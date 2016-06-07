@@ -19,14 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"encoding/gob"
 	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/scheduler"
@@ -34,16 +32,16 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func init() {
+/*func init() {
 	gob.Register(map[interface{}]struct{}{})
 	gob.Register(engine.Actions{})
 	gob.RegisterName("github.com/cgrates/cgrates/engine.ActionPlan", &engine.ActionPlan{})
 	gob.Register([]*utils.LoadInstance{})
-	gob.RegisterName("github.com/cgrates/cgrates/engine.RatingPlan", engine.RatingPlan{})
-	gob.RegisterName("github.com/cgrates/cgrates/engine.RatingProfile", engine.RatingProfile{})
-	gob.RegisterName("github.com/cgrates/cgrates/utils.DerivedChargers", utils.DerivedChargers{})
+	gob.RegisterName("github.com/cgrates/cgrates/engine.RatingPlan", &engine.RatingPlan{})
+	gob.RegisterName("github.com/cgrates/cgrates/engine.RatingProfile", &engine.RatingProfile{})
+	gob.RegisterName("github.com/cgrates/cgrates/utils.DerivedChargers", &utils.DerivedChargers{})
 	gob.Register(engine.AliasValues{})
-}
+}*/
 
 func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled *bool, exitChan chan bool) {
 	bal := balancer2go.NewBalancer()
@@ -96,12 +94,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 				return
 			}
 
-			if err := cache2go.Save("/tmp/cgr_cache", []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
+			if err := engine.CacheSave("/tmp/cgr_cache", []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
 				utils.Logger.Emerg(fmt.Sprintf("could not save cache file: " + err.Error()))
 			}
 			utils.Logger.Info(fmt.Sprintf("Cache rating save time: %v", time.Since(start)))
 		} else {
-			if err := cache2go.Load("/tmp/cgr_cache", []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
+			if err := engine.CacheLoad("/tmp/cgr_cache", []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
 				utils.Logger.Crit("could not load cache file: " + err.Error())
 				exitChan <- true
 				return

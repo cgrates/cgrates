@@ -28,7 +28,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
@@ -813,15 +812,15 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) err
 
 func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.CacheStats) error {
 	cs := new(utils.CacheStats)
-	cs.Destinations = cache2go.CountEntries(utils.DESTINATION_PREFIX)
-	cs.RatingPlans = cache2go.CountEntries(utils.RATING_PLAN_PREFIX)
-	cs.RatingProfiles = cache2go.CountEntries(utils.RATING_PROFILE_PREFIX)
-	cs.Actions = cache2go.CountEntries(utils.ACTION_PREFIX)
-	cs.ActionPlans = cache2go.CountEntries(utils.ACTION_PLAN_PREFIX)
-	cs.SharedGroups = cache2go.CountEntries(utils.SHARED_GROUP_PREFIX)
-	cs.DerivedChargers = cache2go.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
-	cs.LcrProfiles = cache2go.CountEntries(utils.LCR_PREFIX)
-	cs.Aliases = cache2go.CountEntries(utils.ALIASES_PREFIX)
+	cs.Destinations = engine.CacheCountEntries(utils.DESTINATION_PREFIX)
+	cs.RatingPlans = engine.CacheCountEntries(utils.RATING_PLAN_PREFIX)
+	cs.RatingProfiles = engine.CacheCountEntries(utils.RATING_PROFILE_PREFIX)
+	cs.Actions = engine.CacheCountEntries(utils.ACTION_PREFIX)
+	cs.ActionPlans = engine.CacheCountEntries(utils.ACTION_PLAN_PREFIX)
+	cs.SharedGroups = engine.CacheCountEntries(utils.SHARED_GROUP_PREFIX)
+	cs.DerivedChargers = engine.CacheCountEntries(utils.DERIVEDCHARGERS_PREFIX)
+	cs.LcrProfiles = engine.CacheCountEntries(utils.LCR_PREFIX)
+	cs.Aliases = engine.CacheCountEntries(utils.ALIASES_PREFIX)
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
 		if err := self.CdrStatsSrv.Call("CDRStatsV1.GetQueueIds", 0, &queueIds); err != nil {

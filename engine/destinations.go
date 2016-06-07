@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/history"
@@ -75,8 +74,8 @@ func (d *Destination) GetHistoryRecord(deleted bool) history.Record {
 
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
-	if cached, err := cache2go.Get(utils.DESTINATION_PREFIX + prefix); err == nil {
-		_, found := cached.(map[interface{}]struct{})[destId]
+	if cached, err := CacheGet(utils.DESTINATION_PREFIX + prefix); err == nil {
+		_, found := cached.(map[string]struct{})[destId]
 		return found
 	}
 	return false
@@ -84,18 +83,18 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 
 func CleanStalePrefixes(destIds []string) {
 	utils.Logger.Info("Cleaning stale dest prefixes: " + utils.ToJSON(destIds))
-	prefixMap, err := cache2go.GetAllEntries(utils.DESTINATION_PREFIX)
+	prefixMap, err := CacheGetAllEntries(utils.DESTINATION_PREFIX)
 	if err != nil {
 		return
 	}
 	for prefix, idIDs := range prefixMap {
-		dIDs := idIDs.(map[interface{}]struct{})
+		dIDs := idIDs.(map[string]struct{})
 		changed := false
 		for _, searchedDID := range destIds {
 			if _, found := dIDs[searchedDID]; found {
 				if len(dIDs) == 1 {
 					// remove de prefix from cache
-					cache2go.RemKey(utils.DESTINATION_PREFIX + prefix)
+					CacheRemKey(utils.DESTINATION_PREFIX + prefix)
 				} else {
 					// delete the destination from list and put the new list in chache
 					delete(dIDs, searchedDID)
@@ -104,7 +103,7 @@ func CleanStalePrefixes(destIds []string) {
 			}
 		}
 		if changed {
-			cache2go.Cache(utils.DESTINATION_PREFIX+prefix, dIDs)
+			CacheSet(utils.DESTINATION_PREFIX+prefix, dIDs)
 		}
 	}
 }

@@ -28,7 +28,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -98,20 +97,20 @@ type CdrServer struct {
 	aliases       rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
 	guard         *GuardianLock
-	responseCache *cache2go.ResponseCache
+	responseCache *ResponseCache
 }
 
 func (self *CdrServer) Timezone() string {
 	return self.cgrCfg.DefaultTimezone
 }
 func (self *CdrServer) SetTimeToLive(timeToLive time.Duration, out *int) error {
-	self.responseCache = cache2go.NewResponseCache(timeToLive)
+	self.responseCache = NewResponseCache(timeToLive)
 	return nil
 }
 
-func (self *CdrServer) getCache() *cache2go.ResponseCache {
+func (self *CdrServer) getCache() *ResponseCache {
 	if self.responseCache == nil {
-		self.responseCache = cache2go.NewResponseCache(0)
+		self.responseCache = NewResponseCache(0)
 	}
 	return self.responseCache
 }
@@ -501,10 +500,10 @@ func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 		return item.Err
 	}
 	if err := self.LocalProcessCdr(cdr); err != nil {
-		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+		self.getCache().Cache(cacheKey, &CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
-	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
+	self.getCache().Cache(cacheKey, &CacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }

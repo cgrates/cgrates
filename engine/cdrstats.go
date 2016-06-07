@@ -22,7 +22,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -124,10 +123,10 @@ func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 	if len(cs.DestinationIds) > 0 {
 		found := false
 		for _, p := range utils.SplitPrefix(cdr.Destination, MIN_PREFIX_MATCH) {
-			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-				destIds := x.(map[interface{}]struct{})
+			if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+				destIds := x.(map[string]struct{})
 				for idID := range destIds {
-					if utils.IsSliceMember(cs.DestinationIds, idID.(string)) {
+					if utils.IsSliceMember(cs.DestinationIds, idID) {
 						found = true
 						break
 					}

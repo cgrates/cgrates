@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 
@@ -305,12 +304,12 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 
 		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-					destIds := x.(map[interface{}]struct{})
+				if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+					destIds := x.(map[string]struct{})
 					foundResult := false
 					allInclude := true // wheter it is excluded or included
 					for dId, _ := range destIds {
-						inclDest, found := b.DestinationIDs[dId.(string)]
+						inclDest, found := b.DestinationIDs[dId]
 						if found {
 							foundResult = true
 							allInclude = allInclude && inclDest

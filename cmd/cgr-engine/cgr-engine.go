@@ -34,7 +34,6 @@ import (
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -419,12 +418,12 @@ func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, 
 			return
 		}
 
-		if err := cache2go.Save("/tmp/cgr_cache", []string{utils.ALIASES_PREFIX}); err != nil {
+		if err := engine.CacheSave("/tmp/cgr_cache", []string{utils.ALIASES_PREFIX}); err != nil {
 			utils.Logger.Emerg(fmt.Sprintf("could not save cache file: " + err.Error()))
 		}
 		utils.Logger.Info(fmt.Sprintf("Cache accounting save time: %v", time.Since(start)))
 	} else {
-		if err := cache2go.Load("/tmp/cgr_cache", []string{utils.ALIASES_PREFIX}); err != nil {
+		if err := engine.CacheLoad("/tmp/cgr_cache", []string{utils.ALIASES_PREFIX}); err != nil {
 			utils.Logger.Crit("could not load cache file: " + err.Error())
 			exitChan <- true
 			return

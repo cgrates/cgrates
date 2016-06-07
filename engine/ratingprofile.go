@@ -25,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -174,11 +173,10 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 			}
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
-				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-					destIds := x.(map[interface{}]struct{})
+				if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+					destIds := x.(map[string]struct{})
 					var bestWeight float64
-					for idID := range destIds {
-						dID := idID.(string)
+					for dID := range destIds {
 						if _, ok := rpl.DestinationRates[dID]; ok {
 							ril := rpl.RateIntervalList(dID)
 							currentWeight := ril.GetWeight()

@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1165,7 +1164,7 @@ func TestDebitShared(t *testing.T) {
 
 	accountingStorage.SetAccount(groupie)
 	ratingStorage.SetSharedGroup(sg)
-	cache2go.Cache(utils.SHARED_GROUP_PREFIX+"SG_TEST", sg)
+	CacheSet(utils.SHARED_GROUP_PREFIX+"SG_TEST", sg)
 	cc, err := rif.debitCreditBalance(cd, false, false, true)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
@@ -1235,7 +1234,7 @@ func TestMaxDurationShared(t *testing.T) {
 
 	accountingStorage.SetAccount(groupie)
 	ratingStorage.SetSharedGroup(sg)
-	cache2go.Cache(utils.SHARED_GROUP_PREFIX+"SG_TEST", sg)
+	CacheSet(utils.SHARED_GROUP_PREFIX+"SG_TEST", sg)
 	duration, err := cd.getMaxSessionDuration(rif)
 	if err != nil {
 		t.Error("Error getting max session duration from shared group: ", err)

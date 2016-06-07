@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -48,10 +47,10 @@ func DerivedChargersMatchesDest(dcs *utils.DerivedChargers, dest string) bool {
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-			destIds := x.(map[interface{}]struct{})
+		if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+			destIds := x.(map[string]struct{})
 			for dId := range destIds {
-				includeDest, found := dcs.DestinationIDs[dId.(string)]
+				includeDest, found := dcs.DestinationIDs[dId]
 				if found {
 					return includeDest
 				}

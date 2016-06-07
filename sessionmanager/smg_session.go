@@ -195,7 +195,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 		cd.CgrID = self.cd.CgrID
 		cd.RunID = self.cd.RunID
 		cd.Increments.Compress()
-		utils.Logger.Info(fmt.Sprintf("Refunding %s duration %v with incerements: %s", cd.CgrID, initialRefundDuration, utils.ToJSON(cd.Increments)))
+		utils.Logger.Info(fmt.Sprintf("Refunding %s duration %v with cd: %s", cd.CgrID, initialRefundDuration, utils.ToJSON(cd)))
 		var response float64
 		err := self.rater.Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {

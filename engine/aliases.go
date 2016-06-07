@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -120,7 +119,7 @@ func (al *Alias) SetReverseCache() {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
 				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
-				cache2go.Push(rKey, utils.ConcatenatedKey(al.GetId(), value.DestinationId))
+				CachePush(rKey, utils.ConcatenatedKey(al.GetId(), value.DestinationId))
 			}
 		}
 	}
@@ -132,7 +131,7 @@ func (al *Alias) RemoveReverseCache() {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
 				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-				cache2go.Pop(rKey, tmpKey)
+				CachePop(rKey, tmpKey)
 			}
 		}
 	}
@@ -252,7 +251,7 @@ func (am *AliasHandler) RemoveReverseAlias(attr *AttrReverseAlias, reply *string
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, err := cache2go.Get(rKey); err == nil {
+	if x, err := CacheGet(rKey); err == nil {
 		existingKeys := x.(map[interface{}]struct{})
 		for iKey := range existingKeys {
 			key := iKey.(string)
@@ -289,7 +288,7 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, err := cache2go.Get(rKey); err == nil {
+	if x, err := CacheGet(rKey); err == nil {
 		existingKeys := x.(map[interface{}]struct{})
 		for iKey := range existingKeys {
 			key := iKey.(string)
@@ -341,11 +340,10 @@ func (am *AliasHandler) GetMatchingAlias(attr *AttrMatchingAlias, result *string
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-			destIds := x.(map[interface{}]struct{})
+		if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+			destIds := x.(map[string]struct{})
 			for _, value := range values {
-				for idId := range destIds {
-					dId := idId.(string)
+				for dId := range destIds {
 					if value.DestinationId == utils.ANY || value.DestinationId == dId {
 						if origAliasMap, ok := value.Pairs[attr.Target]; ok {
 							if alias, ok := origAliasMap[attr.Original]; ok || attr.Original == "" || attr.Original == utils.ANY {
@@ -422,11 +420,10 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 	if rightPairs == nil {
 		// check destination ids
 		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-				destIds := x.(map[interface{}]struct{})
+			if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+				destIds := x.(map[string]struct{})
 				for _, value := range values {
-					for idId := range destIds {
-						dId := idId.(string)
+					for dId := range destIds {
 						if value.DestinationId == utils.ANY || value.DestinationId == dId {
 							rightPairs = value.Pairs
 						}

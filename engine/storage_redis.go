@@ -26,7 +26,6 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
@@ -92,7 +91,7 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]strin
 		}
 		return r.List()
 	}
-	return cache2go.GetEntriesKeys(prefix), nil
+	return CacheGetEntriesKeys(prefix), nil
 }
 
 func (rs *RedisStorage) CacheRatingAll() error {
@@ -140,20 +139,20 @@ func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 }
 
 func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
-	cache2go.BeginTransaction()
+	CacheBeginTransaction()
 	conn, err := rs.db.Get()
 	if err != nil {
 		return err
 	}
 	defer rs.db.Put(conn)
-	if dKeys == nil || (float64(cache2go.CountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
+	if dKeys == nil || (float64(CacheCountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		// if need to load more than a half of exiting keys load them all
 		utils.Logger.Info("Caching all destinations")
 		if dKeys, err = conn.Cmd("KEYS", utils.DESTINATION_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("destinations: %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.DESTINATION_PREFIX)
+		CacheRemPrefixKey(utils.DESTINATION_PREFIX)
 	} else if len(dKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching destinations: %v", dKeys))
 		CleanStalePrefixes(dKeys)
@@ -164,7 +163,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 			continue
 		}
 		if _, err = rs.GetDestination(key[len(utils.DESTINATION_PREFIX):]); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("destinations: %s", err.Error())
 		}
 	}
@@ -174,17 +173,17 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if rpKeys == nil {
 		utils.Logger.Info("Caching all rating plans")
 		if rpKeys, err = conn.Cmd("KEYS", utils.RATING_PLAN_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("rating plans: %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.RATING_PLAN_PREFIX)
+		CacheRemPrefixKey(utils.RATING_PLAN_PREFIX)
 	} else if len(rpKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching rating plans: %v", rpKeys))
 	}
 	for _, key := range rpKeys {
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		if _, err = rs.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("rating plans: %s", err.Error())
 		}
 	}
@@ -194,17 +193,17 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if rpfKeys == nil {
 		utils.Logger.Info("Caching all rating profiles")
 		if rpfKeys, err = conn.Cmd("KEYS", utils.RATING_PROFILE_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("rating profiles: %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.RATING_PROFILE_PREFIX)
+		CacheRemPrefixKey(utils.RATING_PROFILE_PREFIX)
 	} else if len(rpfKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching rating profile: %v", rpfKeys))
 	}
 	for _, key := range rpfKeys {
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		if _, err = rs.GetRatingProfile(key[len(utils.RATING_PROFILE_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("rating profiles: %s", err.Error())
 		}
 	}
@@ -214,17 +213,17 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if lcrKeys == nil {
 		utils.Logger.Info("Caching LCR rules.")
 		if lcrKeys, err = conn.Cmd("KEYS", utils.LCR_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("lcr rules: %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.LCR_PREFIX)
+		CacheRemPrefixKey(utils.LCR_PREFIX)
 	} else if len(lcrKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching LCR rules: %v", lcrKeys))
 	}
 	for _, key := range lcrKeys {
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		if _, err = rs.GetLCR(key[len(utils.LCR_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("lcr rules: %s", err.Error())
 		}
 	}
@@ -235,17 +234,17 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if dcsKeys == nil {
 		utils.Logger.Info("Caching all derived chargers")
 		if dcsKeys, err = conn.Cmd("KEYS", utils.DERIVEDCHARGERS_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("derived chargers: %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.DERIVEDCHARGERS_PREFIX)
+		CacheRemPrefixKey(utils.DERIVEDCHARGERS_PREFIX)
 	} else if len(dcsKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching derived chargers: %v", dcsKeys))
 	}
 	for _, key := range dcsKeys {
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		if _, err = rs.GetDerivedChargers(key[len(utils.DERIVEDCHARGERS_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("derived chargers: %s", err.Error())
 		}
 	}
@@ -255,17 +254,17 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if actKeys == nil {
 		utils.Logger.Info("Caching all actions")
 		if actKeys, err = conn.Cmd("KEYS", utils.ACTION_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("actions: %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.ACTION_PREFIX)
+		CacheRemPrefixKey(utils.ACTION_PREFIX)
 	} else if len(actKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching actions: %v", actKeys))
 	}
 	for _, key := range actKeys {
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		if _, err = rs.GetActions(key[len(utils.ACTION_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("actions: %s", err.Error())
 		}
 	}
@@ -276,17 +275,17 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if aplKeys == nil {
 		utils.Logger.Info("Caching all action plans")
 		if aplKeys, err = rs.db.Cmd("KEYS", utils.ACTION_PLAN_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf(" %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.ACTION_PLAN_PREFIX)
+		CacheRemPrefixKey(utils.ACTION_PLAN_PREFIX)
 	} else if len(aplKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching action plan: %v", aplKeys))
 	}
 	for _, key := range aplKeys {
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		if _, err = rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf(" %s", err.Error())
 		}
 	}
@@ -297,17 +296,17 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if shgKeys == nil {
 		utils.Logger.Info("Caching all shared groups")
 		if shgKeys, err = conn.Cmd("KEYS", utils.SHARED_GROUP_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("shared groups: %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.SHARED_GROUP_PREFIX)
+		CacheRemPrefixKey(utils.SHARED_GROUP_PREFIX)
 	} else if len(shgKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching shared groups: %v", shgKeys))
 	}
 	for _, key := range shgKeys {
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		if _, err = rs.GetSharedGroup(key[len(utils.SHARED_GROUP_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("shared groups: %s", err.Error())
 		}
 	}
@@ -315,7 +314,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		utils.Logger.Info("Finished shared groups caching.")
 	}
 
-	cache2go.CommitTransaction()
+	CacheCommitTransaction()
 	return nil
 }
 
@@ -350,7 +349,7 @@ func (rs *RedisStorage) CacheAccountingPrefixValues(prefixes map[string][]string
 }
 
 func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
-	cache2go.BeginTransaction()
+	CacheBeginTransaction()
 	conn, err := rs.db.Get()
 	if err != nil {
 		return err
@@ -359,11 +358,11 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	if alsKeys == nil {
 		utils.Logger.Info("Caching all aliases")
 		if alsKeys, err = conn.Cmd("KEYS", utils.ALIASES_PREFIX+"*").List(); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("aliases: %s", err.Error())
 		}
-		cache2go.RemPrefixKey(utils.ALIASES_PREFIX)
-		cache2go.RemPrefixKey(utils.REVERSE_ALIASES_PREFIX)
+		CacheRemPrefixKey(utils.ALIASES_PREFIX)
+		CacheRemPrefixKey(utils.REVERSE_ALIASES_PREFIX)
 	} else if len(alsKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
 	}
@@ -371,14 +370,14 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	for _, key := range alsKeys {
 		// check if it already exists
 		// to remove reverse cache keys
-		if avs, err := cache2go.Get(key); err == nil && avs != nil {
+		if avs, err := CacheGet(key); err == nil && avs != nil {
 			al.Values = avs.(AliasValues)
 			al.SetId(key[len(utils.ALIASES_PREFIX):])
 			al.RemoveReverseCache()
 		}
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		if _, err = rs.GetAlias(key[len(utils.ALIASES_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
+			CacheRollbackTransaction()
 			return fmt.Errorf("aliases: %s", err.Error())
 		}
 	}
@@ -387,11 +386,11 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	}
 	utils.Logger.Info("Caching load history")
 	if _, err = rs.GetLoadHistory(1, true); err != nil {
-		cache2go.RollbackTransaction()
+		CacheRollbackTransaction()
 		return err
 	}
 	utils.Logger.Info("Finished load history caching.")
-	cache2go.CommitTransaction()
+	CacheCommitTransaction()
 	return nil
 }
 
@@ -408,7 +407,7 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
 	key = utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.Get(key); err == nil {
+		if x, err := CacheGet(key); err == nil {
 			return x.(*RatingPlan), nil
 		} else {
 			return nil, err
@@ -428,7 +427,7 @@ func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPla
 		r.Close()
 		rp = new(RatingPlan)
 		err = rs.ms.Unmarshal(out, rp)
-		cache2go.Cache(key, rp)
+		CacheSet(key, rp)
 	}
 	return
 }
@@ -451,7 +450,7 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool) (rpf *Ratin
 
 	key = utils.RATING_PROFILE_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.Get(key); err == nil {
+		if x, err := CacheGet(key); err == nil {
 			return x.(*RatingProfile), nil
 		} else {
 			return nil, err
@@ -461,7 +460,7 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool) (rpf *Ratin
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		rpf = new(RatingProfile)
 		err = rs.ms.Unmarshal(values, rpf)
-		cache2go.Cache(key, rpf)
+		CacheSet(key, rpf)
 	}
 	return
 }
@@ -490,7 +489,7 @@ func (rs *RedisStorage) RemoveRatingProfile(key string) error {
 		if err = conn.Cmd("DEL", key).Err; err != nil {
 			return err
 		}
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 		rpf := &RatingProfile{Id: key}
 		if historyScribe != nil {
 			response := 0
@@ -503,7 +502,7 @@ func (rs *RedisStorage) RemoveRatingProfile(key string) error {
 func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.Get(key); err == nil {
+		if x, err := CacheGet(key); err == nil {
 			return x.(*LCR), nil
 		} else {
 			return nil, err
@@ -512,7 +511,7 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &lcr)
-		cache2go.Cache(key, lcr)
+		CacheSet(key, lcr)
 	}
 	return
 }
@@ -520,7 +519,7 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 func (rs *RedisStorage) SetLCR(lcr *LCR) (err error) {
 	result, err := rs.ms.Marshal(lcr)
 	err = rs.db.Cmd("SET", utils.LCR_PREFIX+lcr.GetId(), result).Err
-	cache2go.Cache(utils.LCR_PREFIX+lcr.GetId(), lcr)
+	CacheSet(utils.LCR_PREFIX+lcr.GetId(), lcr)
 	return
 }
 
@@ -542,7 +541,7 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 		err = rs.ms.Unmarshal(out, dest)
 		// create optimized structure
 		for _, p := range dest.Prefixes {
-			cache2go.Push(utils.DESTINATION_PREFIX+p, dest.Id)
+			CachePush(utils.DESTINATION_PREFIX+p, dest.Id)
 		}
 	} else {
 		return nil, utils.ErrNotFound
@@ -597,11 +596,11 @@ func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 	if dest != nil {
 		for _, prefix := range dest.Prefixes {
 			changed := false
-			if idIDs, err := cache2go.Get(utils.DESTINATION_PREFIX + prefix); err == nil {
+			if idIDs, err := CacheGet(utils.DESTINATION_PREFIX + prefix); err == nil {
 				dIDs := idIDs.(map[interface{}]struct{})
 				if len(dIDs) == 1 {
 					// remove de prefix from cache
-					cache2go.RemKey(utils.DESTINATION_PREFIX + prefix)
+					CacheRemKey(utils.DESTINATION_PREFIX + prefix)
 				} else {
 					// delete the destination from list and put the new list in chache
 					delete(dIDs, searchedDID)
@@ -609,7 +608,7 @@ func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 				}
 			}
 			if changed {
-				cache2go.Cache(utils.DESTINATION_PREFIX+prefix, dIDs)
+				CacheSet(utils.DESTINATION_PREFIX+prefix, dIDs)
 			}
 		}
 	}
@@ -625,7 +624,7 @@ func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
 	key = utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.Get(key); err == nil {
+		if x, err := CacheGet(key); err == nil {
 			return x.(Actions), nil
 		} else {
 			return nil, err
@@ -634,7 +633,7 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err 
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &as)
-		cache2go.Cache(key, as)
+		CacheSet(key, as)
 	}
 	return
 }
@@ -653,7 +652,7 @@ func (rs *RedisStorage) RemoveActions(key string) (err error) {
 func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.Get(key); err == nil {
+		if x, err := CacheGet(key); err == nil {
 			return x.(*SharedGroup), nil
 		} else {
 			return nil, err
@@ -662,7 +661,7 @@ func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGr
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &sg)
-		cache2go.Cache(key, sg)
+		CacheSet(key, sg)
 	}
 	return
 }
@@ -820,7 +819,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.Get(key); err == nil {
+		if x, err := CacheGet(key); err == nil {
 			al = &Alias{Values: x.(AliasValues)}
 			al.SetId(origKey)
 			return al, nil
@@ -834,7 +833,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		al.SetId(origKey)
 		err = rs.ms.Unmarshal(values, &al.Values)
 		if err == nil {
-			cache2go.Cache(key, al.Values)
+			CacheSet(key, al.Values)
 			// cache reverse alias
 			al.SetReverseCache()
 		}
@@ -859,7 +858,7 @@ func (rs *RedisStorage) RemoveAlias(key string) (err error) {
 	err = conn.Cmd("DEL", key).Err
 	if err == nil {
 		al.RemoveReverseCache()
-		cache2go.RemKey(key)
+		CacheRemKey(key)
 	}
 	return
 }
@@ -870,7 +869,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*utils.Load
 		return nil, nil
 	}
 	if !skipCache {
-		if x, err := cache2go.Get(utils.LOADINST_KEY); err != nil {
+		if x, err := CacheGet(utils.LOADINST_KEY); err != nil {
 			return nil, err
 		} else {
 			items := x.([]*utils.LoadInstance)
@@ -896,8 +895,8 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*utils.Load
 		}
 		loadInsts[idx] = &lInst
 	}
-	cache2go.RemKey(utils.LOADINST_KEY)
-	cache2go.Cache(utils.LOADINST_KEY, loadInsts)
+	CacheRemKey(utils.LOADINST_KEY)
+	CacheSet(utils.LOADINST_KEY, loadInsts)
 	return loadInsts, nil
 }
 
@@ -959,7 +958,7 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.Get(key); err == nil {
+		if x, err := CacheGet(key); err == nil {
 			return x.(*ActionPlan), nil
 		} else {
 			return nil, err
@@ -978,7 +977,7 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 		}
 		r.Close()
 		err = rs.ms.Unmarshal(out, &ats)
-		cache2go.Cache(key, ats)
+		CacheSet(key, ats)
 	}
 	return
 }
@@ -987,7 +986,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		err = rs.db.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
-		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
+		CacheRemKey(utils.ACTION_PLAN_PREFIX + key)
 		return err
 	}
 	if !overwrite {
@@ -1014,7 +1013,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 }
 
 func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
-	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
+	apls, err := CacheGetAllEntries(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
@@ -1048,7 +1047,7 @@ func (rs *RedisStorage) PopTask() (t *Task, err error) {
 func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.Get(key); err == nil {
+		if x, err := CacheGet(key); err == nil {
 			return x.(*utils.DerivedChargers), nil
 		} else {
 			return nil, err
@@ -1057,7 +1056,7 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs *uti
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &dcs)
-		cache2go.Cache(key, dcs)
+		CacheSet(key, dcs)
 	}
 	return dcs, err
 }
@@ -1065,7 +1064,7 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs *uti
 func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) (err error) {
 	if dcs == nil || len(dcs.Chargers) == 0 {
 		err = rs.db.Cmd("DEL", utils.DERIVEDCHARGERS_PREFIX+key).Err
-		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
+		CacheRemKey(utils.DERIVEDCHARGERS_PREFIX + key)
 		return err
 	}
 	marshaled, err := rs.ms.Marshal(dcs)
