@@ -210,7 +210,7 @@ func (self *KamailioSessionManager) ProcessCdr(cdr *engine.CDR) error {
 		return nil
 	}
 	var reply string
-	if err := self.cdrsrv.Call("CdrServer.ProcessCdr", cdr, &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", cdr.CGRID, cdr.OriginID, err.Error()))
 	}
 	return nil

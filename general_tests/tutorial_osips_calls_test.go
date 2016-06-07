@@ -330,15 +330,15 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 		return
 	}
 	var reply []*engine.ExternalCDR
-	var cgrId string // Share  with getCostDetails
-	var cCost engine.CallCost
+	//var cgrId string // Share  with getCostDetails
+	//var cCost engine.CallCost
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestinationPrefixes: []string{"1002"}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		cgrId = reply[0].CGRID
+		//cgrId = reply[0].CGRID
 		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
@@ -355,20 +355,21 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 		//	t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		//}
 	}
-	// Make sure call cost contains the matched information
-	if err := tutOsipsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
-		t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
-	}
-
+	/*
+		// Make sure call cost contains the matched information
+		if err := tutOsipsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
+			t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
+		}
+	*/
 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestinationPrefixes: []string{"1003"}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		cgrId = reply[0].CGRID
+		//cgrId = reply[0].CGRID
 		if reply[0].RequestType != utils.META_PREPAID {
 			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0])
 		}
@@ -379,12 +380,14 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
 		}
 	}
-	// Make sure call cost contains the matched information
-	if err := tutOsipsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
-		t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
-	}
+	/*
+		// Make sure call cost contains the matched information
+		if err := tutOsipsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
+			t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
+		}
+	*/
 	req = utils.RPCCDRsFilter{Accounts: []string{"1001"}, RunIDs: []string{"derived_run1"}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())

@@ -18,6 +18,8 @@
 
 [Debian apt-get repository](https://cgrates.readthedocs.org/en/latest/tut_freeswitch_installs.html#cgrates)
 
+[Installing CGRateS from sources on minimal debian](https://asciinema.org/a/0lwlputceg52xssqgra7wjza0) (for devel or testing)
+
 Browsable HTML docs http://readthedocs.org/docs/cgrates/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/

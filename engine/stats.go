@@ -158,6 +158,10 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 		sq = NewStatsQueue(cs)
 		s.queues[cs.Id] = sq
 	}
+	// save the conf
+	if err := s.ratingDb.SetCdrStats(cs); err != nil {
+		return err
+	}
 	if _, exists = s.queueSavers[sq.GetId()]; !exists {
 		s.setupQueueSaver(sq)
 	}
@@ -251,7 +255,6 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		if sq == nil {
 			sq = NewStatsQueue(cs)
 			// load queue from storage if exists
-
 			if saved, err := s.accountingDb.GetCdrStatsQueue(sq.GetId()); err == nil {
 				sq.Load(saved)
 			}

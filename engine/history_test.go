@@ -39,6 +39,7 @@ func TestHistoryDestinations(t *testing.T) {
 	expected := `{"Id":"ALL","Prefixes":["49","41","43"]},
 {"Id":"DST_UK_Mobile_BIG5","Prefixes":["447956"]},
 {"Id":"EU_LANDLINE","Prefixes":["444"]},
+{"Id":"EXOTIC","Prefixes":["999"]},
 {"Id":"GERMANY","Prefixes":["49"]},
 {"Id":"GERMANY_O2","Prefixes":["41"]},
 {"Id":"GERMANY_PREMIUM","Prefixes":["43"]},

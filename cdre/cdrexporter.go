@@ -21,6 +21,7 @@ package cdre
 import (
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -129,15 +130,15 @@ func (cdre *CdrExporter) getCdrCostDetails(CGRID, runId string) (string, error) 
 func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
 	var combinedVal string // Will result as combination of the field values, filters must match
 	for _, filterRule := range cfgCdrFld.FieldFilter {
-		fltrPass, ftrPassValue := processedCdr.PassesFieldFilter(filterRule)
-		if !fltrPass {
-			return "", nil
+		if !filterRule.FilterPasses(processedCdr.FieldAsString(&utils.RSRField{Id: filterRule.Id})) { // Filter will activate the rule to extract the content
+			continue
 		}
+		pairingVal := processedCdr.FieldAsString(filterRule)
 		for _, cdr := range cdre.cdrs {
 			if cdr.CGRID != processedCdr.CGRID {
 				continue // We only care about cdrs with same primary cdr behind
 			}
-			if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == ftrPassValue { // First CDR with filte
+			if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == pairingVal { // First CDR with filte
 				for _, rsrRule := range cfgCdrFld.Value {
 					combinedVal += cdr.FieldAsString(rsrRule)
 				}
@@ -159,10 +160,15 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.CDR, cfgCdrFld *config.
 	if len(cfgCdrFld.Value) == 0 {
 		return "", nil
 	}
-	for _, fltrRl := range cfgCdrFld.FieldFilter {
-		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
-			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+	passesFilters := true
+	for _, cdfFltr := range cfgCdrFld.FieldFilter {
+		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
+			passesFilters = false
+			break
 		}
+	}
+	if !passesFilters { // Not passes filters, ignore this replication
+		return "", errors.New("Not passing filters")
 	}
 	layout := cfgCdrFld.Layout
 	if len(layout) == 0 {
@@ -177,10 +183,15 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.CDR, cfgCdrFld *config.
 
 // Extracts the value specified by cfgHdr out of cdr
 func (cdre *CdrExporter) cdrFieldValue(cdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
-	for _, fltrRl := range cfgCdrFld.FieldFilter {
-		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
-			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+	passesFilters := true
+	for _, cdfFltr := range cfgCdrFld.FieldFilter {
+		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
+			passesFilters = false
+			break
 		}
+	}
+	if !passesFilters { // Not passes filters, ignore this replication
+		return "", fmt.Errorf("Filters not passing")
 	}
 	layout := cfgCdrFld.Layout
 	if len(layout) == 0 {

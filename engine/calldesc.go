@@ -966,7 +966,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 	return nil, utils.ErrNotFound
 }
 
-func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, p *utils.Paginator) (*LCRCost, error) {
+func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *LCRFilter, p *utils.Paginator) (*LCRCost, error) {
 	cd.account = nil // make sure it's not cached
 	lcr, err := cd.GetLCRFromStorage()
 	if err != nil {
@@ -1259,6 +1259,14 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, p *utils.P
 				})
 				continue
 			} else {
+				if lcrFltr != nil {
+					if lcrFltr.MinCost != nil && cc.Cost < *lcrFltr.MinCost {
+						continue // MinCost not reached, ignore the supplier
+					}
+					if lcrFltr.MaxCost != nil && cc.Cost >= *lcrFltr.MaxCost {
+						continue // Equal or higher than MaxCost allowed, ignore the supplier
+					}
+				}
 				supplCost := &LCRSupplierCost{
 					Supplier: fullSupplier,
 					Cost:     cc.Cost,

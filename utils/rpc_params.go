@@ -6,7 +6,7 @@ var rpcParamsMap map[string]*RpcParams
 
 type RpcParams struct {
 	Object   interface{}
-	InParam  reflect.Value
+	InParam  interface{}
 	OutParam interface{}
 }
 
@@ -33,7 +33,7 @@ func RegisterRpcParams(name string, obj interface{}) {
 			}
 			rpcParamsMap[name+"."+method.Name] = &RpcParams{
 				Object:   obj,
-				InParam:  reflect.New(methodType.In(1)),
+				InParam:  reflect.New(methodType.In(1)).Interface(),
 				OutParam: reflect.New(out).Interface(),
 			}
 		}

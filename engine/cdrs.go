@@ -303,7 +303,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
 		matchingAllFilters := true
 		for _, dcRunFilter := range runFilters {
-			if fltrPass, _ := cdr.PassesFieldFilter(dcRunFilter); !fltrPass {
+			if !dcRunFilter.FilterPasses(cdr.FieldAsString(dcRunFilter)) {
 				matchingAllFilters = false
 				break
 			}
@@ -429,7 +429,7 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 	for _, rplCfg := range self.cgrCfg.CDRSCdrReplication {
 		passesFilters := true
 		for _, cdfFltr := range rplCfg.CdrFilter {
-			if fltrPass, _ := cdr.PassesFieldFilter(cdfFltr); !fltrPass {
+			if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
 				passesFilters = false
 				break
 			}
@@ -451,7 +451,10 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			}
 			body = jsn
 		}
-		errChan := make(chan error)
+		var errChan chan error
+		if rplCfg.Synchronous {
+			errChan = make(chan error)
+		}
 		go func(body interface{}, rplCfg *config.CdrReplicationCfg, content string, errChan chan error) {
 			fallbackPath := path.Join(
 				self.cgrCfg.HttpFailedDir,
@@ -462,10 +465,13 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf(
 					"<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
-				errChan <- err
+				if rplCfg.Synchronous {
+					errChan <- err
+				}
 			}
-			errChan <- nil
-
+			if rplCfg.Synchronous {
+				errChan <- nil
+			}
 		}(body, rplCfg, content, errChan)
 		if rplCfg.Synchronous { // Synchronize here
 			<-errChan

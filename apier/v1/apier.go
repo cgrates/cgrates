@@ -63,6 +63,15 @@ func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) err
 	return nil
 }
 
+type AttrRemoveDestination struct {
+	DestinationIDs []string
+	Prefixes       []string
+}
+
+func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) error {
+	return nil
+}
+
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
 	if sg, err := apier.RatingDb.GetSharedGroup(sgId, false); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 		return err
@@ -378,7 +387,8 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}
 
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, nil); err != nil {
+		var out int
+		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, &out); err != nil {
 			return err
 		}
 	}
@@ -592,13 +602,13 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 }
 
 type AttrSetActionPlan struct {
-	Id              string           // Profile id
-	ActionPlan      []*ApiActionPlan // Set of actions this Actions profile will perform
-	Overwrite       bool             // If previously defined, will be overwritten
-	ReloadScheduler bool             // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
+	Id              string            // Profile id
+	ActionPlan      []*AttrActionPlan // Set of actions this Actions profile will perform
+	Overwrite       bool              // If previously defined, will be overwritten
+	ReloadScheduler bool              // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
 }
 
-type ApiActionPlan struct {
+type AttrActionPlan struct {
 	ActionsId string  // Actions id
 	Years     string  // semicolon separated list of years this timing is valid on, *any or empty supported
 	Months    string  // semicolon separated list of months this timing is valid on, *any or empty supported

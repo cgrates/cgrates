@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"net/smtp"
 	"path"
 	"reflect"
@@ -33,6 +35,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/mitchellh/mapstructure"
 )
 
 /*
@@ -420,7 +423,7 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error
 	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	_, _, err = utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 1, fallbackPath, false)
+	_, _, err = utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, config.CgrConfig().HttpPosterAttempts, fallbackPath, false)
 	return err
 }
 
@@ -439,7 +442,7 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 3, fallbackPath, false)
+	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, config.CgrConfig().HttpPosterAttempts, fallbackPath, false)
 	return nil
 }
 
@@ -637,9 +640,44 @@ type RPCRequest struct {
 	Params    map[string]interface{}
 }
 
+/*
+<< .Object.Property >>
+
+Property can be a attribute or a method both used without ()
+Please also note the initial dot .
+
+Currently there are following objects that can be used:
+
+Account -  the account that this action is called on
+Action - the action with all it's attributs
+Actions - the list of actions in the current action set
+Sq - StatsQueueTriggered object
+
+We can actually use everythiong that go templates offer. You can read more here: https://golang.org/pkg/text/template/
+*/
 func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	// parse template
+	tmpl := template.New("extra_params")
+	tmpl.Delims("<<", ">>")
+	t, err := tmpl.Parse(a.ExtraParameters)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("error parsing *cgr_rpc template: %s", err.Error()))
+		return err
+	}
+	var buf bytes.Buffer
+	if err = t.Execute(&buf, struct {
+		Account *Account
+		Sq      *StatsQueueTriggered
+		Action  *Action
+		Actions Actions
+	}{account, sq, a, acs}); err != nil {
+		utils.Logger.Err(fmt.Sprintf("error executing *cgr_rpc template %s:", err.Error()))
+		return err
+	}
+	processedExtraParam := buf.String()
+	//utils.Logger.Info("ExtraParameters: " + parsedExtraParameters)
 	req := RPCRequest{}
-	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
+	if err := json.Unmarshal([]byte(processedExtraParam), &req); err != nil {
 		return err
 	}
 	params, err := utils.GetRpcParams(req.Method)
@@ -648,24 +686,28 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	}
 	var client rpcclient.RpcClientConnection
 	if req.Address != utils.MetaInternal {
-		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
+		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0, config.CgrConfig().ConnectTimeout, config.CgrConfig().ReplyTimeout, req.Transport, nil); err != nil {
 			return err
 		}
 	} else {
 		client = params.Object.(rpcclient.RpcClientConnection)
 	}
 	in, out := params.InParam, params.OutParam
-	p, err := utils.FromMapStringInterfaceValue(req.Params, in)
+	//utils.Logger.Info("Params: " + utils.ToJSON(req.Params))
+	//p, err := utils.FromMapStringInterfaceValue(req.Params, in)
+	mapstructure.Decode(req.Params, in)
 	if err != nil {
+		utils.Logger.Info("<*cgr_rpc> err: " + err.Error())
 		return err
 	}
+	utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> calling: %s with: %s", req.Method, utils.ToJSON(in)))
 	if !req.Async {
-		err = client.Call(req.Method, p, out)
+		err = client.Call(req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 		return err
 	}
 	go func() {
-		err := client.Call(req.Method, p, out)
+		err := client.Call(req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 	}()
 	return nil

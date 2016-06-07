@@ -58,7 +58,13 @@ type LcrRequest struct {
 	Duration     string
 	IgnoreErrors bool
 	ExtraFields  map[string]string
+	*LCRFilter
 	*utils.Paginator
+}
+
+type LCRFilter struct {
+	MinCost *float64
+	MaxCost *float64
 }
 
 func (self *LcrRequest) AsCallDescriptor(timezone string) (*CallDescriptor, error) {

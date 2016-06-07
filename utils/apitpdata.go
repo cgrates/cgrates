@@ -1178,3 +1178,22 @@ type AttrRateCDRs struct {
 	SendToStatS   *bool // Set to true if the CDRs should be sent to stats server
 	ReplicateCDRs *bool // Replicate results
 }
+
+type AttrSetBalance struct {
+	Tenant         string
+	Account        string
+	BalanceType    string
+	BalanceUUID    *string
+	BalanceID      *string
+	Directions     *string
+	Value          *float64
+	ExpiryTime     *string
+	RatingSubject  *string
+	Categories     *string
+	DestinationIds *string
+	TimingIds      *string
+	Weight         *float64
+	SharedGroups   *string
+	Blocker        *bool
+	Disabled       *bool
+}

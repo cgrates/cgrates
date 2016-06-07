@@ -458,26 +458,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	return nil
 }
 
-type AttrSetBalance struct {
-	Tenant         string
-	Account        string
-	BalanceType    string
-	BalanceUUID    *string
-	BalanceID      *string
-	Directions     *string
-	Value          *float64
-	ExpiryTime     *string
-	RatingSubject  *string
-	Categories     *string
-	DestinationIds *string
-	TimingIds      *string
-	Weight         *float64
-	SharedGroups   *string
-	Blocker        *bool
-	Disabled       *bool
-}
-
-func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
+func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -548,7 +529,7 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 	return nil
 }
 
-func (self *ApierV1) RemoveBalances(attr *AttrSetBalance, reply *string) error {
+func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

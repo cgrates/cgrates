@@ -113,3 +113,27 @@ func TestStructFromMapStringInterface(t *testing.T) {
 		t.Error("Error converting map to struct: ", err)
 	}
 }
+
+func TestStructFromMapStringInterfaceValue(t *testing.T) {
+	type T struct {
+		Name     string
+		Disabled *bool
+		Members  []string
+	}
+	ts := &T{}
+	vts := reflect.ValueOf(ts)
+	x, err := FromMapStringInterfaceValue(map[string]interface{}{
+		"Name":     "test",
+		"Disabled": true,
+		"Members":  []string{"1", "2", "3"},
+	}, vts)
+	rt := x.(T)
+	if err != nil {
+		t.Fatalf("error converting structure value: %v", err)
+	}
+	if rt.Name != "test" ||
+		*rt.Disabled != true ||
+		!reflect.DeepEqual(rt.Members, []string{"1", "2", "3"}) {
+		t.Errorf("error converting structure value: %s", ToIJSON(rt))
+	}
+}

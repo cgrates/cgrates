@@ -18,47 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdSetBalance{
-		name:      "balance_set",
-		rpcMethod: "ApierV1.SetBalance",
+	c := &CmdBalanceDebit{
+		name:      "balance_debit",
+		rpcMethod: "ApierV1.DebitBalance",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSetBalance struct {
-	name      string
-	rpcMethod string
-	rpcParams *utils.AttrSetBalance
+type CmdBalanceDebit struct {
+	name       string
+	rpcMethod  string
+	rpcParams  *v1.AttrAddBalance
+	clientArgs []string
 	*CommandExecuter
 }
 
-func (self *CmdSetBalance) Name() string {
+func (self *CmdBalanceDebit) Name() string {
 	return self.name
 }
 
-func (self *CmdSetBalance) RpcMethod() string {
+func (self *CmdBalanceDebit) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetBalance) RpcParams(reset bool) interface{} {
+func (self *CmdBalanceDebit) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrSetBalance{BalanceType: utils.MONETARY}
+		self.rpcParams = &v1.AttrAddBalance{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetBalance) PostprocessRpcParams() error {
+func (self *CmdBalanceDebit) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetBalance) RpcResult() interface{} {
+func (self *CmdBalanceDebit) RpcResult() interface{} {
 	var s string
 	return &s
 }

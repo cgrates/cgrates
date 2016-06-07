@@ -171,12 +171,12 @@ func (self *SMGeneric) getSession(uuid string) []*SMGSession {
 // Handle a new session, pass the connectionId so we can communicate on disconnect request
 func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error {
 	sessionId := evStart.GetUUID()
-	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
+	processed, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
 		var sessionRuns []*engine.SessionRun
 		if err := self.rater.Call("Responder.GetSessionRuns", evStart.AsStoredCdr(self.cgrCfg, self.timezone), &sessionRuns); err != nil {
-			return nil, err
+			return true, err
 		} else if len(sessionRuns) == 0 {
-			return nil, nil
+			return true, nil
 		}
 		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
@@ -189,8 +189,12 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 				go s.debitLoop(self.cgrCfg.SmGenericConfig.DebitInterval)
 			}
 		}
-		return nil, nil
-	}, time.Duration(2)*time.Second, sessionId)
+		return true, nil
+	}, self.cgrCfg.LockingTimeout, sessionId)
+	if processed == nil || processed == false {
+		utils.Logger.Err("<SMGeneric> Cannot start session, empty reply")
+		return utils.ErrServerError
+	}
 	return err
 }
 
@@ -242,6 +246,7 @@ func (self *SMGeneric) sessionRelocate(sessionID, initialID string) error {
 			return nil, utils.ErrNotFound
 		}
 		for i, s := range ss {
+			s.eventStart[utils.ACCID] = sessionID // Overwrite initialSessionID with new one
 			self.indexSession(sessionID, s)
 			if i == 0 {
 				self.unindexSession(initialID)
@@ -254,7 +259,7 @@ func (self *SMGeneric) sessionRelocate(sessionID, initialID string) error {
 
 // Methods to apply on sessions, mostly exported through RPC/Bi-RPC
 //Calculates maximum usage allowed for gevent
-func (self *SMGeneric) GetMaxUsage(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+func (self *SMGeneric) MaxUsage(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	gev[utils.EVENT_NAME] = utils.CGR_AUTHORIZATION
 	storedCdr := gev.AsStoredCdr(config.CgrConfig(), self.timezone)
 	var maxDur float64
@@ -264,7 +269,7 @@ func (self *SMGeneric) GetMaxUsage(gev SMGenericEvent, clnt *rpc2.Client) (time.
 	return time.Duration(maxDur), nil
 }
 
-func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([]string, error) {
+func (self *SMGeneric) LCRSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([]string, error) {
 	gev[utils.EVENT_NAME] = utils.CGR_LCR_REQUEST
 	cd, err := gev.AsLcrRequest().AsCallDescriptor(self.timezone)
 	cd.CgrID = gev.GetCgrId(self.timezone)
@@ -283,12 +288,12 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 }
 
 // Called on session start
-func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+func (self *SMGeneric) InitiateSession(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
 		self.sessionEnd(gev.GetUUID(), 0)
 		return nilDuration, err
 	}
-	d, err := self.SessionUpdate(gev, clnt)
+	d, err := self.UpdateSession(gev, clnt)
 	if err != nil || d == 0 {
 		self.sessionEnd(gev.GetUUID(), 0)
 	}
@@ -296,8 +301,7 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 }
 
 // Execute debits for usage/maxUsage
-func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	self.resetTerminatorTimer(gev.GetUUID(), gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
+func (self *SMGeneric) UpdateSession(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -307,6 +311,7 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 			return nilDuration, err
 		}
 	}
+	self.resetTerminatorTimer(gev.GetUUID(), gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
 	evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
 	if err != nil && err != utils.ErrNotFound {
@@ -322,7 +327,12 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 		}
 		return nilDuration, err
 	}
-	for _, s := range self.getSession(gev.GetUUID()) {
+	aSessions := self.getSession(gev.GetUUID())
+	if len(aSessions) == 0 {
+		utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionUpdate with no active sessions for event: <%s>", gev.GetUUID()))
+		return nilDuration, utils.ErrServerError
+	}
+	for _, s := range aSessions {
 		if maxDur, err := s.debit(evMaxUsage, lastUsed); err != nil {
 			return nilDuration, err
 		} else if maxDur < evMaxUsage {
@@ -333,7 +343,7 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 }
 
 // Called on session end, should stop debit loop
-func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
+func (self *SMGeneric) TerminateSession(gev SMGenericEvent, clnt *rpc2.Client) error {
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -479,7 +489,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 	return maxDur, nil
 }
 
-func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
+func (self *SMGeneric) ProcessCDR(gev SMGenericEvent) error {
 	var reply string
 	if err := self.cdrsrv.Call("CdrsV1.ProcessCdr", gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
 		return err

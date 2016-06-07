@@ -578,6 +578,7 @@ func TestParseEventValue(t *testing.T) {
 	}
 }
 
+/*
 func TestPassesFieldFilterDn1(t *testing.T) {
 	body := `Event-Name: RE_SCHEDULE
 Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
@@ -626,6 +627,7 @@ Caller-Username: 04021292812`
 		t.Error("Should not pass filter")
 	}
 }
+*/
 
 func TestFsEvAsStoredCdr(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()

@@ -988,8 +988,8 @@ func TestApierSetActionPlan(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	atm1 := &ApiActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
-	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*ApiActionPlan{atm1}}
+	atm1 := &AttrActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
+	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*AttrActionPlan{atm1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActionPlan", atms1, &reply1); err != nil {
 		t.Error("Got error on ApierV1.SetActionPlan: ", err.Error())
@@ -1274,7 +1274,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(3**waitRater) * time.Millisecond)
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
@@ -1297,7 +1297,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		if rcvStats.Destinations != 5 ||
 			rcvStats.RatingPlans != 5 ||
 			rcvStats.RatingProfiles != 5 ||
-			rcvStats.Actions != 11 ||
+			rcvStats.Actions != 13 ||
 			rcvStats.DerivedChargers != 3 {
 			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 		}

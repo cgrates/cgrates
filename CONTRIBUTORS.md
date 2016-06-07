@@ -43,6 +43,8 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @noahmehl | Noah Mehl |
 | @elfranne | Tom Braarup Cuykens |
 | @rbarrabe | Régis Barrabé |
+| @J0hnSteel | John Koce Steel |
+| @ewsamuels | Errol Samuels |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->

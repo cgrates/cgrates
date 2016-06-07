@@ -176,13 +176,18 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
-					for idId := range destIds {
-						dId := idId.(string)
-						if _, ok := rpl.DestinationRates[dId]; ok {
-							rps = rpl.RateIntervalList(dId)
-							prefix = p
-							destinationId = dId
-							break
+					var bestWeight float64
+					for idID := range destIds {
+						dID := idID.(string)
+						if _, ok := rpl.DestinationRates[dID]; ok {
+							ril := rpl.RateIntervalList(dID)
+							currentWeight := ril.GetWeight()
+							if currentWeight > bestWeight {
+								bestWeight = currentWeight
+								rps = ril
+								prefix = p
+								destinationId = dID
+							}
 						}
 					}
 				}

@@ -18,8 +18,8 @@ type SMGenericV1 struct {
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	maxUsageDur, err := self.sm.GetMaxUsage(ev, nil)
+func (self *SMGenericV1) MaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+	maxUsageDur, err := self.sm.MaxUsage(ev, nil)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -32,8 +32,8 @@ func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.SMGenericEvent, maxUsage 
 }
 
 // Returns list of suppliers which can be used for the request
-func (self *SMGenericV1) GetLcrSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	if supls, err := self.sm.GetLcrSuppliers(ev, nil); err != nil {
+func (self *SMGenericV1) LCRSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
+	if supls, err := self.sm.LCRSuppliers(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*suppliers = supls
@@ -42,8 +42,8 @@ func (self *SMGenericV1) GetLcrSuppliers(ev sessionmanager.SMGenericEvent, suppl
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
-func (self *SMGenericV1) SessionStart(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.SessionStart(ev, nil); err != nil {
+func (self *SMGenericV1) InitiateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+	if minMaxUsage, err := self.sm.InitiateSession(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
@@ -52,8 +52,8 @@ func (self *SMGenericV1) SessionStart(ev sessionmanager.SMGenericEvent, maxUsage
 }
 
 // Interim updates, returns remaining duration from the rater
-func (self *SMGenericV1) SessionUpdate(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.SessionUpdate(ev, nil); err != nil {
+func (self *SMGenericV1) UpdateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+	if minMaxUsage, err := self.sm.UpdateSession(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
@@ -62,8 +62,8 @@ func (self *SMGenericV1) SessionUpdate(ev sessionmanager.SMGenericEvent, maxUsag
 }
 
 // Called on session end, should stop debit loop
-func (self *SMGenericV1) SessionEnd(ev sessionmanager.SMGenericEvent, reply *string) error {
-	if err := self.sm.SessionEnd(ev, nil); err != nil {
+func (self *SMGenericV1) TerminateSession(ev sessionmanager.SMGenericEvent, reply *string) error {
+	if err := self.sm.TerminateSession(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -81,8 +81,8 @@ func (self *SMGenericV1) ChargeEvent(ev sessionmanager.SMGenericEvent, maxUsage 
 }
 
 // Called on session end, should send the CDR to CDRS
-func (self *SMGenericV1) ProcessCdr(ev sessionmanager.SMGenericEvent, reply *string) error {
-	if err := self.sm.ProcessCdr(ev); err != nil {
+func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *string) error {
+	if err := self.sm.ProcessCDR(ev); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -131,10 +131,19 @@ func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, re
 	return nil
 }
 
+func (self *SMGenericV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
+	var aSessions []*sessionmanager.ActiveSession
+	if err := self.ActiveSessions(attrs, &aSessions); err != nil {
+		return err
+	}
+	*reply = len(aSessions)
+	return nil
+}
+
 // rpcclient.RpcClientConnection interface
 func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	switch serviceMethod {
-	case "SMGenericV1.GetMaxUsage":
+	case "SMGenericV1.MaxUsage":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
@@ -143,8 +152,8 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
-		self.GetMaxUsage(argsConverted, replyConverted)
-	case "SMGenericV1.GetLcrSuppliers":
+		self.MaxUsage(argsConverted, replyConverted)
+	case "SMGenericV1.LCRSuppliers":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
@@ -153,8 +162,8 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
-		return self.GetLcrSuppliers(argsConverted, replyConverted)
-	case "SMGenericV1.SessionStart":
+		return self.LCRSuppliers(argsConverted, replyConverted)
+	case "SMGenericV1.InitiateSession":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
@@ -163,8 +172,8 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
-		return self.SessionStart(argsConverted, replyConverted)
-	case "SMGenericV1.SessionUpdate":
+		return self.InitiateSession(argsConverted, replyConverted)
+	case "SMGenericV1.UpdateSession":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
@@ -173,8 +182,8 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
-		return self.SessionUpdate(argsConverted, replyConverted)
-	case "SMGenericV1.SessionEnd":
+		return self.UpdateSession(argsConverted, replyConverted)
+	case "SMGenericV1.TerminateSession":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
@@ -183,7 +192,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
-		return self.SessionEnd(argsConverted, replyConverted)
+		return self.TerminateSession(argsConverted, replyConverted)
 	case "SMGenericV1.ChargeEvent":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {
@@ -194,7 +203,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 			return rpcclient.ErrWrongReplyType
 		}
 		return self.ChargeEvent(argsConverted, replyConverted)
-	case "SMGenericV1.ProcessCdr":
+	case "SMGenericV1.ProcessCDR":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
@@ -203,7 +212,28 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
-		return self.ProcessCdr(argsConverted, replyConverted)
+		return self.ProcessCDR(argsConverted, replyConverted)
+	case "SMGenericV1.ActiveSessions":
+		argsConverted, canConvert := args.(utils.AttrSMGGetActiveSessions)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*[]*sessionmanager.ActiveSession)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return self.ActiveSessions(argsConverted, replyConverted)
+
+	case "SMGenericV1.ActiveSessionsCount":
+		argsConverted, canConvert := args.(utils.AttrSMGGetActiveSessions)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*int)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return self.ActiveSessionsCount(argsConverted, replyConverted)
 	}
 	return rpcclient.ErrUnsupporteServiceMethod
 }
