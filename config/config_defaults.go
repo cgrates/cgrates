@@ -133,43 +133,6 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"cdre": {
-	"*default": {
-		"cdr_format": "csv",							// exported CDRs format <csv>
-		"field_separator": ",",
-		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
-		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
-		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
-		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
-		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
-		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_folder": "/var/log/cgrates/cdre",		// path where the exported CDRs will be placed
-		"header_fields": [],							// template of the exported header fields
-		"content_fields": [								// template of the exported content fields
-			{"tag": "CGRID", "field_id": "CGRID", "type": "*composed", "value": "CGRID"},
-			{"tag":"RunID", "field_id": "RunID", "type": "*composed", "value": "RunID"},
-			{"tag":"TOR", "field_id": "ToR", "type": "*composed", "value": "ToR"},
-			{"tag":"OriginID", "field_id": "OriginID", "type": "*composed", "value": "OriginID"},
-			{"tag":"RequestType", "field_id": "RequestType", "type": "*composed", "value": "RequestType"},
-			{"tag":"Direction", "field_id": "Direction", "type": "*composed", "value": "Direction"},
-			{"tag":"Tenant", "field_id": "Tenant", "type": "*composed", "value": "Tenant"},
-			{"tag":"Category", "field_id": "Category", "type": "*composed", "value": "Category"},
-			{"tag":"Account", "field_id": "Account", "type": "*composed", "value": "Account"},
-			{"tag":"Subject", "field_id": "Subject", "type": "*composed", "value": "Subject"},
-			{"tag":"Destination", "field_id": "Destination", "type": "*composed", "value": "Destination"},
-			{"tag":"SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "field_id": "Usage", "type": "*composed", "value": "Usage"},
-			{"tag":"Cost", "field_id": "Cost", "type": "*composed", "value": "Cost"},
-		],
-		"trailer_fields": [],							// template of the exported trailer fields
-	}
-},
-
-
 "cdrc": [
 	{
 		"id": "*default",								// identifier of the CDRC runner
@@ -187,7 +150,7 @@ const CGRATES_CFG_JSON = `
 		"cdr_in_dir": "/var/log/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
-		"cdr_path": "",							// path towards one CDR element in case of XML CDRs
+		"cdr_path": "",								// path towards one CDR element in case of XML CDRs
 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",							// filter CDR records to import
 		"continue_on_success": false,				// continue to the next template if executed
@@ -210,6 +173,44 @@ const CGRATES_CFG_JSON = `
 		"trailer_fields": [],							// template of the import trailer fields
 	},
 ],
+
+
+"cdre": {
+	"*default": {
+		"cdr_format": "csv",							// exported CDRs format <csv>
+		"field_separator": ",",
+		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
+		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
+		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
+		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
+		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
+		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
+		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
+		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
+		"mask_length": 0,								// length of the destination suffix to be masked
+		"export_folder": "/var/log/cgrates/cdre",		// path where the exported CDRs will be placed
+		"header_fields": [],							// template of the exported header fields
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
+			{"tag":"RunID", "type": "*composed", "value": "RunID"},
+			{"tag":"TOR", "type": "*composed", "value": "ToR"},
+			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
+			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
+			{"tag":"Direction", "type": "*composed", "value": "Direction"},
+			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "Category"},
+			{"tag":"Account", "type": "*composed", "value": "Account"},
+			{"tag":"Subject", "type": "*composed", "value": "Subject"},
+			{"tag":"Destination", "type": "*composed", "value": "Destination"},
+			{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "type": "*composed", "value": "Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "Cost"},
+		],
+		"trailer_fields": [],							// template of the exported trailer fields
+	},
+},
+
 
 "sm_generic": {
 	"enabled": false,						// starts SessionManager service: <true|false>
