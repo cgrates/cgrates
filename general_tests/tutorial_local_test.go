@@ -41,7 +41,7 @@ func TestTutLocalInitCfg(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutlocal")
+	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
 	tutFsLocalCfg, err = config.NewCGRConfigFromFolder(tutLocalCfgPath)
