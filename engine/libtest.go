@@ -71,9 +71,11 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 		return nil, err
 	}
 	engine := exec.Command(enginePath, "-config_dir", cfgPath)
+	utils.Logger.Debug(fmt.Sprintf("Before engine.Start(), time: %+v", time.Now()))
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}
+	utils.Logger.Debug(fmt.Sprintf("After engine.Start(), time: %+v", time.Now()))
 	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // Give time to rater to fire up
 	return engine, nil
 }
