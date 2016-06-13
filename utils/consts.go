@@ -32,6 +32,10 @@ var (
 	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
 	ErrInsufficientCredit      = errors.New("INSUFFICENT_CREDIT")
 	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
+
+	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
+	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
+		SUPPLIER, DISCONNECT_CAUSE, COST, RATED}
 )
 
 const (
@@ -287,10 +291,4 @@ const (
 	SessionTTLUsage             = "SessionTTLUsage"
 	HandlerSubstractUsage       = "*substract_usage"
 	XML                         = "xml"
-)
-
-var (
-	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
-	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
-		SUPPLIER, DISCONNECT_CAUSE, COST, RATED}
 )

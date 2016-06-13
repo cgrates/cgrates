@@ -23,43 +23,45 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var testIT = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.")
-var storDBType = flag.String("stordb_type", utils.MYSQL, "Perform the tests for MongoDB, not by default.")
+var testTP = flag.Bool("tp", false, "Perform the tests in integration mode, not by default.")
+var configDIR = flag.String("config_dir", "tutmysql", "Relative path towards a config directory under samples prefix")
 
 var tpCfgPath string
 var tpCfg *config.CGRConfig
 var tpRPC *rpc.Client
+var err error
+
+var testTPid = "V2TestTPit"
+var delay int
 
 func TestTPitLoadConfig(t *testing.T) {
-	if !*testIT {
+	if !*testTP {
 		return
 	}
-	var err error
-	switch *storDBType {
-	case utils.MYSQL:
-		tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	case utils.POSTGRES:
-		tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutpostgres")
-	case utils.MONGO:
-		tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	default:
-		t.Fatalf("Unsupported stordb_type: %s", *storDBType)
-	}
+	tpCfgPath = path.Join(*dataDir, "conf", "samples", *configDIR)
 	if tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath); err != nil {
 		t.Error(err)
+	}
+	switch *configDIR {
+	case "tutmongo": // Mongo needs more time to reset db, need to investigate
+		delay = 4000
+	default:
+		delay = *waitRater
 	}
 }
 
 // Remove data in both rating and accounting db
 func TestTPitResetDataDb(t *testing.T) {
-	if !*testIT {
+	if !*testTP {
 		return
 	}
 	if err := engine.InitDataDb(tpCfg); err != nil {
@@ -69,7 +71,7 @@ func TestTPitResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestTPitResetStorDb(t *testing.T) {
-	if !*testIT {
+	if !*testTP {
 		return
 	}
 	if err := engine.InitStorDb(tpCfg); err != nil {
@@ -79,22 +81,117 @@ func TestTPitResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestTPitStartEngine(t *testing.T) {
-	if !*testIT {
+	if !*testTP {
 		return
 	}
-	if _, err := engine.StopStartEngine(tpCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tpCfgPath, delay); err != nil { // Mongo requires more time to start
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
 func TestTPitRpcConn(t *testing.T) {
-	if !*testIT {
+	if !*testTP {
 		return
 	}
 	var err error
 	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestTPitTimings(t *testing.T) {
+	if !*testTP {
+		return
+	}
+	// PEAK,*any,*any,*any,1;2;3;4;5,08:00:00
+	tmPeak := &utils.ApierTPTiming{
+		TPid:      testTPid,
+		TimingId:  "PEAK",
+		Years:     "*any",
+		Months:    "*any",
+		MonthDays: "*any",
+		WeekDays:  "1;2;3;4;5",
+		Time:      "08:00:00",
+	}
+	// OFFPEAK_MORNING,*any,*any,*any,1;2;3;4;5,00:00:00
+	tmOffPeakMorning := &utils.ApierTPTiming{
+		TPid:      testTPid,
+		TimingId:  "OFFPEAK_MORNING",
+		Years:     "*any",
+		Months:    "*any",
+		MonthDays: "*any",
+		WeekDays:  "1;2;3;4;5",
+		Time:      "00:00:00",
+	}
+	// OFFPEAK_EVENING,*any,*any,*any,1;2;3;4;5,19:00:00
+	tmOffPeakEvening := &utils.ApierTPTiming{
+		TPid:      testTPid,
+		TimingId:  "OFFPEAK_EVENING",
+		Years:     "*any",
+		Months:    "*any",
+		MonthDays: "*any",
+		WeekDays:  "1;2;3;4;5",
+		Time:      "19:00:00",
+	}
+	// OFFPEAK_WEEKEND,*any,*any,*any,6;7,00:00:00
+	tmOffPeakWeekend := &utils.ApierTPTiming{
+		TPid:      testTPid,
+		TimingId:  "OFFPEAK_WEEKEND",
+		Years:     "*any",
+		Months:    "*any",
+		MonthDays: "*any",
+		WeekDays:  "6;7",
+		Time:      "00:00:00",
+	}
+	// DUMMY, only used for the purpose of testing remove function
+	tmDummyRemove := &utils.ApierTPTiming{
+		TPid:      testTPid,
+		TimingId:  "DUMMY_REMOVE",
+		Years:     "*any",
+		Months:    "*any",
+		MonthDays: "*any",
+		WeekDays:  "*any",
+		Time:      "01:00:00",
+	}
+	// Test set
+	reply := ""
+	for _, tm := range []*utils.ApierTPTiming{tmPeak, tmOffPeakMorning, tmOffPeakEvening, tmOffPeakWeekend, tmDummyRemove} {
+		if err := tpRPC.Call("ApierV2.SetTPTiming", tm, &reply); err != nil {
+			t.Error("Got error on ApierV2.SetTPTiming: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received when calling ApierV2.SetTPTiming: ", reply)
+		}
+	}
+	// Test get
+	var rplyTmDummy *utils.ApierTPTiming
+	if err := tpRPC.Call("ApierV2.GetTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.TimingId}, &rplyTmDummy); err != nil {
+		t.Error("Calling ApierV2.GetTPTiming, got error: ", err.Error())
+	} else if !reflect.DeepEqual(tmDummyRemove, rplyTmDummy) {
+		t.Errorf("Calling ApierV2.GetTPTiming expected: %v, received: %v", tmDummyRemove, rplyTmDummy)
+	}
+	// Test remove
+	if err := tpRPC.Call("ApierV2.RemTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.TimingId}, &reply); err != nil {
+		t.Error("Calling ApierV2.RemTPTiming, got error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV2.RemTPTiming received: ", reply)
+	}
+	// Test getIds
+	var rplyTmIDs []string
+	expectedTmIDs := []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK"}
+	if err := tpRPC.Call("ApierV1.GetTPTimingIds", v1.AttrGetTPTimingIds{testTPid, utils.Paginator{}}, &rplyTmIDs); err != nil {
+		t.Error("Calling ApierV1.GetTPTimingIds, got error: ", err.Error())
+	} else if len(expectedTmIDs) != len(rplyTmIDs) {
+		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
+	}
+}
+
+func TestTPitKillEngine(t *testing.T) {
+	if !*testTP {
+		return
+	}
+	if err := engine.KillEngine(delay); err != nil {
+		t.Error(err)
 	}
 }
