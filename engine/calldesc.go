@@ -46,20 +46,20 @@ func init() {
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	case "mongo":
-		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", nil)
+		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", nil, "")
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", nil)
+		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", nil, "")
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "redis":
-		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS)
+		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, "")
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK, utils.REDIS_MAX_CONNS)
+		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, "")
 		if err != nil {
 			log.Fatal(err)
 		}

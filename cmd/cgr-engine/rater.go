@@ -73,7 +73,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		}
 
 		start := time.Now()
-		cfi, err := utils.LoadCacheFileInfo("/tmp/cgr_cache")
+		cfi, err := utils.LoadCacheFileInfo(cfg.CacheDumpDir)
 		if err != nil || cfi.LoadInfo.LoadId != loadHist[0].LoadId {
 			if err := ratingDb.CacheRatingAll(); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
@@ -89,17 +89,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 			utils.Logger.Info(fmt.Sprintf("Cache rating creation time: %v", time.Since(start)))
 
 			start = time.Now()
-			if err := utils.SaveCacheFileInfo("/tmp/cgr_cache", &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]}); err != nil {
-				utils.Logger.Crit("could not write cache info file: " + err.Error())
-				return
-			}
-
-			if err := engine.CacheSave("/tmp/cgr_cache", []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
+			if err := engine.CacheSave(cfg.CacheDumpDir, []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]}); err != nil {
 				utils.Logger.Emerg(fmt.Sprintf("could not save cache file: " + err.Error()))
 			}
 			utils.Logger.Info(fmt.Sprintf("Cache rating save time: %v", time.Since(start)))
 		} else {
-			if err := engine.CacheLoad("/tmp/cgr_cache", []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
+			if err := engine.CacheLoad(cfg.CacheDumpDir, []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
 				utils.Logger.Crit("could not load cache file: " + err.Error())
 				exitChan <- true
 				return

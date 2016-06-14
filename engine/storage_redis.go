@@ -36,11 +36,12 @@ var (
 )
 
 type RedisStorage struct {
-	db *pool.Pool
-	ms Marshaler
+	db           *pool.Pool
+	ms           Marshaler
+	cacheDumpDir string
 }
 
-func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int) (*RedisStorage, error) {
+func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int, cacheDumpDir string) (*RedisStorage, error) {
 	df := func(network, addr string) (*redis.Client, error) {
 		client, err := redis.Dial(network, addr)
 		if err != nil {
@@ -72,7 +73,7 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns i
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
-	return &RedisStorage{db: p, ms: mrshler}, nil
+	return &RedisStorage{db: p, ms: mrshler, cacheDumpDir: cacheDumpDir}, nil
 }
 
 func (rs *RedisStorage) Close() {
@@ -315,7 +316,34 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 
 	CacheCommitTransaction()
-	return nil
+	loadHist, err := rs.GetLoadHistory(1, true)
+	if err != nil || len(loadHist) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
+		return err
+	}
+	var keys []string
+	if len(dKeys) > 0 {
+		keys = append(keys, utils.DESTINATION_PREFIX)
+	}
+	if len(rpKeys) > 0 {
+		keys = append(keys, utils.RATING_PLAN_PREFIX)
+	}
+	if len(rpfKeys) > 0 {
+		keys = append(keys, utils.RATING_PROFILE_PREFIX)
+	}
+	if len(lcrKeys) > 0 {
+		keys = append(keys, utils.LCR_PREFIX)
+	}
+	if len(actKeys) > 0 {
+		keys = append(keys, utils.ACTION_PREFIX)
+	}
+	if len(aplKeys) > 0 {
+		keys = append(keys, utils.ACTION_PLAN_PREFIX)
+	}
+	if len(shgKeys) > 0 {
+		keys = append(keys, utils.SHARED_GROUP_PREFIX)
+	}
+	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]})
 }
 
 func (rs *RedisStorage) CacheAccountingAll() error {
@@ -391,7 +419,16 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	}
 	utils.Logger.Info("Finished load history caching.")
 	CacheCommitTransaction()
-	return nil
+	var keys []string
+	if len(alsKeys) > 0 {
+		keys = append(keys, utils.ALIASES_PREFIX)
+	}
+	loadHist, err := rs.GetLoadHistory(1, true)
+	if err != nil || len(loadHist) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
+		return err
+	}
+	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]})
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity

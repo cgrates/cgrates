@@ -1,7 +1,11 @@
 //Simple caching library with expiration capabilities
 package engine
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 const (
 	PREFIX_LEN   = 4
@@ -74,10 +78,10 @@ func CacheCommitTransaction() {
 	transactionMux.Unlock()
 }
 
-func CacheSave(path string, keys []string) error {
+func CacheSave(path string, keys []string, cfi *utils.CacheFileInfo) error {
 	mux.Lock()
 	defer mux.Unlock()
-	return cache.Save(path, keys)
+	return cache.Save(path, keys, cfi)
 }
 
 func CacheLoad(path string, keys []string) error {

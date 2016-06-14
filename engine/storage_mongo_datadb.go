@@ -84,9 +84,10 @@ var (
 )
 
 type MongoStorage struct {
-	session *mgo.Session
-	db      string
-	ms      Marshaler
+	session      *mgo.Session
+	db           string
+	ms           Marshaler
+	cacheDumpDir string
 }
 
 func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
@@ -94,7 +95,7 @@ func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
 	return sessionCopy, sessionCopy.DB(ms.db).C(col)
 }
 
-func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*MongoStorage, error) {
+func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, cacheDumpDir string) (*MongoStorage, error) {
 
 	// We need this object to establish a session to our MongoDB.
 	/*address := fmt.Sprintf("%s:%s", host, port)
@@ -284,7 +285,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*
 	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
 		return nil, err
 	}
-	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler()}, err
+	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler(), cacheDumpDir: cacheDumpDir}, err
 }
 
 func (ms *MongoStorage) Close() {
@@ -640,7 +641,34 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		utils.Logger.Info("Finished shared groups caching.")
 	}
 	CacheCommitTransaction()
-	return nil
+	loadHist, err := ms.GetLoadHistory(1, true)
+	if err != nil || len(loadHist) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
+		return err
+	}
+	var keys []string
+	if len(dKeys) > 0 {
+		keys = append(keys, utils.DESTINATION_PREFIX)
+	}
+	if len(rpKeys) > 0 {
+		keys = append(keys, utils.RATING_PLAN_PREFIX)
+	}
+	if len(rpfKeys) > 0 {
+		keys = append(keys, utils.RATING_PROFILE_PREFIX)
+	}
+	if len(lcrKeys) > 0 {
+		keys = append(keys, utils.LCR_PREFIX)
+	}
+	if len(actKeys) > 0 {
+		keys = append(keys, utils.ACTION_PREFIX)
+	}
+	if len(aplKeys) > 0 {
+		keys = append(keys, utils.ACTION_PLAN_PREFIX)
+	}
+	if len(shgKeys) > 0 {
+		keys = append(keys, utils.SHARED_GROUP_PREFIX)
+	}
+	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]})
 }
 
 func (ms *MongoStorage) CacheAccountingAll() error {
@@ -714,12 +742,18 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		utils.Logger.Info("Finished aliases caching.")
 	}
 	utils.Logger.Info("Caching load history")
-	if _, err = ms.GetLoadHistory(1, true); err != nil {
+	loadHist, err := ms.GetLoadHistory(1, true)
+	if err != nil {
 		CacheRollbackTransaction()
 		return err
 	}
 	utils.Logger.Info("Finished load history caching.")
 	CacheCommitTransaction()
+	var keys []string
+	if len(alsKeys) > 0 {
+		keys = append(keys, utils.ALIASES_PREFIX)
+	}
+	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]})
 	return nil
 }
 
