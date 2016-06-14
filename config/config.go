@@ -85,7 +85,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 		return nil, err
 	}
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
-	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/log/cgrates/cdrc/in"][0].Clone()
+	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
 	dfltFsConnConfig = cfg.SmFsConfig.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.EvapiConns[0]
 	if err := cfg.checkConfigSanity(); err != nil {
@@ -212,6 +212,7 @@ type CGRConfig struct {
 	HttpFailedDir            string          // Directory path where we store failed http requests
 	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
+	CacheDumpDir             string          // cache dump for faster start (leave empty to disable)b
 	RALsEnabled              bool            // start standalone server (no balancer)
 	RALsBalancer             string          // balancer address host:port
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
@@ -698,6 +699,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			if self.LockingTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Locking_timeout); err != nil {
 				return err
 			}
+		}
+		if jsnGeneralCfg.Cache_dump_dir != nil {
+			self.CacheDumpDir = *jsnGeneralCfg.Cache_dump_dir
 		}
 	}
 

@@ -42,9 +42,9 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Http_skip_tls_verify: utils.BoolPointer(false),
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
-		Tpexport_dir:         utils.StringPointer("/var/log/cgrates/tpe"),
+		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
 		Httpposter_attempts:  utils.IntPointer(3),
-		Http_failed_dir:      utils.StringPointer("/var/log/cgrates/http_failed"),
+		Http_failed_dir:      utils.StringPointer("/var/spool/cgrates/http_failed"),
 		Default_request_type: utils.StringPointer(utils.META_RATED),
 		Default_category:     utils.StringPointer("call"),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
@@ -55,7 +55,8 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Reply_timeout:        utils.StringPointer("2s"),
 		Response_cache_ttl:   utils.StringPointer("0s"),
 		Internal_ttl:         utils.StringPointer("2m"),
-		Locking_timeout:      utils.StringPointer("5s")}
+		Locking_timeout:      utils.StringPointer("5s"),
+		Cache_dump_dir:       utils.StringPointer("/var/lib/cgrates/cache_dump")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
@@ -263,7 +264,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Cost_shift_digits:             utils.IntPointer(0),
 			Mask_destination_id:           utils.StringPointer("MASKED_DESTINATIONS"),
 			Mask_length:                   utils.IntPointer(0),
-			Export_folder:                 utils.StringPointer("/var/log/cgrates/cdre"),
+			Export_folder:                 utils.StringPointer("/var/spool/cgrates/cdre"),
 			Header_fields:                 &eFields,
 			Content_fields:                &eContentFlds,
 			Trailer_fields:                &eFields,
@@ -320,8 +321,8 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Run_delay:                  utils.IntPointer(0),
 			Max_open_files:             utils.IntPointer(1024),
 			Data_usage_multiply_factor: utils.Float64Pointer(1024.0),
-			Cdr_in_dir:                 utils.StringPointer("/var/log/cgrates/cdrc/in"),
-			Cdr_out_dir:                utils.StringPointer("/var/log/cgrates/cdrc/out"),
+			Cdr_in_dir:                 utils.StringPointer("/var/spool/cgrates/cdrc/in"),
+			Cdr_out_dir:                utils.StringPointer("/var/spool/cgrates/cdrc/out"),
 			Failed_calls_prefix:        utils.StringPointer("missed_calls"),
 			Cdr_path:                   utils.StringPointer(""),
 			Cdr_source_id:              utils.StringPointer("freeswitch_csv"),
@@ -529,7 +530,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 func TestDfHistServJsonCfg(t *testing.T) {
 	eCfg := &HistServJsonCfg{
 		Enabled:       utils.BoolPointer(false),
-		History_dir:   utils.StringPointer("/var/log/cgrates/history"),
+		History_dir:   utils.StringPointer("/var/lib/cgrates/history"),
 		Save_interval: utils.StringPointer("1s"),
 	}
 	if cfg, err := dfCgrJsonCfg.HistServJsonCfg(); err != nil {

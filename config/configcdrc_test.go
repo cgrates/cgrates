@@ -34,7 +34,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.CdrcProfiles = make(map[string][]*CdrcConfig)
 	// Default instance first
-	eCgrCfg.CdrcProfiles["/var/log/cgrates/cdrc/in"] = []*CdrcConfig{
+	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcConfig{
 		&CdrcConfig{
 			ID:                      utils.META_DEFAULT,
 			Enabled:                 false,
@@ -44,8 +44,8 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 			DataUsageMultiplyFactor: 1024,
 			RunDelay:                0,
 			MaxOpenFiles:            1024,
-			CdrInDir:                "/var/log/cgrates/cdrc/in",
-			CdrOutDir:               "/var/log/cgrates/cdrc/out",
+			CdrInDir:                "/var/spool/cgrates/cdrc/in",
+			CdrOutDir:               "/var/spool/cgrates/cdrc/out",
 			FailedCallsPrefix:       "missed_calls",
 			CDRPath:                 utils.HierarchyPath([]string{""}),
 			CdrSourceId:             "freeswitch_csv",

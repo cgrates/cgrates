@@ -31,9 +31,9 @@ const CGRATES_CFG_JSON = `
 	"http_skip_tls_verify": false,						// if enabled Http Client will accept any TLS certificate
 	"rounding_decimals": 5,								// system level precision for floats
 	"dbdata_encoding": "msgpack",						// encoding used to store object data in strings: <msgpack|json>
-	"tpexport_dir": "/var/log/cgrates/tpe",				// path towards export folder for offline Tariff Plans
+	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline Tariff Plans
 	"httpposter_attempts": 3,							// number of http attempts before considering request failed (eg: *call_url)
-	"http_failed_dir": "/var/log/cgrates/http_failed",	// directory path where we store failed http requests
+	"http_failed_dir": "/var/spool/cgrates/http_failed",	// directory path where we store failed http requests
 	"default_request_type": "*rated",					// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 	"default_category": "call",							// default category to consider when missing from requests
 	"default_tenant": "cgrates.org",					// default tenant to consider when missing from requests
@@ -45,6 +45,8 @@ const CGRATES_CFG_JSON = `
 	"response_cache_ttl": "0s",							// the life span of a cached response
 	"internal_ttl": "2m",								// maximum duration to wait for internal connections before giving up
 	"locking_timeout": "5s",							// timeout internal locks to avoid deadlocks
+    "cache_dump_dir": "/var/lib/cgrates/cache_dump",                 // cache dump for faster start (leave empty to disable)b
+
 },
 
 
@@ -146,7 +148,7 @@ const CGRATES_CFG_JSON = `
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
 		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
 		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_folder": "/var/log/cgrates/cdre",		// path where the exported CDRs will be placed
+		"export_folder": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
 			{"tag": "CGRID", "field_id": "CGRID", "type": "*composed", "value": "CGRID"},
@@ -177,15 +179,15 @@ const CGRATES_CFG_JSON = `
 		"dry_run": false,							// do not send the CDRs to CDRS, just parse them
 		"cdrs_conns": [
 			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
-		],							
+		],
 		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": ",",						// separator used in case of csv files
 		"timezone": "",								// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"max_open_files": 1024,						// maximum simultaneous files to process, 0 for unlimited
 		"data_usage_multiply_factor": 1024,			// conversion factor for data usage
-		"cdr_in_dir": "/var/log/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_dir": "/var/spool/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
+		"cdr_out_dir": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
 		"cdr_path": "",							// path towards one CDR element in case of XML CDRs
 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
@@ -298,7 +300,7 @@ const CGRATES_CFG_JSON = `
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sm_generic_conns": [
 		{"address": "*internal"}									// connection towards SMG component for session management
-	],															
+	],
 	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
 	"debit_interval": "5m",										// interval for CCR updates
@@ -342,7 +344,7 @@ const CGRATES_CFG_JSON = `
 
 "historys": {
 	"enabled": false,							// starts History service: <true|false>.
-	"history_dir": "/var/log/cgrates/history",	// location on disk where to store history files.
+	"history_dir": "/var/lib/cgrates/history",	// location on disk where to store history files.
 	"save_interval": "1s",						// interval to save changed cache into .git archive
 },
 

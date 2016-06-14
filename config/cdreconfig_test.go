@@ -18,9 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestCdreCfgClone(t *testing.T) {
@@ -46,7 +47,7 @@ func TestCdreCfgClone(t *testing.T) {
 		CostShiftDigits:         0,
 		MaskDestinationID:       "MASKED_DESTINATIONS",
 		MaskLength:              0,
-		ExportFolder:            "/var/log/cgrates/cdre",
+		ExportFolder:            "/var/spool/cgrates/cdre",
 		ContentFields:           initContentFlds,
 	}
 	eClnContentFlds := []*CfgCdrField{
@@ -68,7 +69,7 @@ func TestCdreCfgClone(t *testing.T) {
 		CostShiftDigits:         0,
 		MaskDestinationID:       "MASKED_DESTINATIONS",
 		MaskLength:              0,
-		ExportFolder:            "/var/log/cgrates/cdre",
+		ExportFolder:            "/var/spool/cgrates/cdre",
 		HeaderFields:            emptyFields,
 		ContentFields:           eClnContentFlds,
 		TrailerFields:           emptyFields,
