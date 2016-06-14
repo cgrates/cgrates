@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var testTP = flag.Bool("tp", false, "Perform the tests in integration mode, not by default.")
+var testTP = flag.Bool("tp", false, "Perform the tests for TariffPlans, not by default.") // Separate from integration so we can run on multiple DBs without involving all other tests on each run
 var configDIR = flag.String("config_dir", "tutmysql", "Relative path towards a config directory under samples prefix")
 
 var tpCfgPath string
