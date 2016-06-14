@@ -150,7 +150,9 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
 	cacheKey := utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrID + arg.RunID + arg.DurationIndex.String()
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*CallCost))
+		if item.Value != nil {
+			*reply = *(item.Value.(*CallCost))
+		}
 		return item.Err
 	}
 	if arg.Subject == "" {
@@ -198,7 +200,9 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
 	cacheKey := utils.REFUND_INCR_CACHE_PREFIX + arg.CgrID + arg.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*float64))
+		if item.Value != nil {
+			*reply = *(item.Value.(*float64))
+		}
 		return item.Err
 	}
 	if arg.Subject == "" {
@@ -240,7 +244,9 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err error) {
 	cacheKey := utils.REFUND_ROUND_CACHE_PREFIX + arg.CgrID + arg.RunID + arg.DurationIndex.String()
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*float64))
+		if item.Value != nil {
+			*reply = *(item.Value.(*float64))
+		}
 		return item.Err
 	}
 	if arg.Subject == "" {
@@ -317,7 +323,9 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	}
 	cacheKey := utils.GET_DERIV_MAX_SESS_TIME + ev.CGRID + ev.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*float64))
+		if item.Value != nil {
+			*reply = *(item.Value.(*float64))
+		}
 		return item.Err
 	}
 	if ev.Subject == "" {
@@ -423,7 +431,9 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	}
 	cacheKey := utils.GET_SESS_RUNS_CACHE_PREFIX + ev.CGRID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*sRuns = *(item.Value.(*[]*SessionRun))
+		if item.Value != nil {
+			*sRuns = *(item.Value.(*[]*SessionRun))
+		}
 		return item.Err
 	}
 	if ev.Subject == "" {
@@ -519,7 +529,9 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	cacheKey := utils.LCRCachePrefix + attrs.CgrID + attrs.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*LCRCost))
+		if item.Value != nil {
+			*reply = *(item.Value.(*LCRCost))
+		}
 		return item.Err
 	}
 	if attrs.CallDescriptor.Subject == "" {

@@ -497,7 +497,9 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 	cacheKey := "ProcessCdr" + cdr.CGRID
 	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = item.Value.(string)
+		if item.Value != nil {
+			*reply = item.Value.(string)
+		}
 		return item.Err
 	}
 	if err := self.LocalProcessCdr(cdr); err != nil {
