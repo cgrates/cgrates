@@ -33,13 +33,14 @@ binary-arch: clean
 	cp -r $(CURDIR)/data/conf/cgrates $(PKGDIR)/etc/
 	mkdir -p $(PKGDIR)/usr/share/cgrates
 	cp -r $(CURDIR)/data/* $(PKGDIR)/usr/share/cgrates/
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdrc/in
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdrc/out
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdre/csv
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdre/fwv
-	mkdir -p $(PKGDIR)/var/log/cgrates/history
-	mkdir -p $(PKGDIR)/var/log/cgrates/tpe
-	mkdir -p $(PKGDIR)/var/log/cgrates/http_failed
+	mkdir -p $(PKGDIR)/var/spool/cgrates/cdrc/in
+	mkdir -p $(PKGDIR)/var/spool/cgrates/cdrc/out
+	mkdir -p $(PKGDIR)/var/spool/cgrates/cdre/csv
+	mkdir -p $(PKGDIR)/var/spool/cgrates/cdre/fwv
+	mkdir -p $(PKGDIR)/var/spool/cgrates/tpe
+	mkdir -p $(PKGDIR)/var/spool/cgrates/http_failed
+	mkdir -p $(PKGDIR)/var/lib/cgrates/history
+	mkdir -p $(PKGDIR)/var/lib/cgrates/cache_dump
 	dh_strip
 	dh_compress
 	dh_fixperms

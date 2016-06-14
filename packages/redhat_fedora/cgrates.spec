@@ -4,6 +4,8 @@
 %global git_short_commit %(c=%{git_commit}; echo ${c:0:7})
 %define debug_package  %{nil}
 %global _logdir	       /var/log/%name
+%global _spooldir      /var/spool/%name
+%global _libdir	       /var/lib/%name
 
 Name:           cgrates
 Version:        %{version}.%{git_short_commit}
@@ -48,6 +50,8 @@ fi
 /sbin/chkconfig --add %{name}
 %endif
 /bin/chown -R %{name}:%{name} %{_logdir}
+/bin/chown -R %{name}:%{name} %{_spooldir}
+/bin/chown -R %{name}:%{name} %{_libdir}
 
 %preun
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
@@ -84,7 +88,8 @@ mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdrc/in
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdrc/out
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/csv
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/fwv
-mkdir -p $RPM_BUILD_ROOT%{_logdir}/history
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/history
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/cache_dump
 install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.options $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
 	install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.service $RPM_BUILD_ROOT%{_unitdir}/%{name}.service
@@ -98,6 +103,8 @@ install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{na
 %{_bindir}/*
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.json
 %{_logdir}/*
+%{_spooldir}/*
+%{_libdir}/*
 %{_sysconfdir}/sysconfig/%{name}
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
 	%{_unitdir}/%{name}.service
