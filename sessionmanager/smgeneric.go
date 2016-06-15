@@ -91,7 +91,7 @@ func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
 	cdr.Usage = s.TotalUsage()
 	var reply string
-	self.cdrsrv.Call("CdrsV1.ProcessCdr", cdr, &reply)
+	self.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply)
 }
 
 func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
@@ -491,7 +491,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 
 func (self *SMGeneric) ProcessCDR(gev SMGenericEvent) error {
 	var reply string
-	if err := self.cdrsrv.Call("CdrsV1.ProcessCdr", gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrsV1.ProcessCDR", gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
 		return err
 	}
 	return nil

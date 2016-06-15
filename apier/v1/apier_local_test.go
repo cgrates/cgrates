@@ -1472,7 +1472,7 @@ func TestApierLocalProcessCdr(t *testing.T) {
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if err := rater.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
+	if err := rater.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
