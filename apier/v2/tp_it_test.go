@@ -156,7 +156,7 @@ func TestTPitTimings(t *testing.T) {
 		Time:      "01:00:00",
 	}
 	// Test set
-	reply := ""
+	var reply string
 	for _, tm := range []*utils.ApierTPTiming{tmPeak, tmOffPeakMorning, tmOffPeakEvening, tmOffPeakWeekend, tmDummyRemove} {
 		if err := tpRPC.Call("ApierV2.SetTPTiming", tm, &reply); err != nil {
 			t.Error("Got error on ApierV2.SetTPTiming: ", err.Error())
@@ -185,6 +185,58 @@ func TestTPitTimings(t *testing.T) {
 	} else if len(expectedTmIDs) != len(rplyTmIDs) {
 		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
 	}
+}
+
+func TestTPitDestinations(t *testing.T) {
+	if !*testTP {
+		return
+	}
+	var reply string
+	// DST_1002,1002
+	dst1002 := &utils.TPDestination{TPid: testTPid, DestinationId: "DST_1002", Prefixes: []string{"1002"}}
+	// DST_1003,1003
+	dst1003 := &utils.TPDestination{TPid: testTPid, DestinationId: "DST_1003", Prefixes: []string{"1003"}}
+	// DST_1007,1007
+	dst1007 := &utils.TPDestination{TPid: testTPid, DestinationId: "DST_1007", Prefixes: []string{"1007"}}
+	// DST_FS,10
+	dstFS := &utils.TPDestination{TPid: testTPid, DestinationId: "DST_FS", Prefixes: []string{"10"}}
+	// DST_DE_MOBILE,+49151
+	// DST_DE_MOBILE,+49161
+	// DST_DE_MOBILE,+49171
+	dstDEMobile := &utils.TPDestination{TPid: testTPid, DestinationId: "DST_DE_MOBILE", Prefixes: []string{"+49151", "+49161", "+49171"}}
+	dstDUMMY := &utils.TPDestination{TPid: testTPid, DestinationId: "DUMMY_REMOVE", Prefixes: []string{"999"}}
+	for _, dst := range []*utils.TPDestination{dst1002, dst1003, dst1007, dstFS, dstDEMobile, dstDUMMY} {
+		if err := tpRPC.Call("ApierV2.SetTPDestination", dst, &reply); err != nil {
+			t.Error("Got error on ApierV2.SetTPDestination: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received when calling ApierV2.SetTPDestination: ", reply)
+		}
+	}
+	// Test get
+	/*
+		 FixMe for mongodb
+			var rplyDst *utils.TPDestination
+			if err := tpRPC.Call("ApierV2.GetTPDestination", v1.AttrGetTPDestination{testTPid, dstDEMobile.DestinationId}, &rplyDst); err != nil {
+				t.Error("Calling ApierV2.GetTPDestination, got error: ", err.Error())
+			} else if len(dstDEMobile.Prefixes) != len(rplyDst.Prefixes) {
+				t.Errorf("Calling ApierV2.GetTPDestination expected: %v, received: %v", dstDEMobile, rplyDst)
+			}
+	*/
+	// Test remove
+	if err := tpRPC.Call("ApierV2.RemTPDestination", v1.AttrGetTPDestination{testTPid, dstDUMMY.DestinationId}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemTPTiming, got error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV2.RemTPTiming received: ", reply)
+	}
+	// Test getIds
+	var rplyDstIds []string
+	expectedDstIds := []string{"DST_1002", "DST_1003", "DST_1007", "DST_DE_MOBILE", "DST_FS"}
+	if err := tpRPC.Call("ApierV2.GetTPDestinationIds", v1.AttrGetTPDestinationIds{TPid: testTPid}, &rplyDstIds); err != nil {
+		t.Error("Calling ApierV1.GetTPDestinationIds, got error: ", err.Error())
+	} else if len(expectedDstIds) != len(rplyDstIds) {
+		t.Errorf("Calling ApierV2.GetTPDestinationIds expected: %v, received: %v", expectedDstIds, rplyDstIds)
+	}
+
 }
 
 func TestTPitKillEngine(t *testing.T) {
