@@ -57,14 +57,15 @@ const (
 )
 
 var (
-	cfgDir       = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
-	version      = flag.Bool("version", false, "Prints the application version.")
-	raterEnabled = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
-	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
-	cdrsEnabled  = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
-	pidFile      = flag.String("pid", "", "Write pid file")
-	cpuprofile   = flag.String("cpuprofile", "", "write cpu profile to file")
-	singlecpu    = flag.Bool("singlecpu", false, "Run on single CPU core")
+	cfgDir            = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
+	version           = flag.Bool("version", false, "Prints the application version.")
+	raterEnabled      = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
+	schedEnabled      = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
+	cdrsEnabled       = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
+	pidFile           = flag.String("pid", "", "Write pid file")
+	cpuprofile        = flag.String("cpuprofile", "", "write cpu profile to file")
+	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
+	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
 
 	cfg   *config.CGRConfig
 	smRpc *v1.SessionManagerV1
@@ -461,6 +462,7 @@ func main() {
 	if *singlecpu {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
 	}
+	exitChan := make(chan bool)
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
@@ -468,6 +470,17 @@ func main() {
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
+
+	}
+	if *scheduledShutdown != "" {
+		shutdownDur, err := utils.ParseDurationWithSecs(*scheduledShutdown)
+		if err != nil {
+			log.Fatal(err)
+		}
+		go func() { // Schedule shutdown
+			time.Sleep(shutdownDur)
+			exitChan <- true
+		}()
 	}
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
@@ -537,7 +550,6 @@ func main() {
 	server := new(utils.Server)
 
 	// Async starts here, will follow cgrates.json start order
-	exitChan := make(chan bool)
 
 	// Define internal connections via channels
 	internalBalancerChan := make(chan *balancer2go.Balancer, 1)
