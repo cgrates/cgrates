@@ -20,6 +20,7 @@ package agents
 
 import (
 	"flag"
+	//"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -962,6 +963,31 @@ func TestDmtAgentDryRun1(t *testing.T) {
 		t.Errorf("Expecting 300, received: %s", strResult)
 	}
 }
+
+/*
+func TestDmtAgentLoadCER(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	m := diam.NewRequest(diam.CapabilitiesExchange, 4, dict.Default)
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.HostIPAddress, avp.Mbit, 0, datatype.Address(net.ParseIP("127.0.0.1")))
+	m.NewAVP(avp.VendorID, avp.Mbit, 0, datatype.Unsigned32(999))
+	m.NewAVP(avp.ProductName, 0, 0, datatype.UTF8String("CGR-DA"))
+	m.NewAVP(avp.OriginStateID, avp.Mbit, 0, datatype.Unsigned32(1))
+	m.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	m.NewAVP(avp.FirmwareRevision, avp.Mbit, 0, datatype.Unsigned32(1))
+	if err := dmtClient.SendMessage(m); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+}
+*/
 
 func TestDmtAgentStopEngine(t *testing.T) {
 	if !*testIntegration {
