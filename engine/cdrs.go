@@ -510,9 +510,18 @@ func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 
 // RPC method, differs from storeSMCost through it's signature
 func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) error {
+	cacheKey := "V1StoreSMCost" + attr.Cost.CGRID + attr.Cost.RunID + attr.Cost.OriginID
+	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
+		if item.Value != nil {
+			*reply = item.Value.(string)
+		}
+		return item.Err
+	}
 	if err := self.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
+		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
+	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }
