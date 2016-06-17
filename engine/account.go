@@ -377,6 +377,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY)
 	//utils.Logger.Info(fmt.Sprintf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances))
 	//utils.Logger.Info(fmt.Sprintf("STARTCD: %+v", cd))
+	//log.Printf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances)
 	var leftCC *CallCost
 	cc = cd.CreateCallCost()
 
@@ -487,7 +488,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
 		if initialLength == 0 {
 			// this is the first add, debit the connect fee
-			ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
+			ub.DebitConnectionFee(cc, usefulMoneyBalances, count, true)
 		}
 		//log.Printf("Left CC: %+v ", leftCC)
 		// get the default money balanance
@@ -797,7 +798,7 @@ func (acc *Account) Clone() *Account {
 	return newAcc
 }
 
-func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool) {
+func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool, block bool) bool {
 	if cc.deductConnectFee {
 		connectFee := cc.GetConnectFee()
 		//log.Print("CONNECT FEE: %f", connectFee)
@@ -812,6 +813,9 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 				connectFeePaid = true
 				break
 			}
+			if b.Blocker && block { // stop here
+				return false
+			}
 		}
 		// debit connect fee
 		if connectFee > 0 && !connectFeePaid {
@@ -825,6 +829,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 			}
 		}
 	}
+	return true
 }
 
 func (acc *Account) matchActionFilter(condition string) (bool, error) {
