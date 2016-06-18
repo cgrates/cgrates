@@ -30,7 +30,7 @@ var (
 	ErrAccountNotFound         = errors.New("ACCOUNT_NOT_FOUND")
 	ErrAccountDisabled         = errors.New("ACCOUNT_DISABLED")
 	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
-	ErrInsufficientCredit      = errors.New("INSUFFICENT_CREDIT")
+	ErrInsufficientCredit      = errors.New("INSUFFICIENT_CREDIT")
 	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
 
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
@@ -291,4 +291,6 @@ const (
 	SessionTTLUsage             = "SessionTTLUsage"
 	HandlerSubstractUsage       = "*substract_usage"
 	XML                         = "xml"
+	MetaGOBrpc                  = "*gob"
+	MetaJSONrpc                 = "*json"
 )

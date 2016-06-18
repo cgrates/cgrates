@@ -206,7 +206,8 @@ type SmFsJsonCfg struct {
 
 // Represents one connection instance towards a rater/cdrs server
 type HaPoolJsonCfg struct {
-	Address *string
+	Address   *string
+	Transport *string
 }
 
 // Represents one connection instance towards FreeSWITCH

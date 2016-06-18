@@ -110,7 +110,7 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
 	}
-	cdrsConn, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+	cdrsConn, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 		cdrcCfg.CdrsConns, internalCdrSChan, cfg.InternalTtl)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRC> Could not connect to CDRS via RPC: %s", err.Error()))
@@ -133,7 +133,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 	utils.Logger.Info("Starting CGRateS SMGeneric service.")
 	var ralsConns, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SmGenericConfig.RALsConns) != 0 {
-		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmGenericConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RALs: %s", err.Error()))
@@ -142,7 +142,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 		}
 	}
 	if len(cfg.SmGenericConfig.CDRsConns) != 0 {
-		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmGenericConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RALs: %s", err.Error()))
@@ -173,7 +173,7 @@ func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcC
 	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
 	var smgConn, pubsubConn *rpcclient.RpcClientPool
 	if len(cfg.DiameterAgentCfg().SMGenericConns) != 0 {
-		smgConn, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		smgConn, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DiameterAgentCfg().SMGenericConns, internalSMGChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
@@ -182,7 +182,7 @@ func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcC
 		}
 	}
 	if len(cfg.DiameterAgentCfg().PubSubConns) != 0 {
-		pubsubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		pubsubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DiameterAgentCfg().PubSubConns, internalPubSubSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to PubSubS: %s", err.Error()))
@@ -206,7 +206,7 @@ func startSmFreeSWITCH(internalRaterChan, internalCDRSChan chan rpcclient.RpcCli
 	utils.Logger.Info("Starting CGRateS SMFreeSWITCH service.")
 	var ralsConn, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SmFsConfig.RALsConns) != 0 {
-		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmFsConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMFreeSWITCH> Could not connect to RAL: %s", err.Error()))
@@ -215,7 +215,7 @@ func startSmFreeSWITCH(internalRaterChan, internalCDRSChan chan rpcclient.RpcCli
 		}
 	}
 	if len(cfg.SmFsConfig.CDRsConns) != 0 {
-		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmFsConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMFreeSWITCH> Could not connect to RAL: %s", err.Error()))
@@ -235,7 +235,7 @@ func startSmKamailio(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 	utils.Logger.Info("Starting CGRateS SMKamailio service.")
 	var ralsConn, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SmKamConfig.RALsConns) != 0 {
-		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmKamConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RAL: %s", err.Error()))
@@ -244,7 +244,7 @@ func startSmKamailio(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 		}
 	}
 	if len(cfg.SmKamConfig.CDRsConns) != 0 {
-		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmKamConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RAL: %s", err.Error()))
@@ -264,7 +264,7 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 	utils.Logger.Info("Starting CGRateS SMOpenSIPS service.")
 	var ralsConn, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SmOsipsConfig.RALsConns) != 0 {
-		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmOsipsConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMOpenSIPS> Could not connect to RALs: %s", err.Error()))
@@ -273,7 +273,7 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 		}
 	}
 	if len(cfg.SmOsipsConfig.CDRsConns) != 0 {
-		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmOsipsConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMOpenSIPS> Could not connect to CDRs: %s", err.Error()))
@@ -296,7 +296,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, logDb engine
 	utils.Logger.Info("Starting CGRateS CDRS service.")
 	var ralConn, pubSubConn, usersConn, aliasesConn, statsConn *rpcclient.RpcClientPool
 	if len(cfg.CDRSRaterConns) != 0 { // Conn pool towards RAL
-		ralConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		ralConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSRaterConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to RAL: %s", err.Error()))
@@ -305,7 +305,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, logDb engine
 		}
 	}
 	if len(cfg.CDRSPubSubSConns) != 0 { // Pubsub connection init
-		pubSubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		pubSubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSPubSubSConns, internalPubSubSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to PubSubSystem: %s", err.Error()))
@@ -314,7 +314,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, logDb engine
 		}
 	}
 	if len(cfg.CDRSUserSConns) != 0 { // Users connection init
-		usersConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		usersConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSUserSConns, internalUserSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to UserS: %s", err.Error()))
@@ -323,7 +323,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, logDb engine
 		}
 	}
 	if len(cfg.CDRSAliaseSConns) != 0 { // Aliases connection init
-		aliasesConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		aliasesConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSAliaseSConns, internalAliaseSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to AliaseS: %s", err.Error()))
@@ -333,7 +333,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, logDb engine
 	}
 
 	if len(cfg.CDRSStatSConns) != 0 { // Stats connection init
-		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSStatSConns, internalCdrStatSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to StatS: %s", err.Error()))
