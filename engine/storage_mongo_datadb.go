@@ -1274,7 +1274,10 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*
 		CacheRemKey(utils.LOADINST_KEY)
 		CacheSet(utils.LOADINST_KEY, loadInsts)
 	}
-	return loadInsts, nil
+	if len(loadInsts) < limit || limit == -1 {
+		return loadInsts, nil
+	}
+	return loadInsts[:limit], nil
 }
 
 // Adds a single load instance to load history
