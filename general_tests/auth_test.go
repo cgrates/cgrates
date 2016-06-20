@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -78,16 +77,16 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	ratingDbAuth.CacheRatingAll()
 	acntDbAuth.CacheAccountingAll()
 
-	if cachedDests := cache2go.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 1 {
+	if cachedDests := engine.CacheCountEntries(utils.DESTINATION_PREFIX); cachedDests != 1 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}
-	if cachedRPlans := cache2go.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 2 {
+	if cachedRPlans := engine.CacheCountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 2 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := cache2go.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 3 {
+	if cachedRProfiles := engine.CacheCountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 3 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
-	if cachedActions := cache2go.CountEntries(utils.ACTION_PREFIX); cachedActions != 1 {
+	if cachedActions := engine.CacheCountEntries(utils.ACTION_PREFIX); cachedActions != 1 {
 		t.Error("Wrong number of cached actions found", cachedActions)
 	}
 }
