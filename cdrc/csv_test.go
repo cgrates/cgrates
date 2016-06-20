@@ -30,7 +30,7 @@ import (
 
 func TestCsvRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cdrcConfig := cgrConfig.CdrcProfiles["/var/log/cgrates/cdrc/in"][0]
+	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.META_COMPOSED, FieldId: utils.SUPPLIER, Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
 	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "DisconnectCauseTest", Type: utils.META_COMPOSED, FieldId: utils.DISCONNECT_CAUSE,
@@ -76,7 +76,7 @@ func TestCsvRecordForkCdr(t *testing.T) {
 
 func TestCsvDataMultiplyFactor(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cdrcConfig := cgrConfig.CdrcProfiles["/var/log/cgrates/cdrc/in"][0]
+	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.TOR, Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
 		&config.CfgCdrField{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.USAGE, Value: []*utils.RSRField{&utils.RSRField{Id: "1"}}}}
