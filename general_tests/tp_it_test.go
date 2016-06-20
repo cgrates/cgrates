@@ -23,7 +23,7 @@ func TestTpInitCfg(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutlocal")
+	tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
 	tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath)

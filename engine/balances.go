@@ -393,7 +393,10 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		}
 		if debitConnectFee {
 			// this is the first add, debit the connect fee
-			ub.DebitConnectionFee(cc, moneyBalances, count)
+			if ub.DebitConnectionFee(cc, moneyBalances, count, true) == false {
+				// found blocker balance
+				return nil, nil
+			}
 		}
 		cc.Timespans.Decompress()
 		//log.Printf("CC: %+v", cc)
@@ -506,15 +509,19 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
+	//log.Print("B: ", utils.ToJSON(b))
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
 	if err != nil {
 		return nil, err
 	}
-
+	//log.Print("cc: " + utils.ToJSON(cc))
 	if debitConnectFee {
 		// this is the first add, debit the connect fee
-		ub.DebitConnectionFee(cc, moneyBalances, count)
+		if ub.DebitConnectionFee(cc, moneyBalances, count, true) == false {
+			// balance is blocker
+			return nil, nil
+		}
 	}
 
 	cc.Timespans.Decompress()

@@ -55,10 +55,11 @@ type queueSaver struct {
 	stopper      chan bool
 	save         func(*queueSaver)
 	sq           *StatsQueue
+	ratingDb	 RatingStorage
 	accountingDb AccountingStorage
 }
 
-func newQueueSaver(saveInterval time.Duration, sq *StatsQueue, adb AccountingStorage) *queueSaver {
+func newQueueSaver(saveInterval time.Duration, sq *StatsQueue, rdb RatingStorage, adb AccountingStorage) *queueSaver {
 	svr := &queueSaver{
 		ticker:       time.NewTicker(saveInterval),
 		stopper:      make(chan bool),
@@ -69,7 +70,7 @@ func newQueueSaver(saveInterval time.Duration, sq *StatsQueue, adb AccountingSto
 		for {
 			select {
 			case <-svr.ticker.C:
-				sq.Save(adb)
+				sq.Save(rdb, adb)
 			case <-svr.stopper:
 				break
 			}
@@ -79,7 +80,7 @@ func newQueueSaver(saveInterval time.Duration, sq *StatsQueue, adb AccountingSto
 }
 
 func (svr *queueSaver) stop() {
-	svr.sq.Save(svr.accountingDb)
+	svr.sq.Save(svr.ratingDb, svr.accountingDb)
 	svr.ticker.Stop()
 	svr.stopper <- true
 }
@@ -285,7 +286,7 @@ func (s *Stats) setupQueueSaver(sq *StatsQueue) {
 		si = s.defaultSaveInterval
 	}
 	if si > 0 {
-		s.queueSavers[sq.GetId()] = newQueueSaver(si, sq, s.accountingDb)
+		s.queueSavers[sq.GetId()] = newQueueSaver(si, sq, s.ratingDb, s.accountingDb)
 	}
 }
 

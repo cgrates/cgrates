@@ -583,6 +583,9 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if ub == nil {
+		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
+	}
 	if _, exists := ub.BalanceMap[a.Balance.GetType()]; !exists {
 		return utils.ErrNotFound
 	}
@@ -605,6 +608,9 @@ func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func setBalanceAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if acc == nil {
+		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
+	}
 	return acc.setBalanceAction(a)
 }
 

@@ -91,10 +91,16 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	}
 }
 
-func (sq *StatsQueue) Save(adb AccountingStorage) {
+func (sq *StatsQueue) Save(rdb RatingStorage, adb AccountingStorage) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	if sq.dirty {
+		// save the conf
+		if err := rdb.SetCdrStats(sq.conf); err != nil {
+			utils.Logger.Err(fmt.Sprintf("Error saving cdr stats id %s: %v", sq.conf.Id, err))
+			return
+		}
+
 		if err := adb.SetCdrStatsQueue(sq); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
 			return

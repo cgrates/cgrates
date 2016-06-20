@@ -35,7 +35,8 @@ func NewDfltHaPoolConfig() *HaPoolConfig {
 
 // One connection to Rater
 type HaPoolConfig struct {
-	Address string
+	Address   string
+	Transport string
 }
 
 func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
@@ -44,6 +45,9 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 	}
 	if jsnCfg.Address != nil {
 		self.Address = *jsnCfg.Address
+	}
+	if jsnCfg.Transport != nil {
+		self.Transport = *jsnCfg.Transport
 	}
 	return nil
 }

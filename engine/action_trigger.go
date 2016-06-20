@@ -43,15 +43,15 @@ type ActionTrigger struct {
 	ActionsID         string
 	MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
 	Executed          bool
-	lastExecutionTime time.Time
+	LastExecutionTime time.Time
 }
 
 func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err error) {
 	// check for min sleep time
-	if at.Recurrent && !at.lastExecutionTime.IsZero() && time.Since(at.lastExecutionTime) < at.MinSleep {
+	if at.Recurrent && !at.LastExecutionTime.IsZero() && time.Since(at.LastExecutionTime) < at.MinSleep {
 		return
 	}
-	at.lastExecutionTime = time.Now()
+	at.LastExecutionTime = time.Now()
 	if ub != nil && ub.Disabled {
 		return fmt.Errorf("User %s is disabled and there are triggers in action!", ub.ID)
 	}

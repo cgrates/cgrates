@@ -29,16 +29,24 @@ type CdrsV1 struct {
 }
 
 // Designed for CGR internal usage
+// Deprecated
 func (self *CdrsV1) ProcessCdr(cdr *engine.CDR, reply *string) error {
-	if err := self.CdrSrv.LocalProcessCdr(cdr); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
+	return self.ProcessCDR(cdr, reply)
+}
+
+// Designed for CGR internal usage
+func (self *CdrsV1) ProcessCDR(cdr *engine.CDR, reply *string) error {
+	return self.CdrSrv.V1ProcessCDR(cdr, reply)
 }
 
 // Designed for external programs feeding CDRs to CGRateS
+// Deprecated
 func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCDR, reply *string) error {
+	return self.ProcessExternalCDR(cdr, reply)
+}
+
+// Designed for external programs feeding CDRs to CGRateS
+func (self *CdrsV1) ProcessExternalCDR(cdr *engine.ExternalCDR, reply *string) error {
 	if err := self.CdrSrv.ProcessExternalCdr(cdr); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -46,8 +54,14 @@ func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCDR, reply *string) e
 	return nil
 }
 
-// Remotely (re)rating, deprecated
+// Remotely (re)rating
+// Deprecated
 func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
+	return self.RateCDRs(attrs, reply)
+}
+
+// Remotely (re)rating
+func (self *CdrsV1) RateCDRs(attrs utils.AttrRateCdrs, reply *string) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(self.CdrSrv.Timezone())
 	if err != nil {
 		return utils.NewErrServerError(err)

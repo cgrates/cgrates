@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -32,21 +33,30 @@ import (
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
+const CCRQueueLen = 1000 // Maximum number of messages waiting to be processed
+
 func NewDiameterAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection, pubsubs rpcclient.RpcClientConnection) (*DiameterAgent, error) {
-	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg, pubsubs: pubsubs}
+	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg, pubsubs: pubsubs, ccrQueue: make(chan *DiameterMessage, CCRQueueLen)}
 	dictsDir := cgrCfg.DiameterAgentCfg().DictionariesDir
 	if len(dictsDir) != 0 {
 		if err := loadDictionaries(dictsDir, "DiameterAgent"); err != nil {
 			return nil, err
 		}
 	}
+	go da.ccrServer()
 	return da, nil
 }
 
+type DiameterMessage struct {
+	Message    *diam.Message
+	Connection diam.Conn
+}
+
 type DiameterAgent struct {
-	cgrCfg  *config.CGRConfig
-	smg     rpcclient.RpcClientConnection // Connection towards CGR-SMG component
-	pubsubs rpcclient.RpcClientConnection // Connection towards CGR-PubSub component
+	cgrCfg   *config.CGRConfig
+	smg      rpcclient.RpcClientConnection // Connection towards CGR-SMG component
+	pubsubs  rpcclient.RpcClientConnection // Connection towards CGR-PubSub component
+	ccrQueue chan *DiameterMessage
 }
 
 // Creates the message handlers
@@ -195,34 +205,47 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	return true, nil
 }
 
+// Dispatches the ccr to the queue, useful so we offload the receiving buffer
 func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
-	ccr, err := NewCCRFromDiameterMessage(m, self.cgrCfg.DiameterAgentCfg().DebitInterval)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", m, err))
-		return
-	}
-	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
-	var processed, lclProcessed bool
-	processorVars := make(map[string]string) // Shared between processors
-	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
-		lclProcessed, err = self.processCCR(ccr, reqProcessor, processorVars, cca)
-		if lclProcessed { // Process local so we don't overwrite globally
-			processed = lclProcessed
+	self.ccrQueue <- &DiameterMessage{Message: m, Connection: c}
+}
+
+// Asynchronously processes CCR messages
+func (self *DiameterAgent) ccrServer() {
+	utils.Logger.Info("<DiameterAgent> Starting the CCR Server")
+	for {
+		if lenCCRQueue := len(self.ccrQueue); lenCCRQueue != 0 && math.Mod(float64(lenCCRQueue), 100) == 0 {
+			utils.Logger.Warning(fmt.Sprintf("<DiameterAgent> WARNING: CCR message queue loaded with %d items", lenCCRQueue))
 		}
-		if err != nil || (lclProcessed && !reqProcessor.ContinueOnSuccess) {
-			break
+		dmtMsg := <-self.ccrQueue
+		ccr, err := NewCCRFromDiameterMessage(dmtMsg.Message, self.cgrCfg.DiameterAgentCfg().DebitInterval)
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", dmtMsg.Message, err))
+			continue
 		}
-	}
-	if err != nil && err != ErrDiameterRatingFailed {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> CCA SetProcessorAVPs for message: %+v, error: %s", ccr.diamMessage, err))
-		return
-	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %s, ignoring request", ccr.diamMessage))
-		return
-	}
-	if _, err := cca.AsDiameterMessage().WriteTo(c); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to write message to %s: %s\n%s\n", c.RemoteAddr(), err, cca.AsDiameterMessage()))
-		return
+		cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+		var processed, lclProcessed bool
+		processorVars := make(map[string]string) // Shared between processors
+		for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
+			lclProcessed, err = self.processCCR(ccr, reqProcessor, processorVars, cca)
+			if lclProcessed { // Process local so we don't overwrite globally
+				processed = lclProcessed
+			}
+			if err != nil || (lclProcessed && !reqProcessor.ContinueOnSuccess) {
+				break
+			}
+		}
+		if err != nil && err != ErrDiameterRatingFailed {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> CCA SetProcessorAVPs for message: %+v, error: %s", ccr.diamMessage, err))
+			continue
+		} else if !processed {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %s, ignoring request", ccr.diamMessage))
+			continue
+		}
+		if _, err := cca.AsDiameterMessage().WriteTo(dmtMsg.Connection); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to write message to %s: %s\n%s\n", dmtMsg.Connection.RemoteAddr(), err, cca.AsDiameterMessage()))
+			continue
+		}
 	}
 }
 

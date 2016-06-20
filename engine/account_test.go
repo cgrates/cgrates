@@ -203,6 +203,47 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	}
 }
 
+func TestDebitCreditBlocker(t *testing.T) {
+	b1 := &Balance{Uuid: "testa", Value: 0.1152, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, RatingSubject: "passmonde", Blocker: true}
+	b2 := &Balance{Uuid: "*default", Value: 1.5, Weight: 0}
+	cc := &CallCost{
+		Direction:   utils.OUT,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{ConnectFee: 0.15, Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 0.1, RateIncrement: time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		deductConnectFee: true,
+		TOR:              utils.VOICE,
+	}
+	cd := &CallDescriptor{
+		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+		Direction:    utils.OUT,
+		Destination:  "0723045326",
+		Category:     "0",
+		TOR:          utils.VOICE,
+		testCallcost: cc,
+	}
+	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.MONETARY: Balances{b1, b2}}}
+	var err error
+	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if len(cc.Timespans) != 0 {
+		t.Error("Wrong call cost: ", utils.ToIJSON(cc))
+	}
+	if rifsBalance.BalanceMap[utils.MONETARY][0].GetValue() != 0.1152 ||
+		rifsBalance.BalanceMap[utils.MONETARY][1].GetValue() != 1.5 {
+		t.Error("should not have touched the balances: ", utils.ToIJSON(rifsBalance.BalanceMap[utils.MONETARY]))
+	}
+}
+
 func TestDebitCreditZeroMinute(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}, RatingSubject: "*zero1m"}
 	cc := &CallCost{

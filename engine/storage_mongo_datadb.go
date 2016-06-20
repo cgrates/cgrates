@@ -125,7 +125,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 	}
 
 	ndb := session.DB(db)
-	session.SetMode(mgo.Monotonic, true)
+	session.SetMode(mgo.Strong, true)
 	index := mgo.Index{
 		Key:        []string{"key"},
 		Unique:     true,  // Prevent two documents from having the same index key

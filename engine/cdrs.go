@@ -121,11 +121,6 @@ func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
 }
 
-// Used to internally process CDR
-func (self *CdrServer) LocalProcessCdr(cdr *CDR) error {
-	return self.processCdr(cdr)
-}
-
 // Used to process external CDRs
 func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 	cdr, err := NewCDRFromExternalCDR(eCDR, self.cgrCfg.DefaultTimezone)
@@ -493,13 +488,17 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 	return nil
 }
 
+// Internally used and called from CDRSv1
+// Cached requests for HA setups
 func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
-	cacheKey := "ProcessCdr" + cdr.CGRID
+	cacheKey := "V1ProcessCDR" + cdr.CGRID + cdr.RunID
 	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = item.Value.(string)
+		if item.Value != nil {
+			*reply = item.Value.(string)
+		}
 		return item.Err
 	}
-	if err := self.LocalProcessCdr(cdr); err != nil {
+	if err := self.processCdr(cdr); err != nil {
 		self.getCache().Cache(cacheKey, &CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
@@ -508,16 +507,20 @@ func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 	return nil
 }
 
-// Alias, deprecated after removing CdrServerV1.ProcessCdr
-func (self *CdrServer) V1ProcessCdr(cdr *CDR, reply *string) error {
-	return self.V1ProcessCDR(cdr, reply)
-}
-
 // RPC method, differs from storeSMCost through it's signature
 func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) error {
+	cacheKey := "V1StoreSMCost" + attr.Cost.CGRID + attr.Cost.RunID + attr.Cost.OriginID
+	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
+		if item.Value != nil {
+			*reply = item.Value.(string)
+		}
+		return item.Err
+	}
 	if err := self.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
+		self.getCache().Cache(cacheKey, &CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
+	self.getCache().Cache(cacheKey, &CacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }

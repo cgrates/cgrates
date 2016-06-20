@@ -41,7 +41,7 @@ func TestTutLocalInitCfg(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutlocal")
+	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
 	tutFsLocalCfg, err = config.NewCGRConfigFromFolder(tutLocalCfgPath)
@@ -115,7 +115,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 7, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
