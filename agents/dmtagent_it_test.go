@@ -21,6 +21,7 @@ package agents
 import (
 	"flag"
 	//"net"
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -962,6 +963,46 @@ func TestDmtAgentDryRun1(t *testing.T) {
 	} else if strResult := avpValAsString(avps[0]); strResult != "300" { // Result-Code set in the template
 		t.Errorf("Expecting 300, received: %s", strResult)
 	}
+}
+
+func TestDmtAgentDryRun2(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("pubsub1")) // Match specific DryRun profile
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(4))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))
+	if _, err := ccr.NewAVP("Framed-IP-Address", avp.Mbit, 0, datatype.UTF8String("10.228.16.4")); err != nil {
+		t.Error(err)
+	}
+	tStart := time.Now()
+	maxLoops := 100000
+	for i := 0; i < maxLoops; i++ {
+		if err := dmtClient.SendMessage(ccr); err != nil {
+			t.Error(err)
+		}
+		msg := dmtClient.ReceivedMessage()
+		if msg == nil {
+			t.Fatal("No message returned")
+		}
+		/*
+			if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+				t.Error(err)
+			} else if len(avps) == 0 {
+				t.Error("Result-Code")
+			} else if strResult := avpValAsString(avps[0]); strResult != "300" { // Result-Code set in the template
+				t.Errorf("Expecting 300, received: %s", strResult)
+			}
+		*/
+	}
+	totalDur := time.Now().Sub(tStart)
+	fmt.Printf("Total duration: %v resulting %f ops per second\n", totalDur, float64(maxLoops)/totalDur.Seconds())
 }
 
 /*
