@@ -42,12 +42,15 @@ import (
 var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+var interations = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
+var replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
 
 var daCfgPath string
 var daCfg *config.CGRConfig
 var apierRpc *rpc.Client
 var dmtClient *DiameterClient
 var err error
+var rplyTimeout time.Duration
 
 func TestDmtAgentInitCfg(t *testing.T) {
 	if !*testIntegration {
@@ -62,6 +65,7 @@ func TestDmtAgentInitCfg(t *testing.T) {
 	}
 	daCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(daCfg)
+	rplyTimeout, _ = utils.ParseDurationWithSecs(*replyTimeout)
 }
 
 // Remove data in both rating and accounting db
@@ -89,7 +93,7 @@ func TestDmtAgentStartEngine(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	if _, err := engine.StopStartEngine(daCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -245,7 +249,7 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -289,7 +293,7 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -328,7 +332,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -366,7 +370,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No answer to CCR terminate received")
 	}
@@ -443,7 +447,7 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 	}
 
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	dmtClient.ReceivedMessage(rplyTimeout) // Discard the received message so we can test next one
 	/*
 		if msg == nil {
 			t.Fatal("No message returned")
@@ -535,7 +539,7 @@ func TestDmtAgentSendCCRSMSWrongAccount(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	msg := dmtClient.ReceivedMessage(rplyTimeout) // Discard the received message so we can test next one
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -569,7 +573,7 @@ func TestDmtAgentSendCCRInitWrongAccount(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	msg := dmtClient.ReceivedMessage(rplyTimeout) // Discard the received message so we can test next one
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -644,7 +648,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	msg := dmtClient.ReceivedMessage(rplyTimeout) // Discard the received message so we can test next one
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -732,7 +736,7 @@ func TestDmtAgentSendDataGrpInit(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -826,7 +830,7 @@ func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -906,7 +910,7 @@ func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(3000) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -932,6 +936,7 @@ func TestDmtAgentSendDataGrpCDRs(t *testing.T) {
 	}
 }
 
+/*
 func TestDmtAgentDryRun1(t *testing.T) {
 	if !*testIntegration {
 		return
@@ -952,7 +957,7 @@ func TestDmtAgentDryRun1(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -964,8 +969,9 @@ func TestDmtAgentDryRun1(t *testing.T) {
 		t.Errorf("Expecting 300, received: %s", strResult)
 	}
 }
+*/
 
-func TestDmtAgentDryRun2(t *testing.T) {
+func TestDmtAgentDryRun1(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -983,11 +989,11 @@ func TestDmtAgentDryRun2(t *testing.T) {
 	}
 	tStart := time.Now()
 	maxLoops := 100000
-	for i := 0; i < maxLoops; i++ {
+	for i := 0; i < *interations; i++ {
 		if err := dmtClient.SendMessage(ccr); err != nil {
 			t.Error(err)
 		}
-		msg := dmtClient.ReceivedMessage()
+		msg := dmtClient.ReceivedMessage(rplyTimeout)
 		if msg == nil {
 			t.Fatal("No message returned")
 		}
@@ -1023,7 +1029,7 @@ func TestDmtAgentLoadCER(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
