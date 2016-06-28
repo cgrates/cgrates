@@ -318,6 +318,47 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	return nil
 }
 
+type AttrRemoveActionTrigger struct {
+	GroupID  string
+	UniqueID string
+}
+
+func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) error {
+	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if attr.UniqueID == "" {
+		err := self.RatingDb.RemoveActionTriggers(attr.GroupID)
+		if err != nil {
+			*reply = err.Error()
+		} else {
+			*reply = utils.OK
+		}
+		return err
+	} else {
+		atrs, err := self.RatingDb.GetActionTriggers(attr.GroupID)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		var remainingAtrs engine.ActionTriggers
+		for _, atr := range atrs {
+			if atr.UniqueID == attr.UniqueID {
+				continue
+			}
+			remainingAtrs = append(remainingAtrs, atr)
+		}
+		// set the cleared list back
+		err = self.RatingDb.SetActionTriggers(attr.GroupID, remainingAtrs)
+		if err != nil {
+			*reply = err.Error()
+		} else {
+			*reply = utils.OK
+		}
+		return err
+	}
+}
+
 type AttrSetActionTrigger struct {
 	GroupID               string
 	UniqueID              string
