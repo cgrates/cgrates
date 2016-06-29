@@ -6,7 +6,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +36,7 @@ type TpReader struct {
 	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
-	loadInstance      *utils.LoadInstance
+	//loadInstance      *utils.LoadInstance
 }
 
 func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string, loadHistSize int) *TpReader {
@@ -1617,12 +1616,12 @@ func (tpr *TpReader) IsValid() bool {
 	return valid
 }
 
-func (tpr *TpReader) GetLoadInstance() *utils.LoadInstance {
+/*func (tpr *TpReader) GetLoadInstance() *utils.LoadInstance {
 	if tpr.loadInstance == nil {
 		tpr.loadInstance = &utils.LoadInstance{LoadId: utils.GenUUID(), TariffPlanId: tpr.tpid, LoadTime: time.Now()}
 	}
 	return tpr.loadInstance
-}
+}*/
 
 func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if tpr.ratingStorage == nil || tpr.accountingStorage == nil {
@@ -1816,13 +1815,15 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Print("\t", al.GetId())
 		}
 	}
-	ldInst := tpr.GetLoadInstance()
-	if verbose {
-		log.Printf("LoadHistory, instance: %+v\n", ldInst)
-	}
-	if err = tpr.accountingStorage.AddLoadHistory(ldInst, tpr.loadHistSize); err != nil {
-		return err
-	}
+	/*
+		ldInst := tpr.GetLoadInstance()
+			if verbose {
+				log.Printf("LoadHistory, instance: %+v\n", ldInst)
+			}
+			if err = tpr.accountingStorage.AddLoadHistory(ldInst, tpr.loadHistSize); err != nil {
+				return err
+			}
+	*/
 	return
 }
 

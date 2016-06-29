@@ -74,7 +74,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 
 		start := time.Now()
 		cfi, err := utils.LoadCacheFileInfo(cfg.CacheDumpDir)
-		if err != nil || cfi.LoadInfo.LoadId != loadHist[0].LoadId {
+		if err != nil || cfi.LoadInfo.RatingLoadID != loadHist[0].RatingLoadID {
 			if err := ratingDb.CacheRatingAll(); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
 				exitChan <- true

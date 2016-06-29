@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"gopkg.in/mgo.v2"
@@ -641,10 +642,21 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		utils.Logger.Info("Finished shared groups caching.")
 	}
 	CacheCommitTransaction()
-	loadHist, err := ms.GetLoadHistory(1, true)
-	if err != nil || len(loadHist) == 0 {
-		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
-		return err
+	loadHistList, err := ms.GetLoadHistory(1, true)
+	if err != nil || len(loadHistList) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
+	}
+	var loadHist *utils.LoadInstance
+	if len(loadHistList) == 0 {
+		loadHist = &utils.LoadInstance{
+			RatingLoadID:     utils.GenUUID(),
+			AccountingLoadID: utils.GenUUID(),
+			LoadTime:         time.Now(),
+		}
+	} else {
+		loadHist = loadHistList[0]
+		loadHist.RatingLoadID = utils.GenUUID()
+		loadHist.LoadTime = time.Now()
 	}
 	var keys []string
 	if len(dKeys) > 0 {
@@ -668,7 +680,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if len(shgKeys) > 0 {
 		keys = append(keys, utils.SHARED_GROUP_PREFIX)
 	}
-	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]})
+	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
 }
 
 func (ms *MongoStorage) CacheAccountingAll() error {
@@ -742,7 +754,7 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		utils.Logger.Info("Finished aliases caching.")
 	}
 	utils.Logger.Info("Caching load history")
-	loadHist, err := ms.GetLoadHistory(1, true)
+	loadHistList, err := ms.GetLoadHistory(1, true)
 	if err != nil {
 		CacheRollbackTransaction()
 		return err
@@ -753,8 +765,21 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 	if len(alsKeys) > 0 {
 		keys = append(keys, utils.ALIASES_PREFIX)
 	}
-	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]})
-	return nil
+
+	var loadHist *utils.LoadInstance
+	if len(loadHistList) == 0 {
+		loadHist = &utils.LoadInstance{
+			RatingLoadID:     utils.GenUUID(),
+			AccountingLoadID: utils.GenUUID(),
+			LoadTime:         time.Now(),
+		}
+	} else {
+		loadHist = loadHistList[0]
+		loadHist.AccountingLoadID = utils.GenUUID()
+		loadHist.LoadTime = time.Now()
+	}
+
+	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
 }
 
 func (ms *MongoStorage) HasData(category, subject string) (bool, error) {

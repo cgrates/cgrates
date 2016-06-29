@@ -161,7 +161,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return utils.NewErrServerError(err)
 	}
 	if attrs.DryRun {
-		*reply = utils.LoadInstance{LoadId: utils.DRYRUN}
+		*reply = utils.LoadInstance{RatingLoadID: utils.DRYRUN, AccountingLoadID: utils.DRYRUN}
 		return nil // Mission complete, no errors
 	}
 
@@ -225,7 +225,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 
 	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
-	li := loader.GetLoadInstance()
 	loader.Init() // release the tp data
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
@@ -260,7 +259,13 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return err
 		}
 	}
-	*reply = *li
+	loadHistList, err := self.AccountDb.GetLoadHistory(1, false)
+	if err != nil {
+		return err
+	}
+	if len(loadHistList) > 0 {
+		*reply = *loadHistList[0]
+	}
 	return nil
 }
 

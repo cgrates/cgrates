@@ -276,7 +276,7 @@ func TestV2CdrsMongoLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := cdrsMongoRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
-	} else if loadInst.LoadId == "" {
+	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", loadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups

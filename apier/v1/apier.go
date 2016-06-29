@@ -839,10 +839,12 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 		if err != nil { // Not really an error here since we only count in cache
 			utils.Logger.Warning(fmt.Sprintf("ApierV1.GetCacheStats, error on GetLoadHistory: %s", err.Error()))
 		}
-		cs.LastLoadId = utils.NOT_AVAILABLE
+		cs.LastRatingLoadID = utils.NOT_AVAILABLE
+		cs.LastAccountingLoadID = utils.NOT_AVAILABLE
 		cs.LastLoadTime = utils.NOT_AVAILABLE
 	} else {
-		cs.LastLoadId = loadHistInsts[0].LoadId
+		cs.LastRatingLoadID = loadHistInsts[0].RatingLoadID
+		cs.LastAccountingLoadID = loadHistInsts[0].AccountingLoadID
 		cs.LastLoadTime = loadHistInsts[0].LoadTime.Format(time.RFC3339)
 	}
 	*reply = *cs

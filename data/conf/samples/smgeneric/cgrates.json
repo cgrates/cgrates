@@ -6,6 +6,12 @@
 // This file contains the default configuration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
 
+ "listen": {
+ 	"rpc_json": "0.0.0.0:3012",			// RPC JSON listening address
+ 	"rpc_gob": "0.0.0.0:3013",			// RPC GOB listening address
+ 	"http": "0.0.0.0:3080",				// HTTP listening address
+ },
+
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>

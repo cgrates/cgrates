@@ -8,9 +8,11 @@ import (
 )
 
 type LoadInstance struct {
-	LoadId       string    // Unique identifier for the load
-	TariffPlanId string    // Tariff plan identificator for the data loaded
-	LoadTime     time.Time // Time of load
+	//LoadId           string // Unique identifier for the load
+	RatingLoadID     string
+	AccountingLoadID string
+	//TariffPlanID     string    // Tariff plan identificator for the data loaded
+	LoadTime time.Time // Time of load
 }
 
 type CacheFileInfo struct {

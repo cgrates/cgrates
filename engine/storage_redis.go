@@ -316,10 +316,21 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 
 	CacheCommitTransaction()
-	loadHist, err := rs.GetLoadHistory(1, true)
-	if err != nil || len(loadHist) == 0 {
-		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
-		return err
+	loadHistList, err := rs.GetLoadHistory(1, true)
+	if err != nil || len(loadHistList) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
+	}
+	var loadHist *utils.LoadInstance
+	if len(loadHistList) == 0 {
+		loadHist = &utils.LoadInstance{
+			RatingLoadID:     utils.GenUUID(),
+			AccountingLoadID: utils.GenUUID(),
+			LoadTime:         time.Now(),
+		}
+	} else {
+		loadHist = loadHistList[0]
+		loadHist.RatingLoadID = utils.GenUUID()
+		loadHist.LoadTime = time.Now()
 	}
 	var keys []string
 	if len(dKeys) > 0 {
@@ -343,7 +354,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if len(shgKeys) > 0 {
 		keys = append(keys, utils.SHARED_GROUP_PREFIX)
 	}
-	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]})
+	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
 }
 
 func (rs *RedisStorage) CacheAccountingAll() error {
@@ -423,12 +434,23 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	if len(alsKeys) > 0 {
 		keys = append(keys, utils.ALIASES_PREFIX)
 	}
-	loadHist, err := rs.GetLoadHistory(1, true)
-	if err != nil || len(loadHist) == 0 {
-		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
-		return err
+	loadHistList, err := rs.GetLoadHistory(1, true)
+	if err != nil || len(loadHistList) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
 	}
-	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]})
+	var loadHist *utils.LoadInstance
+	if len(loadHistList) == 0 {
+		loadHist = &utils.LoadInstance{
+			RatingLoadID:     utils.GenUUID(),
+			AccountingLoadID: utils.GenUUID(),
+			LoadTime:         time.Now(),
+		}
+	} else {
+		loadHist = loadHistList[0]
+		loadHist.AccountingLoadID = utils.GenUUID()
+		loadHist.LoadTime = time.Now()
+	}
+	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity

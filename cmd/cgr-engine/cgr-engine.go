@@ -405,7 +405,7 @@ func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, 
 
 	start := time.Now()
 	cfi, err := utils.LoadCacheFileInfo(cfg.CacheDumpDir)
-	if err != nil || cfi.LoadInfo.LoadId != loadHist[0].LoadId || !utils.CacheFileExists(filepath.Join(cfg.CacheDumpDir, utils.ALIASES_PREFIX+".cache")) {
+	if err != nil || cfi.LoadInfo.AccountingLoadID != loadHist[0].AccountingLoadID || !utils.CacheFileExists(filepath.Join(cfg.CacheDumpDir, utils.ALIASES_PREFIX+".cache")) {
 		if err := accountDb.CacheAccountingPrefixes(utils.ALIASES_PREFIX); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
 			exitChan <- true
