@@ -407,14 +407,14 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	var stats utils.CacheStats
 	if err := rpcRAL1.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastLoadId != utils.NOT_AVAILABLE {
+	} else if stats.LastRatingLoadID != utils.NOT_AVAILABLE || stats.LastAccountingLoadID != utils.NOT_AVAILABLE {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
 	var loadInst utils.LoadInstance
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := rpcRAL1.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
-	} else if loadInst.LoadId == "" {
+	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
 		t.Errorf("Empty loadId received, loadInstance: %+v", loadInst)
 	}
 	var reply string
@@ -425,12 +425,14 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	}
 	if err := rpcRAL1.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastLoadId != loadInst.LoadId {
+	} else if stats.LastRatingLoadID != loadInst.RatingLoadID ||
+		stats.LastAccountingLoadID != loadInst.AccountingLoadID {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
 	if err := rpcRAL2.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastLoadId != loadInst.LoadId {
+	} else if stats.LastRatingLoadID != loadInst.RatingLoadID ||
+		stats.LastAccountingLoadID != loadInst.AccountingLoadID {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
 }

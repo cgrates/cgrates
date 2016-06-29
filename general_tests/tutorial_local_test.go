@@ -102,7 +102,7 @@ func TestTutLocalLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tutLocalRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
-	} else if loadInst.LoadId == "" {
+	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", loadInst)
 	}
 	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups
@@ -116,7 +116,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 
 	expectedStats := &utils.CacheStats{Destinations: 7, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
-		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
+		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastRatingLoadID: loadInst.RatingLoadID, LastAccountingLoadID: loadInst.AccountingLoadID, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

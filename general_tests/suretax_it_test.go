@@ -106,7 +106,7 @@ func TestSTILoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: *tpDir}
 	if err := stiRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &stiLoadInst); err != nil {
 		t.Error(err)
-	} else if stiLoadInst.LoadId == "" {
+	} else if stiLoadInst.RatingLoadID == "" || stiLoadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", stiLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -119,7 +119,7 @@ func TestSTICacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 1, RatingPlans: 1, RatingProfiles: 1, DerivedChargers: 1,
-		LastLoadId: stiLoadInst.LoadId, LastLoadTime: stiLoadInst.LoadTime.Format(time.RFC3339)}
+		LastRatingLoadID: stiLoadInst.RatingLoadID, LastAccountingLoadID: stiLoadInst.AccountingLoadID, LastLoadTime: stiLoadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := stiRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

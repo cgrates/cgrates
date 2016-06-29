@@ -84,7 +84,7 @@ func TestTpLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
 	if err := tpRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &tpLoadInst); err != nil {
 		t.Error(err)
-	} else if tpLoadInst.LoadId == "" {
+	} else if tpLoadInst.RatingLoadID == "" || tpLoadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", tpLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
