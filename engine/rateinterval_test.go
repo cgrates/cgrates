@@ -349,8 +349,22 @@ func TestRateIntervalCronEmpty(t *testing.T) {
 	}
 }
 
-func TestTimingIsActive(t *testing.T) {
-
+func TestRateIntervalCost(t *testing.T) {
+	ri := &RateInterval{
+		Rating: &RIRate{
+			Rates: RateGroups{
+				&Rate{
+					Value:         0.1,
+					RateIncrement: time.Second,
+					RateUnit:      60 * time.Second,
+				},
+			},
+		},
+	}
+	x := ri.GetCost(60*time.Second, 0)
+	if x != 0.1 {
+		t.Error("expected 0.1 was: ", x)
+	}
 }
 
 /*********************************Benchmarks**************************************/

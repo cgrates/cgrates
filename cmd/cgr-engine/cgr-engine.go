@@ -22,7 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"path/filepath"
 	//	_ "net/http/pprof"
 	"os"
 	"runtime"
@@ -402,29 +401,19 @@ func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, 
 		internalAliaseSChan <- aliasesServer
 		return
 	}
-
-	start := time.Now()
 	cfi, err := utils.LoadCacheFileInfo(cfg.CacheDumpDir)
-	if err != nil || cfi.LoadInfo.AccountingLoadID != loadHist[0].AccountingLoadID || !utils.CacheFileExists(filepath.Join(cfg.CacheDumpDir, utils.ALIASES_PREFIX+".cache")) {
+	if err != nil || cfi.LoadInfo.AccountingLoadID != loadHist[0].AccountingLoadID {
 		if err := accountDb.CacheAccountingPrefixes(utils.ALIASES_PREFIX); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
 			exitChan <- true
 			return
 		}
-		utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
-
-		start = time.Now()
-		if err := engine.CacheSave(cfg.CacheDumpDir, []string{utils.ALIASES_PREFIX}, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]}); err != nil {
-			utils.Logger.Emerg(fmt.Sprintf("could not save cache file: " + err.Error()))
-		}
-		utils.Logger.Info(fmt.Sprintf("Cache accounting save time: %v", time.Since(start)))
 	} else {
 		if err := engine.CacheLoad(cfg.CacheDumpDir, []string{utils.ALIASES_PREFIX}); err != nil {
 			utils.Logger.Crit("could not load cache file: " + err.Error())
 			exitChan <- true
 			return
 		}
-		utils.Logger.Info(fmt.Sprintf("Cache accounting load time: %v", time.Since(start)))
 	}
 	internalAliaseSChan <- aliasesServer
 }
@@ -530,7 +519,7 @@ func main() {
 	var cdrDb engine.CdrStorage
 	if cfg.RALsEnabled || cfg.SchedulerEnabled || cfg.CDRStatsEnabled { // Only connect to dataDb if necessary
 		ratingDb, err = engine.ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort,
-			cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, cfg.CacheDumpDir)
+			cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, cfg.CacheDumpDir, cfg.LoadHistorySize)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
@@ -540,7 +529,7 @@ func main() {
 	}
 	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled || cfg.AliasesServerEnabled || cfg.UserServerEnabled {
 		accountDb, err = engine.ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheDumpDir)
+			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheDumpDir, cfg.LoadHistorySize)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return

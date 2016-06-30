@@ -36,12 +36,13 @@ var (
 )
 
 type RedisStorage struct {
-	db           *pool.Pool
-	ms           Marshaler
-	cacheDumpDir string
+	db              *pool.Pool
+	ms              Marshaler
+	cacheDumpDir    string
+	loadHistorySize int
 }
 
-func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int, cacheDumpDir string) (*RedisStorage, error) {
+func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int, cacheDumpDir string, loadHistorySize int) (*RedisStorage, error) {
 	df := func(network, addr string) (*redis.Client, error) {
 		client, err := redis.Dial(network, addr)
 		if err != nil {
@@ -73,7 +74,7 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns i
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
-	return &RedisStorage{db: p, ms: mrshler, cacheDumpDir: cacheDumpDir}, nil
+	return &RedisStorage{db: p, ms: mrshler, cacheDumpDir: cacheDumpDir, loadHistorySize: loadHistorySize}, nil
 }
 
 func (rs *RedisStorage) Close() {
@@ -140,6 +141,7 @@ func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 }
 
 func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
+	start := time.Now()
 	CacheBeginTransaction()
 	conn, err := rs.db.Get()
 	if err != nil {
@@ -316,6 +318,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 
 	CacheCommitTransaction()
+	utils.Logger.Info(fmt.Sprintf("Cache rating creation time: %v", time.Since(start)))
 	loadHistList, err := rs.GetLoadHistory(1, true)
 	if err != nil || len(loadHistList) == 0 {
 		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
@@ -332,6 +335,11 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		loadHist.RatingLoadID = utils.GenUUID()
 		loadHist.LoadTime = time.Now()
 	}
+	if err := rs.AddLoadHistory(loadHist, rs.loadHistorySize); err != nil {
+		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
+		return err
+	}
+
 	var keys []string
 	if len(dKeys) > 0 {
 		keys = append(keys, utils.DESTINATION_PREFIX)
@@ -388,6 +396,7 @@ func (rs *RedisStorage) CacheAccountingPrefixValues(prefixes map[string][]string
 }
 
 func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
+	start := time.Now()
 	CacheBeginTransaction()
 	conn, err := rs.db.Get()
 	if err != nil {
@@ -430,6 +439,7 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	}
 	utils.Logger.Info("Finished load history caching.")
 	CacheCommitTransaction()
+	utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
 	var keys []string
 	if len(alsKeys) > 0 {
 		keys = append(keys, utils.ALIASES_PREFIX)
@@ -449,6 +459,10 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 		loadHist = loadHistList[0]
 		loadHist.AccountingLoadID = utils.GenUUID()
 		loadHist.LoadTime = time.Now()
+	}
+	if err := rs.AddLoadHistory(loadHist, rs.loadHistorySize); err != nil {
+		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
+		return err
 	}
 	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
 }

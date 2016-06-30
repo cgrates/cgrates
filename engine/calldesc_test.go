@@ -272,6 +272,36 @@ func TestGetCost(t *testing.T) {
 	}
 }
 
+func TestGetCostRounding(t *testing.T) {
+	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2017, time.February, 2, 17, 33, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "round", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
+	result, _ := cd.GetCost()
+	if result.Cost != 0.3001 || result.GetConnectFee() != 0 { // should be 0.3 :(
+		t.Error("bad cost", utils.ToIJSON(result))
+	}
+}
+
+func TestDebitRounding(t *testing.T) {
+	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2017, time.February, 2, 17, 33, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "round", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
+	result, _ := cd.Debit()
+	if result.Cost != 0.30006 || result.GetConnectFee() != 0 { // should be 0.3 :(
+		t.Error("bad cost", utils.ToIJSON(result))
+	}
+}
+
+func TestDebitPerformRounding(t *testing.T) {
+	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2017, time.February, 2, 17, 33, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "round", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, PerformRounding: true}
+	result, _ := cd.Debit()
+	if result.Cost != 0.3001 || result.GetConnectFee() != 0 { // should be 0.3 :(
+		t.Error("bad cost", utils.ToIJSON(result))
+	}
+}
+
 func TestGetCostZero(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)

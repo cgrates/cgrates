@@ -7,7 +7,6 @@ import (
 	"compress/zlib"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -121,11 +120,11 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 }
 
 func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.CacheFileInfo) error {
-	log.Printf("path: %s prefixes: %v", path, prefixes)
+	//log.Printf("path: %s prefixes: %v", path, prefixes)
 	if path == "" || len(prefixes) == 0 {
 		return nil
 	}
-	log.Print("saving cache prefixes: ", prefixes)
+	//log.Print("saving cache prefixes: ", prefixes)
 	// create a the path
 	if err := os.MkdirAll(path, 0766); err != nil {
 		utils.Logger.Info("<cache encoder>:" + err.Error())
@@ -243,7 +242,7 @@ func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 				}
 				kv := CacheTypeFactory(key, "", nil)
 				if err := dataDecoder.Unmarshal(encData, &kv); err != nil {
-					log.Printf("%s err5", key)
+					//log.Printf("%s err5", key)
 					utils.Logger.Info("<cache decoder>: " + err.Error())
 					break
 				}

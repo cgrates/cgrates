@@ -2,7 +2,9 @@
 package engine
 
 import (
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -85,6 +87,7 @@ func CacheSave(path string, keys []string, cfi *utils.CacheFileInfo) error {
 }
 
 func CacheLoad(path string, keys []string) error {
+	start := time.Now()
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
@@ -92,6 +95,7 @@ func CacheLoad(path string, keys []string) error {
 	if !transactionON {
 		return cache.Load(path, keys)
 	}
+	utils.Logger.Info(fmt.Sprintf("Cache rating load time: %v", time.Since(start)))
 	return nil
 }
 

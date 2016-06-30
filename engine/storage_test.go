@@ -273,7 +273,7 @@ func TestDifferentUuid(t *testing.T) {
 
 func TestStorageTask(t *testing.T) {
 	// clean previous unused tasks
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 21; i++ {
 		ratingStorage.PopTask()
 	}
 

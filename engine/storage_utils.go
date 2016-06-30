@@ -28,7 +28,7 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler, cacheDumpDir string) (db RatingStorage, err error) {
+func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler, cacheDumpDir string, loadHistorySize int) (db RatingStorage, err error) {
 	var d Storage
 	switch db_type {
 	case utils.REDIS:
@@ -41,9 +41,9 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler, ca
 		if port != "" {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheDumpDir)
+		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheDumpDir, loadHistorySize)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, nil, cacheDumpDir)
+		d, err = NewMongoStorage(host, port, name, user, pass, nil, cacheDumpDir, loadHistorySize)
 		db = d.(RatingStorage)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
@@ -55,7 +55,7 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler, ca
 	return d.(RatingStorage), nil
 }
 
-func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler, cacheDumpDir string) (db AccountingStorage, err error) {
+func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler, cacheDumpDir string, loadHistorySize int) (db AccountingStorage, err error) {
 	var d AccountingStorage
 	switch db_type {
 	case utils.REDIS:
@@ -68,9 +68,9 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 		if port != "" {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheDumpDir)
+		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheDumpDir, loadHistorySize)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, nil, cacheDumpDir)
+		d, err = NewMongoStorage(host, port, name, user, pass, nil, cacheDumpDir, loadHistorySize)
 		db = d.(AccountingStorage)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
@@ -99,7 +99,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 			d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 	*/
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, nil, "")
+		d, err = NewMongoStorage(host, port, name, user, pass, nil, "", 1)
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MYSQL:
@@ -122,7 +122,7 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes, "")
+		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes, "", 1)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
 			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
@@ -141,7 +141,7 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes, "")
+		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes, "", 1)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
 			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))

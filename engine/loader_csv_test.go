@@ -150,6 +150,7 @@ DY_PLAN,RT_DY,*any,10
 *out,cgrates.org,call,money,2015-02-28T00:00:00Z,EVENING,,
 *out,cgrates.org,call,dy,2015-02-28T00:00:00Z,DY_PLAN,,
 *out,cgrates.org,call,block,2015-02-28T00:00:00Z,DY_PLAN,,
+*out,cgrates.org,call,round,2016-06-30T00:00:00Z,DEFAULT,,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -226,6 +227,7 @@ cgrates.org,block_empty,BLOCK_EMPTY_AT,,false,false
 cgrates.org,expo,EXP_AT,,false,false
 cgrates.org,expnoexp,,,false,false
 cgrates.org,vf,,,false,false
+cgrates.org,round,TOPUP10_AT,,false,false
 `
 
 	derivedCharges = `
@@ -268,7 +270,7 @@ var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "", 10)
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -809,7 +811,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 23 {
+	if len(csvr.ratingProfiles) != 24 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
@@ -1109,7 +1111,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 16 {
+	if len(csvr.accountActions) != 17 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]

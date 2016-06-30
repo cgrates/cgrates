@@ -33,12 +33,12 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	ratingDb, err := ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort, cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, "")
+	ratingDb, err := ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort, cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, cfg.CacheDumpDir, cfg.LoadHistorySize)
 	if err != nil {
 		return err
 	}
 	accountDb, err := ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName,
-		cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, "")
+		cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheDumpDir, cfg.LoadHistorySize)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return StartEngine(cfgPath, waitEngine)
 }
 
-func LoadTariffPlanFromFolder(tpPath, timezone string, loadHistSize int, ratingDb RatingStorage, accountingDb AccountingStorage) error {
+func LoadTariffPlanFromFolder(tpPath, timezone string, ratingDb RatingStorage, accountingDb AccountingStorage) error {
 	loader := NewTpReader(ratingDb, accountingDb, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(tpPath, utils.DESTINATIONS_CSV),
 		path.Join(tpPath, utils.TIMINGS_CSV),
@@ -110,7 +110,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, loadHistSize int, ratingD
 
 		path.Join(tpPath, utils.USERS_CSV),
 		path.Join(tpPath, utils.ALIASES_CSV),
-	), "", timezone, loadHistSize)
+	), "", timezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

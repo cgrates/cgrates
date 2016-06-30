@@ -202,8 +202,8 @@ func main() {
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
-				*tpdb_user, *tpdb_pass, *dbdata_encoding, *cacheDumpDir)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, *cacheDumpDir)
+				*tpdb_user, *tpdb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		} else if *toStorDb { // Import from csv files to storDb
@@ -211,8 +211,8 @@ func main() {
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		} else { // Default load from csv files to dataDb
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
-				*tpdb_user, *tpdb_pass, *dbdata_encoding, *cacheDumpDir)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, *cacheDumpDir)
+				*tpdb_user, *tpdb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
 		}
 		// Defer databases opened to be closed when we are done
 		for _, db := range []engine.Storage{ratingDb, accountDb, storDb} {
@@ -272,7 +272,7 @@ func main() {
 			path.Join(*dataPath, utils.ALIASES_CSV),
 		)
 	}
-	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid, *timezone, *loadHistorySize)
+	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid, *timezone)
 	err = tpReader.LoadAll()
 	if err != nil {
 		log.Fatal(err)

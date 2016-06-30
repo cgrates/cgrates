@@ -85,10 +85,11 @@ var (
 )
 
 type MongoStorage struct {
-	session      *mgo.Session
-	db           string
-	ms           Marshaler
-	cacheDumpDir string
+	session         *mgo.Session
+	db              string
+	ms              Marshaler
+	cacheDumpDir    string
+	loadHistorySize int
 }
 
 func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
@@ -96,7 +97,7 @@ func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
 	return sessionCopy, sessionCopy.DB(ms.db).C(col)
 }
 
-func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, cacheDumpDir string) (*MongoStorage, error) {
+func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, cacheDumpDir string, loadHistorySize int) (*MongoStorage, error) {
 
 	// We need this object to establish a session to our MongoDB.
 	/*address := fmt.Sprintf("%s:%s", host, port)
@@ -286,7 +287,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
 		return nil, err
 	}
-	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler(), cacheDumpDir: cacheDumpDir}, err
+	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler(), cacheDumpDir: cacheDumpDir, loadHistorySize: loadHistorySize}, err
 }
 
 func (ms *MongoStorage) Close() {
@@ -419,6 +420,7 @@ func (ms *MongoStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 }
 
 func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
+	start := time.Now()
 	CacheBeginTransaction()
 	keyResult := struct{ Key string }{}
 	idResult := struct{ Id string }{}
@@ -642,6 +644,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		utils.Logger.Info("Finished shared groups caching.")
 	}
 	CacheCommitTransaction()
+	utils.Logger.Info(fmt.Sprintf("Cache rating creation time: %v", time.Since(start)))
 	loadHistList, err := ms.GetLoadHistory(1, true)
 	if err != nil || len(loadHistList) == 0 {
 		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
@@ -657,6 +660,10 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		loadHist = loadHistList[0]
 		loadHist.RatingLoadID = utils.GenUUID()
 		loadHist.LoadTime = time.Now()
+	}
+	if err := ms.AddLoadHistory(loadHist, ms.loadHistorySize); err != nil {
+		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
+		return err
 	}
 	var keys []string
 	if len(dKeys) > 0 {
@@ -714,6 +721,7 @@ func (ms *MongoStorage) CacheAccountingPrefixValues(prefixes map[string][]string
 }
 
 func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
+	start := time.Now()
 	CacheBeginTransaction()
 	var keyResult struct{ Key string }
 	if alsKeys == nil {
@@ -761,6 +769,7 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 	}
 	utils.Logger.Info("Finished load history caching.")
 	CacheCommitTransaction()
+	utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
 	var keys []string
 	if len(alsKeys) > 0 {
 		keys = append(keys, utils.ALIASES_PREFIX)
@@ -778,7 +787,10 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		loadHist.AccountingLoadID = utils.GenUUID()
 		loadHist.LoadTime = time.Now()
 	}
-
+	if err := ms.AddLoadHistory(loadHist, ms.loadHistorySize); err != nil { //FIXME replace 100 with cfg
+		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
+		return err
+	}
 	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
 }
 
