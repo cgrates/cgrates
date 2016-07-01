@@ -731,6 +731,13 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err er
 	return
 }
 
+func (ms *MapStorage) RemoveActionTriggers(key string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, utils.ACTION_TRIGGER_PREFIX+key)
+	return
+}
+
 func (ms *MapStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()

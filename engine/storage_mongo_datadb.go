@@ -1393,6 +1393,12 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 	return err
 }
 
+func (ms *MongoStorage) RemoveActionTriggers(key string) error {
+	session, col := ms.conn(colAtr)
+	defer session.Close()
+	return col.Remove(bson.M{"key": key})
+}
+
 func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	if !skipCache {
 		if x, err := CacheGet(utils.ACTION_PLAN_PREFIX + key); err == nil {
