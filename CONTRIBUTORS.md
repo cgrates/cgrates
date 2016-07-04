@@ -46,6 +46,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @J0hnSteel | John Koce Steel |
 | @ewsamuels | Errol Samuels |
 | @razvancrainea | Răzvan Crainea |
+| @marcinkowalczyk | Marcin Kowalczyk |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->
