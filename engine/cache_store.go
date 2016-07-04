@@ -9,9 +9,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -130,47 +130,60 @@ func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.Cache
 		utils.Logger.Info("<cache encoder>:" + err.Error())
 		return err
 	}
-
+	/*db, err := bolt.Open(filepath.Join(path, "cgrates.cache"), 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()*/
 	var wg sync.WaitGroup
 	for _, prefix := range prefixes {
 		prefix = prefix[:PREFIX_LEN]
-		value, found := cs[prefix]
+		mapValue, found := cs[prefix]
 		if !found {
 			continue
 		}
 		wg.Add(1)
 		go func(key string, data map[string]interface{}) {
 			defer wg.Done()
-			dataFile, err := os.Create(filepath.Join(path, key) + ".cache")
-			defer dataFile.Close()
-			if err != nil {
+			p := filepath.Join(path, key)
+			if err := os.MkdirAll(p, 0766); err != nil {
 				utils.Logger.Info("<cache encoder>:" + err.Error())
+				return
 			}
 
-			// serialize the data
-			out := bufio.NewWriter(dataFile)
+			/*_, err := tx.CreateBucket([]byte("MyBucket"))
+			if err != nil {
+				return err
+			}*/
 
 			dataEncoder := NewCodecMsgpackMarshaler()
 			for k, v := range data {
-				if encData, err := dataEncoder.Marshal(CacheTypeFactory(key, k, v)); err == nil {
+				dataFile, err := os.Create(filepath.Join(p, k) + ".cache")
+				defer dataFile.Close()
+				if err != nil {
+					utils.Logger.Info("<cache encoder>:" + err.Error())
+				}
+
+				// serialize the data
+				out := bufio.NewWriter(dataFile)
+				if encData, err := dataEncoder.Marshal(v); err == nil {
 					if len(encData) > 1000 {
 						var buf bytes.Buffer
 						w := zlib.NewWriter(&buf)
 						w.Write(encData)
 						w.Close()
-						out.WriteString(fmt.Sprintf("%010.10d", buf.Len()))
 						out.Write(buf.Bytes())
 					} else {
-						out.WriteString(fmt.Sprintf("%010.10d", len(encData)))
 						out.Write(encData)
 					}
 				} else {
 					utils.Logger.Info("<cache encoder>:" + err.Error())
 					break
 				}
+				out.Flush()
+				dataFile.Close()
 			}
-			out.Flush()
-		}(prefix, value)
+		}(prefix, mapValue)
 	}
 	wg.Wait()
 
@@ -181,48 +194,39 @@ func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 	if path == "" || len(prefixes) == 0 {
 		return nil
 	}
+	start := time.Now()
 	var wg sync.WaitGroup
 	var mux sync.Mutex
 	for _, prefix := range prefixes {
 		prefix = prefix[:PREFIX_LEN] // make sure it's only limited to prefix length'
-		file := filepath.Join(path, prefix+".cache")
-		if _, err := os.Stat(file); os.IsNotExist(err) { // no cache file for this prefix
+		p := filepath.Join(path, prefix)
+		if _, err := os.Stat(p); os.IsNotExist(err) { // no cache file for this prefix
 			continue
 		}
 		wg.Add(1)
-		go func(fileName, key string) {
+		go func(dirPath, key string) {
 			defer wg.Done()
-			// open data file
-			dataFile, err := os.Open(fileName)
-			defer dataFile.Close()
+			filePaths, err := filepath.Glob(filepath.Join(p, "*.cache"))
 			if err != nil {
 				utils.Logger.Info("<cache decoder>: " + err.Error())
 				return
 			}
-			nextSize := make([]byte, 10)
-			buf := make([]byte, 100)
-			val := make(map[string]interface{})
 			dataDecoder := NewCodecMsgpackMarshaler()
-			for {
-				dataFile.Read(nextSize)
-				size, err := strconv.Atoi(string(nextSize))
+			val := make(map[string]interface{})
+			for _, filePath := range filePaths {
+				fileName := filepath.Base(filePath)
+				extName := filepath.Ext(fileName)
+				k := fileName[:len(fileName)-len(extName)]
+
+				// open data file
+				data, err := ioutil.ReadFile(filePath)
 				if err != nil {
-					//log.Printf("%s err1", key)
 					utils.Logger.Info("<cache decoder>: " + err.Error())
-					break
-				}
-				if size > len(buf) {
-					buf = make([]byte, size)
-				}
-				buf = buf[:size]
-				read, err := dataFile.Read(buf)
-				if err != nil || read < size {
-					//log.Printf("%s err2 %v (%d - %d [%d])", key, err, read, size, len(buf))
-					break
+					return
 				}
 				var encData []byte
-				if buf[0] == 120 && buf[1] == 156 { //zip header
-					x := bytes.NewBuffer(buf)
+				if data[0] == 120 && data[1] == 156 { //zip header
+					x := bytes.NewBuffer(data)
 					r, err := zlib.NewReader(x)
 					if err != nil {
 						//log.Printf("%s err3", key)
@@ -238,22 +242,24 @@ func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 					r.Close()
 					encData = out
 				} else {
-					encData = buf
+					encData = data
 				}
 				kv := CacheTypeFactory(key, "", nil)
-				if err := dataDecoder.Unmarshal(encData, &kv); err != nil {
+				v := kv.Value()
+				if err := dataDecoder.Unmarshal(encData, &v); err != nil {
 					//log.Printf("%s err5", key)
 					utils.Logger.Info("<cache decoder>: " + err.Error())
 					break
 				}
-				val[kv.Key()] = kv.Value()
+				val[k] = v
 			}
 			mux.Lock()
 			cs[key] = val
 			mux.Unlock()
-		}(file, prefix)
+		}(p, prefix)
 	}
 	wg.Wait()
+	utils.Logger.Info(fmt.Sprintf("Cache rating load time: %v", time.Since(start)))
 	return nil
 }
 
