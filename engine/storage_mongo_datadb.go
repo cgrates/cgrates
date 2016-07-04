@@ -681,6 +681,9 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	if len(actKeys) > 0 {
 		keys = append(keys, utils.ACTION_PREFIX)
 	}
+	if len(actKeys) > 0 {
+		keys = append(keys, utils.DERIVEDCHARGERS_PREFIX)
+	}
 	if len(aplKeys) > 0 {
 		keys = append(keys, utils.ACTION_PLAN_PREFIX)
 	}
