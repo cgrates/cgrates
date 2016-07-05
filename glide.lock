@@ -1,10 +1,8 @@
-hash: 666d66edd6d37ebcdba65d1e422ffe8f2ba180d005a6bafa617cf175fb166599
-updated: 2016-07-04T23:24:35.661878704+03:00
+hash: 3b8a515683d749dcbf7f7cef08b17099bd8a90e0426fea9dfcc77bcfcbd0ed04
+updated: 2016-07-05T13:26:26.429447531+03:00
 imports:
-- name: github.com/boltdb/bolt
-  version: dfb21201d9270c1082d5fb0f07f500311ff72f18
 - name: github.com/cenk/hub
-  version: b864404b5f990410d56858a1b0a6fac23a85443f
+  version: 11382a9960d39b0ecda16fd01c424c11ff765a34
 - name: github.com/cenkalti/rpc2
   version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
 - name: github.com/cgrates/fsock
@@ -38,7 +36,7 @@ imports:
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
-  version: 1a8912836dee1f666f882b2e388e340a3a10ecdd
+  version: 9ada6bfd077a36dc892676633a2c9ca42d884202
   subpackages:
   - diam
   - diam/avp
@@ -48,34 +46,51 @@ imports:
   - diam/sm/smparser
   - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
-  version: 7ebe0a500653eeb1859664bed5e48dec1e164e73
+  version: 3654d25ec346ee8ce71a68431025458d52a38ac0
+- name: github.com/golang/snappy
+  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
 - name: github.com/jinzhu/gorm
-  version: 57c72125b3087e1ed02c16f23a1f381cde3aaf2c
+  version: 3324ab20633e8c7ec6d6b1f7a714a1a6e06fec08
 - name: github.com/jinzhu/inflection
-  version: 3272df6c21d04180007eb3349844c89a3856bc25
+  version: 8f4d3a0d04ce0b7c0cf3126fb98524246d00d102
 - name: github.com/kr/pty
-  version: f7ee69f31298ecbe5d2b349c711e2547a617d398
+  version: a6bad5ee6fc60cad43d219214dd2449bf077f3f5
 - name: github.com/lib/pq
-  version: ee1442bda7bd1b6a84e913bdb421cb1874ec629d
+  version: 4dd446efc17690bc53e154025146f73203b18309
   subpackages:
   - oid
 - name: github.com/mediocregopher/radix.v2
-  version: 74e50e64194d2d2f4836212451c28b127f9d7fa1
+  version: ae04b3eb3731f94789205d1268e0759371166605
   subpackages:
   - pool
   - redis
 - name: github.com/mitchellh/mapstructure
   version: d2dd0262208475919e1a362f675cfc0e7c10e905
 - name: github.com/peterh/liner
-  version: 0e4af131b90a9786839c8b1b01717be263e8555a
+  version: 8975875355a81d612fafb9f5a6037bdcc2d9b073
+- name: github.com/syndtr/goleveldb
+  version: ab8b5dcf1042e818ab68e770d465112a899b668e
+  subpackages:
+  - leveldb
+  - leveldb/cache
+  - leveldb/comparer
+  - leveldb/errors
+  - leveldb/filter
+  - leveldb/iterator
+  - leveldb/journal
+  - leveldb/memdb
+  - leveldb/opt
+  - leveldb/storage
+  - leveldb/table
+  - leveldb/util
 - name: github.com/ugorji/go
-  version: a396ed22fc049df733440d90efe17475e3929ccb
+  version: b94837a2404ab90efe9289e77a70694c355739cb
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: ef00b378c73f107bf44d5c9b69875255ce89b79a
+  version: b400c2eff1badec7022a8c8f5bea058b6315eed7
   subpackages:
   - websocket
   - context
@@ -83,16 +98,17 @@ imports:
   - html
   - html/atom
 - name: golang.org/x/sys
-  version: 33267e036fd93fcd26ea95b7bdaf2d8306cb743c
+  version: a408501be4d17ee978c04a618e7a1b22af058c0e
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: f773ec03ce334298742df7f3108fc0d402646d22
+  version: ce78b075c2fbd48520f4995b173eb9fe18b56ef3
   subpackages:
   - encoding
   - encoding/charmap
   - encoding/htmlindex
   - transform
+  - language
   - encoding/internal/identifier
   - encoding/internal
   - encoding/japanese
@@ -100,14 +116,13 @@ imports:
   - encoding/simplifiedchinese
   - encoding/traditionalchinese
   - encoding/unicode
-  - language
+  - internal/tag
   - internal/utf8internal
   - runes
-  - internal/tag
 - name: gopkg.in/fsnotify.v1
-  version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
+  version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
 - name: gopkg.in/mgo.v2
-  version: b6e2fa371e64216a45e61072a96d4e3859f169da
+  version: 29cc868a5ca65f401ff318143f9408d02f4799cc
   subpackages:
   - bson
   - internal/sasl

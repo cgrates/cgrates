@@ -36,5 +36,6 @@ import:
   - bson
 - package: github.com/ChrisTrenkamp/goxpath
 - package: github.com/mitchellh/mapstructure
-- package: github.com/boltdb/bolt
-  version: ^1.2.1
+- package: github.com/syndtr/goleveldb
+  subpackages:
+  - leveldb

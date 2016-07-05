@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boltdb/bolt"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type cacheStore interface {
@@ -131,11 +131,7 @@ func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.Cache
 		utils.Logger.Info("<cache encoder>:" + err.Error())
 		return err
 	}
-	db, err := bolt.Open(filepath.Join(path, "cgrates.cache"), 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+
 	var wg sync.WaitGroup
 	for _, prefix := range prefixes {
 		prefix = prefix[:PREFIX_LEN]
@@ -148,34 +144,27 @@ func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.Cache
 			defer wg.Done()
 
 			dataEncoder := NewCodecMsgpackMarshaler()
-			err = db.Update(func(tx *bolt.Tx) error {
-				log.Print("start key ", key)
-				bucket, err := tx.CreateBucketIfNotExists([]byte(key))
-				if err != nil {
-					return err
-				}
-				for k, v := range data {
-					if encData, err := dataEncoder.Marshal(v); err == nil {
-						if len(encData) > 1000 {
-							var buf bytes.Buffer
-							w := zlib.NewWriter(&buf)
-							w.Write(encData)
-							w.Close()
-							encData = buf.Bytes()
-						}
-						bucket.Put([]byte(k), encData)
-					} else {
-						return err
-					}
-
-				}
-				return nil
-			})
+			db, err := leveldb.OpenFile(filepath.Join(path, key+".cache"), nil)
 			if err != nil {
-				utils.Logger.Info("<cache encoder>:" + err.Error())
-				return
+				log.Fatal(err)
 			}
-			log.Printf("%s done!", key)
+			defer db.Close()
+
+			for k, v := range data {
+				if encData, err := dataEncoder.Marshal(v); err == nil {
+					if len(encData) > 1000 {
+						var buf bytes.Buffer
+						w := zlib.NewWriter(&buf)
+						w.Write(encData)
+						w.Close()
+						encData = buf.Bytes()
+					}
+					db.Put([]byte(k), encData, nil)
+				} else {
+					utils.Logger.Info("<cache encoder>:" + err.Error())
+					break
+				}
+			}
 		}(prefix, mapValue)
 	}
 	wg.Wait()
@@ -191,31 +180,27 @@ func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 	var mux sync.Mutex
 	for _, prefix := range prefixes {
 		prefix = prefix[:PREFIX_LEN] // make sure it's only limited to prefix length'
-		p := filepath.Join(path, prefix)
+		p := filepath.Join(path, prefix+".cache")
 		if _, err := os.Stat(p); os.IsNotExist(err) { // no cache file for this prefix
 			continue
 		}
 		wg.Add(1)
 		go func(dirPath, key string) {
 			defer wg.Done()
-			filePaths, err := filepath.Glob(filepath.Join(p, "*.cache"))
+			db, err := leveldb.OpenFile(dirPath, nil)
 			if err != nil {
 				utils.Logger.Info("<cache decoder>: " + err.Error())
 				return
 			}
+			defer db.Close()
 			dataDecoder := NewCodecMsgpackMarshaler()
 			val := make(map[string]interface{})
-			for _, filePath := range filePaths {
-				fileName := filepath.Base(filePath)
-				extName := filepath.Ext(fileName)
-				k := fileName[:len(fileName)-len(extName)]
-
-				// open data file
-				data, err := ioutil.ReadFile(filePath)
-				if err != nil {
-					utils.Logger.Info("<cache decoder>: " + err.Error())
-					return
-				}
+			iter := db.NewIterator(nil, nil)
+			for iter.Next() {
+				// Remember that the contents of the returned slice should not be modified, and
+				// only valid until the next call to Next.
+				k := iter.Key()
+				data := iter.Value()
 				var encData []byte
 				if data[0] == 120 && data[1] == 156 { //zip header
 					x := bytes.NewBuffer(data)
@@ -243,15 +228,16 @@ func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 					utils.Logger.Info("<cache decoder>: " + err.Error())
 					break
 				}
-				val[k] = v
+				val[string(k)] = v
 			}
+			iter.Release()
 			mux.Lock()
 			cs[key] = val
 			mux.Unlock()
 		}(p, prefix)
 	}
 	wg.Wait()
-	utils.Logger.Info(fmt.Sprintf("Cache rating load time: %v", time.Since(start)))
+	utils.Logger.Info(fmt.Sprintf("Cache %v load time: %v", prefixes, time.Since(start)))
 	return nil
 }
 
