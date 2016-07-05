@@ -27,7 +27,7 @@ type cacheStore interface {
 	CountEntriesForPrefix(string) int
 	GetAllForPrefix(string) (map[string]interface{}, error)
 	GetKeysForPrefix(string) []string
-	Save(string, []string, *utils.CacheFileInfo) error
+	Save(string, map[string][]string, *utils.CacheFileInfo) error
 	Load(string, []string) error
 }
 
@@ -120,9 +120,10 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 	return
 }
 
-func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.CacheFileInfo) error {
+func (cs cacheDoubleStore) Save(path string, prefixKeysMap map[string][]string, cfi *utils.CacheFileInfo) error {
+	start := time.Now()
 	//log.Printf("path: %s prefixes: %v", path, prefixes)
-	if path == "" || len(prefixes) == 0 {
+	if path == "" || len(prefixKeysMap) == 0 {
 		return nil
 	}
 	//log.Print("saving cache prefixes: ", prefixes)
@@ -133,24 +134,35 @@ func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.Cache
 	}
 
 	var wg sync.WaitGroup
-	for _, prefix := range prefixes {
+	var prefixSlice []string
+	for prefix, keys := range prefixKeysMap {
 		prefix = prefix[:PREFIX_LEN]
 		mapValue, found := cs[prefix]
 		if !found {
 			continue
 		}
+		prefixSlice = append(prefixSlice, prefix)
 		wg.Add(1)
-		go func(key string, data map[string]interface{}) {
+		go func(pref string, ks []string, data map[string]interface{}) {
 			defer wg.Done()
-
 			dataEncoder := NewCodecMsgpackMarshaler()
-			db, err := leveldb.OpenFile(filepath.Join(path, key+".cache"), nil)
+			db, err := leveldb.OpenFile(filepath.Join(path, pref+".cache"), nil)
 			if err != nil {
 				log.Fatal(err)
 			}
 			defer db.Close()
 
-			for k, v := range data {
+			// destinations are reverse mapped
+			if pref == utils.DESTINATION_PREFIX {
+				ks = make([]string, len(cs[utils.DESTINATION_PREFIX]))
+				i := 0
+				for dk := range cs[utils.DESTINATION_PREFIX] {
+					ks[i] = dk
+					i++
+				}
+			}
+			for _, k := range ks {
+				v := data[k]
 				if encData, err := dataEncoder.Marshal(v); err == nil {
 					if len(encData) > 1000 {
 						var buf bytes.Buffer
@@ -165,9 +177,11 @@ func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.Cache
 					break
 				}
 			}
-		}(prefix, mapValue)
+		}(prefix, keys, mapValue)
 	}
 	wg.Wait()
+
+	utils.Logger.Info(fmt.Sprintf("Cache %v save time: %v", prefixSlice, time.Since(start)))
 	return utils.SaveCacheFileInfo(path, cfi)
 }
 
@@ -221,8 +235,7 @@ func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 				} else {
 					encData = data
 				}
-				kv := CacheTypeFactory(key, "", nil)
-				v := kv.Value()
+				v := CacheTypeFactory(key)
 				if err := dataDecoder.Unmarshal(encData, &v); err != nil {
 					//log.Printf("%s err5", key)
 					utils.Logger.Info("<cache decoder>: " + err.Error())
@@ -366,7 +379,7 @@ func (cs cacheSimpleStore) GetKeysForPrefix(prefix string) (keys []string) {
 	return
 }
 
-func (cs cacheSimpleStore) Save(path string, keys []string, cfi *utils.CacheFileInfo) error {
+func (cs cacheSimpleStore) Save(path string, keys map[string][]string, cfi *utils.CacheFileInfo) error {
 	utils.Logger.Info("simplestore save")
 	return nil
 }

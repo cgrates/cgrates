@@ -665,30 +665,30 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
-	var keys []string
+	keys := make(map[string][]string)
 	if len(dKeys) > 0 {
-		keys = append(keys, utils.DESTINATION_PREFIX)
+		keys[utils.DESTINATION_PREFIX] = dKeys
 	}
 	if len(rpKeys) > 0 {
-		keys = append(keys, utils.RATING_PLAN_PREFIX)
+		keys[utils.RATING_PLAN_PREFIX] = rpKeys
 	}
 	if len(rpfKeys) > 0 {
-		keys = append(keys, utils.RATING_PROFILE_PREFIX)
+		keys[utils.RATING_PROFILE_PREFIX] = rpfKeys
 	}
 	if len(lcrKeys) > 0 {
-		keys = append(keys, utils.LCR_PREFIX)
+		keys[utils.LCR_PREFIX] = lcrKeys
 	}
 	if len(actKeys) > 0 {
-		keys = append(keys, utils.ACTION_PREFIX)
+		keys[utils.ACTION_PREFIX] = actKeys
 	}
-	if len(actKeys) > 0 {
-		keys = append(keys, utils.DERIVEDCHARGERS_PREFIX)
+	if len(dcsKeys) > 0 {
+		keys[utils.DERIVEDCHARGERS_PREFIX] = dcsKeys
 	}
 	if len(aplKeys) > 0 {
-		keys = append(keys, utils.ACTION_PLAN_PREFIX)
+		keys[utils.ACTION_PLAN_PREFIX] = aplKeys
 	}
 	if len(shgKeys) > 0 {
-		keys = append(keys, utils.SHARED_GROUP_PREFIX)
+		keys[utils.SHARED_GROUP_PREFIX] = shgKeys
 	}
 	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
 }
@@ -773,9 +773,9 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 	utils.Logger.Info("Finished load history caching.")
 	CacheCommitTransaction()
 	utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
-	var keys []string
+	keys := make(map[string][]string)
 	if len(alsKeys) > 0 {
-		keys = append(keys, utils.ALIASES_PREFIX)
+		keys[utils.ALIASES_PREFIX] = alsKeys
 	}
 
 	var loadHist *utils.LoadInstance

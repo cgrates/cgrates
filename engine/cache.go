@@ -78,7 +78,7 @@ func CacheCommitTransaction() {
 	transactionMux.Unlock()
 }
 
-func CacheSave(path string, keys []string, cfi *utils.CacheFileInfo) error {
+func CacheSave(path string, keys map[string][]string, cfi *utils.CacheFileInfo) error {
 	mux.Lock()
 	defer mux.Unlock()
 	return cache.Save(path, keys, cfi)
