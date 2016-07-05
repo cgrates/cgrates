@@ -2,17 +2,18 @@
 package engine
 
 import (
-	"bufio"
 	"bytes"
 	"compress/zlib"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/boltdb/bolt"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -130,11 +131,11 @@ func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.Cache
 		utils.Logger.Info("<cache encoder>:" + err.Error())
 		return err
 	}
-	/*db, err := bolt.Open(filepath.Join(path, "cgrates.cache"), 0600, nil)
+	db, err := bolt.Open(filepath.Join(path, "cgrates.cache"), 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()*/
+	defer db.Close()
 	var wg sync.WaitGroup
 	for _, prefix := range prefixes {
 		prefix = prefix[:PREFIX_LEN]
@@ -145,48 +146,39 @@ func (cs cacheDoubleStore) Save(path string, prefixes []string, cfi *utils.Cache
 		wg.Add(1)
 		go func(key string, data map[string]interface{}) {
 			defer wg.Done()
-			p := filepath.Join(path, key)
-			if err := os.MkdirAll(p, 0766); err != nil {
+
+			dataEncoder := NewCodecMsgpackMarshaler()
+			err = db.Update(func(tx *bolt.Tx) error {
+				log.Print("start key ", key)
+				bucket, err := tx.CreateBucketIfNotExists([]byte(key))
+				if err != nil {
+					return err
+				}
+				for k, v := range data {
+					if encData, err := dataEncoder.Marshal(v); err == nil {
+						if len(encData) > 1000 {
+							var buf bytes.Buffer
+							w := zlib.NewWriter(&buf)
+							w.Write(encData)
+							w.Close()
+							encData = buf.Bytes()
+						}
+						bucket.Put([]byte(k), encData)
+					} else {
+						return err
+					}
+
+				}
+				return nil
+			})
+			if err != nil {
 				utils.Logger.Info("<cache encoder>:" + err.Error())
 				return
 			}
-
-			/*_, err := tx.CreateBucket([]byte("MyBucket"))
-			if err != nil {
-				return err
-			}*/
-
-			dataEncoder := NewCodecMsgpackMarshaler()
-			for k, v := range data {
-				dataFile, err := os.Create(filepath.Join(p, k) + ".cache")
-				defer dataFile.Close()
-				if err != nil {
-					utils.Logger.Info("<cache encoder>:" + err.Error())
-				}
-
-				// serialize the data
-				out := bufio.NewWriter(dataFile)
-				if encData, err := dataEncoder.Marshal(v); err == nil {
-					if len(encData) > 1000 {
-						var buf bytes.Buffer
-						w := zlib.NewWriter(&buf)
-						w.Write(encData)
-						w.Close()
-						out.Write(buf.Bytes())
-					} else {
-						out.Write(encData)
-					}
-				} else {
-					utils.Logger.Info("<cache encoder>:" + err.Error())
-					break
-				}
-				out.Flush()
-				dataFile.Close()
-			}
+			log.Printf("%s done!", key)
 		}(prefix, mapValue)
 	}
 	wg.Wait()
-
 	return utils.SaveCacheFileInfo(path, cfi)
 }
 

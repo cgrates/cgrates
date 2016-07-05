@@ -1,6 +1,8 @@
-hash: 4f75ceccd2b55c66bbd6da3d533b44f543f4eadc5008178449ff15aad5dacf1b
-updated: 2016-05-26T17:58:38.555038328+03:00
+hash: 666d66edd6d37ebcdba65d1e422ffe8f2ba180d005a6bafa617cf175fb166599
+updated: 2016-07-04T23:24:35.661878704+03:00
 imports:
+- name: github.com/boltdb/bolt
+  version: dfb21201d9270c1082d5fb0f07f500311ff72f18
 - name: github.com/cenk/hub
   version: b864404b5f990410d56858a1b0a6fac23a85443f
 - name: github.com/cenkalti/rpc2
@@ -110,4 +112,4 @@ imports:
   - bson
   - internal/sasl
   - internal/scram
-devImports: []
+testImports: []
