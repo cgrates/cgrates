@@ -65,6 +65,7 @@ type RatingStorage interface {
 	SetSharedGroup(*SharedGroup) error
 	GetActionTriggers(string) (ActionTriggers, error)
 	SetActionTriggers(string, ActionTriggers) error
+	RemoveActionTriggers(string) error
 	GetActionPlan(string, bool) (*ActionPlan, error)
 	SetActionPlan(string, *ActionPlan, bool) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)

@@ -276,7 +276,7 @@ func (sm *FSSessionManager) DisconnectSession(ev engine.Event, connId, notify st
 	}
 	if notify == INSUFFICIENT_FUNDS {
 		if len(sm.cfg.EmptyBalanceContext) != 0 {
-			if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_transfer %s %s %s\n\n", ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), sm.cfg.EmptyBalanceContext)); err != nil {
+			if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_transfer %s %s XML %s\n\n", ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), sm.cfg.EmptyBalanceContext)); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not transfer the call to empty balance context, error: <%s>, connId: %s", err.Error(), connId))
 				return err
 			}
@@ -298,7 +298,7 @@ func (sm *FSSessionManager) DisconnectSession(ev engine.Event, connId, notify st
 
 func (sm *FSSessionManager) ProcessCdr(storedCdr *engine.CDR) error {
 	var reply string
-	if err := sm.cdrsrv.Call("CdrsV1.ProcessCdr", storedCdr, &reply); err != nil {
+	if err := sm.cdrsrv.Call("CdrsV1.ProcessCDR", storedCdr, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CGRID, storedCdr.OriginID, err.Error()))
 	}
 	return nil

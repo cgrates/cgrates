@@ -153,7 +153,7 @@ func (osm *OsipsSessionManager) Shutdown() error {
 // Process the CDR with CDRS component
 func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.CDR) error {
 	var reply string
-	return osm.cdrsrv.Call("CdrsV1.ProcessCdr", storedCdr, &reply)
+	return osm.cdrsrv.Call("CdrsV1.ProcessCDR", storedCdr, &reply)
 }
 
 // Disconnects the session

@@ -125,7 +125,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*
 	}
 
 	ndb := session.DB(db)
-	session.SetMode(mgo.Monotonic, true)
+	session.SetMode(mgo.Strong, true)
 	index := mgo.Index{
 		Key:        []string{"key"},
 		Unique:     true,  // Prevent two documents from having the same index key
@@ -1318,6 +1318,12 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 		Value ActionTriggers
 	}{Key: key, Value: atrs})
 	return err
+}
+
+func (ms *MongoStorage) RemoveActionTriggers(key string) error {
+	session, col := ms.conn(colAtr)
+	defer session.Close()
+	return col.Remove(bson.M{"key": key})
 }
 
 func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {

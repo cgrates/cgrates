@@ -956,6 +956,11 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 	return conn.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
 }
 
+func (rs *RedisStorage) RemoveActionTriggers(key string) (err error) {
+	err = rs.db.Cmd("DEL", utils.ACTION_TRIGGER_PREFIX+key).Err
+	return
+}
+
 func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {

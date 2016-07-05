@@ -122,7 +122,7 @@ func TestV2CDRsPSQLProcessCdrRated(t *testing.T) {
 		Cost: 1.01, CostSource: "TestV2CDRsPSQLProcessCdrRated", Rated: true,
 	}
 	var reply string
-	if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+	if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCDR", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -142,7 +142,7 @@ func TestV2CDRsPSQLProcessCdrRaw(t *testing.T) {
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
-	if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+	if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCDR", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -229,7 +229,7 @@ func TestV2CDRsPSQLProcessPrepaidCdr(t *testing.T) {
 	}
 	tStart := time.Now()
 	for _, cdr := range cdrs {
-		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCDR", cdr, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)

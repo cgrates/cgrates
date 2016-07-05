@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -27,7 +28,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, connectTimeout, replyTimeout time.Duration, codec string,
+func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, connectTimeout, replyTimeout time.Duration,
 	rpcConnCfgs []*config.HaPoolConfig, internalConnChan chan rpcclient.RpcClientConnection, ttl time.Duration) (*rpcclient.RpcClientPool, error) {
 	var rpcClient *rpcclient.RpcClient
 	var err error
@@ -43,8 +44,14 @@ func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, connectTi
 				return nil, errors.New("TTL triggered")
 			}
 			rpcClient, err = rpcclient.NewRpcClient("", "", connAttempts, reconnects, connectTimeout, replyTimeout, rpcclient.INTERNAL_RPC, internalConn)
-		} else {
+		} else if utils.IsSliceMember([]string{utils.MetaJSONrpc, utils.MetaGOBrpc, ""}, rpcConnCfg.Transport) {
+			codec := utils.GOB
+			if rpcConnCfg.Transport != "" {
+				codec = rpcConnCfg.Transport[1:] // Transport contains always * before codec understood by rpcclient
+			}
 			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, connAttempts, reconnects, connectTimeout, replyTimeout, codec, nil)
+		} else {
+			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
 		}
 		if err == nil {
 			atLestOneConnected = true
