@@ -2,11 +2,7 @@
 package engine
 
 import (
-	"bytes"
-	"compress/zlib"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +10,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type cacheStore interface {
@@ -27,7 +22,6 @@ type cacheStore interface {
 	CountEntriesForPrefix(string) int
 	GetAllForPrefix(string) (map[string]interface{}, error)
 	GetKeysForPrefix(string) []string
-	Save(string, map[string][]string, *utils.CacheFileInfo) error
 	Load(string, []string) error
 }
 
@@ -46,6 +40,9 @@ func (cs cacheDoubleStore) Put(key string, value interface{}) {
 		cs[prefix] = mp
 	}
 	mp[key] = value
+	if err := dumper.put(prefix, key, value); err != nil {
+		utils.Logger.Info("<cache dumper> put error: " + err.Error())
+	}
 }
 
 func (cs cacheDoubleStore) Get(key string) (interface{}, error) {
@@ -87,11 +84,18 @@ func (cs cacheDoubleStore) Delete(key string) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if keyMap, ok := cs[prefix]; ok {
 		delete(keyMap, key)
+		if err := dumper.delete(prefix, key); err != nil {
+			utils.Logger.Info("<cache dumper> delete error: " + err.Error())
+		}
+
 	}
 }
 
 func (cs cacheDoubleStore) DeletePrefix(prefix string) {
 	delete(cs, prefix)
+	if err := dumper.deleteAll(prefix); err != nil {
+		utils.Logger.Info("<cache dumper> delete all error: " + err.Error())
+	}
 }
 
 func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
@@ -120,71 +124,6 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 	return
 }
 
-func (cs cacheDoubleStore) Save(path string, prefixKeysMap map[string][]string, cfi *utils.CacheFileInfo) error {
-	start := time.Now()
-	//log.Printf("path: %s prefixes: %v", path, prefixes)
-	if path == "" || len(prefixKeysMap) == 0 {
-		return nil
-	}
-	//log.Print("saving cache prefixes: ", prefixes)
-	// create a the path
-	if err := os.MkdirAll(path, 0766); err != nil {
-		utils.Logger.Info("<cache encoder>:" + err.Error())
-		return err
-	}
-
-	var wg sync.WaitGroup
-	var prefixSlice []string
-	for prefix, keys := range prefixKeysMap {
-		prefix = prefix[:PREFIX_LEN]
-		mapValue, found := cs[prefix]
-		if !found {
-			continue
-		}
-		prefixSlice = append(prefixSlice, prefix)
-		wg.Add(1)
-		go func(pref string, ks []string, data map[string]interface{}) {
-			defer wg.Done()
-			dataEncoder := NewCodecMsgpackMarshaler()
-			db, err := leveldb.OpenFile(filepath.Join(path, pref+".cache"), nil)
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer db.Close()
-
-			// destinations are reverse mapped
-			if pref == utils.DESTINATION_PREFIX {
-				ks = make([]string, len(cs[utils.DESTINATION_PREFIX]))
-				i := 0
-				for dk := range cs[utils.DESTINATION_PREFIX] {
-					ks[i] = dk
-					i++
-				}
-			}
-			for _, k := range ks {
-				v := data[k]
-				if encData, err := dataEncoder.Marshal(v); err == nil {
-					if len(encData) > 1000 {
-						var buf bytes.Buffer
-						w := zlib.NewWriter(&buf)
-						w.Write(encData)
-						w.Close()
-						encData = buf.Bytes()
-					}
-					db.Put([]byte(k), encData, nil)
-				} else {
-					utils.Logger.Info("<cache encoder>:" + err.Error())
-					break
-				}
-			}
-		}(prefix, keys, mapValue)
-	}
-	wg.Wait()
-
-	utils.Logger.Info(fmt.Sprintf("Cache %v save time: %v", prefixSlice, time.Since(start)))
-	return utils.SaveCacheFileInfo(path, cfi)
-}
-
 func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 	if path == "" || len(prefixes) == 0 {
 		return nil
@@ -199,53 +138,15 @@ func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 			continue
 		}
 		wg.Add(1)
-		go func(dirPath, key string) {
+		go func(dirPath, pref string) {
 			defer wg.Done()
-			db, err := leveldb.OpenFile(dirPath, nil)
+			val, err := dumper.load(pref)
 			if err != nil {
-				utils.Logger.Info("<cache decoder>: " + err.Error())
+				utils.Logger.Info("<cache dumper> load error: " + err.Error())
 				return
 			}
-			defer db.Close()
-			dataDecoder := NewCodecMsgpackMarshaler()
-			val := make(map[string]interface{})
-			iter := db.NewIterator(nil, nil)
-			for iter.Next() {
-				// Remember that the contents of the returned slice should not be modified, and
-				// only valid until the next call to Next.
-				k := iter.Key()
-				data := iter.Value()
-				var encData []byte
-				if data[0] == 120 && data[1] == 156 { //zip header
-					x := bytes.NewBuffer(data)
-					r, err := zlib.NewReader(x)
-					if err != nil {
-						//log.Printf("%s err3", key)
-						utils.Logger.Info("<cache decoder>: " + err.Error())
-						break
-					}
-					out, err := ioutil.ReadAll(r)
-					if err != nil {
-						//log.Printf("%s err4", key)
-						utils.Logger.Info("<cache decoder>: " + err.Error())
-						break
-					}
-					r.Close()
-					encData = out
-				} else {
-					encData = data
-				}
-				v := CacheTypeFactory(key)
-				if err := dataDecoder.Unmarshal(encData, &v); err != nil {
-					//log.Printf("%s err5", key)
-					utils.Logger.Info("<cache decoder>: " + err.Error())
-					break
-				}
-				val[string(k)] = v
-			}
-			iter.Release()
 			mux.Lock()
-			cs[key] = val
+			cs[pref] = val
 			mux.Unlock()
 		}(p, prefix)
 	}
@@ -377,11 +278,6 @@ func (cs cacheSimpleStore) GetKeysForPrefix(prefix string) (keys []string) {
 		}
 	}
 	return
-}
-
-func (cs cacheSimpleStore) Save(path string, keys map[string][]string, cfi *utils.CacheFileInfo) error {
-	utils.Logger.Info("simplestore save")
-	return nil
 }
 
 func (cs cacheSimpleStore) Load(path string, keys []string) error {

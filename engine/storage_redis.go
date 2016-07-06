@@ -74,6 +74,11 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns i
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
+	if cacheDumpDir != "" {
+		if err := CacheSetDumperPath(cacheDumpDir); err != nil {
+			utils.Logger.Info("<cache dumper> init error: " + err.Error())
+		}
+	}
 	return &RedisStorage{db: p, ms: mrshler, cacheDumpDir: cacheDumpDir, loadHistorySize: loadHistorySize}, nil
 }
 
@@ -340,32 +345,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		return err
 	}
 
-	keys := make(map[string][]string)
-	if len(dKeys) > 0 {
-		keys[utils.DESTINATION_PREFIX] = dKeys
-	}
-	if len(rpKeys) > 0 {
-		keys[utils.RATING_PLAN_PREFIX] = rpKeys
-	}
-	if len(rpfKeys) > 0 {
-		keys[utils.RATING_PROFILE_PREFIX] = rpfKeys
-	}
-	if len(lcrKeys) > 0 {
-		keys[utils.LCR_PREFIX] = lcrKeys
-	}
-	if len(actKeys) > 0 {
-		keys[utils.ACTION_PREFIX] = actKeys
-	}
-	if len(dcsKeys) > 0 {
-		keys[utils.DERIVEDCHARGERS_PREFIX] = dcsKeys
-	}
-	if len(aplKeys) > 0 {
-		keys[utils.ACTION_PLAN_PREFIX] = aplKeys
-	}
-	if len(shgKeys) > 0 {
-		keys[utils.SHARED_GROUP_PREFIX] = shgKeys
-	}
-	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
+	return utils.SaveCacheFileInfo(rs.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
 func (rs *RedisStorage) CacheAccountingAll() error {
@@ -467,7 +447,7 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
-	return CacheSave(rs.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
+	return utils.SaveCacheFileInfo(rs.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity

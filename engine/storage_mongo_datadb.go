@@ -287,6 +287,11 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
 		return nil, err
 	}
+	if cacheDumpDir != "" {
+		if err := CacheSetDumperPath(cacheDumpDir); err != nil {
+			utils.Logger.Info("<cache dumper> init error: " + err.Error())
+		}
+	}
 	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler(), cacheDumpDir: cacheDumpDir, loadHistorySize: loadHistorySize}, err
 }
 
@@ -665,32 +670,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
-	keys := make(map[string][]string)
-	if len(dKeys) > 0 {
-		keys[utils.DESTINATION_PREFIX] = dKeys
-	}
-	if len(rpKeys) > 0 {
-		keys[utils.RATING_PLAN_PREFIX] = rpKeys
-	}
-	if len(rpfKeys) > 0 {
-		keys[utils.RATING_PROFILE_PREFIX] = rpfKeys
-	}
-	if len(lcrKeys) > 0 {
-		keys[utils.LCR_PREFIX] = lcrKeys
-	}
-	if len(actKeys) > 0 {
-		keys[utils.ACTION_PREFIX] = actKeys
-	}
-	if len(dcsKeys) > 0 {
-		keys[utils.DERIVEDCHARGERS_PREFIX] = dcsKeys
-	}
-	if len(aplKeys) > 0 {
-		keys[utils.ACTION_PLAN_PREFIX] = aplKeys
-	}
-	if len(shgKeys) > 0 {
-		keys[utils.SHARED_GROUP_PREFIX] = shgKeys
-	}
-	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
+	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
 func (ms *MongoStorage) CacheAccountingAll() error {
@@ -794,7 +774,7 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
-	return CacheSave(ms.cacheDumpDir, keys, &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist})
+	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
 func (ms *MongoStorage) HasData(category, subject string) (bool, error) {

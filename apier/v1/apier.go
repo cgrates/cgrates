@@ -21,7 +21,6 @@ package v1
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"strconv"
@@ -1024,7 +1023,6 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 }
 
 func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
-	log.Printf("ATTR: %+v", attr)
 	if attr.Direction == "" {
 		attr.Direction = utils.OUT
 	}
@@ -1034,7 +1032,6 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 		return utils.ErrMandatoryIeMissing
 	}
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		log.Print("RPID: ", attr.GetId())
 		err := self.RatingDb.RemoveRatingProfile(attr.GetId())
 		if err != nil {
 			return 0, err

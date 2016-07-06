@@ -1,11 +1,7 @@
 //Simple caching library with expiration capabilities
 package engine
 
-import (
-	"sync"
-
-	"github.com/cgrates/cgrates/utils"
-)
+import "sync"
 
 const (
 	PREFIX_LEN   = 4
@@ -25,12 +21,20 @@ var (
 	transactionMux    sync.Mutex
 	transactionON     = false
 	transactionLock   = false
+	dumper            *cacheDumper
 )
 
 type transactionItem struct {
 	key   string
 	value interface{}
 	kind  string
+}
+
+func CacheSetDumperPath(path string) (err error) {
+	if dumper == nil {
+		dumper, err = newCacheDumper(path)
+	}
+	return
 }
 
 func init() {
@@ -76,12 +80,6 @@ func CacheCommitTransaction() {
 	transactionBuffer = nil
 	transactionLock = false
 	transactionMux.Unlock()
-}
-
-func CacheSave(path string, keys map[string][]string, cfi *utils.CacheFileInfo) error {
-	mux.Lock()
-	defer mux.Unlock()
-	return cache.Save(path, keys, cfi)
 }
 
 func CacheLoad(path string, keys []string) error {
