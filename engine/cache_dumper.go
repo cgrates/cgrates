@@ -30,10 +30,11 @@ func newCacheDumper(path string) (*cacheDumper, error) {
 	}, nil
 }
 
-func (cd *cacheDumper) getDumbDb(prefix string) (*leveldb.DB, error) {
+func (cd *cacheDumper) getDumpDb(prefix string) (*leveldb.DB, error) {
 	if cd == nil || cd.path == "" {
 		return nil, nil
 	}
+
 	db, found := cd.dbMap[prefix]
 	if !found {
 		var err error
@@ -47,10 +48,11 @@ func (cd *cacheDumper) getDumbDb(prefix string) (*leveldb.DB, error) {
 }
 
 func (cd *cacheDumper) put(prefix, key string, value interface{}) error {
-	db, err := cd.getDumbDb(prefix)
+	db, err := cd.getDumpDb(prefix)
 	if err != nil || db == nil {
 		return err
 	}
+
 	encData, err := cd.dataEncoder.Marshal(value)
 	if err != nil {
 		return err
@@ -66,7 +68,7 @@ func (cd *cacheDumper) put(prefix, key string, value interface{}) error {
 }
 
 func (cd *cacheDumper) load(prefix string) (map[string]interface{}, error) {
-	db, err := cd.getDumbDb(prefix)
+	db, err := cd.getDumpDb(prefix)
 	if err != nil || db == nil {
 		return nil, err
 	}
@@ -104,7 +106,7 @@ func (cd *cacheDumper) load(prefix string) (map[string]interface{}, error) {
 }
 
 func (cd *cacheDumper) delete(prefix, key string) error {
-	db, err := cd.getDumbDb(prefix)
+	db, err := cd.getDumpDb(prefix)
 	if err != nil || db == nil {
 		return err
 	}
@@ -112,7 +114,7 @@ func (cd *cacheDumper) delete(prefix, key string) error {
 }
 
 func (cd *cacheDumper) deleteAll(prefix string) error {
-	db, err := cd.getDumbDb(prefix)
+	db, err := cd.getDumpDb(prefix)
 	if err != nil || db == nil {
 		return err
 	}

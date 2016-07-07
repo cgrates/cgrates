@@ -423,10 +423,7 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	utils.Logger.Info("Finished load history caching.")
 	CacheCommitTransaction()
 	utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
-	keys := make(map[string][]string)
-	if len(alsKeys) > 0 {
-		keys[utils.ALIASES_PREFIX] = alsKeys
-	}
+
 	loadHistList, err := rs.GetLoadHistory(1, true)
 	if err != nil || len(loadHistList) == 0 {
 		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))

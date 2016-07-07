@@ -751,12 +751,7 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		return err
 	}
 	utils.Logger.Info("Finished load history caching.")
-	CacheCommitTransaction()
 	utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
-	keys := make(map[string][]string)
-	if len(alsKeys) > 0 {
-		keys[utils.ALIASES_PREFIX] = alsKeys
-	}
 
 	var loadHist *utils.LoadInstance
 	if len(loadHistList) == 0 {

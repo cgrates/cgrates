@@ -87,12 +87,12 @@ func (cs cacheDoubleStore) Delete(key string) {
 		if err := dumper.delete(prefix, key); err != nil {
 			utils.Logger.Info("<cache dumper> delete error: " + err.Error())
 		}
-
 	}
 }
 
 func (cs cacheDoubleStore) DeletePrefix(prefix string) {
 	delete(cs, prefix)
+
 	if err := dumper.deleteAll(prefix); err != nil {
 		utils.Logger.Info("<cache dumper> delete all error: " + err.Error())
 	}
