@@ -289,9 +289,8 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 	aliases := make(map[string][]*Alias)
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
 	if x, err := CacheGet(rKey); err == nil {
-		existingKeys := x.(map[interface{}]struct{})
-		for iKey := range existingKeys {
-			key := iKey.(string)
+		existingKeys := x.(map[string]struct{})
+		for key := range existingKeys {
 			// get destination id
 			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
 			var destID string

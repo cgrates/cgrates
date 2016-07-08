@@ -346,7 +346,7 @@ func (rs *RedisStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKe
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
-
+	rs.GetLoadHistory(1, true) // to load last instance in cache
 	return utils.SaveCacheFileInfo(rs.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
@@ -448,6 +448,8 @@ func (rs *RedisStorage) cacheAccounting(loadID string, alsKeys []string) (err er
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
+
+	rs.GetLoadHistory(1, true) // to load last instance in cache
 	return utils.SaveCacheFileInfo(rs.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 

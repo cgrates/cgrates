@@ -74,8 +74,8 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
-	ratingDbAuth.CacheRatingAll()
-	acntDbAuth.CacheAccountingAll()
+	ratingDbAuth.CacheRatingAll("TestAuthLoadCsv")
+	acntDbAuth.CacheAccountingAll("TestAuthLoadCsv")
 
 	if cachedDests := engine.CacheCountEntries(utils.DESTINATION_PREFIX); cachedDests != 1 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

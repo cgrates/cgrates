@@ -425,15 +425,13 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	}
 	if err := rpcRAL1.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastRatingLoadID != loadInst.RatingLoadID ||
-		stats.LastAccountingLoadID != loadInst.AccountingLoadID {
-		t.Errorf("Received unexpected stats: %+v", stats)
+	} else if stats.LastRatingLoadID != loadInst.RatingLoadID {
+		t.Errorf("Received unexpected stats:  %+v vs %+v", stats, loadInst)
 	}
 	if err := rpcRAL2.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastRatingLoadID != loadInst.RatingLoadID ||
-		stats.LastAccountingLoadID != loadInst.AccountingLoadID {
-		t.Errorf("Received unexpected stats: %+v", stats)
+	} else if stats.LastRatingLoadID != loadInst.RatingLoadID {
+		t.Errorf("Received unexpected stats: %+v vs %+v", stats, loadInst)
 	}
 }
 

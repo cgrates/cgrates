@@ -227,6 +227,7 @@ func (ms *MapStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKeys
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
+	ms.GetLoadHistory(1, true) // to load last instance in cache
 	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
@@ -305,6 +306,7 @@ func (ms *MapStorage) cacheAccounting(loadID string, alsKeys []string) error {
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
+	ms.GetLoadHistory(1, true) // to load last instance in cache
 	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 

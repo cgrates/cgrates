@@ -110,8 +110,8 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		t.Error("No account saved")
 	}
 
-	ratingDb.CacheRatingAll()
-	acntDb.CacheAccountingAll()
+	ratingDb.CacheRatingAll("TestLoadCsvTp")
+	acntDb.CacheAccountingAll("TestLoadCsvTp")
 
 	if cachedDests := engine.CacheCountEntries(utils.DESTINATION_PREFIX); cachedDests != 2 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

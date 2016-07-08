@@ -672,6 +672,7 @@ func (ms *MongoStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKe
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
+	ms.GetLoadHistory(1, true) // to load last instance in cache
 	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
@@ -773,6 +774,7 @@ func (ms *MongoStorage) cacheAccounting(loadID string, alsKeys []string) (err er
 		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
 		return err
 	}
+	ms.GetLoadHistory(1, true) // to load last instance in cache
 	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 

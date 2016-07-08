@@ -259,7 +259,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return err
 		}
 	}
-	loadHistList, err := self.AccountDb.GetLoadHistory(1, false)
+	loadHistList, err := self.AccountDb.GetLoadHistory(1, true)
 	if err != nil {
 		return err
 	}

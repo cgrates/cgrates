@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"log"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -219,7 +217,6 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 		} else {
 			return 0, err
 		}
-		log.Print("HERE: ", account.ActionTriggers)
 		for _, at := range account.ActionTriggers {
 			if (attr.UniqueID == "" || at.UniqueID == attr.UniqueID) &&
 				(attr.GroupID == "" || at.ID == attr.GroupID) {

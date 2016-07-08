@@ -57,8 +57,8 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDb.CacheRatingAll()
-	acntDb.CacheAccountingAll()
+	ratingDb.CacheRatingAll("TestSMSLoadCsvTpSmsChrg1")
+	acntDb.CacheAccountingAll("TestSMSLoadCsvTpSmsChrg1")
 
 	if cachedRPlans := engine.CacheCountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)

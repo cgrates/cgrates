@@ -61,8 +61,8 @@ RP_DATA1,DR_DATA_2,TM2,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDb.CacheRatingAll()
-	acntDb.CacheAccountingAll()
+	ratingDb.CacheRatingAll("TestLoadCsvTpDtChrg1")
+	acntDb.CacheAccountingAll("TestLoadCsvTpDtChrg1")
 
 	if cachedRPlans := engine.CacheCountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)

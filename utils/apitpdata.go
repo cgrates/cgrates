@@ -588,6 +588,7 @@ type CacheStats struct {
 	CdrStats             int
 	Users                int
 	Aliases              int
+	LastLoadID           string
 	LastRatingLoadID     string
 	LastAccountingLoadID string
 	LastLoadTime         string

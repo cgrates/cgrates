@@ -74,8 +74,8 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDb.CacheRatingAll()
-	acntDb.CacheAccountingAll()
+	ratingDb.CacheRatingAll("TestCosts1LoadCsvTp")
+	acntDb.CacheAccountingAll("TestCosts1LoadCsvTp")
 
 	if cachedRPlans := engine.CacheCountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 3 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
