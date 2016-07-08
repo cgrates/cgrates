@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -14,6 +15,7 @@ import (
 type cacheDumper struct {
 	path        string
 	dbMap       map[string]*leveldb.DB
+	dbLocker    sync.Mutex
 	dataEncoder Marshaler
 }
 
@@ -34,7 +36,7 @@ func (cd *cacheDumper) getDumpDb(prefix string) (*leveldb.DB, error) {
 	if cd == nil || cd.path == "" {
 		return nil, nil
 	}
-
+	cd.dbLocker.Lock()
 	db, found := cd.dbMap[prefix]
 	if !found {
 		var err error
@@ -44,6 +46,7 @@ func (cd *cacheDumper) getDumpDb(prefix string) (*leveldb.DB, error) {
 		}
 		cd.dbMap[prefix] = db
 	}
+	cd.dbLocker.Unlock()
 	return db, nil
 }
 
