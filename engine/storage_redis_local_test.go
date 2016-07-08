@@ -48,7 +48,7 @@ func TestFlush(t *testing.T) {
 	if err := rds.Flush(""); err != nil {
 		t.Error("Failed to Flush redis database", err.Error())
 	}
-	rds.CacheRatingAll()
+	rds.CacheRatingAll("TestConnectRedis")
 }
 
 func TestSetGetDerivedCharges(t *testing.T) {

@@ -38,9 +38,9 @@ type Storage interface {
 // Interface for storage providers.
 type RatingStorage interface {
 	Storage
-	CacheRatingAll() error
-	CacheRatingPrefixes(...string) error
-	CacheRatingPrefixValues(map[string][]string) error
+	CacheRatingAll(string) error
+	CacheRatingPrefixes(string, ...string) error
+	CacheRatingPrefixValues(string, map[string][]string) error
 	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
@@ -74,9 +74,9 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
-	CacheAccountingAll() error
-	CacheAccountingPrefixes(...string) error
-	CacheAccountingPrefixValues(map[string][]string) error
+	CacheAccountingAll(string) error
+	CacheAccountingPrefixes(string, ...string) error
+	CacheAccountingPrefixValues(string, map[string][]string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error

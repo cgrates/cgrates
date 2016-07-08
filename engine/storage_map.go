@@ -33,18 +33,21 @@ import (
 )
 
 type MapStorage struct {
-	dict  map[string][]byte
-	tasks [][]byte
-	ms    Marshaler
-	mu    sync.RWMutex
+	dict         map[string][]byte
+	tasks        [][]byte
+	ms           Marshaler
+	mu           sync.RWMutex
+	cacheDumpDir string
 }
 
 func NewMapStorage() (*MapStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler()}, nil
+	CacheSetDumperPath("/tmp/cgrates")
+	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(), cacheDumpDir: "/tmp/cgrates"}, nil
 }
 
 func NewMapStorageJson() (*MapStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: new(JSONBufMarshaler)}, nil
+	CacheSetDumperPath("/tmp/cgrates")
+	return &MapStorage{dict: make(map[string][]byte), ms: new(JSONBufMarshaler), cacheDumpDir: "/tmp/cgrates"}, nil
 }
 
 func (ms *MapStorage) Close() {}
@@ -71,11 +74,11 @@ func (ms *MapStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string,
 	return CacheGetEntriesKeys(prefix), nil
 }
 
-func (ms *MapStorage) CacheRatingAll() error {
-	return ms.cacheRating(nil, nil, nil, nil, nil, nil, nil, nil)
+func (ms *MapStorage) CacheRatingAll(loadID string) error {
+	return ms.cacheRating(loadID, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
-func (ms *MapStorage) CacheRatingPrefixes(prefixes ...string) error {
+func (ms *MapStorage) CacheRatingPrefixes(loadID string, prefixes ...string) error {
 	pm := map[string][]string{
 		utils.DESTINATION_PREFIX:     []string{},
 		utils.RATING_PLAN_PREFIX:     []string{},
@@ -92,10 +95,10 @@ func (ms *MapStorage) CacheRatingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return ms.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (ms *MapStorage) CacheRatingPrefixValues(prefixes map[string][]string) error {
+func (ms *MapStorage) CacheRatingPrefixValues(loadID string, prefixes map[string][]string) error {
 	pm := map[string][]string{
 		utils.DESTINATION_PREFIX:     []string{},
 		utils.RATING_PLAN_PREFIX:     []string{},
@@ -112,10 +115,10 @@ func (ms *MapStorage) CacheRatingPrefixValues(prefixes map[string][]string) erro
 		}
 		pm[prefix] = ids
 	}
-	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return ms.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (ms *MapStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) error {
+func (ms *MapStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) error {
 	CacheBeginTransaction()
 	if dKeys == nil || (float64(CacheCountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		CacheRemPrefixKey(utils.DESTINATION_PREFIX)
@@ -201,14 +204,37 @@ func (ms *MapStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actK
 		}
 	}
 	CacheCommitTransaction()
-	return nil
+
+	loadHistList, err := ms.GetLoadHistory(1, true)
+	if err != nil || len(loadHistList) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
+	}
+	var loadHist *utils.LoadInstance
+	if len(loadHistList) == 0 {
+		loadHist = &utils.LoadInstance{
+			RatingLoadID:     utils.GenUUID(),
+			AccountingLoadID: utils.GenUUID(),
+			LoadID:           loadID,
+			LoadTime:         time.Now(),
+		}
+	} else {
+		loadHist = loadHistList[0]
+		loadHist.AccountingLoadID = utils.GenUUID()
+		loadHist.LoadID = loadID
+		loadHist.LoadTime = time.Now()
+	}
+	if err := ms.AddLoadHistory(loadHist, 10); err != nil {
+		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
+		return err
+	}
+	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
-func (ms *MapStorage) CacheAccountingAll() error {
-	return ms.cacheAccounting(nil)
+func (ms *MapStorage) CacheAccountingAll(loadID string) error {
+	return ms.cacheAccounting(loadID, nil)
 }
 
-func (ms *MapStorage) CacheAccountingPrefixes(prefixes ...string) error {
+func (ms *MapStorage) CacheAccountingPrefixes(loadID string, prefixes ...string) error {
 	pm := map[string][]string{
 		utils.ALIASES_PREFIX: []string{},
 	}
@@ -218,10 +244,10 @@ func (ms *MapStorage) CacheAccountingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return ms.cacheAccounting(pm[utils.ALIASES_PREFIX])
+	return ms.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
 }
 
-func (ms *MapStorage) CacheAccountingPrefixValues(prefixes map[string][]string) error {
+func (ms *MapStorage) CacheAccountingPrefixValues(loadID string, prefixes map[string][]string) error {
 	pm := map[string][]string{
 		utils.ALIASES_PREFIX: []string{},
 	}
@@ -231,10 +257,10 @@ func (ms *MapStorage) CacheAccountingPrefixValues(prefixes map[string][]string) 
 		}
 		pm[prefix] = ids
 	}
-	return ms.cacheAccounting(pm[utils.ALIASES_PREFIX])
+	return ms.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
 }
 
-func (ms *MapStorage) cacheAccounting(alsKeys []string) error {
+func (ms *MapStorage) cacheAccounting(loadID string, alsKeys []string) error {
 	CacheBeginTransaction()
 	if alsKeys == nil {
 		CacheRemPrefixKey(utils.ALIASES_PREFIX) // Forced until we can fine tune it
@@ -256,7 +282,30 @@ func (ms *MapStorage) cacheAccounting(alsKeys []string) error {
 		}
 	}
 	CacheCommitTransaction()
-	return nil
+
+	loadHistList, err := ms.GetLoadHistory(1, true)
+	if err != nil || len(loadHistList) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
+	}
+	var loadHist *utils.LoadInstance
+	if len(loadHistList) == 0 {
+		loadHist = &utils.LoadInstance{
+			RatingLoadID:     utils.GenUUID(),
+			AccountingLoadID: utils.GenUUID(),
+			LoadID:           loadID,
+			LoadTime:         time.Now(),
+		}
+	} else {
+		loadHist = loadHistList[0]
+		loadHist.AccountingLoadID = utils.GenUUID()
+		loadHist.LoadID = loadID
+		loadHist.LoadTime = time.Now()
+	}
+	if err := ms.AddLoadHistory(loadHist, 10); err != nil {
+		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
+		return err
+	}
+	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity

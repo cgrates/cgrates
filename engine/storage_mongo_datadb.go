@@ -380,11 +380,11 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 	return nil
 }
 
-func (ms *MongoStorage) CacheRatingAll() error {
-	return ms.cacheRating(nil, nil, nil, nil, nil, nil, nil, nil)
+func (ms *MongoStorage) CacheRatingAll(loadID string) error {
+	return ms.cacheRating(loadID, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
-func (ms *MongoStorage) CacheRatingPrefixes(prefixes ...string) error {
+func (ms *MongoStorage) CacheRatingPrefixes(loadID string, prefixes ...string) error {
 	pm := map[string][]string{
 		utils.DESTINATION_PREFIX:     []string{},
 		utils.RATING_PLAN_PREFIX:     []string{},
@@ -401,10 +401,10 @@ func (ms *MongoStorage) CacheRatingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return ms.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (ms *MongoStorage) CacheRatingPrefixValues(prefixes map[string][]string) error {
+func (ms *MongoStorage) CacheRatingPrefixValues(loadID string, prefixes map[string][]string) error {
 	pm := map[string][]string{
 		utils.DESTINATION_PREFIX:     []string{},
 		utils.RATING_PLAN_PREFIX:     []string{},
@@ -421,10 +421,10 @@ func (ms *MongoStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 		}
 		pm[prefix] = ids
 	}
-	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return ms.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
+func (ms *MongoStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
 	start := time.Now()
 	CacheBeginTransaction()
 	keyResult := struct{ Key string }{}
@@ -659,11 +659,13 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		loadHist = &utils.LoadInstance{
 			RatingLoadID:     utils.GenUUID(),
 			AccountingLoadID: utils.GenUUID(),
+			LoadID:           loadID,
 			LoadTime:         time.Now(),
 		}
 	} else {
 		loadHist = loadHistList[0]
 		loadHist.RatingLoadID = utils.GenUUID()
+		loadHist.LoadID = loadID
 		loadHist.LoadTime = time.Now()
 	}
 	if err := ms.AddLoadHistory(loadHist, ms.loadHistorySize); err != nil {
@@ -673,11 +675,11 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
-func (ms *MongoStorage) CacheAccountingAll() error {
-	return ms.cacheAccounting(nil)
+func (ms *MongoStorage) CacheAccountingAll(loadID string) error {
+	return ms.cacheAccounting(loadID, nil)
 }
 
-func (ms *MongoStorage) CacheAccountingPrefixes(prefixes ...string) error {
+func (ms *MongoStorage) CacheAccountingPrefixes(loadID string, prefixes ...string) error {
 	pm := map[string][]string{
 		utils.ALIASES_PREFIX: []string{},
 	}
@@ -687,10 +689,10 @@ func (ms *MongoStorage) CacheAccountingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return ms.cacheAccounting(pm[utils.ALIASES_PREFIX])
+	return ms.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
 }
 
-func (ms *MongoStorage) CacheAccountingPrefixValues(prefixes map[string][]string) error {
+func (ms *MongoStorage) CacheAccountingPrefixValues(loadID string, prefixes map[string][]string) error {
 	pm := map[string][]string{
 		utils.ALIASES_PREFIX: []string{},
 	}
@@ -700,10 +702,10 @@ func (ms *MongoStorage) CacheAccountingPrefixValues(prefixes map[string][]string
 		}
 		pm[prefix] = ids
 	}
-	return ms.cacheAccounting(pm[utils.ALIASES_PREFIX])
+	return ms.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
 }
 
-func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
+func (ms *MongoStorage) cacheAccounting(loadID string, alsKeys []string) (err error) {
 	start := time.Now()
 	CacheBeginTransaction()
 	var keyResult struct{ Key string }
@@ -758,11 +760,13 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		loadHist = &utils.LoadInstance{
 			RatingLoadID:     utils.GenUUID(),
 			AccountingLoadID: utils.GenUUID(),
+			LoadID:           loadID,
 			LoadTime:         time.Now(),
 		}
 	} else {
 		loadHist = loadHistList[0]
 		loadHist.AccountingLoadID = utils.GenUUID()
+		loadHist.LoadID = loadID
 		loadHist.LoadTime = time.Now()
 	}
 	if err := ms.AddLoadHistory(loadHist, ms.loadHistorySize); err != nil { //FIXME replace 100 with cfg

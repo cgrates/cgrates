@@ -890,8 +890,8 @@ func (cd *CallDescriptor) RefundRounding() error {
 
 func (cd *CallDescriptor) FlushCache() (err error) {
 	CacheFlush()
-	ratingStorage.CacheRatingAll()
-	accountingStorage.CacheAccountingAll()
+	ratingStorage.CacheRatingAll("FlushCache")
+	accountingStorage.CacheAccountingAll("FlushCache")
 	return nil
 
 }

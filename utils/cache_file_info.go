@@ -8,7 +8,7 @@ import (
 )
 
 type LoadInstance struct {
-	//LoadId           string // Unique identifier for the load
+	LoadID           string // Unique identifier for the load
 	RatingLoadID     string
 	AccountingLoadID string
 	//TariffPlanID     string    // Tariff plan identificator for the data loaded

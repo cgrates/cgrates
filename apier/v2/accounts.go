@@ -166,7 +166,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				}
 				if len(actionPlansCacheIds) > 0 {
 					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
+					self.RatingDb.CacheRatingPrefixValues("SetAccountAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)

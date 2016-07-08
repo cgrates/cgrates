@@ -57,7 +57,7 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 	if tpRpf.KeyId() != ":::" { // if has some filters
 		ratingProfile = []string{utils.RATING_PROFILE_PREFIX + tpRpf.KeyId()}
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.RATING_PROFILE_PREFIX: ratingProfile}); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadRatingProfileAPI", map[string][]string{utils.RATING_PROFILE_PREFIX: ratingProfile}); err != nil {
 		return err
 	}
 	*reply = v1.OK
@@ -120,7 +120,7 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	if len(attrs.DerivedChargersId) != 0 {
 		dcsChanged = []string{utils.DERIVEDCHARGERS_PREFIX + attrs.DerivedChargersId}
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.DERIVEDCHARGERS_PREFIX: dcsChanged}); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadDerivedChargersAPI", map[string][]string{utils.DERIVEDCHARGERS_PREFIX: dcsChanged}); err != nil {
 		return err
 	}
 	*reply = v1.OK
@@ -226,7 +226,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	loader.Init() // release the tp data
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadTariffPlanFromFolderAPI", map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
 		utils.RATING_PROFILE_PREFIX:  rpfKeys,
@@ -238,7 +238,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
+	if err := self.AccountDb.CacheAccountingPrefixValues("LoadTariffPlanFromFolderAPI", map[string][]string{
 		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err

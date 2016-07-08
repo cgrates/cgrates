@@ -229,7 +229,7 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 
 	//add to cache
 	aliasesChanged := []string{utils.ALIASES_PREFIX + attr.Alias.GetId()}
-	if err := am.accountingDb.CacheAccountingPrefixValues(map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
+	if err := am.accountingDb.CacheAccountingPrefixValues("SetAliasAPI", map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

@@ -122,7 +122,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return 0, err
 		}
 		// update cache
-		self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
+		self.RatingDb.CacheRatingPrefixValues("AttrRemActionTimingAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
@@ -176,7 +176,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 
 				if len(dirtyAps) > 0 {
 					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: dirtyAps})
+					self.RatingDb.CacheRatingPrefixValues("SetAccountAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: dirtyAps})
 					schedulerReloadNeeded = true
 				}
 
@@ -208,7 +208,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 						return 0, err
 					}
 					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
+					self.RatingDb.CacheRatingPrefixValues("SetAccountAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
@@ -284,7 +284,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			}
 			if len(actionPlansCacheIds) > 0 {
 				// update cache
-				self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+				self.RatingDb.CacheRatingPrefixValues("RemoveAccountAPI", map[string][]string{
 					utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
 			}
 			return 0, nil

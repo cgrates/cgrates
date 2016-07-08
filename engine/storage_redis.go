@@ -101,11 +101,11 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]strin
 	return CacheGetEntriesKeys(prefix), nil
 }
 
-func (rs *RedisStorage) CacheRatingAll() error {
-	return rs.cacheRating(nil, nil, nil, nil, nil, nil, nil, nil)
+func (rs *RedisStorage) CacheRatingAll(loadID string) error {
+	return rs.cacheRating(loadID, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
-func (rs *RedisStorage) CacheRatingPrefixes(prefixes ...string) error {
+func (rs *RedisStorage) CacheRatingPrefixes(loadID string, prefixes ...string) error {
 	pm := map[string][]string{
 		utils.DESTINATION_PREFIX:     []string{},
 		utils.RATING_PLAN_PREFIX:     []string{},
@@ -122,10 +122,10 @@ func (rs *RedisStorage) CacheRatingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return rs.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return rs.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) error {
+func (rs *RedisStorage) CacheRatingPrefixValues(loadID string, prefixes map[string][]string) error {
 	pm := map[string][]string{
 		utils.DESTINATION_PREFIX:     []string{},
 		utils.RATING_PLAN_PREFIX:     []string{},
@@ -142,10 +142,10 @@ func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 		}
 		pm[prefix] = ids
 	}
-	return rs.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return rs.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
+func (rs *RedisStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
 	start := time.Now()
 	CacheBeginTransaction()
 	conn, err := rs.db.Get()
@@ -333,11 +333,13 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		loadHist = &utils.LoadInstance{
 			RatingLoadID:     utils.GenUUID(),
 			AccountingLoadID: utils.GenUUID(),
+			LoadID:           loadID,
 			LoadTime:         time.Now(),
 		}
 	} else {
 		loadHist = loadHistList[0]
 		loadHist.RatingLoadID = utils.GenUUID()
+		loadHist.LoadID = loadID
 		loadHist.LoadTime = time.Now()
 	}
 	if err := rs.AddLoadHistory(loadHist, rs.loadHistorySize); err != nil {
@@ -348,11 +350,11 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	return utils.SaveCacheFileInfo(rs.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
-func (rs *RedisStorage) CacheAccountingAll() error {
-	return rs.cacheAccounting(nil)
+func (rs *RedisStorage) CacheAccountingAll(loadID string) error {
+	return rs.cacheAccounting(loadID, nil)
 }
 
-func (rs *RedisStorage) CacheAccountingPrefixes(prefixes ...string) error {
+func (rs *RedisStorage) CacheAccountingPrefixes(loadID string, prefixes ...string) error {
 	pm := map[string][]string{
 		utils.ALIASES_PREFIX: []string{},
 	}
@@ -362,10 +364,10 @@ func (rs *RedisStorage) CacheAccountingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return rs.cacheAccounting(pm[utils.ALIASES_PREFIX])
+	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
 }
 
-func (rs *RedisStorage) CacheAccountingPrefixValues(prefixes map[string][]string) error {
+func (rs *RedisStorage) CacheAccountingPrefixValues(loadID string, prefixes map[string][]string) error {
 	pm := map[string][]string{
 		utils.ALIASES_PREFIX: []string{},
 	}
@@ -375,10 +377,10 @@ func (rs *RedisStorage) CacheAccountingPrefixValues(prefixes map[string][]string
 		}
 		pm[prefix] = ids
 	}
-	return rs.cacheAccounting(pm[utils.ALIASES_PREFIX])
+	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
 }
 
-func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
+func (rs *RedisStorage) cacheAccounting(loadID string, alsKeys []string) (err error) {
 	start := time.Now()
 	CacheBeginTransaction()
 	conn, err := rs.db.Get()
@@ -433,11 +435,13 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 		loadHist = &utils.LoadInstance{
 			RatingLoadID:     utils.GenUUID(),
 			AccountingLoadID: utils.GenUUID(),
+			LoadID:           loadID,
 			LoadTime:         time.Now(),
 		}
 	} else {
 		loadHist = loadHistList[0]
 		loadHist.AccountingLoadID = utils.GenUUID()
+		loadHist.LoadID = loadID
 		loadHist.LoadTime = time.Now()
 	}
 	if err := rs.AddLoadHistory(loadHist, rs.loadHistorySize); err != nil {

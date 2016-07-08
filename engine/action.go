@@ -522,7 +522,7 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 		// remove existing from cache
 		CleanStalePrefixes([]string{ddcDestId})
 		// update new values from redis
-		ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + ddcDestId}})
+		ratingStorage.CacheRatingPrefixValues("SetDestinationAction", map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + ddcDestId}})
 	} else {
 		return utils.ErrNotFound
 	}
@@ -570,7 +570,7 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		}
 		if len(dirtyAps) > 0 {
 			// cache
-			ratingStorage.CacheRatingPrefixValues(map[string][]string{
+			ratingStorage.CacheRatingPrefixValues("RemoveAccountAction", map[string][]string{
 				utils.ACTION_PLAN_PREFIX: dirtyAps})
 		}
 		return 0, nil

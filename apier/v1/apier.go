@@ -97,7 +97,7 @@ func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *strin
 	if err := self.RatingDb.SetDestination(dest); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{dest.Id}})
+	self.RatingDb.CacheRatingPrefixValues("SetDestinationAPI", map[string][]string{utils.DESTINATION_PREFIX: []string{dest.Id}})
 	*reply = OK
 	return nil
 }
@@ -147,7 +147,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	if len(attrs.DestinationId) == 0 {
 		destIds = nil // Cache all destinations, temporary here until we add ApierV2.LoadDestinations
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadDestinationAPI", map[string][]string{
 		utils.DESTINATION_PREFIX: destIds}); err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 	if len(attrs.Direction) != 0 && len(attrs.Tenant) != 0 && len(attrs.Category) != 0 && len(attrs.Account) != 0 && len(attrs.Subject) != 0 {
 		derivedChargingKeys = []string{utils.DERIVEDCHARGERS_PREFIX + attrs.GetDerivedChargersKey()}
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.DERIVEDCHARGERS_PREFIX: derivedChargingKeys}); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadDerivedChargersAPI", map[string][]string{utils.DERIVEDCHARGERS_PREFIX: derivedChargingKeys}); err != nil {
 		return err
 	}
 	*reply = OK
@@ -202,7 +202,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 			changedRPlKeys = nil
 		}
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadRatingPlanAPI", map[string][]string{
 		utils.DESTINATION_PREFIX: nil,
 		utils.RATING_PLAN_PREFIX: changedRPlKeys,
 	}); err != nil {
@@ -227,7 +227,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	if attrs.KeyId() != ":::" { // if has some filters
 		ratingProfile = []string{utils.RATING_PROFILE_PREFIX + attrs.KeyId()}
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.RATING_PROFILE_PREFIX: ratingProfile}); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadRatingProfileAPI", map[string][]string{utils.RATING_PROFILE_PREFIX: ratingProfile}); err != nil {
 		return err
 	}
 	*reply = OK
@@ -253,7 +253,7 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	if len(attrs.SharedGroupId) != 0 {
 		changedSharedGroup = []string{utils.SHARED_GROUP_PREFIX + attrs.SharedGroupId}
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.SHARED_GROUP_PREFIX: changedSharedGroup}); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadSharedGroupAPI", map[string][]string{utils.SHARED_GROUP_PREFIX: changedSharedGroup}); err != nil {
 		return err
 	}
 	*reply = OK
@@ -361,7 +361,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	dbReader.Init()
 
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(attrs.TPid, map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
 		utils.RATING_PROFILE_PREFIX:  rpfKeys,
@@ -373,7 +373,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
+	if err := self.AccountDb.CacheAccountingPrefixValues(attrs.TPid, map[string][]string{
 		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
@@ -482,7 +482,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		return utils.NewErrServerError(err)
 	}
 	//Automatic cache of the newly inserted rating profile
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues("SetRatingProfileAPI", map[string][]string{
 		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + keyId},
 	}); err != nil {
 		return err
@@ -555,7 +555,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	if err := self.RatingDb.SetActions(attrs.ActionsId, storeActions); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PREFIX: []string{utils.ACTION_PREFIX + attrs.ActionsId}})
+	self.RatingDb.CacheRatingPrefixValues("SetActionsAPI", map[string][]string{utils.ACTION_PREFIX: []string{utils.ACTION_PREFIX + attrs.ActionsId}})
 	*reply = OK
 	return nil
 }
@@ -658,7 +658,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 	if err := self.RatingDb.SetActionPlan(ap.Id, ap, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.Id}})
+	self.RatingDb.CacheRatingPrefixValues("SetActionPlanAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.Id}})
 	if attrs.ReloadScheduler {
 		if self.Sched == nil {
 			return errors.New("SCHEDULER_NOT_ENABLED")
@@ -787,7 +787,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) err
 			dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 		}
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues("ReloadCacheAPI", map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
 		utils.RATING_PROFILE_PREFIX:  rpfKeys,
@@ -799,7 +799,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) err
 	}); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
+	if err := self.AccountDb.CacheAccountingPrefixValues("ReloadCacheAPI", map[string][]string{
 		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
@@ -952,7 +952,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	// relase the tp data
 	loader.Init()
 
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues("LoadTariffPlanFromFolderAPI", map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
 		utils.RATING_PROFILE_PREFIX:  rpfKeys,
@@ -964,7 +964,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
+	if err := self.AccountDb.CacheAccountingPrefixValues("LoadTariffPlanFromFolderAPI", map[string][]string{
 		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
