@@ -37,6 +37,7 @@ func (cd *cacheDumper) getDumpDb(prefix string) (*leveldb.DB, error) {
 		return nil, nil
 	}
 	cd.dbLocker.Lock()
+	defer cd.dbLocker.Unlock()
 	db, found := cd.dbMap[prefix]
 	if !found {
 		var err error
@@ -46,7 +47,6 @@ func (cd *cacheDumper) getDumpDb(prefix string) (*leveldb.DB, error) {
 		}
 		cd.dbMap[prefix] = db
 	}
-	cd.dbLocker.Unlock()
 	return db, nil
 }
 
