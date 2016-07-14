@@ -106,30 +106,32 @@ func (fltr *RequestFilter) passTimings(req interface{}, extraFieldsLabel string)
 	return false, utils.ErrNotImplemented
 }
 
-// ToDo
 func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel string) (bool, error) {
-	/*for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
-	if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
-		destIds := x.(map[string]struct{})
-		var bestWeight float64
-		for dID := range destIds {
-			if _, ok := rpl.DestinationRates[dID]; ok {
-				ril := rpl.RateIntervalList(dID)
-				currentWeight := ril.GetWeight()
-				if currentWeight > bestWeight {
-					bestWeight = currentWeight
-					rps = ril
-					prefix = p
-					destinationId = dID
+	dst, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
+	if err != nil {
+		return false, err
+	}
+	var matched bool
+	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
+		if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+			destIds := x.(map[string]struct{})
+			for dID := range destIds {
+				for _, valDstID := range fltr.Values {
+					if valDstID == dID {
+						matched = true
+						break
+					}
 				}
+				if matched {
+					break
+				}
+			}
+			if matched {
+				break
 			}
 		}
 	}
-	if rps != nil {
-		break
-	}
-	*/
-	return false, utils.ErrNotImplemented
+	return matched, nil
 }
 
 func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel string) (bool, error) {
