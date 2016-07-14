@@ -124,6 +124,7 @@ func TestPassDestinations(t *testing.T) {
 	}
 }
 
+/*
 func TestPassCDRStats(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
@@ -153,3 +154,4 @@ func TestPassCDRStats(t *testing.T) {
 		t.Error("Not passing")
 	}
 }
+*/

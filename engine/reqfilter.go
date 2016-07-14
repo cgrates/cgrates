@@ -165,7 +165,6 @@ func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel strin
 	return false, nil
 }
 
-/*
 func (fltr *RequestFilter) passCDRStats(req interface{}, extraFieldsLabel string) (bool, error) {
 	for _, threshold := range fltr.cdrStatSThresholds {
 		statValues := make(map[string]float64)
@@ -183,4 +182,3 @@ func (fltr *RequestFilter) passCDRStats(req interface{}, extraFieldsLabel string
 	}
 	return false, nil
 }
-*/
