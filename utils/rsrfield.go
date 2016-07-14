@@ -184,8 +184,12 @@ func ParseRSRFilters(fldsStr, sep string) (RSRFilters, error) {
 		return nil, nil
 	}
 	fltrSplt := strings.Split(fldsStr, sep)
-	rsrFltrs := make(RSRFilters, len(fltrSplt))
-	for i, rlStr := range fltrSplt {
+	return ParseRSRFiltersFromSlice(fltrSplt)
+}
+
+func ParseRSRFiltersFromSlice(fltrStrs []string) (RSRFilters, error) {
+	rsrFltrs := make(RSRFilters, len(fltrStrs))
+	for i, rlStr := range fltrStrs {
 		if rsrFltr, err := NewRSRFilter(rlStr); err != nil {
 			return nil, err
 		} else if rsrFltr == nil {

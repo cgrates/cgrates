@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -28,26 +29,29 @@ import (
 
 const (
 	MetaStringPrefix = "*string_prefix"
-	MetaTiming       = "*timing"
+	MetaTimings      = "*timings"
 	MetaRSRFields    = "*rsr_fields"
 	MetaCDRStats     = "*cdr_stats"
 	MetaDestinations = "*destinations"
 )
 
-func NewRequestFilter(rfType, fieldName, vals string, tpDB RatingStorage, cdrStats rpcclient.RpcClientConnection) (*RequestFilter, error) {
-	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals, tpDB: tpDB, cdrStats: cdrStats}
-	switch rfType {
-	case MetaTiming, MetaDestinations:
-		if tpDB == nil {
-			return nil, errors.New("Missing tpDB information")
-		}
-	case MetaCDRStats:
-		if cdrStats == nil {
-			return nil, errors.New("Missing cdrStats information")
-		}
-	case MetaRSRFields:
+func NewRequestFilter(rfType, fieldName string, vals []string, cdrStats rpcclient.RpcClientConnection) (*RequestFilter, error) {
+	if !utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaCDRStats, MetaDestinations}, rfType) {
+		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
+	}
+	if fieldName == "" && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaDestinations}, rfType) {
+		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
+	}
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaDestinations}, rfType) {
+		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
+	}
+	if rfType == MetaCDRStats && cdrStats == nil {
+		return nil, errors.New("Missing cdrStats information")
+	}
+	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals, cdrStats: cdrStats}
+	if rfType == MetaRSRFields {
 		var err error
-		if rf.rsrFields, err = utils.ParseRSRFields(vals, utils.INFIELD_SEP); err != nil {
+		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(vals); err != nil {
 			return nil, err
 		}
 	}
@@ -58,9 +62,8 @@ func NewRequestFilter(rfType, fieldName, vals string, tpDB RatingStorage, cdrSta
 type RequestFilter struct {
 	Type      string          // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
 	FieldName string          // Name of the field providing us the Values to check (used in case of some )
-	Values    string          // Filter definition
+	Values    []string        // Filter definition
 	rsrFields utils.RSRFields // Cache here the RSRFilter Values
-	tpDB      RatingStorage
 	dataDB    AccountingStorage
 	cdrStats  rpcclient.RpcClientConnection // Connection towards CDRStats service (eg: for *cdr_stats type)
 
@@ -70,8 +73,8 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool,
 	switch fltr.Type {
 	case MetaStringPrefix:
 		return fltr.passStringPrefix(req, extraFieldsLabel)
-	case MetaTiming:
-		return fltr.passTiming(req, extraFieldsLabel)
+	case MetaTimings:
+		return fltr.passTimings(req, extraFieldsLabel)
 	case MetaDestinations:
 		return fltr.passDestinations(req, extraFieldsLabel)
 	case MetaRSRFields:
@@ -89,7 +92,7 @@ func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel st
 		return false, err
 	}
 	matchedPrefix := false
-	for _, prfx := range strings.Split(fltr.Values, utils.INFIELD_SEP) {
+	for _, prfx := range fltr.Values {
 		if strings.HasPrefix(strVal, prfx) {
 			matchedPrefix = true
 			break
@@ -98,13 +101,34 @@ func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel st
 	return matchedPrefix, nil
 }
 
-// ToDo
-func (fltr *RequestFilter) passTiming(req interface{}, extraFieldsLabel string) (bool, error) {
+// ToDo when Timings will be available in TPdb
+func (fltr *RequestFilter) passTimings(req interface{}, extraFieldsLabel string) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
 // ToDo
 func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel string) (bool, error) {
+	/*for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
+	if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+		destIds := x.(map[string]struct{})
+		var bestWeight float64
+		for dID := range destIds {
+			if _, ok := rpl.DestinationRates[dID]; ok {
+				ril := rpl.RateIntervalList(dID)
+				currentWeight := ril.GetWeight()
+				if currentWeight > bestWeight {
+					bestWeight = currentWeight
+					rps = ril
+					prefix = p
+					destinationId = dID
+				}
+			}
+		}
+	}
+	if rps != nil {
+		break
+	}
+	*/
 	return false, utils.ErrNotImplemented
 }
 
