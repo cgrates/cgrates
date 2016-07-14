@@ -64,3 +64,36 @@ func TestPassStringPrefix(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestPassRSRFields(t *testing.T) {
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	rf, err := NewRequestFilter(MetaRSRFields, "", "Tenant(~^cgr.*\\.org$)", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+	rf, err = NewRequestFilter(MetaRSRFields, "", "navigation(on)", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Passing")
+	}
+	rf, err = NewRequestFilter(MetaRSRFields, "", "navigation(off)", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+}

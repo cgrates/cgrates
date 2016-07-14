@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -28,18 +29,41 @@ import (
 const (
 	MetaStringPrefix = "*string_prefix"
 	MetaTiming       = "*timing"
-	MetaRSRFilters   = "*rsr_filters"
+	MetaRSRFields    = "*rsr_fields"
 	MetaCDRStats     = "*cdr_stats"
 	MetaDestinations = "*destinations"
 )
 
+func NewRequestFilter(rfType, fieldName, vals string, tpDB RatingStorage, cdrStats rpcclient.RpcClientConnection) (*RequestFilter, error) {
+	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals, tpDB: tpDB, cdrStats: cdrStats}
+	switch rfType {
+	case MetaTiming, MetaDestinations:
+		if tpDB == nil {
+			return nil, errors.New("Missing tpDB information")
+		}
+	case MetaCDRStats:
+		if cdrStats == nil {
+			return nil, errors.New("Missing cdrStats information")
+		}
+	case MetaRSRFields:
+		var err error
+		if rf.rsrFields, err = utils.ParseRSRFields(vals, utils.INFIELD_SEP); err != nil {
+			return nil, err
+		}
+	}
+	return rf, nil
+}
+
 // RequestFilter filters requests coming into various places
 type RequestFilter struct {
-	Type        string                        // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FieldName   string                        // Name of the field providing us the value to check
-	Values      string                        // Filter definition
-	rsrFltrVals []*utils.RSRFilter            // Cache here the RSRFilter values
-	cdrStats    rpcclient.RpcClientConnection // Connection towards CDRStats service (eg: for *cdr_stats type)
+	Type      string          // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName string          // Name of the field providing us the Values to check (used in case of some )
+	Values    string          // Filter definition
+	rsrFields utils.RSRFields // Cache here the RSRFilter Values
+	tpDB      RatingStorage
+	dataDB    AccountingStorage
+	cdrStats  rpcclient.RpcClientConnection // Connection towards CDRStats service (eg: for *cdr_stats type)
+
 }
 
 func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool, error) {
@@ -50,8 +74,8 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool,
 		return fltr.passTiming(req, extraFieldsLabel)
 	case MetaDestinations:
 		return fltr.passDestinations(req, extraFieldsLabel)
-	case MetaRSRFilters:
-		return fltr.passRSRFilters(req, extraFieldsLabel)
+	case MetaRSRFields:
+		return fltr.passRSRFields(req, extraFieldsLabel)
 	case MetaCDRStats:
 		return fltr.passCDRStats(req, extraFieldsLabel)
 	default:
@@ -84,9 +108,15 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 	return false, utils.ErrNotImplemented
 }
 
-// ToDo
-func (fltr *RequestFilter) passRSRFilters(req interface{}, extraFieldsLabel string) (bool, error) {
-	return false, utils.ErrNotImplemented
+func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel string) (bool, error) {
+	for _, rsrFld := range fltr.rsrFields {
+		if strVal, err := utils.ReflectFieldAsString(req, rsrFld.Id, extraFieldsLabel); err != nil {
+			return false, err
+		} else if !rsrFld.FilterPasses(strVal) {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 // ToDo

@@ -352,3 +352,23 @@ func TestRSRFilterPass(t *testing.T) {
 		t.Error("Not passing!")
 	}
 }
+
+func TestRSRFiltersPass(t *testing.T) {
+	rlStr := "~^C.+S$;CGRateS;ateS$"
+	fltrs, err := ParseRSRFilters(rlStr, INFIELD_SEP)
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltrs.Pass("CGRateS", true) {
+		t.Error("Not passing")
+	}
+	if fltrs.Pass("ateS", true) {
+		t.Error("Passing")
+	}
+	if !fltrs.Pass("ateS", false) {
+		t.Error("Not passing")
+	}
+	if fltrs.Pass("teS", false) {
+		t.Error("Passing")
+	}
+}
