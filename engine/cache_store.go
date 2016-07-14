@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -155,6 +156,117 @@ func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
 	return nil
 }
 
+type cacheParam struct {
+	limit      int
+	expiration time.Duration
+}
+
+func (ct *cacheParam) createCache() *cache2go.Cache {
+	if ct.limit > 0 {
+		return cache2go.NewLRU(ct.limit)
+	}
+	if ct.expiration > 0 {
+		return cache2go.NewTTL(ct.expiration)
+	}
+	return cache2go.NewLRU(1000) // sane default
+}
+
+type cacheLRUTTL map[string]*cache2go.Cache
+
+func newLRUTTL(types map[string]*cacheParam) cacheLRUTTL {
+	c := make(map[string]*cache2go.Cache, len(types))
+	for prefix, param := range types {
+		c[prefix] = param.createCache()
+	}
+
+	return c
+}
+
+func (cs cacheLRUTTL) Put(key string, value interface{}) {
+	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
+	mp, ok := cs[prefix]
+	if !ok {
+		mp = cache2go.NewLRU(1000)
+		cs[prefix] = mp
+	}
+	mp.Set(key, value)
+	if err := dumper.put(prefix, key, value); err != nil {
+		utils.Logger.Info("<cache dumper> put error: " + err.Error())
+	}
+}
+
+func (cs cacheLRUTTL) Get(key string) (interface{}, error) {
+	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
+	if keyMap, ok := cs[prefix]; ok {
+		if ti, exists := keyMap.Get(key); exists {
+			return ti, nil
+		}
+	}
+	return nil, utils.ErrNotFound
+}
+
+func (cs cacheLRUTTL) Append(key string, value string) {
+	var elements map[string]struct{} // using map for faster check if element is present
+	if v, err := cs.Get(key); err == nil {
+		elements = v.(map[string]struct{})
+	} else {
+		elements = make(map[string]struct{})
+	}
+	elements[value] = struct{}{}
+	cache.Put(key, elements)
+}
+
+func (cs cacheLRUTTL) Pop(key string, value string) {
+	if v, err := cs.Get(key); err == nil {
+		elements, ok := v.(map[string]struct{})
+		if ok {
+			delete(elements, value)
+			if len(elements) > 0 {
+				cache.Put(key, elements)
+			} else {
+				cache.Delete(key)
+			}
+		}
+	}
+}
+
+func (cs cacheLRUTTL) Delete(key string) {
+	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
+	if keyMap, ok := cs[prefix]; ok {
+		keyMap.Remove(key)
+		if err := dumper.delete(prefix, key); err != nil {
+			utils.Logger.Info("<cache dumper> delete error: " + err.Error())
+		}
+	}
+}
+
+func (cs cacheLRUTTL) DeletePrefix(prefix string) {
+	delete(cs, prefix)
+
+	if err := dumper.deleteAll(prefix); err != nil {
+		utils.Logger.Info("<cache dumper> delete all error: " + err.Error())
+	}
+}
+
+func (cs cacheLRUTTL) CountEntriesForPrefix(prefix string) int {
+	if m, ok := cs[prefix]; ok {
+		return m.Len()
+	}
+	return 0
+}
+
+func (cs cacheLRUTTL) GetAllForPrefix(prefix string) (map[string]interface{}, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (cs cacheLRUTTL) GetKeysForPrefix(prefix string) (keys []string) {
+	return nil
+}
+
+func (cs cacheLRUTTL) Load(path string, prefixes []string) error {
+	return utils.ErrNotImplemented
+}
+
 // faster to access
 type cacheSimpleStore struct {
 	cache    map[string]interface{}
@@ -281,6 +393,5 @@ func (cs cacheSimpleStore) GetKeysForPrefix(prefix string) (keys []string) {
 }
 
 func (cs cacheSimpleStore) Load(path string, keys []string) error {
-	utils.Logger.Info("simplestore load")
-	return nil
+	return utils.ErrNotImplemented
 }
