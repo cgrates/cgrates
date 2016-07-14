@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -33,6 +34,8 @@ const (
 	MetaRSRFields    = "*rsr_fields"
 	MetaCDRStats     = "*cdr_stats"
 	MetaDestinations = "*destinations"
+	MetaMinCapPrefix = "*MIN_"
+	MetaMaxCapPrefix = "*MAX_"
 )
 
 func NewRequestFilter(rfType, fieldName string, vals []string, cdrStats rpcclient.RpcClientConnection) (*RequestFilter, error) {
@@ -42,13 +45,33 @@ func NewRequestFilter(rfType, fieldName string, vals []string, cdrStats rpcclien
 	if fieldName == "" && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaDestinations}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaDestinations}, rfType) {
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaDestinations, MetaDestinations}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
-	if rfType == MetaCDRStats && cdrStats == nil {
-		return nil, errors.New("Missing cdrStats information")
+	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals, cdrStats: cdrStats, cdrStatSThresholds: make([]*RFStatSThreshold, len(vals))}
+	if rfType == MetaCDRStats {
+		if cdrStats == nil {
+			return nil, errors.New("Missing cdrStats information")
+		}
+		for i, val := range vals {
+			valSplt := strings.Split(val, utils.InInFieldSep)
+			if len(valSplt) != 3 {
+				return nil, fmt.Errorf("Value %s needs to contain at least 3 items", val)
+			}
+			st := &RFStatSThreshold{QueueID: valSplt[0], ThresholdType: strings.ToUpper(valSplt[1])}
+			if len(st.ThresholdType) < len(MetaMinCapPrefix)+1 {
+				return nil, fmt.Errorf("Value %s contains a unsupported ThresholdType format", val)
+			} else if !strings.HasPrefix(st.ThresholdType, MetaMinCapPrefix) && !strings.HasPrefix(st.ThresholdType, MetaMaxCapPrefix) {
+				return nil, fmt.Errorf("Value %s contains unsupported ThresholdType prefix", val)
+			}
+			if tv, err := strconv.ParseFloat(valSplt[2], 64); err != nil {
+				return nil, err
+			} else {
+				st.ThresholdValue = tv
+			}
+			rf.cdrStatSThresholds[i] = st
+		}
 	}
-	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals, cdrStats: cdrStats}
 	if rfType == MetaRSRFields {
 		var err error
 		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(vals); err != nil {
@@ -58,15 +81,22 @@ func NewRequestFilter(rfType, fieldName string, vals []string, cdrStats rpcclien
 	return rf, nil
 }
 
-// RequestFilter filters requests coming into various places
-type RequestFilter struct {
-	Type      string          // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FieldName string          // Name of the field providing us the Values to check (used in case of some )
-	Values    []string        // Filter definition
-	rsrFields utils.RSRFields // Cache here the RSRFilter Values
-	dataDB    AccountingStorage
-	cdrStats  rpcclient.RpcClientConnection // Connection towards CDRStats service (eg: for *cdr_stats type)
+type RFStatSThreshold struct {
+	QueueID        string
+	ThresholdType  string
+	ThresholdValue float64
+}
 
+// RequestFilter filters requests coming into various places
+// Pass rule: default negative, one mathing rule should pass the filter
+type RequestFilter struct {
+	Type               string          // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName          string          // Name of the field providing us the Values to check (used in case of some )
+	Values             []string        // Filter definition
+	rsrFields          utils.RSRFields // Cache here the RSRFilter Values
+	dataDB             AccountingStorage
+	cdrStats           rpcclient.RpcClientConnection // Connection towards CDRStats service (eg: for *cdr_stats type)
+	cdrStatSThresholds []*RFStatSThreshold
 }
 
 func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool, error) {
@@ -91,14 +121,12 @@ func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel st
 	if err != nil {
 		return false, err
 	}
-	matchedPrefix := false
 	for _, prfx := range fltr.Values {
 		if strings.HasPrefix(strVal, prfx) {
-			matchedPrefix = true
-			break
+			return true, nil
 		}
 	}
-	return matchedPrefix, nil
+	return false, nil
 }
 
 // ToDo when Timings will be available in TPdb
@@ -111,41 +139,48 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 	if err != nil {
 		return false, err
 	}
-	var matched bool
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
 		if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
 			destIds := x.(map[string]struct{})
 			for dID := range destIds {
 				for _, valDstID := range fltr.Values {
 					if valDstID == dID {
-						matched = true
-						break
+						return true, nil
 					}
 				}
-				if matched {
-					break
-				}
-			}
-			if matched {
-				break
 			}
 		}
 	}
-	return matched, nil
+	return false, nil
 }
 
 func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel string) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
 		if strVal, err := utils.ReflectFieldAsString(req, rsrFld.Id, extraFieldsLabel); err != nil {
 			return false, err
-		} else if !rsrFld.FilterPasses(strVal) {
-			return false, nil
+		} else if rsrFld.FilterPasses(strVal) {
+			return true, nil
 		}
 	}
-	return true, nil
+	return false, nil
 }
 
-// ToDo
+/*
 func (fltr *RequestFilter) passCDRStats(req interface{}, extraFieldsLabel string) (bool, error) {
-	return false, utils.ErrNotImplemented
+	for _, threshold := range fltr.cdrStatSThresholds {
+		statValues := make(map[string]float64)
+		fmt.Printf("Threshold: %+v", threshold)
+		if err := fltr.cdrStats.Call("CDRStatsV1.GetValues", threshold.QueueID, &statValues); err != nil {
+			return false, err
+		}
+		if val, hasIt := statValues[threshold.ThresholdType[len(MetaMinCapPrefix):]]; !hasIt {
+			continue
+		} else if strings.HasPrefix(threshold.ThresholdType, MetaMinCapPrefix) && val >= threshold.ThresholdValue {
+			return true, nil
+		} else if strings.HasPrefix(threshold.ThresholdType, MetaMaxCapPrefix) && val < threshold.ThresholdValue {
+			return true, nil
+		}
+	}
+	return false, nil
 }
+*/

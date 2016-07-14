@@ -106,6 +106,7 @@ const (
 	FALLBACK_SEP                 = ';'
 	INFIELD_SEP                  = ";"
 	FIELDS_SEP                   = ","
+	InInFieldSep                 = ":"
 	STATIC_HDRVAL_SEP            = "::"
 	REGEXP_PREFIX                = "~"
 	FILTER_VAL_START             = "("

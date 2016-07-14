@@ -123,3 +123,33 @@ func TestPassDestinations(t *testing.T) {
 		t.Error("Passing")
 	}
 }
+
+func TestPassCDRStats(t *testing.T) {
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
+	cdr := &CDR{
+		Tenant:          "cgrates.org",
+		Category:        "call",
+		AnswerTime:      time.Now(),
+		SetupTime:       time.Now(),
+		Usage:           10 * time.Second,
+		Cost:            10,
+		Supplier:        "suppl1",
+		DisconnectCause: "NORMAL_CLEARNING",
+	}
+	err := cdrStats.AppendCDR(cdr, nil)
+	if err != nil {
+		t.Error("Error appending cdr to stats: ", err)
+	}
+	rf, err := NewRequestFilter(MetaCDRStats, "", []string{"CDRST1:*min_asr:20", "CDRST2:*min_acd:120"}, cdrStats)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if passes, err := rf.passCDRStats(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+}
