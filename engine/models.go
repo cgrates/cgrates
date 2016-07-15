@@ -377,7 +377,7 @@ type TpAlias struct {
 }
 
 func (ta *TpAlias) TableName() string {
-	return "tp_aliases"
+	return utils.TBL_TP_ALIASES
 }
 
 func (ta *TpAlias) SetId(id string) error {
@@ -396,20 +396,6 @@ func (ta *TpAlias) SetId(id string) error {
 
 func (ta *TpAlias) GetId() string {
 	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
-}
-
-type TpLimiter struct {
-	Id             int64
-	Tpid           string
-	LimiterID      string    `index:"0" re:""`
-	ResourceID     string    `index:"1" re:""`
-	Filter         string    `index:"2" re:""`
-	TTL            string    `index:"3" re:""`
-	TimingIDs      string    `index:"4" re:""`
-	ActivationTime string    `index:"5" re:""`
-	Limit          float64   `index:"6" re:""`
-	ActionTriggers string    `index:"7" re:""`
-	CreatedAt      time.Time `index:"8" re:""`
 }
 
 type TBLCDRs struct {
@@ -462,4 +448,18 @@ type TBLSMCosts struct {
 
 func (t TBLSMCosts) TableName() string {
 	return utils.TBLSMCosts
+}
+
+type TpResourceLimits struct {
+	ID              int64
+	TPID            string
+	Tag             string  `index:"0" re:""`
+	FilterType      string  `index:"1" re:"^\*[A-Za-z].*"`
+	FilterFieldName string  `index:"2" re:""`
+	FilterValues    string  `index:"3" re:""`
+	ActivationTime  string  `index:"4" re:""`
+	Weight          float64 `index:"5" re:"\d+\.?\d*"`
+	Limit           float64 `index:"6" re:""`
+	ActionTriggers  string  `index:"7" re:""`
+	CreatedAt       time.Time
 }
