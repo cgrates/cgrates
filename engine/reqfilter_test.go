@@ -124,7 +124,6 @@ func TestPassDestinations(t *testing.T) {
 	}
 }
 
-/*
 func TestPassCDRStats(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
@@ -144,7 +143,7 @@ func TestPassCDRStats(t *testing.T) {
 	if err != nil {
 		t.Error("Error appending cdr to stats: ", err)
 	}
-	rf, err := NewRequestFilter(MetaCDRStats, "", []string{"CDRST1:*min_asr:20", "CDRST2:*min_acd:120"}, cdrStats)
+	rf, err := NewRequestFilter(MetaCDRStats, "", []string{"CDRST1:*min_asr:20", "CDRST2:*min_acd:10"}, cdrStats)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,4 +153,3 @@ func TestPassCDRStats(t *testing.T) {
 		t.Error("Not passing")
 	}
 }
-*/

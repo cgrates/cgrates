@@ -168,7 +168,6 @@ func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel strin
 func (fltr *RequestFilter) passCDRStats(req interface{}, extraFieldsLabel string) (bool, error) {
 	for _, threshold := range fltr.cdrStatSThresholds {
 		statValues := make(map[string]float64)
-		fmt.Printf("Threshold: %+v", threshold)
 		if err := fltr.cdrStats.Call("CDRStatsV1.GetValues", threshold.QueueID, &statValues); err != nil {
 			return false, err
 		}
