@@ -637,3 +637,73 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
 	}
 }
+
+func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
+	tps := []*TpResourceLimit{
+		&TpResourceLimit{
+			TPID:             "TEST_TPID",
+			Tag:              "ResGroup1",
+			FilterType:       MetaStringPrefix,
+			FilterFieldName:  "Destination",
+			FilterValues:     "+49151;+49161",
+			ActivationTime:   "2014-07-29T15:00:00Z",
+			Weight:           10.0,
+			Limit:            "45",
+			ActionTriggerIds: "WARN_RES1;WARN_RES2"},
+		&TpResourceLimit{
+			TPID:             "TEST_TPID",
+			Tag:              "ResGroup1",
+			FilterType:       MetaStringPrefix,
+			FilterFieldName:  "Category",
+			FilterValues:     "call;inbound_call",
+			ActionTriggerIds: "WARN3"},
+		&TpResourceLimit{
+			TPID:            "TEST_TPID",
+			Tag:             "ResGroup2",
+			FilterType:      MetaStringPrefix,
+			FilterFieldName: "Destination",
+			FilterValues:    "+40",
+			ActivationTime:  "2014-07-29T15:00:00Z",
+			Weight:          10.0,
+			Limit:           "20"},
+	}
+	eTPs := map[string]*utils.TPResourceLimits{
+		tps[0].Tag: &utils.TPResourceLimits{
+			TPID: tps[0].TPID,
+			ID:   tps[0].Tag,
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					Type:      tps[0].FilterType,
+					FieldName: tps[0].FilterFieldName,
+					Values:    []string{"+49151", "+49161"},
+				},
+				&utils.TPRequestFilter{
+					Type:      tps[1].FilterType,
+					FieldName: tps[1].FilterFieldName,
+					Values:    []string{"call", "inbound_call"},
+				},
+			},
+			ActivationTime:   tps[0].ActivationTime,
+			Weight:           tps[0].Weight,
+			Limit:            tps[0].Limit,
+			ActionTriggerIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
+		},
+		tps[2].Tag: &utils.TPResourceLimits{
+			TPID: tps[2].TPID,
+			ID:   tps[2].Tag,
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					Type:      tps[2].FilterType,
+					FieldName: tps[2].FilterFieldName,
+					Values:    []string{"+40"},
+				},
+			},
+			ActivationTime: tps[2].ActivationTime,
+			Weight:         tps[2].Weight,
+			Limit:          tps[2].Limit,
+		},
+	}
+	if rcvTPs := TpResourceLimits(tps).AsTPResourceLimits(); !reflect.DeepEqual(eTPs, rcvTPs) {
+		t.Errorf("Expecting: %+v, received: %+v", eTPs, rcvTPs)
+	}
+}

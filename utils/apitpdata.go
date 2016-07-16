@@ -1199,3 +1199,19 @@ type AttrSetBalance struct {
 	Blocker        *bool
 	Disabled       *bool
 }
+
+type TPResourceLimits struct {
+	TPID             string
+	ID               string             // Identifier of this limit
+	Filters          []*TPRequestFilter // Filters for the request
+	ActivationTime   string             // Time when this limit becomes active
+	Weight           float64            // Weight to sort the ResourceLimits
+	Limit            string             // Limit value
+	ActionTriggerIDs []string           // Thresholds to check after changing Limit
+}
+
+type TPRequestFilter struct {
+	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName string   // Name of the field providing us the Values to check (used in case of some )
+	Values    []string // Filter definition
+}

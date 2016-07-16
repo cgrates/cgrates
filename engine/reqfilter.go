@@ -90,15 +90,15 @@ type RFStatSThreshold struct {
 // RequestFilter filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
 type RequestFilter struct {
-	Type               string          // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FieldName          string          // Name of the field providing us the Values to check (used in case of some )
-	Values             []string        // Filter definition
-	rsrFields          utils.RSRFields // Cache here the RSRFilter Values
-	dataDB             AccountingStorage
+	Type               string                        // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName          string                        // Name of the field providing us the Values to check (used in case of some )
+	Values             []string                      // Filter definition
+	rsrFields          utils.RSRFields               // Cache here the RSRFilter Values
 	cdrStats           rpcclient.RpcClientConnection // Connection towards CDRStats service (eg: for *cdr_stats type)
-	cdrStatSThresholds []*RFStatSThreshold
+	cdrStatSThresholds []*RFStatSThreshold           // Cached compiled RFStatsThreshold out of Values
 }
 
+// Pass is the method which should be used from outside.
 func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool, error) {
 	switch fltr.Type {
 	case MetaStringPrefix:
