@@ -344,7 +344,8 @@ CREATE TABLE tp_cdr_stats (
   `action_triggers` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_cdr_stats` (`tpid`, `tag`)
 );
 
 --
@@ -390,3 +391,23 @@ CREATE TABLE tp_aliases (
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_aliases` (`tpid`,`direction`,`tenant`,`category`,`account`,`subject`,`context`, `target`)
 );
+
+DROP TABLE IF EXISTS tp_resource_limits;
+CREATE TABLE tp_resource_limits (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
+  `filter_type` varchar(16) NOT NULL,
+  `filter_field_name` varchar(64) NOT NULL,
+  `filter_field_values` varchar(256) NOT NULL,
+  `activation_time` varchar(24) NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
+  `limit` varchar(64) NOT NULL,
+  `action_triggers` varchar(64) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_resource_limits` (`tpid`, `tag`)
+);  
+
+
