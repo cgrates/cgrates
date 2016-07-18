@@ -56,7 +56,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Response_cache_ttl:   utils.StringPointer("0s"),
 		Internal_ttl:         utils.StringPointer("2m"),
 		Locking_timeout:      utils.StringPointer("5s"),
-		Cache_dump_dir:       utils.StringPointer("/var/lib/cgrates/cache_dump")}
+		Cache_dump_dir:       utils.StringPointer("")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
