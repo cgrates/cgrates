@@ -82,8 +82,8 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 	return d, nil
 }
 
-func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int, cdrsIndexes []string) (db LogStorage, err error) {
-	var d LogStorage
+func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int, cdrsIndexes []string) (db Storage, err error) {
+	var d Storage
 	switch db_type {
 	/*
 		case utils.REDIS:

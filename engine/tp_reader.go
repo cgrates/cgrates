@@ -35,6 +35,7 @@ type TpReader struct {
 	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
+	resLimits         map[string]*utils.TPResourceLimits
 }
 
 func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string) *TpReader {
@@ -85,6 +86,7 @@ func (tpr *TpReader) Init() {
 	tpr.users = make(map[string]*UserProfile)
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
+	tpr.resLimits = make(map[string]*utils.TPResourceLimits)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1539,6 +1541,18 @@ func (tpr *TpReader) LoadAliases() error {
 		}
 	}
 	return err
+}
+
+func (tpr *TpReader) LoadResourceLimitsFiltered(tag string) (err error) {
+	/*
+		rls, err := tpr.lr.GetTpResourceLimits(tpr.tpid, tag)
+		if err != nil {
+			return err
+		}
+
+		tpr.timings, err = TpTimings(tps).GetTimings()
+	*/
+	return nil
 }
 
 func (tpr *TpReader) LoadAll() error {

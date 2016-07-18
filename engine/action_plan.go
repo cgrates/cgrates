@@ -360,7 +360,11 @@ func (at *ActionTiming) Execute() (err error) {
 		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 		return err
 	}
-	storageLogger.LogActionTiming(utils.SCHED_SOURCE, at, aac)
+	Publish(CgrEvent{
+		"Uuid":      at.Uuid,
+		"Id":        at.actionPlanID,
+		"ActionIds": at.ActionsID,
+	})
 	return
 }
 

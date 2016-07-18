@@ -602,7 +602,6 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	}
 	ratingStorage.Close()
 	accountingStorage.Close()
-	storageLogger.Close()
 	cdrStorage.Close()
 	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"

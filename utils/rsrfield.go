@@ -179,6 +179,46 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 	return val == rsrFltr.filterRule != rsrFltr.negative
 }
 
+func ParseRSRFilters(fldsStr, sep string) (RSRFilters, error) {
+	if fldsStr == "" {
+		return nil, nil
+	}
+	fltrSplt := strings.Split(fldsStr, sep)
+	return ParseRSRFiltersFromSlice(fltrSplt)
+}
+
+func ParseRSRFiltersFromSlice(fltrStrs []string) (RSRFilters, error) {
+	rsrFltrs := make(RSRFilters, len(fltrStrs))
+	for i, rlStr := range fltrStrs {
+		if rsrFltr, err := NewRSRFilter(rlStr); err != nil {
+			return nil, err
+		} else if rsrFltr == nil {
+			return nil, fmt.Errorf("Empty RSRFilter in rule: %s", rlStr)
+		} else {
+			rsrFltrs[i] = rsrFltr
+		}
+	}
+	return rsrFltrs, nil
+}
+
+type RSRFilters []*RSRFilter
+
+// @all: specifies whether all filters should match or at least one
+func (fltrs RSRFilters) Pass(val string, allMustMatch bool) bool {
+	if len(fltrs) == 0 {
+		return true
+	}
+	var matched bool
+	for _, fltr := range fltrs {
+		if fltr.Pass(val) {
+			matched = true
+		} else if allMustMatch {
+			return false
+		}
+	}
+	return matched
+}
+
 // Parses list of RSRFields, used for example as multiple filters in derived charging
 func ParseRSRFields(fldsStr, sep string) (RSRFields, error) {
 	//rsrRlsPattern := regexp.MustCompile(`^(~\w+:s/.+/.*/)|(\^.+(/.+/)?)(;(~\w+:s/.+/.*/)|(\^.+(/.+/)?))*$`) //ToDo:Fix here rule able to confirm the content
@@ -198,6 +238,8 @@ func ParseRSRFieldsFromSlice(flds []string) (RSRFields, error) {
 	for idx, ruleStr := range flds {
 		if rsrField, err := NewRSRField(ruleStr); err != nil {
 			return nil, err
+		} else if rsrField == nil {
+			return nil, fmt.Errorf("Empty RSRField in rule: %s", ruleStr)
 		} else {
 			rsrFields[idx] = rsrField
 		}
@@ -217,9 +259,9 @@ func ParseRSRFieldsMustCompile(fldsStr, sep string) RSRFields {
 type RSRFields []*RSRField
 
 // Return first Id of the rsrFields, used in cdre
-func (self RSRFields) Id() string {
-	if len(self) == 0 {
+func (flds RSRFields) Id() string {
+	if len(flds) == 0 {
 		return ""
 	}
-	return self[0].Id
+	return flds[0].Id
 }

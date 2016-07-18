@@ -6,7 +6,8 @@
 Welcome to CGRateS's documentation!
 ===================================
 
-Contents:
+Full contents:
+=============
 
 .. toctree::
    :maxdepth: 2

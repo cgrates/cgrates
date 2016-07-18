@@ -106,19 +106,13 @@ type CdrStorage interface {
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 
-type LogStorage interface {
-	Storage
-	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
-	LogActionTiming(source string, at *ActionTiming, as Actions) error
-}
-
 type LoadStorage interface {
 	Storage
 	LoadReader
 	LoadWriter
 }
 
+// LoadReader reads from .csv or TP tables and provides the data ready for the tp_db or data_db.
 type LoadReader interface {
 	GetTpIds() ([]string, error)
 	GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
@@ -138,6 +132,7 @@ type LoadReader interface {
 	GetTpActionPlans(string, string) ([]TpActionPlan, error)
 	GetTpActionTriggers(string, string) ([]TpActionTrigger, error)
 	GetTpAccountActions(*TpAccountAction) ([]TpAccountAction, error)
+	//GetTpResourceLimits(string, *utils.Paginator) ([]TpResourceLimits, error)
 }
 
 type LoadWriter interface {

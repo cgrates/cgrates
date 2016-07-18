@@ -289,7 +289,7 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 	exitChan <- true
 }
 
-func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, logDb engine.LogStorage, cdrDb engine.CdrStorage,
+func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage,
 	internalRaterChan chan rpcclient.RpcClientConnection, internalPubSubSChan chan rpcclient.RpcClientConnection,
 	internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	internalCdrStatSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
@@ -514,7 +514,6 @@ func main() {
 	}
 	var ratingDb engine.RatingStorage
 	var accountDb engine.AccountingStorage
-	var logDb engine.LogStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	if cfg.RALsEnabled || cfg.SchedulerEnabled || cfg.CDRStatsEnabled { // Only connect to dataDb if necessary
@@ -542,17 +541,16 @@ func main() {
 		}
 	}
 	if cfg.RALsEnabled || cfg.CDRSEnabled || cfg.SchedulerEnabled { // Only connect to storDb if necessary
-		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
+		storDb, err := engine.ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
 			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBCDRSIndexes)
 		if err != nil { // Cannot configure logger database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return
 		}
-		defer logDb.Close()
-		engine.SetStorageLogger(logDb)
-		// loadDb,cdrDb and logDb are all mapped on the same stordb storage
-		loadDb = logDb.(engine.LoadStorage)
-		cdrDb = logDb.(engine.CdrStorage)
+		defer storDb.Close()
+		// loadDb,cdrDb and storDb are all mapped on the same stordb storage
+		loadDb = storDb.(engine.LoadStorage)
+		cdrDb = storDb.(engine.CdrStorage)
 		engine.SetCdrStorage(cdrDb)
 	}
 
@@ -586,7 +584,7 @@ func main() {
 	// Start rater service
 	if cfg.RALsEnabled {
 		go startRater(internalRaterChan, cacheDoneChan, internalBalancerChan, internalSchedulerChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
-			server, ratingDb, accountDb, loadDb, cdrDb, logDb, &stopHandled, exitChan)
+			server, ratingDb, accountDb, loadDb, cdrDb, &stopHandled, exitChan)
 	}
 
 	// Start Scheduler
@@ -596,7 +594,7 @@ func main() {
 
 	// Start CDR Server
 	if cfg.CDRSEnabled {
-		go startCDRS(internalCdrSChan, logDb, cdrDb, internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalCdrStatSChan, server, exitChan)
+		go startCDRS(internalCdrSChan, cdrDb, internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalCdrStatSChan, server, exitChan)
 	}
 
 	// Start CDR Stats server

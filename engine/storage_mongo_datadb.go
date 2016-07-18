@@ -50,8 +50,6 @@ const (
 	colUsr    = "users"
 	colCrs    = "cdr_stats"
 	colLht    = "load_history"
-	colLogAtr = "action_trigger_logs"
-	colLogApl = "action_plan_logs"
 	colLogErr = "error_logs"
 	colVer    = "versions"
 )

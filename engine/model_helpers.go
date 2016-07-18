@@ -810,3 +810,33 @@ func (tps TpLcrRules) GetLcrRules() (map[string]*utils.TPLcrRules, error) {
 	}
 	return lcrs, nil
 }
+
+type TpResourceLimits []*TpResourceLimit
+
+// Converts model received from StorDB or .csv into API format (optimized version for TP)
+func (tps TpResourceLimits) AsTPResourceLimits() map[string]*utils.TPResourceLimits {
+	resLimits := make(map[string]*utils.TPResourceLimits)
+	for _, tp := range tps {
+		resLimit, found := resLimits[tp.Tag]
+		if !found {
+			resLimit = &utils.TPResourceLimits{
+				TPID:           tp.TPID,
+				ID:             tp.Tag,
+				ActivationTime: tp.ActivationTime,
+				Weight:         tp.Weight,
+				Limit:          tp.Limit,
+			}
+		}
+		if tp.FilterType != "" {
+			resLimit.Filters = append(resLimit.Filters, &utils.TPRequestFilter{
+				Type:      tp.FilterType,
+				FieldName: tp.FilterFieldName,
+				Values:    strings.Split(tp.FilterValues, utils.INFIELD_SEP)})
+		}
+		if tp.ActionTriggerIds != "" {
+			resLimit.ActionTriggerIDs = append(resLimit.ActionTriggerIDs, strings.Split(tp.ActionTriggerIds, utils.INFIELD_SEP)...)
+		}
+		resLimits[tp.Tag] = resLimit
+	}
+	return resLimits
+}

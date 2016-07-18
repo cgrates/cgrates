@@ -64,13 +64,11 @@ func init() {
 			log.Fatal(err)
 		}
 	}
-	storageLogger = ratingStorage.(LogStorage)
 }
 
 var (
 	ratingStorage            RatingStorage
 	accountingStorage        AccountingStorage
-	storageLogger            LogStorage
 	cdrStorage               CdrStorage
 	debitPeriod              = 10 * time.Second
 	globalRoundingDecimals   = 6
@@ -102,13 +100,6 @@ func SetRpSubjectPrefixMatching(flag bool) {
 
 func SetLcrSubjectPrefixMatching(flag bool) {
 	lcrSubjectPrefixMatching = flag
-}
-
-/*
-Sets the database for logging (can be de same  as storage getter or different db)
-*/
-func SetStorageLogger(sg LogStorage) {
-	storageLogger = sg
 }
 
 /*

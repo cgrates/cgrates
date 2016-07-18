@@ -963,36 +963,6 @@ func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID strin
 	return
 }
 
-func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	mat, err := ms.ms.Marshal(at)
-	if err != nil {
-		return
-	}
-	mas, err := ms.ms.Marshal(&as)
-	if err != nil {
-		return
-	}
-	ms.dict[utils.LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
-	return
-}
-
-func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	mat, err := ms.ms.Marshal(at)
-	if err != nil {
-		return
-	}
-	mas, err := ms.ms.Marshal(&as)
-	if err != nil {
-		return
-	}
-	ms.dict[utils.LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s", string(mat), string(mas)))
-	return
-}
-
 func (ms *MapStorage) SetStructVersion(v *StructVersion) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

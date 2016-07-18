@@ -29,5 +29,5 @@ type ResourceLimit struct {
 	ActivationTime time.Time        // Time when this limit becomes active
 	Weight         float64          // Weight to sort the ResourceLimits
 	Limit          float64          // Limit value
-	ActionTriggers ActionTriggers   // Thresholds to check after when changing Limit
+	ActionTriggers ActionTriggers   // Thresholds to check after changing Limit
 }

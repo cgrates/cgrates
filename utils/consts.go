@@ -76,6 +76,7 @@ const (
 	TBL_TP_USERS                 = "tp_users"
 	TBL_TP_ALIASES               = "tp_aliases"
 	TBLSMCosts                   = "sm_costs"
+	TBLTPResourceLimits          = "tp_resource_limits"
 	TBL_CDRS                     = "cdrs"
 	TIMINGS_CSV                  = "Timings.csv"
 	DESTINATIONS_CSV             = "Destinations.csv"
@@ -106,6 +107,7 @@ const (
 	FALLBACK_SEP                 = ';'
 	INFIELD_SEP                  = ";"
 	FIELDS_SEP                   = ","
+	InInFieldSep                 = ":"
 	STATIC_HDRVAL_SEP            = "::"
 	REGEXP_PREFIX                = "~"
 	FILTER_VAL_START             = "("

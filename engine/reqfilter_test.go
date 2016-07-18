@@ -29,38 +29,127 @@ func TestPassStringPrefix(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	rf := &RequestFilter{Type: MetaStringPrefix, FieldName: "Category", Values: "call"}
+	rf := &RequestFilter{Type: MetaStringPrefix, FieldName: "Category", Values: []string{"call"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Category", Values: "premium"}
+	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Category", Values: []string{"premium"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: "+49"}
+	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+49"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: "+499"}
+	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+499"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "navigation", Values: "off"}
+	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "navigation", Values: []string{"off"}}
 	if passes, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "nonexisting", Values: "off"}
+	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "nonexisting", Values: []string{"off"}}
 	if _, err := rf.passStringPrefix(cd, "ExtraFields"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
+	}
+}
+
+func TestPassRSRFields(t *testing.T) {
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	rf, err := NewRequestFilter(MetaRSRFields, "", []string{"Tenant(~^cgr.*\\.org$)"}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+	rf, err = NewRequestFilter(MetaRSRFields, "", []string{"navigation(on)"}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Passing")
+	}
+	rf, err = NewRequestFilter(MetaRSRFields, "", []string{"navigation(off)"}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+}
+
+func TestPassDestinations(t *testing.T) {
+	x := struct{}{}
+	CacheSet(utils.DESTINATION_PREFIX+"+49", map[string]struct{}{"DE": x, "EU_LANDLINE": x})
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	rf, err := NewRequestFilter(MetaDestinations, "Destination", []string{"DE"}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passDestinations(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+	rf, err = NewRequestFilter(MetaDestinations, "Destination", []string{"RO"}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passDestinations(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Passing")
+	}
+}
+
+func TestPassCDRStats(t *testing.T) {
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
+	cdr := &CDR{
+		Tenant:          "cgrates.org",
+		Category:        "call",
+		AnswerTime:      time.Now(),
+		SetupTime:       time.Now(),
+		Usage:           10 * time.Second,
+		Cost:            10,
+		Supplier:        "suppl1",
+		DisconnectCause: "NORMAL_CLEARNING",
+	}
+	err := cdrStats.AppendCDR(cdr, nil)
+	if err != nil {
+		t.Error("Error appending cdr to stats: ", err)
+	}
+	rf, err := NewRequestFilter(MetaCDRStats, "", []string{"CDRST1:*min_asr:20", "CDRST2:*min_acd:10"}, cdrStats)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if passes, err := rf.passCDRStats(cd, "ExtraFields"); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
 	}
 }

@@ -736,29 +736,6 @@ func (ms *MongoStorage) SetTpAccountActions(tps []TpAccountAction) error {
 	return err
 }
 
-func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
-	session, col := ms.conn(colLogAtr)
-	defer session.Close()
-	return col.Insert(&struct {
-		ubId          string
-		ActionTrigger *ActionTrigger
-		Actions       Actions
-		LogTime       time.Time
-		Source        string
-	}{ubId, at, as, time.Now(), source})
-}
-
-func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
-	session, col := ms.conn(colLogApl)
-	defer session.Close()
-	return col.Insert(&struct {
-		ActionPlan *ActionTiming
-		Actions    Actions
-		LogTime    time.Time
-		Source     string
-	}{at, as, time.Now(), source})
-}
-
 func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 	session, col := ms.conn(utils.TBLSMCosts)
 	defer session.Close()

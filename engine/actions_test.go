@@ -1059,7 +1059,11 @@ func TestActionTriggerLogging(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting actions for the action timing: ", as, err)
 	}
-	storageLogger.LogActionTrigger("rif", utils.RATER_SOURCE, at, as)
+	Publish(CgrEvent{
+		"Uuid":      at.UniqueID,
+		"Id":        at.ID,
+		"ActionIds": at.ActionsID,
+	})
 	//expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"
 	var key string
 	atMap, _ := ratingStorage.GetAllActionPlans()
@@ -1097,11 +1101,14 @@ func TestActionPlanLogging(t *testing.T) {
 		Weight:     10.0,
 		ActionsID:  "TEST_ACTIONS",
 	}
-	as, err := ratingStorage.GetActions(at.ActionsID, false)
 	if err != nil {
 		t.Error("Error getting actions for the action trigger: ", err)
 	}
-	storageLogger.LogActionTiming(utils.SCHED_SOURCE, at, as)
+	Publish(CgrEvent{
+		"Uuid":      at.Uuid,
+		"Id":        at.actionPlanID,
+		"ActionIds": at.ActionsID,
+	})
 	//expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*|TOPUP|MONETARY|OUT|10|0"
 	var key string
 	atMap, _ := ratingStorage.GetAllActionPlans()
