@@ -1196,30 +1196,6 @@ func (rs *RedisStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCos
 	return
 }
 
-func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
-	mat, err := rs.ms.Marshal(at)
-	if err != nil {
-		return
-	}
-	mas, err := rs.ms.Marshal(as)
-	if err != nil {
-		return
-	}
-	return rs.db.Cmd("SET", utils.LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v*%v", ubId, string(mat), string(mas)))).Err
-}
-
-func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
-	mat, err := rs.ms.Marshal(at)
-	if err != nil {
-		return
-	}
-	mas, err := rs.ms.Marshal(as)
-	if err != nil {
-		return
-	}
-	return rs.db.Cmd("SET", utils.LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v", string(mat), string(mas)))).Err
-}
-
 func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(v)

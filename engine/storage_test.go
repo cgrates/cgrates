@@ -253,7 +253,6 @@ func TestStoreInterfaces(t *testing.T) {
 	var _ AccountingStorage = rds
 	sql := new(SQLStorage)
 	var _ CdrStorage = sql
-	var _ LogStorage = sql
 }
 
 func TestDifferentUuid(t *testing.T) {

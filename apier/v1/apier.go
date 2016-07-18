@@ -43,7 +43,6 @@ type ApierV1 struct {
 	RatingDb    engine.RatingStorage
 	AccountDb   engine.AccountingStorage
 	CdrDb       engine.CdrStorage
-	LogDb       engine.LogStorage
 	Sched       *scheduler.Scheduler
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
