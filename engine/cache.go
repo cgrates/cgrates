@@ -115,15 +115,15 @@ func CacheGet(key string) (v interface{}, err error) {
 }
 
 // Appends to an existing slice in the cache key
-func CachePush(key string, value string) {
+func CachePush(key string, values ...string) {
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
 	}
 	if !transactionON {
-		cache.Append(key, value)
+		cache.Append(key, values...)
 	} else {
-		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_ADP})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: values, kind: KIND_ADP})
 	}
 }
 

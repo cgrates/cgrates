@@ -582,42 +582,25 @@ func (rs *RedisStorage) SetLCR(lcr *LCR) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
-	key = utils.DESTINATION_PREFIX + key
-	var values []byte
-	if values, err = rs.db.Cmd("GET", key).Bytes(); len(values) > 0 && err == nil {
-		b := bytes.NewBuffer(values)
-		r, err := zlib.NewReader(b)
-		if err != nil {
-			return nil, err
-		}
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			return nil, err
-		}
-		r.Close()
-		dest = new(Destination)
-		err = rs.ms.Unmarshal(out, dest)
-		// create optimized structure
-		for _, p := range dest.Prefixes {
-			CachePush(utils.DESTINATION_PREFIX+p, dest.Id)
-		}
+func (rs *RedisStorage) GetDestinationIDs(prefix string) (ids []string, err error) {
+	prefix = utils.DESTINATION_PREFIX + prefix
+	var values []string
+	if values, err = rs.db.Cmd("SMEMBERS", prefix).List(); len(values) > 0 && err == nil {
+		CachePush(utils.DESTINATION_PREFIX+prefix, values...)
 	} else {
 		return nil, utils.ErrNotFound
 	}
 	return
 }
 
-func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
-	result, err := rs.ms.Marshal(dest)
-	if err != nil {
-		return err
+func (rs *RedisStorage) SetDestinationIDs(dest *Destination) (err error) {
+	for _, p := range dest.Prefixes {
+		err = rs.db.Cmd("SADD", utils.DESTINATION_PREFIX+p, dest.Id).Err
+		if err != nil {
+			break
+		}
 	}
-	var b bytes.Buffer
-	w := zlib.NewWriter(&b)
-	w.Write(result)
-	w.Close()
-	err = rs.db.Cmd("SET", utils.DESTINATION_PREFIX+dest.Id, b.Bytes()).Err
+
 	if err == nil && historyScribe != nil {
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)

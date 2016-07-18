@@ -16,7 +16,7 @@ import (
 type cacheStore interface {
 	Put(string, interface{})
 	Get(string) (interface{}, error)
-	Append(string, string)
+	Append(string, ...string)
 	Pop(string, string)
 	Delete(string)
 	DeletePrefix(string)
@@ -56,14 +56,16 @@ func (cs cacheDoubleStore) Get(key string) (interface{}, error) {
 	return nil, utils.ErrNotFound
 }
 
-func (cs cacheDoubleStore) Append(key string, value string) {
+func (cs cacheDoubleStore) Append(key string, values ...string) {
 	var elements map[string]struct{} // using map for faster check if element is present
 	if v, err := cs.Get(key); err == nil {
 		elements = v.(map[string]struct{})
 	} else {
 		elements = make(map[string]struct{})
 	}
-	elements[value] = struct{}{}
+	for _, value := range values {
+		elements[value] = struct{}{}
+	}
 	cache.Put(key, elements)
 }
 
@@ -205,14 +207,16 @@ func (cs cacheLRUTTL) Get(key string) (interface{}, error) {
 	return nil, utils.ErrNotFound
 }
 
-func (cs cacheLRUTTL) Append(key string, value string) {
+func (cs cacheLRUTTL) Append(key string, values ...string) {
 	var elements map[string]struct{} // using map for faster check if element is present
 	if v, err := cs.Get(key); err == nil {
 		elements = v.(map[string]struct{})
 	} else {
 		elements = make(map[string]struct{})
 	}
-	elements[value] = struct{}{}
+	for _, value := range values {
+		elements[value] = struct{}{}
+	}
 	cache.Put(key, elements)
 }
 
@@ -288,14 +292,16 @@ func (cs cacheSimpleStore) Put(key string, value interface{}) {
 	cs.cache[key] = value
 }
 
-func (cs cacheSimpleStore) Append(key string, value string) {
+func (cs cacheSimpleStore) Append(key string, values ...string) {
 	var elements map[string]struct{}
 	if v, err := cs.Get(key); err == nil {
 		elements = v.(map[string]struct{})
 	} else {
 		elements = make(map[string]struct{})
 	}
-	elements[value] = struct{}{}
+	for _, value := range values {
+		elements[value] = struct{}{}
+	}
 	cache.Put(key, elements)
 }
 
