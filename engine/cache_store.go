@@ -17,7 +17,7 @@ type cacheStore interface {
 	Put(string, interface{})
 	Get(string) (interface{}, error)
 	Append(string, ...string)
-	Pop(string, string)
+	Pop(string, ...string)
 	Delete(string)
 	DeletePrefix(string)
 	CountEntriesForPrefix(string) int
@@ -69,11 +69,13 @@ func (cs cacheDoubleStore) Append(key string, values ...string) {
 	cache.Put(key, elements)
 }
 
-func (cs cacheDoubleStore) Pop(key string, value string) {
+func (cs cacheDoubleStore) Pop(key string, values ...string) {
 	if v, err := cs.Get(key); err == nil {
 		elements, ok := v.(map[string]struct{})
 		if ok {
-			delete(elements, value)
+			for _, value := range values {
+				delete(elements, value)
+			}
 			if len(elements) > 0 {
 				cache.Put(key, elements)
 			} else {
@@ -164,13 +166,7 @@ type cacheParam struct {
 }
 
 func (ct *cacheParam) createCache() *cache2go.Cache {
-	if ct.limit > 0 {
-		return cache2go.NewLRU(ct.limit)
-	}
-	if ct.expiration > 0 {
-		return cache2go.NewTTL(ct.expiration)
-	}
-	return cache2go.NewLRU(1000) // sane default
+	return cache2go.New(ct.limit, ct.expiration)
 }
 
 type cacheLRUTTL map[string]*cache2go.Cache
@@ -188,7 +184,7 @@ func (cs cacheLRUTTL) Put(key string, value interface{}) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	mp, ok := cs[prefix]
 	if !ok {
-		mp = cache2go.NewLRU(1000)
+		mp = cache2go.New(1000, 0)
 		cs[prefix] = mp
 	}
 	mp.Set(key, value)
@@ -220,11 +216,13 @@ func (cs cacheLRUTTL) Append(key string, values ...string) {
 	cache.Put(key, elements)
 }
 
-func (cs cacheLRUTTL) Pop(key string, value string) {
+func (cs cacheLRUTTL) Pop(key string, values ...string) {
 	if v, err := cs.Get(key); err == nil {
 		elements, ok := v.(map[string]struct{})
 		if ok {
-			delete(elements, value)
+			for _, value := range values {
+				delete(elements, value)
+			}
 			if len(elements) > 0 {
 				cache.Put(key, elements)
 			} else {
@@ -312,11 +310,13 @@ func (cs cacheSimpleStore) Get(key string) (interface{}, error) {
 	return nil, utils.ErrNotFound
 }
 
-func (cs cacheSimpleStore) Pop(key string, value string) {
+func (cs cacheSimpleStore) Pop(key string, values ...string) {
 	if v, err := cs.Get(key); err == nil {
 		elements, ok := v.(map[string]struct{})
 		if ok {
-			delete(elements, value)
+			for _, value := range values {
+				delete(elements, value)
+			}
 			if len(elements) > 0 {
 				cache.Put(key, elements)
 			} else {

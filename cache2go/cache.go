@@ -11,7 +11,7 @@ type Cache struct {
 	mu sync.RWMutex
 	// MaxEntries is the maximum number of cache entries before
 	// an item is evicted. Zero means no limit.
-	MaxEntries int
+	maxEntries int
 
 	// OnEvicted optionally specificies a callback function to be
 	// executed when an entry is purged from the cache.
@@ -20,29 +20,27 @@ type Cache struct {
 	ll         *list.List
 	cache      map[interface{}]*list.Element
 	expiration time.Duration
-	isTTL      bool
+}
+
+type entry struct {
+	key       string
+	value     interface{}
+	timestamp time.Time
 }
 
 // New creates a new Cache.
 // If maxEntries is zero, the cache has no limit and it's assumed
 // that eviction is done by the caller.
-func NewLRU(maxEntries int) *Cache {
+func New(maxEntries int, expire time.Duration) *Cache {
 	c := &Cache{
-		MaxEntries: maxEntries,
-		ll:         list.New(),
-		cache:      make(map[interface{}]*list.Element),
-	}
-	return c
-}
-
-func NewTTL(expire time.Duration) *Cache {
-	c := &Cache{
-		ll:         list.New(),
-		cache:      make(map[interface{}]*list.Element),
+		maxEntries: maxEntries,
 		expiration: expire,
-		isTTL:      true,
+		ll:         list.New(),
+		cache:      make(map[interface{}]*list.Element),
 	}
-	go c.cleanExpired()
+	if c.expiration > 0 {
+		go c.cleanExpired()
+	}
 	return c
 }
 
@@ -56,7 +54,7 @@ func (c *Cache) cleanExpired() {
 			time.Sleep(c.expiration)
 			continue
 		}
-		en := e.Value.(*entryTTL)
+		en := e.Value.(*entry)
 		if en.timestamp.Add(c.expiration).After(time.Now()) {
 			c.mu.Lock()
 			c.removeElement(e)
@@ -78,23 +76,18 @@ func (c *Cache) Set(key string, value interface{}) {
 	if e, ok := c.cache[key]; ok {
 		c.ll.MoveToFront(e)
 
-		en := e.Value.(entry)
-		en.SetValue(value)
-		en.SetTimestamp(time.Now())
+		en := e.Value.(*entry)
+		en.value = value
+		en.timestamp = time.Now()
 
 		c.mu.Unlock()
 		return
 	}
-	var e *list.Element
-	if c.isTTL {
-		e = c.ll.PushFront(&entryTTL{key: key, value: value, timestamp: time.Now()})
-	} else {
-		e = c.ll.PushFront(&entryLRU{key: key, value: value})
-	}
+	e := c.ll.PushFront(&entry{key: key, value: value, timestamp: time.Now()})
 	c.cache[key] = e
 	c.mu.Unlock()
 
-	if c.MaxEntries != 0 && c.ll.Len() > c.MaxEntries {
+	if c.maxEntries != 0 && c.ll.Len() > c.maxEntries {
 		c.RemoveOldest()
 	}
 }
@@ -108,8 +101,8 @@ func (c *Cache) Get(key string) (value interface{}, ok bool) {
 	}
 	if e, hit := c.cache[key]; hit {
 		c.ll.MoveToFront(e)
-		e.Value.(entry).SetTimestamp(time.Now())
-		return e.Value.(entry).Value(), true
+		e.Value.(*entry).timestamp = time.Now()
+		return e.Value.(*entry).value, true
 	}
 	return
 }
@@ -141,10 +134,10 @@ func (c *Cache) RemoveOldest() {
 
 func (c *Cache) removeElement(e *list.Element) {
 	c.ll.Remove(e)
-	kv := e.Value.(entry)
-	delete(c.cache, kv.Key())
+	kv := e.Value.(*entry)
+	delete(c.cache, kv.key)
 	if c.OnEvicted != nil {
-		c.OnEvicted(kv.Key(), kv.Value())
+		c.OnEvicted(kv.key, kv.value)
 	}
 }
 

@@ -71,9 +71,9 @@ func CacheCommitTransaction() {
 		case KIND_ADD:
 			CacheSet(item.key, item.value)
 		case KIND_ADP:
-			CachePush(item.key, item.value.(string))
+			CachePush(item.key, item.value.([]string)...)
 		case KIND_POP:
-			CachePop(item.key, item.value.(string))
+			CachePop(item.key, item.value.([]string)...)
 		}
 	}
 	mux.Unlock()
@@ -127,15 +127,15 @@ func CachePush(key string, values ...string) {
 	}
 }
 
-func CachePop(key string, value string) {
+func CachePop(key string, values ...string) {
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
 	}
 	if !transactionON {
-		cache.Pop(key, value)
+		cache.Pop(key, values...)
 	} else {
-		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_POP})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: values, kind: KIND_POP})
 	}
 }
 

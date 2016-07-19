@@ -975,8 +975,29 @@ func (ms *MongoStorage) GetDestination(key string) (result *Destination, err err
 	}
 	return
 }
-
 func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
+	result, err := ms.ms.Marshal(dest)
+	if err != nil {
+		return err
+	}
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	w.Write(result)
+	w.Close()
+	session, col := ms.conn(colDst)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": dest.Id}, &struct {
+		Key   string
+		Value []byte
+	}{Key: dest.Id, Value: b.Bytes()})
+	if err == nil && historyScribe != nil {
+		var response int
+		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
+	}
+	return
+}
+
+/*func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
 	for _, p := range dest.Prefixes {
 		session, col := ms.conn(colDst)
 		if _, err = col.Upsert(bson.M{"key": p}, &struct {
@@ -991,7 +1012,7 @@ func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
 		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
 	return
-}
+}*/
 
 func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
 	return

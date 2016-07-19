@@ -12,7 +12,7 @@ type myStruct struct {
 }
 
 func TestCache(t *testing.T) {
-	cache := NewTTL(time.Second)
+	cache := New(0, time.Second)
 	a := &myStruct{data: "mama are mere"}
 	cache.Set("mama", a)
 	b, ok := cache.Get("mama")
@@ -22,7 +22,7 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheExpire(t *testing.T) {
-	cache := NewTTL(5 * time.Millisecond)
+	cache := New(0, 5*time.Millisecond)
 	a := &myStruct{data: "mama are mere"}
 	cache.Set("mama", a)
 	b, ok := cache.Get("mama")
@@ -37,21 +37,45 @@ func TestCacheExpire(t *testing.T) {
 }
 
 func TestLRU(t *testing.T) {
-	cache := NewLRU(32)
+	cache := New(32, 0)
 	for i := 0; i < 40; i++ {
 		cache.Set(fmt.Sprintf("%d", i), i)
 	}
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entry: ", cache.Len())
 	}
-	last := cache.ll.Back().Value.(entry).Value().(int)
+	last := cache.ll.Back().Value.(*entry).value.(int)
 	if last != 8 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
 }
 
+func TestLRUandExpire(t *testing.T) {
+	cache := New(32, 5*time.Millisecond)
+	for i := 0; i < 40; i++ {
+		cache.Set(fmt.Sprintf("%d", i), i)
+	}
+	if cache.Len() != 32 {
+		t.Error("error dicarding least recently used entries: ", cache.Len())
+	}
+	last := cache.ll.Back().Value.(*entry).value.(int)
+	if last != 8 {
+		t.Error("error dicarding least recently used entry: ", last)
+	}
+	time.Sleep(5 * time.Millisecond)
+	if cache.Len() != 0 {
+		t.Error("error dicarding expired entries: ", cache.Len())
+	}
+	for i := 0; i < 40; i++ {
+		cache.Set(fmt.Sprintf("%d", i), i)
+	}
+	if cache.Len() != 32 {
+		t.Error("error dicarding least recently used entries: ", cache.Len())
+	}
+}
+
 func TestLRUParallel(t *testing.T) {
-	cache := NewLRU(32)
+	cache := New(32, 0)
 	wg := sync.WaitGroup{}
 	for i := 0; i < 40; i++ {
 		wg.Add(1)
@@ -67,7 +91,7 @@ func TestLRUParallel(t *testing.T) {
 }
 
 func TestFlush(t *testing.T) {
-	cache := NewTTL(5 * time.Millisecond)
+	cache := New(0, 5*time.Millisecond)
 	a := &myStruct{data: "mama are mere"}
 	cache.Set("mama", a)
 	time.Sleep(5 * time.Millisecond)
@@ -79,7 +103,7 @@ func TestFlush(t *testing.T) {
 }
 
 func TestFlushNoTimeout(t *testing.T) {
-	cache := NewTTL(5 * time.Millisecond)
+	cache := New(0, 5*time.Millisecond)
 	a := &myStruct{data: "mama are mere"}
 	cache.Set("mama", a)
 	cache.Flush()
@@ -90,7 +114,7 @@ func TestFlushNoTimeout(t *testing.T) {
 }
 
 func TestRemKey(t *testing.T) {
-	cache := NewLRU(10)
+	cache := New(10, 0)
 	cache.Set("t11_mm", "test")
 	if t1, ok := cache.Get("t11_mm"); !ok || t1 != "test" {
 		t.Error("Error setting cache")
@@ -102,7 +126,7 @@ func TestRemKey(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
-	cache := NewTTL(10 * time.Millisecond)
+	cache := New(0, 10*time.Millisecond)
 	cache.Set("dst_A1", "1")
 	cache.Set("dst_A2", "2")
 	cache.Set("rpf_A3", "3")
