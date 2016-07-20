@@ -108,6 +108,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	}
 	if !transactionFailed && ub != nil && !removeAccountActionFound {
 		Publish(CgrEvent{
+			"EventName": utils.EVT_ACTION_TRIGGER_FIRED,
 			"Uuid":      at.UniqueID,
 			"Id":        at.ID,
 			"ActionIds": at.ActionsID,

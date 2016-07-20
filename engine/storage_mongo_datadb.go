@@ -752,6 +752,7 @@ func (ms *MongoStorage) cacheAccounting(loadID string, alsKeys []string) (err er
 		return err
 	}
 	utils.Logger.Info("Finished load history caching.")
+	CacheCommitTransaction()
 	utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
 
 	var loadHist *utils.LoadInstance

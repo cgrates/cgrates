@@ -361,6 +361,7 @@ func (at *ActionTiming) Execute() (err error) {
 		return err
 	}
 	Publish(CgrEvent{
+		"EventName": utils.EVT_ACTION_TIMING_FIRED,
 		"Uuid":      at.Uuid,
 		"Id":        at.actionPlanID,
 		"ActionIds": at.ActionsID,

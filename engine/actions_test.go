@@ -1060,6 +1060,7 @@ func TestActionTriggerLogging(t *testing.T) {
 		t.Error("Error getting actions for the action timing: ", as, err)
 	}
 	Publish(CgrEvent{
+		"EventName": utils.EVT_ACTION_TRIGGER_FIRED,
 		"Uuid":      at.UniqueID,
 		"Id":        at.ID,
 		"ActionIds": at.ActionsID,
@@ -1105,6 +1106,7 @@ func TestActionPlanLogging(t *testing.T) {
 		t.Error("Error getting actions for the action trigger: ", err)
 	}
 	Publish(CgrEvent{
+		"EventName": utils.EVT_ACTION_TIMING_FIRED,
 		"Uuid":      at.Uuid,
 		"Id":        at.actionPlanID,
 		"ActionIds": at.ActionsID,
