@@ -35,7 +35,7 @@ var (
 
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
 	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
-		SUPPLIER, DISCONNECT_CAUSE, COST, RATED}
+		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField}
 )
 
 const (
@@ -142,6 +142,7 @@ const (
 	COST_DETAILS                 = "CostDetails"
 	RATED                        = "rated"
 	RATED_FLD                    = "Rated"
+	PartialField                 = "Partial"
 	DEFAULT_RUNID                = "*default"
 	META_DEFAULT                 = "*default"
 	STATIC_VALUE_PREFIX          = "^"

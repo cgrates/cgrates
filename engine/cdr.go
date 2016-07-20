@@ -37,20 +37,28 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 		Source: extCdr.Source, RequestType: extCdr.RequestType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category,
 		Account: extCdr.Account, Subject: extCdr.Subject, Destination: extCdr.Destination, Supplier: extCdr.Supplier,
 		DisconnectCause: extCdr.DisconnectCause, CostSource: extCdr.CostSource, Cost: extCdr.Cost, Rated: extCdr.Rated}
-	if cdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime, timezone); err != nil {
-		return nil, err
+	if extCdr.SetupTime != "" {
+		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime, timezone); err != nil {
+			return nil, err
+		}
 	}
 	if len(cdr.CGRID) == 0 { // Populate CGRID if not present
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.UTC().String())
 	}
-	if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime, timezone); err != nil {
-		return nil, err
+	if extCdr.AnswerTime != "" {
+		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime, timezone); err != nil {
+			return nil, err
+		}
 	}
-	if cdr.Usage, err = utils.ParseDurationWithSecs(extCdr.Usage); err != nil {
-		return nil, err
+	if extCdr.Usage != "" {
+		if cdr.Usage, err = utils.ParseDurationWithSecs(extCdr.Usage); err != nil {
+			return nil, err
+		}
 	}
-	if cdr.PDD, err = utils.ParseDurationWithSecs(extCdr.PDD); err != nil {
-		return nil, err
+	if extCdr.PDD != "" {
+		if cdr.PDD, err = utils.ParseDurationWithSecs(extCdr.PDD); err != nil {
+			return nil, err
+		}
 	}
 	if len(extCdr.CostDetails) != 0 {
 		if err = json.Unmarshal([]byte(extCdr.CostDetails), cdr.CostDetails); err != nil {
@@ -98,6 +106,7 @@ type CDR struct {
 	CostDetails     *CallCost // Attach the cost details to CDR when possible
 	ExtraInfo       string    // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
 	Rated           bool      // Mark the CDR as rated so we do not process it during rating
+	Partial         bool      // Used for partial record processing by CDRC
 }
 
 func (cdr *CDR) CostDetailsJson() string {
@@ -187,6 +196,8 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(strconv.FormatFloat(cdr.Cost, 'f', -1, 64)) // Recommended to use FormatCost
 	case utils.COST_DETAILS:
 		return rsrFld.ParseValue(cdr.CostDetailsJson())
+	case utils.PartialField:
+		return rsrFld.ParseValue(strconv.FormatBool(cdr.Partial))
 	default:
 		return rsrFld.ParseValue(cdr.ExtraFields[rsrFld.Id])
 	}
@@ -240,6 +251,8 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		if cdr.Cost, err = strconv.ParseFloat(fieldVal, 64); err != nil {
 			return fmt.Errorf("Cannot parse cost field with value: %s, err: %s", fieldVal, err.Error())
 		}
+	case utils.PartialField:
+		cdr.Partial, _ = strconv.ParseBool(fieldVal)
 	default: // Extra fields will not match predefined so they all show up here
 		cdr.ExtraFields[fieldId] += fieldVal
 	}
