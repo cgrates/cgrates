@@ -181,7 +181,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Subject:   "b1",
 		Context:   "*other",
 	}
-	if x, err := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.ALIAS_CONTEXT_RATING); err == nil {
+	if x, ok := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.ALIAS_CONTEXT_RATING); ok {
 		aliasKeys := x.(map[string]struct{})
 		_, found := aliasKeys[utils.ConcatenatedKey(ala.GetId(), utils.ANY)]
 		if !found {
@@ -190,7 +190,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 	} else {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	if x, err := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + "*other"); err == nil {
+	if x, ok := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + "*other"); ok {
 		aliasKeys := x.(map[string]struct{})
 		_, found := aliasKeys[utils.ConcatenatedKey(alb.GetId(), utils.ANY)]
 		if !found {
@@ -221,18 +221,18 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 	accountingStorage.RemoveAlias(ala.GetId())
 	accountingStorage.RemoveAlias(alb.GetId())
 
-	if _, err := CacheGet(utils.ALIASES_PREFIX + ala.GetId()); err == nil {
-		t.Error("Error removing cached alias: ", err)
+	if _, ok := CacheGet(utils.ALIASES_PREFIX + ala.GetId()); ok {
+		t.Error("Error removing cached alias: ", ok)
 	}
-	if _, err := CacheGet(utils.ALIASES_PREFIX + alb.GetId()); err == nil {
-		t.Error("Error removing cached alias: ", err)
+	if _, ok := CacheGet(utils.ALIASES_PREFIX + alb.GetId()); ok {
+		t.Error("Error removing cached alias: ", ok)
 	}
 
-	if _, err := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); err == nil {
-		t.Error("Error removing cached reverse alias: ", err)
+	if _, ok := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); ok {
+		t.Error("Error removing cached reverse alias: ", ok)
 	}
-	if _, err := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); err == nil {
-		t.Error("Error removing cached reverse alias: ", err)
+	if _, ok := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); ok {
+		t.Error("Error removing cached reverse alias: ", ok)
 	}
 }
 

@@ -15,7 +15,7 @@ import (
 
 type cacheStore interface {
 	Put(string, interface{})
-	Get(string) (interface{}, error)
+	Get(string) (interface{}, bool)
 	Append(string, ...string)
 	Pop(string, ...string)
 	Delete(string)
@@ -46,19 +46,19 @@ func (cs cacheDoubleStore) Put(key string, value interface{}) {
 	}
 }
 
-func (cs cacheDoubleStore) Get(key string) (interface{}, error) {
+func (cs cacheDoubleStore) Get(key string) (interface{}, bool) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if keyMap, ok := cs[prefix]; ok {
 		if ti, exists := keyMap[key]; exists {
-			return ti, nil
+			return ti, true
 		}
 	}
-	return nil, utils.ErrNotFound
+	return nil, false
 }
 
 func (cs cacheDoubleStore) Append(key string, values ...string) {
 	var elements map[string]struct{} // using map for faster check if element is present
-	if v, err := cs.Get(key); err == nil {
+	if v, ok := cs.Get(key); ok {
 		elements = v.(map[string]struct{})
 	} else {
 		elements = make(map[string]struct{})
@@ -70,7 +70,7 @@ func (cs cacheDoubleStore) Append(key string, values ...string) {
 }
 
 func (cs cacheDoubleStore) Pop(key string, values ...string) {
-	if v, err := cs.Get(key); err == nil {
+	if v, ok := cs.Get(key); ok {
 		elements, ok := v.(map[string]struct{})
 		if ok {
 			for _, value := range values {
@@ -193,19 +193,19 @@ func (cs cacheLRUTTL) Put(key string, value interface{}) {
 	}
 }
 
-func (cs cacheLRUTTL) Get(key string) (interface{}, error) {
+func (cs cacheLRUTTL) Get(key string) (interface{}, bool) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if keyMap, ok := cs[prefix]; ok {
 		if ti, exists := keyMap.Get(key); exists {
-			return ti, nil
+			return ti, true
 		}
 	}
-	return nil, utils.ErrNotFound
+	return nil, false
 }
 
 func (cs cacheLRUTTL) Append(key string, values ...string) {
 	var elements map[string]struct{} // using map for faster check if element is present
-	if v, err := cs.Get(key); err == nil {
+	if v, ok := cs.Get(key); ok {
 		elements = v.(map[string]struct{})
 	} else {
 		elements = make(map[string]struct{})
@@ -217,7 +217,7 @@ func (cs cacheLRUTTL) Append(key string, values ...string) {
 }
 
 func (cs cacheLRUTTL) Pop(key string, values ...string) {
-	if v, err := cs.Get(key); err == nil {
+	if v, ok := cs.Get(key); ok {
 		elements, ok := v.(map[string]struct{})
 		if ok {
 			for _, value := range values {
@@ -292,7 +292,7 @@ func (cs cacheSimpleStore) Put(key string, value interface{}) {
 
 func (cs cacheSimpleStore) Append(key string, values ...string) {
 	var elements map[string]struct{}
-	if v, err := cs.Get(key); err == nil {
+	if v, ok := cs.Get(key); ok {
 		elements = v.(map[string]struct{})
 	} else {
 		elements = make(map[string]struct{})
@@ -303,15 +303,15 @@ func (cs cacheSimpleStore) Append(key string, values ...string) {
 	cache.Put(key, elements)
 }
 
-func (cs cacheSimpleStore) Get(key string) (interface{}, error) {
+func (cs cacheSimpleStore) Get(key string) (interface{}, bool) {
 	if value, exists := cs.cache[key]; exists {
-		return value, nil
+		return value, true
 	}
-	return nil, utils.ErrNotFound
+	return nil, false
 }
 
 func (cs cacheSimpleStore) Pop(key string, values ...string) {
-	if v, err := cs.Get(key); err == nil {
+	if v, ok := cs.Get(key); ok {
 		elements, ok := v.(map[string]struct{})
 		if ok {
 			for _, value := range values {

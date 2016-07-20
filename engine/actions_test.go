@@ -1289,12 +1289,12 @@ func TestActionSetDDestination(t *testing.T) {
 	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil || !reflect.DeepEqual(d, origD) {
 		t.Error("Error storing destination: ", d, err)
 	}
-	x1, err := CacheGet(utils.DESTINATION_PREFIX + "111")
-	if _, ok := x1.(map[string]struct{})["*ddc_test"]; err != nil || !ok {
+	x1, found := CacheGet(utils.DESTINATION_PREFIX + "111")
+	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, err = CacheGet(utils.DESTINATION_PREFIX + "222")
-	if _, ok := x1.(map[string]struct{})["*ddc_test"]; err != nil || !ok {
+	x1, found = CacheGet(utils.DESTINATION_PREFIX + "222")
+	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "444": 1}}, nil, nil)
@@ -1305,20 +1305,21 @@ func TestActionSetDDestination(t *testing.T) {
 		!utils.IsSliceMember(d.Prefixes, "444") {
 		t.Error("Error storing destination: ", d, err)
 	}
-	x1, err = CacheGet(utils.DESTINATION_PREFIX + "111")
-	if err == nil {
+	var ok bool
+	x1, ok = CacheGet(utils.DESTINATION_PREFIX + "111")
+	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, err = CacheGet(utils.DESTINATION_PREFIX + "222")
-	if err == nil {
+	x1, ok = CacheGet(utils.DESTINATION_PREFIX + "222")
+	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, err = CacheGet(utils.DESTINATION_PREFIX + "333")
-	if _, ok := x1.(map[string]struct{})["*ddc_test"]; err != nil || !ok {
+	x1, found = CacheGet(utils.DESTINATION_PREFIX + "333")
+	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, err = CacheGet(utils.DESTINATION_PREFIX + "444")
-	if _, ok := x1.(map[string]struct{})["*ddc_test"]; err != nil || !ok {
+	x1, found = CacheGet(utils.DESTINATION_PREFIX + "444")
+	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
 }

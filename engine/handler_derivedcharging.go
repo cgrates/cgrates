@@ -47,7 +47,7 @@ func DerivedChargersMatchesDest(dcs *utils.DerivedChargers, dest string) bool {
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-		if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+		if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 			destIds := x.(map[string]struct{})
 			for dId := range destIds {
 				includeDest, found := dcs.DestinationIDs[dId]

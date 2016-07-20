@@ -270,7 +270,7 @@ func (ms *MapStorage) cacheAccounting(loadID string, alsKeys []string) error {
 		if strings.HasPrefix(k, utils.ALIASES_PREFIX) {
 			// check if it already exists
 			// to remove reverse cache keys
-			if avs, err := CacheGet(k); err == nil && avs != nil {
+			if avs, ok := CacheGet(k); ok && avs != nil {
 				al := &Alias{Values: avs.(AliasValues)}
 				al.SetId(k[len(utils.ALIASES_PREFIX):])
 				al.RemoveReverseCache()
@@ -327,11 +327,10 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan,
 	defer ms.mu.RUnlock()
 	key = utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*RatingPlan), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		b := bytes.NewBuffer(values)
@@ -374,11 +373,10 @@ func (ms *MapStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingP
 	defer ms.mu.RUnlock()
 	key = utils.RATING_PROFILE_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*RatingProfile), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		rpf = new(RatingProfile)
@@ -425,11 +423,10 @@ func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 	defer ms.mu.RUnlock()
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*LCR), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &lcr)
@@ -500,11 +497,10 @@ func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err er
 	defer ms.mu.RUnlock()
 	key = utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(Actions), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
@@ -535,11 +531,10 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGrou
 	defer ms.mu.RUnlock()
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*SharedGroup), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &sg)
@@ -707,13 +702,12 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 	defer ms.mu.RUnlock()
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			al = &Alias{Values: x.(AliasValues)}
 			al.SetId(key[len(utils.ALIASES_PREFIX):])
 			return al, nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		al = &Alias{Values: make(AliasValues, 0)}
@@ -794,11 +788,10 @@ func (ms *MapStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan
 	defer ms.mu.RUnlock()
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*ActionPlan), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
@@ -883,11 +876,10 @@ func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils
 	defer ms.mu.RUnlock()
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*utils.DerivedChargers), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &dcs)

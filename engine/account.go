@@ -304,7 +304,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 
 		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+				if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 					destIds := x.(map[string]struct{})
 					foundResult := false
 					allInclude := true // wheter it is excluded or included

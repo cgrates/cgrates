@@ -140,7 +140,7 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 		return false, err
 	}
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
-		if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+		if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 			destIds := x.(map[string]struct{})
 			for dID := range destIds {
 				for _, valDstID := range fltr.Values {

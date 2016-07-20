@@ -195,7 +195,7 @@ func (b *Balance) Clone() *Balance {
 func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destId string) {
 	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-			if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+			if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 				destIDs := x.(map[string]struct{})
 				for dID := range destIDs {
 					if b.DestinationIDs[dID] == true {

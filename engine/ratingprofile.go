@@ -173,7 +173,7 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 			}
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
-				if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+				if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 					destIds := x.(map[string]struct{})
 					var bestWeight float64
 					for dID := range destIds {

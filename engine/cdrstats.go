@@ -123,7 +123,7 @@ func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 	if len(cs.DestinationIds) > 0 {
 		found := false
 		for _, p := range utils.SplitPrefix(cdr.Destination, MIN_PREFIX_MATCH) {
-			if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+			if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 				destIds := x.(map[string]struct{})
 				for idID := range destIds {
 					if utils.IsSliceMember(cs.DestinationIds, idID) {

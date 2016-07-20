@@ -251,7 +251,7 @@ func (am *AliasHandler) RemoveReverseAlias(attr *AttrReverseAlias, reply *string
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, err := CacheGet(rKey); err == nil {
+	if x, ok := CacheGet(rKey); ok {
 		existingKeys := x.(map[interface{}]struct{})
 		for iKey := range existingKeys {
 			key := iKey.(string)
@@ -288,7 +288,7 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, err := CacheGet(rKey); err == nil {
+	if x, ok := CacheGet(rKey); ok {
 		existingKeys := x.(map[string]struct{})
 		for key := range existingKeys {
 			// get destination id
@@ -339,7 +339,7 @@ func (am *AliasHandler) GetMatchingAlias(attr *AttrMatchingAlias, result *string
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-		if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+		if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 			destIds := x.(map[string]struct{})
 			for _, value := range values {
 				for dId := range destIds {
@@ -419,7 +419,7 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 	if rightPairs == nil {
 		// check destination ids
 		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-			if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+			if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 				destIds := x.(map[string]struct{})
 				for _, value := range values {
 					for dId := range destIds {

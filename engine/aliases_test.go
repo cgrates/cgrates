@@ -207,32 +207,32 @@ func TestAliasesLoadAlias(t *testing.T) {
 
 func TestAliasesCache(t *testing.T) {
 	key := "*out:cgrates.org:call:remo:remo:*rating"
-	a, err := CacheGet(utils.ALIASES_PREFIX + key)
-	if err != nil || a == nil {
+	a, found := CacheGet(utils.ALIASES_PREFIX + key)
+	if !found || a == nil {
 		//log.Printf("Test: %+v", CacheGetEntriesKeys(utils.REVERSE_ALIASES_PREFIX))
 		t.Error("Error getting alias from cache: ", err, a)
 	}
 	rKey1 := "minuAccount*rating"
-	ra1, err := CacheGet(utils.REVERSE_ALIASES_PREFIX + rKey1)
-	if err != nil || len(ra1.(map[string]struct{})) != 2 {
+	ra1, found := CacheGet(utils.REVERSE_ALIASES_PREFIX + rKey1)
+	if !found || len(ra1.(map[string]struct{})) != 2 {
 		t.Error("Error getting reverse alias 1: ", ra1)
 	}
 	rKey2 := "minuSubject*rating"
-	ra2, err := CacheGet(utils.REVERSE_ALIASES_PREFIX + rKey2)
-	if err != nil || len(ra2.(map[string]struct{})) != 2 {
+	ra2, found := CacheGet(utils.REVERSE_ALIASES_PREFIX + rKey2)
+	if !found || len(ra2.(map[string]struct{})) != 2 {
 		t.Error("Error getting reverse alias 2: ", ra2)
 	}
 	accountingStorage.RemoveAlias(key)
-	a, err = CacheGet(utils.ALIASES_PREFIX + key)
-	if err == nil {
-		t.Error("Error getting alias from cache: ", err)
+	a, found = CacheGet(utils.ALIASES_PREFIX + key)
+	if found {
+		t.Error("Error getting alias from cache: ", found)
 	}
-	ra1, err = CacheGet(utils.REVERSE_ALIASES_PREFIX + rKey1)
-	if err != nil || len(ra1.(map[string]struct{})) != 1 {
+	ra1, found = CacheGet(utils.REVERSE_ALIASES_PREFIX + rKey1)
+	if !found || len(ra1.(map[string]struct{})) != 1 {
 		t.Error("Error getting reverse alias 1: ", ra1)
 	}
-	ra2, err = CacheGet(utils.REVERSE_ALIASES_PREFIX + rKey2)
-	if err != nil || len(ra2.(map[string]struct{})) != 1 {
+	ra2, found = CacheGet(utils.REVERSE_ALIASES_PREFIX + rKey2)
+	if !found || len(ra2.(map[string]struct{})) != 1 {
 		t.Error("Error getting reverse alias 2: ", ra2)
 	}
 }

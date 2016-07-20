@@ -74,7 +74,7 @@ func (d *Destination) GetHistoryRecord(deleted bool) history.Record {
 
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
-	if cached, err := CacheGet(utils.DESTINATION_PREFIX + prefix); err == nil {
+	if cached, ok := CacheGet(utils.DESTINATION_PREFIX + prefix); ok {
 		_, found := cached.(map[string]struct{})[destId]
 		return found
 	}

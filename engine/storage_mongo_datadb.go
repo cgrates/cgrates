@@ -731,7 +731,7 @@ func (ms *MongoStorage) cacheAccounting(loadID string, alsKeys []string) (err er
 	for _, key := range alsKeys {
 		// check if it already exists
 		// to remove reverse cache keys
-		if avs, err := CacheGet(key); err == nil && avs != nil {
+		if avs, ok := CacheGet(key); ok && avs != nil {
 			al := &Alias{Values: avs.(AliasValues)}
 			al.SetId(key[len(utils.ALIASES_PREFIX):])
 			al.RemoveReverseCache()
@@ -805,11 +805,10 @@ func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
 
 func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
 	if !skipCache {
-		if x, err := CacheGet(utils.RATING_PLAN_PREFIX + key); err == nil {
+		if x, ok := CacheGet(utils.RATING_PLAN_PREFIX + key); ok {
 			return x.(*RatingPlan), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	rp = new(RatingPlan)
 	var kv struct {
@@ -863,11 +862,10 @@ func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan) error {
 
 func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool) (rp *RatingProfile, err error) {
 	if !skipCache {
-		if x, err := CacheGet(utils.RATING_PROFILE_PREFIX + key); err == nil {
+		if x, ok := CacheGet(utils.RATING_PROFILE_PREFIX + key); ok {
 			return x.(*RatingProfile), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	rp = new(RatingProfile)
 	session, col := ms.conn(colRpf)
@@ -911,11 +909,10 @@ func (ms *MongoStorage) RemoveRatingProfile(key string) error {
 
 func (ms *MongoStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 	if !skipCache {
-		if x, err := CacheGet(utils.LCR_PREFIX + key); err == nil {
+		if x, ok := CacheGet(utils.LCR_PREFIX + key); ok {
 			return x.(*LCR), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var result struct {
 		Key   string
@@ -1020,11 +1017,10 @@ func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
 
 func (ms *MongoStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
 	if !skipCache {
-		if x, err := CacheGet(utils.ACTION_PREFIX + key); err == nil {
+		if x, ok := CacheGet(utils.ACTION_PREFIX + key); ok {
 			return x.(Actions), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var result struct {
 		Key   string
@@ -1058,11 +1054,10 @@ func (ms *MongoStorage) RemoveActions(key string) error {
 
 func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
 	if !skipCache {
-		if x, err := CacheGet(utils.SHARED_GROUP_PREFIX + key); err == nil {
+		if x, ok := CacheGet(utils.SHARED_GROUP_PREFIX + key); ok {
 			return x.(*SharedGroup), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	session, col := ms.conn(colShg)
 	defer session.Close()
@@ -1233,13 +1228,12 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			al = &Alias{Values: x.(AliasValues)}
 			al.SetId(origKey)
 			return al, nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var kv struct {
 		Key   string
@@ -1287,15 +1281,14 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*
 		return nil, nil
 	}
 	if !skipCache {
-		if x, err := CacheGet(utils.LOADINST_KEY); err != nil {
-			return nil, err
-		} else {
+		if x, ok := CacheGet(utils.LOADINST_KEY); ok {
 			items := x.([]*utils.LoadInstance)
 			if len(items) < limit || limit == -1 {
 				return items, nil
 			}
 			return items[:limit], nil
 		}
+		return nil, utils.ErrNotFound
 	}
 	var kv struct {
 		Key   string
@@ -1399,11 +1392,10 @@ func (ms *MongoStorage) RemoveActionTriggers(key string) error {
 
 func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	if !skipCache {
-		if x, err := CacheGet(utils.ACTION_PLAN_PREFIX + key); err == nil {
+		if x, ok := CacheGet(utils.ACTION_PLAN_PREFIX + key); ok {
 			return x.(*ActionPlan), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var kv struct {
 		Key   string
@@ -1510,11 +1502,10 @@ func (ms *MongoStorage) PopTask() (t *Task, err error) {
 
 func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
 	if !skipCache {
-		if x, err := CacheGet(utils.DERIVEDCHARGERS_PREFIX + key); err == nil {
+		if x, ok := CacheGet(utils.DERIVEDCHARGERS_PREFIX + key); ok {
 			return x.(*utils.DerivedChargers), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var kv struct {
 		Key   string

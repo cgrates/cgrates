@@ -82,7 +82,7 @@ func TestDestinationGetExists(t *testing.T) {
 
 func TestDestinationGetExistsCache(t *testing.T) {
 	ratingStorage.GetDestination("NAT")
-	if _, err := CacheGet(utils.DESTINATION_PREFIX + "0256"); err != nil {
+	if _, ok := CacheGet(utils.DESTINATION_PREFIX + "0256"); !ok {
 		t.Error("Destination not cached:", err)
 	}
 }
@@ -96,7 +96,7 @@ func TestDestinationGetNotExists(t *testing.T) {
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
 	ratingStorage.GetDestination("not existing")
-	if d, err := CacheGet("not existing"); err == nil {
+	if d, ok := CacheGet("not existing"); ok {
 		t.Error("Bad destination cached: ", d)
 	}
 }
@@ -131,13 +131,13 @@ func TestCleanStalePrefixes(t *testing.T) {
 	CacheSet(utils.DESTINATION_PREFIX+"2", map[string]struct{}{"D1": x})
 	CacheSet(utils.DESTINATION_PREFIX+"3", map[string]struct{}{"D2": x})
 	CleanStalePrefixes([]string{"D1"})
-	if r, err := CacheGet(utils.DESTINATION_PREFIX + "1"); err != nil || len(r.(map[string]struct{})) != 1 {
+	if r, ok := CacheGet(utils.DESTINATION_PREFIX + "1"); !ok || len(r.(map[string]struct{})) != 1 {
 		t.Error("Error cleaning stale destination ids", r)
 	}
-	if r, err := CacheGet(utils.DESTINATION_PREFIX + "2"); err == nil {
+	if r, ok := CacheGet(utils.DESTINATION_PREFIX + "2"); ok {
 		t.Error("Error removing stale prefix: ", r)
 	}
-	if r, err := CacheGet(utils.DESTINATION_PREFIX + "3"); err != nil || len(r.(map[string]struct{})) != 1 {
+	if r, ok := CacheGet(utils.DESTINATION_PREFIX + "3"); !ok || len(r.(map[string]struct{})) != 1 {
 		t.Error("Error performing stale cleaning: ", r)
 	}
 }

@@ -403,7 +403,7 @@ func (rs *RedisStorage) cacheAccounting(loadID string, alsKeys []string) (err er
 	for _, key := range alsKeys {
 		// check if it already exists
 		// to remove reverse cache keys
-		if avs, err := CacheGet(key); err == nil && avs != nil {
+		if avs, ok := CacheGet(key); ok && avs != nil {
 			al.Values = avs.(AliasValues)
 			al.SetId(key[len(utils.ALIASES_PREFIX):])
 			al.RemoveReverseCache()
@@ -466,11 +466,10 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
 	key = utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*RatingPlan), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
@@ -509,11 +508,10 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool) (rpf *Ratin
 
 	key = utils.RATING_PROFILE_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*RatingProfile), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
@@ -561,11 +559,10 @@ func (rs *RedisStorage) RemoveRatingProfile(key string) error {
 func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*LCR), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
@@ -708,11 +705,10 @@ func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
 	key = utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(Actions), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
@@ -736,11 +732,10 @@ func (rs *RedisStorage) RemoveActions(key string) (err error) {
 func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*SharedGroup), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
@@ -903,13 +898,12 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			al = &Alias{Values: x.(AliasValues)}
 			al.SetId(origKey)
 			return al, nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
@@ -953,15 +947,14 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*utils.Load
 		return nil, nil
 	}
 	if !skipCache {
-		if x, err := CacheGet(utils.LOADINST_KEY); err != nil {
-			return nil, err
-		} else {
+		if x, ok := CacheGet(utils.LOADINST_KEY); ok {
 			items := x.([]*utils.LoadInstance)
 			if len(items) < limit || limit == -1 {
 				return items, nil
 			}
 			return items[:limit], nil
 		}
+		return nil, utils.ErrNotFound
 	}
 	if limit != -1 {
 		limit -= -1 // Decrease limit to match redis approach on lrange
@@ -1050,11 +1043,10 @@ func (rs *RedisStorage) RemoveActionTriggers(key string) (err error) {
 func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*ActionPlan), nil
-		} else {
-			return nil, err
 		}
+		return nil, utils.ErrNotFound
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
@@ -1139,10 +1131,10 @@ func (rs *RedisStorage) PopTask() (t *Task, err error) {
 func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
-		if x, err := CacheGet(key); err == nil {
+		if x, ok := CacheGet(key); ok {
 			return x.(*utils.DerivedChargers), nil
 		} else {
-			return nil, err
+			return nil, utils.ErrNotFound
 		}
 	}
 	var values []byte

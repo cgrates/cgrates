@@ -279,7 +279,7 @@ func (es LCREntriesSorter) Sort() {
 func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 	var potentials LCREntriesSorter
 	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
-		if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+		if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 
 			destIds := x.(map[string]struct{})
 			for dId := range destIds {

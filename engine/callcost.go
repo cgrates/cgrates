@@ -235,7 +235,7 @@ func (cc *CallCost) MatchCCFilter(bf *BalanceFilter) bool {
 	foundMatchingDestID := false
 	if bf.DestinationIDs != nil && cc.Destination != "" {
 		for _, p := range utils.SplitPrefix(cc.Destination, MIN_PREFIX_MATCH) {
-			if x, err := CacheGet(utils.DESTINATION_PREFIX + p); err == nil {
+			if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
 				destIds := x.(map[string]struct{})
 				for filterDestID := range *bf.DestinationIDs {
 					if _, ok := destIds[filterDestID]; ok {
