@@ -106,13 +106,6 @@ type CdrStorage interface {
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 
-type LogStorage interface {
-	Storage
-	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
-	LogActionTiming(source string, at *ActionTiming, as Actions) error
-}
-
 type LoadStorage interface {
 	Storage
 	LoadReader

@@ -55,8 +55,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	internalCdrStatSChan chan rpcclient.RpcClientConnection, internalHistorySChan chan rpcclient.RpcClientConnection,
 	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server,
-	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
-	stopHandled *bool, exitChan chan bool) {
+	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
 	var waitTasks []chan struct{}
 
 	//Cache load
@@ -209,7 +208,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	}
 	responder := &engine.Responder{Bal: bal, ExitChan: exitChan}
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
-	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Sched: sched,
+	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, Sched: sched,
 		Config: cfg, Responder: responder}
 	if cdrStats != nil { // ToDo: Fix here properly the init of stats
 		responder.Stats = cdrStats

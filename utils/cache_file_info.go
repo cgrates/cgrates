@@ -40,6 +40,9 @@ func LoadCacheFileInfo(path string) (*CacheFileInfo, error) {
 }
 
 func SaveCacheFileInfo(path string, cfi *CacheFileInfo) error {
+	if path == "" {
+		return nil
+	}
 	// open data file
 	// create a the path
 	if err := os.MkdirAll(path, 0766); err != nil {

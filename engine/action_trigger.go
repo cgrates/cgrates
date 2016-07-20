@@ -107,7 +107,12 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 		at.Executed = false
 	}
 	if !transactionFailed && ub != nil && !removeAccountActionFound {
-		storageLogger.LogActionTrigger(ub.ID, utils.RATER_SOURCE, at, aac)
+		Publish(CgrEvent{
+			"EventName": utils.EVT_ACTION_TRIGGER_FIRED,
+			"Uuid":      at.UniqueID,
+			"Id":        at.ID,
+			"ActionIds": at.ActionsID,
+		})
 		accountingStorage.SetAccount(ub)
 	}
 	return
