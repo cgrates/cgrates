@@ -172,6 +172,23 @@ const CGRATES_CFG_JSON = `
 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
 		],
 		"trailer_fields": [],							// template of the import trailer fields
+		"cache_dump_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "RunID"},
+			{"tag": "TOR", "type": "*composed", "value": "ToR"},
+			{"tag": "OriginID", "type": "*composed", "value": "OriginID"},
+			{"tag": "RequestType", "type": "*composed", "value": "RequestType"},
+			{"tag": "Direction", "type": "*composed", "value": "Direction"},
+			{"tag": "Tenant", "type": "*composed", "value": "Tenant"},
+			{"tag": "Category", "type": "*composed", "value": "Category"},
+			{"tag": "Account", "type": "*composed", "value": "Account"},
+			{"tag": "Subject", "type": "*composed", "value": "Subject"},
+			{"tag": "Destination", "type": "*composed", "value": "Destination"},
+			{"tag": "SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag": "AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag": "Usage", "type": "*composed", "value": "Usage"},
+			{"tag": "Cost", "type": "*composed", "value": "Cost"},
+		],
 	},
 ],
 

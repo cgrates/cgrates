@@ -46,6 +46,7 @@ type CdrcConfig struct {
 	HeaderFields            []*CfgCdrField
 	ContentFields           []*CfgCdrField
 	TrailerFields           []*CfgCdrField
+	CacheDumpFields         []*CfgCdrField
 }
 
 func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
@@ -131,6 +132,11 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 			return err
 		}
 	}
+	if jsnCfg.Cache_dump_fields != nil {
+		if self.CacheDumpFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Cache_dump_fields); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -156,6 +162,7 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
 	clnCdrc.ContentFields = make([]*CfgCdrField, len(self.ContentFields))
 	clnCdrc.TrailerFields = make([]*CfgCdrField, len(self.TrailerFields))
+	clnCdrc.CacheDumpFields = make([]*CfgCdrField, len(self.CacheDumpFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld
 		clnCdrc.HeaderFields[idx] = &clonedVal
@@ -167,6 +174,10 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	for idx, fld := range self.TrailerFields {
 		clonedVal := *fld
 		clnCdrc.TrailerFields[idx] = &clonedVal
+	}
+	for idx, fld := range self.CacheDumpFields {
+		clonedVal := *fld
+		clnCdrc.CacheDumpFields[idx] = &clonedVal
 	}
 	return clnCdrc
 }
