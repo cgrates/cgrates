@@ -755,10 +755,10 @@ TBD
 
 ::
 
-    "" - csv
-    "" - stor_db
+    "ResourceLimits.csv" - csv
+    "tp_resource_limits" - stor_db
 
 .. csv-table::
-    :file:
+    :file: ../data/tariffplans/tutorial/ResourceLimits.csv
     :header-rows: 1
 
