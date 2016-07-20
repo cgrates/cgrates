@@ -32,7 +32,7 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(string, bool) ([]string, error)
+	GetKeysForPrefix(string) ([]string, error)
 }
 
 // Interface for storage providers.
@@ -42,31 +42,31 @@ type RatingStorage interface {
 	CacheRatingPrefixes(string, ...string) error
 	CacheRatingPrefixValues(string, map[string][]string) error
 	HasData(string, string) (bool, error)
-	GetRatingPlan(string, bool) (*RatingPlan, error)
+	GetRatingPlan(string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
-	GetRatingProfile(string, bool) (*RatingProfile, error)
+	GetRatingProfile(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	RemoveRatingProfile(string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 	RemoveDestination(string) error
 	//GetReverseDestination(string) ([]string, error)
-	GetLCR(string, bool) (*LCR, error)
+	GetLCR(string) (*LCR, error)
 	SetLCR(*LCR) error
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
-	GetDerivedChargers(string, bool) (*utils.DerivedChargers, error)
+	GetDerivedChargers(string) (*utils.DerivedChargers, error)
 	SetDerivedChargers(string, *utils.DerivedChargers) error
-	GetActions(string, bool) (Actions, error)
+	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
 	RemoveActions(string) error
-	GetSharedGroup(string, bool) (*SharedGroup, error)
+	GetSharedGroup(string) (*SharedGroup, error)
 	SetSharedGroup(*SharedGroup) error
 	GetActionTriggers(string) (ActionTriggers, error)
 	SetActionTriggers(string, ActionTriggers) error
 	RemoveActionTriggers(string) error
-	GetActionPlan(string, bool) (*ActionPlan, error)
+	GetActionPlan(string) (*ActionPlan, error)
 	SetActionPlan(string, *ActionPlan, bool) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	PushTask(*Task) error
@@ -91,7 +91,7 @@ type AccountingStorage interface {
 	GetUsers() ([]*UserProfile, error)
 	RemoveUser(string) error
 	SetAlias(*Alias) error
-	GetAlias(string, bool) (*Alias, error)
+	GetAlias(string) (*Alias, error)
 	RemoveAlias(string) error
 	GetLoadHistory(int, bool) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int) error

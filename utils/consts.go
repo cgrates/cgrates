@@ -190,6 +190,7 @@ const (
 	ACTION_PREFIX                = "act_"
 	SHARED_GROUP_PREFIX          = "shg_"
 	ACCOUNT_PREFIX               = "acc_"
+	GENERIC_PREFIX               = "gen_"
 	DESTINATION_PREFIX           = "dst_"
 	LCR_PREFIX                   = "lcr_"
 	DERIVEDCHARGERS_PREFIX       = "dcs_"

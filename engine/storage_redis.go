@@ -24,7 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/mediocregopher/radix.v2/pool"
@@ -90,367 +89,17 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.db.Cmd("FLUSHDB").Err
 }
 
-func (rs *RedisStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
-	if skipCache {
-		r := rs.db.Cmd("KEYS", prefix+"*")
-		if r.Err != nil {
-			return nil, r.Err
-		}
-		return r.List()
+func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+	if x, ok := CacheGet(utils.GENERIC_PREFIX + "keys_" + prefix); ok {
+		return x.([]string), nil
 	}
-	return CacheGetEntriesKeys(prefix), nil
-}
+	r := rs.db.Cmd("KEYS", prefix+"*")
+	if r.Err != nil {
+		return nil, r.Err
+	}
+	CacheSet(utils.GENERIC_PREFIX+"keys_"+prefix, r.List())
+	return r.List()
 
-func (rs *RedisStorage) CacheRatingAll(loadID string) error {
-	return rs.cacheRating(loadID, nil, nil, nil, nil, nil, nil, nil, nil)
-}
-
-func (rs *RedisStorage) CacheRatingPrefixes(loadID string, prefixes ...string) error {
-	pm := map[string][]string{
-		utils.DESTINATION_PREFIX:     []string{},
-		utils.RATING_PLAN_PREFIX:     []string{},
-		utils.RATING_PROFILE_PREFIX:  []string{},
-		utils.LCR_PREFIX:             []string{},
-		utils.DERIVEDCHARGERS_PREFIX: []string{},
-		utils.ACTION_PREFIX:          []string{},
-		utils.ACTION_PLAN_PREFIX:     []string{},
-		utils.SHARED_GROUP_PREFIX:    []string{},
-	}
-	for _, prefix := range prefixes {
-		if _, found := pm[prefix]; !found {
-			return utils.ErrNotFound
-		}
-		pm[prefix] = nil
-	}
-	return rs.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
-}
-
-func (rs *RedisStorage) CacheRatingPrefixValues(loadID string, prefixes map[string][]string) error {
-	pm := map[string][]string{
-		utils.DESTINATION_PREFIX:     []string{},
-		utils.RATING_PLAN_PREFIX:     []string{},
-		utils.RATING_PROFILE_PREFIX:  []string{},
-		utils.LCR_PREFIX:             []string{},
-		utils.DERIVEDCHARGERS_PREFIX: []string{},
-		utils.ACTION_PREFIX:          []string{},
-		utils.ACTION_PLAN_PREFIX:     []string{},
-		utils.SHARED_GROUP_PREFIX:    []string{},
-	}
-	for prefix, ids := range prefixes {
-		if _, found := pm[prefix]; !found {
-			return utils.ErrNotFound
-		}
-		pm[prefix] = ids
-	}
-	return rs.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
-}
-
-func (rs *RedisStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
-	start := time.Now()
-	CacheBeginTransaction()
-	conn, err := rs.db.Get()
-	if err != nil {
-		return err
-	}
-	defer rs.db.Put(conn)
-	if dKeys == nil || (float64(CacheCountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
-		// if need to load more than a half of exiting keys load them all
-		utils.Logger.Info("Caching all destinations")
-		if dKeys, err = conn.Cmd("KEYS", utils.DESTINATION_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("destinations: %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.DESTINATION_PREFIX)
-	} else if len(dKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching destinations: %v", dKeys))
-		CleanStalePrefixes(dKeys)
-	}
-	for _, key := range dKeys {
-		if len(key) <= len(utils.DESTINATION_PREFIX) {
-			utils.Logger.Warning(fmt.Sprintf("Got malformed destination id: %s", key))
-			continue
-		}
-		if _, err = rs.GetDestination(key[len(utils.DESTINATION_PREFIX):]); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("destinations: %s", err.Error())
-		}
-	}
-	if len(dKeys) != 0 {
-		utils.Logger.Info("Finished destinations caching.")
-	}
-	if rpKeys == nil {
-		utils.Logger.Info("Caching all rating plans")
-		if rpKeys, err = conn.Cmd("KEYS", utils.RATING_PLAN_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("rating plans: %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.RATING_PLAN_PREFIX)
-	} else if len(rpKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching rating plans: %v", rpKeys))
-	}
-	for _, key := range rpKeys {
-		CacheRemKey(key)
-		if _, err = rs.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("rating plans: %s", err.Error())
-		}
-	}
-	if len(rpKeys) != 0 {
-		utils.Logger.Info("Finished rating plans caching.")
-	}
-	if rpfKeys == nil {
-		utils.Logger.Info("Caching all rating profiles")
-		if rpfKeys, err = conn.Cmd("KEYS", utils.RATING_PROFILE_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("rating profiles: %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.RATING_PROFILE_PREFIX)
-	} else if len(rpfKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching rating profile: %v", rpfKeys))
-	}
-	for _, key := range rpfKeys {
-		CacheRemKey(key)
-		if _, err = rs.GetRatingProfile(key[len(utils.RATING_PROFILE_PREFIX):], true); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("rating profiles: %s", err.Error())
-		}
-	}
-	if len(rpfKeys) != 0 {
-		utils.Logger.Info("Finished rating profile caching.")
-	}
-	if lcrKeys == nil {
-		utils.Logger.Info("Caching LCR rules.")
-		if lcrKeys, err = conn.Cmd("KEYS", utils.LCR_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("lcr rules: %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.LCR_PREFIX)
-	} else if len(lcrKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching LCR rules: %v", lcrKeys))
-	}
-	for _, key := range lcrKeys {
-		CacheRemKey(key)
-		if _, err = rs.GetLCR(key[len(utils.LCR_PREFIX):], true); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("lcr rules: %s", err.Error())
-		}
-	}
-	if len(lcrKeys) != 0 {
-		utils.Logger.Info("Finished LCR rules caching.")
-	}
-	// DerivedChargers caching
-	if dcsKeys == nil {
-		utils.Logger.Info("Caching all derived chargers")
-		if dcsKeys, err = conn.Cmd("KEYS", utils.DERIVEDCHARGERS_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("derived chargers: %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.DERIVEDCHARGERS_PREFIX)
-	} else if len(dcsKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching derived chargers: %v", dcsKeys))
-	}
-	for _, key := range dcsKeys {
-		CacheRemKey(key)
-		if _, err = rs.GetDerivedChargers(key[len(utils.DERIVEDCHARGERS_PREFIX):], true); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("derived chargers: %s", err.Error())
-		}
-	}
-	if len(dcsKeys) != 0 {
-		utils.Logger.Info("Finished derived chargers caching.")
-	}
-	if actKeys == nil {
-		utils.Logger.Info("Caching all actions")
-		if actKeys, err = conn.Cmd("KEYS", utils.ACTION_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("actions: %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.ACTION_PREFIX)
-	} else if len(actKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching actions: %v", actKeys))
-	}
-	for _, key := range actKeys {
-		CacheRemKey(key)
-		if _, err = rs.GetActions(key[len(utils.ACTION_PREFIX):], true); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("actions: %s", err.Error())
-		}
-	}
-	if len(actKeys) != 0 {
-		utils.Logger.Info("Finished actions caching.")
-	}
-
-	if aplKeys == nil {
-		utils.Logger.Info("Caching all action plans")
-		if aplKeys, err = rs.db.Cmd("KEYS", utils.ACTION_PLAN_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf(" %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.ACTION_PLAN_PREFIX)
-	} else if len(aplKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching action plan: %v", aplKeys))
-	}
-	for _, key := range aplKeys {
-		CacheRemKey(key)
-		if _, err = rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf(" %s", err.Error())
-		}
-	}
-	if len(aplKeys) != 0 {
-		utils.Logger.Info("Finished action plans caching.")
-	}
-
-	if shgKeys == nil {
-		utils.Logger.Info("Caching all shared groups")
-		if shgKeys, err = conn.Cmd("KEYS", utils.SHARED_GROUP_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("shared groups: %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.SHARED_GROUP_PREFIX)
-	} else if len(shgKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching shared groups: %v", shgKeys))
-	}
-	for _, key := range shgKeys {
-		CacheRemKey(key)
-		if _, err = rs.GetSharedGroup(key[len(utils.SHARED_GROUP_PREFIX):], true); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("shared groups: %s", err.Error())
-		}
-	}
-	if len(shgKeys) != 0 {
-		utils.Logger.Info("Finished shared groups caching.")
-	}
-
-	CacheCommitTransaction()
-	utils.Logger.Info(fmt.Sprintf("Cache rating creation time: %v", time.Since(start)))
-	loadHistList, err := rs.GetLoadHistory(1, true)
-	if err != nil || len(loadHistList) == 0 {
-		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
-	}
-	var loadHist *utils.LoadInstance
-	if len(loadHistList) == 0 {
-		loadHist = &utils.LoadInstance{
-			RatingLoadID:     utils.GenUUID(),
-			AccountingLoadID: utils.GenUUID(),
-			LoadID:           loadID,
-			LoadTime:         time.Now(),
-		}
-	} else {
-		loadHist = loadHistList[0]
-		loadHist.RatingLoadID = utils.GenUUID()
-		loadHist.LoadID = loadID
-		loadHist.LoadTime = time.Now()
-	}
-	if err := rs.AddLoadHistory(loadHist, rs.loadHistorySize); err != nil {
-		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
-		return err
-	}
-	rs.GetLoadHistory(1, true) // to load last instance in cache
-	return utils.SaveCacheFileInfo(rs.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
-}
-
-func (rs *RedisStorage) CacheAccountingAll(loadID string) error {
-	return rs.cacheAccounting(loadID, nil)
-}
-
-func (rs *RedisStorage) CacheAccountingPrefixes(loadID string, prefixes ...string) error {
-	pm := map[string][]string{
-		utils.ALIASES_PREFIX: []string{},
-	}
-	for _, prefix := range prefixes {
-		if _, found := pm[prefix]; !found {
-			return utils.ErrNotFound
-		}
-		pm[prefix] = nil
-	}
-	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
-}
-
-func (rs *RedisStorage) CacheAccountingPrefixValues(loadID string, prefixes map[string][]string) error {
-	pm := map[string][]string{
-		utils.ALIASES_PREFIX: []string{},
-	}
-	for prefix, ids := range prefixes {
-		if _, found := pm[prefix]; !found {
-			return utils.ErrNotFound
-		}
-		pm[prefix] = ids
-	}
-	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
-}
-
-func (rs *RedisStorage) cacheAccounting(loadID string, alsKeys []string) (err error) {
-	start := time.Now()
-	CacheBeginTransaction()
-	conn, err := rs.db.Get()
-	if err != nil {
-		return err
-	}
-	defer rs.db.Put(conn)
-	if alsKeys == nil {
-		utils.Logger.Info("Caching all aliases")
-		if alsKeys, err = conn.Cmd("KEYS", utils.ALIASES_PREFIX+"*").List(); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("aliases: %s", err.Error())
-		}
-		CacheRemPrefixKey(utils.ALIASES_PREFIX)
-		CacheRemPrefixKey(utils.REVERSE_ALIASES_PREFIX)
-	} else if len(alsKeys) != 0 {
-		utils.Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
-	}
-	al := &Alias{}
-	for _, key := range alsKeys {
-		// check if it already exists
-		// to remove reverse cache keys
-		if avs, ok := CacheGet(key); ok && avs != nil {
-			al.Values = avs.(AliasValues)
-			al.SetId(key[len(utils.ALIASES_PREFIX):])
-			al.RemoveReverseCache()
-		}
-		CacheRemKey(key)
-		if _, err = rs.GetAlias(key[len(utils.ALIASES_PREFIX):], true); err != nil {
-			CacheRollbackTransaction()
-			return fmt.Errorf("aliases: %s", err.Error())
-		}
-	}
-	if len(alsKeys) != 0 {
-		utils.Logger.Info("Finished aliases caching.")
-	}
-	utils.Logger.Info("Caching load history")
-	if _, err = rs.GetLoadHistory(1, true); err != nil {
-		CacheRollbackTransaction()
-		return err
-	}
-	utils.Logger.Info("Finished load history caching.")
-	CacheCommitTransaction()
-	utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
-
-	loadHistList, err := rs.GetLoadHistory(1, true)
-	if err != nil || len(loadHistList) == 0 {
-		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
-	}
-	var loadHist *utils.LoadInstance
-	if len(loadHistList) == 0 {
-		loadHist = &utils.LoadInstance{
-			RatingLoadID:     utils.GenUUID(),
-			AccountingLoadID: utils.GenUUID(),
-			LoadID:           loadID,
-			LoadTime:         time.Now(),
-		}
-	} else {
-		loadHist = loadHistList[0]
-		loadHist.AccountingLoadID = utils.GenUUID()
-		loadHist.LoadID = loadID
-		loadHist.LoadTime = time.Now()
-	}
-	if err := rs.AddLoadHistory(loadHist, rs.loadHistorySize); err != nil {
-		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
-		return err
-	}
-
-	rs.GetLoadHistory(1, true) // to load last instance in cache
-	return utils.SaveCacheFileInfo(rs.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
@@ -463,10 +112,11 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	return false, errors.New("unsupported HasData category")
 }
 
-func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
+func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	key = utils.RATING_PLAN_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*RatingPlan), nil
 		}
 		return nil, utils.ErrNotFound
@@ -485,12 +135,12 @@ func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPla
 		r.Close()
 		rp = new(RatingPlan)
 		err = rs.ms.Unmarshal(out, rp)
-		CacheSet(key, rp)
 	}
+	CacheSet(key, rp)
 	return
 }
 
-func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
+func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan, cache bool) (err error) {
 	result, err := rs.ms.Marshal(rp)
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
@@ -501,14 +151,17 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
+	if cache && err == nil {
+		CacheSet(utils.RATING_PLAN_PREFIX+rp.Id, rp)
+	}
 	return
 }
 
-func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingProfile, err error) {
-
+func (rs *RedisStorage) GetRatingProfile(key string) (rpf *RatingProfile, err error) {
 	key = utils.RATING_PROFILE_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*RatingProfile), nil
 		}
 		return nil, utils.ErrNotFound
@@ -517,17 +170,20 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool) (rpf *Ratin
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		rpf = new(RatingProfile)
 		err = rs.ms.Unmarshal(values, rpf)
-		CacheSet(key, rpf)
 	}
+	CacheSet(key, rpf)
 	return
 }
 
-func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
+func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile, cache bool) (err error) {
 	result, err := rs.ms.Marshal(rpf)
 	err = rs.db.Cmd("SET", utils.RATING_PROFILE_PREFIX+rpf.Id, result).Err
 	if err == nil && historyScribe != nil {
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
+	}
+	if cache && err == nil {
+		CacheSet(utils.RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	}
 	return
 }
@@ -556,10 +212,10 @@ func (rs *RedisStorage) RemoveRatingProfile(key string) error {
 	return nil
 }
 
-func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
+func (rs *RedisStorage) GetLCR(key string) (lcr *LCR, err error) {
 	key = utils.LCR_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*LCR), nil
 		}
 		return nil, utils.ErrNotFound
@@ -572,10 +228,12 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 	return
 }
 
-func (rs *RedisStorage) SetLCR(lcr *LCR) (err error) {
+func (rs *RedisStorage) SetLCR(lcr *LCR, cache bool) (err error) {
 	result, err := rs.ms.Marshal(lcr)
 	err = rs.db.Cmd("SET", utils.LCR_PREFIX+lcr.GetId(), result).Err
-	CacheSet(utils.LCR_PREFIX+lcr.GetId(), lcr)
+	if cache && err == nil {
+		CacheSet(utils.LCR_PREFIX+lcr.GetId(), lcr)
+	}
 	return
 }
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
@@ -604,7 +262,7 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 	return
 }
 
-func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
+func (rs *RedisStorage) SetDestination(dest *Destination, cache bool) (err error) {
 	result, err := rs.ms.Marshal(dest)
 	if err != nil {
 		return err
@@ -617,6 +275,9 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	if err == nil && historyScribe != nil {
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
+	}
+	if cache && err == nil {
+		CacheSet(utils.DESTINATION_PREFIX+dest.Id, dest)
 	}
 	return
 }
@@ -702,10 +363,10 @@ func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
+func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	key = utils.ACTION_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(Actions), nil
 		}
 		return nil, utils.ErrNotFound
@@ -713,26 +374,30 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err 
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &as)
-		CacheSet(key, as)
 	}
+	CacheSet(key, as)
 	return
 }
 
-func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
+func (rs *RedisStorage) SetActions(key string, as Actions, cache bool) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.db.Cmd("SET", utils.ACTION_PREFIX+key, result).Err
+	if cache && err == nil {
+		CacheSet(utils.ACTION_PREFIX+key, as)
+	}
 	return
 }
 
 func (rs *RedisStorage) RemoveActions(key string) (err error) {
 	err = rs.db.Cmd("DEL", utils.ACTION_PREFIX+key).Err
+	CacheRemKey(utils.ACTION_PREFIX + key)
 	return
 }
 
-func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
+func (rs *RedisStorage) GetSharedGroup(key string) (sg *SharedGroup, err error) {
 	key = utils.SHARED_GROUP_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*SharedGroup), nil
 		}
 		return nil, utils.ErrNotFound
@@ -740,14 +405,17 @@ func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGr
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &sg)
-		CacheSet(key, sg)
 	}
+	CacheSet(key, sg)
 	return
 }
 
-func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup) (err error) {
+func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup, cache bool) (err error) {
 	result, err := rs.ms.Marshal(sg)
 	err = rs.db.Cmd("SET", utils.SHARED_GROUP_PREFIX+sg.Id, result).Err
+	if cache && err == nil {
+		CacheSet(utils.SHARED_GROUP_PREFIX+sg.Id, sg)
+	}
 	return
 }
 
@@ -886,19 +554,12 @@ func (rs *RedisStorage) RemoveUser(key string) (err error) {
 	return rs.db.Cmd("DEL", utils.USERS_PREFIX+key).Err
 }
 
-func (rs *RedisStorage) SetAlias(al *Alias) (err error) {
-	result, err := rs.ms.Marshal(al.Values)
-	if err != nil {
-		return err
-	}
-	return rs.db.Cmd("SET", utils.ALIASES_PREFIX+al.GetId(), result).Err
-}
-
-func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
+func (rs *RedisStorage) GetAlias(key string) (al *Alias, err error) {
 	origKey := key
 	key = utils.ALIASES_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			al = &Alias{Values: x.(AliasValues)}
 			al.SetId(origKey)
 			return al, nil
@@ -915,6 +576,20 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 			// cache reverse alias
 			al.SetReverseCache()
 		}
+	} else {
+		CacheSet(key, nil)
+	}
+	return
+}
+
+func (rs *RedisStorage) SetAlias(al *Alias, cache bool) (err error) {
+	result, err := rs.ms.Marshal(al.Values)
+	if err != nil {
+		return err
+	}
+	err = rs.db.Cmd("SET", utils.ALIASES_PREFIX+al.GetId(), result).Err
+	if cache && err == nil {
+		CacheSet(key, al.Values)
 	}
 	return
 }
@@ -942,12 +617,13 @@ func (rs *RedisStorage) RemoveAlias(key string) (err error) {
 }
 
 // Limit will only retrieve the last n items out of history, newest first
-func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*utils.LoadInstance, error) {
+func (rs *RedisStorage) GetLoadHistory(limit int) ([]*utils.LoadInstance, error) {
 	if limit == 0 {
 		return nil, nil
 	}
-	if !skipCache {
-		if x, ok := CacheGet(utils.LOADINST_KEY); ok {
+
+	if x, ok := CacheGet(utils.LOADINST_KEY); ok {
+		if x != nil {
 			items := x.([]*utils.LoadInstance)
 			if len(items) < limit || limit == -1 {
 				return items, nil
@@ -961,6 +637,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*utils.Load
 	}
 	marshaleds, err := rs.db.Cmd("LRANGE", utils.LOADINST_KEY, 0, limit).ListBytes()
 	if err != nil {
+		CacheSet(utils.LOADINST_KEY, nil)
 		return nil, err
 	}
 	loadInsts := make([]*utils.LoadInstance, len(marshaleds))
@@ -981,7 +658,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*utils.Load
 }
 
 // Adds a single load instance to load history
-func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int) error {
+func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int, cache bool) error {
 	conn, err := rs.db.Get()
 	if err != nil {
 		return err
@@ -1007,18 +684,29 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 		err = conn.Cmd("LPUSH", utils.LOADINST_KEY, marshaled).Err
 		return nil, err
 	}, 0, utils.LOADINST_KEY)
+
+	if cache && err == nil {
+		CacheSet(utils.LOADINST_KEY, loadInsts)
+	}
 	return err
 }
 
 func (rs *RedisStorage) GetActionTriggers(key string) (atrs ActionTriggers, err error) {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
+			return x.(ActionTriggers), nil
+		}
+		return nil, utils.ErrNotFound
+	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", utils.ACTION_TRIGGER_PREFIX+key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &atrs)
 	}
+	CacheSet(utils.ACTION_TRIGGER_PREFIX+key, atrs)
 	return
 }
 
-func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
+func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers, cache bool) (err error) {
 	conn, err := rs.db.Get()
 	if err != nil {
 		return err
@@ -1032,21 +720,30 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 	if err != nil {
 		return err
 	}
-	return conn.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
-}
-
-func (rs *RedisStorage) RemoveActionTriggers(key string) (err error) {
-	err = rs.db.Cmd("DEL", utils.ACTION_TRIGGER_PREFIX+key).Err
+	err = conn.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
+	if cache && err == nil {
+		CacheSet(utils.ACTION_TRIGGER_PREFIX+key, atrs)
+	}
 	return
 }
 
-func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
+func (rs *RedisStorage) RemoveActionTriggers(key string) (err error) {
+	key = utils.ACTION_TRIGGER_PREFIX + key
+	err = rs.db.Cmd("DEL", key).Err
+	if err == nil {
+		CacheRemKey(key)
+	}
+	return
+}
+
+func (rs *RedisStorage) GetActionPlan(key string) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*ActionPlan), nil
 		}
-		return nil, utils.ErrNotFound
+		return nil, utils.ErrNotFond
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
@@ -1061,8 +758,8 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 		}
 		r.Close()
 		err = rs.ms.Unmarshal(out, &ats)
-		CacheSet(key, ats)
 	}
+	CacheSet(key, ats)
 	return
 }
 
@@ -1093,7 +790,11 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	return rs.db.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, b.Bytes()).Err
+	err = rs.db.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, b.Bytes()).Err
+	if cache && err == nil {
+		CacheSet(utils.ACTION_PLAN_PREFIX+key, at)
+	}
+	return
 }
 
 func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
@@ -1128,34 +829,38 @@ func (rs *RedisStorage) PopTask() (t *Task, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
+func (rs *RedisStorage) GetDerivedChargers(key string) (dcs *utils.DerivedChargers, err error) {
 	key = utils.DERIVEDCHARGERS_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*utils.DerivedChargers), nil
-		} else {
-			return nil, utils.ErrNotFound
 		}
+		return nil, utils.ErrNotFound
 	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &dcs)
-		CacheSet(key, dcs)
 	}
+	CacheSet(key, dcs)
 	return dcs, err
 }
 
-func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) (err error) {
+func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers, cache bool) (err error) {
+	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if dcs == nil || len(dcs.Chargers) == 0 {
-		err = rs.db.Cmd("DEL", utils.DERIVEDCHARGERS_PREFIX+key).Err
-		CacheRemKey(utils.DERIVEDCHARGERS_PREFIX + key)
+		err = rs.db.Cmd("DEL").Err
+		CacheRemKey(key)
 		return err
 	}
 	marshaled, err := rs.ms.Marshal(dcs)
 	if err != nil {
 		return err
 	}
-	return rs.db.Cmd("SET", utils.DERIVEDCHARGERS_PREFIX+key, marshaled).Err
+	err = rs.db.Cmd("SET", key, marshaled).Err
+	if cache && err == nil {
+		CacheSet(key, dcs)
+	}
+	return
 }
 
 func (rs *RedisStorage) SetCdrStats(cs *CdrStats) error {
@@ -1192,23 +897,6 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 		cs := &CdrStats{}
 		err = rs.ms.Unmarshal(value, cs)
 		css = append(css, cs)
-	}
-	return
-}
-
-func (rs *RedisStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
-	var result []byte
-	result, err = rs.ms.Marshal(cc)
-	if err != nil {
-		return
-	}
-	return rs.db.Cmd("SET", utils.LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid, result).Err
-}
-
-func (rs *RedisStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	var values []byte
-	if values, err = rs.db.Cmd("GET", utils.LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, cc)
 	}
 	return
 }

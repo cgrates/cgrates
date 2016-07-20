@@ -184,7 +184,7 @@ func (cs cacheLRUTTL) Put(key string, value interface{}) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	mp, ok := cs[prefix]
 	if !ok {
-		mp = cache2go.New(1000, 0)
+		mp = cache2go.New(1000, 0) //FixME
 		cs[prefix] = mp
 	}
 	mp.Set(key, value)
@@ -236,18 +236,11 @@ func (cs cacheLRUTTL) Delete(key string) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if keyMap, ok := cs[prefix]; ok {
 		keyMap.Remove(key)
-		if err := dumper.delete(prefix, key); err != nil {
-			utils.Logger.Info("<cache dumper> delete error: " + err.Error())
-		}
 	}
 }
 
 func (cs cacheLRUTTL) DeletePrefix(prefix string) {
 	delete(cs, prefix)
-
-	if err := dumper.deleteAll(prefix); err != nil {
-		utils.Logger.Info("<cache dumper> delete all error: " + err.Error())
-	}
 }
 
 func (cs cacheLRUTTL) CountEntriesForPrefix(prefix string) int {
