@@ -22,12 +22,10 @@ import (
 	"bytes"
 	"compress/zlib"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"sync"
 
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -59,255 +57,20 @@ func (ms *MapStorage) Flush(ignore string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
+func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	if skipCache {
-		keysForPrefix := make([]string, 0)
-		for key := range ms.dict {
-			if strings.HasPrefix(key, prefix) {
-				keysForPrefix = append(keysForPrefix, key)
-			}
-		}
-		return keysForPrefix, nil
+	if x, ok := CacheGet(utils.GENERIC_PREFIX + "keys_" + prefix); ok {
+		return x.([]string), nil
 	}
-	return CacheGetEntriesKeys(prefix), nil
-}
-
-func (ms *MapStorage) CacheRatingAll(loadID string) error {
-	return ms.cacheRating(loadID, nil, nil, nil, nil, nil, nil, nil, nil)
-}
-
-func (ms *MapStorage) CacheRatingPrefixes(loadID string, prefixes ...string) error {
-	pm := map[string][]string{
-		utils.DESTINATION_PREFIX:     []string{},
-		utils.RATING_PLAN_PREFIX:     []string{},
-		utils.RATING_PROFILE_PREFIX:  []string{},
-		utils.LCR_PREFIX:             []string{},
-		utils.DERIVEDCHARGERS_PREFIX: []string{},
-		utils.ACTION_PREFIX:          []string{},
-		utils.ACTION_PLAN_PREFIX:     []string{},
-		utils.SHARED_GROUP_PREFIX:    []string{},
-	}
-	for _, prefix := range prefixes {
-		if _, found := pm[prefix]; !found {
-			return utils.ErrNotFound
-		}
-		pm[prefix] = nil
-	}
-	return ms.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
-}
-
-func (ms *MapStorage) CacheRatingPrefixValues(loadID string, prefixes map[string][]string) error {
-	pm := map[string][]string{
-		utils.DESTINATION_PREFIX:     []string{},
-		utils.RATING_PLAN_PREFIX:     []string{},
-		utils.RATING_PROFILE_PREFIX:  []string{},
-		utils.LCR_PREFIX:             []string{},
-		utils.DERIVEDCHARGERS_PREFIX: []string{},
-		utils.ACTION_PREFIX:          []string{},
-		utils.ACTION_PLAN_PREFIX:     []string{},
-		utils.SHARED_GROUP_PREFIX:    []string{},
-	}
-	for prefix, ids := range prefixes {
-		if _, found := pm[prefix]; !found {
-			return utils.ErrNotFound
-		}
-		pm[prefix] = ids
-	}
-	return ms.cacheRating(loadID, pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
-}
-
-func (ms *MapStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) error {
-	CacheBeginTransaction()
-	if dKeys == nil || (float64(CacheCountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
-		CacheRemPrefixKey(utils.DESTINATION_PREFIX)
-	} else {
-		CleanStalePrefixes(dKeys)
-	}
-	if rpKeys == nil {
-		CacheRemPrefixKey(utils.RATING_PLAN_PREFIX)
-	}
-	if rpfKeys == nil {
-		CacheRemPrefixKey(utils.RATING_PROFILE_PREFIX)
-	}
-	if lcrKeys == nil {
-		CacheRemPrefixKey(utils.LCR_PREFIX)
-	}
-	if dcsKeys == nil {
-		CacheRemPrefixKey(utils.DERIVEDCHARGERS_PREFIX)
-	}
-	if actKeys == nil {
-		CacheRemPrefixKey(utils.ACTION_PREFIX) // Forced until we can fine tune it
-	}
-	if aplKeys == nil {
-		CacheRemPrefixKey(utils.ACTION_PLAN_PREFIX)
-	}
-	if shgKeys == nil {
-		CacheRemPrefixKey(utils.SHARED_GROUP_PREFIX) // Forced until we can fine tune it
-	}
-	for k, _ := range ms.dict {
-		if strings.HasPrefix(k, utils.DESTINATION_PREFIX) {
-			if _, err := ms.GetDestination(k[len(utils.DESTINATION_PREFIX):]); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
-		}
-		if strings.HasPrefix(k, utils.RATING_PLAN_PREFIX) {
-			CacheRemKey(k)
-			if _, err := ms.GetRatingPlan(k[len(utils.RATING_PLAN_PREFIX):], true); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
-		}
-		if strings.HasPrefix(k, utils.RATING_PROFILE_PREFIX) {
-			CacheRemKey(k)
-			if _, err := ms.GetRatingProfile(k[len(utils.RATING_PROFILE_PREFIX):], true); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
-		}
-		if strings.HasPrefix(k, utils.LCR_PREFIX) {
-			CacheRemKey(k)
-			if _, err := ms.GetLCR(k[len(utils.LCR_PREFIX):], true); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
-		}
-		if strings.HasPrefix(k, utils.DERIVEDCHARGERS_PREFIX) {
-			CacheRemKey(k)
-			if _, err := ms.GetDerivedChargers(k[len(utils.DERIVEDCHARGERS_PREFIX):], true); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
-		}
-		if strings.HasPrefix(k, utils.ACTION_PREFIX) {
-			CacheRemKey(k)
-			if _, err := ms.GetActions(k[len(utils.ACTION_PREFIX):], true); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
-		}
-		if strings.HasPrefix(k, utils.ACTION_PLAN_PREFIX) {
-			CacheRemKey(k)
-			if _, err := ms.GetActionPlan(k[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
-		}
-		if strings.HasPrefix(k, utils.SHARED_GROUP_PREFIX) {
-			CacheRemKey(k)
-			if _, err := ms.GetSharedGroup(k[len(utils.SHARED_GROUP_PREFIX):], true); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
+	keysForPrefix := make([]string, 0)
+	for key := range ms.dict {
+		if strings.HasPrefix(key, prefix) {
+			keysForPrefix = append(keysForPrefix, key)
 		}
 	}
-	CacheCommitTransaction()
-
-	loadHistList, err := ms.GetLoadHistory(1, true)
-	if err != nil || len(loadHistList) == 0 {
-		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
-	}
-	var loadHist *utils.LoadInstance
-	if len(loadHistList) == 0 {
-		loadHist = &utils.LoadInstance{
-			RatingLoadID:     utils.GenUUID(),
-			AccountingLoadID: utils.GenUUID(),
-			LoadID:           loadID,
-			LoadTime:         time.Now(),
-		}
-	} else {
-		loadHist = loadHistList[0]
-		loadHist.AccountingLoadID = utils.GenUUID()
-		loadHist.LoadID = loadID
-		loadHist.LoadTime = time.Now()
-	}
-	if err := ms.AddLoadHistory(loadHist, 10); err != nil {
-		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
-		return err
-	}
-	ms.GetLoadHistory(1, true) // to load last instance in cache
-	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
-}
-
-func (ms *MapStorage) CacheAccountingAll(loadID string) error {
-	return ms.cacheAccounting(loadID, nil)
-}
-
-func (ms *MapStorage) CacheAccountingPrefixes(loadID string, prefixes ...string) error {
-	pm := map[string][]string{
-		utils.ALIASES_PREFIX: []string{},
-	}
-	for _, prefix := range prefixes {
-		if _, found := pm[prefix]; !found {
-			return utils.ErrNotFound
-		}
-		pm[prefix] = nil
-	}
-	return ms.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
-}
-
-func (ms *MapStorage) CacheAccountingPrefixValues(loadID string, prefixes map[string][]string) error {
-	pm := map[string][]string{
-		utils.ALIASES_PREFIX: []string{},
-	}
-	for prefix, ids := range prefixes {
-		if _, found := pm[prefix]; !found {
-			return utils.ErrNotFound
-		}
-		pm[prefix] = ids
-	}
-	return ms.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
-}
-
-func (ms *MapStorage) cacheAccounting(loadID string, alsKeys []string) error {
-	CacheBeginTransaction()
-	if alsKeys == nil {
-		CacheRemPrefixKey(utils.ALIASES_PREFIX) // Forced until we can fine tune it
-	}
-	for k, _ := range ms.dict {
-		if strings.HasPrefix(k, utils.ALIASES_PREFIX) {
-			// check if it already exists
-			// to remove reverse cache keys
-			if avs, ok := CacheGet(k); ok && avs != nil {
-				al := &Alias{Values: avs.(AliasValues)}
-				al.SetId(k[len(utils.ALIASES_PREFIX):])
-				al.RemoveReverseCache()
-			}
-			CacheRemKey(k)
-			if _, err := ms.GetAlias(k[len(utils.ALIASES_PREFIX):], true); err != nil {
-				CacheRollbackTransaction()
-				return err
-			}
-		}
-	}
-	CacheCommitTransaction()
-
-	loadHistList, err := ms.GetLoadHistory(1, true)
-	if err != nil || len(loadHistList) == 0 {
-		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHistList, err))
-	}
-	var loadHist *utils.LoadInstance
-	if len(loadHistList) == 0 {
-		loadHist = &utils.LoadInstance{
-			RatingLoadID:     utils.GenUUID(),
-			AccountingLoadID: utils.GenUUID(),
-			LoadID:           loadID,
-			LoadTime:         time.Now(),
-		}
-	} else {
-		loadHist = loadHistList[0]
-		loadHist.AccountingLoadID = utils.GenUUID()
-		loadHist.LoadID = loadID
-		loadHist.LoadTime = time.Now()
-	}
-	if err := ms.AddLoadHistory(loadHist, 10); err != nil {
-		utils.Logger.Info(fmt.Sprintf("error saving load history: %v (%v)", loadHist, err))
-		return err
-	}
-	ms.GetLoadHistory(1, true) // to load last instance in cache
-	return utils.SaveCacheFileInfo(ms.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
+	CacheSet(utils.GENERIC_PREFIX+"keys_"+prefix, r.List())
+	return keysForPrefix, nil
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
@@ -316,18 +79,23 @@ func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	defer ms.mu.RUnlock()
 	switch categ {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+		if x, ok := CacheGet(utils.GENERIC_PREFIX + "has_" + category + "_" + subject); ok {
+			return x.(bool), nil
+		}
 		_, exists := ms.dict[categ+subject]
+		CacheSet(utils.GENERIC_PREFIX+"has_"+category+"_"+subject, exists)
 		return exists, nil
 	}
+	CacheSet(utils.GENERIC_PREFIX+"has_"+category+"_"+subject, false)
 	return false, errors.New("Unsupported HasData category")
 }
 
-func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
+func (ms *MapStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.RATING_PLAN_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*RatingPlan), nil
 		}
 		return nil, utils.ErrNotFound
@@ -345,14 +113,15 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan,
 		r.Close()
 		rp = new(RatingPlan)
 		err = ms.ms.Unmarshal(out, rp)
-		CacheSet(key, rp)
 	} else {
+		CacheSet(key, nil)
 		return nil, utils.ErrNotFound
 	}
+	CacheSet(key, rp)
 	return
 }
 
-func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
+func (ms *MapStorage) SetRatingPlan(rp *RatingPlan, cache bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rp)
@@ -365,31 +134,36 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
+	if cache && err == nil {
+		CacheSet(utils.RATING_PLAN_PREFIX+rp.Id, rp)
+	}
 	return
 }
 
-func (ms *MapStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingProfile, err error) {
+func (ms *MapStorage) GetRatingProfile(key string) (rpf *RatingProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.RATING_PROFILE_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*RatingProfile), nil
 		}
 		return nil, utils.ErrNotFound
 	}
+
 	if values, ok := ms.dict[key]; ok {
 		rpf = new(RatingProfile)
 
 		err = ms.ms.Unmarshal(values, rpf)
-		CacheSet(key, rpf)
 	} else {
+		CacheSet(key, nil)
 		return nil, utils.ErrNotFound
 	}
+	CacheSet(key, rpf)
 	return
 }
 
-func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
+func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile, cache bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rpf)
@@ -397,6 +171,9 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	response := 0
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
+	}
+	if cache && err == nil {
+		CacheSet(utils.RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	}
 	return
 }
@@ -418,30 +195,34 @@ func (ms *MapStorage) RemoveRatingProfile(key string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
+func (ms *MapStorage) GetLCR(key string) (lcr *LCR, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.LCR_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*LCR), nil
 		}
 		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &lcr)
-		CacheSet(key, lcr)
 	} else {
+		CacheSet(key, nil)
 		return nil, utils.ErrNotFound
 	}
+	CacheSet(key, lcr)
 	return
 }
 
-func (ms *MapStorage) SetLCR(lcr *LCR) (err error) {
+func (ms *MapStorage) SetLCR(lcr *LCR, cache bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(lcr)
 	ms.dict[utils.LCR_PREFIX+lcr.GetId()] = result
+	if cache && err == nil {
+		CacheSet(utils.LCR_PREFIX+lcr.GetId(), lcr)
+	}
 	return
 }
 
@@ -472,7 +253,7 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 	return
 }
 
-func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
+func (ms *MapStorage) SetDestination(dest *Destination, cache bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(dest)
@@ -485,6 +266,9 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
+	if cache && err == nil {
+		CacheSet(utils.DESTINATION_PREFIX+dest.Id, dest)
+	}
 	return
 }
 
@@ -492,30 +276,34 @@ func (ms *MapStorage) RemoveDestination(destID string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
+func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.ACTION_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(Actions), nil
 		}
 		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
-		CacheSet(key, as)
 	} else {
+		CacheSet(key, nil)
 		return nil, utils.ErrNotFound
 	}
+	CacheSet(key, as)
 	return
 }
 
-func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
+func (ms *MapStorage) SetActions(key string, as Actions, cache bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[utils.ACTION_PREFIX+key] = result
+	if cache && err == nil {
+		CacheSet(utils.ACTION_PREFIX+key, as)
+	}
 	return
 }
 
@@ -523,15 +311,16 @@ func (ms *MapStorage) RemoveActions(key string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACTION_PREFIX+key)
+	CacheRemKey(utils.ACTION_PREFIX + key)
 	return
 }
 
-func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
+func (ms *MapStorage) GetSharedGroup(key string) (sg *SharedGroup, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.SHARED_GROUP_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*SharedGroup), nil
 		}
 		return nil, utils.ErrNotFound
@@ -542,16 +331,20 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGrou
 			CacheSet(key, sg)
 		}
 	} else {
+		CacheSet(key, nil)
 		return nil, utils.ErrNotFound
 	}
 	return
 }
 
-func (ms *MapStorage) SetSharedGroup(sg *SharedGroup) (err error) {
+func (ms *MapStorage) SetSharedGroup(sg *SharedGroup, cache bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sg)
 	ms.dict[utils.SHARED_GROUP_PREFIX+sg.Id] = result
+	if cache && err == nil {
+		CacheSet(utils.SHARED_GROUP_PREFIX+sg.Id, sg)
+	}
 	return
 }
 
@@ -686,25 +479,14 @@ func (ms *MapStorage) RemoveUser(key string) error {
 	return nil
 }
 
-func (ms *MapStorage) SetAlias(al *Alias) error {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(al.Values)
-	if err != nil {
-		return err
-	}
-	ms.dict[utils.ALIASES_PREFIX+al.GetId()] = result
-	return nil
-}
-
-func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
+func (ms *MapStorage) GetAlias(key string) (al *Alias, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.ALIASES_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			al = &Alias{Values: x.(AliasValues)}
-			al.SetId(key[len(utils.ALIASES_PREFIX):])
+			al.SetId(origKey)
 			return al, nil
 		}
 		return nil, utils.ErrNotFound
@@ -718,9 +500,25 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 			al.SetReverseCache()
 		}
 	} else {
+		CacheSet(key, nil)
 		return nil, utils.ErrNotFound
 	}
 	return al, nil
+}
+
+func (ms *MapStorage) SetAlias(al *Alias, cache bool) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(al.Values)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.ALIASES_PREFIX+al.GetId()] = result
+	if cache && err == nil {
+		CacheSet(key, al.Values)
+		al.SetReverseCache()
+	}
+	return nil
 }
 
 func (ms *MapStorage) RemoveAlias(key string) error {
@@ -740,13 +538,13 @@ func (ms *MapStorage) RemoveAlias(key string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool) ([]*utils.LoadInstance, error) {
+func (ms *MapStorage) GetLoadHistory(limitItems int) ([]*utils.LoadInstance, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	return nil, nil
 }
 
-func (ms *MapStorage) AddLoadHistory(*utils.LoadInstance, int) error {
+func (ms *MapStorage) AddLoadHistory(*utils.LoadInstance, int, bool) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return nil
@@ -755,15 +553,24 @@ func (ms *MapStorage) AddLoadHistory(*utils.LoadInstance, int) error {
 func (ms *MapStorage) GetActionTriggers(key string) (atrs ActionTriggers, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	if values, ok := ms.dict[utils.ACTION_TRIGGER_PREFIX+key]; ok {
-		err = ms.ms.Unmarshal(values, &atrs)
-	} else {
+	key = utils.ACTION_TRIGGER_PREFIX + key
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
+			return x.(ActionTriggers), nil
+		}
 		return nil, utils.ErrNotFound
 	}
+	if values, ok := ms.dict[key]; ok {
+		err = ms.ms.Unmarshal(values, &atrs)
+	} else {
+		CacheSet(key, nil)
+		return nil, utils.ErrNotFound
+	}
+	CacheSet(key, atrs)
 	return
 }
 
-func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
+func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers, cache bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if len(atrs) == 0 {
@@ -773,6 +580,9 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err er
 	}
 	result, err := ms.ms.Marshal(&atrs)
 	ms.dict[utils.ACTION_TRIGGER_PREFIX+key] = result
+	if cache && err == nil {
+		CacheSet(utils.ACTION_TRIGGER_PREFIX+key, atrs)
+	}
 	return
 }
 
@@ -780,29 +590,31 @@ func (ms *MapStorage) RemoveActionTriggers(key string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACTION_TRIGGER_PREFIX+key)
+	CacheRemKey(key)
 	return
 }
 
-func (ms *MapStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
+func (ms *MapStorage) GetActionPlan(key string) (ats *ActionPlan, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.ACTION_PLAN_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*ActionPlan), nil
 		}
-		return nil, utils.ErrNotFound
+		return nil, utils.ErrNotFond
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
-		CacheSet(key, ats)
 	} else {
+		CacheSet(key, nil)
 		return nil, utils.ErrNotFound
 	}
+	CacheSet(key, ats)
 	return
 }
 
-func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) (err error) {
+func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite, cache bool) (err error) {
 	if len(ats.ActionTimings) == 0 {
 		ms.mu.Lock()
 		defer ms.mu.Unlock()
@@ -826,6 +638,9 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool)
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(&ats)
 	ms.dict[utils.ACTION_PLAN_PREFIX+key] = result
+	if cache && err == nil {
+		CacheSet(utils.ACTION_PLAN_PREFIX+key, at)
+	}
 	return
 }
 
@@ -871,26 +686,27 @@ func (ms *MapStorage) PopTask() (t *Task, err error) {
 	return
 }
 
-func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
+func (ms *MapStorage) GetDerivedChargers(key string) (dcs *utils.DerivedChargers, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.DERIVEDCHARGERS_PREFIX + key
-	if !skipCache {
-		if x, ok := CacheGet(key); ok {
+	if x, ok := CacheGet(key); ok {
+		if x != nil {
 			return x.(*utils.DerivedChargers), nil
 		}
 		return nil, utils.ErrNotFound
 	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &dcs)
-		CacheSet(key, dcs)
 	} else {
+		CacheSet(key, nil)
 		return nil, utils.ErrNotFound
 	}
+	CacheSet(key, dcs)
 	return
 }
 
-func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) error {
+func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers, cache bool) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if dcs == nil || len(dcs.Chargers) == 0 {
@@ -900,6 +716,9 @@ func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers)
 	}
 	result, err := ms.ms.Marshal(dcs)
 	ms.dict[utils.DERIVEDCHARGERS_PREFIX+key] = result
+	if cache && err == nil {
+		CacheSet(key, dcs)
+	}
 	return err
 }
 

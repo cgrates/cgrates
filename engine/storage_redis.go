@@ -91,24 +91,32 @@ func (rs *RedisStorage) Flush(ignore string) error {
 
 func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	if x, ok := CacheGet(utils.GENERIC_PREFIX + "keys_" + prefix); ok {
-		return x.([]string), nil
+		if x != nil {
+			return x.([]string), nil
+		}
+		return nil, utils.ErrNotFound
 	}
 	r := rs.db.Cmd("KEYS", prefix+"*")
 	if r.Err != nil {
+		CacheSet(utils.GENERIC_PREFIX+"keys_"+prefix, nil)
 		return nil, r.Err
 	}
 	CacheSet(utils.GENERIC_PREFIX+"keys_"+prefix, r.List())
 	return r.List()
-
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
 func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+		if x, ok := CacheGet(utils.GENERIC_PREFIX + "has_" + category + "_" + subject); ok {
+			return x.(bool), nil
+		}
 		i, err := rs.db.Cmd("EXISTS", category+subject).Int()
+		CacheSet(utils.GENERIC_PREFIX+"has_"+category+"_"+subject, i == 1)
 		return i == 1, err
 	}
+	CacheSet(utils.GENERIC_PREFIX+"has_"+category+"_"+subject, false)
 	return false, errors.New("unsupported HasData category")
 }
 
@@ -590,6 +598,7 @@ func (rs *RedisStorage) SetAlias(al *Alias, cache bool) (err error) {
 	err = rs.db.Cmd("SET", utils.ALIASES_PREFIX+al.GetId(), result).Err
 	if cache && err == nil {
 		CacheSet(key, al.Values)
+		al.SetReverseCache()
 	}
 	return
 }
@@ -692,6 +701,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 }
 
 func (rs *RedisStorage) GetActionTriggers(key string) (atrs ActionTriggers, err error) {
+	key = utils.ACTION_TRIGGER_PREFIX + key
 	if x, ok := CacheGet(key); ok {
 		if x != nil {
 			return x.(ActionTriggers), nil
@@ -699,10 +709,10 @@ func (rs *RedisStorage) GetActionTriggers(key string) (atrs ActionTriggers, err 
 		return nil, utils.ErrNotFound
 	}
 	var values []byte
-	if values, err = rs.db.Cmd("GET", utils.ACTION_TRIGGER_PREFIX+key).Bytes(); err == nil {
+	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &atrs)
 	}
-	CacheSet(utils.ACTION_TRIGGER_PREFIX+key, atrs)
+	CacheSet(key, atrs)
 	return
 }
 
@@ -763,7 +773,7 @@ func (rs *RedisStorage) GetActionPlan(key string) (ats *ActionPlan, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) (err error) {
+func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite, cache bool) (err error) {
 	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		err = rs.db.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
