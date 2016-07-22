@@ -41,9 +41,9 @@ func (cs cacheDoubleStore) Put(key string, value interface{}) {
 		cs[prefix] = mp
 	}
 	mp[key] = value
-	if err := dumper.put(prefix, key, value); err != nil {
+	/*if err := dumper.put(prefix, key, value); err != nil {
 		utils.Logger.Info("<cache dumper> put error: " + err.Error())
-	}
+	}*/
 }
 
 func (cs cacheDoubleStore) Get(key string) (interface{}, bool) {
@@ -89,18 +89,18 @@ func (cs cacheDoubleStore) Delete(key string) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if keyMap, ok := cs[prefix]; ok {
 		delete(keyMap, key)
-		if err := dumper.delete(prefix, key); err != nil {
+		/*if err := dumper.delete(prefix, key); err != nil {
 			utils.Logger.Info("<cache dumper> delete error: " + err.Error())
-		}
+		}*/
 	}
 }
 
 func (cs cacheDoubleStore) DeletePrefix(prefix string) {
 	delete(cs, prefix)
 
-	if err := dumper.deleteAll(prefix); err != nil {
+	/*if err := dumper.deleteAll(prefix); err != nil {
 		utils.Logger.Info("<cache dumper> delete all error: " + err.Error())
-	}
+	}*/
 }
 
 func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
