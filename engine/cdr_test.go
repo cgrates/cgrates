@@ -478,3 +478,17 @@ func TestUsageReqAsCD(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", eCD, cd)
 	}
 }
+
+func TestCDRParseFieldValue(t *testing.T) {
+	cdr := new(CDR)
+	if err := cdr.ParseFieldValue(utils.PartialField, "true", ""); err != nil {
+		t.Error(err)
+	} else if !cdr.Partial {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
+	if err := cdr.ParseFieldValue(utils.ORDERID, "5", ""); err != nil {
+		t.Error(err)
+	} else if cdr.OrderID != 5 {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
+}

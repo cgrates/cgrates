@@ -207,6 +207,10 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 	var err error
 	switch fieldId {
+	case utils.ORDERID:
+		if cdr.OrderID, err = strconv.ParseInt(fieldVal, 10, 64); err != nil {
+			return err
+		}
 	case utils.TOR:
 		cdr.ToR += fieldVal
 	case utils.ACCID:

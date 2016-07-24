@@ -148,6 +148,7 @@ const (
 	STATIC_VALUE_PREFIX          = "^"
 	CSV                          = "csv"
 	FWV                          = "fwv"
+	PartialCSV                   = "partial_csv"
 	DRYRUN                       = "dry_run"
 	META_COMBIMED                = "*combimed"
 	MetaInternal                 = "*internal"
