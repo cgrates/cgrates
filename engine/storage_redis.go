@@ -231,8 +231,8 @@ func (rs *RedisStorage) GetLCR(key string) (lcr *LCR, err error) {
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &lcr)
-		CacheSet(key, lcr)
 	}
+	CacheSet(key, lcr)
 	return
 }
 
