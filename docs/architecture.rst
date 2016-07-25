@@ -106,7 +106,7 @@ Responsible with the following tasks:
 
    "tariffplan_db" - (ratingDb)
    "data_db"       - (accountDb)
-   "stor_db"       - (cdrDb, logDb, loadDb)
+   "stor_db"       - (cdrDb, loadDb)
 
 - Config section in the CGRateS configuration file:
    - ``"rals": {...}``
@@ -189,7 +189,7 @@ Centralized CDR server and CDR (raw or rated) **replicator**.
 
 - Operates with the following CGRateS database(s): ::
 
-   "stor_db" - (cdrDb, logDb)
+   "stor_db" - (cdrDb)
 
 - Config section in the CGRateS configuration file:
    - ``"cdrs": {...}``
