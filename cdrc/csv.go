@@ -22,8 +22,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -33,112 +31,24 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewPartialRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune) (*PartialRecordsCache, error) {
-	return &PartialRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep,
-		partialRecords: make(map[string]map[string]*PartialFlatstoreRecord), guard: engine.Guardian}, nil
-}
-
-type PartialRecordsCache struct {
-	ttl            time.Duration
-	cdrOutDir      string
-	csvSep         rune
-	partialRecords map[string]map[string]*PartialFlatstoreRecord // [FileName"][OriginID]*PartialRecord
-	guard          *engine.GuardianLock
-}
-
-// Dumps the cache into a .unpaired file in the outdir and cleans cache after
-func (self *PartialRecordsCache) dumpUnpairedRecords(fileName string) error {
-	_, err := self.guard.Guard(func() (interface{}, error) {
-		if len(self.partialRecords[fileName]) != 0 { // Only write the file if there are records in the cache
-			unpairedFilePath := path.Join(self.cdrOutDir, fileName+UNPAIRED_SUFFIX)
-			fileOut, err := os.Create(unpairedFilePath)
-			if err != nil {
-				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed creating %s, error: %s", unpairedFilePath, err.Error()))
-				return nil, err
-			}
-			csvWriter := csv.NewWriter(fileOut)
-			csvWriter.Comma = self.csvSep
-			for _, pr := range self.partialRecords[fileName] {
-				if err := csvWriter.Write(pr.Values); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing unpaired record %v to file: %s, error: %s", pr, unpairedFilePath, err.Error()))
-					return nil, err
-				}
-			}
-			csvWriter.Flush()
-		}
-		delete(self.partialRecords, fileName)
-		return nil, nil
-	}, 0, fileName)
-	return err
-}
-
-// Search in cache and return the partial record with accountind id defined, prefFilename is searched at beginning because of better match probability
-func (self *PartialRecordsCache) GetPartialRecord(OriginID, prefFileName string) (string, *PartialFlatstoreRecord) {
-	var cachedFilename string
-	var cachedPartial *PartialFlatstoreRecord
-	checkCachedFNames := []string{prefFileName} // Higher probability to match as firstFileName
-	for fName := range self.partialRecords {
-		if fName != prefFileName {
-			checkCachedFNames = append(checkCachedFNames, fName)
-		}
-	}
-	for _, fName := range checkCachedFNames { // Need to lock them individually
-		self.guard.Guard(func() (interface{}, error) {
-			var hasPartial bool
-			if cachedPartial, hasPartial = self.partialRecords[fName][OriginID]; hasPartial {
-				cachedFilename = fName
-			}
-			return nil, nil
-		}, 0, fName)
-		if cachedPartial != nil {
-			break
-		}
-	}
-	return cachedFilename, cachedPartial
-}
-
-func (self *PartialRecordsCache) CachePartial(fileName string, pr *PartialFlatstoreRecord) {
-	self.guard.Guard(func() (interface{}, error) {
-		if fileMp, hasFile := self.partialRecords[fileName]; !hasFile {
-			self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.OriginID: pr}
-			if self.ttl != 0 { // Schedule expiry/dump of the just created entry in cache
-				go func() {
-					time.Sleep(self.ttl)
-					self.dumpUnpairedRecords(fileName)
-				}()
-			}
-		} else if _, hasOriginID := fileMp[pr.OriginID]; !hasOriginID {
-			self.partialRecords[fileName][pr.OriginID] = pr
-		}
-		return nil, nil
-	}, 0, fileName)
-}
-
-func (self *PartialRecordsCache) UncachePartial(fileName string, pr *PartialFlatstoreRecord) {
-	self.guard.Guard(func() (interface{}, error) {
-		delete(self.partialRecords[fileName], pr.OriginID) // Remove the record out of cache
-		return nil, nil
-	}, 0, fileName)
-}
-
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig,
-	httpSkipTlsCheck bool, partialRecordsCache *PartialRecordsCache) *CsvRecordsProcessor {
+	httpSkipTlsCheck bool, PartialFlatstoreRecordsCache *PartialFlatstoreRecordsCache) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader, timezone: timezone, fileName: fileName,
 		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs,
-		httpSkipTlsCheck: httpSkipTlsCheck, partialRecordsCache: partialRecordsCache}
+		httpSkipTlsCheck: httpSkipTlsCheck, PartialFlatstoreRecordsCache: PartialFlatstoreRecordsCache}
 
 }
 
 type CsvRecordsProcessor struct {
-	csvReader           *csv.Reader
-	timezone            string // Timezone for CDRs which are not clearly specifying it
-	fileName            string
-	dfltCdrcCfg         *config.CdrcConfig
-	cdrcCfgs            []*config.CdrcConfig
-	processedRecordsNr  int64 // Number of content records in file
-	httpSkipTlsCheck    bool
-	partialRecordsCache *PartialRecordsCache // Shared by cdrc so we can cache for all files in a folder
+	csvReader                    *csv.Reader
+	timezone                     string // Timezone for CDRs which are not clearly specifying it
+	fileName                     string
+	dfltCdrcCfg                  *config.CdrcConfig
+	cdrcCfgs                     []*config.CdrcConfig
+	processedRecordsNr           int64 // Number of content records in file
+	httpSkipTlsCheck             bool
+	PartialFlatstoreRecordsCache *PartialFlatstoreRecordsCache // Shared by cdrc so we can cache for all files in a folder
 }
 
 func (self *CsvRecordsProcessor) ProcessedRecordsNr() int64 {
@@ -152,7 +62,7 @@ func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	}
 	self.processedRecordsNr += 1
 	if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) {
-		if record, err = self.processPartialRecord(record); err != nil {
+		if record, err = self.processFlatstoreRecord(record); err != nil {
 			return nil, err
 		} else if record == nil {
 			return nil, nil // Due to partial, none returned
@@ -163,7 +73,7 @@ func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 }
 
 // Processes a single partial record for flatstore CDRs
-func (self *CsvRecordsProcessor) processPartialRecord(record []string) ([]string, error) {
+func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]string, error) {
 	if strings.HasPrefix(self.fileName, self.dfltCdrcCfg.FailedCallsPrefix) { // Use the first index since they should be the same in all configs
 		record = append(record, "0") // Append duration 0 for failed calls flatstore CDR and do not process it further
 		return record, nil
@@ -173,16 +83,16 @@ func (self *CsvRecordsProcessor) processPartialRecord(record []string) ([]string
 		return nil, err
 	}
 	// Retrieve and complete the record from cache
-	cachedFilename, cachedPartial := self.partialRecordsCache.GetPartialRecord(pr.OriginID, self.fileName)
+	cachedFilename, cachedPartial := self.PartialFlatstoreRecordsCache.GetPartialRecord(pr.OriginID, self.fileName)
 	if cachedPartial == nil { // Not cached, do it here and stop processing
-		self.partialRecordsCache.CachePartial(self.fileName, pr)
+		self.PartialFlatstoreRecordsCache.CachePartial(self.fileName, pr)
 		return nil, nil
 	}
 	pairedRecord, err := pairToRecord(cachedPartial, pr)
 	if err != nil {
 		return nil, err
 	}
-	self.partialRecordsCache.UncachePartial(cachedFilename, pr)
+	self.PartialFlatstoreRecordsCache.UncachePartial(cachedFilename, pr)
 	return pairedRecord, nil
 }
 

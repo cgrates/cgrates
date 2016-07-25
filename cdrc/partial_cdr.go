@@ -19,74 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
-	"errors"
 	"reflect"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
-
-func NewPartialFlatstoreRecord(record []string, timezone string) (*PartialFlatstoreRecord, error) {
-	if len(record) < 7 {
-		return nil, errors.New("MISSING_IE")
-	}
-	pr := &PartialFlatstoreRecord{Method: record[0], OriginID: record[3] + record[1] + record[2], Values: record}
-	var err error
-	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6], timezone); err != nil {
-		return nil, err
-	}
-	return pr, nil
-}
-
-// This is a partial record received from Flatstore, can be INVITE or BYE and it needs to be paired in order to produce duration
-type PartialFlatstoreRecord struct {
-	Method    string    // INVITE or BYE
-	OriginID  string    // Copute here the OriginID
-	Timestamp time.Time // Timestamp of the event, as written by db_flastore module
-	Values    []string  // Can contain original values or updated via UpdateValues
-}
-
-// Pairs INVITE and BYE into final record containing as last element the duration
-func pairToRecord(part1, part2 *PartialFlatstoreRecord) ([]string, error) {
-	var invite, bye *PartialFlatstoreRecord
-	if part1.Method == "INVITE" {
-		invite = part1
-	} else if part2.Method == "INVITE" {
-		invite = part2
-	} else {
-		return nil, errors.New("MISSING_INVITE")
-	}
-	if part1.Method == "BYE" {
-		bye = part1
-	} else if part2.Method == "BYE" {
-		bye = part2
-	} else {
-		return nil, errors.New("MISSING_BYE")
-	}
-	if len(invite.Values) != len(bye.Values) {
-		return nil, errors.New("INCONSISTENT_VALUES_LENGTH")
-	}
-	record := invite.Values
-	for idx := range record {
-		switch idx {
-		case 0, 1, 2, 3, 6: // Leave these values as they are
-		case 4, 5:
-			record[idx] = bye.Values[idx] // Update record with status from bye
-		default:
-			if bye.Values[idx] != "" { // Any value higher than 6 is dynamically inserted, overwrite if non empty
-				record[idx] = bye.Values[idx]
-			}
-
-		}
-	}
-	callDur := bye.Timestamp.Sub(invite.Timestamp)
-	record = append(record, strconv.FormatFloat(callDur.Seconds(), 'f', -1, 64))
-	return record, nil
-}
 
 type PartialCDRRecord struct {
 	cdrs            []*engine.CDR         // Number of CDRs

@@ -68,7 +68,7 @@ func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclien
 		cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
 	var err error
-	if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
+	if cdrc.partialFlatstoreRecordsCache, err = NewPartialFlatstoreRecordsCache(cdrcCfg.PartialRecordCache, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
 		return nil, err
 	}
 	// Before processing, make sure in and out folders exist
@@ -82,15 +82,15 @@ func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclien
 }
 
 type Cdrc struct {
-	httpSkipTlsCheck    bool
-	cdrcCfgs            []*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
-	dfltCdrcCfg         *config.CdrcConfig
-	timezone            string
-	cdrs                rpcclient.RpcClientConnection
-	httpClient          *http.Client
-	closeChan           chan struct{}        // Used to signal config reloads when we need to span different CDRC-Client
-	maxOpenFiles        chan struct{}        // Maximum number of simultaneous files processed
-	partialRecordsCache *PartialRecordsCache // Shared between all files in the folder we process
+	httpSkipTlsCheck             bool
+	cdrcCfgs                     []*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
+	dfltCdrcCfg                  *config.CdrcConfig
+	timezone                     string
+	cdrs                         rpcclient.RpcClientConnection
+	httpClient                   *http.Client
+	closeChan                    chan struct{}                 // Used to signal config reloads when we need to span different CDRC-Client
+	maxOpenFiles                 chan struct{}                 // Maximum number of simultaneous files processed
+	partialFlatstoreRecordsCache *PartialFlatstoreRecordsCache // Shared between all files in the folder we process
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -178,7 +178,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		csvReader := csv.NewReader(bufio.NewReader(file))
 		csvReader.Comma = self.dfltCdrcCfg.FieldSeparator
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg, self.cdrcCfgs,
-			self.httpSkipTlsCheck, self.partialRecordsCache)
+			self.httpSkipTlsCheck, self.partialFlatstoreRecordsCache)
 	case utils.FWV:
 		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs, self.httpClient, self.httpSkipTlsCheck, self.timezone)
 	case utils.XML:
