@@ -16,8 +16,6 @@ import (
 type cacheStore interface {
 	Put(string, interface{})
 	Get(string) (interface{}, bool)
-	Append(string, ...string)
-	Pop(string, ...string)
 	Delete(string)
 	DeletePrefix(string)
 	CountEntriesForPrefix(string) int
@@ -54,35 +52,6 @@ func (cs cacheDoubleStore) Get(key string) (interface{}, bool) {
 		}
 	}
 	return nil, false
-}
-
-func (cs cacheDoubleStore) Append(key string, values ...string) {
-	var elements map[string]struct{} // using map for faster check if element is present
-	if v, ok := cs.Get(key); ok {
-		elements = v.(map[string]struct{})
-	} else {
-		elements = make(map[string]struct{})
-	}
-	for _, value := range values {
-		elements[value] = struct{}{}
-	}
-	cache.Put(key, elements)
-}
-
-func (cs cacheDoubleStore) Pop(key string, values ...string) {
-	if v, ok := cs.Get(key); ok {
-		elements, ok := v.(map[string]struct{})
-		if ok {
-			for _, value := range values {
-				delete(elements, value)
-			}
-			if len(elements) > 0 {
-				cache.Put(key, elements)
-			} else {
-				cache.Delete(key)
-			}
-		}
-	}
 }
 
 func (cs cacheDoubleStore) Delete(key string) {
@@ -203,35 +172,6 @@ func (cs cacheLRUTTL) Get(key string) (interface{}, bool) {
 	return nil, false
 }
 
-func (cs cacheLRUTTL) Append(key string, values ...string) {
-	var elements map[string]struct{} // using map for faster check if element is present
-	if v, ok := cs.Get(key); ok {
-		elements = v.(map[string]struct{})
-	} else {
-		elements = make(map[string]struct{})
-	}
-	for _, value := range values {
-		elements[value] = struct{}{}
-	}
-	cache.Put(key, elements)
-}
-
-func (cs cacheLRUTTL) Pop(key string, values ...string) {
-	if v, ok := cs.Get(key); ok {
-		elements, ok := v.(map[string]struct{})
-		if ok {
-			for _, value := range values {
-				delete(elements, value)
-			}
-			if len(elements) > 0 {
-				cache.Put(key, elements)
-			} else {
-				cache.Delete(key)
-			}
-		}
-	}
-}
-
 func (cs cacheLRUTTL) Delete(key string) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if keyMap, ok := cs[prefix]; ok {
@@ -283,40 +223,11 @@ func (cs cacheSimpleStore) Put(key string, value interface{}) {
 	cs.cache[key] = value
 }
 
-func (cs cacheSimpleStore) Append(key string, values ...string) {
-	var elements map[string]struct{}
-	if v, ok := cs.Get(key); ok {
-		elements = v.(map[string]struct{})
-	} else {
-		elements = make(map[string]struct{})
-	}
-	for _, value := range values {
-		elements[value] = struct{}{}
-	}
-	cache.Put(key, elements)
-}
-
 func (cs cacheSimpleStore) Get(key string) (interface{}, bool) {
 	if value, exists := cs.cache[key]; exists {
 		return value, true
 	}
 	return nil, false
-}
-
-func (cs cacheSimpleStore) Pop(key string, values ...string) {
-	if v, ok := cs.Get(key); ok {
-		elements, ok := v.(map[string]struct{})
-		if ok {
-			for _, value := range values {
-				delete(elements, value)
-			}
-			if len(elements) > 0 {
-				cache.Put(key, elements)
-			} else {
-				cache.Delete(key)
-			}
-		}
-	}
 }
 
 func (cs cacheSimpleStore) Delete(key string) {

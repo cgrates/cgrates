@@ -1642,6 +1642,8 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		if err != nil {
 			return err
 		}
+		// write reverse destination
+
 		if verbose {
 			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}

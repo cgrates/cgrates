@@ -188,7 +188,7 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 
 	var oldAlias *Alias
 	if !attr.Overwrite { // get previous value
-		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId(), false)
+		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId())
 	}
 
 	if attr.Overwrite || oldAlias == nil {

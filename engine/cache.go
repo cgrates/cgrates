@@ -6,9 +6,7 @@ import "sync"
 const (
 	PREFIX_LEN   = 4
 	KIND_ADD     = "ADD"
-	KIND_ADP     = "ADP"
 	KIND_REM     = "REM"
-	KIND_POP     = "POP"
 	KIND_PRF     = "PRF"
 	DOUBLE_CACHE = true
 )
@@ -70,10 +68,6 @@ func CacheCommitTransaction() {
 			CacheRemPrefixKey(item.key)
 		case KIND_ADD:
 			CacheSet(item.key, item.value)
-		case KIND_ADP:
-			CachePush(item.key, item.value.([]string)...)
-		case KIND_POP:
-			CachePop(item.key, item.value.([]string)...)
 		}
 	}
 	mux.Unlock()

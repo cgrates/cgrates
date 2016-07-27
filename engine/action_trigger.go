@@ -57,12 +57,12 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
-	aac, err = ratingStorage.GetActions(at.ActionsID, false)
-	aac.Sort()
+	aac, err = ratingStorage.GetActions(at.ActionsID)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
 		return
 	}
+	aac.Sort()
 	at.Executed = true
 	transactionFailed := false
 	removeAccountActionFound := false

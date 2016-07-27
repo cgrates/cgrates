@@ -290,28 +290,33 @@ func (rs *RedisStorage) SetDestination(dest *Destination, cache bool) (err error
 	return
 }
 
-func (rs *RedisStorage) GetDestinationIDs(prefix string) (ids []string, err error) {
-	prefix = utils.DESTINATION_PREFIX + prefix
-	var values []string
-	if values, err = rs.db.Cmd("SMEMBERS", prefix).List(); len(values) > 0 && err == nil {
-		CachePush(utils.DESTINATION_PREFIX+prefix, values...)
-	} else {
+func (rs *RedisStorage) GetReverseDestination(prefix string) (ids []string, err error) {
+	prefix = utils.REVERSE_DESTINATION_PREFIX + prefix
+	if x, ok := CacheGet(prefix); ok {
+		if x != nil {
+			return x.([]string), nil
+		}
 		return nil, utils.ErrNotFound
 	}
+	var values []string
+	if values, err = rs.db.Cmd("SMEMBERS", prefix).List(); len(values) > 0 && err == nil {
+	} else {
+
+		return nil, utils.ErrNotFound
+	}
+	CacheSet(prefix, values)
 	return
 }
 
-func (rs *RedisStorage) SetDestinationIDs(dest *Destination) (err error) {
+func (rs *RedisStorage) SetReverseDestination(dest *Destination, cache bool) (err error) {
 	for _, p := range dest.Prefixes {
-		err = rs.db.Cmd("SADD", utils.DESTINATION_PREFIX+p, dest.Id).Err
+		err = rs.db.Cmd("SADD", utils.REVERSE_DESTINATION_PREFIX+p, dest.Id).Err
 		if err != nil {
 			break
 		}
 	}
-
-	if err == nil && historyScribe != nil {
-		response := 0
-		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
+	if cache && err == nil {
+		CacheSet(utils.REVERSE_DESTINATION_PREFIX+dest.Id, dest)
 	}
 	return
 }
