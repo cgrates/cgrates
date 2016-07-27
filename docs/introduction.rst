@@ -91,6 +91,7 @@ Without Balancer using HA (broadcast) ....
 1.2. Links
 ----------
 
+- CGRateS quick overview :ref:`overview-main`
 - CGRateS home page `<http://www.cgrates.org>`_
 - Documentation `<http://cgrates.readthedocs.io>`_
 - API docs `<https://godoc.org/github.com/cgrates/cgrates/apier>`_
