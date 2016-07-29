@@ -297,4 +297,6 @@ const (
 	XML                         = "xml"
 	MetaGOBrpc                  = "*gob"
 	MetaJSONrpc                 = "*json"
+	MetaDateTime                = "*datetime"
+	MetaMaskedDestination       = "*masked_destination"
 )

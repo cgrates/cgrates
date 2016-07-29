@@ -588,3 +588,18 @@ func (h HierarchyPath) AsString(sep string, prefix bool) string {
 	}
 	return retStr
 }
+
+// Mask a number of characters in the suffix of the destination
+func MaskSuffix(dest string, maskLen int) string {
+	destLen := len(dest)
+	if maskLen < 0 {
+		return dest
+	} else if maskLen > destLen {
+		maskLen = destLen
+	}
+	dest = dest[:destLen-maskLen]
+	for i := 0; i < maskLen; i++ {
+		dest += MASK_CHAR
+	}
+	return dest
+}

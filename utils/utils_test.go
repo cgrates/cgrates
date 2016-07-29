@@ -686,3 +686,20 @@ func TestHierarchyPathAsString(t *testing.T) {
 		t.Errorf("Expecting: %q, received: %q", eStr, hpStr)
 	}
 }
+
+func TestMaskSuffix(t *testing.T) {
+	dest := "+4986517174963"
+	if destMasked := MaskSuffix(dest, 3); destMasked != "+4986517174***" {
+		t.Error("Unexpected mask applied", destMasked)
+	}
+	if destMasked := MaskSuffix(dest, -1); destMasked != dest {
+		t.Error("Negative maskLen should not modify destination", destMasked)
+	}
+	if destMasked := MaskSuffix(dest, 0); destMasked != dest {
+		t.Error("Zero maskLen should not modify destination", destMasked)
+	}
+	if destMasked := MaskSuffix(dest, 100); destMasked != "**************" {
+		t.Error("High maskLen should return complete mask", destMasked)
+	}
+
+}

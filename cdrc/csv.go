@@ -33,22 +33,22 @@ import (
 
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig,
-	httpSkipTlsCheck bool, PartialFlatstoreRecordsCache *PartialFlatstoreRecordsCache) *CsvRecordsProcessor {
+	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader, timezone: timezone, fileName: fileName,
 		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs,
-		httpSkipTlsCheck: httpSkipTlsCheck, PartialFlatstoreRecordsCache: PartialFlatstoreRecordsCache}
+		httpSkipTlsCheck: httpSkipTlsCheck, unpairedRecordsCache: unpairedRecordsCache}
 
 }
 
 type CsvRecordsProcessor struct {
-	csvReader                    *csv.Reader
-	timezone                     string // Timezone for CDRs which are not clearly specifying it
-	fileName                     string
-	dfltCdrcCfg                  *config.CdrcConfig
-	cdrcCfgs                     []*config.CdrcConfig
-	processedRecordsNr           int64 // Number of content records in file
-	httpSkipTlsCheck             bool
-	PartialFlatstoreRecordsCache *PartialFlatstoreRecordsCache // Shared by cdrc so we can cache for all files in a folder
+	csvReader            *csv.Reader
+	timezone             string // Timezone for CDRs which are not clearly specifying it
+	fileName             string
+	dfltCdrcCfg          *config.CdrcConfig
+	cdrcCfgs             []*config.CdrcConfig
+	processedRecordsNr   int64 // Number of content records in file
+	httpSkipTlsCheck     bool
+	unpairedRecordsCache *UnpairedRecordsCache // Shared by cdrc so we can cache for all files in a folder
 }
 
 func (self *CsvRecordsProcessor) ProcessedRecordsNr() int64 {
@@ -78,21 +78,21 @@ func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]stri
 		record = append(record, "0") // Append duration 0 for failed calls flatstore CDR and do not process it further
 		return record, nil
 	}
-	pr, err := NewPartialFlatstoreRecord(record, self.timezone)
+	pr, err := NewUnpairedRecord(record, self.timezone)
 	if err != nil {
 		return nil, err
 	}
 	// Retrieve and complete the record from cache
-	cachedFilename, cachedPartial := self.PartialFlatstoreRecordsCache.GetPartialRecord(pr.OriginID, self.fileName)
+	cachedFilename, cachedPartial := self.unpairedRecordsCache.GetPartialRecord(pr.OriginID, self.fileName)
 	if cachedPartial == nil { // Not cached, do it here and stop processing
-		self.PartialFlatstoreRecordsCache.CachePartial(self.fileName, pr)
+		self.unpairedRecordsCache.CachePartial(self.fileName, pr)
 		return nil, nil
 	}
 	pairedRecord, err := pairToRecord(cachedPartial, pr)
 	if err != nil {
 		return nil, err
 	}
-	self.PartialFlatstoreRecordsCache.UncachePartial(cachedFilename, pr)
+	self.unpairedRecordsCache.UncachePartial(cachedFilename, pr)
 	return pairedRecord, nil
 }
 

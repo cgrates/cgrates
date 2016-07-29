@@ -31,21 +31,21 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewPartialFlatstoreRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune) (*PartialFlatstoreRecordsCache, error) {
-	return &PartialFlatstoreRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep,
-		partialRecords: make(map[string]map[string]*PartialFlatstoreRecord), guard: engine.Guardian}, nil
+func NewUnpairedRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune) (*UnpairedRecordsCache, error) {
+	return &UnpairedRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep,
+		partialRecords: make(map[string]map[string]*UnpairedRecord), guard: engine.Guardian}, nil
 }
 
-type PartialFlatstoreRecordsCache struct {
+type UnpairedRecordsCache struct {
 	ttl            time.Duration
 	cdrOutDir      string
 	csvSep         rune
-	partialRecords map[string]map[string]*PartialFlatstoreRecord // [FileName"][OriginID]*PartialRecord
+	partialRecords map[string]map[string]*UnpairedRecord // [FileName"][OriginID]*PartialRecord
 	guard          *engine.GuardianLock
 }
 
 // Dumps the cache into a .unpaired file in the outdir and cleans cache after
-func (self *PartialFlatstoreRecordsCache) dumpUnpairedRecords(fileName string) error {
+func (self *UnpairedRecordsCache) dumpUnpairedRecords(fileName string) error {
 	_, err := self.guard.Guard(func() (interface{}, error) {
 		if len(self.partialRecords[fileName]) != 0 { // Only write the file if there are records in the cache
 			unpairedFilePath := path.Join(self.cdrOutDir, fileName+UNPAIRED_SUFFIX)
@@ -71,9 +71,9 @@ func (self *PartialFlatstoreRecordsCache) dumpUnpairedRecords(fileName string) e
 }
 
 // Search in cache and return the partial record with accountind id defined, prefFilename is searched at beginning because of better match probability
-func (self *PartialFlatstoreRecordsCache) GetPartialRecord(OriginID, prefFileName string) (string, *PartialFlatstoreRecord) {
+func (self *UnpairedRecordsCache) GetPartialRecord(OriginID, prefFileName string) (string, *UnpairedRecord) {
 	var cachedFilename string
-	var cachedPartial *PartialFlatstoreRecord
+	var cachedPartial *UnpairedRecord
 	checkCachedFNames := []string{prefFileName} // Higher probability to match as firstFileName
 	for fName := range self.partialRecords {
 		if fName != prefFileName {
@@ -95,10 +95,10 @@ func (self *PartialFlatstoreRecordsCache) GetPartialRecord(OriginID, prefFileNam
 	return cachedFilename, cachedPartial
 }
 
-func (self *PartialFlatstoreRecordsCache) CachePartial(fileName string, pr *PartialFlatstoreRecord) {
+func (self *UnpairedRecordsCache) CachePartial(fileName string, pr *UnpairedRecord) {
 	self.guard.Guard(func() (interface{}, error) {
 		if fileMp, hasFile := self.partialRecords[fileName]; !hasFile {
-			self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.OriginID: pr}
+			self.partialRecords[fileName] = map[string]*UnpairedRecord{pr.OriginID: pr}
 			if self.ttl != 0 { // Schedule expiry/dump of the just created entry in cache
 				go func() {
 					time.Sleep(self.ttl)
@@ -112,18 +112,18 @@ func (self *PartialFlatstoreRecordsCache) CachePartial(fileName string, pr *Part
 	}, 0, fileName)
 }
 
-func (self *PartialFlatstoreRecordsCache) UncachePartial(fileName string, pr *PartialFlatstoreRecord) {
+func (self *UnpairedRecordsCache) UncachePartial(fileName string, pr *UnpairedRecord) {
 	self.guard.Guard(func() (interface{}, error) {
 		delete(self.partialRecords[fileName], pr.OriginID) // Remove the record out of cache
 		return nil, nil
 	}, 0, fileName)
 }
 
-func NewPartialFlatstoreRecord(record []string, timezone string) (*PartialFlatstoreRecord, error) {
+func NewUnpairedRecord(record []string, timezone string) (*UnpairedRecord, error) {
 	if len(record) < 7 {
 		return nil, errors.New("MISSING_IE")
 	}
-	pr := &PartialFlatstoreRecord{Method: record[0], OriginID: record[3] + record[1] + record[2], Values: record}
+	pr := &UnpairedRecord{Method: record[0], OriginID: record[3] + record[1] + record[2], Values: record}
 	var err error
 	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6], timezone); err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func NewPartialFlatstoreRecord(record []string, timezone string) (*PartialFlatst
 }
 
 // This is a partial record received from Flatstore, can be INVITE or BYE and it needs to be paired in order to produce duration
-type PartialFlatstoreRecord struct {
+type UnpairedRecord struct {
 	Method    string    // INVITE or BYE
 	OriginID  string    // Copute here the OriginID
 	Timestamp time.Time // Timestamp of the event, as written by db_flastore module
@@ -140,8 +140,8 @@ type PartialFlatstoreRecord struct {
 }
 
 // Pairs INVITE and BYE into final record containing as last element the duration
-func pairToRecord(part1, part2 *PartialFlatstoreRecord) ([]string, error) {
-	var invite, bye *PartialFlatstoreRecord
+func pairToRecord(part1, part2 *UnpairedRecord) ([]string, error) {
+	var invite, bye *UnpairedRecord
 	if part1.Method == "INVITE" {
 		invite = part1
 	} else if part2.Method == "INVITE" {

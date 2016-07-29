@@ -28,6 +28,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// PartialCDRRecord is a record which can be updated later
+// different from PartialFlatstoreRecordsCache which is incomplete (eg: need to calculate duration out of 2 records)
 type PartialCDRRecord struct {
 	cdrs            []*engine.CDR         // Number of CDRs
 	cacheDumpFields []*config.CfgCdrField // Fields template to use when dumping from cache on disk
@@ -106,3 +108,5 @@ func (partCDR *PartialCDRRecord) MergeCDRs() *engine.CDR {
 	}
 	return retCdr
 }
+
+//func (partCDR *PartialCDRRecord) AsString() *engine.CDR {
