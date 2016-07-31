@@ -36,13 +36,14 @@ import (
 var partpartcsvCfgPath string
 var partcsvCfg *config.CGRConfig
 var partcsvRPC *rpc.Client
-var partcsvCDRCDirIn, partcsvCDRCDirOut string
+var partcsvCDRCDirIn1, partcsvCDRCDirOut1, partcsvCDRCDirIn2, partcsvCDRCDirOut2 string
 
 var partCsvFileContent1 = `4986517174963,004986517174964,DE-National,04.07.2016 18:58:55,04.07.2016 18:58:55,1,65,Peak,0.014560,498651,partial
 4986517174964,004986517174963,DE-National,04.07.2016 20:58:55,04.07.2016 20:58:55,0,74,Offpeak,0.003360,498651,complete
 `
 
 var partCsvFileContent2 = `4986517174963,004986517174964,DE-National,04.07.2016 19:00:00,04.07.2016 18:58:55,0,15,Offpeak,0.003360,498651,partial`
+var partCsvFileContent3 = `4986517174964,004986517174960,DE-National,04.07.2016 19:05:55,04.07.2016 19:05:55,0,23,Offpeak,0.003360,498651,partial`
 
 var eCacheDumpFile1 = `4986517174963_004986517174964_04.07.2016 18:58:55,1467651600,*rated,086517174963,+4986517174964,2016-07-04T18:58:55+02:00,2016-07-04T18:58:55+02:00,15,-1.00000
 4986517174963_004986517174964_04.07.2016 18:58:55,1467651535,*rated,086517174963,+4986517174964,2016-07-04T18:58:55+02:00,2016-07-04T18:58:55+02:00,65,-1.00000
@@ -73,10 +74,12 @@ func TestPartcsvITCreateCdrDirs(t *testing.T) {
 	if !*testIT {
 		return
 	}
-	for _, cdrcProfiles := range partcsvCfg.CdrcProfiles {
-		for i, cdrcInst := range cdrcProfiles {
-			if i == 0 {
-				partcsvCDRCDirIn, partcsvCDRCDirOut = cdrcInst.CdrInDir, cdrcInst.CdrOutDir
+	for path, cdrcProfiles := range partcsvCfg.CdrcProfiles {
+		for _, cdrcInst := range cdrcProfiles {
+			if path == "/tmp/cdrctests/partcsv1/in" {
+				partcsvCDRCDirIn1, partcsvCDRCDirOut1 = cdrcInst.CdrInDir, cdrcInst.CdrOutDir
+			} else if path == "/tmp/cdrctests/partcsv2/in" {
+				partcsvCDRCDirIn2, partcsvCDRCDirOut2 = cdrcInst.CdrInDir, cdrcInst.CdrOutDir
 			}
 			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
 				if err := os.RemoveAll(dir); err != nil {
@@ -121,7 +124,7 @@ func TestPartcsvITHandleCdr1File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent1), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn1, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -136,7 +139,22 @@ func TestPartcsvITHandleCdr2File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent2), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn1, fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+// Scenario out of first .xml config
+func TestPartcsvITHandleCdr3File(t *testing.T) {
+	if !*testIT {
+		return
+	}
+	fileName := "file3.csv"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent3), 0644); err != nil {
+		t.Fatal(err.Error)
+	}
+	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn2, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -145,18 +163,18 @@ func TestPartcsvITProcessedFiles(t *testing.T) {
 	if !*testIT {
 		return
 	}
-	time.Sleep(time.Duration(2 * time.Second))
-	if outContent1, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut, "file1.csv")); err != nil {
+	time.Sleep(time.Duration(3 * time.Second))
+	if outContent1, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, "file1.csv")); err != nil {
 		t.Error(err)
 	} else if partCsvFileContent1 != string(outContent1) {
 		t.Errorf("Expecting: %q, received: %q", partCsvFileContent1, string(outContent1))
 	}
-	if outContent2, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut, "file2.csv")); err != nil {
+	if outContent2, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, "file2.csv")); err != nil {
 		t.Error(err)
 	} else if partCsvFileContent2 != string(outContent2) {
 		t.Errorf("Expecting: %q, received: %q", partCsvFileContent2, string(outContent2))
 	}
-	filesInDir, _ := ioutil.ReadDir(partcsvCDRCDirOut)
+	filesInDir, _ := ioutil.ReadDir(partcsvCDRCDirOut1)
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		if strings.HasPrefix(file.Name(), "4986517174963_004986517174964") {
@@ -164,10 +182,15 @@ func TestPartcsvITProcessedFiles(t *testing.T) {
 			break
 		}
 	}
-	if contentCacheDump, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut, fileName)); err != nil {
+	if contentCacheDump, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, fileName)); err != nil {
 		t.Error(err)
 	} else if eCacheDumpFile1 != string(contentCacheDump) {
 		t.Errorf("Expecting: %q, received: %q", eCacheDumpFile1, string(contentCacheDump))
+	}
+	if outContent3, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut2, "file3.csv")); err != nil {
+		t.Error(err)
+	} else if partCsvFileContent3 != string(outContent3) {
+		t.Errorf("Expecting: %q, received: %q", partCsvFileContent3, string(outContent3))
 	}
 }
 
@@ -178,10 +201,15 @@ func TestPartcsvITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	if err := partcsvRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
+	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 	if err := partcsvRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174963"}}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+	if err := partcsvRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174960"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
