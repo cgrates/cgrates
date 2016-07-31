@@ -30,24 +30,27 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 const (
 	PartialRecordsSuffix = "partial"
 )
 
-func NewPartialRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune, roundDecimals int, timezone string, httpSkipTlsCheck bool) (*PartialRecordsCache, error) {
-	return &PartialRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep, roundDecimals: roundDecimals, timezone: timezone, httpSkipTlsCheck: httpSkipTlsCheck,
+func NewPartialRecordsCache(ttl time.Duration, expiryAction string, cdrOutDir string, csvSep rune, roundDecimals int, timezone string, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection) (*PartialRecordsCache, error) {
+	return &PartialRecordsCache{ttl: ttl, expiryAction: expiryAction, cdrOutDir: cdrOutDir, csvSep: csvSep, roundDecimals: roundDecimals, timezone: timezone, httpSkipTlsCheck: httpSkipTlsCheck,
 		partialRecords: make(map[string]*PartialCDRRecord), dumpTimers: make(map[string]*time.Timer), guard: engine.Guardian}, nil
 }
 
 type PartialRecordsCache struct {
 	ttl              time.Duration
+	expiryAction     string
 	cdrOutDir        string
 	csvSep           rune
 	roundDecimals    int
 	timezone         string
 	httpSkipTlsCheck bool
+	cdrs             rpcclient.RpcClientConnection
 	partialRecords   map[string]*PartialCDRRecord // [OriginID]*PartialRecord
 	dumpTimers       map[string]*time.Timer       // [OriginID]*time.Timer which can be canceled or reset
 	guard            *engine.GuardianLock
@@ -85,22 +88,51 @@ func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
 	}
 }
 
+// Called when record expires in cache, will send the CDR merged (forcing it's completion) to the CDRS
+func (prc *PartialRecordsCache) postCDR(originID string) {
+	_, err := prc.guard.Guard(func() (interface{}, error) {
+		if prc.partialRecords[originID].Len() != 0 { // Only write the file if there are records in the cache
+			cdr := prc.partialRecords[originID].MergeCDRs()
+			cdr.Partial = false // force completion
+			var reply string
+			if err := prc.cdrs.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR  %+v from partial cache, error: %s", cdr, err.Error()))
+			} else if reply != utils.OK {
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", cdr, reply))
+			}
+		}
+		delete(prc.partialRecords, originID)
+		return nil, nil
+	}, 0, originID)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CDRC> Failed posting from cache CDR with originID: %s, error: %s", originID, err.Error()))
+	}
+}
+
 // Called to cache a partial record.
 // If exists in cache, CDRs will be updated
 // Locking should be handled at higher layer
-func (prc *PartialRecordsCache) cachePartialCDR(pCDR *PartialCDRRecord) *PartialCDRRecord {
+func (prc *PartialRecordsCache) cachePartialCDR(pCDR *PartialCDRRecord) (*PartialCDRRecord, error) {
 	originID := pCDR.cdrs[0].OriginID
-	if tmr, hasIt := prc.dumpTimers[originID]; hasIt {
+	if tmr, hasIt := prc.dumpTimers[originID]; hasIt { // Update existing timer
 		tmr.Reset(prc.ttl)
 	} else {
-		prc.dumpTimers[originID] = time.AfterFunc(prc.ttl, func() { prc.dumpPartialRecords(originID) }) // Schedule dumping of the partial CDR
+		switch prc.expiryAction {
+		case utils.MetaDumpToFile:
+			prc.dumpTimers[originID] = time.AfterFunc(prc.ttl, func() { prc.dumpPartialRecords(originID) }) // Schedule dumping of the partial CDR
+		case utils.MetaPostCDR:
+			prc.dumpTimers[originID] = time.AfterFunc(prc.ttl, func() { prc.postCDR(originID) }) // Schedule dumping of the partial CDR
+		default:
+			return nil, fmt.Errorf("Unsupported PartialCacheExpiryAction: %s", prc.expiryAction)
+		}
+
 	}
 	if _, hasIt := prc.partialRecords[originID]; !hasIt {
 		prc.partialRecords[originID] = pCDR
 	} else { // Exists, update it's records
 		prc.partialRecords[originID].cdrs = append(prc.partialRecords[originID].cdrs, pCDR.cdrs...)
 	}
-	return prc.partialRecords[originID]
+	return prc.partialRecords[originID], nil
 }
 
 // Called to uncache partialCDR and remove automatic dumping of the cached records
@@ -122,7 +154,10 @@ func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*
 		if _, hasIt := prc.partialRecords[originID]; !hasIt && pCDR.Len() == 1 && !pCDR.cdrs[0].Partial {
 			return pCDR.cdrs[0], nil // Special case when not a partial CDR and not having cached CDRs on same OriginID
 		}
-		cachedPartialCDR := prc.cachePartialCDR(pCDR)
+		cachedPartialCDR, err := prc.cachePartialCDR(pCDR)
+		if err != nil {
+			return nil, err
+		}
 		var final bool
 		for _, cdr := range pCDR.cdrs {
 			if !cdr.Partial {

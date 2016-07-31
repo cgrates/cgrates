@@ -300,4 +300,6 @@ const (
 	MetaDateTime                = "*datetime"
 	MetaMaskedDestination       = "*masked_destination"
 	MetaUnixTimestamp           = "*unix_timestamp"
+	MetaPostCDR                 = "*post_cdr"
+	MetaDumpToFile              = "*dump_to_file"
 )

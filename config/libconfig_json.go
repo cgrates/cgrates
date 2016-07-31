@@ -148,28 +148,29 @@ type CdreJsonCfg struct {
 
 // Cdrc config section
 type CdrcJsonCfg struct {
-	Id                         *string
-	Enabled                    *bool
-	Dry_run                    *bool
-	Cdrs_conns                 *[]*HaPoolJsonCfg
-	Cdr_format                 *string
-	Field_separator            *string
-	Timezone                   *string
-	Run_delay                  *int
-	Data_usage_multiply_factor *float64
-	Cdr_in_dir                 *string
-	Cdr_out_dir                *string
-	Failed_calls_prefix        *string
-	Cdr_path                   *string
-	Cdr_source_id              *string
-	Cdr_filter                 *string
-	Continue_on_success        *bool
-	Max_open_files             *int
-	Partial_record_cache       *string
-	Header_fields              *[]*CdrFieldJsonCfg
-	Content_fields             *[]*CdrFieldJsonCfg
-	Trailer_fields             *[]*CdrFieldJsonCfg
-	Cache_dump_fields          *[]*CdrFieldJsonCfg
+	Id                          *string
+	Enabled                     *bool
+	Dry_run                     *bool
+	Cdrs_conns                  *[]*HaPoolJsonCfg
+	Cdr_format                  *string
+	Field_separator             *string
+	Timezone                    *string
+	Run_delay                   *int
+	Data_usage_multiply_factor  *float64
+	Cdr_in_dir                  *string
+	Cdr_out_dir                 *string
+	Failed_calls_prefix         *string
+	Cdr_path                    *string
+	Cdr_source_id               *string
+	Cdr_filter                  *string
+	Continue_on_success         *bool
+	Max_open_files              *int
+	Partial_record_cache        *string
+	Partial_cache_expiry_action *string
+	Header_fields               *[]*CdrFieldJsonCfg
+	Content_fields              *[]*CdrFieldJsonCfg
+	Trailer_fields              *[]*CdrFieldJsonCfg
+	Cache_dump_fields           *[]*CdrFieldJsonCfg
 }
 
 // SM-Generic config section
