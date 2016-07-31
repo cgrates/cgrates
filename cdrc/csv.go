@@ -142,6 +142,21 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
+		filterBreak := false
+		for _, rsrFilter := range cdrFldCfg.FieldFilter {
+			if rsrFilter == nil { // Nil filter does not need to match anything
+				continue
+			}
+			if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+				return nil, fmt.Errorf("Ignoring record: %v - cannot compile field filter %+v", record, rsrFilter)
+			} else if !rsrFilter.FilterPasses(record[cfgFieldIdx]) {
+				filterBreak = true
+				break
+			}
+		}
+		if filterBreak { // Stop processing this field template since it's filters are not matching
+			continue
+		}
 		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
 			switch cdrFldCfg.FieldId {
 			case utils.ACCID:
@@ -152,7 +167,8 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 
 		}
 		var fieldVal string
-		if cdrFldCfg.Type == utils.META_COMPOSED {
+		switch cdrFldCfg.Type {
+		case utils.META_COMPOSED, utils.MetaUnixTimestamp:
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
 					fieldVal += cfgFieldRSR.ParseValue("")
@@ -160,13 +176,18 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
 						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
 					} else {
-						fieldVal += cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+						strVal := cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+						if cdrFldCfg.Type == utils.MetaUnixTimestamp {
+							t, _ := utils.ParseTimeDetectLayout(strVal, self.timezone)
+							strVal = strconv.Itoa(int(t.Unix()))
+						}
+						fieldVal += strVal
 					}
 				}
 			}
-		} else if cdrFldCfg.Type == utils.META_HTTP_POST {
+		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
-		} else {
+		default:
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
 		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {

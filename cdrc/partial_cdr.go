@@ -33,12 +33,12 @@ import (
 )
 
 const (
-	PartialRecordsSuffix = ".partial"
+	PartialRecordsSuffix = "partial"
 )
 
 func NewPartialRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune, roundDecimals int, timezone string, httpSkipTlsCheck bool) (*PartialRecordsCache, error) {
 	return &PartialRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep, roundDecimals: roundDecimals, timezone: timezone, httpSkipTlsCheck: httpSkipTlsCheck,
-		partialRecords: make(map[string]*PartialCDRRecord), guard: engine.Guardian}, nil
+		partialRecords: make(map[string]*PartialCDRRecord), dumpTimers: make(map[string]*time.Timer), guard: engine.Guardian}, nil
 }
 
 type PartialRecordsCache struct {
@@ -120,7 +120,7 @@ func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*
 	originID := pCDR.cdrs[0].OriginID
 	pCDRIf, err := prc.guard.Guard(func() (interface{}, error) {
 		if _, hasIt := prc.partialRecords[originID]; !hasIt && pCDR.Len() == 1 && !pCDR.cdrs[0].Partial {
-			return pCDR, nil // Special case when not a partial CDR and not having cached CDRs on same OriginID
+			return pCDR.cdrs[0], nil // Special case when not a partial CDR and not having cached CDRs on same OriginID
 		}
 		cachedPartialCDR := prc.cachePartialCDR(pCDR)
 		var final bool
@@ -136,6 +136,9 @@ func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*
 		prc.uncachePartialCDR(cachedPartialCDR)
 		return cachedPartialCDR.MergeCDRs(), nil
 	}, 0, originID)
+	if pCDRIf == nil {
+		return nil, err
+	}
 	return pCDRIf.(*engine.CDR), err
 }
 

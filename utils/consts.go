@@ -299,4 +299,5 @@ const (
 	MetaJSONrpc                 = "*json"
 	MetaDateTime                = "*datetime"
 	MetaMaskedDestination       = "*masked_destination"
+	MetaUnixTimestamp           = "*unix_timestamp"
 )

@@ -142,7 +142,7 @@ const CGRATES_CFG_JSON = `
 		"cdrs_conns": [
 			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
 		],
-		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
+		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv>
 		"field_separator": ",",						// separator used in case of csv files
 		"timezone": "",								// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
@@ -156,6 +156,7 @@ const CGRATES_CFG_JSON = `
 		"cdr_filter": "",							// filter CDR records to import
 		"continue_on_success": false,				// continue to the next template if executed
 		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
+		"cache_expiry_action": "*post_cdr",			// action taken when cache when records in cache are timed-out
 		"header_fields": [],						// template of the import header fields
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "2", "mandatory": true},
