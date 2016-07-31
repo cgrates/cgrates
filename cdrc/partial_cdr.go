@@ -28,7 +28,6 @@ import (
 )
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 const (
 	PartialRecordsSuffix = ".partial"
 )
@@ -132,8 +131,6 @@ func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*
 	return pCDRIf.(*engine.CDR), err
 }
 
-=======
->>>>>>> parent of a36812f... PartialRecordsCache with MergePartialCDR method
 =======
 >>>>>>> parent of a36812f... PartialRecordsCache with MergePartialCDR method
 // PartialCDRRecord is a record which can be updated later
