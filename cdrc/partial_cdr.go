@@ -19,10 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
-	"encoding/csv"
-	"fmt"
-	"os"
-	"path"
 	"reflect"
 	"sort"
 	"time"
@@ -31,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+<<<<<<< HEAD
 const (
 	PartialRecordsSuffix = ".partial"
 )
@@ -134,6 +131,8 @@ func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*
 	return pCDRIf.(*engine.CDR), err
 }
 
+=======
+>>>>>>> parent of a36812f... PartialRecordsCache with MergePartialCDR method
 // PartialCDRRecord is a record which can be updated later
 // different from PartialFlatstoreRecordsCache which is incomplete (eg: need to calculate duration out of 2 records)
 type PartialCDRRecord struct {
@@ -214,3 +213,5 @@ func (partCDR *PartialCDRRecord) MergeCDRs() *engine.CDR {
 	}
 	return retCdr
 }
+
+//func (partCDR *PartialCDRRecord) AsString() *engine.CDR {
