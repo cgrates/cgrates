@@ -293,6 +293,9 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 	if b == nil {
 		return
 	}
+        if bf.Uuid != nil {
+		b.Uuid = *bf.Uuid
+	}
 	if bf.ID != nil {
 		b.ID = *bf.ID
 	}
