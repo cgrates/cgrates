@@ -27,7 +27,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -65,13 +64,9 @@ func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
 			}
 			csvWriter := csv.NewWriter(fileOut)
 			csvWriter.Comma = prc.csvSep
-			for _, cdr := range prc.partialRecords[originID].cdrs {
-				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields, 0, prc.roundDecimals, prc.timezone, prc.httpSkipTlsCheck, 0, "", nil)
-				if err != nil {
-					return nil, err
-				}
-				if err := csvWriter.Write(expRec); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing partial CDR %v to file: %s, error: %s", cdr, dumpFilePath, err.Error()))
+			for _, rec := range prc.partialRecords[originID].originalRecords {
+				if err := csvWriter.Write(rec); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing partial CDR record %v to file: %s, error: %s", rec, dumpFilePath, err.Error()))
 					return nil, err
 				}
 			}
@@ -113,12 +108,15 @@ func (prc *PartialRecordsCache) uncachePartialCDR(pCDR *PartialCDRRecord) {
 }
 
 // Returns PartialCDR only if merge was possible
-func (prc *PartialRecordsCache) MergePartialCDR(pCDR *PartialCDRRecord) (*engine.CDR, error) {
+func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*engine.CDR, error) {
 	if pCDR.Len() == 0 || pCDR.cdrs[0].OriginID == "" { // Sanity check
 		return nil, nil
 	}
 	originID := pCDR.cdrs[0].OriginID
 	pCDRIf, err := prc.guard.Guard(func() (interface{}, error) {
+		if _, hasIt := prc.partialRecords[originID]; !hasIt && pCDR.Len() == 1 && !pCDR.cdrs[0].Partial { // Special case when not a partial CDR and not having cached CDRs on same OriginID
+			return pCDR, nil
+		}
 		cachedPartialCDR := prc.cachePartialCDR(pCDR)
 		var final bool
 		for _, cdr := range pCDR.cdrs {
@@ -139,8 +137,8 @@ func (prc *PartialRecordsCache) MergePartialCDR(pCDR *PartialCDRRecord) (*engine
 // PartialCDRRecord is a record which can be updated later
 // different from PartialFlatstoreRecordsCache which is incomplete (eg: need to calculate duration out of 2 records)
 type PartialCDRRecord struct {
-	cdrs            []*engine.CDR         // Number of CDRs
-	cacheDumpFields []*config.CfgCdrField // Fields template to use when dumping from cache on disk
+	cdrs            []*engine.CDR // Number of CDRs
+	originalRecords [][]string    // Keep here the original records so we can dump when needed
 }
 
 // Part of sort interface
