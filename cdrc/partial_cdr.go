@@ -113,12 +113,15 @@ func (prc *PartialRecordsCache) uncachePartialCDR(pCDR *PartialCDRRecord) {
 }
 
 // Returns PartialCDR only if merge was possible
-func (prc *PartialRecordsCache) MergePartialCDR(pCDR *PartialCDRRecord) (*engine.CDR, error) {
+func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*engine.CDR, error) {
 	if pCDR.Len() == 0 || pCDR.cdrs[0].OriginID == "" { // Sanity check
 		return nil, nil
 	}
 	originID := pCDR.cdrs[0].OriginID
 	pCDRIf, err := prc.guard.Guard(func() (interface{}, error) {
+		if _, hasIt := prc.partialRecords[originID]; !hasIt && pCDR.Len() == 1 && !pCDR.cdrs[0].Partial {
+			return pCDR, nil // Special case when not a partial CDR and not having cached CDRs on same OriginID
+		}
 		cachedPartialCDR := prc.cachePartialCDR(pCDR)
 		var final bool
 		for _, cdr := range pCDR.cdrs {
@@ -134,6 +137,10 @@ func (prc *PartialRecordsCache) MergePartialCDR(pCDR *PartialCDRRecord) (*engine
 		return cachedPartialCDR.MergeCDRs(), nil
 	}, 0, originID)
 	return pCDRIf.(*engine.CDR), err
+}
+
+func NewPartialCDRRecord(cdr *engine.CDR, cacheDumpFlds []*config.CfgCdrField) *PartialCDRRecord {
+	return &PartialCDRRecord{cdrs: []*engine.CDR{cdr}, cacheDumpFields: cacheDumpFlds}
 }
 
 // PartialCDRRecord is a record which can be updated later

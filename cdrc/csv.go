@@ -33,22 +33,24 @@ import (
 
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig,
-	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache) *CsvRecordsProcessor {
+	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache, partialRecordsCache *PartialRecordsCache, cacheDumpFields []*config.CfgCdrField) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader, timezone: timezone, fileName: fileName,
-		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs,
-		httpSkipTlsCheck: httpSkipTlsCheck, unpairedRecordsCache: unpairedRecordsCache}
+		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs, httpSkipTlsCheck: httpSkipTlsCheck, unpairedRecordsCache: unpairedRecordsCache,
+		partialRecordsCache: partialRecordsCache, partialCacheDumpFields: cacheDumpFields}
 
 }
 
 type CsvRecordsProcessor struct {
-	csvReader            *csv.Reader
-	timezone             string // Timezone for CDRs which are not clearly specifying it
-	fileName             string
-	dfltCdrcCfg          *config.CdrcConfig
-	cdrcCfgs             []*config.CdrcConfig
-	processedRecordsNr   int64 // Number of content records in file
-	httpSkipTlsCheck     bool
-	unpairedRecordsCache *UnpairedRecordsCache // Shared by cdrc so we can cache for all files in a folder
+	csvReader              *csv.Reader
+	timezone               string // Timezone for CDRs which are not clearly specifying it
+	fileName               string
+	dfltCdrcCfg            *config.CdrcConfig
+	cdrcCfgs               []*config.CdrcConfig
+	processedRecordsNr     int64 // Number of content records in file
+	httpSkipTlsCheck       bool
+	unpairedRecordsCache   *UnpairedRecordsCache // Shared by cdrc so we can cache for all files in a folder
+	partialRecordsCache    *PartialRecordsCache  // Cache records which are of type "Partial"
+	partialCacheDumpFields []*config.CfgCdrField
 }
 
 func (self *CsvRecordsProcessor) ProcessedRecordsNr() int64 {
@@ -116,11 +118,17 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 		if filterBreak { // Stop importing cdrc fields profile due to non matching filter
 			continue
 		}
-		if storedCdr, err := self.recordToStoredCdr(record, cdrcCfg); err != nil {
+		storedCdr, err := self.recordToStoredCdr(record, cdrcCfg)
+		if err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
-		} else {
-			recordCdrs = append(recordCdrs, storedCdr)
+		} else if self.dfltCdrcCfg.CdrFormat == utils.PartialCSV {
+			if storedCdr, err = self.partialRecordsCache.MergePartialCDRRecord(NewPartialCDRRecord(storedCdr, self.partialCacheDumpFields)); err != nil {
+				return nil, fmt.Errorf("Failed merging PartialCDR, error: %s", err.Error())
+			} else if storedCdr == nil { // CDR was absorbed by cache since it was partial
+				continue
+			}
 		}
+		recordCdrs = append(recordCdrs, storedCdr)
 		if !cdrcCfg.ContinueOnSuccess {
 			break
 		}
