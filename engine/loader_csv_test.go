@@ -1312,8 +1312,8 @@ func TestLoadAliases(t *testing.T) {
 }
 
 func TestLoadResourceLimits(t *testing.T) {
-	eResLimits := map[string]*utils.TPResourceLimits{
-		"ResGroup1": &utils.TPResourceLimits{
+	eResLimits := map[string]*utils.TPResourceLimit{
+		"ResGroup1": &utils.TPResourceLimit{
 			TPID: testTPID,
 			ID:   "ResGroup1",
 			Filters: []*utils.TPRequestFilter{
@@ -1326,7 +1326,7 @@ func TestLoadResourceLimits(t *testing.T) {
 			Weight:         10,
 			Limit:          "2",
 		},
-		"ResGroup2": &utils.TPResourceLimits{
+		"ResGroup2": &utils.TPResourceLimit{
 			TPID: testTPID,
 			ID:   "ResGroup2",
 			Filters: []*utils.TPRequestFilter{

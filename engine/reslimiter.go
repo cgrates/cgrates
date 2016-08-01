@@ -35,6 +35,7 @@ type ResourceLimit struct {
 	Weight         float64          // Weight to sort the ResourceLimits
 	Limit          float64          // Limit value
 	ActionTriggers ActionTriggers   // Thresholds to check after changing Limit
+	Used           utils.Int64Slice // []time.Time.Unix() - keep it in this format so we can expire usage automatically
 }
 
 // ResourcesLimiter is the service handling channel limits

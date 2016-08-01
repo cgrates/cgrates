@@ -603,3 +603,16 @@ func MaskSuffix(dest string, maskLen int) string {
 	}
 	return dest
 }
+
+// Sortable Int64Slice
+type Int64Slice []int64
+
+func (slc Int64Slice) Len() int {
+	return len(slc)
+}
+func (slc Int64Slice) Swap(i, j int) {
+	slc[i], slc[j] = slc[j], slc[i]
+}
+func (slc Int64Slice) Less(i, j int) bool {
+	return slc[i] < slc[j]
+}

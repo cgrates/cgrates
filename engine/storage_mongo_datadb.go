@@ -52,6 +52,7 @@ const (
 	colLht    = "load_history"
 	colLogErr = "error_logs"
 	colVer    = "versions"
+	colRL     = "resource_limits"
 )
 
 var (
@@ -1586,4 +1587,14 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	}
 	rsv = &result.Value
 	return
+}
+
+func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool) (*ResourceLimit, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit) error {
+	return nil
+}
+func (ms *MongoStorage) RemoveResourceLimit(id string) error {
+	return nil
 }

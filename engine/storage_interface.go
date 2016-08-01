@@ -92,6 +92,9 @@ type AccountingStorage interface {
 	SetAlias(*Alias) error
 	GetAlias(string, bool) (*Alias, error)
 	RemoveAlias(string) error
+	GetResourceLimit(string, bool) (*ResourceLimit, error)
+	SetResourceLimit(*ResourceLimit) error
+	RemoveResourceLimit(string) error
 	GetLoadHistory(int, bool) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int) error
 	GetStructVersion() (*StructVersion, error)

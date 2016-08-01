@@ -667,8 +667,8 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Weight:          10.0,
 			Limit:           "20"},
 	}
-	eTPs := map[string]*utils.TPResourceLimits{
-		tps[0].Tag: &utils.TPResourceLimits{
+	eTPs := map[string]*utils.TPResourceLimit{
+		tps[0].Tag: &utils.TPResourceLimit{
 			TPID: tps[0].Tpid,
 			ID:   tps[0].Tag,
 			Filters: []*utils.TPRequestFilter{
@@ -688,7 +688,7 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Limit:            tps[0].Limit,
 			ActionTriggerIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
-		tps[2].Tag: &utils.TPResourceLimits{
+		tps[2].Tag: &utils.TPResourceLimit{
 			TPID: tps[2].Tpid,
 			ID:   tps[2].Tag,
 			Filters: []*utils.TPRequestFilter{

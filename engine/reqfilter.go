@@ -49,32 +49,9 @@ func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, 
 	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaDestinations, MetaDestinations}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
-	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals, cdrStatSThresholds: make([]*RFStatSThreshold, len(vals))}
-	if rfType == MetaCDRStats {
-		for i, val := range vals {
-			valSplt := strings.Split(val, utils.InInFieldSep)
-			if len(valSplt) != 3 {
-				return nil, fmt.Errorf("Value %s needs to contain at least 3 items", val)
-			}
-			st := &RFStatSThreshold{QueueID: valSplt[0], ThresholdType: strings.ToUpper(valSplt[1])}
-			if len(st.ThresholdType) < len(MetaMinCapPrefix)+1 {
-				return nil, fmt.Errorf("Value %s contains a unsupported ThresholdType format", val)
-			} else if !strings.HasPrefix(st.ThresholdType, MetaMinCapPrefix) && !strings.HasPrefix(st.ThresholdType, MetaMaxCapPrefix) {
-				return nil, fmt.Errorf("Value %s contains unsupported ThresholdType prefix", val)
-			}
-			if tv, err := strconv.ParseFloat(valSplt[2], 64); err != nil {
-				return nil, err
-			} else {
-				st.ThresholdValue = tv
-			}
-			rf.cdrStatSThresholds[i] = st
-		}
-	}
-	if rfType == MetaRSRFields {
-		var err error
-		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(vals); err != nil {
-			return nil, err
-		}
+	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals}
+	if err := rf.CompileValues(); err != nil {
+		return nil, err
 	}
 	return rf, nil
 }
@@ -93,6 +70,36 @@ type RequestFilter struct {
 	Values             []string            // Filter definition
 	rsrFields          utils.RSRFields     // Cache here the RSRFilter Values
 	cdrStatSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
+}
+
+// Separate method to compile RSR fields
+func (rf *RequestFilter) CompileValues() (err error) {
+	if rf.Type == MetaRSRFields {
+		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(rf.Values); err != nil {
+			return err
+		}
+	} else if rf.Type == MetaCDRStats {
+		rf.cdrStatSThresholds = make([]*RFStatSThreshold, len(rf.Values))
+		for i, val := range rf.Values {
+			valSplt := strings.Split(val, utils.InInFieldSep)
+			if len(valSplt) != 3 {
+				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
+			}
+			st := &RFStatSThreshold{QueueID: valSplt[0], ThresholdType: strings.ToUpper(valSplt[1])}
+			if len(st.ThresholdType) < len(MetaMinCapPrefix)+1 {
+				return fmt.Errorf("Value %s contains a unsupported ThresholdType format", val)
+			} else if !strings.HasPrefix(st.ThresholdType, MetaMinCapPrefix) && !strings.HasPrefix(st.ThresholdType, MetaMaxCapPrefix) {
+				return fmt.Errorf("Value %s contains unsupported ThresholdType prefix", val)
+			}
+			if tv, err := strconv.ParseFloat(valSplt[2], 64); err != nil {
+				return err
+			} else {
+				st.ThresholdValue = tv
+			}
+			rf.cdrStatSThresholds[i] = st
+		}
+	}
+	return nil
 }
 
 // Pass is the method which should be used from outside.

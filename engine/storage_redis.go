@@ -1213,3 +1213,43 @@ func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	}
 	return
 }
+
+func (rs *RedisStorage) GetResourceLimit(id string, skipCache bool) (rl *ResourceLimit, err error) {
+	key := utils.ResourceLimitsPrefix + id
+	if !skipCache {
+		if x, err := CacheGet(key); err == nil {
+			return x.(*ResourceLimit), nil
+		} else {
+			return nil, err
+		}
+	}
+	var values []byte
+	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
+		err = rs.ms.Unmarshal(values, &rl)
+		for _, fltr := range rl.Filters {
+			if err := fltr.CompileValues(); err != nil {
+				return nil, err
+			}
+		}
+		CacheSet(key, rl)
+	}
+	return
+}
+func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit) error {
+	result, err := rs.ms.Marshal(rl)
+	if err != nil {
+		return err
+	}
+	key := utils.ResourceLimitsPrefix + rl.ID
+	err = rs.db.Cmd("SET", key, result).Err
+	CacheSet(key, rl)
+	return err
+}
+func (rs *RedisStorage) RemoveResourceLimit(id string) error {
+	key := utils.ResourceLimitsPrefix + id
+	if err := rs.db.Cmd("DEL", key).Err; err != nil {
+		return err
+	}
+	CacheRemKey(key)
+	return nil
+}
