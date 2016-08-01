@@ -132,7 +132,7 @@ type LoadReader interface {
 	GetTpActionPlans(string, string) ([]TpActionPlan, error)
 	GetTpActionTriggers(string, string) ([]TpActionTrigger, error)
 	GetTpAccountActions(*TpAccountAction) ([]TpAccountAction, error)
-	//GetTpResourceLimits(string, *utils.Paginator) ([]TpResourceLimits, error)
+	GetTpResourceLimits(string, string) (TpResourceLimits, error)
 }
 
 type LoadWriter interface {

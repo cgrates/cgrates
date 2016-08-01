@@ -60,8 +60,9 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	cdrStats := ``
 	users := ``
 	aliases := ``
+	resLimits := ``
 	csvr := engine.NewTpReader(ratingDb3, acntDb3, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

@@ -1340,6 +1340,17 @@ func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 	if err := q.Find(&tpAliases).Error; err != nil {
 		return nil, err
 	}
-
 	return tpAliases, nil
+}
+
+func (self *SQLStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits, error) {
+	var tpResourceLimits TpResourceLimits
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("tag = ?", tag)
+	}
+	if err := q.Find(&tpResourceLimits).Error; err != nil {
+		return nil, err
+	}
+	return tpResourceLimits, nil
 }

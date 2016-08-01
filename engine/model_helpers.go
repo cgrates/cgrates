@@ -820,7 +820,7 @@ func (tps TpResourceLimits) AsTPResourceLimits() map[string]*utils.TPResourceLim
 		resLimit, found := resLimits[tp.Tag]
 		if !found {
 			resLimit = &utils.TPResourceLimits{
-				TPID:           tp.TPID,
+				TPID:           tp.Tpid,
 				ID:             tp.Tag,
 				ActivationTime: tp.ActivationTime,
 				Weight:         tp.Weight,

@@ -28,6 +28,7 @@ import (
 )
 
 var (
+	testTPID     = "LoaderCSVTests"
 	destinations = `
 #Tag,Prefix
 GERMANY,49
@@ -264,13 +265,22 @@ cgrates.org,mas,true,another,value,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Subject,remo,minu,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
+
+	resLimits = `
+#Id,FilterType,FilterFieldName,FilterValues,ActivationTime,Weight,Limit,ActionTriggers
+ResGroup1,*string,Account,1001;1002,2014-07-29T15:00:00Z,10,2,
+ResGroup1,*string_prefix,Destination,10;20,2014-07-29T15:00:00Z,10,,
+ResGroup1,*cdr_stats,,CDRST1:*min_ASR:34;CDRST_1001:*min_ASR:20,,,,
+ResGroup1,*rsr_fields,,Subject(~^1.*1$);Destination(1002),,,,
+ResGroup2,*destinations,Destination,DST_FS,2014-07-29T15:00:00Z,10,2,
+`
 )
 
 var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits), testTPID, "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -319,9 +329,12 @@ func init() {
 	if err := csvr.LoadAliases(); err != nil {
 		log.Print("error in LoadAliases:", err)
 	}
+	if err := csvr.LoadResourceLimits(); err != nil {
+		log.Print("error in LoadResourceLimits:", err)
+	}
 	csvr.WriteToDatabase(false, false)
-	ratingStorage.CacheRatingAll("NewTpReader")
-	accountingStorage.CacheAccountingAll("NewTpReader")
+	ratingStorage.CacheRatingAll("LoaderCSVTests")
+	accountingStorage.CacheAccountingAll("LoaderCSVTests")
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -496,7 +509,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
 	dr := &utils.TPDestinationRate{
-		TPid:              "",
+		TPid:              testTPID,
 		DestinationRateId: "RT_STANDARD",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -527,6 +540,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["RT_DEFAULT"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "RT_DEFAULT",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -542,6 +556,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["RT_STD_WEEKEND"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "RT_STD_WEEKEND",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -564,6 +579,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["P1"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "P1",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -579,6 +595,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["P2"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "P2",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -594,6 +611,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["T1"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "T1",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -609,6 +627,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["T2"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "T2",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -1290,4 +1309,39 @@ func TestLoadAliases(t *testing.T) {
 		}
 		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
 	}
+}
+
+func TestLoadResourceLimits(t *testing.T) {
+	eResLimits := map[string]*utils.TPResourceLimits{
+		"ResGroup1": &utils.TPResourceLimits{
+			TPID: testTPID,
+			ID:   "ResGroup1",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"10", "20"}},
+				&utils.TPRequestFilter{Type: MetaCDRStats, Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"}},
+				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"}},
+			},
+			ActivationTime: "2014-07-29T15:00:00Z",
+			Weight:         10,
+			Limit:          "2",
+		},
+		"ResGroup2": &utils.TPResourceLimits{
+			TPID: testTPID,
+			ID:   "ResGroup2",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "Destination", Values: []string{"DST_FS"}},
+			},
+			ActivationTime: "2014-07-29T15:00:00Z",
+			Weight:         10,
+			Limit:          "2",
+		},
+	}
+	if len(csvr.resLimits) != len(eResLimits) {
+		t.Error("Failed to load resourcelimits: ", len(csvr.resLimits))
+	}
+	if !reflect.DeepEqual(eResLimits, csvr.resLimits) {
+		t.Errorf("Expecting: %+v, received: %+v", eResLimits, csvr.resLimits)
+	}
+
 }

@@ -1543,16 +1543,17 @@ func (tpr *TpReader) LoadAliases() error {
 	return err
 }
 
-func (tpr *TpReader) LoadResourceLimitsFiltered(tag string) (err error) {
-	/*
-		rls, err := tpr.lr.GetTpResourceLimits(tpr.tpid, tag)
-		if err != nil {
-			return err
-		}
-
-		tpr.timings, err = TpTimings(tps).GetTimings()
-	*/
+func (tpr *TpReader) LoadResourceLimitsFiltered(tag string) error {
+	rls, err := tpr.lr.GetTpResourceLimits(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	tpr.resLimits = TpResourceLimits(rls).AsTPResourceLimits()
 	return nil
+}
+
+func (tpr *TpReader) LoadResourceLimits() error {
+	return tpr.LoadResourceLimitsFiltered("")
 }
 
 func (tpr *TpReader) LoadAll() error {
@@ -1603,6 +1604,9 @@ func (tpr *TpReader) LoadAll() error {
 		return err
 	}
 	if err = tpr.LoadAliases(); err != nil {
+		return err
+	}
+	if err = tpr.LoadResourceLimits(); err != nil {
 		return err
 	}
 	return nil

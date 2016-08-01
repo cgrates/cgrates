@@ -270,6 +270,7 @@ func main() {
 			path.Join(*dataPath, utils.CDR_STATS_CSV),
 			path.Join(*dataPath, utils.USERS_CSV),
 			path.Join(*dataPath, utils.ALIASES_CSV),
+			path.Join(*dataPath, utils.ResourceLimitsCsv),
 		)
 	}
 	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid, *timezone)
