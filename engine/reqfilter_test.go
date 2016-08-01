@@ -25,6 +25,24 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestPassString(t *testing.T) {
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	rf := &RequestFilter{Type: MetaString, FieldName: "Category", Values: []string{"call"}}
+	if passes, err := rf.passString(cd, ""); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &RequestFilter{Type: MetaString, FieldName: "Category", Values: []string{"cal"}}
+	if passes, err := rf.passString(cd, ""); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+}
+
 func TestPassStringPrefix(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),

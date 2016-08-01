@@ -31,3 +31,8 @@ type ResourceLimit struct {
 	Limit          float64          // Limit value
 	ActionTriggers ActionTriggers   // Thresholds to check after changing Limit
 }
+
+// ResourcesLimiter is the service handling channel limits
+type ResourceLimiterService struct {
+	stringIndexes map[string]map[string]string // map[fieldName]map[fieldValue]resourceID
+}

@@ -29,6 +29,7 @@ import (
 )
 
 const (
+	MetaString       = "*string"
 	MetaStringPrefix = "*string_prefix"
 	MetaTimings      = "*timings"
 	MetaRSRFields    = "*rsr_fields"
@@ -101,6 +102,8 @@ type RequestFilter struct {
 // Pass is the method which should be used from outside.
 func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool, error) {
 	switch fltr.Type {
+	case MetaString:
+		return fltr.passString(req, extraFieldsLabel)
 	case MetaStringPrefix:
 		return fltr.passStringPrefix(req, extraFieldsLabel)
 	case MetaTimings:
@@ -114,6 +117,19 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool,
 	default:
 		return false, utils.ErrNotImplemented
 	}
+}
+
+func (fltr *RequestFilter) passString(req interface{}, extraFieldsLabel string) (bool, error) {
+	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
+	if err != nil {
+		return false, err
+	}
+	for _, val := range fltr.Values {
+		if strVal == val {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel string) (bool, error) {
