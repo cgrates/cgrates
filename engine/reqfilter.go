@@ -39,7 +39,7 @@ const (
 	MetaMaxCapPrefix = "*MAX_"
 )
 
-func NewRequestFilter(rfType, fieldName string, vals []string, cdrStats rpcclient.RpcClientConnection) (*RequestFilter, error) {
+func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
 	if !utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaCDRStats, MetaDestinations}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
@@ -49,11 +49,8 @@ func NewRequestFilter(rfType, fieldName string, vals []string, cdrStats rpcclien
 	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaDestinations, MetaDestinations}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
-	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals, cdrStats: cdrStats, cdrStatSThresholds: make([]*RFStatSThreshold, len(vals))}
+	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals, cdrStatSThresholds: make([]*RFStatSThreshold, len(vals))}
 	if rfType == MetaCDRStats {
-		if cdrStats == nil {
-			return nil, errors.New("Missing cdrStats information")
-		}
 		for i, val := range vals {
 			valSplt := strings.Split(val, utils.InInFieldSep)
 			if len(valSplt) != 3 {
@@ -91,16 +88,15 @@ type RFStatSThreshold struct {
 // RequestFilter filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
 type RequestFilter struct {
-	Type               string                        // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FieldName          string                        // Name of the field providing us the Values to check (used in case of some )
-	Values             []string                      // Filter definition
-	rsrFields          utils.RSRFields               // Cache here the RSRFilter Values
-	cdrStats           rpcclient.RpcClientConnection // Connection towards CDRStats service (eg: for *cdr_stats type)
-	cdrStatSThresholds []*RFStatSThreshold           // Cached compiled RFStatsThreshold out of Values
+	Type               string              // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName          string              // Name of the field providing us the Values to check (used in case of some )
+	Values             []string            // Filter definition
+	rsrFields          utils.RSRFields     // Cache here the RSRFilter Values
+	cdrStatSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, cdrStats rpcclient.RpcClientConnection) (bool, error) {
 	switch fltr.Type {
 	case MetaString:
 		return fltr.passString(req, extraFieldsLabel)
@@ -113,7 +109,7 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string) (bool,
 	case MetaRSRFields:
 		return fltr.passRSRFields(req, extraFieldsLabel)
 	case MetaCDRStats:
-		return fltr.passCDRStats(req, extraFieldsLabel)
+		return fltr.passCDRStats(req, extraFieldsLabel, cdrStats)
 	default:
 		return false, utils.ErrNotImplemented
 	}
@@ -181,10 +177,13 @@ func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel strin
 	return false, nil
 }
 
-func (fltr *RequestFilter) passCDRStats(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *RequestFilter) passCDRStats(req interface{}, extraFieldsLabel string, cdrStats rpcclient.RpcClientConnection) (bool, error) {
+	if cdrStats == nil {
+		return false, errors.New("Missing CDRStatS information")
+	}
 	for _, threshold := range fltr.cdrStatSThresholds {
 		statValues := make(map[string]float64)
-		if err := fltr.cdrStats.Call("CDRStatsV1.GetValues", threshold.QueueID, &statValues); err != nil {
+		if err := cdrStats.Call("CDRStatsV1.GetValues", threshold.QueueID, &statValues); err != nil {
 			return false, err
 		}
 		if val, hasIt := statValues[threshold.ThresholdType[len(MetaMinCapPrefix):]]; !hasIt {
