@@ -1217,3 +1217,8 @@ type TPRequestFilter struct {
 	FieldName string   // Name of the field providing us the Values to check (used in case of some )
 	Values    []string // Filter definition
 }
+
+type AttrRLsCache struct {
+	LoadID           string
+	ResourceLimitIDs []string
+}

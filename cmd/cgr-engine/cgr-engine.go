@@ -429,6 +429,34 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, acco
 	internalUserSChan <- userServer
 }
 
+func startResourceLimiterService(internalRLSChan, internalCdrStatSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+	accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
+	var statsConn *rpcclient.RpcClientPool
+	if len(cfg.ResourceLimiterCfg().CDRStatConns) != 0 { // Stats connection init
+		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.ResourceLimiterCfg().CDRStatConns, internalCdrStatSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<RLs> Could not connect to StatS: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	rls, err := engine.NewResourceLimiterService(cfg, accountDb, statsConn)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<RLs> Could not init, error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	utils.Logger.Info(fmt.Sprintf("Starting ResourceLimiter service"))
+	if err := rls.Start(); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<RLs> Could not start, error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	server.RpcRegisterName("RLsV1", rls)
+	internalRLSChan <- rls
+}
+
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan chan rpcclient.RpcClientConnection) {
@@ -576,6 +604,7 @@ func main() {
 	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalRLSChan := make(chan rpcclient.RpcClientConnection, 1)
 	// Start balancer service
 	if cfg.BalancerEnabled {
 		go startBalancer(internalBalancerChan, &stopHandled, exitChan) // Not really needed async here but to cope with uniformity
@@ -654,6 +683,11 @@ func main() {
 	// Start users service
 	if cfg.UserServerEnabled {
 		go startUsersServer(internalUserSChan, accountDb, server, exitChan)
+	}
+
+	// Start RL service
+	if cfg.ResourceLimiterCfg().Enabled {
+		go startResourceLimiterService(internalRLSChan, internalCdrStatSChan, cfg, accountDb, server, exitChan)
 	}
 
 	// Serve rpc connections

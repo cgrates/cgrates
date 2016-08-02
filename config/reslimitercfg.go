@@ -35,9 +35,6 @@ func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJ
 	if jsnCfg == nil {
 		return nil
 	}
-	if rlcfg == nil {
-		rlcfg = new(ResourceLimiterConfig)
-	}
 	if jsnCfg.Enabled != nil {
 		rlcfg.Enabled = *jsnCfg.Enabled
 	}

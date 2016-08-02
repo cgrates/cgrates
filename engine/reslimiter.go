@@ -19,12 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // ResourceLimit represents a limit imposed for accessing a resource (eg: new calls)
@@ -38,15 +41,23 @@ type ResourceLimit struct {
 	Used           utils.Int64Slice // []time.Time.Unix() - keep it in this format so we can expire usage automatically
 }
 
+// Pas the config as a whole so we can ask access concurrently
+func NewResourceLimiterService(cfg *config.CGRConfig, dataDB AccountingStorage, cdrStatS rpcclient.RpcClientConnection) (*ResourceLimiterService, error) {
+	rls := &ResourceLimiterService{stringIndexes: make(map[string]map[string]utils.StringMap), dataDB: dataDB, cdrStatS: cdrStatS}
+	return rls, nil
+}
+
 // ResourcesLimiter is the service handling channel limits
 type ResourceLimiterService struct {
 	sync.RWMutex
 	stringIndexes map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[resourceID]
 	dataDB        AccountingStorage                     // So we can load the data in cache and index it
+	cdrStatS      rpcclient.RpcClientConnection
 }
 
 // Index cached ResourceLimits with MetaString filter types
 func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
+	utils.Logger.Info("<RLs> Start indexing string filters")
 	newStringIndexes := make(map[string]map[string]utils.StringMap) // Index it transactionally
 	var cacheIDsToIndex []string                                    // Cache keys of RLs to be indexed
 	if rlIDs == nil {
@@ -99,23 +110,30 @@ func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
 			}
 		}
 	}
+	utils.Logger.Info("<RLs> Done indexing string filters")
 	return nil
 }
 
 // Called when cache/re-caching is necessary
-func (rls *ResourceLimiterService) CacheResourceLimits(loadID string, rlIDs []string) error {
+func (rls *ResourceLimiterService) cacheResourceLimits(loadID string, rlIDs []string) error {
 	if len(rlIDs) == 0 {
 		return nil
+	}
+	if rlIDs == nil {
+		utils.Logger.Info("<RLs> Start caching all resource limits")
+	} else if len(rlIDs) != 0 {
+		utils.Logger.Info(fmt.Sprintf("<RLs> Start caching resource limits with ids: %+v", rlIDs))
 	}
 	if err := rls.dataDB.CacheAccountingPrefixValues(loadID, map[string][]string{utils.ResourceLimitsPrefix: rlIDs}); err != nil {
 		return err
 	}
+	utils.Logger.Info("<RLs> Done caching resource limits")
 	return rls.indexStringFilters(rlIDs)
 }
 
 // Called to start the service
 func (rls *ResourceLimiterService) Start() error {
-	if err := rls.CacheResourceLimits("ResourceLimiterServiceStart", nil); err != nil {
+	if err := rls.cacheResourceLimits("ResourceLimiterServiceStart", nil); err != nil {
 		return err
 	}
 	return nil
@@ -123,6 +141,17 @@ func (rls *ResourceLimiterService) Start() error {
 
 // Called to shutdown the service
 func (rls *ResourceLimiterService) Shutdown() error {
+	return nil
+}
+
+// RPC Methods available internally
+
+// Cache/Re-cache
+func (rls *ResourceLimiterService) V1CacheResourceLimits(attrs *utils.AttrRLsCache, reply *string) error {
+	if err := rls.cacheResourceLimits(attrs.LoadID, attrs.ResourceLimitIDs); err != nil {
+		return err
+	}
+	*reply = utils.OK
 	return nil
 }
 
