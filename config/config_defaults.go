@@ -383,6 +383,14 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"rls": {
+	"enabled": false,						// starts ResourceLimiter service: <true|false>.
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>					
+	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|dur>
+	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|dur>
+},
+
+
 "mailer": {
 	"server": "localhost",								// the server to use when sending emails out
 	"auth_user": "cgrates",								// authenticate to email server using this user

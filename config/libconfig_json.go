@@ -312,6 +312,14 @@ type UserServJsonCfg struct {
 	Indexes *[]string
 }
 
+// ResourceLimiter service config section
+type ResourceLimiterServJsonCfg struct {
+	Enabled             *bool
+	Cdrstats_conns      *[]*HaPoolJsonCfg
+	Cache_dump_interval *string
+	Usage_ttl           *string
+}
+
 // Mailer config section
 type MailerJsonCfg struct {
 	Server        *string

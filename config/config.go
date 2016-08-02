@@ -250,6 +250,7 @@ type CGRConfig struct {
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
 	UserServerIndexes        []string                 // List of user profile field indexes
+	ResourceLimiterCfg       *ResourceLimiterConfig   // Configuration for resource limiter
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -548,6 +549,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnRLSCfg, err := jsnCfg.ResourceLimiterJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -947,6 +953,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnAliasesServCfg != nil {
 		if jsnAliasesServCfg.Enabled != nil {
 			self.AliasesServerEnabled = *jsnAliasesServCfg.Enabled
+		}
+	}
+
+	if jsnRLSCfg != nil {
+		if self.ResourceLimiterCfg.loadFromJsonCfg(jsnRLSCfg); err != nil {
+			return err
 		}
 	}
 
