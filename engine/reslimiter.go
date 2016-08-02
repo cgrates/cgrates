@@ -42,10 +42,82 @@ type ResourceLimit struct {
 type ResourceLimiterService struct {
 	sync.RWMutex
 	stringIndexes map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[resourceID]
+	dataDB        AccountingStorage                     // So we can load the data in cache and index it
+}
+
+// Index cached ResourceLimits with MetaString filter types
+func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
+	newStringIndexes := make(map[string]map[string]utils.StringMap) // Index it transactionally
+	var cacheIDsToIndex []string                                    // Cache keys of RLs to be indexed
+	if rlIDs == nil {
+		cacheIDsToIndex = CacheGetEntriesKeys(utils.ResourceLimitsPrefix)
+	} else {
+		for _, rlID := range rlIDs {
+			cacheIDsToIndex = append(cacheIDsToIndex, utils.ResourceLimitsPrefix+rlID)
+		}
+	}
+	for _, cacheKey := range cacheIDsToIndex {
+		x, err := CacheGet(cacheKey)
+		if err != nil {
+			return err
+		}
+		rl := x.(*ResourceLimit)
+		for _, fltr := range rl.Filters {
+			if fltr.Type != MetaString {
+				continue
+			}
+			if _, hastIt := newStringIndexes[fltr.FieldName]; !hastIt {
+				newStringIndexes[fltr.FieldName] = make(map[string]utils.StringMap)
+			}
+			for _, fldVal := range fltr.Values {
+				if _, hasIt := newStringIndexes[fltr.FieldName][fldVal]; !hasIt {
+					newStringIndexes[fltr.FieldName][fldVal] = make(utils.StringMap)
+				}
+				newStringIndexes[fltr.FieldName][fldVal][rl.ID] = true
+			}
+		}
+	}
+	rls.Lock()
+	defer rls.Unlock()
+	if rlIDs == nil { // We have rebuilt complete index
+		rls.stringIndexes = newStringIndexes
+		return nil
+	}
+	// Merge the indexes since we have only performed limited indexing
+	for fldNameKey, mpFldName := range newStringIndexes {
+		if _, hasIt := rls.stringIndexes[fldNameKey]; !hasIt {
+			rls.stringIndexes[fldNameKey] = mpFldName
+		} else {
+			for fldValKey, strMap := range newStringIndexes[fldNameKey] {
+				if _, hasIt := rls.stringIndexes[fldNameKey][fldValKey]; !hasIt {
+					rls.stringIndexes[fldNameKey][fldValKey] = strMap
+				} else {
+					for resIDKey := range newStringIndexes[fldNameKey][fldValKey] {
+						rls.stringIndexes[fldNameKey][fldValKey][resIDKey] = true
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// Called when cache/re-caching is necessary
+func (rls *ResourceLimiterService) CacheResourceLimits(loadID string, rlIDs []string) error {
+	if len(rlIDs) == 0 {
+		return nil
+	}
+	if err := rls.dataDB.CacheAccountingPrefixValues(loadID, map[string][]string{utils.ResourceLimitsPrefix: rlIDs}); err != nil {
+		return err
+	}
+	return rls.indexStringFilters(rlIDs)
 }
 
 // Called to start the service
 func (rls *ResourceLimiterService) Start() error {
+	if err := rls.CacheResourceLimits("ResourceLimiterServiceStart", nil); err != nil {
+		return err
+	}
 	return nil
 }
 

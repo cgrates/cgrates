@@ -380,7 +380,6 @@ func (rs *RedisStorage) CacheAccountingPrefixValues(loadID string, prefixes map[
 		}
 		pm[prefix] = ids
 	}
-	utils.Logger.Debug(fmt.Sprintf("### CacheAccountingPrefixValues pm: %+v", pm))
 	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX], pm[utils.ResourceLimitsPrefix])
 }
 
