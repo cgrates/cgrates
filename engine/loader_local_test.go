@@ -178,6 +178,9 @@ func TestLoadFromCSV(t *testing.T) {
 	if err = loader.LoadAliases(); err != nil {
 		t.Error("Failed loading aliases: ", err.Error())
 	}
+	if err = loader.LoadResourceLimits(); err != nil {
+		t.Error("Failed loading resource limits: ", err.Error())
+	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
 		t.Error("Could not write data into ratingDb: ", err.Error())
 	}
@@ -252,9 +255,6 @@ func TestLoadFromStorDb(t *testing.T) {
 	}
 	if err := loader.LoadAliases(); err != nil {
 		t.Error("Failed loading aliases: ", err.Error())
-	}
-	if err := loader.WriteToDatabase(true, false); err != nil {
-		t.Error("Could not write data into ratingDb: ", err.Error())
 	}
 }
 

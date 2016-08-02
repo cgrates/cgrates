@@ -571,6 +571,7 @@ type AttrReloadCache struct {
 	DerivedChargers  []string
 	LcrProfiles      []string
 	Aliases          []string
+	ResourceLimits   []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
@@ -588,6 +589,7 @@ type CacheStats struct {
 	CdrStats             int
 	Users                int
 	Aliases              int
+	ResourceLimits       int
 	LastLoadID           string
 	LastRatingLoadID     string
 	LastAccountingLoadID string

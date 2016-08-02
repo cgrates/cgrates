@@ -211,6 +211,11 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, alias := range aliases {
 		alsKeys[idx] = utils.ALIASES_PREFIX + alias
 	}
+	rls, _ := loader.GetLoadedIds(utils.ResourceLimitsPrefix)
+	rlKeys := make([]string, len(rls))
+	for idx, rlID := range rls {
+		rlKeys[idx] = utils.ResourceLimitsPrefix + rlID
+	}
 	lcrIds, _ := loader.GetLoadedIds(utils.LCR_PREFIX)
 	lcrKeys := make([]string, len(lcrIds))
 	for idx, lcrId := range lcrIds {
@@ -240,7 +245,8 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return err
 	}
 	if err := self.AccountDb.CacheAccountingPrefixValues("LoadTariffPlanFromFolderAPI", map[string][]string{
-		utils.ALIASES_PREFIX: alsKeys,
+		utils.ALIASES_PREFIX:       alsKeys,
+		utils.ResourceLimitsPrefix: rlKeys,
 	}); err != nil {
 		return err
 	}

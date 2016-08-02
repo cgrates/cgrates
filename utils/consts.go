@@ -200,7 +200,7 @@ const (
 	PUBSUB_SUBSCRIBERS_PREFIX    = "pss_"
 	USERS_PREFIX                 = "usr_"
 	ALIASES_PREFIX               = "als_"
-	ResourceLimitsPrefix         = "rl_"
+	ResourceLimitsPrefix         = "rlm_"
 	REVERSE_ALIASES_PREFIX       = "rls_"
 	CDR_STATS_PREFIX             = "cst_"
 	TEMP_DESTINATION_PREFIX      = "tmp_"

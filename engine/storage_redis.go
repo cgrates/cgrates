@@ -351,12 +351,13 @@ func (rs *RedisStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKe
 }
 
 func (rs *RedisStorage) CacheAccountingAll(loadID string) error {
-	return rs.cacheAccounting(loadID, nil)
+	return rs.cacheAccounting(loadID, nil, nil)
 }
 
 func (rs *RedisStorage) CacheAccountingPrefixes(loadID string, prefixes ...string) error {
 	pm := map[string][]string{
-		utils.ALIASES_PREFIX: []string{},
+		utils.ALIASES_PREFIX:       []string{},
+		utils.ResourceLimitsPrefix: []string{},
 	}
 	for _, prefix := range prefixes {
 		if _, found := pm[prefix]; !found {
@@ -364,12 +365,13 @@ func (rs *RedisStorage) CacheAccountingPrefixes(loadID string, prefixes ...strin
 		}
 		pm[prefix] = nil
 	}
-	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
+	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX], pm[utils.ResourceLimitsPrefix])
 }
 
 func (rs *RedisStorage) CacheAccountingPrefixValues(loadID string, prefixes map[string][]string) error {
 	pm := map[string][]string{
-		utils.ALIASES_PREFIX: []string{},
+		utils.ALIASES_PREFIX:       []string{},
+		utils.ResourceLimitsPrefix: []string{},
 	}
 	for prefix, ids := range prefixes {
 		if _, found := pm[prefix]; !found {
@@ -377,10 +379,10 @@ func (rs *RedisStorage) CacheAccountingPrefixValues(loadID string, prefixes map[
 		}
 		pm[prefix] = ids
 	}
-	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX])
+	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX], pm[utils.ResourceLimitsPrefix])
 }
 
-func (rs *RedisStorage) cacheAccounting(loadID string, alsKeys []string) (err error) {
+func (rs *RedisStorage) cacheAccounting(loadID string, alsKeys, rlsKeys []string) (err error) {
 	start := time.Now()
 	CacheBeginTransaction()
 	conn, err := rs.db.Get()
@@ -416,6 +418,26 @@ func (rs *RedisStorage) cacheAccounting(loadID string, alsKeys []string) (err er
 	}
 	if len(alsKeys) != 0 {
 		utils.Logger.Info("Finished aliases caching.")
+	}
+	if rlsKeys == nil {
+		utils.Logger.Info("Caching all resource limits")
+		if rlsKeys, err = conn.Cmd("KEYS", utils.ResourceLimitsPrefix+"*").List(); err != nil {
+			CacheRollbackTransaction()
+			return fmt.Errorf("resourcelimits: %s", err.Error())
+		}
+		CacheRemPrefixKey(utils.ResourceLimitsPrefix)
+	} else if len(rlsKeys) != 0 {
+		utils.Logger.Info(fmt.Sprintf("Caching resourcelimits: %v", rlsKeys))
+	}
+	for _, key := range rlsKeys {
+		CacheRemKey(key)
+		if _, err = rs.GetResourceLimit(key[len(utils.ResourceLimitsPrefix):], true); err != nil {
+			CacheRollbackTransaction()
+			return fmt.Errorf("Caching resourcelimit with id: %s, error %s", key[len(utils.ResourceLimitsPrefix):], err.Error())
+		}
+	}
+	if len(rlsKeys) != 0 {
+		utils.Logger.Info("Finished resource limits caching.")
 	}
 	utils.Logger.Info("Caching load history")
 	if _, err = rs.GetLoadHistory(1, true); err != nil {

@@ -1276,7 +1276,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(4**waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(2 * time.Second))
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {

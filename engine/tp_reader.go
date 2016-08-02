@@ -1898,6 +1898,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("LCR rules: ", len(tpr.lcrs))
 	// cdr stats
 	log.Print("CDR stats: ", len(tpr.cdrStats))
+	// resource limits
+	log.Print("ResourceLimits: ", len(tpr.resLimits))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -1979,6 +1981,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.aliases))
 		i := 0
 		for k := range tpr.aliases {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.ResourceLimitsPrefix:
+		keys := make([]string, len(tpr.resLimits))
+		i := 0
+		for k := range tpr.resLimits {
 			keys[i] = k
 			i++
 		}
