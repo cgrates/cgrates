@@ -350,8 +350,9 @@ func (rs *RedisStorage) cacheRating(loadID string, dKeys, rpKeys, rpfKeys, lcrKe
 	return utils.SaveCacheFileInfo(rs.cacheDumpDir, &utils.CacheFileInfo{Encoding: utils.MSGPACK, LoadInfo: loadHist})
 }
 
+// We don't cache resourceLimits here since we need to do indexing in the service so we do it from there
 func (rs *RedisStorage) CacheAccountingAll(loadID string) error {
-	return rs.cacheAccounting(loadID, nil, nil)
+	return rs.cacheAccounting(loadID, nil, []string{})
 }
 
 func (rs *RedisStorage) CacheAccountingPrefixes(loadID string, prefixes ...string) error {
@@ -379,6 +380,7 @@ func (rs *RedisStorage) CacheAccountingPrefixValues(loadID string, prefixes map[
 		}
 		pm[prefix] = ids
 	}
+	utils.Logger.Debug(fmt.Sprintf("### CacheAccountingPrefixValues pm: %+v", pm))
 	return rs.cacheAccounting(loadID, pm[utils.ALIASES_PREFIX], pm[utils.ResourceLimitsPrefix])
 }
 
@@ -1264,7 +1266,7 @@ func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit) error {
 	}
 	key := utils.ResourceLimitsPrefix + rl.ID
 	err = rs.db.Cmd("SET", key, result).Err
-	CacheSet(key, rl)
+	//CacheSet(key, rl)
 	return err
 }
 func (rs *RedisStorage) RemoveResourceLimit(id string) error {

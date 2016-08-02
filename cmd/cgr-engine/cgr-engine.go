@@ -403,7 +403,7 @@ func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, 
 	}
 	cfi, err := utils.LoadCacheFileInfo(cfg.CacheDumpDir)
 	if err != nil || cfi.LoadInfo.AccountingLoadID != loadHist[0].AccountingLoadID {
-		if err := accountDb.CacheAccountingPrefixes("RaterStart", utils.ALIASES_PREFIX, utils.ResourceLimitsPrefix); err != nil {
+		if err := accountDb.CacheAccountingPrefixes("EngineStart", utils.ALIASES_PREFIX); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
 			exitChan <- true
 			return

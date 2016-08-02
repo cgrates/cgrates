@@ -342,11 +342,6 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	for idx, alias := range aliases {
 		alsKeys[idx] = utils.ALIASES_PREFIX + alias
 	}
-	rls, _ := dbReader.GetLoadedIds(utils.ResourceLimitsPrefix)
-	rlKeys := make([]string, len(rls))
-	for idx, rlID := range rls {
-		rlKeys[idx] = utils.ResourceLimitsPrefix + rlID
-	}
 	lcrIds, _ := dbReader.GetLoadedIds(utils.LCR_PREFIX)
 	lcrKeys := make([]string, len(lcrIds))
 	for idx, lcrId := range lcrIds {
@@ -378,8 +373,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		return err
 	}
 	if err := self.AccountDb.CacheAccountingPrefixValues(attrs.TPid, map[string][]string{
-		utils.ALIASES_PREFIX:       alsKeys,
-		utils.ResourceLimitsPrefix: rlKeys,
+		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
 	}
@@ -736,7 +730,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys, aplKeys, shgKeys, lcrKeys, dcsKeys, alsKeys, rlKeys []string
+	var dstKeys, rpKeys, rpfKeys, actKeys, aplKeys, shgKeys, lcrKeys, dcsKeys, alsKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -779,12 +773,6 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) err
 			alsKeys[idx] = utils.ALIASES_PREFIX + alias
 		}
 	}
-	if len(attrs.ResourceLimits) > 0 {
-		rlKeys = make([]string, len(attrs.ResourceLimits))
-		for idx, rlID := range attrs.ResourceLimits {
-			rlKeys[idx] = utils.ResourceLimitsPrefix + rlID
-		}
-	}
 	if len(attrs.LCRIds) > 0 {
 		lcrKeys = make([]string, len(attrs.LCRIds))
 		for idx, lcrId := range attrs.LCRIds {
@@ -811,8 +799,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) err
 		return err
 	}
 	if err := self.AccountDb.CacheAccountingPrefixValues("ReloadCacheAPI", map[string][]string{
-		utils.ALIASES_PREFIX:       alsKeys,
-		utils.ResourceLimitsPrefix: rlKeys,
+		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
 	}
@@ -950,11 +937,6 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, alias := range aliases {
 		alsKeys[idx] = utils.ALIASES_PREFIX + alias
 	}
-	rls, _ := loader.GetLoadedIds(utils.ResourceLimitsPrefix)
-	rlKeys := make([]string, len(rls))
-	for idx, rlID := range rls {
-		rlKeys[idx] = utils.ResourceLimitsPrefix + rlID
-	}
 	lcrIds, _ := loader.GetLoadedIds(utils.LCR_PREFIX)
 	lcrKeys := make([]string, len(lcrIds))
 	for idx, lcrId := range lcrIds {
@@ -986,8 +968,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return err
 	}
 	if err := self.AccountDb.CacheAccountingPrefixValues("LoadTariffPlanFromFolderAPI", map[string][]string{
-		utils.ALIASES_PREFIX:       alsKeys,
-		utils.ResourceLimitsPrefix: rlKeys,
+		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
 	}

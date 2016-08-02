@@ -155,7 +155,7 @@ func TestCdrsFileFailover(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	time.Sleep(time.Duration(3**waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(1 * time.Second))
 	failoverContent := []byte(`Account=1001&AnswerTime=2013-12-07T08%3A42%3A26Z&Category=call&Destination=1002&Direction=%2Aout&DisconnectCause=&OriginHost=192.168.1.1&OriginID=httpjsonrpc1&PDD=0&RequestType=%2Apseudoprepaid&SetupTime=2013-12-07T08%3A42%3A24Z&Source=UNKNOWN&Subject=1001&Supplier=&Tenant=cgrates.org&ToR=%2Avoice&Usage=10&field_extr1=val_extr1&fieldextr2=valextr2`)
 	var rplCfg *config.CdrReplicationCfg
 	for _, rplCfg = range cdrsMasterCfg.CDRSCdrReplication {

@@ -343,7 +343,7 @@ func main() {
 	if len(*historyServer) != 0 && *verbose {
 		log.Print("Wrote history.")
 	}
-	var dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, rlIds, lcrIds, dcsIds []string
+	var dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds []string
 	if rater != nil {
 		dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
 		rplIds, _ = tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
@@ -351,7 +351,6 @@ func main() {
 		actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
 		shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
 		alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
-		rlIds, _ = tpReader.GetLoadedIds(utils.ResourceLimitsPrefix)
 		lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
 		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
 	}
@@ -385,7 +384,6 @@ func main() {
 			ActionIds:        actIds,
 			SharedGroupIds:   shgIds,
 			Aliases:          alsIds,
-			ResourceLimits:   rlIds,
 			LCRIds:           lcrIds,
 			DerivedChargers:  dcsIds,
 		}, &reply); err != nil {
