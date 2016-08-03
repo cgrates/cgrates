@@ -1,0 +1,38 @@
+{
+
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"cdrstats": {
+	"enabled": true,						// starts the cdrstats service: <true|false>
+},
+
+"sm_opensips": {
+	"enabled": true,				// starts SessionManager service: <true|false>
+	"create_cdr": true,				// create CDR out of events and sends them to CDRS component
+	"debit_interval": "5s",			// interval to perform debits on.
+},
+
+}
