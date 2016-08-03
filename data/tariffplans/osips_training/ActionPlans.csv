@@ -1,0 +1,3 @@
+#Id,ActionsId,TimingId,Weight
+TEST_ACCOUNT,TOPUP_MONETARY_5,*asap,10
+TEST_ACCOUNT,TOPUP_VOICE_200,*asap,10
