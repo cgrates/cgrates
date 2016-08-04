@@ -695,6 +695,138 @@ func (cdr *CDR) String() string {
 	return string(mrsh)
 }
 
+func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.CfgCdrField, groupCDRs []*CDR) (string, error) {
+	var combinedVal string // Will result as combination of the field values, filters must match
+	for _, filterRule := range cfgCdrFld.FieldFilter {
+		if !filterRule.FilterPasses(cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id})) { // Filter will activate the rule to extract the content
+			continue
+		}
+		pairingVal := cdr.FieldAsString(filterRule)
+		for _, grpCDR := range groupCDRs {
+			if cdr.CGRID != grpCDR.CGRID {
+				continue // We only care about cdrs with same primary cdr behind
+			}
+			if grpCDR.FieldAsString(&utils.RSRField{Id: filterRule.Id}) != pairingVal { // First CDR with field equal with ours
+				continue
+			}
+			for _, rsrRule := range cfgCdrFld.Value {
+				combinedVal += grpCDR.FieldAsString(rsrRule)
+			}
+		}
+	}
+	return combinedVal, nil
+}
+
+// Extracts the value specified by cfgHdr out of cdr, used for export values
+func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField, costShiftDigits, roundDecimals int, layout string, maskLen int, maskDestID string) (string, error) {
+	passesFilters := true
+	for _, cdfFltr := range cfgCdrFld.FieldFilter {
+		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
+			passesFilters = false
+			break
+		}
+	}
+	if !passesFilters { // Not passes filters, ignore this replication
+		return "", fmt.Errorf("Filters not passing")
+	}
+	var retVal string // Concatenate the resulting values
+	for _, rsrFld := range cfgCdrFld.Value {
+		var cdrVal string
+		switch rsrFld.Id {
+		case utils.COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
+			if cdr.CostDetails == nil {
+				cdrVal = ""
+			} else {
+				jsonVal, _ := json.Marshal(cdr.CostDetails)
+				cdrVal = string(jsonVal)
+			}
+		case utils.COST:
+			cdrVal = cdr.FormatCost(costShiftDigits, roundDecimals)
+		case utils.USAGE:
+			cdrVal = cdr.FormatUsage(layout)
+		case utils.SETUP_TIME:
+			cdrVal = cdr.SetupTime.Format(layout)
+		case utils.ANSWER_TIME: // Format time based on layout
+			cdrVal = cdr.AnswerTime.Format(layout)
+		case utils.DESTINATION:
+			cdrVal = cdr.FieldAsString(rsrFld)
+			if maskLen != -1 && len(maskDestID) != 0 && CachedDestHasPrefix(maskDestID, cdrVal) {
+				cdrVal = utils.MaskSuffix(cdrVal, maskLen)
+			}
+		default:
+			cdrVal = cdr.FieldAsString(rsrFld)
+		}
+		retVal += cdrVal
+	}
+	return retVal, nil
+}
+
+// Used in place where we need to export the CDR based on an export template
+// ExportRecord is a []string to keep it compatible with encoding/csv Writer
+func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, costShiftDigits, roundDecimals int, timezone string, httpSkipTlsCheck bool, maskLen int, maskDestID string, groupedCDRs []*CDR) ([]string, error) {
+	var err error
+	expRecord := make([]string, len(exportFields))
+	for idx, cfgFld := range exportFields {
+		layout := cfgFld.Layout
+		if len(layout) == 0 {
+			layout = time.RFC3339
+		}
+		var outVal string
+		switch cfgFld.Type {
+		case utils.META_FILLER:
+			outVal = cfgFld.Value.Id()
+			cfgFld.Padding = "right"
+		case utils.META_CONSTANT:
+			outVal = cfgFld.Value.Id()
+		case utils.MetaDateTime: // Convert the requested field value into datetime with layout
+			rawVal, err := cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
+			if err != nil {
+				return nil, err
+			}
+			if dtFld, err := utils.ParseTimeDetectLayout(rawVal, timezone); err != nil { // Only one rule makes sense here
+				return nil, err
+			} else {
+				outVal = dtFld.Format(layout)
+			}
+		case utils.META_HTTP_POST:
+			var outValByte []byte
+			httpAddr := cfgFld.Value.Id()
+			jsn, err := json.Marshal(cdr)
+			if err != nil {
+				return nil, err
+			}
+			if len(httpAddr) == 0 {
+				err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
+			} else if outValByte, err = utils.HttpJsonPost(httpAddr, httpSkipTlsCheck, jsn); err == nil {
+				outVal = string(outValByte)
+				if len(outVal) == 0 && cfgFld.Mandatory {
+					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
+				}
+			}
+		case utils.META_COMBIMED:
+			outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs)
+		case utils.META_COMPOSED:
+			outVal, err = cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
+		case utils.MetaMaskedDestination:
+			if len(maskDestID) != 0 && CachedDestHasPrefix(maskDestID, cdr.Destination) {
+				outVal = "1"
+			} else {
+				outVal = "0"
+			}
+		}
+
+		if err != nil {
+			return nil, err
+		}
+		fmtOut := outVal
+		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			return nil, err
+		}
+		expRecord[idx] += fmtOut
+	}
+	return expRecord, nil
+}
+
 type ExternalCDR struct {
 	CGRID           string
 	RunID           string

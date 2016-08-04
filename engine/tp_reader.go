@@ -35,7 +35,7 @@ type TpReader struct {
 	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
-	resLimits         map[string]*utils.TPResourceLimits
+	resLimits         map[string]*utils.TPResourceLimit
 }
 
 func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string) *TpReader {
@@ -86,7 +86,7 @@ func (tpr *TpReader) Init() {
 	tpr.users = make(map[string]*UserProfile)
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
-	tpr.resLimits = make(map[string]*utils.TPResourceLimits)
+	tpr.resLimits = make(map[string]*utils.TPResourceLimit)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1543,16 +1543,17 @@ func (tpr *TpReader) LoadAliases() error {
 	return err
 }
 
-func (tpr *TpReader) LoadResourceLimitsFiltered(tag string) (err error) {
-	/*
-		rls, err := tpr.lr.GetTpResourceLimits(tpr.tpid, tag)
-		if err != nil {
-			return err
-		}
-
-		tpr.timings, err = TpTimings(tps).GetTimings()
-	*/
+func (tpr *TpReader) LoadResourceLimitsFiltered(tag string) error {
+	rls, err := tpr.lr.GetTpResourceLimits(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	tpr.resLimits = TpResourceLimits(rls).AsTPResourceLimits()
 	return nil
+}
+
+func (tpr *TpReader) LoadResourceLimits() error {
+	return tpr.LoadResourceLimitsFiltered("")
 }
 
 func (tpr *TpReader) LoadAll() error {
@@ -1603,6 +1604,9 @@ func (tpr *TpReader) LoadAll() error {
 		return err
 	}
 	if err = tpr.LoadAliases(); err != nil {
+		return err
+	}
+	if err = tpr.LoadResourceLimits(); err != nil {
 		return err
 	}
 	return nil
@@ -1821,6 +1825,21 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Print("\t", al.GetId())
 		}
 	}
+	if verbose {
+		log.Print("ResourceLimits:")
+	}
+	for _, tpRL := range tpr.resLimits {
+		rl, err := APItoResourceLimit(tpRL, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.accountingStorage.SetResourceLimit(rl); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", rl.ID)
+		}
+	}
 	return
 }
 
@@ -1881,6 +1900,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("LCR rules: ", len(tpr.lcrs))
 	// cdr stats
 	log.Print("CDR stats: ", len(tpr.cdrStats))
+	// resource limits
+	log.Print("ResourceLimits: ", len(tpr.resLimits))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -1962,6 +1983,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.aliases))
 		i := 0
 		for k := range tpr.aliases {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.ResourceLimitsPrefix:
+		keys := make([]string, len(tpr.resLimits))
+		i := 0
+		for k := range tpr.resLimits {
 			keys[i] = k
 			i++
 		}

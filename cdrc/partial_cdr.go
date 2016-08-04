@@ -19,75 +19,170 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
-	"errors"
+	"encoding/csv"
+	"fmt"
+	"os"
+	"path"
 	"reflect"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
-func NewPartialFlatstoreRecord(record []string, timezone string) (*PartialFlatstoreRecord, error) {
-	if len(record) < 7 {
-		return nil, errors.New("MISSING_IE")
+const (
+	PartialRecordsSuffix = "partial"
+)
+
+func NewPartialRecordsCache(ttl time.Duration, expiryAction string, cdrOutDir string, csvSep rune, roundDecimals int, timezone string, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection) (*PartialRecordsCache, error) {
+	return &PartialRecordsCache{ttl: ttl, expiryAction: expiryAction, cdrOutDir: cdrOutDir, csvSep: csvSep, roundDecimals: roundDecimals, timezone: timezone, httpSkipTlsCheck: httpSkipTlsCheck, cdrs: cdrs,
+		partialRecords: make(map[string]*PartialCDRRecord), dumpTimers: make(map[string]*time.Timer), guard: engine.Guardian}, nil
+}
+
+type PartialRecordsCache struct {
+	ttl              time.Duration
+	expiryAction     string
+	cdrOutDir        string
+	csvSep           rune
+	roundDecimals    int
+	timezone         string
+	httpSkipTlsCheck bool
+	cdrs             rpcclient.RpcClientConnection
+	partialRecords   map[string]*PartialCDRRecord // [OriginID]*PartialRecord
+	dumpTimers       map[string]*time.Timer       // [OriginID]*time.Timer which can be canceled or reset
+	guard            *engine.GuardianLock
+}
+
+// Dumps the cache into a .unpaired file in the outdir and cleans cache after
+func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
+	_, err := prc.guard.Guard(func() (interface{}, error) {
+		if prc.partialRecords[originID].Len() != 0 { // Only write the file if there are records in the cache
+			dumpFilePath := path.Join(prc.cdrOutDir, fmt.Sprintf("%s.%s.%d", originID, PartialRecordsSuffix, time.Now().Unix()))
+			fileOut, err := os.Create(dumpFilePath)
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed creating %s, error: %s", dumpFilePath, err.Error()))
+				return nil, err
+			}
+			csvWriter := csv.NewWriter(fileOut)
+			csvWriter.Comma = prc.csvSep
+			for _, cdr := range prc.partialRecords[originID].cdrs {
+				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields, 0, prc.roundDecimals, prc.timezone, prc.httpSkipTlsCheck, 0, "", nil)
+				if err != nil {
+					return nil, err
+				}
+				if err := csvWriter.Write(expRec); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing partial CDR %v to file: %s, error: %s", cdr, dumpFilePath, err.Error()))
+					return nil, err
+				}
+			}
+			csvWriter.Flush()
+		}
+		delete(prc.partialRecords, originID)
+		return nil, nil
+	}, 0, originID)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CDRC> Failed dumping CDR with originID: %s, error: %s", originID, err.Error()))
 	}
-	pr := &PartialFlatstoreRecord{Method: record[0], OriginID: record[3] + record[1] + record[2], Values: record}
-	var err error
-	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6], timezone); err != nil {
+}
+
+// Called when record expires in cache, will send the CDR merged (forcing it's completion) to the CDRS
+func (prc *PartialRecordsCache) postCDR(originID string) {
+	_, err := prc.guard.Guard(func() (interface{}, error) {
+		if prc.partialRecords[originID].Len() != 0 { // Only write the file if there are records in the cache
+			cdr := prc.partialRecords[originID].MergeCDRs()
+			cdr.Partial = false // force completion
+			var reply string
+			if err := prc.cdrs.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR  %+v from partial cache, error: %s", cdr, err.Error()))
+			} else if reply != utils.OK {
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", cdr, reply))
+			}
+		}
+		delete(prc.partialRecords, originID)
+		return nil, nil
+	}, 0, originID)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CDRC> Failed posting from cache CDR with originID: %s, error: %s", originID, err.Error()))
+	}
+}
+
+// Called to cache a partial record.
+// If exists in cache, CDRs will be updated
+// Locking should be handled at higher layer
+func (prc *PartialRecordsCache) cachePartialCDR(pCDR *PartialCDRRecord) (*PartialCDRRecord, error) {
+	originID := pCDR.cdrs[0].OriginID
+	if tmr, hasIt := prc.dumpTimers[originID]; hasIt { // Update existing timer
+		tmr.Reset(prc.ttl)
+	} else {
+		switch prc.expiryAction {
+		case utils.MetaDumpToFile:
+			prc.dumpTimers[originID] = time.AfterFunc(prc.ttl, func() { prc.dumpPartialRecords(originID) }) // Schedule dumping of the partial CDR
+		case utils.MetaPostCDR:
+			prc.dumpTimers[originID] = time.AfterFunc(prc.ttl, func() { prc.postCDR(originID) }) // Schedule dumping of the partial CDR
+		default:
+			return nil, fmt.Errorf("Unsupported PartialCacheExpiryAction: %s", prc.expiryAction)
+		}
+
+	}
+	if _, hasIt := prc.partialRecords[originID]; !hasIt {
+		prc.partialRecords[originID] = pCDR
+	} else { // Exists, update it's records
+		prc.partialRecords[originID].cdrs = append(prc.partialRecords[originID].cdrs, pCDR.cdrs...)
+	}
+	return prc.partialRecords[originID], nil
+}
+
+// Called to uncache partialCDR and remove automatic dumping of the cached records
+func (prc *PartialRecordsCache) uncachePartialCDR(pCDR *PartialCDRRecord) {
+	originID := pCDR.cdrs[0].OriginID
+	if tmr, hasIt := prc.dumpTimers[originID]; hasIt {
+		tmr.Stop()
+	}
+	delete(prc.partialRecords, originID)
+}
+
+// Returns PartialCDR only if merge was possible
+func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*engine.CDR, error) {
+	if pCDR.Len() == 0 || pCDR.cdrs[0].OriginID == "" { // Sanity check
+		return nil, nil
+	}
+	originID := pCDR.cdrs[0].OriginID
+	pCDRIf, err := prc.guard.Guard(func() (interface{}, error) {
+		if _, hasIt := prc.partialRecords[originID]; !hasIt && pCDR.Len() == 1 && !pCDR.cdrs[0].Partial {
+			return pCDR.cdrs[0], nil // Special case when not a partial CDR and not having cached CDRs on same OriginID
+		}
+		cachedPartialCDR, err := prc.cachePartialCDR(pCDR)
+		if err != nil {
+			return nil, err
+		}
+		var final bool
+		for _, cdr := range pCDR.cdrs {
+			if !cdr.Partial {
+				final = true
+				break
+			}
+		}
+		if !final {
+			return nil, nil
+		}
+		prc.uncachePartialCDR(cachedPartialCDR)
+		return cachedPartialCDR.MergeCDRs(), nil
+	}, 0, originID)
+	if pCDRIf == nil {
 		return nil, err
 	}
-	return pr, nil
+	return pCDRIf.(*engine.CDR), err
 }
 
-// This is a partial record received from Flatstore, can be INVITE or BYE and it needs to be paired in order to produce duration
-type PartialFlatstoreRecord struct {
-	Method    string    // INVITE or BYE
-	OriginID  string    // Copute here the OriginID
-	Timestamp time.Time // Timestamp of the event, as written by db_flastore module
-	Values    []string  // Can contain original values or updated via UpdateValues
+func NewPartialCDRRecord(cdr *engine.CDR, cacheDumpFlds []*config.CfgCdrField) *PartialCDRRecord {
+	return &PartialCDRRecord{cdrs: []*engine.CDR{cdr}, cacheDumpFields: cacheDumpFlds}
 }
 
-// Pairs INVITE and BYE into final record containing as last element the duration
-func pairToRecord(part1, part2 *PartialFlatstoreRecord) ([]string, error) {
-	var invite, bye *PartialFlatstoreRecord
-	if part1.Method == "INVITE" {
-		invite = part1
-	} else if part2.Method == "INVITE" {
-		invite = part2
-	} else {
-		return nil, errors.New("MISSING_INVITE")
-	}
-	if part1.Method == "BYE" {
-		bye = part1
-	} else if part2.Method == "BYE" {
-		bye = part2
-	} else {
-		return nil, errors.New("MISSING_BYE")
-	}
-	if len(invite.Values) != len(bye.Values) {
-		return nil, errors.New("INCONSISTENT_VALUES_LENGTH")
-	}
-	record := invite.Values
-	for idx := range record {
-		switch idx {
-		case 0, 1, 2, 3, 6: // Leave these values as they are
-		case 4, 5:
-			record[idx] = bye.Values[idx] // Update record with status from bye
-		default:
-			if bye.Values[idx] != "" { // Any value higher than 6 is dynamically inserted, overwrite if non empty
-				record[idx] = bye.Values[idx]
-			}
-
-		}
-	}
-	callDur := bye.Timestamp.Sub(invite.Timestamp)
-	record = append(record, strconv.FormatFloat(callDur.Seconds(), 'f', -1, 64))
-	return record, nil
-}
-
+// PartialCDRRecord is a record which can be updated later
+// different from PartialFlatstoreRecordsCache which is incomplete (eg: need to calculate duration out of 2 records)
 type PartialCDRRecord struct {
 	cdrs            []*engine.CDR         // Number of CDRs
 	cacheDumpFields []*config.CfgCdrField // Fields template to use when dumping from cache on disk

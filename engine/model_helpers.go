@@ -814,13 +814,13 @@ func (tps TpLcrRules) GetLcrRules() (map[string]*utils.TPLcrRules, error) {
 type TpResourceLimits []*TpResourceLimit
 
 // Converts model received from StorDB or .csv into API format (optimized version for TP)
-func (tps TpResourceLimits) AsTPResourceLimits() map[string]*utils.TPResourceLimits {
-	resLimits := make(map[string]*utils.TPResourceLimits)
+func (tps TpResourceLimits) AsTPResourceLimits() map[string]*utils.TPResourceLimit {
+	resLimits := make(map[string]*utils.TPResourceLimit)
 	for _, tp := range tps {
 		resLimit, found := resLimits[tp.Tag]
 		if !found {
-			resLimit = &utils.TPResourceLimits{
-				TPID:           tp.TPID,
+			resLimit = &utils.TPResourceLimit{
+				TPID:           tp.Tpid,
 				ID:             tp.Tag,
 				ActivationTime: tp.ActivationTime,
 				Weight:         tp.Weight,

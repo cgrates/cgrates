@@ -250,6 +250,7 @@ type CGRConfig struct {
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
 	UserServerIndexes        []string                 // List of user profile field indexes
+	resourceLimiterCfg       *ResourceLimiterConfig   // Configuration for resource limiter
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -440,6 +441,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// ResourceLimiter checks
+	if self.resourceLimiterCfg != nil && self.resourceLimiterCfg.Enabled {
+		for _, connCfg := range self.resourceLimiterCfg.CDRStatConns {
+			if connCfg.Address == utils.MetaInternal && !self.CDRStatsEnabled {
+				return errors.New("CDRStats not enabled but requested by ResourceLimiter component.")
+			}
+		}
+	}
 	return nil
 }
 
@@ -548,6 +557,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnRLSCfg, err := jsnCfg.ResourceLimiterJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -950,6 +964,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
+	if jsnRLSCfg != nil {
+		if self.resourceLimiterCfg == nil {
+			self.resourceLimiterCfg = new(ResourceLimiterConfig)
+		}
+		if self.resourceLimiterCfg.loadFromJsonCfg(jsnRLSCfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnUserServCfg != nil {
 		if jsnUserServCfg.Enabled != nil {
 			self.UserServerEnabled = *jsnUserServCfg.Enabled
@@ -997,4 +1020,8 @@ func (self *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
 	cfgChan := <-self.ConfigReloads[utils.DIAMETER_AGENT] // Lock config for read or reloads
 	defer func() { self.ConfigReloads[utils.DIAMETER_AGENT] <- cfgChan }()
 	return self.diameterAgentCfg
+}
+
+func (self *CGRConfig) ResourceLimiterCfg() *ResourceLimiterConfig {
+	return self.resourceLimiterCfg
 }

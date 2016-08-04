@@ -571,6 +571,7 @@ type AttrReloadCache struct {
 	DerivedChargers  []string
 	LcrProfiles      []string
 	Aliases          []string
+	ResourceLimits   []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
@@ -588,6 +589,7 @@ type CacheStats struct {
 	CdrStats             int
 	Users                int
 	Aliases              int
+	ResourceLimits       int
 	LastLoadID           string
 	LastRatingLoadID     string
 	LastAccountingLoadID string
@@ -1200,7 +1202,7 @@ type AttrSetBalance struct {
 	Disabled       *bool
 }
 
-type TPResourceLimits struct {
+type TPResourceLimit struct {
 	TPID             string
 	ID               string             // Identifier of this limit
 	Filters          []*TPRequestFilter // Filters for the request
@@ -1214,4 +1216,9 @@ type TPRequestFilter struct {
 	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
 	FieldName string   // Name of the field providing us the Values to check (used in case of some )
 	Values    []string // Filter definition
+}
+
+type AttrRLsCache struct {
+	LoadID           string
+	ResourceLimitIDs []string
 }

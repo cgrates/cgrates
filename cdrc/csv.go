@@ -22,8 +22,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -33,112 +31,26 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewPartialRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune) (*PartialRecordsCache, error) {
-	return &PartialRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep,
-		partialRecords: make(map[string]map[string]*PartialFlatstoreRecord), guard: engine.Guardian}, nil
-}
-
-type PartialRecordsCache struct {
-	ttl            time.Duration
-	cdrOutDir      string
-	csvSep         rune
-	partialRecords map[string]map[string]*PartialFlatstoreRecord // [FileName"][OriginID]*PartialRecord
-	guard          *engine.GuardianLock
-}
-
-// Dumps the cache into a .unpaired file in the outdir and cleans cache after
-func (self *PartialRecordsCache) dumpUnpairedRecords(fileName string) error {
-	_, err := self.guard.Guard(func() (interface{}, error) {
-		if len(self.partialRecords[fileName]) != 0 { // Only write the file if there are records in the cache
-			unpairedFilePath := path.Join(self.cdrOutDir, fileName+UNPAIRED_SUFFIX)
-			fileOut, err := os.Create(unpairedFilePath)
-			if err != nil {
-				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed creating %s, error: %s", unpairedFilePath, err.Error()))
-				return nil, err
-			}
-			csvWriter := csv.NewWriter(fileOut)
-			csvWriter.Comma = self.csvSep
-			for _, pr := range self.partialRecords[fileName] {
-				if err := csvWriter.Write(pr.Values); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing unpaired record %v to file: %s, error: %s", pr, unpairedFilePath, err.Error()))
-					return nil, err
-				}
-			}
-			csvWriter.Flush()
-		}
-		delete(self.partialRecords, fileName)
-		return nil, nil
-	}, 0, fileName)
-	return err
-}
-
-// Search in cache and return the partial record with accountind id defined, prefFilename is searched at beginning because of better match probability
-func (self *PartialRecordsCache) GetPartialRecord(OriginID, prefFileName string) (string, *PartialFlatstoreRecord) {
-	var cachedFilename string
-	var cachedPartial *PartialFlatstoreRecord
-	checkCachedFNames := []string{prefFileName} // Higher probability to match as firstFileName
-	for fName := range self.partialRecords {
-		if fName != prefFileName {
-			checkCachedFNames = append(checkCachedFNames, fName)
-		}
-	}
-	for _, fName := range checkCachedFNames { // Need to lock them individually
-		self.guard.Guard(func() (interface{}, error) {
-			var hasPartial bool
-			if cachedPartial, hasPartial = self.partialRecords[fName][OriginID]; hasPartial {
-				cachedFilename = fName
-			}
-			return nil, nil
-		}, 0, fName)
-		if cachedPartial != nil {
-			break
-		}
-	}
-	return cachedFilename, cachedPartial
-}
-
-func (self *PartialRecordsCache) CachePartial(fileName string, pr *PartialFlatstoreRecord) {
-	self.guard.Guard(func() (interface{}, error) {
-		if fileMp, hasFile := self.partialRecords[fileName]; !hasFile {
-			self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.OriginID: pr}
-			if self.ttl != 0 { // Schedule expiry/dump of the just created entry in cache
-				go func() {
-					time.Sleep(self.ttl)
-					self.dumpUnpairedRecords(fileName)
-				}()
-			}
-		} else if _, hasOriginID := fileMp[pr.OriginID]; !hasOriginID {
-			self.partialRecords[fileName][pr.OriginID] = pr
-		}
-		return nil, nil
-	}, 0, fileName)
-}
-
-func (self *PartialRecordsCache) UncachePartial(fileName string, pr *PartialFlatstoreRecord) {
-	self.guard.Guard(func() (interface{}, error) {
-		delete(self.partialRecords[fileName], pr.OriginID) // Remove the record out of cache
-		return nil, nil
-	}, 0, fileName)
-}
-
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig,
-	httpSkipTlsCheck bool, partialRecordsCache *PartialRecordsCache) *CsvRecordsProcessor {
+	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache, partialRecordsCache *PartialRecordsCache, cacheDumpFields []*config.CfgCdrField) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader, timezone: timezone, fileName: fileName,
-		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs,
-		httpSkipTlsCheck: httpSkipTlsCheck, partialRecordsCache: partialRecordsCache}
+		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs, httpSkipTlsCheck: httpSkipTlsCheck, unpairedRecordsCache: unpairedRecordsCache,
+		partialRecordsCache: partialRecordsCache, partialCacheDumpFields: cacheDumpFields}
 
 }
 
 type CsvRecordsProcessor struct {
-	csvReader           *csv.Reader
-	timezone            string // Timezone for CDRs which are not clearly specifying it
-	fileName            string
-	dfltCdrcCfg         *config.CdrcConfig
-	cdrcCfgs            []*config.CdrcConfig
-	processedRecordsNr  int64 // Number of content records in file
-	httpSkipTlsCheck    bool
-	partialRecordsCache *PartialRecordsCache // Shared by cdrc so we can cache for all files in a folder
+	csvReader              *csv.Reader
+	timezone               string // Timezone for CDRs which are not clearly specifying it
+	fileName               string
+	dfltCdrcCfg            *config.CdrcConfig
+	cdrcCfgs               []*config.CdrcConfig
+	processedRecordsNr     int64 // Number of content records in file
+	httpSkipTlsCheck       bool
+	unpairedRecordsCache   *UnpairedRecordsCache // Shared by cdrc so we can cache for all files in a folder
+	partialRecordsCache    *PartialRecordsCache  // Cache records which are of type "Partial"
+	partialCacheDumpFields []*config.CfgCdrField
 }
 
 func (self *CsvRecordsProcessor) ProcessedRecordsNr() int64 {
@@ -152,7 +64,7 @@ func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	}
 	self.processedRecordsNr += 1
 	if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) {
-		if record, err = self.processPartialRecord(record); err != nil {
+		if record, err = self.processFlatstoreRecord(record); err != nil {
 			return nil, err
 		} else if record == nil {
 			return nil, nil // Due to partial, none returned
@@ -163,26 +75,26 @@ func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 }
 
 // Processes a single partial record for flatstore CDRs
-func (self *CsvRecordsProcessor) processPartialRecord(record []string) ([]string, error) {
+func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]string, error) {
 	if strings.HasPrefix(self.fileName, self.dfltCdrcCfg.FailedCallsPrefix) { // Use the first index since they should be the same in all configs
 		record = append(record, "0") // Append duration 0 for failed calls flatstore CDR and do not process it further
 		return record, nil
 	}
-	pr, err := NewPartialFlatstoreRecord(record, self.timezone)
+	pr, err := NewUnpairedRecord(record, self.timezone)
 	if err != nil {
 		return nil, err
 	}
 	// Retrieve and complete the record from cache
-	cachedFilename, cachedPartial := self.partialRecordsCache.GetPartialRecord(pr.OriginID, self.fileName)
+	cachedFilename, cachedPartial := self.unpairedRecordsCache.GetPartialRecord(pr.OriginID, self.fileName)
 	if cachedPartial == nil { // Not cached, do it here and stop processing
-		self.partialRecordsCache.CachePartial(self.fileName, pr)
+		self.unpairedRecordsCache.CachePartial(self.fileName, pr)
 		return nil, nil
 	}
 	pairedRecord, err := pairToRecord(cachedPartial, pr)
 	if err != nil {
 		return nil, err
 	}
-	self.partialRecordsCache.UncachePartial(cachedFilename, pr)
+	self.unpairedRecordsCache.UncachePartial(cachedFilename, pr)
 	return pairedRecord, nil
 }
 
@@ -206,11 +118,17 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 		if filterBreak { // Stop importing cdrc fields profile due to non matching filter
 			continue
 		}
-		if storedCdr, err := self.recordToStoredCdr(record, cdrcCfg); err != nil {
+		storedCdr, err := self.recordToStoredCdr(record, cdrcCfg)
+		if err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
-		} else {
-			recordCdrs = append(recordCdrs, storedCdr)
+		} else if self.dfltCdrcCfg.CdrFormat == utils.PartialCSV {
+			if storedCdr, err = self.partialRecordsCache.MergePartialCDRRecord(NewPartialCDRRecord(storedCdr, self.partialCacheDumpFields)); err != nil {
+				return nil, fmt.Errorf("Failed merging PartialCDR, error: %s", err.Error())
+			} else if storedCdr == nil { // CDR was absorbed by cache since it was partial
+				continue
+			}
 		}
+		recordCdrs = append(recordCdrs, storedCdr)
 		if !cdrcCfg.ContinueOnSuccess {
 			break
 		}
@@ -224,6 +142,21 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
+		filterBreak := false
+		for _, rsrFilter := range cdrFldCfg.FieldFilter {
+			if rsrFilter == nil { // Nil filter does not need to match anything
+				continue
+			}
+			if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+				return nil, fmt.Errorf("Ignoring record: %v - cannot compile field filter %+v", record, rsrFilter)
+			} else if !rsrFilter.FilterPasses(record[cfgFieldIdx]) {
+				filterBreak = true
+				break
+			}
+		}
+		if filterBreak { // Stop processing this field template since it's filters are not matching
+			continue
+		}
 		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
 			switch cdrFldCfg.FieldId {
 			case utils.ACCID:
@@ -234,7 +167,8 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 
 		}
 		var fieldVal string
-		if cdrFldCfg.Type == utils.META_COMPOSED {
+		switch cdrFldCfg.Type {
+		case utils.META_COMPOSED, utils.MetaUnixTimestamp:
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
 					fieldVal += cfgFieldRSR.ParseValue("")
@@ -242,13 +176,18 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
 						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
 					} else {
-						fieldVal += cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+						strVal := cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+						if cdrFldCfg.Type == utils.MetaUnixTimestamp {
+							t, _ := utils.ParseTimeDetectLayout(strVal, self.timezone)
+							strVal = strconv.Itoa(int(t.Unix()))
+						}
+						fieldVal += strVal
 					}
 				}
 			}
-		} else if cdrFldCfg.Type == utils.META_HTTP_POST {
+		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
-		} else {
+		default:
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
 		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {

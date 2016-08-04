@@ -75,8 +75,7 @@ var contentJsnCfgFlds = []*config.CdrFieldJsonCfg{
 		Width: utils.IntPointer(5), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Cost"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.COST), Width: utils.IntPointer(9),
 		Padding: utils.StringPointer("zeroleft")},
-	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("DestinationPrivacy"), Type: utils.StringPointer(utils.META_HANDLER), Value: utils.StringPointer(META_MASKDESTINATION),
-		Width: utils.IntPointer(1)},
+	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("DestinationPrivacy"), Type: utils.StringPointer(utils.MetaMaskedDestination), Width: utils.IntPointer(1)},
 }
 
 var trailerJsnCfgFlds = []*config.CdrFieldJsonCfg{

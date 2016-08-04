@@ -641,7 +641,7 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 	tps := []*TpResourceLimit{
 		&TpResourceLimit{
-			TPID:             "TEST_TPID",
+			Tpid:             "TEST_TPID",
 			Tag:              "ResGroup1",
 			FilterType:       MetaStringPrefix,
 			FilterFieldName:  "Destination",
@@ -651,14 +651,14 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Limit:            "45",
 			ActionTriggerIds: "WARN_RES1;WARN_RES2"},
 		&TpResourceLimit{
-			TPID:             "TEST_TPID",
+			Tpid:             "TEST_TPID",
 			Tag:              "ResGroup1",
 			FilterType:       MetaStringPrefix,
 			FilterFieldName:  "Category",
 			FilterValues:     "call;inbound_call",
 			ActionTriggerIds: "WARN3"},
 		&TpResourceLimit{
-			TPID:            "TEST_TPID",
+			Tpid:            "TEST_TPID",
 			Tag:             "ResGroup2",
 			FilterType:      MetaStringPrefix,
 			FilterFieldName: "Destination",
@@ -667,9 +667,9 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Weight:          10.0,
 			Limit:           "20"},
 	}
-	eTPs := map[string]*utils.TPResourceLimits{
-		tps[0].Tag: &utils.TPResourceLimits{
-			TPID: tps[0].TPID,
+	eTPs := map[string]*utils.TPResourceLimit{
+		tps[0].Tag: &utils.TPResourceLimit{
+			TPID: tps[0].Tpid,
 			ID:   tps[0].Tag,
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
@@ -688,8 +688,8 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Limit:            tps[0].Limit,
 			ActionTriggerIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
-		tps[2].Tag: &utils.TPResourceLimits{
-			TPID: tps[2].TPID,
+		tps[2].Tag: &utils.TPResourceLimit{
+			TPID: tps[2].Tpid,
 			ID:   tps[2].Tag,
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{

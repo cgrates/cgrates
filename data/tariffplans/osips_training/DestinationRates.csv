@@ -1,0 +1,2 @@
+#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_ANY_1CNT,*any,RT_1CNT,*up,4,0,

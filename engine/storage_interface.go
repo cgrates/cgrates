@@ -93,6 +93,9 @@ type AccountingStorage interface {
 	SetAlias(*Alias) error
 	GetAlias(string) (*Alias, error)
 	RemoveAlias(string) error
+	GetResourceLimit(string, bool) (*ResourceLimit, error)
+	SetResourceLimit(*ResourceLimit) error
+	RemoveResourceLimit(string) error
 	GetLoadHistory(int, bool) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int) error
 	GetStructVersion() (*StructVersion, error)
@@ -133,7 +136,7 @@ type LoadReader interface {
 	GetTpActionPlans(string, string) ([]TpActionPlan, error)
 	GetTpActionTriggers(string, string) ([]TpActionTrigger, error)
 	GetTpAccountActions(*TpAccountAction) ([]TpAccountAction, error)
-	//GetTpResourceLimits(string, *utils.Paginator) ([]TpResourceLimits, error)
+	GetTpResourceLimits(string, string) (TpResourceLimits, error)
 }
 
 type LoadWriter interface {

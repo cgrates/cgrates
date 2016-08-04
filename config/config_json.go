@@ -27,34 +27,35 @@ import (
 )
 
 const (
-	GENERAL_JSN     = "general"
-	LISTEN_JSN      = "listen"
-	TPDB_JSN        = "tariffplan_db"
-	DATADB_JSN      = "data_db"
-	STORDB_JSN      = "stor_db"
-	BALANCER_JSN    = "balancer"
-	RALS_JSN        = "rals"
-	SCHEDULER_JSN   = "scheduler"
-	CDRS_JSN        = "cdrs"
-	MEDIATOR_JSN    = "mediator"
-	CDRSTATS_JSN    = "cdrstats"
-	CDRE_JSN        = "cdre"
-	CDRC_JSN        = "cdrc"
-	SMGENERIC_JSON  = "sm_generic"
-	SMFS_JSN        = "sm_freeswitch"
-	SMKAM_JSN       = "sm_kamailio"
-	SMOSIPS_JSN     = "sm_opensips"
-	SM_JSN          = "session_manager"
-	FS_JSN          = "freeswitch"
-	KAMAILIO_JSN    = "kamailio"
-	OSIPS_JSN       = "opensips"
-	DA_JSN          = "diameter_agent"
-	HISTSERV_JSN    = "historys"
-	PUBSUBSERV_JSN  = "pubsubs"
-	ALIASESSERV_JSN = "aliases"
-	USERSERV_JSN    = "users"
-	MAILER_JSN      = "mailer"
-	SURETAX_JSON    = "suretax"
+	GENERAL_JSN          = "general"
+	LISTEN_JSN           = "listen"
+	TPDB_JSN             = "tariffplan_db"
+	DATADB_JSN           = "data_db"
+	STORDB_JSN           = "stor_db"
+	BALANCER_JSN         = "balancer"
+	RALS_JSN             = "rals"
+	SCHEDULER_JSN        = "scheduler"
+	CDRS_JSN             = "cdrs"
+	MEDIATOR_JSN         = "mediator"
+	CDRSTATS_JSN         = "cdrstats"
+	CDRE_JSN             = "cdre"
+	CDRC_JSN             = "cdrc"
+	SMGENERIC_JSON       = "sm_generic"
+	SMFS_JSN             = "sm_freeswitch"
+	SMKAM_JSN            = "sm_kamailio"
+	SMOSIPS_JSN          = "sm_opensips"
+	SM_JSN               = "session_manager"
+	FS_JSN               = "freeswitch"
+	KAMAILIO_JSN         = "kamailio"
+	OSIPS_JSN            = "opensips"
+	DA_JSN               = "diameter_agent"
+	HISTSERV_JSN         = "historys"
+	PUBSUBSERV_JSN       = "pubsubs"
+	ALIASESSERV_JSN      = "aliases"
+	USERSERV_JSN         = "users"
+	RESOURCELIMITER_JSON = "rls"
+	MAILER_JSN           = "mailer"
+	SURETAX_JSON         = "suretax"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -302,6 +303,18 @@ func (self CgrJsonCfg) UserServJsonCfg() (*UserServJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(UserServJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) ResourceLimiterJsonCfg() (*ResourceLimiterServJsonCfg, error) {
+	rawCfg, hasKey := self[RESOURCELIMITER_JSON]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(ResourceLimiterServJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

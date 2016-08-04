@@ -349,24 +349,25 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Cdrs_conns: &[]*HaPoolJsonCfg{&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-			Cdr_format:                 utils.StringPointer("csv"),
-			Field_separator:            utils.StringPointer(","),
-			Timezone:                   utils.StringPointer(""),
-			Run_delay:                  utils.IntPointer(0),
-			Max_open_files:             utils.IntPointer(1024),
-			Data_usage_multiply_factor: utils.Float64Pointer(1024.0),
-			Cdr_in_dir:                 utils.StringPointer("/var/spool/cgrates/cdrc/in"),
-			Cdr_out_dir:                utils.StringPointer("/var/spool/cgrates/cdrc/out"),
-			Failed_calls_prefix:        utils.StringPointer("missed_calls"),
-			Cdr_path:                   utils.StringPointer(""),
-			Cdr_source_id:              utils.StringPointer("freeswitch_csv"),
-			Cdr_filter:                 utils.StringPointer(""),
-			Continue_on_success:        utils.BoolPointer(false),
-			Partial_record_cache:       utils.StringPointer("10s"),
-			Header_fields:              &eFields,
-			Content_fields:             &cdrFields,
-			Trailer_fields:             &eFields,
-			Cache_dump_fields:          &cacheDumpFields,
+			Cdr_format:                  utils.StringPointer("csv"),
+			Field_separator:             utils.StringPointer(","),
+			Timezone:                    utils.StringPointer(""),
+			Run_delay:                   utils.IntPointer(0),
+			Max_open_files:              utils.IntPointer(1024),
+			Data_usage_multiply_factor:  utils.Float64Pointer(1024.0),
+			Cdr_in_dir:                  utils.StringPointer("/var/spool/cgrates/cdrc/in"),
+			Cdr_out_dir:                 utils.StringPointer("/var/spool/cgrates/cdrc/out"),
+			Failed_calls_prefix:         utils.StringPointer("missed_calls"),
+			Cdr_path:                    utils.StringPointer(""),
+			Cdr_source_id:               utils.StringPointer("freeswitch_csv"),
+			Cdr_filter:                  utils.StringPointer(""),
+			Continue_on_success:         utils.BoolPointer(false),
+			Partial_record_cache:        utils.StringPointer("10s"),
+			Partial_cache_expiry_action: utils.StringPointer(utils.MetaDumpToFile),
+			Header_fields:               &eFields,
+			Content_fields:              &cdrFields,
+			Trailer_fields:              &eFields,
+			Cache_dump_fields:           &cacheDumpFields,
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrcJsonCfg(); err != nil {
@@ -603,6 +604,20 @@ func TestDfUserServJsonCfg(t *testing.T) {
 		Indexes: utils.StringSlicePointer([]string{}),
 	}
 	if cfg, err := dfCgrJsonCfg.UserServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestDfResourceLimiterSJsonCfg(t *testing.T) {
+	eCfg := &ResourceLimiterServJsonCfg{
+		Enabled:             utils.BoolPointer(false),
+		Cdrstats_conns:      &[]*HaPoolJsonCfg{},
+		Cache_dump_interval: utils.StringPointer("0s"),
+		Usage_ttl:           utils.StringPointer("3h"),
+	}
+	if cfg, err := dfCgrJsonCfg.ResourceLimiterJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

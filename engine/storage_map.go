@@ -797,3 +797,13 @@ func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	}
 	return
 }
+
+func (ms *MapStorage) GetResourceLimit(id string, skipCache bool) (*ResourceLimit, error) {
+	return nil, nil
+}
+func (ms *MapStorage) SetResourceLimit(rl *ResourceLimit) error {
+	return nil
+}
+func (ms *MapStorage) RemoveResourceLimit(id string) error {
+	return nil
+}

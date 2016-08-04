@@ -588,3 +588,31 @@ func (h HierarchyPath) AsString(sep string, prefix bool) string {
 	}
 	return retStr
 }
+
+// Mask a number of characters in the suffix of the destination
+func MaskSuffix(dest string, maskLen int) string {
+	destLen := len(dest)
+	if maskLen < 0 {
+		return dest
+	} else if maskLen > destLen {
+		maskLen = destLen
+	}
+	dest = dest[:destLen-maskLen]
+	for i := 0; i < maskLen; i++ {
+		dest += MASK_CHAR
+	}
+	return dest
+}
+
+// Sortable Int64Slice
+type Int64Slice []int64
+
+func (slc Int64Slice) Len() int {
+	return len(slc)
+}
+func (slc Int64Slice) Swap(i, j int) {
+	slc[i], slc[j] = slc[j], slc[i]
+}
+func (slc Int64Slice) Less(i, j int) bool {
+	return slc[i] < slc[j]
+}

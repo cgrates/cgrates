@@ -301,6 +301,10 @@ func (ms *MongoStorage) GetTpAliases(tp *TpAlias) ([]TpAlias, error) {
 	return results, err
 }
 
+func (ms *MongoStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits, error) {
+	return nil, nil
+}
+
 func (ms *MongoStorage) GetTpDerivedChargers(tp *TpDerivedCharger) ([]TpDerivedCharger, error) {
 	filter := bson.M{"tpid": tp.Tpid}
 	if tp.Direction != "" {

@@ -452,7 +452,7 @@ func (t TBLSMCosts) TableName() string {
 
 type TpResourceLimit struct {
 	ID               int64
-	TPID             string
+	Tpid             string
 	Tag              string  `index:"0" re:""`
 	FilterType       string  `index:"1" re:"^\*[A-Za-z].*"`
 	FilterFieldName  string  `index:"2" re:""`

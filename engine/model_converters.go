@@ -409,3 +409,21 @@ func APItoModelUsers(attr *utils.TPUsers) (result []TpUser) {
 	}
 	return
 }
+
+func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceLimit, err error) {
+	rl = &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight, Filters: make([]*RequestFilter, len(tpRL.Filters))}
+	for i, tpFltr := range tpRL.Filters {
+		rf := &RequestFilter{Type: tpFltr.Type, FieldName: tpFltr.FieldName, Values: tpFltr.Values}
+		if err := rf.CompileValues(); err != nil {
+			return nil, err
+		}
+		rl.Filters[i] = rf
+	}
+	if rl.ActivationTime, err = utils.ParseTimeDetectLayout(tpRL.ActivationTime, timezone); err != nil {
+		return nil, err
+	}
+	if rl.Limit, err = strconv.ParseFloat(tpRL.Limit, 64); err != nil {
+		return nil, err
+	}
+	return rl, nil
+}

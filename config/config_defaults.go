@@ -28,24 +28,24 @@ const CGRATES_CFG_JSON = `
 // This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
-	"http_skip_tls_verify": false,						// if enabled Http Client will accept any TLS certificate
-	"rounding_decimals": 5,								// system level precision for floats
-	"dbdata_encoding": "msgpack",						// encoding used to store object data in strings: <msgpack|json>
+	"http_skip_tls_verify": false,							// if enabled Http Client will accept any TLS certificate
+	"rounding_decimals": 5,									// system level precision for floats
+	"dbdata_encoding": "msgpack",							// encoding used to store object data in strings: <msgpack|json>
 	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline Tariff Plans
-	"httpposter_attempts": 3,							// number of http attempts before considering request failed (eg: *call_url)
+	"httpposter_attempts": 3,								// number of http attempts before considering request failed (eg: *call_url)
 	"http_failed_dir": "/var/spool/cgrates/http_failed",	// directory path where we store failed http requests
-	"default_request_type": "*rated",					// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
-	"default_category": "call",							// default category to consider when missing from requests
-	"default_tenant": "cgrates.org",					// default tenant to consider when missing from requests
-	"default_timezone": "Local",						// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	"connect_attempts": 3,								// initial server connect attempts
-	"reconnects": -1,									// number of retries in case of connection lost
-	"connect_timeout": "1s",							// consider connection unsuccessful on timeout, 0 to disable the feature
-	"reply_timeout": "2s",								// consider connection down for replies taking longer than this value
-	"response_cache_ttl": "0s",							// the life span of a cached response
-	"internal_ttl": "2m",								// maximum duration to wait for internal connections before giving up
-	"locking_timeout": "5s",							// timeout internal locks to avoid deadlocks
-    "cache_dump_dir": "",                 // cache dump for faster start (leave empty to disable)
+	"default_request_type": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
+	"default_category": "call",								// default category to consider when missing from requests
+	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
+	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	"connect_attempts": 3,									// initial server connect attempts
+	"reconnects": -1,										// number of retries in case of connection lost
+	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
+	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
+	"response_cache_ttl": "0s",								// the life span of a cached response
+	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
+	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
+    "cache_dump_dir": "",									 // cache dump for faster start (leave empty to disable)
 
 },
 
@@ -137,27 +137,28 @@ const CGRATES_CFG_JSON = `
 "cdrc": [
 	{
 		"id": "*default",								// identifier of the CDRC runner
-		"enabled": false,							// enable CDR client functionality
-		"dry_run": false,							// do not send the CDRs to CDRS, just parse them
+		"enabled": false,								// enable CDR client functionality
+		"dry_run": false,								// do not send the CDRs to CDRS, just parse them
 		"cdrs_conns": [
-			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
+			{"address": "*internal"}					// address where to reach CDR server. <*internal|x.y.z.y:1234>
 		],
-		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
-		"field_separator": ",",						// separator used in case of csv files
-		"timezone": "",								// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"max_open_files": 1024,						// maximum simultaneous files to process, 0 for unlimited
-		"data_usage_multiply_factor": 1024,			// conversion factor for data usage
-		"cdr_in_dir": "/var/spool/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
+		"cdr_format": "csv",							// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv>
+		"field_separator": ",",							// separator used in case of csv files
+		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+		"max_open_files": 1024,							// maximum simultaneous files to process, 0 for unlimited
+		"data_usage_multiply_factor": 1024,				// conversion factor for data usage
+		"cdr_in_dir": "/var/spool/cgrates/cdrc/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
-		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
-		"cdr_path": "",								// path towards one CDR element in case of XML CDRs
-		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
-		"cdr_filter": "",							// filter CDR records to import
-		"continue_on_success": false,				// continue to the next template if executed
-		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
-		"header_fields": [],						// template of the import header fields
-		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
+		"cdr_path": "",									// path towards one CDR element in case of XML CDRs
+		"cdr_source_id": "freeswitch_csv",				// free form field, tag identifying the source of the CDRs within CDRS database
+		"cdr_filter": "",								// filter CDR records to import
+		"continue_on_success": false,					// continue to the next template if executed
+		"partial_record_cache": "10s",					// duration to cache partial records when not pairing
+		"partial_cache_expiry_action": "*dump_to_file",	// action taken when cache when records in cache are timed-out <*dump_to_file|*post_cdr>
+		"header_fields": [],							// template of the import header fields
+		"content_fields":[								// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "2", "mandatory": true},
 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "3", "mandatory": true},
 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "4", "mandatory": true},
@@ -296,10 +297,10 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
 	"rals_conns": [
-		{"address": "*internal"}     // address where to reach the Rater <""|*internal|127.0.0.1:2013>
+		{"address": "*internal"}		// address where to reach the Rater <""|*internal|127.0.0.1:2013>
 	],
 	"cdrs_conns": [
-		{"address": "*internal"}     // address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+		{"address": "*internal"}		// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
 	"reconnects": 5,					// number of reconnects if connection is lost
 	"create_cdr": false,				// create CDR out of events and sends it to CDRS component
@@ -379,6 +380,14 @@ const CGRATES_CFG_JSON = `
 "users": {
 	"enabled": false,							// starts User service: <true|false>.
 	"indexes": [],								// user profile field indexes
+},
+
+
+"rls": {
+	"enabled": false,						// starts ResourceLimiter service: <true|false>.
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>					
+	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|dur>
+	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|dur>
 },
 
 
