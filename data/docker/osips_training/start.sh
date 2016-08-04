@@ -5,7 +5,7 @@ sed -i 's/127.0.0.1/0.0.0.0/g' /etc/redis/redis.conf /etc/mysql/my.cnf
 /etc/init.d/rsyslog start
 /etc/init.d/mysql start
 /etc/init.d/redis-server start
-cgr-engine -config_dir=/root/cgr/data/conf/samples/osips_training
+/root/code/bin/cgr-engine -config_dir /root/cgr/data/conf/samples/osips_training
 
 # setup mysql
 cd /usr/share/cgrates/storage/mysql && ./setup_cgr_db.sh root CGRateS.org
