@@ -1,160 +1,143 @@
+//Simple caching library with expiration capabilities
 package cache2go
 
-import (
-	"container/list"
-	"sync"
-	"time"
+import "sync"
+
+const (
+	PREFIX_LEN   = 4
+	KIND_ADD     = "ADD"
+	KIND_REM     = "REM"
+	KIND_PRF     = "PRF"
+	DOUBLE_CACHE = true
 )
 
-// Cache is an LRU cache. It is not safe for concurrent access.
-type Cache struct {
-	mu sync.RWMutex
-	// MaxEntries is the maximum number of cache entries before
-	// an item is evicted. Zero means no limit.
-	maxEntries int
+var (
+	mux   sync.RWMutex
+	cache cacheStore
+	// transaction stuff
+	transactionBuffer []*transactionItem
+	transactionMux    sync.Mutex
+	transactionON     = false
+	transactionLock   = false
+)
 
-	// OnEvicted optionally specificies a callback function to be
-	// executed when an entry is purged from the cache.
-	OnEvicted func(key string, value interface{})
-
-	ll         *list.List
-	cache      map[interface{}]*list.Element
-	expiration time.Duration
+type transactionItem struct {
+	key   string
+	value interface{}
+	kind  string
 }
 
-type entry struct {
-	key       string
-	value     interface{}
-	timestamp time.Time
-}
-
-// New creates a new Cache.
-// If maxEntries is zero, the cache has no limit and it's assumed
-// that eviction is done by the caller.
-func New(maxEntries int, expire time.Duration) *Cache {
-	c := &Cache{
-		maxEntries: maxEntries,
-		expiration: expire,
-		ll:         list.New(),
-		cache:      make(map[interface{}]*list.Element),
+func init() {
+	if DOUBLE_CACHE {
+		cache = newDoubleStore()
+	} else {
+		cache = newSimpleStore()
 	}
-	if c.expiration > 0 {
-		go c.cleanExpired()
-	}
-	return c
 }
 
-// cleans expired entries performing minimal checks
-func (c *Cache) cleanExpired() {
-	for {
-		c.mu.RLock()
-		e := c.ll.Back()
-		c.mu.RUnlock()
-		if e == nil {
-			time.Sleep(c.expiration)
-			continue
-		}
-		en := e.Value.(*entry)
-		if en.timestamp.Add(c.expiration).After(time.Now()) {
-			c.mu.Lock()
-			c.removeElement(e)
-			c.mu.Unlock()
-		} else {
-			time.Sleep(time.Now().Sub(en.timestamp.Add(c.expiration)))
+func CacheBeginTransaction() {
+	transactionMux.Lock()
+	transactionLock = true
+	transactionON = true
+}
+
+func CacheRollbackTransaction() {
+	transactionBuffer = nil
+	transactionLock = false
+	transactionON = false
+	transactionMux.Unlock()
+}
+
+func CacheCommitTransaction() {
+	transactionON = false
+	// apply all transactioned items
+	mux.Lock()
+	for _, item := range transactionBuffer {
+		switch item.kind {
+		case KIND_REM:
+			CacheRemKey(item.key)
+		case KIND_PRF:
+			CacheRemPrefixKey(item.key)
+		case KIND_ADD:
+			CacheSet(item.key, item.value)
 		}
 	}
+	mux.Unlock()
+	transactionBuffer = nil
+	transactionLock = false
+	transactionMux.Unlock()
 }
 
-// Add adds a value to the cache
-func (c *Cache) Set(key string, value interface{}) {
-	c.mu.Lock()
-	if c.cache == nil {
-		c.cache = make(map[interface{}]*list.Element)
-		c.ll = list.New()
+// The function to be used to cache a key/value pair when expiration is not needed
+func CacheSet(key string, value interface{}) {
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
 	}
-
-	if e, ok := c.cache[key]; ok {
-		c.ll.MoveToFront(e)
-
-		en := e.Value.(*entry)
-		en.value = value
-		en.timestamp = time.Now()
-
-		c.mu.Unlock()
-		return
-	}
-	e := c.ll.PushFront(&entry{key: key, value: value, timestamp: time.Now()})
-	c.cache[key] = e
-	c.mu.Unlock()
-
-	if c.maxEntries != 0 && c.ll.Len() > c.maxEntries {
-		c.RemoveOldest()
+	if !transactionON {
+		cache.Put(key, value)
+		//log.Println("ADD: ", key)
+	} else {
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_ADD})
 	}
 }
 
-// Get looks up a key's value from the cache.
-func (c *Cache) Get(key string) (value interface{}, ok bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	if c.cache == nil {
-		return
-	}
-	if e, hit := c.cache[key]; hit {
-		c.ll.MoveToFront(e)
-		e.Value.(*entry).timestamp = time.Now()
-		return e.Value.(*entry).value, true
-	}
-	return
+// The function to extract a value for a key that never expire
+func CacheGet(key string) (interface{}, bool) {
+	mux.RLock()
+	defer mux.RUnlock()
+	return cache.Get(key)
 }
 
-// Remove removes the provided key from the cache.
-func (c *Cache) Remove(key string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if c.cache == nil {
-		return
+func CacheRemKey(key string) {
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
 	}
-	if e, hit := c.cache[key]; hit {
-		c.removeElement(e)
+	if !transactionON {
+		cache.Delete(key)
+	} else {
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, kind: KIND_REM})
 	}
 }
 
-// RemoveOldest removes the oldest item from the cache.
-func (c *Cache) RemoveOldest() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if c.cache == nil {
-		return
+func CacheRemPrefixKey(prefix string) {
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
 	}
-	e := c.ll.Back()
-	if e != nil {
-		c.removeElement(e)
-	}
-}
-
-func (c *Cache) removeElement(e *list.Element) {
-	c.ll.Remove(e)
-	kv := e.Value.(*entry)
-	delete(c.cache, kv.key)
-	if c.OnEvicted != nil {
-		c.OnEvicted(kv.key, kv.value)
+	if !transactionON {
+		cache.DeletePrefix(prefix)
+	} else {
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: prefix, kind: KIND_PRF})
 	}
 }
 
-// Len returns the number of items in the cache.
-func (c *Cache) Len() int {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	if c.cache == nil {
-		return 0
+// Delete all keys from cache
+func CacheFlush() {
+	mux.Lock()
+	defer mux.Unlock()
+	if DOUBLE_CACHE {
+		cache = newDoubleStore()
+	} else {
+		cache = newSimpleStore()
 	}
-	return c.ll.Len()
 }
 
-// empties the whole cache
-func (c *Cache) Flush() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.ll = list.New()
-	c.cache = make(map[interface{}]*list.Element)
+func CacheCountEntries(prefix string) (result int) {
+	mux.RLock()
+	defer mux.RUnlock()
+	return cache.CountEntriesForPrefix(prefix)
+}
+
+func CacheGetAllEntries(prefix string) (map[string]interface{}, error) {
+	mux.RLock()
+	defer mux.RUnlock()
+	return cache.GetAllForPrefix(prefix)
+}
+
+func CacheGetEntriesKeys(prefix string) (keys []string) {
+	mux.RLock()
+	defer mux.RUnlock()
+	return cache.GetKeysForPrefix(prefix)
 }

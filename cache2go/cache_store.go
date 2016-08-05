@@ -1,15 +1,10 @@
 //Simple caching library with expiration capabilities
-package engine
+package cache2go
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -21,7 +16,6 @@ type cacheStore interface {
 	CountEntriesForPrefix(string) int
 	GetAllForPrefix(string) (map[string]interface{}, error)
 	GetKeysForPrefix(string) []string
-	Load(string, []string) error
 }
 
 // easy to be counted exported by prefix
@@ -98,50 +92,19 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 	return
 }
 
-func (cs cacheDoubleStore) Load(path string, prefixes []string) error {
-	if path == "" || len(prefixes) == 0 {
-		return nil
-	}
-	start := time.Now()
-	var wg sync.WaitGroup
-	var mux sync.Mutex
-	for _, prefix := range prefixes {
-		prefix = prefix[:PREFIX_LEN] // make sure it's only limited to prefix length'
-		p := filepath.Join(path, prefix+".cache")
-		if _, err := os.Stat(p); os.IsNotExist(err) { // no cache file for this prefix
-			continue
-		}
-		wg.Add(1)
-		go func(dirPath, pref string) {
-			defer wg.Done()
-			val, err := dumper.load(pref)
-			if err != nil {
-				utils.Logger.Info("<cache dumper> load error: " + err.Error())
-				return
-			}
-			mux.Lock()
-			cs[pref] = val
-			mux.Unlock()
-		}(p, prefix)
-	}
-	wg.Wait()
-	utils.Logger.Info(fmt.Sprintf("Cache %v load time: %v", prefixes, time.Since(start)))
-	return nil
-}
-
 type cacheParam struct {
 	limit      int
 	expiration time.Duration
 }
 
-func (ct *cacheParam) createCache() *cache2go.Cache {
-	return cache2go.New(ct.limit, ct.expiration)
+func (ct *cacheParam) createCache() *Cache {
+	return NewLRUTTL(ct.limit, ct.expiration)
 }
 
-type cacheLRUTTL map[string]*cache2go.Cache
+type cacheLRUTTL map[string]*Cache
 
 func newLRUTTL(types map[string]*cacheParam) cacheLRUTTL {
-	c := make(map[string]*cache2go.Cache, len(types))
+	c := make(map[string]*Cache, len(types))
 	for prefix, param := range types {
 		c[prefix] = param.createCache()
 	}
@@ -153,13 +116,10 @@ func (cs cacheLRUTTL) Put(key string, value interface{}) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	mp, ok := cs[prefix]
 	if !ok {
-		mp = cache2go.New(1000, 0) //FixME
+		mp = NewLRUTTL(1000, 0) //FixME
 		cs[prefix] = mp
 	}
 	mp.Set(key, value)
-	if err := dumper.put(prefix, key, value); err != nil {
-		utils.Logger.Info("<cache dumper> put error: " + err.Error())
-	}
 }
 
 func (cs cacheLRUTTL) Get(key string) (interface{}, bool) {

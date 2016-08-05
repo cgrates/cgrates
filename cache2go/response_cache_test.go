@@ -1,4 +1,4 @@
-package engine
+package cache2go
 
 import (
 	"testing"
