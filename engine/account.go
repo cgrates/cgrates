@@ -478,10 +478,18 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		utils.Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 	}
 	if leftCC.Cost == 0 && len(leftCC.Timespans) > 0 {
+		// put AccountID ubformation in increments
+		for _, ts := range leftCC.Timespans {
+			for _, inc := range ts.Increments {
+				if inc.BalanceInfo == nil {
+					inc.BalanceInfo = &DebitInfo{}
+				}
+				inc.BalanceInfo.AccountID = ub.ID
+			}
+		}
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
 	}
 
-	//log.Printf("HERE: %+v", leftCC)
 	if leftCC.Cost > 0 && goNegative {
 		initialLength := len(cc.Timespans)
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)

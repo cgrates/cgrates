@@ -25,30 +25,25 @@ RUN chsh -s /usr/bin/zsh
 # cleanup
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# create a link to data dir
-RUN ln -s /root/code/src/github.com/cgrates/cgrates/data /usr/share/cgrates
+# get cgrates from github
+RUN mkdir -p /root/code/src/github.com/cgrates; cd /root/code/src/github.com/cgrates; git clone https://github.com/cgrates/cgrates.git
 
 # create link to cgrates dir
 RUN ln -s /root/code/src/github.com/cgrates/cgrates /root/cgr
 
-# setup mysql for CGRateS
-RUN cd /usr/share/cgrates/storage/mysql && ./setup_cgr_db.sh root CGRateS.org
+# get deps
+RUN cd /root/cgr; GOROOT=/root/go GOPATH=/root/code PATH=$GOROOT/bin:$GOPATH/bin:$PATH glide install
 
+# build cgrates
+RUN cd /root/cgr; GOROOT=/root/go GOPATH=/root/code PATH=$GOROOT/bin:$GOPATH/bin:$PATH ./build.sh
 
-#env vars
-RUN export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-
-# build and install cgrates
-RUN cd /root/cgr
-RUN glide install
-
-# create cgr-engine and cgr-loader link
+# create links
 RUN ln -s /root/code/bin/cgr-engine /usr/bin/
 RUN ln -s /root/code/bin/cgr-loader /usr/bin/
+RUN ln -s /root/code/src/github.com/cgrates/cgrates/data /usr/share/cgrates
 
-
-RUN cd /root/cgr
+# prepare zshrc
 RUN echo 'export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH'>>/root/.zshrc
 
 # set start command
-RUN CMD /root/code/src/github.com/cgrates/cgrates/data/docker/osips_training/start.sh
+CMD /root/code/src/github.com/cgrates/cgrates/data/docker/osips_training/start.sh

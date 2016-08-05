@@ -1587,6 +1587,35 @@ func TestCDRefundIncrements(t *testing.T) {
 	}
 }
 
+func TestCDRefundIncrementsZeroValue(t *testing.T) {
+	ub := &Account{
+		ID: "test:ref",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Uuid: "moneya", Value: 100},
+			},
+			utils.VOICE: Balances{
+				&Balance{Uuid: "minutea", Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Uuid: "minuteb", Value: 10, DestinationIDs: utils.StringMap{"RET": true}},
+			},
+		},
+	}
+	accountingStorage.SetAccount(ub)
+	increments := Increments{
+		&Increment{Cost: 0, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
+		&Increment{Cost: 0, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
+		&Increment{Cost: 0, Duration: 4 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
+	}
+	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
+	cd.RefundIncrements()
+	ub, _ = accountingStorage.GetAccount(ub.ID)
+	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
+		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
+		ub.BalanceMap[utils.VOICE][1].GetValue() != 10 {
+		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
+	}
+}
+
 /*************** BENCHMARKS ********************/
 func BenchmarkStorageGetting(b *testing.B) {
 	b.StopTimer()
