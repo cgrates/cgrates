@@ -37,6 +37,7 @@
 
 "sm_opensips": {
 	"enabled": true,				// starts SessionManager service: <true|false>
+	"listen_udp": ":2020",		// address where to listen for datagram events coming from OpenSIPS
 	"create_cdr": true,				// create CDR out of events and sends them to CDRS component
 	"debit_interval": "5s",			// interval to perform debits on.
 	"mi_addr": "192.168.56.128:8020",		// address where to reach OpenSIPS MI to send session disconnects
