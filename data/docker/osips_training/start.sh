@@ -2,9 +2,9 @@
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/redis/redis.conf /etc/mysql/my.cnf
 
 # start services
-/etc/init.d/rsyslog start
-/etc/init.d/mysql start
-/etc/init.d/redis-server start
+service rsyslog start
+service mysql start
+service redis-server start
 /root/code/bin/cgr-engine -config_dir /root/cgr/data/conf/samples/osips_training
 
 # setup mysql
