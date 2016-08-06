@@ -1222,3 +1222,9 @@ type AttrRLsCache struct {
 	LoadID           string
 	ResourceLimitIDs []string
 }
+
+type AttrRLsResourceUsage struct {
+	ResourceUsageID string
+	Event           map[string]interface{}
+	RequestedUnits  float64
+}
