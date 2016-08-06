@@ -38,9 +38,10 @@ type ResourceUsage struct {
 
 // ResourceLimit represents a limit imposed for accessing a resource (eg: new calls)
 type ResourceLimit struct {
-	ID             string                    // Identifier of this limit
-	Filters        []*RequestFilter          // Filters for the request
-	ActivationTime time.Time                 // Time when this limit becomes active
+	ID             string           // Identifier of this limit
+	Filters        []*RequestFilter // Filters for the request
+	ActivationTime time.Time        // Time when this limit becomes active
+	ExpiryTime     time.Time
 	Weight         float64                   // Weight to sort the ResourceLimits
 	Limit          float64                   // Limit value
 	ActionTriggers ActionTriggers            // Thresholds to check after changing Limit
@@ -186,6 +187,46 @@ func (rls *ResourceLimiterService) cacheResourceLimits(loadID string, rlIDs []st
 	return rls.indexStringFilters(rlIDs)
 }
 
+func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]interface{}) (map[string]*ResourceLimit, error) {
+	matchingResources := make(map[string]*ResourceLimit)
+	for fldName, fieldValIf := range ev {
+		_, hasIt := rls.stringIndexes[fldName]
+		if !hasIt {
+			continue
+		}
+		strVal, canCast := utils.CastFieldIfToString(fieldValIf)
+		if !canCast {
+			return nil, fmt.Errorf("Cannot cast field: %s into string", fldName)
+		}
+		if _, hasIt := rls.stringIndexes[fldName][strVal]; !hasIt {
+			continue
+		}
+		for resName := range rls.stringIndexes[fldName][strVal] {
+			if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
+				continue
+			}
+			x, err := CacheGet(utils.ResourceLimitsPrefix + resName)
+			if err != nil {
+				return nil, err
+			}
+			rl := x.(*ResourceLimit)
+			now := time.Now()
+			if rl.ActivationTime.After(now) || (!rl.ExpiryTime.IsZero() && rl.ExpiryTime.Before(now)) { // not active
+				continue
+			}
+			for _, fltr := range rl.Filters {
+				if pass, err := fltr.Pass(ev, "", rls.cdrStatS); err != nil {
+					return nil, utils.NewErrServerError(err)
+				} else if !pass {
+					continue
+				}
+				matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
+			}
+		}
+	}
+	return matchingResources, nil
+}
+
 // Called to start the service
 func (rls *ResourceLimiterService) Start() error {
 	if err := rls.cacheResourceLimits("ResourceLimiterServiceStart", nil); err != nil {
@@ -199,64 +240,69 @@ func (rls *ResourceLimiterService) Shutdown() error {
 	return nil
 }
 
-// RPC Methods available internally
+// RPC Methods
+
+// Cache/Re-cache
+func (rls *ResourceLimiterService) V1CacheResourceLimits(attrs *utils.AttrRLsCache, reply *string) error {
+	if err := rls.cacheResourceLimits(attrs.LoadID, attrs.ResourceLimitIDs); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interface{}, reply *[]*ResourceLimit) error {
+	rls.Lock() // Unknown number of RLs updated
+	defer rls.Unlock()
+	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(ev)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	retRLs := make([]*ResourceLimit, len(matchingRLForEv))
+	i := 0
+	for _, rl := range matchingRLForEv {
+		retRLs[i] = rl
+		i++
+	}
+	*reply = retRLs
+	return nil
+}
 
 // Called when a session or another event needs to
 func (rls *ResourceLimiterService) V1InitiateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
 	rls.Lock() // Unknown number of RLs updated
 	defer rls.Unlock()
-	matchingResources := make(map[string]*ResourceLimit)
-	for fldName, fieldValIf := range attrs.Event {
-		_, hasIt := rls.stringIndexes[fldName]
-		if !hasIt {
-			continue
+	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(attrs.Event)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	for rlID, rl := range matchingRLForEv {
+		if rl.Limit < rl.UsedUnits()+attrs.RequestedUnits {
+			delete(matchingRLForEv, rlID)
 		}
-		strVal, canCast := utils.CastFieldIfToString(fieldValIf)
-		if !canCast {
-			return fmt.Errorf("Cannot cast field: %s into string", fldName)
-		}
-		if _, hasIt := rls.stringIndexes[fldName][strVal]; !hasIt {
-			continue
-		}
-		for resName := range rls.stringIndexes[fldName][strVal] {
-			if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
-				continue
-			}
-			x, err := CacheGet(utils.ResourceLimitsPrefix + resName)
-			if err != nil {
-				return err
-			}
-			rl := x.(*ResourceLimit)
-			for _, fltr := range rl.Filters {
-				if pass, err := fltr.Pass(attrs, "", rls.cdrStatS); err != nil {
-					return utils.NewErrServerError(err)
-				} else if !pass {
-					continue
-				}
-				if rl.Limit < rl.UsedUnits()+attrs.RequestedUnits {
-					continue // Not offering any usage units
-				}
-				if err := rl.RecordUsage(&ResourceUsage{ID: attrs.ResourceUsageID, UsageTime: time.Now(), UsageUnits: attrs.RequestedUnits}); err != nil {
-					return err // Should not happen
-				}
-				matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
-			}
+		if err := rl.RecordUsage(&ResourceUsage{ID: attrs.ResourceUsageID, UsageTime: time.Now(), UsageUnits: attrs.RequestedUnits}); err != nil {
+			return err // Should not happen
 		}
 	}
-	if len(matchingResources) == 0 {
+	if len(matchingRLForEv) == 0 {
 		return utils.ErrResourceUnavailable
 	}
-	for _, rl := range matchingResources {
+	for _, rl := range matchingRLForEv {
 		CacheSet(utils.ResourceLimitsPrefix+rl.ID, rl)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// Cache/Re-cache
-func (rls *ResourceLimiterService) V1CacheResourceLimits(attrs *utils.AttrRLsCache, reply *string) error {
-	if err := rls.cacheResourceLimits(attrs.LoadID, attrs.ResourceLimitIDs); err != nil {
-		return err
+func (rls *ResourceLimiterService) V1TerminateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
+	rls.Lock() // Unknown number of RLs updated
+	defer rls.Unlock()
+	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(attrs.Event)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	for _, rl := range matchingRLForEv {
+		rl.RemoveUsage(attrs.ResourceUsageID)
 	}
 	*reply = utils.OK
 	return nil
