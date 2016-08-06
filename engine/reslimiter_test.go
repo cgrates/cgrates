@@ -49,6 +49,24 @@ func TestIndexStringFilters(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 			Limit:          1,
 		},
+		&ResourceLimit{
+			ID:     "RL4",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+49"}},
+			},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          1,
+		},
+		&ResourceLimit{
+			ID:     "RL5",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+40"}},
+			},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          1,
+		},
 	}
 	for _, rl := range rls {
 		CacheSet(utils.ResourceLimitsPrefix+rl.ID, rl)
@@ -70,6 +88,12 @@ func TestIndexStringFilters(t *testing.T) {
 		"Subject": map[string]utils.StringMap{
 			"dan": utils.StringMap{
 				"RL2": true,
+			},
+		},
+		utils.NOT_AVAILABLE: map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: utils.StringMap{
+				"RL4": true,
+				"RL5": true,
 			},
 		},
 	}
@@ -109,6 +133,12 @@ func TestIndexStringFilters(t *testing.T) {
 			},
 			"1003": utils.StringMap{
 				"RL3": true,
+			},
+		},
+		utils.NOT_AVAILABLE: map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: utils.StringMap{
+				"RL4": true,
+				"RL5": true,
 			},
 		},
 	}

@@ -32,13 +32,13 @@ import (
 
 // ResourceLimit represents a limit imposed for accessing a resource (eg: new calls)
 type ResourceLimit struct {
-	ID             string           // Identifier of this limit
-	Filters        []*RequestFilter // Filters for the request
-	ActivationTime time.Time        // Time when this limit becomes active
-	Weight         float64          // Weight to sort the ResourceLimits
-	Limit          float64          // Limit value
-	ActionTriggers ActionTriggers   // Thresholds to check after changing Limit
-	Used           utils.Int64Slice // []time.Time.Unix() - keep it in this format so we can expire usage automatically
+	ID             string               // Identifier of this limit
+	Filters        []*RequestFilter     // Filters for the request
+	ActivationTime time.Time            // Time when this limit becomes active
+	Weight         float64              // Weight to sort the ResourceLimits
+	Limit          float64              // Limit value
+	ActionTriggers ActionTriggers       // Thresholds to check after changing Limit
+	Usage          map[string]time.Time //Keep a record of usage, bounded with timestamps so we can expire too long records
 }
 
 // Pas the config as a whole so we can ask access concurrently
@@ -73,10 +73,12 @@ func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
 			return err
 		}
 		rl := x.(*ResourceLimit)
+		var hasMetaString bool
 		for _, fltr := range rl.Filters {
 			if fltr.Type != MetaString {
 				continue
 			}
+			hasMetaString = true // Mark that we found at least one metatring so we don't need to index globally
 			if _, hastIt := newStringIndexes[fltr.FieldName]; !hastIt {
 				newStringIndexes[fltr.FieldName] = make(map[string]utils.StringMap)
 			}
@@ -86,6 +88,15 @@ func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
 				}
 				newStringIndexes[fltr.FieldName][fldVal][rl.ID] = true
 			}
+		}
+		if !hasMetaString {
+			if _, hasIt := newStringIndexes[utils.NOT_AVAILABLE]; !hasIt {
+				newStringIndexes[utils.NOT_AVAILABLE] = make(map[string]utils.StringMap)
+			}
+			if _, hasIt := newStringIndexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE]; !hasIt {
+				newStringIndexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] = make(utils.StringMap)
+			}
+			newStringIndexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE][rl.ID] = true // Fields without real field index will be located in map[NOT_AVAILABLE][NOT_AVAILABLE][rl.ID]
 		}
 	}
 	rls.Lock()
