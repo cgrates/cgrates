@@ -208,7 +208,6 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 	} else if cdr.ExtraFields == nil { // Avoid assignment in nil map if not initialized
 		cdr.ExtraFields = make(map[string]string)
 	}
-	utils.Logger.Debug(fmt.Sprintf("CdrExporter, processCdr: %+v", cdr))
 	// Cost multiply
 	if cdre.dataUsageMultiplyFactor != 0.0 && cdr.ToR == utils.DATA {
 		cdr.UsageMultiply(cdre.dataUsageMultiplyFactor, cdre.cgrPrecision)
@@ -227,7 +226,6 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 		utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s and runid: %s, error: %s", cdr.CGRID, cdr.RunID, err.Error()))
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("CdrExporter, cdrRow: %+v", cdrRow))
 	if len(cdrRow) == 0 { // No CDR data, most likely no configuration fields defined
 		return nil
 	} else {
@@ -326,9 +324,7 @@ func (cdre *CdrExporter) writeCsv(csvWriter *csv.Writer) error {
 			return err
 		}
 	}
-	utils.Logger.Debug(fmt.Sprintf("CdrExporter, writeCsv cdrContents: %+v", cdre.content))
 	for _, cdrContent := range cdre.content {
-		utils.Logger.Debug(fmt.Sprintf("CdrExporter, cdrContent: %+v", cdrContent))
 		if err := csvWriter.Write(cdrContent); err != nil {
 			return err
 		}

@@ -767,7 +767,6 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, costShiftDigi
 	var err error
 	expRecord := make([]string, len(exportFields))
 	for idx, cfgFld := range exportFields {
-		utils.Logger.Debug(fmt.Sprintf("CDR with export field: %+v", cfgFld))
 		layout := cfgFld.Layout
 		if len(layout) == 0 {
 			layout = time.RFC3339
@@ -808,7 +807,6 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, costShiftDigi
 			outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs)
 		case utils.META_COMPOSED:
 			outVal, err = cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
-			utils.Logger.Debug(fmt.Sprintf("CDR: %+v, outVal: %+v, err: %+v", cdr, outVal, err))
 		case utils.MetaMaskedDestination:
 			if len(maskDestID) != 0 && CachedDestHasPrefix(maskDestID, cdr.Destination) {
 				outVal = "1"
