@@ -249,7 +249,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Cost_shift_digits:             utils.IntPointer(0),
 			Mask_destination_id:           utils.StringPointer("MASKED_DESTINATIONS"),
 			Mask_length:                   utils.IntPointer(0),
-			Export_folder:                 utils.StringPointer("/var/spool/cgrates/cdre"),
+			Export_directory:              utils.StringPointer("/var/spool/cgrates/cdre"),
 			Header_fields:                 &eFields,
 			Content_fields:                &eContentFlds,
 			Trailer_fields:                &eFields,

@@ -120,7 +120,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError.Error(), "Invalid")
 		}
 	}
-	exportDir := exportTemplate.ExportFolder
+	exportDir := exportTemplate.ExportDirectory
 	if attr.ExportDir != nil && len(*attr.ExportDir) != 0 {
 		exportDir = *attr.ExportDir
 	}

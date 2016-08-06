@@ -140,7 +140,7 @@ type CdreJsonCfg struct {
 	Cost_shift_digits             *int
 	Mask_destination_id           *string
 	Mask_length                   *int
-	Export_folder                 *string
+	Export_directory              *string
 	Header_fields                 *[]*CdrFieldJsonCfg
 	Content_fields                *[]*CdrFieldJsonCfg
 	Trailer_fields                *[]*CdrFieldJsonCfg

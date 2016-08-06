@@ -207,7 +207,7 @@ const CGRATES_CFG_JSON = `
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
 		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
 		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_folder": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
+		"export_directory": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
 			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},

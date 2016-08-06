@@ -56,9 +56,9 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError, "Invalid")
 		}
 	}
-	ExportFolder := exportTemplate.ExportFolder
-	if attr.ExportFolder != nil && len(*attr.ExportFolder) != 0 {
-		ExportFolder = *attr.ExportFolder
+	eDir := exportTemplate.ExportDirectory
+	if attr.ExportDirectory != nil && len(*attr.ExportDirectory) != 0 {
+		eDir = *attr.ExportDirectory
 	}
 	ExportID := strconv.FormatInt(time.Now().Unix(), 10)
 	if attr.ExportID != nil && len(*attr.ExportID) != 0 {
@@ -68,7 +68,7 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	if attr.ExportFileName != nil && len(*attr.ExportFileName) != 0 {
 		fileName = *attr.ExportFileName
 	}
-	filePath := path.Join(ExportFolder, fileName)
+	filePath := path.Join(eDir, fileName)
 	if cdrFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}

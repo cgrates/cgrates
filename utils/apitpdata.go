@@ -1093,7 +1093,7 @@ type AttrExportCdrsToFile struct {
 	CdrFormat                  *string  // Cdr output file format <utils.CdreCdrFormats>
 	FieldSeparator             *string  // Separator used between fields
 	ExportID                   *string  // Optional exportid
-	ExportFolder               *string  // If provided it overwrites the configured export directory
+	ExportDirectory            *string  // If provided it overwrites the configured export directory
 	ExportFileName             *string  // If provided the output filename will be set to this
 	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
