@@ -47,7 +47,7 @@ type ResourceLimit struct {
 	ActionTriggers ActionTriggers            // Thresholds to check after changing Limit
 	UsageTTL       time.Duration             // Expire usage after this duration
 	Usage          map[string]*ResourceUsage //Keep a record of usage, bounded with timestamps so we can expire too long records
-	usageCounter   float64                   // internal counter representing real usage
+	usageCounter   float64                   // internal counter aggregating real usage of ResourceLimit
 }
 
 func (rl *ResourceLimit) removeExpiredUnits() {
@@ -103,7 +103,7 @@ type ResourceLimiterService struct {
 // Index cached ResourceLimits with MetaString filter types
 func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
 	utils.Logger.Info("<RLs> Start indexing string filters")
-	newStringIndexes := make(map[string]map[string]utils.StringMap) // Index it transactionally
+	newStringIndexes := make(map[string]map[string]utils.StringMap) // Index it transactional
 	var cacheIDsToIndex []string                                    // Cache keys of RLs to be indexed
 	if rlIDs == nil {
 		cacheIDsToIndex = CacheGetEntriesKeys(utils.ResourceLimitsPrefix)
@@ -214,14 +214,41 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 			if rl.ActivationTime.After(now) || (!rl.ExpiryTime.IsZero() && rl.ExpiryTime.Before(now)) { // not active
 				continue
 			}
+			passAllFilters := true
 			for _, fltr := range rl.Filters {
 				if pass, err := fltr.Pass(ev, "", rls.cdrStatS); err != nil {
 					return nil, utils.NewErrServerError(err)
 				} else if !pass {
+					passAllFilters = false
 					continue
 				}
+			}
+			if passAllFilters {
 				matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
 			}
+		}
+	}
+	// Check un-indexed resources
+	for resName := range rls.stringIndexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] {
+		if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
+			continue
+		}
+		x, err := CacheGet(utils.ResourceLimitsPrefix + resName)
+		if err != nil {
+			return nil, err
+		}
+		rl := x.(*ResourceLimit)
+		now := time.Now()
+		if rl.ActivationTime.After(now) || (!rl.ExpiryTime.IsZero() && rl.ExpiryTime.Before(now)) { // not active
+			continue
+		}
+		for _, fltr := range rl.Filters {
+			if pass, err := fltr.Pass(ev, "", rls.cdrStatS); err != nil {
+				return nil, utils.NewErrServerError(err)
+			} else if !pass {
+				continue
+			}
+			matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
 		}
 	}
 	return matchingResources, nil

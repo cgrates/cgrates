@@ -26,7 +26,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestIndexStringFilters(t *testing.T) {
+var rLS *ResourceLimiterService
+
+func TestRLsIndexStringFilters(t *testing.T) {
 	rls := []*ResourceLimit{
 		&ResourceLimit{
 			ID:     "RL1",
@@ -48,6 +50,7 @@ func TestIndexStringFilters(t *testing.T) {
 			},
 			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 			Limit:          1,
+			UsageTTL:       time.Duration(1 * time.Millisecond),
 		},
 		&ResourceLimit{
 			ID:     "RL4",
@@ -66,12 +69,13 @@ func TestIndexStringFilters(t *testing.T) {
 			},
 			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 			Limit:          1,
+			UsageTTL:       time.Duration(10 * time.Millisecond),
 		},
 	}
 	for _, rl := range rls {
 		CacheSet(utils.ResourceLimitsPrefix+rl.ID, rl)
 	}
-	rLS := new(ResourceLimiterService)
+	rLS = new(ResourceLimiterService)
 	eIndexes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -113,6 +117,17 @@ func TestIndexStringFilters(t *testing.T) {
 		Limit:          1,
 	}
 	CacheSet(utils.ResourceLimitsPrefix+rl3.ID, rl3)
+	rl6 := &ResourceLimit{ // Add it so we can test expiryTime
+		ID:     "RL6",
+		Weight: 10,
+		Filters: []*RequestFilter{
+			&RequestFilter{Type: MetaString, FieldName: "Subject", Values: []string{"dan"}},
+		},
+		ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+		ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+		Limit:          1,
+	}
+	CacheSet(utils.ResourceLimitsPrefix+rl6.ID, rl6)
 	eIndexes = map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -130,6 +145,7 @@ func TestIndexStringFilters(t *testing.T) {
 			"dan": utils.StringMap{
 				"RL2": true,
 				"RL3": true,
+				"RL6": true,
 			},
 			"1003": utils.StringMap{
 				"RL3": true,
@@ -143,9 +159,56 @@ func TestIndexStringFilters(t *testing.T) {
 		},
 	}
 	// Test index update
-	if err := rLS.indexStringFilters([]string{rl3.ID}); err != nil {
+	if err := rLS.indexStringFilters([]string{rl3.ID, rl6.ID}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIndexes, rLS.stringIndexes) {
 		t.Errorf("Expecting: %+v, received: %+v", eIndexes, rLS.stringIndexes)
+	}
+}
+
+func TestRLsMatchingResourceLimitsForEvent(t *testing.T) {
+	eResLimits := map[string]*ResourceLimit{
+		"RL1": &ResourceLimit{
+			ID:     "RL1",
+			Weight: 20,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+				&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+				}},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          2,
+		},
+		"RL2": &ResourceLimit{
+			ID:     "RL2",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
+				&RequestFilter{Type: MetaString, FieldName: "Subject", Values: []string{"dan"}},
+			},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          1,
+			UsageTTL:       time.Duration(1 * time.Millisecond),
+		},
+	}
+	if resLimits, err := rLS.matchingResourceLimitsForEvent(map[string]interface{}{"Account": "1002", "Subject": "dan", "Destination": "1002"}); err != nil {
+		t.Error(err)
+	} else if len(eResLimits) != len(resLimits) {
+		t.Errorf("Expecting: %+v, received: %+v", eResLimits, resLimits)
+	} else {
+		for rlID := range eResLimits {
+			if _, hasID := resLimits[rlID]; !hasID {
+				t.Errorf("Expecting: %+v, received: %+v", eResLimits, resLimits)
+			}
+		}
+		// Make sure the filters are what we expect to be after retrieving from cache:
+		fltr := resLimits["RL1"].Filters[1]
+		if pass, _ := fltr.Pass(map[string]interface{}{"Subject": "10000001"}, "", nil); !pass {
+			t.Errorf("Expecting RL: %+v, received: %+v", eResLimits["RL1"], resLimits["RL1"])
+		}
+		if pass, _ := fltr.Pass(map[string]interface{}{"Account": "1002"}, "", nil); pass {
+			t.Errorf("Expecting RL: %+v, received: %+v", eResLimits["RL1"], resLimits["RL1"])
+		}
+
 	}
 }
