@@ -47,6 +47,9 @@
 
 "rls": {
 	"enabled": true,						// starts ResourceLimiter service: <true|false>.
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
 },
 
 

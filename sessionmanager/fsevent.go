@@ -373,9 +373,29 @@ func (fsev FSEvent) ComputeLcr() bool {
 }
 
 // Used with RLs
-func (fsev FSEvent) AsMapStringInterface() map[string]interface{} {
-	return utils.ConvertMapValStrIf(fsev)
-
+func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{} {
+	mp := make(map[string]interface{})
+	mp[utils.CGRID] = fsev.GetCgrId(timezone)
+	mp[utils.TOR] = utils.VOICE
+	mp[utils.ACCID] = fsev.GetUUID()
+	mp[utils.CDRHOST] = fsev.GetOriginatorIP(utils.META_DEFAULT)
+	mp[utils.CDRSOURCE] = "FS_" + fsev.GetName()
+	mp[utils.REQTYPE] = fsev.GetReqType(utils.META_DEFAULT)
+	mp[utils.DIRECTION] = fsev.GetDirection(utils.META_DEFAULT)
+	mp[utils.TENANT] = fsev.GetTenant(utils.META_DEFAULT)
+	mp[utils.CATEGORY] = fsev.GetCategory(utils.META_DEFAULT)
+	mp[utils.ACCOUNT] = fsev.GetAccount(utils.META_DEFAULT)
+	mp[utils.SUBJECT] = fsev.GetSubject(utils.META_DEFAULT)
+	mp[utils.DESTINATION] = fsev.GetDestination(utils.META_DEFAULT)
+	mp[utils.SETUP_TIME], _ = fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	mp[utils.ANSWER_TIME], _ = fsev.GetAnswerTime(utils.META_DEFAULT, timezone)
+	mp[utils.USAGE], _ = fsev.GetDuration(utils.META_DEFAULT)
+	mp[utils.PDD], _ = fsev.GetPdd(utils.META_DEFAULT)
+	mp[utils.COST] = -1
+	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.META_DEFAULT)
+	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.META_DEFAULT)
+	//storCdr.ExtraFields = fsev.GetExtraFields()
+	return mp
 }
 
 // Converts into CallDescriptor due to responder interface needs

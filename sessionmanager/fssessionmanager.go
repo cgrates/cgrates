@@ -189,10 +189,9 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 		var reply string
 		attrRU := utils.AttrRLsResourceUsage{
 			ResourceUsageID: ev.GetUUID(),
-			Event:           utils.ConvertMapValStrIf(ev.(FSEvent)),
+			Event:           ev.(FSEvent).AsMapStringInterface(sm.timezone),
 			RequestedUnits:  1,
 		}
-		fmt.Printf("InitiateResourceUsage, attrs: %+v\n", attrRU)
 		if err := sm.rls.Call("RLsV1.InitiateResourceUsage", attrRU, &reply); err != nil {
 			if err.Error() == utils.ErrResourceUnavailable.Error() {
 				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), "-"+utils.ErrResourceUnavailable.Error())
@@ -254,11 +253,10 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 	var reply string
 	attrRU := utils.AttrRLsResourceUsage{
 		ResourceUsageID: ev.GetUUID(),
-		Event:           utils.ConvertMapValStrIf(ev.(FSEvent)),
+		Event:           ev.(FSEvent).AsMapStringInterface(sm.timezone),
 		RequestedUnits:  1,
 	}
 	if sm.rls != nil {
-		fmt.Printf("Will call the RLs over conn: %+v\n", sm.rls)
 		if err := sm.rls.Call("RLsV1.TerminateResourceUsage", attrRU, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> RLs API error: %s", err.Error()))
 		}

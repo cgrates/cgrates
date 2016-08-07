@@ -88,6 +88,9 @@ func (rl *ResourceLimit) RemoveUsage(ruID string) error {
 
 // Pas the config as a whole so we can ask access concurrently
 func NewResourceLimiterService(cfg *config.CGRConfig, dataDB AccountingStorage, cdrStatS rpcclient.RpcClientConnection) (*ResourceLimiterService, error) {
+	if cdrStatS != nil && reflect.ValueOf(cdrStatS).IsNil() {
+		cdrStatS = nil
+	}
 	rls := &ResourceLimiterService{stringIndexes: make(map[string]map[string]utils.StringMap), dataDB: dataDB, cdrStatS: cdrStatS}
 	return rls, nil
 }
@@ -172,12 +175,11 @@ func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
 
 // Called when cache/re-caching is necessary
 func (rls *ResourceLimiterService) cacheResourceLimits(loadID string, rlIDs []string) error {
-	if len(rlIDs) == 0 {
-		return nil
-	}
 	if rlIDs == nil {
 		utils.Logger.Info("<RLs> Start caching all resource limits")
-	} else if len(rlIDs) != 0 {
+	} else if len(rlIDs) == 0 {
+		return nil
+	} else {
 		utils.Logger.Info(fmt.Sprintf("<RLs> Start caching resource limits with ids: %+v", rlIDs))
 	}
 	if err := rls.dataDB.CacheAccountingPrefixValues(loadID, map[string][]string{utils.ResourceLimitsPrefix: rlIDs}); err != nil {
@@ -190,8 +192,7 @@ func (rls *ResourceLimiterService) cacheResourceLimits(loadID string, rlIDs []st
 func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]interface{}) (map[string]*ResourceLimit, error) {
 	matchingResources := make(map[string]*ResourceLimit)
 	for fldName, fieldValIf := range ev {
-		_, hasIt := rls.stringIndexes[fldName]
-		if !hasIt {
+		if _, hasIt := rls.stringIndexes[fldName]; !hasIt {
 			continue
 		}
 		strVal, canCast := utils.CastFieldIfToString(fieldValIf)
