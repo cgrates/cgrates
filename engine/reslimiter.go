@@ -31,9 +31,9 @@ import (
 )
 
 type ResourceUsage struct {
-	ID         string
-	UsageTime  time.Time
-	UsageUnits float64
+	ID         string    // Unique identifier of this resourceUsage, Eg: FreeSWITCH UUID
+	UsageTime  time.Time // So we can expire it later
+	UsageUnits float64   // Number of units used
 }
 
 // ResourceLimit represents a limit imposed for accessing a resource (eg: new calls)
@@ -46,7 +46,7 @@ type ResourceLimit struct {
 	Limit          float64                   // Limit value
 	ActionTriggers ActionTriggers            // Thresholds to check after changing Limit
 	UsageTTL       time.Duration             // Expire usage after this duration
-	Usage          map[string]*ResourceUsage //Keep a record of usage, bounded with timestamps so we can expire too long records
+	Usage          map[string]*ResourceUsage // Keep a record of usage, bounded with timestamps so we can expire too long records
 	usageCounter   float64                   // internal counter aggregating real usage of ResourceLimit
 }
 
