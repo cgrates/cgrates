@@ -33,13 +33,14 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs rpcclient.RpcClientConnection, timezone string) *FSSessionManager {
+func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs, rls rpcclient.RpcClientConnection, timezone string) *FSSessionManager {
 	return &FSSessionManager{
 		cfg:         smFsConfig,
 		conns:       make(map[string]*fsock.FSock),
 		senderPools: make(map[string]*fsock.FSockPool),
 		rater:       rater,
 		cdrsrv:      cdrs,
+		rls:         rls,
 		sessions:    NewSessions(),
 		timezone:    timezone,
 	}
@@ -53,6 +54,7 @@ type FSSessionManager struct {
 	senderPools map[string]*fsock.FSockPool // Keep sender pools here
 	rater       rpcclient.RpcClientConnection
 	cdrsrv      rpcclient.RpcClientConnection
+	rls         rpcclient.RpcClientConnection
 
 	sessions *Sessions
 	timezone string

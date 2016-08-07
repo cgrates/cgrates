@@ -388,6 +388,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("CDRS not enabled but referenced by SMFreeSWITCH component")
 			}
 		}
+		for _, smFSRLsConn := range self.SmFsConfig.RLsConns {
+			if smFSRLsConn.Address == utils.MetaInternal && !self.resourceLimiterCfg.Enabled {
+				return errors.New("RLs not enabled but referenced by SMFreeSWITCH component")
+			}
+		}
 	}
 	// SM-Kamailio checks
 	if self.SmKamConfig.Enabled {
