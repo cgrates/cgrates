@@ -372,6 +372,12 @@ func (fsev FSEvent) ComputeLcr() bool {
 	}
 }
 
+// Used with RLs
+func (fsev FSEvent) AsMapStringInterface() map[string]interface{} {
+	return utils.ConvertMapValStrIf(fsev)
+
+}
+
 // Converts into CallDescriptor due to responder interface needs
 func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 	lcrReq := &engine.LcrRequest{

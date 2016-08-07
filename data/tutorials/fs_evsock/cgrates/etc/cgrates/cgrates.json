@@ -45,6 +45,11 @@
 },
 
 
+"rls": {
+	"enabled": true,						// starts ResourceLimiter service: <true|false>.
+},
+
+
 "cdre": {
 	"*default": {
 		"cdr_format": "csv",							// exported CDRs format <csv>
@@ -111,6 +116,9 @@
 "sm_freeswitch": {
 	"enabled": true,				// starts SessionManager service: <true|false>
 	"debit_interval": "5s",			// interval to perform debits on.
+	"rls_conns": [
+		{"address": "*internal"}
+	],
 	"channel_sync_interval": "10s",
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}

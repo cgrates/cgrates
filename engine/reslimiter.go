@@ -278,6 +278,11 @@ func (rls *ResourceLimiterService) V1CacheResourceLimits(attrs *utils.AttrRLsCac
 	return nil
 }
 
+// Alias API for external usage
+func (rls *ResourceLimiterService) CacheResourceLimits(attrs *utils.AttrRLsCache, reply *string) error {
+	return rls.V1CacheResourceLimits(attrs, reply)
+}
+
 func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interface{}, reply *[]*ResourceLimit) error {
 	rls.Lock() // Unknown number of RLs updated
 	defer rls.Unlock()
@@ -293,6 +298,11 @@ func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interf
 	}
 	*reply = retRLs
 	return nil
+}
+
+// Alias API for external usage
+func (rls *ResourceLimiterService) ResourceLimitsForEvent(ev map[string]interface{}, reply *[]*ResourceLimit) error {
+	return rls.V1ResourceLimitsForEvent(ev, reply)
 }
 
 // Called when a session or another event needs to
@@ -321,6 +331,11 @@ func (rls *ResourceLimiterService) V1InitiateResourceUsage(attrs utils.AttrRLsRe
 	return nil
 }
 
+// Alias for externam methods
+func (rls *ResourceLimiterService) InitiateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
+	return rls.V1InitiateResourceUsage(attrs, reply)
+}
+
 func (rls *ResourceLimiterService) V1TerminateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
 	rls.Lock() // Unknown number of RLs updated
 	defer rls.Unlock()
@@ -333,6 +348,11 @@ func (rls *ResourceLimiterService) V1TerminateResourceUsage(attrs utils.AttrRLsR
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// Alias for external methods
+func (rls *ResourceLimiterService) TerminateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
+	return rls.V1TerminateResourceUsage(attrs, reply)
 }
 
 // Make the service available as RPC internally
