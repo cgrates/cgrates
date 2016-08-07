@@ -163,6 +163,7 @@ type SmFsConfig struct {
 	Enabled             bool
 	RALsConns           []*HaPoolConfig
 	CDRsConns           []*HaPoolConfig
+	RLsConns            []*HaPoolConfig
 	CreateCdr           bool
 	ExtraFields         []*utils.RSRField
 	DebitInterval       time.Duration
@@ -198,6 +199,13 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
 			self.CDRsConns[idx] = NewDfltHaPoolConfig()
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Rls_conns != nil {
+		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Rls_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rls_conns {
+			self.RLsConns[idx] = NewDfltHaPoolConfig()
+			self.RLsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {

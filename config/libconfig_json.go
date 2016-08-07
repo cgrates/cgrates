@@ -192,6 +192,7 @@ type SmFsJsonCfg struct {
 	Enabled                *bool
 	Rals_conns             *[]*HaPoolJsonCfg
 	Cdrs_conns             *[]*HaPoolJsonCfg
+	Rls_conns              *[]*HaPoolJsonCfg
 	Create_cdr             *bool
 	Extra_fields           *[]string
 	Debit_interval         *string

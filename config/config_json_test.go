@@ -412,6 +412,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
+		Rls_conns:              &[]*HaPoolJsonCfg{},
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           utils.StringSlicePointer([]string{}),
 		Debit_interval:         utils.StringPointer("10s"),
