@@ -79,8 +79,10 @@ func TestPassStringPrefix(t *testing.T) {
 		t.Error("Not passes filter")
 	}
 	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "nonexisting", Values: []string{"off"}}
-	if _, err := rf.passStringPrefix(cd, "ExtraFields"); err == nil || err != utils.ErrNotFound {
+	if passing, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
 		t.Error(err)
+	} else if passing {
+		t.Error("Passes filter")
 	}
 }
 

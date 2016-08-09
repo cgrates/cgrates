@@ -30,11 +30,11 @@ func TestCdreCfgClone(t *testing.T) {
 	emptyFields := []*CfgCdrField{}
 	initContentFlds := []*CfgCdrField{
 		&CfgCdrField{Tag: "CgrId",
-			Type:    "cdrfield",
+			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
 		&CfgCdrField{Tag: "RunId",
-			Type:    "cdrfield",
+			Type:    "*composed",
 			FieldId: "mediation_runid",
 			Value:   runIdRsrs},
 	}
@@ -47,16 +47,16 @@ func TestCdreCfgClone(t *testing.T) {
 		CostShiftDigits:         0,
 		MaskDestinationID:       "MASKED_DESTINATIONS",
 		MaskLength:              0,
-		ExportFolder:            "/var/spool/cgrates/cdre",
+		ExportDirectory:         "/var/spool/cgrates/cdre",
 		ContentFields:           initContentFlds,
 	}
 	eClnContentFlds := []*CfgCdrField{
 		&CfgCdrField{Tag: "CgrId",
-			Type:    "cdrfield",
+			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
 		&CfgCdrField{Tag: "RunId",
-			Type:    "cdrfield",
+			Type:    "*composed",
 			FieldId: "mediation_runid",
 			Value:   runIdRsrs},
 	}
@@ -69,7 +69,7 @@ func TestCdreCfgClone(t *testing.T) {
 		CostShiftDigits:         0,
 		MaskDestinationID:       "MASKED_DESTINATIONS",
 		MaskLength:              0,
-		ExportFolder:            "/var/spool/cgrates/cdre",
+		ExportDirectory:         "/var/spool/cgrates/cdre",
 		HeaderFields:            emptyFields,
 		ContentFields:           eClnContentFlds,
 		TrailerFields:           emptyFields,

@@ -126,6 +126,9 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, cdrSta
 func (fltr *RequestFilter) passString(req interface{}, extraFieldsLabel string) (bool, error) {
 	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
 		return false, err
 	}
 	for _, val := range fltr.Values {
@@ -139,6 +142,9 @@ func (fltr *RequestFilter) passString(req interface{}, extraFieldsLabel string) 
 func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel string) (bool, error) {
 	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
 		return false, err
 	}
 	for _, prfx := range fltr.Values {
@@ -157,6 +163,9 @@ func (fltr *RequestFilter) passTimings(req interface{}, extraFieldsLabel string)
 func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel string) (bool, error) {
 	dst, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
 		return false, err
 	}
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
@@ -177,6 +186,9 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel string) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
 		if strVal, err := utils.ReflectFieldAsString(req, rsrFld.Id, extraFieldsLabel); err != nil {
+			if err == utils.ErrNotFound {
+				return false, nil
+			}
 			return false, err
 		} else if rsrFld.FilterPasses(strVal) {
 			return true, nil

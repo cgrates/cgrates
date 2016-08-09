@@ -202,9 +202,9 @@ func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcC
 	exitChan <- true
 }
 
-func startSmFreeSWITCH(internalRaterChan, internalCDRSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+func startSmFreeSWITCH(internalRaterChan, internalCDRSChan, rlsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMFreeSWITCH service.")
-	var ralsConn, cdrsConn *rpcclient.RpcClientPool
+	var ralsConn, cdrsConn, rlsConn *rpcclient.RpcClientPool
 	if len(cfg.SmFsConfig.RALsConns) != 0 {
 		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmFsConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
@@ -223,7 +223,16 @@ func startSmFreeSWITCH(internalRaterChan, internalCDRSChan chan rpcclient.RpcCli
 			return
 		}
 	}
-	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, ralsConn, cdrsConn, cfg.DefaultTimezone)
+	if len(cfg.SmFsConfig.RLsConns) != 0 {
+		rlsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.SmFsConfig.RLsConns, rlsChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<SMFreeSWITCH> Could not connect to RLs: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, ralsConn, cdrsConn, rlsConn, cfg.DefaultTimezone)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMFreeSWITCH> error: %s!", err))
@@ -640,7 +649,7 @@ func main() {
 	}
 	// Start SM-FreeSWITCH
 	if cfg.SmFsConfig.Enabled {
-		go startSmFreeSWITCH(internalRaterChan, internalCdrSChan, cdrDb, exitChan)
+		go startSmFreeSWITCH(internalRaterChan, internalCdrSChan, internalRLSChan, cdrDb, exitChan)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler(exitChan)
 	}

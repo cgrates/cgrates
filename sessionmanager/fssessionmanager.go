@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"log/syslog"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -33,13 +34,17 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs rpcclient.RpcClientConnection, timezone string) *FSSessionManager {
+func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs, rls rpcclient.RpcClientConnection, timezone string) *FSSessionManager {
+	if rls != nil && reflect.ValueOf(rls).IsNil() {
+		rls = nil
+	}
 	return &FSSessionManager{
 		cfg:         smFsConfig,
 		conns:       make(map[string]*fsock.FSock),
 		senderPools: make(map[string]*fsock.FSockPool),
 		rater:       rater,
 		cdrsrv:      cdrs,
+		rls:         rls,
 		sessions:    NewSessions(),
 		timezone:    timezone,
 	}
@@ -53,6 +58,7 @@ type FSSessionManager struct {
 	senderPools map[string]*fsock.FSockPool // Keep sender pools here
 	rater       rpcclient.RpcClientConnection
 	cdrsrv      rpcclient.RpcClientConnection
+	rls         rpcclient.RpcClientConnection
 
 	sessions *Sessions
 	timezone string
@@ -159,6 +165,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 		if err = sm.Rater().Call("Responder.GetLCR", &engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_API_ERROR: %s", err.Error()))
 			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+			return
 		}
 		if lcr.HasErrors() {
 			lcr.LogErrors()
@@ -174,9 +181,28 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 			if _, err = sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n", ev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
 				utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_ERROR: %s", err.Error()))
 				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+				return
 			}
 		}
 	}
+	if sm.rls != nil {
+		var reply string
+		attrRU := utils.AttrRLsResourceUsage{
+			ResourceUsageID: ev.GetUUID(),
+			Event:           ev.(FSEvent).AsMapStringInterface(sm.timezone),
+			RequestedUnits:  1,
+		}
+		if err := sm.rls.Call("RLsV1.InitiateResourceUsage", attrRU, &reply); err != nil {
+			if err.Error() == utils.ErrResourceUnavailable.Error() {
+				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), "-"+utils.ErrResourceUnavailable.Error())
+			} else {
+				utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> RLs API error: %s", err.Error()))
+				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+			}
+			return
+		}
+	}
+	// Check ResourceLimits
 	sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
@@ -223,6 +249,17 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 	}
 	if sm.cfg.CreateCdr {
 		sm.ProcessCdr(ev.AsStoredCdr(config.CgrConfig().DefaultTimezone))
+	}
+	var reply string
+	attrRU := utils.AttrRLsResourceUsage{
+		ResourceUsageID: ev.GetUUID(),
+		Event:           ev.(FSEvent).AsMapStringInterface(sm.timezone),
+		RequestedUnits:  1,
+	}
+	if sm.rls != nil {
+		if err := sm.rls.Call("RLsV1.TerminateResourceUsage", attrRU, &reply); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> RLs API error: %s", err.Error()))
+		}
 	}
 }
 

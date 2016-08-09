@@ -207,7 +207,7 @@ const CGRATES_CFG_JSON = `
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
 		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
 		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_folder": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
+		"export_directory": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
 			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
@@ -250,13 +250,14 @@ const CGRATES_CFG_JSON = `
 
 
 "sm_freeswitch": {
-	"enabled": false,				// starts SessionManager service: <true|false>
+	"enabled": false,						// starts SessionManager service: <true|false>
 	"rals_conns": [
-		{"address": "*internal"}		// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
 	],
 	"cdrs_conns": [
-		{"address": "*internal"}		// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
+	"rls_conns": [],						// address where to reach the ResourceLimiter service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
 	"debit_interval": "10s",				// interval to perform debits on.
@@ -386,8 +387,8 @@ const CGRATES_CFG_JSON = `
 "rls": {
 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>					
-	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|dur>
-	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|dur>
+	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|$dur>
 },
 
 

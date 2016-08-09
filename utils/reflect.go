@@ -60,7 +60,19 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	field := v.FieldByName(fldName)
+	var field reflect.Value
+	switch v.Kind() {
+	case reflect.Struct:
+		field = v.FieldByName(fldName)
+	case reflect.Map:
+		field = v.MapIndex(reflect.ValueOf(fldName))
+		if !field.IsValid() { // Not looking in extra fields anymore
+			return "", ErrNotFound
+		}
+	default:
+		return "", fmt.Errorf("Unsupported field kind: %v", v.Kind())
+	}
+
 	if !field.IsValid() {
 		if extraFieldsLabel == "" {
 			return "", ErrNotFound

@@ -411,7 +411,7 @@ func APItoModelUsers(attr *utils.TPUsers) (result []TpUser) {
 }
 
 func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceLimit, err error) {
-	rl = &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight, Filters: make([]*RequestFilter, len(tpRL.Filters))}
+	rl = &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight, Filters: make([]*RequestFilter, len(tpRL.Filters)), Usage: make(map[string]*ResourceUsage)}
 	for i, tpFltr := range tpRL.Filters {
 		rf := &RequestFilter{Type: tpFltr.Type, FieldName: tpFltr.FieldName, Values: tpFltr.Values}
 		if err := rf.CompileValues(); err != nil {

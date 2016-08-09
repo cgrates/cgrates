@@ -140,7 +140,7 @@ type CdreJsonCfg struct {
 	Cost_shift_digits             *int
 	Mask_destination_id           *string
 	Mask_length                   *int
-	Export_folder                 *string
+	Export_directory              *string
 	Header_fields                 *[]*CdrFieldJsonCfg
 	Content_fields                *[]*CdrFieldJsonCfg
 	Trailer_fields                *[]*CdrFieldJsonCfg
@@ -192,6 +192,7 @@ type SmFsJsonCfg struct {
 	Enabled                *bool
 	Rals_conns             *[]*HaPoolJsonCfg
 	Cdrs_conns             *[]*HaPoolJsonCfg
+	Rls_conns              *[]*HaPoolJsonCfg
 	Create_cdr             *bool
 	Extra_fields           *[]string
 	Debit_interval         *string

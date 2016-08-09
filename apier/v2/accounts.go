@@ -28,7 +28,7 @@ import (
 
 func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Account) error {
 	if len(attr.Tenant) == 0 {
-		return utils.NewErrMandatoryIeMissing("Tenanat")
+		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
 	var accountKeys []string
 	var err error
