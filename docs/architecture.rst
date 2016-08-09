@@ -291,7 +291,22 @@ PubSub service used to expose internal events to interested external components 
    - ``"pubsubs": {...}``
 
 
-2.1.13. APIER RPC service
+2.1.13. Resource Limiter service
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Resource Limiter service used to limit resources during authorization (eg: maximum calls per destination for an account)
+
+- Communicates via:
+   - RPC
+   - internal/in-process *within the same running* **cgr-engine** process.
+
+- Operates with the following CGRateS database(s): ::
+
+   "data_db" - (accountDb)
+
+- Config section in the CGRateS configuration file:
+   - ``"rls": {...}``
+
+2.1.14. APIER RPC service
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 RPC service used to expose external access towards internal components.
 
@@ -300,7 +315,7 @@ RPC service used to expose external access towards internal components.
    - JSON over HTTP
    - JSON over WebSocket
 
-2.1.14. Cdre
+2.1.15. Cdre
 ~~~~~~~~~~~~
 Component to retrieve rated CDRs from internal CDRs database.
 
@@ -313,7 +328,7 @@ Component to retrieve rated CDRs from internal CDRs database.
 - Config section in the CGRateS configuration file:
    - ``"cdre": {...}``
 
-2.1.15. Mailer
+2.1.16. Mailer
 ~~~~~~~~~~~~~~
 TBD
 
@@ -324,7 +339,7 @@ TBD
 - Config section in the CGRateS configuration file:
    - ``"mailer": {...}``
 
-2.1.16. Suretax
+2.1.17. Suretax
 ~~~~~~~~~~~~~~~
 TBD
 
