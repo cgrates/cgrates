@@ -333,8 +333,8 @@ func init() {
 		log.Print("error in LoadResourceLimits:", err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingStorage.CacheRatingAll("LoaderCSVTests")
-	accountingStorage.CacheAccountingAll("LoaderCSVTests")
+	ratingStorage.PreloadRatingCache()
+	accountingStorage.PreloadAccountingCache()
 }
 
 func TestLoadDestinations(t *testing.T) {

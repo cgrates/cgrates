@@ -21,6 +21,7 @@ package engine
 import (
 	"encoding/json"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 
 	"testing"
@@ -82,7 +83,7 @@ func TestDestinationGetExists(t *testing.T) {
 
 func TestDestinationGetExistsCache(t *testing.T) {
 	ratingStorage.GetDestination("NAT")
-	if _, ok := CacheGet(utils.DESTINATION_PREFIX + "0256"); !ok {
+	if _, ok := cache2go.Get(utils.DESTINATION_PREFIX + "0256"); !ok {
 		t.Error("Destination not cached:", err)
 	}
 }
@@ -96,7 +97,7 @@ func TestDestinationGetNotExists(t *testing.T) {
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
 	ratingStorage.GetDestination("not existing")
-	if d, ok := CacheGet("not existing"); ok {
+	if d, ok := cache2go.Get("not existing"); ok {
 		t.Error("Bad destination cached: ", d)
 	}
 }
@@ -127,17 +128,17 @@ func TestNonCachedDestWrongPrefix(t *testing.T) {
 
 func TestCleanStalePrefixes(t *testing.T) {
 	x := struct{}{}
-	CacheSet(utils.DESTINATION_PREFIX+"1", map[string]struct{}{"D1": x, "D2": x})
-	CacheSet(utils.DESTINATION_PREFIX+"2", map[string]struct{}{"D1": x})
-	CacheSet(utils.DESTINATION_PREFIX+"3", map[string]struct{}{"D2": x})
+	cache2go.Set(utils.DESTINATION_PREFIX+"1", map[string]struct{}{"D1": x, "D2": x})
+	cache2go.Set(utils.DESTINATION_PREFIX+"2", map[string]struct{}{"D1": x})
+	cache2go.Set(utils.DESTINATION_PREFIX+"3", map[string]struct{}{"D2": x})
 	CleanStalePrefixes([]string{"D1"})
-	if r, ok := CacheGet(utils.DESTINATION_PREFIX + "1"); !ok || len(r.(map[string]struct{})) != 1 {
+	if r, ok := cache2go.Get(utils.DESTINATION_PREFIX + "1"); !ok || len(r.(map[string]struct{})) != 1 {
 		t.Error("Error cleaning stale destination ids", r)
 	}
-	if r, ok := CacheGet(utils.DESTINATION_PREFIX + "2"); ok {
+	if r, ok := cache2go.Get(utils.DESTINATION_PREFIX + "2"); ok {
 		t.Error("Error removing stale prefix: ", r)
 	}
-	if r, ok := CacheGet(utils.DESTINATION_PREFIX + "3"); !ok || len(r.(map[string]struct{})) != 1 {
+	if r, ok := cache2go.Get(utils.DESTINATION_PREFIX + "3"); !ok || len(r.(map[string]struct{})) != 1 {
 		t.Error("Error performing stale cleaning: ", r)
 	}
 }

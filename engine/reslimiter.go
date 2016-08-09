@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -61,16 +62,16 @@ func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
 	newStringIndexes := make(map[string]map[string]utils.StringMap) // Index it transactionally
 	var cacheIDsToIndex []string                                    // Cache keys of RLs to be indexed
 	if rlIDs == nil {
-		cacheIDsToIndex = CacheGetEntriesKeys(utils.ResourceLimitsPrefix)
+		cacheIDsToIndex = cache2go.GetEntriesKeys(utils.ResourceLimitsPrefix)
 	} else {
 		for _, rlID := range rlIDs {
 			cacheIDsToIndex = append(cacheIDsToIndex, utils.ResourceLimitsPrefix+rlID)
 		}
 	}
 	for _, cacheKey := range cacheIDsToIndex {
-		x, err := CacheGet(cacheKey)
-		if err != nil {
-			return err
+		x, ok := cache2go.Get(cacheKey)
+		if !ok {
+			return utils.ErrNotFound
 		}
 		rl := x.(*ResourceLimit)
 		for _, fltr := range rl.Filters {
@@ -124,7 +125,7 @@ func (rls *ResourceLimiterService) cacheResourceLimits(loadID string, rlIDs []st
 	} else if len(rlIDs) != 0 {
 		utils.Logger.Info(fmt.Sprintf("<RLs> Start caching resource limits with ids: %+v", rlIDs))
 	}
-	if err := rls.dataDB.CacheAccountingPrefixValues(loadID, map[string][]string{utils.ResourceLimitsPrefix: rlIDs}); err != nil {
+	if err := rls.dataDB.PreloadCacheForPrefix(utils.ResourceLimitsPrefix); err != nil {
 		return err
 	}
 	utils.Logger.Info("<RLs> Done caching resource limits")

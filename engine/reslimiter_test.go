@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -51,7 +52,7 @@ func TestIndexStringFilters(t *testing.T) {
 		},
 	}
 	for _, rl := range rls {
-		CacheSet(utils.ResourceLimitsPrefix+rl.ID, rl)
+		cache2go.Set(utils.ResourceLimitsPrefix+rl.ID, rl)
 	}
 	rLS := new(ResourceLimiterService)
 	eIndexes := map[string]map[string]utils.StringMap{
@@ -88,7 +89,7 @@ func TestIndexStringFilters(t *testing.T) {
 		ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Limit:          1,
 	}
-	CacheSet(utils.ResourceLimitsPrefix+rl3.ID, rl3)
+	cache2go.Set(utils.ResourceLimitsPrefix+rl3.ID, rl3)
 	eIndexes = map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{

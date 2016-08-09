@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -102,7 +103,7 @@ func TestStorageCacheRefresh(t *testing.T) {
 	ratingStorage.GetDestination("T11")
 	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}})
 	t.Log("Test cache refresh")
-	err := ratingStorage.CacheRatingAll("TestStorageCacheRefresh")
+	err := ratingStorage.PreloadRatingCache()
 	if err != nil {
 		t.Error("Error cache rating: ", err)
 	}
@@ -144,8 +145,8 @@ func TestStorageGetAliases(t *testing.T) {
 			},
 		},
 	}
-	accountingStorage.SetAlias(ala)
-	accountingStorage.SetAlias(alb)
+	accountingStorage.SetAlias(ala, true)
+	accountingStorage.SetAlias(alb, true)
 	foundAlias, err := accountingStorage.GetAlias(ala.GetId(), true)
 	if err != nil || len(foundAlias.Values) != 1 {
 		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
@@ -181,7 +182,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Subject:   "b1",
 		Context:   "*other",
 	}
-	if x, ok := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.ALIAS_CONTEXT_RATING); ok {
+	if x, ok := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.ALIAS_CONTEXT_RATING); ok {
 		aliasKeys := x.(map[string]struct{})
 		_, found := aliasKeys[utils.ConcatenatedKey(ala.GetId(), utils.ANY)]
 		if !found {
@@ -190,7 +191,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 	} else {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	if x, ok := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + "*other"); ok {
+	if x, ok := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + "*other"); ok {
 		aliasKeys := x.(map[string]struct{})
 		_, found := aliasKeys[utils.ConcatenatedKey(alb.GetId(), utils.ANY)]
 		if !found {
@@ -221,17 +222,17 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 	accountingStorage.RemoveAlias(ala.GetId())
 	accountingStorage.RemoveAlias(alb.GetId())
 
-	if _, ok := CacheGet(utils.ALIASES_PREFIX + ala.GetId()); ok {
+	if _, ok := cache2go.Get(utils.ALIASES_PREFIX + ala.GetId()); ok {
 		t.Error("Error removing cached alias: ", ok)
 	}
-	if _, ok := CacheGet(utils.ALIASES_PREFIX + alb.GetId()); ok {
+	if _, ok := cache2go.Get(utils.ALIASES_PREFIX + alb.GetId()); ok {
 		t.Error("Error removing cached alias: ", ok)
 	}
 
-	if _, ok := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); ok {
+	if _, ok := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); ok {
 		t.Error("Error removing cached reverse alias: ", ok)
 	}
-	if _, ok := CacheGet(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); ok {
+	if _, ok := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); ok {
 		t.Error("Error removing cached reverse alias: ", ok)
 	}
 }

@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1286,16 +1287,15 @@ func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
 	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
 	ratingStorage.SetDestination(origD)
-	ratingStorage.CacheRatingPrefixValues("", map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + "*ddc_test"}})
 	// check redis and cache
 	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil || !reflect.DeepEqual(d, origD) {
 		t.Error("Error storing destination: ", d, err)
 	}
-	x1, found := CacheGet(utils.DESTINATION_PREFIX + "111")
+	x1, found := cache2go.Get(utils.DESTINATION_PREFIX + "111")
 	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, found = CacheGet(utils.DESTINATION_PREFIX + "222")
+	x1, found = cache2go.Get(utils.DESTINATION_PREFIX + "222")
 	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
@@ -1308,19 +1308,19 @@ func TestActionSetDDestination(t *testing.T) {
 		t.Error("Error storing destination: ", d, err)
 	}
 	var ok bool
-	x1, ok = CacheGet(utils.DESTINATION_PREFIX + "111")
+	x1, ok = cache2go.Get(utils.DESTINATION_PREFIX + "111")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, ok = CacheGet(utils.DESTINATION_PREFIX + "222")
+	x1, ok = cache2go.Get(utils.DESTINATION_PREFIX + "222")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, found = CacheGet(utils.DESTINATION_PREFIX + "333")
+	x1, found = cache2go.Get(utils.DESTINATION_PREFIX + "333")
 	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, found = CacheGet(utils.DESTINATION_PREFIX + "444")
+	x1, found = cache2go.Get(utils.DESTINATION_PREFIX + "444")
 	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
 		t.Error("Error cacheing destination: ", x1)
 	}

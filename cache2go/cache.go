@@ -35,31 +35,31 @@ func init() {
 	}
 }
 
-func CacheBeginTransaction() {
+func BeginTransaction() {
 	transactionMux.Lock()
 	transactionLock = true
 	transactionON = true
 }
 
-func CacheRollbackTransaction() {
+func RollbackTransaction() {
 	transactionBuffer = nil
 	transactionLock = false
 	transactionON = false
 	transactionMux.Unlock()
 }
 
-func CacheCommitTransaction() {
+func CommitTransaction() {
 	transactionON = false
 	// apply all transactioned items
 	mux.Lock()
 	for _, item := range transactionBuffer {
 		switch item.kind {
 		case KIND_REM:
-			CacheRemKey(item.key)
+			RemKey(item.key)
 		case KIND_PRF:
-			CacheRemPrefixKey(item.key)
+			RemPrefixKey(item.key)
 		case KIND_ADD:
-			CacheSet(item.key, item.value)
+			Set(item.key, item.value)
 		}
 	}
 	mux.Unlock()
@@ -69,7 +69,7 @@ func CacheCommitTransaction() {
 }
 
 // The function to be used to cache a key/value pair when expiration is not needed
-func CacheSet(key string, value interface{}) {
+func Set(key string, value interface{}) {
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
@@ -83,13 +83,13 @@ func CacheSet(key string, value interface{}) {
 }
 
 // The function to extract a value for a key that never expire
-func CacheGet(key string) (interface{}, bool) {
+func Get(key string) (interface{}, bool) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.Get(key)
 }
 
-func CacheRemKey(key string) {
+func RemKey(key string) {
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
@@ -101,7 +101,7 @@ func CacheRemKey(key string) {
 	}
 }
 
-func CacheRemPrefixKey(prefix string) {
+func RemPrefixKey(prefix string) {
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
@@ -114,7 +114,7 @@ func CacheRemPrefixKey(prefix string) {
 }
 
 // Delete all keys from cache
-func CacheFlush() {
+func Flush() {
 	mux.Lock()
 	defer mux.Unlock()
 	if DOUBLE_CACHE {
@@ -124,19 +124,19 @@ func CacheFlush() {
 	}
 }
 
-func CacheCountEntries(prefix string) (result int) {
+func CountEntries(prefix string) (result int) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.CountEntriesForPrefix(prefix)
 }
 
-func CacheGetAllEntries(prefix string) (map[string]interface{}, error) {
+func GetAllEntries(prefix string) (map[string]interface{}, error) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.GetAllForPrefix(prefix)
 }
 
-func CacheGetEntriesKeys(prefix string) (keys []string) {
+func GetEntriesKeys(prefix string) (keys []string) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.GetKeysForPrefix(prefix)

@@ -517,12 +517,17 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 			prefixes[i] = p
 			i++
 		}
+		newDest := &Destination{Id: ddcDestId, Prefixes: prefixes}
+		oldDest, err := ratingStorage.GetDestination(ddcDestId)
 		// update destid in storage
-		ratingStorage.SetDestination(&Destination{Id: ddcDestId, Prefixes: prefixes})
-		// remove existing from cache
-		CleanStalePrefixes([]string{ddcDestId})
-		// update new values from redis
-		ratingStorage.CacheRatingPrefixValues("SetDestinationAction", map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + ddcDestId}})
+		ratingStorage.SetDestination(newDest)
+
+		if err == nil && oldDest != nil {
+			err = ratingStorage.UpdateReverseDestination(oldDest, newDest)
+			if err != nil {
+				return err
+			}
+		}
 	} else {
 		return utils.ErrNotFound
 	}
@@ -559,20 +564,20 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 			utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
 			return 0, err
 		}
-		var dirtyAps []string
+		//var dirtyAps []string
 		for key, ap := range allAPs {
 			if _, exists := ap.AccountIDs[accID]; !exists {
 				// save action plan
 				delete(ap.AccountIDs, key)
-				ratingStorage.SetActionPlan(key, ap, true)
-				dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
+				ratingStorage.SetActionPlan(key, ap, true, true)
+				//dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
 			}
 		}
-		if len(dirtyAps) > 0 {
+		/*if len(dirtyAps) > 0 {
 			// cache
 			ratingStorage.CacheRatingPrefixValues("RemoveAccountAction", map[string][]string{
 				utils.ACTION_PLAN_PREFIX: dirtyAps})
-		}
+		}*/
 		return 0, nil
 
 	}, 0, utils.ACTION_PLAN_PREFIX)

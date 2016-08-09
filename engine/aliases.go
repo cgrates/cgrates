@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -114,29 +115,6 @@ func (al *Alias) SetId(id string) error {
 	return nil
 }
 
-func (al *Alias) SetReverseCache() {
-	for _, value := range al.Values {
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
-				CachePush(rKey, utils.ConcatenatedKey(al.GetId(), value.DestinationId))
-			}
-		}
-	}
-}
-
-func (al *Alias) RemoveReverseCache() {
-	for _, value := range al.Values {
-		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-				CachePop(rKey, tmpKey)
-			}
-		}
-	}
-}
-
 type AttrMatchingAlias struct {
 	Destination string
 	Direction   string
@@ -188,11 +166,11 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 
 	var oldAlias *Alias
 	if !attr.Overwrite { // get previous value
-		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId())
+		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId(), false)
 	}
 
 	if attr.Overwrite || oldAlias == nil {
-		if err := am.accountingDb.SetAlias(attr.Alias); err != nil {
+		if err := am.accountingDb.SetAlias(attr.Alias, false); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -221,17 +199,17 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 				oldAlias.Values = append(oldAlias.Values, value)
 			}
 		}
-		if err := am.accountingDb.SetAlias(oldAlias); err != nil {
+		if err := am.accountingDb.SetAlias(oldAlias, true); err != nil {
 			*reply = err.Error()
+			return err
+		}
+		// FIXME!!!!
+		err = am.accountingDb.UpdateReverseAlias(oldAlias, oldAlias)
+		if err != nil {
 			return err
 		}
 	}
 
-	//add to cache
-	aliasesChanged := []string{utils.ALIASES_PREFIX + attr.Alias.GetId()}
-	if err := am.accountingDb.CacheAccountingPrefixValues("SetAliasAPI", map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
-		return utils.NewErrServerError(err)
-	}
 	*reply = utils.OK
 	return nil
 }
@@ -251,7 +229,7 @@ func (am *AliasHandler) RemoveReverseAlias(attr *AttrReverseAlias, reply *string
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, ok := CacheGet(rKey); ok {
+	if x, ok := cache2go.Get(rKey); ok {
 		existingKeys := x.(map[interface{}]struct{})
 		for iKey := range existingKeys {
 			key := iKey.(string)
@@ -288,7 +266,7 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, ok := CacheGet(rKey); ok {
+	if x, ok := cache2go.Get(rKey); ok {
 		existingKeys := x.(map[string]struct{})
 		for key := range existingKeys {
 			// get destination id
@@ -339,7 +317,7 @@ func (am *AliasHandler) GetMatchingAlias(attr *AttrMatchingAlias, result *string
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-		if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
+		if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
 			destIds := x.(map[string]struct{})
 			for _, value := range values {
 				for dId := range destIds {
@@ -419,7 +397,7 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 	if rightPairs == nil {
 		// check destination ids
 		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-			if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
+			if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
 				destIds := x.(map[string]struct{})
 				for _, value := range values {
 					for dId := range destIds {

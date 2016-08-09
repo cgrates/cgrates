@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -118,7 +119,7 @@ func TestPassRSRFields(t *testing.T) {
 
 func TestPassDestinations(t *testing.T) {
 	x := struct{}{}
-	CacheSet(utils.DESTINATION_PREFIX+"+49", map[string]struct{}{"DE": x, "EU_LANDLINE": x})
+	cache2go.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", map[string]struct{}{"DE": x, "EU_LANDLINE": x})
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}

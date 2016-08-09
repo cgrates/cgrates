@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -97,20 +98,20 @@ type CdrServer struct {
 	aliases       rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
 	guard         *GuardianLock
-	responseCache *ResponseCache
+	responseCache *cache2go.ResponseCache
 }
 
 func (self *CdrServer) Timezone() string {
 	return self.cgrCfg.DefaultTimezone
 }
 func (self *CdrServer) SetTimeToLive(timeToLive time.Duration, out *int) error {
-	self.responseCache = NewResponseCache(timeToLive)
+	self.responseCache = cache2go.NewResponseCache(timeToLive)
 	return nil
 }
 
-func (self *CdrServer) getCache() *ResponseCache {
+func (self *CdrServer) getCache() *cache2go.ResponseCache {
 	if self.responseCache == nil {
-		self.responseCache = NewResponseCache(0)
+		self.responseCache = cache2go.NewResponseCache(0)
 	}
 	return self.responseCache
 }
@@ -499,10 +500,10 @@ func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 		return item.Err
 	}
 	if err := self.processCdr(cdr); err != nil {
-		self.getCache().Cache(cacheKey, &CacheItem{Err: err})
+		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
-	self.getCache().Cache(cacheKey, &CacheItem{Value: utils.OK})
+	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }
@@ -517,10 +518,10 @@ func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) er
 		return item.Err
 	}
 	if err := self.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
-		self.getCache().Cache(cacheKey, &CacheItem{Err: err})
+		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
-	self.getCache().Cache(cacheKey, &CacheItem{Value: utils.OK})
+	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }

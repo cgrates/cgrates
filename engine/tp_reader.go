@@ -252,7 +252,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				}
 			}
 		}
-		if err := tpr.ratingStorage.SetRatingPlan(ratingPlan); err != nil {
+		if err := tpr.ratingStorage.SetRatingPlan(ratingPlan, true); err != nil {
 			return false, err
 		}
 	}
@@ -294,7 +294,7 @@ func (tpr *TpReader) LoadRatingPlans() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile) error {
+func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile, cache bool) error {
 	var resultRatingProfile *RatingProfile
 	mpTpRpfs, err := tpr.lr.GetTpRatingProfiles(qriedRpf)
 	if err != nil {
@@ -329,7 +329,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile) error
 					CdrStatQueueIds: strings.Split(tpRa.CdrStatQueueIds, utils.INFIELD_SEP),
 				})
 		}
-		if err := tpr.ratingStorage.SetRatingProfile(resultRatingProfile); err != nil {
+		if err := tpr.ratingStorage.SetRatingProfile(resultRatingProfile, cache); err != nil {
 			return err
 		}
 	}
@@ -375,7 +375,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error) {
+func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save, cache bool) (err error) {
 	tps, err := tpr.lr.GetTpSharedGroups(tpr.tpid, "")
 	if err != nil {
 		return err
@@ -402,7 +402,7 @@ func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error)
 	}
 	if save {
 		for _, sg := range tpr.sharedGroups {
-			if err := tpr.ratingStorage.SetSharedGroup(sg); err != nil {
+			if err := tpr.ratingStorage.SetSharedGroup(sg, cache); err != nil {
 				return err
 			}
 		}
@@ -411,7 +411,7 @@ func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error)
 }
 
 func (tpr *TpReader) LoadSharedGroups() error {
-	return tpr.LoadSharedGroupsFiltered(tpr.tpid, false)
+	return tpr.LoadSharedGroupsFiltered(tpr.tpid, false, false)
 }
 
 func (tpr *TpReader) LoadLCRs() (err error) {
@@ -431,7 +431,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 			}
 		}
 		if !found && tpr.ratingStorage != nil {
-			if keys, err := tpr.ratingStorage.GetKeysForPrefix(utils.RATING_PROFILE_PREFIX+ratingProfileSearchKey, true); err != nil {
+			if keys, err := tpr.ratingStorage.GetKeysForPrefix(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil {
 				return fmt.Errorf("[LCR] error querying ratingDb %s", err.Error())
 			} else if len(keys) != 0 {
 				found = true
@@ -759,7 +759,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error {
+func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction, cache bool) error {
 	accountActions, err := tpr.lr.GetTpAccountActions(qriedAA)
 	if err != nil {
 		return errors.New(err.Error() + ": " + fmt.Sprintf("%+v", qriedAA))
@@ -856,7 +856,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				}
 			}
 			// write action plan
-			err = tpr.ratingStorage.SetActionPlan(accountAction.ActionPlanId, actionPlan, false)
+			err = tpr.ratingStorage.SetActionPlan(accountAction.ActionPlanId, actionPlan, false, cache)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
 			}
@@ -961,7 +961,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				actionIDs = append(actionIDs, atr.ActionsID)
 			}
 			// write action triggers
-			err = tpr.ratingStorage.SetActionTriggers(accountAction.ActionTriggersId, actionTriggers)
+			err = tpr.ratingStorage.SetActionTriggers(accountAction.ActionTriggersId, actionTriggers, cache)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionTriggers): " + accountAction.ActionTriggersId)
 			}
@@ -1076,7 +1076,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 		}
 		// write actions
 		for k, as := range facts {
-			err = tpr.ratingStorage.SetActions(k, as)
+			err = tpr.ratingStorage.SetActions(k, as, cache)
 			if err != nil {
 				return err
 			}
@@ -1141,7 +1141,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save bool) (err error) {
+func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save, cache bool) (err error) {
 	tps, err := tpr.lr.GetTpDerivedChargers(filter)
 	if err != nil {
 		return err
@@ -1171,7 +1171,7 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 	}
 	if save {
 		for dcsKey, dcs := range tpr.derivedChargers {
-			if err := tpr.ratingStorage.SetDerivedChargers(dcsKey, dcs); err != nil {
+			if err := tpr.ratingStorage.SetDerivedChargers(dcsKey, dcs, cache); err != nil {
 				return err
 			}
 		}
@@ -1180,10 +1180,10 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 }
 
 func (tpr *TpReader) LoadDerivedChargers() (err error) {
-	return tpr.LoadDerivedChargersFiltered(&TpDerivedCharger{Tpid: tpr.tpid}, false)
+	return tpr.LoadDerivedChargersFiltered(&TpDerivedCharger{Tpid: tpr.tpid}, false, false)
 }
 
-func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
+func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save, cache bool) (err error) {
 	tps, err := tpr.lr.GetTpCdrStats(tpr.tpid, tag)
 	if err != nil {
 		return err
@@ -1306,7 +1306,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 				return fmt.Errorf("could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
 			}
 			// write action triggers
-			err = tpr.ratingStorage.SetActionTriggers(triggerTag, triggers)
+			err = tpr.ratingStorage.SetActionTriggers(triggerTag, triggers, cache)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionTriggers): " + triggerTag)
 			}
@@ -1410,7 +1410,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 	if save {
 		// write actions
 		for k, as := range tpr.actions {
-			err = tpr.ratingStorage.SetActions(k, as)
+			err = tpr.ratingStorage.SetActions(k, as, cache)
 			if err != nil {
 				return err
 			}
@@ -1425,7 +1425,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 }
 
 func (tpr *TpReader) LoadCdrStats() error {
-	return tpr.LoadCdrStatsFiltered("", false)
+	return tpr.LoadCdrStatsFiltered("", false, false)
 }
 
 func (tpr *TpReader) LoadUsersFiltered(filter *TpUser) (bool, error) {
@@ -1469,7 +1469,7 @@ func (tpr *TpReader) LoadUsers() error {
 	return err
 }
 
-func (tpr *TpReader) LoadAliasesFiltered(filter *TpAlias) (bool, error) {
+func (tpr *TpReader) LoadAliasesFiltered(filter *TpAlias, cache bool) (bool, error) {
 	tpAliases, err := tpr.lr.GetTpAliases(filter)
 
 	alias := &Alias{
@@ -1497,7 +1497,7 @@ func (tpr *TpReader) LoadAliasesFiltered(filter *TpAlias) (bool, error) {
 		av.Pairs[tpAlias.Target][tpAlias.Original] = tpAlias.Alias
 
 	}
-	tpr.accountingStorage.SetAlias(alias)
+	tpr.accountingStorage.SetAlias(alias, cache)
 	return len(tpAliases) > 0, err
 }
 
@@ -1646,17 +1646,19 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		if err != nil {
 			return err
 		}
-		// write reverse destination
-
 		if verbose {
 			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}
+	}
+	err = tpr.ratingStorage.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX)
+	if err != nil {
+		return err
 	}
 	if verbose {
 		log.Print("Rating Plans:")
 	}
 	for _, rp := range tpr.ratingPlans {
-		err = tpr.ratingStorage.SetRatingPlan(rp)
+		err = tpr.ratingStorage.SetRatingPlan(rp, false)
 		if err != nil {
 			return err
 		}
@@ -1668,7 +1670,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Rating Profiles:")
 	}
 	for _, rp := range tpr.ratingProfiles {
-		err = tpr.ratingStorage.SetRatingProfile(rp)
+		err = tpr.ratingStorage.SetRatingProfile(rp, false)
 		if err != nil {
 			return err
 		}
@@ -1709,7 +1711,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 				}
 			}
 		}
-		err = tpr.ratingStorage.SetActionPlan(k, ap, false)
+		err = tpr.ratingStorage.SetActionPlan(k, ap, false, false)
 		if err != nil {
 			return err
 		}
@@ -1721,7 +1723,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Action Triggers:")
 	}
 	for k, atrs := range tpr.actionsTriggers {
-		err = tpr.ratingStorage.SetActionTriggers(k, atrs)
+		err = tpr.ratingStorage.SetActionTriggers(k, atrs, false)
 		if err != nil {
 			return err
 		}
@@ -1733,7 +1735,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Shared Groups:")
 	}
 	for k, sg := range tpr.sharedGroups {
-		err = tpr.ratingStorage.SetSharedGroup(sg)
+		err = tpr.ratingStorage.SetSharedGroup(sg, false)
 		if err != nil {
 			return err
 		}
@@ -1745,7 +1747,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("LCR Rules:")
 	}
 	for k, lcr := range tpr.lcrs {
-		err = tpr.ratingStorage.SetLCR(lcr)
+		err = tpr.ratingStorage.SetLCR(lcr, false)
 		if err != nil {
 			return err
 		}
@@ -1757,7 +1759,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Actions:")
 	}
 	for k, as := range tpr.actions {
-		err = tpr.ratingStorage.SetActions(k, as)
+		err = tpr.ratingStorage.SetActions(k, as, false)
 		if err != nil {
 			return err
 		}
@@ -1781,7 +1783,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Derived Chargers:")
 	}
 	for key, dcs := range tpr.derivedChargers {
-		err = tpr.ratingStorage.SetDerivedChargers(key, dcs)
+		err = tpr.ratingStorage.SetDerivedChargers(key, dcs, false)
 		if err != nil {
 			return err
 		}
@@ -1817,13 +1819,17 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Aliases:")
 	}
 	for _, al := range tpr.aliases {
-		err = tpr.accountingStorage.SetAlias(al)
+		err = tpr.accountingStorage.SetAlias(al, false)
 		if err != nil {
 			return err
 		}
 		if verbose {
 			log.Print("\t", al.GetId())
 		}
+	}
+	err = tpr.ratingStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX)
+	if err != nil {
+		return err
 	}
 	if verbose {
 		log.Print("ResourceLimits:")
@@ -1833,7 +1839,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		if err != nil {
 			return err
 		}
-		if err = tpr.accountingStorage.SetResourceLimit(rl); err != nil {
+		if err = tpr.accountingStorage.SetResourceLimit(rl, false); err != nil {
 			return err
 		}
 		if verbose {

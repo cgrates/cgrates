@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 
@@ -54,7 +55,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	for _, cb := range creditBalances {
 		if len(cb.SharedGroups) > 0 {
 			for sg := range cb.SharedGroups {
-				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg); sharedGroup != nil {
+				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false); sharedGroup != nil {
 					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, ub)
 					sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
 					extendedCreditBalances = append(extendedCreditBalances, sgb...)
@@ -68,7 +69,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	for _, mb := range unitBalances {
 		if len(mb.SharedGroups) > 0 {
 			for sg := range mb.SharedGroups {
-				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg); sharedGroup != nil {
+				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false); sharedGroup != nil {
 					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, cd.TOR, ub)
 					sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 					extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
@@ -136,7 +137,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 		_, err := Guardian.Guard(func() (interface{}, error) {
 			for sgID := range balance.SharedGroups {
 				// add shared group member
-				sg, err := ratingStorage.GetSharedGroup(sgID)
+				sg, err := ratingStorage.GetSharedGroup(sgID, false)
 				if err != nil || sg == nil {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
@@ -147,7 +148,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 							sg.MemberIds = make(utils.StringMap)
 						}
 						sg.MemberIds[acc.ID] = true
-						ratingStorage.SetSharedGroup(sg)
+						ratingStorage.SetSharedGroup(sg, true)
 					}
 				}
 			}
@@ -224,7 +225,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		_, err := Guardian.Guard(func() (interface{}, error) {
 			for sgId := range bClone.SharedGroups {
 				// add shared group member
-				sg, err := ratingStorage.GetSharedGroup(sgId)
+				sg, err := ratingStorage.GetSharedGroup(sgId, false)
 				if err != nil || sg == nil {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
@@ -235,7 +236,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 							sg.MemberIds = make(utils.StringMap)
 						}
 						sg.MemberIds[ub.ID] = true
-						ratingStorage.SetSharedGroup(sg)
+						ratingStorage.SetSharedGroup(sg, true)
 					}
 				}
 			}
@@ -304,7 +305,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 
 		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
+				if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
 					destIds := x.(map[string]struct{})
 					foundResult := false
 					allInclude := true // wheter it is excluded or included
@@ -355,7 +356,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, directio
 	for _, b := range balances {
 		if len(b.SharedGroups) > 0 {
 			for sgId := range b.SharedGroups {
-				sharedGroup, err := ratingStorage.GetSharedGroup(sgId)
+				sharedGroup, err := ratingStorage.GetSharedGroup(sgId, false)
 				if err != nil || sharedGroup == nil {
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 					continue
@@ -774,7 +775,7 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.S
 	}
 	memberIds := make(utils.StringMap)
 	for _, sgID := range sharedGroupIds {
-		sharedGroup, err := ratingStorage.GetSharedGroup(sgID)
+		sharedGroup, err := ratingStorage.GetSharedGroup(sgID, false)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 			return nil, err

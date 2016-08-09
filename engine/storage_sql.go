@@ -54,8 +54,16 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	return nil
 }
 
-func (self *SQLStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
+func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
+}
+
+func (ms *SQLStorage) RebuildReverseForPrefix(prefix string) error {
+	return utils.ErrNotImplemented
+}
+
+func (self *SQLStorage) PreloadCacheForPrefix(prefix string) error {
+	return utils.ErrNotImplemented
 }
 
 func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {

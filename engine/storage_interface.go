@@ -33,41 +33,43 @@ type Storage interface {
 	Close()
 	Flush(string) error
 	GetKeysForPrefix(string) ([]string, error)
+	PreloadCacheForPrefix(string) error
+	RebuildReverseForPrefix(string) error
 }
 
 // Interface for storage providers.
 type RatingStorage interface {
 	Storage
-	CacheRatingAll(string) error
-	CacheRatingPrefixes(string, ...string) error
-	CacheRatingPrefixValues(string, map[string][]string) error
 	HasData(string, string) (bool, error)
-	GetRatingPlan(string) (*RatingPlan, error)
-	SetRatingPlan(*RatingPlan) error
-	GetRatingProfile(string) (*RatingProfile, error)
-	SetRatingProfile(*RatingProfile) error
+	PreloadRatingCache() error
+	GetRatingPlan(string, bool) (*RatingPlan, error)
+	SetRatingPlan(*RatingPlan, bool) error
+	GetRatingProfile(string, bool) (*RatingProfile, error)
+	SetRatingProfile(*RatingProfile, bool) error
 	RemoveRatingProfile(string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 	RemoveDestination(string) error
-	//GetReverseDestination(string) ([]string, error)
-	GetLCR(string) (*LCR, error)
-	SetLCR(*LCR) error
+	SetReverseDestination(*Destination, bool) error
+	GetReverseDestination(string, bool) ([]string, error)
+	UpdateReverseDestination(*Destination, *Destination) error
+	GetLCR(string, bool) (*LCR, error)
+	SetLCR(*LCR, bool) error
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
-	GetDerivedChargers(string) (*utils.DerivedChargers, error)
-	SetDerivedChargers(string, *utils.DerivedChargers) error
-	GetActions(string) (Actions, error)
-	SetActions(string, Actions) error
+	GetDerivedChargers(string, bool) (*utils.DerivedChargers, error)
+	SetDerivedChargers(string, *utils.DerivedChargers, bool) error
+	GetActions(string, bool) (Actions, error)
+	SetActions(string, Actions, bool) error
 	RemoveActions(string) error
-	GetSharedGroup(string) (*SharedGroup, error)
-	SetSharedGroup(*SharedGroup) error
-	GetActionTriggers(string) (ActionTriggers, error)
-	SetActionTriggers(string, ActionTriggers) error
+	GetSharedGroup(string, bool) (*SharedGroup, error)
+	SetSharedGroup(*SharedGroup, bool) error
+	GetActionTriggers(string, bool) (ActionTriggers, error)
+	SetActionTriggers(string, ActionTriggers, bool) error
 	RemoveActionTriggers(string) error
-	GetActionPlan(string) (*ActionPlan, error)
-	SetActionPlan(string, *ActionPlan, bool) error
+	GetActionPlan(string, bool) (*ActionPlan, error)
+	SetActionPlan(string, *ActionPlan, bool, bool) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
@@ -75,9 +77,7 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
-	CacheAccountingAll(string) error
-	CacheAccountingPrefixes(string, ...string) error
-	CacheAccountingPrefixValues(string, map[string][]string) error
+	PreloadAccountingCache() error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
@@ -90,14 +90,17 @@ type AccountingStorage interface {
 	GetUser(string) (*UserProfile, error)
 	GetUsers() ([]*UserProfile, error)
 	RemoveUser(string) error
-	SetAlias(*Alias) error
-	GetAlias(string) (*Alias, error)
+	SetAlias(*Alias, bool) error
+	GetAlias(string, bool) (*Alias, error)
 	RemoveAlias(string) error
+	SetReverseAlias(*Alias, bool) error
+	GetReverseAlias(string, bool) ([]string, error)
+	UpdateReverseAlias(*Alias, *Alias) error
 	GetResourceLimit(string, bool) (*ResourceLimit, error)
-	SetResourceLimit(*ResourceLimit) error
+	SetResourceLimit(*ResourceLimit, bool) error
 	RemoveResourceLimit(string) error
 	GetLoadHistory(int, bool) ([]*utils.LoadInstance, error)
-	AddLoadHistory(*utils.LoadInstance, int) error
+	AddLoadHistory(*utils.LoadInstance, int, bool) error
 	GetStructVersion() (*StructVersion, error)
 	SetStructVersion(*StructVersion) error
 }

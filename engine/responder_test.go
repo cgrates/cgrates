@@ -42,10 +42,7 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}}
 	rsponder = &Responder{}
 	attrs := &utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "responder_test", Subject: "responder_test"}
-	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
-		t.Error(err)
-	}
-	if err := ratingStorage.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
+	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC, true); err != nil {
 		t.Error(err)
 	}
 	dcs := &utils.DerivedChargers{}
@@ -92,10 +89,9 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 		&utils.DerivedCharger{RunID: "extra3", RequestTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^rif", SubjectField: "^rif", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}}
-	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
+	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1, true); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	ratingStorage.CacheRatingAll("TestResponderGetDerivedMaxSessionTime")
 	if rifStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(testTenant, "rif")); err != nil {
 		t.Error(err)
 		//} else if rifStoredAcnt.BalanceMap[utils.VOICE].Equal(rifsAccount.BalanceMap[utils.VOICE]) {
@@ -146,10 +142,9 @@ func TestResponderGetSessionRuns(t *testing.T) {
 		SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
 		DisconnectCauseField: utils.META_DEFAULT}
 	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{extra1DC, extra2DC, extra3DC}}
-	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
+	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1, true); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	ratingStorage.CacheRatingAll("TestResponderGetSessionRuns")
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
@@ -286,7 +281,7 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 	}
 	for _, rpf := range []*RatingPlan{rp1, rp2, rp3} {
-		if err := ratingStorage.SetRatingPlan(rpf); err != nil {
+		if err := ratingStorage.SetRatingPlan(rpf, true); err != nil {
 			t.Error(err)
 		}
 	}
@@ -322,7 +317,7 @@ func TestResponderGetLCR(t *testing.T) {
 		}},
 	}
 	for _, rpfl := range []*RatingProfile{danRpfl, rifRpfl, ivoRpfl} {
-		if err := ratingStorage.SetRatingProfile(rpfl); err != nil {
+		if err := ratingStorage.SetRatingProfile(rpfl, true); err != nil {
 			t.Error(err)
 		}
 	}
@@ -372,17 +367,9 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 	}
 	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost, lcrQosThreshold, lcrQos, lcrLoad} {
-		if err := ratingStorage.SetLCR(lcr); err != nil {
+		if err := ratingStorage.SetLCR(lcr, true); err != nil {
 			t.Error(err)
 		}
-	}
-	if err := ratingStorage.CacheRatingPrefixValues("TestResponderGetLCR", map[string][]string{
-		utils.DESTINATION_PREFIX:    []string{utils.DESTINATION_PREFIX + dstDe.Id},
-		utils.RATING_PLAN_PREFIX:    []string{utils.RATING_PLAN_PREFIX + rp1.Id, utils.RATING_PLAN_PREFIX + rp2.Id, utils.RATING_PLAN_PREFIX + rp3.Id},
-		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + danRpfl.Id, utils.RATING_PROFILE_PREFIX + rifRpfl.Id, utils.RATING_PROFILE_PREFIX + ivoRpfl.Id},
-		utils.LCR_PREFIX:            []string{utils.LCR_PREFIX + lcrStatic.GetId(), utils.LCR_PREFIX + lcrLowestCost.GetId(), utils.LCR_PREFIX + lcrQosThreshold.GetId(), utils.LCR_PREFIX + lcrQos.GetId()},
-	}); err != nil {
-		t.Error(err)
 	}
 	cdStatic := &CallDescriptor{
 		TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),

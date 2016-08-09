@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -159,7 +160,7 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 		return false, err
 	}
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
-		if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
+		if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
 			destIds := x.(map[string]struct{})
 			for dID := range destIds {
 				for _, valDstID := range fltr.Values {

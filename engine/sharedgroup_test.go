@@ -34,7 +34,7 @@ func TestSharedSetGet(t *testing.T) {
 		},
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
-	err := ratingStorage.SetSharedGroup(sg)
+	err := ratingStorage.SetSharedGroup(sg, true)
 	if err != nil {
 		t.Error("Error storing Shared groudp: ", err)
 	}

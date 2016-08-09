@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -882,9 +883,9 @@ func (cd *CallDescriptor) RefundRounding() error {
 }
 
 func (cd *CallDescriptor) FlushCache() (err error) {
-	CacheFlush()
-	ratingStorage.CacheRatingAll("FlushCache")
-	accountingStorage.CacheAccountingAll("FlushCache")
+	cache2go.Flush()
+	ratingStorage.PreloadRatingCache()
+	accountingStorage.PreloadAccountingCache()
 	return nil
 
 }
@@ -1030,7 +1031,7 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 		}
 		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
 		//log.Print("KEY: ", ratingProfileSearchKey)
-		suppliers := CacheGetEntriesKeys(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey)
+		suppliers := cache2go.GetEntriesKeys(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 		for _, supplier := range suppliers {
 			//log.Print("Supplier: ", supplier)
 			split := strings.Split(supplier, ":")

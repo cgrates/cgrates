@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -279,7 +280,7 @@ func (es LCREntriesSorter) Sort() {
 func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 	var potentials LCREntriesSorter
 	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
-		if x, ok := CacheGet(utils.DESTINATION_PREFIX + p); ok {
+		if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
 
 			destIds := x.(map[string]struct{})
 			for dId := range destIds {
