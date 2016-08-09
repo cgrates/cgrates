@@ -207,9 +207,9 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 			if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
 				continue
 			}
-			x, err := CacheGet(utils.ResourceLimitsPrefix + resName)
-			if err != nil {
-				return nil, err
+			x, ok := cache2go.Get(utils.ResourceLimitsPrefix + resName)
+			if !ok {
+				return nil, utils.ErrNotFound
 			}
 			rl := x.(*ResourceLimit)
 			now := time.Now()
@@ -235,9 +235,9 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 		if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
 			continue
 		}
-		x, err := CacheGet(utils.ResourceLimitsPrefix + resName)
-		if err != nil {
-			return nil, err
+		x, ok := cache2go.Get(utils.ResourceLimitsPrefix + resName)
+		if !ok {
+			return nil, utils.ErrNotFound
 		}
 		rl := x.(*ResourceLimit)
 		now := time.Now()
@@ -327,7 +327,7 @@ func (rls *ResourceLimiterService) V1InitiateResourceUsage(attrs utils.AttrRLsRe
 		return utils.ErrResourceUnavailable
 	}
 	for _, rl := range matchingRLForEv {
-		CacheSet(utils.ResourceLimitsPrefix+rl.ID, rl)
+		cache2go.Set(utils.ResourceLimitsPrefix+rl.ID, rl)
 	}
 	*reply = utils.OK
 	return nil

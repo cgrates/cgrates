@@ -134,7 +134,7 @@ func TestRLsIndexStringFilters(t *testing.T) {
 		Limit:          1,
 		Usage:          make(map[string]*ResourceUsage),
 	}
-	CacheSet(utils.ResourceLimitsPrefix+rl6.ID, rl6)
+	cache2go.Set(utils.ResourceLimitsPrefix+rl6.ID, rl6)
 	eIndexes = map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{

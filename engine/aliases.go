@@ -204,7 +204,7 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 			return err
 		}
 		// FIXME!!!!
-		err = am.accountingDb.UpdateReverseAlias(oldAlias, oldAlias)
+		err := am.accountingDb.UpdateReverseAlias(oldAlias, oldAlias)
 		if err != nil {
 			return err
 		}
