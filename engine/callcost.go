@@ -21,7 +21,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -236,10 +235,9 @@ func (cc *CallCost) MatchCCFilter(bf *BalanceFilter) bool {
 	foundMatchingDestID := false
 	if bf.DestinationIDs != nil && cc.Destination != "" {
 		for _, p := range utils.SplitPrefix(cc.Destination, MIN_PREFIX_MATCH) {
-			if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
-				destIds := x.(map[string]struct{})
-				for filterDestID := range *bf.DestinationIDs {
-					if _, ok := destIds[filterDestID]; ok {
+			if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+				for _, dID := range destIDs {
+					if _, ok := (*bf.DestinationIDs)[dID]; ok {
 						foundMatchingDestID = true
 						break // only one found?
 					}

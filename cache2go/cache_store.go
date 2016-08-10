@@ -14,7 +14,7 @@ type cacheStore interface {
 	Delete(string)
 	DeletePrefix(string)
 	CountEntriesForPrefix(string) int
-	GetAllForPrefix(string) (map[string]interface{}, error)
+	GetAllForPrefix(string) map[string]interface{}
 	GetKeysForPrefix(string) []string
 }
 
@@ -73,11 +73,11 @@ func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
 	return 0
 }
 
-func (cs cacheDoubleStore) GetAllForPrefix(prefix string) (map[string]interface{}, error) {
+func (cs cacheDoubleStore) GetAllForPrefix(prefix string) map[string]interface{} {
 	if keyMap, ok := cs[prefix]; ok {
-		return keyMap, nil
+		return keyMap
 	}
-	return nil, utils.ErrNotFound
+	return nil
 }
 
 func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
@@ -150,8 +150,8 @@ func (cs cacheLRUTTL) CountEntriesForPrefix(prefix string) int {
 	return 0
 }
 
-func (cs cacheLRUTTL) GetAllForPrefix(prefix string) (map[string]interface{}, error) {
-	return nil, utils.ErrNotImplemented
+func (cs cacheLRUTTL) GetAllForPrefix(prefix string) map[string]interface{} {
+	return nil
 }
 
 func (cs cacheLRUTTL) GetKeysForPrefix(prefix string) (keys []string) {
@@ -238,7 +238,7 @@ func (cs cacheSimpleStore) CountEntriesForPrefix(prefix string) int {
 	return 0
 }
 
-func (cs cacheSimpleStore) GetAllForPrefix(prefix string) (map[string]interface{}, error) {
+func (cs cacheSimpleStore) GetAllForPrefix(prefix string) map[string]interface{} {
 	result := make(map[string]interface{})
 	found := false
 	for key, ti := range cs.cache {
@@ -248,9 +248,9 @@ func (cs cacheSimpleStore) GetAllForPrefix(prefix string) (map[string]interface{
 		}
 	}
 	if !found {
-		return nil, utils.ErrNotFound
+		return nil
 	}
-	return result, nil
+	return result
 }
 
 func (cs cacheSimpleStore) GetKeysForPrefix(prefix string) (keys []string) {

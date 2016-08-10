@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 
@@ -50,6 +49,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")
 
 	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")
+	//log.Printf("Credit: %v Unit: %v", creditBalances, unitBalances)
 	// gather all balances from shared groups
 	var extendedCreditBalances Balances
 	for _, cb := range creditBalances {
@@ -286,6 +286,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 	}
 	var usefulBalances Balances
 	for _, b := range balances {
+
 		if b.Disabled {
 			continue
 		}
@@ -305,11 +306,10 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 
 		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
-					destIds := x.(map[string]struct{})
+				if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
 					foundResult := false
-					allInclude := true // wheter it is excluded or included
-					for dId, _ := range destIds {
+					allInclude := true // whether it is excluded or included
+					for _, dId := range destIDs {
 						inclDest, found := b.DestinationIDs[dId]
 						if found {
 							foundResult = true

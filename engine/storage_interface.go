@@ -47,12 +47,12 @@ type RatingStorage interface {
 	GetRatingProfile(string, bool) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile, bool) error
 	RemoveRatingProfile(string) error
-	GetDestination(string) (*Destination, error)
-	SetDestination(*Destination) error
+	GetDestination(string, bool) (*Destination, error)
+	SetDestination(*Destination, bool) error
 	RemoveDestination(string) error
 	SetReverseDestination(*Destination, bool) error
 	GetReverseDestination(string, bool) ([]string, error)
-	UpdateReverseDestination(*Destination, *Destination) error
+	UpdateReverseDestination(*Destination, *Destination, bool) error
 	GetLCR(string, bool) (*LCR, error)
 	SetLCR(*LCR, bool) error
 	SetCdrStats(*CdrStats) error

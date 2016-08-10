@@ -67,7 +67,10 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 	deTMobile := &Destination{Id: "DE_TMOBILE", Prefixes: []string{"+49151", "+49160", "+49170", "+49171", "+49175"}}
-	if err := ratingStorage.SetDestination(deTMobile); err != nil {
+	if err := ratingStorage.SetDestination(deTMobile, true); err != nil {
+		t.Error(err)
+	}
+	if err := ratingStorage.SetReverseDestination(deTMobile, true); err != nil {
 		t.Error(err)
 	}
 	b10 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
@@ -169,7 +172,10 @@ func TestResponderGetSessionRuns(t *testing.T) {
 func TestResponderGetLCR(t *testing.T) {
 	rsponder.Stats = NewStats(ratingStorage, accountingStorage, 0) // Load stats instance
 	dstDe := &Destination{Id: "GERMANY", Prefixes: []string{"+49"}}
-	if err := ratingStorage.SetDestination(dstDe); err != nil {
+	if err := ratingStorage.SetDestination(dstDe, true); err != nil {
+		t.Error(err)
+	}
+	if err := ratingStorage.SetReverseDestination(dstDe, true); err != nil {
 		t.Error(err)
 	}
 	rp1 := &RatingPlan{
@@ -395,7 +401,7 @@ func TestResponderGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
 	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eStLcr.SupplierCosts), utils.ToJSON(lcr.SupplierCosts))
 	}
 	// Test *least_cost strategy here
 	cdLowestCost := &CallDescriptor{

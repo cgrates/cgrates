@@ -1286,42 +1286,45 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
 	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
-	ratingStorage.SetDestination(origD)
+	ratingStorage.SetDestination(origD, true)
+	ratingStorage.SetReverseDestination(origD, true)
 	// check redis and cache
-	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil || !reflect.DeepEqual(d, origD) {
+	if d, err := ratingStorage.GetDestination("*ddc_test", false); err != nil || !reflect.DeepEqual(d, origD) {
 		t.Error("Error storing destination: ", d, err)
 	}
-	x1, found := cache2go.Get(utils.DESTINATION_PREFIX + "111")
-	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
+	x1, found := cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, found = cache2go.Get(utils.DESTINATION_PREFIX + "222")
-	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
+	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "444": 1}}, nil, nil)
-	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil ||
+	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "666": 1}}, nil, nil)
+	d, err := ratingStorage.GetDestination("*ddc_test", false)
+	if err != nil ||
 		d.Id != origD.Id ||
 		len(d.Prefixes) != 2 ||
 		!utils.IsSliceMember(d.Prefixes, "333") ||
-		!utils.IsSliceMember(d.Prefixes, "444") {
+		!utils.IsSliceMember(d.Prefixes, "666") {
 		t.Error("Error storing destination: ", d, err)
 	}
+
 	var ok bool
-	x1, ok = cache2go.Get(utils.DESTINATION_PREFIX + "111")
+	x1, ok = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, ok = cache2go.Get(utils.DESTINATION_PREFIX + "222")
+	x1, ok = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, found = cache2go.Get(utils.DESTINATION_PREFIX + "333")
-	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
+	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
+	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, found = cache2go.Get(utils.DESTINATION_PREFIX + "444")
-	if _, ok := x1.(map[string]struct{})["*ddc_test"]; !found || !ok {
+	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
+	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 }

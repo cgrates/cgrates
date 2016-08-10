@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"log"
 	"net/smtp"
 	"path"
 	"reflect"
@@ -518,12 +519,12 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 			i++
 		}
 		newDest := &Destination{Id: ddcDestId, Prefixes: prefixes}
-		oldDest, err := ratingStorage.GetDestination(ddcDestId)
+		oldDest, err := ratingStorage.GetDestination(ddcDestId, false)
 		// update destid in storage
-		ratingStorage.SetDestination(newDest)
+		ratingStorage.SetDestination(newDest, true)
 
 		if err == nil && oldDest != nil {
-			err = ratingStorage.UpdateReverseDestination(oldDest, newDest)
+			err = ratingStorage.UpdateReverseDestination(oldDest, newDest, true)
 			if err != nil {
 				return err
 			}
@@ -566,6 +567,7 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		}
 		//var dirtyAps []string
 		for key, ap := range allAPs {
+			log.Print(ap)
 			if _, exists := ap.AccountIDs[accID]; !exists {
 				// save action plan
 				delete(ap.AccountIDs, key)

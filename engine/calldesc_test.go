@@ -554,7 +554,11 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxRate(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	ap, err := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	if err != nil {
+		t.FailNow()
+	}
+	//log.Print(ap)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute()

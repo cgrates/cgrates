@@ -18,10 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import (
-	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 // Handles retrieving of DerivedChargers profile based on longest match from AccountingDb
 func HandleGetDerivedChargers(ratingStorage RatingStorage, attrs *utils.AttrDerivedChargers) (*utils.DerivedChargers, error) {
@@ -48,9 +45,8 @@ func DerivedChargersMatchesDest(dcs *utils.DerivedChargers, dest string) bool {
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-		if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
-			destIds := x.(map[string]struct{})
-			for dId := range destIds {
+		if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+			for _, dId := range destIDs {
 				includeDest, found := dcs.DestinationIDs[dId]
 				if found {
 					return includeDest

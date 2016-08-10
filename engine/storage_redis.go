@@ -96,10 +96,6 @@ func (rs *RedisStorage) PreloadRatingCache() error {
 }
 
 func (rs *RedisStorage) PreloadAccountingCache() error {
-	err := rs.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX)
-	if err != nil {
-		return err
-	}
 	// add more prefixes if needed
 	return nil
 }
@@ -129,7 +125,12 @@ func (rs *RedisStorage) PreloadCacheForPrefix(prefix string) error {
 }
 
 func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
-	err := rs.db.Cmd("MULTI").Err
+	conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	defer rs.db.Put(conn)
+	err = conn.Cmd("MULTI").Err //FIXME: command bellow are using conn
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
 		return err
 	}
 	for _, key := range keys {
-		err = rs.db.Cmd("DEL", key).Err
+		err = conn.Cmd("DEL", key).Err
 		if err != nil {
 			return err
 		}
@@ -150,7 +151,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
 			return err
 		}
 		for _, key := range keys {
-			dest, err := rs.GetDestination(key[len(utils.DESTINATION_PREFIX):])
+			dest, err := rs.GetDestination(key[len(utils.DESTINATION_PREFIX):], false)
 			if err != nil {
 				return err
 			}
@@ -175,7 +176,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
 	default:
 		return utils.ErrInvalidKey
 	}
-	err = rs.db.Cmd("EXEC").Err
+	err = conn.Cmd("EXEC").Err
 	if err != nil {
 		return err
 	}
@@ -308,6 +309,7 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
 		if x, ok := cache2go.Get(key); ok {
+
 			if x != nil {
 				return x.(*LCR), nil
 			}
@@ -317,6 +319,9 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &lcr)
+	} else {
+		cache2go.Set(key, nil)
+		return nil, utils.ErrNotFound
 	}
 	cache2go.Set(key, lcr)
 	return
@@ -324,15 +329,24 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 
 func (rs *RedisStorage) SetLCR(lcr *LCR, cache bool) (err error) {
 	result, err := rs.ms.Marshal(lcr)
-	err = rs.db.Cmd("SET", utils.LCR_PREFIX+lcr.GetId(), result).Err
+	key := utils.LCR_PREFIX + lcr.GetId()
+	err = rs.db.Cmd("SET", key, result).Err
 	if cache && err == nil {
-		cache2go.Set(utils.LCR_PREFIX+lcr.GetId(), lcr)
+		cache2go.Set(key, lcr)
 	}
 	return
 }
 
-func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
+func (rs *RedisStorage) GetDestination(key string, skipCache bool) (dest *Destination, err error) {
 	key = utils.DESTINATION_PREFIX + key
+	if !skipCache {
+		if x, ok := cache2go.Get(key); ok {
+			if x != nil {
+				return x.(*Destination), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); len(values) > 0 && err == nil {
 		b := bytes.NewBuffer(values)
@@ -347,13 +361,17 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 		r.Close()
 		dest = new(Destination)
 		err = rs.ms.Unmarshal(out, dest)
+		if err != nil {
+			cache2go.Set(key, dest)
+		}
 	} else {
-		return nil, utils.ErrNotFound
+		cache2go.Set(key, nil)
+		return nil, err
 	}
 	return
 }
 
-func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
+func (rs *RedisStorage) SetDestination(dest *Destination, cache bool) (err error) {
 	result, err := rs.ms.Marshal(dest)
 	if err != nil {
 		return err
@@ -362,10 +380,14 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	err = rs.db.Cmd("SET", utils.DESTINATION_PREFIX+dest.Id, b.Bytes()).Err
+	key := utils.DESTINATION_PREFIX + dest.Id
+	err = rs.db.Cmd("SET", key, b.Bytes()).Err
 	if err == nil && historyScribe != nil {
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
+	}
+	if cache && err == nil {
+		cache2go.Set(key, dest)
 	}
 	return
 }
@@ -380,14 +402,11 @@ func (rs *RedisStorage) GetReverseDestination(prefix string, skipCache bool) (id
 			return nil, utils.ErrNotFound
 		}
 	}
-	var values []string
-	if values, err = rs.db.Cmd("SMEMBERS", prefix).List(); len(values) > 0 && err == nil {
-	} else {
-
-		return nil, utils.ErrNotFound
+	if ids, err = rs.db.Cmd("SMEMBERS", prefix).List(); len(ids) > 0 && err == nil {
+		cache2go.Set(prefix, ids)
+		return ids, nil
 	}
-	cache2go.Set(prefix, values)
-	return
+	return nil, utils.ErrNotFound
 }
 
 func (rs *RedisStorage) SetReverseDestination(dest *Destination, cache bool) (err error) {
@@ -407,7 +426,7 @@ func (rs *RedisStorage) SetReverseDestination(dest *Destination, cache bool) (er
 func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 	key := utils.DESTINATION_PREFIX + destID
 	// get destination for prefix list
-	d, err := rs.GetDestination(destID)
+	d, err := rs.GetDestination(destID, false)
 	if err != nil {
 		return
 	}
@@ -429,7 +448,8 @@ func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination) error {
+func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, cache bool) error {
+	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
 	var obsoletePrefixes []string
 	var addedPrefixes []string
 	var found bool
@@ -458,7 +478,8 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination) 
 			addedPrefixes = append(addedPrefixes, newPrefix)
 		}
 	}
-
+	//log.Print("Obsolete prefixes: ", obsoletePrefixes)
+	//log.Print("Added prefixes: ", addedPrefixes)
 	// remove id for all obsolete prefixes
 	var err error
 	for _, obsoletePrefix := range obsoletePrefixes {
@@ -466,14 +487,19 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination) 
 		if err != nil {
 			return err
 		}
-		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + obsoletePrefix)
+		if cache {
+			cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + obsoletePrefix)
+		}
 	}
 
 	// add the id to all new prefixes
 	for _, addedPrefix := range addedPrefixes {
-		err = rs.db.Cmd("SADD", utils.REVERSE_ALIASES_PREFIX, addedPrefix, oldDest.Id).Err
+		err = rs.db.Cmd("SADD", utils.REVERSE_DESTINATION_PREFIX+addedPrefix, oldDest.Id).Err
 		if err != nil {
 			return err
+		}
+		if cache {
+			rs.GetReverseDestination(addedPrefix, true) // will recache
 		}
 	}
 	return nil
@@ -693,12 +719,11 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		al = &Alias{Values: make(AliasValues, 0)}
 		al.SetId(origKey)
 		err = rs.ms.Unmarshal(values, &al.Values)
-		if err == nil {
-			cache2go.Set(key, al.Values)
-		}
 	} else {
 		cache2go.Set(key, nil)
+		return nil, utils.ErrNotFound
 	}
+	cache2go.Set(key, al.Values)
 	return
 }
 
@@ -728,6 +753,7 @@ func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool) (ids [
 	var values []string
 	if values, err = rs.db.Cmd("SMEMBERS", key).List(); len(values) > 0 && err == nil {
 	} else {
+		cache2go.Set(key, nil)
 		return nil, utils.ErrNotFound
 	}
 	cache2go.Set(key, values)
@@ -745,9 +771,7 @@ func (rs *RedisStorage) SetReverseAlias(al *Alias, cache bool) (err error) {
 					break
 				}
 				if cache && err == nil {
-					// remove previos cache
-					cache2go.RemKey(rKey)
-					_, err = rs.GetReverseAlias(id, true) // will recache
+					_, err = rs.GetReverseAlias(rKey[len(utils.REVERSE_ALIASES_PREFIX):], true) // will recache
 				}
 			}
 		}
@@ -779,10 +803,10 @@ func (rs *RedisStorage) RemoveAlias(id string) (err error) {
 					return err
 				}
 				cache2go.RemKey(rKey)
-				_, err = rs.GetReverseAlias(rKey, true) // recache
+				/*_, err = rs.GetReverseAlias(rKey, true) // recache
 				if err != nil {
 					return err
-				}
+				}*/
 			}
 		}
 	}
@@ -966,7 +990,6 @@ func (rs *RedisStorage) RemoveActionTriggers(key string) (err error) {
 
 func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
-
 	if !skipCache {
 		if x, ok := cache2go.Get(key); ok {
 			if x != nil {
@@ -987,6 +1010,7 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 			return nil, err
 		}
 		r.Close()
+		ats = &ActionPlan{}
 		err = rs.ms.Unmarshal(out, &ats)
 	}
 	cache2go.Set(key, ats)
@@ -1010,8 +1034,9 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite, ca
 				ats.AccountIDs[accID] = true
 			}
 		}
+		// do not keep this in cache (will be obsolete)
+		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 	}
-
 	result, err := rs.ms.Marshal(ats)
 	if err != nil {
 		return err
@@ -1028,15 +1053,19 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite, ca
 }
 
 func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
-	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
+
+	keys, err := rs.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
 
-	ats = make(map[string]*ActionPlan, len(apls))
-	for key, value := range apls {
-		apl := value.(*ActionPlan)
-		ats[key] = apl
+	ats = make(map[string]*ActionPlan, len(keys))
+	for _, key := range keys {
+		ap, err := rs.GetActionPlan(key, false)
+		if err != nil {
+			return nil, err
+		}
+		ats[key] = ap
 	}
 
 	return
@@ -1072,15 +1101,18 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs *uti
 	var values []byte
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &dcs)
+	} else {
+		cache2go.Set(key, nil)
+		return nil, utils.ErrNotFound
 	}
 	cache2go.Set(key, dcs)
-	return dcs, err
+	return
 }
 
 func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers, cache bool) (err error) {
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if dcs == nil || len(dcs.Chargers) == 0 {
-		err = rs.db.Cmd("DEL").Err
+		err = rs.db.Cmd("DEL", key).Err
 		cache2go.RemKey(key)
 		return err
 	}

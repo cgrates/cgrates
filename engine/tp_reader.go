@@ -89,14 +89,14 @@ func (tpr *TpReader) Init() {
 	tpr.resLimits = make(map[string]*utils.TPResourceLimit)
 }
 
-func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
+func (tpr *TpReader) LoadDestinationsFiltered(tag string, cache bool) (bool, error) {
 	tpDests, err := tpr.lr.GetTpDestinations(tpr.tpid, tag)
 
 	dest := &Destination{Id: tag}
 	for _, tpDest := range tpDests {
 		dest.AddPrefix(tpDest.Prefix)
 	}
-	tpr.ratingStorage.SetDestination(dest)
+	tpr.ratingStorage.SetDestination(dest, cache)
 	return len(tpDests) > 0, err
 }
 
@@ -181,7 +181,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 }
 
 // Returns true, nil in case of load success, false, nil in case of RatingPlan  not found ratingStorage
-func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
+func (tpr *TpReader) LoadRatingPlansFiltered(tag string, cache bool) (bool, error) {
 	mpRpls, err := tpr.lr.GetTpRatingPlans(tpr.tpid, tag, nil)
 	if err != nil {
 		return false, err
@@ -248,11 +248,11 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 					return false, fmt.Errorf("could not get destination for tag %v", drate.DestinationId)
 				}
 				for _, destination := range dms {
-					tpr.ratingStorage.SetDestination(destination)
+					tpr.ratingStorage.SetDestination(destination, cache)
 				}
 			}
 		}
-		if err := tpr.ratingStorage.SetRatingPlan(ratingPlan, true); err != nil {
+		if err := tpr.ratingStorage.SetRatingPlan(ratingPlan, cache); err != nil {
 			return false, err
 		}
 	}
@@ -1642,7 +1642,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Destinations:")
 	}
 	for _, d := range tpr.destinations {
-		err = tpr.ratingStorage.SetDestination(d)
+		err = tpr.ratingStorage.SetDestination(d, false)
 		if err != nil {
 			return err
 		}
@@ -1827,7 +1827,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Print("\t", al.GetId())
 		}
 	}
-	err = tpr.ratingStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX)
+	err = tpr.accountingStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX)
 	if err != nil {
 		return err
 	}

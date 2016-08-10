@@ -566,7 +566,15 @@ func (ms *MongoStorage) SetLCR(lcr *LCR, cache bool) error {
 	return err
 }
 
-func (ms *MongoStorage) GetDestination(key string) (result *Destination, err error) {
+func (ms *MongoStorage) GetDestination(key string, skipCache bool) (result *Destination, err error) {
+	if !skipCache {
+		if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + key); ok {
+			if x != nil {
+				return x.(*Destination), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
 	result = new(Destination)
 	var kv struct {
 		Key   string
@@ -594,9 +602,10 @@ func (ms *MongoStorage) GetDestination(key string) (result *Destination, err err
 	if err != nil {
 		result = nil
 	}
+	cache2go.Set(utils.DESTINATION_PREFIX+key, result)
 	return
 }
-func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
+func (ms *MongoStorage) SetDestination(dest *Destination, cache bool) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	if err != nil {
 		return err
@@ -611,6 +620,9 @@ func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
 		Key   string
 		Value []byte
 	}{Key: dest.Id, Value: b.Bytes()})
+	if cache && err == nil {
+		cache2go.Set(utils.DESTINATION_PREFIX+dest.Id, dest)
+	}
 	if err == nil && historyScribe != nil {
 		var response int
 		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
@@ -647,7 +659,7 @@ func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
 	return
 }
 
-func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination) error {
+func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, cache bool) error {
 	return nil
 }
 
@@ -1158,10 +1170,7 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 }
 
 func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
-	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
-	if err != nil {
-		return nil, err
-	}
+	apls := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
 
 	ats = make(map[string]*ActionPlan, len(apls))
 	for key, value := range apls {

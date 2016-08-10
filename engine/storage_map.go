@@ -238,10 +238,18 @@ func (ms *MapStorage) SetLCR(lcr *LCR, cache bool) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {
+func (ms *MapStorage) GetDestination(key string, skipCache bool) (dest *Destination, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.DESTINATION_PREFIX + key
+	if !skipCache {
+		if x, ok := cache2go.Get(key); ok {
+			if x != nil {
+				return x.(*Destination), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
 	if values, ok := ms.dict[key]; ok {
 		b := bytes.NewBuffer(values)
 		r, err := zlib.NewReader(b)
@@ -255,13 +263,17 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 		r.Close()
 		dest = new(Destination)
 		err = ms.ms.Unmarshal(out, dest)
+		if err != nil {
+			cache2go.Set(key, dest)
+		}
 	} else {
+		cache2go.Set(key, nil)
 		return nil, utils.ErrNotFound
 	}
 	return
 }
 
-func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
+func (ms *MapStorage) SetDestination(dest *Destination, cache bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(dest)
@@ -269,10 +281,14 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	ms.dict[utils.DESTINATION_PREFIX+dest.Id] = b.Bytes()
+	key := utils.DESTINATION_PREFIX + dest.Id
+	ms.dict[key] = b.Bytes()
 	response := 0
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
+	}
+	if cache && err == nil {
+		cache2go.Set(key, dest)
 	}
 	return
 }
@@ -291,7 +307,7 @@ func (ms *MapStorage) RemoveDestination(destID string) (err error) {
 	return
 }
 
-func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination) error {
+func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, cache bool) error {
 	return nil
 }
 
@@ -686,10 +702,7 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite, cach
 func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
-	if err != nil {
-		return nil, err
-	}
+	apls := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
 
 	ats = make(map[string]*ActionPlan, len(apls))
 	for key, value := range apls {

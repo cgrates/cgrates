@@ -317,10 +317,9 @@ func (am *AliasHandler) GetMatchingAlias(attr *AttrMatchingAlias, result *string
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-		if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
-			destIds := x.(map[string]struct{})
+		if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
 			for _, value := range values {
-				for dId := range destIds {
+				for _, dId := range destIDs {
 					if value.DestinationId == utils.ANY || value.DestinationId == dId {
 						if origAliasMap, ok := value.Pairs[attr.Target]; ok {
 							if alias, ok := origAliasMap[attr.Original]; ok || attr.Original == "" || attr.Original == utils.ANY {
@@ -397,10 +396,9 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 	if rightPairs == nil {
 		// check destination ids
 		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-			if x, ok := cache2go.Get(utils.DESTINATION_PREFIX + p); ok {
-				destIds := x.(map[string]struct{})
+			if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
 				for _, value := range values {
-					for dId := range destIds {
+					for _, dId := range destIDs {
 						if value.DestinationId == utils.ANY || value.DestinationId == dId {
 							rightPairs = value.Pairs
 						}

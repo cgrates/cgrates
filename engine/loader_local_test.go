@@ -272,7 +272,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			t.Fatal("Could not convert rating plans")
 		}
 		for tag := range rpls {
-			if loaded, err := loader.LoadRatingPlansFiltered(tag); err != nil {
+			if loaded, err := loader.LoadRatingPlansFiltered(tag, true); err != nil {
 				t.Fatalf("Could not load ratingPlan for tag: %s, error: %s", tag, err.Error())
 			} else if !loaded {
 				t.Fatal("Cound not find ratingPLan with id:", tag)
