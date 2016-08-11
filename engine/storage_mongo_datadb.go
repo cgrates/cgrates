@@ -33,26 +33,27 @@ import (
 )
 
 const (
-	colDst    = "destinations"
-	colAct    = "actions"
-	colApl    = "action_plans"
-	colTsk    = "tasks"
-	colAtr    = "action_triggers"
-	colRpl    = "rating_plans"
-	colRpf    = "rating_profiles"
-	colAcc    = "accounts"
-	colShg    = "shared_groups"
-	colLcr    = "lcr_rules"
-	colDcs    = "derived_chargers"
-	colAls    = "aliases"
-	colStq    = "stat_qeues"
-	colPbs    = "pubsub"
-	colUsr    = "users"
-	colCrs    = "cdr_stats"
-	colLht    = "load_history"
-	colLogErr = "error_logs"
-	colVer    = "versions"
-	colRL     = "resource_limits"
+	colDst = "destinations"
+	colRst = "reverse_destinations"
+	colAct = "actions"
+	colApl = "action_plans"
+	colTsk = "tasks"
+	colAtr = "action_triggers"
+	colRpl = "rating_plans"
+	colRpf = "rating_profiles"
+	colAcc = "accounts"
+	colShg = "shared_groups"
+	colLcr = "lcr_rules"
+	colDcs = "derived_chargers"
+	colAls = "aliases"
+	colRls = "reverse_aliases"
+	colStq = "stat_qeues"
+	colPbs = "pubsub"
+	colUsr = "users"
+	colCrs = "cdr_stats"
+	colLht = "load_history"
+	colVer = "versions"
+	colRL  = "resource_limits"
 )
 
 var (
@@ -134,7 +135,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 		Background: false, // Build index in background and return immediately
 		Sparse:     false, // Only index documents containing the Key fields
 	}
-	collections := []string{colAct, colApl, colAtr, colDcs, colAls, colUsr, colLcr, colLht, colRpl, colDst}
+	collections := []string{colAct, colApl, colAtr, colDcs, colAls, colRls, colUsr, colLcr, colLht, colRpl, colDst, colRst}
 	for _, col := range collections {
 		if err = ndb.C(col).EnsureIndex(index); err != nil {
 			return nil, err
@@ -289,6 +290,33 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler(), cacheDumpDir: cacheDumpDir, loadHistorySize: loadHistorySize}, err
 }
 
+func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool) {
+	colMap := map[string]string{
+		utils.DESTINATION_PREFIX:         colDst,
+		utils.REVERSE_DESTINATION_PREFIX: colRst,
+		utils.ACTION_PREFIX:              colAct,
+		utils.ACTION_PLAN_PREFIX:         colApl,
+		utils.TASKS_KEY:                  colTsk,
+		utils.ACTION_TRIGGER_PREFIX:      colAtr,
+		utils.RATING_PLAN_PREFIX:         colRpl,
+		utils.RATING_PROFILE_PREFIX:      colRpf,
+		utils.ACCOUNT_PREFIX:             colAcc,
+		utils.SHARED_GROUP_PREFIX:        colShg,
+		utils.LCR_PREFIX:                 colLcr,
+		utils.DERIVEDCHARGERS_PREFIX:     colDcs,
+		utils.ALIASES_PREFIX:             colAls,
+		utils.REVERSE_ALIASES_PREFIX:     colRls,
+		utils.PUBSUB_SUBSCRIBERS_PREFIX:  colPbs,
+		utils.USERS_PREFIX:               colUsr,
+		utils.CDR_STATS_PREFIX:           colCrs,
+		utils.LOADINST_KEY:               colLht,
+		utils.VERSION_PREFIX:             colVer,
+		utils.ResourceLimitsPrefix:       colRL,
+	}
+	name, ok = colMap[prefix]
+	return
+}
+
 func (ms *MongoStorage) Close() {
 	ms.session.Close()
 }
@@ -302,7 +330,7 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 		return err
 	}
 	for _, c := range collections {
-		if err = db.C(c).DropCollection(); err != nil {
+		if _, err = db.C(c).RemoveAll(bson.M{}); err != nil {
 			return err
 		}
 	}
@@ -310,10 +338,59 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 }
 
 func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
+	colName, ok := ms.getColNameForPrefix(prefix)
+	if !ok {
+		return utils.ErrInvalidKey
+	}
+
+	session, col := ms.conn(colName)
+	defer session.Close()
+
+	if _, err := col.RemoveAll(bson.M{}); err != nil {
+		return err
+	}
+
+	switch prefix {
+	case utils.REVERSE_DESTINATION_PREFIX:
+		keys, err := ms.GetKeysForPrefix(utils.DESTINATION_PREFIX)
+		if err != nil {
+			return err
+		}
+		for _, key := range keys {
+			dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], false)
+			if err != nil {
+				return err
+			}
+			if err := ms.SetReverseDestination(dest, false); err != nil {
+				return err
+			}
+		}
+	case utils.REVERSE_ALIASES_PREFIX:
+		keys, err := ms.GetKeysForPrefix(utils.ALIASES_PREFIX)
+		if err != nil {
+			return err
+		}
+		for _, key := range keys {
+			al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], false)
+			if err != nil {
+				return err
+			}
+			if err := ms.SetReverseAlias(al, false); err != nil {
+				return err
+			}
+		}
+	default:
+		return utils.ErrInvalidKey
+	}
 	return nil
 }
 
 func (ms *MongoStorage) PreloadRatingCache() error {
+	err := ms.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX)
+	if err != nil {
+		return err
+	}
+	// add more prefixes if needed
 	return nil
 }
 
@@ -322,6 +399,26 @@ func (ms *MongoStorage) PreloadAccountingCache() error {
 }
 
 func (ms *MongoStorage) PreloadCacheForPrefix(prefix string) error {
+	cache2go.BeginTransaction()
+	cache2go.RemPrefixKey(prefix)
+	keyList, err := ms.GetKeysForPrefix(prefix)
+	if err != nil {
+		cache2go.RollbackTransaction()
+		return err
+	}
+	switch prefix {
+	case utils.RATING_PLAN_PREFIX:
+		for _, key := range keyList {
+			_, err := ms.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true)
+			if err != nil {
+				cache2go.RollbackTransaction()
+				return err
+			}
+		}
+	default:
+		return utils.ErrInvalidKey
+	}
+	cache2go.CommitTransaction()
 	return nil
 }
 
@@ -381,6 +478,12 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 		iter := db.C(colAcc).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.ACCOUNT_PREFIX+idResult.Id)
+		}
+		return result, nil
+	case utils.ALIASES_PREFIX:
+		iter := db.C(colAls).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+		for iter.Next(&keyResult) {
+			result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
 		}
 		return result, nil
 	}
@@ -545,9 +648,11 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 	}
 	session, col := ms.conn(colLcr)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&result)
-	if err == nil {
+	if err = col.Find(bson.M{"key": key}).One(&result); err == nil {
 		lcr = result.Value
+	} else {
+		cache2go.Set(utils.LCR_PREFIX+key, nil)
+		return nil, utils.ErrNotFound
 	}
 	cache2go.Set(utils.LCR_PREFIX+key, lcr)
 	return
@@ -630,36 +735,126 @@ func (ms *MongoStorage) SetDestination(dest *Destination, cache bool) (err error
 	return
 }
 
-/*func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
-	for _, p := range dest.Prefixes {
-		session, col := ms.conn(colDst)
-		if _, err = col.Upsert(bson.M{"key": p}, &struct {
-				Key   string
-				Value []string
-			},	bson.M{"key": p}, bson.M{"$addToSet": bson.M{Value: dest.Id}}); err != nil {
-			break
+func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool) (ids []string, err error) {
+	if !skipCache {
+		if x, ok := cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + prefix); ok {
+			if x != nil {
+				return x.([]string), nil
+			}
+			return nil, utils.ErrNotFound
 		}
 	}
-	if err == nil && historyScribe != nil {
-		var response int
-		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
+	var result struct {
+		Key   string
+		Value []string
 	}
-	return
-}*/
-func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool) (ids []string, err error) {
+	session, col := ms.conn(colRst)
+	defer session.Close()
+	err = col.Find(bson.M{"key": prefix}).One(&result)
+	if err == nil {
+		ids = result.Value
+	}
+	cache2go.Set(utils.REVERSE_DESTINATION_PREFIX+prefix, ids)
 	return
 }
 
 func (ms *MongoStorage) SetReverseDestination(dest *Destination, cache bool) (err error) {
+	session, col := ms.conn(colRst)
+	defer session.Close()
+	for _, p := range dest.Prefixes {
+		_, err = col.Upsert(bson.M{"key": p}, bson.M{"$addToSet": bson.M{"value": dest.Id}})
+		if err != nil {
+			break
+		}
 
+		if cache && err == nil {
+			_, err = ms.GetReverseDestination(p, true) // will recache
+		}
+	}
 	return
 }
 
 func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
+	session, col := ms.conn(colDst)
+	key := utils.DESTINATION_PREFIX + destID
+	// get destination for prefix list
+	d, err := ms.GetDestination(destID, false)
+	if err != nil {
+		return
+	}
+	err = col.Remove(bson.M{"key": key})
+	if err != nil {
+		return err
+	}
+	cache2go.RemKey(key)
+	session.Close()
+
+	session, col = ms.conn(colRst)
+	defer session.Close()
+	for _, prefix := range d.Prefixes {
+		err = col.Update(bson.M{"key": prefix}, bson.M{"$pull": bson.M{"value": destID}})
+		if err != nil {
+			return err
+		}
+		ms.GetReverseDestination(prefix, true) // it will recache the destination
+	}
 	return
 }
 
 func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, cache bool) error {
+	session, col := ms.conn(colRst)
+	defer session.Close()
+	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
+	var obsoletePrefixes []string
+	var addedPrefixes []string
+	var found bool
+	for _, oldPrefix := range oldDest.Prefixes {
+		found = false
+		for _, newPrefix := range newDest.Prefixes {
+			if oldPrefix == newPrefix {
+				found = true
+				break
+			}
+		}
+		if !found {
+			obsoletePrefixes = append(obsoletePrefixes, oldPrefix)
+		}
+	}
+
+	for _, newPrefix := range newDest.Prefixes {
+		found = false
+		for _, oldPrefix := range oldDest.Prefixes {
+			if newPrefix == oldPrefix {
+				found = true
+				break
+			}
+		}
+		if !found {
+			addedPrefixes = append(addedPrefixes, newPrefix)
+		}
+	}
+	//log.Print("Obsolete prefixes: ", obsoletePrefixes)
+	//log.Print("Added prefixes: ", addedPrefixes)
+	// remove id for all obsolete prefixes
+	var err error
+	for _, obsoletePrefix := range obsoletePrefixes {
+		err = col.Update(bson.M{"key": obsoletePrefix}, bson.M{"$pull": bson.M{"value": oldDest.Id}})
+		if err != nil {
+			return err
+		}
+		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + obsoletePrefix)
+	}
+
+	// add the id to all new prefixes
+	for _, addedPrefix := range addedPrefixes {
+		_, err = col.Upsert(bson.M{"key": addedPrefix}, bson.M{"$addToSet": bson.M{"value": newDest.Id}})
+		if err != nil {
+			return err
+		}
+		if cache {
+			ms.GetReverseDestination(addedPrefix, true) // will recache
+		}
+	}
 	return nil
 }
 
@@ -884,8 +1079,8 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 				al.SetId(origKey)
 				return al, nil
 			}
+			return nil, utils.ErrNotFound
 		}
-		return nil, utils.ErrNotFound
 	}
 
 	var kv struct {
@@ -902,6 +1097,7 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		}
 	} else {
 		cache2go.Set(key, nil)
+		return nil, utils.ErrNotFound
 	}
 	return
 }
@@ -920,12 +1116,49 @@ func (ms *MongoStorage) SetAlias(al *Alias, cache bool) (err error) {
 }
 
 func (ms *MongoStorage) GetReverseAlias(reverseID string, skipCache bool) (ids []string, err error) {
+	if !skipCache {
+		if x, ok := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + reverseID); ok {
+			if x != nil {
+				return x.([]string), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	var result struct {
+		Key   string
+		Value []string
+	}
+	session, col := ms.conn(colRls)
+	defer session.Close()
+	if err = col.Find(bson.M{"key": reverseID}).One(&result); err == nil {
+		ids = result.Value
+		cache2go.Set(utils.REVERSE_ALIASES_PREFIX+reverseID, ids)
+	} else {
+		cache2go.Set(utils.REVERSE_ALIASES_PREFIX+reverseID, nil)
+		return nil, utils.ErrNotFound
+	}
 
 	return
 }
 
 func (ms *MongoStorage) SetReverseAlias(al *Alias, cache bool) (err error) {
-
+	session, col := ms.conn(colRls)
+	defer session.Close()
+	for _, value := range al.Values {
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := strings.Join([]string{alias, target, al.Context}, "")
+				id := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
+				_, err = col.Upsert(bson.M{"key": rKey}, bson.M{"$addToSet": bson.M{"value": id}})
+				if err != nil {
+					break
+				}
+				if cache && err == nil {
+					ms.GetReverseAlias(rKey, true) // will recache
+				}
+			}
+		}
+	}
 	return
 }
 
@@ -939,13 +1172,30 @@ func (ms *MongoStorage) RemoveAlias(key string) (err error) {
 		Value AliasValues
 	}
 	session, col := ms.conn(colAls)
-	defer session.Close()
 	if err := col.Find(bson.M{"key": origKey}).One(&kv); err == nil {
 		al.Values = kv.Value
 	}
 	err = col.Remove(bson.M{"key": origKey})
-	if err == nil {
-		cache2go.RemKey(key)
+	if err != nil {
+		return err
+	}
+	cache2go.RemKey(key)
+	session.Close()
+
+	session, col = ms.conn(colRls)
+	defer session.Close()
+	for _, value := range al.Values {
+		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := alias + target + al.Context
+				err = col.Update(bson.M{"key": rKey}, bson.M{"$pull": bson.M{"value": tmpKey}})
+				if err != nil {
+					return err
+				}
+				cache2go.RemKey(utils.REVERSE_ALIASES_PREFIX + rKey)
+			}
+		}
 	}
 	return
 }
@@ -1222,6 +1472,9 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs *uti
 	err = col.Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
 		dcs = kv.Value
+	} else {
+		cache2go.Set(utils.DERIVEDCHARGERS_PREFIX+key, nil)
+		return nil, utils.ErrNotFound
 	}
 	cache2go.Set(utils.DERIVEDCHARGERS_PREFIX+key, dcs)
 	return

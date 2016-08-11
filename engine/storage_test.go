@@ -99,9 +99,9 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 }
 
 func TestStorageCacheRefresh(t *testing.T) {
-	ratingStorage.SetDestination(&Destination{"T11", []string{"0"}}, false)
+	ratingStorage.SetDestination(&Destination{"T11", []string{"0"}}, true)
 	ratingStorage.GetDestination("T11", false)
-	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}}, false)
+	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}}, true)
 	t.Log("Test cache refresh")
 	err := ratingStorage.PreloadRatingCache()
 	if err != nil {
@@ -190,6 +190,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 			t.Error("Error getting reverse alias: ", aliasKeys, ala.GetId()+utils.ANY)
 		}
 	} else {
+		t.Log(utils.ToIJSON(cache2go.GetAllEntries(utils.REVERSE_ALIASES_PREFIX)))
 		t.Error("Error getting reverse alias: ", err)
 	}
 	if x, ok := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + "*other"); ok {

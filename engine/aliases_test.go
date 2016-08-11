@@ -23,7 +23,7 @@ func TestAliasesGetAlias(t *testing.T) {
 	if err != nil ||
 		len(alias.Values) != 2 ||
 		len(alias.Values[0].Pairs) != 2 {
-		t.Error("Error getting alias: ", err, alias, alias.Values[0])
+		t.Error("Error getting alias: ", err, alias, alias.Values)
 	}
 }
 
