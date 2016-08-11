@@ -440,10 +440,7 @@ func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 		if err != nil {
 			return err
 		}
-		_, err = rs.GetReverseDestination(prefix, true) // it will recache the destination
-		if err != nil {
-			return err
-		}
+		rs.GetReverseDestination(prefix, true) // it will recache the destination
 	}
 	return
 }
@@ -487,14 +484,12 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 		if err != nil {
 			return err
 		}
-		if cache {
-			cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + obsoletePrefix)
-		}
+		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + obsoletePrefix)
 	}
 
 	// add the id to all new prefixes
 	for _, addedPrefix := range addedPrefixes {
-		err = rs.db.Cmd("SADD", utils.REVERSE_DESTINATION_PREFIX+addedPrefix, oldDest.Id).Err
+		err = rs.db.Cmd("SADD", utils.REVERSE_DESTINATION_PREFIX+addedPrefix, newDest.Id).Err
 		if err != nil {
 			return err
 		}
@@ -751,8 +746,7 @@ func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool) (ids [
 		}
 	}
 	var values []string
-	if values, err = rs.db.Cmd("SMEMBERS", key).List(); len(values) > 0 && err == nil {
-	} else {
+	if values, err = rs.db.Cmd("SMEMBERS", key).List(); len(values) == 0 || err != nil {
 		cache2go.Set(key, nil)
 		return nil, utils.ErrNotFound
 	}
@@ -771,7 +765,7 @@ func (rs *RedisStorage) SetReverseAlias(al *Alias, cache bool) (err error) {
 					break
 				}
 				if cache && err == nil {
-					_, err = rs.GetReverseAlias(rKey[len(utils.REVERSE_ALIASES_PREFIX):], true) // will recache
+					rs.GetReverseAlias(rKey[len(utils.REVERSE_ALIASES_PREFIX):], true) // will recache
 				}
 			}
 		}
@@ -814,52 +808,7 @@ func (rs *RedisStorage) RemoveAlias(id string) (err error) {
 }
 
 func (rs *RedisStorage) UpdateReverseAlias(oldAl, newAl *Alias) error {
-	/*var obsoleteDestinations []string
-	var addedDestinations []string
-	var found bool
-	for _, oldValue := range oldAl.Values {
-		found = false
-		for _, newPrefix := range newDest.Destinations {
-			if oldPrefix == newPrefix {
-				found = true
-				break
-			}
-		}
-		if !found {
-			obsoleteDestinations = append(obsoleteDestinations, oldPrefix)
-		}
-	}
 
-	for _, newPrefix := range newDest.Destinations {
-		found = false
-		for _, oldPrefix := range oldDest.Destinations {
-			if newPrefix == oldPrefix {
-				found = true
-				break
-			}
-		}
-		if !found {
-			addedDestinations = append(addedDestinations, newPrefix)
-		}
-	}
-
-	// remove id for all obsolete prefixes
-	var err error
-	for _, obsoletePrefix := range obsoleteDestinations {
-		err = rs.db.Cmd("SREM", utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, oldDest.Id).Err
-		if err != nil {
-			return err
-		}
-		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + obsoletePrefix)
-	}
-
-	// add the id to all new prefixes
-	for _, addedPrefix := range addedDestinations {
-		err = rs.db.Cmd("SADD", utils.REVERSE_ALIASES_PREFIX, addedPrefix, oldDest.Id).Err
-		if err != nil {
-			return err
-		}
-	}*/
 	return nil
 }
 

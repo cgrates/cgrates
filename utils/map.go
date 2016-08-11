@@ -128,7 +128,7 @@ func (sm StringMap) IsEmpty() bool {
 }
 
 func StringMapFromSlice(s []string) StringMap {
-	result := make(StringMap)
+	result := make(StringMap, len(s))
 	for _, v := range s {
 		v = strings.TrimSpace(v)
 		if v != "" {
