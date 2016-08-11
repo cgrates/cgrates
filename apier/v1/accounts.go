@@ -96,7 +96,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		if attrs.Tenant != "" && attrs.Account != "" {
 			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
 			delete(ap.AccountIDs, accID)
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, true)
 			goto UPDATE
 		}
 
@@ -108,21 +108,19 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 					break
 				}
 			}
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, true)
 			goto UPDATE
 		}
 
 		if attrs.ActionPlanId != "" { // delete the entire action plan
 			ap.ActionTimings = nil // will delete the action plan
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, true)
 			goto UPDATE
 		}
 	UPDATE:
 		if err != nil {
 			return 0, err
 		}
-		// update cache
-		self.RatingDb.CacheRatingPrefixValues("AttrRemActionTimingAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
