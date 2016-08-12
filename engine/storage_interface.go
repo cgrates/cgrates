@@ -43,33 +43,33 @@ type RatingStorage interface {
 	HasData(string, string) (bool, error)
 	PreloadRatingCache() error
 	GetRatingPlan(string, bool) (*RatingPlan, error)
-	SetRatingPlan(*RatingPlan, bool) error
+	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string, bool) (*RatingProfile, error)
-	SetRatingProfile(*RatingProfile, bool) error
+	SetRatingProfile(*RatingProfile) error
 	RemoveRatingProfile(string) error
 	GetDestination(string, bool) (*Destination, error)
-	SetDestination(*Destination, bool) error
+	SetDestination(*Destination) error
 	RemoveDestination(string) error
-	SetReverseDestination(*Destination, bool) error
+	SetReverseDestination(*Destination) error
 	GetReverseDestination(string, bool) ([]string, error)
-	UpdateReverseDestination(*Destination, *Destination, bool) error
+	UpdateReverseDestination(*Destination, *Destination) error
 	GetLCR(string, bool) (*LCR, error)
-	SetLCR(*LCR, bool) error
+	SetLCR(*LCR) error
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
 	GetDerivedChargers(string, bool) (*utils.DerivedChargers, error)
-	SetDerivedChargers(string, *utils.DerivedChargers, bool) error
+	SetDerivedChargers(string, *utils.DerivedChargers) error
 	GetActions(string, bool) (Actions, error)
-	SetActions(string, Actions, bool) error
+	SetActions(string, Actions) error
 	RemoveActions(string) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
-	SetSharedGroup(*SharedGroup, bool) error
+	SetSharedGroup(*SharedGroup) error
 	GetActionTriggers(string, bool) (ActionTriggers, error)
-	SetActionTriggers(string, ActionTriggers, bool) error
+	SetActionTriggers(string, ActionTriggers) error
 	RemoveActionTriggers(string) error
 	GetActionPlan(string, bool) (*ActionPlan, error)
-	SetActionPlan(string, *ActionPlan, bool, bool) error
+	SetActionPlan(string, *ActionPlan, bool) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
@@ -90,17 +90,17 @@ type AccountingStorage interface {
 	GetUser(string) (*UserProfile, error)
 	GetUsers() ([]*UserProfile, error)
 	RemoveUser(string) error
-	SetAlias(*Alias, bool) error
+	SetAlias(*Alias) error
 	GetAlias(string, bool) (*Alias, error)
 	RemoveAlias(string) error
-	SetReverseAlias(*Alias, bool) error
+	SetReverseAlias(*Alias) error
 	GetReverseAlias(string, bool) ([]string, error)
 	UpdateReverseAlias(*Alias, *Alias) error
 	GetResourceLimit(string, bool) (*ResourceLimit, error)
-	SetResourceLimit(*ResourceLimit, bool) error
+	SetResourceLimit(*ResourceLimit) error
 	RemoveResourceLimit(string) error
 	GetLoadHistory(int, bool) ([]*utils.LoadInstance, error)
-	AddLoadHistory(*utils.LoadInstance, int, bool) error
+	AddLoadHistory(*utils.LoadInstance, int) error
 	GetStructVersion() (*StructVersion, error)
 	SetStructVersion(*StructVersion) error
 }

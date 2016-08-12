@@ -40,7 +40,7 @@ func TestDestinationStoreRestore(t *testing.T) {
 
 func TestDestinationStorageStore(t *testing.T) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	err := ratingStorage.SetDestination(nationale, true)
+	err := ratingStorage.SetDestination(nationale)
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
@@ -149,7 +149,7 @@ func TestCleanStalePrefixes(t *testing.T) {
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
-		ratingStorage.SetDestination(nationale, false)
+		ratingStorage.SetDestination(nationale)
 		ratingStorage.GetDestination(nationale.Id, true)
 	}
 }

@@ -42,7 +42,7 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}}
 	rsponder = &Responder{}
 	attrs := &utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "responder_test", Subject: "responder_test"}
-	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC, true); err != nil {
+	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
 		t.Error(err)
 	}
 	dcs := &utils.DerivedChargers{}
@@ -67,10 +67,10 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 	deTMobile := &Destination{Id: "DE_TMOBILE", Prefixes: []string{"+49151", "+49160", "+49170", "+49171", "+49175"}}
-	if err := ratingStorage.SetDestination(deTMobile, true); err != nil {
+	if err := ratingStorage.SetDestination(deTMobile); err != nil {
 		t.Error(err)
 	}
-	if err := ratingStorage.SetReverseDestination(deTMobile, true); err != nil {
+	if err := ratingStorage.SetReverseDestination(deTMobile); err != nil {
 		t.Error(err)
 	}
 	b10 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
@@ -92,7 +92,7 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 		&utils.DerivedCharger{RunID: "extra3", RequestTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^rif", SubjectField: "^rif", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}}
-	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1, true); err != nil {
+	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
 	if rifStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(testTenant, "rif")); err != nil {
@@ -145,7 +145,7 @@ func TestResponderGetSessionRuns(t *testing.T) {
 		SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
 		DisconnectCauseField: utils.META_DEFAULT}
 	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{extra1DC, extra2DC, extra3DC}}
-	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1, true); err != nil {
+	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
 	sesRuns := make([]*SessionRun, 0)
@@ -172,10 +172,10 @@ func TestResponderGetSessionRuns(t *testing.T) {
 func TestResponderGetLCR(t *testing.T) {
 	rsponder.Stats = NewStats(ratingStorage, accountingStorage, 0) // Load stats instance
 	dstDe := &Destination{Id: "GERMANY", Prefixes: []string{"+49"}}
-	if err := ratingStorage.SetDestination(dstDe, true); err != nil {
+	if err := ratingStorage.SetDestination(dstDe); err != nil {
 		t.Error(err)
 	}
-	if err := ratingStorage.SetReverseDestination(dstDe, true); err != nil {
+	if err := ratingStorage.SetReverseDestination(dstDe); err != nil {
 		t.Error(err)
 	}
 	rp1 := &RatingPlan{
@@ -287,7 +287,7 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 	}
 	for _, rpf := range []*RatingPlan{rp1, rp2, rp3} {
-		if err := ratingStorage.SetRatingPlan(rpf, true); err != nil {
+		if err := ratingStorage.SetRatingPlan(rpf); err != nil {
 			t.Error(err)
 		}
 	}
@@ -323,7 +323,7 @@ func TestResponderGetLCR(t *testing.T) {
 		}},
 	}
 	for _, rpfl := range []*RatingProfile{danRpfl, rifRpfl, ivoRpfl} {
-		if err := ratingStorage.SetRatingProfile(rpfl, true); err != nil {
+		if err := ratingStorage.SetRatingProfile(rpfl); err != nil {
 			t.Error(err)
 		}
 	}
@@ -373,7 +373,7 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 	}
 	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost, lcrQosThreshold, lcrQos, lcrLoad} {
-		if err := ratingStorage.SetLCR(lcr, true); err != nil {
+		if err := ratingStorage.SetLCR(lcr); err != nil {
 			t.Error(err)
 		}
 	}

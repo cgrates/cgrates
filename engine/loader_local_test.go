@@ -272,7 +272,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			t.Fatal("Could not convert rating plans")
 		}
 		for tag := range rpls {
-			if loaded, err := loader.LoadRatingPlansFiltered(tag, true); err != nil {
+			if loaded, err := loader.LoadRatingPlansFiltered(tag); err != nil {
 				t.Fatalf("Could not load ratingPlan for tag: %s, error: %s", tag, err.Error())
 			} else if !loaded {
 				t.Fatal("Cound not find ratingPLan with id:", tag)
@@ -293,7 +293,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		for rpId := range rpfs {
 			rp, _ := utils.NewTPRatingProfileFromKeyId(utils.TEST_SQL, loadId, rpId)
 			mrp := APItoModelRatingProfile(rp)
-			if err := loader.LoadRatingProfilesFiltered(&mrp[0], true); err != nil {
+			if err := loader.LoadRatingProfilesFiltered(&mrp[0]); err != nil {
 				t.Fatalf("Could not load ratingProfile with id: %s, error: %s", rpId, err.Error())
 			}
 		}
@@ -312,7 +312,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		for dcId := range dcs {
 			mdc := &TpDerivedCharger{Tpid: utils.TEST_SQL, Loadid: loadId}
 			mdc.SetDerivedChargersId(dcId)
-			if err := loader.LoadDerivedChargersFiltered(mdc, true, true); err != nil {
+			if err := loader.LoadDerivedChargersFiltered(mdc, true); err != nil {
 				t.Fatalf("Could not load derived charger with id: %s, error: %s", dcId, err.Error())
 			}
 		}
@@ -329,7 +329,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			t.Fatal("Could not convert cdr stats")
 		}
 		for id := range cds {
-			if err := loader.LoadCdrStatsFiltered(id, true, true); err != nil {
+			if err := loader.LoadCdrStatsFiltered(id, true); err != nil {
 				t.Fatalf("Could not load cdr stats with id: %s, error: %s", id, err.Error())
 			}
 		}
@@ -353,7 +353,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		t.Fatal("Could not retrieve aliases")
 	} else {
 		for _, al := range aliases {
-			if found, err := loader.LoadAliasesFiltered(&al, true); found && err != nil {
+			if found, err := loader.LoadAliasesFiltered(&al); found && err != nil {
 				t.Fatalf("Could not load aliase with id: %s, error: %s", al.GetId(), err.Error())
 			}
 		}
@@ -372,7 +372,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			aa, _ := utils.NewTPAccountActionsFromKeyId(utils.TEST_SQL, loadId, aaId)
 			maa := APItoModelAccountAction(aa)
 
-			if err := loader.LoadAccountActionsFiltered(maa, true); err != nil {
+			if err := loader.LoadAccountActionsFiltered(maa); err != nil {
 				t.Fatalf("Could not load account actions with id: %s, error: %s", aaId, err.Error())
 			}
 		}

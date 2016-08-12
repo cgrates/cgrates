@@ -102,8 +102,8 @@ func populateDB() {
 			}},
 	}
 	if accountingStorage != nil && ratingStorage != nil {
-		ratingStorage.SetActions("TEST_ACTIONS", ats, true)
-		ratingStorage.SetActions("TEST_ACTIONS_ORDER", ats1, true)
+		ratingStorage.SetActions("TEST_ACTIONS", ats)
+		ratingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
 		accountingStorage.SetAccount(broker)
 		accountingStorage.SetAccount(minu)
 		accountingStorage.SetAccount(minitsboy)

@@ -170,7 +170,7 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 	}
 
 	if attr.Overwrite || oldAlias == nil {
-		if err := am.accountingDb.SetAlias(attr.Alias, false); err != nil {
+		if err := am.accountingDb.SetAlias(attr.Alias); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -199,7 +199,7 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 				oldAlias.Values = append(oldAlias.Values, value)
 			}
 		}
-		if err := am.accountingDb.SetAlias(oldAlias, true); err != nil {
+		if err := am.accountingDb.SetAlias(oldAlias); err != nil {
 			*reply = err.Error()
 			return err
 		}

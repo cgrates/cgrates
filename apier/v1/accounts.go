@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -160,7 +161,6 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 					}
 					return 0, err
 				}
-				var dirtyAps []string
 				for actionPlanID, ap := range actionPlansMap {
 					if actionPlanID == attr.ActionPlanId {
 						// don't remove it if it's the current one
@@ -168,14 +168,9 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 					}
 					if _, exists := ap.AccountIDs[accID]; exists {
 						delete(ap.AccountIDs, accID)
-						dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+actionPlanID)
+						// clean from cache
+						cache2go.RemKey(utils.ACTION_PLAN_PREFIX + actionPlanID)
 					}
-				}
-
-				if len(dirtyAps) > 0 {
-					// update cache
-					self.RatingDb.CacheRatingPrefixValues("SetAccountAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: dirtyAps})
-					schedulerReloadNeeded = true
 				}
 
 				var ap *engine.ActionPlan
@@ -202,11 +197,9 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 							}
 						}
 					}
-					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, true); err != nil {
+					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, true, true); err != nil {
 						return 0, err
 					}
-					// update cache
-					self.RatingDb.CacheRatingPrefixValues("SetAccountAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
@@ -216,7 +209,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		}
 
 		if len(attr.ActionTriggersId) != 0 {
-			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId)
+			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId, false)
 			if err != nil {
 				return 0, err
 			}
@@ -273,17 +266,10 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 				}
 			}
 
-			var actionPlansCacheIds []string
 			for actionPlanID, ap := range dirtyActionPlans {
-				if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
+				if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true, true); err != nil {
 					return 0, err
 				}
-				actionPlansCacheIds = append(actionPlansCacheIds, utils.ACTION_PLAN_PREFIX+actionPlanID)
-			}
-			if len(actionPlansCacheIds) > 0 {
-				// update cache
-				self.RatingDb.CacheRatingPrefixValues("RemoveAccountAPI", map[string][]string{
-					utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
 			}
 			return 0, nil
 		}, 0, utils.ACTION_PLAN_PREFIX)
@@ -316,7 +302,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX+attr.Tenant, true); err != nil {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {

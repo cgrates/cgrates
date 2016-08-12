@@ -361,7 +361,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
 			if err != nil {
 				return err
 			}
-			if err := ms.SetReverseDestination(dest, false); err != nil {
+			if err := ms.SetReverseDestination(dest); err != nil {
 				return err
 			}
 		}
@@ -375,7 +375,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
 			if err != nil {
 				return err
 			}
-			if err := ms.SetReverseAlias(al, false); err != nil {
+			if err := ms.SetReverseAlias(al); err != nil {
 				return err
 			}
 		}
@@ -554,7 +554,7 @@ func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPla
 	return
 }
 
-func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan, cache bool) error {
+func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan) error {
 	result, err := ms.ms.Marshal(rp)
 	if err != nil {
 		return err
@@ -573,9 +573,7 @@ func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan, cache bool) error {
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	if cache && err == nil {
-		cache2go.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp)
-	}
+	cache2go.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp)
 	return err
 }
 
@@ -600,7 +598,7 @@ func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool) (rp *Rating
 	return
 }
 
-func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile, cache bool) error {
+func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
 	session, col := ms.conn(colRpf)
 	defer session.Close()
 	_, err := col.Upsert(bson.M{"id": rp.Id}, rp)
@@ -608,9 +606,7 @@ func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile, cache bool) error {
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(false), &response)
 	}
-	if cache && err == nil {
-		cache2go.Set(utils.RATING_PROFILE_PREFIX+rp.Id, rp)
-	}
+	cache2go.RemKey(utils.RATING_PROFILE_PREFIX + rp.Id)
 	return err
 }
 
@@ -658,16 +654,14 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 	return
 }
 
-func (ms *MongoStorage) SetLCR(lcr *LCR, cache bool) error {
+func (ms *MongoStorage) SetLCR(lcr *LCR) error {
 	session, col := ms.conn(colLcr)
 	defer session.Close()
 	_, err := col.Upsert(bson.M{"key": lcr.GetId()}, &struct {
 		Key   string
 		Value *LCR
 	}{lcr.GetId(), lcr})
-	if cache && err == nil {
-		cache2go.Set(utils.LCR_PREFIX+lcr.GetId(), lcr)
-	}
+	cache2go.RemKey(utils.LCR_PREFIX + lcr.GetId())
 	return err
 }
 
@@ -710,7 +704,7 @@ func (ms *MongoStorage) GetDestination(key string, skipCache bool) (result *Dest
 	cache2go.Set(utils.DESTINATION_PREFIX+key, result)
 	return
 }
-func (ms *MongoStorage) SetDestination(dest *Destination, cache bool) (err error) {
+func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	if err != nil {
 		return err
@@ -725,9 +719,7 @@ func (ms *MongoStorage) SetDestination(dest *Destination, cache bool) (err error
 		Key   string
 		Value []byte
 	}{Key: dest.Id, Value: b.Bytes()})
-	if cache && err == nil {
-		cache2go.Set(utils.DESTINATION_PREFIX+dest.Id, dest)
-	}
+	cache2go.RemKey(utils.DESTINATION_PREFIX + dest.Id)
 	if err == nil && historyScribe != nil {
 		var response int
 		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
@@ -758,7 +750,7 @@ func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool) (id
 	return
 }
 
-func (ms *MongoStorage) SetReverseDestination(dest *Destination, cache bool) (err error) {
+func (ms *MongoStorage) SetReverseDestination(dest *Destination) (err error) {
 	session, col := ms.conn(colRst)
 	defer session.Close()
 	for _, p := range dest.Prefixes {
@@ -766,10 +758,7 @@ func (ms *MongoStorage) SetReverseDestination(dest *Destination, cache bool) (er
 		if err != nil {
 			break
 		}
-
-		if cache && err == nil {
-			_, err = ms.GetReverseDestination(p, true) // will recache
-		}
+		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + p)
 	}
 	return
 }
@@ -801,7 +790,7 @@ func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
 	return
 }
 
-func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, cache bool) error {
+func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination) error {
 	session, col := ms.conn(colRst)
 	defer session.Close()
 	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
@@ -851,9 +840,7 @@ func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 		if err != nil {
 			return err
 		}
-		if cache {
-			ms.GetReverseDestination(addedPrefix, true) // will recache
-		}
+		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + addedPrefix)
 	}
 	return nil
 }
@@ -881,16 +868,14 @@ func (ms *MongoStorage) GetActions(key string, skipCache bool) (as Actions, err 
 	return
 }
 
-func (ms *MongoStorage) SetActions(key string, as Actions, cache bool) error {
+func (ms *MongoStorage) SetActions(key string, as Actions) error {
 	session, col := ms.conn(colAct)
 	defer session.Close()
 	_, err := col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value Actions
 	}{Key: key, Value: as})
-	if cache && err == nil {
-		cache2go.Set(utils.ACTION_PREFIX+key, as)
-	}
+	cache2go.RemKey(utils.ACTION_PREFIX + key)
 	return err
 }
 
@@ -921,13 +906,11 @@ func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGr
 	return
 }
 
-func (ms *MongoStorage) SetSharedGroup(sg *SharedGroup, cache bool) (err error) {
+func (ms *MongoStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 	session, col := ms.conn(colShg)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"id": sg.Id}, sg)
-	if cache && err == nil {
-		cache2go.Set(utils.SHARED_GROUP_PREFIX+sg.Id, sg)
-	}
+	cache2go.RemKey(utils.SHARED_GROUP_PREFIX + sg.Id)
 	return err
 }
 
@@ -1102,16 +1085,14 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 	return
 }
 
-func (ms *MongoStorage) SetAlias(al *Alias, cache bool) (err error) {
+func (ms *MongoStorage) SetAlias(al *Alias) (err error) {
 	session, col := ms.conn(colAls)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"key": al.GetId()}, &struct {
 		Key   string
 		Value AliasValues
 	}{Key: al.GetId(), Value: al.Values})
-	if cache && err == nil {
-		cache2go.Set(utils.ALIASES_PREFIX+al.GetId(), al.Values)
-	}
+	cache2go.RemKey(utils.ALIASES_PREFIX + al.GetId())
 	return err
 }
 
@@ -1141,7 +1122,7 @@ func (ms *MongoStorage) GetReverseAlias(reverseID string, skipCache bool) (ids [
 	return
 }
 
-func (ms *MongoStorage) SetReverseAlias(al *Alias, cache bool) (err error) {
+func (ms *MongoStorage) SetReverseAlias(al *Alias) (err error) {
 	session, col := ms.conn(colRls)
 	defer session.Close()
 	for _, value := range al.Values {
@@ -1153,9 +1134,7 @@ func (ms *MongoStorage) SetReverseAlias(al *Alias, cache bool) (err error) {
 				if err != nil {
 					break
 				}
-				if cache && err == nil {
-					ms.GetReverseAlias(rKey, true) // will recache
-				}
+				cache2go.RemKey(rKey)
 			}
 		}
 	}
@@ -1240,7 +1219,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*
 }
 
 // Adds a single load instance to load history
-func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int, cache bool) error {
+func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int) error {
 	if loadHistSize == 0 { // Load history disabled
 		return nil
 	}
@@ -1282,9 +1261,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 		return nil, err
 	}, 0, utils.LOADINST_KEY)
 
-	if cache && err == nil {
-		cache2go.Set(utils.LOADINST_KEY, ldInst)
-	}
+	cache2go.RemKey(utils.LOADINST_KEY)
 	return err
 }
 
@@ -1312,7 +1289,7 @@ func (ms *MongoStorage) GetActionTriggers(key string, skipCache bool) (atrs Acti
 	return
 }
 
-func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers, cache bool) (err error) {
+func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
 	session, col := ms.conn(colAtr)
 	defer session.Close()
 	if len(atrs) == 0 {
@@ -1326,9 +1303,7 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers, cache
 		Key   string
 		Value ActionTriggers
 	}{Key: key, Value: atrs})
-	if cache && err == nil {
-		cache2go.Set(utils.ACTION_TRIGGER_PREFIX+key, atrs)
-	}
+	cache2go.RemKey(utils.ACTION_TRIGGER_PREFIX + key)
 	return err
 }
 
@@ -1378,7 +1353,7 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 	return
 }
 
-func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool, cache bool) error {
+func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) error {
 	session, col := ms.conn(colApl)
 	defer session.Close()
 	// clean dots from account ids map
@@ -1413,9 +1388,7 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 		Key   string
 		Value []byte
 	}{Key: key, Value: b.Bytes()})
-	if cache && err == nil {
-		cache2go.Set(utils.ACTION_PLAN_PREFIX+key, ats)
-	}
+	cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 	return err
 }
 
@@ -1480,7 +1453,7 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs *uti
 	return
 }
 
-func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers, cache bool) (err error) {
+func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) (err error) {
 	if dcs == nil || len(dcs.Chargers) == 0 {
 		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
 		session, col := ms.conn(colDcs)
@@ -1497,9 +1470,7 @@ func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 		Key   string
 		Value *utils.DerivedChargers
 	}{Key: key, Value: dcs})
-	if cache && err == nil {
-		cache2go.Set(utils.DERIVEDCHARGERS_PREFIX+key, dcs)
-	}
+	cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
 	return err
 }
 
@@ -1559,7 +1530,7 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool) (*ResourceLimit, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit, cache bool) error {
+func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit) error {
 	return nil
 }
 func (ms *MongoStorage) RemoveResourceLimit(id string) error {

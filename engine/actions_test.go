@@ -1286,16 +1286,18 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
 	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
-	ratingStorage.SetDestination(origD, true)
-	ratingStorage.SetReverseDestination(origD, true)
+	ratingStorage.SetDestination(origD)
+	ratingStorage.SetReverseDestination(origD)
 	// check redis and cache
 	if d, err := ratingStorage.GetDestination("*ddc_test", false); err != nil || !reflect.DeepEqual(d, origD) {
 		t.Error("Error storing destination: ", d, err)
 	}
+	ratingStorage.GetReverseDestination("111", false)
 	x1, found := cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
+	ratingStorage.GetReverseDestination("222", false)
 	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
@@ -1319,10 +1321,12 @@ func TestActionSetDDestination(t *testing.T) {
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
+	ratingStorage.GetReverseDestination("333", false)
 	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
+	ratingStorage.GetReverseDestination("666", false)
 	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)

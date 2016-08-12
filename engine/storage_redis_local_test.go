@@ -62,7 +62,7 @@ func TestSetGetDerivedCharges(t *testing.T) {
 		&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}}
-	if err := rds.SetDerivedChargers(keyCharger1, charger1, true); err != nil {
+	if err := rds.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
 	// Try retrieving from cache, should not be in yet

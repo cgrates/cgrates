@@ -148,7 +148,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 							sg.MemberIds = make(utils.StringMap)
 						}
 						sg.MemberIds[acc.ID] = true
-						ratingStorage.SetSharedGroup(sg, true)
+						ratingStorage.SetSharedGroup(sg)
 					}
 				}
 			}
@@ -236,7 +236,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 							sg.MemberIds = make(utils.StringMap)
 						}
 						sg.MemberIds[ub.ID] = true
-						ratingStorage.SetSharedGroup(sg, true)
+						ratingStorage.SetSharedGroup(sg)
 					}
 				}
 			}

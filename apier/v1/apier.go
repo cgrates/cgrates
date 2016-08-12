@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
@@ -52,7 +53,7 @@ type ApierV1 struct {
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
-	if dst, err := self.RatingDb.GetDestination(dstId); err != nil {
+	if dst, err := self.RatingDb.GetDestination(dstId, false); err != nil {
 		return utils.ErrNotFound
 	} else {
 		*reply = *dst
@@ -66,7 +67,24 @@ type AttrRemoveDestination struct {
 }
 
 func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) error {
-	return nil
+	var err error
+	for _, dstID := range attr.DestinationIDs {
+		if len(attr.Prefixes) == 0 {
+			if err = self.RatingDb.RemoveDestination(dstID); err != nil {
+				*reply = err.Error()
+				break
+			} else {
+				*reply = utils.OK
+			}
+		} else {
+			// TODO list
+			// get destination
+			// remove prefixes
+			// handle reverse destination
+			// set destinastion
+		}
+	}
+	return err
 }
 
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
@@ -93,10 +111,9 @@ func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *strin
 		}
 	}
 	dest := &engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
-	if err := self.RatingDb.SetDestination(dest); err != nil {
+	if err := self.RatingDb.SetDestination(dest, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	self.RatingDb.CacheRatingPrefixValues("SetDestinationAPI", map[string][]string{utils.DESTINATION_PREFIX: []string{dest.Id}})
 	*reply = OK
 	return nil
 }
@@ -136,7 +153,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
-	if loaded, err := dbReader.LoadDestinationsFiltered(attrs.DestinationId); err != nil {
+	if loaded, err := dbReader.LoadDestinationsFiltered(attrs.DestinationId, true); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
 		return utils.ErrNotFound
@@ -145,10 +162,6 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	destIds := []string{utils.DESTINATION_PREFIX + attrs.DestinationId}
 	if len(attrs.DestinationId) == 0 {
 		destIds = nil // Cache all destinations, temporary here until we add ApierV2.LoadDestinations
-	}
-	if err := self.RatingDb.CacheRatingPrefixValues("LoadDestinationAPI", map[string][]string{
-		utils.DESTINATION_PREFIX: destIds}); err != nil {
-		return err
 	}
 	*reply = OK
 	return nil
@@ -161,16 +174,13 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	dc := engine.APItoModelDerivedCharger(&attrs)
-	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
+	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//Automatic cache of the newly inserted rating plan
 	var derivedChargingKeys []string
 	if len(attrs.Direction) != 0 && len(attrs.Tenant) != 0 && len(attrs.Category) != 0 && len(attrs.Account) != 0 && len(attrs.Subject) != 0 {
 		derivedChargingKeys = []string{utils.DERIVEDCHARGERS_PREFIX + attrs.GetDerivedChargersKey()}
-	}
-	if err := self.RatingDb.CacheRatingPrefixValues("LoadDerivedChargersAPI", map[string][]string{utils.DERIVEDCHARGERS_PREFIX: derivedChargingKeys}); err != nil {
-		return err
 	}
 	*reply = OK
 	return nil
@@ -187,7 +197,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
-	if loaded, err := dbReader.LoadRatingPlansFiltered(attrs.RatingPlanId); err != nil {
+	if loaded, err := dbReader.LoadRatingPlansFiltered(attrs.RatingPlanId, true); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
 		return utils.ErrNotFound
@@ -201,12 +211,6 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 			changedRPlKeys = nil
 		}
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues("LoadRatingPlanAPI", map[string][]string{
-		utils.DESTINATION_PREFIX: nil,
-		utils.RATING_PLAN_PREFIX: changedRPlKeys,
-	}); err != nil {
-		return err
-	}
 	*reply = OK
 	return nil
 }
@@ -218,16 +222,13 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	rp := engine.APItoModelRatingProfile(&attrs)
-	if err := dbReader.LoadRatingProfilesFiltered(&rp[0]); err != nil {
+	if err := dbReader.LoadRatingProfilesFiltered(&rp[0], true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//Automatic cache of the newly inserted rating profile
 	var ratingProfile []string
 	if attrs.KeyId() != ":::" { // if has some filters
 		ratingProfile = []string{utils.RATING_PROFILE_PREFIX + attrs.KeyId()}
-	}
-	if err := self.RatingDb.CacheRatingPrefixValues("LoadRatingProfileAPI", map[string][]string{utils.RATING_PROFILE_PREFIX: ratingProfile}); err != nil {
-		return err
 	}
 	*reply = OK
 	return nil
@@ -244,16 +245,13 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
-	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
+	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//Automatic cache of the newly inserted rating plan
 	var changedSharedGroup []string
 	if len(attrs.SharedGroupId) != 0 {
 		changedSharedGroup = []string{utils.SHARED_GROUP_PREFIX + attrs.SharedGroupId}
-	}
-	if err := self.RatingDb.CacheRatingPrefixValues("LoadSharedGroupAPI", map[string][]string{utils.SHARED_GROUP_PREFIX: changedSharedGroup}); err != nil {
-		return err
 	}
 	*reply = OK
 	return nil
@@ -270,7 +268,7 @@ func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
-	if err := dbReader.LoadCdrStatsFiltered(attrs.CdrStatsId, true); err != nil {
+	if err := dbReader.LoadCdrStatsFiltered(attrs.CdrStatsId, true, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -359,24 +357,9 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	// relase tp data
 	dbReader.Init()
 
-	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := self.RatingDb.CacheRatingPrefixValues(attrs.TPid, map[string][]string{
-		utils.DESTINATION_PREFIX:     dstKeys,
-		utils.RATING_PLAN_PREFIX:     rpKeys,
-		utils.RATING_PROFILE_PREFIX:  rpfKeys,
-		utils.LCR_PREFIX:             lcrKeys,
-		utils.DERIVEDCHARGERS_PREFIX: dcsKeys,
-		utils.ACTION_PREFIX:          actKeys,
-		utils.ACTION_PLAN_PREFIX:     aplKeys,
-		utils.SHARED_GROUP_PREFIX:    shgKeys,
-	}); err != nil {
-		return err
-	}
-	if err := self.AccountDb.CacheAccountingPrefixValues(attrs.TPid, map[string][]string{
-		utils.ALIASES_PREFIX: alsKeys,
-	}); err != nil {
-		return err
-	}
+	cache2go.Flush()
+	self.RatingDb.PreloadRatingCache()
+	self.AccountDb.PreloadAccountingCache()
 
 	if len(aps) != 0 && self.Sched != nil {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
@@ -477,15 +460,10 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		rpfl.RatingPlanActivations = append(rpfl.RatingPlanActivations, &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
 			FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, ra.FallbackSubjects)})
 	}
-	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
+	if err := self.RatingDb.SetRatingProfile(rpfl, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	//Automatic cache of the newly inserted rating profile
-	if err := self.RatingDb.CacheRatingPrefixValues("SetRatingProfileAPI", map[string][]string{
-		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + keyId},
-	}); err != nil {
-		return err
-	}
+
 	*reply = OK
 	return nil
 }

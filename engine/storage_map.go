@@ -109,7 +109,7 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 			if err != nil {
 				return err
 			}
-			if err := ms.SetReverseDestination(dest, false); err != nil {
+			if err := ms.SetReverseDestination(dest); err != nil {
 				return err
 			}
 		}
@@ -123,7 +123,7 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 			if err != nil {
 				return err
 			}
-			if err := ms.SetReverseAlias(al, false); err != nil {
+			if err := ms.SetReverseAlias(al); err != nil {
 				return err
 			}
 		}
@@ -227,7 +227,7 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan,
 	return
 }
 
-func (ms *MapStorage) SetRatingPlan(rp *RatingPlan, cache bool) (err error) {
+func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rp)
@@ -240,9 +240,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan, cache bool) (err error) {
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	if cache && err == nil {
-		cache2go.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp)
-	}
+	cache2go.RemKey(utils.RATING_PLAN_PREFIX + rp.Id)
 	return
 }
 
@@ -271,7 +269,7 @@ func (ms *MapStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingP
 	return
 }
 
-func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile, cache bool) (err error) {
+func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rpf)
@@ -280,9 +278,7 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile, cache bool) (err erro
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
-	if cache && err == nil {
-		cache2go.Set(utils.RATING_PROFILE_PREFIX+rpf.Id, rpf)
-	}
+	cache2go.RemKey(utils.RATING_PROFILE_PREFIX + rpf.Id)
 	return
 }
 
@@ -325,14 +321,12 @@ func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 	return
 }
 
-func (ms *MapStorage) SetLCR(lcr *LCR, cache bool) (err error) {
+func (ms *MapStorage) SetLCR(lcr *LCR) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(lcr)
 	ms.dict[utils.LCR_PREFIX+lcr.GetId()] = result
-	if cache && err == nil {
-		cache2go.Set(utils.LCR_PREFIX+lcr.GetId(), lcr)
-	}
+	cache2go.RemKey(utils.LCR_PREFIX + lcr.GetId())
 	return
 }
 
@@ -371,7 +365,7 @@ func (ms *MapStorage) GetDestination(key string, skipCache bool) (dest *Destinat
 	return
 }
 
-func (ms *MapStorage) SetDestination(dest *Destination, cache bool) (err error) {
+func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(dest)
@@ -385,9 +379,7 @@ func (ms *MapStorage) SetDestination(dest *Destination, cache bool) (err error) 
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
-	if cache && err == nil {
-		cache2go.Set(key, dest)
-	}
+	cache2go.RemKey(key)
 	return
 }
 
@@ -415,17 +407,14 @@ func (ms *MapStorage) GetReverseDestination(prefix string, skipCache bool) (ids 
 	return
 }
 
-func (ms *MapStorage) SetReverseDestination(dest *Destination, cache bool) (err error) {
+func (ms *MapStorage) SetReverseDestination(dest *Destination) (err error) {
 	for _, p := range dest.Prefixes {
 		key := utils.REVERSE_DESTINATION_PREFIX + p
 
 		ms.mu.Lock()
 		ms.dict.sadd(key, dest.Id, ms.ms)
 		ms.mu.Unlock()
-
-		if cache && err == nil {
-			_, err = ms.GetReverseDestination(p, true) // will recache
-		}
+		cache2go.RemKey(key)
 	}
 	return
 }
@@ -452,7 +441,7 @@ func (ms *MapStorage) RemoveDestination(destID string) (err error) {
 	return
 }
 
-func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, cache bool) error {
+func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination) error {
 	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
 	var obsoletePrefixes []string
 	var addedPrefixes []string
@@ -499,9 +488,6 @@ func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, ca
 		ms.dict.sadd(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, newDest.Id, ms.ms)
 		ms.mu.Unlock()
 		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + addedPrefix)
-		if cache {
-			ms.GetReverseDestination(addedPrefix, true) // will recache
-		}
 	}
 	return err
 }
@@ -528,14 +514,12 @@ func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err er
 	return
 }
 
-func (ms *MapStorage) SetActions(key string, as Actions, cache bool) (err error) {
+func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[utils.ACTION_PREFIX+key] = result
-	if cache && err == nil {
-		cache2go.Set(utils.ACTION_PREFIX+key, as)
-	}
+	cache2go.RemKey(utils.ACTION_PREFIX + key)
 	return
 }
 
@@ -571,14 +555,12 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGrou
 	return
 }
 
-func (ms *MapStorage) SetSharedGroup(sg *SharedGroup, cache bool) (err error) {
+func (ms *MapStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sg)
 	ms.dict[utils.SHARED_GROUP_PREFIX+sg.Id] = result
-	if cache && err == nil {
-		cache2go.Set(utils.SHARED_GROUP_PREFIX+sg.Id, sg)
-	}
+	cache2go.RemKey(utils.SHARED_GROUP_PREFIX + sg.Id)
 	return
 }
 
@@ -742,7 +724,7 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 	return al, nil
 }
 
-func (ms *MapStorage) SetAlias(al *Alias, cache bool) error {
+func (ms *MapStorage) SetAlias(al *Alias) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(al.Values)
@@ -751,9 +733,7 @@ func (ms *MapStorage) SetAlias(al *Alias, cache bool) error {
 	}
 	key := utils.ALIASES_PREFIX + al.GetId()
 	ms.dict[key] = result
-	if cache && err == nil {
-		cache2go.Set(key, al.Values)
-	}
+	cache2go.RemKey(key)
 	return nil
 }
 
@@ -781,7 +761,7 @@ func (ms *MapStorage) GetReverseAlias(reverseID string, skipCache bool) (ids []s
 
 }
 
-func (ms *MapStorage) SetReverseAlias(al *Alias, cache bool) (err error) {
+func (ms *MapStorage) SetReverseAlias(al *Alias) (err error) {
 	for _, value := range al.Values {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
@@ -791,9 +771,7 @@ func (ms *MapStorage) SetReverseAlias(al *Alias, cache bool) (err error) {
 				ms.dict.sadd(rKey, id, ms.ms)
 				ms.mu.Unlock()
 
-				if cache && err == nil {
-					ms.GetReverseAlias(rKey[len(utils.REVERSE_ALIASES_PREFIX):], true) // will recache
-				}
+				cache2go.RemKey(rKey)
 			}
 		}
 	}
@@ -845,7 +823,7 @@ func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool) ([]*utils.L
 	return nil, nil
 }
 
-func (ms *MapStorage) AddLoadHistory(*utils.LoadInstance, int, bool) error {
+func (ms *MapStorage) AddLoadHistory(*utils.LoadInstance, int) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return nil
@@ -873,7 +851,7 @@ func (ms *MapStorage) GetActionTriggers(key string, skipCache bool) (atrs Action
 	return
 }
 
-func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers, cache bool) (err error) {
+func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if len(atrs) == 0 {
@@ -883,9 +861,7 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers, cache b
 	}
 	result, err := ms.ms.Marshal(&atrs)
 	ms.dict[utils.ACTION_TRIGGER_PREFIX+key] = result
-	if cache && err == nil {
-		cache2go.Set(utils.ACTION_TRIGGER_PREFIX+key, atrs)
-	}
+	cache2go.RemKey(utils.ACTION_TRIGGER_PREFIX + key)
 	return
 }
 
@@ -919,7 +895,7 @@ func (ms *MapStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan
 	return
 }
 
-func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite, cache bool) (err error) {
+func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) (err error) {
 	if len(ats.ActionTimings) == 0 {
 		ms.mu.Lock()
 		defer ms.mu.Unlock()
@@ -943,9 +919,7 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite, cach
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(&ats)
 	ms.dict[utils.ACTION_PLAN_PREFIX+key] = result
-	if cache && err == nil {
-		cache2go.Set(utils.ACTION_PLAN_PREFIX+key, ats)
-	}
+	cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 	return
 }
 
@@ -1010,7 +984,7 @@ func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils
 	return
 }
 
-func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers, cache bool) error {
+func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key = utils.DERIVEDCHARGERS_PREFIX + key
@@ -1021,9 +995,7 @@ func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers,
 	}
 	result, err := ms.ms.Marshal(dcs)
 	ms.dict[key] = result
-	if cache && err == nil {
-		cache2go.Set(key, dcs)
-	}
+	cache2go.RemKey(key)
 	return err
 }
 
@@ -1106,7 +1078,7 @@ func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
 func (ms *MapStorage) GetResourceLimit(id string, skipCache bool) (*ResourceLimit, error) {
 	return nil, nil
 }
-func (ms *MapStorage) SetResourceLimit(rl *ResourceLimit, cache bool) error {
+func (ms *MapStorage) SetResourceLimit(rl *ResourceLimit) error {
 	return nil
 }
 
