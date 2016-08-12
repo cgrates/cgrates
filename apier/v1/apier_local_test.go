@@ -110,7 +110,7 @@ func TestApierInitStorDb(t *testing.T) {
 }
 
 // Finds cgr-engine executable and starts it with default configuration
-func TestApierStartEngine(t *testing.T) {
+/*func TestApierStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -126,7 +126,7 @@ func TestApierStartEngine(t *testing.T) {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
-}
+}*/
 
 // Connect rpc client to rater
 func TestApierRpcConn(t *testing.T) {

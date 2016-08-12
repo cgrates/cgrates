@@ -743,6 +743,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) err
 func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.CacheStats) error {
 	cs := new(utils.CacheStats)
 	cs.Destinations = cache2go.CountEntries(utils.DESTINATION_PREFIX)
+	cs.ReverseDestinations = cache2go.CountEntries(utils.REVERSE_DESTINATION_PREFIX)
 	cs.RatingPlans = cache2go.CountEntries(utils.RATING_PLAN_PREFIX)
 	cs.RatingProfiles = cache2go.CountEntries(utils.RATING_PROFILE_PREFIX)
 	cs.Actions = cache2go.CountEntries(utils.ACTION_PREFIX)
@@ -751,6 +752,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.DerivedChargers = cache2go.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
 	cs.LcrProfiles = cache2go.CountEntries(utils.LCR_PREFIX)
 	cs.Aliases = cache2go.CountEntries(utils.ALIASES_PREFIX)
+	cs.ReverseAliases = cache2go.CountEntries(utils.REVERSE_ALIASES_PREFIX)
 	cs.ResourceLimits = cache2go.CountEntries(utils.ResourceLimitsPrefix)
 	if self.CdrStatsSrv != nil {
 		var queueIds []string

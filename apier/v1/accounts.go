@@ -52,6 +52,9 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	}
 	accID := utils.AccountKey(attrs.Tenant, attrs.Account)
 	for _, ap := range allAPs {
+		if ap == nil {
+			continue
+		}
 		if _, exists := ap.AccountIDs[accID]; exists {
 			for _, at := range ap.ActionTimings {
 				accountATs = append(accountATs, &AccountActionTiming{

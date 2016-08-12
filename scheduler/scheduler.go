@@ -119,6 +119,9 @@ func (s *Scheduler) loadActionPlans() {
 	// recreate the queue
 	s.queue = engine.ActionTimingPriorityList{}
 	for _, actionPlan := range actionPlans {
+		if actionPlan == nil {
+			continue
+		}
 		for _, at := range actionPlan.ActionTimings {
 			if at.Timing == nil {
 				utils.Logger.Warning(fmt.Sprintf("<Scheduler> Nil timing on action plan: %+v, discarding!", at))
