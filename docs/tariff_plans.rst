@@ -607,8 +607,7 @@ for example rated for different tenants or resellers.
 
 4.2.12. CDR Stats
 ~~~~~~~~~~~~~~~~~~
-
-CDR Stats enabled some realtime statistics in your platform for multiple
+CDR Stats enables some realtime statistics in your platform for multiple
 purposes, you can read more, see :ref:`cdrstats-main`
 
 ::
@@ -620,81 +619,81 @@ purposes, you can read more, see :ref:`cdrstats-main`
     :file: ../data/tariffplans/tutorial/CdrStats.csv
     :header-rows: 1
 
-Id:
+[0] - Id:
     Tag name for the Queue id
 
-QueueLength:
+[1] - QueueLength:
     Maximum number of calls in this queue
 
-TimeWindow:
+[2] - TimeWindow:
     Window frame to store the calls
 
-SaveInterval:
+[3] - SaveInterval:
     Each interval queue stats will save in the stordb
 
-Metric:
+[4] - Metric:
     Type of metric see :ref:`cdrstats-metrics`
 
-SetupInterval:
+[5] - SetupInterval:
     TBD
 
-TOR:
+[6] - TOR:
     TBD
 
-CdrHost
+[7] - CdrHost
     TBD
 
-CdrSource:
+[8] - CdrSource:
     TBD
 
-ReqType:
+[9] - ReqType:
     Filter by reqtype
 
-Direction:
+[10] - Direction:
     TBD
 
-Tenant:
+[11] - Tenant:
     Used to distinguish between carriers if more than one share the same
     database in the CGRates system.
 
-Category:
+[12] - Category:
     Type of record specifies the kind of transmission this rate profile applies
     to.
 
-Account:
+[13] - Account:
     The identifier for the user's account.
 
-Subject:
+[14] - Subject:
     The client/user for who this profile is detailing the rates.
 
-DestinationIds:
-    Filter only by destinations prefix. Can be multiple separated with ;
+[15] - DestinationIds:
+    Filter only by destinations prefix. Can be multiple separated with **;**
 
-PddInterval:
+[16] - PddInterval:
     TBD
 
-UsageInterval:
+[17] - UsageInterval:
     TBD
 
-Supplier:
+[18] - Supplier:
     TBD
 
-DisconnectCause:
+[19] - DisconnectCause:
     TBD
 
-RunIds:
+[20] - RunIds:
     TBD
 
-RatedAccount:
+[21] - RatedAccount:
     Filter by rated account
 
-RatedSubject:
+[22] - RatedSubject:
     Filter by rated subject
 
-CostInterval:
+[23] - CostInterval:
     Filter by cost
 
-ActionTriggers:
+[24] - ActionTriggers:
     ActionTriggers associated with this queue
 
 4.2.13. Shared groups
@@ -710,6 +709,18 @@ TBD
     :file: ../data/tariffplans/tutorial/SharedGroups.csv
     :header-rows: 1
 
+[0] - Id:
+    TBD
+
+[1] - Account:
+    TBD
+
+[2] - Strategy:
+    TBD
+
+[3] - RatingSubject:
+    TBD
+
 4.2.14. LCR rules
 ~~~~~~~~~~~~~~~~~
 TBD
@@ -722,6 +733,39 @@ TBD
 .. csv-table::
     :file: ../data/tariffplans/tutorial/LcrRules.csv
     :header-rows: 1
+
+[0] - Direction:
+    TBD
+
+[1] - Tenant:
+    TBD
+
+[2] - Category:
+    TBD
+
+[3] - Account:
+    TBD
+
+[4] - Subject:
+    TBD
+
+[5] - DestinationTag:
+    TBD
+
+[6] - RpCategory:
+    TBD
+
+[7] - Strategy:
+    TBD
+
+[8] - StrategyParams:
+    TBD
+
+[9] - ActivationTime:
+    TBD
+
+[10] - Weight:
+    TBD
 
 4.2.15. Users
 ~~~~~~~~~~~~~
@@ -736,6 +780,24 @@ TBD
     :file: ../data/tariffplans/tutorial/Users.csv
     :header-rows: 1
 
+[0] - Tenant:
+   TBD
+
+[1] - UserName:
+   TBD
+
+[2] - Masked:
+   TBD
+
+[3] - AttributeName:
+   TBD
+
+[4] - AttributeValue:
+   TBD
+
+[5] - Weight:
+   TBD
+
 4.2.16. Aliases
 ~~~~~~~~~~~~~~~
 TBD
@@ -749,6 +811,39 @@ TBD
     :file: ../data/tariffplans/tutorial/Aliases.csv
     :header-rows: 1
 
+[0] - Direction:
+   TBD
+
+[1] - Tenant:
+   TBD
+
+[2] - Category:
+   TBD
+
+[3] - Account:
+   TBD
+
+[4] - Subject:
+   TBD
+
+[5] - DestinationId:
+   TBD
+
+[6] - Context:
+   TBD
+
+[7] - Target:
+   TBD
+
+[8] - Original:
+   TBD
+
+[9] - Alias:
+   TBD
+
+[10] - Weight:
+   TBD
+
 4.2.17. Resource Limits
 ~~~~~~~~~~~~~~~~~~~~~~~
 TBD
@@ -761,4 +856,28 @@ TBD
 .. csv-table::
     :file: ../data/tariffplans/tutorial/ResourceLimits.csv
     :header-rows: 1
+
+[0] - Tag
+   TBD
+
+[1] - FilterType
+   TBD
+
+[2] - FilterFieldName
+   TBD
+
+[3] - FilterValues
+   TBD
+
+[4] - ActivationTime
+   TBD
+
+[5] - Weight
+   TBD
+
+[6] - Limit
+   TBD
+
+[7] - ActionTriggerIds
+   TBD
 
