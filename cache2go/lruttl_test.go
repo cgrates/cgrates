@@ -44,7 +44,7 @@ func TestLRU(t *testing.T) {
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entry: ", cache.Len())
 	}
-	last := cache.ll.Back().Value.(*entry).value.(int)
+	last := cache.lruIndex.Back().Value.(*entry).value.(int)
 	if last != 8 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
@@ -58,7 +58,7 @@ func TestLRUandExpire(t *testing.T) {
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entries: ", cache.Len())
 	}
-	last := cache.ll.Back().Value.(*entry).value.(int)
+	last := cache.lruIndex.Back().Value.(*entry).value.(int)
 	if last != 8 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
@@ -100,6 +100,23 @@ func TestFlush(t *testing.T) {
 	if ok || b != nil {
 		t.Error("Error expiring data")
 	}
+}
+
+func TestRemoveElementTTLIndex(t *testing.T) {
+	cache := NewLRUTTL(32, 10*time.Hour)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 40; i++ {
+		wg.Add(1)
+		go func(x int) {
+			defer wg.Done()
+			cache.Set(fmt.Sprintf("%d", x), x)
+		}(i)
+	}
+	wg.Wait()
+	if cache.Len() != 32 || len(cache.ttlIndex) != 32 {
+		t.Error("error dicarding least recently used entry: ", cache.Len())
+	}
+
 }
 
 func TestFlushNoTimeout(t *testing.T) {

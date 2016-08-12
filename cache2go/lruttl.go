@@ -17,7 +17,8 @@ type Cache struct {
 	// executed when an entry is purged from the cache.
 	OnEvicted func(key string, value interface{})
 
-	ll         *list.List
+	lruIndex   *list.List
+	ttlIndex   []*list.Element
 	cache      map[interface{}]*list.Element
 	expiration time.Duration
 }
@@ -35,7 +36,8 @@ func NewLRUTTL(maxEntries int, expire time.Duration) *Cache {
 	c := &Cache{
 		maxEntries: maxEntries,
 		expiration: expire,
-		ll:         list.New(),
+		lruIndex:   list.New(),
+		ttlIndex:   make([]*list.Element, 0),
 		cache:      make(map[interface{}]*list.Element),
 	}
 	if c.expiration > 0 {
@@ -47,13 +49,14 @@ func NewLRUTTL(maxEntries int, expire time.Duration) *Cache {
 // cleans expired entries performing minimal checks
 func (c *Cache) cleanExpired() {
 	for {
-		c.mu.RLock()
-		e := c.ll.Back()
-		c.mu.RUnlock()
-		if e == nil {
+		if len(c.ttlIndex) == 0 {
 			time.Sleep(c.expiration)
 			continue
 		}
+		c.mu.RLock()
+		e := c.ttlIndex[0]
+		c.mu.RUnlock()
+
 		en := e.Value.(*entry)
 		if en.timestamp.Add(c.expiration).After(time.Now()) {
 			c.mu.Lock()
@@ -70,11 +73,12 @@ func (c *Cache) Set(key string, value interface{}) {
 	c.mu.Lock()
 	if c.cache == nil {
 		c.cache = make(map[interface{}]*list.Element)
-		c.ll = list.New()
+		c.lruIndex = list.New()
+		c.ttlIndex = make([]*list.Element, 0)
 	}
 
 	if e, ok := c.cache[key]; ok {
-		c.ll.MoveToFront(e)
+		c.lruIndex.MoveToFront(e)
 
 		en := e.Value.(*entry)
 		en.value = value
@@ -83,11 +87,12 @@ func (c *Cache) Set(key string, value interface{}) {
 		c.mu.Unlock()
 		return
 	}
-	e := c.ll.PushFront(&entry{key: key, value: value, timestamp: time.Now()})
+	e := c.lruIndex.PushFront(&entry{key: key, value: value, timestamp: time.Now()})
+	c.ttlIndex = append(c.ttlIndex, e)
 	c.cache[key] = e
 	c.mu.Unlock()
 
-	if c.maxEntries != 0 && c.ll.Len() > c.maxEntries {
+	if c.maxEntries != 0 && c.lruIndex.Len() > c.maxEntries {
 		c.RemoveOldest()
 	}
 }
@@ -100,7 +105,7 @@ func (c *Cache) Get(key string) (value interface{}, ok bool) {
 		return
 	}
 	if e, hit := c.cache[key]; hit {
-		c.ll.MoveToFront(e)
+		c.lruIndex.MoveToFront(e)
 		e.Value.(*entry).timestamp = time.Now()
 		return e.Value.(*entry).value, true
 	}
@@ -126,14 +131,25 @@ func (c *Cache) RemoveOldest() {
 	if c.cache == nil {
 		return
 	}
-	e := c.ll.Back()
+	e := c.lruIndex.Back()
 	if e != nil {
 		c.removeElement(e)
 	}
 }
 
 func (c *Cache) removeElement(e *list.Element) {
-	c.ll.Remove(e)
+	c.lruIndex.Remove(e)
+	if c.expiration > 0 {
+		for i, se := range c.ttlIndex {
+			if se == e {
+				//delete
+				copy(c.ttlIndex[i:], c.ttlIndex[i+1:])
+				c.ttlIndex[len(c.ttlIndex)-1] = nil
+				c.ttlIndex = c.ttlIndex[:len(c.ttlIndex)-1]
+				break
+			}
+		}
+	}
 	kv := e.Value.(*entry)
 	delete(c.cache, kv.key)
 	if c.OnEvicted != nil {
@@ -148,13 +164,14 @@ func (c *Cache) Len() int {
 	if c.cache == nil {
 		return 0
 	}
-	return c.ll.Len()
+	return c.lruIndex.Len()
 }
 
 // empties the whole cache
 func (c *Cache) Flush() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.ll = list.New()
+	c.lruIndex = list.New()
+	c.ttlIndex = make([]*list.Element, 0)
 	c.cache = make(map[interface{}]*list.Element)
 }
