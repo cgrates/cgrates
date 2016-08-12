@@ -410,20 +410,13 @@ func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, 
 		internalAliaseSChan <- aliasesServer
 		return
 	}
-	cfi, err := utils.LoadCacheFileInfo(cfg.CacheDumpDir)
-	if err != nil || cfi.LoadInfo.AccountingLoadID != loadHist[0].AccountingLoadID {
-		if err := accountDb.CacheAccountingPrefixes("EngineStart", utils.ALIASES_PREFIX); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	} else {
-		if err := engine.CacheLoad(cfg.CacheDumpDir, []string{utils.ALIASES_PREFIX}); err != nil {
-			utils.Logger.Crit("could not load cache file: " + err.Error())
-			exitChan <- true
-			return
-		}
+
+	if err := accountDb.PreloadAccountingCache(); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
+		exitChan <- true
+		return
 	}
+
 	internalAliaseSChan <- aliasesServer
 }
 

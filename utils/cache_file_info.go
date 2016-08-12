@@ -1,11 +1,6 @@
 package utils
 
-import (
-	"encoding/json"
-	"os"
-	"path/filepath"
-	"time"
-)
+import "time"
 
 type LoadInstance struct {
 	LoadID           string // Unique identifier for the load
@@ -20,6 +15,7 @@ type CacheFileInfo struct {
 	LoadInfo *LoadInstance
 }
 
+/*
 func LoadCacheFileInfo(path string) (*CacheFileInfo, error) {
 	// open data file
 	dataFile, err := os.Open(filepath.Join(path, "cache.info"))
@@ -72,3 +68,4 @@ func CacheFileExists(filePath string) bool {
 	}
 	return false
 }
+*/

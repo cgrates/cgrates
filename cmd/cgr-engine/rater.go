@@ -70,20 +70,13 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 			cacheDoneChan <- struct{}{}
 			return
 		}
-		cfi, err := utils.LoadCacheFileInfo(cfg.CacheDumpDir)
-		if err != nil || cfi.LoadInfo.RatingLoadID != loadHist[0].RatingLoadID {
-			if err := ratingDb.CacheRatingAll("StartRater"); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
-				exitChan <- true
-				return
-			}
-		} else {
-			if err := engine.CacheLoad(cfg.CacheDumpDir, []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
-				utils.Logger.Crit("could not load cache file: " + err.Error())
-				exitChan <- true
-				return
-			}
+
+		if err := ratingDb.PreloadRatingCache(); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
+			exitChan <- true
+			return
 		}
+
 		cacheDoneChan <- struct{}{}
 	}()
 

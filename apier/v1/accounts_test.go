@@ -56,7 +56,7 @@ func TestSetAccounts(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	apierAcntsAcntStorage.CacheRatingPrefixes(utils.ACTION_PREFIX)
+	//apierAcntsAcntStorage.CacheRatingPrefixes(utils.ACTION_PREFIX)
 }
 
 /*

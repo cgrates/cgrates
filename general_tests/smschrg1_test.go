@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -57,13 +58,14 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDb.CacheRatingAll("TestSMSLoadCsvTpSmsChrg1")
-	acntDb.CacheAccountingAll("TestSMSLoadCsvTpSmsChrg1")
+	cache2go.Flush()
+	ratingDb.PreloadRatingCache()
+	acntDb.PreloadAccountingCache()
 
-	if cachedRPlans := engine.CacheCountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
+	if cachedRPlans := cache2go.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := engine.CacheCountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 1 {
+	if cachedRProfiles := cache2go.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 0 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
 }

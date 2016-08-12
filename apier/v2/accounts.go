@@ -33,7 +33,7 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX+attr.Tenant, true); err != nil {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {
@@ -157,16 +157,10 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 						}
 					}
 				}
-				var actionPlansCacheIds []string
 				for actionPlanID, ap := range dirtyActionPlans {
 					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
 						return 0, err
 					}
-					actionPlansCacheIds = append(actionPlansCacheIds, utils.ACTION_PLAN_PREFIX+actionPlanID)
-				}
-				if len(actionPlansCacheIds) > 0 {
-					// update cache
-					self.RatingDb.CacheRatingPrefixValues("SetAccountAPI", map[string][]string{utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
@@ -180,7 +174,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				ub.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
 			for _, actionTriggerID := range *attr.ActionTriggerIDs {
-				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID)
+				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID, false)
 				if err != nil {
 					return 0, err
 				}

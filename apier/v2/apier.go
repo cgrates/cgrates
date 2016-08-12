@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -51,14 +52,6 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadRatingProfilesFiltered(&rpf[0]); err != nil {
 		return utils.NewErrServerError(err)
-	}
-	//Automatic cache of the newly inserted rating profile
-	var ratingProfile []string
-	if tpRpf.KeyId() != ":::" { // if has some filters
-		ratingProfile = []string{utils.RATING_PROFILE_PREFIX + tpRpf.KeyId()}
-	}
-	if err := self.RatingDb.CacheRatingPrefixValues("LoadRatingProfileAPI", map[string][]string{utils.RATING_PROFILE_PREFIX: ratingProfile}); err != nil {
-		return err
 	}
 	*reply = v1.OK
 	return nil
@@ -86,11 +79,6 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	}, 0, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
-	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.RatingDb.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.SHARED_GROUP_PREFIX); err != nil {
-		return err
-	}
 	if self.Sched != nil {
 		self.Sched.Reload(true)
 	}
@@ -114,14 +102,6 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
 		return utils.NewErrServerError(err)
-	}
-	//Automatic cache of the newly inserted rating plan
-	var dcsChanged []string
-	if len(attrs.DerivedChargersId) != 0 {
-		dcsChanged = []string{utils.DERIVEDCHARGERS_PREFIX + attrs.DerivedChargersId}
-	}
-	if err := self.RatingDb.CacheRatingPrefixValues("LoadDerivedChargersAPI", map[string][]string{utils.DERIVEDCHARGERS_PREFIX: dcsChanged}); err != nil {
-		return err
 	}
 	*reply = v1.OK
 	return nil
@@ -227,23 +207,10 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	loader.Init() // release the tp data
-	if err := self.RatingDb.CacheRatingPrefixValues("LoadTariffPlanFromFolderAPI", map[string][]string{
-		utils.DESTINATION_PREFIX:     dstKeys,
-		utils.RATING_PLAN_PREFIX:     rpKeys,
-		utils.RATING_PROFILE_PREFIX:  rpfKeys,
-		utils.LCR_PREFIX:             lcrKeys,
-		utils.DERIVEDCHARGERS_PREFIX: dcsKeys,
-		utils.ACTION_PREFIX:          actKeys,
-		utils.ACTION_PLAN_PREFIX:     aplKeys,
-		utils.SHARED_GROUP_PREFIX:    shgKeys,
-	}); err != nil {
-		return err
-	}
-	if err := self.AccountDb.CacheAccountingPrefixValues("LoadTariffPlanFromFolderAPI", map[string][]string{
-		utils.ALIASES_PREFIX: alsKeys,
-	}); err != nil {
-		return err
-	}
+	cache2go.Flush()
+	self.RatingDb.PreloadRatingCache()
+	self.AccountDb.PreloadAccountingCache()
+
 	if len(aps) != 0 && self.Sched != nil {
 		utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
 		self.Sched.Reload(true)
@@ -281,7 +248,7 @@ func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Ac
 	var actionKeys []string
 	var err error
 	if len(attr.ActionIDs) == 0 {
-		if actionKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACTION_PREFIX, false); err != nil {
+		if actionKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
 			return err
 		}
 	} else {
@@ -336,7 +303,7 @@ func (self *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.
 	}
 	if len(attr.DestinationIDs) == 0 {
 		// get all destination ids
-		destIDs, err := self.RatingDb.GetKeysForPrefix(utils.DESTINATION_PREFIX, true)
+		destIDs, err := self.RatingDb.GetKeysForPrefix(utils.DESTINATION_PREFIX)
 		if err != nil {
 			return err
 		}
@@ -345,7 +312,7 @@ func (self *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.
 		}
 	}
 	for _, destID := range attr.DestinationIDs {
-		dst, err := self.RatingDb.GetDestination(destID)
+		dst, err := self.RatingDb.GetDestination(destID, false)
 		if err != nil {
 			return err
 		}
