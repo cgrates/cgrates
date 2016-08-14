@@ -20,6 +20,7 @@ package v1
 
 import (
 	"errors"
+	"log"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -74,6 +75,7 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 		return utils.NewErrServerError(err)
 	}
 	var ignr string
+	log.Print("RVAL: ", reverseAliases)
 	for _, aliass := range reverseAliases {
 		for _, alias := range aliass {
 			if alias.Tenant != tenantRatingSubject.Tenant {

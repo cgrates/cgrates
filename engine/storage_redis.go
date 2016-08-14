@@ -203,7 +203,6 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 
 func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
 	key = utils.RATING_PLAN_PREFIX + key
-
 	if !skipCache {
 		if x, ok := cache2go.Get(key); ok {
 			if x != nil {
@@ -408,7 +407,7 @@ func (rs *RedisStorage) SetReverseDestination(dest *Destination) (err error) {
 		if err != nil {
 			break
 		}
-		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + p)
+		cache2go.RemKey(key)
 	}
 	return
 }
@@ -983,7 +982,7 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		ap, err := rs.GetActionPlan(key, false)
+		ap, err := rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], false)
 		if err != nil {
 			return nil, err
 		}

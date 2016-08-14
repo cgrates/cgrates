@@ -97,6 +97,7 @@ func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
 		dest.AddPrefix(tpDest.Prefix)
 	}
 	tpr.ratingStorage.SetDestination(dest)
+	tpr.ratingStorage.SetReverseDestination(dest)
 	return len(tpDests) > 0, err
 }
 
@@ -249,6 +250,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				}
 				for _, destination := range dms {
 					tpr.ratingStorage.SetDestination(destination)
+					tpr.ratingStorage.SetReverseDestination(destination)
 				}
 			}
 		}
@@ -1498,6 +1500,7 @@ func (tpr *TpReader) LoadAliasesFiltered(filter *TpAlias) (bool, error) {
 
 	}
 	tpr.accountingStorage.SetAlias(alias)
+	tpr.accountingStorage.SetReverseAlias(alias)
 	return len(tpAliases) > 0, err
 }
 

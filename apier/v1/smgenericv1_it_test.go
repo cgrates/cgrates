@@ -103,8 +103,8 @@ func TestSMGV1LoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := smgV1Rpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &smgV1LoadInst); err != nil {
 		t.Error(err)
-	} else if smgV1LoadInst.RatingLoadID == "" && smgV1LoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", smgV1LoadInst)
+	} else if smgV1LoadInst.RatingLoadID != "" && smgV1LoadInst.AccountingLoadID != "" {
+		t.Error("Non Empty loadId received, loadInstance: ", smgV1LoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -116,9 +116,9 @@ func TestSMGV1CacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 7, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1, ResourceLimits: 0,
-		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3,
-		LastLoadID: smgV1LoadInst.LoadID, LastRatingLoadID: smgV1LoadInst.RatingLoadID, LastAccountingLoadID: smgV1LoadInst.AccountingLoadID, LastLoadTime: smgV1LoadInst.LoadTime.Format(time.RFC3339)}
+	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 4, RatingProfiles: 0, Actions: 7, ActionPlans: 4, SharedGroups: 0, Aliases: 0, ResourceLimits: 0,
+		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3,
+		LastLoadID: utils.NOT_AVAILABLE, LastRatingLoadID: utils.NOT_AVAILABLE, LastAccountingLoadID: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
 	if err := smgV1Rpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

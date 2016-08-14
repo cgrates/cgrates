@@ -34,7 +34,7 @@ import (
 
 const (
 	colDst = "destinations"
-	colRst = "reverse_destinations"
+	colRds = "reverse_destinations"
 	colAct = "actions"
 	colApl = "action_plans"
 	colTsk = "tasks"
@@ -135,7 +135,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 		Background: false, // Build index in background and return immediately
 		Sparse:     false, // Only index documents containing the Key fields
 	}
-	collections := []string{colAct, colApl, colAtr, colDcs, colAls, colRls, colUsr, colLcr, colLht, colRpl, colDst, colRst}
+	collections := []string{colAct, colApl, colAtr, colDcs, colAls, colRls, colUsr, colLcr, colLht, colRpl, colDst, colRds}
 	for _, col := range collections {
 		if err = ndb.C(col).EnsureIndex(index); err != nil {
 			return nil, err
@@ -293,7 +293,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool) {
 	colMap := map[string]string{
 		utils.DESTINATION_PREFIX:         colDst,
-		utils.REVERSE_DESTINATION_PREFIX: colRst,
+		utils.REVERSE_DESTINATION_PREFIX: colRds,
 		utils.ACTION_PREFIX:              colAct,
 		utils.ACTION_PLAN_PREFIX:         colApl,
 		utils.TASKS_KEY:                  colTsk,
@@ -740,7 +740,7 @@ func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool) (id
 		Key   string
 		Value []string
 	}
-	session, col := ms.conn(colRst)
+	session, col := ms.conn(colRds)
 	defer session.Close()
 	err = col.Find(bson.M{"key": prefix}).One(&result)
 	if err == nil {
@@ -751,7 +751,7 @@ func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool) (id
 }
 
 func (ms *MongoStorage) SetReverseDestination(dest *Destination) (err error) {
-	session, col := ms.conn(colRst)
+	session, col := ms.conn(colRds)
 	defer session.Close()
 	for _, p := range dest.Prefixes {
 		_, err = col.Upsert(bson.M{"key": p}, bson.M{"$addToSet": bson.M{"value": dest.Id}})
@@ -778,7 +778,7 @@ func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
 	cache2go.RemKey(key)
 	session.Close()
 
-	session, col = ms.conn(colRst)
+	session, col = ms.conn(colRds)
 	defer session.Close()
 	for _, prefix := range d.Prefixes {
 		err = col.Update(bson.M{"key": prefix}, bson.M{"$pull": bson.M{"value": destID}})
@@ -791,7 +791,7 @@ func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
 }
 
 func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination) error {
-	session, col := ms.conn(colRst)
+	session, col := ms.conn(colRds)
 	defer session.Close()
 	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
 	var obsoletePrefixes []string
@@ -1393,12 +1393,18 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 }
 
 func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
-	apls := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
+	keys, err := ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return nil, err
+	}
 
-	ats = make(map[string]*ActionPlan, len(apls))
-	for key, value := range apls {
-		apl := value.(*ActionPlan)
-		ats[key] = apl
+	ats = make(map[string]*ActionPlan, len(keys))
+	for _, key := range keys {
+		ap, err := ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], false)
+		if err != nil {
+			return nil, err
+		}
+		ats[key] = ap
 	}
 
 	return

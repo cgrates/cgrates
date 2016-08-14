@@ -155,29 +155,10 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			}
 		}
 		if len(attr.ActionPlanId) != 0 {
-			_, err := engine.Guardian.Guard(func() (interface{}, error) {
-				// clean previous action plans
-				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
-				if err != nil {
-					if err == utils.ErrNotFound { // if no action plans just continue
-						return 0, nil
-					}
-					return 0, err
-				}
-				for actionPlanID, ap := range actionPlansMap {
-					if actionPlanID == attr.ActionPlanId {
-						// don't remove it if it's the current one
-						continue
-					}
-					if _, exists := ap.AccountIDs[accID]; exists {
-						delete(ap.AccountIDs, accID)
-						// clean from cache
-						cache2go.RemKey(utils.ACTION_PLAN_PREFIX + actionPlanID)
-					}
-				}
 
+			_, err := engine.Guardian.Guard(func() (interface{}, error) {
 				var ap *engine.ActionPlan
-				ap, err = self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
+				ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
 				if err != nil {
 					return 0, err
 				}
@@ -204,6 +185,26 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 						return 0, err
 					}
 				}
+				// clean previous action plans
+				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
+				if err != nil {
+					if err == utils.ErrNotFound { // if no action plans just continue
+						return 0, nil
+					}
+					return 0, err
+				}
+				for actionPlanID, ap := range actionPlansMap {
+					if actionPlanID[len(utils.ACTION_PLAN_PREFIX):] == attr.ActionPlanId {
+						// don't remove it if it's the current one
+						continue
+					}
+					if _, exists := ap.AccountIDs[accID]; exists {
+						delete(ap.AccountIDs, accID)
+						// clean from cache
+						cache2go.RemKey(utils.ACTION_PLAN_PREFIX + actionPlanID)
+					}
+				}
+
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
 			if err != nil {

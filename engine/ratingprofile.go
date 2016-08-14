@@ -163,7 +163,6 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 		prefix := ""
 		destinationId := ""
 		var rps RateIntervalList
-		//log.Printf("RPA: %+v", rpa)
 		if cd.Destination == utils.ANY || cd.Destination == "" {
 			cd.Destination = utils.ANY
 			if _, ok := rpl.DestinationRates[utils.ANY]; ok {

@@ -436,7 +436,8 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
 		return utils.NewErrServerError(err)
 	}
-
+	cache2go.RemPrefixKey(utils.RATING_PLAN_PREFIX)
+	self.RatingDb.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX)
 	*reply = OK
 	return nil
 }

@@ -924,14 +924,18 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool)
 }
 
 func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	apls := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
+	keys, err := ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return nil, err
+	}
 
-	ats = make(map[string]*ActionPlan, len(apls))
-	for key, value := range apls {
-		apl := value.(*ActionPlan)
-		ats[key] = apl
+	ats = make(map[string]*ActionPlan, len(keys))
+	for _, key := range keys {
+		ap, err := ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], false)
+		if err != nil {
+			return nil, err
+		}
+		ats[key] = ap
 	}
 
 	return

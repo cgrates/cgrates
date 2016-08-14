@@ -110,7 +110,7 @@ func TestApierInitStorDb(t *testing.T) {
 }
 
 // Finds cgr-engine executable and starts it with default configuration
-/*func TestApierStartEngine(t *testing.T) {
+func TestApierStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -126,7 +126,7 @@ func TestApierInitStorDb(t *testing.T) {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
-}*/
+}
 
 // Connect rpc client to rater
 func TestApierRpcConn(t *testing.T) {
@@ -828,7 +828,7 @@ func TestApierGetCacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	var args utils.AttrCacheStats
 	err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats)
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2, ActionPlans: 1, LastLoadID: "ReloadCacheAPI", LastRatingLoadID: rcvStats.LastRatingLoadID, LastAccountingLoadID: rcvStats.LastAccountingLoadID, LastLoadTime: rcvStats.LastLoadTime}
+	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 1, RatingProfiles: 0, Actions: 0, ActionPlans: 0, LastLoadID: utils.NOT_AVAILABLE, LastRatingLoadID: utils.NOT_AVAILABLE, LastAccountingLoadID: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	if err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -1142,7 +1142,7 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {
-		t.Error("Unexpected action plan received")
+		t.Error("Unexpected action plan received: ", utils.ToJSON(reply))
 	} else {
 		if reply[0].ActionPlanId != "ATMS_1" {
 			t.Errorf("Unexpected ActionoveAccountPlanId received")
@@ -1296,11 +1296,11 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else {
-		if rcvStats.Destinations != 5 ||
+		if rcvStats.Destinations != 0 ||
 			rcvStats.RatingPlans != 5 ||
-			rcvStats.RatingProfiles != 5 ||
-			rcvStats.Actions != 13 ||
-			rcvStats.DerivedChargers != 3 {
+			rcvStats.RatingProfiles != 0 ||
+			rcvStats.Actions != 0 ||
+			rcvStats.DerivedChargers != 0 {
 			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 		}
 	}

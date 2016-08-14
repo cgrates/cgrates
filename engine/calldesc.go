@@ -526,6 +526,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 		cd.TOR = utils.VOICE
 	}
 	err := cd.LoadRatingPlans()
+	//log.Print("ERR: ", err)
 	//log.Print("RI: ", utils.ToJSON(cd.RatingInfos))
 	if err != nil {
 		//utils.Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
