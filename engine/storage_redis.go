@@ -726,12 +726,11 @@ func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool) (ids [
 			return nil, utils.ErrNotFound
 		}
 	}
-	var values []string
-	if values, err = rs.db.Cmd("SMEMBERS", key).List(); len(values) == 0 || err != nil {
+	if ids, err = rs.db.Cmd("SMEMBERS", key).List(); len(ids) == 0 || err != nil {
 		cache2go.Set(key, nil)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, values)
+	cache2go.Set(key, ids)
 	return
 }
 
@@ -787,7 +786,9 @@ func (rs *RedisStorage) RemoveAlias(id string) (err error) {
 }
 
 func (rs *RedisStorage) UpdateReverseAlias(oldAl, newAl *Alias) error {
-
+	// FIXME: thi can be optimized
+	cache2go.RemPrefixKey(utils.REVERSE_ALIASES_PREFIX)
+	rs.SetReverseAlias(newAl)
 	return nil
 }
 

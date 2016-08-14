@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -174,6 +173,10 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 			*reply = err.Error()
 			return err
 		}
+		if err := am.accountingDb.SetReverseAlias(attr.Alias); err != nil {
+			*reply = err.Error()
+			return err
+		}
 	} else {
 		for _, value := range attr.Alias.Values {
 			found := false
@@ -203,11 +206,15 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 			*reply = err.Error()
 			return err
 		}
-		// FIXME!!!!
-		err := am.accountingDb.UpdateReverseAlias(oldAlias, oldAlias)
-		if err != nil {
+		if err := am.accountingDb.SetReverseAlias(oldAlias); err != nil {
+			*reply = err.Error()
 			return err
 		}
+		//FIXME: optimize by creating better update reverse alias
+		/*err := am.accountingDb.UpdateReverseAlias(oldAlias, oldAlias)
+		if err != nil {
+			return err
+		}*/
 	}
 
 	*reply = utils.OK
@@ -220,29 +227,6 @@ func (am *AliasHandler) RemoveAlias(al *Alias, reply *string) error {
 	if err := am.accountingDb.RemoveAlias(al.GetId()); err != nil {
 		*reply = err.Error()
 		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-
-func (am *AliasHandler) RemoveReverseAlias(attr *AttrReverseAlias, reply *string) error {
-	am.mu.Lock()
-	defer am.mu.Unlock()
-	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, ok := cache2go.Get(rKey); ok {
-		existingKeys := x.(map[interface{}]struct{})
-		for iKey := range existingKeys {
-			key := iKey.(string)
-			// get destination id
-			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
-			if len(elems) > 0 {
-				key = strings.Join(elems[:len(elems)-1], utils.CONCATENATED_KEY_SEP)
-			}
-			if err := am.accountingDb.RemoveAlias(key); err != nil {
-				*reply = err.Error()
-				return err
-			}
-		}
 	}
 	*reply = utils.OK
 	return nil
@@ -265,10 +249,9 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
-	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, ok := cache2go.Get(rKey); ok {
-		existingKeys := x.(map[string]struct{})
-		for key := range existingKeys {
+	rKey := attr.Alias + attr.Target + attr.Context
+	if ids, err := am.accountingDb.GetReverseAlias(rKey, false); err == nil {
+		for _, key := range ids {
 			// get destination id
 			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
 			var destID string
