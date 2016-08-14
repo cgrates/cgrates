@@ -65,10 +65,6 @@ func TestSetGetDerivedCharges(t *testing.T) {
 	if err := rds.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	// Try retrieving from cache, should not be in yet
-	if _, err := rds.GetDerivedChargers(keyCharger1, false); err == nil {
-		t.Error("DerivedCharger should not be in the cache")
-	}
 	// Retrieve from db
 	if rcvCharger, err := rds.GetDerivedChargers(keyCharger1, true); err != nil {
 		t.Error("Error when retrieving DerivedCHarger", err.Error())
