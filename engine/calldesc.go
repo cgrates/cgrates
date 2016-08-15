@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -47,20 +48,20 @@ func init() {
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	case "mongo":
-		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", nil, "", 10)
+		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", nil, "", 10)
+		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "redis":
-		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, "", 10)
+		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, "", 10)
+		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}

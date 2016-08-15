@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -92,35 +93,69 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 	return
 }
 
-func newLRUTTLStore() cacheLRUTTL {
-	return newLRUTTL(map[string]*cacheParam{
-		utils.DESTINATION_PREFIX:         &cacheParam{limit: 10000, expiration: 0},
-		utils.RATING_PLAN_PREFIX:         &cacheParam{limit: 10000, expiration: 0},
-		utils.RATING_PROFILE_PREFIX:      &cacheParam{limit: 10000, expiration: 0},
-		utils.ACTION_PREFIX:              &cacheParam{limit: 10000, expiration: 0},
-		utils.ACTION_PLAN_PREFIX:         &cacheParam{limit: 10000, expiration: 0},
-		utils.ACTION_TRIGGER_PREFIX:      &cacheParam{limit: 10000, expiration: 0},
-		utils.ALIASES_PREFIX:             &cacheParam{limit: 10000, expiration: 0},
-		utils.REVERSE_ALIASES_PREFIX:     &cacheParam{limit: 10000, expiration: 0},
-		utils.REVERSE_DESTINATION_PREFIX: &cacheParam{limit: 100000, expiration: 0},
-	})
-}
-
-type cacheParam struct {
-	limit      int
-	expiration time.Duration
-}
-
-func (ct *cacheParam) createCache() *Cache {
-	return NewLRUTTL(ct.limit, ct.expiration)
-}
-
 type cacheLRUTTL map[string]*Cache
 
-func newLRUTTL(types map[string]*cacheParam) cacheLRUTTL {
-	c := make(map[string]*Cache, len(types))
-	for prefix, param := range types {
-		c[prefix] = param.createCache()
+func newLRUTTL(cfg *config.CacheConfig) cacheLRUTTL {
+	c := make(map[string]*Cache)
+	if cfg != nil && cfg.Destinations != nil {
+		c[utils.DESTINATION_PREFIX] = NewLRUTTL(cfg.Destinations.Limit, cfg.Destinations.TTL)
+	} else {
+		c[utils.DESTINATION_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.ReverseDestinations != nil {
+		c[utils.REVERSE_DESTINATION_PREFIX] = NewLRUTTL(cfg.ReverseDestinations.Limit, cfg.ReverseDestinations.TTL)
+	} else {
+		c[utils.REVERSE_DESTINATION_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.RatingPlans != nil {
+		c[utils.RATING_PLAN_PREFIX] = NewLRUTTL(cfg.RatingPlans.Limit, cfg.RatingPlans.TTL)
+	} else {
+		c[utils.RATING_PLAN_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.RatingProfiles != nil {
+		c[utils.RATING_PROFILE_PREFIX] = NewLRUTTL(cfg.RatingProfiles.Limit, cfg.RatingProfiles.TTL)
+	} else {
+		c[utils.RATING_PROFILE_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.Lcr != nil {
+		c[utils.LCR_PREFIX] = NewLRUTTL(cfg.Lcr.Limit, cfg.Lcr.TTL)
+	} else {
+		c[utils.LCR_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.CdrStats != nil {
+		c[utils.CDR_STATS_PREFIX] = NewLRUTTL(cfg.CdrStats.Limit, cfg.CdrStats.TTL)
+	} else {
+		c[utils.CDR_STATS_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.Actions != nil {
+		c[utils.ACTION_PREFIX] = NewLRUTTL(cfg.Actions.Limit, cfg.Actions.TTL)
+	} else {
+		c[utils.ACTION_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.ActionPlans != nil {
+		c[utils.ACTION_PLAN_PREFIX] = NewLRUTTL(cfg.ActionPlans.Limit, cfg.ActionPlans.TTL)
+	} else {
+		c[utils.ACTION_PLAN_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.ActionTriggers != nil {
+		c[utils.ACTION_TRIGGER_PREFIX] = NewLRUTTL(cfg.ActionTriggers.Limit, cfg.ActionTriggers.TTL)
+	} else {
+		c[utils.ACTION_TRIGGER_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.SharedGroups != nil {
+		c[utils.SHARED_GROUP_PREFIX] = NewLRUTTL(cfg.SharedGroups.Limit, cfg.SharedGroups.TTL)
+	} else {
+		c[utils.SHARED_GROUP_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.Aliases != nil {
+		c[utils.ALIASES_PREFIX] = NewLRUTTL(cfg.Aliases.Limit, cfg.Aliases.TTL)
+	} else {
+		c[utils.ALIASES_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+	}
+	if cfg != nil && cfg.ReverseAliases != nil {
+		c[utils.REVERSE_ALIASES_PREFIX] = NewLRUTTL(cfg.ReverseAliases.Limit, cfg.ReverseAliases.TTL)
+	} else {
+		c[utils.REVERSE_ALIASES_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
 	}
 
 	return c

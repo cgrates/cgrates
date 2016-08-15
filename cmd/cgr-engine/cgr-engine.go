@@ -33,6 +33,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -533,6 +534,8 @@ func main() {
 		return
 	}
 	config.SetCgrConfig(cfg) // Share the config object
+	cache2go.NewCache(cfg.CacheConfig)
+
 	if *raterEnabled {
 		cfg.RALsEnabled = *raterEnabled
 	}
@@ -548,7 +551,7 @@ func main() {
 	var cdrDb engine.CdrStorage
 	if cfg.RALsEnabled || cfg.SchedulerEnabled || cfg.CDRStatsEnabled { // Only connect to dataDb if necessary
 		ratingDb, err = engine.ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort,
-			cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, cfg.CacheDumpDir, cfg.LoadHistorySize)
+			cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
@@ -558,7 +561,7 @@ func main() {
 	}
 	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled || cfg.AliasesServerEnabled || cfg.UserServerEnabled {
 		accountDb, err = engine.ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheDumpDir, cfg.LoadHistorySize)
+			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return

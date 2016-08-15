@@ -63,6 +63,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.InstanceID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SmGenericConfig = new(SmGenericConfig)
+	cfg.CacheConfig = new(CacheConfig)
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
@@ -191,7 +192,8 @@ type CGRConfig struct {
 	StorDBMaxOpenConns       int    // Maximum database connections opened
 	StorDBMaxIdleConns       int    // Maximum idle connections to keep opened
 	StorDBCDRSIndexes        []string
-	DBDataEncoding           string        // The encoding used to store object data in strings: <msgpack|json>
+	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
+	CacheConfig              *CacheConfig
 	RPCJSONListen            string        // RPC JSON listening address
 	RPCGOBListen             string        // RPC GOB listening address
 	HTTPListen               string        // HTTP listening address
@@ -212,7 +214,6 @@ type CGRConfig struct {
 	HttpFailedDir            string          // Directory path where we store failed http requests
 	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
-	CacheDumpDir             string          // cache dump for faster start (leave empty to disable)b
 	RALsEnabled              bool            // start standalone server (no balancer)
 	RALsBalancer             string          // balancer address host:port
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
@@ -462,6 +463,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 
 	// Load sections out of JSON config, stop on error
 	jsnGeneralCfg, err := jsnCfg.GeneralJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	// Load sections out of JSON config, stop on error
+	jsnCacheCfg, err := jsnCfg.CacheJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -719,8 +726,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 				return err
 			}
 		}
-		if jsnGeneralCfg.Cache_dump_dir != nil {
-			self.CacheDumpDir = *jsnGeneralCfg.Cache_dump_dir
+	}
+
+	if jsnCacheCfg != nil {
+		if err := self.CacheConfig.loadFromJsonCfg(jsnCacheCfg); err != nil {
+			return err
 		}
 	}
 

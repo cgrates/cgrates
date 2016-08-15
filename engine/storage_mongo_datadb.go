@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -88,7 +89,7 @@ type MongoStorage struct {
 	session         *mgo.Session
 	db              string
 	ms              Marshaler
-	cacheDumpDir    string
+	cacheCfg        *config.CacheConfig
 	loadHistorySize int
 }
 
@@ -97,7 +98,7 @@ func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
 	return sessionCopy, sessionCopy.DB(ms.db).C(col)
 }
 
-func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, cacheDumpDir string, loadHistorySize int) (*MongoStorage, error) {
+func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, cacheCfg *config.CacheConfig, loadHistorySize int) (*MongoStorage, error) {
 
 	// We need this object to establish a session to our MongoDB.
 	/*address := fmt.Sprintf("%s:%s", host, port)
@@ -287,7 +288,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
 		return nil, err
 	}
-	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler(), cacheDumpDir: cacheDumpDir, loadHistorySize: loadHistorySize}, err
+	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler(), cacheCfg: cacheCfg, loadHistorySize: loadHistorySize}, err
 }
 
 func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool) {
@@ -386,15 +387,81 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
 }
 
 func (ms *MongoStorage) PreloadRatingCache() error {
-	err := ms.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX)
-	if err != nil {
-		return err
+	if ms.cacheCfg == nil {
+		return nil
+	}
+	if ms.cacheCfg.Destinations != nil && ms.cacheCfg.Destinations.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if ms.cacheCfg.ReverseDestinations != nil && ms.cacheCfg.ReverseDestinations.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if ms.cacheCfg.RatingPlans != nil && ms.cacheCfg.RatingPlans.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if ms.cacheCfg.RatingProfiles != nil && ms.cacheCfg.RatingProfiles.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.Lcr != nil && ms.cacheCfg.Lcr.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.LCR_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.CdrStats != nil && ms.cacheCfg.CdrStats.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.CDR_STATS_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.Actions != nil && ms.cacheCfg.Actions.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.ACTION_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.ActionPlans != nil && ms.cacheCfg.ActionPlans.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.ActionTriggers != nil && ms.cacheCfg.ActionTriggers.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.ACTION_TRIGGER_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.SharedGroups != nil && ms.cacheCfg.SharedGroups.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.SHARED_GROUP_PREFIX); err != nil {
+			return err
+		}
 	}
 	// add more prefixes if needed
 	return nil
 }
 
 func (ms *MongoStorage) PreloadAccountingCache() error {
+	if ms.cacheCfg == nil {
+		return nil
+	}
+	if ms.cacheCfg.Aliases != nil && ms.cacheCfg.Aliases.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.ALIASES_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if ms.cacheCfg.ReverseAliases != nil && ms.cacheCfg.ReverseAliases.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

@@ -28,15 +28,16 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type MapStorage struct {
-	dict         storage
-	tasks        [][]byte
-	ms           Marshaler
-	mu           sync.RWMutex
-	cacheDumpDir string
+	dict     storage
+	tasks    [][]byte
+	ms       Marshaler
+	mu       sync.RWMutex
+	cacheCfg *config.CacheConfig
 }
 
 type storage map[string][]byte
@@ -71,11 +72,11 @@ func (s storage) smembers(key string, ms Marshaler) (idMap utils.StringMap, ok b
 }
 
 func NewMapStorage() (*MapStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(), cacheDumpDir: "/tmp/cgrates"}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(), cacheCfg: &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}}, nil
 }
 
 func NewMapStorageJson() (*MapStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: new(JSONBufMarshaler), cacheDumpDir: "/tmp/cgrates"}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: new(JSONBufMarshaler), cacheCfg: &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}}, nil
 }
 
 func (ms *MapStorage) Close() {}
@@ -134,15 +135,81 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 }
 
 func (ms *MapStorage) PreloadRatingCache() error {
-	err := ms.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX)
-	if err != nil {
-		return err
+	if ms.cacheCfg == nil {
+		return nil
+	}
+	if ms.cacheCfg.Destinations != nil && ms.cacheCfg.Destinations.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if ms.cacheCfg.ReverseDestinations != nil && ms.cacheCfg.ReverseDestinations.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if ms.cacheCfg.RatingPlans != nil && ms.cacheCfg.RatingPlans.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if ms.cacheCfg.RatingProfiles != nil && ms.cacheCfg.RatingProfiles.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.Lcr != nil && ms.cacheCfg.Lcr.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.LCR_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.CdrStats != nil && ms.cacheCfg.CdrStats.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.CDR_STATS_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.Actions != nil && ms.cacheCfg.Actions.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.ACTION_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.ActionPlans != nil && ms.cacheCfg.ActionPlans.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.ActionTriggers != nil && ms.cacheCfg.ActionTriggers.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.ACTION_TRIGGER_PREFIX); err != nil {
+			return err
+		}
+	}
+	if ms.cacheCfg.SharedGroups != nil && ms.cacheCfg.SharedGroups.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.SHARED_GROUP_PREFIX); err != nil {
+			return err
+		}
 	}
 	// add more prefixes if needed
 	return nil
 }
 
 func (ms *MapStorage) PreloadAccountingCache() error {
+	if ms.cacheCfg == nil {
+		return nil
+	}
+	if ms.cacheCfg.Aliases != nil && ms.cacheCfg.Aliases.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.ALIASES_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if ms.cacheCfg.ReverseAliases != nil && ms.cacheCfg.ReverseAliases.Precache {
+		if err := ms.PreloadCacheForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -803,7 +870,7 @@ func (ms *MapStorage) RemoveAlias(key string) error {
 				ms.dict.srem(rKey, tmpKey, ms.ms)
 
 				cache2go.RemKey(rKey)
-				/*_, err = rs.GetReverseAlias(rKey, true) // recache
+				/*_, err = ms.GetReverseAlias(rKey, true) // recache
 				if err != nil {
 					return err
 				}*/

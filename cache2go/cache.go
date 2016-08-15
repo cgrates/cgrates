@@ -1,7 +1,11 @@
 //Simple caching library with expiration capabilities
 package cache2go
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/cgrates/cgrates/config"
+)
 
 const (
 	PREFIX_LEN   = 4
@@ -14,6 +18,7 @@ const (
 var (
 	mux   sync.RWMutex
 	cache cacheStore
+	cfg   *config.CacheConfig
 	// transaction stuff
 	transactionBuffer []*transactionItem
 	transactionMux    sync.Mutex
@@ -28,11 +33,12 @@ type transactionItem struct {
 }
 
 func init() {
-	if DOUBLE_CACHE {
-		cache = newLRUTTLStore()
-	} else {
-		cache = newSimpleStore()
-	}
+	NewCache(nil)
+}
+
+func NewCache(cacheCfg *config.CacheConfig) {
+	cfg = cacheCfg
+	cache = newLRUTTL(cfg)
 }
 
 func BeginTransaction() {
@@ -117,11 +123,7 @@ func RemPrefixKey(prefix string) {
 func Flush() {
 	mux.Lock()
 	defer mux.Unlock()
-	if DOUBLE_CACHE {
-		cache = newDoubleStore()
-	} else {
-		cache = newSimpleStore()
-	}
+	cache = newLRUTTL(cfg)
 }
 
 func CountEntries(prefix string) (result int) {

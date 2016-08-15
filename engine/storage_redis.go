@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
@@ -39,11 +40,11 @@ var (
 type RedisStorage struct {
 	db              *pool.Pool
 	ms              Marshaler
-	cacheDumpDir    string
+	cacheCfg        *config.CacheConfig
 	loadHistorySize int
 }
 
-func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int, cacheDumpDir string, loadHistorySize int) (*RedisStorage, error) {
+func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int, cacheCfg *config.CacheConfig, loadHistorySize int) (*RedisStorage, error) {
 	df := func(network, addr string) (*redis.Client, error) {
 		client, err := redis.Dial(network, addr)
 		if err != nil {
@@ -75,7 +76,7 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns i
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
-	return &RedisStorage{db: p, ms: mrshler, cacheDumpDir: cacheDumpDir, loadHistorySize: loadHistorySize}, nil
+	return &RedisStorage{db: p, ms: mrshler, cacheCfg: cacheCfg, loadHistorySize: loadHistorySize}, nil
 }
 
 func (rs *RedisStorage) Close() {
@@ -87,16 +88,81 @@ func (rs *RedisStorage) Flush(ignore string) error {
 }
 
 func (rs *RedisStorage) PreloadRatingCache() error {
-	err := rs.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX)
-	if err != nil {
-		return err
+	if rs.cacheCfg == nil {
+		return nil
+	}
+	if rs.cacheCfg.Destinations != nil && rs.cacheCfg.Destinations.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if rs.cacheCfg.ReverseDestinations != nil && rs.cacheCfg.ReverseDestinations.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if rs.cacheCfg.RatingPlans != nil && rs.cacheCfg.RatingPlans.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if rs.cacheCfg.RatingProfiles != nil && rs.cacheCfg.RatingProfiles.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
+			return err
+		}
+	}
+	if rs.cacheCfg.Lcr != nil && rs.cacheCfg.Lcr.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.LCR_PREFIX); err != nil {
+			return err
+		}
+	}
+	if rs.cacheCfg.CdrStats != nil && rs.cacheCfg.CdrStats.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.CDR_STATS_PREFIX); err != nil {
+			return err
+		}
+	}
+	if rs.cacheCfg.Actions != nil && rs.cacheCfg.Actions.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.ACTION_PREFIX); err != nil {
+			return err
+		}
+	}
+	if rs.cacheCfg.ActionPlans != nil && rs.cacheCfg.ActionPlans.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+			return err
+		}
+	}
+	if rs.cacheCfg.ActionTriggers != nil && rs.cacheCfg.ActionTriggers.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.ACTION_TRIGGER_PREFIX); err != nil {
+			return err
+		}
+	}
+	if rs.cacheCfg.SharedGroups != nil && rs.cacheCfg.SharedGroups.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.SHARED_GROUP_PREFIX); err != nil {
+			return err
+		}
 	}
 	// add more prefixes if needed
 	return nil
 }
 
 func (rs *RedisStorage) PreloadAccountingCache() error {
-	// add more prefixes if needed
+	if rs.cacheCfg == nil {
+		return nil
+	}
+	if rs.cacheCfg.Aliases != nil && rs.cacheCfg.Aliases.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.ALIASES_PREFIX); err != nil {
+			return err
+		}
+	}
+
+	if rs.cacheCfg.ReverseAliases != nil && rs.cacheCfg.ReverseAliases.Precache {
+		if err := rs.PreloadCacheForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
