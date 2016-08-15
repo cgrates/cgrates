@@ -29,7 +29,7 @@ type transactionItem struct {
 
 func init() {
 	if DOUBLE_CACHE {
-		cache = newDoubleStore()
+		cache = newLRUTTLStore()
 	} else {
 		cache = newSimpleStore()
 	}

@@ -24,7 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"log"
 	"net/smtp"
 	"path"
 	"reflect"
@@ -567,7 +566,6 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		}
 		//var dirtyAps []string
 		for key, ap := range allAPs {
-			log.Print(ap)
 			if _, exists := ap.AccountIDs[accID]; !exists {
 				// save action plan
 				delete(ap.AccountIDs, key)

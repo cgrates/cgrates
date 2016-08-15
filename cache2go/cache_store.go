@@ -92,6 +92,20 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 	return
 }
 
+func newLRUTTLStore() cacheLRUTTL {
+	return newLRUTTL(map[string]*cacheParam{
+		utils.DESTINATION_PREFIX:         &cacheParam{limit: 10000, expiration: 0},
+		utils.RATING_PLAN_PREFIX:         &cacheParam{limit: 10000, expiration: 0},
+		utils.RATING_PROFILE_PREFIX:      &cacheParam{limit: 10000, expiration: 0},
+		utils.ACTION_PREFIX:              &cacheParam{limit: 10000, expiration: 0},
+		utils.ACTION_PLAN_PREFIX:         &cacheParam{limit: 10000, expiration: 0},
+		utils.ACTION_TRIGGER_PREFIX:      &cacheParam{limit: 10000, expiration: 0},
+		utils.ALIASES_PREFIX:             &cacheParam{limit: 10000, expiration: 0},
+		utils.REVERSE_ALIASES_PREFIX:     &cacheParam{limit: 10000, expiration: 0},
+		utils.REVERSE_DESTINATION_PREFIX: &cacheParam{limit: 100000, expiration: 0},
+	})
+}
+
 type cacheParam struct {
 	limit      int
 	expiration time.Duration
@@ -116,7 +130,7 @@ func (cs cacheLRUTTL) Put(key string, value interface{}) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	mp, ok := cs[prefix]
 	if !ok {
-		mp = NewLRUTTL(1000, 0) //FixME
+		mp = NewLRUTTL(10000, 0) //FixME
 		cs[prefix] = mp
 	}
 	mp.Set(key, value)
