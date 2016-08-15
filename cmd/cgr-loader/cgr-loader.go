@@ -78,7 +78,6 @@ var (
 	runId           = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
 	timezone        = flag.String("timezone", cgrConfig.DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
-	cacheDumpDir    = flag.String("cache_dump_dir", cgrConfig.CacheDumpDir, "Folder to store cache dump for fast reload")
 )
 
 func main() {
@@ -202,8 +201,8 @@ func main() {
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
-				*tpdb_user, *tpdb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
+				*tpdb_user, *tpdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		} else if *toStorDb { // Import from csv files to storDb
@@ -211,8 +210,8 @@ func main() {
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		} else { // Default load from csv files to dataDb
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
-				*tpdb_user, *tpdb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
+				*tpdb_user, *tpdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 		}
 		// Defer databases opened to be closed when we are done
 		for _, db := range []engine.Storage{ratingDb, accountDb, storDb} {
