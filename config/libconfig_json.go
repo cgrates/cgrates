@@ -214,6 +214,27 @@ type HaPoolJsonCfg struct {
 	Transport *string
 }
 
+type CacheParamJsonCfg struct {
+	Limit    *int
+	Ttl      *string
+	Precache *bool
+}
+
+type CacheJsonCfg struct {
+	Destinations         *CacheParamJsonCfg
+	Reverse_destinations *CacheParamJsonCfg
+	Rating_plans         *CacheParamJsonCfg
+	Rating_profiles      *CacheParamJsonCfg
+	Lcr                  *CacheParamJsonCfg
+	Cdr_stats            *CacheParamJsonCfg
+	Actions              *CacheParamJsonCfg
+	Action_plans         *CacheParamJsonCfg
+	Action_triggers      *CacheParamJsonCfg
+	Shared_groups        *CacheParamJsonCfg
+	Aliases              *CacheParamJsonCfg
+	Reverse_aliases      *CacheParamJsonCfg
+}
+
 // Represents one connection instance towards FreeSWITCH
 type FsConnJsonCfg struct {
 	Address    *string

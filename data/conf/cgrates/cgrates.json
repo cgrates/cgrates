@@ -27,6 +27,20 @@
 //  "cache_dump_dir": "/var/lib/cgrates/cache_dump"                  // cache dump for faster start (leave empty to disable)
 // },
 
+    "cache":{
+        "destinations": {"limit": 10000, "ttl":0, "precache": false},
+        "reverse_destinations": {"limit": 10000, "ttl":0, "precache": false},
+        "rating_plans": {"limit": 10000, "ttl":0,"precache": true},
+        "rating_profiles": {"limit": 10000, "ttl":0, "precache": false},
+        "lcr": {"limit": 10000, "ttl":0, "precache": false},
+        "cdr_stats": {"limit": 10000, "ttl":0, "precache": false},
+        "actions": {"limit": 10000, "ttl":0, "precache": false},
+        "action_plans": {"limit": 10000, "ttl":0, "precache": false},
+        "action_triggers": {"limit": 10000, "ttl":0, "precache": false},
+        "shared_groups": {"limit": 10000, "ttl":0, "precache": false},
+        "aliases": {"limit": 10000, "ttl":0, "precache": false},
+        "reverse_aliases": {"limit": 10000, "ttl":0, "precache": false},
+    },
 
 // "listen": {
 // 	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address

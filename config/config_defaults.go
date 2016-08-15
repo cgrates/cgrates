@@ -49,6 +49,20 @@ const CGRATES_CFG_JSON = `
 
 },
 
+"cache":{
+    "destinations": {"limit": 10000, "ttl":"0s", "precache": false},
+    "reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": false},
+    "rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
+    "rating_profiles": {"limit": 10000, "ttl":"0s", "precache": false},
+    "lcr": {"limit": 10000, "ttl":"0s", "precache": false},
+    "cdr_stats": {"limit": 10000, "ttl":"0s", "precache": false},
+    "actions": {"limit": 10000, "ttl":"0s", "precache": false},
+    "action_plans": {"limit": 10000, "ttl":"0s", "precache": false},
+    "action_triggers": {"limit": 10000, "ttl":"0s", "precache": false},
+    "shared_groups": {"limit": 10000, "ttl":"0s", "precache": false},
+    "aliases": {"limit": 10000, "ttl":"0s", "precache": false},
+    "reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": false},
+},
 
 "listen": {
 	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
@@ -386,7 +400,7 @@ const CGRATES_CFG_JSON = `
 
 "rls": {
 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
-	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>					
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
 	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|$dur>
 },

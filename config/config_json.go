@@ -28,6 +28,7 @@ import (
 
 const (
 	GENERAL_JSN          = "general"
+	CACHE_JSN            = "cache"
 	LISTEN_JSN           = "listen"
 	TPDB_JSN             = "tariffplan_db"
 	DATADB_JSN           = "data_db"
@@ -87,6 +88,18 @@ func (self CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(GeneralJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) CacheJsonCfg() (*CacheJsonCfg, error) {
+	rawCfg, hasKey := self[CACHE_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(CacheJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

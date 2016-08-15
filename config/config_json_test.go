@@ -64,6 +64,28 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 	}
 }
 
+func TestCacheJsonCfg(t *testing.T) {
+	eCfg := &CacheJsonCfg{
+		Destinations:         &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Reverse_destinations: &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Rating_plans:         &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(true)},
+		Rating_profiles:      &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Lcr:                  &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Cdr_stats:            &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Actions:              &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Action_plans:         &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Action_triggers:      &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Shared_groups:        &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Aliases:              &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Reverse_aliases:      &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+	}
+	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, gCfg) {
+		t.Error("Received: ", utils.ToIJSON(gCfg))
+	}
+}
+
 func TestDfListenJsonCfg(t *testing.T) {
 	eCfg := &ListenJsonCfg{
 		Rpc_json: utils.StringPointer("127.0.0.1:2012"),
