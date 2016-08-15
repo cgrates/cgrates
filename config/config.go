@@ -899,19 +899,44 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.CdrcProfiles = make(map[string][]*CdrcConfig)
 		}
 		for _, jsnCrc1Cfg := range jsnCdrcCfg {
-			if _, hasDir := self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir]; !hasDir {
-				self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir] = make([]*CdrcConfig, 0)
+			if jsnCrc1Cfg.Id == nil || *jsnCrc1Cfg.Id == "" {
+				return errors.New("CDRC profile without an id")
 			}
+			if *jsnCrc1Cfg.Id == utils.META_DEFAULT {
+				if self.dfltCdrcProfile == nil {
+					self.dfltCdrcProfile = new(CdrcConfig)
+				}
+			}
+			indxFound := -1 // Will be different than -1 if an instance with same id will be found
+			pathFound := "" // Will be populated with the path where slice of cfgs was found
 			var cdrcInstCfg *CdrcConfig
-			if *jsnCrc1Cfg.Id == utils.META_DEFAULT && self.dfltCdrcProfile == nil {
-				cdrcInstCfg = new(CdrcConfig)
-			} else {
-				cdrcInstCfg = self.dfltCdrcProfile.Clone() // Clone default so we do not inherit pointers
+			for path := range self.CdrcProfiles {
+				for i := range self.CdrcProfiles[path] {
+					if self.CdrcProfiles[path][i].ID == *jsnCrc1Cfg.Id {
+						indxFound = i
+						pathFound = path
+						cdrcInstCfg = self.CdrcProfiles[path][i]
+						break
+					}
+				}
+			}
+			if cdrcInstCfg == nil {
+				cdrcInstCfg = self.dfltCdrcProfile.Clone()
 			}
 			if err := cdrcInstCfg.loadFromJsonCfg(jsnCrc1Cfg); err != nil {
 				return err
 			}
-			self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir] = append(self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir], cdrcInstCfg)
+			if cdrcInstCfg.CdrInDir == "" {
+				return errors.New("CDRC profile without cdr_in_dir")
+			}
+			if _, hasDir := self.CdrcProfiles[cdrcInstCfg.CdrInDir]; !hasDir {
+				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = make([]*CdrcConfig, 0)
+			}
+			if indxFound != -1 { // Replace previous config so we have inheritance
+				self.CdrcProfiles[pathFound][indxFound] = cdrcInstCfg
+			} else {
+				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = append(self.CdrcProfiles[cdrcInstCfg.CdrInDir], cdrcInstCfg)
+			}
 		}
 	}
 	if jsnSmGenericCfg != nil {

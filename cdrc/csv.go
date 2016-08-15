@@ -173,6 +173,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 				if cfgFieldRSR.IsStatic() {
 					fieldVal += cfgFieldRSR.ParseValue("")
 				} else { // Dynamic value extracted using index
+					utils.Logger.Debug(fmt.Sprintf("### Checking field with configuration: %+v", cfgFieldRSR))
 					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
 						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
 					} else {

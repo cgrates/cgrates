@@ -162,6 +162,10 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc.MaxOpenFiles = self.MaxOpenFiles
 	clnCdrc.CdrInDir = self.CdrInDir
 	clnCdrc.CdrOutDir = self.CdrOutDir
+	clnCdrc.CDRPath = make(utils.HierarchyPath, len(self.CDRPath))
+	for i, path := range self.CDRPath {
+		clnCdrc.CDRPath[i] = path
+	}
 	clnCdrc.CdrSourceId = self.CdrSourceId
 	clnCdrc.PartialRecordCache = self.PartialRecordCache
 	clnCdrc.PartialCacheExpiryAction = self.PartialCacheExpiryAction
