@@ -69,7 +69,7 @@ func TestV2CdrsMongoInjectUnratedCdr(t *testing.T) {
 		return
 	}
 	mongoDb, err := engine.NewMongoStorage(cdrsMongoCfg.StorDBHost, cdrsMongoCfg.StorDBPort, cdrsMongoCfg.StorDBName,
-		cdrsMongoCfg.StorDBUser, cdrsMongoCfg.StorDBPass, cdrsMongoCfg.StorDBCDRSIndexes, "", 10)
+		cdrsMongoCfg.StorDBUser, cdrsMongoCfg.StorDBPass, cdrsMongoCfg.StorDBCDRSIndexes, nil, 10)
 	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
