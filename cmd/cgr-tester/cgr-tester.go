@@ -60,19 +60,18 @@ var (
 	subject         = flag.String("subject", "1001", "The rating subject to use in queries.")
 	destination     = flag.String("destination", "1002", "The destination to use in queries.")
 	json            = flag.Bool("json", false, "Use JSON RPC")
-	cacheDumpDir    = flag.String("cache_dump_dir", cgrConfig.CacheDumpDir, "Folder to store cache dump for fast reload")
 	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
 	nilDuration     = time.Duration(0)
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
-	ratingDb, err := engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, *ratingdb_user, *ratingdb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
+	ratingDb, err := engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, *ratingdb_user, *ratingdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to rating database: %s", err.Error())
 	}
 	defer ratingDb.Close()
 	engine.SetRatingStorage(ratingDb)
-	accountDb, err := engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding, *cacheDumpDir, *loadHistorySize)
+	accountDb, err := engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to accounting database: %s", err.Error())
 	}
