@@ -3,7 +3,6 @@ package cache2go
 
 import (
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -100,62 +99,62 @@ func newLRUTTL(cfg *config.CacheConfig) cacheLRUTTL {
 	if cfg != nil && cfg.Destinations != nil {
 		c[utils.DESTINATION_PREFIX] = NewLRUTTL(cfg.Destinations.Limit, cfg.Destinations.TTL)
 	} else {
-		c[utils.DESTINATION_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.DESTINATION_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.ReverseDestinations != nil {
 		c[utils.REVERSE_DESTINATION_PREFIX] = NewLRUTTL(cfg.ReverseDestinations.Limit, cfg.ReverseDestinations.TTL)
 	} else {
-		c[utils.REVERSE_DESTINATION_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.REVERSE_DESTINATION_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.RatingPlans != nil {
 		c[utils.RATING_PLAN_PREFIX] = NewLRUTTL(cfg.RatingPlans.Limit, cfg.RatingPlans.TTL)
 	} else {
-		c[utils.RATING_PLAN_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.RATING_PLAN_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.RatingProfiles != nil {
 		c[utils.RATING_PROFILE_PREFIX] = NewLRUTTL(cfg.RatingProfiles.Limit, cfg.RatingProfiles.TTL)
 	} else {
-		c[utils.RATING_PROFILE_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.RATING_PROFILE_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.Lcr != nil {
 		c[utils.LCR_PREFIX] = NewLRUTTL(cfg.Lcr.Limit, cfg.Lcr.TTL)
 	} else {
-		c[utils.LCR_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.LCR_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.CdrStats != nil {
 		c[utils.CDR_STATS_PREFIX] = NewLRUTTL(cfg.CdrStats.Limit, cfg.CdrStats.TTL)
 	} else {
-		c[utils.CDR_STATS_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.CDR_STATS_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.Actions != nil {
 		c[utils.ACTION_PREFIX] = NewLRUTTL(cfg.Actions.Limit, cfg.Actions.TTL)
 	} else {
-		c[utils.ACTION_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.ACTION_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.ActionPlans != nil {
 		c[utils.ACTION_PLAN_PREFIX] = NewLRUTTL(cfg.ActionPlans.Limit, cfg.ActionPlans.TTL)
 	} else {
-		c[utils.ACTION_PLAN_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.ACTION_PLAN_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.ActionTriggers != nil {
 		c[utils.ACTION_TRIGGER_PREFIX] = NewLRUTTL(cfg.ActionTriggers.Limit, cfg.ActionTriggers.TTL)
 	} else {
-		c[utils.ACTION_TRIGGER_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.ACTION_TRIGGER_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.SharedGroups != nil {
 		c[utils.SHARED_GROUP_PREFIX] = NewLRUTTL(cfg.SharedGroups.Limit, cfg.SharedGroups.TTL)
 	} else {
-		c[utils.SHARED_GROUP_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.SHARED_GROUP_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.Aliases != nil {
 		c[utils.ALIASES_PREFIX] = NewLRUTTL(cfg.Aliases.Limit, cfg.Aliases.TTL)
 	} else {
-		c[utils.ALIASES_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.ALIASES_PREFIX] = NewLRUTTL(10000, 0)
 	}
 	if cfg != nil && cfg.ReverseAliases != nil {
 		c[utils.REVERSE_ALIASES_PREFIX] = NewLRUTTL(cfg.ReverseAliases.Limit, cfg.ReverseAliases.TTL)
 	} else {
-		c[utils.REVERSE_ALIASES_PREFIX] = NewLRUTTL(10000, 24*time.Hour)
+		c[utils.REVERSE_ALIASES_PREFIX] = NewLRUTTL(10000, 0)
 	}
 
 	return c
@@ -165,7 +164,7 @@ func (cs cacheLRUTTL) Put(key string, value interface{}) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	mp, ok := cs[prefix]
 	if !ok {
-		mp = NewLRUTTL(10000, 0) //FixME
+		mp = NewLRUTTL(10000, 0)
 		cs[prefix] = mp
 	}
 	mp.Set(key, value)
