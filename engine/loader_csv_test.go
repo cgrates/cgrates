@@ -701,7 +701,7 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"b457f86d": &RIRate{
+			"ebefae11": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -715,7 +715,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R1",
 			},
-			"16e9ee19": &RIRate{
+			"fac0138e": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -729,7 +729,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R2",
 			},
-			"638dc1ab": &RIRate{
+			"781bfa03": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -743,7 +743,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R3",
 			},
-			"3913037f": &RIRate{
+			"f692daa4": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -762,34 +762,34 @@ func TestLoadRatingPlans(t *testing.T) {
 			"GERMANY": []*RPRate{
 				&RPRate{
 					Timing: "ec8ed374",
-					Rating: "b457f86d",
+					Rating: "ebefae11",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "83429156",
-					Rating: "16e9ee19",
+					Rating: "fac0138e",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "a60bfb13",
-					Rating: "16e9ee19",
+					Rating: "fac0138e",
 					Weight: 10,
 				},
 			},
 			"GERMANY_O2": []*RPRate{
 				&RPRate{
 					Timing: "ec8ed374",
-					Rating: "16e9ee19",
+					Rating: "fac0138e",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "83429156",
-					Rating: "638dc1ab",
+					Rating: "781bfa03",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "a60bfb13",
-					Rating: "638dc1ab",
+					Rating: "781bfa03",
 					Weight: 10,
 				},
 			},
@@ -803,7 +803,7 @@ func TestLoadRatingPlans(t *testing.T) {
 			"URG": []*RPRate{
 				&RPRate{
 					Timing: "2d9ca64",
-					Rating: "3913037f",
+					Rating: "f692daa4",
 					Weight: 20,
 				},
 			},
