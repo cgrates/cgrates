@@ -58,7 +58,7 @@ func (c *Cache) cleanExpired() {
 		c.mu.RUnlock()
 
 		en := e.Value.(*entry)
-		if en.timestamp.Add(c.expiration).After(time.Now()) {
+		if time.Now().After(en.timestamp.Add(c.expiration)) {
 			c.mu.Lock()
 			c.removeElement(e)
 			c.mu.Unlock()
