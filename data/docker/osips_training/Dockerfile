@@ -11,7 +11,7 @@ RUN apt-get -y update && apt-get -y install git redis-server mysql-server python
 RUN useradd -c CGRateS -d /var/run/cgrates -s /bin/false -r cgrates
 
 # install golang
-RUN wget -qO- https://storage.googleapis.com/golang/go1.6.3.linux-amd64.tar.gz | tar xzf - -C /root/
+RUN wget -qO- https://storage.googleapis.com/golang/go1.7.linux-amd64.tar.gz | tar xzf - -C /root/
 
 #install glide
 RUN GOROOT=/root/go GOPATH=/root/code /root/go/bin/go get github.com/Masterminds/glide
