@@ -189,7 +189,7 @@ func (cs cacheLRUTTL) GetKeysForPrefix(prefix string) (keys []string) {
 			}
 		}
 	}
-	return nil
+	return
 }
 
 // faster to access
