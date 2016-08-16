@@ -130,7 +130,7 @@ CREATE TABLE `tp_shared_groups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
-  `account` varchar(24) NOT NULL,
+  `account` varchar(64) NOT NULL,
   `strategy` varchar(24) NOT NULL,
   `rating_subject` varchar(24) NOT NULL,
   `created_at` TIMESTAMP,
@@ -258,7 +258,7 @@ CREATE TABLE tp_lcr_rules (
   `direction` varchar(8) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `category` varchar(32) NOT NULL,
-  `account` varchar(24) NOT NULL,
+  `account` varchar(64) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `destination_tag` varchar(64) NOT NULL,
   `rp_category` varchar(32) NOT NULL,
@@ -283,7 +283,7 @@ CREATE TABLE tp_derived_chargers (
   `direction` varchar(8) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `category` varchar(32) NOT NULL,
-  `account` varchar(24) NOT NULL,
+  `account` varchar(64) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `destination_ids` varchar(64) NOT NULL,
   `runid`  varchar(24) NOT NULL,
@@ -292,8 +292,8 @@ CREATE TABLE tp_derived_chargers (
   `direction_field`  varchar(24) NOT NULL,
   `tenant_field`  varchar(24) NOT NULL,
   `category_field`  varchar(24) NOT NULL,
-  `account_field`  varchar(24) NOT NULL,
-  `subject_field`  varchar(24) NOT NULL,
+  `account_field`  varchar(64) NOT NULL,
+  `subject_field`  varchar(64) NOT NULL,
   `destination_field`  varchar(24) NOT NULL,
   `setup_time_field`  varchar(24) NOT NULL,
   `pdd_field`  varchar(24) NOT NULL,
@@ -330,7 +330,7 @@ CREATE TABLE tp_cdr_stats (
   `directions` varchar(8) NOT NULL,
   `tenants` varchar(64) NOT NULL,
   `categories` varchar(32) NOT NULL,
-  `accounts` varchar(24) NOT NULL,
+  `accounts` varchar(255) NOT NULL,
   `subjects` varchar(64) NOT NULL,
   `destination_ids` varchar(64) NOT NULL,
   `pdd_interval` varchar(64) NOT NULL,
@@ -338,7 +338,7 @@ CREATE TABLE tp_cdr_stats (
   `suppliers` varchar(64) NOT NULL,
   `disconnect_causes` varchar(64) NOT NULL,
   `mediation_runids` varchar(64) NOT NULL,
-  `rated_accounts` varchar(64) NOT NULL,
+  `rated_accounts` varchar(255) NOT NULL,
   `rated_subjects` varchar(64) NOT NULL,
   `cost_interval` varchar(24) NOT NULL,
   `action_triggers` varchar(64) NOT NULL,
@@ -408,6 +408,6 @@ CREATE TABLE tp_resource_limits (
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_resource_limits` (`tpid`, `tag`)
-);  
+);
 
 

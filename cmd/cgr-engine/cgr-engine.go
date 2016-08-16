@@ -97,7 +97,9 @@ func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConn
 			}
 
 			if len(enabledCfgs) != 0 {
-				go startCdrc(internalCdrSChan, internalRaterChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cdrcChildrenChan, exitChan)
+				go startCdrc(internalCdrSChan, internalRaterChan, enabledCfgs, cfg.HttpSkipTlsVerify, cdrcChildrenChan, exitChan)
+			} else {
+				utils.Logger.Info("<CDRC> No enabled CDRC clients")
 			}
 		}
 		cdrcInitialized = true // Initialized

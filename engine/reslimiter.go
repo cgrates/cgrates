@@ -302,7 +302,7 @@ func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interf
 	return nil
 }
 
-// Alias API for external usage
+// Alias API for external use
 func (rls *ResourceLimiterService) ResourceLimitsForEvent(ev map[string]interface{}, reply *[]*ResourceLimit) error {
 	return rls.V1ResourceLimitsForEvent(ev, reply)
 }
