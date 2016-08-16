@@ -191,7 +191,6 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 			t.Error("Error getting reverse alias: ", aliasKeys, ala.GetId()+utils.ANY)
 		}
 	} else {
-		t.Log(utils.ToIJSON(cache2go.GetAllEntries(utils.REVERSE_ALIASES_PREFIX)))
 		t.Error("Error getting reverse alias: ", err)
 	}
 	accountingStorage.GetReverseAlias("aaa"+"Account"+"*other", false)

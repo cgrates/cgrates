@@ -19,7 +19,7 @@ type Cache struct {
 
 	lruIndex   *list.List
 	ttlIndex   []*list.Element
-	cache      map[interface{}]*list.Element
+	cache      map[string]*list.Element
 	expiration time.Duration
 }
 
@@ -38,7 +38,7 @@ func NewLRUTTL(maxEntries int, expire time.Duration) *Cache {
 		expiration: expire,
 		lruIndex:   list.New(),
 		ttlIndex:   make([]*list.Element, 0),
-		cache:      make(map[interface{}]*list.Element),
+		cache:      make(map[string]*list.Element),
 	}
 	if c.expiration > 0 {
 		go c.cleanExpired()
@@ -49,11 +49,12 @@ func NewLRUTTL(maxEntries int, expire time.Duration) *Cache {
 // cleans expired entries performing minimal checks
 func (c *Cache) cleanExpired() {
 	for {
+		c.mu.RLock()
 		if len(c.ttlIndex) == 0 {
+			c.mu.RUnlock()
 			time.Sleep(c.expiration)
 			continue
 		}
-		c.mu.RLock()
 		e := c.ttlIndex[0]
 		c.mu.RUnlock()
 
@@ -72,7 +73,7 @@ func (c *Cache) cleanExpired() {
 func (c *Cache) Set(key string, value interface{}) {
 	c.mu.Lock()
 	if c.cache == nil {
-		c.cache = make(map[interface{}]*list.Element)
+		c.cache = make(map[string]*list.Element)
 		c.lruIndex = list.New()
 		c.ttlIndex = make([]*list.Element, 0)
 	}
@@ -173,5 +174,5 @@ func (c *Cache) Flush() {
 	defer c.mu.Unlock()
 	c.lruIndex = list.New()
 	c.ttlIndex = make([]*list.Element, 0)
-	c.cache = make(map[interface{}]*list.Element)
+	c.cache = make(map[string]*list.Element)
 }

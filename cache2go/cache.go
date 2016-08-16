@@ -132,12 +132,6 @@ func CountEntries(prefix string) (result int) {
 	return cache.CountEntriesForPrefix(prefix)
 }
 
-func GetAllEntries(prefix string) map[string]interface{} {
-	mux.RLock()
-	defer mux.RUnlock()
-	return cache.GetAllForPrefix(prefix)
-}
-
 func GetEntriesKeys(prefix string) (keys []string) {
 	mux.RLock()
 	defer mux.RUnlock()
