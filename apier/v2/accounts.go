@@ -20,6 +20,7 @@ package v2
 
 import (
 	"fmt"
+	"log"
 	"math"
 
 	"github.com/cgrates/cgrates/engine"
@@ -129,7 +130,6 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 						}
 					}
 				}
-
 				for _, actionPlanID := range *attr.ActionPlanIDs {
 					ap, ok := actionPlansMap[actionPlanID]
 					if !ok {
@@ -157,6 +157,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 						}
 					}
 				}
+				log.Print(5)
 				for actionPlanID, ap := range dirtyActionPlans {
 					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
 						return 0, err

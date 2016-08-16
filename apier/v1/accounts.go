@@ -194,7 +194,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 					return 0, err
 				}
 				for actionPlanID, ap := range actionPlansMap {
-					if actionPlanID[len(utils.ACTION_PLAN_PREFIX):] == attr.ActionPlanId {
+					if actionPlanID == attr.ActionPlanId {
 						// don't remove it if it's the current one
 						continue
 					}

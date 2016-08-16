@@ -1471,7 +1471,7 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 		if err != nil {
 			return nil, err
 		}
-		ats[key] = ap
+		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = ap
 	}
 
 	return
