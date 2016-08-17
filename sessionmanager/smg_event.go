@@ -429,7 +429,7 @@ func (self SMGenericEvent) AsLcrRequest() *engine.LcrRequest {
 
 // AsMapStringString Converts into map[string]string, used for example as pubsub event
 func (self SMGenericEvent) AsMapStringString() (map[string]string, error) {
-	mp := make(map[string]string)
+	mp := make(map[string]string, len(self))
 	for k, v := range self {
 		if strV, casts := utils.CastIfToString(v); !casts {
 			return nil, fmt.Errorf("Value %+v does not cast to string", v)
@@ -438,4 +438,12 @@ func (self SMGenericEvent) AsMapStringString() (map[string]string, error) {
 		}
 	}
 	return mp, nil
+}
+
+func (self SMGenericEvent) Clone() SMGenericEvent {
+	evOut := make(SMGenericEvent, len(self))
+	for key, val := range self {
+		evOut[key] = val
+	}
+	return evOut
 }

@@ -2,8 +2,11 @@ package cache2go
 
 import (
 	"container/list"
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Cache is an LRU cache. It is not safe for concurrent access.
@@ -151,8 +154,12 @@ func (c *Cache) removeElement(e *list.Element) {
 			}
 		}
 	}
-	kv := e.Value.(*entry)
-	delete(c.cache, kv.key)
+	if e.Value != nil {
+		kv := e.Value.(*entry)
+		delete(c.cache, kv.key)
+	} else {
+		utils.Logger.Debug(fmt.Sprintf("<lruttl_cache>: nil element: %+v", e))
+	}
 }
 
 // Len returns the number of items in the cache.
