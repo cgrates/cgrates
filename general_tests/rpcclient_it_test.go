@@ -202,6 +202,18 @@ func TestRPCITDirectedRPC(t *testing.T) {
 	}
 }
 
+func TestRPCITTimeout(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var status map[string]interface{}
+	if err := rpcPoolFirst.Call("Responder.Status", "3s", &status); err == nil {
+		t.Error("Expecting timeout")
+	} else {
+		t.Error(err)
+	}
+}
+
 // Special tests involving remote server (manually set)
 // The server network will be manually disconnected without TCP close
 func TestRPCITRmtRpcConnPool(t *testing.T) {

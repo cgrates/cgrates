@@ -183,6 +183,14 @@ func (rs *RedisStorage) PreloadCacheForPrefix(prefix string) error {
 				return err
 			}
 		}
+	case utils.ResourceLimitsPrefix:
+		for _, key := range keyList {
+			_, err = rs.GetResourceLimit(key[len(utils.ResourceLimitsPrefix):], true)
+			if err != nil {
+				cache2go.RollbackTransaction()
+				return err
+			}
+		}
 	default:
 		return utils.ErrInvalidKey
 	}
