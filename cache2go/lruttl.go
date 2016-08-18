@@ -3,6 +3,7 @@ package cache2go
 import (
 	"container/list"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -10,104 +11,174 @@ import (
 
 // Cache is an LRU cache. It is not safe for concurrent access.
 type Cache struct {
+	mu sync.RWMutex
 	// MaxEntries is the maximum number of cache entries before
 	// an item is evicted. Zero means no limit.
-	MaxEntries int
+	maxEntries int
 
-	ll    *list.List
-	cache map[string]*list.Element
+	lruIndex   *list.List
+	ttlIndex   []*list.Element
+	cache      map[string]*list.Element
+	expiration time.Duration
 }
 
-// A Key may be any value that is comparable. See http://golang.org/ref/spec#Comparison_operators
-
 type entry struct {
-	key   string
-	value interface{}
+	key       string
+	value     interface{}
+	timestamp time.Time
 }
 
 // New creates a new Cache.
 // If maxEntries is zero, the cache has no limit and it's assumed
 // that eviction is done by the caller.
-func NewLRUTTL(maxEntries int, exp time.Duration) *Cache {
-	return &Cache{
-		MaxEntries: maxEntries,
-		ll:         list.New(),
+func NewLRUTTL(maxEntries int, expire time.Duration) *Cache {
+	c := &Cache{
+		maxEntries: maxEntries,
+		expiration: expire,
+		lruIndex:   list.New(),
 		cache:      make(map[string]*list.Element),
+	}
+	if c.expiration > 0 {
+		c.ttlIndex = make([]*list.Element, 0)
+		go c.cleanExpired()
+	}
+	return c
+}
+
+// cleans expired entries performing minimal checks
+func (c *Cache) cleanExpired() {
+	for {
+		c.mu.RLock()
+		if len(c.ttlIndex) == 0 {
+			c.mu.RUnlock()
+			time.Sleep(c.expiration)
+			continue
+		}
+		e := c.ttlIndex[0]
+		c.mu.RUnlock()
+
+		en := e.Value.(*entry)
+		if time.Now().After(en.timestamp.Add(c.expiration)) {
+			c.mu.Lock()
+			c.removeElement(e)
+			c.mu.Unlock()
+		} else {
+			time.Sleep(time.Now().Sub(en.timestamp.Add(c.expiration)))
+		}
 	}
 }
 
-// Add adds a value to the cache.
+// Add adds a value to the cache
 func (c *Cache) Set(key string, value interface{}) {
+	c.mu.Lock()
 	if c.cache == nil {
 		c.cache = make(map[string]*list.Element)
-		c.ll = list.New()
+		c.lruIndex = list.New()
+		if c.expiration > 0 {
+			c.ttlIndex = make([]*list.Element, 0)
+		}
 	}
-	if ee, ok := c.cache[key]; ok {
-		c.ll.MoveToFront(ee)
-		ee.Value.(*entry).value = value
+
+	if e, ok := c.cache[key]; ok {
+		c.lruIndex.MoveToFront(e)
+
+		en := e.Value.(*entry)
+		en.value = value
+		en.timestamp = time.Now()
+
+		c.mu.Unlock()
 		return
 	}
-	ele := c.ll.PushFront(&entry{key, value})
-	c.cache[key] = ele
-	if c.MaxEntries != 0 && c.ll.Len() > c.MaxEntries {
+	e := c.lruIndex.PushFront(&entry{key: key, value: value, timestamp: time.Now()})
+	if c.expiration > 0 {
+		c.ttlIndex = append(c.ttlIndex, e)
+	}
+	c.cache[key] = e
+	c.mu.Unlock()
+
+	if c.maxEntries != 0 && c.lruIndex.Len() > c.maxEntries {
 		c.RemoveOldest()
 	}
 }
 
 // Get looks up a key's value from the cache.
 func (c *Cache) Get(key string) (value interface{}, ok bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.cache == nil {
 		return
 	}
-	if ele, hit := c.cache[key]; hit {
-		if ele.Value == nil {
-			utils.Logger.Debug(fmt.Sprintf("<lruttl_cache>: nil val element %+v", ele))
-		}
-		c.ll.MoveToFront(ele)
-		return ele.Value.(*entry).value, true
+	if e, hit := c.cache[key]; hit {
+		c.lruIndex.MoveToFront(e)
+		//e.Value.(*entry).timestamp = time.Now() don't update the timestamp on get'
+		return e.Value.(*entry).value, true
 	}
 	return
 }
 
 // Remove removes the provided key from the cache.
 func (c *Cache) Remove(key string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.cache == nil {
 		return
 	}
-	if ele, hit := c.cache[key]; hit {
-		c.removeElement(ele)
+	if e, hit := c.cache[key]; hit {
+		c.removeElement(e)
 	}
 }
 
 // RemoveOldest removes the oldest item from the cache.
 func (c *Cache) RemoveOldest() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.cache == nil {
 		return
 	}
-	utils.Logger.Debug("<lruttl_cache>: REMOVE OLDEST!")
-	ele := c.ll.Back()
-	if ele != nil {
-		c.removeElement(ele)
+	e := c.lruIndex.Back()
+	if e != nil {
+		c.removeElement(e)
 	}
 }
 
 func (c *Cache) removeElement(e *list.Element) {
-	c.ll.Remove(e)
-	kv := e.Value.(*entry)
-	delete(c.cache, kv.key)
+	c.lruIndex.Remove(e)
+	if c.expiration > 0 {
+		for i, se := range c.ttlIndex {
+			if se == e {
+				//delete
+				copy(c.ttlIndex[i:], c.ttlIndex[i+1:])
+				c.ttlIndex[len(c.ttlIndex)-1] = nil
+				c.ttlIndex = c.ttlIndex[:len(c.ttlIndex)-1]
+				break
+			}
+		}
+	}
+	if e.Value != nil {
+		kv := e.Value.(*entry)
+		delete(c.cache, kv.key)
+	} else {
+		utils.Logger.Debug(fmt.Sprintf("<lruttl_cache>: nil element: %+v", e))
+	}
 }
 
 // Len returns the number of items in the cache.
 func (c *Cache) Len() int {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.cache == nil {
 		return 0
 	}
-	return c.ll.Len()
+	return c.lruIndex.Len()
 }
 
 // empties the whole cache
 func (c *Cache) Flush() {
-	utils.Logger.Debug("<lruttl_cache>: FLUSH!")
-	c.ll = list.New()
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.lruIndex = list.New()
+	if c.expiration > 0 {
+		c.ttlIndex = make([]*list.Element, 0)
+	}
 	c.cache = make(map[string]*list.Element)
 }
