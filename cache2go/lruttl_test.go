@@ -44,7 +44,7 @@ func TestLRU(t *testing.T) {
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entry: ", cache.Len())
 	}
-	last := cache.lruIndex.Back().Value.(*entry).value.(int)
+	last := cache.ll.Back().Value.(*entry).value.(int)
 	if last != 8 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
@@ -58,7 +58,7 @@ func TestLRUandExpire(t *testing.T) {
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entries: ", cache.Len())
 	}
-	last := cache.lruIndex.Back().Value.(*entry).value.(int)
+	last := cache.ll.Back().Value.(*entry).value.(int)
 	if last != 8 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
@@ -113,7 +113,7 @@ func TestRemoveElementTTLIndex(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
-	if cache.Len() != 32 || len(cache.ttlIndex) != 32 {
+	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entry: ", cache.Len())
 	}
 
