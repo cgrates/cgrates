@@ -38,37 +38,35 @@ func TestCacheExpire(t *testing.T) {
 
 func TestLRU(t *testing.T) {
 	cache := NewLRUTTL(32, 0)
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 100000; i++ {
 		cache.Set(fmt.Sprintf("%d", i), i)
 	}
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entry: ", cache.Len())
 	}
-	key := cache.lruIndex.Back().Value.(string)
-	last := cache.cache[key]
-	if last.value.(int) != 8 {
+	last := cache.lruIndex.Back().Value.(*entry).value.(int)
+	if last != 99968 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
 }
 
 func TestLRUandExpire(t *testing.T) {
 	cache := NewLRUTTL(32, 5*time.Millisecond)
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 100000; i++ {
 		cache.Set(fmt.Sprintf("%d", i), i)
 	}
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entries: ", cache.Len())
 	}
-	key := cache.lruIndex.Back().Value.(string)
-	last := cache.cache[key]
-	if last.value.(int) != 8 {
+	last := cache.lruIndex.Back().Value.(*entry).value.(int)
+	if last != 99968 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
 	time.Sleep(10 * time.Millisecond)
 	if cache.Len() != 0 {
 		t.Error("error dicarding expired entries: ", cache.Len())
 	}
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 100000; i++ {
 		cache.Set(fmt.Sprintf("%d", i), i)
 	}
 	if cache.Len() != 32 {

@@ -38,7 +38,7 @@ func init() {
 
 func NewCache(cacheCfg *config.CacheConfig) {
 	cfg = cacheCfg
-	cache = newLRUTTL(cfg)
+	cache = newLruStore()
 }
 
 func BeginTransaction() {
@@ -123,7 +123,7 @@ func RemPrefixKey(prefix string) {
 func Flush() {
 	mux.Lock()
 	defer mux.Unlock()
-	cache = newLRUTTL(cfg)
+	cache = newLruStore()
 }
 
 func CountEntries(prefix string) (result int) {
