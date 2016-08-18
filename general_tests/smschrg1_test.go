@@ -57,7 +57,7 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 	if err := csvr.LoadRatingProfiles(); err != nil {
 		t.Fatal(err)
 	}
-	csvr.WriteToDatabase(false, false)
+	csvr.WriteToDatabase(false, false, false)
 	cache2go.Flush()
 	ratingDb.PreloadRatingCache()
 	acntDb.PreloadAccountingCache()

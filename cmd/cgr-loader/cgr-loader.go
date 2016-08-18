@@ -78,6 +78,7 @@ var (
 	runId           = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
 	timezone        = flag.String("timezone", cgrConfig.DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
+	disable_reverse = flag.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
 )
 
 func main() {
@@ -336,7 +337,7 @@ func main() {
 	}
 
 	// write maps to database
-	if err := tpReader.WriteToDatabase(*flush, *verbose); err != nil {
+	if err := tpReader.WriteToDatabase(*flush, *verbose, *disable_reverse); err != nil {
 		log.Fatal("Could not write to database: ", err)
 	}
 	if len(*historyServer) != 0 && *verbose {

@@ -274,7 +274,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		*reply = OK
 		return nil // Mission complete, no errors
 	}
-	if err := dbReader.WriteToDatabase(attrs.FlushDb, false); err != nil {
+	if err := dbReader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	// Make sure the items are in the cache
@@ -833,7 +833,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		}
 	}
 
-	if err := loader.WriteToDatabase(attrs.FlushDb, false); err != nil {
+	if err := loader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	// Make sure the items are in the cache

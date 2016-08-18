@@ -91,7 +91,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return StartEngine(cfgPath, waitEngine)
 }
 
-func LoadTariffPlanFromFolder(tpPath, timezone string, ratingDb RatingStorage, accountingDb AccountingStorage) error {
+func LoadTariffPlanFromFolder(tpPath, timezone string, ratingDb RatingStorage, accountingDb AccountingStorage, disable_reverse bool) error {
 	loader := NewTpReader(ratingDb, accountingDb, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(tpPath, utils.DESTINATIONS_CSV),
 		path.Join(tpPath, utils.TIMINGS_CSV),
@@ -115,7 +115,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, ratingDb RatingStorage, a
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := loader.WriteToDatabase(false, false); err != nil {
+	if err := loader.WriteToDatabase(false, false, disable_reverse); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return nil

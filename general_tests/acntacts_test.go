@@ -62,7 +62,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
-	csvr.WriteToDatabase(false, false)
+	csvr.WriteToDatabase(false, false, false)
 
 	cache2go.Flush()
 	ratingDbAcntActs.PreloadRatingCache()
