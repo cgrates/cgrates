@@ -584,6 +584,11 @@ func (rs *Responder) FlushCache(arg *CallDescriptor, reply *float64) (err error)
 }
 
 func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err error) {
+	if arg != "" { // Introduce  delay in answer, used in some automated tests
+		if delay, err := utils.ParseDurationWithSecs(arg); err == nil {
+			time.Sleep(delay)
+		}
+	}
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
