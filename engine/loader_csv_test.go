@@ -333,7 +333,7 @@ func init() {
 	if err := csvr.LoadResourceLimits(); err != nil {
 		log.Print("error in LoadResourceLimits:", err)
 	}
-	csvr.WriteToDatabase(false, false)
+	csvr.WriteToDatabase(false, false, false)
 	cache2go.Flush()
 	ratingStorage.PreloadRatingCache()
 	accountingStorage.PreloadAccountingCache()

@@ -2,10 +2,12 @@
 package cache2go
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 type cacheStore interface {
@@ -68,6 +70,68 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 		for iterKey := range keyMap {
 			if len(key) == 0 || strings.HasPrefix(iterKey, key) {
 				keys = append(keys, prefix+iterKey)
+			}
+		}
+	}
+	return
+}
+
+// easy to be counted exported by prefix
+type lrustore map[string]*lru.Cache
+
+func newLruStore() lrustore {
+	return make(lrustore)
+}
+
+func (cs lrustore) Put(key string, value interface{}) {
+	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
+	mp, ok := cs[prefix]
+	if !ok {
+		var err error
+		mp, err = lru.New(10000)
+		if err != nil {
+			utils.Logger.Debug(fmt.Sprintf("<cache>: error at init: %v", err))
+		}
+		cs[prefix] = mp
+	}
+	mp.Add(key, value)
+}
+
+func (cs lrustore) Get(key string) (interface{}, bool) {
+	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
+	if keyMap, ok := cs[prefix]; ok {
+		if ti, exists := keyMap.Get(key); exists {
+			return ti, true
+		}
+	}
+	return nil, false
+}
+
+func (cs lrustore) Delete(key string) {
+	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
+	if keyMap, ok := cs[prefix]; ok {
+		keyMap.Remove(key)
+	}
+}
+
+func (cs lrustore) DeletePrefix(prefix string) {
+	delete(cs, prefix)
+}
+
+func (cs lrustore) CountEntriesForPrefix(prefix string) int {
+	if m, ok := cs[prefix]; ok {
+		return m.Len()
+	}
+	return 0
+}
+
+func (cs lrustore) GetKeysForPrefix(prefix string) (keys []string) {
+	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
+	if keyMap, ok := cs[prefix]; ok {
+		for _, iterKey := range keyMap.Keys() {
+			iterKeyString := iterKey.(string)
+			if len(key) == 0 || strings.HasPrefix(iterKeyString, key) {
+				keys = append(keys, prefix+iterKeyString)
 			}
 		}
 	}

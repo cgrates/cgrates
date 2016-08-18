@@ -70,7 +70,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
-	csvr.WriteToDatabase(false, false)
+	csvr.WriteToDatabase(false, false, false)
 	if acnt, err := acntDbAuth.GetAccount("cgrates.org:testauthpostpaid1"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {

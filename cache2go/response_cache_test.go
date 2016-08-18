@@ -17,9 +17,9 @@ func TestRCacheSetGet(t *testing.T) {
 func TestRCacheExpire(t *testing.T) {
 	rc := NewResponseCache(1 * time.Microsecond)
 	rc.Cache("test", &CacheItem{Value: "best"})
-	time.Sleep(1 * time.Millisecond)
-	_, err := rc.Get("test")
+	time.Sleep(3 * time.Millisecond)
+	o, err := rc.Get("test")
 	if err == nil {
-		t.Error("Error expiring response cache: ", err)
+		t.Error("Error expiring response cache: ", o)
 	}
 }

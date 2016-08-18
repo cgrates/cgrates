@@ -103,7 +103,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	if err := csvr.LoadDerivedChargers(); err != nil {
 		t.Fatal(err)
 	}
-	csvr.WriteToDatabase(false, false)
+	csvr.WriteToDatabase(false, false, false)
 	if acnt, err := acntDb3.GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {

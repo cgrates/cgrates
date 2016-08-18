@@ -438,7 +438,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 				cd.CgrID = sR.CallDescriptor.CgrID
 				cd.RunID = sR.CallDescriptor.RunID
 				cd.Increments.Compress()
-				utils.Logger.Info(fmt.Sprintf("Refunding session run callcost: %s", utils.ToJSON(cd)))
+				//utils.Logger.Info(fmt.Sprintf("Refunding session run callcost: %s", utils.ToJSON(cd)))
 				var response float64
 				err := self.rater.Call("Responder.RefundIncrements", cd, &response)
 				if err != nil {

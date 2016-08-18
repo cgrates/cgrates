@@ -2,8 +2,11 @@ package cache2go
 
 import (
 	"container/list"
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Cache is an LRU cache. It is not safe for concurrent access.
@@ -12,10 +15,6 @@ type Cache struct {
 	// MaxEntries is the maximum number of cache entries before
 	// an item is evicted. Zero means no limit.
 	maxEntries int
-
-	// OnEvicted optionally specificies a callback function to be
-	// executed when an entry is purged from the cache.
-	OnEvicted func(key string, value interface{})
 
 	lruIndex   *list.List
 	ttlIndex   []*list.Element
@@ -37,10 +36,10 @@ func NewLRUTTL(maxEntries int, expire time.Duration) *Cache {
 		maxEntries: maxEntries,
 		expiration: expire,
 		lruIndex:   list.New(),
-		ttlIndex:   make([]*list.Element, 0),
 		cache:      make(map[string]*list.Element),
 	}
 	if c.expiration > 0 {
+		c.ttlIndex = make([]*list.Element, 0)
 		go c.cleanExpired()
 	}
 	return c
@@ -75,7 +74,9 @@ func (c *Cache) Set(key string, value interface{}) {
 	if c.cache == nil {
 		c.cache = make(map[string]*list.Element)
 		c.lruIndex = list.New()
-		c.ttlIndex = make([]*list.Element, 0)
+		if c.expiration > 0 {
+			c.ttlIndex = make([]*list.Element, 0)
+		}
 	}
 
 	if e, ok := c.cache[key]; ok {
@@ -89,13 +90,15 @@ func (c *Cache) Set(key string, value interface{}) {
 		return
 	}
 	e := c.lruIndex.PushFront(&entry{key: key, value: value, timestamp: time.Now()})
-	c.ttlIndex = append(c.ttlIndex, e)
+	if c.expiration > 0 {
+		c.ttlIndex = append(c.ttlIndex, e)
+	}
 	c.cache[key] = e
-	c.mu.Unlock()
 
 	if c.maxEntries != 0 && c.lruIndex.Len() > c.maxEntries {
-		c.RemoveOldest()
+		c.removeOldest()
 	}
+	c.mu.Unlock()
 }
 
 // Get looks up a key's value from the cache.
@@ -107,7 +110,7 @@ func (c *Cache) Get(key string) (value interface{}, ok bool) {
 	}
 	if e, hit := c.cache[key]; hit {
 		c.lruIndex.MoveToFront(e)
-		e.Value.(*entry).timestamp = time.Now()
+		//e.Value.(*entry).timestamp = time.Now() don't update the timestamp on get'
 		return e.Value.(*entry).value, true
 	}
 	return
@@ -126,9 +129,7 @@ func (c *Cache) Remove(key string) {
 }
 
 // RemoveOldest removes the oldest item from the cache.
-func (c *Cache) RemoveOldest() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+func (c *Cache) removeOldest() {
 	if c.cache == nil {
 		return
 	}
@@ -151,10 +152,11 @@ func (c *Cache) removeElement(e *list.Element) {
 			}
 		}
 	}
-	kv := e.Value.(*entry)
-	delete(c.cache, kv.key)
-	if c.OnEvicted != nil {
-		c.OnEvicted(kv.key, kv.value)
+	if e.Value != nil {
+		kv := e.Value.(*entry)
+		delete(c.cache, kv.key)
+	} else {
+		utils.Logger.Debug(fmt.Sprintf("<lruttl_cache>: nil element: %+v", e))
 	}
 }
 
@@ -173,6 +175,8 @@ func (c *Cache) Flush() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.lruIndex = list.New()
-	c.ttlIndex = make([]*list.Element, 0)
+	if c.expiration > 0 {
+		c.ttlIndex = make([]*list.Element, 0)
+	}
 	c.cache = make(map[string]*list.Element)
 }

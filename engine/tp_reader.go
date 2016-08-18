@@ -1634,7 +1634,7 @@ func (tpr *TpReader) IsValid() bool {
 	return valid
 }
 
-func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
+func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err error) {
 	if tpr.ratingStorage == nil || tpr.accountingStorage == nil {
 		return errors.New("no database connection")
 	}
@@ -1653,9 +1653,10 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}
 	}
-	err = tpr.ratingStorage.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX)
-	if err != nil {
-		return err
+	if !disable_reverse {
+		if err = tpr.ratingStorage.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+			return err
+		}
 	}
 	if verbose {
 		log.Print("Rating Plans:")
@@ -1830,9 +1831,10 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Print("\t", al.GetId())
 		}
 	}
-	err = tpr.accountingStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX)
-	if err != nil {
-		return err
+	if !disable_reverse {
+		if err = tpr.accountingStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
+			return err
+		}
 	}
 	if verbose {
 		log.Print("ResourceLimits:")

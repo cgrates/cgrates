@@ -30,12 +30,12 @@ func ConvertMapValStrIf(inMap map[string]string) map[string]interface{} {
 }
 
 // Mirrors key/val
-func MirrorMap(mapIn map[string]string) (map[string]string, error) {
-	mapOut := make(map[string]string)
+func MirrorMap(mapIn map[string]string) map[string]string {
+	mapOut := make(map[string]string, len(mapIn))
 	for key, val := range mapIn {
 		mapOut[val] = key
 	}
-	return mapOut, nil
+	return mapOut
 }
 
 // Returns mising keys in a map

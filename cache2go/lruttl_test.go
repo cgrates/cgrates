@@ -29,7 +29,7 @@ func TestCacheExpire(t *testing.T) {
 	if !ok || b == nil || b != a {
 		t.Error("Error retriving data from cache", b)
 	}
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	b, ok = cache.Get("mama")
 	if ok || b != nil {
 		t.Error("Error expiring data from cache", b)
@@ -38,35 +38,35 @@ func TestCacheExpire(t *testing.T) {
 
 func TestLRU(t *testing.T) {
 	cache := NewLRUTTL(32, 0)
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 100000; i++ {
 		cache.Set(fmt.Sprintf("%d", i), i)
 	}
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entry: ", cache.Len())
 	}
 	last := cache.lruIndex.Back().Value.(*entry).value.(int)
-	if last != 8 {
+	if last != 99968 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
 }
 
 func TestLRUandExpire(t *testing.T) {
 	cache := NewLRUTTL(32, 5*time.Millisecond)
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 100000; i++ {
 		cache.Set(fmt.Sprintf("%d", i), i)
 	}
 	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entries: ", cache.Len())
 	}
 	last := cache.lruIndex.Back().Value.(*entry).value.(int)
-	if last != 8 {
+	if last != 99968 {
 		t.Error("error dicarding least recently used entry: ", last)
 	}
 	time.Sleep(10 * time.Millisecond)
 	if cache.Len() != 0 {
 		t.Error("error dicarding expired entries: ", cache.Len())
 	}
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 100000; i++ {
 		cache.Set(fmt.Sprintf("%d", i), i)
 	}
 	if cache.Len() != 32 {
@@ -113,7 +113,7 @@ func TestRemoveElementTTLIndex(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
-	if cache.Len() != 32 || len(cache.ttlIndex) != 32 {
+	if cache.Len() != 32 {
 		t.Error("error dicarding least recently used entry: ", cache.Len())
 	}
 
