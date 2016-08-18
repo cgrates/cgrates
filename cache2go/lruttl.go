@@ -2,11 +2,8 @@ package cache2go
 
 import (
 	"container/list"
-	"fmt"
 	"sync"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 // Cache is an LRU cache. It is not safe for concurrent access.
@@ -18,12 +15,12 @@ type Cache struct {
 
 	lruIndex   *list.List
 	ttlIndex   []*list.Element
-	cache      map[string]*list.Element
+	cache      map[string]*entry
 	expiration time.Duration
 }
 
 type entry struct {
-	key       string
+	element   *list.Element
 	value     interface{}
 	timestamp time.Time
 }
@@ -36,7 +33,7 @@ func NewLRUTTL(maxEntries int, expire time.Duration) *Cache {
 		maxEntries: maxEntries,
 		expiration: expire,
 		lruIndex:   list.New(),
-		cache:      make(map[string]*list.Element),
+		cache:      make(map[string]*entry),
 	}
 	if c.expiration > 0 {
 		c.ttlIndex = make([]*list.Element, 0)
@@ -57,7 +54,7 @@ func (c *Cache) cleanExpired() {
 		e := c.ttlIndex[0]
 		c.mu.RUnlock()
 
-		en := e.Value.(*entry)
+		en := c.cache[e.Value.(string)]
 		if time.Now().After(en.timestamp.Add(c.expiration)) {
 			c.mu.Lock()
 			c.removeElement(e)
@@ -72,28 +69,26 @@ func (c *Cache) cleanExpired() {
 func (c *Cache) Set(key string, value interface{}) {
 	c.mu.Lock()
 	if c.cache == nil {
-		c.cache = make(map[string]*list.Element)
+		c.cache = make(map[string]*entry)
 		c.lruIndex = list.New()
 		if c.expiration > 0 {
 			c.ttlIndex = make([]*list.Element, 0)
 		}
 	}
 
-	if e, ok := c.cache[key]; ok {
-		c.lruIndex.MoveToFront(e)
-
-		en := e.Value.(*entry)
+	if en, ok := c.cache[key]; ok {
+		c.lruIndex.MoveToFront(en.element)
 		en.value = value
 		en.timestamp = time.Now()
 
 		c.mu.Unlock()
 		return
 	}
-	e := c.lruIndex.PushFront(&entry{key: key, value: value, timestamp: time.Now()})
+	e := c.lruIndex.PushFront(key)
 	if c.expiration > 0 {
 		c.ttlIndex = append(c.ttlIndex, e)
 	}
-	c.cache[key] = e
+	c.cache[key] = &entry{element: e, value: value, timestamp: time.Now()}
 	c.mu.Unlock()
 
 	if c.maxEntries != 0 && c.lruIndex.Len() > c.maxEntries {
@@ -108,10 +103,9 @@ func (c *Cache) Get(key string) (value interface{}, ok bool) {
 	if c.cache == nil {
 		return
 	}
-	if e, hit := c.cache[key]; hit {
-		c.lruIndex.MoveToFront(e)
-		//e.Value.(*entry).timestamp = time.Now() don't update the timestamp on get'
-		return e.Value.(*entry).value, true
+	if en, hit := c.cache[key]; hit {
+		c.lruIndex.MoveToFront(en.element)
+		return en.value, true
 	}
 	return
 }
@@ -123,8 +117,8 @@ func (c *Cache) Remove(key string) {
 	if c.cache == nil {
 		return
 	}
-	if e, hit := c.cache[key]; hit {
-		c.removeElement(e)
+	if en, hit := c.cache[key]; hit {
+		c.removeElement(en.element)
 	}
 }
 
@@ -154,12 +148,8 @@ func (c *Cache) removeElement(e *list.Element) {
 			}
 		}
 	}
-	if e.Value != nil {
-		kv := e.Value.(*entry)
-		delete(c.cache, kv.key)
-	} else {
-		utils.Logger.Debug(fmt.Sprintf("<lruttl_cache>: nil element: %+v", e))
-	}
+	key := e.Value.(string)
+	delete(c.cache, key)
 }
 
 // Len returns the number of items in the cache.
@@ -180,5 +170,5 @@ func (c *Cache) Flush() {
 	if c.expiration > 0 {
 		c.ttlIndex = make([]*list.Element, 0)
 	}
-	c.cache = make(map[string]*list.Element)
+	c.cache = make(map[string]*entry)
 }
