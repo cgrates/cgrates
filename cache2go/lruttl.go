@@ -2,7 +2,10 @@ package cache2go
 
 import (
 	"container/list"
+	"fmt"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Cache is an LRU cache. It is not safe for concurrent access.
@@ -57,6 +60,9 @@ func (c *Cache) Get(key string) (value interface{}, ok bool) {
 		return
 	}
 	if ele, hit := c.cache[key]; hit {
+		if ele.Value == nil {
+			utils.Logger.Debug(fmt.Sprintf("<lruttl_cache>: nil val element %+v", ele))
+		}
 		c.ll.MoveToFront(ele)
 		return ele.Value.(*entry).value, true
 	}
@@ -78,6 +84,7 @@ func (c *Cache) RemoveOldest() {
 	if c.cache == nil {
 		return
 	}
+	utils.Logger.Debug("<lruttl_cache>: REMOVE OLDEST!")
 	ele := c.ll.Back()
 	if ele != nil {
 		c.removeElement(ele)
@@ -100,6 +107,7 @@ func (c *Cache) Len() int {
 
 // empties the whole cache
 func (c *Cache) Flush() {
+	utils.Logger.Debug("<lruttl_cache>: FLUSH!")
 	c.ll = list.New()
 	c.cache = make(map[string]*list.Element)
 }
