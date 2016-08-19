@@ -1,5 +1,5 @@
-hash: 3b8a515683d749dcbf7f7cef08b17099bd8a90e0426fea9dfcc77bcfcbd0ed04
-updated: 2016-07-05T13:26:26.429447531+03:00
+hash: 2b726f6a37dc6d46898c0e674a1558140f609d4942d92c694d31eebc37923185
+updated: 2016-08-19T11:50:43.067248086+03:00
 imports:
 - name: github.com/cenk/hub
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
@@ -16,23 +16,23 @@ imports:
 - name: github.com/ChrisTrenkamp/goxpath
   version: 4aad8d0161aae7d17df4755d2c1e86cd1fcaaab6
   subpackages:
-  - tree
-  - tree/xmltree
   - internal/execxp
-  - internal/parser
-  - tree/xmltree/xmlbuilder
-  - tree/xmltree/xmlele
   - internal/lexer
+  - internal/parser
   - internal/parser/findutil
   - internal/parser/intfns
   - internal/parser/pathexpr
+  - literals/boollit
   - literals/numlit
   - literals/strlit
+  - tree
+  - tree/xmltree
+  - tree/xmltree/xmlbuilder
+  - tree/xmltree/xmlele
+  - tree/xmltree/xmlnode
   - xconst
   - xfn
   - xsort
-  - tree/xmltree/xmlnode
-  - literals/boollit
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
@@ -47,10 +47,12 @@ imports:
   - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
   version: 3654d25ec346ee8ce71a68431025458d52a38ac0
-- name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
+- name: github.com/hashicorp/golang-lru
+  version: 0a025b7e63adc15a622f29b0b2c4c3848243bbf6
+  subpackages:
+  - simplelru
 - name: github.com/jinzhu/gorm
   version: 3324ab20633e8c7ec6d6b1f7a714a1a6e06fec08
 - name: github.com/jinzhu/inflection
@@ -70,21 +72,6 @@ imports:
   version: d2dd0262208475919e1a362f675cfc0e7c10e905
 - name: github.com/peterh/liner
   version: 8975875355a81d612fafb9f5a6037bdcc2d9b073
-- name: github.com/syndtr/goleveldb
-  version: ab8b5dcf1042e818ab68e770d465112a899b668e
-  subpackages:
-  - leveldb
-  - leveldb/cache
-  - leveldb/comparer
-  - leveldb/errors
-  - leveldb/filter
-  - leveldb/iterator
-  - leveldb/journal
-  - leveldb/memdb
-  - leveldb/opt
-  - leveldb/storage
-  - leveldb/table
-  - leveldb/util
 - name: github.com/ugorji/go
   version: b94837a2404ab90efe9289e77a70694c355739cb
   subpackages:
@@ -92,11 +79,11 @@ imports:
 - name: golang.org/x/net
   version: b400c2eff1badec7022a8c8f5bea058b6315eed7
   subpackages:
-  - websocket
   - context
-  - html/charset
   - html
   - html/atom
+  - html/charset
+  - websocket
 - name: golang.org/x/sys
   version: a408501be4d17ee978c04a618e7a1b22af058c0e
   subpackages:
@@ -107,10 +94,8 @@ imports:
   - encoding
   - encoding/charmap
   - encoding/htmlindex
-  - transform
-  - language
-  - encoding/internal/identifier
   - encoding/internal
+  - encoding/internal/identifier
   - encoding/japanese
   - encoding/korean
   - encoding/simplifiedchinese
@@ -118,7 +103,9 @@ imports:
   - encoding/unicode
   - internal/tag
   - internal/utf8internal
+  - language
   - runes
+  - transform
 - name: gopkg.in/fsnotify.v1
   version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
 - name: gopkg.in/mgo.v2

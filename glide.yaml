@@ -35,6 +35,4 @@ import:
   - bson
 - package: github.com/ChrisTrenkamp/goxpath
 - package: github.com/mitchellh/mapstructure
-- package: github.com/syndtr/goleveldb
-  subpackages:
-  - leveldb
+- package: github.com/hashicorp/golang-lru
