@@ -80,7 +80,69 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 type lrustore map[string]*lru.Cache
 
 func newLruStore() lrustore {
-	return make(lrustore)
+	c := make(lrustore)
+	if cfg != nil && cfg.Destinations != nil {
+		c[utils.DESTINATION_PREFIX], _ = lru.New(cfg.Destinations.Limit)
+	} else {
+		c[utils.DESTINATION_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.ReverseDestinations != nil {
+		c[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(cfg.ReverseDestinations.Limit)
+	} else {
+		c[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.RatingPlans != nil {
+		c[utils.RATING_PLAN_PREFIX], _ = lru.New(cfg.RatingPlans.Limit)
+	} else {
+		c[utils.RATING_PLAN_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.RatingProfiles != nil {
+		c[utils.RATING_PROFILE_PREFIX], _ = lru.New(cfg.RatingProfiles.Limit)
+	} else {
+		c[utils.RATING_PROFILE_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.Lcr != nil {
+		c[utils.LCR_PREFIX], _ = lru.New(cfg.Lcr.Limit)
+	} else {
+		c[utils.LCR_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.CdrStats != nil {
+		c[utils.CDR_STATS_PREFIX], _ = lru.New(cfg.CdrStats.Limit)
+	} else {
+		c[utils.CDR_STATS_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.Actions != nil {
+		c[utils.ACTION_PREFIX], _ = lru.New(cfg.Actions.Limit)
+	} else {
+		c[utils.ACTION_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.ActionPlans != nil {
+		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(cfg.ActionPlans.Limit)
+	} else {
+		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.ActionTriggers != nil {
+		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(cfg.ActionTriggers.Limit)
+	} else {
+		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.SharedGroups != nil {
+		c[utils.SHARED_GROUP_PREFIX], _ = lru.New(cfg.SharedGroups.Limit)
+	} else {
+		c[utils.SHARED_GROUP_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.Aliases != nil {
+		c[utils.ALIASES_PREFIX], _ = lru.New(cfg.Aliases.Limit)
+	} else {
+		c[utils.ALIASES_PREFIX], _ = lru.New(10000)
+	}
+	if cfg != nil && cfg.ReverseAliases != nil {
+		c[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(cfg.ReverseAliases.Limit)
+	} else {
+		c[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(10000)
+	}
+
+	return c
 }
 
 func (cs lrustore) Put(key string, value interface{}) {
@@ -141,7 +203,7 @@ func (cs lrustore) GetKeysForPrefix(prefix string) (keys []string) {
 type cacheLRUTTL map[string]*Cache
 
 func newLRUTTL(cfg *config.CacheConfig) cacheLRUTTL {
-	c := make(map[string]*Cache)
+	c := make(cacheLRUTTL)
 	if cfg != nil && cfg.Destinations != nil {
 		c[utils.DESTINATION_PREFIX] = NewLRUTTL(cfg.Destinations.Limit, cfg.Destinations.TTL)
 	} else {
