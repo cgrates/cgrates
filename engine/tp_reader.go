@@ -1653,7 +1653,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}
 	}
-	if !disable_reverse {
+	if !disable_reverse && len(tpr.destinations) > 0 {
 		if err = tpr.ratingStorage.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 			return err
 		}
@@ -1831,7 +1831,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", al.GetId())
 		}
 	}
-	if !disable_reverse {
+	if !disable_reverse && len(tpr.aliases) > 0 {
 		if err = tpr.accountingStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
 			return err
 		}
