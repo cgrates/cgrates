@@ -204,10 +204,6 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
 		return err
 	}
 	defer rs.db.Put(conn)
-	err = conn.Cmd("MULTI").Err //FIXME: command bellow are using conn
-	if err != nil {
-		return err
-	}
 	keys, err := rs.GetKeysForPrefix(prefix)
 	if err != nil {
 		return err
@@ -249,10 +245,6 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
 		}
 	default:
 		return utils.ErrInvalidKey
-	}
-	err = conn.Cmd("EXEC").Err
-	if err != nil {
-		return err
 	}
 	return nil
 }
