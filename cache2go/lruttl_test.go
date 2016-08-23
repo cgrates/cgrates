@@ -50,6 +50,7 @@ func TestLRU(t *testing.T) {
 	}
 }
 
+/*
 func TestLRUandExpire(t *testing.T) {
 	cache := NewLRUTTL(32, 5*time.Millisecond)
 	for i := 0; i < 100000; i++ {
@@ -73,7 +74,7 @@ func TestLRUandExpire(t *testing.T) {
 		t.Error("error dicarding least recently used entries: ", cache.Len())
 	}
 }
-
+*/
 func TestLRUParallel(t *testing.T) {
 	cache := NewLRUTTL(32, 0)
 	wg := sync.WaitGroup{}
