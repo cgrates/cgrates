@@ -77,6 +77,9 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	defer sq.mux.Unlock()
 	// check if new conf asks for action trigger reset only
 	if sq.conf != nil && (conf.hasGeneralConfigs() || sq.conf.equalExceptTriggers(conf)) {
+		for _, trigger := range conf.Triggers {
+			trigger.LastExecutionTime = sq.GetTriggerLastExecution(&trigger.ID)
+		}
 		sq.conf.Triggers = conf.Triggers
 		return
 	}
@@ -170,6 +173,15 @@ func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 			}
 		}
 	}
+}
+
+func (sq *StatsQueue) GetTriggerLastExecution(trigger_id *string) time.Time {
+	for _, trigger := range sq.conf.Triggers {
+		if trigger.ID == *trigger_id {
+			return trigger.LastExecutionTime
+		}
+	}
+	return time.Time{}
 }
 
 func (sq *StatsQueue) addToMetrics(cdr *QCdr) {
