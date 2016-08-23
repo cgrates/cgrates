@@ -810,10 +810,10 @@ func TestLoadRatingPlans(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan.Ratings, expected.Ratings) {
-		t.Errorf("Error loading destination rate timing: %+v", utils.ToIJSON(rplan.Ratings))
 		/*for tag, key := range rplan.Ratings {
 			log.Print(tag, key)
 		}*/
+		t.Errorf("Expecting: %s, received: %s", utils.ToIJSON(expected.Ratings), utils.ToIJSON(rplan.Ratings))
 	}
 	anyTiming := &RITiming{
 		Years:      utils.Years{},
