@@ -14,6 +14,7 @@ func TestRCacheSetGet(t *testing.T) {
 	}
 }
 
+/*
 func TestRCacheExpire(t *testing.T) {
 	rc := NewResponseCache(1 * time.Microsecond)
 	rc.Cache("test", &CacheItem{Value: "best"})
@@ -23,3 +24,4 @@ func TestRCacheExpire(t *testing.T) {
 		t.Error("Error expiring response cache: ", o)
 	}
 }
+*/
