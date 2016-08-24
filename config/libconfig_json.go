@@ -184,6 +184,7 @@ type SmGenericJsonCfg struct {
 	Session_ttl           *string
 	Session_ttl_last_used *string
 	Session_ttl_usage     *string
+	Session_indexes       *[]string
 }
 
 // SM-FreeSWITCH config section

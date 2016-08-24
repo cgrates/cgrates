@@ -95,6 +95,7 @@ type SmGenericConfig struct {
 	SessionTTL         time.Duration
 	SessionTTLLastUsed *time.Duration
 	SessionTTLUsage    *time.Duration
+	SessionIndexes     []string
 }
 
 func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
@@ -149,12 +150,8 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 			self.SessionTTLLastUsed = &sessionTTLLastUsed
 		}
 	}
-	if jsnCfg.Session_ttl_usage != nil {
-		if sessionTTLUsage, err := utils.ParseDurationWithSecs(*jsnCfg.Session_ttl_usage); err != nil {
-			return err
-		} else {
-			self.SessionTTLUsage = &sessionTTLUsage
-		}
+	if jsnCfg.Session_indexes != nil {
+		self.SessionIndexes = *jsnCfg.Session_indexes
 	}
 	return nil
 }

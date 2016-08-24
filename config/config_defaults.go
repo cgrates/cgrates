@@ -260,6 +260,7 @@ const CGRATES_CFG_JSON = `
 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
+	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 },
 
 
