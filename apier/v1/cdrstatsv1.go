@@ -80,6 +80,6 @@ func (sts *CDRStatsV1) ResetQueues(attr utils.AttrCDRStatsReloadQueues, reply *s
 	return nil
 }
 
-func (sts CDRStatsV1) AppendCDR(cdr *engine.CDR, reply *int) error {
+func (sts *CDRStatsV1) AppendCDR(cdr *engine.CDR, reply *int) error {
         return sts.CdrStats.Call("CDRStatsV1.AppendCDR", cdr, reply)
 }
