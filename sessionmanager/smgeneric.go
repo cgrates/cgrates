@@ -130,7 +130,7 @@ func (self *SMGeneric) recordSession(uuid string, s *SMGSession) {
 
 		}
 	}
-
+	self.indexSession(uuid, s)
 }
 
 // Remove session from session list, removes all related in case of multiple runs, true if item was found
@@ -145,6 +145,7 @@ func (self *SMGeneric) unrecordSession(uuid string) bool {
 		st.endChan <- true
 		delete(self.sessionTerminators, uuid)
 	}
+	self.unindexSession(uuid)
 	return true
 }
 
@@ -181,9 +182,11 @@ func (self *SMGeneric) indexSession(uuid string, s *SMGSession) bool {
 func (self *SMGeneric) unindexSession(uuid string) bool {
 	self.sessionIndexMux.Lock()
 	defer self.sessionIndexMux.Unlock()
+	var found bool
 	for fldName := range self.sessionIndexes {
 		for fldVal := range self.sessionIndexes[fldName] {
 			if _, hasUUID := self.sessionIndexes[fldName][fldVal][uuid]; hasUUID {
+				found = true
 				delete(self.sessionIndexes[fldName][fldVal], uuid)
 				if len(self.sessionIndexes[fldName][fldVal]) == 0 {
 					delete(self.sessionIndexes[fldName], fldVal)
@@ -194,7 +197,39 @@ func (self *SMGeneric) unindexSession(uuid string) bool {
 			}
 		}
 	}
-	return false
+	return found
+}
+
+// getSessionIDsMatchingIndexes will check inside indexes if it can find sessionIDs matching all filters
+// matchedIndexes returns map[matchedFieldName]possibleMatchedFieldVal so we optimize further to avoid checking them
+func (self *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string) (matchingSessions utils.StringMap, matchedIndexes map[string]string) {
+	self.sessionIndexMux.RLock()
+	sessionIDxes := self.sessionIndexes
+	self.sessionIndexMux.RUnlock()
+	matchedIndexes = make(map[string]string)
+	checkNr := 0
+	for fltrName, fltrVal := range fltrs {
+		checkNr += 1
+		if _, hasFldName := sessionIDxes[fltrName]; !hasFldName {
+			continue
+		}
+		if _, hasFldVal := sessionIDxes[fltrName][fltrVal]; !hasFldVal {
+			matchedIndexes[fltrName] = utils.META_NONE
+			continue
+		}
+		matchedIndexes[fltrName] = fltrVal
+		if checkNr == 1 { // First run will init the MatchingSessions
+			matchingSessions = sessionIDxes[fltrName][fltrVal]
+			continue
+		}
+		// Higher run, takes out non matching indexes
+		for sessID := range sessionIDxes[fltrName][fltrVal] {
+			if _, hasUUID := matchingSessions[sessID]; !hasUUID {
+				delete(matchingSessions, sessID)
+			}
+		}
+	}
+	return
 }
 
 func (self *SMGeneric) getSessionIDsForPrefix(prefix string) []string {
@@ -550,10 +585,55 @@ func (self *SMGeneric) Connect() error {
 }
 
 // Used by APIer to retrieve sessions
-func (self *SMGeneric) Sessions() map[string][]*SMGSession {
+func (self *SMGeneric) getSessions() map[string][]*SMGSession {
 	self.sessionsMux.RLock()
 	defer self.sessionsMux.RUnlock()
 	return self.sessions
+}
+
+func (self *SMGeneric) ActiveSessions(fltrs map[string]string) (aSessions []*ActiveSession, err error) {
+	// Check first based on indexes so we can downsize the list of matching sessions
+	matchingSessionIDs, checkedFilters := self.getSessionIDsMatchingIndexes(fltrs)
+	if len(matchingSessionIDs) == 0 && len(checkedFilters) != 0 {
+		return
+	}
+	for fltrFldName := range fltrs {
+		if _, alreadyChecked := checkedFilters[fltrFldName]; alreadyChecked && fltrFldName != utils.MEDI_RUNID { // Optimize further checks, RunID should stay since it can create bugs
+			delete(fltrs, fltrFldName)
+		}
+	}
+	var remainingSessions []*SMGSession // Survived index matching
+	for sUUID, sGrp := range self.getSessions() {
+		if _, hasUUID := matchingSessionIDs[sUUID]; !hasUUID && len(checkedFilters) != 0 {
+			continue
+		}
+		for _, s := range sGrp {
+			remainingSessions = append(remainingSessions, s)
+		}
+	}
+	if len(fltrs) != 0 { // Still have some filters to match
+		for i, s := range remainingSessions {
+			sMp, err := s.eventStart.AsMapStringString()
+			if err != nil {
+				return nil, err
+			}
+			matchingAll := true
+			for fltrFldName, fltrFldVal := range fltrs {
+				if fldVal, hasIt := sMp[fltrFldName]; !hasIt || fltrFldVal != fldVal { // No Match
+					matchingAll = false
+					break
+				}
+			}
+			if !matchingAll { // Strip the session from remaining ones with emptying the session to be garbage collected
+				remainingSessions[i] = remainingSessions[len(remainingSessions)-1]
+				remainingSessions = remainingSessions[:len(remainingSessions)-1]
+			}
+		}
+	}
+	for _, s := range remainingSessions {
+		aSessions = append(aSessions, s.AsActiveSession(self.Timezone()))
+	}
+	return
 }
 
 func (self *SMGeneric) Timezone() string {
@@ -562,7 +642,7 @@ func (self *SMGeneric) Timezone() string {
 
 // System shutdown
 func (self *SMGeneric) Shutdown() error {
-	for ssId := range self.Sessions() { // Force sessions shutdown
+	for ssId := range self.getSessions() { // Force sessions shutdown
 		self.sessionEnd(ssId, time.Duration(self.cgrCfg.MaxCallDuration))
 	}
 	return nil

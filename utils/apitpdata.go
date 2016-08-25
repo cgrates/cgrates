@@ -1178,6 +1178,72 @@ type AttrSMGGetActiveSessions struct {
 	Supplier    *string
 }
 
+// Used for easier filtering, keep struct format to mark filter fields clearly
+func (attrs *AttrSMGGetActiveSessions) AsMapStringString() map[string]string {
+	out := make(map[string]string)
+	if attrs.ToR != nil {
+		if *attrs.ToR == "" {
+			*attrs.ToR = MetaEmpty
+		}
+		out[TOR] = *attrs.ToR
+	}
+	if attrs.OriginID != nil {
+		if *attrs.OriginID == "" {
+			*attrs.OriginID = MetaEmpty
+		}
+		out[ACCID] = *attrs.OriginID
+	}
+	if attrs.RunID != nil {
+		if *attrs.RunID == "" {
+			*attrs.RunID = MetaEmpty
+		}
+		out[MEDI_RUNID] = *attrs.RunID
+	}
+	if attrs.RequestType != nil {
+		if *attrs.RequestType == "" {
+			*attrs.RequestType = MetaEmpty
+		}
+		out[REQTYPE] = *attrs.RequestType
+	}
+	if attrs.Tenant != nil {
+		if *attrs.Tenant == "" {
+			*attrs.Tenant = MetaEmpty
+		}
+		out[TENANT] = *attrs.Tenant
+	}
+	if attrs.Category != nil {
+		if *attrs.Category == "" {
+			*attrs.Category = MetaEmpty
+		}
+		out[CATEGORY] = *attrs.Category
+	}
+	if attrs.Account != nil {
+		if *attrs.Account == "" {
+			*attrs.Account = MetaEmpty
+		}
+		out[ACCOUNT] = *attrs.Account
+	}
+	if attrs.Subject != nil {
+		if *attrs.Subject == "" {
+			*attrs.Subject = MetaEmpty
+		}
+		out[SUBJECT] = MetaEmpty
+	}
+	if attrs.Destination != nil {
+		if *attrs.Destination == "" {
+			*attrs.Destination = MetaEmpty
+		}
+		out[DESTINATION] = *attrs.Destination
+	}
+	if attrs.Supplier != nil {
+		if *attrs.Supplier == "" {
+			*attrs.Supplier = MetaEmpty
+		}
+		out[SUPPLIER] = *attrs.Supplier
+	}
+	return out
+}
+
 type AttrRateCDRs struct {
 	RPCCDRsFilter
 	StoreCDRs     *bool

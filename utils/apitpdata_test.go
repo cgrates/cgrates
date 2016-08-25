@@ -31,3 +31,33 @@ func TestNewDTCSFromRPKey(t *testing.T) {
 		t.Error("Received: ", dtcs)
 	}
 }
+
+func TestAPIAttrSMGGetActiveSessionsAsMapStr(t *testing.T) {
+	attrs := &AttrSMGGetActiveSessions{
+		ToR:         StringPointer(""),
+		OriginID:    StringPointer(""),
+		RunID:       StringPointer(""),
+		RequestType: StringPointer(""),
+		Tenant:      StringPointer(""),
+		Category:    StringPointer(""),
+		Account:     StringPointer(""),
+		Subject:     StringPointer(""),
+		Destination: StringPointer(""),
+		Supplier:    StringPointer(""),
+	}
+	expectMP := map[string]string{
+		TOR:         MetaEmpty,
+		ACCID:       MetaEmpty,
+		MEDI_RUNID:  MetaEmpty,
+		REQTYPE:     MetaEmpty,
+		TENANT:      MetaEmpty,
+		CATEGORY:    MetaEmpty,
+		ACCOUNT:     MetaEmpty,
+		SUBJECT:     MetaEmpty,
+		DESTINATION: MetaEmpty,
+		SUPPLIER:    MetaEmpty,
+	}
+	if mp := attrs.AsMapStringString(); !reflect.DeepEqual(expectMP, mp) {
+		t.Errorf("Expecting: %+v, received: %+v", expectMP, mp)
+	}
+}

@@ -26,10 +26,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var smgCfg *config.CGRConfig
+
+func init() {
+	smgCfg, _ = config.NewDefaultCGRConfig()
+	smgCfg.SmGenericConfig.SessionIndexes = []string{"Tenant", "Account", "Extra3", "Extra4"}
+
+}
+
 func TestSMGSessionIndexing(t *testing.T) {
-	cfg, _ = config.NewDefaultCGRConfig()
-	cfg.SmGenericConfig.SessionIndexes = []string{"Tenant", "Account", "Extra3", "Extra4"}
-	smg := NewSMGeneric(cfg, nil, nil, "UTC", nil)
+	smg := NewSMGeneric(smgCfg, nil, nil, "UTC", nil)
 	smGev := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
@@ -158,5 +164,78 @@ func TestSMGSessionIndexing(t *testing.T) {
 	if !reflect.DeepEqual(eIndexes, smg.sessionIndexes) {
 		t.Errorf("Expecting: %+v, received: %+v", eIndexes, smg.sessionIndexes)
 	}
+}
 
+func TestSMGActiveSessions(t *testing.T) {
+	smg := NewSMGeneric(smgCfg, nil, nil, "UTC", nil)
+	smGev1 := SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "111",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account1",
+		utils.SUBJECT:          "subject1",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "cgrates.org",
+		utils.REQTYPE:          "*prepaid",
+		utils.SETUP_TIME:       "2015-11-09 14:21:24",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "1m23s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	}
+	smg.recordSession(smGev1.GetUUID(), &SMGSession{eventStart: smGev1})
+	smGev2 := SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "222",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account2",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "itsyscom.com",
+		utils.REQTYPE:          "*prepaid",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "1m23s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier2",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra3":               "extra3",
+	}
+	smg.recordSession(smGev2.GetUUID(), &SMGSession{eventStart: smGev2})
+	if aSessions, err := smg.ActiveSessions(nil); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("Received sessions: %%+v", aSessions)
+	}
+	if aSessions, err := smg.ActiveSessions(map[string]string{"Tenant": "itsyscom.com"}); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %%+v", aSessions)
+	}
+	if aSessions, err := smg.ActiveSessions(map[string]string{utils.TOR: "*voice"}); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("Received sessions: %%+v", aSessions)
+	}
+	if aSessions, err := smg.ActiveSessions(map[string]string{"Extra3": utils.MetaEmpty}); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, err := smg.ActiveSessions(map[string]string{utils.SUPPLIER: "supplier2"}); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
 }
