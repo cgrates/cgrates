@@ -395,3 +395,7 @@ func (kev KamEvent) ComputeLcr() bool {
 		return computeLcr
 	}
 }
+
+func (kev KamEvent) AsMapStringIface() (map[string]interface{}, error) {
+	return nil, utils.ErrNotImplemented
+}

@@ -415,6 +415,10 @@ func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 	return lcrReq.AsCallDescriptor(config.CgrConfig().DefaultTimezone)
 }
 
+func (fsev FSEvent) AsMapStringIface() (map[string]interface{}, error) {
+	return nil, utils.ErrNotImplemented
+}
+
 // Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now
 func SliceAsFsArray(slc []string) string {
 	arry := ""

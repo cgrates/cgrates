@@ -21,6 +21,7 @@ package sessionmanager
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -312,6 +313,15 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 		aSessions = append(aSessions, aSession)
 	}
 	return aSessions
+}
+
+func (s *Session) AsMapStringIface() (map[string]interface{}, error) {
+	mp := make(map[string]interface{})
+	v := reflect.ValueOf(s).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		mp[v.Type().Field(i).Name] = v.Field(i).Interface()
+	}
+	return mp, nil
 }
 
 // Will be used when displaying active sessions via RPC

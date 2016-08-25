@@ -42,7 +42,7 @@ func TestBalanceStoreRestore(t *testing.T) {
 	if err != nil {
 		t.Error("Error restoring balance: ", err)
 	}
-	t.Logf("INITIAL: %+v", b)
+	//t.Logf("INITIAL: %+v", b)
 	if !b.Equal(b1) {
 		t.Errorf("Balance store/restore failed: expected %+v was %+v", b, b1)
 	}
@@ -321,7 +321,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	t.Logf("%+v", cc.Timespans)
+	//t.Logf("%+v", cc.Timespans)
 	if cc.Timespans[0].Increments[0].BalanceInfo.Unit.UUID != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])

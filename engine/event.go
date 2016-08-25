@@ -51,4 +51,5 @@ type Event interface {
 	String() string
 	AsEvent(string) Event
 	ComputeLcr() bool
+	AsMapStringIface() (map[string]interface{}, error)
 }

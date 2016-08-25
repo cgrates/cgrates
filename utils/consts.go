@@ -260,6 +260,7 @@ const (
 	LCRCachePrefix                = "LCR_"
 	ALIAS_CONTEXT_RATING          = "*rating"
 	NOT_AVAILABLE                 = "N/A"
+	MetaEmpty                     = "*empty"
 	CALL                          = "call"
 	EXTRA_FIELDS                  = "ExtraFields"
 	META_SURETAX                  = "*sure_tax"

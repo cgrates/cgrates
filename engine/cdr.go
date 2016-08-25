@@ -827,6 +827,11 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, costShiftDigi
 	return expRecord, nil
 }
 
+// Part of event interface
+func (cdr *CDR) AsMapStringIface() (map[string]interface{}, error) {
+	return nil, utils.ErrNotImplemented
+}
+
 type ExternalCDR struct {
 	CGRID           string
 	RunID           string
