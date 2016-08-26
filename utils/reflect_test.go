@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -114,5 +115,27 @@ func TestReflectFieldAsStringOnMap(t *testing.T) {
 		t.Error(err)
 	} else if strVal != "17.3" {
 		t.Error("Received: %s", strVal)
+	}
+}
+
+func TestReflectAsMapStringIface(t *testing.T) {
+	mystruct := struct {
+		Title       string
+		Count       int
+		Count64     int64
+		Val         float64
+		ExtraFields map[string]interface{}
+	}{"Title1", 5, 6, 7.3, map[string]interface{}{"a": "Title2", "b": 15, "c": int64(16), "d": 17.3}}
+	expectOutMp := map[string]interface{}{
+		"Title":       "Title1",
+		"Count":       5,
+		"Count64":     int64(6),
+		"Val":         7.3,
+		"ExtraFields": map[string]interface{}{"a": "Title2", "b": 15, "c": int64(16), "d": 17.3},
+	}
+	if outMp, err := AsMapStringIface(mystruct); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectOutMp, outMp) {
+		t.Errorf("Expecting: %+v, received: %+v", expectOutMp, outMp)
 	}
 }

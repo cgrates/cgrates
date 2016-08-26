@@ -104,3 +104,20 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 		return "", fmt.Errorf("Cannot convert to string field type: %s", field.Kind().String())
 	}
 }
+
+// AsMapStringIface converts an item (mostly struct) as map[string]interface{}
+func AsMapStringIface(item interface{}) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	v := reflect.ValueOf(item)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct { // Only structs for now
+		return nil, fmt.Errorf("AsMapStringIface only accepts structs; got %T", v)
+	}
+	typ := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		out[typ.Field(i).Name] = v.Field(i).Interface()
+	}
+	return out, nil
+}
