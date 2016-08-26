@@ -1,6 +1,9 @@
 package utils
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestStringMapParse(t *testing.T) {
 	sm := ParseStringMap("1;2;3;4")
@@ -29,5 +32,26 @@ func TestStringMapCompare(t *testing.T) {
 	}
 	if include, found := sm["5"]; include != false && found != false {
 		t.Error("Error detecting missing: ", sm)
+	}
+}
+
+func TestMapMergeMapsStringIface(t *testing.T) {
+	mp1 := map[string]interface{}{
+		"Hdr1": "Val1",
+		"Hdr2": "Val2",
+		"Hdr3": "Val3",
+	}
+	mp2 := map[string]interface{}{
+		"Hdr3": "Val4",
+		"Hdr4": "Val4",
+	}
+	eMergedMap := map[string]interface{}{
+		"Hdr1": "Val1",
+		"Hdr2": "Val2",
+		"Hdr3": "Val4",
+		"Hdr4": "Val4",
+	}
+	if mergedMap := MergeMapsStringIface(mp1, mp2); !reflect.DeepEqual(eMergedMap, mergedMap) {
+		t.Errorf("Expecting: %+v, received: %+v", eMergedMap, mergedMap)
 	}
 }

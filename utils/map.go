@@ -183,3 +183,18 @@ func MapKeysReplace(m map[string]struct{}, old, new string) map[string]struct{} 
 	return m
 }
 */
+
+// Used to merge multiple maps (eg: output of struct having ExtraFields)
+func MergeMapsStringIface(mps ...map[string]interface{}) (outMp map[string]interface{}) {
+	outMp = make(map[string]interface{})
+	for i, mp := range mps {
+		if i == 0 {
+			outMp = mp
+			continue
+		}
+		for k, v := range mp {
+			outMp[k] = v
+		}
+	}
+	return
+}
