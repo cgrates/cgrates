@@ -202,11 +202,12 @@ func (self *SMGeneric) unindexSession(uuid string) bool {
 
 // getSessionIDsMatchingIndexes will check inside indexes if it can find sessionIDs matching all filters
 // matchedIndexes returns map[matchedFieldName]possibleMatchedFieldVal so we optimize further to avoid checking them
-func (self *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string) (matchingSessions utils.StringMap, matchedIndexes map[string]string) {
+func (self *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string) (utils.StringMap, map[string]string) {
 	self.sessionIndexMux.RLock()
-	sessionIDxes := self.sessionIndexes
-	self.sessionIndexMux.RUnlock()
-	matchedIndexes = make(map[string]string)
+	defer self.sessionIndexMux.RUnlock()
+	sessionIDxes := self.sessionIndexes // Clone here and unlock sooner if getting slow
+	matchedIndexes := make(map[string]string)
+	var matchingSessions utils.StringMap
 	checkNr := 0
 	for fltrName, fltrVal := range fltrs {
 		checkNr += 1
@@ -229,7 +230,7 @@ func (self *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string) (ma
 			}
 		}
 	}
-	return
+	return matchingSessions.Clone(), matchedIndexes
 }
 
 func (self *SMGeneric) getSessionIDsForPrefix(prefix string) []string {
