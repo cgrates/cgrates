@@ -464,7 +464,7 @@ func startResourceLimiterService(internalRLSChan, internalCdrStatSChan chan rpcc
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
-	internalAliaseSChan chan rpcclient.RpcClientConnection) {
+	internalAliaseSChan, internalSMGChan chan rpcclient.RpcClientConnection) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -480,6 +480,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalUserSChan <- users
 	case aliases := <-internalAliaseSChan:
 		internalAliaseSChan <- aliases
+	case smg := <-internalSMGChan:
+		internalSMGChan <- smg
 	}
 	go server.ServeJSON(cfg.RPCJSONListen)
 	go server.ServeGOB(cfg.RPCGOBListen)
@@ -699,7 +701,7 @@ func main() {
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan, internalHistorySChan,
-		internalPubSubSChan, internalUserSChan, internalAliaseSChan)
+		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalSMGChan)
 	<-exitChan
 
 	if *pidFile != "" {
