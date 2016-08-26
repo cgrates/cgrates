@@ -592,7 +592,7 @@ func (self *SMGeneric) getSessions() map[string][]*SMGSession {
 	return self.sessions
 }
 
-func (self *SMGeneric) ActiveSessions(fltrs map[string]string) (aSessions []*ActiveSession, err error) {
+func (self *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSessions []*ActiveSession, counter int, err error) {
 	aSessions = make([]*ActiveSession, 0) // Make sure we return at least empty list and not nil
 	// Check first based on indexes so we can downsize the list of matching sessions
 	matchingSessionIDs, checkedFilters := self.getSessionIDsMatchingIndexes(fltrs)
@@ -617,7 +617,7 @@ func (self *SMGeneric) ActiveSessions(fltrs map[string]string) (aSessions []*Act
 		for i, s := range remainingSessions {
 			sMp, err := s.eventStart.AsMapStringString()
 			if err != nil {
-				return nil, err
+				return nil, 0, err
 			}
 			if _, hasRunID := sMp[utils.MEDI_RUNID]; !hasRunID {
 				sMp[utils.MEDI_RUNID] = utils.META_DEFAULT
@@ -635,8 +635,11 @@ func (self *SMGeneric) ActiveSessions(fltrs map[string]string) (aSessions []*Act
 			}
 		}
 	}
+	if count {
+		return nil, len(remainingSessions), nil
+	}
 	for _, s := range remainingSessions {
-		aSessions = append(aSessions, s.AsActiveSession(self.Timezone()))
+		aSessions = append(aSessions, s.AsActiveSession(self.Timezone())) // Expensive for large number of sessions
 	}
 	return
 }

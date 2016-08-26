@@ -213,27 +213,27 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra3":               "extra3",
 	}
 	smg.recordSession(smGev2.GetUUID(), &SMGSession{eventStart: smGev2})
-	if aSessions, err := smg.ActiveSessions(nil); err != nil {
+	if aSessions, _, err := smg.ActiveSessions(nil, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Received sessions: %%+v", aSessions)
 	}
-	if aSessions, err := smg.ActiveSessions(map[string]string{"Tenant": "itsyscom.com"}); err != nil {
+	if aSessions, _, err := smg.ActiveSessions(map[string]string{"Tenant": "itsyscom.com"}, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %%+v", aSessions)
 	}
-	if aSessions, err := smg.ActiveSessions(map[string]string{utils.TOR: "*voice"}); err != nil {
+	if aSessions, _, err := smg.ActiveSessions(map[string]string{utils.TOR: "*voice"}, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Received sessions: %%+v", aSessions)
 	}
-	if aSessions, err := smg.ActiveSessions(map[string]string{"Extra3": utils.MetaEmpty}); err != nil {
+	if aSessions, _, err := smg.ActiveSessions(map[string]string{"Extra3": utils.MetaEmpty}, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
-	if aSessions, err := smg.ActiveSessions(map[string]string{utils.SUPPLIER: "supplier2"}); err != nil {
+	if aSessions, _, err := smg.ActiveSessions(map[string]string{utils.SUPPLIER: "supplier2"}, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)

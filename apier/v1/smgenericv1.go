@@ -90,7 +90,7 @@ func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *str
 }
 
 func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, reply *[]*sessionmanager.ActiveSession) error {
-	aSessions, err := self.sm.ActiveSessions(attrs.AsMapStringString())
+	aSessions, _, err := self.sm.ActiveSessions(attrs.AsMapStringString(), false)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -99,11 +99,11 @@ func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, re
 }
 
 func (self *SMGenericV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
-	var aSessions []*sessionmanager.ActiveSession
-	if err := self.ActiveSessions(attrs, &aSessions); err != nil {
+	if _, count, err := self.sm.ActiveSessions(attrs.AsMapStringString(), true); err != nil {
 		return err
+	} else {
+		*reply = count
 	}
-	*reply = len(aSessions)
 	return nil
 }
 
