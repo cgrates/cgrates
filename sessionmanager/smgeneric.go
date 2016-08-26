@@ -592,6 +592,7 @@ func (self *SMGeneric) getSessions() map[string][]*SMGSession {
 }
 
 func (self *SMGeneric) ActiveSessions(fltrs map[string]string) (aSessions []*ActiveSession, err error) {
+	aSessions = make([]*ActiveSession, 0) // Make sure we return at least empty list and not nil
 	// Check first based on indexes so we can downsize the list of matching sessions
 	matchingSessionIDs, checkedFilters := self.getSessionIDsMatchingIndexes(fltrs)
 	if len(matchingSessionIDs) == 0 && len(checkedFilters) != 0 {
@@ -616,6 +617,9 @@ func (self *SMGeneric) ActiveSessions(fltrs map[string]string) (aSessions []*Act
 			sMp, err := s.eventStart.AsMapStringString()
 			if err != nil {
 				return nil, err
+			}
+			if _, hasRunID := sMp[utils.MEDI_RUNID]; !hasRunID {
+				sMp[utils.MEDI_RUNID] = utils.META_DEFAULT
 			}
 			matchingAll := true
 			for fltrFldName, fltrFldVal := range fltrs {
