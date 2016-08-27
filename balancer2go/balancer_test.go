@@ -51,26 +51,3 @@ func TestOneBalancer(t *testing.T) {
 		t.Error("With only one rater these shoud be equal")
 	}
 }
-
-func Test100Balancer(t *testing.T) {
-	balancer := NewBalancer()
-	var clients []Worker
-	for i := 0; i < 100; i++ {
-		c := new(rpc.Client)
-		balancer.AddClient(fmt.Sprintf("client%v", i), c)
-	}
-	for i := 0; i < 100; i++ {
-		c := balancer.Balance()
-		if c == nil {
-			t.Error("Retuned nil client!")
-		}
-		for _, o := range clients {
-			if c == o {
-				t.Error("Balance did not iterate all the available clients")
-				break
-			}
-		}
-		clients = append(clients, c)
-	}
-
-}
