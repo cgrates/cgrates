@@ -1,7 +1,6 @@
 package balancer2go
 
 import (
-	"fmt"
 	"net/rpc"
 	"testing"
 )
