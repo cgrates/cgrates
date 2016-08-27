@@ -620,6 +620,11 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	return cc, nil
 }
 
+// Converts the balance towards compressed information to be displayed
+func (b *Balance) AsBalanceDigest(typ string) *BalanceDigest {
+	return &BalanceDigest{ID: b.ID, Type: typ, Value: b.Value, Disabled: b.Disabled}
+}
+
 /*
 Structure to store minute buckets according to weight, precision or price.
 */
@@ -740,4 +745,12 @@ func (f ValueFactor) GetValue(tor string) float64 {
 		return value
 	}
 	return 1.0
+}
+
+// BalanceDigest represents compressed information about a balance
+type BalanceDigest struct {
+	ID       string // ID or UUID if not defined
+	Type     string // *voice, *data, etc
+	Value    float64
+	Disabled bool
 }

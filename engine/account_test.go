@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -1869,6 +1870,47 @@ func TestAccountGetBalancesForPrefixMixedBad(t *testing.T) {
 	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
 	if len(bcs) != 0 {
 		t.Error("error excluding on mixed balances bad")
+	}
+}
+
+func TestAccountAsAccountDigest(t *testing.T) {
+	acnt1 := &Account{
+		ID:            "cgrates.org:account1",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.SMS:  Balances{&Balance{ID: "sms1", Value: 14}},
+			utils.DATA: Balances{&Balance{ID: "data1", Value: 1204}},
+			utils.VOICE: Balances{
+				&Balance{ID: "voice1", Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Value: 3600},
+				&Balance{ID: "voice2", Weight: 10, DestinationIDs: utils.StringMap{"RET": true}, Value: 1200},
+			},
+		},
+	}
+	expectAcntDigest := &AccountDigest{
+		Tenant: "cgrates.org",
+		ID:     "account1",
+		BalanceDigests: []*BalanceDigest{
+			&BalanceDigest{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
+			&BalanceDigest{ID: "data1", Type: utils.DATA, Value: 1204, Disabled: false},
+			&BalanceDigest{ID: "voice1", Type: utils.VOICE, Value: 1204, Disabled: false},
+			&BalanceDigest{ID: "voice2", Type: utils.VOICE, Value: 1200, Disabled: false},
+		},
+		AllowNegative: true,
+		Disabled:      false,
+	}
+	acntDigest := acnt1.AsAccountDigest()
+	if expectAcntDigest.Tenant != acntDigest.Tenant ||
+		expectAcntDigest.ID != acntDigest.ID ||
+		expectAcntDigest.AllowNegative != acntDigest.AllowNegative ||
+		expectAcntDigest.Disabled != acntDigest.Disabled ||
+		len(expectAcntDigest.BalanceDigests) != len(acntDigest.BalanceDigests) {
+		t.Errorf("Expecting: %+v, received: %+v", expectAcntDigest, acntDigest)
+	}
+	// Since maps are unordered, slices will be too so we need to find element to compare before doing it
+	for _, bd := range acntDigest.BalanceDigests {
+		if b; d.ID == "sms1" && !reflect.DeepEqual(expectAcntDigest.BalanceDigests[0], bd) {
+			t.Errorf("Expecting: %+v, received: %+v", expectAcntDigest, acntDigest)
+		}
 	}
 }
 
