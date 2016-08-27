@@ -225,9 +225,10 @@ type CGRConfig struct {
 	LcrSubjectPrefixMatching bool // enables prefix matching for the lcr subject
 	BalancerEnabled          bool
 	SchedulerEnabled         bool
-	CDRSEnabled              bool                 // Enable CDR Server service
-	CDRSExtraFields          []*utils.RSRField    // Extra fields to store in CDRs
-	CDRSStoreCdrs            bool                 // store cdrs in storDb
+	CDRSEnabled              bool              // Enable CDR Server service
+	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
+	CDRSStoreCdrs            bool              // store cdrs in storDb
+	CDRScdrAccountDigest     bool
 	CDRSRaterConns           []*HaPoolConfig      // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
 	CDRSPubSubSConns         []*HaPoolConfig      // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
 	CDRSUserSConns           []*HaPoolConfig      // address where to reach the users service: <""|internal|x.y.z.y:1234>
@@ -815,6 +816,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnCdrsCfg.Store_cdrs != nil {
 			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
+		}
+		if jsnCdrsCfg.Cdr_account_digest != nil {
+			self.CDRScdrAccountDigest = *jsnCdrsCfg.Cdr_account_digest
 		}
 		if jsnCdrsCfg.Rals_conns != nil {
 			self.CDRSRaterConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Rals_conns))

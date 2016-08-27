@@ -70,7 +70,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater, pubsub, users, aliases, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB AccountingStorage, rater, pubsub, users, aliases, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
 	if rater == nil || reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -92,6 +92,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater, pubsub, use
 type CdrServer struct {
 	cgrCfg        *config.CGRConfig
 	cdrDb         CdrStorage
+	dataDB        AccountingStorage
 	rals          rpcclient.RpcClientConnection
 	pubsub        rpcclient.RpcClientConnection
 	users         rpcclient.RpcClientConnection
@@ -243,6 +244,16 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, rep
 			if ratedCDR.CostDetails != nil {
 				ratedCDR.CostDetails.UpdateCost()
 				ratedCDR.CostDetails.UpdateRatedUsage()
+				if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID, utils.META_PSEUDOPREPAID, utils.PSEUDOPREPAID,
+					utils.META_POSTPAID, utils.POSTPAID}, ratedCDR.RequestType) && self.cgrCfg.CDRScdrAccountDigest {
+					acntID := utils.ConcatenatedKey(ratedCDR.Tenant, ratedCDR.Account)
+					acnt, err := self.dataDB.GetAccount(acntID)
+					if err != nil {
+						utils.Logger.Err(fmt.Sprintf("<CDRS> Querying AccountDigest for account: %s got error: %s", acntID, err.Error()))
+					} else if acnt.ID != "" {
+						ratedCDR.CostDetails.AccountDigest = acnt.AsAccountDigest()
+					}
+				}
 			}
 			if err := self.cdrDb.SetCDR(ratedCDR, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", ratedCDR, err.Error()))

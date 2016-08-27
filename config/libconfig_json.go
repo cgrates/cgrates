@@ -85,15 +85,16 @@ type SchedulerJsonCfg struct {
 
 // Cdrs config section
 type CdrsJsonCfg struct {
-	Enabled         *bool
-	Extra_fields    *[]string
-	Store_cdrs      *bool
-	Rals_conns      *[]*HaPoolJsonCfg
-	Pubsubs_conns   *[]*HaPoolJsonCfg
-	Users_conns     *[]*HaPoolJsonCfg
-	Aliases_conns   *[]*HaPoolJsonCfg
-	Cdrstats_conns  *[]*HaPoolJsonCfg
-	Cdr_replication *[]*CdrReplicationJsonCfg
+	Enabled            *bool
+	Extra_fields       *[]string
+	Store_cdrs         *bool
+	Cdr_account_digest *bool
+	Rals_conns         *[]*HaPoolJsonCfg
+	Pubsubs_conns      *[]*HaPoolJsonCfg
+	Users_conns        *[]*HaPoolJsonCfg
+	Aliases_conns      *[]*HaPoolJsonCfg
+	Cdrstats_conns     *[]*HaPoolJsonCfg
+	Cdr_replication    *[]*CdrReplicationJsonCfg
 }
 
 type CdrReplicationJsonCfg struct {

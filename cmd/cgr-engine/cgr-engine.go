@@ -301,7 +301,7 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 	exitChan <- true
 }
 
-func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage,
+func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, dataDB engine.AccountingStorage,
 	internalRaterChan chan rpcclient.RpcClientConnection, internalPubSubSChan chan rpcclient.RpcClientConnection,
 	internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	internalCdrStatSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
@@ -353,7 +353,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, cdrDb engine
 			return
 		}
 	}
-	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, ralConn, pubSubConn, usersConn, aliasesConn, statsConn)
+	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dataDB, ralConn, pubSubConn, usersConn, aliasesConn, statsConn)
 	cdrServer.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHandlersToServer(server)
@@ -632,7 +632,8 @@ func main() {
 
 	// Start CDR Server
 	if cfg.CDRSEnabled {
-		go startCDRS(internalCdrSChan, cdrDb, internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalCdrStatSChan, server, exitChan)
+		go startCDRS(internalCdrSChan, cdrDb, accountDb,
+			internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalCdrStatSChan, server, exitChan)
 	}
 
 	// Start CDR Stats server
