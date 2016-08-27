@@ -1906,9 +1906,9 @@ func TestAccountAsAccountDigest(t *testing.T) {
 		len(expectAcntDigest.BalanceDigests) != len(acntDigest.BalanceDigests) {
 		t.Errorf("Expecting: %+v, received: %+v", expectAcntDigest, acntDigest)
 	}
-	// Since maps are unordered, slices will be too so we need to find element to compare before doing it
+	// Since maps are unordered, slices will be too so we need to find element to compare
 	for _, bd := range acntDigest.BalanceDigests {
-		if b; d.ID == "sms1" && !reflect.DeepEqual(expectAcntDigest.BalanceDigests[0], bd) {
+		if bd.ID == "sms1" && !reflect.DeepEqual(expectAcntDigest.BalanceDigests[0], bd) {
 			t.Errorf("Expecting: %+v, received: %+v", expectAcntDigest, acntDigest)
 		}
 	}
