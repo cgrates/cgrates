@@ -622,7 +622,11 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 
 // Converts the balance towards compressed information to be displayed
 func (b *Balance) AsBalanceDigest(typ string) *BalanceDigest {
-	return &BalanceDigest{ID: b.ID, Type: typ, Value: b.Value, Disabled: b.Disabled}
+	bd := &BalanceDigest{ID: b.ID, Type: typ, Value: b.Value, Disabled: b.Disabled}
+	if bd.ID == "" {
+		bd.ID = b.Uuid
+	}
+	return bd
 }
 
 /*
