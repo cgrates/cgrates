@@ -30,7 +30,6 @@ type CallCost struct {
 	Cost                                                            float64
 	Timespans                                                       TimeSpans
 	RatedUsage                                                      float64
-	AccountSummary                                                  *AccountSummary
 	deductConnectFee                                                bool
 	negativeConnectFee                                              bool // the connect fee went negative on default balance
 	maxCostDisconect                                                bool

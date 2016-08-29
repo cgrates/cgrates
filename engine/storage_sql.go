@@ -675,6 +675,7 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 		CostSource:      cdr.CostSource,
 		Cost:            cdr.Cost,
 		CostDetails:     cdr.CostDetailsJson(),
+		AccountSummary:  utils.ToJSON(cdr.AccountSummary),
 		ExtraInfo:       cdr.ExtraInfo,
 		CreatedAt:       time.Now(),
 	})
@@ -707,6 +708,7 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 				CostSource:      cdr.CostSource,
 				Cost:            cdr.Cost,
 				CostDetails:     cdr.CostDetailsJson(),
+				AccountSummary:  utils.ToJSON(cdr.AccountSummary),
 				ExtraInfo:       cdr.ExtraInfo,
 				UpdatedAt:       time.Now(),
 			},
@@ -975,6 +977,10 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
 		}
+		acntSummary, err := NewAccountSummaryFromJSON(result.AccountSummary)
+		if err != nil {
+			return nil, 0, fmt.Errorf("JSON unmarshal account summary error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
+		}
 		usageDur := time.Duration(result.Usage * utils.NANO_MULTIPLIER)
 		pddDur := time.Duration(result.Pdd * utils.NANO_MULTIPLIER)
 		storCdr := &CDR{
@@ -1002,6 +1008,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 			CostSource:      result.CostSource,
 			Cost:            result.Cost,
 			CostDetails:     &callCost,
+			AccountSummary:  acntSummary,
 			ExtraInfo:       result.ExtraInfo,
 		}
 		cdrs = append(cdrs, storCdr)

@@ -239,22 +239,27 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, rep
 			}
 		}
 	}
+	// Store AccountSummary if requested
+	if self.cgrCfg.CDRScdrAccountSummary {
+		for _, ratedCDR := range ratedCDRs {
+			if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID, utils.META_PSEUDOPREPAID, utils.PSEUDOPREPAID,
+				utils.META_POSTPAID, utils.POSTPAID}, ratedCDR.RequestType) {
+				acntID := utils.ConcatenatedKey(ratedCDR.Tenant, ratedCDR.Account)
+				acnt, err := self.dataDB.GetAccount(acntID)
+				if err != nil {
+					utils.Logger.Err(fmt.Sprintf("<CDRS> Querying AccountDigest for account: %s got error: %s", acntID, err.Error()))
+				} else if acnt.ID != "" {
+					ratedCDR.AccountSummary = acnt.AsAccountSummary()
+				}
+			}
+		}
+	}
 	// Store rated CDRs
 	if store {
 		for _, ratedCDR := range ratedCDRs {
 			if ratedCDR.CostDetails != nil {
 				ratedCDR.CostDetails.UpdateCost()
 				ratedCDR.CostDetails.UpdateRatedUsage()
-				if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID, utils.META_PSEUDOPREPAID, utils.PSEUDOPREPAID,
-					utils.META_POSTPAID, utils.POSTPAID}, ratedCDR.RequestType) && self.cgrCfg.CDRScdrAccountSummary {
-					acntID := utils.ConcatenatedKey(ratedCDR.Tenant, ratedCDR.Account)
-					acnt, err := self.dataDB.GetAccount(acntID)
-					if err != nil {
-						utils.Logger.Err(fmt.Sprintf("<CDRS> Querying AccountDigest for account: %s got error: %s", acntID, err.Error()))
-					} else if acnt.ID != "" {
-						ratedCDR.CostDetails.AccountSummary = acnt.AsAccountSummary()
-					}
-				}
 			}
 			if err := self.cdrDb.SetCDR(ratedCDR, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", ratedCDR, err.Error()))

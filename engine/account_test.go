@@ -1873,6 +1873,14 @@ func TestAccountGetBalancesForPrefixMixedBad(t *testing.T) {
 	}
 }
 
+func TestAccountNewAccountSummaryFromJSON(t *testing.T) {
+	if acnt, err := NewAccountSummaryFromJSON("null"); err != nil {
+		t.Error(err)
+	} else if acnt != nil {
+		t.Errorf("Expecting nil, received: %+v", acnt)
+	}
+}
+
 func TestAccountAsAccountDigest(t *testing.T) {
 	acnt1 := &Account{
 		ID:            "cgrates.org:account1",

@@ -28,6 +28,7 @@ CREATE TABLE cdrs (
   cost_source varchar(64) NOT NULL,
   cost DECIMAL(20,4) NOT NULL,
   cost_details text,
+  account_summary text,
   extra_info text,
   created_at TIMESTAMP NULL,
   updated_at TIMESTAMP NULL,

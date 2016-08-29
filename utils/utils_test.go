@@ -703,3 +703,9 @@ func TestMaskSuffix(t *testing.T) {
 	}
 
 }
+
+func TestToJSON(t *testing.T) {
+	if outNilObj := ToJSON(nil); outNilObj != "null" {
+		t.Errorf("Expecting null, received: <%q>", outNilObj)
+	}
+}

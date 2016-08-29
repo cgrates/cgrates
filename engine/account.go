@@ -1036,6 +1036,13 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 	return ad
 }
 
+func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err error) {
+	if !utils.IsSliceMember([]string{"", "null"}, jsn) { // Unmarshal only when content
+		json.Unmarshal([]byte(jsn), &acntSummary)
+	}
+	return
+}
+
 // AccountDigest contains compressed information about an Account
 type AccountSummary struct {
 	Tenant           string

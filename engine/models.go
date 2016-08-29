@@ -423,6 +423,7 @@ type TBLCDRs struct {
 	Cost            float64
 	CostDetails     string
 	CostSource      string
+	AccountSummary  string
 	ExtraInfo       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time

@@ -103,10 +103,11 @@ type CDR struct {
 	ExtraFields     map[string]string // Extra fields to be stored in CDR
 	CostSource      string            // The source of this cost
 	Cost            float64
-	CostDetails     *CallCost // Attach the cost details to CDR when possible
-	ExtraInfo       string    // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
-	Rated           bool      // Mark the CDR as rated so we do not process it during rating
-	Partial         bool      // Used for partial record processing by CDRC
+	CostDetails     *CallCost       // Attach the cost details to CDR when possible
+	AccountSummary  *AccountSummary // Store AccountSummary information
+	ExtraInfo       string          // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
+	Rated           bool            // Mark the CDR as rated so we do not process it during rating
+	Partial         bool            // Used for partial record processing by CDRC
 }
 
 func (cdr *CDR) CostDetailsJson() string {
