@@ -93,91 +93,100 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 }
 
 // easy to be counted exported by prefix
-type lrustore map[string]*lru.Cache
+type lrustore struct {
+	store map[string]*lru.Cache
+	sync.RWMutex
+}
 
-func newLruStore() lrustore {
-	c := make(lrustore)
+func newLruStore() *lrustore {
+	c := &lrustore{store: make(map[string]*lru.Cache)}
+	c.Lock()
+	defer c.Unlock()
 	if cfg != nil && cfg.Destinations != nil {
-		c[utils.DESTINATION_PREFIX], _ = lru.New(cfg.Destinations.Limit)
+		c.store[utils.DESTINATION_PREFIX], _ = lru.New(cfg.Destinations.Limit)
 	} else {
-		c[utils.DESTINATION_PREFIX], _ = lru.New(10000)
+		c.store[utils.DESTINATION_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.ReverseDestinations != nil {
-		c[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(cfg.ReverseDestinations.Limit)
+		c.store[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(cfg.ReverseDestinations.Limit)
 	} else {
-		c[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(10000)
+		c.store[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.RatingPlans != nil {
-		c[utils.RATING_PLAN_PREFIX], _ = lru.New(cfg.RatingPlans.Limit)
+		c.store[utils.RATING_PLAN_PREFIX], _ = lru.New(cfg.RatingPlans.Limit)
 	} else {
-		c[utils.RATING_PLAN_PREFIX], _ = lru.New(10000)
+		c.store[utils.RATING_PLAN_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.RatingProfiles != nil {
-		c[utils.RATING_PROFILE_PREFIX], _ = lru.New(cfg.RatingProfiles.Limit)
+		c.store[utils.RATING_PROFILE_PREFIX], _ = lru.New(cfg.RatingProfiles.Limit)
 	} else {
-		c[utils.RATING_PROFILE_PREFIX], _ = lru.New(10000)
+		c.store[utils.RATING_PROFILE_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.Lcr != nil {
-		c[utils.LCR_PREFIX], _ = lru.New(cfg.Lcr.Limit)
+		c.store[utils.LCR_PREFIX], _ = lru.New(cfg.Lcr.Limit)
 	} else {
-		c[utils.LCR_PREFIX], _ = lru.New(10000)
+		c.store[utils.LCR_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.CdrStats != nil {
-		c[utils.CDR_STATS_PREFIX], _ = lru.New(cfg.CdrStats.Limit)
+		c.store[utils.CDR_STATS_PREFIX], _ = lru.New(cfg.CdrStats.Limit)
 	} else {
-		c[utils.CDR_STATS_PREFIX], _ = lru.New(10000)
+		c.store[utils.CDR_STATS_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.Actions != nil {
-		c[utils.ACTION_PREFIX], _ = lru.New(cfg.Actions.Limit)
+		c.store[utils.ACTION_PREFIX], _ = lru.New(cfg.Actions.Limit)
 	} else {
-		c[utils.ACTION_PREFIX], _ = lru.New(10000)
+		c.store[utils.ACTION_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.ActionPlans != nil {
-		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(cfg.ActionPlans.Limit)
+		c.store[utils.ACTION_PLAN_PREFIX], _ = lru.New(cfg.ActionPlans.Limit)
 	} else {
-		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(10000)
+		c.store[utils.ACTION_PLAN_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.ActionTriggers != nil {
-		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(cfg.ActionTriggers.Limit)
+		c.store[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(cfg.ActionTriggers.Limit)
 	} else {
-		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(10000)
+		c.store[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.SharedGroups != nil {
-		c[utils.SHARED_GROUP_PREFIX], _ = lru.New(cfg.SharedGroups.Limit)
+		c.store[utils.SHARED_GROUP_PREFIX], _ = lru.New(cfg.SharedGroups.Limit)
 	} else {
-		c[utils.SHARED_GROUP_PREFIX], _ = lru.New(10000)
+		c.store[utils.SHARED_GROUP_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.Aliases != nil {
-		c[utils.ALIASES_PREFIX], _ = lru.New(cfg.Aliases.Limit)
+		c.store[utils.ALIASES_PREFIX], _ = lru.New(cfg.Aliases.Limit)
 	} else {
-		c[utils.ALIASES_PREFIX], _ = lru.New(10000)
+		c.store[utils.ALIASES_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.ReverseAliases != nil {
-		c[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(cfg.ReverseAliases.Limit)
+		c.store[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(cfg.ReverseAliases.Limit)
 	} else {
-		c[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(10000)
+		c.store[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(10000)
 	}
 
 	return c
 }
 
 func (cs lrustore) Put(key string, value interface{}) {
+	cs.Lock()
+	defer cs.Unlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	mp, ok := cs[prefix]
+	mp, ok := cs.store[prefix]
 	if !ok {
 		var err error
 		mp, err = lru.New(10000)
 		if err != nil {
 			utils.Logger.Debug(fmt.Sprintf("<cache>: error at init: %v", err))
 		}
-		cs[prefix] = mp
+		cs.store[prefix] = mp
 	}
 	mp.Add(key, value)
 }
 
 func (cs lrustore) Get(key string) (interface{}, bool) {
+	cs.RLock()
+	defer cs.RUnlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
+	if keyMap, ok := cs.store[prefix]; ok {
 		if ti, exists := keyMap.Get(key); exists {
 			return ti, true
 		}
@@ -186,26 +195,34 @@ func (cs lrustore) Get(key string) (interface{}, bool) {
 }
 
 func (cs lrustore) Delete(key string) {
+	cs.Lock()
+	defer cs.Unlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
+	if keyMap, ok := cs.store[prefix]; ok {
 		keyMap.Remove(key)
 	}
 }
 
 func (cs lrustore) DeletePrefix(prefix string) {
-	delete(cs, prefix)
+	cs.Lock()
+	defer cs.Unlock()
+	delete(cs.store, prefix)
 }
 
 func (cs lrustore) CountEntriesForPrefix(prefix string) int {
-	if m, ok := cs[prefix]; ok {
+	cs.RLock()
+	defer cs.RUnlock()
+	if m, ok := cs.store[prefix]; ok {
 		return m.Len()
 	}
 	return 0
 }
 
 func (cs lrustore) GetKeysForPrefix(prefix string) (keys []string) {
+	cs.Lock()
+	defer cs.Unlock()
 	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
+	if keyMap, ok := cs.store[prefix]; ok {
 		for _, iterKey := range keyMap.Keys() {
 			iterKeyString := iterKey.(string)
 			if len(key) == 0 || strings.HasPrefix(iterKeyString, key) {
