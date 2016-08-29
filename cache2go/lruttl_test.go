@@ -29,7 +29,7 @@ func TestCacheExpire(t *testing.T) {
 	if !ok || b == nil || b != a {
 		t.Error("Error retriving data from cache", b)
 	}
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	b, ok = cache.Get("mama")
 	if ok || b != nil {
 		t.Error("Error expiring data from cache", b)
