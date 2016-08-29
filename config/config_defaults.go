@@ -45,24 +45,26 @@ const CGRATES_CFG_JSON = `
 	"response_cache_ttl": "0s",								// the life span of a cached response
 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
 	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
-    "cache_dump_dir": "",									 // cache dump for faster start (leave empty to disable)
+	"cache_dump_dir": "",									 // cache dump for faster start (leave empty to disable)
 
 },
+
 
 "cache":{
-    "destinations": {"limit": 10000, "ttl":"0s", "precache": false},
-    "reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": false},
-    "rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
-    "rating_profiles": {"limit": 10000, "ttl":"0s", "precache": false},
-    "lcr": {"limit": 10000, "ttl":"0s", "precache": false},
-    "cdr_stats": {"limit": 10000, "ttl":"0s", "precache": false},
-    "actions": {"limit": 10000, "ttl":"0s", "precache": false},
-    "action_plans": {"limit": 10000, "ttl":"0s", "precache": false},
-    "action_triggers": {"limit": 10000, "ttl":"0s", "precache": false},
-    "shared_groups": {"limit": 10000, "ttl":"0s", "precache": false},
-    "aliases": {"limit": 10000, "ttl":"0s", "precache": false},
-    "reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": false},
+	"destinations": {"limit": 10000, "ttl":"0s", "precache": false},
+	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": false},
+	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
+	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": false},
+	"lcr": {"limit": 10000, "ttl":"0s", "precache": false},
+	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": false},
+	"actions": {"limit": 10000, "ttl":"0s", "precache": false},
+	"action_plans": {"limit": 10000, "ttl":"0s", "precache": false},
+	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": false},
+	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": false},
+	"aliases": {"limit": 10000, "ttl":"0s", "precache": false},
+	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": false},
 },
+
 
 "listen": {
 	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
@@ -148,6 +150,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts the cdrstats service: <true|false>
 	"save_interval": "1m",					// interval to save changed stats into dataDb storage
 },
+
 
 "cdrc": [
 	{

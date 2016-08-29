@@ -9,7 +9,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Cache is an LRU cache. It is not safe for concurrent access.
+// Cache is an LRU cache.
 type Cache struct {
 	mu sync.RWMutex
 	// MaxEntries is the maximum number of cache entries before
