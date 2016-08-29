@@ -246,13 +246,13 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, rep
 				ratedCDR.CostDetails.UpdateCost()
 				ratedCDR.CostDetails.UpdateRatedUsage()
 				if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID, utils.META_PSEUDOPREPAID, utils.PSEUDOPREPAID,
-					utils.META_POSTPAID, utils.POSTPAID}, ratedCDR.RequestType) && self.cgrCfg.CDRScdrAccountDigest {
+					utils.META_POSTPAID, utils.POSTPAID}, ratedCDR.RequestType) && self.cgrCfg.CDRScdrAccountSummary {
 					acntID := utils.ConcatenatedKey(ratedCDR.Tenant, ratedCDR.Account)
 					acnt, err := self.dataDB.GetAccount(acntID)
 					if err != nil {
 						utils.Logger.Err(fmt.Sprintf("<CDRS> Querying AccountDigest for account: %s got error: %s", acntID, err.Error()))
 					} else if acnt.ID != "" {
-						ratedCDR.CostDetails.AccountDigest = acnt.AsAccountDigest()
+						ratedCDR.CostDetails.AccountSummary = acnt.AsAccountSummary()
 					}
 				}
 			}

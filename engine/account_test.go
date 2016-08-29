@@ -1886,30 +1886,30 @@ func TestAccountAsAccountDigest(t *testing.T) {
 			},
 		},
 	}
-	expectAcntDigest := &AccountDigest{
+	expectacntSummary := &AccountSummary{
 		Tenant: "cgrates.org",
 		ID:     "account1",
-		BalanceDigests: []*BalanceDigest{
-			&BalanceDigest{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
-			&BalanceDigest{ID: "data1", Type: utils.DATA, Value: 1204, Disabled: false},
-			&BalanceDigest{ID: "voice1", Type: utils.VOICE, Value: 1204, Disabled: false},
-			&BalanceDigest{ID: "voice2", Type: utils.VOICE, Value: 1200, Disabled: false},
+		BalanceSummaries: []*BalanceSummary{
+			&BalanceSummary{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
+			&BalanceSummary{ID: "data1", Type: utils.DATA, Value: 1204, Disabled: false},
+			&BalanceSummary{ID: "voice1", Type: utils.VOICE, Value: 1204, Disabled: false},
+			&BalanceSummary{ID: "voice2", Type: utils.VOICE, Value: 1200, Disabled: false},
 		},
 		AllowNegative: true,
 		Disabled:      false,
 	}
-	acntDigest := acnt1.AsAccountDigest()
-	if expectAcntDigest.Tenant != acntDigest.Tenant ||
-		expectAcntDigest.ID != acntDigest.ID ||
-		expectAcntDigest.AllowNegative != acntDigest.AllowNegative ||
-		expectAcntDigest.Disabled != acntDigest.Disabled ||
-		len(expectAcntDigest.BalanceDigests) != len(acntDigest.BalanceDigests) {
-		t.Errorf("Expecting: %+v, received: %+v", expectAcntDigest, acntDigest)
+	acntSummary := acnt1.AsAccountSummary()
+	if expectacntSummary.Tenant != acntSummary.Tenant ||
+		expectacntSummary.ID != acntSummary.ID ||
+		expectacntSummary.AllowNegative != acntSummary.AllowNegative ||
+		expectacntSummary.Disabled != acntSummary.Disabled ||
+		len(expectacntSummary.BalanceSummaries) != len(acntSummary.BalanceSummaries) {
+		t.Errorf("Expecting: %+v, received: %+v", expectacntSummary, acntSummary)
 	}
 	// Since maps are unordered, slices will be too so we need to find element to compare
-	for _, bd := range acntDigest.BalanceDigests {
-		if bd.ID == "sms1" && !reflect.DeepEqual(expectAcntDigest.BalanceDigests[0], bd) {
-			t.Errorf("Expecting: %+v, received: %+v", expectAcntDigest, acntDigest)
+	for _, bd := range acntSummary.BalanceSummaries {
+		if bd.ID == "sms1" && !reflect.DeepEqual(expectacntSummary.BalanceSummaries[0], bd) {
+			t.Errorf("Expecting: %+v, received: %+v", expectacntSummary, acntSummary)
 		}
 	}
 }

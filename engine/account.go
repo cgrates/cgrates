@@ -1019,9 +1019,9 @@ func (acc *Account) AsOldStructure() interface{} {
 	return result
 }
 
-func (acc *Account) AsAccountDigest() *AccountDigest {
+func (acc *Account) AsAccountSummary() *AccountSummary {
 	idSplt := strings.Split(acc.ID, utils.CONCATENATED_KEY_SEP)
-	ad := &AccountDigest{AllowNegative: acc.AllowNegative, Disabled: acc.Disabled}
+	ad := &AccountSummary{AllowNegative: acc.AllowNegative, Disabled: acc.Disabled}
 	if len(idSplt) == 1 {
 		ad.ID = idSplt[0]
 	} else if len(idSplt) == 2 {
@@ -1030,17 +1030,17 @@ func (acc *Account) AsAccountDigest() *AccountDigest {
 	}
 	for balanceType, balances := range acc.BalanceMap {
 		for _, balance := range balances {
-			ad.BalanceDigests = append(ad.BalanceDigests, balance.AsBalanceDigest(balanceType))
+			ad.BalanceSummaries = append(ad.BalanceSummaries, balance.AsBalanceSummary(balanceType))
 		}
 	}
 	return ad
 }
 
 // AccountDigest contains compressed information about an Account
-type AccountDigest struct {
-	Tenant         string
-	ID             string
-	BalanceDigests []*BalanceDigest
-	AllowNegative  bool
-	Disabled       bool
+type AccountSummary struct {
+	Tenant           string
+	ID               string
+	BalanceSummaries []*BalanceSummary
+	AllowNegative    bool
+	Disabled         bool
 }

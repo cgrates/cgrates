@@ -174,10 +174,10 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
-		Enabled:            utils.BoolPointer(false),
-		Extra_fields:       utils.StringSlicePointer([]string{}),
-		Store_cdrs:         utils.BoolPointer(true),
-		Cdr_account_digest: utils.BoolPointer(false),
+		Enabled:             utils.BoolPointer(false),
+		Extra_fields:        utils.StringSlicePointer([]string{}),
+		Store_cdrs:          utils.BoolPointer(true),
+		Cdr_account_summary: utils.BoolPointer(false),
 		Rals_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer("*internal"),
