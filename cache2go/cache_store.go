@@ -4,6 +4,7 @@ package cache2go
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -20,25 +21,32 @@ type cacheStore interface {
 }
 
 // easy to be counted exported by prefix
-type cacheDoubleStore map[string]map[string]interface{}
+type cacheDoubleStore struct {
+	cache map[string]map[string]interface{}
+	sync.RWMutex
+}
 
-func newDoubleStore() cacheDoubleStore {
-	return make(cacheDoubleStore)
+func newDoubleStore() *cacheDoubleStore {
+	return &cacheDoubleStore{cache: make(map[string]map[string]interface{})}
 }
 
 func (cs cacheDoubleStore) Put(key string, value interface{}) {
+	cs.Lock()
+	defer cs.Unlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	mp, ok := cs[prefix]
+	mp, ok := cs.cache[prefix]
 	if !ok {
 		mp = make(map[string]interface{})
-		cs[prefix] = mp
+		cs.cache[prefix] = mp
 	}
 	mp[key] = value
 }
 
 func (cs cacheDoubleStore) Get(key string) (interface{}, bool) {
+	cs.RLock()
+	defer cs.RUnlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
+	if keyMap, ok := cs.cache[prefix]; ok {
 		if ti, exists := keyMap[key]; exists {
 			return ti, true
 		}
@@ -47,26 +55,34 @@ func (cs cacheDoubleStore) Get(key string) (interface{}, bool) {
 }
 
 func (cs cacheDoubleStore) Delete(key string) {
+	cs.Lock()
+	cs.Unlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
+	if keyMap, ok := cs.cache[prefix]; ok {
 		delete(keyMap, key)
 	}
 }
 
 func (cs cacheDoubleStore) DeletePrefix(prefix string) {
-	delete(cs, prefix)
+	cs.Lock()
+	defer cs.Unlock()
+	delete(cs.cache, prefix)
 }
 
 func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
-	if m, ok := cs[prefix]; ok {
+	cs.RLock()
+	defer cs.RUnlock()
+	if m, ok := cs.cache[prefix]; ok {
 		return len(m)
 	}
 	return 0
 }
 
 func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
+	cs.RLock()
+	defer cs.RUnlock()
 	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
+	if keyMap, ok := cs.cache[prefix]; ok {
 		for iterKey := range keyMap {
 			if len(key) == 0 || strings.HasPrefix(iterKey, key) {
 				keys = append(keys, prefix+iterKey)
