@@ -939,7 +939,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, utils.ANY),
 		utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, utils.ANY, utils.ANY),
 		utils.LCRKey(cd.Direction, cd.Tenant, utils.ANY, utils.ANY, utils.ANY),
-		utils.LCRKey(cd.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
+		utils.LCRKey(utils.ANY, utils.ANY, cd.Category, utils.ANY, utils.ANY),
 		utils.LCRKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
 	}
 	if lcrSubjectPrefixMatching {
