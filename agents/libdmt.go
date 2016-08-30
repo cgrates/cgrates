@@ -313,7 +313,7 @@ func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, pro
 			matchingAvps, err := avpsWithPath(m, rsrTpl)
 			if err != nil || len(matchingAvps) == 0 {
 				if err != nil {
-					utils.Logger.Error("<DiameterAgent> Error matching AVPS: %s", err.Error())
+					utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Error matching AVPS: %s", err.Error()))
 				}
 				continue
 			}
