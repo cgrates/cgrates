@@ -2,6 +2,7 @@
 package cache2go
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 
