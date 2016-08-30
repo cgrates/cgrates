@@ -312,9 +312,12 @@ func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, pro
 			}
 			matchingAvps, err := avpsWithPath(m, rsrTpl)
 			if err != nil || len(matchingAvps) == 0 {
-				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
-				continue // Filter not matching
+				if err != nil {
+					utils.Logger.Error("<DiameterAgent> Error matching AVPS: %s", err.Error())
+				}
+				continue
 			}
+
 			if len(matchingAvps) <= avpIdx {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot retrieve AVP with index %d for field template with id: %s", avpIdx, rsrTpl.Id))
 				continue // Not convertible, ignore
