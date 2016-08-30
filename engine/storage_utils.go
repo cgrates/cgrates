@@ -100,7 +100,7 @@ func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler strin
 			d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 	*/
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, nil, nil, 1)
+		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes, nil, 1)
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MYSQL:
