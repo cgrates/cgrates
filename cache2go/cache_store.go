@@ -176,6 +176,7 @@ func (cs lrustore) Put(key string, value interface{}) {
 		mp, err = lru.New(10000)
 		if err != nil {
 			utils.Logger.Debug(fmt.Sprintf("<cache>: error at init: %v", err))
+			return
 		}
 		cs.store[prefix] = mp
 	}
