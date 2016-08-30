@@ -2,7 +2,6 @@
 package cache2go
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 
@@ -95,7 +94,7 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 // easy to be counted exported by prefix
 type lrustore struct {
 	store map[string]*lru.Cache
-	sync.RWMutex
+	sync.Mutex
 }
 
 func newLruStore() *lrustore {
@@ -184,8 +183,8 @@ func (cs lrustore) Put(key string, value interface{}) {
 }
 
 func (cs lrustore) Get(key string) (interface{}, bool) {
-	cs.RLock()
-	defer cs.RUnlock()
+	cs.Lock()
+	defer cs.Unlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if keyMap, ok := cs.store[prefix]; ok {
 		if ti, exists := keyMap.Get(key); exists {
@@ -211,8 +210,8 @@ func (cs lrustore) DeletePrefix(prefix string) {
 }
 
 func (cs lrustore) CountEntriesForPrefix(prefix string) int {
-	cs.RLock()
-	defer cs.RUnlock()
+	cs.Lock()
+	defer cs.Unlock()
 	if m, ok := cs.store[prefix]; ok {
 		return m.Len()
 	}

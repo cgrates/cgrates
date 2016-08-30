@@ -1,6 +1,8 @@
 package cache2go
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestRemKey(t *testing.T) {
 	Set("t11_mm", "test")
