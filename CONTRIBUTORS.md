@@ -49,6 +49,8 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @marcinkowalczyk | Marcin Kowalczyk |
 | @andmar | André Maricato |
 | @brendangilmore | Brendan Gilmore |
+| @afone-lboue | Ludovic Boué |
+
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->
