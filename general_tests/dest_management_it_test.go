@@ -16,7 +16,6 @@ import (
 var destCfgPath string
 var destCfg *config.CGRConfig
 var destRPC *rpc.Client
-var destLoadInst utils.LoadInstance // Share load information between tests
 
 func TestDestManagInitCfg(t *testing.T) {
 	if !*testIntegration {
@@ -81,10 +80,9 @@ func TestDestManagLoadTariffPlanFromFolderAll(t *testing.T) {
 		return
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "alldests")}
+	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -113,10 +111,9 @@ func TestDestManagLoadTariffPlanFromFolderRemoveSome(t *testing.T) {
 		return
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome")}
+	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -145,10 +142,9 @@ func TestDestManagLoadTariffPlanFromFolderRemoveSomeFlush(t *testing.T) {
 		return
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome"), FlushDb: true}
+	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -177,10 +173,9 @@ func TestDestManagLoadTariffPlanFromFolderAddBack(t *testing.T) {
 		return
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "addback")}
+	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -209,10 +204,9 @@ func TestDestManagLoadTariffPlanFromFolderAddOne(t *testing.T) {
 		return
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "addone")}
+	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -250,10 +244,9 @@ func TestDestManagCacheWithGetCache(t *testing.T) {
 		t.Errorf("Calling ApierV1.ReloadCache received: %+v", reply)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheall"), FlushDb: true}
+	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 
@@ -274,8 +267,6 @@ func TestDestManagCacheWithGetCache(t *testing.T) {
 	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheone"), FlushDb: true}
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 
@@ -307,10 +298,9 @@ func TestDestManagCacheWithGetCost(t *testing.T) {
 		t.Errorf("Calling ApierV1.ReloadCache received: %+v", reply)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheall"), FlushDb: true}
+	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 
@@ -340,8 +330,6 @@ func TestDestManagCacheWithGetCost(t *testing.T) {
 	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheone"), FlushDb: true}
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
 		t.Error(err)
-	} else if destLoadInst.RatingLoadID == "" || destLoadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 

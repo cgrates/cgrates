@@ -578,24 +578,20 @@ type AttrCacheStats struct { // Add in the future filters here maybe so we avoid
 }
 
 type CacheStats struct {
-	Destinations         int
-	ReverseDestinations  int
-	RatingPlans          int
-	RatingProfiles       int
-	Actions              int
-	ActionPlans          int
-	SharedGroups         int
-	DerivedChargers      int
-	LcrProfiles          int
-	CdrStats             int
-	Users                int
-	Aliases              int
-	ReverseAliases       int
-	ResourceLimits       int
-	LastLoadID           string
-	LastRatingLoadID     string
-	LastAccountingLoadID string
-	LastLoadTime         string
+	Destinations        int
+	ReverseDestinations int
+	RatingPlans         int
+	RatingProfiles      int
+	Actions             int
+	ActionPlans         int
+	SharedGroups        int
+	DerivedChargers     int
+	LcrProfiles         int
+	CdrStats            int
+	Users               int
+	Aliases             int
+	ReverseAliases      int
+	ResourceLimits      int
 }
 
 type AttrExpFileCdrs struct {

@@ -117,8 +117,7 @@ func TestSMGV1CacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 
 	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 4, RatingProfiles: 0, Actions: 7, ActionPlans: 4, SharedGroups: 0, Aliases: 0, ResourceLimits: 0,
-		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3,
-		LastLoadID: utils.NOT_AVAILABLE, LastRatingLoadID: utils.NOT_AVAILABLE, LastAccountingLoadID: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
+		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3}
 	var args utils.AttrCacheStats
 	if err := smgV1Rpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

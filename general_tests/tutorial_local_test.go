@@ -116,7 +116,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 
 	expectedStats := &utils.CacheStats{Destinations: 7, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1, ResourceLimits: 0,
-		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadID: "LoadTariffPlanFromFolderAPI", LastRatingLoadID: loadInst.RatingLoadID, LastAccountingLoadID: loadInst.AccountingLoadID, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
+		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
@@ -1102,7 +1102,7 @@ func TestTutLocalLeastCost(t *testing.T) {
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
 	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[2], lcr.SupplierCosts[2])
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
 	}
 	cd = engine.CallDescriptor{
 		Direction:   "*out",

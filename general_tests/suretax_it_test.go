@@ -118,8 +118,7 @@ func TestSTICacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 1, RatingPlans: 1, RatingProfiles: 1, DerivedChargers: 1,
-		LastRatingLoadID: stiLoadInst.RatingLoadID, LastAccountingLoadID: stiLoadInst.AccountingLoadID, LastLoadTime: stiLoadInst.LoadTime.Format(time.RFC3339)}
+	expectedStats := &utils.CacheStats{Destinations: 1, RatingPlans: 1, RatingProfiles: 1, DerivedChargers: 1}
 	var args utils.AttrCacheStats
 	if err := stiRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

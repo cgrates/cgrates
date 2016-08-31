@@ -828,7 +828,7 @@ func TestApierGetCacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	var args utils.AttrCacheStats
 	err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats)
-	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 1, RatingProfiles: 0, Actions: 0, ActionPlans: 0, LastLoadID: utils.NOT_AVAILABLE, LastRatingLoadID: utils.NOT_AVAILABLE, LastAccountingLoadID: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
+	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 1, RatingProfiles: 0, Actions: 0, ActionPlans: 0}
 	if err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -1247,7 +1247,7 @@ func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	var args utils.AttrCacheStats
 	err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats)
-	expectedStats := &utils.CacheStats{LastLoadID: rcvStats.LastLoadID, LastRatingLoadID: rcvStats.LastRatingLoadID, LastAccountingLoadID: rcvStats.LastAccountingLoadID, LastLoadTime: rcvStats.LastLoadTime}
+	expectedStats := new(utils.CacheStats)
 	if err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(rcvStats, expectedStats) {
@@ -1763,7 +1763,7 @@ func TestApierGetCacheStats2(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	var args utils.AttrCacheStats
 	err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats)
-	expectedStats := &utils.CacheStats{LastLoadID: rcvStats.LastLoadID, LastRatingLoadID: rcvStats.LastRatingLoadID, LastAccountingLoadID: rcvStats.LastAccountingLoadID, LastLoadTime: rcvStats.LastLoadTime}
+	expectedStats := new(utils.CacheStats)
 	if err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
