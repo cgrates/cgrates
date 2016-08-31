@@ -344,8 +344,7 @@ CREATE TABLE tp_cdr_stats (
   `action_triggers` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_cdr_stats` (`tpid`, `tag`)
+  KEY `tpid` (`tpid`)
 );
 
 --
