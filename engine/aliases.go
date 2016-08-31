@@ -165,15 +165,15 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 
 	var oldAlias *Alias
 	if !attr.Overwrite { // get previous value
-		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId(), false)
+		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId(), false, utils.NonTransactional)
 	}
 
 	if attr.Overwrite || oldAlias == nil {
-		if err := am.accountingDb.SetAlias(attr.Alias); err != nil {
+		if err := am.accountingDb.SetAlias(attr.Alias, utils.NonTransactional); err != nil {
 			*reply = err.Error()
 			return err
 		}
-		if err := am.accountingDb.SetReverseAlias(attr.Alias); err != nil {
+		if err := am.accountingDb.SetReverseAlias(attr.Alias, utils.NonTransactional); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -202,11 +202,11 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 				oldAlias.Values = append(oldAlias.Values, value)
 			}
 		}
-		if err := am.accountingDb.SetAlias(oldAlias); err != nil {
+		if err := am.accountingDb.SetAlias(oldAlias, utils.NonTransactional); err != nil {
 			*reply = err.Error()
 			return err
 		}
-		if err := am.accountingDb.SetReverseAlias(oldAlias); err != nil {
+		if err := am.accountingDb.SetReverseAlias(oldAlias, utils.NonTransactional); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -224,7 +224,7 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 func (am *AliasHandler) RemoveAlias(al *Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-	if err := am.accountingDb.RemoveAlias(al.GetId()); err != nil {
+	if err := am.accountingDb.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -237,7 +237,7 @@ func (am *AliasHandler) GetAlias(al *Alias, result *Alias) error {
 	defer am.mu.RUnlock()
 	variants := al.GenerateIds()
 	for _, variant := range variants {
-		if r, err := am.accountingDb.GetAlias(variant, false); err == nil {
+		if r, err := am.accountingDb.GetAlias(variant, false, utils.NonTransactional); err == nil {
 			*result = *r
 			return nil
 		}
@@ -250,7 +250,7 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
 	rKey := attr.Alias + attr.Target + attr.Context
-	if ids, err := am.accountingDb.GetReverseAlias(rKey, false); err == nil {
+	if ids, err := am.accountingDb.GetReverseAlias(rKey, false, utils.NonTransactional); err == nil {
 		for _, key := range ids {
 			// get destination id
 			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
@@ -259,7 +259,7 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 				destID = elems[len(elems)-1]
 				key = strings.Join(elems[:len(elems)-1], utils.CONCATENATED_KEY_SEP)
 			}
-			if r, err := am.accountingDb.GetAlias(key, false); err != nil {
+			if r, err := am.accountingDb.GetAlias(key, false, utils.NonTransactional); err != nil {
 				return err
 			} else {
 				aliases[destID] = append(aliases[destID], r)
@@ -300,7 +300,7 @@ func (am *AliasHandler) GetMatchingAlias(attr *AttrMatchingAlias, result *string
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-		if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+		if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, value := range values {
 				for _, dId := range destIDs {
 					if value.DestinationId == utils.ANY || value.DestinationId == dId {
@@ -379,7 +379,7 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 	if rightPairs == nil {
 		// check destination ids
 		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-			if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+			if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 				for _, value := range values {
 					for _, dId := range destIDs {
 						if value.DestinationId == utils.ANY || value.DestinationId == dId {

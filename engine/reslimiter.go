@@ -327,7 +327,7 @@ func (rls *ResourceLimiterService) V1InitiateResourceUsage(attrs utils.AttrRLsRe
 		return utils.ErrResourceUnavailable
 	}
 	for _, rl := range matchingRLForEv {
-		cache2go.Set(utils.ResourceLimitsPrefix+rl.ID, rl)
+		cache2go.Set(utils.ResourceLimitsPrefix+rl.ID, rl, true, "") // no real reason for a transaction
 	}
 	*reply = utils.OK
 	return nil

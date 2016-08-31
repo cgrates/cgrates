@@ -42,34 +42,34 @@ type RatingStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
 	PreloadRatingCache() error
-	GetRatingPlan(string, bool) (*RatingPlan, error)
-	SetRatingPlan(*RatingPlan) error
-	GetRatingProfile(string, bool) (*RatingProfile, error)
-	SetRatingProfile(*RatingProfile) error
-	RemoveRatingProfile(string) error
-	GetDestination(string, bool) (*Destination, error)
-	SetDestination(*Destination) error
-	RemoveDestination(string) error
-	SetReverseDestination(*Destination) error
-	GetReverseDestination(string, bool) ([]string, error)
-	UpdateReverseDestination(*Destination, *Destination) error
-	GetLCR(string, bool) (*LCR, error)
-	SetLCR(*LCR) error
+	GetRatingPlan(string, bool, string) (*RatingPlan, error)
+	SetRatingPlan(*RatingPlan, string) error
+	GetRatingProfile(string, bool, string) (*RatingProfile, error)
+	SetRatingProfile(*RatingProfile, string) error
+	RemoveRatingProfile(string, string) error
+	GetDestination(string, bool, string) (*Destination, error)
+	SetDestination(*Destination, string) error
+	RemoveDestination(string, string) error
+	SetReverseDestination(*Destination, string) error
+	GetReverseDestination(string, bool, string) ([]string, error)
+	UpdateReverseDestination(*Destination, *Destination, string) error
+	GetLCR(string, bool, string) (*LCR, error)
+	SetLCR(*LCR, string) error
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
-	GetDerivedChargers(string, bool) (*utils.DerivedChargers, error)
-	SetDerivedChargers(string, *utils.DerivedChargers) error
-	GetActions(string, bool) (Actions, error)
-	SetActions(string, Actions) error
-	RemoveActions(string) error
-	GetSharedGroup(string, bool) (*SharedGroup, error)
-	SetSharedGroup(*SharedGroup) error
-	GetActionTriggers(string, bool) (ActionTriggers, error)
-	SetActionTriggers(string, ActionTriggers) error
-	RemoveActionTriggers(string) error
-	GetActionPlan(string, bool) (*ActionPlan, error)
-	SetActionPlan(string, *ActionPlan, bool) error
+	GetDerivedChargers(string, bool, string) (*utils.DerivedChargers, error)
+	SetDerivedChargers(string, *utils.DerivedChargers, string) error
+	GetActions(string, bool, string) (Actions, error)
+	SetActions(string, Actions, string) error
+	RemoveActions(string, string) error
+	GetSharedGroup(string, bool, string) (*SharedGroup, error)
+	SetSharedGroup(*SharedGroup, string) error
+	GetActionTriggers(string, bool, string) (ActionTriggers, error)
+	SetActionTriggers(string, ActionTriggers, string) error
+	RemoveActionTriggers(string, string) error
+	GetActionPlan(string, bool, string) (*ActionPlan, error)
+	SetActionPlan(string, *ActionPlan, bool, string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
@@ -90,17 +90,17 @@ type AccountingStorage interface {
 	GetUser(string) (*UserProfile, error)
 	GetUsers() ([]*UserProfile, error)
 	RemoveUser(string) error
-	SetAlias(*Alias) error
-	GetAlias(string, bool) (*Alias, error)
-	RemoveAlias(string) error
-	SetReverseAlias(*Alias) error
-	GetReverseAlias(string, bool) ([]string, error)
-	UpdateReverseAlias(*Alias, *Alias) error
-	GetResourceLimit(string, bool) (*ResourceLimit, error)
-	SetResourceLimit(*ResourceLimit) error
-	RemoveResourceLimit(string) error
-	GetLoadHistory(int, bool) ([]*utils.LoadInstance, error)
-	AddLoadHistory(*utils.LoadInstance, int) error
+	SetAlias(*Alias, string) error
+	GetAlias(string, bool, string) (*Alias, error)
+	RemoveAlias(string, string) error
+	SetReverseAlias(*Alias, string) error
+	GetReverseAlias(string, bool, string) ([]string, error)
+	UpdateReverseAlias(*Alias, *Alias, string) error
+	GetResourceLimit(string, bool, string) (*ResourceLimit, error)
+	SetResourceLimit(*ResourceLimit, string) error
+	RemoveResourceLimit(string, string) error
+	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
+	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetStructVersion() (*StructVersion, error)
 	SetStructVersion(*StructVersion) error
 }
@@ -253,4 +253,12 @@ func (gm *GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
 
 func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
+}
+
+// Decide the value of cacheCommit parameter based on transactionID
+func cacheCommit(transactionID string) bool {
+	if transactionID == utils.NonTransactional {
+		return true
+	}
+	return false
 }

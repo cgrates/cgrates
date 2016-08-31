@@ -168,7 +168,7 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 		return false, err
 	}
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
-		if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+		if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, dID := range destIDs {
 				for _, valDstID := range fltr.Values {
 					if valDstID == dID {

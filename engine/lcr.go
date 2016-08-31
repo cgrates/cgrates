@@ -279,7 +279,7 @@ func (es LCREntriesSorter) Sort() {
 func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 	var potentials LCREntriesSorter
 	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
-		if destIDs, err := ratingStorage.GetReverseDestination(p, true); err == nil {
+		if destIDs, err := ratingStorage.GetReverseDestination(p, true, utils.NonTransactional); err == nil {
 			for _, dId := range destIDs {
 				for _, entry := range lcra.Entries {
 					if entry.DestinationId == dId {

@@ -1,4 +1,20 @@
-//Simple caching library with expiration capabilities
+/*
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package cache2go
 
 import (
@@ -93,84 +109,77 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 }
 
 // easy to be counted exported by prefix
-type lrustore struct {
-	store map[string]*lru.Cache
-	sync.Mutex
-}
+type lrustore map[string]*lru.Cache
 
-func newLruStore() *lrustore {
-	c := &lrustore{store: make(map[string]*lru.Cache)}
-	c.Lock()
-	defer c.Unlock()
+func newLruStore() lrustore {
+	c := make(map[string]*lru.Cache)
 	if cfg != nil && cfg.Destinations != nil {
-		c.store[utils.DESTINATION_PREFIX], _ = lru.New(cfg.Destinations.Limit)
+		c[utils.DESTINATION_PREFIX], _ = lru.New(cfg.Destinations.Limit)
 	} else {
-		c.store[utils.DESTINATION_PREFIX], _ = lru.New(10000)
+		c[utils.DESTINATION_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.ReverseDestinations != nil {
-		c.store[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(cfg.ReverseDestinations.Limit)
+		c[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(cfg.ReverseDestinations.Limit)
 	} else {
-		c.store[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(10000)
+		c[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.RatingPlans != nil {
-		c.store[utils.RATING_PLAN_PREFIX], _ = lru.New(cfg.RatingPlans.Limit)
+		c[utils.RATING_PLAN_PREFIX], _ = lru.New(cfg.RatingPlans.Limit)
 	} else {
-		c.store[utils.RATING_PLAN_PREFIX], _ = lru.New(10000)
+		c[utils.RATING_PLAN_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.RatingProfiles != nil {
-		c.store[utils.RATING_PROFILE_PREFIX], _ = lru.New(cfg.RatingProfiles.Limit)
+		c[utils.RATING_PROFILE_PREFIX], _ = lru.New(cfg.RatingProfiles.Limit)
 	} else {
-		c.store[utils.RATING_PROFILE_PREFIX], _ = lru.New(10000)
+		c[utils.RATING_PROFILE_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.Lcr != nil {
-		c.store[utils.LCR_PREFIX], _ = lru.New(cfg.Lcr.Limit)
+		c[utils.LCR_PREFIX], _ = lru.New(cfg.Lcr.Limit)
 	} else {
-		c.store[utils.LCR_PREFIX], _ = lru.New(10000)
+		c[utils.LCR_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.CdrStats != nil {
-		c.store[utils.CDR_STATS_PREFIX], _ = lru.New(cfg.CdrStats.Limit)
+		c[utils.CDR_STATS_PREFIX], _ = lru.New(cfg.CdrStats.Limit)
 	} else {
-		c.store[utils.CDR_STATS_PREFIX], _ = lru.New(10000)
+		c[utils.CDR_STATS_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.Actions != nil {
-		c.store[utils.ACTION_PREFIX], _ = lru.New(cfg.Actions.Limit)
+		c[utils.ACTION_PREFIX], _ = lru.New(cfg.Actions.Limit)
 	} else {
-		c.store[utils.ACTION_PREFIX], _ = lru.New(10000)
+		c[utils.ACTION_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.ActionPlans != nil {
-		c.store[utils.ACTION_PLAN_PREFIX], _ = lru.New(cfg.ActionPlans.Limit)
+		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(cfg.ActionPlans.Limit)
 	} else {
-		c.store[utils.ACTION_PLAN_PREFIX], _ = lru.New(10000)
+		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.ActionTriggers != nil {
-		c.store[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(cfg.ActionTriggers.Limit)
+		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(cfg.ActionTriggers.Limit)
 	} else {
-		c.store[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(10000)
+		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.SharedGroups != nil {
-		c.store[utils.SHARED_GROUP_PREFIX], _ = lru.New(cfg.SharedGroups.Limit)
+		c[utils.SHARED_GROUP_PREFIX], _ = lru.New(cfg.SharedGroups.Limit)
 	} else {
-		c.store[utils.SHARED_GROUP_PREFIX], _ = lru.New(10000)
+		c[utils.SHARED_GROUP_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.Aliases != nil {
-		c.store[utils.ALIASES_PREFIX], _ = lru.New(cfg.Aliases.Limit)
+		c[utils.ALIASES_PREFIX], _ = lru.New(cfg.Aliases.Limit)
 	} else {
-		c.store[utils.ALIASES_PREFIX], _ = lru.New(10000)
+		c[utils.ALIASES_PREFIX], _ = lru.New(10000)
 	}
 	if cfg != nil && cfg.ReverseAliases != nil {
-		c.store[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(cfg.ReverseAliases.Limit)
+		c[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(cfg.ReverseAliases.Limit)
 	} else {
-		c.store[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(10000)
+		c[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(10000)
 	}
 
 	return c
 }
 
 func (cs lrustore) Put(key string, value interface{}) {
-	cs.Lock()
-	defer cs.Unlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	mp, ok := cs.store[prefix]
+	mp, ok := cs[prefix]
 	if !ok {
 		var err error
 		mp, err = lru.New(10000)
@@ -178,16 +187,14 @@ func (cs lrustore) Put(key string, value interface{}) {
 			utils.Logger.Debug(fmt.Sprintf("<cache>: error at init: %v", err))
 			return
 		}
-		cs.store[prefix] = mp
+		cs[prefix] = mp
 	}
 	mp.Add(key, value)
 }
 
 func (cs lrustore) Get(key string) (interface{}, bool) {
-	cs.Lock()
-	defer cs.Unlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs.store[prefix]; ok {
+	if keyMap, ok := cs[prefix]; ok {
 		if ti, exists := keyMap.Get(key); exists {
 			return ti, true
 		}
@@ -196,34 +203,26 @@ func (cs lrustore) Get(key string) (interface{}, bool) {
 }
 
 func (cs lrustore) Delete(key string) {
-	cs.Lock()
-	defer cs.Unlock()
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs.store[prefix]; ok {
+	if keyMap, ok := cs[prefix]; ok {
 		keyMap.Remove(key)
 	}
 }
 
 func (cs lrustore) DeletePrefix(prefix string) {
-	cs.Lock()
-	defer cs.Unlock()
-	delete(cs.store, prefix)
+	delete(cs, prefix)
 }
 
 func (cs lrustore) CountEntriesForPrefix(prefix string) int {
-	cs.Lock()
-	defer cs.Unlock()
-	if m, ok := cs.store[prefix]; ok {
+	if m, ok := cs[prefix]; ok {
 		return m.Len()
 	}
 	return 0
 }
 
 func (cs lrustore) GetKeysForPrefix(prefix string) (keys []string) {
-	cs.Lock()
-	defer cs.Unlock()
 	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
-	if keyMap, ok := cs.store[prefix]; ok {
+	if keyMap, ok := cs[prefix]; ok {
 		for _, iterKey := range keyMap.Keys() {
 			iterKeyString := iterKey.(string)
 			if len(key) == 0 || strings.HasPrefix(iterKeyString, key) {

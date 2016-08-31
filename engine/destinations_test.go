@@ -40,11 +40,11 @@ func TestDestinationStoreRestore(t *testing.T) {
 
 func TestDestinationStorageStore(t *testing.T) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	err := ratingStorage.SetDestination(nationale)
+	err := ratingStorage.SetDestination(nationale, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
-	result, err := ratingStorage.GetDestination(nationale.Id, false)
+	result, err := ratingStorage.GetDestination(nationale.Id, false, utils.NonTransactional)
 	if nationale.containsPrefix("0257") == 0 || nationale.containsPrefix("0256") == 0 || nationale.containsPrefix("0723") == 0 {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
@@ -75,28 +75,28 @@ func TestDestinationContainsPrefixWrong(t *testing.T) {
 }
 
 func TestDestinationGetExists(t *testing.T) {
-	d, err := ratingStorage.GetDestination("NAT", false)
+	d, err := ratingStorage.GetDestination("NAT", false, utils.NonTransactional)
 	if err != nil || d == nil {
 		t.Error("Could not get destination: ", d)
 	}
 }
 
 func TestDestinationReverseGetExistsCache(t *testing.T) {
-	ratingStorage.GetReverseDestination("0256", false)
+	ratingStorage.GetReverseDestination("0256", false, utils.NonTransactional)
 	if _, ok := cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "0256"); !ok {
 		t.Error("Destination not cached:", err)
 	}
 }
 
 func TestDestinationGetNotExists(t *testing.T) {
-	d, err := ratingStorage.GetDestination("not existing", false)
+	d, err := ratingStorage.GetDestination("not existing", false, utils.NonTransactional)
 	if d != nil {
 		t.Error("Got false destination: ", d, err)
 	}
 }
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
-	ratingStorage.GetDestination("not existing", false)
+	ratingStorage.GetDestination("not existing", false, utils.NonTransactional)
 	if d, ok := cache2go.Get("not existing"); ok {
 		t.Error("Bad destination cached: ", d)
 	}
@@ -149,7 +149,7 @@ func TestCleanStalePrefixes(t *testing.T) {
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
-		ratingStorage.SetDestination(nationale)
-		ratingStorage.GetDestination(nationale.Id, true)
+		ratingStorage.SetDestination(nationale, utils.NonTransactional)
+		ratingStorage.GetDestination(nationale.Id, true, utils.NonTransactional)
 	}
 }

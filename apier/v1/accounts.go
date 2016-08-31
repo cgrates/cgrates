@@ -90,7 +90,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		}
 	}
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false)
+		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
 		if err != nil {
 			return 0, err
 		} else if ap == nil {
@@ -100,7 +100,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		if attrs.Tenant != "" && attrs.Account != "" {
 			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
 			delete(ap.AccountIDs, accID)
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
@@ -112,13 +112,13 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 					break
 				}
 			}
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
 		if attrs.ActionPlanId != "" { // delete the entire action plan
 			ap.ActionTimings = nil // will delete the action plan
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 	UPDATE:
@@ -158,7 +158,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
 				var ap *engine.ActionPlan
-				ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
+				ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
 				if err != nil {
 					return 0, err
 				}
@@ -181,7 +181,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 							}
 						}
 					}
-					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, true); err != nil {
+					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
 				}
@@ -201,7 +201,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 					if _, exists := ap.AccountIDs[accID]; exists {
 						delete(ap.AccountIDs, accID)
 						// clean from cache
-						cache2go.RemKey(utils.ACTION_PLAN_PREFIX + actionPlanID)
+						cache2go.RemKey(utils.ACTION_PLAN_PREFIX+actionPlanID, true, utils.NonTransactional)
 					}
 				}
 
@@ -213,7 +213,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		}
 
 		if len(attr.ActionTriggersId) != 0 {
-			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId, false)
+			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
 			if err != nil {
 				return 0, err
 			}
@@ -271,7 +271,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			}
 
 			for actionPlanID, ap := range dirtyActionPlans {
-				if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
+				if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 					return 0, err
 				}
 			}

@@ -1056,7 +1056,7 @@ func TestActionTriggerLogging(t *testing.T) {
 		Weight:         10.0,
 		ActionsID:      "TEST_ACTIONS",
 	}
-	as, err := ratingStorage.GetActions(at.ActionsID, false)
+	as, err := ratingStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting actions for the action timing: ", as, err)
 	}
@@ -1286,24 +1286,24 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
 	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
-	ratingStorage.SetDestination(origD)
-	ratingStorage.SetReverseDestination(origD)
+	ratingStorage.SetDestination(origD, utils.NonTransactional)
+	ratingStorage.SetReverseDestination(origD, utils.NonTransactional)
 	// check redis and cache
-	if d, err := ratingStorage.GetDestination("*ddc_test", false); err != nil || !reflect.DeepEqual(d, origD) {
+	if d, err := ratingStorage.GetDestination("*ddc_test", false, utils.NonTransactional); err != nil || !reflect.DeepEqual(d, origD) {
 		t.Error("Error storing destination: ", d, err)
 	}
-	ratingStorage.GetReverseDestination("111", false)
+	ratingStorage.GetReverseDestination("111", false, utils.NonTransactional)
 	x1, found := cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	ratingStorage.GetReverseDestination("222", false)
+	ratingStorage.GetReverseDestination("222", false, utils.NonTransactional)
 	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "666": 1}}, nil, nil)
-	d, err := ratingStorage.GetDestination("*ddc_test", false)
+	d, err := ratingStorage.GetDestination("*ddc_test", false, utils.NonTransactional)
 	if err != nil ||
 		d.Id != origD.Id ||
 		len(d.Prefixes) != 2 ||
@@ -1321,12 +1321,12 @@ func TestActionSetDDestination(t *testing.T) {
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	ratingStorage.GetReverseDestination("333", false)
+	ratingStorage.GetReverseDestination("333", false, utils.NonTransactional)
 	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	ratingStorage.GetReverseDestination("666", false)
+	ratingStorage.GetReverseDestination("666", false, utils.NonTransactional)
 	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
@@ -2063,7 +2063,7 @@ func TestActionSetBalance(t *testing.T) {
 }
 
 func TestActionCSVFilter(t *testing.T) {
-	act, err := ratingStorage.GetActions("FILTER", false)
+	act, err := ratingStorage.GetActions("FILTER", false, utils.NonTransactional)
 	if err != nil {
 		t.Error("error getting actions: ", err)
 	}
@@ -2073,7 +2073,7 @@ func TestActionCSVFilter(t *testing.T) {
 }
 
 func TestActionExpirationTime(t *testing.T) {
-	a, err := ratingStorage.GetActions("EXP", false)
+	a, err := ratingStorage.GetActions("EXP", false, utils.NonTransactional)
 	if err != nil || a == nil {
 		t.Error("Error getting actions: ", err)
 	}
@@ -2093,11 +2093,11 @@ func TestActionExpirationTime(t *testing.T) {
 }
 
 func TestActionExpNoExp(t *testing.T) {
-	exp, err := ratingStorage.GetActions("EXP", false)
+	exp, err := ratingStorage.GetActions("EXP", false, utils.NonTransactional)
 	if err != nil || exp == nil {
 		t.Error("Error getting actions: ", err)
 	}
-	noexp, err := ratingStorage.GetActions("NOEXP", false)
+	noexp, err := ratingStorage.GetActions("NOEXP", false, utils.NonTransactional)
 	if err != nil || noexp == nil {
 		t.Error("Error getting actions: ", err)
 	}

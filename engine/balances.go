@@ -195,7 +195,7 @@ func (b *Balance) Clone() *Balance {
 func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destId string) {
 	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-			if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+			if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 				for _, dID := range destIDs {
 					if b.DestinationIDs[dID] == true {
 						return p, dID

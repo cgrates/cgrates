@@ -308,4 +308,5 @@ const (
 	MetaUnixTimestamp           = "*unix_timestamp"
 	MetaPostCDR                 = "*post_cdr"
 	MetaDumpToFile              = "*dump_to_file"
+	NonTransactional            = "" // used in transactional cache mechanism
 )

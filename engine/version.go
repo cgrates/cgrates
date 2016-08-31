@@ -14,7 +14,7 @@ func CheckVersion(acntDB AccountingStorage) error {
 	}
 	dbVersion, err := acntDB.GetStructVersion()
 	if err != nil {
-		if lhList, err := acntDB.GetLoadHistory(1, true); err != nil || len(lhList) == 0 {
+		if lhList, err := acntDB.GetLoadHistory(1, true, utils.NonTransactional); err != nil || len(lhList) == 0 {
 			// no data, write version
 			if err := acntDB.SetStructVersion(CurrentVersion); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))

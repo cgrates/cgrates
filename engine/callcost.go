@@ -235,7 +235,7 @@ func (cc *CallCost) MatchCCFilter(bf *BalanceFilter) bool {
 	foundMatchingDestID := false
 	if bf.DestinationIDs != nil && cc.Destination != "" {
 		for _, p := range utils.SplitPrefix(cc.Destination, MIN_PREFIX_MATCH) {
-			if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+			if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 				for _, dID := range destIDs {
 					if _, ok := (*bf.DestinationIDs)[dID]; ok {
 						foundMatchingDestID = true

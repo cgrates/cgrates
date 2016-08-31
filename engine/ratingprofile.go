@@ -155,7 +155,7 @@ func (ris RatingInfos) String() string {
 func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
 	for index, rpa := range rpf.RatingPlanActivations.GetActiveForCall(cd) {
-		rpl, err := ratingStorage.GetRatingPlan(rpa.RatingPlanId, false)
+		rpl, err := ratingStorage.GetRatingPlan(rpa.RatingPlanId, false, utils.NonTransactional)
 		if err != nil || rpl == nil {
 			utils.Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 			continue
@@ -172,7 +172,7 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 			}
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
-				if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+				if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 					var bestWeight float64
 					for _, dID := range destIDs {
 						if _, ok := rpl.DestinationRates[dID]; ok {
@@ -257,9 +257,9 @@ type TenantRatingSubject struct {
 
 func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
 	if !rpSubjectPrefixMatching || strings.HasSuffix(key, utils.ANY) {
-		return ratingStorage.GetRatingProfile(key, false)
+		return ratingStorage.GetRatingProfile(key, false, utils.NonTransactional)
 	}
-	if rp, err = ratingStorage.GetRatingProfile(key, false); err == nil {
+	if rp, err = ratingStorage.GetRatingProfile(key, false, utils.NonTransactional); err == nil {
 		return rp, err
 	}
 	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
@@ -267,7 +267,7 @@ func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err erro
 	subject := key[lastIndex:]
 	lenSubject := len(subject)
 	for i := 1; i < lenSubject-1; i++ {
-		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false); err == nil {
+		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false, utils.NonTransactional); err == nil {
 			return rp, err
 		}
 	}

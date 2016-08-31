@@ -518,12 +518,12 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 			i++
 		}
 		newDest := &Destination{Id: ddcDestId, Prefixes: prefixes}
-		oldDest, err := ratingStorage.GetDestination(ddcDestId, false)
+		oldDest, err := ratingStorage.GetDestination(ddcDestId, false, utils.NonTransactional)
 		// update destid in storage
-		ratingStorage.SetDestination(newDest)
+		ratingStorage.SetDestination(newDest, utils.NonTransactional)
 
 		if err == nil && oldDest != nil {
-			err = ratingStorage.UpdateReverseDestination(oldDest, newDest)
+			err = ratingStorage.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -569,7 +569,7 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 			if _, exists := ap.AccountIDs[accID]; !exists {
 				// save action plan
 				delete(ap.AccountIDs, key)
-				ratingStorage.SetActionPlan(key, ap, true)
+				ratingStorage.SetActionPlan(key, ap, true, utils.NonTransactional)
 				//dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
 			}
 		}

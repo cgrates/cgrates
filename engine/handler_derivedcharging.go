@@ -29,7 +29,7 @@ func HandleGetDerivedChargers(ratingStorage RatingStorage, attrs *utils.AttrDeri
 	anyCategKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, utils.ANY, utils.ANY, utils.ANY)
 	anyTenantKey := utils.DerivedChargersKey(attrs.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY)
 	for _, dcKey := range []string{strictKey, anySubjKey, anyAcntKey, anyCategKey, anyTenantKey} {
-		if dcsDb, err := ratingStorage.GetDerivedChargers(dcKey, false); err != nil && err != utils.ErrNotFound {
+		if dcsDb, err := ratingStorage.GetDerivedChargers(dcKey, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return nil, err
 		} else if dcsDb != nil && DerivedChargersMatchesDest(dcsDb, attrs.Destination) {
 			dcs = dcsDb
@@ -45,7 +45,7 @@ func DerivedChargersMatchesDest(dcs *utils.DerivedChargers, dest string) bool {
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-		if destIDs, err := ratingStorage.GetReverseDestination(p, false); err == nil {
+		if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, dId := range destIDs {
 				includeDest, found := dcs.DestinationIDs[dId]
 				if found {

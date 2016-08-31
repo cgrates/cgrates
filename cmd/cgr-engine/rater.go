@@ -64,7 +64,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	go func() {
 		defer close(cacheTaskChan)
 
-		loadHist, err := accountDb.GetLoadHistory(1, true)
+		loadHist, err := accountDb.GetLoadHistory(1, true, utils.NonTransactional)
 		if err != nil || len(loadHist) == 0 {
 			utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
 			cacheDoneChan <- struct{}{}

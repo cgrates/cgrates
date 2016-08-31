@@ -407,7 +407,7 @@ func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, a
 func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
 	aliasesServer := engine.NewAliasHandler(accountDb)
 	server.RpcRegisterName("AliasesV1", aliasesServer)
-	loadHist, err := accountDb.GetLoadHistory(1, true)
+	loadHist, err := accountDb.GetLoadHistory(1, true, utils.NonTransactional)
 	if err != nil || len(loadHist) == 0 {
 		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
 		internalAliaseSChan <- aliasesServer

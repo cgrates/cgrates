@@ -268,7 +268,7 @@ func (at *ActionTiming) GetActionPlanID() string {
 
 func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		at.actions, err = ratingStorage.GetActions(at.ActionsID, false)
+		at.actions, err = ratingStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
 	}
 	at.actions.Sort()
 	return at.actions, err
