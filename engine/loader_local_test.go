@@ -21,25 +21,11 @@ package engine
 import (
 	"flag"
 	"path"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
-
-/*
-README:
-
- Enable local tests by passing '-local' to the go test command
- Tests in this file combine end2end tests using both redis and MySQL.
- It is expected that the data folder of CGRateS exists at path /usr/share/cgrates/data or passed via command arguments.
- Prior running the tests, create database and users by running:
-  mysql -pyourrootpwd < /usr/share/cgrates/data/storage/mysql/create_db_with_users.sql
- What these tests do:
-  * Connect to redis using 2 handles, one where we store CSV reference data and one where we store data out of storDb, each with it's own db number
-  * Flush data in each handle to start clean
-*/
 
 // Globals used
 var ratingDbCsv, ratingDbStor, ratingDbApier RatingStorage        // Each ratingDb will have it's own sources to collect data
@@ -379,6 +365,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	}
 }
 
+/*
 // Compares previously loaded data from csv and stor to be identical, redis specific tests
 func TestMatchLoadCsvWithStorRating(t *testing.T) {
 	if !*testLocal {
@@ -449,3 +436,4 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 		}
 	}
 }
+*/

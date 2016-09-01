@@ -55,4 +55,8 @@
 	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|dur>
 },
 
+"historys": {
+	"enabled": true,
+}
+
 }

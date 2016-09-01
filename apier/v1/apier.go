@@ -676,62 +676,99 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys, aplKeys, shgKeys, lcrKeys, dcsKeys, alsKeys []string
-	if len(attrs.DestinationIds) > 0 {
-		dstKeys = make([]string, len(attrs.DestinationIds))
-		for idx, dId := range attrs.DestinationIds {
+	var dstKeys, rpKeys, rpfKeys, actKeys, aplKeys, shgKeys, lcrKeys, dcsKeys, alsKeys, rlKeys []string
+
+	if attrs.DestinationIds == nil {
+		dstKeys = nil // Reload all
+	} else if len(*attrs.DestinationIds) > 0 {
+		dstKeys = make([]string, len(*attrs.DestinationIds))
+		for idx, dId := range *attrs.DestinationIds {
 			dstKeys[idx] = utils.DESTINATION_PREFIX + dId // Cache expects them as redis keys
 		}
 	}
-	if len(attrs.RatingPlanIds) > 0 {
-		rpKeys = make([]string, len(attrs.RatingPlanIds))
-		for idx, rpId := range attrs.RatingPlanIds {
+
+	if attrs.RatingPlanIds == nil {
+		rpKeys = nil
+	} else if len(*attrs.RatingPlanIds) > 0 {
+		rpKeys = make([]string, len(*attrs.RatingPlanIds))
+		for idx, rpId := range *attrs.RatingPlanIds {
 			rpKeys[idx] = utils.RATING_PLAN_PREFIX + rpId
 		}
 	}
-	if len(attrs.RatingProfileIds) > 0 {
-		rpfKeys = make([]string, len(attrs.RatingProfileIds))
-		for idx, rpfId := range attrs.RatingProfileIds {
+
+	if attrs.RatingProfileIds == nil {
+		rpfKeys = nil
+	} else if len(*attrs.RatingProfileIds) > 0 {
+		rpfKeys = make([]string, len(*attrs.RatingProfileIds))
+		for idx, rpfId := range *attrs.RatingProfileIds {
 			rpfKeys[idx] = utils.RATING_PROFILE_PREFIX + rpfId
 		}
 	}
-	if len(attrs.ActionIds) > 0 {
-		actKeys = make([]string, len(attrs.ActionIds))
-		for idx, actId := range attrs.ActionIds {
+
+	if attrs.ActionIds == nil {
+		actKeys = nil
+	} else if len(*attrs.ActionIds) > 0 {
+		actKeys = make([]string, len(*attrs.ActionIds))
+		for idx, actId := range *attrs.ActionIds {
 			actKeys[idx] = utils.ACTION_PREFIX + actId
 		}
 	}
-	if len(attrs.ActionPlanIds) > 0 {
-		aplKeys = make([]string, len(attrs.ActionPlanIds))
-		for idx, aplId := range attrs.ActionPlanIds {
+
+	if attrs.ActionPlanIds == nil {
+		aplKeys = nil
+	} else if len(*attrs.ActionPlanIds) > 0 {
+		aplKeys = make([]string, len(*attrs.ActionPlanIds))
+		for idx, aplId := range *attrs.ActionPlanIds {
 			aplKeys[idx] = utils.ACTION_PLAN_PREFIX + aplId
 		}
 	}
-	if len(attrs.SharedGroupIds) > 0 {
-		shgKeys = make([]string, len(attrs.SharedGroupIds))
-		for idx, shgId := range attrs.SharedGroupIds {
+
+	if attrs.SharedGroupIds == nil {
+		shgKeys = nil
+	} else if len(*attrs.SharedGroupIds) > 0 {
+		shgKeys = make([]string, len(*attrs.SharedGroupIds))
+		for idx, shgId := range *attrs.SharedGroupIds {
 			shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
 		}
 	}
-	if len(attrs.Aliases) > 0 {
-		alsKeys = make([]string, len(attrs.Aliases))
-		for idx, alias := range attrs.Aliases {
-			alsKeys[idx] = utils.ALIASES_PREFIX + alias
-		}
-	}
-	if len(attrs.LCRIds) > 0 {
-		lcrKeys = make([]string, len(attrs.LCRIds))
-		for idx, lcrId := range attrs.LCRIds {
+
+	if attrs.LCRIds == nil {
+		lcrKeys = nil
+	} else if len(*attrs.LCRIds) > 0 {
+		lcrKeys = make([]string, len(*attrs.LCRIds))
+		for idx, lcrId := range *attrs.LCRIds {
 			lcrKeys[idx] = utils.LCR_PREFIX + lcrId
 		}
 	}
 
-	if len(attrs.DerivedChargers) > 0 {
-		dcsKeys = make([]string, len(attrs.DerivedChargers))
-		for idx, dc := range attrs.DerivedChargers {
+	if attrs.DerivedChargers == nil {
+		dcsKeys = nil
+	} else if len(*attrs.DerivedChargers) > 0 {
+		dcsKeys = make([]string, len(*attrs.DerivedChargers))
+		for idx, dc := range *attrs.DerivedChargers {
 			dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 		}
 	}
+
+	if attrs.Aliases == nil {
+		alsKeys = nil
+	} else if len(*attrs.Aliases) > 0 {
+		alsKeys = make([]string, len(*attrs.Aliases))
+		for idx, alias := range *attrs.Aliases {
+			alsKeys[idx] = utils.ALIASES_PREFIX + alias
+		}
+	}
+
+	if attrs.ResourceLimits == nil {
+		rlKeys = nil
+	} else if len(*attrs.ResourceLimits) > 0 {
+		rlKeys = make([]string, len(*attrs.ResourceLimits))
+		for idx, rlID := range *attrs.ResourceLimits {
+			rlKeys[idx] = utils.ResourceLimitsPrefix + rlID
+		}
+	}
+
+	// FixMe with CacheS
 	cache2go.Flush()
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
