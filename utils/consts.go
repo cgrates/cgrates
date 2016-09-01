@@ -33,6 +33,7 @@ var (
 	ErrInsufficientCredit      = errors.New("INSUFFICIENT_CREDIT")
 	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
 	ErrResourceUnavailable     = errors.New("RESOURCE_UNAVAILABLE")
+	ErrNoActiveSession         = errors.New("NO_ACTIVE_SESSION")
 
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
 	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,

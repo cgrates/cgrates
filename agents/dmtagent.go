@@ -145,7 +145,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 					smgEv[utils.USAGE] = 0 // For CDR not to debit
 				}
 			}
-			if self.cgrCfg.DiameterAgentCfg().CreateCDR {
+			if self.cgrCfg.DiameterAgentCfg().CreateCDR && err == nil || err.Error() != utils.ErrNoActiveSession.Error() { // NO CDR for no active session
 				if errCdr := self.smg.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); errCdr != nil {
 					err = errCdr
 				}

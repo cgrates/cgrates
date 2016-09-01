@@ -1,5 +1,6 @@
 package general_tests
 
+/*
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -87,6 +88,7 @@ func TestDestManagLoadTariffPlanFromFolderAll(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+
 func TestDestManagAllDestinationLoaded(t *testing.T) {
 	if !*testIntegration {
 		return
@@ -105,6 +107,7 @@ func TestDestManagAllDestinationLoaded(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 	}
 }
+
 
 func TestDestManagLoadTariffPlanFromFolderRemoveSome(t *testing.T) {
 	if !*testIntegration {
@@ -344,3 +347,4 @@ func TestDestManagCacheWithGetCost(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

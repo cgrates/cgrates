@@ -457,6 +457,7 @@ func (self *SMGeneric) TerminateSession(gev SMGenericEvent, clnt *rpc2.Client) e
 		}
 	}
 	var interimError error
+	var hasActiveSession bool
 	for _, sessionID := range sessionIDs {
 		if errUsage != nil {
 			var s *SMGSession
@@ -466,11 +467,15 @@ func (self *SMGeneric) TerminateSession(gev SMGenericEvent, clnt *rpc2.Client) e
 			if s == nil {
 				continue // No session active, will not be able to close it anyway
 			}
+			hasActiveSession = true
 			usage = s.TotalUsage() - s.lastUsage + lastUsed
 		}
 		if err := self.sessionEnd(sessionID, usage); err != nil {
 			interimError = err // Last error will be the one returned as API result
 		}
+	}
+	if !hasActiveSession {
+		return utils.ErrNoActiveSession
 	}
 	return interimError
 }
