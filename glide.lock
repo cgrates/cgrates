@@ -18,7 +18,7 @@ imports:
 - name: github.com/cgrates/rpcclient
   version: a016c2c55d530ec2a7caf28cfdff267d364958ca
 - name: github.com/ChrisTrenkamp/goxpath
-  version: 2ad3b31cf4a21db70fc0cacd0e0120eaae566f98
+  version: 4aad8d0161aae7d17df4755d2c1e86cd1fcaaab6
   subpackages:
   - internal/execxp
   - internal/lexer
