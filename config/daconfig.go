@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ type DiameterAgentCfg struct {
 	CreateCDR         bool
 	DebitInterval     time.Duration
 	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Dialect           string // the diameter dialect used in the implementation <huawei>
 	OriginHost        string
 	OriginRealm       string
 	VendorId          int
