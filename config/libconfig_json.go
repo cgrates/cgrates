@@ -282,19 +282,20 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled            *bool             // enables the diameter agent: <true|false>
-	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
-	Dictionaries_dir   *string           // path towards additional dictionaries
-	Sm_generic_conns   *[]*HaPoolJsonCfg // Connections towards generic SM
-	Pubsubs_conns      *[]*HaPoolJsonCfg // connection towards pubsubs
-	Create_cdr         *bool
-	Debit_interval     *string
-	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Origin_host        *string
-	Origin_realm       *string
-	Vendor_id          *int
-	Product_name       *string
-	Request_processors *[]*DARequestProcessorJsnCfg
+	Enabled              *bool             // enables the diameter agent: <true|false>
+	Listen               *string           // address where to listen for diameter requests <x.y.z.y:1234>
+	Dictionaries_dir     *string           // path towards additional dictionaries
+	Sm_generic_conns     *[]*HaPoolJsonCfg // Connections towards generic SM
+	Pubsubs_conns        *[]*HaPoolJsonCfg // connection towards pubsubs
+	Create_cdr           *bool
+	Cdr_requires_session *bool
+	Debit_interval       *string
+	Timezone             *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Origin_host          *string
+	Origin_realm         *string
+	Vendor_id            *int
+	Product_name         *string
+	Request_processors   *[]*DARequestProcessorJsnCfg
 }
 
 // One Diameter request processor configuration

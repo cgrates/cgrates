@@ -24,19 +24,20 @@ import (
 )
 
 type DiameterAgentCfg struct {
-	Enabled           bool   // enables the diameter agent: <true|false>
-	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
-	DictionariesDir   string
-	SMGenericConns    []*HaPoolConfig // connections towards SMG component
-	PubSubConns       []*HaPoolConfig // connection towards pubsubs
-	CreateCDR         bool
-	DebitInterval     time.Duration
-	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	OriginHost        string
-	OriginRealm       string
-	VendorId          int
-	ProductName       string
-	RequestProcessors []*DARequestProcessor
+	Enabled            bool   // enables the diameter agent: <true|false>
+	Listen             string // address where to listen for diameter requests <x.y.z.y:1234>
+	DictionariesDir    string
+	SMGenericConns     []*HaPoolConfig // connections towards SMG component
+	PubSubConns        []*HaPoolConfig // connection towards pubsubs
+	CreateCDR          bool
+	CDRRequiresSession bool
+	DebitInterval      time.Duration
+	Timezone           string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	OriginHost         string
+	OriginRealm        string
+	VendorId           int
+	ProductName        string
+	RequestProcessors  []*DARequestProcessor
 }
 
 func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error {
@@ -68,6 +69,9 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCDR = *jsnCfg.Create_cdr
+	}
+	if jsnCfg.Cdr_requires_session != nil {
+		self.CDRRequiresSession = *jsnCfg.Cdr_requires_session
 	}
 	if jsnCfg.Debit_interval != nil {
 		var err error

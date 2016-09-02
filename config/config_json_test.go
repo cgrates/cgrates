@@ -525,14 +525,15 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Pubsubs_conns:  &[]*HaPoolJsonCfg{},
-		Create_cdr:     utils.BoolPointer(true),
-		Debit_interval: utils.StringPointer("5m"),
-		Timezone:       utils.StringPointer(""),
-		Origin_host:    utils.StringPointer("CGR-DA"),
-		Origin_realm:   utils.StringPointer("cgrates.org"),
-		Vendor_id:      utils.IntPointer(0),
-		Product_name:   utils.StringPointer("CGRateS"),
+		Pubsubs_conns:        &[]*HaPoolJsonCfg{},
+		Create_cdr:           utils.BoolPointer(true),
+		Cdr_requires_session: utils.BoolPointer(true),
+		Debit_interval:       utils.StringPointer("5m"),
+		Timezone:             utils.StringPointer(""),
+		Origin_host:          utils.StringPointer("CGR-DA"),
+		Origin_realm:         utils.StringPointer("cgrates.org"),
+		Vendor_id:            utils.IntPointer(0),
+		Product_name:         utils.StringPointer("CGRateS"),
 		Request_processors: &[]*DARequestProcessorJsnCfg{
 			&DARequestProcessorJsnCfg{
 				Id:                  utils.StringPointer("*default"),

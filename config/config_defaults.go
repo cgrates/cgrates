@@ -336,10 +336,11 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sm_generic_conns": [
-		{"address": "*internal"}									// connection towards SMG component for session management
+		{"address": "*internal"}								// connection towards SMG component for session management
 	],
 	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
+	"cdr_requires_session": true,								// only create CDR if there is an active session at terminate
 	"debit_interval": "5m",										// interval for CCR updates
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
