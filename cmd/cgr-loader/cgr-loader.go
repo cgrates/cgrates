@@ -70,7 +70,7 @@ var (
 	stats           = flag.Bool("stats", false, "Generates statsistics about given data.")
 	fromStorDb      = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb        = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	historyServer   = flag.String("history_server", cgrConfig.RPCGOBListen, "The history server address:port, empty to disable automaticautomatic  history archiving")
+	historyServer   = flag.String("history_server", cgrConfig.RPCGOBListen, "The history server address:port, empty to disable automatic history archiving")
 	raterAddress    = flag.String("rater_address", cgrConfig.RPCGOBListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
 	cdrstatsAddress = flag.String("cdrstats_address", cgrConfig.RPCGOBListen, "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
 	usersAddress    = flag.String("users_address", cgrConfig.RPCGOBListen, "Users service to contact for data reloads, empty to disable automatic data reloads")

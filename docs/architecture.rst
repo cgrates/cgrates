@@ -49,7 +49,7 @@ it will start on demand **one or more** service(s), outlined below.
 
 ::
 
- rif@grace:~$ cgr-engine -help
+ cgrates@OCS:~$ cgr-engine -help
  Usage of cgr-engine:
    -cdrs
          Enforce starting of the cdrs daemon overwriting config
@@ -63,6 +63,8 @@ it will start on demand **one or more** service(s), outlined below.
          Enforce starting of the rater daemon overwriting config
    -scheduler
          Enforce starting of the scheduler daemon .overwriting config
+  -scheduled_shutdown string
+         shutdown the engine after this duration
    -singlecpu
          Run on single CPU core
    -version
@@ -190,6 +192,7 @@ Centralized CDR server and CDR (raw or rated) **replicator**.
 - Operates with the following CGRateS database(s): ::
 
    "stor_db" - (cdrDb)
+   "data_db" - (accountDb)
 
 - Config section in the CGRateS configuration file:
    - ``"cdrs": {...}``
@@ -374,7 +377,7 @@ Can be used to:
 
 ::
 
- rif@grace:~$ cgr-loader -help
+ cgrates@OCS:~$ cgr-loader -help
  Usage of cgr-loader:
    -cdrstats_address string
          CDRStats service to contact for data reloads, empty to disable automatic data reloads (default "127.0.0.1:2013")
@@ -392,6 +395,8 @@ Can be used to:
          The DataDb user to sign in as.
    -dbdata_encoding string
          The encoding used to store object data in strings (default "msgpack")
+   -disable_reverse_mappings
+         Will disable reverse mappings rebuilding
    -dry_run
          When true will not save loaded data to dataDb but just parse it for consistency and errors.
    -flushdb
@@ -399,11 +404,11 @@ Can be used to:
    -from_stordb
          Load the tariff plan from storDb to dataDb
    -history_server string
-         The history server address:port, empty to disable automaticautomatic  history archiving (default "127.0.0.1:2013")
+         The history server address:port, empty to disable automatic history archiving (default "127.0.0.1:2013")
    -load_history_size int
          Limit the number of records in the load history (default 10)
-   -migrate_rc8
-         Migrate Accounts, Actions and ActionTriggers to RC8 structures
+   -migrate_rc8 string
+         Migrate Accounts, Actions, ActionTriggers, DerivedChargers, ActionPlans and SharedGroups to RC8 structures, possible values: *all,acc,atr,act,dcs,apl,shg
    -path string
          The path to folder containing the data files (default "./")
    -rater_address string
@@ -461,7 +466,7 @@ Command line tool used to interface with the RALs (and/or Balancer) service. Abl
 
 ::
 
- rif@grace:~$ cgr-console -help
+ cgrates@OCS:~$ cgr-console -help
  Usage of cgr-console:
    -rpc_encoding string
          RPC encoding used <gob|json> (default "json")
@@ -484,7 +489,7 @@ Command line stress testing tool.
 
 ::
 
- rif@grace:~$ cgr-tester --help
+ cgrates@OCS:~$ cgr-tester --help
  Usage of cgr-tester:
   -accountdb_host string
         The AccountingDb host to connect to. (default "127.0.0.1")
@@ -508,6 +513,8 @@ Command line stress testing tool.
         The destination to use in queries. (default "1002")
   -json
         Use JSON RPC
+  -load_history_size int
+        Limit the number of records in the load history (default 10)
   -memprofile string
         write memory profile to this file
   -parallel int
