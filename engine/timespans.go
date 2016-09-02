@@ -291,6 +291,9 @@ func (incr *Increment) GetCost() float64 {
 type Increments []*Increment
 
 func (incs Increments) Equal(other Increments) bool {
+	if len(other) < len(incs) { // Protect index in case of not being the same size
+		return false
+	}
 	for index, i := range incs {
 		if !i.Equal(other[index]) || i.GetCompressFactor() != other[index].GetCompressFactor() {
 			return false
