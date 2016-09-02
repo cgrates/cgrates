@@ -458,15 +458,15 @@ func (self *SMGeneric) TerminateSession(gev SMGenericEvent, clnt *rpc2.Client) e
 	var interimError error
 	var hasActiveSession bool
 	for _, sessionID := range sessionIDs {
+		var s *SMGSession
+		for _, s = range self.getSession(sessionID) {
+			break
+		}
+		if s == nil {
+			continue // No session active, will not be able to close it anyway
+		}
+		hasActiveSession = true
 		if errUsage != nil {
-			var s *SMGSession
-			for _, s = range self.getSession(sessionID) {
-				break
-			}
-			if s == nil {
-				continue // No session active, will not be able to close it anyway
-			}
-			hasActiveSession = true
 			usage = s.TotalUsage() - s.lastUsage + lastUsed
 		}
 		if err := self.sessionEnd(sessionID, usage); err != nil {
