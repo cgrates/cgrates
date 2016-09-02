@@ -342,7 +342,6 @@ const CGRATES_CFG_JSON = `
 	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
 	"debit_interval": "5m",										// interval for CCR updates
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
-	"dialect": "huawei",										// the diameter dialect used in the communication, supported: <huawei>
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies

@@ -529,7 +529,6 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Create_cdr:     utils.BoolPointer(true),
 		Debit_interval: utils.StringPointer("5m"),
 		Timezone:       utils.StringPointer(""),
-		Dialect:        utils.StringPointer("huawei"),
 		Origin_host:    utils.StringPointer("CGR-DA"),
 		Origin_realm:   utils.StringPointer("cgrates.org"),
 		Vendor_id:      utils.IntPointer(0),

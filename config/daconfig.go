@@ -32,7 +32,6 @@ type DiameterAgentCfg struct {
 	CreateCDR         bool
 	DebitInterval     time.Duration
 	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Dialect           string // the diameter dialect used in the implementation <huawei>
 	OriginHost        string
 	OriginRealm       string
 	VendorId          int

@@ -290,7 +290,6 @@ type DiameterAgentJsonCfg struct {
 	Create_cdr         *bool
 	Debit_interval     *string
 	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Dialect            *string
 	Origin_host        *string
 	Origin_realm       *string
 	Vendor_id          *int
