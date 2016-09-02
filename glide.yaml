@@ -38,3 +38,4 @@ import:
 - package: github.com/mitchellh/mapstructure
 - package: github.com/hashicorp/golang-lru
 - package: github.com/cgrates/aringo
+- package: github.com/bit4bit/gami

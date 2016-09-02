@@ -1,6 +1,8 @@
-hash: 42118560553f73a954a14addbfc3ea15eb83983d2f25d34dd67020db4d163621
-updated: 2016-09-02T20:20:08.442098147+02:00
+hash: b36f3efb90a672bb3bd639d10d016aeb9e46726c2876d1831103a280e35784c6
+updated: 2016-09-02T20:33:01.649869367+02:00
 imports:
+- name: github.com/bit4bit/gami
+  version: 3a7f98e7efce7ed7f22c2169b666910b8abb15dc
 - name: github.com/cenk/hub
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
 - name: github.com/cenkalti/rpc2
