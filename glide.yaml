@@ -1,3 +1,4 @@
+package: ""
 import:
 - package: github.com/DisposaBoy/JsonConfigReader
 - package: github.com/cenk/hub
@@ -36,3 +37,4 @@ import:
 - package: github.com/ChrisTrenkamp/goxpath
 - package: github.com/mitchellh/mapstructure
 - package: github.com/hashicorp/golang-lru
+- package: github.com/cgrates/aringo
