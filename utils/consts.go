@@ -1,3 +1,20 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package utils
 
 import (
@@ -277,37 +294,40 @@ const (
 	CGR_SESSION_END               = "CgrSessionEnd"
 	CGR_LCR_REQUEST               = "CgrLcrRequest"
 	// action trigger threshold types
-	TRIGGER_MIN_EVENT_COUNTER   = "*min_event_counter"
-	TRIGGER_MIN_BALANCE_COUNTER = "*min_balance_counter"
-	TRIGGER_MAX_EVENT_COUNTER   = "*max_event_counter"
-	TRIGGER_MAX_BALANCE_COUNTER = "*max_balance_counter"
-	TRIGGER_MIN_BALANCE         = "*min_balance"
-	TRIGGER_MAX_BALANCE         = "*max_balance"
-	TRIGGER_BALANCE_EXPIRED     = "*balance_expired"
-	HIERARCHY_SEP               = ">"
-	META_COMPOSED               = "*composed"
-	NegativePrefix              = "!"
-	MatchStartPrefix            = "^"
-	MatchEndPrefix              = "$"
-	SMG                         = "SMG"
-	MetaGrouped                 = "*grouped"
-	MetaRaw                     = "*raw"
-	CreatedAt                   = "CreatedAt"
-	UpdatedAt                   = "UpdatedAt"
-	HandlerArgSep               = "|"
-	FlagForceDuration           = "fd"
-	InstanceID                  = "InstanceID"
-	SessionTTL                  = "SessionTTL"
-	SessionTTLLastUsed          = "SessionTTLLastUsed"
-	SessionTTLUsage             = "SessionTTLUsage"
-	HandlerSubstractUsage       = "*substract_usage"
-	XML                         = "xml"
-	MetaGOBrpc                  = "*gob"
-	MetaJSONrpc                 = "*json"
-	MetaDateTime                = "*datetime"
-	MetaMaskedDestination       = "*masked_destination"
-	MetaUnixTimestamp           = "*unix_timestamp"
-	MetaPostCDR                 = "*post_cdr"
-	MetaDumpToFile              = "*dump_to_file"
-	NonTransactional            = "" // used in transactional cache mechanism
+	TRIGGER_MIN_EVENT_COUNTER    = "*min_event_counter"
+	TRIGGER_MIN_BALANCE_COUNTER  = "*min_balance_counter"
+	TRIGGER_MAX_EVENT_COUNTER    = "*max_event_counter"
+	TRIGGER_MAX_BALANCE_COUNTER  = "*max_balance_counter"
+	TRIGGER_MIN_BALANCE          = "*min_balance"
+	TRIGGER_MAX_BALANCE          = "*max_balance"
+	TRIGGER_BALANCE_EXPIRED      = "*balance_expired"
+	HIERARCHY_SEP                = ">"
+	META_COMPOSED                = "*composed"
+	NegativePrefix               = "!"
+	MatchStartPrefix             = "^"
+	MatchEndPrefix               = "$"
+	SMG                          = "SMG"
+	MetaGrouped                  = "*grouped"
+	MetaRaw                      = "*raw"
+	CreatedAt                    = "CreatedAt"
+	UpdatedAt                    = "UpdatedAt"
+	HandlerArgSep                = "|"
+	FlagForceDuration            = "fd"
+	InstanceID                   = "InstanceID"
+	SessionTTL                   = "SessionTTL"
+	SessionTTLLastUsed           = "SessionTTLLastUsed"
+	SessionTTLUsage              = "SessionTTLUsage"
+	HandlerSubstractUsage        = "*substract_usage"
+	XML                          = "xml"
+	MetaGOBrpc                   = "*gob"
+	MetaJSONrpc                  = "*json"
+	MetaDateTime                 = "*datetime"
+	MetaMaskedDestination        = "*masked_destination"
+	MetaUnixTimestamp            = "*unix_timestamp"
+	MetaPostCDR                  = "*post_cdr"
+	MetaDumpToFile               = "*dump_to_file"
+	NonTransactional             = "" // used in transactional cache mechanism
+	EVT_ACCOUNT_BALANCE_MODIFIED = "ACCOUNT_BALANCE_MODIFIED"
+	EVT_ACTION_TRIGGER_FIRED     = "ACTION_TRIGGER_FIRED"
+	EVT_ACTION_TIMING_FIRED      = "ACTION_TRIGGER_FIRED"
 )

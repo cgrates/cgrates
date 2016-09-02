@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
