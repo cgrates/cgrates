@@ -20,11 +20,18 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=asterisk
 DESC="Asterisk PBX"
+TUTDIR=/usr/share/cgrates/tutorials/asterisk_events/asterisk
+TMP_DIR=/tmp/cgr_astevents/asterisk
 # Full path to asterisk binary
-DAEMON=__ASTERISK_SBIN_DIR__/asterisk
-ASTVARRUNDIR=__ASTERISK_VARRUN_DIR__
-ASTETCDIR=__ASTERISK_ETC_DIR__
+DAEMON=/usr/sbin/asterisk
+ASTVARRUNDIR=$TMP_DIR/run
+LOGDIR=$TMP_DIR/log
+SPOOLDIR=$TMP_DIR/spool
+ALTCONF=$TUTDIR/etc/asterisk/asterisk.conf
 TRUE=/bin/true
+AST_USER="asterisk"
+AST_GROUP="asterisk"
+
 
 ### BEGIN INIT INFO
 # Provides:		asterisk
@@ -48,6 +55,16 @@ fi
 if ! [ -d $ASTETCDIR ] ; then
         echo "ERROR: $ASTETCDIR directory not found"
         exit 0
+fi
+
+if [ ! -d $LOGDIR ]; then
+  mkdir -p $LOGDIR
+  chown -R $AST_USER:$AST_GROUP $LOGDIR
+fi
+
+if [ ! -d $SPOOLDIR ]; then
+  mkdir -p $SPOOLDIR
+  chown -R $AST_USER:$AST_GROUP $SPOOLDIR
 fi
 
 # Use the LSB standard functions for services management
@@ -77,7 +94,7 @@ case "$1" in
 		mkdir -p $ASTVARRUNDIR
 	fi
 	if [ $AST_USER ] ; then
-		ASTARGS="-U $AST_USER"
+		ASTARGS="$ASTARGS  -U $AST_USER"
 		chown $AST_USER $ASTVARRUNDIR
 	fi
 	if [ $AST_GROUP ] ; then
@@ -85,7 +102,7 @@ case "$1" in
 		chgrp $AST_GROUP $ASTVARRUNDIR
 	fi
 	if [ $ALTCONF ]; then
-		ASTARGS="$ASTARGS -C \"$ALTCONF\""
+		ASTARGS="$ASTARGS -C $ALTCONF"
 	fi
 	if [ "x$COREDUMP" = "xyes" ]; then
 		ASTARGS="$ASTARGS -g"
