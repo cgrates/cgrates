@@ -19,6 +19,7 @@ package agents
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -34,6 +35,9 @@ import (
 
 func NewDiameterAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection, pubsubs rpcclient.RpcClientConnection) (*DiameterAgent, error) {
 	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg, pubsubs: pubsubs, connMux: new(sync.Mutex)}
+	if reflect.ValueOf(da.pubsubs).IsNil() {
+		da.pubsubs = nil // Empty it so we can check it later
+	}
 	dictsDir := cgrCfg.DiameterAgentCfg().DictionariesDir
 	if len(dictsDir) != 0 {
 		if err := loadDictionaries(dictsDir, "DiameterAgent"); err != nil {
