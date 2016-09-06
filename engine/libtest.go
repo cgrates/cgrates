@@ -125,7 +125,7 @@ type PjsuaAccount struct {
 }
 
 // Returns file reference where we can write to control pjsua in terminal
-func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitMs int) (*os.File, error) {
+func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitDur time.Duration) (*os.File, error) {
 	cmdArgs := []string{fmt.Sprintf("--local-port=%d", localPort), "--null-audio", "--auto-answer=200", "--max-calls=32", "--app-log-level=0"}
 	for idx, acnt := range acnts {
 		if idx != 0 {
@@ -137,15 +137,14 @@ func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitMs int) (*os.File,
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("StartPjsuaListener, args: %+v\n", cmdArgs)
 	pjsua := exec.Command(pjsuaPath, cmdArgs...)
 	fPty, err := pty.Start(pjsua)
 	if err != nil {
 		return nil, err
 	}
 	buf := new(bytes.Buffer)
-	io.Copy(os.Stdout, buf)                              // Free the content since otherwise pjsua will not start
-	time.Sleep(time.Duration(waitMs) * time.Millisecond) // Give time to rater to fire up
+	io.Copy(os.Stdout, buf) // Free the content since otherwise pjsua will not start
+	time.Sleep(waitDur)     // Give time to rater to fire up
 	return fPty, nil
 }
 
@@ -157,7 +156,6 @@ func PjsuaCallUri(acnt *PjsuaAccount, dstUri, outboundUri string, callDur time.D
 	if err != nil {
 		return err
 	}
-	fmt.Printf("PjsuaCallUri, args: %+v\n", cmdArgs)
 	pjsua := exec.Command(pjsuaPath, cmdArgs...)
 	fPty, err := pty.Start(pjsua)
 	if err != nil {
