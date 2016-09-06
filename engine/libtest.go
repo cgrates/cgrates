@@ -137,6 +137,7 @@ func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitMs int) (*os.File,
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("StartPjsuaListener, args: %+v\n", cmdArgs)
 	pjsua := exec.Command(pjsuaPath, cmdArgs...)
 	fPty, err := pty.Start(pjsua)
 	if err != nil {
@@ -156,6 +157,7 @@ func PjsuaCallUri(acnt *PjsuaAccount, dstUri, outboundUri string, callDur time.D
 	if err != nil {
 		return err
 	}
+	fmt.Printf("PjsuaCallUri, args: %+v\n", cmdArgs)
 	pjsua := exec.Command(pjsuaPath, cmdArgs...)
 	fPty, err := pty.Start(pjsua)
 	if err != nil {

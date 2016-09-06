@@ -26,11 +26,13 @@ TMP_DIR=/tmp/cgr_astevents/asterisk
 DAEMON=/usr/sbin/asterisk
 ASTVARRUNDIR=$TMP_DIR/run
 LOGDIR=$TMP_DIR/log
+CDRDIR=$LOGDIR/cdr-custom
 SPOOLDIR=$TMP_DIR/spool
 ALTCONF=$TUTDIR/etc/asterisk/asterisk.conf
 TRUE=/bin/true
 AST_USER="asterisk"
 AST_GROUP="asterisk"
+VERBOSITY=99
 
 
 ### BEGIN INIT INFO
@@ -60,6 +62,12 @@ fi
 if [ ! -d $LOGDIR ]; then
   mkdir -p $LOGDIR
   chown -R $AST_USER:$AST_GROUP $LOGDIR
+fi
+
+
+if [ ! -d $CDRDIR ]; then
+  mkdir -p $CDRDIR
+  chown -R $AST_USER:$AST_GROUP $CDRDIR
 fi
 
 if [ ! -d $SPOOLDIR ]; then
