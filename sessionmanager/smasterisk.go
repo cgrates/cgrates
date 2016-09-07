@@ -22,7 +22,21 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+func NewSMAsterisk(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection) (*SMAsterisk, error) {
+	return &SMAsterisk{cgrCfg: cgrCfg, smg: smg}, nil
+}
+
 type SMAsterisk struct {
 	cgrCfg *config.CGRConfig // Separate from smCfg since there can be multiple
 	smg    rpcclient.RpcClientConnection
+}
+
+// Called to start the service
+func (sma *SMAsterisk) ListenAndServe() error {
+	return nil
+}
+
+// Called to shutdown the service
+func (rls *SMAsterisk) ServiceShutdown() error {
+	return nil
 }

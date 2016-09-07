@@ -256,7 +256,7 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 }
 
 // Called to start the service
-func (rls *ResourceLimiterService) Start() error {
+func (rls *ResourceLimiterService) ListenAndServe() error {
 	if err := rls.cacheResourceLimits("ResourceLimiterServiceStart", nil); err != nil {
 		return err
 	}
@@ -264,7 +264,7 @@ func (rls *ResourceLimiterService) Start() error {
 }
 
 // Called to shutdown the service
-func (rls *ResourceLimiterService) Shutdown() error {
+func (rls *ResourceLimiterService) ServiceShutdown() error {
 	return nil
 }
 

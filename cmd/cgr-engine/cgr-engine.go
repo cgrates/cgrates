@@ -171,6 +171,30 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 	server.BijsonRegisterOnDisconnect(smg_econns.OnClientDisconnect)
 }
 
+func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+	utils.Logger.Info("Starting CGRateS SMAsterisk service.")
+	var smgConn *rpcclient.RpcClientPool
+	if len(cfg.SMAsteriskCfg().SMGConns) != 0 {
+		smgConn, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.SMAsteriskCfg().SMGConns, internalSMGChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<SMAsterisk> Could not connect to SMG: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	sma, err := sessionmanager.NewSMAsterisk(cfg, smgConn)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> error: %s!", err))
+		exitChan <- true
+		return
+	}
+	if err = sma.ListenAndServe(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> runtime error: %s!", err))
+	}
+	exitChan <- true
+}
+
 func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
 	var smgConn, pubsubConn *rpcclient.RpcClientPool
@@ -452,7 +476,7 @@ func startResourceLimiterService(internalRLSChan, internalCdrStatSChan chan rpcc
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting ResourceLimiter service"))
-	if err := rls.Start(); err != nil {
+	if err := rls.ListenAndServe(); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<RLs> Could not start, error: %s", err.Error()))
 		exitChan <- true
 		return
@@ -665,9 +689,13 @@ func main() {
 	}
 
 	// Register session manager service // FixMe: make sure this is thread safe
-	if cfg.SmGenericConfig.Enabled || cfg.SmFsConfig.Enabled || cfg.SmKamConfig.Enabled || cfg.SmOsipsConfig.Enabled { // Register SessionManagerV1 service
+	if cfg.SmGenericConfig.Enabled || cfg.SmFsConfig.Enabled || cfg.SmKamConfig.Enabled || cfg.SmOsipsConfig.Enabled || cfg.SMAsteriskCfg().Enabled { // Register SessionManagerV1 service
 		smRpc = new(v1.SessionManagerV1)
 		server.RpcRegister(smRpc)
+	}
+
+	if cfg.SMAsteriskCfg().Enabled {
+		go startSMAsterisk(internalSMGChan, exitChan)
 	}
 
 	if cfg.DiameterAgentCfg().Enabled {

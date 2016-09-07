@@ -67,7 +67,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
-	cfg.SMAsteriskCfg = new(SMAsteriskCfg)
+	cfg.smAsteriskCfg = new(SMAsteriskCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
@@ -90,7 +90,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
 	dfltFsConnConfig = cfg.SmFsConfig.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.EvapiConns[0]
-	dfltAstConnCfg = cfg.SMAsteriskCfg.AsteriskConns[0]
+	dfltAstConnCfg = cfg.smAsteriskCfg.AsteriskConns[0]
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -245,7 +245,7 @@ type CGRConfig struct {
 	SmFsConfig               *SmFsConfig              // SMFreeSWITCH configuration
 	SmKamConfig              *SmKamConfig             // SM-Kamailio Configuration
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
-	SMAsteriskCfg            *SMAsteriskCfg           // SMAsterisk Configuration
+	smAsteriskCfg            *SMAsteriskCfg           // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
 	HistoryServer            string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled     bool                     // Starts History as server: <true|false>.
@@ -439,11 +439,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SMOpenSIPS checks
-	if self.SMAsteriskCfg.Enabled {
-		if len(self.SMAsteriskCfg.SMGConns) == 0 {
+	if self.smAsteriskCfg.Enabled {
+		if len(self.smAsteriskCfg.SMGConns) == 0 {
 			return errors.New("<SMAsterisk> SMG definition is mandatory!")
 		}
-		for _, smAstSMGConn := range self.SMAsteriskCfg.SMGConns {
+		for _, smAstSMGConn := range self.smAsteriskCfg.SMGConns {
 			if smAstSMGConn.Address == utils.MetaInternal && !self.SmGenericConfig.Enabled {
 				return errors.New("<SMAsterisk> SMG not enabled.")
 			}
@@ -996,7 +996,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	if jsnSMAstCfg != nil {
-		if err := self.SMAsteriskCfg.loadFromJsonCfg(jsnSMAstCfg); err != nil {
+		if err := self.smAsteriskCfg.loadFromJsonCfg(jsnSMAstCfg); err != nil {
 			return err
 		}
 	}
@@ -1091,6 +1091,12 @@ func (self *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
 	return self.diameterAgentCfg
 }
 
+// ToDo: fix locking here
 func (self *CGRConfig) ResourceLimiterCfg() *ResourceLimiterConfig {
 	return self.resourceLimiterCfg
+}
+
+// ToDo: fix locking here
+func (self *CGRConfig) SMAsteriskCfg() *SMAsteriskCfg {
+	return self.smAsteriskCfg
 }
