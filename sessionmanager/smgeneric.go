@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"

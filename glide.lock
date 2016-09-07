@@ -1,11 +1,11 @@
-hash: b36f3efb90a672bb3bd639d10d016aeb9e46726c2876d1831103a280e35784c6
-updated: 2016-09-02T20:33:01.649869367+02:00
+hash: da953ea34fabe4e21f4dde6344f3b7ab5a75e02122a1c17af5ea434058fc77fb
+updated: 2016-09-06T20:33:01.649869367+02:00
 imports:
 - name: github.com/bit4bit/gami
   version: 3a7f98e7efce7ed7f22c2169b666910b8abb15dc
 - name: github.com/cenk/hub
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
-- name: github.com/cenkalti/rpc2
+- name: github.com/cenk/rpc2
   version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
 - name: github.com/cgrates/aringo
   version: 039f5c2edbf9db9ec170f10c5e78f1248c365331

@@ -27,7 +27,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cenk/rpc2"
 	"golang.org/x/net/websocket"
 )
 import _ "net/http/pprof"
