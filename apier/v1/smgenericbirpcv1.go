@@ -20,7 +20,7 @@ package v1
 import (
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 )

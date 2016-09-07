@@ -21,7 +21,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/utils"
 )
 
