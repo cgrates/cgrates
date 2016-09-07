@@ -2,7 +2,7 @@ package: ""
 import:
 - package: github.com/DisposaBoy/JsonConfigReader
 - package: github.com/cenk/hub
-- package: github.com/cenkalti/rpc2
+- package: github.com/cenk/rpc2
 - package: github.com/cgrates/fsock
 - package: github.com/cgrates/kamevapi
 - package: github.com/cgrates/osipsdagram
