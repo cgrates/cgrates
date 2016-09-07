@@ -44,6 +44,7 @@ const (
 	SMFS_JSN             = "sm_freeswitch"
 	SMKAM_JSN            = "sm_kamailio"
 	SMOSIPS_JSN          = "sm_opensips"
+	SMAsteriskJSN        = "sm_asterisk"
 	SM_JSN               = "session_manager"
 	FS_JSN               = "freeswitch"
 	KAMAILIO_JSN         = "kamailio"
@@ -255,6 +256,18 @@ func (self CgrJsonCfg) SmOsipsJsonCfg() (*SmOsipsJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(SmOsipsJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) SmAsteriskJsonCfg() (*SMAsteriskJsonCfg, error) {
+	rawCfg, hasKey := self[SMAsteriskJSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(SMAsteriskJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

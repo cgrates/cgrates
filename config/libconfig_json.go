@@ -214,6 +214,23 @@ type HaPoolJsonCfg struct {
 	Transport *string
 }
 
+type AstConnJsonCfg struct {
+	Address    *string
+	User       *string
+	Password   *string
+	Reconnects *int
+}
+
+type SMAsteriskJsonCfg struct {
+	Enabled                      *bool
+	Sm_generic_conns             *[]*HaPoolJsonCfg // Connections towards generic SM
+	Session_terminate_subscriber *HaPoolJsonCfg
+	Debit_interval               *string
+	Min_call_duration            *string
+	Max_call_duration            *string
+	Asterisk_conns               *[]*AstConnJsonCfg
+}
+
 type CacheParamJsonCfg struct {
 	Limit    *int
 	Ttl      *string

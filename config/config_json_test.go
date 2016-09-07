@@ -516,6 +516,33 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 	}
 }
 
+func TestSmAsteriskJsonCfg(t *testing.T) {
+	eCfg := &SMAsteriskJsonCfg{
+		Enabled: utils.BoolPointer(false),
+		Sm_generic_conns: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Address: utils.StringPointer(utils.MetaInternal),
+			}},
+		Session_terminate_subscriber: &HaPoolJsonCfg{Address: utils.StringPointer(utils.MetaInternal)},
+		Debit_interval:               utils.StringPointer("10s"),
+		Min_call_duration:            utils.StringPointer("0s"),
+		Max_call_duration:            utils.StringPointer("3h"),
+		Asterisk_conns: &[]*AstConnJsonCfg{
+			&AstConnJsonCfg{
+				Address:    utils.StringPointer("127.0.0.1:8088"),
+				User:       utils.StringPointer("cgrates"),
+				Password:   utils.StringPointer("CGRateS.org"),
+				Reconnects: utils.IntPointer(5),
+			},
+		},
+	}
+	if cfg, err := dfCgrJsonCfg.SmAsteriskJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
 		Enabled:          utils.BoolPointer(false),

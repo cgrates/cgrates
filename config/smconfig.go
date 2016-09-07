@@ -435,3 +435,85 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 
 	return nil
 }
+
+// Uses stored defaults so we can pre-populate by loading from JSON config
+func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
+	if dfltAstConnCfg == nil {
+		return new(AsteriskConnCfg) // No defaults, most probably we are building the defaults now
+	}
+	dfltVal := *dfltAstConnCfg // Copy the value instead of it's pointer
+	return &dfltVal
+}
+
+type AsteriskConnCfg struct {
+	Address    string
+	User       string
+	Password   string
+	Reconnects int
+}
+
+func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
+	if jsnCfg.Address != nil {
+		aConnCfg.Address = *jsnCfg.Address
+	}
+	if jsnCfg.User != nil {
+		aConnCfg.User = *jsnCfg.User
+	}
+	if jsnCfg.Password != nil {
+		aConnCfg.Password = *jsnCfg.Password
+	}
+	if jsnCfg.Reconnects != nil {
+		aConnCfg.Reconnects = *jsnCfg.Reconnects
+	}
+	return nil
+}
+
+type SMAsteriskCfg struct {
+	Enabled                    bool
+	SMGConns                   []*HaPoolConfig
+	SessionTerminateSubscriber *HaPoolConfig
+	DebitInterval              time.Duration
+	MinCallDuration            time.Duration
+	MaxCallDuration            time.Duration
+	AsteriskConns              []*AsteriskConnCfg
+}
+
+func (aCfg *SMAsteriskCfg) loadFromJsonCfg(jsnCfg *SMAsteriskJsonCfg) (err error) {
+	if jsnCfg.Enabled != nil {
+		aCfg.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Sm_generic_conns != nil {
+		aCfg.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Sm_generic_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Sm_generic_conns {
+			aCfg.SMGConns[idx] = NewDfltHaPoolConfig()
+			aCfg.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Session_terminate_subscriber != nil {
+		aCfg.SessionTerminateSubscriber = NewDfltHaPoolConfig()
+		aCfg.SessionTerminateSubscriber.loadFromJsonCfg(jsnCfg.Session_terminate_subscriber)
+	}
+	if jsnCfg.Debit_interval != nil {
+		if aCfg.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Min_call_duration != nil {
+		if aCfg.MinCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Min_call_duration); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Max_call_duration != nil {
+		if aCfg.MaxCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Max_call_duration); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Asterisk_conns != nil {
+		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))
+		for i, jsnAConn := range *jsnCfg.Asterisk_conns {
+			aCfg.AsteriskConns[i] = NewDefaultAsteriskConnCfg()
+			aCfg.AsteriskConns[i].loadFromJsonCfg(jsnAConn)
+		}
+	}
+	return nil
+}
