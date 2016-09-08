@@ -183,14 +183,16 @@ func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitCha
 			return
 		}
 	}
-	sma, err := sessionmanager.NewSMAsterisk(cfg, smgConn)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> error: %s!", err))
-		exitChan <- true
-		return
-	}
-	if err = sma.ListenAndServe(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> runtime error: %s!", err))
+	for connIdx := range cfg.SMAsteriskCfg().AsteriskConns { // Instantiate connections towards asterisk servers
+		sma, err := sessionmanager.NewSMAsterisk(cfg, connIdx, smgConn)
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> error: %s!", err))
+			exitChan <- true
+			return
+		}
+		if err = sma.ListenAndServe(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> runtime error: %s!", err))
+		}
 	}
 	exitChan <- true
 }

@@ -18,21 +18,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"fmt"
+
+	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/rpcclient"
 )
 
-func NewSMAsterisk(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection) (*SMAsterisk, error) {
+const (
+	CGRAuthAPP = "cgrates_auth"
+)
+
+func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smg rpcclient.RpcClientConnection) (*SMAsterisk, error) {
 	return &SMAsterisk{cgrCfg: cgrCfg, smg: smg}, nil
 }
 
 type SMAsterisk struct {
-	cgrCfg *config.CGRConfig // Separate from smCfg since there can be multiple
-	smg    rpcclient.RpcClientConnection
+	cgrCfg     *config.CGRConfig // Separate from smCfg since there can be multiple
+	astConnIdx int
+	smg        rpcclient.RpcClientConnection
+	astConn    *aringo.ARInGO
+}
+
+func (sma *SMAsterisk) connectAsterisk() error {
+	connCfg := sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx]
+	_, err := aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s", connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), connCfg.Reconnects)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Called to start the service
 func (sma *SMAsterisk) ListenAndServe() error {
+	if err := sma.connectAsterisk(); err != nil {
+		return err
+	}
 	return nil
 }
 
