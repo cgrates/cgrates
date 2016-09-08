@@ -618,8 +618,8 @@ func (self *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSes
 		}
 	}
 	if len(fltrs) != 0 { // Still have some filters to match
-		for i, s := range remainingSessions {
-			sMp, err := s.eventStart.AsMapStringString()
+		for i := 0; i < len(remainingSessions); {
+			sMp, err := remainingSessions[i].eventStart.AsMapStringString()
 			if err != nil {
 				return nil, 0, err
 			}
@@ -633,10 +633,11 @@ func (self *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSes
 					break
 				}
 			}
-			if !matchingAll { // Strip the session from remaining ones with emptying the session to be garbage collected
-				remainingSessions[i] = remainingSessions[len(remainingSessions)-1]
-				remainingSessions = remainingSessions[:len(remainingSessions)-1]
+			if !matchingAll {
+				remainingSessions = append(remainingSessions[:i], remainingSessions[i+1:]...)
+				continue // if we have stripped, don't increase index so we can check next element by next run
 			}
+			i++
 		}
 	}
 	if count {
