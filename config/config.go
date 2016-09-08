@@ -78,6 +78,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.ConfigReloads[utils.SURETAX] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
+	cfg.ConfigReloads[utils.SMAsterisk] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.SMAsterisk] <- struct{}{} // Unlock the channel
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
@@ -1098,5 +1100,7 @@ func (self *CGRConfig) ResourceLimiterCfg() *ResourceLimiterConfig {
 
 // ToDo: fix locking here
 func (self *CGRConfig) SMAsteriskCfg() *SMAsteriskCfg {
+	cfgChan := <-self.ConfigReloads[utils.SMAsterisk] // Lock config for read or reloads
+	defer func() { self.ConfigReloads[utils.SMAsterisk] <- cfgChan }()
 	return self.smAsteriskCfg
 }
