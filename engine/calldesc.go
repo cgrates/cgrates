@@ -953,7 +953,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 	for _, key := range keyVariants {
 		if lcr, err := ratingStorage.GetLCR(key, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return nil, err
-		} else if err == nil {
+		} else if err == nil && lcr != nil {
 			return lcr, nil
 		}
 	}
