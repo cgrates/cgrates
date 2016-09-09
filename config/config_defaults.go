@@ -341,7 +341,7 @@ const CGRATES_CFG_JSON = `
 	"min_call_duration": "0s",										// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",										// maximum call duration a prepaid call can last
 	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
-		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "reconnects": 5}
+		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
 	],
 },
 

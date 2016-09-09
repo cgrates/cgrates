@@ -446,10 +446,11 @@ func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
 }
 
 type AsteriskConnCfg struct {
-	Address    string
-	User       string
-	Password   string
-	Reconnects int
+	Address         string
+	User            string
+	Password        string
+	ConnectAttempts int
+	Reconnects      int
 }
 
 func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
@@ -461,6 +462,9 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 	}
 	if jsnCfg.Password != nil {
 		aConnCfg.Password = *jsnCfg.Password
+	}
+	if jsnCfg.Connect_attempts != nil {
+		aConnCfg.ConnectAttempts = *jsnCfg.Connect_attempts
 	}
 	if jsnCfg.Reconnects != nil {
 		aConnCfg.Reconnects = *jsnCfg.Reconnects

@@ -215,10 +215,11 @@ type HaPoolJsonCfg struct {
 }
 
 type AstConnJsonCfg struct {
-	Address    *string
-	User       *string
-	Password   *string
-	Reconnects *int
+	Address          *string
+	User             *string
+	Password         *string
+	Connect_attempts *int
+	Reconnects       *int
 }
 
 type SMAsteriskJsonCfg struct {

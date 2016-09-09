@@ -529,10 +529,11 @@ func TestSmAsteriskJsonCfg(t *testing.T) {
 		Max_call_duration:            utils.StringPointer("3h"),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			&AstConnJsonCfg{
-				Address:    utils.StringPointer("127.0.0.1:8088"),
-				User:       utils.StringPointer("cgrates"),
-				Password:   utils.StringPointer("CGRateS.org"),
-				Reconnects: utils.IntPointer(5),
+				Address:          utils.StringPointer("127.0.0.1:8088"),
+				User:             utils.StringPointer("cgrates"),
+				Password:         utils.StringPointer("CGRateS.org"),
+				Connect_attempts: utils.IntPointer(3),
+				Reconnects:       utils.IntPointer(5),
 			},
 		},
 	}

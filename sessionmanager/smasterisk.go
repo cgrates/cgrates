@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/cgrates/aringo"
@@ -38,11 +39,16 @@ type SMAsterisk struct {
 	astConnIdx int
 	smg        rpcclient.RpcClientConnection
 	astConn    *aringo.ARInGO
+	astEvChan  chan *json.RawMessage
+	astErrChan chan error
 }
 
 func (sma *SMAsterisk) connectAsterisk() error {
 	connCfg := sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx]
-	_, err := aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s", connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), connCfg.Reconnects)
+	sma.astEvChan = make(chan *json.RawMessage)
+	sma.astErrChan = make(chan error)
+	_, err := aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s", connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
+		sma.astEvChan, sma.astErrChan, connCfg.ConnectAttempts, connCfg.Reconnects)
 	if err != nil {
 		return err
 	}
@@ -50,11 +56,19 @@ func (sma *SMAsterisk) connectAsterisk() error {
 }
 
 // Called to start the service
-func (sma *SMAsterisk) ListenAndServe() error {
+func (sma *SMAsterisk) ListenAndServe() (err error) {
 	if err := sma.connectAsterisk(); err != nil {
 		return err
 	}
-	return nil
+	for {
+		select {
+		case err = <-sma.astErrChan:
+			return err
+		case astRawEv := <-sma.astEvChan:
+			fmt.Printf("<SMAsterisk> Received raw event: %+v\n", astRawEv)
+		}
+	}
+	panic("<SMAsterisk> ListenAndServe out of select")
 }
 
 // Called to shutdown the service
