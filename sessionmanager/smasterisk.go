@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/cgrates/aringo"
@@ -39,13 +38,13 @@ type SMAsterisk struct {
 	astConnIdx int
 	smg        rpcclient.RpcClientConnection
 	astConn    *aringo.ARInGO
-	astEvChan  chan *json.RawMessage
+	astEvChan  chan map[string]interface{}
 	astErrChan chan error
 }
 
 func (sma *SMAsterisk) connectAsterisk() error {
 	connCfg := sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx]
-	sma.astEvChan = make(chan *json.RawMessage)
+	sma.astEvChan = make(chan map[string]interface{})
 	sma.astErrChan = make(chan error)
 	_, err := aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s", connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
 		sma.astEvChan, sma.astErrChan, connCfg.ConnectAttempts, connCfg.Reconnects)
