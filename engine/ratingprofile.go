@@ -258,7 +258,7 @@ func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err erro
 	if !rpSubjectPrefixMatching || strings.HasSuffix(key, utils.ANY) {
 		return ratingStorage.GetRatingProfile(key, false, utils.NonTransactional)
 	}
-	if rp, err = ratingStorage.GetRatingProfile(key, false, utils.NonTransactional); err == nil {
+	if rp, err = ratingStorage.GetRatingProfile(key, false, utils.NonTransactional); err == nil && rp != nil { // rp nil represents cached no-result
 		return rp, err
 	}
 	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
@@ -266,7 +266,7 @@ func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err erro
 	subject := key[lastIndex:]
 	lenSubject := len(subject)
 	for i := 1; i < lenSubject-1; i++ {
-		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false, utils.NonTransactional); err == nil {
+		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false, utils.NonTransactional); err == nil && rp != nil {
 			return rp, err
 		}
 	}
