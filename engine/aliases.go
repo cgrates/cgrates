@@ -254,7 +254,7 @@ func (am *AliasHandler) GetAlias(al *Alias, result *Alias) error {
 	defer am.mu.RUnlock()
 	variants := al.GenerateIds()
 	for _, variant := range variants {
-		if r, err := am.accountingDb.GetAlias(variant, false, utils.NonTransactional); err == nil {
+		if r, err := am.accountingDb.GetAlias(variant, false, utils.NonTransactional); err == nil && r != nil {
 			*result = *r
 			return nil
 		}

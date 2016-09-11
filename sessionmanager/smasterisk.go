@@ -19,9 +19,11 @@ package sessionmanager
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -42,12 +44,12 @@ type SMAsterisk struct {
 	astErrChan chan error
 }
 
-func (sma *SMAsterisk) connectAsterisk() error {
+func (sma *SMAsterisk) connectAsterisk() (err error) {
 	connCfg := sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx]
 	sma.astEvChan = make(chan map[string]interface{})
 	sma.astErrChan = make(chan error)
-	_, err := aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s", connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
-		sma.astEvChan, sma.astErrChan, connCfg.ConnectAttempts, connCfg.Reconnects)
+	sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s", connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
+		connCfg.User, connCfg.Password, fmt.Sprintf("%s %s", utils.CGRateS, utils.VERSION), sma.astEvChan, sma.astErrChan, connCfg.ConnectAttempts, connCfg.Reconnects)
 	if err != nil {
 		return err
 	}
@@ -64,7 +66,11 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 		case err = <-sma.astErrChan:
 			return err
 		case astRawEv := <-sma.astEvChan:
-			fmt.Printf("<SMAsterisk> Received raw event: %+v\n", astRawEv)
+			channelData := astRawEv["channel"].(map[string]interface{})
+			channelID := channelData["id"].(string)
+			if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
+				sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID), url.Values{"channelId": {channelID}}); err != nil {
+			}
 		}
 	}
 	panic("<SMAsterisk> ListenAndServe out of select")
