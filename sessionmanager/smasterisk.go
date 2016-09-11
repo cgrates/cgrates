@@ -66,10 +66,16 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 		case err = <-sma.astErrChan:
 			return err
 		case astRawEv := <-sma.astEvChan:
-			channelData := astRawEv["channel"].(map[string]interface{})
-			channelID := channelData["id"].(string)
-			if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
-				sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID), url.Values{"channelId": {channelID}}); err != nil {
+			stasisType := astRawEv["type"].(string)
+			if stasisType == "StasisStart" {
+				channelData := astRawEv["channel"].(map[string]interface{})
+				channelID := channelData["id"].(string)
+				if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/applications/%s/subscription?eventSource=channel:%s",
+					sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, CGRAuthAPP, channelID), nil); err != nil {
+				}
+				if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
+					sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID), url.Values{"channelId": {channelID}}); err != nil {
+				}
 			}
 		}
 	}
