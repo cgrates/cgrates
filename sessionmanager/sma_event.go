@@ -17,19 +17,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package sessionmanager
 
+import (
+	"github.com/cgrates/cgrates/utils"
+)
+
 const (
 	ARIStasisStart = "StasisStart"
 )
 
-type ARIEvent map[string]interface{}
+func NewARIEvent(ev map[string]interface{}) *ARIEvent {
+	return &ARIEvent{ev: ev}
+}
 
-func (aev ARIEvent) Type() string {
-	typ, _ := aev["type"].(string)
-	return typ
+type ARIEvent struct { // Standalone struct so we can cache the fields while we parse them
+	ev        map[string]interface{}
+	evType    *string
+	channelID *string
+}
+
+func (aev *ARIEvent) Type() string {
+	if aev.evType == nil {
+		typ, _ := aev.ev["type"].(string)
+		aev.evType = utils.StringPointer(typ)
+	}
+	return *aev.evType
 }
 
 func (aev ARIEvent) ChannelID() string {
-	channelData, _ := aev["channel"].(map[string]interface{})
-	channelID, _ := channelData["id"].(string)
-	return channelID
+	if aev.channelID == nil {
+		channelData, _ := aev.ev["channel"].(map[string]interface{})
+		channelID, _ := channelData["id"].(string)
+		aev.channelID = utils.StringPointer(channelID)
+	}
+	return *aev.channelID
+}
+
+func (aev ARIEvent) AsSMGenericSessionStart() (smgEv SMGenericEvent, err error) {
+	smgEv = SMGenericEvent{utils.EVENT_NAME: utils.CGR_SESSION_START}
+	return smgEv, nil
 }
