@@ -45,7 +45,7 @@ type SMAsteriskEvent struct { // Standalone struct so we can cache the fields wh
 // args need to be in the form of []string{"key=value", "key2=value2"}
 func (smaEv *SMAsteriskEvent) parseStasisArgs() {
 	smaEv.appArgs = make(map[string]string)
-	args := smaEv.ariEv["args"].([]interface{})
+	args, _ := smaEv.ariEv["args"].([]interface{})
 	for _, arg := range args {
 		if splt := strings.Split(arg.(string), "="); len(splt) > 1 {
 			smaEv.appArgs[splt[0]] = splt[1]
