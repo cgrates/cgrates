@@ -35,4 +35,25 @@ func TestSMAEventType(t *testing.T) {
 	} else if ARIEvent(ev).Type() != "StasisStart" {
 		t.Error("Received type:", ARIEvent(ev).Type())
 	}
+	ev = make(map[string]interface{}) // Clear previous data
+	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
+		t.Error(err)
+	} else if ARIEvent(ev).Type() != "" {
+		t.Error("Received type:", ARIEvent(ev).Type())
+	}
+}
+
+func TestSMAEventChannelID(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	} else if ARIEvent(ev).ChannelID() != "1473681228.6" {
+		t.Error("Received type:", ARIEvent(ev).ChannelID())
+	}
+	ev = make(map[string]interface{}) // Clear previous data
+	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
+		t.Error(err)
+	} else if ARIEvent(ev).ChannelID() != "" {
+		t.Error("Received type:", ARIEvent(ev).ChannelID())
+	}
 }

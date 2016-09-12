@@ -17,9 +17,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package sessionmanager
 
+const (
+	ARIStasisStart = "StasisStart"
+)
+
 type ARIEvent map[string]interface{}
 
 func (aev ARIEvent) Type() string {
 	typ, _ := aev["type"].(string)
 	return typ
+}
+
+func (aev ARIEvent) ChannelID() string {
+	channelData, _ := aev["channel"].(map[string]interface{})
+	channelID, _ := channelData["id"].(string)
+	return channelID
 }
