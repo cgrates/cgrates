@@ -40,6 +40,15 @@ func TestSMAParseStasisArgs(t *testing.T) {
 	if !reflect.DeepEqual(smaEv.appArgs, expAppArgs) {
 		t.Errorf("Expecting: %+v, received: %+v", smaEv.appArgs, expAppArgs)
 	}
+	ev = make(map[string]interface{}) // Clear previous data
+	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv = NewSMAsteriskEvent(ev)
+	expAppArgs = map[string]string{}
+	if !reflect.DeepEqual(smaEv.appArgs, expAppArgs) {
+		t.Errorf("Expecting: %+v, received: %+v", smaEv.appArgs, expAppArgs)
+	}
 }
 
 func TestSMAEventType(t *testing.T) {
@@ -47,17 +56,17 @@ func TestSMAEventType(t *testing.T) {
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
-	ariEv := NewSMAsteriskEvent(ev)
-	if ariEv.Type() != "StasisStart" {
-		t.Error("Received type:", ariEv.Type())
+	smaEv := NewSMAsteriskEvent(ev)
+	if smaEv.Type() != "StasisStart" {
+		t.Error("Received type:", smaEv.Type())
 	}
 	ev = make(map[string]interface{}) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
-	ariEv = NewSMAsteriskEvent(ev)
-	if ariEv.Type() != "" {
-		t.Error("Received type:", ariEv.Type())
+	smaEv = NewSMAsteriskEvent(ev)
+	if smaEv.Type() != "" {
+		t.Error("Received type:", smaEv.Type())
 	}
 }
 
@@ -66,16 +75,16 @@ func TestSMAEventChannelID(t *testing.T) {
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
-	ariEv := NewSMAsteriskEvent(ev)
-	if ariEv.ChannelID() != "1473681228.6" {
-		t.Error("Received type:", ariEv.ChannelID())
+	smaEv := NewSMAsteriskEvent(ev)
+	if smaEv.ChannelID() != "1473681228.6" {
+		t.Error("Received type:", smaEv.ChannelID())
 	}
 	ev = make(map[string]interface{}) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
-	ariEv = NewSMAsteriskEvent(ev)
-	if ariEv.ChannelID() != "" {
-		t.Error("Received type:", ariEv.ChannelID())
+	smaEv = NewSMAsteriskEvent(ev)
+	if smaEv.ChannelID() != "" {
+		t.Error("Received type:", smaEv.ChannelID())
 	}
 }
