@@ -66,34 +66,33 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 		case err = <-sma.astErrChan:
 			return err
 		case astRawEv := <-sma.astEvChan:
-			ariEvent := NewARIEvent(astRawEv)
-			switch ariEvent.Type() {
+			SMAsteriskEvent := NewSMAsteriskEvent(astRawEv)
+			switch SMAsteriskEvent.Type() {
 			case ARIStasisStart:
-				go sma.handleStasisStart(ariEvent)
+				go sma.handleStasisStart(SMAsteriskEvent)
 			}
 		}
 	}
 	panic("<SMAsterisk> ListenAndServe out of select")
 }
 
-func (sma *SMAsterisk) handleStasisStart(ev *ARIEvent) {
-	channelID := ev.ChannelID()
+func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 
 	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/applications/%s/subscription?eventSource=channel:%s",
-		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, CGRAuthAPP, channelID), nil); err != nil {
+		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, CGRAuthAPP, ev.ChannelID()), nil); err != nil {
 
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when subscribing to events for channelID: %s", err.Error(), channelID))
+		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when subscribing to events for channelID: %s", err.Error(), ev.ChannelID()))
 
 		if _, err := sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("http://%s/ari/channels/%s",
-			sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID), url.Values{"reason": {"congestion"}}); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), channelID))
+			sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID()), url.Values{"reason": {"congestion"}}); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
 			return
 		}
 
 	}
 
 	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
-		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID), url.Values{"channelId": {channelID}}); err != nil {
+		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID()), url.Values{"channelId": {ev.ChannelID()}}); err != nil {
 	}
 
 }
