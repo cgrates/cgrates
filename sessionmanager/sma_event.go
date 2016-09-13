@@ -80,20 +80,26 @@ func (smaEv *SMAsteriskEvent) OriginatorIP() string {
 
 func (smaEv *SMAsteriskEvent) Account() string {
 	if smaEv.account == nil {
-		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
-		callerData, _ := channelData["caller"].(map[string]interface{})
-		callerNumber, _ := callerData["number"].(string)
-		smaEv.account = utils.StringPointer(callerNumber)
+		cgrAccount, hasIt := smaEv.appArgs[utils.CGR_ACCOUNT]
+		if !hasIt {
+			channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+			callerData, _ := channelData["caller"].(map[string]interface{})
+			cgrAccount, _ = callerData["number"].(string)
+		}
+		smaEv.account = utils.StringPointer(cgrAccount)
 	}
 	return *smaEv.account
 }
 
 func (smaEv *SMAsteriskEvent) Destination() string {
 	if smaEv.destination == nil {
-		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
-		dialplanData, _ := channelData["dialplan"].(map[string]interface{})
-		exten, _ := dialplanData["exten"].(string)
-		smaEv.destination = utils.StringPointer(exten)
+		cgrDestination, hasIt := smaEv.appArgs[utils.CGR_DESTINATION]
+		if !hasIt {
+			channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+			dialplanData, _ := channelData["dialplan"].(map[string]interface{})
+			cgrDestination, _ = dialplanData["exten"].(string)
+		}
+		smaEv.destination = utils.StringPointer(cgrDestination)
 	}
 	return *smaEv.destination
 }
