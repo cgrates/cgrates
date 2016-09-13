@@ -67,10 +67,10 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 		case err = <-sma.astErrChan:
 			return
 		case astRawEv := <-sma.astEvChan:
-			SMAsteriskEvent := NewSMAsteriskEvent(astRawEv, strings.Split(sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0])
-			switch SMAsteriskEvent.Type() {
+			smAsteriskEvent := NewSMAsteriskEvent(astRawEv, strings.Split(sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0])
+			switch smAsteriskEvent.EventType() {
 			case ARIStasisStart:
-				go sma.handleStasisStart(SMAsteriskEvent)
+				go sma.handleStasisStart(smAsteriskEvent)
 			}
 		}
 	}

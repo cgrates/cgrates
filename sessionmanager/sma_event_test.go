@@ -40,8 +40,8 @@ func TestSMAParseStasisArgs(t *testing.T) {
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
 	expAppArgs := map[string]string{"cgr_reqtype": "*prepaid", "cgr_destination": "1003"}
-	if !reflect.DeepEqual(smaEv.appArgs, expAppArgs) {
-		t.Errorf("Expecting: %+v, received: %+v", smaEv.appArgs, expAppArgs)
+	if !reflect.DeepEqual(smaEv.cachedFields, expAppArgs) {
+		t.Errorf("Expecting: %+v, received: %+v", smaEv.cachedFields, expAppArgs)
 	}
 	ev = make(map[string]interface{}) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
@@ -49,8 +49,8 @@ func TestSMAParseStasisArgs(t *testing.T) {
 	}
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
 	expAppArgs = map[string]string{}
-	if !reflect.DeepEqual(smaEv.appArgs, expAppArgs) {
-		t.Errorf("Expecting: %+v, received: %+v", smaEv.appArgs, expAppArgs)
+	if !reflect.DeepEqual(smaEv.cachedFields, expAppArgs) {
+		t.Errorf("Expecting: %+v, received: %+v", smaEv.cachedFields, expAppArgs)
 	}
 }
 
@@ -60,16 +60,16 @@ func TestSMAEventType(t *testing.T) {
 		t.Error(err)
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
-	if smaEv.Type() != "StasisStart" {
-		t.Error("Received:", smaEv.Type())
+	if smaEv.EventType() != "StasisStart" {
+		t.Error("Received:", smaEv.EventType())
 	}
 	ev = make(map[string]interface{}) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
-	if smaEv.Type() != "" {
-		t.Error("Received:", smaEv.Type())
+	if smaEv.EventType() != "" {
+		t.Error("Received:", smaEv.EventType())
 	}
 }
 
@@ -160,6 +160,118 @@ func TestSMAEventTimestamp(t *testing.T) {
 	}
 }
 
+func TestSMAEventRequestType(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.RequestType() != "*prepaid" {
+		t.Error("Received:", smaEv.RequestType())
+	}
+	ev = make(map[string]interface{}) // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.RequestType() != "" {
+		t.Error("Received:", smaEv.RequestType())
+	}
+}
+
+func TestSMAEventTenant(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Tenant() != "" {
+		t.Error("Received:", smaEv.Tenant())
+	}
+	ev = map[string]interface{}{"args": []interface{}{"cgr_tenant=cgrates.org"}} // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Tenant() != "cgrates.org" {
+		t.Error("Received:", smaEv.Tenant())
+	}
+}
+
+func TestSMAEventCategory(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Category() != "" {
+		t.Error("Received:", smaEv.Category())
+	}
+	ev = map[string]interface{}{"args": []interface{}{"cgr_category=premium_call"}} // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Category() != "premium_call" {
+		t.Error("Received:", smaEv.Category())
+	}
+}
+
+func TestSMAEventSubject(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Subject() != "" {
+		t.Error("Received:", smaEv.Subject())
+	}
+	ev = map[string]interface{}{"args": []interface{}{"cgr_subject=dan"}} // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Subject() != "dan" {
+		t.Error("Received:", smaEv.Subject())
+	}
+}
+
+func TestSMAEventPDD(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.PDD() != "" {
+		t.Error("Received:", smaEv.PDD())
+	}
+	ev = map[string]interface{}{"args": []interface{}{"cgr_pdd=2.1"}} // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.PDD() != "2.1" {
+		t.Error("Received:", smaEv.PDD())
+	}
+}
+
+func TestSMAEventSupplier(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Supplier() != "" {
+		t.Error("Received:", smaEv.Supplier())
+	}
+	ev = map[string]interface{}{"args": []interface{}{"cgr_supplier=supplier1"}} // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Supplier() != "supplier1" {
+		t.Error("Received:", smaEv.Supplier())
+	}
+}
+
+func TestSMAEventDisconnectCause(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.DisconnectCause() != "" {
+		t.Error("Received:", smaEv.DisconnectCause())
+	}
+	ev = map[string]interface{}{"args": []interface{}{"cgr_disconnectcause=NORMAL_DISCONNECT"}} // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.DisconnectCause() != "NORMAL_DISCONNECT" {
+		t.Error("Received:", smaEv.DisconnectCause())
+	}
+}
+
 func TestSMAEventAsSMGenericSessionStart(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
@@ -168,6 +280,7 @@ func TestSMAEventAsSMGenericSessionStart(t *testing.T) {
 	eSMGEv := SMGenericEvent{
 		utils.EVENT_NAME:  utils.CGR_SESSION_START,
 		utils.ACCID:       "1473681228.6",
+		utils.REQTYPE:     "*prepaid",
 		utils.CDRHOST:     "127.0.0.1",
 		utils.ACCOUNT:     "1001",
 		utils.DESTINATION: "1003",

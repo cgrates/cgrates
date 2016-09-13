@@ -25,99 +25,154 @@ import (
 
 const (
 	ARIStasisStart = "StasisStart"
+	eventType      = "eventType"
+	channelID      = "channelID"
+	timestamp      = "timestamp"
 )
 
 func NewSMAsteriskEvent(ariEv map[string]interface{}, asteriskIP string) *SMAsteriskEvent {
-	smsmaEv := &SMAsteriskEvent{ariEv: ariEv, asteriskIP: asteriskIP}
+	smsmaEv := &SMAsteriskEvent{ariEv: ariEv, asteriskIP: asteriskIP, cachedFields: make(map[string]string)}
 	smsmaEv.parseStasisArgs() // Populate appArgs
 	return smsmaEv
 }
 
 type SMAsteriskEvent struct { // Standalone struct so we can cache the fields while we parse them
-	ariEv      map[string]interface{} // stasis event
-	appArgs    map[string]string      // parsed stasis args
-	asteriskIP string
-	// cached values start here
-	evType      *string
-	channelID   *string
-	account     *string
-	destination *string
-	timestamp   *string
+	ariEv        map[string]interface{} // stasis event
+	asteriskIP   string
+	cachedFields map[string]string // Cache replies here
 }
 
-// parseStasisArgs will convert the args passed to Stasis into CGRateS attribute/value pairs understood by CGRateS
+// parseStasisArgs will convert the args passed to Stasis into CGRateS attribute/value pairs understood by CGRateS and store them in cachedFields
 // args need to be in the form of []string{"key=value", "key2=value2"}
 func (smaEv *SMAsteriskEvent) parseStasisArgs() {
-	smaEv.appArgs = make(map[string]string)
 	args, _ := smaEv.ariEv["args"].([]interface{})
 	for _, arg := range args {
 		if splt := strings.Split(arg.(string), "="); len(splt) > 1 {
-			smaEv.appArgs[splt[0]] = splt[1]
+			smaEv.cachedFields[splt[0]] = splt[1]
 		}
 	}
-}
-
-func (smaEv *SMAsteriskEvent) Type() string {
-	if smaEv.evType == nil {
-		typ, _ := smaEv.ariEv["type"].(string)
-		smaEv.evType = utils.StringPointer(typ)
-	}
-	return *smaEv.evType
-}
-
-func (smaEv *SMAsteriskEvent) ChannelID() string {
-	if smaEv.channelID == nil {
-		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
-		channelID, _ := channelData["id"].(string)
-		smaEv.channelID = utils.StringPointer(channelID)
-	}
-	return *smaEv.channelID
 }
 
 func (smaEv *SMAsteriskEvent) OriginatorIP() string {
 	return smaEv.asteriskIP
 }
 
-func (smaEv *SMAsteriskEvent) Account() string {
-	if smaEv.account == nil {
-		cgrAccount, hasIt := smaEv.appArgs[utils.CGR_ACCOUNT]
-		if !hasIt {
-			channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
-			callerData, _ := channelData["caller"].(map[string]interface{})
-			cgrAccount, _ = callerData["number"].(string)
-		}
-		smaEv.account = utils.StringPointer(cgrAccount)
+func (smaEv *SMAsteriskEvent) EventType() string {
+	cachedKey := eventType
+	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
+	if !hasIt {
+		cachedVal, _ = smaEv.ariEv["type"].(string)
+		smaEv.cachedFields[cachedKey] = cachedVal
 	}
-	return *smaEv.account
+	return cachedVal
 }
 
-func (smaEv *SMAsteriskEvent) Destination() string {
-	if smaEv.destination == nil {
-		cgrDestination, hasIt := smaEv.appArgs[utils.CGR_DESTINATION]
-		if !hasIt {
-			channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
-			dialplanData, _ := channelData["dialplan"].(map[string]interface{})
-			cgrDestination, _ = dialplanData["exten"].(string)
-		}
-		smaEv.destination = utils.StringPointer(cgrDestination)
+func (smaEv *SMAsteriskEvent) ChannelID() string {
+	cachedKey := channelID
+	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
+	if !hasIt {
+		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+		cachedVal, _ = channelData["id"].(string)
+		smaEv.cachedFields[cachedKey] = cachedVal
 	}
-	return *smaEv.destination
+	return cachedVal
 }
 
 func (smaEv *SMAsteriskEvent) Timestamp() string {
-	if smaEv.timestamp == nil {
-		timestamp, _ := smaEv.ariEv["timestamp"].(string)
-		smaEv.timestamp = utils.StringPointer(timestamp)
+	cachedKey := timestamp
+	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
+	if !hasIt {
+		cachedVal, _ = smaEv.ariEv["timestamp"].(string)
+		smaEv.cachedFields[cachedKey] = cachedVal
 	}
-	return *smaEv.timestamp
+	return cachedVal
+}
+
+func (smaEv *SMAsteriskEvent) Account() string {
+	cachedKey := utils.CGR_ACCOUNT
+	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
+	if !hasIt {
+		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+		callerData, _ := channelData["caller"].(map[string]interface{})
+		cachedVal, _ = callerData["number"].(string)
+		smaEv.cachedFields[cachedKey] = cachedVal
+	}
+	return cachedVal
+}
+
+func (smaEv *SMAsteriskEvent) Destination() string {
+	cachedKey := utils.CGR_DESTINATION
+	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
+	if !hasIt {
+		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+		dialplanData, _ := channelData["dialplan"].(map[string]interface{})
+		cachedVal, _ = dialplanData["exten"].(string)
+		smaEv.cachedFields[cachedKey] = cachedVal
+	}
+	return cachedVal
+}
+
+func (smaEv *SMAsteriskEvent) RequestType() string {
+	return smaEv.cachedFields[utils.CGR_REQTYPE]
+}
+
+func (smaEv *SMAsteriskEvent) Tenant() string {
+	return smaEv.cachedFields[utils.CGR_TENANT]
+}
+
+func (smaEv *SMAsteriskEvent) Category() string {
+	return smaEv.cachedFields[utils.CGR_CATEGORY]
+}
+
+func (smaEv *SMAsteriskEvent) Subject() string {
+	return smaEv.cachedFields[utils.CGR_SUBJECT]
+}
+
+func (smaEv *SMAsteriskEvent) PDD() string {
+	return smaEv.cachedFields[utils.CGR_PDD]
+}
+
+func (smaEv *SMAsteriskEvent) Supplier() string {
+	return smaEv.cachedFields[utils.CGR_SUPPLIER]
+}
+
+func (smaEv *SMAsteriskEvent) DisconnectCause() string {
+	return smaEv.cachedFields[utils.CGR_DISCONNECT_CAUSE]
+}
+
+func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) {
+	extraParams = make(map[string]string)
+	primaryFields := []string{eventType, channelID, timestamp, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
+		utils.CGR_TENANT, utils.CGR_CATEGORY, utils.CGR_SUBJECT, utils.CGR_PDD, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE}
+	for cachedKey, cachedVal := range smaEv.cachedFields {
+		if !utils.IsSliceMember(primaryFields, cachedKey) {
+			extraParams[cachedKey] = cachedVal
+		}
+	}
+	return
 }
 
 func (smaEv *SMAsteriskEvent) AsSMGenericSessionStart() (smgEv SMGenericEvent, err error) {
 	smgEv = SMGenericEvent{utils.EVENT_NAME: utils.CGR_SESSION_START}
 	smgEv[utils.ACCID] = smaEv.ChannelID()
+	if smaEv.RequestType() != "" {
+		smgEv[utils.REQTYPE] = smaEv.RequestType()
+	}
+	if smaEv.Tenant() != "" {
+		smgEv[utils.TENANT] = smaEv.Tenant()
+	}
+	if smaEv.Category() != "" {
+		smgEv[utils.CATEGORY] = smaEv.Category()
+	}
+	if smaEv.Subject() != "" {
+		smgEv[utils.SUBJECT] = smaEv.Subject()
+	}
 	smgEv[utils.CDRHOST] = smaEv.OriginatorIP()
 	smgEv[utils.ACCOUNT] = smaEv.Account()
 	smgEv[utils.DESTINATION] = smaEv.Destination()
 	smgEv[utils.SETUP_TIME] = smaEv.Timestamp()
+	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
+		smgEv[extraKey] = extraVal
+	}
 	return smgEv, nil
 }
