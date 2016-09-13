@@ -64,7 +64,7 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 	for {
 		select {
 		case err = <-sma.astErrChan:
-			return err
+			return
 		case astRawEv := <-sma.astEvChan:
 			SMAsteriskEvent := NewSMAsteriskEvent(astRawEv)
 			switch SMAsteriskEvent.Type() {
@@ -76,25 +76,28 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 	panic("<SMAsterisk> ListenAndServe out of select")
 }
 
-func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
+// hangupChannel will disconnect from CGRateS side with congestion reason
+func (sma *SMAsterisk) hangupChannel(channelID string) (err error) {
+	_, err = sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("http://%s/ari/channels/%s",
+		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID), url.Values{"reason": {"congestion"}})
+	return
+}
 
+func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
+	// Subscribe for channel updates even after we leave Stasis
 	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/applications/%s/subscription?eventSource=channel:%s",
 		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, CGRAuthAPP, ev.ChannelID()), nil); err != nil {
-
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when subscribing to events for channelID: %s", err.Error(), ev.ChannelID()))
-
-		if _, err := sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("http://%s/ari/channels/%s",
-			sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID()), url.Values{"reason": {"congestion"}}); err != nil {
+		// Since we got error, disconnect channel
+		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
 			return
 		}
-
 	}
-
+	// Exit channel from stasis
 	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
 		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID()), url.Values{"channelId": {ev.ChannelID()}}); err != nil {
 	}
-
 }
 
 // Called to shutdown the service
