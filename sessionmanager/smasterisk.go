@@ -20,6 +20,7 @@ package sessionmanager
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
@@ -66,7 +67,7 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 		case err = <-sma.astErrChan:
 			return
 		case astRawEv := <-sma.astEvChan:
-			SMAsteriskEvent := NewSMAsteriskEvent(astRawEv)
+			SMAsteriskEvent := NewSMAsteriskEvent(astRawEv, strings.Split(sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0])
 			switch SMAsteriskEvent.Type() {
 			case ARIStasisStart:
 				go sma.handleStasisStart(SMAsteriskEvent)
