@@ -293,14 +293,13 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 		}
 		for idx, s := range ss {
 			s.totalUsage = usage // save final usage as totalUsage
-			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Ending session: %s, runId: %s", sessionId, s.runId))
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
 			}
 			aTime, err := s.eventStart.GetAnswerTime(utils.META_DEFAULT, self.cgrCfg.DefaultTimezone)
 			if err != nil || aTime.IsZero() {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %s",
-					sessionId, s.runId, aTime, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %v",
+					sessionId, s.runId, aTime, err))
 			}
 			if err := s.close(aTime.Add(usage)); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))

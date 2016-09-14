@@ -19,11 +19,8 @@ package cache2go
 
 import (
 	"container/list"
-	"fmt"
 	"sync"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 // Cache is an LRU cache.
@@ -172,8 +169,6 @@ func (c *Cache) removeElement(e *list.Element) {
 	if e.Value != nil {
 		kv := e.Value.(*entry)
 		delete(c.cache, kv.key)
-	} else {
-		utils.Logger.Debug(fmt.Sprintf("<lruttl_cache>: nil element: %+v", e))
 	}
 }
 

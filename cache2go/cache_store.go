@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cache2go
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 
@@ -184,7 +183,6 @@ func (cs lrustore) Put(key string, value interface{}) {
 		var err error
 		mp, err = lru.New(10000)
 		if err != nil {
-			utils.Logger.Debug(fmt.Sprintf("<cache>: error at init: %v", err))
 			return
 		}
 		cs[prefix] = mp

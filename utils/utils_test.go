@@ -266,6 +266,14 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if !broadTmS.Equal(expectedTime) {
 		t.Errorf("Expecting: %v, received: %v", expectedTime, broadTmS)
 	}
+	astTimestamp := "2016-09-14T19:37:43.665+0000"
+	expectedTime = time.Date(2016, 9, 14, 19, 37, 43, 665000000, time.UTC)
+	astTMS, err := ParseTimeDetectLayout(astTimestamp, "")
+	if err != nil {
+		t.Error(err)
+	} else if !astTMS.Equal(expectedTime) {
+		t.Errorf("Expecting: %v, received: %v", expectedTime, astTMS)
+	}
 }
 
 func TestParseDateUnix(t *testing.T) {

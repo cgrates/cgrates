@@ -201,7 +201,6 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	if err == utils.ErrNotFound && rec == 1 {
 		//if err != nil || !cd.continousRatingInfos() {
 		// use the default subject only if the initial one was not found
-		//utils.Logger.Debug(fmt.Sprintf("Try the default subject for %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
 		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
@@ -390,7 +389,6 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		//log.Printf("==============%v==================", i)
 		//log.Printf("TS: %+v", timespans[i])
 		rp := timespans[i].ratingInfo
-		// utils.Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rateIntervals := rp.SelectRatingIntevalsForTimespan(timespans[i])
 		//log.Print("RIs: ", utils.ToJSON(rateIntervals))
@@ -423,10 +421,8 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		//log.Print(timespans[i].RateInterval.Timing)
 	}
 
-	//utils.Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
 	//log.Printf("After SplitByRateInterval: %+v", timespans[0].RateInterval.Timing)
 	timespans = cd.roundTimeSpansToIncrement(timespans)
-	// utils.Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
 	//log.Printf("After round: %+v", timespans[0].RateInterval.Timing)
 	return
 }
@@ -578,27 +574,18 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	if origCD.TOR == "" {
 		origCD.TOR = utils.VOICE
 	}
-	//utils.Logger.Debug("ORIG: " + utils.ToJSON(origCD))
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
-	//utils.Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
 	defaultBalance := account.GetDefaultMoneyBalance()
 
 	//use this to check what increment was payed with debt
 	initialDefaultBalanceValue := defaultBalance.GetValue()
 
-	//utils.Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
-	//utils.Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
-
 	cc, err := cd.debit(account, true, false)
-	//utils.Logger.Debug("CC: " + utils.ToJSON(cc))
-	//log.Print("CC: ", utils.ToIJSON(cc))
-	//utils.Logger.Debug(fmt.Sprintf("ERR: %v", err))
 	if err != nil {
 		return 0, err
 	}
 
-	//log.Printf("CC: %+v", cc)
 	// not enough credit for connect fee
 	if cc.negativeConnectFee == true {
 		return 0, nil
@@ -607,16 +594,10 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	var totalCost float64
 	var totalDuration time.Duration
 	cc.Timespans.Decompress()
-	//log.Printf("ACC: %+v", account)
 	for _, ts := range cc.Timespans {
-		//if ts.RateInterval != nil {
-		//log.Printf("TS: %+v", ts)
-		//utils.Logger.Debug("TS: " + utils.ToJSON(ts))
-		//}
 		if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
 			rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
-				//utils.Logger.Debug(fmt.Sprintf("0_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 				return utils.MinDuration(initialDuration, totalDuration), nil
 			}
 		}
@@ -624,14 +605,12 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			ts.createIncrementsSlice()
 		}
 		for _, incr := range ts.Increments {
-			//utils.Logger.Debug("INCR: " + utils.ToJSON(incr))
 			totalCost += incr.Cost
 			if incr.BalanceInfo.Monetary != nil && incr.BalanceInfo.Monetary.UUID == defaultBalance.Uuid {
 				initialDefaultBalanceValue -= incr.Cost
 				if initialDefaultBalanceValue < 0 {
 					// this increment was payed with debt
 					// TODO: improve this check
-					//utils.Logger.Debug(fmt.Sprintf("1_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 					return utils.MinDuration(initialDuration, totalDuration), nil
 
 				}
@@ -640,13 +619,10 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			//log.Print("INC: ", utils.ToJSON(incr))
 			if totalDuration >= initialDuration {
 				// we have enough, return
-				//utils.Logger.Debug(fmt.Sprintf("2_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 				return initialDuration, nil
 			}
 		}
 	}
-	//utils.Logger.Debug(fmt.Sprintf("3_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
-
 	return utils.MinDuration(initialDuration, totalDuration), nil
 }
 

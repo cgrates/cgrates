@@ -476,9 +476,12 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			continue // We only consider prepaid sessions
 		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)
-		if err != nil {
-			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
-			return errors.New("Error parsing answer event start time")
+		if err != nil || startTime.IsZero() { // AnswerTime not parsable, try SetupTime
+			startTime, err = ev.GetSetupTime(dc.SetupTimeField, rs.Timezone)
+			if err != nil {
+				rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+				return errors.New("Error parsing answer event start time")
+			}
 		}
 		endTime, err := ev.GetEndTime("", rs.Timezone)
 		if err != nil {
