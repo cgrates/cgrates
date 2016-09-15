@@ -80,16 +80,12 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
 	requestedDuration := dur
-	//utils.Logger.Debug(fmt.Sprintf("InitDur: %f, lastUsed: %f", requestedDuration.Seconds(), lastUsed.Seconds()))
-	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f, extraDuration: %f", self.totalUsage.Seconds(), self.extraDuration.Seconds()))
 	if lastUsed != nil {
 		self.extraDuration = self.lastDebit - *lastUsed
-		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %f", self.extraDuration.Seconds()))
 		if *lastUsed != self.lastUsage {
 			// total usage correction
 			self.totalUsage -= self.lastUsage
 			self.totalUsage += *lastUsed
-			//utils.Logger.Debug(fmt.Sprintf("TotalUsage Correction: %f", self.totalUsage.Seconds()))
 		}
 	}
 	// apply correction from previous run
@@ -102,7 +98,6 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 		self.extraDuration -= dur
 		return ccDuration, nil
 	}
-	//utils.Logger.Debug(fmt.Sprintf("dur: %f", dur.Seconds()))
 	initialExtraDuration := self.extraDuration
 	self.extraDuration = 0
 	if self.cd.LoopIndex > 0 {
@@ -152,6 +147,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	//initialRefundDuration := refundDuration
 	firstCC := self.callCosts[0] // use merged cc (from close function)
 	firstCC.Timespans.Decompress()
+	defer firstCC.Timespans.Compress()
 	var refundIncrements engine.Increments
 	for i := len(firstCC.Timespans) - 1; i >= 0; i-- {
 		ts := firstCC.Timespans[i]
@@ -204,7 +200,6 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	//firstCC.Cost -= refundIncrements.GetTotalCost() // use updateCost instead
 	firstCC.UpdateCost()
 	firstCC.UpdateRatedUsage()
-	firstCC.Timespans.Compress()
 	return nil
 }
 
@@ -215,7 +210,6 @@ func (self *SMGSession) close(endTime time.Time) error {
 		for _, cc := range self.callCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		//utils.Logger.Debug("MergedCC: " + utils.ToJSON(firstCC))
 		end := firstCC.GetEndTime()
 		refundDuration := end.Sub(endTime)
 		self.refund(refundDuration)
@@ -250,7 +244,6 @@ func (self *SMGSession) saveOperations(originID string) error {
 	}
 	firstCC := self.callCosts[0] // was merged in close method
 	firstCC.Round()
-	//utils.Logger.Debug("Saved CC: " + utils.ToJSON(firstCC))
 	roundIncrements := firstCC.GetRoundIncrements()
 	if len(roundIncrements) != 0 {
 		cd := firstCC.CreateCallDescriptor()

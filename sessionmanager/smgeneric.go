@@ -300,6 +300,7 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			if err != nil || aTime.IsZero() {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %v",
 					sessionId, s.runId, aTime, err))
+				continue // Unanswered session
 			}
 			if err := s.close(aTime.Add(usage)); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))

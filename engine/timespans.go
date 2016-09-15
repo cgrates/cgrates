@@ -18,8 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	//"fmt"
-
 	"reflect"
 	"time"
 
@@ -296,6 +294,19 @@ func (incs Increments) Equal(other Increments) bool {
 	}
 	for index, i := range incs {
 		if !i.Equal(other[index]) || i.GetCompressFactor() != other[index].GetCompressFactor() {
+			return false
+		}
+	}
+	return true
+}
+
+// Estimate whether the increments are the same, ignoring the CompressFactor
+func (incs Increments) SharingSignature(other Increments) bool {
+	if len(other) < len(incs) { // Protect index in case of not being the same size
+		return false
+	}
+	for index, i := range incs {
+		if !i.Equal(other[index]) {
 			return false
 		}
 	}
@@ -740,9 +751,40 @@ func (ts *TimeSpan) Equal(other *TimeSpan) bool {
 		ts.RatingPlanId == other.RatingPlanId
 }
 
+// Estimate if they share charging signature
+func (ts *TimeSpan) SharingSignature(other *TimeSpan) bool {
+	return ts.Increments.SharingSignature(other.Increments) &&
+		ts.RateInterval.Equal(other.RateInterval) &&
+		ts.MatchedSubject == other.MatchedSubject &&
+		ts.MatchedPrefix == other.MatchedPrefix &&
+		ts.MatchedDestId == other.MatchedDestId &&
+		ts.RatingPlanId == other.RatingPlanId
+}
+
 func (ts *TimeSpan) GetCompressFactor() int {
 	if ts.CompressFactor == 0 {
 		ts.CompressFactor = 1
 	}
 	return ts.CompressFactor
+}
+
+// Merges timespans if they share the same charging signature, useful to run in SM before compressing
+func (ts *TimeSpan) Merge(other *TimeSpan) bool {
+	if !ts.SharingSignature(other) {
+		return false
+	} else if !ts.TimeEnd.Equal(other.TimeStart) { // other needs to continue ts for merge to be possible
+		return false
+	}
+	var otherCloned TimeSpan // Clone so we don't affect with decompress the original structure
+	if err := utils.Clone(*other, &otherCloned); err != nil {
+		return false
+	}
+	otherCloned.Increments.Decompress()
+	ts.Increments.Decompress()
+	ts.TimeEnd = otherCloned.TimeEnd
+	ts.Cost += otherCloned.Cost
+	ts.DurationIndex = otherCloned.DurationIndex
+	ts.Increments = append(ts.Increments, otherCloned.Increments...)
+	ts.Increments.Compress()
+	return true
 }
