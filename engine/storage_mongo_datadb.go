@@ -679,7 +679,7 @@ func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile, transactionID string
 func (ms *MongoStorage) RemoveRatingProfile(key, transactionID string) error {
 	session, col := ms.conn(colRpf)
 	defer session.Close()
-	iter := col.Find(bson.M{"id": key, Options: ""}}).Select(bson.M{"id": 1}).Iter()
+	iter := col.Find(bson.M{"id": key}).Select(bson.M{"id": 1}).Iter()
 	var result struct{ Id string }
 	for iter.Next(&result) {
 		if err := col.Remove(bson.M{"id": result.Id}); err != nil {
