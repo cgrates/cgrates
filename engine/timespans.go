@@ -300,19 +300,6 @@ func (incs Increments) Equal(other Increments) bool {
 	return true
 }
 
-// Estimate whether the increments are the same, ignoring the CompressFactor
-func (incs Increments) SharingSignature(other Increments) bool {
-	if len(other) < len(incs) { // Protect index in case of not being the same size
-		return false
-	}
-	for index, i := range incs {
-		if !i.Equal(other[index]) {
-			return false
-		}
-	}
-	return true
-}
-
 func (incs *Increments) Compress() { // must be pointer receiver
 	var cIncrs Increments
 	for _, incr := range *incs {
@@ -353,6 +340,29 @@ func (incs *Increments) Decompress() { // must be pointer receiver
 		}
 	}
 	*incs = cIncrs
+}
+
+// Estimate whether the increments are the same ignoring the CompressFactor
+func (incs Increments) SharingSignature(other Increments) bool {
+	var otherCloned Increments // Clone so we don't affect with decompress the original structure
+	if err := utils.Clone(other, &otherCloned); err != nil {
+		return false
+	}
+	var thisCloned Increments
+	if err := utils.Clone(incs, &thisCloned); err != nil {
+		return false
+	}
+	otherCloned.Compress()
+	thisCloned.Compress()
+	if len(other) < len(incs) { // Protect index in case of not being the same size
+		return false
+	}
+	for index, i := range incs {
+		if !i.Equal(other[index]) {
+			return false
+		}
+	}
+	return true
 }
 
 func (incs Increments) GetTotalCost() float64 {
@@ -721,19 +731,13 @@ func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
 	ownLeftMargin := ts.RateInterval.Timing.getLeftMargin(ts.TimeStart)
 	ownDistance := ts.TimeStart.Sub(ownLeftMargin)
 
-	//log.Print("OWN LEFT: ", otherLeftMargin)
-	//log.Print("OWN DISTANCE: ", otherDistance)
-	//endOtherDistance := ts.TimeEnd.Sub(otherLeftMargin)
-
 	// if own interval is closer than its better
-	//log.Print(ownDistance)
 	if ownDistance > otherDistance {
 		return false
 	}
 	ownPrice, _, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 	otherPrice, _, _ := interval.GetRateParameters(ts.GetGroupStart())
 	// if own price is smaller than it's better
-	//log.Print(ownPrice, otherPrice)
 	if ownPrice < otherPrice {
 		return true
 	}
@@ -753,12 +757,16 @@ func (ts *TimeSpan) Equal(other *TimeSpan) bool {
 
 // Estimate if they share charging signature
 func (ts *TimeSpan) SharingSignature(other *TimeSpan) bool {
-	return ts.Increments.SharingSignature(other.Increments) &&
-		ts.RateInterval.Equal(other.RateInterval) &&
-		ts.MatchedSubject == other.MatchedSubject &&
-		ts.MatchedPrefix == other.MatchedPrefix &&
-		ts.MatchedDestId == other.MatchedDestId &&
-		ts.RatingPlanId == other.RatingPlanId
+	if ts.GetCompressFactor() != other.GetCompressFactor() ||
+		!ts.Increments.SharingSignature(other.Increments) ||
+		!ts.RateInterval.Equal(other.RateInterval) ||
+		ts.MatchedSubject != other.MatchedSubject ||
+		ts.MatchedPrefix != other.MatchedPrefix ||
+		ts.MatchedDestId != other.MatchedDestId ||
+		ts.RatingPlanId != other.RatingPlanId {
+		return false
+	}
+	return true
 }
 
 func (ts *TimeSpan) GetCompressFactor() int {
@@ -775,16 +783,9 @@ func (ts *TimeSpan) Merge(other *TimeSpan) bool {
 	} else if !ts.TimeEnd.Equal(other.TimeStart) { // other needs to continue ts for merge to be possible
 		return false
 	}
-	var otherCloned TimeSpan // Clone so we don't affect with decompress the original structure
-	if err := utils.Clone(*other, &otherCloned); err != nil {
-		return false
-	}
-	otherCloned.Increments.Decompress()
-	ts.Increments.Decompress()
-	ts.TimeEnd = otherCloned.TimeEnd
-	ts.Cost += otherCloned.Cost
-	ts.DurationIndex = otherCloned.DurationIndex
-	ts.Increments = append(ts.Increments, otherCloned.Increments...)
-	ts.Increments.Compress()
+	ts.TimeEnd = other.TimeEnd
+	ts.Cost += other.Cost
+	ts.DurationIndex = other.DurationIndex
+	ts.Increments = append(ts.Increments, other.Increments...)
 	return true
 }

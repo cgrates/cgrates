@@ -1865,7 +1865,7 @@ func TestTSMerge(t *testing.T) {
 				},
 			},
 		},
-		Cost:          2,
+		Cost:          3,
 		DurationIndex: 1 * time.Minute,
 		Increments: Increments{
 			&Increment{
@@ -1875,14 +1875,7 @@ func TestTSMerge(t *testing.T) {
 					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
 					Monetary:  &MonetaryInfo{UUID: "2"},
 					AccountID: "3"},
-			},
-			&Increment{
-				Duration: time.Minute,
-				Cost:     1,
-				BalanceInfo: &DebitInfo{
-					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
-					Monetary:  &MonetaryInfo{UUID: "2"},
-					AccountID: "3"},
+				CompressFactor: 3,
 			},
 		},
 	}
@@ -1937,7 +1930,7 @@ func TestTSMerge(t *testing.T) {
 				},
 			},
 		},
-		Cost:          4,
+		Cost:          5,
 		DurationIndex: 2 * time.Minute,
 		Increments: Increments{
 			&Increment{
@@ -1947,9 +1940,28 @@ func TestTSMerge(t *testing.T) {
 					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
 					Monetary:  &MonetaryInfo{UUID: "2"},
 					AccountID: "3"},
-				CompressFactor: 4,
+				CompressFactor: 3,
+			},
+			&Increment{
+				Duration: time.Minute,
+				Cost:     1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+					Monetary:  &MonetaryInfo{UUID: "2"},
+					AccountID: "3"},
+				CompressFactor: 1,
+			},
+			&Increment{
+				Duration: time.Minute,
+				Cost:     1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+					Monetary:  &MonetaryInfo{UUID: "2"},
+					AccountID: "3"},
+				CompressFactor: 1,
 			},
 		},
+		CompressFactor: 1,
 	}
 	if merged := tss1.Merge(tss2); !merged {
 		t.Error("Not merged")
