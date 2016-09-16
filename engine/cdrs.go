@@ -530,7 +530,7 @@ func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) er
 	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
 			*reply = item.Value.(string)
-			utils.Logger.Err(fmt.Sprintf("<CDRS> Serving cached error for key: %s, err: %s", cacheKey, *reply))
+			utils.Logger.Info(fmt.Sprintf("<CDRS> Serving cached value for key: %s, reply: %s, error: %v", cacheKey, *reply, item.Err))
 		}
 		return item.Err
 	}
