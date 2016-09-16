@@ -160,26 +160,24 @@ func TestSMAEventTimestamp(t *testing.T) {
 	}
 }
 
-/*
 func TestSMASetupTime(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(channelStateChange), &ev); err != nil {
 		t.Error(err)
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
-	if smaEv.Timestamp() != "2016-09-12T13:53:48.918+0200" {
-		t.Error("Received:", smaEv.Timestamp())
+	if smaEv.SetupTime() != "2016-09-12T13:53:48.918+0200" {
+		t.Error("Received:", smaEv.SetupTime())
 	}
 	ev = make(map[string]interface{}) // Clear previous data
 	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
 		t.Error(err)
 	}
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
-	if smaEv.Timestamp() != "" {
-		t.Error("Received:", smaEv.Timestamp())
+	if smaEv.SetupTime() != "" {
+		t.Error("Received:", smaEv.SetupTime())
 	}
 }
-*/
 
 func TestSMAEventRequestType(t *testing.T) {
 	var ev map[string]interface{}

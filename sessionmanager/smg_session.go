@@ -139,6 +139,9 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
+	if refundDuration == 0 { // Nothing to refund
+		return nil
+	}
 	firstCC := self.callCosts[0] // use merged cc (from close function)
 	firstCC.Timespans.Decompress()
 	defer firstCC.Timespans.Compress()
