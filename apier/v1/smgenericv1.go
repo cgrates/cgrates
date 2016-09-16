@@ -136,7 +136,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
-		self.MaxUsage(argsConverted, replyConverted)
+		return self.MaxUsage(argsConverted, replyConverted)
 	case "SMGenericV1.LCRSuppliers":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {
