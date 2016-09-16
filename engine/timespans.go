@@ -258,6 +258,18 @@ func (tss *TimeSpans) Decompress() { // must be pointer receiver
 	*tss = cTss
 }
 
+func (tss TimeSpans) Merge() { // Merge whenever possible
+	for i := 0; i < len(tss); i++ {
+		if i == 0 {
+			continue
+		}
+		if tss[i-1].Merge(tss[i]) {
+			tss = append(tss[:i], tss[i+1:]...)
+			i-- // Reschedule checking of last index since slice will decrease
+		}
+	}
+}
+
 func (incr *Increment) Clone() *Increment {
 	nInc := &Increment{
 		Duration: incr.Duration,
