@@ -258,16 +258,18 @@ func (tss *TimeSpans) Decompress() { // must be pointer receiver
 	*tss = cTss
 }
 
-func (tss TimeSpans) Merge() { // Merge whenever possible
-	for i := 0; i < len(tss); i++ {
+func (tss *TimeSpans) Merge() { // Merge whenever possible
+	tssVal := *tss
+	for i := 0; i < len(tssVal); i++ {
 		if i == 0 {
 			continue
 		}
-		if tss[i-1].Merge(tss[i]) {
-			tss = append(tss[:i], tss[i+1:]...)
+		if tssVal[i-1].Merge(tssVal[i]) {
+			tssVal = append(tssVal[:i], tssVal[i+1:]...)
 			i-- // Reschedule checking of last index since slice will decrease
 		}
 	}
+	*tss = tssVal
 }
 
 func (incr *Increment) Clone() *Increment {
@@ -366,11 +368,11 @@ func (incs Increments) SharingSignature(other Increments) bool {
 	}
 	otherCloned.Compress()
 	thisCloned.Compress()
-	if len(other) < len(incs) { // Protect index in case of not being the same size
+	if len(otherCloned) < len(thisCloned) { // Protect index in case of not being the same size
 		return false
 	}
-	for index, i := range incs {
-		if !i.Equal(other[index]) {
+	for index, i := range thisCloned {
+		if !i.Equal(otherCloned[index]) {
 			return false
 		}
 	}
@@ -494,12 +496,10 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		//log.Print("Not in interval")
 		return
 	}
-	//Logger.Debug(fmt.Sprintf("TS: %+v", ts))
 	// split by GroupStart
 	if i.Rating != nil {
 		i.Rating.Rates.Sort()
 		for _, rate := range i.Rating.Rates {
-			//Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
 			if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
 				//log.Print("Splitting")
 				ts.SetRateInterval(i)
@@ -513,7 +513,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 				nts.SetRateInterval(i)
 				nts.DurationIndex = ts.DurationIndex
 				ts.SetNewDurationIndex(nts)
-				// Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
 				return
 			}
 		}
@@ -547,13 +546,10 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		ts.TimeEnd = splitTime
 		nts.DurationIndex = ts.DurationIndex
 		ts.SetNewDurationIndex(nts)
-		// Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
 		return
 	}
 	// if only the end time is in the interval split the interval to the left
 	if i.Contains(ts.TimeEnd, true) {
-		//log.Print("End in interval")
-		//tmpTime := time.Date(ts.TimeStart.)
 		splitTime := i.Timing.getLeftMargin(ts.TimeEnd)
 		splitTime = utils.CopyHour(splitTime, ts.TimeStart)
 		if splitTime.Equal(ts.TimeEnd) {
@@ -568,7 +564,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		nts.SetRateInterval(i)
 		nts.DurationIndex = ts.DurationIndex
 		ts.SetNewDurationIndex(nts)
-		// Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
 		return
 	}
 	return
@@ -643,7 +638,6 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = activationTime
 	ts.SetNewDurationIndex(newTs)
-	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	return
 }
 
@@ -663,7 +657,6 @@ func (ts *TimeSpan) SplitByDay() (newTs *TimeSpan) {
 	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = splitDate
 	ts.SetNewDurationIndex(newTs)
-	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	return
 }
 
