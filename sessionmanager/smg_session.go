@@ -132,19 +132,14 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.callCosts = append(self.callCosts, cc)
 	self.lastDebit = initialExtraDuration + ccDuration
 	self.totalUsage += self.lastUsage
-	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f", self.totalUsage.Seconds()))
-
 	if ccDuration >= dur { // we got what we asked to be debited
-		//utils.Logger.Debug(fmt.Sprintf("returning normal: %f", requestedDuration.Seconds()))
 		return requestedDuration, nil
 	}
-	//utils.Logger.Debug(fmt.Sprintf("returning initialExtra: %f + ccDuration: %f", initialExtraDuration.Seconds(), ccDuration.Seconds()))
 	return initialExtraDuration + ccDuration, nil
 }
 
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
-	//initialRefundDuration := refundDuration
 	firstCC := self.callCosts[0] // use merged cc (from close function)
 	firstCC.Timespans.Decompress()
 	defer firstCC.Timespans.Compress()
@@ -183,7 +178,6 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 		}
 	}
 	// show only what was actualy refunded (stopped in timespan)
-	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
 		cd := firstCC.CreateCallDescriptor()
 		cd.Increments = refundIncrements
@@ -255,6 +249,9 @@ func (self *SMGSession) saveOperations(originID string) error {
 			return err
 		}
 	}
+	firstCC.Timespans.Decompress()
+	firstCC.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
+	firstCC.Timespans.Compress()
 	smCost := &engine.SMCost{
 		CGRID:       self.eventStart.GetCgrId(self.timezone),
 		CostSource:  utils.SESSION_MANAGER_SOURCE,
