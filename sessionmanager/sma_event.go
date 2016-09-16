@@ -23,13 +23,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-const (
-	ARIStasisStart = "StasisStart"
-	eventType      = "eventType"
-	channelID      = "channelID"
-	timestamp      = "timestamp"
-)
-
 func NewSMAsteriskEvent(ariEv map[string]interface{}, asteriskIP string) *SMAsteriskEvent {
 	smsmaEv := &SMAsteriskEvent{ariEv: ariEv, asteriskIP: asteriskIP, cachedFields: make(map[string]string)}
 	smsmaEv.parseStasisArgs() // Populate appArgs
@@ -83,6 +76,17 @@ func (smaEv *SMAsteriskEvent) Timestamp() string {
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
 		cachedVal, _ = smaEv.ariEv["timestamp"].(string)
+		smaEv.cachedFields[cachedKey] = cachedVal
+	}
+	return cachedVal
+}
+
+func (smaEv *SMAsteriskEvent) SetupTime() string {
+	cachedKey := utils.SETUP_TIME
+	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
+	if !hasIt {
+		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+		cachedVal, _ = channelData["creationtime"].(string)
 		smaEv.cachedFields[cachedKey] = cachedVal
 	}
 	return cachedVal
@@ -142,7 +146,7 @@ func (smaEv *SMAsteriskEvent) DisconnectCause() string {
 
 func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) {
 	extraParams = make(map[string]string)
-	primaryFields := []string{eventType, channelID, timestamp, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
+	primaryFields := []string{eventType, channelID, timestamp, utils.SETUP_TIME, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
 		utils.CGR_TENANT, utils.CGR_CATEGORY, utils.CGR_SUBJECT, utils.CGR_PDD, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE}
 	for cachedKey, cachedVal := range smaEv.cachedFields {
 		if !utils.IsSliceMember(primaryFields, cachedKey) {
@@ -152,8 +156,8 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) AsSMGenericSessionStart() (smgEv SMGenericEvent, err error) {
-	smgEv = SMGenericEvent{utils.EVENT_NAME: utils.CGR_SESSION_START}
+func (smaEv *SMAsteriskEvent) AsSMGenericCGRAuth() (smgEv SMGenericEvent, err error) {
+	smgEv = SMGenericEvent{utils.EVENT_NAME: utils.CGR_AUTHORIZATION}
 	smgEv[utils.ACCID] = smaEv.ChannelID()
 	if smaEv.RequestType() != "" {
 		smgEv[utils.REQTYPE] = smaEv.RequestType()

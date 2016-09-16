@@ -32,6 +32,10 @@ import (
 const (
 	CGRAuthAPP        = "cgrates_auth"
 	CGRMaxSessionTime = "CGRMaxSessionTime"
+	ARIStasisStart    = "StasisStart"
+	eventType         = "eventType"
+	channelID         = "channelID"
+	timestamp         = "timestamp"
 )
 
 func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smg rpcclient.RpcClientConnection) (*SMAsterisk, error) {
@@ -99,7 +103,7 @@ func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 	}
 
 	var maxUsage float64
-	smgEv, err := ev.AsSMGenericSessionStart()
+	smgEv, err := ev.AsSMGenericCGRAuth()
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when generating SMG for channelID: %s", err.Error(), ev.ChannelID()))
 		// Since we got error, disconnect channel
@@ -109,8 +113,8 @@ func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 		return
 	}
 
-	if err = sma.smg.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to initiate session for channelID: %s", err.Error(), ev.ChannelID()))
+	if err = sma.smg.Call("SMGenericV1.MaxUsage", smgEv, &maxUsage); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to authorize session for channelID: %s", err.Error(), ev.ChannelID()))
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
 		}

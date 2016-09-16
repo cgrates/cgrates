@@ -115,7 +115,6 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.cd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	// update call duration with real debited duration
 	ccDuration := cc.GetDuration()
-	//utils.Logger.Debug(fmt.Sprintf("CCDur: %f", ccDuration.Seconds()))
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
@@ -140,7 +139,6 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
-	//fmt.Printf("Refunding duration: %+v\n", refundDuration)
 	firstCC := self.callCosts[0] // use merged cc (from close function)
 	firstCC.Timespans.Decompress()
 	var refundIncrements engine.Increments
@@ -184,7 +182,6 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 		cd.CgrID = self.cd.CgrID
 		cd.RunID = self.cd.RunID
 		cd.Increments.Compress()
-		//utils.Logger.Info(fmt.Sprintf("Refunding %s duration %v with cd: %s", cd.CgrID, initialRefundDuration, utils.ToJSON(cd)))
 		var response float64
 		err := self.rater.Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {

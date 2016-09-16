@@ -160,6 +160,25 @@ func TestSMAEventTimestamp(t *testing.T) {
 	}
 }
 
+func TestSMASetupTime(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(channelStateChange), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Timestamp() != "2016-09-12T13:53:48.918+0200" {
+		t.Error("Received:", smaEv.Timestamp())
+	}
+	ev = make(map[string]interface{}) // Clear previous data
+	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.Timestamp() != "" {
+		t.Error("Received:", smaEv.Timestamp())
+	}
+}
+
 func TestSMAEventRequestType(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
@@ -272,13 +291,13 @@ func TestSMAEventDisconnectCause(t *testing.T) {
 	}
 }
 
-func TestSMAEventAsSMGenericSessionStart(t *testing.T) {
+func TestSMAEventAsSMGenericCGRAuth(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
 	eSMGEv := SMGenericEvent{
-		utils.EVENT_NAME:  utils.CGR_SESSION_START,
+		utils.EVENT_NAME:  utils.CGR_AUTHORIZATION,
 		utils.ACCID:       "1473681228.6",
 		utils.REQTYPE:     "*prepaid",
 		utils.CDRHOST:     "127.0.0.1",
@@ -287,7 +306,7 @@ func TestSMAEventAsSMGenericSessionStart(t *testing.T) {
 		utils.SETUP_TIME:  "2016-09-12T13:53:48.919+0200",
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
-	if smgEv, err := smaEv.AsSMGenericSessionStart(); err != nil {
+	if smgEv, err := smaEv.AsSMGenericCGRAuth(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSMGEv, smgEv) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, smgEv)

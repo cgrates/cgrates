@@ -297,14 +297,12 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 				close(s.stopDebit) // Stop automatic debits
 			}
 			aTime, err := s.eventStart.GetAnswerTime(utils.META_DEFAULT, self.cgrCfg.DefaultTimezone)
-			//fmt.Printf("sessionEnd, session: %+v, totalUsage: %v, answerTime: %v\n", s, s.totalUsage, aTime)
 			if err != nil || aTime.IsZero() {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %v",
 					sessionId, s.runId, aTime, err))
 				continue // Unanswered session
 			}
 			if err := s.close(aTime.Add(usage)); err != nil {
-				//fmt.Printf("sessionEnd, session: %+v closing session, err: %v\n", s, err)
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
 			go func() { // Call it in goroutine since it could take a while to compress timespans and save them
