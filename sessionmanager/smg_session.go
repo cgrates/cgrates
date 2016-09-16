@@ -141,6 +141,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 func (self *SMGSession) refund(refundDuration time.Duration) error {
 	firstCC := self.callCosts[0] // use merged cc (from close function)
 	firstCC.Timespans.Decompress()
+	defer firstCC.Timespans.Compress()
 	var refundIncrements engine.Increments
 	for i := len(firstCC.Timespans) - 1; i >= 0; i-- {
 		ts := firstCC.Timespans[i]
@@ -246,9 +247,13 @@ func (self *SMGSession) saveOperations(originID string) error {
 			return err
 		}
 	}
-	//firstCC.Timespans.Decompress()
-	firstCC.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
-	firstCC.Timespans.Compress()
+	//
+	if len(firstCC.Timespans) > 50 { // Merge since we will get a callCost too big
+		firstCC.Timespans.Decompress()
+		firstCC.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
+		firstCC.Timespans.Compress()
+	}
+
 	smCost := &engine.SMCost{
 		CGRID:       self.eventStart.GetCgrId(self.timezone),
 		CostSource:  utils.SESSION_MANAGER_SOURCE,
