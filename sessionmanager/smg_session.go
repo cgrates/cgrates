@@ -249,7 +249,7 @@ func (self *SMGSession) saveOperations(originID string) error {
 			return err
 		}
 	}
-	firstCC.Timespans.Decompress()
+	//firstCC.Timespans.Decompress()
 	firstCC.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
 	firstCC.Timespans.Compress()
 	smCost := &engine.SMCost{
