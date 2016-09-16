@@ -140,9 +140,9 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
+	//fmt.Printf("Refunding duration: %+v\n", refundDuration)
 	firstCC := self.callCosts[0] // use merged cc (from close function)
 	firstCC.Timespans.Decompress()
-	defer firstCC.Timespans.Compress()
 	var refundIncrements engine.Increments
 	for i := len(firstCC.Timespans) - 1; i >= 0; i-- {
 		ts := firstCC.Timespans[i]
