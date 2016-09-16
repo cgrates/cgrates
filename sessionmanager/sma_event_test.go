@@ -160,6 +160,7 @@ func TestSMAEventTimestamp(t *testing.T) {
 	}
 }
 
+/*
 func TestSMASetupTime(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(channelStateChange), &ev); err != nil {
@@ -178,6 +179,7 @@ func TestSMASetupTime(t *testing.T) {
 		t.Error("Received:", smaEv.Timestamp())
 	}
 }
+*/
 
 func TestSMAEventRequestType(t *testing.T) {
 	var ev map[string]interface{}
