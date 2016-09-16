@@ -365,7 +365,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		var smCosts []*SMCost
-		for i := 0; i < 4; i++ {
+		for i := 0; i < self.cgrCfg.CDRSSMCostRetries; i++ {
 			smCosts, err = self.cdrDb.GetSMCosts(cdr.CGRID, cdr.RunID, cdr.OriginHost, cdr.ExtraFields[utils.OriginIDPrefix])
 			if err == nil && len(smCosts) != 0 {
 				break
