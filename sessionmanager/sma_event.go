@@ -156,6 +156,16 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
+func (smaEv *SMAsteriskEvent) UpdateFromEvent(updateEv *SMAsteriskEvent) {
+	smaEv.ariEv["type"] = updateEv.ariEv["type"]
+	smaEv.ariEv["timestamp"] = updateEv.ariEv["timestamp"]
+	smaEv.ariEv["channel"] = updateEv.ariEv["channel"]
+	if updateEv.EventType() == ARIChannelDestroyed {
+		smaEv.ariEv["cause"] = updateEv.ariEv["cause"]
+		smaEv.ariEv["cause_txt"] = updateEv.ariEv["cause_txt"]
+	}
+}
+
 func (smaEv *SMAsteriskEvent) AsSMGenericCGRAuth() (smgEv SMGenericEvent, err error) {
 	smgEv = SMGenericEvent{utils.EVENT_NAME: utils.CGR_AUTHORIZATION}
 	smgEv[utils.ACCID] = smaEv.ChannelID()

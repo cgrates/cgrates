@@ -22,6 +22,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
@@ -30,25 +31,29 @@ import (
 )
 
 const (
-	CGRAuthAPP        = "cgrates_auth"
-	CGRMaxSessionTime = "CGRMaxSessionTime"
-	ARIStasisStart    = "StasisStart"
-	eventType         = "eventType"
-	channelID         = "channelID"
-	timestamp         = "timestamp"
+	CGRAuthAPP            = "cgrates_auth"
+	CGRMaxSessionTime     = "CGRMaxSessionTime"
+	ARIStasisStart        = "StasisStart"
+	ARIChannelStateChange = "ChannelStateChange"
+	ARIChannelDestroyed   = "ChannelDestroyed"
+	eventType             = "eventType"
+	channelID             = "channelID"
+	timestamp             = "timestamp"
 )
 
 func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smg rpcclient.RpcClientConnection) (*SMAsterisk, error) {
-	return &SMAsterisk{cgrCfg: cgrCfg, smg: smg}, nil
+	return &SMAsterisk{cgrCfg: cgrCfg, smg: smg, eventsCache: make(map[string]*SMAsteriskEvent)}, nil
 }
 
 type SMAsterisk struct {
-	cgrCfg     *config.CGRConfig // Separate from smCfg since there can be multiple
-	astConnIdx int
-	smg        rpcclient.RpcClientConnection
-	astConn    *aringo.ARInGO
-	astEvChan  chan map[string]interface{}
-	astErrChan chan error
+	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
+	astConnIdx  int
+	smg         rpcclient.RpcClientConnection
+	astConn     *aringo.ARInGO
+	astEvChan   chan map[string]interface{}
+	astErrChan  chan error
+	eventsCache map[string]*SMAsteriskEvent // used to gather information about events during various phases
+	evCacheMux  sync.RWMutex                // Protect eventsCache
 }
 
 func (sma *SMAsterisk) connectAsterisk() (err error) {

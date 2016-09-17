@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	stasisStart                = `{"application":"cgrates_auth","type":"StasisStart","timestamp":"2016-09-12T13:53:48.919+0200","args":["cgr_reqtype=*prepaid","cgr_destination=1003"],"channel":{"id":"1473681228.6","state":"Ring","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":""},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":2},"creationtime":"2016-09-12T13:53:48.918+0200"}}`
+	stasisStart                = `{"application":"cgrates_auth","type":"StasisStart","timestamp":"2016-09-12T13:53:48.919+0200","args":["cgr_reqtype=*prepaid","cgr_destination=1003", "extra1=val1", "extra2=val2"],"channel":{"id":"1473681228.6","state":"Ring","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":""},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":2},"creationtime":"2016-09-12T13:53:48.918+0200"}}`
 	channelStateChange         = `{"application":"cgrates_auth","type":"ChannelStateChange","timestamp":"2016-09-12T13:53:52.110+0200","channel":{"id":"1473681228.6","state":"Up","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":"1002"},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":3},"creationtime":"2016-09-12T13:53:48.918+0200"}}`
 	channelAnsweredDestroyed   = `{"type":"ChannelDestroyed","timestamp":"2016-09-12T13:54:27.335+0200","application":"cgrates_auth","cause_txt":"Normal Clearing","channel":{"id":"1473681228.6","state":"Up","name":"PJSIP/1001-00000004","caller":{"name":"1001","number":"1001"},"language":"en","connected":{"name":"","number":"1002"},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":3},"creationtime":"2016-09-12T13:53:48.918+0200"},"cause":16}`
 	channelUnansweredDestroyed = `{"type":"ChannelDestroyed","timestamp":"2016-09-12T18:00:18.121+0200","application":"cgrates_auth","cause_txt":"Normal Clearing","channel":{"id":"1473696018.2","state":"Ring","name":"PJSIP/1002-00000002","caller":{"name":"1002","number":"1002"},"language":"en","connected":{"name":"","number":""},"accountcode":"","dialplan":{"context":"internal","exten":"1002","priority":2},"creationtime":"2016-09-12T18:00:18.109+0200"},"cause":16}`
@@ -39,7 +39,7 @@ func TestSMAParseStasisArgs(t *testing.T) {
 		t.Error(err)
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
-	expAppArgs := map[string]string{"cgr_reqtype": "*prepaid", "cgr_destination": "1003"}
+	expAppArgs := map[string]string{"cgr_reqtype": "*prepaid", "cgr_destination": "1003", "extra1": "val1", "extra2": "val2"}
 	if !reflect.DeepEqual(smaEv.cachedFields, expAppArgs) {
 		t.Errorf("Expecting: %+v, received: %+v", smaEv.cachedFields, expAppArgs)
 	}
@@ -291,6 +291,70 @@ func TestSMAEventDisconnectCause(t *testing.T) {
 	}
 }
 
+func TestSMAEventExtraParameters(t *testing.T) {
+	expExtraParams := map[string]string{
+		"extra1": "val1",
+		"extra2": "val2",
+	}
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.PDD() != "" {
+		t.Error("Received:", smaEv.PDD())
+	}
+	if extraParams := smaEv.ExtraParameters(); !reflect.DeepEqual(expExtraParams, extraParams) {
+		t.Errorf("Expecting: %+v, received: %+v", expExtraParams, extraParams)
+	}
+}
+
+func TestSMAEventUpdateFromEvent(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	ev = make(map[string]interface{})
+	if err := json.Unmarshal([]byte(channelAnsweredDestroyed), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv2 := NewSMAsteriskEvent(ev, "127.0.0.1")
+	smaEv.UpdateFromEvent(smaEv2)
+	eSMAEv := &SMAsteriskEvent{
+		ariEv: map[string]interface{}{
+			"type":        "ChannelDestroyed",
+			"args":        []interface{}{"cgr_reqtype=*prepaid", "cgr_destination=1003", "extra1=val1", "extra2=val2"},
+			"timestamp":   "2016-09-12T13:54:27.335+0200",
+			"application": "cgrates_auth",
+			"cause_txt":   "Normal Clearing",
+			"channel": map[string]interface{}{
+				"id":    "1473681228.6",
+				"state": "Up",
+				"name":  "PJSIP/1001-00000004",
+				"caller": map[string]interface{}{
+					"name":   "1001",
+					"number": "1001"},
+				"language": "en",
+				"connected": map[string]interface{}{
+					"name":   "",
+					"number": "1002"},
+				"accountcode": "",
+				"dialplan": map[string]interface{}{
+					"context":  "internal",
+					"exten":    "1002",
+					"priority": 3.0},
+				"creationtime": "2016-09-12T13:53:48.918+0200"},
+			"cause": 16.0},
+		asteriskIP: "127.0.0.1",
+		cachedFields: map[string]string{"cgr_reqtype": "*prepaid",
+			"cgr_destination": "1003", "extra1": "val1", "extra2": "val2"},
+	}
+	if !reflect.DeepEqual(eSMAEv, smaEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMAEv, smaEv)
+	}
+}
+
 func TestSMAEventAsSMGenericCGRAuth(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
@@ -304,6 +368,8 @@ func TestSMAEventAsSMGenericCGRAuth(t *testing.T) {
 		utils.ACCOUNT:     "1001",
 		utils.DESTINATION: "1003",
 		utils.SETUP_TIME:  "2016-09-12T13:53:48.919+0200",
+		"extra1":          "val1",
+		"extra2":          "val2",
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
 	if smgEv, err := smaEv.AsSMGenericCGRAuth(); err != nil {
