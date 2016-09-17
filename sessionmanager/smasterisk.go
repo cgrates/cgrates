@@ -38,11 +38,13 @@ const (
 	ARIChannelDestroyed   = "ChannelDestroyed"
 	eventType             = "eventType"
 	channelID             = "channelID"
+	channelState          = "channelState"
+	channelUp             = "Up"
 	timestamp             = "timestamp"
 )
 
 func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smg rpcclient.RpcClientConnection) (*SMAsterisk, error) {
-	return &SMAsterisk{cgrCfg: cgrCfg, smg: smg, eventsCache: make(map[string]*SMAsteriskEvent)}, nil
+	return &SMAsterisk{cgrCfg: cgrCfg, smg: smg, eventsCache: make(map[string]*SMGenericEvent)}, nil
 }
 
 type SMAsterisk struct {
@@ -52,8 +54,8 @@ type SMAsterisk struct {
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
-	eventsCache map[string]*SMAsteriskEvent // used to gather information about events during various phases
-	evCacheMux  sync.RWMutex                // Protect eventsCache
+	eventsCache map[string]*SMGenericEvent // used to gather information about events during various phases
+	evCacheMux  sync.RWMutex               // Protect eventsCache
 }
 
 func (sma *SMAsterisk) connectAsterisk() (err error) {
@@ -82,6 +84,10 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 			switch smAsteriskEvent.EventType() {
 			case ARIStasisStart:
 				go sma.handleStasisStart(smAsteriskEvent)
+			case ARIChannelStateChange:
+				go sma.handleChannelStateChange(smAsteriskEvent)
+			case ARIChannelDestroyed:
+				go sma.handleChannelDestroyed(smAsteriskEvent)
 			}
 		}
 	}
@@ -106,26 +112,16 @@ func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 		}
 		return
 	}
-
+	// Query the SMG via RPC for maxUsage
 	var maxUsage float64
-	smgEv, err := ev.AsSMGenericCGRAuth()
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when generating SMG for channelID: %s", err.Error(), ev.ChannelID()))
-		// Since we got error, disconnect channel
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
-		}
-		return
-	}
-
-	if err = sma.smg.Call("SMGenericV1.MaxUsage", smgEv, &maxUsage); err != nil {
+	smgEv := ev.AsSMGenericEvent()
+	if err := sma.smg.Call("SMGenericV1.MaxUsage", smgEv, &maxUsage); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to authorize session for channelID: %s", err.Error(), ev.ChannelID()))
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
 		}
 		return
 	}
-
 	if maxUsage == -1 {
 		maxUsage = 0 // So we can set it later as unlimited
 	} else if maxUsage == 0 || maxUsage < sma.cgrCfg.SMAsteriskCfg().MinCallDuration.Seconds() {
@@ -149,6 +145,46 @@ func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 	// Exit channel from stasis
 	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
 		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID()), nil); err != nil {
+	}
+	// Done with processing event, cache it for later use
+	sma.evCacheMux.Lock()
+	sma.eventsCache[ev.ChannelID()] = &smgEv
+	sma.evCacheMux.Unlock()
+}
+
+// Ussually channelUP
+func (sma *SMAsterisk) handleChannelStateChange(ev *SMAsteriskEvent) {
+	if ev.ChannelState() != channelUp {
+		return
+	}
+	sma.evCacheMux.RLock()
+	smgEv, hasIt := sma.eventsCache[ev.ChannelID()]
+	sma.evCacheMux.RUnlock()
+	if !hasIt { // Not handled by us
+		return
+	}
+	var maxUsage float64
+	if err := sma.smg.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to initiate session for channelID: %s", err.Error(), ev.ChannelID()))
+		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
+		}
+		return
+	}
+}
+
+// Channel disconnect
+func (sma *SMAsterisk) handleChannelDestroyed(ev *SMAsteriskEvent) {
+	sma.evCacheMux.RLock()
+	smgEv, hasIt := sma.eventsCache[ev.ChannelID()]
+	sma.evCacheMux.RUnlock()
+	if !hasIt { // Not handled by us
+		return
+	}
+	var reply string
+	if err := sma.smg.Call("SMGenericV1.TerminateSession", smgEv, &reply); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to terminate session for channelID: %s", err.Error(), ev.ChannelID()))
+		return
 	}
 }
 

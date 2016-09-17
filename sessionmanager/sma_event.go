@@ -81,6 +81,16 @@ func (smaEv *SMAsteriskEvent) Timestamp() string {
 	return cachedVal
 }
 
+func (smaEv *SMAsteriskEvent) ChannelState() string {
+	cachedKey := channelState
+	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
+	if !hasIt {
+		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
+		cachedVal, _ = channelData["state"].(string)
+	}
+	return cachedVal
+}
+
 func (smaEv *SMAsteriskEvent) SetupTime() string {
 	cachedKey := utils.SETUP_TIME
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
@@ -156,18 +166,39 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) UpdateFromEvent(updateEv *SMAsteriskEvent) {
-	smaEv.ariEv["type"] = updateEv.ariEv["type"]
-	smaEv.ariEv["timestamp"] = updateEv.ariEv["timestamp"]
-	smaEv.ariEv["channel"] = updateEv.ariEv["channel"]
-	if updateEv.EventType() == ARIChannelDestroyed {
-		smaEv.ariEv["cause"] = updateEv.ariEv["cause"]
-		smaEv.ariEv["cause_txt"] = updateEv.ariEv["cause_txt"]
+/*
+// Updates fields in smgEv based on own fields
+// Need pointer so we update it directly in cache
+func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *SMGenericEvent) error {
+	switch smaEv.EventType() {
+	case ARIChannelStateChange:
+		smgEv[utils.EVENT_NAME] = utils.CGR_SESSION_START
+		if smaEv.ChannelState() == channelUp {
+			smgEv[utils.ANSWER_TIME] = smaEv.Timestamp()
+		}
+	case ARIChannelDestroyed:
+		smgEv[utils.EVENT_NAME] = utils.CGR_SESSION_END
+		aTime, err := smgEv.GetAnswerTime(utils.META_DEFAULT, "")
+		if err != nil {
+			return err
+		} else if aTime.IsZero() {
+			return errors.New("Unaswered channel")
+		}
 	}
 }
+*/
 
-func (smaEv *SMAsteriskEvent) AsSMGenericCGRAuth() (smgEv SMGenericEvent, err error) {
-	smgEv = SMGenericEvent{utils.EVENT_NAME: utils.CGR_AUTHORIZATION}
+func (smaEv *SMAsteriskEvent) AsSMGenericEvent() SMGenericEvent {
+	var evName string
+	switch smaEv.EventType() {
+	case ARIStasisStart:
+		evName = utils.CGR_AUTHORIZATION
+	case ARIChannelStateChange:
+		evName = utils.CGR_SESSION_START
+	case ARIChannelDestroyed:
+		evName = utils.CGR_SESSION_END
+	}
+	smgEv := SMGenericEvent{utils.EVENT_NAME: evName}
 	smgEv[utils.ACCID] = smaEv.ChannelID()
 	if smaEv.RequestType() != "" {
 		smgEv[utils.REQTYPE] = smaEv.RequestType()
@@ -188,5 +219,5 @@ func (smaEv *SMAsteriskEvent) AsSMGenericCGRAuth() (smgEv SMGenericEvent, err er
 	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
 		smgEv[extraKey] = extraVal
 	}
-	return smgEv, nil
+	return smgEv
 }

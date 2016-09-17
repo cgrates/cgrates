@@ -160,6 +160,25 @@ func TestSMAEventTimestamp(t *testing.T) {
 	}
 }
 
+func TestSMAEventChannelState(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(channelStateChange), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.ChannelState() != "Up" {
+		t.Error("Received:", smaEv.ChannelState())
+	}
+	ev = make(map[string]interface{}) // Clear previous data
+	if err := json.Unmarshal([]byte("{}"), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	if smaEv.ChannelState() != "" {
+		t.Error("Received:", smaEv.ChannelState())
+	}
+}
+
 func TestSMASetupTime(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(channelStateChange), &ev); err != nil {
@@ -309,6 +328,7 @@ func TestSMAEventExtraParameters(t *testing.T) {
 	}
 }
 
+/*
 func TestSMAEventUpdateFromEvent(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
@@ -354,8 +374,9 @@ func TestSMAEventUpdateFromEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMAEv, smaEv)
 	}
 }
+*/
 
-func TestSMAEventAsSMGenericCGRAuth(t *testing.T) {
+func TestSMAEventAsSMGenericEvent(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
@@ -372,9 +393,7 @@ func TestSMAEventAsSMGenericCGRAuth(t *testing.T) {
 		"extra2":          "val2",
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
-	if smgEv, err := smaEv.AsSMGenericCGRAuth(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eSMGEv, smgEv) {
+	if smgEv := smaEv.AsSMGenericEvent(); !reflect.DeepEqual(eSMGEv, smgEv) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, smgEv)
 	}
 }
