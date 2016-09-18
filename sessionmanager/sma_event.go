@@ -176,11 +176,11 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 	var evName string
 	switch smaEv.EventType() {
 	case ARIStasisStart:
-		evName = utils.CGR_AUTHORIZATION
+		evName = SMAAuthorization
 	case ARIChannelStateChange:
-		evName = utils.CGR_SESSION_START
+		evName = SMASessionStart
 	case ARIChannelDestroyed:
-		evName = utils.CGR_SESSION_END
+		evName = SMASessionTerminate
 	}
 	smgEv := SMGenericEvent{utils.EVENT_NAME: evName}
 	smgEv[utils.ACCID] = smaEv.ChannelID()
@@ -200,6 +200,9 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 	smgEv[utils.ACCOUNT] = smaEv.Account()
 	smgEv[utils.DESTINATION] = smaEv.Destination()
 	smgEv[utils.SETUP_TIME] = smaEv.Timestamp()
+	if smaEv.Supplier() != "" {
+		smgEv[utils.SUPPLIER] = smaEv.Supplier()
+	}
 	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
 		smgEv[extraKey] = extraVal
 	}
@@ -212,12 +215,12 @@ func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *SMGenericEvent) error {
 	resSMGEv := *smgEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
-		resSMGEv[utils.EVENT_NAME] = utils.CGR_SESSION_START
 		if smaEv.ChannelState() == channelUp {
+			resSMGEv[utils.EVENT_NAME] = SMASessionStart
 			resSMGEv[utils.ANSWER_TIME] = smaEv.Timestamp()
 		}
 	case ARIChannelDestroyed:
-		resSMGEv[utils.EVENT_NAME] = utils.CGR_SESSION_END
+		resSMGEv[utils.EVENT_NAME] = SMASessionTerminate
 		resSMGEv[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
 		if _, hasIt := resSMGEv[utils.ANSWER_TIME]; !hasIt {
 			resSMGEv[utils.USAGE] = "0s"

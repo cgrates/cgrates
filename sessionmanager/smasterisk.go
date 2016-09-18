@@ -41,6 +41,9 @@ const (
 	channelState          = "channelState"
 	channelUp             = "Up"
 	timestamp             = "timestamp"
+	SMAAuthorization      = "SMA_AUTHORIZATION"
+	SMASessionStart       = "SMA_SESSION_START"
+	SMASessionTerminate   = "SMA_SESSION_TERMINATE"
 )
 
 func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smg rpcclient.RpcClientConnection) (*SMAsterisk, error) {
