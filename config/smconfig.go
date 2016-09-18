@@ -473,13 +473,10 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 }
 
 type SMAsteriskCfg struct {
-	Enabled                    bool
-	SMGConns                   []*HaPoolConfig
-	SessionTerminateSubscriber *HaPoolConfig
-	DebitInterval              time.Duration
-	MinCallDuration            time.Duration
-	MaxCallDuration            time.Duration
-	AsteriskConns              []*AsteriskConnCfg
+	Enabled       bool
+	SMGConns      []*HaPoolConfig
+	CreateCDR     bool
+	AsteriskConns []*AsteriskConnCfg
 }
 
 func (aCfg *SMAsteriskCfg) loadFromJsonCfg(jsnCfg *SMAsteriskJsonCfg) (err error) {
@@ -493,24 +490,8 @@ func (aCfg *SMAsteriskCfg) loadFromJsonCfg(jsnCfg *SMAsteriskJsonCfg) (err error
 			aCfg.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Session_terminate_subscriber != nil {
-		aCfg.SessionTerminateSubscriber = NewDfltHaPoolConfig()
-		aCfg.SessionTerminateSubscriber.loadFromJsonCfg(jsnCfg.Session_terminate_subscriber)
-	}
-	if jsnCfg.Debit_interval != nil {
-		if aCfg.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Min_call_duration != nil {
-		if aCfg.MinCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Min_call_duration); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Max_call_duration != nil {
-		if aCfg.MaxCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Max_call_duration); err != nil {
-			return err
-		}
+	if jsnCfg.Create_cdr != nil {
+		aCfg.CreateCDR = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Asterisk_conns != nil {
 		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))

@@ -524,10 +524,7 @@ func TestSmAsteriskJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Session_terminate_subscriber: &HaPoolJsonCfg{Address: utils.StringPointer(utils.MetaInternal)},
-		Debit_interval:               utils.StringPointer("10s"),
-		Min_call_duration:            utils.StringPointer("0s"),
-		Max_call_duration:            utils.StringPointer("3h"),
+		Create_cdr: utils.BoolPointer(false),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			&AstConnJsonCfg{
 				Address:          utils.StringPointer("127.0.0.1:8088"),

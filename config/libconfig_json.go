@@ -224,13 +224,10 @@ type AstConnJsonCfg struct {
 }
 
 type SMAsteriskJsonCfg struct {
-	Enabled                      *bool
-	Sm_generic_conns             *[]*HaPoolJsonCfg // Connections towards generic SM
-	Session_terminate_subscriber *HaPoolJsonCfg
-	Debit_interval               *string
-	Min_call_duration            *string
-	Max_call_duration            *string
-	Asterisk_conns               *[]*AstConnJsonCfg
+	Enabled          *bool
+	Sm_generic_conns *[]*HaPoolJsonCfg // Connections towards generic SMf
+	Create_cdr       *bool
+	Asterisk_conns   *[]*AstConnJsonCfg
 }
 
 type CacheParamJsonCfg struct {

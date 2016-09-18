@@ -125,24 +125,23 @@ func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 		}
 		return
 	}
-	if maxUsage == -1 {
-		maxUsage = 0 // So we can set it later as unlimited
-	} else if maxUsage == 0 || maxUsage < sma.cgrCfg.SMAsteriskCfg().MinCallDuration.Seconds() {
+	if maxUsage == 0 {
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
 		}
 		return
-	}
-	// Call allowed, set absolute timeout
-	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/variable?variable=%s", // Asterisk having issue with variable terminating empty so harcoding param in url
-		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID(), CGRMaxSessionTime),
-		url.Values{"value": {strconv.FormatFloat(maxUsage*1000, 'f', -1, 64)}}); err != nil { // Asterisk expects value in ms
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when setting %s for channelID: %s", err.Error(), CGRMaxSessionTime, ev.ChannelID()))
-		// Since we got error, disconnect channel
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
+	} else if maxUsage != -1 {
+		//  Set absolute timeout for non-postpaid calls
+		if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/variable?variable=%s", // Asterisk having issue with variable terminating empty so harcoding param in url
+			sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID(), CGRMaxSessionTime),
+			url.Values{"value": {strconv.FormatFloat(maxUsage*1000, 'f', -1, 64)}}); err != nil { // Asterisk expects value in ms
+			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when setting %s for channelID: %s", err.Error(), CGRMaxSessionTime, ev.ChannelID()))
+			// Since we got error, disconnect channel
+			if err := sma.hangupChannel(ev.ChannelID()); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
+			}
+			return
 		}
-		return
 	}
 
 	// Exit channel from stasis
@@ -183,7 +182,7 @@ func (sma *SMAsterisk) handleChannelStateChange(ev *SMAsteriskEvent) {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
 		}
 		return
-	} else if maxUsage != -1 && (maxUsage == 0 || maxUsage < sma.cgrCfg.SMAsteriskCfg().MinCallDuration.Seconds()) {
+	} else if maxUsage == 0 {
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
 		}
@@ -213,8 +212,10 @@ func (sma *SMAsterisk) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	if err := sma.smg.Call("SMGenericV1.TerminateSession", *smgEv, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to terminate session for channelID: %s", err.Error(), ev.ChannelID()))
 	}
-	if err := sma.smg.Call("SMGenericV1.ProcessCDR", *smgEv, &reply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to process CDR for channelID: %s", err.Error(), ev.ChannelID()))
+	if sma.cgrCfg.SMAsteriskCfg().CreateCDR {
+		if err := sma.smg.Call("SMGenericV1.ProcessCDR", *smgEv, &reply); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to process CDR for channelID: %s", err.Error(), ev.ChannelID()))
+		}
 	}
 }
 
