@@ -151,7 +151,13 @@ func (smaEv *SMAsteriskEvent) Supplier() string {
 }
 
 func (smaEv *SMAsteriskEvent) DisconnectCause() string {
-	return smaEv.cachedFields[utils.CGR_DISCONNECT_CAUSE]
+	cachedKey := utils.CGR_DISCONNECT_CAUSE
+	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
+	if !hasIt {
+		cachedVal, _ = smaEv.ariEv["cause_txt"].(string)
+		smaEv.cachedFields[cachedKey] = cachedVal
+	}
+	return cachedVal
 }
 
 func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) {
@@ -166,29 +172,7 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-/*
-// Updates fields in smgEv based on own fields
-// Need pointer so we update it directly in cache
-func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *SMGenericEvent) error {
-	switch smaEv.EventType() {
-	case ARIChannelStateChange:
-		smgEv[utils.EVENT_NAME] = utils.CGR_SESSION_START
-		if smaEv.ChannelState() == channelUp {
-			smgEv[utils.ANSWER_TIME] = smaEv.Timestamp()
-		}
-	case ARIChannelDestroyed:
-		smgEv[utils.EVENT_NAME] = utils.CGR_SESSION_END
-		aTime, err := smgEv.GetAnswerTime(utils.META_DEFAULT, "")
-		if err != nil {
-			return err
-		} else if aTime.IsZero() {
-			return errors.New("Unaswered channel")
-		}
-	}
-}
-*/
-
-func (smaEv *SMAsteriskEvent) AsSMGenericEvent() SMGenericEvent {
+func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 	var evName string
 	switch smaEv.EventType() {
 	case ARIStasisStart:
@@ -219,5 +203,38 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() SMGenericEvent {
 	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
 		smgEv[extraKey] = extraVal
 	}
-	return smgEv
+	return &smgEv
+}
+
+// Updates fields in smgEv based on own fields
+// Using pointer so we update it directly in cache
+func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *SMGenericEvent) error {
+	resSMGEv := *smgEv
+	switch smaEv.EventType() {
+	case ARIChannelStateChange:
+		resSMGEv[utils.EVENT_NAME] = utils.CGR_SESSION_START
+		if smaEv.ChannelState() == channelUp {
+			resSMGEv[utils.ANSWER_TIME] = smaEv.Timestamp()
+		}
+	case ARIChannelDestroyed:
+		resSMGEv[utils.EVENT_NAME] = utils.CGR_SESSION_END
+		resSMGEv[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
+		if _, hasIt := resSMGEv[utils.ANSWER_TIME]; !hasIt {
+			resSMGEv[utils.USAGE] = "0s"
+		} else {
+			if aTime, err := smgEv.GetAnswerTime(utils.META_DEFAULT, ""); err != nil {
+				return err
+			} else if aTime.IsZero() {
+				resSMGEv[utils.USAGE] = "0s"
+			} else {
+				actualTime, err := utils.ParseTimeDetectLayout(smaEv.Timestamp(), "")
+				if err != nil {
+					return err
+				}
+				resSMGEv[utils.USAGE] = actualTime.Sub(aTime).String()
+			}
+		}
+	}
+	*smgEv = resSMGEv
+	return nil
 }

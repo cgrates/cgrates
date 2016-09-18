@@ -381,7 +381,7 @@ func TestSMAEventAsSMGenericEvent(t *testing.T) {
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
-	eSMGEv := SMGenericEvent{
+	eSMGEv := &SMGenericEvent{
 		utils.EVENT_NAME:  utils.CGR_AUTHORIZATION,
 		utils.ACCID:       "1473681228.6",
 		utils.REQTYPE:     "*prepaid",
@@ -394,6 +394,143 @@ func TestSMAEventAsSMGenericEvent(t *testing.T) {
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
 	if smgEv := smaEv.AsSMGenericEvent(); !reflect.DeepEqual(eSMGEv, smgEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, smgEv)
+	}
+}
+
+func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(channelStateChange), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	smgEv := &SMGenericEvent{
+		utils.EVENT_NAME:  utils.CGR_AUTHORIZATION,
+		utils.ACCID:       "1473681228.6",
+		utils.REQTYPE:     "*prepaid",
+		utils.CDRHOST:     "127.0.0.1",
+		utils.ACCOUNT:     "1001",
+		utils.DESTINATION: "1003",
+		utils.SETUP_TIME:  "2016-09-12T13:53:48.919+0200",
+		"extra1":          "val1",
+		"extra2":          "val2",
+	}
+	eSMGEv := &SMGenericEvent{
+		utils.EVENT_NAME:  utils.CGR_SESSION_START,
+		utils.ACCID:       "1473681228.6",
+		utils.REQTYPE:     "*prepaid",
+		utils.CDRHOST:     "127.0.0.1",
+		utils.ACCOUNT:     "1001",
+		utils.DESTINATION: "1003",
+		utils.SETUP_TIME:  "2016-09-12T13:53:48.919+0200",
+		utils.ANSWER_TIME: "2016-09-12T13:53:52.110+0200",
+		"extra1":          "val1",
+		"extra2":          "val2",
+	}
+	if err := smaEv.UpdateSMGEvent(smgEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSMGEv, smgEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, smgEv)
+	}
+	// Apply update using a terminate event
+	ev = make(map[string]interface{})
+	if err = json.Unmarshal([]byte(channelAnsweredDestroyed), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
+	eSMGEv = &SMGenericEvent{
+		utils.EVENT_NAME:       utils.CGR_SESSION_END,
+		utils.ACCID:            "1473681228.6",
+		utils.REQTYPE:          "*prepaid",
+		utils.CDRHOST:          "127.0.0.1",
+		utils.ACCOUNT:          "1001",
+		utils.DESTINATION:      "1003",
+		utils.SETUP_TIME:       "2016-09-12T13:53:48.919+0200",
+		utils.ANSWER_TIME:      "2016-09-12T13:53:52.110+0200",
+		utils.USAGE:            "35.225s",
+		utils.DISCONNECT_CAUSE: "Normal Clearing",
+		"extra1":               "val1",
+		"extra2":               "val2",
+	}
+	if err := smaEv.UpdateSMGEvent(smgEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSMGEv, smgEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, smgEv)
+	}
+}
+
+func TestSMAEventUpdateSMGEventUnaswered(t *testing.T) {
+	smgEv := &SMGenericEvent{
+		utils.EVENT_NAME:  utils.CGR_AUTHORIZATION,
+		utils.ACCID:       "1473681228.6",
+		utils.REQTYPE:     "*prepaid",
+		utils.CDRHOST:     "127.0.0.1",
+		utils.ACCOUNT:     "1001",
+		utils.DESTINATION: "1003",
+		utils.SETUP_TIME:  "2016-09-12T13:53:48.919+0200",
+		"extra1":          "val1",
+		"extra2":          "val2",
+	}
+	eSMGEv := &SMGenericEvent{
+		utils.EVENT_NAME:       utils.CGR_SESSION_END,
+		utils.ACCID:            "1473681228.6",
+		utils.REQTYPE:          "*prepaid",
+		utils.CDRHOST:          "127.0.0.1",
+		utils.ACCOUNT:          "1001",
+		utils.DESTINATION:      "1003",
+		utils.SETUP_TIME:       "2016-09-12T13:53:48.919+0200",
+		utils.USAGE:            "0s",
+		utils.DISCONNECT_CAUSE: "Normal Clearing",
+		"extra1":               "val1",
+		"extra2":               "val2",
+	}
+	// Apply update using a terminate event
+	ev := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(channelUnansweredDestroyed), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if err := smaEv.UpdateSMGEvent(smgEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSMGEv, smgEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, smgEv)
+	}
+}
+
+func TestSMAEventUpdateSMGEventBusy(t *testing.T) {
+	smgEv := &SMGenericEvent{
+		utils.EVENT_NAME:  utils.CGR_AUTHORIZATION,
+		utils.ACCID:       "1473681228.6",
+		utils.REQTYPE:     "*prepaid",
+		utils.CDRHOST:     "127.0.0.1",
+		utils.ACCOUNT:     "1001",
+		utils.DESTINATION: "1003",
+		utils.SETUP_TIME:  "2016-09-12T13:53:48.919+0200",
+		"extra1":          "val1",
+		"extra2":          "val2",
+	}
+	eSMGEv := &SMGenericEvent{
+		utils.EVENT_NAME:       utils.CGR_SESSION_END,
+		utils.ACCID:            "1473681228.6",
+		utils.REQTYPE:          "*prepaid",
+		utils.CDRHOST:          "127.0.0.1",
+		utils.ACCOUNT:          "1001",
+		utils.DESTINATION:      "1003",
+		utils.SETUP_TIME:       "2016-09-12T13:53:48.919+0200",
+		utils.USAGE:            "0s",
+		utils.DISCONNECT_CAUSE: "User busy",
+		"extra1":               "val1",
+		"extra2":               "val2",
+	}
+	// Apply update using a terminate event
+	ev := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(channelBusyDestroyed), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if err := smaEv.UpdateSMGEvent(smgEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSMGEv, smgEv) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, smgEv)
 	}
 }
