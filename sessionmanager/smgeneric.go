@@ -378,6 +378,9 @@ func (self *SMGeneric) InitiateSession(gev SMGenericEvent, clnt *rpc2.Client) (t
 		self.sessionEnd(gev.GetUUID(), 0)
 		return nilDuration, err
 	}
+	if self.cgrCfg.SmGenericConfig.DebitInterval != 0 { // Session handled by debit loop
+		return 0, nil
+	}
 	d, err := self.UpdateSession(gev, clnt)
 	if err != nil || d == 0 {
 		self.sessionEnd(gev.GetUUID(), 0)
@@ -387,6 +390,9 @@ func (self *SMGeneric) InitiateSession(gev SMGenericEvent, clnt *rpc2.Client) (t
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) UpdateSession(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	if self.cgrCfg.SmGenericConfig.DebitInterval != 0 { // Not possible to update a session with debit loop active
+		return 0, errors.New("ACTIVE_DEBIT_LOOP")
+	}
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -398,14 +404,12 @@ func (self *SMGeneric) UpdateSession(gev SMGenericEvent, clnt *rpc2.Client) (tim
 	}
 	self.resetTerminatorTimer(gev.GetUUID(), gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
-	evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
-	if err != nil && err != utils.ErrNotFound {
+	if evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT); err == nil {
+		lastUsed = &evLastUsed
+	} else if err != utils.ErrNotFound {
 		return nilDuration, err
 	}
-	if err == nil {
-		lastUsed = &evLastUsed
-	}
-	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.MaxCallDuration)
+	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.SmGenericConfig.MaxCallDuration)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrMandatoryIeMissing
