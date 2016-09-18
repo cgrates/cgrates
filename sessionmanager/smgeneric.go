@@ -379,7 +379,7 @@ func (self *SMGeneric) InitiateSession(gev SMGenericEvent, clnt *rpc2.Client) (t
 		return nilDuration, err
 	}
 	if self.cgrCfg.SmGenericConfig.DebitInterval != 0 { // Session handled by debit loop
-		return 0, nil
+		return -1, nil
 	}
 	d, err := self.UpdateSession(gev, clnt)
 	if err != nil || d == 0 {
