@@ -49,36 +49,38 @@ type SMGSession struct {
 // Called in case of automatic debits
 func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 	loopIndex := 0
+	sleepDur := time.Duration(0) // start with empty duration for debit
 	for {
 		select {
 		case <-self.stopDebit:
 			return
-		default:
+		case <-time.After(sleepDur):
+			if maxDebit, err := self.debit(debitInterval, nil); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit operation on session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+				disconnectReason := SYSTEM_ERROR
+				if err.Error() == utils.ErrUnauthorizedDestination.Error() {
+					disconnectReason = err.Error()
+				}
+				if err := self.disconnectSession(disconnectReason); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+				}
+				return
+			} else if maxDebit < debitInterval {
+				time.Sleep(maxDebit)
+				if err := self.disconnectSession(INSUFFICIENT_FUNDS); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+				}
+				return
+			}
+			sleepDur = debitInterval
+			loopIndex++
 		}
-		if maxDebit, err := self.debit(debitInterval, nil); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit opperation on session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
-			disconnectReason := SYSTEM_ERROR
-			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
-				disconnectReason = UNAUTHORIZED_DESTINATION
-			}
-			if err := self.disconnectSession(disconnectReason); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
-			}
-			return
-		} else if maxDebit < debitInterval {
-			time.Sleep(maxDebit)
-			if err := self.disconnectSession(INSUFFICIENT_FUNDS); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
-			}
-			return
-		}
-		time.Sleep(debitInterval)
-		loopIndex++
 	}
 }
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
+	//utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit, dur: %+v, lastUsed: %+v, session: %+v", dur, lastUsed, self))
 	requestedDuration := dur
 	if lastUsed != nil {
 		self.extraDuration = self.lastDebit - *lastUsed
