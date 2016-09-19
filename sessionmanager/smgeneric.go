@@ -305,11 +305,11 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			if err := s.close(aTime.Add(usage)); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
-			go func() { // Call it in goroutine since it could take a while to compress timespans and save them
-				if err := s.saveOperations(sessionId); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
-				}
-			}()
+			//go func() { // Call it in goroutine since it could take a while to compress timespans and save them
+			if err := s.saveOperations(sessionId); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
+			}
+			//}()
 		}
 		return nil, nil
 	}, time.Duration(2)*time.Second, sessionId)
