@@ -38,14 +38,6 @@ type Paginator struct {
 	SearchTerm string // Global matching pattern in items returned, partially used in some APIs
 }
 
-/*func (pag *Paginator) GetLimits() (low, high int) {
-	if pag.ItemsPerPage == 0 {
-		return 0, math.MaxInt32
-	}
-	return pag.Page * pag.ItemsPerPage, pag.ItemsPerPage
-}
-*/
-
 type TPDestination struct {
 	TPid          string   // Tariff plan id
 	DestinationId string   // Destination id
@@ -182,7 +174,6 @@ func (self *TPRatingPlanBinding) Timing() *TPTiming {
 func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, error) {
 	// *out:cgrates.org:call:*any
 	s := strings.Split(keyId, ":")
-	// [*out cgrates.org call *any]
 	if len(s) != 4 {
 		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
 	}
@@ -504,7 +495,6 @@ type TPActionTrigger struct {
 func NewTPAccountActionsFromKeyId(tpid, loadId, keyId string) (*TPAccountActions, error) {
 	// *out:cgrates.org:1001
 	s := strings.Split(keyId, ":")
-	// [*out cgrates.org 1001]
 	if len(s) != 2 {
 		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
 	}

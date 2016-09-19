@@ -235,15 +235,16 @@ func (self *SMGSession) disconnectSession(reason string) error {
 
 // Merge the sum of costs and sends it to CDRS for storage
 // originID could have been changed from original event, hence passing as argument here
-func (self *SMGSession) saveOperations(originID string) error {
+// pass cc as the clone of original to avoid concurrency issues
+func (self *SMGSession) saveOperations(originID string, cc *engine.CallCost) error {
 	if len(self.callCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
-	firstCC := self.callCosts[0] // was merged in close method
-	firstCC.Round()
-	roundIncrements := firstCC.GetRoundIncrements()
+	//firstCC := self.callCosts[0] // was merged in close method
+	cc.Round()
+	roundIncrements := cc.GetRoundIncrements()
 	if len(roundIncrements) != 0 {
-		cd := firstCC.CreateCallDescriptor()
+		cd := cc.CreateCallDescriptor()
 		cd.CgrID = self.cd.CgrID
 		cd.RunID = self.cd.RunID
 		cd.Increments = roundIncrements
@@ -252,11 +253,11 @@ func (self *SMGSession) saveOperations(originID string) error {
 			return err
 		}
 	}
-	//
-	if len(firstCC.Timespans) > 50 { // Merge since we will get a callCost too big
-		firstCC.Timespans.Decompress()
-		firstCC.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
-		firstCC.Timespans.Compress()
+
+	if len(cc.Timespans) > 50 { // Merge since we will get a callCost too big
+		cc.Timespans.Decompress()
+		cc.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
+		cc.Timespans.Compress()
 	}
 
 	smCost := &engine.SMCost{
@@ -266,7 +267,7 @@ func (self *SMGSession) saveOperations(originID string) error {
 		OriginHost:  self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
 		OriginID:    originID,
 		Usage:       self.TotalUsage().Seconds(),
-		CostDetails: firstCC,
+		CostDetails: cc,
 	}
 	var reply string
 	if err := self.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
