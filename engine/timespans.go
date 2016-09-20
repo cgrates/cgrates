@@ -260,10 +260,21 @@ func (tss *TimeSpans) Decompress() { // must be pointer receiver
 
 func (tss *TimeSpans) Merge() { // Merge whenever possible
 	tssVal := *tss
-	for i := 0; i < len(tssVal); i++ {
-		if i == 0 {
-			continue
-		}
+	
+	if len(tssVal) > 2 {
+		
+                middle := len(tssVal) / 2
+
+                tssVal1 := tssVal[:middle]
+                tssVal2 := tssVal[middle:]
+
+                tssVal1.Merge()
+                tssVal2.Merge()
+
+                tssVal = append(tssVal1, tssVal2 ...)
+        }
+	
+	for i := 1; i < len(tssVal); i++ {
 		if tssVal[i-1].Merge(tssVal[i]) {
 			tssVal = append(tssVal[:i], tssVal[i+1:]...)
 			i-- // Reschedule checking of last index since slice will decrease
