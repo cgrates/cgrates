@@ -253,11 +253,6 @@ func (self *SMGSession) saveOperations(originID string) error {
 			return err
 		}
 	}
-	if len(cc.Timespans) > 50 { // Merge since we will get a callCost too big
-		cc.Timespans.Decompress()
-		cc.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
-		cc.Timespans.Compress()
-	}
 	smCost := &engine.SMCost{
 		CGRID:       self.eventStart.GetCgrId(self.timezone),
 		CostSource:  utils.SESSION_MANAGER_SOURCE,
@@ -266,6 +261,27 @@ func (self *SMGSession) saveOperations(originID string) error {
 		OriginID:    originID,
 		Usage:       self.TotalUsage().Seconds(),
 		CostDetails: cc,
+	}
+	if len(smCost.CostDetails.Timespans) > MaxTimespansInCost { // Merge since we will get a callCost too big
+		if err := utils.Clone(cc, &smCost.CostDetails); err != nil { // Avoid concurrency on CC
+			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not clone callcost for sessionID: %s, runId: %s, error: %s", originID, self.runId, err.Error()))
+		}
+		go func(smCost *engine.SMCost) { // could take longer than the locked stage
+			if err := self.storeSMCost(smCost); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not store callcost for sessionID: %s, runId: %s, error: %s", originID, self.runId, err.Error()))
+			}
+		}(smCost)
+	} else {
+		return self.storeSMCost(smCost)
+	}
+	return nil
+}
+
+func (self *SMGSession) storeSMCost(smCost *engine.SMCost) error {
+	if len(smCost.CostDetails.Timespans) > MaxTimespansInCost { // Merge so we can compress the CostDetails
+		smCost.CostDetails.Timespans.Decompress()
+		smCost.CostDetails.Timespans.Merge()
+		smCost.CostDetails.Timespans.Compress()
 	}
 	var reply string
 	if err := self.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
