@@ -29,6 +29,7 @@ type CallCost struct {
 	Direction, Category, Tenant, Subject, Account, Destination, TOR string
 	Cost                                                            float64
 	Timespans                                                       TimeSpans
+	TimespansMerged                                                 bool
 	RatedUsage                                                      float64
 	deductConnectFee                                                bool
 	negativeConnectFee                                              bool // the connect fee went negative on default balance

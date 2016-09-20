@@ -236,11 +236,11 @@ func (self *SMGSession) disconnectSession(reason string) error {
 // Merge the sum of costs and sends it to CDRS for storage
 // originID could have been changed from original event, hence passing as argument here
 // pass cc as the clone of original to avoid concurrency issues
-func (self *SMGSession) saveOperations(originID string, cc *engine.CallCost) error {
+func (self *SMGSession) saveOperations(originID string) error {
 	if len(self.callCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
-	//firstCC := self.callCosts[0] // was merged in close method
+	cc := self.callCosts[0] // was merged in close method
 	cc.Round()
 	roundIncrements := cc.GetRoundIncrements()
 	if len(roundIncrements) != 0 {
@@ -258,7 +258,6 @@ func (self *SMGSession) saveOperations(originID string, cc *engine.CallCost) err
 		cc.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
 		cc.Timespans.Compress()
 	}
-
 	smCost := &engine.SMCost{
 		CGRID:       self.eventStart.GetCgrId(self.timezone),
 		CostSource:  utils.SESSION_MANAGER_SOURCE,

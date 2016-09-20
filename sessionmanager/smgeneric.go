@@ -31,6 +31,10 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+const (
+	MaxTimespansInCost = 50
+)
+
 var ErrPartiallyExecuted = errors.New("Partially executed")
 
 func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection, timezone string, extconns *SMGExternalConnections) *SMGeneric {
@@ -305,17 +309,8 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			if err := s.close(aTime.Add(usage)); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
-			if len(s.callCosts) != 0 { // Save cost to sm_cost table
-				var cc engine.CallCost
-				if err := utils.Clone(*s.callCosts[0], &cc); err != nil { // Avoid concurrency on CC
-					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not clone callcost for sessionID: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
-					continue
-				}
-				go func(sessionID string, cc *engine.CallCost) { // Call it in goroutine since it could take a while to compress timespans and save them
-					if err := s.saveOperations(sessionId, cc); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
-					}
-				}(sessionId, &cc)
+			if err := s.saveOperations(sessionId); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
 		}
 		return nil, nil
