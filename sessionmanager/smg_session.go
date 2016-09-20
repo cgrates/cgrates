@@ -253,13 +253,11 @@ func (self *SMGSession) saveOperations(originID string, cc *engine.CallCost) err
 			return err
 		}
 	}
-	/*
-		if len(cc.Timespans) > 50 { // Merge since we will get a callCost too big
-			cc.Timespans.Decompress()
-			cc.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
-			cc.Timespans.Compress()
-		}
-	*/
+	if len(cc.Timespans) > 50 { // Merge since we will get a callCost too big
+		cc.Timespans.Decompress()
+		cc.Timespans.Merge() // Here we could wait a while depending on the size of the timespans
+		cc.Timespans.Compress()
+	}
 
 	smCost := &engine.SMCost{
 		CGRID:       self.eventStart.GetCgrId(self.timezone),
