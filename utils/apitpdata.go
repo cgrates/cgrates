@@ -1280,3 +1280,9 @@ type AttrRLsResourceUsage struct {
 	Event           map[string]interface{}
 	RequestedUnits  float64
 }
+
+// Attributes to send on SessionDisconnect by SMG
+type AttrDisconnectSession struct {
+	EventStart map[string]interface{}
+	Reason     string
+}

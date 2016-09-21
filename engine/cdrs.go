@@ -576,14 +576,13 @@ func (self *CdrServer) V1RateCDRs(attrs utils.AttrRateCDRs, reply *string) error
 func (cdrsrv *CdrServer) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
-		return utils.ErrNotImplemented
+		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	// get method
 	method := reflect.ValueOf(cdrsrv).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
 	if !method.IsValid() {
-		return utils.ErrNotImplemented
+		return rpcclient.ErrUnsupporteServiceMethod
 	}
-
 	// construct the params
 	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 	ret := method.Call(params)

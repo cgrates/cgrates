@@ -38,7 +38,6 @@ const (
 var ErrPartiallyExecuted = errors.New("Partially executed")
 
 func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection, timezone string) *SMGeneric {
-
 	gsm := &SMGeneric{cgrCfg: cgrCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone,
 		sessions: make(map[string][]*SMGSession), sessionTerminators: make(map[string]*smgSessionTerminator),
 		sessionIndexes: make(map[string]map[string]utils.StringMap),

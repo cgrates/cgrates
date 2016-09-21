@@ -20,6 +20,7 @@ package sessionmanager
 import (
 	"fmt"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -220,6 +221,42 @@ func (sma *SMAsterisk) handleChannelDestroyed(ev *SMAsteriskEvent) {
 }
 
 // Called to shutdown the service
-func (rls *SMAsterisk) ServiceShutdown() error {
+func (sma *SMAsterisk) ServiceShutdown() error {
 	return nil
+}
+
+// Internal method to disconnect session in asterisk
+func (sma *SMAsterisk) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
+	channelID := SMGenericEvent(args.EventStart).GetUUID()
+	if err := sma.hangupChannel(channelID); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), channelID))
+	}
+	return nil
+}
+
+// rpcclient.RpcClientConnection interface
+func (sma *SMAsterisk) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	// get method
+	method := reflect.ValueOf(sma).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
+	if !method.IsValid() {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }
