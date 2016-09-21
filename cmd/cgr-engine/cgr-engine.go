@@ -152,8 +152,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 			return
 		}
 	}
-	smg_econns := sessionmanager.NewSMGExternalConnections()
-	sm := sessionmanager.NewSMGeneric(cfg, ralsConns, cdrsConn, cfg.DefaultTimezone, smg_econns)
+	sm := sessionmanager.NewSMGeneric(cfg, ralsConns, cdrsConn, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMGeneric> error: %s!", err))
 	}
@@ -166,9 +165,6 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 	for method, handler := range smgBiRpc.Handlers() {
 		server.BijsonRegisterName(method, handler)
 	}
-	// Register OnConnect handlers so we can intercept connections for session disconnects
-	server.BijsonRegisterOnConnect(smg_econns.OnClientConnect)
-	server.BijsonRegisterOnDisconnect(smg_econns.OnClientDisconnect)
 }
 
 func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {

@@ -20,6 +20,7 @@ package sessionmanager
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -29,21 +30,21 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
-	eventStart    SMGenericEvent // Event which started
-	stopDebit     chan struct{}  // Channel to communicate with debit loops when closing the session
-	connId        string         // Reference towards connection id on the session manager side.
-	runId         string         // Keep a reference for the derived run
-	timezone      string
-	rater         rpcclient.RpcClientConnection // Connector to Rater service
-	cdrsrv        rpcclient.RpcClientConnection // Connector to CDRS service
-	extconns      *SMGExternalConnections
+	eventStart SMGenericEvent // Event which started
+	stopDebit  chan struct{}  // Channel to communicate with debit loops when closing the session
+	runId      string         // Keep a reference for the derived run
+	timezone   string
+	rater      rpcclient.RpcClientConnection // Connector to Rater service
+	cdrsrv     rpcclient.RpcClientConnection // Connector to CDRS service
+	//extconns      *SMGExternalConnections
 	cd            *engine.CallDescriptor
 	sessionCds    []*engine.CallDescriptor
 	callCosts     []*engine.CallCost
-	extraDuration time.Duration // keeps the current duration debited on top of what heas been asked
-	lastUsage     time.Duration // last requested Duration
-	lastDebit     time.Duration // last real debited duration
-	totalUsage    time.Duration // sum of lastUsage
+	extraDuration time.Duration                 // keeps the current duration debited on top of what heas been asked
+	lastUsage     time.Duration                 // last requested Duration
+	lastDebit     time.Duration                 // last real debited duration
+	totalUsage    time.Duration                 // sum of lastUsage
+	clntConn      rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
 }
 
 // Called in case of automatic debits
@@ -216,16 +217,15 @@ func (self *SMGSession) close(endTime time.Time) error {
 
 // Send disconnect order to remote connection
 func (self *SMGSession) disconnectSession(reason string) error {
+	if self.clntConn == nil || reflect.ValueOf(self.clntConn).IsNil() {
+		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
+	}
 	type AttrDisconnectSession struct {
 		EventStart map[string]interface{}
 		Reason     string
 	}
-	conn := self.extconns.GetConnection(self.connId)
-	if conn == nil {
-		return ErrConnectionNotFound
-	}
 	var reply string
-	if err := conn.Call("SMGClientV1.DisconnectSession", AttrDisconnectSession{EventStart: self.eventStart, Reason: reason}, &reply); err != nil {
+	if err := self.clntConn.Call("SMGClientV1.DisconnectSession", AttrDisconnectSession{EventStart: self.eventStart, Reason: reason}, &reply); err != nil {
 		return err
 	} else if reply != utils.OK {
 		return errors.New(fmt.Sprintf("Unexpected disconnect reply: %s", reply))

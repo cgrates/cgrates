@@ -61,16 +61,6 @@ func (s *Server) BijsonRegisterName(method string, handlerFunc interface{}) {
 	s.bijsonSrv.Handle(method, handlerFunc)
 }
 
-//Registers a new handler for OnConnect event
-func (s *Server) BijsonRegisterOnConnect(f func(*rpc2.Client)) {
-	s.bijsonSrv.OnConnect(f)
-}
-
-//Registers a new handler for OnDisconnect event
-func (s *Server) BijsonRegisterOnDisconnect(f func(*rpc2.Client)) {
-	s.bijsonSrv.OnDisconnect(f)
-}
-
 func (s *Server) ServeJSON(addr string) {
 	if !s.rpcEnabled {
 		return

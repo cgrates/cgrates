@@ -37,9 +37,9 @@ const (
 
 var ErrPartiallyExecuted = errors.New("Partially executed")
 
-func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection, timezone string, extconns *SMGExternalConnections) *SMGeneric {
+func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection, timezone string) *SMGeneric {
 
-	gsm := &SMGeneric{cgrCfg: cgrCfg, rater: rater, cdrsrv: cdrsrv, extconns: extconns, timezone: timezone,
+	gsm := &SMGeneric{cgrCfg: cgrCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone,
 		sessions: make(map[string][]*SMGSession), sessionTerminators: make(map[string]*smgSessionTerminator),
 		sessionIndexes: make(map[string]map[string]utils.StringMap),
 		sessionsMux:    new(sync.RWMutex), sessionIndexMux: new(sync.RWMutex), guard: engine.Guardian}
@@ -54,7 +54,6 @@ type SMGeneric struct {
 	sessions           map[string][]*SMGSession              //Group sessions per sessionId, multiple runs based on derived charging
 	sessionTerminators map[string]*smgSessionTerminator      // terminate and cleanup the session if timer expires
 	sessionIndexes     map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[sesionID]
-	extconns           *SMGExternalConnections               // Reference towards external connections manager
 	sessionsMux        *sync.RWMutex                         // Locks sessions map
 	sessionIndexMux    *sync.RWMutex
 	guard              *engine.GuardianLock // Used to lock on uuid
@@ -256,7 +255,7 @@ func (self *SMGeneric) getSession(uuid string) []*SMGSession {
 }
 
 // Handle a new session, pass the connectionId so we can communicate on disconnect request
-func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error {
+func (self *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.RpcClientConnection) error {
 	sessionId := evStart.GetUUID()
 	processed, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
 		var sessionRuns []*engine.SessionRun
@@ -267,8 +266,8 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 		}
 		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
-			s := &SMGSession{eventStart: evStart, connId: connId, runId: sessionRun.DerivedCharger.RunID, timezone: self.timezone,
-				rater: self.rater, cdrsrv: self.cdrsrv, cd: sessionRun.CallDescriptor}
+			s := &SMGSession{eventStart: evStart, runId: sessionRun.DerivedCharger.RunID, timezone: self.timezone,
+				rater: self.rater, cdrsrv: self.cdrsrv, cd: sessionRun.CallDescriptor, clntConn: clntConn}
 			self.recordSession(sessionId, s)
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
 			if self.cgrCfg.SmGenericConfig.DebitInterval != 0 {
@@ -376,7 +375,7 @@ func (self *SMGeneric) LCRSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([]st
 
 // Called on session start
 func (self *SMGeneric) InitiateSession(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
+	if err := self.sessionStart(gev, clnt); err != nil {
 		self.sessionEnd(gev.GetUUID(), 0)
 		return nilDuration, err
 	}
@@ -398,7 +397,7 @@ func (self *SMGeneric) UpdateSession(gev SMGenericEvent, clnt *rpc2.Client) (tim
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
-			err = self.sessionStart(gev, getClientConnId(clnt))
+			err = self.sessionStart(gev, clnt)
 		}
 		if err != nil {
 			return nilDuration, err
@@ -438,7 +437,7 @@ func (self *SMGeneric) TerminateSession(gev SMGenericEvent, clnt *rpc2.Client) e
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
-			err = self.sessionStart(gev, getClientConnId(clnt))
+			err = self.sessionStart(gev, clnt)
 		}
 		if err != nil && err != utils.ErrMandatoryIeMissing {
 			return err

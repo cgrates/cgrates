@@ -34,7 +34,7 @@ func init() {
 }
 
 func TestSMGSessionIndexing(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, "UTC", nil)
+	smg := NewSMGeneric(smgCfg, nil, nil, "UTC")
 	smGev := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
@@ -166,7 +166,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 }
 
 func TestSMGActiveSessions(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, "UTC", nil)
+	smg := NewSMGeneric(smgCfg, nil, nil, "UTC")
 	smGev1 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
