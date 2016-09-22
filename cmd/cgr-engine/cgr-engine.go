@@ -161,9 +161,10 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 	server.RpcRegister(smgRpc)
 	internalSMGChan <- smgRpc
 	// Register BiRpc handlers
+	//server.BiRPCRegister(v1.NewSMGenericBiRpcV1(sm))
 	smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
 	for method, handler := range smgBiRpc.Handlers() {
-		server.BijsonRegisterName(method, handler)
+		server.BiRPCRegisterName(method, handler)
 	}
 }
 

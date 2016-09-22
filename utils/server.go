@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"reflect"
 
 	"github.com/cenk/rpc2"
 	"golang.org/x/net/websocket"
@@ -35,7 +36,7 @@ import _ "net/http/pprof"
 type Server struct {
 	rpcEnabled  bool
 	httpEnabled bool
-	bijsonSrv   *rpc2.Server
+	birpcSrv    *rpc2.Server
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
@@ -54,11 +55,24 @@ func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWrit
 }
 
 // Registers a new BiJsonRpc name
-func (s *Server) BijsonRegisterName(method string, handlerFunc interface{}) {
-	if s.bijsonSrv == nil {
-		s.bijsonSrv = rpc2.NewServer()
+func (s *Server) BiRPCRegisterName(method string, handlerFunc interface{}) {
+	if s.birpcSrv == nil {
+		s.birpcSrv = rpc2.NewServer()
 	}
-	s.bijsonSrv.Handle(method, handlerFunc)
+	s.birpcSrv.Handle(method, handlerFunc)
+}
+
+func (s *Server) BiRPCRegister(rcvr interface{}) {
+	if s.birpcSrv == nil {
+		s.birpcSrv = rpc2.NewServer()
+	}
+	rcvType := reflect.TypeOf(rcvr)
+	for i := 0; i < rcvType.NumMethod(); i++ {
+		method := rcvType.Method(i)
+		if method.Name != "Call" {
+			s.birpcSrv.Handle("SMGenericV1."+method.Name, method.Func.Interface())
+		}
+	}
 }
 
 func (s *Server) ServeJSON(addr string) {
@@ -124,7 +138,7 @@ func (s *Server) ServeHTTP(addr string) {
 }
 
 func (s *Server) ServeBiJSON(addr string) {
-	if s.bijsonSrv == nil {
+	if s.birpcSrv == nil {
 		return
 	}
 	lBiJSON, e := net.Listen("tcp", addr)
@@ -132,7 +146,7 @@ func (s *Server) ServeBiJSON(addr string) {
 		log.Fatal("ServeBiJSON listen error:", e)
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at %s.", addr))
-	s.bijsonSrv.Accept(lBiJSON)
+	s.birpcSrv.Accept(lBiJSON)
 }
 
 // rpcRequest represents a RPC request.
