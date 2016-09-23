@@ -667,6 +667,15 @@ func (smg *SMGeneric) Shutdown() error {
 	return nil
 }
 
+// RpcClientConnection interface
+func (smg *SMGeneric) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	return smg.CallBiRPC(nil, "BiRPC"+parts[0][len(parts[0])-2:]+"."+parts[1], args, reply) // Capture the version part out of original call
+}
+
 // Part of utils.BiRPCServer to help internal connections do calls over rpcclient.RpcClientConnection interface
 func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
@@ -679,7 +688,13 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMetho
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+	var clntVal reflect.Value
+	if clnt == nil {
+		clntVal = reflect.New(reflect.TypeOf(new(utils.BiRPCInternalClient))).Elem() // Kinda cheat since we make up a type here
+	} else {
+		clntVal = reflect.ValueOf(clnt)
+	}
+	params := []reflect.Value{clntVal, reflect.ValueOf(args), reflect.ValueOf(reply)}
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return utils.ErrServerError

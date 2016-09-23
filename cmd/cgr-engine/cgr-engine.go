@@ -131,7 +131,7 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 	}
 }
 
-func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internalRaterChan, internalCDRSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
+func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRaterChan, internalCDRSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMGeneric service.")
 	var ralsConns, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SmGenericConfig.RALsConns) != 0 {
@@ -156,10 +156,11 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMGeneric> error: %s!", err))
 	}
+	// Pass internal connection via BiRPCClient
+	internalSMGChan <- sm
 	// Register RPC handler
 	smgRpc := v1.NewSMGenericV1(sm)
 	server.RpcRegister(smgRpc)
-	internalSMGChan <- smgRpc
 	// Register BiRpc handlers
 	//server.BiRPCRegister(v1.NewSMGenericBiRpcV1(sm))
 	smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
@@ -168,20 +169,25 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 	}
 }
 
-func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startSMAsterisk(internalSMGChan chan *sessionmanager.SMGeneric, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMAsterisk service.")
-	var smgConn *rpcclient.RpcClientPool
-	if len(cfg.SMAsteriskCfg().SMGConns) != 0 {
-		smgConn, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SMAsteriskCfg().SMGConns, internalSMGChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMAsterisk> Could not connect to SMG: %s", err.Error()))
-			exitChan <- true
-			return
+	/*
+		var smgConn *rpcclient.RpcClientPool
+		if len(cfg.SMAsteriskCfg().SMGConns) != 0 {
+			smgConn, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+				cfg.SMAsteriskCfg().SMGConns, internalSMGChan, cfg.InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<SMAsterisk> Could not connect to SMG: %s", err.Error()))
+				exitChan <- true
+				return
+			}
 		}
-	}
+	*/
+	smg := <-internalSMGChan
+	internalSMGChan <- smg
+	birpcClnt := utils.NewBiRPCInternalClient(smg)
 	for connIdx := range cfg.SMAsteriskCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		sma, err := sessionmanager.NewSMAsterisk(cfg, connIdx, smgConn)
+		sma, err := sessionmanager.NewSMAsterisk(cfg, connIdx, birpcClnt)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> error: %s!", err))
 			exitChan <- true
@@ -194,12 +200,20 @@ func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitCha
 	exitChan <- true
 }
 
-func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startDiameterAgent(internalSMGChan chan *sessionmanager.SMGeneric, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
+	smgChan := make(chan rpcclient.RpcClientConnection, 1) // Use it to pass smg
+	go func(internalSMGChan chan *sessionmanager.SMGeneric, smgChan chan rpcclient.RpcClientConnection) {
+		// Need this to pass from *sessionmanager.SMGeneric to rpcclient.RpcClientConnection
+		smg := <-internalSMGChan
+		internalSMGChan <- smg
+		smgChan <- smg
+	}(internalSMGChan, smgChan)
 	var smgConn, pubsubConn *rpcclient.RpcClientPool
+
 	if len(cfg.DiameterAgentCfg().SMGenericConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DiameterAgentCfg().SMGenericConns, internalSMGChan, cfg.InternalTtl)
+			cfg.DiameterAgentCfg().SMGenericConns, smgChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
 			exitChan <- true
@@ -486,7 +500,7 @@ func startResourceLimiterService(internalRLSChan, internalCdrStatSChan chan rpcc
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
-	internalAliaseSChan, internalSMGChan chan rpcclient.RpcClientConnection) {
+	internalAliaseSChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -634,7 +648,7 @@ func main() {
 	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalSMGChan := make(chan *sessionmanager.SMGeneric, 1)
 	internalRLSChan := make(chan rpcclient.RpcClientConnection, 1)
 	// Start balancer service
 	if cfg.BalancerEnabled {

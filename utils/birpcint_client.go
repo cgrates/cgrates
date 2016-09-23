@@ -21,8 +21,9 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-// Interface which the server needs to match as BiRPCServer
+// Interface which the server needs to work as BiRPCServer
 type BiRPCServer interface {
+	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.RpcClientConnection
 	CallBiRPC(rpcclient.RpcClientConnection, string, interface{}, interface{}) error
 }
 

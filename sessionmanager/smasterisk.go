@@ -47,14 +47,16 @@ const (
 	SMASessionTerminate   = "SMA_SESSION_TERMINATE"
 )
 
-func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smg rpcclient.RpcClientConnection) (*SMAsterisk, error) {
-	return &SMAsterisk{cgrCfg: cgrCfg, smg: smg, eventsCache: make(map[string]*SMGenericEvent)}, nil
+func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smgConn *utils.BiRPCInternalClient) (*SMAsterisk, error) {
+	sma := &SMAsterisk{cgrCfg: cgrCfg, smg: *smgConn, eventsCache: make(map[string]*SMGenericEvent)}
+	sma.smg.SetClientConn(sma) // pass the connection to SMA back into smg so we can receive the disconnects
+	return sma, nil
 }
 
 type SMAsterisk struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
 	astConnIdx  int
-	smg         rpcclient.RpcClientConnection
+	smg         utils.BiRPCInternalClient
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
