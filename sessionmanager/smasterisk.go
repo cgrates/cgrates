@@ -233,6 +233,7 @@ func (sma *SMAsterisk) V1DisconnectSession(args utils.AttrDisconnectSession, rep
 	if err := sma.hangupChannel(channelID); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), channelID))
 	}
+	*reply = utils.OK
 	return nil
 }
 

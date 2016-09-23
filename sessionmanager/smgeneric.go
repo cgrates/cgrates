@@ -669,11 +669,7 @@ func (smg *SMGeneric) Shutdown() error {
 
 // RpcClientConnection interface
 func (smg *SMGeneric) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	return smg.CallBiRPC(nil, "BiRPC"+parts[0][len(parts[0])-2:]+"."+parts[1], args, reply) // Capture the version part out of original call
+	return smg.CallBiRPC(nil, serviceMethod, args, reply) // Capture the version part out of original call
 }
 
 // Part of utils.BiRPCServer to help internal connections do calls over rpcclient.RpcClientConnection interface
@@ -683,7 +679,7 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMetho
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	// get method BiRPCV1.Method
-	method := reflect.ValueOf(smg).MethodByName(parts[0][len(parts[0])-7:] + parts[1]) // Inherit the BiRPCV1 in the method
+	method := reflect.ValueOf(smg).MethodByName("BiRPC" + parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version V1 in the method name and add prefix
 	if !method.IsValid() {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
