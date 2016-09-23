@@ -113,6 +113,7 @@
 // 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 // 	"store_cdrs": true,						// store cdrs in storDb
 // 	"cdr_account_summary": false,			// add account information from dataDB
+// 	"sm_cost_retries": 5,					// number of queries to sm_costs before recalculating CDR
 // 	"rals_conns": [
 // 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 // 	],
@@ -246,6 +247,15 @@
 // },
 
 
+// "sm_asterisk": {
+// 	"enabled": false,												// starts Asterisk SessionManager service: <true|false>
+// 	"create_cdr": false,											// create CDR out of events and sends it to CDRS component
+// 	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
+// 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+// 	],
+// },
+
+
 // "sm_freeswitch": {
 // 	"enabled": false,						// starts SessionManager service: <true|false>
 // 	"rals_conns": [
@@ -315,10 +325,11 @@
 // 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 // 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 // 	"sm_generic_conns": [
-// 		{"address": "*internal"}									// connection towards SMG component for session management
+// 		{"address": "*internal"}								// connection towards SMG component for session management
 // 	],
 // 	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 // 	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
+// 	"cdr_requires_session": true,								// only create CDR if there is an active session at terminate
 // 	"debit_interval": "5m",										// interval for CCR updates
 // 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 // 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
@@ -365,18 +376,18 @@
 
 
 // "pubsubs": {
-// 	"enabled": false,							// starts PubSub service: <true|false>.
+// 	"enabled": false,						// starts PubSub service: <true|false>.
 // },
 
 
 // "aliases": {
-// 	"enabled": false,							// starts Aliases service: <true|false>.
+// 	"enabled": false,						// starts Aliases service: <true|false>.
 // },
 
 
 // "users": {
-// 	"enabled": false,							// starts User service: <true|false>.
-// 	"indexes": [],								// user profile field indexes
+// 	"enabled": false,						// starts User service: <true|false>.
+// 	"indexes": [],							// user profile field indexes
 // },
 
 

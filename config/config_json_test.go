@@ -519,11 +519,7 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 
 func TestSmAsteriskJsonCfg(t *testing.T) {
 	eCfg := &SMAsteriskJsonCfg{
-		Enabled: utils.BoolPointer(false),
-		Sm_generic_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
+		Enabled:    utils.BoolPointer(false),
 		Create_cdr: utils.BoolPointer(false),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			&AstConnJsonCfg{

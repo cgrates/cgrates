@@ -45,7 +45,6 @@ const CGRATES_CFG_JSON = `
 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
 	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
 	"cache_dump_dir": "",									 // cache dump for faster start (leave empty to disable)
-
 },
 
 
@@ -268,6 +267,15 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"sm_asterisk": {
+	"enabled": false,												// starts Asterisk SessionManager service: <true|false>
+	"create_cdr": false,											// create CDR out of events and sends it to CDRS component
+	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
+		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+	],
+},
+
+
 "sm_freeswitch": {
 	"enabled": false,						// starts SessionManager service: <true|false>
 	"rals_conns": [
@@ -329,18 +337,6 @@ const CGRATES_CFG_JSON = `
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
-},
-
-
-"sm_asterisk": {
-	"enabled": false,												// starts Asterisk SessionManager service: <true|false>
-	"sm_generic_conns": [
-		{"address": "*internal"}									// connection towards SMG component for session management
-	],
-	"create_cdr": false,											// create CDR out of events and sends it to CDRS component
-	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
-		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
-	],
 },
 
 
