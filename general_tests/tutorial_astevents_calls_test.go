@@ -73,7 +73,7 @@ func TestTutAstCallsResetStorDb(t *testing.T) {
 }
 
 // start Asterisk server
-func TestTutAstCallsStartOsips(t *testing.T) {
+func TestTutAstCallsStartAsterisk(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -94,6 +94,7 @@ func TestTutAstCallsStartEngine(t *testing.T) {
 	}
 }
 
+/*
 // Restart FS so we make sure reconnects are working
 func TestTutAstCallsRestartAsterisk(t *testing.T) {
 	if !*testCalls {
@@ -103,7 +104,7 @@ func TestTutAstCallsRestartAsterisk(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-
+*/
 // Connect rpc client to rater
 func TestTutAstCallsRpcConn(t *testing.T) {
 	if !*testCalls {
@@ -258,7 +259,6 @@ func TestTutAstCallsCall1001To1003(t *testing.T) {
 	}
 }
 
-/*
 func TestTutAstCallsCall1002To1001(t *testing.T) {
 	if !*testCalls {
 		return
@@ -308,9 +308,7 @@ func TestTutAstCallsCall1007To1002(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-*/
 
-/*
 // Make sure account was debited properly
 func TestTutAstCallsAccount1001(t *testing.T) {
 	if !*testCalls {
@@ -359,14 +357,6 @@ func TestTutAstCalls1001Cdrs(t *testing.T) {
 		//	t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		//}
 	}
-	/*
-		// Make sure call cost contains the matched information
-		if err := tutAstCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
-			t.Error("Unexpected error: ", err.Error())
-		} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
-			t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
-		}
-
 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestinationPrefixes: []string{"1003"}}
 	if err := tutAstCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -384,14 +374,6 @@ func TestTutAstCalls1001Cdrs(t *testing.T) {
 			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
 		}
 	}
-	/*
-		// Make sure call cost contains the matched information
-		if err := tutAstCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
-			t.Error("Unexpected error: ", err.Error())
-		} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
-			t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
-		}
-
 	req = utils.RPCCDRsFilter{Accounts: []string{"1001"}, RunIDs: []string{"derived_run1"}}
 	if err := tutAstCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -562,7 +544,6 @@ func TestTutAstCallsAccountDisabled1001(t *testing.T) {
 		t.Error("Account should be disabled per fraud detection rules.")
 	}
 }
-*/
 
 func TestTutAstCallsStopPjsuaListener(t *testing.T) {
 	if !*testCalls {

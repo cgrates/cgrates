@@ -441,15 +441,19 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// SMOpenSIPS checks
+	// SMAsterisk checks
 	if self.smAsteriskCfg.Enabled {
-		if len(self.smAsteriskCfg.SMGConns) == 0 {
+		/*if len(self.smAsteriskCfg.SMGConns) == 0 {
 			return errors.New("<SMAsterisk> SMG definition is mandatory!")
 		}
 		for _, smAstSMGConn := range self.smAsteriskCfg.SMGConns {
 			if smAstSMGConn.Address == utils.MetaInternal && !self.SmGenericConfig.Enabled {
 				return errors.New("<SMAsterisk> SMG not enabled.")
 			}
+		}
+		*/
+		if !self.SmGenericConfig.Enabled {
+			return errors.New("<SMAsterisk> SMG not enabled.")
 		}
 	}
 	// DAgent checks
