@@ -8,7 +8,7 @@ imports:
 - name: github.com/cenk/rpc2
   version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
 - name: github.com/cgrates/aringo
-  version: 8b4571d7b404357170711dfacb31cf24fa6d707d
+  version: 47cdb110c5ff42bddf2b801dc5ae8ceb15d2d602
 - name: github.com/cgrates/fsock
   version: a8ffdbdfc8440016df008ba91e6f05f806d7a69f
 - name: github.com/cgrates/kamevapi
