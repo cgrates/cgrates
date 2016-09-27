@@ -1,28 +1,26 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
 	"reflect"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -124,10 +122,9 @@ func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 	if len(cs.DestinationIds) > 0 {
 		found := false
 		for _, p := range utils.SplitPrefix(cdr.Destination, MIN_PREFIX_MATCH) {
-			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-				destIds := x.(map[interface{}]struct{})
-				for idID := range destIds {
-					if utils.IsSliceMember(cs.DestinationIds, idID.(string)) {
+			if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+				for _, idID := range destIDs {
+					if utils.IsSliceMember(cs.DestinationIds, idID) {
 						found = true
 						break
 					}

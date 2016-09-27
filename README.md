@@ -1,16 +1,24 @@
-## Real-time Charging System for Telecom & ISP environments ##
+## Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments ##
 
 [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
 
 ### Features ###
-+ Rates for prepaid and for postpaid
-+ The budget expressed in money and/or minutes (seconds)
-+ High accuracy rating: configurable to milliseconds
-+ Handles volume discount
-+ Received calls bonus
-+ Fully/Easy configurable 
++ Real-time Online/Offline Charging System (OCS).
++ Account Balances Management with bundle support.
++ Session or Event charging with reservation.
++ Rating engine.
++ CDR logging with support for Interim Records.
++ QoS LCR and LCR over Bundles.
++ Fraud detection with automatic mitigation.
++ Call Statistics with pattern monitoring.
++ Performance oriented.
++ Modular architecture.
++ Test driven development.
++ Plug-able/non-intrusive into existing setups.
++ Cloud-ready, built on independent micro-services with rich set of RPC APIs.
++ Agile in developing new features.
 + Very fast (5000+ req/sec on a single machine)
-+ Good documentation
++ Good documentation.
 + Commercial support available
 
 ### Documentation ###

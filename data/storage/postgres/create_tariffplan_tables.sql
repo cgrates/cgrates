@@ -125,7 +125,7 @@ CREATE TABLE tp_shared_groups (
   id SERIAL PRIMARY KEY,
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
-  account VARCHAR(24) NOT NULL,
+  account VARCHAR(64) NOT NULL,
   strategy VARCHAR(24) NOT NULL,
   rating_subject VARCHAR(24) NOT NULL,
   created_at TIMESTAMP,
@@ -253,7 +253,7 @@ CREATE TABLE tp_lcr_rules (
   direction VARCHAR(8) NOT NULL,
   tenant VARCHAR(64) NOT NULL,
   category VARCHAR(32) NOT NULL,
-  account VARCHAR(24) NOT NULL,
+  account VARCHAR(64) NOT NULL,
   subject VARCHAR(64) NOT NULL,
   destination_tag VARCHAR(64) NOT NULL,
   rp_category VARCHAR(32) NOT NULL,
@@ -278,7 +278,7 @@ CREATE TABLE tp_derived_chargers (
   direction VARCHAR(8) NOT NULL,
   tenant VARCHAR(64) NOT NULL,
   category VARCHAR(32) NOT NULL,
-  account VARCHAR(24) NOT NULL,
+  account VARCHAR(64) NOT NULL,
   subject VARCHAR(64) NOT NULL,
   destination_ids VARCHAR(64) NOT NULL,
   runid  VARCHAR(24) NOT NULL,
@@ -287,8 +287,8 @@ CREATE TABLE tp_derived_chargers (
   direction_field  VARCHAR(24) NOT NULL,
   tenant_field  VARCHAR(24) NOT NULL,
   category_field  VARCHAR(24) NOT NULL,
-  account_field  VARCHAR(24) NOT NULL,
-  subject_field  VARCHAR(24) NOT NULL,
+  account_field  VARCHAR(64) NOT NULL,
+  subject_field  VARCHAR(64) NOT NULL,
   destination_field  VARCHAR(24) NOT NULL,
   setup_time_field  VARCHAR(24) NOT NULL,
   pdd_field  VARCHAR(24) NOT NULL,
@@ -325,7 +325,7 @@ CREATE TABLE tp_cdr_stats (
   directions VARCHAR(8) NOT NULL,
   tenants VARCHAR(64) NOT NULL,
   categories VARCHAR(32) NOT NULL,
-  accounts VARCHAR(24) NOT NULL,
+  accounts VARCHAR(255) NOT NULL,
   subjects VARCHAR(64) NOT NULL,
   destination_ids VARCHAR(64) NOT NULL,
   pdd_interval VARCHAR(64) NOT NULL,
@@ -333,7 +333,7 @@ CREATE TABLE tp_cdr_stats (
   suppliers VARCHAR(64) NOT NULL,
   disconnect_causes VARCHAR(64) NOT NULL,
   mediation_runids VARCHAR(64) NOT NULL,
-  rated_accounts VARCHAR(64) NOT NULL,
+  rated_accounts VARCHAR(255) NOT NULL,
   rated_subjects VARCHAR(64) NOT NULL,
   cost_interval VARCHAR(24) NOT NULL,
   action_triggers VARCHAR(64) NOT NULL,
@@ -385,3 +385,21 @@ CREATE TABLE tp_aliases (
 );
 CREATE INDEX tpaliases_tpid_idx ON tp_aliases (tpid);
 CREATE INDEX tpaliases_idx ON tp_aliases ("tpid","direction","tenant","category","account","subject","context","target");
+
+DROP TABLE IF EXISTS tp_resource_limits;
+CREATE TABLE tp_resource_limits (
+  "id" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tag" varchar(64) NOT NULL,
+  "filter_type" varchar(16) NOT NULL,
+  "filter_field_name" varchar(64) NOT NULL,
+  "filter_field_values" varchar(256) NOT NULL,
+  "activation_time" varchar(24) NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "limit" varchar(64) NOT NULL,
+  "action_triggers" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP
+);
+CREATE INDEX tp_resource_limits_idx ON tp_resource_limits (tpid);
+CREATE INDEX tp_resource_limits_unique ON tp_resource_limits  ("tpid", "tag");
+

@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package cdre
 
 import (
@@ -75,8 +74,7 @@ var contentJsnCfgFlds = []*config.CdrFieldJsonCfg{
 		Width: utils.IntPointer(5), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Cost"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.COST), Width: utils.IntPointer(9),
 		Padding: utils.StringPointer("zeroleft")},
-	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("DestinationPrivacy"), Type: utils.StringPointer(utils.META_HANDLER), Value: utils.StringPointer(META_MASKDESTINATION),
-		Width: utils.IntPointer(1)},
+	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("DestinationPrivacy"), Type: utils.StringPointer(utils.MetaMaskedDestination), Width: utils.IntPointer(1)},
 }
 
 var trailerJsnCfgFlds = []*config.CdrFieldJsonCfg{

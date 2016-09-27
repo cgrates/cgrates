@@ -1,6 +1,25 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package v1
 
 import (
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/sessionmanager"
@@ -19,7 +38,7 @@ type SMGenericV1 struct {
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *SMGenericV1) MaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	maxUsageDur, err := self.sm.MaxUsage(ev, nil)
+	maxUsageDur, err := self.sm.MaxUsage(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -33,7 +52,7 @@ func (self *SMGenericV1) MaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *fl
 
 // Returns list of suppliers which can be used for the request
 func (self *SMGenericV1) LCRSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	if supls, err := self.sm.LCRSuppliers(ev, nil); err != nil {
+	if supls, err := self.sm.LCRSuppliers(ev); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*suppliers = supls
@@ -72,7 +91,7 @@ func (self *SMGenericV1) TerminateSession(ev sessionmanager.SMGenericEvent, repl
 
 // Called on individual Events (eg SMS)
 func (self *SMGenericV1) ChargeEvent(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.ChargeEvent(ev, nil); err != nil {
+	if minMaxUsage, err := self.sm.ChargeEvent(ev); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
@@ -90,150 +109,44 @@ func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *str
 }
 
 func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, reply *[]*sessionmanager.ActiveSession) error {
-	aSessions := make([]*sessionmanager.ActiveSession, 0)
-	for _, sGrp := range self.sm.Sessions() { // Add sessions to return with filter
-		for _, s := range sGrp {
-			as := s.AsActiveSession(self.sm.Timezone())
-			if attrs.ToR != nil && *attrs.ToR != as.TOR {
-				continue
-			}
-			if attrs.OriginID != nil && *attrs.OriginID != as.OriginID {
-				continue
-			}
-			if attrs.RunID != nil && *attrs.RunID != as.RunId {
-				continue
-			}
-			if attrs.RequestType != nil && *attrs.RequestType != as.ReqType {
-				continue
-			}
-			if attrs.Tenant != nil && *attrs.Tenant != as.Tenant {
-				continue
-			}
-			if attrs.Category != nil && *attrs.Category != as.Category {
-				continue
-			}
-			if attrs.Account != nil && *attrs.Account != as.Account {
-				continue
-			}
-			if attrs.Subject != nil && *attrs.Subject != as.Subject {
-				continue
-			}
-			if attrs.Destination != nil && *attrs.Destination != as.Destination {
-				continue
-			}
-			if attrs.Supplier != nil && *attrs.Supplier != as.Supplier {
-				continue
-			}
-			aSessions = append(aSessions, as)
-		}
+	aSessions, _, err := self.sm.ActiveSessions(attrs.AsMapStringString(), false)
+	if err != nil {
+		return utils.NewErrServerError(err)
 	}
 	*reply = aSessions
 	return nil
 }
 
 func (self *SMGenericV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
-	var aSessions []*sessionmanager.ActiveSession
-	if err := self.ActiveSessions(attrs, &aSessions); err != nil {
+	if _, count, err := self.sm.ActiveSessions(attrs.AsMapStringString(), true); err != nil {
 		return err
+	} else {
+		*reply = count
 	}
-	*reply = len(aSessions)
 	return nil
 }
 
 // rpcclient.RpcClientConnection interface
 func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	switch serviceMethod {
-	case "SMGenericV1.MaxUsage":
-		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*float64)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		self.MaxUsage(argsConverted, replyConverted)
-	case "SMGenericV1.LCRSuppliers":
-		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*[]string)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		return self.LCRSuppliers(argsConverted, replyConverted)
-	case "SMGenericV1.InitiateSession":
-		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*float64)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		return self.InitiateSession(argsConverted, replyConverted)
-	case "SMGenericV1.UpdateSession":
-		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*float64)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		return self.UpdateSession(argsConverted, replyConverted)
-	case "SMGenericV1.TerminateSession":
-		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*string)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		return self.TerminateSession(argsConverted, replyConverted)
-	case "SMGenericV1.ChargeEvent":
-		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*float64)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		return self.ChargeEvent(argsConverted, replyConverted)
-	case "SMGenericV1.ProcessCDR":
-		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*string)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		return self.ProcessCDR(argsConverted, replyConverted)
-	case "SMGenericV1.ActiveSessions":
-		argsConverted, canConvert := args.(utils.AttrSMGGetActiveSessions)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*[]*sessionmanager.ActiveSession)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		return self.ActiveSessions(argsConverted, replyConverted)
-
-	case "SMGenericV1.ActiveSessionsCount":
-		argsConverted, canConvert := args.(utils.AttrSMGGetActiveSessions)
-		if !canConvert {
-			return rpcclient.ErrWrongArgsType
-		}
-		replyConverted, canConvert := reply.(*int)
-		if !canConvert {
-			return rpcclient.ErrWrongReplyType
-		}
-		return self.ActiveSessionsCount(argsConverted, replyConverted)
+	methodSplit := strings.Split(serviceMethod, ".")
+	if len(methodSplit) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	return rpcclient.ErrUnsupporteServiceMethod
+	method := reflect.ValueOf(self).MethodByName(methodSplit[1])
+	if !method.IsValid() {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }

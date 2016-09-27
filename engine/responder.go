@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -150,7 +149,9 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
 	cacheKey := utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrID + arg.RunID + arg.DurationIndex.String()
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*CallCost))
+		if item.Value != nil {
+			*reply = *(item.Value.(*CallCost))
+		}
 		return item.Err
 	}
 	if arg.Subject == "" {
@@ -198,7 +199,9 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
 	cacheKey := utils.REFUND_INCR_CACHE_PREFIX + arg.CgrID + arg.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*float64))
+		if item.Value != nil {
+			*reply = *(item.Value.(*float64))
+		}
 		return item.Err
 	}
 	if arg.Subject == "" {
@@ -240,7 +243,9 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err error) {
 	cacheKey := utils.REFUND_ROUND_CACHE_PREFIX + arg.CgrID + arg.RunID + arg.DurationIndex.String()
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*float64))
+		if item.Value != nil {
+			*reply = *(item.Value.(*float64))
+		}
 		return item.Err
 	}
 	if arg.Subject == "" {
@@ -317,7 +322,9 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	}
 	cacheKey := utils.GET_DERIV_MAX_SESS_TIME + ev.CGRID + ev.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*float64))
+		if item.Value != nil {
+			*reply = *(item.Value.(*float64))
+		}
 		return item.Err
 	}
 	if ev.Subject == "" {
@@ -423,7 +430,9 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	}
 	cacheKey := utils.GET_SESS_RUNS_CACHE_PREFIX + ev.CGRID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*sRuns = *(item.Value.(*[]*SessionRun))
+		if item.Value != nil {
+			*sRuns = *(item.Value.(*[]*SessionRun))
+		}
 		return item.Err
 	}
 	if ev.Subject == "" {
@@ -467,9 +476,12 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			continue // We only consider prepaid sessions
 		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)
-		if err != nil {
-			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
-			return errors.New("Error parsing answer event start time")
+		if err != nil || startTime.IsZero() { // AnswerTime not parsable, try SetupTime
+			startTime, err = ev.GetSetupTime(dc.SetupTimeField, rs.Timezone)
+			if err != nil {
+				rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+				return errors.New("Error parsing answer event start time")
+			}
 		}
 		endTime, err := ev.GetEndTime("", rs.Timezone)
 		if err != nil {
@@ -519,7 +531,9 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	cacheKey := utils.LCRCachePrefix + attrs.CgrID + attrs.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*LCRCost))
+		if item.Value != nil {
+			*reply = *(item.Value.(*LCRCost))
+		}
 		return item.Err
 	}
 	if attrs.CallDescriptor.Subject == "" {
@@ -572,6 +586,11 @@ func (rs *Responder) FlushCache(arg *CallDescriptor, reply *float64) (err error)
 }
 
 func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err error) {
+	if arg != "" { // Introduce  delay in answer, used in some automated tests
+		if delay, err := utils.ParseDurationWithSecs(arg); err == nil {
+			time.Sleep(delay)
+		}
+	}
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
@@ -591,7 +610,6 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	}
 	ratingStorage.Close()
 	accountingStorage.Close()
-	storageLogger.Close()
 	cdrStorage.Close()
 	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"

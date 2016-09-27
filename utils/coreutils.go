@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package utils
 
 import (
@@ -140,12 +139,15 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
 	gotimeRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
 	fsTimestamp := regexp.MustCompile(`^\d{16}$`)
+	astTimestamp := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d*[+,-]\d+$`)
 	unixTimestampRule := regexp.MustCompile(`^\d{10}$`)
 	oneLineTimestampRule := regexp.MustCompile(`^\d{14}$`)
 	oneSpaceTimestampRule := regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
 	eamonTimestampRule := regexp.MustCompile(`^\d{2}/\d{2}/\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
 	broadsoftTimestampRule := regexp.MustCompile(`^\d{14}\.\d{3}`)
 	switch {
+	case astTimestamp.MatchString(tmStr):
+		return time.Parse("2006-01-02T15:04:05.999999999-0700", tmStr)
 	case rfc3339Rule.MatchString(tmStr):
 		return time.Parse(time.RFC3339, tmStr)
 	case gotimeRule.MatchString(tmStr):
@@ -587,4 +589,32 @@ func (h HierarchyPath) AsString(sep string, prefix bool) string {
 		retStr += itm
 	}
 	return retStr
+}
+
+// Mask a number of characters in the suffix of the destination
+func MaskSuffix(dest string, maskLen int) string {
+	destLen := len(dest)
+	if maskLen < 0 {
+		return dest
+	} else if maskLen > destLen {
+		maskLen = destLen
+	}
+	dest = dest[:destLen-maskLen]
+	for i := 0; i < maskLen; i++ {
+		dest += MASK_CHAR
+	}
+	return dest
+}
+
+// Sortable Int64Slice
+type Int64Slice []int64
+
+func (slc Int64Slice) Len() int {
+	return len(slc)
+}
+func (slc Int64Slice) Swap(i, j int) {
+	slc[i], slc[j] = slc[j], slc[i]
+}
+func (slc Int64Slice) Less(i, j int) bool {
+	return slc[i] < slc[j]
 }

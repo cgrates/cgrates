@@ -1,7 +1,23 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package balancer2go
 
 import (
-	"fmt"
 	"net/rpc"
 	"testing"
 )
@@ -50,27 +66,4 @@ func TestOneBalancer(t *testing.T) {
 	if c1 != c2 {
 		t.Error("With only one rater these shoud be equal")
 	}
-}
-
-func Test100Balancer(t *testing.T) {
-	balancer := NewBalancer()
-	var clients []Worker
-	for i := 0; i < 100; i++ {
-		c := new(rpc.Client)
-		balancer.AddClient(fmt.Sprintf("client%v", i), c)
-	}
-	for i := 0; i < 100; i++ {
-		c := balancer.Balance()
-		if c == nil {
-			t.Error("Retuned nil client!")
-		}
-		for _, o := range clients {
-			if c == o {
-				t.Error("Balance did not iterate all the available clients")
-				break
-			}
-		}
-		clients = append(clients, c)
-	}
-
 }

@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package config
 
 import (
@@ -25,27 +24,29 @@ import (
 )
 
 type CdrcConfig struct {
-	ID                      string              // free-form text identifying this CDRC instance
-	Enabled                 bool                // Enable/Disable the profile
-	DryRun                  bool                // Do not post CDRs to the server
-	CdrsConns               []*HaPoolConfig     // The address where CDRs can be reached
-	CdrFormat               string              // The type of CDR file to process <csv|opensips_flatstore>
-	FieldSeparator          rune                // The separator to use when reading csvs
-	DataUsageMultiplyFactor float64             // Conversion factor for data usage
-	Timezone                string              // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	RunDelay                time.Duration       // Delay between runs, 0 for inotify driven requests
-	MaxOpenFiles            int                 // Maximum number of files opened simultaneously
-	CdrInDir                string              // Folder to process CDRs from
-	CdrOutDir               string              // Folder to move processed CDRs to
-	FailedCallsPrefix       string              // Used in case of flatstore CDRs to avoid searching for BYE records
-	CDRPath                 utils.HierarchyPath // used for XML CDRs to specify the path towards CDR elements
-	CdrSourceId             string              // Source identifier for the processed CDRs
-	CdrFilter               utils.RSRFields     // Filter CDR records to import
-	ContinueOnSuccess       bool                // Continue after execution
-	PartialRecordCache      time.Duration       // Duration to cache partial records when not pairing
-	HeaderFields            []*CfgCdrField
-	ContentFields           []*CfgCdrField
-	TrailerFields           []*CfgCdrField
+	ID                       string              // free-form text identifying this CDRC instance
+	Enabled                  bool                // Enable/Disable the profile
+	DryRun                   bool                // Do not post CDRs to the server
+	CdrsConns                []*HaPoolConfig     // The address where CDRs can be reached
+	CdrFormat                string              // The type of CDR file to process <csv|opensips_flatstore>
+	FieldSeparator           rune                // The separator to use when reading csvs
+	DataUsageMultiplyFactor  float64             // Conversion factor for data usage
+	Timezone                 string              // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	RunDelay                 time.Duration       // Delay between runs, 0 for inotify driven requests
+	MaxOpenFiles             int                 // Maximum number of files opened simultaneously
+	CdrInDir                 string              // Folder to process CDRs from
+	CdrOutDir                string              // Folder to move processed CDRs to
+	FailedCallsPrefix        string              // Used in case of flatstore CDRs to avoid searching for BYE records
+	CDRPath                  utils.HierarchyPath // used for XML CDRs to specify the path towards CDR elements
+	CdrSourceId              string              // Source identifier for the processed CDRs
+	CdrFilter                utils.RSRFields     // Filter CDR records to import
+	ContinueOnSuccess        bool                // Continue after execution
+	PartialRecordCache       time.Duration       // Duration to cache partial records when not pairing
+	PartialCacheExpiryAction string
+	HeaderFields             []*CfgCdrField
+	ContentFields            []*CfgCdrField
+	TrailerFields            []*CfgCdrField
+	CacheDumpFields          []*CfgCdrField
 }
 
 func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
@@ -116,6 +117,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 			return err
 		}
 	}
+	if jsnCfg.Partial_cache_expiry_action != nil {
+		self.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
+	}
 	if jsnCfg.Header_fields != nil {
 		if self.HeaderFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Header_fields); err != nil {
 			return err
@@ -128,6 +132,11 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	}
 	if jsnCfg.Trailer_fields != nil {
 		if self.TrailerFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Trailer_fields); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Cache_dump_fields != nil {
+		if self.CacheDumpFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Cache_dump_fields); err != nil {
 			return err
 		}
 	}
@@ -152,10 +161,17 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc.MaxOpenFiles = self.MaxOpenFiles
 	clnCdrc.CdrInDir = self.CdrInDir
 	clnCdrc.CdrOutDir = self.CdrOutDir
+	clnCdrc.CDRPath = make(utils.HierarchyPath, len(self.CDRPath))
+	for i, path := range self.CDRPath {
+		clnCdrc.CDRPath[i] = path
+	}
 	clnCdrc.CdrSourceId = self.CdrSourceId
+	clnCdrc.PartialRecordCache = self.PartialRecordCache
+	clnCdrc.PartialCacheExpiryAction = self.PartialCacheExpiryAction
 	clnCdrc.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
 	clnCdrc.ContentFields = make([]*CfgCdrField, len(self.ContentFields))
 	clnCdrc.TrailerFields = make([]*CfgCdrField, len(self.TrailerFields))
+	clnCdrc.CacheDumpFields = make([]*CfgCdrField, len(self.CacheDumpFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld
 		clnCdrc.HeaderFields[idx] = &clonedVal
@@ -167,6 +183,10 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	for idx, fld := range self.TrailerFields {
 		clonedVal := *fld
 		clnCdrc.TrailerFields[idx] = &clonedVal
+	}
+	for idx, fld := range self.CacheDumpFields {
+		clonedVal := *fld
+		clnCdrc.CacheDumpFields[idx] = &clonedVal
 	}
 	return clnCdrc
 }

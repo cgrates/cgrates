@@ -1,0 +1,71 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",					// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+ "tariffplan_db": {							// database used to store active tariff plan configuration
+ 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "tpdb",
+},
+
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "datadb",
+},
+
+"stor_db": {
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "stordb",
+},
+
+
+"rals": {
+	"enabled": true,					// enable Rater service: <true|false>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"scheduler": {
+	"enabled": true,					// start Scheduler service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,					// start the CDR Server service:  <true|false>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"cdrstats": {
+	"enabled": true,					// starts the cdrstats service: <true|false>
+},
+
+"pubsubs": {
+	"enabled": true,				// starts PubSub service: <true|false>.
+},
+
+
+"users": {
+	"enabled": true,				// starts User service: <true|false>.
+	"indexes": ["Uuid"],			// user profile field indexes
+},
+
+}

@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestCdreCfgClone(t *testing.T) {
@@ -29,11 +30,11 @@ func TestCdreCfgClone(t *testing.T) {
 	emptyFields := []*CfgCdrField{}
 	initContentFlds := []*CfgCdrField{
 		&CfgCdrField{Tag: "CgrId",
-			Type:    "cdrfield",
+			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
 		&CfgCdrField{Tag: "RunId",
-			Type:    "cdrfield",
+			Type:    "*composed",
 			FieldId: "mediation_runid",
 			Value:   runIdRsrs},
 	}
@@ -46,16 +47,16 @@ func TestCdreCfgClone(t *testing.T) {
 		CostShiftDigits:         0,
 		MaskDestinationID:       "MASKED_DESTINATIONS",
 		MaskLength:              0,
-		ExportFolder:            "/var/log/cgrates/cdre",
+		ExportDirectory:         "/var/spool/cgrates/cdre",
 		ContentFields:           initContentFlds,
 	}
 	eClnContentFlds := []*CfgCdrField{
 		&CfgCdrField{Tag: "CgrId",
-			Type:    "cdrfield",
+			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
 		&CfgCdrField{Tag: "RunId",
-			Type:    "cdrfield",
+			Type:    "*composed",
 			FieldId: "mediation_runid",
 			Value:   runIdRsrs},
 	}
@@ -68,7 +69,7 @@ func TestCdreCfgClone(t *testing.T) {
 		CostShiftDigits:         0,
 		MaskDestinationID:       "MASKED_DESTINATIONS",
 		MaskLength:              0,
-		ExportFolder:            "/var/log/cgrates/cdre",
+		ExportDirectory:         "/var/spool/cgrates/cdre",
 		HeaderFields:            emptyFields,
 		ContentFields:           eClnContentFlds,
 		TrailerFields:           emptyFields,

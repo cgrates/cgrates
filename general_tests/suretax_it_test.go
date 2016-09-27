@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package general_tests
 
 import (
@@ -42,7 +41,7 @@ var tpDir = flag.String("tp_dir", "", "CGR config dir path here")
 
 var stiCfg *config.CGRConfig
 var stiRpc *rpc.Client
-var stiLoadInst engine.LoadInstance
+var stiLoadInst utils.LoadInstance
 
 func TestSTIInitCfg(t *testing.T) {
 	if !*testSureTax {
@@ -106,7 +105,7 @@ func TestSTILoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: *tpDir}
 	if err := stiRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &stiLoadInst); err != nil {
 		t.Error(err)
-	} else if stiLoadInst.LoadId == "" {
+	} else if stiLoadInst.RatingLoadID == "" || stiLoadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", stiLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -118,8 +117,7 @@ func TestSTICacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 1, RatingPlans: 1, RatingProfiles: 1, DerivedChargers: 1,
-		LastLoadId: stiLoadInst.LoadId, LastLoadTime: stiLoadInst.LoadTime.Format(time.RFC3339)}
+	expectedStats := &utils.CacheStats{Destinations: 1, RatingPlans: 1, RatingProfiles: 1, DerivedChargers: 1}
 	var args utils.AttrCacheStats
 	if err := stiRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

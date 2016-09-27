@@ -28,6 +28,7 @@ CREATE TABLE cdrs (
  cost_source VARCHAR(64) NOT NULL,
  cost NUMERIC(20,4) DEFAULT NULL,
  cost_details jsonb,
+ account_summary jsonb,
  extra_info text,
  created_at TIMESTAMP,
  updated_at TIMESTAMP NULL,

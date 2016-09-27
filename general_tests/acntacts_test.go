@@ -1,27 +1,27 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package general_tests
 
 import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -55,14 +55,18 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	cdrStats := ``
 	users := ``
 	aliases := ``
+	resLimits := ``
 	csvr := engine.NewTpReader(ratingDbAcntActs, acntDbAcntActs, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "", 10)
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
-	csvr.WriteToDatabase(false, false)
-	ratingDbAcntActs.CacheRatingAll()
-	acntDbAcntActs.CacheAccountingAll()
+	csvr.WriteToDatabase(false, false, false)
+
+	cache2go.Flush()
+	ratingDbAcntActs.PreloadRatingCache()
+	acntDbAcntActs.PreloadAccountingCache()
+
 	expectAcnt := &engine.Account{ID: "cgrates.org:1"}
 	if acnt, err := acntDbAcntActs.GetAccount("cgrates.org:1"); err != nil {
 		t.Error(err)

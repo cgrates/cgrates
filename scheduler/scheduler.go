@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package scheduler
 
 import (
@@ -119,6 +118,9 @@ func (s *Scheduler) loadActionPlans() {
 	// recreate the queue
 	s.queue = engine.ActionTimingPriorityList{}
 	for _, actionPlan := range actionPlans {
+		if actionPlan == nil {
+			continue
+		}
 		for _, at := range actionPlan.ActionTimings {
 			if at.Timing == nil {
 				utils.Logger.Warning(fmt.Sprintf("<Scheduler> Nil timing on action plan: %+v, discarding!", at))

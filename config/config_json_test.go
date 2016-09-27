@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package config
 
 import (
@@ -42,9 +41,9 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Http_skip_tls_verify: utils.BoolPointer(false),
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
-		Tpexport_dir:         utils.StringPointer("/var/log/cgrates/tpe"),
+		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
 		Httpposter_attempts:  utils.IntPointer(3),
-		Http_failed_dir:      utils.StringPointer("/var/log/cgrates/http_failed"),
+		Http_failed_dir:      utils.StringPointer("/var/spool/cgrates/http_failed"),
 		Default_request_type: utils.StringPointer(utils.META_RATED),
 		Default_category:     utils.StringPointer("call"),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
@@ -57,6 +56,28 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Internal_ttl:         utils.StringPointer("2m"),
 		Locking_timeout:      utils.StringPointer("5s")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, gCfg) {
+		t.Error("Received: ", utils.ToIJSON(gCfg))
+	}
+}
+
+func TestCacheJsonCfg(t *testing.T) {
+	eCfg := &CacheJsonCfg{
+		Destinations:         &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Reverse_destinations: &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Rating_plans:         &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(true)},
+		Rating_profiles:      &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Lcr:                  &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Cdr_stats:            &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Actions:              &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Action_plans:         &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Action_triggers:      &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Shared_groups:        &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Aliases:              &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Reverse_aliases:      &CacheParamJsonCfg{Limit: utils.IntPointer(10000), Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+	}
+	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Error("Received: ", utils.ToIJSON(gCfg))
@@ -152,9 +173,11 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
-		Enabled:      utils.BoolPointer(false),
-		Extra_fields: utils.StringSlicePointer([]string{}),
-		Store_cdrs:   utils.BoolPointer(true),
+		Enabled:             utils.BoolPointer(false),
+		Extra_fields:        utils.StringSlicePointer([]string{}),
+		Store_cdrs:          utils.BoolPointer(true),
+		Cdr_account_summary: utils.BoolPointer(false),
+		Sm_cost_retries:     utils.IntPointer(5),
 		Rals_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer("*internal"),
@@ -188,67 +211,52 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 	eFields := []*CdrFieldJsonCfg{}
 	eContentFlds := []*CdrFieldJsonCfg{
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("CGRID"),
-			Field_id: utils.StringPointer(utils.CGRID),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.CGRID)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.CGRID)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("RunID"),
-			Field_id: utils.StringPointer(utils.MEDI_RUNID),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.MEDI_RUNID)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.MEDI_RUNID)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"),
-			Field_id: utils.StringPointer(utils.TOR),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.TOR)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.TOR)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"),
-			Field_id: utils.StringPointer(utils.ACCID),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.ACCID)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.ACCID)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"),
-			Field_id: utils.StringPointer(utils.REQTYPE),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.REQTYPE)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.REQTYPE)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Direction"),
-			Field_id: utils.StringPointer(utils.DIRECTION),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.DIRECTION)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.DIRECTION)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tenant"),
-			Field_id: utils.StringPointer(utils.TENANT),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.TENANT)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.TENANT)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Category"),
-			Field_id: utils.StringPointer(utils.CATEGORY),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.CATEGORY)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.CATEGORY)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Account"),
-			Field_id: utils.StringPointer(utils.ACCOUNT),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.ACCOUNT)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.ACCOUNT)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Subject"),
-			Field_id: utils.StringPointer(utils.SUBJECT),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.SUBJECT)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.SUBJECT)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Destination"),
-			Field_id: utils.StringPointer(utils.DESTINATION),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.DESTINATION)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.DESTINATION)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("SetupTime"),
-			Field_id: utils.StringPointer(utils.SETUP_TIME),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.SETUP_TIME),
-			Layout:   utils.StringPointer("2006-01-02T15:04:05Z07:00")},
+			Type:   utils.StringPointer(utils.META_COMPOSED),
+			Value:  utils.StringPointer(utils.SETUP_TIME),
+			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("AnswerTime"),
-			Field_id: utils.StringPointer(utils.ANSWER_TIME),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.ANSWER_TIME),
-			Layout:   utils.StringPointer("2006-01-02T15:04:05Z07:00")},
+			Type:   utils.StringPointer(utils.META_COMPOSED),
+			Value:  utils.StringPointer(utils.ANSWER_TIME),
+			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Usage"),
-			Field_id: utils.StringPointer(utils.USAGE),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.USAGE)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.USAGE)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Cost"),
-			Field_id: utils.StringPointer(utils.COST),
-			Type:     utils.StringPointer(utils.META_COMPOSED),
-			Value:    utils.StringPointer(utils.COST)},
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.COST)},
 	}
 	eCfg := map[string]*CdreJsonCfg{
 		utils.META_DEFAULT: &CdreJsonCfg{
@@ -263,7 +271,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Cost_shift_digits:             utils.IntPointer(0),
 			Mask_destination_id:           utils.StringPointer("MASKED_DESTINATIONS"),
 			Mask_length:                   utils.IntPointer(0),
-			Export_folder:                 utils.StringPointer("/var/log/cgrates/cdre"),
+			Export_directory:              utils.StringPointer("/var/spool/cgrates/cdre"),
 			Header_fields:                 &eFields,
 			Content_fields:                &eContentFlds,
 			Trailer_fields:                &eFields,
@@ -306,6 +314,55 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Usage"), Field_id: utils.StringPointer(utils.USAGE), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("13"), Mandatory: utils.BoolPointer(true)},
 	}
+	cacheDumpFields := []*CdrFieldJsonCfg{
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("CGRID"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.CGRID)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("RunID"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.MEDI_RUNID)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.TOR)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.ACCID)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.REQTYPE)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("Direction"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.DIRECTION)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tenant"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.TENANT)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("Category"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.CATEGORY)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("Account"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.ACCOUNT)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("Subject"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.SUBJECT)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("Destination"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.DESTINATION)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("SetupTime"),
+			Type:   utils.StringPointer(utils.META_COMPOSED),
+			Value:  utils.StringPointer(utils.SETUP_TIME),
+			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00")},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("AnswerTime"),
+			Type:   utils.StringPointer(utils.META_COMPOSED),
+			Value:  utils.StringPointer(utils.ANSWER_TIME),
+			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00")},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("Usage"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.USAGE)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("Cost"),
+			Type:  utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer(utils.COST)},
+	}
 	eCfg := []*CdrcJsonCfg{
 		&CdrcJsonCfg{
 			Id:      utils.StringPointer(utils.META_DEFAULT),
@@ -314,23 +371,25 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Cdrs_conns: &[]*HaPoolJsonCfg{&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-			Cdr_format:                 utils.StringPointer("csv"),
-			Field_separator:            utils.StringPointer(","),
-			Timezone:                   utils.StringPointer(""),
-			Run_delay:                  utils.IntPointer(0),
-			Max_open_files:             utils.IntPointer(1024),
-			Data_usage_multiply_factor: utils.Float64Pointer(1024.0),
-			Cdr_in_dir:                 utils.StringPointer("/var/log/cgrates/cdrc/in"),
-			Cdr_out_dir:                utils.StringPointer("/var/log/cgrates/cdrc/out"),
-			Failed_calls_prefix:        utils.StringPointer("missed_calls"),
-			Cdr_path:                   utils.StringPointer(""),
-			Cdr_source_id:              utils.StringPointer("freeswitch_csv"),
-			Cdr_filter:                 utils.StringPointer(""),
-			Continue_on_success:        utils.BoolPointer(false),
-			Partial_record_cache:       utils.StringPointer("10s"),
-			Header_fields:              &eFields,
-			Content_fields:             &cdrFields,
-			Trailer_fields:             &eFields,
+			Cdr_format:                  utils.StringPointer("csv"),
+			Field_separator:             utils.StringPointer(","),
+			Timezone:                    utils.StringPointer(""),
+			Run_delay:                   utils.IntPointer(0),
+			Max_open_files:              utils.IntPointer(1024),
+			Data_usage_multiply_factor:  utils.Float64Pointer(1024.0),
+			Cdr_in_dir:                  utils.StringPointer("/var/spool/cgrates/cdrc/in"),
+			Cdr_out_dir:                 utils.StringPointer("/var/spool/cgrates/cdrc/out"),
+			Failed_calls_prefix:         utils.StringPointer("missed_calls"),
+			Cdr_path:                    utils.StringPointer(""),
+			Cdr_source_id:               utils.StringPointer("freeswitch_csv"),
+			Cdr_filter:                  utils.StringPointer(""),
+			Continue_on_success:         utils.BoolPointer(false),
+			Partial_record_cache:        utils.StringPointer("10s"),
+			Partial_cache_expiry_action: utils.StringPointer(utils.MetaDumpToFile),
+			Header_fields:               &eFields,
+			Content_fields:              &cdrFields,
+			Trailer_fields:              &eFields,
+			Cache_dump_fields:           &cacheDumpFields,
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrcJsonCfg(); err != nil {
@@ -356,6 +415,7 @@ func TestSmGenericJsonCfg(t *testing.T) {
 		Min_call_duration: utils.StringPointer("0s"),
 		Max_call_duration: utils.StringPointer("3h"),
 		Session_ttl:       utils.StringPointer("0s"),
+		Session_indexes:   utils.StringSlicePointer([]string{}),
 	}
 	if cfg, err := dfCgrJsonCfg.SmGenericJsonCfg(); err != nil {
 		t.Error(err)
@@ -375,6 +435,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
+		Rls_conns:              &[]*HaPoolJsonCfg{},
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           utils.StringSlicePointer([]string{}),
 		Debit_interval:         utils.StringPointer("10s"),
@@ -456,6 +517,27 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 	}
 }
 
+func TestSmAsteriskJsonCfg(t *testing.T) {
+	eCfg := &SMAsteriskJsonCfg{
+		Enabled:    utils.BoolPointer(false),
+		Create_cdr: utils.BoolPointer(false),
+		Asterisk_conns: &[]*AstConnJsonCfg{
+			&AstConnJsonCfg{
+				Address:          utils.StringPointer("127.0.0.1:8088"),
+				User:             utils.StringPointer("cgrates"),
+				Password:         utils.StringPointer("CGRateS.org"),
+				Connect_attempts: utils.IntPointer(3),
+				Reconnects:       utils.IntPointer(5),
+			},
+		},
+	}
+	if cfg, err := dfCgrJsonCfg.SmAsteriskJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
 		Enabled:          utils.BoolPointer(false),
@@ -465,15 +547,15 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Pubsubs_conns:  &[]*HaPoolJsonCfg{},
-		Create_cdr:     utils.BoolPointer(true),
-		Debit_interval: utils.StringPointer("5m"),
-		Timezone:       utils.StringPointer(""),
-		Dialect:        utils.StringPointer("huawei"),
-		Origin_host:    utils.StringPointer("CGR-DA"),
-		Origin_realm:   utils.StringPointer("cgrates.org"),
-		Vendor_id:      utils.IntPointer(0),
-		Product_name:   utils.StringPointer("CGRateS"),
+		Pubsubs_conns:        &[]*HaPoolJsonCfg{},
+		Create_cdr:           utils.BoolPointer(true),
+		Cdr_requires_session: utils.BoolPointer(true),
+		Debit_interval:       utils.StringPointer("5m"),
+		Timezone:             utils.StringPointer(""),
+		Origin_host:          utils.StringPointer("CGR-DA"),
+		Origin_realm:         utils.StringPointer("cgrates.org"),
+		Vendor_id:            utils.IntPointer(0),
+		Product_name:         utils.StringPointer("CGRateS"),
 		Request_processors: &[]*DARequestProcessorJsnCfg{
 			&DARequestProcessorJsnCfg{
 				Id:                  utils.StringPointer("*default"),
@@ -529,7 +611,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 func TestDfHistServJsonCfg(t *testing.T) {
 	eCfg := &HistServJsonCfg{
 		Enabled:       utils.BoolPointer(false),
-		History_dir:   utils.StringPointer("/var/log/cgrates/history"),
+		History_dir:   utils.StringPointer("/var/lib/cgrates/history"),
 		Save_interval: utils.StringPointer("1s"),
 	}
 	if cfg, err := dfCgrJsonCfg.HistServJsonCfg(); err != nil {
@@ -567,6 +649,20 @@ func TestDfUserServJsonCfg(t *testing.T) {
 		Indexes: utils.StringSlicePointer([]string{}),
 	}
 	if cfg, err := dfCgrJsonCfg.UserServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestDfResourceLimiterSJsonCfg(t *testing.T) {
+	eCfg := &ResourceLimiterServJsonCfg{
+		Enabled:             utils.BoolPointer(false),
+		Cdrstats_conns:      &[]*HaPoolJsonCfg{},
+		Cache_dump_interval: utils.StringPointer("0s"),
+		Usage_ttl:           utils.StringPointer("3h"),
+	}
+	if cfg, err := dfCgrJsonCfg.ResourceLimiterJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

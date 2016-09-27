@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package general_tests
 
 import (
@@ -35,13 +34,13 @@ import (
 var tutLocalCfgPath string
 var tutFsLocalCfg *config.CGRConfig
 var tutLocalRpc *rpc.Client
-var loadInst engine.LoadInstance // Share load information between tests
+var loadInst utils.LoadInstance // Share load information between tests
 
 func TestTutLocalInitCfg(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutlocal")
+	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
 	tutFsLocalCfg, err = config.NewCGRConfigFromFolder(tutLocalCfgPath)
@@ -102,7 +101,7 @@ func TestTutLocalLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tutLocalRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
-	} else if loadInst.LoadId == "" {
+	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", loadInst)
 	}
 	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups
@@ -115,8 +114,8 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
-		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
+	expectedStats := &utils.CacheStats{Destinations: 7, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1, ResourceLimits: 0,
+		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
@@ -1102,7 +1101,7 @@ func TestTutLocalLeastCost(t *testing.T) {
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
 	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[2], lcr.SupplierCosts[2])
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
 	}
 	cd = engine.CallDescriptor{
 		Direction:   "*out",

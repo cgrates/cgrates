@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -268,7 +267,7 @@ func (at *ActionTiming) GetActionPlanID() string {
 
 func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		at.actions, err = ratingStorage.GetActions(at.ActionsID, false)
+		at.actions, err = ratingStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
 	}
 	at.actions.Sort()
 	return at.actions, err
@@ -360,7 +359,12 @@ func (at *ActionTiming) Execute() (err error) {
 		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 		return err
 	}
-	storageLogger.LogActionTiming(utils.SCHED_SOURCE, at, aac)
+	Publish(CgrEvent{
+		"EventName": utils.EVT_ACTION_TIMING_FIRED,
+		"Uuid":      at.Uuid,
+		"Id":        at.actionPlanID,
+		"ActionIds": at.ActionsID,
+	})
 	return
 }
 

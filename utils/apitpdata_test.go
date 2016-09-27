@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package utils
 
 import (
@@ -29,5 +28,35 @@ func TestNewDTCSFromRPKey(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dtcs, &DirectionTenantCategorySubject{"*out", "tenant12", "call", "dan12"}) {
 		t.Error("Received: ", dtcs)
+	}
+}
+
+func TestAPIAttrSMGGetActiveSessionsAsMapStr(t *testing.T) {
+	attrs := &AttrSMGGetActiveSessions{
+		ToR:         StringPointer(""),
+		OriginID:    StringPointer(""),
+		RunID:       StringPointer(""),
+		RequestType: StringPointer(""),
+		Tenant:      StringPointer(""),
+		Category:    StringPointer(""),
+		Account:     StringPointer(""),
+		Subject:     StringPointer(""),
+		Destination: StringPointer(""),
+		Supplier:    StringPointer(""),
+	}
+	expectMP := map[string]string{
+		TOR:         MetaEmpty,
+		ACCID:       MetaEmpty,
+		MEDI_RUNID:  MetaEmpty,
+		REQTYPE:     MetaEmpty,
+		TENANT:      MetaEmpty,
+		CATEGORY:    MetaEmpty,
+		ACCOUNT:     MetaEmpty,
+		SUBJECT:     MetaEmpty,
+		DESTINATION: MetaEmpty,
+		SUPPLIER:    MetaEmpty,
+	}
+	if mp := attrs.AsMapStringString(); !reflect.DeepEqual(expectMP, mp) {
+		t.Errorf("Expecting: %+v, received: %+v", expectMP, mp)
 	}
 }

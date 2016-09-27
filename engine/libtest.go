@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -33,12 +32,12 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	ratingDb, err := ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort, cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding)
+	ratingDb, err := ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort, cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 	if err != nil {
 		return err
 	}
 	accountDb, err := ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName,
-		cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding)
+		cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 	if err != nil {
 		return err
 	}
@@ -47,7 +46,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 			return err
 		}
 	}
-	ratingDb.CacheRatingAll()
+	ratingDb.PreloadRatingCache()
 	CheckVersion(accountDb) // Write version before starting
 	return nil
 }
@@ -91,7 +90,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return StartEngine(cfgPath, waitEngine)
 }
 
-func LoadTariffPlanFromFolder(tpPath, timezone string, loadHistSize int, ratingDb RatingStorage, accountingDb AccountingStorage) error {
+func LoadTariffPlanFromFolder(tpPath, timezone string, ratingDb RatingStorage, accountingDb AccountingStorage, disable_reverse bool) error {
 	loader := NewTpReader(ratingDb, accountingDb, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(tpPath, utils.DESTINATIONS_CSV),
 		path.Join(tpPath, utils.TIMINGS_CSV),
@@ -110,11 +109,12 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, loadHistSize int, ratingD
 
 		path.Join(tpPath, utils.USERS_CSV),
 		path.Join(tpPath, utils.ALIASES_CSV),
-	), "", timezone, loadHistSize)
+		path.Join(tpPath, utils.ResourceLimitsCsv),
+	), "", timezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := loader.WriteToDatabase(false, false); err != nil {
+	if err := loader.WriteToDatabase(false, false, disable_reverse); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return nil
@@ -125,7 +125,7 @@ type PjsuaAccount struct {
 }
 
 // Returns file reference where we can write to control pjsua in terminal
-func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitMs int) (*os.File, error) {
+func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitDur time.Duration) (*os.File, error) {
 	cmdArgs := []string{fmt.Sprintf("--local-port=%d", localPort), "--null-audio", "--auto-answer=200", "--max-calls=32", "--app-log-level=0"}
 	for idx, acnt := range acnts {
 		if idx != 0 {
@@ -143,8 +143,8 @@ func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitMs int) (*os.File,
 		return nil, err
 	}
 	buf := new(bytes.Buffer)
-	io.Copy(os.Stdout, buf)                              // Free the content since otherwise pjsua will not start
-	time.Sleep(time.Duration(waitMs) * time.Millisecond) // Give time to rater to fire up
+	io.Copy(os.Stdout, buf) // Free the content since otherwise pjsua will not start
+	time.Sleep(waitDur)     // Give time to rater to fire up
 	return fPty, nil
 }
 

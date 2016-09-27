@@ -1,29 +1,46 @@
 {
 
-// Real-time Charging System for Telecom & ISP environments
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 // Copyright (C) ITsysCOM GmbH
 //
 // This file contains the default configuration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
 
 // "general": {
-// 	"http_skip_tls_verify": false,						// if enabled Http Client will accept any TLS certificate
-// 	"rounding_decimals": 5,								// system level precision for floats
-// 	"dbdata_encoding": "msgpack",						// encoding used to store object data in strings: <msgpack|json>
-// 	"tpexport_dir": "/var/log/cgrates/tpe",				// path towards export folder for offline Tariff Plans
-// 	"httpposter_attempts": 3,							// number of http attempts before considering request failed (eg: *call_url)
-// 	"http_failed_dir": "/var/log/cgrates/http_failed",	// directory path where we store failed http requests
-// 	"default_request_type": "*rated",					// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
-// 	"default_category": "call",							// default category to consider when missing from requests
-// 	"default_tenant": "cgrates.org",					// default tenant to consider when missing from requests
-// 	"default_timezone": "Local",						// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-// 	"connect_attempts": 3,								// initial server connect attempts
-// 	"reconnects": -1,									// number of retries in case of connection lost
-// 	"connect_timeout": "1s",							// consider connection unsuccessful on timeout, 0 to disable the feature
-// 	"reply_timeout": "2s",								// consider connection down for replies taking longer than this value
-// 	"response_cache_ttl": "0s",							// the life span of a cached response
-// 	"internal_ttl": "2m",								// maximum duration to wait for internal connections before giving up
-// 	"locking_timeout": "5s",							// timeout internal locks to avoid deadlocks
+// 	"http_skip_tls_verify": false,							// if enabled Http Client will accept any TLS certificate
+// 	"rounding_decimals": 5,									// system level precision for floats
+// 	"dbdata_encoding": "msgpack",							// encoding used to store object data in strings: <msgpack|json>
+// 	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline Tariff Plans
+// 	"httpposter_attempts": 3,								// number of http attempts before considering request failed (eg: *call_url)
+// 	"http_failed_dir": "/var/spool/cgrates/http_failed",	// directory path where we store failed http requests
+// 	"default_request_type": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
+// 	"default_category": "call",								// default category to consider when missing from requests
+// 	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
+// 	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+// 	"connect_attempts": 3,									// initial server connect attempts
+// 	"reconnects": -1,										// number of retries in case of connection lost
+// 	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
+// 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
+// 	"response_cache_ttl": "0s",								// the life span of a cached response
+// 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
+// 	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
+// 	"cache_dump_dir": "",									 // cache dump for faster start (leave empty to disable)
+// },
+
+
+// "cache":{
+// 	"destinations": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
+// 	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"lcr": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"actions": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"action_plans": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"aliases": {"limit": 10000, "ttl":"0s", "precache": false},
+// 	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": false},
 // },
 
 
@@ -95,6 +112,8 @@
 // 	"enabled": false,						// start the CDR Server service:  <true|false>
 // 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 // 	"store_cdrs": true,						// store cdrs in storDb
+// 	"cdr_account_summary": false,			// add account information from dataDB
+// 	"sm_cost_retries": 5,					// number of queries to sm_costs before recalculating CDR
 // 	"rals_conns": [
 // 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 // 	],
@@ -112,67 +131,31 @@
 // },
 
 
-// "cdre": {
-// 	"*default": {
-// 		"cdr_format": "csv",							// exported CDRs format <csv>
-// 		"field_separator": ",",
-// 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
-// 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-// 		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
-// 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-// 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-// 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
-// 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
-// 		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
-// 		"mask_length": 0,								// length of the destination suffix to be masked
-// 		"export_folder": "/var/log/cgrates/cdre",		// path where the exported CDRs will be placed
-// 		"header_fields": [],							// template of the exported header fields
-// 		"content_fields": [								// template of the exported content fields
-// 			{"tag": "CGRID", "field_id": "CGRID", "type": "*composed", "value": "CGRID"},
-// 			{"tag":"RunID", "field_id": "RunID", "type": "*composed", "value": "RunID"},
-// 			{"tag":"TOR", "field_id": "ToR", "type": "*composed", "value": "ToR"},
-// 			{"tag":"OriginID", "field_id": "OriginID", "type": "*composed", "value": "OriginID"},
-// 			{"tag":"RequestType", "field_id": "RequestType", "type": "*composed", "value": "RequestType"},
-// 			{"tag":"Direction", "field_id": "Direction", "type": "*composed", "value": "Direction"},
-// 			{"tag":"Tenant", "field_id": "Tenant", "type": "*composed", "value": "Tenant"},
-// 			{"tag":"Category", "field_id": "Category", "type": "*composed", "value": "Category"},
-// 			{"tag":"Account", "field_id": "Account", "type": "*composed", "value": "Account"},
-// 			{"tag":"Subject", "field_id": "Subject", "type": "*composed", "value": "Subject"},
-// 			{"tag":"Destination", "field_id": "Destination", "type": "*composed", "value": "Destination"},
-// 			{"tag":"SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-// 			{"tag":"AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-// 			{"tag":"Usage", "field_id": "Usage", "type": "*composed", "value": "Usage"},
-// 			{"tag":"Cost", "field_id": "Cost", "type": "*composed", "value": "Cost"},
-// 		],
-// 		"trailer_fields": [],							// template of the exported trailer fields
-// 	}
-// },
-
-
 // "cdrc": [
 // 	{
 // 		"id": "*default",								// identifier of the CDRC runner
-// 		"enabled": false,							// enable CDR client functionality
-// 		"dry_run": false,							// do not send the CDRs to CDRS, just parse them
+// 		"enabled": false,								// enable CDR client functionality
+// 		"dry_run": false,								// do not send the CDRs to CDRS, just parse them
 // 		"cdrs_conns": [
-// 			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
-// 		],							
-// 		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
-// 		"field_separator": ",",						// separator used in case of csv files
-// 		"timezone": "",								// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-// 		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-// 		"max_open_files": 1024,						// maximum simultaneous files to process, 0 for unlimited
-// 		"data_usage_multiply_factor": 1024,			// conversion factor for data usage
-// 		"cdr_in_dir": "/var/log/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
-// 		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
-// 		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
-// 		"cdr_path": "",							// path towards one CDR element in case of XML CDRs
-// 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
-// 		"cdr_filter": "",							// filter CDR records to import
-// 		"continue_on_success": false,				// continue to the next template if executed
-// 		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
-// 		"header_fields": [],						// template of the import header fields
-// 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+// 			{"address": "*internal"}					// address where to reach CDR server. <*internal|x.y.z.y:1234>
+// 		],
+// 		"cdr_format": "csv",							// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv>
+// 		"field_separator": ",",							// separator used in case of csv files
+// 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+// 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+// 		"max_open_files": 1024,							// maximum simultaneous files to process, 0 for unlimited
+// 		"data_usage_multiply_factor": 1024,				// conversion factor for data usage
+// 		"cdr_in_dir": "/var/spool/cgrates/cdrc/in",		// absolute path towards the directory where the CDRs are stored
+// 		"cdr_out_dir": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
+// 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
+// 		"cdr_path": "",									// path towards one CDR element in case of XML CDRs
+// 		"cdr_source_id": "freeswitch_csv",				// free form field, tag identifying the source of the CDRs within CDRS database
+// 		"cdr_filter": "",								// filter CDR records to import
+// 		"continue_on_success": false,					// continue to the next template if executed
+// 		"partial_record_cache": "10s",					// duration to cache partial records when not pairing
+// 		"partial_cache_expiry_action": "*dump_to_file",	// action taken when cache when records in cache are timed-out <*dump_to_file|*post_cdr>
+// 		"header_fields": [],							// template of the import header fields
+// 		"content_fields":[								// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 // 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "2", "mandatory": true},
 // 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "3", "mandatory": true},
 // 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "4", "mandatory": true},
@@ -187,8 +170,62 @@
 // 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
 // 		],
 // 		"trailer_fields": [],							// template of the import trailer fields
+// 		"cache_dump_fields": [
+// 			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
+// 			{"tag": "RunID", "type": "*composed", "value": "RunID"},
+// 			{"tag": "TOR", "type": "*composed", "value": "ToR"},
+// 			{"tag": "OriginID", "type": "*composed", "value": "OriginID"},
+// 			{"tag": "RequestType", "type": "*composed", "value": "RequestType"},
+// 			{"tag": "Direction", "type": "*composed", "value": "Direction"},
+// 			{"tag": "Tenant", "type": "*composed", "value": "Tenant"},
+// 			{"tag": "Category", "type": "*composed", "value": "Category"},
+// 			{"tag": "Account", "type": "*composed", "value": "Account"},
+// 			{"tag": "Subject", "type": "*composed", "value": "Subject"},
+// 			{"tag": "Destination", "type": "*composed", "value": "Destination"},
+// 			{"tag": "SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+// 			{"tag": "AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+// 			{"tag": "Usage", "type": "*composed", "value": "Usage"},
+// 			{"tag": "Cost", "type": "*composed", "value": "Cost"},
+// 		],
 // 	},
 // ],
+
+
+// "cdre": {
+// 	"*default": {
+// 		"cdr_format": "csv",							// exported CDRs format <csv>
+// 		"field_separator": ",",
+// 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
+// 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
+// 		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
+// 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
+// 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
+// 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
+// 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
+// 		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
+// 		"mask_length": 0,								// length of the destination suffix to be masked
+// 		"export_directory": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
+// 		"header_fields": [],							// template of the exported header fields
+// 		"content_fields": [								// template of the exported content fields
+// 			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
+// 			{"tag":"RunID", "type": "*composed", "value": "RunID"},
+// 			{"tag":"TOR", "type": "*composed", "value": "ToR"},
+// 			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
+// 			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
+// 			{"tag":"Direction", "type": "*composed", "value": "Direction"},
+// 			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
+// 			{"tag":"Category", "type": "*composed", "value": "Category"},
+// 			{"tag":"Account", "type": "*composed", "value": "Account"},
+// 			{"tag":"Subject", "type": "*composed", "value": "Subject"},
+// 			{"tag":"Destination", "type": "*composed", "value": "Destination"},
+// 			{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+// 			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+// 			{"tag":"Usage", "type": "*composed", "value": "Usage"},
+// 			{"tag":"Cost", "type": "*composed", "value": "Cost"},
+// 		],
+// 		"trailer_fields": [],							// template of the exported trailer fields
+// 	},
+// },
 
 
 // "sm_generic": {
@@ -204,19 +241,30 @@
 // 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 // 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 // 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
-	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
-	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
+// 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
+// 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
+// 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
+// },
+
+
+// "sm_asterisk": {
+// 	"enabled": false,												// starts Asterisk SessionManager service: <true|false>
+// 	"create_cdr": false,											// create CDR out of events and sends it to CDRS component
+// 	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
+// 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+// 	],
 // },
 
 
 // "sm_freeswitch": {
-// 	"enabled": false,				// starts SessionManager service: <true|false>
+// 	"enabled": false,						// starts SessionManager service: <true|false>
 // 	"rals_conns": [
-// 		{"address": "*internal"}		// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+// 		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
 // 	],
 // 	"cdrs_conns": [
-// 		{"address": "*internal"}		// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+// 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 // 	],
+// 	"rls_conns": [],						// address where to reach the ResourceLimiter service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 // 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 // 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
 // 	"debit_interval": "10s",				// interval to perform debits on.
@@ -257,10 +305,10 @@
 // 	"enabled": false,					// starts SessionManager service: <true|false>
 // 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
 // 	"rals_conns": [
-// 		{"address": "*internal"}     // address where to reach the Rater <""|*internal|127.0.0.1:2013>
+// 		{"address": "*internal"}		// address where to reach the Rater <""|*internal|127.0.0.1:2013>
 // 	],
 // 	"cdrs_conns": [
-// 		{"address": "*internal"}     // address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+// 		{"address": "*internal"}		// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 // 	],
 // 	"reconnects": 5,					// number of reconnects if connection is lost
 // 	"create_cdr": false,				// create CDR out of events and sends it to CDRS component
@@ -277,13 +325,13 @@
 // 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 // 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 // 	"sm_generic_conns": [
-// 		{"address": "*internal"}									// connection towards SMG component for session management
-// 	],															
+// 		{"address": "*internal"}								// connection towards SMG component for session management
+// 	],
 // 	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 // 	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
+// 	"cdr_requires_session": true,								// only create CDR if there is an active session at terminate
 // 	"debit_interval": "5m",										// interval for CCR updates
 // 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
-// 	"dialect": "huawei",										// the diameter dialect used in the communication, supported: <huawei>
 // 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 // 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 // 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
@@ -322,24 +370,32 @@
 
 // "historys": {
 // 	"enabled": false,							// starts History service: <true|false>.
-// 	"history_dir": "/var/log/cgrates/history",	// location on disk where to store history files.
+// 	"history_dir": "/var/lib/cgrates/history",	// location on disk where to store history files.
 // 	"save_interval": "1s",						// interval to save changed cache into .git archive
 // },
 
 
 // "pubsubs": {
-// 	"enabled": false,							// starts PubSub service: <true|false>.
+// 	"enabled": false,						// starts PubSub service: <true|false>.
 // },
 
 
 // "aliases": {
-// 	"enabled": false,							// starts Aliases service: <true|false>.
+// 	"enabled": false,						// starts Aliases service: <true|false>.
 // },
 
 
 // "users": {
-// 	"enabled": false,							// starts User service: <true|false>.
-// 	"indexes": [],								// user profile field indexes
+// 	"enabled": false,						// starts User service: <true|false>.
+// 	"indexes": [],							// user profile field indexes
+// },
+
+
+// "rls": {
+// 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
+// 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+// 	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+// 	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|$dur>
 // },
 
 

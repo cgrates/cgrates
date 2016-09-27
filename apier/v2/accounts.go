@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package v2
 
 import (
@@ -28,12 +27,12 @@ import (
 
 func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Account) error {
 	if len(attr.Tenant) == 0 {
-		return utils.NewErrMandatoryIeMissing("Tenanat")
+		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX+attr.Tenant, true); err != nil {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {
@@ -129,7 +128,6 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 						}
 					}
 				}
-
 				for _, actionPlanID := range *attr.ActionPlanIDs {
 					ap, ok := actionPlansMap[actionPlanID]
 					if !ok {
@@ -157,16 +155,10 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 						}
 					}
 				}
-				var actionPlansCacheIds []string
 				for actionPlanID, ap := range dirtyActionPlans {
-					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
+					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
-					actionPlansCacheIds = append(actionPlansCacheIds, utils.ACTION_PLAN_PREFIX+actionPlanID)
-				}
-				if len(actionPlansCacheIds) > 0 {
-					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
@@ -180,7 +172,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				ub.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
 			for _, actionTriggerID := range *attr.ActionTriggerIDs {
-				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID)
+				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
 				if err != nil {
 					return 0, err
 				}

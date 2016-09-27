@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -26,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -196,11 +194,10 @@ func (b *Balance) Clone() *Balance {
 func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destId string) {
 	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-				destIDs := x.(map[interface{}]struct{})
-				for dID := range destIDs {
-					if b.DestinationIDs[dID.(string)] == true {
-						return p, dID.(string)
+			if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+				for _, dID := range destIDs {
+					if b.DestinationIDs[dID] == true {
+						return p, dID
 					}
 				}
 			}
@@ -394,7 +391,10 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		}
 		if debitConnectFee {
 			// this is the first add, debit the connect fee
-			ub.DebitConnectionFee(cc, moneyBalances, count)
+			if ub.DebitConnectionFee(cc, moneyBalances, count, true) == false {
+				// found blocker balance
+				return nil, nil
+			}
 		}
 		cc.Timespans.Decompress()
 		//log.Printf("CC: %+v", cc)
@@ -507,15 +507,19 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
+	//log.Print("B: ", utils.ToJSON(b))
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
 	if err != nil {
 		return nil, err
 	}
-
+	//log.Print("cc: " + utils.ToJSON(cc))
 	if debitConnectFee {
 		// this is the first add, debit the connect fee
-		ub.DebitConnectionFee(cc, moneyBalances, count)
+		if ub.DebitConnectionFee(cc, moneyBalances, count, true) == false {
+			// balance is blocker
+			return nil, nil
+		}
 	}
 
 	cc.Timespans.Decompress()
@@ -613,6 +617,15 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		cc = nil
 	}
 	return cc, nil
+}
+
+// Converts the balance towards compressed information to be displayed
+func (b *Balance) AsBalanceSummary(typ string) *BalanceSummary {
+	bd := &BalanceSummary{ID: b.ID, Type: typ, Value: b.Value, Disabled: b.Disabled}
+	if bd.ID == "" {
+		bd.ID = b.Uuid
+	}
+	return bd
 }
 
 /*
@@ -735,4 +748,12 @@ func (f ValueFactor) GetValue(tor string) float64 {
 		return value
 	}
 	return 1.0
+}
+
+// BalanceDigest represents compressed information about a balance
+type BalanceSummary struct {
+	ID       string // ID or UUID if not defined
+	Type     string // *voice, *data, etc
+	Value    float64
+	Disabled bool
 }

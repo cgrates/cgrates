@@ -1,14 +1,14 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -26,8 +26,9 @@ import (
 	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"reflect"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cenk/rpc2"
 	"golang.org/x/net/websocket"
 )
 import _ "net/http/pprof"
@@ -35,7 +36,7 @@ import _ "net/http/pprof"
 type Server struct {
 	rpcEnabled  bool
 	httpEnabled bool
-	bijsonSrv   *rpc2.Server
+	birpcSrv    *rpc2.Server
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
@@ -54,21 +55,24 @@ func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWrit
 }
 
 // Registers a new BiJsonRpc name
-func (s *Server) BijsonRegisterName(method string, handlerFunc interface{}) {
-	if s.bijsonSrv == nil {
-		s.bijsonSrv = rpc2.NewServer()
+func (s *Server) BiRPCRegisterName(method string, handlerFunc interface{}) {
+	if s.birpcSrv == nil {
+		s.birpcSrv = rpc2.NewServer()
 	}
-	s.bijsonSrv.Handle(method, handlerFunc)
+	s.birpcSrv.Handle(method, handlerFunc)
 }
 
-//Registers a new handler for OnConnect event
-func (s *Server) BijsonRegisterOnConnect(f func(*rpc2.Client)) {
-	s.bijsonSrv.OnConnect(f)
-}
-
-//Registers a new handler for OnDisconnect event
-func (s *Server) BijsonRegisterOnDisconnect(f func(*rpc2.Client)) {
-	s.bijsonSrv.OnDisconnect(f)
+func (s *Server) BiRPCRegister(rcvr interface{}) {
+	if s.birpcSrv == nil {
+		s.birpcSrv = rpc2.NewServer()
+	}
+	rcvType := reflect.TypeOf(rcvr)
+	for i := 0; i < rcvType.NumMethod(); i++ {
+		method := rcvType.Method(i)
+		if method.Name != "Call" {
+			s.birpcSrv.Handle("SMGenericV1."+method.Name, method.Func.Interface())
+		}
+	}
 }
 
 func (s *Server) ServeJSON(addr string) {
@@ -134,7 +138,7 @@ func (s *Server) ServeHTTP(addr string) {
 }
 
 func (s *Server) ServeBiJSON(addr string) {
-	if s.bijsonSrv == nil {
+	if s.birpcSrv == nil {
 		return
 	}
 	lBiJSON, e := net.Listen("tcp", addr)
@@ -142,7 +146,7 @@ func (s *Server) ServeBiJSON(addr string) {
 		log.Fatal("ServeBiJSON listen error:", e)
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at %s.", addr))
-	s.bijsonSrv.Accept(lBiJSON)
+	s.birpcSrv.Accept(lBiJSON)
 }
 
 // rpcRequest represents a RPC request.

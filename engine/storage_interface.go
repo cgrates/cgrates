@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -23,7 +22,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"reflect"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
@@ -33,40 +31,44 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(string, bool) ([]string, error)
+	GetKeysForPrefix(string) ([]string, error)
+	PreloadCacheForPrefix(string) error
+	RebuildReverseForPrefix(string) error
 }
 
 // Interface for storage providers.
 type RatingStorage interface {
 	Storage
-	CacheRatingAll() error
-	CacheRatingPrefixes(...string) error
-	CacheRatingPrefixValues(map[string][]string) error
 	HasData(string, string) (bool, error)
-	GetRatingPlan(string, bool) (*RatingPlan, error)
-	SetRatingPlan(*RatingPlan) error
-	GetRatingProfile(string, bool) (*RatingProfile, error)
-	SetRatingProfile(*RatingProfile) error
-	RemoveRatingProfile(string) error
-	GetDestination(string) (*Destination, error)
-	SetDestination(*Destination) error
-	RemoveDestination(string) error
-	GetLCR(string, bool) (*LCR, error)
-	SetLCR(*LCR) error
+	PreloadRatingCache() error
+	GetRatingPlan(string, bool, string) (*RatingPlan, error)
+	SetRatingPlan(*RatingPlan, string) error
+	GetRatingProfile(string, bool, string) (*RatingProfile, error)
+	SetRatingProfile(*RatingProfile, string) error
+	RemoveRatingProfile(string, string) error
+	GetDestination(string, bool, string) (*Destination, error)
+	SetDestination(*Destination, string) error
+	RemoveDestination(string, string) error
+	SetReverseDestination(*Destination, string) error
+	GetReverseDestination(string, bool, string) ([]string, error)
+	UpdateReverseDestination(*Destination, *Destination, string) error
+	GetLCR(string, bool, string) (*LCR, error)
+	SetLCR(*LCR, string) error
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
-	GetDerivedChargers(string, bool) (*utils.DerivedChargers, error)
-	SetDerivedChargers(string, *utils.DerivedChargers) error
-	GetActions(string, bool) (Actions, error)
-	SetActions(string, Actions) error
-	RemoveActions(string) error
-	GetSharedGroup(string, bool) (*SharedGroup, error)
-	SetSharedGroup(*SharedGroup) error
-	GetActionTriggers(string) (ActionTriggers, error)
-	SetActionTriggers(string, ActionTriggers) error
-	GetActionPlan(string, bool) (*ActionPlan, error)
-	SetActionPlan(string, *ActionPlan, bool) error
+	GetDerivedChargers(string, bool, string) (*utils.DerivedChargers, error)
+	SetDerivedChargers(string, *utils.DerivedChargers, string) error
+	GetActions(string, bool, string) (Actions, error)
+	SetActions(string, Actions, string) error
+	RemoveActions(string, string) error
+	GetSharedGroup(string, bool, string) (*SharedGroup, error)
+	SetSharedGroup(*SharedGroup, string) error
+	GetActionTriggers(string, bool, string) (ActionTriggers, error)
+	SetActionTriggers(string, ActionTriggers, string) error
+	RemoveActionTriggers(string, string) error
+	GetActionPlan(string, bool, string) (*ActionPlan, error)
+	SetActionPlan(string, *ActionPlan, bool, string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
@@ -74,9 +76,7 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
-	CacheAccountingAll() error
-	CacheAccountingPrefixes(...string) error
-	CacheAccountingPrefixValues(map[string][]string) error
+	PreloadAccountingCache() error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
@@ -89,11 +89,17 @@ type AccountingStorage interface {
 	GetUser(string) (*UserProfile, error)
 	GetUsers() ([]*UserProfile, error)
 	RemoveUser(string) error
-	SetAlias(*Alias) error
-	GetAlias(string, bool) (*Alias, error)
-	RemoveAlias(string) error
-	GetLoadHistory(int, bool) ([]*LoadInstance, error)
-	AddLoadHistory(*LoadInstance, int) error
+	SetAlias(*Alias, string) error
+	GetAlias(string, bool, string) (*Alias, error)
+	RemoveAlias(string, string) error
+	SetReverseAlias(*Alias, string) error
+	GetReverseAlias(string, bool, string) ([]string, error)
+	UpdateReverseAlias(*Alias, *Alias, string) error
+	GetResourceLimit(string, bool, string) (*ResourceLimit, error)
+	SetResourceLimit(*ResourceLimit, string) error
+	RemoveResourceLimit(string, string) error
+	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
+	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetStructVersion() (*StructVersion, error)
 	SetStructVersion(*StructVersion) error
 }
@@ -106,19 +112,13 @@ type CdrStorage interface {
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 
-type LogStorage interface {
-	Storage
-	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
-	LogActionTiming(source string, at *ActionTiming, as Actions) error
-}
-
 type LoadStorage interface {
 	Storage
 	LoadReader
 	LoadWriter
 }
 
+// LoadReader reads from .csv or TP tables and provides the data ready for the tp_db or data_db.
 type LoadReader interface {
 	GetTpIds() ([]string, error)
 	GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
@@ -138,6 +138,7 @@ type LoadReader interface {
 	GetTpActionPlans(string, string) ([]TpActionPlan, error)
 	GetTpActionTriggers(string, string) ([]TpActionTrigger, error)
 	GetTpAccountActions(*TpAccountAction) ([]TpAccountAction, error)
+	GetTpResourceLimits(string, string) (TpResourceLimits, error)
 }
 
 type LoadWriter interface {
@@ -253,8 +254,10 @@ func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 
-type LoadInstance struct {
-	LoadId       string    // Unique identifier for the load
-	TariffPlanId string    // Tariff plan identificator for the data loaded
-	LoadTime     time.Time // Time of load
+// Decide the value of cacheCommit parameter based on transactionID
+func cacheCommit(transactionID string) bool {
+	if transactionID == utils.NonTransactional {
+		return true
+	}
+	return false
 }

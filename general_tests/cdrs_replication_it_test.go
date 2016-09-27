@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package general_tests
 
 import (
@@ -66,6 +65,12 @@ func TestCdrsInitCdrDb(t *testing.T) {
 	if err := engine.InitStorDb(cdrsSlaveCfg); err != nil {
 		t.Fatal(err)
 	}
+	/*
+		if err := os.Mkdir(cdrsMasterCfg.HttpFailedDir, 0700); err != nil {
+			t.Error(err)
+		}
+	*/
+
 }
 
 func TestCdrsStartMasterEngine(t *testing.T) {
@@ -149,7 +154,7 @@ func TestCdrsFileFailover(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(1 * time.Second))
 	failoverContent := []byte(`Account=1001&AnswerTime=2013-12-07T08%3A42%3A26Z&Category=call&Destination=1002&Direction=%2Aout&DisconnectCause=&OriginHost=192.168.1.1&OriginID=httpjsonrpc1&PDD=0&RequestType=%2Apseudoprepaid&SetupTime=2013-12-07T08%3A42%3A24Z&Source=UNKNOWN&Subject=1001&Supplier=&Tenant=cgrates.org&ToR=%2Avoice&Usage=10&field_extr1=val_extr1&fieldextr2=valextr2`)
 	var rplCfg *config.CdrReplicationCfg
 	for _, rplCfg = range cdrsMasterCfg.CDRSCdrReplication {
@@ -158,6 +163,9 @@ func TestCdrsFileFailover(t *testing.T) {
 		}
 	}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.HttpFailedDir)
+	if len(filesInDir) == 0 {
+		t.Fatalf("No files in directory: %s", cdrsMasterCfg.HttpFailedDir)
+	}
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()

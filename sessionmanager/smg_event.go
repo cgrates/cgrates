@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package sessionmanager
 
 import (
@@ -429,7 +428,7 @@ func (self SMGenericEvent) AsLcrRequest() *engine.LcrRequest {
 
 // AsMapStringString Converts into map[string]string, used for example as pubsub event
 func (self SMGenericEvent) AsMapStringString() (map[string]string, error) {
-	mp := make(map[string]string)
+	mp := make(map[string]string, len(self))
 	for k, v := range self {
 		if strV, casts := utils.CastIfToString(v); !casts {
 			return nil, fmt.Errorf("Value %+v does not cast to string", v)
@@ -438,4 +437,12 @@ func (self SMGenericEvent) AsMapStringString() (map[string]string, error) {
 		}
 	}
 	return mp, nil
+}
+
+func (self SMGenericEvent) Clone() SMGenericEvent {
+	evOut := make(SMGenericEvent, len(self))
+	for key, val := range self {
+		evOut[key] = val
+	}
+	return evOut
 }

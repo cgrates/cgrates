@@ -1,3 +1,20 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package engine
 
 import (
@@ -23,7 +40,7 @@ func TestAliasesGetAlias(t *testing.T) {
 	if err != nil ||
 		len(alias.Values) != 2 ||
 		len(alias.Values[0].Pairs) != 2 {
-		t.Error("Error getting alias: ", err, alias, alias.Values[0])
+		t.Error("Error getting alias: ", err, alias, alias.Values)
 	}
 }
 
@@ -208,32 +225,52 @@ func TestAliasesLoadAlias(t *testing.T) {
 
 func TestAliasesCache(t *testing.T) {
 	key := "*out:cgrates.org:call:remo:remo:*rating"
-	a, err := cache2go.Get(utils.ALIASES_PREFIX + key)
-	if err != nil || a == nil {
+	_, err := accountingStorage.GetAlias(key, false, utils.NonTransactional)
+	if err != nil {
+		t.Error("Error getting alias: ", err)
+	}
+	a, found := cache2go.Get(utils.ALIASES_PREFIX + key)
+	if !found || a == nil {
 		//log.Printf("Test: %+v", cache2go.GetEntriesKeys(utils.REVERSE_ALIASES_PREFIX))
 		t.Error("Error getting alias from cache: ", err, a)
 	}
 	rKey1 := "minuAccount*rating"
-	ra1, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey1)
-	if err != nil || len(ra1.(map[interface{}]struct{})) != 2 {
+	_, err = accountingStorage.GetReverseAlias(rKey1, false, utils.NonTransactional)
+	if err != nil {
+		t.Error("Error getting reverse alias: ", err)
+	}
+	ra1, found := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey1)
+	if !found || len(ra1.([]string)) != 2 {
 		t.Error("Error getting reverse alias 1: ", ra1)
 	}
 	rKey2 := "minuSubject*rating"
-	ra2, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey2)
-	if err != nil || len(ra2.(map[interface{}]struct{})) != 2 {
+	_, err = accountingStorage.GetReverseAlias(rKey2, false, utils.NonTransactional)
+	if err != nil {
+		t.Error("Error getting reverse alias: ", err)
+	}
+	ra2, found := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey2)
+	if !found || len(ra2.([]string)) != 2 {
 		t.Error("Error getting reverse alias 2: ", ra2)
 	}
-	accountingStorage.RemoveAlias(key)
-	a, err = cache2go.Get(utils.ALIASES_PREFIX + key)
-	if err == nil {
-		t.Error("Error getting alias from cache: ", err)
+	accountingStorage.RemoveAlias(key, utils.NonTransactional)
+	a, found = cache2go.Get(utils.ALIASES_PREFIX + key)
+	if found {
+		t.Error("Error getting alias from cache: ", found)
 	}
-	ra1, err = cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey1)
-	if err != nil || len(ra1.(map[interface{}]struct{})) != 1 {
+	_, err = accountingStorage.GetReverseAlias(rKey1, false, utils.NonTransactional)
+	if err != nil {
+		t.Error("Error getting reverse alias: ", err)
+	}
+	ra1, found = cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey1)
+	if !found || len(ra1.([]string)) != 1 {
 		t.Error("Error getting reverse alias 1: ", ra1)
 	}
-	ra2, err = cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey2)
-	if err != nil || len(ra2.(map[interface{}]struct{})) != 1 {
+	_, err = accountingStorage.GetReverseAlias(rKey2, false, utils.NonTransactional)
+	if err != nil {
+		t.Error("Error getting reverse alias: ", err)
+	}
+	ra2, found = cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey2)
+	if !found || len(ra2.([]string)) != 1 {
 		t.Error("Error getting reverse alias 2: ", ra2)
 	}
 }

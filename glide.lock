@@ -1,10 +1,14 @@
-hash: 4f75ceccd2b55c66bbd6da3d533b44f543f4eadc5008178449ff15aad5dacf1b
-updated: 2016-05-26T17:58:38.555038328+03:00
+hash: da953ea34fabe4e21f4dde6344f3b7ab5a75e02122a1c17af5ea434058fc77fb
+updated: 2016-09-06T20:33:01.649869367+02:00
 imports:
+- name: github.com/bit4bit/gami
+  version: 3a7f98e7efce7ed7f22c2169b666910b8abb15dc
 - name: github.com/cenk/hub
-  version: b864404b5f990410d56858a1b0a6fac23a85443f
-- name: github.com/cenkalti/rpc2
+  version: 11382a9960d39b0ecda16fd01c424c11ff765a34
+- name: github.com/cenk/rpc2
   version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
+- name: github.com/cgrates/aringo
+  version: 47cdb110c5ff42bddf2b801dc5ae8ceb15d2d602
 - name: github.com/cgrates/fsock
   version: a8ffdbdfc8440016df008ba91e6f05f806d7a69f
 - name: github.com/cgrates/kamevapi
@@ -12,31 +16,27 @@ imports:
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/rpcclient
-  version: 1d54b34b6a5531e1124728b489c44ec6a8ac231e
+  version: 20381958afb5d61950d60bbecec244d302334e5c
 - name: github.com/ChrisTrenkamp/goxpath
   version: 4aad8d0161aae7d17df4755d2c1e86cd1fcaaab6
   subpackages:
-  - tree
-  - tree/xmltree
   - internal/execxp
-  - internal/parser
-  - tree/xmltree/xmlbuilder
-  - tree/xmltree/xmlele
   - internal/lexer
+  - internal/parser
   - internal/parser/findutil
   - internal/parser/intfns
   - internal/parser/pathexpr
-  - literals/numlit
-  - literals/strlit
-  - xconst
-  - xfn
-  - xsort
+  - internal/xconst
+  - internal/xsort
+  - tree
+  - tree/xmltree
+  - tree/xmltree/xmlbuilder
+  - tree/xmltree/xmlele
   - tree/xmltree/xmlnode
-  - literals/boollit
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
-  version: 1a8912836dee1f666f882b2e388e340a3a10ecdd
+  version: 81dbef1b2e101aef372726366d5ecbf7de15f9da
   subpackages:
   - diam
   - diam/avp
@@ -46,68 +46,73 @@ imports:
   - diam/sm/smparser
   - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
-  version: 7ebe0a500653eeb1859664bed5e48dec1e164e73
+  version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
+- name: github.com/hashicorp/golang-lru
+  version: 0a025b7e63adc15a622f29b0b2c4c3848243bbf6
+  subpackages:
+  - simplelru
 - name: github.com/jinzhu/gorm
-  version: 57c72125b3087e1ed02c16f23a1f381cde3aaf2c
+  version: f26fa242cc1bf884f9a4f98849f70fb8e73f441f
 - name: github.com/jinzhu/inflection
-  version: 3272df6c21d04180007eb3349844c89a3856bc25
+  version: 74387dc39a75e970e7a3ae6a3386b5bd2e5c5cff
 - name: github.com/kr/pty
-  version: f7ee69f31298ecbe5d2b349c711e2547a617d398
+  version: ce7fa45920dc37a92de8377972e52bc55ffa8d57
 - name: github.com/lib/pq
-  version: ee1442bda7bd1b6a84e913bdb421cb1874ec629d
+  version: 50761b0867bd1d9d069276790bcd4a3bccf2324a
   subpackages:
   - oid
 - name: github.com/mediocregopher/radix.v2
-  version: 74e50e64194d2d2f4836212451c28b127f9d7fa1
+  version: ae04b3eb3731f94789205d1268e0759371166605
   subpackages:
   - pool
   - redis
 - name: github.com/mitchellh/mapstructure
-  version: d2dd0262208475919e1a362f675cfc0e7c10e905
+  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
 - name: github.com/peterh/liner
-  version: 0e4af131b90a9786839c8b1b01717be263e8555a
+  version: 8975875355a81d612fafb9f5a6037bdcc2d9b073
 - name: github.com/ugorji/go
-  version: a396ed22fc049df733440d90efe17475e3929ccb
+  version: 5cd0f2b3b6cca8e3a0a4101821e41a73cb59bed6
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: ef00b378c73f107bf44d5c9b69875255ce89b79a
+  version: 1358eff22f0dd0c54fc521042cc607f6ff4b531a
   subpackages:
-  - websocket
   - context
-  - html/charset
   - html
   - html/atom
+  - html/charset
+  - websocket
 - name: golang.org/x/sys
-  version: 33267e036fd93fcd26ea95b7bdaf2d8306cb743c
+  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: f773ec03ce334298742df7f3108fc0d402646d22
+  version: ceefd2213ed29504fff30155163c8f59827734f3
   subpackages:
   - encoding
   - encoding/charmap
   - encoding/htmlindex
-  - transform
-  - encoding/internal/identifier
   - encoding/internal
+  - encoding/internal/identifier
   - encoding/japanese
   - encoding/korean
   - encoding/simplifiedchinese
   - encoding/traditionalchinese
   - encoding/unicode
-  - language
-  - internal/utf8internal
-  - runes
   - internal/tag
+  - internal/utf8internal
+  - language
+  - runes
+  - transform
 - name: gopkg.in/fsnotify.v1
-  version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
+  version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
 - name: gopkg.in/mgo.v2
-  version: b6e2fa371e64216a45e61072a96d4e3859f169da
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
   - bson
+  - internal/json
   - internal/sasl
   - internal/scram
-devImports: []
+testImports: []

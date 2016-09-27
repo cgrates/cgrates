@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package config
 
 import (
@@ -25,20 +24,20 @@ import (
 )
 
 type DiameterAgentCfg struct {
-	Enabled           bool   // enables the diameter agent: <true|false>
-	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
-	DictionariesDir   string
-	SMGenericConns    []*HaPoolConfig // connections towards SMG component
-	PubSubConns       []*HaPoolConfig // connection towards pubsubs
-	CreateCDR         bool
-	DebitInterval     time.Duration
-	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Dialect           string // the diameter dialect used in the implementation <huawei>
-	OriginHost        string
-	OriginRealm       string
-	VendorId          int
-	ProductName       string
-	RequestProcessors []*DARequestProcessor
+	Enabled            bool   // enables the diameter agent: <true|false>
+	Listen             string // address where to listen for diameter requests <x.y.z.y:1234>
+	DictionariesDir    string
+	SMGenericConns     []*HaPoolConfig // connections towards SMG component
+	PubSubConns        []*HaPoolConfig // connection towards pubsubs
+	CreateCDR          bool
+	CDRRequiresSession bool
+	DebitInterval      time.Duration
+	Timezone           string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	OriginHost         string
+	OriginRealm        string
+	VendorId           int
+	ProductName        string
+	RequestProcessors  []*DARequestProcessor
 }
 
 func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error {
@@ -70,6 +69,9 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCDR = *jsnCfg.Create_cdr
+	}
+	if jsnCfg.Cdr_requires_session != nil {
+		self.CDRRequiresSession = *jsnCfg.Cdr_requires_session
 	}
 	if jsnCfg.Debit_interval != nil {
 		var err error

@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -1610,11 +1609,9 @@ func TestTSMultipleIncrementsCompressDecompress(t *testing.T) {
 		},
 	}
 	tss.Compress()
-	tss.Compress()
 	if len(tss[0].Increments) != 3 {
 		t.Error("Error compressing timespan: ", tss[0].Increments)
 	}
-	tss.Decompress()
 	tss.Decompress()
 	if len(tss[0].Increments) != 5 {
 		t.Error("Error decompressing timespans: ", tss[0].Increments)
@@ -1849,5 +1846,126 @@ func TestTSDifferentCompressDecompress(t *testing.T) {
 			t.Logf("TS(%d): %+v", i, ts)
 		}
 		t.Error("Error decompressing timespans: ", tss)
+	}
+}
+
+func TestTSMerge(t *testing.T) {
+	tss1 := &TimeSpan{
+		TimeStart: time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
+		RateInterval: &RateInterval{
+			Rating: &RIRate{
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&Rate{
+						Value:         2.0,
+						RateIncrement: 10 * time.Second,
+					},
+				},
+			},
+		},
+		Cost:          3,
+		DurationIndex: 1 * time.Minute,
+		Increments: Increments{
+			&Increment{
+				Duration: time.Minute,
+				Cost:     1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+					Monetary:  &MonetaryInfo{UUID: "2"},
+					AccountID: "3"},
+				CompressFactor: 3,
+			},
+		},
+	}
+	tss2 := &TimeSpan{
+		TimeStart: time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC),
+		RateInterval: &RateInterval{
+			Rating: &RIRate{
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&Rate{
+						Value:         2.0,
+						RateIncrement: 10 * time.Second,
+					},
+				},
+			},
+		},
+		Cost:          2,
+		DurationIndex: 2 * time.Minute,
+		Increments: Increments{
+			&Increment{
+				Duration: time.Minute,
+				Cost:     1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+					Monetary:  &MonetaryInfo{UUID: "2"},
+					AccountID: "3"},
+			},
+			&Increment{
+				Duration: time.Minute,
+				Cost:     1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+					Monetary:  &MonetaryInfo{UUID: "2"},
+					AccountID: "3"},
+			},
+		},
+	}
+	eMergedTSS := &TimeSpan{
+		TimeStart: time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC),
+		RateInterval: &RateInterval{
+			Rating: &RIRate{
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&Rate{
+						Value:         2.0,
+						RateIncrement: 10 * time.Second,
+					},
+				},
+			},
+		},
+		Cost:          5,
+		DurationIndex: 2 * time.Minute,
+		Increments: Increments{
+			&Increment{
+				Duration: time.Minute,
+				Cost:     1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+					Monetary:  &MonetaryInfo{UUID: "2"},
+					AccountID: "3"},
+				CompressFactor: 3,
+			},
+			&Increment{
+				Duration: time.Minute,
+				Cost:     1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+					Monetary:  &MonetaryInfo{UUID: "2"},
+					AccountID: "3"},
+				CompressFactor: 1,
+			},
+			&Increment{
+				Duration: time.Minute,
+				Cost:     1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+					Monetary:  &MonetaryInfo{UUID: "2"},
+					AccountID: "3"},
+				CompressFactor: 1,
+			},
+		},
+		CompressFactor: 1,
+	}
+	if merged := tss1.Merge(tss2); !merged {
+		t.Error("Not merged")
+	} else if !tss1.Equal(eMergedTSS) {
+		t.Errorf("Expecting: %+v, received: %+v", eMergedTSS, tss1)
 	}
 }

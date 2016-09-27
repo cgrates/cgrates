@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package general_tests
 
 import (
@@ -199,6 +198,18 @@ func TestRPCITDirectedRPC(t *testing.T) {
 		t.Error(err) // {"id":2,"result":null,"error":"rpc: can't find service SMGenericV1.ActiveSessions"}
 	} else if len(sessions) != 0 {
 		t.Errorf("Received sessions: %+v", sessions)
+	}
+}
+
+func TestRPCITTimeout(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var status map[string]interface{}
+	if err := rpcPoolFirst.Call("Responder.Status", "10s", &status); err == nil {
+		t.Error("Expecting timeout")
+	} else if err.Error() != rpcclient.ErrReplyTimeout.Error() {
+		t.Error(err)
 	}
 }
 
@@ -400,6 +411,7 @@ func TestRPCITStatusBcastRALs1Up(t *testing.T) {
 	}
 }
 
+/*
 func TestRPCITStatusBcastCmd(t *testing.T) {
 	if !*testIntegration {
 		return
@@ -407,14 +419,14 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	var stats utils.CacheStats
 	if err := rpcRAL1.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastLoadId != utils.NOT_AVAILABLE {
+	} else if stats.LastRatingLoadID != utils.NOT_AVAILABLE || stats.LastAccountingLoadID != utils.NOT_AVAILABLE {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
-	var loadInst engine.LoadInstance
+	var loadInst utils.LoadInstance
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := rpcRAL1.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
-	} else if loadInst.LoadId == "" {
+	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
 		t.Errorf("Empty loadId received, loadInstance: %+v", loadInst)
 	}
 	var reply string
@@ -425,15 +437,16 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	}
 	if err := rpcRAL1.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastLoadId != loadInst.LoadId {
-		t.Errorf("Received unexpected stats: %+v", stats)
+	} else if stats.LastRatingLoadID != loadInst.RatingLoadID {
+		t.Errorf("Received unexpected stats:  %+v vs %+v", stats, loadInst)
 	}
 	if err := rpcRAL2.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastLoadId != loadInst.LoadId {
-		t.Errorf("Received unexpected stats: %+v", stats)
+	} else if stats.LastRatingLoadID != loadInst.RatingLoadID {
+		t.Errorf("Received unexpected stats: %+v vs %+v", stats, loadInst)
 	}
 }
+*/
 
 func TestRPCITStopCgrEngine(t *testing.T) {
 	if !*testIntegration {

@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,13 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package v1
 
 import (
-	"time"
-
-	"github.com/cenkalti/rpc2"
+	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -48,72 +45,43 @@ func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 
 /// Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *SMGenericBiRpcV1) MaxUsage(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	maxUsageDur, err := self.sm.MaxUsage(ev, clnt)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if maxUsageDur == time.Duration(-1) {
-		*maxUsage = -1.0
-	} else {
-		*maxUsage = maxUsageDur.Seconds()
-	}
-	return nil
+	return self.sm.BiRPCV1MaxUsage(clnt, ev, maxUsage)
 }
 
 /// Returns list of suppliers which can be used for the request
 func (self *SMGenericBiRpcV1) LCRSuppliers(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	if supls, err := self.sm.LCRSuppliers(ev, clnt); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*suppliers = supls
-	}
-	return nil
+	return self.sm.BiRPCV1LCRSuppliers(clnt, ev, suppliers)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
 func (self *SMGenericBiRpcV1) InitiateSession(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.InitiateSession(ev, clnt); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*maxUsage = minMaxUsage.Seconds()
-	}
-	return nil
+	return self.sm.BiRPCV1InitiateSession(clnt, ev, maxUsage)
 }
 
 // Interim updates, returns remaining duration from the rater
 func (self *SMGenericBiRpcV1) UpdateSession(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.UpdateSession(ev, clnt); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*maxUsage = minMaxUsage.Seconds()
-	}
-	return nil
+	return self.sm.BiRPCV1UpdateSession(clnt, ev, maxUsage)
 }
 
 // Called on session end, should stop debit loop
 func (self *SMGenericBiRpcV1) TerminateSession(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, reply *string) error {
-	if err := self.sm.TerminateSession(ev, clnt); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
+	return self.sm.BiRPCV1TerminateSession(clnt, ev, reply)
 }
 
 // Called on individual Events (eg SMS)
 func (self *SMGenericBiRpcV1) ChargeEvent(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.ChargeEvent(ev, clnt); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*maxUsage = minMaxUsage.Seconds()
-	}
-	return nil
+	return self.sm.BiRPCV1ChargeEvent(clnt, ev, maxUsage)
 }
 
 // Called on session end, should send the CDR to CDRS
 func (self *SMGenericBiRpcV1) ProcessCDR(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, reply *string) error {
-	if err := self.sm.ProcessCDR(ev); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
+	return self.sm.BiRPCV1ProcessCDR(clnt, ev, reply)
+}
+
+func (self *SMGenericBiRpcV1) ActiveSessions(clnt *rpc2.Client, attrs utils.AttrSMGGetActiveSessions, reply *[]*sessionmanager.ActiveSession) error {
+	return self.sm.BiRPCV1ActiveSessions(clnt, attrs, reply)
+}
+
+func (self *SMGenericBiRpcV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
+	return self.sm.BiRPCV1ActiveSessionsCount(attrs, reply)
 }

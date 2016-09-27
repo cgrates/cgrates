@@ -1,0 +1,6 @@
+#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
+cgrates.org,101,TEST_ACCOUNT,TEST_THRESHOLDS,,
+cgrates.org,102,TEST_ACCOUNT,TEST_THRESHOLDS,,
+cgrates.org,103,TEST_ACCOUNT,TEST_THRESHOLDS,,
+cgrates.org,104,TEST_ACCOUNT,TEST_THRESHOLDS,,
+cgrates.org,105,TEST_ACCOUNT,TEST_THRESHOLDS,,

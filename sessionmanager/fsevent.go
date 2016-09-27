@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package sessionmanager
 
 import (
@@ -372,6 +371,32 @@ func (fsev FSEvent) ComputeLcr() bool {
 	}
 }
 
+// Used with RLs
+func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{} {
+	mp := make(map[string]interface{})
+	mp[utils.CGRID] = fsev.GetCgrId(timezone)
+	mp[utils.TOR] = utils.VOICE
+	mp[utils.ACCID] = fsev.GetUUID()
+	mp[utils.CDRHOST] = fsev.GetOriginatorIP(utils.META_DEFAULT)
+	mp[utils.CDRSOURCE] = "FS_" + fsev.GetName()
+	mp[utils.REQTYPE] = fsev.GetReqType(utils.META_DEFAULT)
+	mp[utils.DIRECTION] = fsev.GetDirection(utils.META_DEFAULT)
+	mp[utils.TENANT] = fsev.GetTenant(utils.META_DEFAULT)
+	mp[utils.CATEGORY] = fsev.GetCategory(utils.META_DEFAULT)
+	mp[utils.ACCOUNT] = fsev.GetAccount(utils.META_DEFAULT)
+	mp[utils.SUBJECT] = fsev.GetSubject(utils.META_DEFAULT)
+	mp[utils.DESTINATION] = fsev.GetDestination(utils.META_DEFAULT)
+	mp[utils.SETUP_TIME], _ = fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	mp[utils.ANSWER_TIME], _ = fsev.GetAnswerTime(utils.META_DEFAULT, timezone)
+	mp[utils.USAGE], _ = fsev.GetDuration(utils.META_DEFAULT)
+	mp[utils.PDD], _ = fsev.GetPdd(utils.META_DEFAULT)
+	mp[utils.COST] = -1
+	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.META_DEFAULT)
+	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.META_DEFAULT)
+	//storCdr.ExtraFields = fsev.GetExtraFields()
+	return mp
+}
+
 // Converts into CallDescriptor due to responder interface needs
 func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 	lcrReq := &engine.LcrRequest{
@@ -387,6 +412,10 @@ func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 		ExtraFields: fsev.GetExtraFields(),
 	}
 	return lcrReq.AsCallDescriptor(config.CgrConfig().DefaultTimezone)
+}
+
+func (fsev FSEvent) AsMapStringIface() (map[string]interface{}, error) {
+	return nil, utils.ErrNotImplemented
 }
 
 // Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now

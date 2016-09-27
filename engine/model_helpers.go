@@ -1,3 +1,20 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package engine
 
 import (
@@ -809,4 +826,34 @@ func (tps TpLcrRules) GetLcrRules() (map[string]*utils.TPLcrRules, error) {
 		})
 	}
 	return lcrs, nil
+}
+
+type TpResourceLimits []*TpResourceLimit
+
+// Converts model received from StorDB or .csv into API format (optimized version for TP)
+func (tps TpResourceLimits) AsTPResourceLimits() map[string]*utils.TPResourceLimit {
+	resLimits := make(map[string]*utils.TPResourceLimit)
+	for _, tp := range tps {
+		resLimit, found := resLimits[tp.Tag]
+		if !found {
+			resLimit = &utils.TPResourceLimit{
+				TPID:           tp.Tpid,
+				ID:             tp.Tag,
+				ActivationTime: tp.ActivationTime,
+				Weight:         tp.Weight,
+				Limit:          tp.Limit,
+			}
+		}
+		if tp.FilterType != "" {
+			resLimit.Filters = append(resLimit.Filters, &utils.TPRequestFilter{
+				Type:      tp.FilterType,
+				FieldName: tp.FilterFieldName,
+				Values:    strings.Split(tp.FilterValues, utils.INFIELD_SEP)})
+		}
+		if tp.ActionTriggerIds != "" {
+			resLimit.ActionTriggerIDs = append(resLimit.ActionTriggerIDs, strings.Split(tp.ActionTriggerIds, utils.INFIELD_SEP)...)
+		}
+		resLimits[tp.Tag] = resLimit
+	}
+	return resLimits
 }

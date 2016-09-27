@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package v1
 
 import (
@@ -79,7 +78,7 @@ func TestApierCreateDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportFolder, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out", cfg.HistoryDir} {
+	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportDirectory, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out", cfg.HistoryDir} {
 
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
@@ -826,9 +825,10 @@ func TestApierGetCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2, ActionPlans: 1, LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
-	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+	err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats)
+	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 1, RatingProfiles: 0, Actions: 0, ActionPlans: 0}
+	if err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
@@ -1141,7 +1141,7 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {
-		t.Error("Unexpected action plan received")
+		t.Error("Unexpected action plan received: ", utils.ToJSON(reply))
 	} else {
 		if reply[0].ActionPlanId != "ATMS_1" {
 			t.Errorf("Unexpected ActionoveAccountPlanId received")
@@ -1244,9 +1244,10 @@ func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
-	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+	err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats)
+	expectedStats := new(utils.CacheStats)
+	if err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(rcvStats, expectedStats) {
 		t.Errorf("Calling ApierV1.GetCacheStats received: %v, expected: %v", rcvStats, expectedStats)
@@ -1274,7 +1275,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(3**waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(2 * time.Second))
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
@@ -1294,11 +1295,11 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else {
-		if rcvStats.Destinations != 5 ||
+		if rcvStats.Destinations != 0 ||
 			rcvStats.RatingPlans != 5 ||
-			rcvStats.RatingProfiles != 5 ||
-			rcvStats.Actions != 13 ||
-			rcvStats.DerivedChargers != 3 {
+			rcvStats.RatingProfiles != 0 ||
+			rcvStats.Actions != 0 ||
+			rcvStats.DerivedChargers != 0 {
 			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 		}
 	}
@@ -1472,7 +1473,7 @@ func TestApierLocalProcessCdr(t *testing.T) {
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if err := rater.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
+	if err := rater.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -1759,9 +1760,10 @@ func TestApierGetCacheStats2(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
-	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+	err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats)
+	expectedStats := new(utils.CacheStats)
+	if err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)

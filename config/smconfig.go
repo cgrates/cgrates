@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package config
 
 import (
@@ -35,7 +34,8 @@ func NewDfltHaPoolConfig() *HaPoolConfig {
 
 // One connection to Rater
 type HaPoolConfig struct {
-	Address string
+	Address   string
+	Transport string
 }
 
 func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
@@ -44,6 +44,9 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 	}
 	if jsnCfg.Address != nil {
 		self.Address = *jsnCfg.Address
+	}
+	if jsnCfg.Transport != nil {
+		self.Transport = *jsnCfg.Transport
 	}
 	return nil
 }
@@ -91,6 +94,7 @@ type SmGenericConfig struct {
 	SessionTTL         time.Duration
 	SessionTTLLastUsed *time.Duration
 	SessionTTLUsage    *time.Duration
+	SessionIndexes     []string
 }
 
 func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
@@ -145,12 +149,8 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 			self.SessionTTLLastUsed = &sessionTTLLastUsed
 		}
 	}
-	if jsnCfg.Session_ttl_usage != nil {
-		if sessionTTLUsage, err := utils.ParseDurationWithSecs(*jsnCfg.Session_ttl_usage); err != nil {
-			return err
-		} else {
-			self.SessionTTLUsage = &sessionTTLUsage
-		}
+	if jsnCfg.Session_indexes != nil {
+		self.SessionIndexes = *jsnCfg.Session_indexes
 	}
 	return nil
 }
@@ -159,6 +159,7 @@ type SmFsConfig struct {
 	Enabled             bool
 	RALsConns           []*HaPoolConfig
 	CDRsConns           []*HaPoolConfig
+	RLsConns            []*HaPoolConfig
 	CreateCdr           bool
 	ExtraFields         []*utils.RSRField
 	DebitInterval       time.Duration
@@ -194,6 +195,13 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
 			self.CDRsConns[idx] = NewDfltHaPoolConfig()
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Rls_conns != nil {
+		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Rls_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rls_conns {
+			self.RLsConns[idx] = NewDfltHaPoolConfig()
+			self.RLsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {
@@ -425,5 +433,72 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 		self.MiAddr = *jsnCfg.Mi_addr
 	}
 
+	return nil
+}
+
+// Uses stored defaults so we can pre-populate by loading from JSON config
+func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
+	if dfltAstConnCfg == nil {
+		return new(AsteriskConnCfg) // No defaults, most probably we are building the defaults now
+	}
+	dfltVal := *dfltAstConnCfg // Copy the value instead of it's pointer
+	return &dfltVal
+}
+
+type AsteriskConnCfg struct {
+	Address         string
+	User            string
+	Password        string
+	ConnectAttempts int
+	Reconnects      int
+}
+
+func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
+	if jsnCfg.Address != nil {
+		aConnCfg.Address = *jsnCfg.Address
+	}
+	if jsnCfg.User != nil {
+		aConnCfg.User = *jsnCfg.User
+	}
+	if jsnCfg.Password != nil {
+		aConnCfg.Password = *jsnCfg.Password
+	}
+	if jsnCfg.Connect_attempts != nil {
+		aConnCfg.ConnectAttempts = *jsnCfg.Connect_attempts
+	}
+	if jsnCfg.Reconnects != nil {
+		aConnCfg.Reconnects = *jsnCfg.Reconnects
+	}
+	return nil
+}
+
+type SMAsteriskCfg struct {
+	Enabled       bool
+	SMGConns      []*HaPoolConfig
+	CreateCDR     bool
+	AsteriskConns []*AsteriskConnCfg
+}
+
+func (aCfg *SMAsteriskCfg) loadFromJsonCfg(jsnCfg *SMAsteriskJsonCfg) (err error) {
+	if jsnCfg.Enabled != nil {
+		aCfg.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Sm_generic_conns != nil {
+		aCfg.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Sm_generic_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Sm_generic_conns {
+			aCfg.SMGConns[idx] = NewDfltHaPoolConfig()
+			aCfg.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Create_cdr != nil {
+		aCfg.CreateCDR = *jsnCfg.Create_cdr
+	}
+	if jsnCfg.Asterisk_conns != nil {
+		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))
+		for i, jsnAConn := range *jsnCfg.Asterisk_conns {
+			aCfg.AsteriskConns[i] = NewDefaultAsteriskConnCfg()
+			aCfg.AsteriskConns[i].loadFromJsonCfg(jsnAConn)
+		}
+	}
 	return nil
 }

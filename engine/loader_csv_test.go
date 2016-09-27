@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -24,10 +23,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
+	testTPID     = "LoaderCSVTests"
 	destinations = `
 #Tag,Prefix
 GERMANY,49
@@ -150,6 +151,7 @@ DY_PLAN,RT_DY,*any,10
 *out,cgrates.org,call,money,2015-02-28T00:00:00Z,EVENING,,
 *out,cgrates.org,call,dy,2015-02-28T00:00:00Z,DY_PLAN,,
 *out,cgrates.org,call,block,2015-02-28T00:00:00Z,DY_PLAN,,
+*out,cgrates.org,call,round,2016-06-30T00:00:00Z,DEFAULT,,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -226,6 +228,7 @@ cgrates.org,block_empty,BLOCK_EMPTY_AT,,false,false
 cgrates.org,expo,EXP_AT,,false,false
 cgrates.org,expnoexp,,,false,false
 cgrates.org,vf,,,false,false
+cgrates.org,round,TOPUP10_AT,,false,false
 `
 
 	derivedCharges = `
@@ -262,13 +265,22 @@ cgrates.org,mas,true,another,value,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Subject,remo,minu,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
+
+	resLimits = `
+#Id,FilterType,FilterFieldName,FilterValues,ActivationTime,Weight,Limit,ActionTriggers
+ResGroup1,*string,Account,1001;1002,2014-07-29T15:00:00Z,10,2,
+ResGroup1,*string_prefix,Destination,10;20,2014-07-29T15:00:00Z,10,,
+ResGroup1,*cdr_stats,,CDRST1:*min_ASR:34;CDRST_1001:*min_ASR:20,,,,
+ResGroup1,*rsr_fields,,Subject(~^1.*1$);Destination(1002),,,,
+ResGroup2,*destinations,Destination,DST_FS,2014-07-29T15:00:00Z,10,2,
+`
 )
 
 var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "", 10)
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits), testTPID, "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -317,9 +329,13 @@ func init() {
 	if err := csvr.LoadAliases(); err != nil {
 		log.Print("error in LoadAliases:", err)
 	}
-	csvr.WriteToDatabase(false, false)
-	ratingStorage.CacheRatingAll()
-	accountingStorage.CacheAccountingAll()
+	if err := csvr.LoadResourceLimits(); err != nil {
+		log.Print("error in LoadResourceLimits:", err)
+	}
+	csvr.WriteToDatabase(false, false, false)
+	cache2go.Flush()
+	ratingStorage.PreloadRatingCache()
+	accountingStorage.PreloadAccountingCache()
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -494,7 +510,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
 	dr := &utils.TPDestinationRate{
-		TPid:              "",
+		TPid:              testTPID,
 		DestinationRateId: "RT_STANDARD",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -525,6 +541,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["RT_DEFAULT"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "RT_DEFAULT",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -540,6 +557,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["RT_STD_WEEKEND"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "RT_STD_WEEKEND",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -562,6 +580,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["P1"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "P1",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -577,6 +596,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["P2"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "P2",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -592,6 +612,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["T1"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "T1",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -607,6 +628,7 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 	drs = csvr.destinationRates["T2"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
+		TPid:              testTPID,
 		DestinationRateId: "T2",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
@@ -678,7 +700,7 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"b457f86d": &RIRate{
+			"ebefae11": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -692,7 +714,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R1",
 			},
-			"16e9ee19": &RIRate{
+			"fac0138e": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -706,7 +728,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R2",
 			},
-			"638dc1ab": &RIRate{
+			"781bfa03": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -720,7 +742,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				RoundingDecimals: 4,
 				tag:              "R3",
 			},
-			"3913037f": &RIRate{
+			"f692daa4": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -739,34 +761,34 @@ func TestLoadRatingPlans(t *testing.T) {
 			"GERMANY": []*RPRate{
 				&RPRate{
 					Timing: "ec8ed374",
-					Rating: "b457f86d",
+					Rating: "ebefae11",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "83429156",
-					Rating: "16e9ee19",
+					Rating: "fac0138e",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "a60bfb13",
-					Rating: "16e9ee19",
+					Rating: "fac0138e",
 					Weight: 10,
 				},
 			},
 			"GERMANY_O2": []*RPRate{
 				&RPRate{
 					Timing: "ec8ed374",
-					Rating: "16e9ee19",
+					Rating: "fac0138e",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "83429156",
-					Rating: "638dc1ab",
+					Rating: "781bfa03",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "a60bfb13",
-					Rating: "638dc1ab",
+					Rating: "781bfa03",
 					Weight: 10,
 				},
 			},
@@ -780,17 +802,17 @@ func TestLoadRatingPlans(t *testing.T) {
 			"URG": []*RPRate{
 				&RPRate{
 					Timing: "2d9ca64",
-					Rating: "3913037f",
+					Rating: "f692daa4",
 					Weight: 20,
 				},
 			},
 		},
 	}
 	if !reflect.DeepEqual(rplan.Ratings, expected.Ratings) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan.Ratings)
 		/*for tag, key := range rplan.Ratings {
 			log.Print(tag, key)
 		}*/
+		t.Errorf("Expecting: %s, received: %s", utils.ToIJSON(expected.Ratings), utils.ToIJSON(rplan.Ratings))
 	}
 	anyTiming := &RITiming{
 		Years:      utils.Years{},
@@ -809,7 +831,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 23 {
+	if len(csvr.ratingProfiles) != 24 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
@@ -1109,7 +1131,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 16 {
+	if len(csvr.accountActions) != 17 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]
@@ -1288,4 +1310,39 @@ func TestLoadAliases(t *testing.T) {
 		}
 		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
 	}
+}
+
+func TestLoadResourceLimits(t *testing.T) {
+	eResLimits := map[string]*utils.TPResourceLimit{
+		"ResGroup1": &utils.TPResourceLimit{
+			TPID: testTPID,
+			ID:   "ResGroup1",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"10", "20"}},
+				&utils.TPRequestFilter{Type: MetaCDRStats, Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"}},
+				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"}},
+			},
+			ActivationTime: "2014-07-29T15:00:00Z",
+			Weight:         10,
+			Limit:          "2",
+		},
+		"ResGroup2": &utils.TPResourceLimit{
+			TPID: testTPID,
+			ID:   "ResGroup2",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "Destination", Values: []string{"DST_FS"}},
+			},
+			ActivationTime: "2014-07-29T15:00:00Z",
+			Weight:         10,
+			Limit:          "2",
+		},
+	}
+	if len(csvr.resLimits) != len(eResLimits) {
+		t.Error("Failed to load resourcelimits: ", len(csvr.resLimits))
+	}
+	if !reflect.DeepEqual(eResLimits, csvr.resLimits) {
+		t.Errorf("Expecting: %+v, received: %+v", eResLimits, csvr.resLimits)
+	}
+
 }

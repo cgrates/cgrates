@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -70,7 +69,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater, pubsub, users, aliases, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB AccountingStorage, rater, pubsub, users, aliases, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
 	if rater == nil || reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -86,12 +85,14 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater, pubsub, use
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		stats = nil
 	}
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rals: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: Guardian}, nil
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dataDB: dataDB,
+		rals: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: Guardian}, nil
 }
 
 type CdrServer struct {
 	cgrCfg        *config.CGRConfig
 	cdrDb         CdrStorage
+	dataDB        AccountingStorage
 	rals          rpcclient.RpcClientConnection
 	pubsub        rpcclient.RpcClientConnection
 	users         rpcclient.RpcClientConnection
@@ -120,11 +121,6 @@ func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
 	cdrServer = self // Share the server object for handlers
 	server.RegisterHttpFunc("/cdr_http", cgrCdrHandler)
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
-}
-
-// Used to internally process CDR
-func (self *CdrServer) LocalProcessCdr(cdr *CDR) error {
-	return self.processCdr(cdr)
 }
 
 // Used to process external CDRs
@@ -242,6 +238,21 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, rep
 			}
 		}
 	}
+	// Store AccountSummary if requested
+	if self.cgrCfg.CDRScdrAccountSummary {
+		for _, ratedCDR := range ratedCDRs {
+			if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID, utils.META_PSEUDOPREPAID, utils.PSEUDOPREPAID,
+				utils.META_POSTPAID, utils.POSTPAID}, ratedCDR.RequestType) {
+				acntID := utils.ConcatenatedKey(ratedCDR.Tenant, ratedCDR.Account)
+				acnt, err := self.dataDB.GetAccount(acntID)
+				if err != nil {
+					utils.Logger.Err(fmt.Sprintf("<CDRS> Querying AccountDigest for account: %s got error: %s", acntID, err.Error()))
+				} else if acnt.ID != "" {
+					ratedCDR.AccountSummary = acnt.AsAccountSummary()
+				}
+			}
+		}
+	}
 	// Store rated CDRs
 	if store {
 		for _, ratedCDR := range ratedCDRs {
@@ -354,7 +365,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		var smCosts []*SMCost
-		for i := 0; i < 4; i++ {
+		for i := 0; i < self.cgrCfg.CDRSSMCostRetries; i++ {
 			smCosts, err = self.cdrDb.GetSMCosts(cdr.CGRID, cdr.RunID, cdr.OriginHost, cdr.ExtraFields[utils.OriginIDPrefix])
 			if err == nil && len(smCosts) != 0 {
 				break
@@ -372,11 +383,11 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 				}
 				cdrClone.Cost = smCost.CostDetails.Cost
 				cdrClone.CostDetails = smCost.CostDetails
+				cdrClone.CostSource = smCost.CostSource
 				cdrsRated = append(cdrsRated, cdrClone)
 			}
 			return cdrsRated, nil
-		}
-		if len(smCosts) == 0 { //calculate CDR as for pseudoprepaid
+		} else { //calculate CDR as for pseudoprepaid
 			utils.Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", cdr.CGRID, utils.SESSION_MANAGER_SOURCE, cdr.RunID))
 			qryCC, err = self.getCostFromRater(cdr)
 		}
@@ -421,6 +432,7 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	if err != nil {
 		return cc, err
 	}
+	cdr.CostSource = utils.CDRS_SOURCE
 	return cc, nil
 }
 
@@ -494,13 +506,17 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 	return nil
 }
 
+// Internally used and called from CDRSv1
+// Cached requests for HA setups
 func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
-	cacheKey := "ProcessCdr" + cdr.CGRID
+	cacheKey := "V1ProcessCDR" + cdr.CGRID + cdr.RunID
 	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = item.Value.(string)
+		if item.Value != nil {
+			*reply = item.Value.(string)
+		}
 		return item.Err
 	}
-	if err := self.LocalProcessCdr(cdr); err != nil {
+	if err := self.processCdr(cdr); err != nil {
 		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
@@ -509,16 +525,20 @@ func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 	return nil
 }
 
-// Alias, deprecated after removing CdrServerV1.ProcessCdr
-func (self *CdrServer) V1ProcessCdr(cdr *CDR, reply *string) error {
-	return self.V1ProcessCDR(cdr, reply)
-}
-
 // RPC method, differs from storeSMCost through it's signature
 func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) error {
+	cacheKey := "V1StoreSMCost" + attr.Cost.CGRID + attr.Cost.RunID + attr.Cost.OriginID
+	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
+		if item.Value != nil {
+			*reply = item.Value.(string)
+		}
+		return item.Err
+	}
 	if err := self.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
+		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
+	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }
@@ -556,14 +576,13 @@ func (self *CdrServer) V1RateCDRs(attrs utils.AttrRateCDRs, reply *string) error
 func (cdrsrv *CdrServer) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
-		return utils.ErrNotImplemented
+		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	// get method
 	method := reflect.ValueOf(cdrsrv).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
 	if !method.IsValid() {
-		return utils.ErrNotImplemented
+		return rpcclient.ErrUnsupporteServiceMethod
 	}
-
 	// construct the params
 	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 	ret := method.Call(params)

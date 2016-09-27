@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package utils
 
 import (
@@ -266,6 +265,14 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Error(err)
 	} else if !broadTmS.Equal(expectedTime) {
 		t.Errorf("Expecting: %v, received: %v", expectedTime, broadTmS)
+	}
+	astTimestamp := "2016-09-14T19:37:43.665+0000"
+	expectedTime = time.Date(2016, 9, 14, 19, 37, 43, 665000000, time.UTC)
+	astTMS, err := ParseTimeDetectLayout(astTimestamp, "")
+	if err != nil {
+		t.Error(err)
+	} else if !astTMS.Equal(expectedTime) {
+		t.Errorf("Expecting: %v, received: %v", expectedTime, astTMS)
 	}
 }
 
@@ -684,5 +691,28 @@ func TestHierarchyPathAsString(t *testing.T) {
 	hp := HierarchyPath([]string{"Root", "CGRateS"})
 	if hpStr := hp.AsString("/", true); hpStr != eStr {
 		t.Errorf("Expecting: %q, received: %q", eStr, hpStr)
+	}
+}
+
+func TestMaskSuffix(t *testing.T) {
+	dest := "+4986517174963"
+	if destMasked := MaskSuffix(dest, 3); destMasked != "+4986517174***" {
+		t.Error("Unexpected mask applied", destMasked)
+	}
+	if destMasked := MaskSuffix(dest, -1); destMasked != dest {
+		t.Error("Negative maskLen should not modify destination", destMasked)
+	}
+	if destMasked := MaskSuffix(dest, 0); destMasked != dest {
+		t.Error("Zero maskLen should not modify destination", destMasked)
+	}
+	if destMasked := MaskSuffix(dest, 100); destMasked != "**************" {
+		t.Error("High maskLen should return complete mask", destMasked)
+	}
+
+}
+
+func TestToJSON(t *testing.T) {
+	if outNilObj := ToJSON(nil); outNilObj != "null" {
+		t.Errorf("Expecting null, received: <%q>", outNilObj)
 	}
 }

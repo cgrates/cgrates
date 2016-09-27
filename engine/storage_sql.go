@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -54,8 +53,16 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	return nil
 }
 
-func (self *SQLStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
+func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
+}
+
+func (ms *SQLStorage) RebuildReverseForPrefix(prefix string) error {
+	return utils.ErrNotImplemented
+}
+
+func (self *SQLStorage) PreloadCacheForPrefix(prefix string) error {
+	return utils.ErrNotImplemented
 }
 
 func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
@@ -169,7 +176,8 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	tx := self.db.Begin()
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES,
-			utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_LCRS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TBL_TP_DERIVED_CHARGERS, utils.TBL_TP_ALIASES} {
+			utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_LCRS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS, utils.TBL_TP_ACCOUNT_ACTIONS,
+			utils.TBL_TP_DERIVED_CHARGERS, utils.TBL_TP_ALIASES, utils.TBLTPResourceLimits} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -666,6 +674,7 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 		CostSource:      cdr.CostSource,
 		Cost:            cdr.Cost,
 		CostDetails:     cdr.CostDetailsJson(),
+		AccountSummary:  utils.ToJSON(cdr.AccountSummary),
 		ExtraInfo:       cdr.ExtraInfo,
 		CreatedAt:       time.Now(),
 	})
@@ -698,6 +707,7 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 				CostSource:      cdr.CostSource,
 				Cost:            cdr.Cost,
 				CostDetails:     cdr.CostDetailsJson(),
+				AccountSummary:  utils.ToJSON(cdr.AccountSummary),
 				ExtraInfo:       cdr.ExtraInfo,
 				UpdatedAt:       time.Now(),
 			},
@@ -966,6 +976,10 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
 		}
+		acntSummary, err := NewAccountSummaryFromJSON(result.AccountSummary)
+		if err != nil {
+			return nil, 0, fmt.Errorf("JSON unmarshal account summary error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
+		}
 		usageDur := time.Duration(result.Usage * utils.NANO_MULTIPLIER)
 		pddDur := time.Duration(result.Pdd * utils.NANO_MULTIPLIER)
 		storCdr := &CDR{
@@ -993,6 +1007,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 			CostSource:      result.CostSource,
 			Cost:            result.Cost,
 			CostDetails:     &callCost,
+			AccountSummary:  acntSummary,
 			ExtraInfo:       result.ExtraInfo,
 		}
 		cdrs = append(cdrs, storCdr)
@@ -1340,6 +1355,17 @@ func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 	if err := q.Find(&tpAliases).Error; err != nil {
 		return nil, err
 	}
-
 	return tpAliases, nil
+}
+
+func (self *SQLStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits, error) {
+	var tpResourceLimits TpResourceLimits
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("tag = ?", tag)
+	}
+	if err := q.Find(&tpResourceLimits).Error; err != nil {
+		return nil, err
+	}
+	return tpResourceLimits, nil
 }

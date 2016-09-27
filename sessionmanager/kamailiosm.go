@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package sessionmanager
 
 import (
@@ -210,7 +209,7 @@ func (self *KamailioSessionManager) ProcessCdr(cdr *engine.CDR) error {
 		return nil
 	}
 	var reply string
-	if err := self.cdrsrv.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", cdr.CGRID, cdr.OriginID, err.Error()))
 	}
 	return nil

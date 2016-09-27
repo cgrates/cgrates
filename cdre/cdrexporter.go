@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,13 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package cdre
 
 import (
 	"encoding/csv"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -34,22 +31,18 @@ import (
 )
 
 const (
-	COST_DETAILS = "cost_details"
-	//DATETIME             = "datetime"
-	META_DATETIME        = "*datetime"
-	META_EXPORTID        = "*export_id"
-	META_TIMENOW         = "*time_now"
-	META_FIRSTCDRATIME   = "*first_cdr_atime"
-	META_LASTCDRATIME    = "*last_cdr_atime"
-	META_NRCDRS          = "*cdrs_number"
-	META_DURCDRS         = "*cdrs_duration"
-	META_SMSUSAGE        = "*sms_usage"
-	META_MMSUSAGE        = "*mms_usage"
-	META_GENERICUSAGE    = "*generic_usage"
-	META_DATAUSAGE       = "*data_usage"
-	META_COSTCDRS        = "*cdrs_cost"
-	META_MASKDESTINATION = "*mask_destination"
-	META_FORMATCOST      = "*format_cost"
+	META_EXPORTID      = "*export_id"
+	META_TIMENOW       = "*time_now"
+	META_FIRSTCDRATIME = "*first_cdr_atime"
+	META_LASTCDRATIME  = "*last_cdr_atime"
+	META_NRCDRS        = "*cdrs_number"
+	META_DURCDRS       = "*cdrs_duration"
+	META_SMSUSAGE      = "*sms_usage"
+	META_MMSUSAGE      = "*mms_usage"
+	META_GENERICUSAGE  = "*generic_usage"
+	META_DATAUSAGE     = "*data_usage"
+	META_COSTCDRS      = "*cdrs_cost"
+	META_FORMATCOST    = "*format_cost"
 )
 
 var err error
@@ -114,120 +107,6 @@ type CdrExporter struct {
 	negativeExports                 map[string]string // CGRIDs of failed exports
 }
 
-// Return Json marshaled callCost attached to
-// Keep it separately so we test only this part in local tests
-func (cdre *CdrExporter) getCdrCostDetails(CGRID, runId string) (string, error) {
-	smcs, err := cdre.cdrDb.GetSMCosts(CGRID, runId, "", "")
-	if err != nil {
-		return "", err
-	} else if len(smcs) == 0 {
-		return "", nil
-	}
-	ccJson, _ := json.Marshal(smcs[0].CostDetails)
-	return string(ccJson), nil
-}
-
-func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
-	var combinedVal string // Will result as combination of the field values, filters must match
-	for _, filterRule := range cfgCdrFld.FieldFilter {
-		if !filterRule.FilterPasses(processedCdr.FieldAsString(&utils.RSRField{Id: filterRule.Id})) { // Filter will activate the rule to extract the content
-			continue
-		}
-		pairingVal := processedCdr.FieldAsString(filterRule)
-		for _, cdr := range cdre.cdrs {
-			if cdr.CGRID != processedCdr.CGRID {
-				continue // We only care about cdrs with same primary cdr behind
-			}
-			if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == pairingVal { // First CDR with filte
-				for _, rsrRule := range cfgCdrFld.Value {
-					combinedVal += cdr.FieldAsString(rsrRule)
-				}
-			}
-		}
-	}
-	return combinedVal, nil
-}
-
-// Check if the destination should be masked in output
-func (cdre *CdrExporter) maskedDestination(destination string) bool {
-	if len(cdre.maskDestId) != 0 && engine.CachedDestHasPrefix(cdre.maskDestId, destination) {
-		return true
-	}
-	return false
-}
-
-func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
-	if len(cfgCdrFld.Value) == 0 {
-		return "", nil
-	}
-	passesFilters := true
-	for _, cdfFltr := range cfgCdrFld.FieldFilter {
-		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
-			passesFilters = false
-			break
-		}
-	}
-	if !passesFilters { // Not passes filters, ignore this replication
-		return "", errors.New("Not passing filters")
-	}
-	layout := cfgCdrFld.Layout
-	if len(layout) == 0 {
-		layout = time.RFC3339
-	}
-	if dtFld, err := utils.ParseTimeDetectLayout(cdr.FieldAsString(cfgCdrFld.Value[0]), cdre.timezone); err != nil { // Only one rule makes sense here
-		return "", err
-	} else {
-		return dtFld.Format(layout), nil
-	}
-}
-
-// Extracts the value specified by cfgHdr out of cdr
-func (cdre *CdrExporter) cdrFieldValue(cdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
-	passesFilters := true
-	for _, cdfFltr := range cfgCdrFld.FieldFilter {
-		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
-			passesFilters = false
-			break
-		}
-	}
-	if !passesFilters { // Not passes filters, ignore this replication
-		return "", fmt.Errorf("Filters not passing")
-	}
-	layout := cfgCdrFld.Layout
-	if len(layout) == 0 {
-		layout = time.RFC3339
-	}
-	var retVal string // Concatenate the resulting values
-	for _, rsrFld := range cfgCdrFld.Value {
-		var cdrVal string
-		switch rsrFld.Id {
-		case COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
-			if cdr.ExtraFields[COST_DETAILS], err = cdre.getCdrCostDetails(cdr.CGRID, cdr.RunID); err != nil {
-				return "", err
-			} else {
-				cdrVal = cdr.FieldAsString(rsrFld)
-			}
-		case utils.COST:
-			cdrVal = cdr.FormatCost(cdre.costShiftDigits, cdre.roundDecimals)
-		case utils.USAGE:
-			cdrVal = cdr.FormatUsage(layout)
-		case utils.SETUP_TIME:
-			cdrVal = cdr.SetupTime.Format(layout)
-		case utils.ANSWER_TIME: // Format time based on layout
-			cdrVal = cdr.AnswerTime.Format(layout)
-		case utils.DESTINATION:
-			cdrVal = cdr.FieldAsString(rsrFld)
-			if cdre.maskLen != -1 && cdre.maskedDestination(cdrVal) {
-				cdrVal = MaskDestination(cdrVal, cdre.maskLen)
-			}
-		default:
-			cdrVal = cdr.FieldAsString(rsrFld)
-		}
-		retVal += cdrVal
-	}
-	return retVal, nil
-}
-
 // Handle various meta functions used in header/trailer
 func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	switch tag {
@@ -258,11 +137,6 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
-	case META_MASKDESTINATION:
-		if cdre.maskedDestination(arg) {
-			return "1", nil
-		}
-		return "0", nil
 	default:
 		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
@@ -346,54 +220,10 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 	if cdre.costMultiplyFactor != 0.0 {
 		cdr.CostMultiply(cdre.costMultiplyFactor, cdre.cgrPrecision)
 	}
-	var err error
-	cdrRow := make([]string, len(cdre.exportTemplate.ContentFields))
-	for idx, cfgFld := range cdre.exportTemplate.ContentFields {
-		var outVal string
-		switch cfgFld.Type {
-		case utils.META_FILLER:
-			outVal = cfgFld.Value.Id()
-			cfgFld.Padding = "right"
-		case utils.META_CONSTANT:
-			outVal = cfgFld.Value.Id()
-		case utils.META_COMPOSED:
-			outVal, err = cdre.cdrFieldValue(cdr, cfgFld)
-		case META_DATETIME:
-			outVal, err = cdre.getDateTimeFieldVal(cdr, cfgFld)
-		case utils.META_HTTP_POST:
-			var outValByte []byte
-			httpAddr := cfgFld.Value.Id()
-			jsn, err := json.Marshal(cdr)
-			if err != nil {
-				return err
-			}
-			if len(httpAddr) == 0 {
-				err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-			} else if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, jsn); err == nil {
-				outVal = string(outValByte)
-				if len(outVal) == 0 && cfgFld.Mandatory {
-					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
-				}
-			}
-		case utils.META_COMBIMED:
-			outVal, err = cdre.getCombimedCdrFieldVal(cdr, cfgFld)
-		case utils.META_HANDLER:
-			if cfgFld.Value.Id() == META_MASKDESTINATION {
-				outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}))
-			} else {
-				outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cfgFld.Layout)
-			}
-		}
-		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s and runid: %s, error: %s", cdr.CGRID, cdr.RunID, err.Error()))
-			return err
-		}
-		fmtOut := outVal
-		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CGRID, cdr.RunID, cfgFld.Tag, outVal, err.Error()))
-			return err
-		}
-		cdrRow[idx] += fmtOut
+	cdrRow, err := cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.costShiftDigits, cdre.roundDecimals, cdre.timezone, cdre.httpSkipTlsCheck, cdre.maskLen, cdre.maskDestId, cdre.cdrs)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s and runid: %s, error: %s", cdr.CGRID, cdr.RunID, err.Error()))
+		return err
 	}
 	if len(cdrRow) == 0 { // No CDR data, most likely no configuration fields defined
 		return nil

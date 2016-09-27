@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package sessionmanager
 
 import (
@@ -153,7 +152,7 @@ func (osm *OsipsSessionManager) Shutdown() error {
 // Process the CDR with CDRS component
 func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.CDR) error {
 	var reply string
-	return osm.cdrsrv.Call("CdrsV1.ProcessCdr", storedCdr, &reply)
+	return osm.cdrsrv.Call("CdrsV1.ProcessCDR", storedCdr, &reply)
 }
 
 // Disconnects the session

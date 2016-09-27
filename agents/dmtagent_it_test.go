@@ -1,25 +1,26 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be u297seful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package agents
 
 import (
 	"flag"
+	//"net"
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -40,12 +41,15 @@ import (
 var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+var interations = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
+var replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
 
 var daCfgPath string
 var daCfg *config.CGRConfig
 var apierRpc *rpc.Client
 var dmtClient *DiameterClient
 var err error
+var rplyTimeout time.Duration
 
 func TestDmtAgentInitCfg(t *testing.T) {
 	if !*testIntegration {
@@ -60,6 +64,7 @@ func TestDmtAgentInitCfg(t *testing.T) {
 	}
 	daCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(daCfg)
+	rplyTimeout, _ = utils.ParseDurationWithSecs(*replyTimeout)
 }
 
 // Remove data in both rating and accounting db
@@ -87,7 +92,7 @@ func TestDmtAgentStartEngine(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	if _, err := engine.StopStartEngine(daCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -204,7 +209,7 @@ func TestDmtAgentTPFromFolder(t *testing.T) {
 		return
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	var loadInst engine.LoadInstance
+	var loadInst utils.LoadInstance
 	if err := apierRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
@@ -243,7 +248,7 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -287,7 +292,7 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -326,7 +331,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
@@ -364,7 +369,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No answer to CCR terminate received")
 	}
@@ -441,7 +446,7 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 	}
 
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	dmtClient.ReceivedMessage(rplyTimeout) // Discard the received message so we can test next one
 	/*
 		if msg == nil {
 			t.Fatal("No message returned")
@@ -533,7 +538,7 @@ func TestDmtAgentSendCCRSMSWrongAccount(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	msg := dmtClient.ReceivedMessage(rplyTimeout) // Discard the received message so we can test next one
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -567,7 +572,7 @@ func TestDmtAgentSendCCRInitWrongAccount(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	msg := dmtClient.ReceivedMessage(rplyTimeout) // Discard the received message so we can test next one
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -642,7 +647,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	msg := dmtClient.ReceivedMessage(rplyTimeout) // Discard the received message so we can test next one
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -730,7 +735,7 @@ func TestDmtAgentSendDataGrpInit(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -824,7 +829,7 @@ func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -904,7 +909,7 @@ func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(3000) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -930,6 +935,7 @@ func TestDmtAgentSendDataGrpCDRs(t *testing.T) {
 	}
 }
 
+/*
 func TestDmtAgentDryRun1(t *testing.T) {
 	if !*testIntegration {
 		return
@@ -950,7 +956,7 @@ func TestDmtAgentDryRun1(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -962,6 +968,109 @@ func TestDmtAgentDryRun1(t *testing.T) {
 		t.Errorf("Expecting 300, received: %s", strResult)
 	}
 }
+*/
+
+func TestDmtAgentDryRun1(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.UserName, avp.Mbit, 0, datatype.UTF8String("CGR-DA"))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("pubsub1")) // Match specific DryRun profile
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(2))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
+	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))
+	ccr.NewAVP(avp.TerminationCause, avp.Mbit, 0, datatype.Enumerated(1))
+	ccr.NewAVP(443, avp.Mbit, 0, &diam.GroupedAVP{ // Subscription-Id
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),      // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(443, avp.Mbit, 0, &diam.GroupedAVP{ // Subscription-Id
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(1)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208123456789")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(439, avp.Mbit, 0, datatype.Unsigned32(0)) // Service-Identifier
+	ccr.NewAVP(437, avp.Mbit, 0, &diam.GroupedAVP{       // Requested-Service-Unit
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(300)), // CC-Time
+		}})
+	ccr.NewAVP(873, avp.Mbit|avp.Vbit, 10415, &diam.GroupedAVP{ // Service-information
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(20336, avp.Mbit, 2011, datatype.UTF8String("1001")),             // CallingPartyAdress
+					diam.NewAVP(20337, avp.Mbit, 2011, datatype.UTF8String("1002")),             // CalledPartyAdress
+					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                  // ChargeFlowType
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("33609004940")),      // CallingVlrNumber
+					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("208104941749984")),  // CallingCellID
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("0x8090a3")),        // BearerCapability
+					diam.NewAVP(20321, avp.Mbit, 2011, datatype.OctetString("0x401c4132ed665")), // CallreferenceNumber
+					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("33609004940")),      // MSCAddress
+					diam.NewAVP(20386, avp.Mbit, 2011, datatype.UTF8String("20160501010101")),   // SSPTime
+					diam.NewAVP(20938, avp.Mbit, 2011, datatype.OctetString("0x00000001")),      // HighLayerCharacteristics
+					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Integer32(8)),                   // Time-Zone
+				},
+			}),
+		}})
+	if _, err := ccr.NewAVP("Framed-IP-Address", avp.Mbit, 0, datatype.UTF8String("10.228.16.4")); err != nil {
+		t.Error(err)
+	}
+	tStart := time.Now()
+	maxLoops := 100000
+	for i := 0; i < *interations; i++ {
+		if err := dmtClient.SendMessage(ccr); err != nil {
+			t.Error(err)
+		}
+		msg := dmtClient.ReceivedMessage(rplyTimeout)
+		if msg == nil {
+			t.Fatal("No message returned")
+		}
+		/*
+			if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+				t.Error(err)
+			} else if len(avps) == 0 {
+				t.Error("Result-Code")
+			} else if strResult := avpValAsString(avps[0]); strResult != "300" { // Result-Code set in the template
+				t.Errorf("Expecting 300, received: %s", strResult)
+			}
+		*/
+	}
+	totalDur := time.Now().Sub(tStart)
+	fmt.Printf("Total duration: %v resulting %f ops per second\n", totalDur, float64(maxLoops)/totalDur.Seconds())
+}
+
+/*
+func TestDmtAgentLoadCER(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	m := diam.NewRequest(diam.CapabilitiesExchange, 4, dict.Default)
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.HostIPAddress, avp.Mbit, 0, datatype.Address(net.ParseIP("127.0.0.1")))
+	m.NewAVP(avp.VendorID, avp.Mbit, 0, datatype.Unsigned32(999))
+	m.NewAVP(avp.ProductName, 0, 0, datatype.UTF8String("CGR-DA"))
+	m.NewAVP(avp.OriginStateID, avp.Mbit, 0, datatype.Unsigned32(1))
+	m.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	m.NewAVP(avp.FirmwareRevision, avp.Mbit, 0, datatype.Unsigned32(1))
+	if err := dmtClient.SendMessage(m); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage(rplyTimeout)
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+}
+*/
 
 func TestDmtAgentStopEngine(t *testing.T) {
 	if !*testIntegration {

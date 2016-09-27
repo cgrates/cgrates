@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -76,7 +75,10 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	// check if new conf asks for action trigger reset only
-	if sq.conf != nil && (!conf.hasGeneralConfigs() || sq.conf.equalExceptTriggers(conf)) {
+	if sq.conf != nil && (conf.hasGeneralConfigs() || sq.conf.equalExceptTriggers(conf)) {
+		for _, trigger := range conf.Triggers {
+			trigger.LastExecutionTime = sq.GetTriggerLastExecution(&trigger.ID)
+		}
 		sq.conf.Triggers = conf.Triggers
 		return
 	}
@@ -170,6 +172,15 @@ func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 			}
 		}
 	}
+}
+
+func (sq *StatsQueue) GetTriggerLastExecution(trigger_id *string) time.Time {
+	for _, trigger := range sq.conf.Triggers {
+		if trigger.ID == *trigger_id {
+			return trigger.LastExecutionTime
+		}
+	}
+	return time.Time{}
 }
 
 func (sq *StatsQueue) addToMetrics(cdr *QCdr) {

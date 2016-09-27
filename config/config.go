@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package config
 
 import (
@@ -46,6 +45,7 @@ var (
 	dfltFsConnConfig  *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
 	dfltKamConnConfig *KamConnConfig // Default Kamailio Connection configuration
 	dfltHaPoolConfig  *HaPoolConfig
+	dfltAstConnCfg    *AsteriskConnCfg
 )
 
 // Used to retrieve system configuration from other packages
@@ -63,9 +63,11 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.InstanceID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SmGenericConfig = new(SmGenericConfig)
+	cfg.CacheConfig = new(CacheConfig)
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
+	cfg.smAsteriskCfg = new(SMAsteriskCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
@@ -76,6 +78,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.ConfigReloads[utils.SURETAX] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
+	cfg.ConfigReloads[utils.SMAsterisk] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.SMAsterisk] <- struct{}{} // Unlock the channel
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
@@ -85,9 +89,10 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 		return nil, err
 	}
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
-	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/log/cgrates/cdrc/in"][0].Clone()
+	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
 	dfltFsConnConfig = cfg.SmFsConfig.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.EvapiConns[0]
+	dfltAstConnCfg = cfg.smAsteriskCfg.AsteriskConns[0]
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -191,7 +196,8 @@ type CGRConfig struct {
 	StorDBMaxOpenConns       int    // Maximum database connections opened
 	StorDBMaxIdleConns       int    // Maximum idle connections to keep opened
 	StorDBCDRSIndexes        []string
-	DBDataEncoding           string        // The encoding used to store object data in strings: <msgpack|json>
+	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
+	CacheConfig              *CacheConfig
 	RPCJSONListen            string        // RPC JSON listening address
 	RPCGOBListen             string        // RPC GOB listening address
 	HTTPListen               string        // HTTP listening address
@@ -223,9 +229,11 @@ type CGRConfig struct {
 	LcrSubjectPrefixMatching bool // enables prefix matching for the lcr subject
 	BalancerEnabled          bool
 	SchedulerEnabled         bool
-	CDRSEnabled              bool                 // Enable CDR Server service
-	CDRSExtraFields          []*utils.RSRField    // Extra fields to store in CDRs
-	CDRSStoreCdrs            bool                 // store cdrs in storDb
+	CDRSEnabled              bool              // Enable CDR Server service
+	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
+	CDRSStoreCdrs            bool              // store cdrs in storDb
+	CDRScdrAccountSummary    bool
+	CDRSSMCostRetries        int
 	CDRSRaterConns           []*HaPoolConfig      // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
 	CDRSPubSubSConns         []*HaPoolConfig      // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
 	CDRSUserSConns           []*HaPoolConfig      // address where to reach the users service: <""|internal|x.y.z.y:1234>
@@ -240,6 +248,7 @@ type CGRConfig struct {
 	SmFsConfig               *SmFsConfig              // SMFreeSWITCH configuration
 	SmKamConfig              *SmKamConfig             // SM-Kamailio Configuration
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
+	smAsteriskCfg            *SMAsteriskCfg           // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
 	HistoryServer            string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled     bool                     // Starts History as server: <true|false>.
@@ -249,6 +258,7 @@ type CGRConfig struct {
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
 	UserServerIndexes        []string                 // List of user profile field indexes
+	resourceLimiterCfg       *ResourceLimiterConfig   // Configuration for resource limiter
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -386,6 +396,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("CDRS not enabled but referenced by SMFreeSWITCH component")
 			}
 		}
+		for _, smFSRLsConn := range self.SmFsConfig.RLsConns {
+			if smFSRLsConn.Address == utils.MetaInternal && !self.resourceLimiterCfg.Enabled {
+				return errors.New("RLs not enabled but referenced by SMFreeSWITCH component")
+			}
+		}
 	}
 	// SM-Kamailio checks
 	if self.SmKamConfig.Enabled {
@@ -413,7 +428,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 		for _, smOsipsRaterConn := range self.SmOsipsConfig.RALsConns {
 			if smOsipsRaterConn.Address == utils.MetaInternal && !self.RALsEnabled {
-				return errors.New("<SMOpenSIPS> RALs not enabled but requested by SMOpenSIPS component.")
+				return errors.New("<SMOpenSIPS> RALs not enabled.")
 			}
 		}
 		if len(self.SmOsipsConfig.CDRsConns) == 0 {
@@ -422,8 +437,23 @@ func (self *CGRConfig) checkConfigSanity() error {
 
 		for _, smOsipsCDRSConn := range self.SmOsipsConfig.CDRsConns {
 			if smOsipsCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
-				return errors.New("<SMOpenSIPS> CDRS not enabled but referenced by SMOpenSIPS component")
+				return errors.New("<SMOpenSIPS> CDRS not enabled.")
 			}
+		}
+	}
+	// SMAsterisk checks
+	if self.smAsteriskCfg.Enabled {
+		/*if len(self.smAsteriskCfg.SMGConns) == 0 {
+			return errors.New("<SMAsterisk> SMG definition is mandatory!")
+		}
+		for _, smAstSMGConn := range self.smAsteriskCfg.SMGConns {
+			if smAstSMGConn.Address == utils.MetaInternal && !self.SmGenericConfig.Enabled {
+				return errors.New("<SMAsterisk> SMG not enabled.")
+			}
+		}
+		*/
+		if !self.SmGenericConfig.Enabled {
+			return errors.New("<SMAsterisk> SMG not enabled.")
 		}
 	}
 	// DAgent checks
@@ -439,6 +469,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// ResourceLimiter checks
+	if self.resourceLimiterCfg != nil && self.resourceLimiterCfg.Enabled {
+		for _, connCfg := range self.resourceLimiterCfg.CDRStatConns {
+			if connCfg.Address == utils.MetaInternal && !self.CDRStatsEnabled {
+				return errors.New("CDRStats not enabled but requested by ResourceLimiter component.")
+			}
+		}
+	}
 	return nil
 }
 
@@ -447,6 +485,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 
 	// Load sections out of JSON config, stop on error
 	jsnGeneralCfg, err := jsnCfg.GeneralJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	// Load sections out of JSON config, stop on error
+	jsnCacheCfg, err := jsnCfg.CacheJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -526,6 +570,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
+	jsnSMAstCfg, err := jsnCfg.SmAsteriskJsonCfg()
+	if err != nil {
+		return err
+	}
+
 	jsnDACfg, err := jsnCfg.DiameterAgentJsonCfg()
 	if err != nil {
 		return err
@@ -547,6 +596,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnRLSCfg, err := jsnCfg.ResourceLimiterJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -701,6 +755,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
+	if jsnCacheCfg != nil {
+		if err := self.CacheConfig.loadFromJsonCfg(jsnCacheCfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnListenCfg != nil {
 		if jsnListenCfg.Rpc_json != nil {
 			self.RPCJSONListen = *jsnListenCfg.Rpc_json
@@ -782,6 +842,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnCdrsCfg.Store_cdrs != nil {
 			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
+		}
+		if jsnCdrsCfg.Cdr_account_summary != nil {
+			self.CDRScdrAccountSummary = *jsnCdrsCfg.Cdr_account_summary
+		}
+		if jsnCdrsCfg.Sm_cost_retries != nil {
+			self.CDRSSMCostRetries = *jsnCdrsCfg.Sm_cost_retries
 		}
 		if jsnCdrsCfg.Rals_conns != nil {
 			self.CDRSRaterConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Rals_conns))
@@ -876,19 +942,44 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.CdrcProfiles = make(map[string][]*CdrcConfig)
 		}
 		for _, jsnCrc1Cfg := range jsnCdrcCfg {
-			if _, hasDir := self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir]; !hasDir {
-				self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir] = make([]*CdrcConfig, 0)
+			if jsnCrc1Cfg.Id == nil || *jsnCrc1Cfg.Id == "" {
+				return errors.New("CDRC profile without an id")
 			}
+			if *jsnCrc1Cfg.Id == utils.META_DEFAULT {
+				if self.dfltCdrcProfile == nil {
+					self.dfltCdrcProfile = new(CdrcConfig)
+				}
+			}
+			indxFound := -1 // Will be different than -1 if an instance with same id will be found
+			pathFound := "" // Will be populated with the path where slice of cfgs was found
 			var cdrcInstCfg *CdrcConfig
-			if *jsnCrc1Cfg.Id == utils.META_DEFAULT && self.dfltCdrcProfile == nil {
-				cdrcInstCfg = new(CdrcConfig)
-			} else {
-				cdrcInstCfg = self.dfltCdrcProfile.Clone() // Clone default so we do not inherit pointers
+			for path := range self.CdrcProfiles {
+				for i := range self.CdrcProfiles[path] {
+					if self.CdrcProfiles[path][i].ID == *jsnCrc1Cfg.Id {
+						indxFound = i
+						pathFound = path
+						cdrcInstCfg = self.CdrcProfiles[path][i]
+						break
+					}
+				}
+			}
+			if cdrcInstCfg == nil {
+				cdrcInstCfg = self.dfltCdrcProfile.Clone()
 			}
 			if err := cdrcInstCfg.loadFromJsonCfg(jsnCrc1Cfg); err != nil {
 				return err
 			}
-			self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir] = append(self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir], cdrcInstCfg)
+			if cdrcInstCfg.CdrInDir == "" {
+				return errors.New("CDRC profile without cdr_in_dir")
+			}
+			if _, hasDir := self.CdrcProfiles[cdrcInstCfg.CdrInDir]; !hasDir {
+				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = make([]*CdrcConfig, 0)
+			}
+			if indxFound != -1 { // Replace previous config so we have inheritance
+				self.CdrcProfiles[pathFound][indxFound] = cdrcInstCfg
+			} else {
+				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = append(self.CdrcProfiles[cdrcInstCfg.CdrInDir], cdrcInstCfg)
+			}
 		}
 	}
 	if jsnSmGenericCfg != nil {
@@ -910,6 +1001,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 
 	if jsnSmOsipsCfg != nil {
 		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
+			return err
+		}
+	}
+
+	if jsnSMAstCfg != nil {
+		if err := self.smAsteriskCfg.loadFromJsonCfg(jsnSMAstCfg); err != nil {
 			return err
 		}
 	}
@@ -943,6 +1040,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnAliasesServCfg != nil {
 		if jsnAliasesServCfg.Enabled != nil {
 			self.AliasesServerEnabled = *jsnAliasesServCfg.Enabled
+		}
+	}
+
+	if jsnRLSCfg != nil {
+		if self.resourceLimiterCfg == nil {
+			self.resourceLimiterCfg = new(ResourceLimiterConfig)
+		}
+		if self.resourceLimiterCfg.loadFromJsonCfg(jsnRLSCfg); err != nil {
+			return err
 		}
 	}
 
@@ -993,4 +1099,16 @@ func (self *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
 	cfgChan := <-self.ConfigReloads[utils.DIAMETER_AGENT] // Lock config for read or reloads
 	defer func() { self.ConfigReloads[utils.DIAMETER_AGENT] <- cfgChan }()
 	return self.diameterAgentCfg
+}
+
+// ToDo: fix locking here
+func (self *CGRConfig) ResourceLimiterCfg() *ResourceLimiterConfig {
+	return self.resourceLimiterCfg
+}
+
+// ToDo: fix locking here
+func (self *CGRConfig) SMAsteriskCfg() *SMAsteriskCfg {
+	cfgChan := <-self.ConfigReloads[utils.SMAsterisk] // Lock config for read or reloads
+	defer func() { self.ConfigReloads[utils.SMAsterisk] <- cfgChan }()
+	return self.smAsteriskCfg
 }

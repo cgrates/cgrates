@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package main
 
 import (
@@ -71,13 +70,14 @@ var (
 	stats           = flag.Bool("stats", false, "Generates statsistics about given data.")
 	fromStorDb      = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb        = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	historyServer   = flag.String("history_server", cgrConfig.RPCGOBListen, "The history server address:port, empty to disable automaticautomatic  history archiving")
+	historyServer   = flag.String("history_server", cgrConfig.RPCGOBListen, "The history server address:port, empty to disable automatic history archiving")
 	raterAddress    = flag.String("rater_address", cgrConfig.RPCGOBListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
 	cdrstatsAddress = flag.String("cdrstats_address", cgrConfig.RPCGOBListen, "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
 	usersAddress    = flag.String("users_address", cgrConfig.RPCGOBListen, "Users service to contact for data reloads, empty to disable automatic data reloads")
 	runId           = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
 	timezone        = flag.String("timezone", cgrConfig.DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
+	disable_reverse = flag.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
 )
 
 func main() {
@@ -201,8 +201,8 @@ func main() {
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
-				*tpdb_user, *tpdb_pass, *dbdata_encoding)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding)
+				*tpdb_user, *tpdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		} else if *toStorDb { // Import from csv files to storDb
@@ -210,8 +210,8 @@ func main() {
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		} else { // Default load from csv files to dataDb
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
-				*tpdb_user, *tpdb_pass, *dbdata_encoding)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding)
+				*tpdb_user, *tpdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 		}
 		// Defer databases opened to be closed when we are done
 		for _, db := range []engine.Storage{ratingDb, accountDb, storDb} {
@@ -269,9 +269,10 @@ func main() {
 			path.Join(*dataPath, utils.CDR_STATS_CSV),
 			path.Join(*dataPath, utils.USERS_CSV),
 			path.Join(*dataPath, utils.ALIASES_CSV),
+			path.Join(*dataPath, utils.ResourceLimitsCsv),
 		)
 	}
-	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid, *timezone, *loadHistorySize)
+	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid, *timezone)
 	err = tpReader.LoadAll()
 	if err != nil {
 		log.Fatal(err)
@@ -335,13 +336,13 @@ func main() {
 	}
 
 	// write maps to database
-	if err := tpReader.WriteToDatabase(*flush, *verbose); err != nil {
+	if err := tpReader.WriteToDatabase(*flush, *verbose, *disable_reverse); err != nil {
 		log.Fatal("Could not write to database: ", err)
 	}
 	if len(*historyServer) != 0 && *verbose {
 		log.Print("Wrote history.")
 	}
-	var dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds []string
+	var dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds, rlIDs []string
 	if rater != nil {
 		dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
 		rplIds, _ = tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
@@ -351,6 +352,7 @@ func main() {
 		alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
 		lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
 		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
+		rlIDs, _ = tpReader.GetLoadedIds(utils.ResourceLimitsPrefix)
 	}
 	actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	var statsQueueIds []string
@@ -376,14 +378,15 @@ func main() {
 			dstIds, rplIds, rpfIds, lcrIds = nil, nil, nil, nil // Should reload all these on flush
 		}
 		if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{
-			DestinationIds:   dstIds,
-			RatingPlanIds:    rplIds,
-			RatingProfileIds: rpfIds,
-			ActionIds:        actIds,
-			SharedGroupIds:   shgIds,
-			Aliases:          alsIds,
-			LCRIds:           lcrIds,
-			DerivedChargers:  dcsIds,
+			DestinationIds:   &dstIds,
+			RatingPlanIds:    &rplIds,
+			RatingProfileIds: &rpfIds,
+			ActionIds:        &actIds,
+			SharedGroupIds:   &shgIds,
+			Aliases:          &alsIds,
+			LCRIds:           &lcrIds,
+			DerivedChargers:  &dcsIds,
+			ResourceLimits:   &rlIDs,
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}

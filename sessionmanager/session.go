@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package sessionmanager
 
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -312,6 +312,15 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 		aSessions = append(aSessions, aSession)
 	}
 	return aSessions
+}
+
+func (s *Session) AsMapStringIface() (map[string]interface{}, error) {
+	mp := make(map[string]interface{})
+	v := reflect.ValueOf(s).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		mp[v.Type().Field(i).Name] = v.Field(i).Interface()
+	}
+	return mp, nil
 }
 
 // Will be used when displaying active sessions via RPC

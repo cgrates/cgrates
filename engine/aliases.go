@@ -1,3 +1,20 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package engine
 
 import (
@@ -6,7 +23,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -96,7 +112,7 @@ func (al *Alias) GenerateIds() []string {
 	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, utils.ANY, al.Context))
 	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, utils.ANY, utils.ANY, al.Context))
 	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, utils.ANY, utils.ANY, utils.ANY, al.Context))
-	result = append(result, utils.ConcatenatedKey(al.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY, al.Context))
+	result = append(result, utils.ConcatenatedKey(utils.ANY, utils.ANY, al.Category, utils.ANY, utils.ANY, al.Context))
 	result = append(result, utils.ConcatenatedKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, al.Context))
 	return result
 }
@@ -113,29 +129,6 @@ func (al *Alias) SetId(id string) error {
 	al.Subject = vals[4]
 	al.Context = vals[5]
 	return nil
-}
-
-func (al *Alias) SetReverseCache() {
-	for _, value := range al.Values {
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
-				cache2go.Push(rKey, utils.ConcatenatedKey(al.GetId(), value.DestinationId))
-			}
-		}
-	}
-}
-
-func (al *Alias) RemoveReverseCache() {
-	for _, value := range al.Values {
-		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-				cache2go.Pop(rKey, tmpKey)
-			}
-		}
-	}
 }
 
 type AttrMatchingAlias struct {
@@ -189,11 +182,15 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 
 	var oldAlias *Alias
 	if !attr.Overwrite { // get previous value
-		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId(), false)
+		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId(), false, utils.NonTransactional)
 	}
 
 	if attr.Overwrite || oldAlias == nil {
-		if err := am.accountingDb.SetAlias(attr.Alias); err != nil {
+		if err := am.accountingDb.SetAlias(attr.Alias, utils.NonTransactional); err != nil {
+			*reply = err.Error()
+			return err
+		}
+		if err := am.accountingDb.SetReverseAlias(attr.Alias, utils.NonTransactional); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -222,17 +219,21 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 				oldAlias.Values = append(oldAlias.Values, value)
 			}
 		}
-		if err := am.accountingDb.SetAlias(oldAlias); err != nil {
+		if err := am.accountingDb.SetAlias(oldAlias, utils.NonTransactional); err != nil {
 			*reply = err.Error()
 			return err
 		}
+		if err := am.accountingDb.SetReverseAlias(oldAlias, utils.NonTransactional); err != nil {
+			*reply = err.Error()
+			return err
+		}
+		//FIXME: optimize by creating better update reverse alias
+		/*err := am.accountingDb.UpdateReverseAlias(oldAlias, oldAlias)
+		if err != nil {
+			return err
+		}*/
 	}
 
-	//add to cache
-	aliasesChanged := []string{utils.ALIASES_PREFIX + attr.Alias.GetId()}
-	if err := am.accountingDb.CacheAccountingPrefixValues(map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
-		return utils.NewErrServerError(err)
-	}
 	*reply = utils.OK
 	return nil
 }
@@ -240,32 +241,9 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 func (am *AliasHandler) RemoveAlias(al *Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-	if err := am.accountingDb.RemoveAlias(al.GetId()); err != nil {
+	if err := am.accountingDb.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
 		*reply = err.Error()
 		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-
-func (am *AliasHandler) RemoveReverseAlias(attr *AttrReverseAlias, reply *string) error {
-	am.mu.Lock()
-	defer am.mu.Unlock()
-	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, err := cache2go.Get(rKey); err == nil {
-		existingKeys := x.(map[interface{}]struct{})
-		for iKey := range existingKeys {
-			key := iKey.(string)
-			// get destination id
-			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
-			if len(elems) > 0 {
-				key = strings.Join(elems[:len(elems)-1], utils.CONCATENATED_KEY_SEP)
-			}
-			if err := am.accountingDb.RemoveAlias(key); err != nil {
-				*reply = err.Error()
-				return err
-			}
-		}
 	}
 	*reply = utils.OK
 	return nil
@@ -276,7 +254,7 @@ func (am *AliasHandler) GetAlias(al *Alias, result *Alias) error {
 	defer am.mu.RUnlock()
 	variants := al.GenerateIds()
 	for _, variant := range variants {
-		if r, err := am.accountingDb.GetAlias(variant, false); err == nil {
+		if r, err := am.accountingDb.GetAlias(variant, false, utils.NonTransactional); err == nil && r != nil {
 			*result = *r
 			return nil
 		}
@@ -288,11 +266,9 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
-	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
-	if x, err := cache2go.Get(rKey); err == nil {
-		existingKeys := x.(map[interface{}]struct{})
-		for iKey := range existingKeys {
-			key := iKey.(string)
+	rKey := attr.Alias + attr.Target + attr.Context
+	if ids, err := am.accountingDb.GetReverseAlias(rKey, false, utils.NonTransactional); err == nil {
+		for _, key := range ids {
 			// get destination id
 			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
 			var destID string
@@ -300,7 +276,7 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 				destID = elems[len(elems)-1]
 				key = strings.Join(elems[:len(elems)-1], utils.CONCATENATED_KEY_SEP)
 			}
-			if r, err := am.accountingDb.GetAlias(key, false); err != nil {
+			if r, err := am.accountingDb.GetAlias(key, false, utils.NonTransactional); err != nil {
 				return err
 			} else {
 				aliases[destID] = append(aliases[destID], r)
@@ -341,11 +317,9 @@ func (am *AliasHandler) GetMatchingAlias(attr *AttrMatchingAlias, result *string
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-			destIds := x.(map[interface{}]struct{})
+		if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, value := range values {
-				for idId := range destIds {
-					dId := idId.(string)
+				for _, dId := range destIDs {
 					if value.DestinationId == utils.ANY || value.DestinationId == dId {
 						if origAliasMap, ok := value.Pairs[attr.Target]; ok {
 							if alias, ok := origAliasMap[attr.Original]; ok || attr.Original == "" || attr.Original == utils.ANY {
@@ -422,11 +396,9 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 	if rightPairs == nil {
 		// check destination ids
 		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-				destIds := x.(map[interface{}]struct{})
+			if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 				for _, value := range values {
-					for idId := range destIds {
-						dId := idId.(string)
+					for _, dId := range destIDs {
 						if value.DestinationId == utils.ANY || value.DestinationId == dId {
 							rightPairs = value.Pairs
 						}

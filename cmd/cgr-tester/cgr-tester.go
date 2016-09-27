@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package main
 
 import (
@@ -60,27 +59,27 @@ var (
 	subject         = flag.String("subject", "1001", "The rating subject to use in queries.")
 	destination     = flag.String("destination", "1002", "The destination to use in queries.")
 	json            = flag.Bool("json", false, "Use JSON RPC")
-
-	nilDuration = time.Duration(0)
+	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
+	nilDuration     = time.Duration(0)
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
-	ratingDb, err := engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, *ratingdb_user, *ratingdb_pass, *dbdata_encoding)
+	ratingDb, err := engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, *ratingdb_user, *ratingdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to rating database: %s", err.Error())
 	}
 	defer ratingDb.Close()
 	engine.SetRatingStorage(ratingDb)
-	accountDb, err := engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding)
+	accountDb, err := engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to accounting database: %s", err.Error())
 	}
 	defer accountDb.Close()
 	engine.SetAccountingStorage(accountDb)
-	if err := ratingDb.CacheRatingAll(); err != nil {
+	if err := ratingDb.PreloadRatingCache(); err != nil {
 		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
 	}
-	if err := accountDb.CacheAccountingAll(); err != nil {
+	if err := accountDb.PreloadAccountingCache(); err != nil {
 		return nilDuration, fmt.Errorf("Cache accounting error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)

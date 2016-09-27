@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package config
 
 // One instance of CdrExporter
@@ -31,7 +30,7 @@ type CdreConfig struct {
 	CostShiftDigits            int
 	MaskDestinationID          string
 	MaskLength                 int
-	ExportFolder               string
+	ExportDirectory            string
 	HeaderFields               []*CfgCdrField
 	ContentFields              []*CfgCdrField
 	TrailerFields              []*CfgCdrField
@@ -76,8 +75,8 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 	if jsnCfg.Mask_length != nil {
 		self.MaskLength = *jsnCfg.Mask_length
 	}
-	if jsnCfg.Export_folder != nil {
-		self.ExportFolder = *jsnCfg.Export_folder
+	if jsnCfg.Export_directory != nil {
+		self.ExportDirectory = *jsnCfg.Export_directory
 	}
 	if jsnCfg.Header_fields != nil {
 		if self.HeaderFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Header_fields); err != nil {
@@ -111,7 +110,7 @@ func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre.CostShiftDigits = self.CostShiftDigits
 	clnCdre.MaskDestinationID = self.MaskDestinationID
 	clnCdre.MaskLength = self.MaskLength
-	clnCdre.ExportFolder = self.ExportFolder
+	clnCdre.ExportDirectory = self.ExportDirectory
 	clnCdre.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld

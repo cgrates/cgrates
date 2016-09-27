@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package v1
 
 import (
@@ -24,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -51,6 +51,9 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	}
 	accID := utils.AccountKey(attrs.Tenant, attrs.Account)
 	for _, ap := range allAPs {
+		if ap == nil {
+			continue
+		}
 		if _, exists := ap.AccountIDs[accID]; exists {
 			for _, at := range ap.ActionTimings {
 				accountATs = append(accountATs, &AccountActionTiming{
@@ -86,7 +89,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		}
 	}
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false)
+		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
 		if err != nil {
 			return 0, err
 		} else if ap == nil {
@@ -96,7 +99,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		if attrs.Tenant != "" && attrs.Account != "" {
 			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
 			delete(ap.AccountIDs, accID)
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
@@ -108,21 +111,19 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 					break
 				}
 			}
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
 		if attrs.ActionPlanId != "" { // delete the entire action plan
 			ap.ActionTimings = nil // will delete the action plan
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 	UPDATE:
 		if err != nil {
 			return 0, err
 		}
-		// update cache
-		self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
@@ -153,35 +154,10 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			}
 		}
 		if len(attr.ActionPlanId) != 0 {
+
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
-				// clean previous action plans
-				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
-				if err != nil {
-					if err == utils.ErrNotFound { // if no action plans just continue
-						return 0, nil
-					}
-					return 0, err
-				}
-				var dirtyAps []string
-				for actionPlanID, ap := range actionPlansMap {
-					if actionPlanID == attr.ActionPlanId {
-						// don't remove it if it's the current one
-						continue
-					}
-					if _, exists := ap.AccountIDs[accID]; exists {
-						delete(ap.AccountIDs, accID)
-						dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+actionPlanID)
-					}
-				}
-
-				if len(dirtyAps) > 0 {
-					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: dirtyAps})
-					schedulerReloadNeeded = true
-				}
-
 				var ap *engine.ActionPlan
-				ap, err = self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
+				ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
 				if err != nil {
 					return 0, err
 				}
@@ -204,12 +180,30 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 							}
 						}
 					}
-					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, true); err != nil {
+					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
-					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
 				}
+				// clean previous action plans
+				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
+				if err != nil {
+					if err == utils.ErrNotFound { // if no action plans just continue
+						return 0, nil
+					}
+					return 0, err
+				}
+				for actionPlanID, ap := range actionPlansMap {
+					if actionPlanID == attr.ActionPlanId {
+						// don't remove it if it's the current one
+						continue
+					}
+					if _, exists := ap.AccountIDs[accID]; exists {
+						delete(ap.AccountIDs, accID)
+						// clean from cache
+						cache2go.RemKey(utils.ACTION_PLAN_PREFIX+actionPlanID, true, utils.NonTransactional)
+					}
+				}
+
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
 			if err != nil {
@@ -218,7 +212,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		}
 
 		if len(attr.ActionTriggersId) != 0 {
-			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId)
+			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
 			if err != nil {
 				return 0, err
 			}
@@ -275,17 +269,10 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 				}
 			}
 
-			var actionPlansCacheIds []string
 			for actionPlanID, ap := range dirtyActionPlans {
-				if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
+				if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 					return 0, err
 				}
-				actionPlansCacheIds = append(actionPlansCacheIds, utils.ACTION_PLAN_PREFIX+actionPlanID)
-			}
-			if len(actionPlansCacheIds) > 0 {
-				// update cache
-				self.RatingDb.CacheRatingPrefixValues(map[string][]string{
-					utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
 			}
 			return 0, nil
 		}, 0, utils.ACTION_PLAN_PREFIX)
@@ -318,7 +305,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX+attr.Tenant, true); err != nil {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {

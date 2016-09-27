@@ -1,45 +1,30 @@
 /*
-Real-Time Charging System for Telecom Environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
 	"flag"
 	"path"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
-
-/*
-README:
-
- Enable local tests by passing '-local' to the go test command
- Tests in this file combine end2end tests using both redis and MySQL.
- It is expected that the data folder of CGRateS exists at path /usr/share/cgrates/data or passed via command arguments.
- Prior running the tests, create database and users by running:
-  mysql -pyourrootpwd < /usr/share/cgrates/data/storage/mysql/create_db_with_users.sql
- What these tests do:
-  * Connect to redis using 2 handles, one where we store CSV reference data and one where we store data out of storDb, each with it's own db number
-  * Flush data in each handle to start clean
-*/
 
 // Globals used
 var ratingDbCsv, ratingDbStor, ratingDbApier RatingStorage        // Each ratingDb will have it's own sources to collect data
@@ -57,25 +42,25 @@ func TestConnDataDbs(t *testing.T) {
 	}
 	lCfg, _ = config.NewDefaultCGRConfig()
 	var err error
-	if ratingDbCsv, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "4", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding); err != nil {
+	if ratingDbCsv, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "4", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if ratingDbStor, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "5", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding); err != nil {
+	if ratingDbStor, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "5", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if ratingDbApier, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "6", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding); err != nil {
+	if ratingDbApier, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "6", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
 	if accountDbCsv, err = ConfigureAccountingStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "7",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
 	if accountDbStor, err = ConfigureAccountingStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "8",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
 	if accountDbApier, err = ConfigureAccountingStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "9",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
 	for _, db := range []Storage{ratingDbCsv, ratingDbStor, ratingDbApier, accountDbCsv, accountDbStor, accountDbApier} {
@@ -133,7 +118,8 @@ func TestLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
-	), "", "", lCfg.LoadHistorySize)
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourceLimitsCsv),
+	), "", "")
 
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
@@ -177,7 +163,10 @@ func TestLoadFromCSV(t *testing.T) {
 	if err = loader.LoadAliases(); err != nil {
 		t.Error("Failed loading aliases: ", err.Error())
 	}
-	if err := loader.WriteToDatabase(true, false); err != nil {
+	if err = loader.LoadResourceLimits(); err != nil {
+		t.Error("Failed loading resource limits: ", err.Error())
+	}
+	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into ratingDb: ", err.Error())
 	}
 }
@@ -209,7 +198,7 @@ func TestLoadFromStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, utils.TEST_SQL, "", lCfg.LoadHistorySize)
+	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, utils.TEST_SQL, "")
 	if err := loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -252,16 +241,13 @@ func TestLoadFromStorDb(t *testing.T) {
 	if err := loader.LoadAliases(); err != nil {
 		t.Error("Failed loading aliases: ", err.Error())
 	}
-	if err := loader.WriteToDatabase(true, false); err != nil {
-		t.Error("Could not write data into ratingDb: ", err.Error())
-	}
 }
 
 func TestLoadIndividualProfiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, utils.TEST_SQL, "", lCfg.LoadHistorySize)
+	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, utils.TEST_SQL, "")
 	// Load ratingPlans. This will also set destination keys
 	if ratingPlans, err := storDb.GetTpRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")
@@ -378,6 +364,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	}
 }
 
+/*
 // Compares previously loaded data from csv and stor to be identical, redis specific tests
 func TestMatchLoadCsvWithStorRating(t *testing.T) {
 	if !*testLocal {
@@ -448,3 +435,4 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 		}
 	}
 }
+*/

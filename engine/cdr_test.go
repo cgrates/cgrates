@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -23,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -476,5 +476,61 @@ func TestUsageReqAsCD(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCD, cd) {
 		t.Errorf("Expected: %+v, received: %+v", eCD, cd)
+	}
+}
+
+func TestCDRParseFieldValue(t *testing.T) {
+	cdr := new(CDR)
+	if err := cdr.ParseFieldValue(utils.PartialField, "true", ""); err != nil {
+		t.Error(err)
+	} else if !cdr.Partial {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
+	if err := cdr.ParseFieldValue(utils.ORDERID, "5", ""); err != nil {
+		t.Error(err)
+	} else if cdr.OrderID != 5 {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
+}
+
+func TestCDRAsExportRecord(t *testing.T) {
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
+		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 1.01,
+		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
+
+	val, _ := utils.ParseRSRFields(utils.DESTINATION, utils.INFIELD_SEP)
+	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val}
+	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, 0, 0, "UTC", false, 0, "", nil); err != nil {
+		t.Error(err)
+	} else if expRecord[0] != cdr.Destination {
+		t.Errorf("Expecting: %s, received: %s", cdr.Destination, expRecord[0])
+	}
+	fltr, _ := utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
+	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val, FieldFilter: fltr}
+	if _, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, 0, 0, "UTC", false, 0, "", nil); err == nil {
+		t.Error("Failed to use filter")
+	}
+	// Test MetaDateTime
+	val, _ = utils.ParseRSRFields("stop_time", utils.INFIELD_SEP)
+	layout := "2006-01-02 15:04:05"
+	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime, FieldId: "stop_time", Value: val, Layout: layout}
+	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, 0, 0, "UTC", false, 0, "", nil); err != nil {
+		t.Error(err)
+	} else if expRecord[0] != "2014-06-11 19:19:00" {
+		t.Error("Expecting: 2014-06-11 19:19:00, got: ", expRecord[0])
+	}
+	// Test filter
+	fltr, _ = utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
+	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime, FieldId: "stop_time", Value: val, FieldFilter: fltr, Layout: layout}
+	if _, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, 0, 0, "UTC", false, 0, "", nil); err == nil {
+		t.Error("Received empty error", err)
+	}
+	val, _ = utils.ParseRSRFields("fieldextr2", utils.INFIELD_SEP)
+	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime, FieldId: "stop_time", Value: val, Layout: layout}
+	// Test time parse error
+	if _, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, 0, 0, "UTC", false, 0, "", nil); err == nil {
+		t.Error("Should give error here, got none.")
 	}
 }

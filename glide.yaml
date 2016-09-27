@@ -1,8 +1,8 @@
-package: github.com/cgrates/cgrates
+package: ""
 import:
 - package: github.com/DisposaBoy/JsonConfigReader
 - package: github.com/cenk/hub
-- package: github.com/cenkalti/rpc2
+- package: github.com/cenk/rpc2
 - package: github.com/cgrates/fsock
 - package: github.com/cgrates/kamevapi
 - package: github.com/cgrates/osipsdagram
@@ -36,3 +36,6 @@ import:
   - bson
 - package: github.com/ChrisTrenkamp/goxpath
 - package: github.com/mitchellh/mapstructure
+- package: github.com/hashicorp/golang-lru
+- package: github.com/cgrates/aringo
+- package: github.com/bit4bit/gami

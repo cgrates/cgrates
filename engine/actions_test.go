@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -1056,11 +1055,16 @@ func TestActionTriggerLogging(t *testing.T) {
 		Weight:         10.0,
 		ActionsID:      "TEST_ACTIONS",
 	}
-	as, err := ratingStorage.GetActions(at.ActionsID, false)
+	as, err := ratingStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting actions for the action timing: ", as, err)
 	}
-	storageLogger.LogActionTrigger("rif", utils.RATER_SOURCE, at, as)
+	Publish(CgrEvent{
+		"EventName": utils.EVT_ACTION_TRIGGER_FIRED,
+		"Uuid":      at.UniqueID,
+		"Id":        at.ID,
+		"ActionIds": at.ActionsID,
+	})
 	//expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"
 	var key string
 	atMap, _ := ratingStorage.GetAllActionPlans()
@@ -1098,11 +1102,15 @@ func TestActionPlanLogging(t *testing.T) {
 		Weight:     10.0,
 		ActionsID:  "TEST_ACTIONS",
 	}
-	as, err := ratingStorage.GetActions(at.ActionsID, false)
 	if err != nil {
 		t.Error("Error getting actions for the action trigger: ", err)
 	}
-	storageLogger.LogActionTiming(utils.SCHED_SOURCE, at, as)
+	Publish(CgrEvent{
+		"EventName": utils.EVT_ACTION_TIMING_FIRED,
+		"Uuid":      at.Uuid,
+		"Id":        at.actionPlanID,
+		"ActionIds": at.ActionsID,
+	})
 	//expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*|TOPUP|MONETARY|OUT|10|0"
 	var key string
 	atMap, _ := ratingStorage.GetAllActionPlans()
@@ -1277,42 +1285,49 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
 	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
-	ratingStorage.SetDestination(origD)
-	ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + "*ddc_test"}})
+	ratingStorage.SetDestination(origD, utils.NonTransactional)
+	ratingStorage.SetReverseDestination(origD, utils.NonTransactional)
 	// check redis and cache
-	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil || !reflect.DeepEqual(d, origD) {
+	if d, err := ratingStorage.GetDestination("*ddc_test", false, utils.NonTransactional); err != nil || !reflect.DeepEqual(d, origD) {
 		t.Error("Error storing destination: ", d, err)
 	}
-	x1, err := cache2go.Get(utils.DESTINATION_PREFIX + "111")
-	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
+	ratingStorage.GetReverseDestination("111", false, utils.NonTransactional)
+	x1, found := cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "222")
-	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
+	ratingStorage.GetReverseDestination("222", false, utils.NonTransactional)
+	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "444": 1}}, nil, nil)
-	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil ||
+	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "666": 1}}, nil, nil)
+	d, err := ratingStorage.GetDestination("*ddc_test", false, utils.NonTransactional)
+	if err != nil ||
 		d.Id != origD.Id ||
 		len(d.Prefixes) != 2 ||
 		!utils.IsSliceMember(d.Prefixes, "333") ||
-		!utils.IsSliceMember(d.Prefixes, "444") {
+		!utils.IsSliceMember(d.Prefixes, "666") {
 		t.Error("Error storing destination: ", d, err)
 	}
-	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "111")
-	if err == nil {
+
+	var ok bool
+	x1, ok = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "222")
-	if err == nil {
+	x1, ok = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "333")
-	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
+	ratingStorage.GetReverseDestination("333", false, utils.NonTransactional)
+	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
+	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "444")
-	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
+	ratingStorage.GetReverseDestination("666", false, utils.NonTransactional)
+	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
+	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 }
@@ -2047,7 +2062,7 @@ func TestActionSetBalance(t *testing.T) {
 }
 
 func TestActionCSVFilter(t *testing.T) {
-	act, err := ratingStorage.GetActions("FILTER", false)
+	act, err := ratingStorage.GetActions("FILTER", false, utils.NonTransactional)
 	if err != nil {
 		t.Error("error getting actions: ", err)
 	}
@@ -2057,7 +2072,7 @@ func TestActionCSVFilter(t *testing.T) {
 }
 
 func TestActionExpirationTime(t *testing.T) {
-	a, err := ratingStorage.GetActions("EXP", false)
+	a, err := ratingStorage.GetActions("EXP", false, utils.NonTransactional)
 	if err != nil || a == nil {
 		t.Error("Error getting actions: ", err)
 	}
@@ -2077,11 +2092,11 @@ func TestActionExpirationTime(t *testing.T) {
 }
 
 func TestActionExpNoExp(t *testing.T) {
-	exp, err := ratingStorage.GetActions("EXP", false)
+	exp, err := ratingStorage.GetActions("EXP", false, utils.NonTransactional)
 	if err != nil || exp == nil {
 		t.Error("Error getting actions: ", err)
 	}
-	noexp, err := ratingStorage.GetActions("NOEXP", false)
+	noexp, err := ratingStorage.GetActions("NOEXP", false, utils.NonTransactional)
 	if err != nil || noexp == nil {
 		t.Error("Error getting actions: ", err)
 	}

@@ -1,28 +1,30 @@
 {
 // Contains CDRC  template for FreeSWITCH CDR
 
-"cdrc": {
-        "CDRC-FS": {
+"cdrc": [
+        {
+                "id": "CDRC-FS",
                 "enabled": true,                                	// enable CDR client functionality
                 "cdr_in_dir": "/tmp/cgr_fsevsock/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
                 "cdr_out_dir": "/tmp/cgr_fsevsock/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
                 "cdr_source_id": "fs_csv",			      	// free form field, tag identifying the source of the CDRs within CDRS database
                 "content_fields":[					// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-                        {"tag": "tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "^*voice", "mandatory": true},
-                        {"tag": "accid", "cdr_field_id": "accid", "type": "cdrfield", "value": "10", "mandatory": true},
-                        {"tag": "reqtype", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "^*pseudoprepaid", "mandatory": true},
-                        {"tag": "direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "^*out", "mandatory": true},
-                        {"tag": "tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "^cgrates.org", "mandatory": true},
-                        {"tag": "category", "cdr_field_id": "category", "type": "cdrfield", "value": "^call", "mandatory": true},
-                        {"tag": "account", "cdr_field_id": "account", "type": "cdrfield", "value": "12", "mandatory": true},
-                        {"tag": "subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "12", "mandatory": true},
-                        {"tag": "destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "2", "mandatory": true},
-                        {"tag": "setup_time", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "4", "mandatory": true},
-                        {"tag": "answer_time", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "5", "mandatory": true},
-                        {"tag": "usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "~8:s/^(\\d+)$/${1}s/", "mandatory": true},
+                        {"tag": "tor", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
+                        {"tag": "accid", "field_id": "OriginID", "type": "*composed", "value": "10", "mandatory": true},
+                        {"tag": "reqtype", "field_id": "RequestType", "type": "*composed", "value": "^*pseudoprepaid", "mandatory": true},
+                        {"tag": "direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
+                        {"tag": "tenant", "field_id": "Tenant", "type": "*composed", "value": "^cgrates.org", "mandatory": true},
+                        {"tag": "category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
+                        {"tag": "account", "field_id": "Account", "type": "*composed", "value": "12", "mandatory": true},
+                        {"tag": "subject", "field_id": "Subject", "type": "*composed", "value": "12", "mandatory": true},
+                        {"tag": "destination", "field_id": "Destination", "type": "*composed", "value": "2", "mandatory": true},
+                        {"tag": "setup_time", "field_id": "SetupTime", "type": "*composed", "value": "4", "mandatory": true},
+                        {"tag": "answer_time", "field_id": "AnswerTime", "type": "*composed", "value": "5", "mandatory": true},
+                        {"tag": "usage", "field_id": "Usage", "type": "*composed", "value": "~8:s/^(\\d+)$/${1}s/", "mandatory": true},
+
                 ],
         },
-},
+],
 
 }
 

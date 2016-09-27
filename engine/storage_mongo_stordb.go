@@ -1,3 +1,20 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package engine
 
 import (
@@ -299,6 +316,10 @@ func (ms *MongoStorage) GetTpAliases(tp *TpAlias) ([]TpAlias, error) {
 	defer session.Close()
 	err := col.Find(filter).All(&results)
 	return results, err
+}
+
+func (ms *MongoStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits, error) {
+	return nil, nil
 }
 
 func (ms *MongoStorage) GetTpDerivedChargers(tp *TpDerivedCharger) ([]TpDerivedCharger, error) {
@@ -734,29 +755,6 @@ func (ms *MongoStorage) SetTpAccountActions(tps []TpAccountAction) error {
 	}
 	_, err := tx.Run()
 	return err
-}
-
-func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
-	session, col := ms.conn(colLogAtr)
-	defer session.Close()
-	return col.Insert(&struct {
-		ubId          string
-		ActionTrigger *ActionTrigger
-		Actions       Actions
-		LogTime       time.Time
-		Source        string
-	}{ubId, at, as, time.Now(), source})
-}
-
-func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
-	session, col := ms.conn(colLogApl)
-	defer session.Close()
-	return col.Insert(&struct {
-		ActionPlan *ActionTiming
-		Actions    Actions
-		LogTime    time.Time
-		Source     string
-	}{at, as, time.Now(), source})
 }
 
 func (ms *MongoStorage) SetSMCost(smc *SMCost) error {

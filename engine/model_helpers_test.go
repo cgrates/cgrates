@@ -1,3 +1,20 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package engine
 
 import (
@@ -635,5 +652,75 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 	slc = append(slc, lc)
 	if !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
+	}
+}
+
+func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
+	tps := []*TpResourceLimit{
+		&TpResourceLimit{
+			Tpid:             "TEST_TPID",
+			Tag:              "ResGroup1",
+			FilterType:       MetaStringPrefix,
+			FilterFieldName:  "Destination",
+			FilterValues:     "+49151;+49161",
+			ActivationTime:   "2014-07-29T15:00:00Z",
+			Weight:           10.0,
+			Limit:            "45",
+			ActionTriggerIds: "WARN_RES1;WARN_RES2"},
+		&TpResourceLimit{
+			Tpid:             "TEST_TPID",
+			Tag:              "ResGroup1",
+			FilterType:       MetaStringPrefix,
+			FilterFieldName:  "Category",
+			FilterValues:     "call;inbound_call",
+			ActionTriggerIds: "WARN3"},
+		&TpResourceLimit{
+			Tpid:            "TEST_TPID",
+			Tag:             "ResGroup2",
+			FilterType:      MetaStringPrefix,
+			FilterFieldName: "Destination",
+			FilterValues:    "+40",
+			ActivationTime:  "2014-07-29T15:00:00Z",
+			Weight:          10.0,
+			Limit:           "20"},
+	}
+	eTPs := map[string]*utils.TPResourceLimit{
+		tps[0].Tag: &utils.TPResourceLimit{
+			TPID: tps[0].Tpid,
+			ID:   tps[0].Tag,
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					Type:      tps[0].FilterType,
+					FieldName: tps[0].FilterFieldName,
+					Values:    []string{"+49151", "+49161"},
+				},
+				&utils.TPRequestFilter{
+					Type:      tps[1].FilterType,
+					FieldName: tps[1].FilterFieldName,
+					Values:    []string{"call", "inbound_call"},
+				},
+			},
+			ActivationTime:   tps[0].ActivationTime,
+			Weight:           tps[0].Weight,
+			Limit:            tps[0].Limit,
+			ActionTriggerIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
+		},
+		tps[2].Tag: &utils.TPResourceLimit{
+			TPID: tps[2].Tpid,
+			ID:   tps[2].Tag,
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					Type:      tps[2].FilterType,
+					FieldName: tps[2].FilterFieldName,
+					Values:    []string{"+40"},
+				},
+			},
+			ActivationTime: tps[2].ActivationTime,
+			Weight:         tps[2].Weight,
+			Limit:          tps[2].Limit,
+		},
+	}
+	if rcvTPs := TpResourceLimits(tps).AsTPResourceLimits(); !reflect.DeepEqual(eTPs, rcvTPs) {
+		t.Errorf("Expecting: %+v, received: %+v", eTPs, rcvTPs)
 	}
 }

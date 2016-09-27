@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package v2
 
 import (
@@ -56,9 +55,9 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError, "Invalid")
 		}
 	}
-	ExportFolder := exportTemplate.ExportFolder
-	if attr.ExportFolder != nil && len(*attr.ExportFolder) != 0 {
-		ExportFolder = *attr.ExportFolder
+	eDir := exportTemplate.ExportDirectory
+	if attr.ExportDirectory != nil && len(*attr.ExportDirectory) != 0 {
+		eDir = *attr.ExportDirectory
 	}
 	ExportID := strconv.FormatInt(time.Now().Unix(), 10)
 	if attr.ExportID != nil && len(*attr.ExportID) != 0 {
@@ -68,7 +67,7 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	if attr.ExportFileName != nil && len(*attr.ExportFileName) != 0 {
 		fileName = *attr.ExportFileName
 	}
-	filePath := path.Join(ExportFolder, fileName)
+	filePath := path.Join(eDir, fileName)
 	if cdrFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}

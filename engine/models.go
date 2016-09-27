@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -377,7 +376,7 @@ type TpAlias struct {
 }
 
 func (ta *TpAlias) TableName() string {
-	return "tp_aliases"
+	return utils.TBL_TP_ALIASES
 }
 
 func (ta *TpAlias) SetId(id string) error {
@@ -396,20 +395,6 @@ func (ta *TpAlias) SetId(id string) error {
 
 func (ta *TpAlias) GetId() string {
 	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
-}
-
-type TpLimiter struct {
-	Id             int64
-	Tpid           string
-	LimiterID      string    `index:"0" re:""`
-	ResourceID     string    `index:"1" re:""`
-	Filter         string    `index:"2" re:""`
-	TTL            string    `index:"3" re:""`
-	TimingIDs      string    `index:"4" re:""`
-	ActivationTime string    `index:"5" re:""`
-	Limit          float64   `index:"6" re:""`
-	ActionTriggers string    `index:"7" re:""`
-	CreatedAt      time.Time `index:"8" re:""`
 }
 
 type TBLCDRs struct {
@@ -437,6 +422,7 @@ type TBLCDRs struct {
 	Cost            float64
 	CostDetails     string
 	CostSource      string
+	AccountSummary  string
 	ExtraInfo       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -462,4 +448,18 @@ type TBLSMCosts struct {
 
 func (t TBLSMCosts) TableName() string {
 	return utils.TBLSMCosts
+}
+
+type TpResourceLimit struct {
+	ID               int64
+	Tpid             string
+	Tag              string  `index:"0" re:""`
+	FilterType       string  `index:"1" re:"^\*[A-Za-z].*"`
+	FilterFieldName  string  `index:"2" re:""`
+	FilterValues     string  `index:"3" re:""`
+	ActivationTime   string  `index:"4" re:""`
+	Weight           float64 `index:"5" re:"\d+\.?\d*"`
+	Limit            string  `index:"6" re:""`
+	ActionTriggerIds string  `index:"7" re:""`
+	CreatedAt        time.Time
 }

@@ -1,8 +1,8 @@
 8.1. FreeSWITCH integration
 ================================
-
-FreeSWITCH_ used as Telecom Switch is fully supported by all of the 4 rating modes: prepaid/postpaid/pseudoprepaid/rated.
-A typical use case would be like the one in the diagram bellow:
+Being the original platform supported by CGRateS, FreeSWITCH_ has the advantage of support for complete set of CGRateS features.
+When used as Telecom Switch it fully supports all rating modes: **prepaid**/**postpaid**/**pseudoprepaid**/**rated**.
+A typical use case would be like the one in the diagram below:
 
 .. image::  images/CGRateSFSTypicalUsage.png
 
@@ -10,6 +10,8 @@ The process of rating is decoupled into two different components:
 
 8.1.1. SessionManager
 ---------------------
+
+**TODO** - update and add CDRs and CDRc.
 
 - Attached to FreeSWITCH_ via the socket library, enhancing CGRateS with real-time call monitoring and call control functions.
 - In Prepaid mode implements the following behaviour:
@@ -49,6 +51,9 @@ The process of rating is decoupled into two different components:
 
 8.1.2. Mediator
 ---------------
+
+**TODO** - remove this section. Mediator functionality is handled by CDRs and CDRc.
+
 
 Attaches costs to FreeSWITCH_ native written .csv files. Since writing channel variables during hangup is asynchronous and can be missed by the CDR recorder mechanism of FreeSWITCH_, we decided to keep this as separate process after the call is completed and do not write the costs via channel variables.
 

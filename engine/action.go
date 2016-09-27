@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -110,8 +109,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		DEBIT_RESET:     debitResetAction,
 		DEBIT:           debitAction,
 		RESET_COUNTERS:  resetCountersAction,
-		ENABLE_ACCOUNT:  enableUserAction,
-		DISABLE_ACCOUNT: disableUserAction,
+		ENABLE_ACCOUNT:  enableAccountAction,
+		DISABLE_ACCOUNT: disableAccountAction,
 		//case ENABLE_DISABLE_BALANCE:
 		//	return enableDisableBalanceAction, true
 		CALL_URL:                  callUrl,
@@ -376,19 +375,19 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	return ub.debitBalanceAction(a, reset)
 }
 
-func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-	if ub == nil {
+func enableAccountAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+	if acc == nil {
 		return errors.New("nil account")
 	}
-	ub.Disabled = false
+	acc.Disabled = false
 	return
 }
 
-func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-	if ub == nil {
+func disableAccountAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+	if acc == nil {
 		return errors.New("nil account")
 	}
-	ub.Disabled = true
+	acc.Disabled = true
 	return
 }
 
@@ -517,12 +516,17 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 			prefixes[i] = p
 			i++
 		}
+		newDest := &Destination{Id: ddcDestId, Prefixes: prefixes}
+		oldDest, err := ratingStorage.GetDestination(ddcDestId, false, utils.NonTransactional)
 		// update destid in storage
-		ratingStorage.SetDestination(&Destination{Id: ddcDestId, Prefixes: prefixes})
-		// remove existing from cache
-		CleanStalePrefixes([]string{ddcDestId})
-		// update new values from redis
-		ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + ddcDestId}})
+		ratingStorage.SetDestination(newDest, utils.NonTransactional)
+
+		if err == nil && oldDest != nil {
+			err = ratingStorage.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+		}
 	} else {
 		return utils.ErrNotFound
 	}
@@ -559,20 +563,20 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 			utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
 			return 0, err
 		}
-		var dirtyAps []string
+		//var dirtyAps []string
 		for key, ap := range allAPs {
 			if _, exists := ap.AccountIDs[accID]; !exists {
 				// save action plan
 				delete(ap.AccountIDs, key)
-				ratingStorage.SetActionPlan(key, ap, true)
-				dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
+				ratingStorage.SetActionPlan(key, ap, true, utils.NonTransactional)
+				//dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
 			}
 		}
-		if len(dirtyAps) > 0 {
+		/*if len(dirtyAps) > 0 {
 			// cache
-			ratingStorage.CacheRatingPrefixValues(map[string][]string{
+			ratingStorage.CacheRatingPrefixValues("RemoveAccountAction", map[string][]string{
 				utils.ACTION_PLAN_PREFIX: dirtyAps})
-		}
+		}*/
 		return 0, nil
 
 	}, 0, utils.ACTION_PLAN_PREFIX)
@@ -583,6 +587,9 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if ub == nil {
+		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
+	}
 	if _, exists := ub.BalanceMap[a.Balance.GetType()]; !exists {
 		return utils.ErrNotFound
 	}
@@ -605,6 +612,9 @@ func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func setBalanceAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if acc == nil {
+		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
+	}
 	return acc.setBalanceAction(a)
 }
 
@@ -700,7 +710,11 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 		utils.Logger.Info("<*cgr_rpc> err: " + err.Error())
 		return err
 	}
-	utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> calling: %s with: %s", req.Method, utils.ToJSON(in)))
+	if in == nil {
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> nil params err: req.Params: %+v params: %+v", req.Params, params))
+		return utils.ErrParserError
+	}
+	utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> calling: %s with: %s and result %v", req.Method, utils.ToJSON(in), out))
 	if !req.Async {
 		err = client.Call(req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))

@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package utils
 
 import (
@@ -38,14 +37,6 @@ type Paginator struct {
 	Offset     *int   // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
 	SearchTerm string // Global matching pattern in items returned, partially used in some APIs
 }
-
-/*func (pag *Paginator) GetLimits() (low, high int) {
-	if pag.ItemsPerPage == 0 {
-		return 0, math.MaxInt32
-	}
-	return pag.Page * pag.ItemsPerPage, pag.ItemsPerPage
-}
-*/
 
 type TPDestination struct {
 	TPid          string   // Tariff plan id
@@ -183,7 +174,6 @@ func (self *TPRatingPlanBinding) Timing() *TPTiming {
 func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, error) {
 	// *out:cgrates.org:call:*any
 	s := strings.Split(keyId, ":")
-	// [*out cgrates.org call *any]
 	if len(s) != 4 {
 		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
 	}
@@ -505,7 +495,6 @@ type TPActionTrigger struct {
 func NewTPAccountActionsFromKeyId(tpid, loadId, keyId string) (*TPAccountActions, error) {
 	// *out:cgrates.org:1001
 	s := strings.Split(keyId, ":")
-	// [*out cgrates.org 1001]
 	if len(s) != 2 {
 		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
 	}
@@ -561,35 +550,36 @@ type AttrGetAccounts struct {
 
 // Data used to do remote cache reloads via api
 type AttrReloadCache struct {
-	DestinationIds   []string
-	RatingPlanIds    []string
-	RatingProfileIds []string
-	ActionIds        []string
-	ActionPlanIds    []string
-	SharedGroupIds   []string
-	LCRIds           []string
-	DerivedChargers  []string
-	LcrProfiles      []string
-	Aliases          []string
+	DestinationIds   *[]string
+	RatingPlanIds    *[]string
+	RatingProfileIds *[]string
+	ActionIds        *[]string
+	ActionPlanIds    *[]string
+	SharedGroupIds   *[]string
+	LCRIds           *[]string
+	DerivedChargers  *[]string
+	Aliases          *[]string
+	ResourceLimits   *[]string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
 }
 
 type CacheStats struct {
-	Destinations    int
-	RatingPlans     int
-	RatingProfiles  int
-	Actions         int
-	ActionPlans     int
-	SharedGroups    int
-	DerivedChargers int
-	LcrProfiles     int
-	CdrStats        int
-	Users           int
-	Aliases         int
-	LastLoadId      string
-	LastLoadTime    string
+	Destinations        int
+	ReverseDestinations int
+	RatingPlans         int
+	RatingProfiles      int
+	Actions             int
+	ActionPlans         int
+	SharedGroups        int
+	DerivedChargers     int
+	LcrProfiles         int
+	CdrStats            int
+	Users               int
+	Aliases             int
+	ReverseAliases      int
+	ResourceLimits      int
 }
 
 type AttrExpFileCdrs struct {
@@ -1089,7 +1079,7 @@ type AttrExportCdrsToFile struct {
 	CdrFormat                  *string  // Cdr output file format <utils.CdreCdrFormats>
 	FieldSeparator             *string  // Separator used between fields
 	ExportID                   *string  // Optional exportid
-	ExportFolder               *string  // If provided it overwrites the configured export directory
+	ExportDirectory            *string  // If provided it overwrites the configured export directory
 	ExportFileName             *string  // If provided the output filename will be set to this
 	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
@@ -1172,6 +1162,72 @@ type AttrSMGGetActiveSessions struct {
 	Supplier    *string
 }
 
+// Used for easier filtering, keep struct format to mark filter fields clearly
+func (attrs *AttrSMGGetActiveSessions) AsMapStringString() map[string]string {
+	out := make(map[string]string)
+	if attrs.ToR != nil {
+		if *attrs.ToR == "" {
+			*attrs.ToR = MetaEmpty
+		}
+		out[TOR] = *attrs.ToR
+	}
+	if attrs.OriginID != nil {
+		if *attrs.OriginID == "" {
+			*attrs.OriginID = MetaEmpty
+		}
+		out[ACCID] = *attrs.OriginID
+	}
+	if attrs.RunID != nil {
+		if *attrs.RunID == "" {
+			*attrs.RunID = MetaEmpty
+		}
+		out[MEDI_RUNID] = *attrs.RunID
+	}
+	if attrs.RequestType != nil {
+		if *attrs.RequestType == "" {
+			*attrs.RequestType = MetaEmpty
+		}
+		out[REQTYPE] = *attrs.RequestType
+	}
+	if attrs.Tenant != nil {
+		if *attrs.Tenant == "" {
+			*attrs.Tenant = MetaEmpty
+		}
+		out[TENANT] = *attrs.Tenant
+	}
+	if attrs.Category != nil {
+		if *attrs.Category == "" {
+			*attrs.Category = MetaEmpty
+		}
+		out[CATEGORY] = *attrs.Category
+	}
+	if attrs.Account != nil {
+		if *attrs.Account == "" {
+			*attrs.Account = MetaEmpty
+		}
+		out[ACCOUNT] = *attrs.Account
+	}
+	if attrs.Subject != nil {
+		if *attrs.Subject == "" {
+			*attrs.Subject = MetaEmpty
+		}
+		out[SUBJECT] = MetaEmpty
+	}
+	if attrs.Destination != nil {
+		if *attrs.Destination == "" {
+			*attrs.Destination = MetaEmpty
+		}
+		out[DESTINATION] = *attrs.Destination
+	}
+	if attrs.Supplier != nil {
+		if *attrs.Supplier == "" {
+			*attrs.Supplier = MetaEmpty
+		}
+		out[SUPPLIER] = *attrs.Supplier
+	}
+	return out
+}
+
 type AttrRateCDRs struct {
 	RPCCDRsFilter
 	StoreCDRs     *bool
@@ -1196,4 +1252,37 @@ type AttrSetBalance struct {
 	SharedGroups   *string
 	Blocker        *bool
 	Disabled       *bool
+}
+
+type TPResourceLimit struct {
+	TPID             string
+	ID               string             // Identifier of this limit
+	Filters          []*TPRequestFilter // Filters for the request
+	ActivationTime   string             // Time when this limit becomes active
+	Weight           float64            // Weight to sort the ResourceLimits
+	Limit            string             // Limit value
+	ActionTriggerIDs []string           // Thresholds to check after changing Limit
+}
+
+type TPRequestFilter struct {
+	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName string   // Name of the field providing us the Values to check (used in case of some )
+	Values    []string // Filter definition
+}
+
+type AttrRLsCache struct {
+	LoadID           string
+	ResourceLimitIDs []string
+}
+
+type AttrRLsResourceUsage struct {
+	ResourceUsageID string
+	Event           map[string]interface{}
+	RequestedUnits  float64
+}
+
+// Attributes to send on SessionDisconnect by SMG
+type AttrDisconnectSession struct {
+	EventStart map[string]interface{}
+	Reason     string
 }

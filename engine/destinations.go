@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,14 +15,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
 	"encoding/json"
 	"strings"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/history"
@@ -75,27 +73,23 @@ func (d *Destination) GetHistoryRecord(deleted bool) history.Record {
 
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
-	if cached, err := cache2go.Get(utils.DESTINATION_PREFIX + prefix); err == nil {
-		_, found := cached.(map[interface{}]struct{})[destId]
-		return found
+	if cached, err := ratingStorage.GetReverseDestination(prefix, true, utils.NonTransactional); err == nil {
+		return utils.IsSliceMember(cached, destId)
 	}
 	return false
 }
 
-func CleanStalePrefixes(destIds []string) {
+/*func CleanStalePrefixes(destIds []string) {
 	utils.Logger.Info("Cleaning stale dest prefixes: " + utils.ToJSON(destIds))
-	prefixMap, err := cache2go.GetAllEntries(utils.DESTINATION_PREFIX)
-	if err != nil {
-		return
-	}
+	prefixMap := cache2go.GetAllEntries(utils.REVERSE_DESTINATION_PREFIX)
 	for prefix, idIDs := range prefixMap {
-		dIDs := idIDs.(map[interface{}]struct{})
+		dIDs := idIDs.(map[string]struct{})
 		changed := false
 		for _, searchedDID := range destIds {
 			if _, found := dIDs[searchedDID]; found {
 				if len(dIDs) == 1 {
 					// remove de prefix from cache
-					cache2go.RemKey(utils.DESTINATION_PREFIX + prefix)
+					cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + prefix)
 				} else {
 					// delete the destination from list and put the new list in chache
 					delete(dIDs, searchedDID)
@@ -104,7 +98,8 @@ func CleanStalePrefixes(destIds []string) {
 			}
 		}
 		if changed {
-			cache2go.Cache(utils.DESTINATION_PREFIX+prefix, dIDs)
+			cache2go.Set(utils.REVERSE_DESTINATION_PREFIX+prefix, dIDs)
 		}
 	}
 }
+*/

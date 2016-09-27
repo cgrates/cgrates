@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -24,7 +23,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 
@@ -50,12 +48,13 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")
 
 	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")
+	//log.Printf("Credit: %v Unit: %v", creditBalances, unitBalances)
 	// gather all balances from shared groups
 	var extendedCreditBalances Balances
 	for _, cb := range creditBalances {
 		if len(cb.SharedGroups) > 0 {
 			for sg := range cb.SharedGroups {
-				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false); sharedGroup != nil {
+				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
 					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, ub)
 					sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
 					extendedCreditBalances = append(extendedCreditBalances, sgb...)
@@ -69,7 +68,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	for _, mb := range unitBalances {
 		if len(mb.SharedGroups) > 0 {
 			for sg := range mb.SharedGroups {
-				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false); sharedGroup != nil {
+				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
 					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, cd.TOR, ub)
 					sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 					extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
@@ -137,7 +136,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 		_, err := Guardian.Guard(func() (interface{}, error) {
 			for sgID := range balance.SharedGroups {
 				// add shared group member
-				sg, err := ratingStorage.GetSharedGroup(sgID, false)
+				sg, err := ratingStorage.GetSharedGroup(sgID, false, utils.NonTransactional)
 				if err != nil || sg == nil {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
@@ -148,7 +147,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 							sg.MemberIds = make(utils.StringMap)
 						}
 						sg.MemberIds[acc.ID] = true
-						ratingStorage.SetSharedGroup(sg)
+						ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
 					}
 				}
 			}
@@ -225,7 +224,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		_, err := Guardian.Guard(func() (interface{}, error) {
 			for sgId := range bClone.SharedGroups {
 				// add shared group member
-				sg, err := ratingStorage.GetSharedGroup(sgId, false)
+				sg, err := ratingStorage.GetSharedGroup(sgId, false, utils.NonTransactional)
 				if err != nil || sg == nil {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
@@ -236,7 +235,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 							sg.MemberIds = make(utils.StringMap)
 						}
 						sg.MemberIds[ub.ID] = true
-						ratingStorage.SetSharedGroup(sg)
+						ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
 					}
 				}
 			}
@@ -286,6 +285,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 	}
 	var usefulBalances Balances
 	for _, b := range balances {
+
 		if b.Disabled {
 			continue
 		}
@@ -305,12 +305,11 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 
 		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-					destIds := x.(map[interface{}]struct{})
+				if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 					foundResult := false
-					allInclude := true // wheter it is excluded or included
-					for dId, _ := range destIds {
-						inclDest, found := b.DestinationIDs[dId.(string)]
+					allInclude := true // whether it is excluded or included
+					for _, dId := range destIDs {
+						inclDest, found := b.DestinationIDs[dId]
 						if found {
 							foundResult = true
 							allInclude = allInclude && inclDest
@@ -356,8 +355,8 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, directio
 	for _, b := range balances {
 		if len(b.SharedGroups) > 0 {
 			for sgId := range b.SharedGroups {
-				sharedGroup, err := ratingStorage.GetSharedGroup(sgId, false)
-				if err != nil {
+				sharedGroup, err := ratingStorage.GetSharedGroup(sgId, false, utils.NonTransactional)
+				if err != nil || sharedGroup == nil {
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 					continue
 				}
@@ -377,6 +376,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY)
 	//utils.Logger.Info(fmt.Sprintf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances))
 	//utils.Logger.Info(fmt.Sprintf("STARTCD: %+v", cd))
+	//log.Printf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances)
 	var leftCC *CallCost
 	cc = cd.CreateCallCost()
 
@@ -478,16 +478,24 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		utils.Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 	}
 	if leftCC.Cost == 0 && len(leftCC.Timespans) > 0 {
+		// put AccountID ubformation in increments
+		for _, ts := range leftCC.Timespans {
+			for _, inc := range ts.Increments {
+				if inc.BalanceInfo == nil {
+					inc.BalanceInfo = &DebitInfo{}
+				}
+				inc.BalanceInfo.AccountID = ub.ID
+			}
+		}
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
 	}
 
-	//log.Printf("HERE: %+v", leftCC)
 	if leftCC.Cost > 0 && goNegative {
 		initialLength := len(cc.Timespans)
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
 		if initialLength == 0 {
 			// this is the first add, debit the connect fee
-			ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
+			ub.DebitConnectionFee(cc, usefulMoneyBalances, count, true)
 		}
 		//log.Printf("Left CC: %+v ", leftCC)
 		// get the default money balanance
@@ -766,7 +774,7 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.S
 	}
 	memberIds := make(utils.StringMap)
 	for _, sgID := range sharedGroupIds {
-		sharedGroup, err := ratingStorage.GetSharedGroup(sgID, false)
+		sharedGroup, err := ratingStorage.GetSharedGroup(sgID, false, utils.NonTransactional)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 			return nil, err
@@ -797,7 +805,7 @@ func (acc *Account) Clone() *Account {
 	return newAcc
 }
 
-func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool) {
+func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool, block bool) bool {
 	if cc.deductConnectFee {
 		connectFee := cc.GetConnectFee()
 		//log.Print("CONNECT FEE: %f", connectFee)
@@ -812,6 +820,9 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 				connectFeePaid = true
 				break
 			}
+			if b.Blocker && block { // stop here
+				return false
+			}
 		}
 		// debit connect fee
 		if connectFee > 0 && !connectFeePaid {
@@ -825,6 +836,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 			}
 		}
 	}
+	return true
 }
 
 func (acc *Account) matchActionFilter(condition string) (bool, error) {
@@ -1004,4 +1016,37 @@ func (acc *Account) AsOldStructure() interface{} {
 		}
 	}
 	return result
+}
+
+func (acc *Account) AsAccountSummary() *AccountSummary {
+	idSplt := strings.Split(acc.ID, utils.CONCATENATED_KEY_SEP)
+	ad := &AccountSummary{AllowNegative: acc.AllowNegative, Disabled: acc.Disabled}
+	if len(idSplt) == 1 {
+		ad.ID = idSplt[0]
+	} else if len(idSplt) == 2 {
+		ad.Tenant = idSplt[0]
+		ad.ID = idSplt[1]
+	}
+	for balanceType, balances := range acc.BalanceMap {
+		for _, balance := range balances {
+			ad.BalanceSummaries = append(ad.BalanceSummaries, balance.AsBalanceSummary(balanceType))
+		}
+	}
+	return ad
+}
+
+func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err error) {
+	if !utils.IsSliceMember([]string{"", "null"}, jsn) { // Unmarshal only when content
+		json.Unmarshal([]byte(jsn), &acntSummary)
+	}
+	return
+}
+
+// AccountDigest contains compressed information about an Account
+type AccountSummary struct {
+	Tenant           string
+	ID               string
+	BalanceSummaries []*BalanceSummary
+	AllowNegative    bool
+	Disabled         bool
 }

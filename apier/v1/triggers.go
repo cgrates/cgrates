@@ -1,3 +1,20 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package v1
 
 import (
@@ -53,7 +70,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 				account.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
 			for _, actionTriggerID := range *attr.ActionTriggerIDs {
-				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID)
+				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
 				if err != nil {
 
 					return 0, err
@@ -318,6 +335,47 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	return nil
 }
 
+type AttrRemoveActionTrigger struct {
+	GroupID  string
+	UniqueID string
+}
+
+func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) error {
+	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if attr.UniqueID == "" {
+		err := self.RatingDb.RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
+		if err != nil {
+			*reply = err.Error()
+		} else {
+			*reply = utils.OK
+		}
+		return err
+	} else {
+		atrs, err := self.RatingDb.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		var remainingAtrs engine.ActionTriggers
+		for _, atr := range atrs {
+			if atr.UniqueID == attr.UniqueID {
+				continue
+			}
+			remainingAtrs = append(remainingAtrs, atr)
+		}
+		// set the cleared list back
+		err = self.RatingDb.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional)
+		if err != nil {
+			*reply = err.Error()
+		} else {
+			*reply = utils.OK
+		}
+		return err
+	}
+}
+
 type AttrSetActionTrigger struct {
 	GroupID               string
 	UniqueID              string
@@ -349,7 +407,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	atrs, _ := self.RatingDb.GetActionTriggers(attr.GroupID)
+	atrs, _ := self.RatingDb.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
 	var newAtr *engine.ActionTrigger
 	if attr.UniqueID != "" {
 		//search for exiting one
@@ -454,7 +512,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 		newAtr.ActionsID = *attr.ActionsID
 	}
 
-	if err := self.RatingDb.SetActionTriggers(attr.GroupID, atrs); err != nil {
+	if err := self.RatingDb.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -471,7 +529,7 @@ func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 	var allAttrs engine.ActionTriggers
 	if len(attr.GroupIDs) > 0 {
 		for _, key := range attr.GroupIDs {
-			getAttrs, err := self.RatingDb.GetActionTriggers(key)
+			getAttrs, err := self.RatingDb.GetActionTriggers(key, false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -479,12 +537,12 @@ func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 		}
 
 	} else {
-		keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX, true)
+		keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {
 			return err
 		}
 		for _, key := range keys {
-			getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):])
+			getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}

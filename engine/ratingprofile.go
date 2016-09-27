@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -25,7 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -156,7 +154,7 @@ func (ris RatingInfos) String() string {
 func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
 	for index, rpa := range rpf.RatingPlanActivations.GetActiveForCall(cd) {
-		rpl, err := ratingStorage.GetRatingPlan(rpa.RatingPlanId, false)
+		rpl, err := ratingStorage.GetRatingPlan(rpa.RatingPlanId, false, utils.NonTransactional)
 		if err != nil || rpl == nil {
 			utils.Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 			continue
@@ -164,7 +162,6 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 		prefix := ""
 		destinationId := ""
 		var rps RateIntervalList
-		//log.Printf("RPA: %+v", rpa)
 		if cd.Destination == utils.ANY || cd.Destination == "" {
 			cd.Destination = utils.ANY
 			if _, ok := rpl.DestinationRates[utils.ANY]; ok {
@@ -174,11 +171,9 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 			}
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
-				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-					destIds := x.(map[interface{}]struct{})
+				if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 					var bestWeight float64
-					for idID := range destIds {
-						dID := idID.(string)
+					for _, dID := range destIDs {
 						if _, ok := rpl.DestinationRates[dID]; ok {
 							ril := rpl.RateIntervalList(dID)
 							currentWeight := ril.GetWeight()
@@ -261,18 +256,18 @@ type TenantRatingSubject struct {
 
 func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
 	if !rpSubjectPrefixMatching || strings.HasSuffix(key, utils.ANY) {
-		return ratingStorage.GetRatingProfile(key, false)
+		return ratingStorage.GetRatingProfile(key, false, utils.NonTransactional)
 	}
-	if rp, err = ratingStorage.GetRatingProfile(key, false); err == nil {
-		return rp, err
+	if rp, err = ratingStorage.GetRatingProfile(key, false, utils.NonTransactional); err == nil && rp != nil { // rp nil represents cached no-result
+		return
 	}
 	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
 	baseKey := key[:lastIndex]
 	subject := key[lastIndex:]
 	lenSubject := len(subject)
 	for i := 1; i < lenSubject-1; i++ {
-		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false); err == nil {
-			return rp, err
+		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false, utils.NonTransactional); err == nil && rp != nil {
+			return
 		}
 	}
 	return

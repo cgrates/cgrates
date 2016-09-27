@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package general_tests
 
 import (
@@ -34,7 +33,7 @@ import (
 var tutSMGCfgPath string
 var tutSMGCfg *config.CGRConfig
 var tutSMGRpc *rpc.Client
-var smgLoadInst engine.LoadInstance // Share load information between tests
+var smgLoadInst utils.LoadInstance // Share load information between tests
 
 func TestTutSMGInitCfg(t *testing.T) {
 	if !*testLocal {
@@ -101,7 +100,7 @@ func TestTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tutSMGRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &smgLoadInst); err != nil {
 		t.Error(err)
-	} else if smgLoadInst.LoadId == "" {
+	} else if smgLoadInst.RatingLoadID == "" || smgLoadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", smgLoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -114,8 +113,8 @@ func TestTutSMGCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
-		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: smgLoadInst.LoadId, LastLoadTime: smgLoadInst.LoadTime.Format(time.RFC3339)}
+	expectedStats := &utils.CacheStats{Destinations: 7, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1, ResourceLimits: 0,
+		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3}
 	var args utils.AttrCacheStats
 	if err := tutSMGRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

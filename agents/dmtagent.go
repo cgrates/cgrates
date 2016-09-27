@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,13 +15,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package agents
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,7 +34,10 @@ import (
 )
 
 func NewDiameterAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection, pubsubs rpcclient.RpcClientConnection) (*DiameterAgent, error) {
-	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg, pubsubs: pubsubs}
+	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg, pubsubs: pubsubs, connMux: new(sync.Mutex)}
+	if reflect.ValueOf(da.pubsubs).IsNil() {
+		da.pubsubs = nil // Empty it so we can check it later
+	}
 	dictsDir := cgrCfg.DiameterAgentCfg().DictionariesDir
 	if len(dictsDir) != 0 {
 		if err := loadDictionaries(dictsDir, "DiameterAgent"); err != nil {
@@ -47,6 +51,7 @@ type DiameterAgent struct {
 	cgrCfg  *config.CGRConfig
 	smg     rpcclient.RpcClientConnection // Connection towards CGR-SMG component
 	pubsubs rpcclient.RpcClientConnection // Connection towards CGR-PubSub component
+	connMux *sync.Mutex                   // Protect connection for read/write
 }
 
 // Creates the message handlers
@@ -138,12 +143,13 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			if ccr.CCRequestType == 3 {
 				err = self.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
 			} else if ccr.CCRequestType == 4 {
-				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &maxUsage)
+				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv.Clone(), &maxUsage)
 				if maxUsage == 0 {
 					smgEv[utils.USAGE] = 0 // For CDR not to debit
 				}
 			}
-			if self.cgrCfg.DiameterAgentCfg().CreateCDR {
+			if self.cgrCfg.DiameterAgentCfg().CreateCDR &&
+				(!self.cgrCfg.DiameterAgentCfg().CDRRequiresSession || err == nil || !strings.HasSuffix(err.Error(), utils.ErrNoActiveSession.Error())) { // Check if CDR requires session
 				if errCdr := self.smg.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); errCdr != nil {
 					err = errCdr
 				}
@@ -195,7 +201,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	return true, nil
 }
 
-func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
+func (self *DiameterAgent) handlerCCR(c diam.Conn, m *diam.Message) {
 	ccr, err := NewCCRFromDiameterMessage(m, self.cgrCfg.DiameterAgentCfg().DebitInterval)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", m, err))
@@ -220,10 +226,18 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %s, ignoring request", ccr.diamMessage))
 		return
 	}
+	self.connMux.Lock()
+	defer self.connMux.Unlock()
 	if _, err := cca.AsDiameterMessage().WriteTo(c); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to write message to %s: %s\n%s\n", c.RemoteAddr(), err, cca.AsDiameterMessage()))
 		return
 	}
+}
+
+// Simply dispatch the handling in goroutines
+// Could be futher improved with rate control
+func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
+	go self.handlerCCR(c, m)
 }
 
 func (self *DiameterAgent) handleALL(c diam.Conn, m *diam.Message) {

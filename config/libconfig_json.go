@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package config
 
 // General config section
@@ -85,15 +84,17 @@ type SchedulerJsonCfg struct {
 
 // Cdrs config section
 type CdrsJsonCfg struct {
-	Enabled         *bool
-	Extra_fields    *[]string
-	Store_cdrs      *bool
-	Rals_conns      *[]*HaPoolJsonCfg
-	Pubsubs_conns   *[]*HaPoolJsonCfg
-	Users_conns     *[]*HaPoolJsonCfg
-	Aliases_conns   *[]*HaPoolJsonCfg
-	Cdrstats_conns  *[]*HaPoolJsonCfg
-	Cdr_replication *[]*CdrReplicationJsonCfg
+	Enabled             *bool
+	Extra_fields        *[]string
+	Store_cdrs          *bool
+	Cdr_account_summary *bool
+	Sm_cost_retries     *int
+	Rals_conns          *[]*HaPoolJsonCfg
+	Pubsubs_conns       *[]*HaPoolJsonCfg
+	Users_conns         *[]*HaPoolJsonCfg
+	Aliases_conns       *[]*HaPoolJsonCfg
+	Cdrstats_conns      *[]*HaPoolJsonCfg
+	Cdr_replication     *[]*CdrReplicationJsonCfg
 }
 
 type CdrReplicationJsonCfg struct {
@@ -139,7 +140,7 @@ type CdreJsonCfg struct {
 	Cost_shift_digits             *int
 	Mask_destination_id           *string
 	Mask_length                   *int
-	Export_folder                 *string
+	Export_directory              *string
 	Header_fields                 *[]*CdrFieldJsonCfg
 	Content_fields                *[]*CdrFieldJsonCfg
 	Trailer_fields                *[]*CdrFieldJsonCfg
@@ -147,27 +148,29 @@ type CdreJsonCfg struct {
 
 // Cdrc config section
 type CdrcJsonCfg struct {
-	Id                         *string
-	Enabled                    *bool
-	Dry_run                    *bool
-	Cdrs_conns                 *[]*HaPoolJsonCfg
-	Cdr_format                 *string
-	Field_separator            *string
-	Timezone                   *string
-	Run_delay                  *int
-	Data_usage_multiply_factor *float64
-	Cdr_in_dir                 *string
-	Cdr_out_dir                *string
-	Failed_calls_prefix        *string
-	Cdr_path                   *string
-	Cdr_source_id              *string
-	Cdr_filter                 *string
-	Continue_on_success        *bool
-	Max_open_files             *int
-	Partial_record_cache       *string
-	Header_fields              *[]*CdrFieldJsonCfg
-	Content_fields             *[]*CdrFieldJsonCfg
-	Trailer_fields             *[]*CdrFieldJsonCfg
+	Id                          *string
+	Enabled                     *bool
+	Dry_run                     *bool
+	Cdrs_conns                  *[]*HaPoolJsonCfg
+	Cdr_format                  *string
+	Field_separator             *string
+	Timezone                    *string
+	Run_delay                   *int
+	Data_usage_multiply_factor  *float64
+	Cdr_in_dir                  *string
+	Cdr_out_dir                 *string
+	Failed_calls_prefix         *string
+	Cdr_path                    *string
+	Cdr_source_id               *string
+	Cdr_filter                  *string
+	Continue_on_success         *bool
+	Max_open_files              *int
+	Partial_record_cache        *string
+	Partial_cache_expiry_action *string
+	Header_fields               *[]*CdrFieldJsonCfg
+	Content_fields              *[]*CdrFieldJsonCfg
+	Trailer_fields              *[]*CdrFieldJsonCfg
+	Cache_dump_fields           *[]*CdrFieldJsonCfg
 }
 
 // SM-Generic config section
@@ -182,6 +185,7 @@ type SmGenericJsonCfg struct {
 	Session_ttl           *string
 	Session_ttl_last_used *string
 	Session_ttl_usage     *string
+	Session_indexes       *[]string
 }
 
 // SM-FreeSWITCH config section
@@ -189,6 +193,7 @@ type SmFsJsonCfg struct {
 	Enabled                *bool
 	Rals_conns             *[]*HaPoolJsonCfg
 	Cdrs_conns             *[]*HaPoolJsonCfg
+	Rls_conns              *[]*HaPoolJsonCfg
 	Create_cdr             *bool
 	Extra_fields           *[]string
 	Debit_interval         *string
@@ -206,7 +211,44 @@ type SmFsJsonCfg struct {
 
 // Represents one connection instance towards a rater/cdrs server
 type HaPoolJsonCfg struct {
-	Address *string
+	Address   *string
+	Transport *string
+}
+
+type AstConnJsonCfg struct {
+	Address          *string
+	User             *string
+	Password         *string
+	Connect_attempts *int
+	Reconnects       *int
+}
+
+type SMAsteriskJsonCfg struct {
+	Enabled          *bool
+	Sm_generic_conns *[]*HaPoolJsonCfg // Connections towards generic SMf
+	Create_cdr       *bool
+	Asterisk_conns   *[]*AstConnJsonCfg
+}
+
+type CacheParamJsonCfg struct {
+	Limit    *int
+	Ttl      *string
+	Precache *bool
+}
+
+type CacheJsonCfg struct {
+	Destinations         *CacheParamJsonCfg
+	Reverse_destinations *CacheParamJsonCfg
+	Rating_plans         *CacheParamJsonCfg
+	Rating_profiles      *CacheParamJsonCfg
+	Lcr                  *CacheParamJsonCfg
+	Cdr_stats            *CacheParamJsonCfg
+	Actions              *CacheParamJsonCfg
+	Action_plans         *CacheParamJsonCfg
+	Action_triggers      *CacheParamJsonCfg
+	Shared_groups        *CacheParamJsonCfg
+	Aliases              *CacheParamJsonCfg
+	Reverse_aliases      *CacheParamJsonCfg
 }
 
 // Represents one connection instance towards FreeSWITCH
@@ -256,20 +298,20 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled            *bool             // enables the diameter agent: <true|false>
-	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
-	Dictionaries_dir   *string           // path towards additional dictionaries
-	Sm_generic_conns   *[]*HaPoolJsonCfg // Connections towards generic SM
-	Pubsubs_conns      *[]*HaPoolJsonCfg // connection towards pubsubs
-	Create_cdr         *bool
-	Debit_interval     *string
-	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Dialect            *string
-	Origin_host        *string
-	Origin_realm       *string
-	Vendor_id          *int
-	Product_name       *string
-	Request_processors *[]*DARequestProcessorJsnCfg
+	Enabled              *bool             // enables the diameter agent: <true|false>
+	Listen               *string           // address where to listen for diameter requests <x.y.z.y:1234>
+	Dictionaries_dir     *string           // path towards additional dictionaries
+	Sm_generic_conns     *[]*HaPoolJsonCfg // Connections towards generic SM
+	Pubsubs_conns        *[]*HaPoolJsonCfg // connection towards pubsubs
+	Create_cdr           *bool
+	Cdr_requires_session *bool
+	Debit_interval       *string
+	Timezone             *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Origin_host          *string
+	Origin_realm         *string
+	Vendor_id            *int
+	Product_name         *string
+	Request_processors   *[]*DARequestProcessorJsnCfg
 }
 
 // One Diameter request processor configuration
@@ -306,6 +348,14 @@ type AliasesServJsonCfg struct {
 type UserServJsonCfg struct {
 	Enabled *bool
 	Indexes *[]string
+}
+
+// ResourceLimiter service config section
+type ResourceLimiterServJsonCfg struct {
+	Enabled             *bool
+	Cdrstats_conns      *[]*HaPoolJsonCfg
+	Cache_dump_interval *string
+	Usage_ttl           *string
 }
 
 // Mailer config section

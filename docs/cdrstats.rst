@@ -63,10 +63,11 @@ configuration object is internally represented as:
         Triggers          ActionTriggerPriotityList
     }
 
-Metrics Types
--------------
 
 .. _cdrstats-metrics:
+
+Metrics Types
+-------------
 
 - ACC *(Average Call Cost)*: Queue with the average call cost
 - ACD *(Average Call Duration)*: Queue with the average call duration

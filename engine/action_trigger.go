@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -43,26 +42,26 @@ type ActionTrigger struct {
 	ActionsID         string
 	MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
 	Executed          bool
-	lastExecutionTime time.Time
+	LastExecutionTime time.Time
 }
 
 func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err error) {
 	// check for min sleep time
-	if at.Recurrent && !at.lastExecutionTime.IsZero() && time.Since(at.lastExecutionTime) < at.MinSleep {
+	if at.Recurrent && !at.LastExecutionTime.IsZero() && time.Since(at.LastExecutionTime) < at.MinSleep {
 		return
 	}
-	at.lastExecutionTime = time.Now()
+	at.LastExecutionTime = time.Now()
 	if ub != nil && ub.Disabled {
 		return fmt.Errorf("User %s is disabled and there are triggers in action!", ub.ID)
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
-	aac, err = ratingStorage.GetActions(at.ActionsID, false)
-	aac.Sort()
+	aac, err = ratingStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
 		return
 	}
+	aac.Sort()
 	at.Executed = true
 	transactionFailed := false
 	removeAccountActionFound := false
@@ -107,7 +106,12 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 		at.Executed = false
 	}
 	if !transactionFailed && ub != nil && !removeAccountActionFound {
-		storageLogger.LogActionTrigger(ub.ID, utils.RATER_SOURCE, at, aac)
+		Publish(CgrEvent{
+			"EventName": utils.EVT_ACTION_TRIGGER_FIRED,
+			"Uuid":      at.UniqueID,
+			"Id":        at.ID,
+			"ActionIds": at.ActionsID,
+		})
 		accountingStorage.SetAccount(ub)
 	}
 	return

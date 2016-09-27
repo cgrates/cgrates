@@ -4,6 +4,10 @@
 // Used for cgradmin
 // Starts rater, scheduler
 
+"general": {
+	"internal_ttl": "30m",
+},
+
 "listen": {
 	"rpc_json": ":2012",			// RPC JSON listening address
 	"rpc_gob": ":2013",			// RPC GOB listening address

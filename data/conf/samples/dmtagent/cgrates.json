@@ -10,6 +10,25 @@
 	"http": ":2080",					// HTTP listening address
 },
 
+"tariffplan_db": {							// database used to store active tariff plan configuration
+ 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "tpdb",
+},
+
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "datadb",
+},
+
+"stor_db": {
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "stordb",
+},
+
 "rals": {
 	"enabled": true,
 	"cdrstats_conns": [

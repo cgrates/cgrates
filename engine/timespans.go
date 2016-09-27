@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,12 +15,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
-	//"fmt"
-
 	"reflect"
 	"time"
 
@@ -261,6 +258,25 @@ func (tss *TimeSpans) Decompress() { // must be pointer receiver
 	*tss = cTss
 }
 
+func (tss *TimeSpans) Merge() { // Merge whenever possible
+	tssVal := *tss
+	if len(tssVal) > 2 { // Optimization for faster merge
+		middle := len(tssVal) / 2
+		tssVal1 := tssVal[:middle]
+		tssVal2 := tssVal[middle:]
+		tssVal1.Merge()
+		tssVal2.Merge()
+		tssVal = append(tssVal1, tssVal2...)
+	}
+	for i := 1; i < len(tssVal); i++ {
+		if tssVal[i-1].Merge(tssVal[i]) {
+			tssVal = append(tssVal[:i], tssVal[i+1:]...)
+			i-- // Reschedule checking of last index since slice will decrease
+		}
+	}
+	*tss = tssVal
+}
+
 func (incr *Increment) Clone() *Increment {
 	nInc := &Increment{
 		Duration: incr.Duration,
@@ -292,6 +308,9 @@ func (incr *Increment) GetCost() float64 {
 type Increments []*Increment
 
 func (incs Increments) Equal(other Increments) bool {
+	if len(other) < len(incs) { // Protect index in case of not being the same size
+		return false
+	}
 	for index, i := range incs {
 		if !i.Equal(other[index]) || i.GetCompressFactor() != other[index].GetCompressFactor() {
 			return false
@@ -340,6 +359,29 @@ func (incs *Increments) Decompress() { // must be pointer receiver
 		}
 	}
 	*incs = cIncrs
+}
+
+// Estimate whether the increments are the same ignoring the CompressFactor
+func (incs Increments) SharingSignature(other Increments) bool {
+	var otherCloned Increments // Clone so we don't affect with decompress the original structure
+	if err := utils.Clone(other, &otherCloned); err != nil {
+		return false
+	}
+	var thisCloned Increments
+	if err := utils.Clone(incs, &thisCloned); err != nil {
+		return false
+	}
+	otherCloned.Compress()
+	thisCloned.Compress()
+	if len(otherCloned) < len(thisCloned) { // Protect index in case of not being the same size
+		return false
+	}
+	for index, i := range thisCloned {
+		if !i.Equal(otherCloned[index]) {
+			return false
+		}
+	}
+	return true
 }
 
 func (incs Increments) GetTotalCost() float64 {
@@ -459,12 +501,10 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		//log.Print("Not in interval")
 		return
 	}
-	//Logger.Debug(fmt.Sprintf("TS: %+v", ts))
 	// split by GroupStart
 	if i.Rating != nil {
 		i.Rating.Rates.Sort()
 		for _, rate := range i.Rating.Rates {
-			//Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
 			if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
 				//log.Print("Splitting")
 				ts.SetRateInterval(i)
@@ -478,7 +518,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 				nts.SetRateInterval(i)
 				nts.DurationIndex = ts.DurationIndex
 				ts.SetNewDurationIndex(nts)
-				// Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
 				return
 			}
 		}
@@ -512,13 +551,10 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		ts.TimeEnd = splitTime
 		nts.DurationIndex = ts.DurationIndex
 		ts.SetNewDurationIndex(nts)
-		// Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
 		return
 	}
 	// if only the end time is in the interval split the interval to the left
 	if i.Contains(ts.TimeEnd, true) {
-		//log.Print("End in interval")
-		//tmpTime := time.Date(ts.TimeStart.)
 		splitTime := i.Timing.getLeftMargin(ts.TimeEnd)
 		splitTime = utils.CopyHour(splitTime, ts.TimeStart)
 		if splitTime.Equal(ts.TimeEnd) {
@@ -533,7 +569,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		nts.SetRateInterval(i)
 		nts.DurationIndex = ts.DurationIndex
 		ts.SetNewDurationIndex(nts)
-		// Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
 		return
 	}
 	return
@@ -608,7 +643,6 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = activationTime
 	ts.SetNewDurationIndex(newTs)
-	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	return
 }
 
@@ -628,7 +662,6 @@ func (ts *TimeSpan) SplitByDay() (newTs *TimeSpan) {
 	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = splitDate
 	ts.SetNewDurationIndex(newTs)
-	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	return
 }
 
@@ -708,19 +741,13 @@ func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
 	ownLeftMargin := ts.RateInterval.Timing.getLeftMargin(ts.TimeStart)
 	ownDistance := ts.TimeStart.Sub(ownLeftMargin)
 
-	//log.Print("OWN LEFT: ", otherLeftMargin)
-	//log.Print("OWN DISTANCE: ", otherDistance)
-	//endOtherDistance := ts.TimeEnd.Sub(otherLeftMargin)
-
 	// if own interval is closer than its better
-	//log.Print(ownDistance)
 	if ownDistance > otherDistance {
 		return false
 	}
 	ownPrice, _, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 	otherPrice, _, _ := interval.GetRateParameters(ts.GetGroupStart())
 	// if own price is smaller than it's better
-	//log.Print(ownPrice, otherPrice)
 	if ownPrice < otherPrice {
 		return true
 	}
@@ -738,9 +765,37 @@ func (ts *TimeSpan) Equal(other *TimeSpan) bool {
 		ts.RatingPlanId == other.RatingPlanId
 }
 
+// Estimate if they share charging signature
+func (ts *TimeSpan) SharingSignature(other *TimeSpan) bool {
+	if ts.GetCompressFactor() != other.GetCompressFactor() ||
+		!ts.Increments.SharingSignature(other.Increments) ||
+		!ts.RateInterval.Equal(other.RateInterval) ||
+		ts.MatchedSubject != other.MatchedSubject ||
+		ts.MatchedPrefix != other.MatchedPrefix ||
+		ts.MatchedDestId != other.MatchedDestId ||
+		ts.RatingPlanId != other.RatingPlanId {
+		return false
+	}
+	return true
+}
+
 func (ts *TimeSpan) GetCompressFactor() int {
 	if ts.CompressFactor == 0 {
 		ts.CompressFactor = 1
 	}
 	return ts.CompressFactor
+}
+
+// Merges timespans if they share the same charging signature, useful to run in SM before compressing
+func (ts *TimeSpan) Merge(other *TimeSpan) bool {
+	if !ts.SharingSignature(other) {
+		return false
+	} else if !ts.TimeEnd.Equal(other.TimeStart) { // other needs to continue ts for merge to be possible
+		return false
+	}
+	ts.TimeEnd = other.TimeEnd
+	ts.Cost += other.Cost
+	ts.DurationIndex = other.DurationIndex
+	ts.Increments = append(ts.Increments, other.Increments...)
+	return true
 }

@@ -1,5 +1,5 @@
 /*
-Real-time Charging System for Telecom & ISP environments
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package sessionmanager
 
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -32,65 +32,62 @@ import (
 type SMGSession struct {
 	eventStart    SMGenericEvent // Event which started
 	stopDebit     chan struct{}  // Channel to communicate with debit loops when closing the session
-	connId        string         // Reference towards connection id on the session manager side.
 	runId         string         // Keep a reference for the derived run
 	timezone      string
 	rater         rpcclient.RpcClientConnection // Connector to Rater service
 	cdrsrv        rpcclient.RpcClientConnection // Connector to CDRS service
-	extconns      *SMGExternalConnections
 	cd            *engine.CallDescriptor
 	sessionCds    []*engine.CallDescriptor
 	callCosts     []*engine.CallCost
-	extraDuration time.Duration // keeps the current duration debited on top of what heas been asked
-	lastUsage     time.Duration // last requested Duration
-	lastDebit     time.Duration // last real debited duration
-	totalUsage    time.Duration // sum of lastUsage
+	extraDuration time.Duration                 // keeps the current duration debited on top of what heas been asked
+	lastUsage     time.Duration                 // last requested Duration
+	lastDebit     time.Duration                 // last real debited duration
+	totalUsage    time.Duration                 // sum of lastUsage
+	clntConn      rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
 }
 
 // Called in case of automatic debits
 func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 	loopIndex := 0
+	sleepDur := time.Duration(0) // start with empty duration for debit
 	for {
 		select {
 		case <-self.stopDebit:
 			return
-		default:
+		case <-time.After(sleepDur):
+			if maxDebit, err := self.debit(debitInterval, nil); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit operation on session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+				disconnectReason := SYSTEM_ERROR
+				if err.Error() == utils.ErrUnauthorizedDestination.Error() {
+					disconnectReason = err.Error()
+				}
+				if err := self.disconnectSession(disconnectReason); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+				}
+				return
+			} else if maxDebit < debitInterval {
+				time.Sleep(maxDebit)
+				if err := self.disconnectSession(INSUFFICIENT_FUNDS); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+				}
+				return
+			}
+			sleepDur = debitInterval
+			loopIndex++
 		}
-		if maxDebit, err := self.debit(debitInterval, nil); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit opperation on session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
-			disconnectReason := SYSTEM_ERROR
-			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
-				disconnectReason = UNAUTHORIZED_DESTINATION
-			}
-			if err := self.disconnectSession(disconnectReason); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
-			}
-			return
-		} else if maxDebit < debitInterval {
-			time.Sleep(maxDebit)
-			if err := self.disconnectSession(INSUFFICIENT_FUNDS); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
-			}
-			return
-		}
-		time.Sleep(debitInterval)
-		loopIndex++
 	}
 }
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
+	//utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit, dur: %+v, lastUsed: %+v, session: %+v", dur, lastUsed, self))
 	requestedDuration := dur
-	//utils.Logger.Debug(fmt.Sprintf("InitDur: %f, lastUsed: %f", requestedDuration.Seconds(), lastUsed.Seconds()))
-	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f, extraDuration: %f", self.totalUsage.Seconds(), self.extraDuration.Seconds()))
 	if lastUsed != nil {
 		self.extraDuration = self.lastDebit - *lastUsed
-		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %f", self.extraDuration.Seconds()))
 		if *lastUsed != self.lastUsage {
 			// total usage correction
 			self.totalUsage -= self.lastUsage
 			self.totalUsage += *lastUsed
-			//utils.Logger.Debug(fmt.Sprintf("TotalUsage Correction: %f", self.totalUsage.Seconds()))
 		}
 	}
 	// apply correction from previous run
@@ -103,7 +100,6 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 		self.extraDuration -= dur
 		return ccDuration, nil
 	}
-	//utils.Logger.Debug(fmt.Sprintf("dur: %f", dur.Seconds()))
 	initialExtraDuration := self.extraDuration
 	self.extraDuration = 0
 	if self.cd.LoopIndex > 0 {
@@ -121,7 +117,6 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.cd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	// update call duration with real debited duration
 	ccDuration := cc.GetDuration()
-	//utils.Logger.Debug(fmt.Sprintf("CCDur: %f", ccDuration.Seconds()))
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
@@ -138,21 +133,20 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.callCosts = append(self.callCosts, cc)
 	self.lastDebit = initialExtraDuration + ccDuration
 	self.totalUsage += self.lastUsage
-	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f", self.totalUsage.Seconds()))
-
 	if ccDuration >= dur { // we got what we asked to be debited
-		//utils.Logger.Debug(fmt.Sprintf("returning normal: %f", requestedDuration.Seconds()))
 		return requestedDuration, nil
 	}
-	//utils.Logger.Debug(fmt.Sprintf("returning initialExtra: %f + ccDuration: %f", initialExtraDuration.Seconds(), ccDuration.Seconds()))
 	return initialExtraDuration + ccDuration, nil
 }
 
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
-	initialRefundDuration := refundDuration
+	if refundDuration == 0 { // Nothing to refund
+		return nil
+	}
 	firstCC := self.callCosts[0] // use merged cc (from close function)
 	firstCC.Timespans.Decompress()
+	defer firstCC.Timespans.Compress()
 	var refundIncrements engine.Increments
 	for i := len(firstCC.Timespans) - 1; i >= 0; i-- {
 		ts := firstCC.Timespans[i]
@@ -188,14 +182,12 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 		}
 	}
 	// show only what was actualy refunded (stopped in timespan)
-	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
 		cd := firstCC.CreateCallDescriptor()
 		cd.Increments = refundIncrements
 		cd.CgrID = self.cd.CgrID
 		cd.RunID = self.cd.RunID
 		cd.Increments.Compress()
-		utils.Logger.Info(fmt.Sprintf("Refunding %s duration %v with incerements: %s", cd.CgrID, initialRefundDuration, utils.ToJSON(cd.Increments)))
 		var response float64
 		err := self.rater.Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {
@@ -205,7 +197,6 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	//firstCC.Cost -= refundIncrements.GetTotalCost() // use updateCost instead
 	firstCC.UpdateCost()
 	firstCC.UpdateRatedUsage()
-	firstCC.Timespans.Compress()
 	return nil
 }
 
@@ -216,7 +207,6 @@ func (self *SMGSession) close(endTime time.Time) error {
 		for _, cc := range self.callCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		//utils.Logger.Debug("MergedCC: " + utils.ToJSON(firstCC))
 		end := firstCC.GetEndTime()
 		refundDuration := end.Sub(endTime)
 		self.refund(refundDuration)
@@ -226,16 +216,11 @@ func (self *SMGSession) close(endTime time.Time) error {
 
 // Send disconnect order to remote connection
 func (self *SMGSession) disconnectSession(reason string) error {
-	type AttrDisconnectSession struct {
-		EventStart map[string]interface{}
-		Reason     string
-	}
-	conn := self.extconns.GetConnection(self.connId)
-	if conn == nil {
-		return ErrConnectionNotFound
+	if self.clntConn == nil || reflect.ValueOf(self.clntConn).IsNil() {
+		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
 	}
 	var reply string
-	if err := conn.Call("SMGClientV1.DisconnectSession", AttrDisconnectSession{EventStart: self.eventStart, Reason: reason}, &reply); err != nil {
+	if err := self.clntConn.Call("SMGClientV1.DisconnectSession", utils.AttrDisconnectSession{EventStart: self.eventStart, Reason: reason}, &reply); err != nil {
 		return err
 	} else if reply != utils.OK {
 		return errors.New(fmt.Sprintf("Unexpected disconnect reply: %s", reply))
@@ -245,16 +230,16 @@ func (self *SMGSession) disconnectSession(reason string) error {
 
 // Merge the sum of costs and sends it to CDRS for storage
 // originID could have been changed from original event, hence passing as argument here
+// pass cc as the clone of original to avoid concurrency issues
 func (self *SMGSession) saveOperations(originID string) error {
 	if len(self.callCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
-	firstCC := self.callCosts[0] // was merged in close method
-	firstCC.Round()
-	//utils.Logger.Debug("Saved CC: " + utils.ToJSON(firstCC))
-	roundIncrements := firstCC.GetRoundIncrements()
+	cc := self.callCosts[0] // was merged in close method
+	cc.Round()
+	roundIncrements := cc.GetRoundIncrements()
 	if len(roundIncrements) != 0 {
-		cd := firstCC.CreateCallDescriptor()
+		cd := cc.CreateCallDescriptor()
 		cd.CgrID = self.cd.CgrID
 		cd.RunID = self.cd.RunID
 		cd.Increments = roundIncrements
@@ -270,7 +255,28 @@ func (self *SMGSession) saveOperations(originID string) error {
 		OriginHost:  self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
 		OriginID:    originID,
 		Usage:       self.TotalUsage().Seconds(),
-		CostDetails: firstCC,
+		CostDetails: cc,
+	}
+	if len(smCost.CostDetails.Timespans) > MaxTimespansInCost { // Merge since we will get a callCost too big
+		if err := utils.Clone(cc, &smCost.CostDetails); err != nil { // Avoid concurrency on CC
+			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not clone callcost for sessionID: %s, runId: %s, error: %s", originID, self.runId, err.Error()))
+		}
+		go func(smCost *engine.SMCost) { // could take longer than the locked stage
+			if err := self.storeSMCost(smCost); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not store callcost for sessionID: %s, runId: %s, error: %s", originID, self.runId, err.Error()))
+			}
+		}(smCost)
+	} else {
+		return self.storeSMCost(smCost)
+	}
+	return nil
+}
+
+func (self *SMGSession) storeSMCost(smCost *engine.SMCost) error {
+	if len(smCost.CostDetails.Timespans) > MaxTimespansInCost { // Merge so we can compress the CostDetails
+		smCost.CostDetails.Timespans.Decompress()
+		smCost.CostDetails.Timespans.Merge()
+		smCost.CostDetails.Timespans.Compress()
 	}
 	var reply string
 	if err := self.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {

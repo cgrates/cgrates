@@ -1,0 +1,4 @@
+#Tag[0],UniqueId[1],ThresholdType[2],ThresholdValue[3],Recurrent[4],MinSleep[5],ExpiryTime[6],ActivationTime[7],BalanceTag[8],BalanceType[9],BalanceDirections[10],BalanceCategories[11],BalanceDestinationIds[12],BalanceRatingSubject[13],BalanceSharedGroup[14],BalanceExpiryTime[15],BalanceTimingIds[16],BalanceWeight[17],BalanceBlocker[18],BalanceDisabled[19],StatsMinQueuedItems[20],ActionsId[21],Weight[22]
+TEST_THRESHOLDS,,*min_balance,2,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
+TEST_THRESHOLDS,,*max_balance,20,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
+STATS_WARN,,*min_asr,35,true,1m,,,,,,,,,,,,,,,3,LOG_WARNING,10

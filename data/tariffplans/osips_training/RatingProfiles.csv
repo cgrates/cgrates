@@ -1,0 +1,2 @@
+#Direction,Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject,CdrStatQueueIds
+*out,cgrates.org,call,*any,2016-08-01T00:00:00Z,RP_TRAINING1,,

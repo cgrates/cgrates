@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,14 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -43,7 +42,7 @@ func TestBalanceStoreRestore(t *testing.T) {
 	if err != nil {
 		t.Error("Error restoring balance: ", err)
 	}
-	t.Logf("INITIAL: %+v", b)
+	//t.Logf("INITIAL: %+v", b)
 	if !b.Equal(b1) {
 		t.Errorf("Balance store/restore failed: expected %+v was %+v", b, b1)
 	}
@@ -150,6 +149,9 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 }
 
 func TestAccountStorageStore(t *testing.T) {
+	if DB == "mongo" {
+		return // mongo will have a problem with null and {} so the Equal will not work
+	}
 	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
@@ -204,6 +206,88 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	}
 }
 
+func TestDebitCreditBlocker(t *testing.T) {
+	b1 := &Balance{Uuid: "testa", Value: 0.1152, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, RatingSubject: "passmonde", Blocker: true}
+	b2 := &Balance{Uuid: "*default", Value: 1.5, Weight: 0}
+	cc := &CallCost{
+		Direction:   utils.OUT,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{ConnectFee: 0.15, Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 0.1, RateIncrement: time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		deductConnectFee: true,
+		TOR:              utils.VOICE,
+	}
+	cd := &CallDescriptor{
+		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+		Direction:    utils.OUT,
+		Destination:  "0723045326",
+		Category:     "0",
+		TOR:          utils.VOICE,
+		testCallcost: cc,
+	}
+	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.MONETARY: Balances{b1, b2}}}
+	var err error
+	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if len(cc.Timespans) != 0 {
+		t.Error("Wrong call cost: ", utils.ToIJSON(cc))
+	}
+	if rifsBalance.BalanceMap[utils.MONETARY][0].GetValue() != 0.1152 ||
+		rifsBalance.BalanceMap[utils.MONETARY][1].GetValue() != 1.5 {
+		t.Error("should not have touched the balances: ", utils.ToIJSON(rifsBalance.BalanceMap[utils.MONETARY]))
+	}
+}
+
+func TestDebitFreeEmpty(t *testing.T) {
+	cc := &CallCost{
+		Direction:   utils.OUT,
+		Destination: "112",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{ConnectFee: 0, Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		deductConnectFee: true,
+		TOR:              utils.VOICE,
+	}
+	cd := &CallDescriptor{
+		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+		Direction:    utils.OUT,
+		Tenant:       "CUSTOMER_1",
+		Subject:      "rif:from:tm",
+		Destination:  "112",
+		Category:     "0",
+		TOR:          utils.VOICE,
+		testCallcost: cc,
+	}
+	// empty account
+	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.MONETARY: Balances{}}}
+	var err error
+	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if len(cc.Timespans) == 0 || cc.Cost != 0 {
+		t.Error("Wrong call cost: ", utils.ToIJSON(cc))
+	}
+	if len(rifsBalance.BalanceMap[utils.MONETARY]) != 0 {
+		t.Error("should not have touched the balances: ", utils.ToIJSON(rifsBalance.BalanceMap[utils.MONETARY]))
+	}
+}
+
 func TestDebitCreditZeroMinute(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}, RatingSubject: "*zero1m"}
 	cc := &CallCost{
@@ -237,7 +321,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	t.Logf("%+v", cc.Timespans)
+	//t.Logf("%+v", cc.Timespans)
 	if cc.Timespans[0].Increments[0].BalanceInfo.Unit.UUID != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
@@ -1164,8 +1248,7 @@ func TestDebitShared(t *testing.T) {
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
-	ratingStorage.SetSharedGroup(sg)
-	cache2go.Cache(utils.SHARED_GROUP_PREFIX+"SG_TEST", sg)
+	ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
 	cc, err := rif.debitCreditBalance(cd, false, false, true)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
@@ -1234,8 +1317,7 @@ func TestMaxDurationShared(t *testing.T) {
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
-	ratingStorage.SetSharedGroup(sg)
-	cache2go.Cache(utils.SHARED_GROUP_PREFIX+"SG_TEST", sg)
+	ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
 	duration, err := cd.getMaxSessionDuration(rif)
 	if err != nil {
 		t.Error("Error getting max session duration from shared group: ", err)
@@ -1787,6 +1869,55 @@ func TestAccountGetBalancesForPrefixMixedBad(t *testing.T) {
 	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
 	if len(bcs) != 0 {
 		t.Error("error excluding on mixed balances bad")
+	}
+}
+
+func TestAccountNewAccountSummaryFromJSON(t *testing.T) {
+	if acnt, err := NewAccountSummaryFromJSON("null"); err != nil {
+		t.Error(err)
+	} else if acnt != nil {
+		t.Errorf("Expecting nil, received: %+v", acnt)
+	}
+}
+
+func TestAccountAsAccountDigest(t *testing.T) {
+	acnt1 := &Account{
+		ID:            "cgrates.org:account1",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.SMS:  Balances{&Balance{ID: "sms1", Value: 14}},
+			utils.DATA: Balances{&Balance{ID: "data1", Value: 1204}},
+			utils.VOICE: Balances{
+				&Balance{ID: "voice1", Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Value: 3600},
+				&Balance{ID: "voice2", Weight: 10, DestinationIDs: utils.StringMap{"RET": true}, Value: 1200},
+			},
+		},
+	}
+	expectacntSummary := &AccountSummary{
+		Tenant: "cgrates.org",
+		ID:     "account1",
+		BalanceSummaries: []*BalanceSummary{
+			&BalanceSummary{ID: "sms1", Type: utils.SMS, Value: 14, Disabled: false},
+			&BalanceSummary{ID: "data1", Type: utils.DATA, Value: 1204, Disabled: false},
+			&BalanceSummary{ID: "voice1", Type: utils.VOICE, Value: 1204, Disabled: false},
+			&BalanceSummary{ID: "voice2", Type: utils.VOICE, Value: 1200, Disabled: false},
+		},
+		AllowNegative: true,
+		Disabled:      false,
+	}
+	acntSummary := acnt1.AsAccountSummary()
+	if expectacntSummary.Tenant != acntSummary.Tenant ||
+		expectacntSummary.ID != acntSummary.ID ||
+		expectacntSummary.AllowNegative != acntSummary.AllowNegative ||
+		expectacntSummary.Disabled != acntSummary.Disabled ||
+		len(expectacntSummary.BalanceSummaries) != len(acntSummary.BalanceSummaries) {
+		t.Errorf("Expecting: %+v, received: %+v", expectacntSummary, acntSummary)
+	}
+	// Since maps are unordered, slices will be too so we need to find element to compare
+	for _, bd := range acntSummary.BalanceSummaries {
+		if bd.ID == "sms1" && !reflect.DeepEqual(expectacntSummary.BalanceSummaries[0], bd) {
+			t.Errorf("Expecting: %+v, received: %+v", expectacntSummary, acntSummary)
+		}
 	}
 }
 

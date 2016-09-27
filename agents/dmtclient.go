@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -84,11 +84,11 @@ func (dc *DiameterClient) handleALL(c diam.Conn, m *diam.Message) {
 }
 
 // Returns the message out of received buffer
-func (dc *DiameterClient) ReceivedMessage() *diam.Message {
+func (dc *DiameterClient) ReceivedMessage(rplyTimeout time.Duration) *diam.Message {
 	select {
 	case rcv := <-dc.received:
 		return rcv
-	case <-time.After(time.Duration(1) * time.Second): // Timeout reading
+	case <-time.After(rplyTimeout): // Timeout reading
 		return nil
 	}
 }

@@ -1,21 +1,20 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2015 ITsysCOM GmbH
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can Storagetribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITH*out ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package general_tests
 
 import (
@@ -54,7 +53,7 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 *out,cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,,
 *out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,,`
 	csvr := engine.NewTpReader(ratingDb, acntDb, engine.NewStringCSVStorage(',', dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "", "", ""), "", "", 10)
+		"", "", "", "", "", "", "", "", "", "", ""), "", "")
 
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
@@ -74,14 +73,15 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 	if err := csvr.LoadRatingProfiles(); err != nil {
 		t.Fatal(err)
 	}
-	csvr.WriteToDatabase(false, false)
-	ratingDb.CacheRatingAll()
-	acntDb.CacheAccountingAll()
+	csvr.WriteToDatabase(false, false, false)
+	cache2go.Flush()
+	ratingDb.PreloadRatingCache()
+	acntDb.PreloadAccountingCache()
 
 	if cachedRPlans := cache2go.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 3 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := cache2go.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 3 {
+	if cachedRProfiles := cache2go.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 0 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
 }

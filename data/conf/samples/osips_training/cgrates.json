@@ -1,0 +1,46 @@
+{
+
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+"listen": {
+	"rpc_json": ":2012",			// RPC JSON listening address
+	"rpc_gob": ":2013",			// RPC GOB listening address
+	"http": ":2080",				// HTTP listening address
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"cdrstats": {
+	"enabled": true,						// starts the cdrstats service: <true|false>
+},
+
+"sm_opensips": {
+	"enabled": true,				// starts SessionManager service: <true|false>
+	"listen_udp": ":2020",		// address where to listen for datagram events coming from OpenSIPS
+	"create_cdr": true,				// create CDR out of events and sends them to CDRS component
+	"debit_interval": "5s",			// interval to perform debits on.
+	"mi_addr": "192.168.56.128:8020",		// address where to reach OpenSIPS MI to send session disconnects
+},
+
+}

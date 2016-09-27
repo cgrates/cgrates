@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -28,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -47,31 +47,29 @@ func init() {
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	case "mongo":
-		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", nil)
+		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", nil)
+		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "redis":
-		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS)
+		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK, utils.REDIS_MAX_CONNS)
+		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-	storageLogger = ratingStorage.(LogStorage)
 }
 
 var (
 	ratingStorage            RatingStorage
 	accountingStorage        AccountingStorage
-	storageLogger            LogStorage
 	cdrStorage               CdrStorage
 	debitPeriod              = 10 * time.Second
 	globalRoundingDecimals   = 6
@@ -103,13 +101,6 @@ func SetRpSubjectPrefixMatching(flag bool) {
 
 func SetLcrSubjectPrefixMatching(flag bool) {
 	lcrSubjectPrefixMatching = flag
-}
-
-/*
-Sets the database for logging (can be de same  as storage getter or different db)
-*/
-func SetStorageLogger(sg LogStorage) {
-	storageLogger = sg
 }
 
 /*
@@ -210,7 +201,6 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	if err == utils.ErrNotFound && rec == 1 {
 		//if err != nil || !cd.continousRatingInfos() {
 		// use the default subject only if the initial one was not found
-		//utils.Logger.Debug(fmt.Sprintf("Try the default subject for %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
 		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
@@ -399,7 +389,6 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		//log.Printf("==============%v==================", i)
 		//log.Printf("TS: %+v", timespans[i])
 		rp := timespans[i].ratingInfo
-		// utils.Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rateIntervals := rp.SelectRatingIntevalsForTimespan(timespans[i])
 		//log.Print("RIs: ", utils.ToJSON(rateIntervals))
@@ -432,10 +421,8 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		//log.Print(timespans[i].RateInterval.Timing)
 	}
 
-	//utils.Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
 	//log.Printf("After SplitByRateInterval: %+v", timespans[0].RateInterval.Timing)
 	timespans = cd.roundTimeSpansToIncrement(timespans)
-	// utils.Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
 	//log.Printf("After round: %+v", timespans[0].RateInterval.Timing)
 	return
 }
@@ -535,6 +522,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 		cd.TOR = utils.VOICE
 	}
 	err := cd.LoadRatingPlans()
+	//log.Print("ERR: ", err)
 	//log.Print("RI: ", utils.ToJSON(cd.RatingInfos))
 	if err != nil {
 		//utils.Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
@@ -586,27 +574,18 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	if origCD.TOR == "" {
 		origCD.TOR = utils.VOICE
 	}
-	//utils.Logger.Debug("ORIG: " + utils.ToJSON(origCD))
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
-	//utils.Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
 	defaultBalance := account.GetDefaultMoneyBalance()
 
 	//use this to check what increment was payed with debt
 	initialDefaultBalanceValue := defaultBalance.GetValue()
 
-	//utils.Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
-	//utils.Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
-
 	cc, err := cd.debit(account, true, false)
-	//utils.Logger.Debug("CC: " + utils.ToJSON(cc))
-	//log.Print("CC: ", utils.ToIJSON(cc))
-	//utils.Logger.Debug(fmt.Sprintf("ERR: %v", err))
 	if err != nil {
 		return 0, err
 	}
 
-	//log.Printf("CC: %+v", cc)
 	// not enough credit for connect fee
 	if cc.negativeConnectFee == true {
 		return 0, nil
@@ -615,16 +594,10 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	var totalCost float64
 	var totalDuration time.Duration
 	cc.Timespans.Decompress()
-	//log.Printf("ACC: %+v", account)
 	for _, ts := range cc.Timespans {
-		//if ts.RateInterval != nil {
-		//log.Printf("TS: %+v", ts)
-		//utils.Logger.Debug("TS: " + utils.ToJSON(ts))
-		//}
 		if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
 			rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
-				//utils.Logger.Debug(fmt.Sprintf("0_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 				return utils.MinDuration(initialDuration, totalDuration), nil
 			}
 		}
@@ -632,14 +605,12 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			ts.createIncrementsSlice()
 		}
 		for _, incr := range ts.Increments {
-			//utils.Logger.Debug("INCR: " + utils.ToJSON(incr))
 			totalCost += incr.Cost
 			if incr.BalanceInfo.Monetary != nil && incr.BalanceInfo.Monetary.UUID == defaultBalance.Uuid {
 				initialDefaultBalanceValue -= incr.Cost
 				if initialDefaultBalanceValue < 0 {
 					// this increment was payed with debt
 					// TODO: improve this check
-					//utils.Logger.Debug(fmt.Sprintf("1_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 					return utils.MinDuration(initialDuration, totalDuration), nil
 
 				}
@@ -648,13 +619,10 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			//log.Print("INC: ", utils.ToJSON(incr))
 			if totalDuration >= initialDuration {
 				// we have enough, return
-				//utils.Logger.Debug(fmt.Sprintf("2_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 				return initialDuration, nil
 			}
 		}
 	}
-	//utils.Logger.Debug(fmt.Sprintf("3_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
-
 	return utils.MinDuration(initialDuration, totalDuration), nil
 }
 
@@ -806,7 +774,9 @@ func (cd *CallDescriptor) RefundIncrements() error {
 	accMap := make(utils.StringMap)
 	cd.Increments.Decompress()
 	for _, increment := range cd.Increments {
-		accMap[increment.BalanceInfo.AccountID] = true
+		if increment.BalanceInfo.Monetary != nil || increment.BalanceInfo.Unit != nil {
+			accMap[increment.BalanceInfo.AccountID] = true
+		}
 	}
 	// start increment refunding loop
 	_, err := Guardian.Guard(func() (interface{}, error) {
@@ -891,8 +861,8 @@ func (cd *CallDescriptor) RefundRounding() error {
 
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.Flush()
-	ratingStorage.CacheRatingAll()
-	accountingStorage.CacheAccountingAll()
+	ratingStorage.PreloadRatingCache()
+	accountingStorage.PreloadAccountingCache()
 	return nil
 
 }
@@ -944,7 +914,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, utils.ANY),
 		utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, utils.ANY, utils.ANY),
 		utils.LCRKey(cd.Direction, cd.Tenant, utils.ANY, utils.ANY, utils.ANY),
-		utils.LCRKey(cd.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
+		utils.LCRKey(utils.ANY, utils.ANY, cd.Category, utils.ANY, utils.ANY),
 		utils.LCRKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
 	}
 	if lcrSubjectPrefixMatching {
@@ -957,9 +927,9 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		keyVariants = append(keyVariants[:1], append(partialSubjects, keyVariants[1:]...)...)
 	}
 	for _, key := range keyVariants {
-		if lcr, err := ratingStorage.GetLCR(key, false); err != nil && err != utils.ErrNotFound {
+		if lcr, err := ratingStorage.GetLCR(key, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return nil, err
-		} else if err == nil {
+		} else if err == nil && lcr != nil {
 			return lcr, nil
 		}
 	}

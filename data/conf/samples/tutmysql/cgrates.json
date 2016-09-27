@@ -1,0 +1,62 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",					// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+"rals": {
+	"enabled": true,					// enable Rater service: <true|false>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"scheduler": {
+	"enabled": true,					// start Scheduler service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,					// start the CDR Server service:  <true|false>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"cdrstats": {
+	"enabled": true,					// starts the cdrstats service: <true|false>
+},
+
+"pubsubs": {
+	"enabled": true,				// starts PubSub service: <true|false>.
+},
+
+
+"users": {
+	"enabled": true,				// starts User service: <true|false>.
+	"indexes": ["Uuid"],			// user profile field indexes
+},
+
+"rls": {
+	"enabled": true,						// starts ResourceLimiter service: <true|false>.
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>					
+	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|dur>
+	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|dur>
+},
+
+"historys": {
+	"enabled": true,
+}
+
+}
