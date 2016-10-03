@@ -152,8 +152,10 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 			}
 			for _, jsonFilePath := range cfgFiles {
 				if cgrJsonCfg, err := NewCgrJsonCfgFromFile(jsonFilePath); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), jsonFilePath))
 					return err
 				} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), jsonFilePath))
 					return err
 				}
 			}
