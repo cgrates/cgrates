@@ -337,8 +337,14 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 		dcDCauseFld, _ := utils.NewRSRField(dc.DisconnectCauseField)
 		dcRatedFld, _ := utils.NewRSRField(dc.RatedField)
 		dcCostFld, _ := utils.NewRSRField(dc.CostField)
+		
+		dcExtraFields := []*utils.RSRField{}
+                for key, _ := range cdr.ExtraFields{
+                        dcExtraFields = append(dcExtraFields, &utils.RSRField{Id: key})
+                }
+		
 		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
-			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCauseFld, dcRatedFld, dcCostFld, []*utils.RSRField{}, true, self.cgrCfg.DefaultTimezone)
+			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCauseFld, dcRatedFld, dcCostFld, dcExtraFields, true, self.cgrCfg.DefaultTimezone)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", cdr.CGRID, dc.RunID, err.Error()))
 			continue // do not add it to the forked CDR list
