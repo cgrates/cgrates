@@ -20,8 +20,8 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=asterisk
 DESC="Asterisk PBX"
-TUTDIR=/usr/share/cgrates/tutorials/asterisk_events/asterisk
-TMP_DIR=/tmp/cgr_astevents/asterisk
+TUTDIR=/usr/share/cgrates/tutorials/asterisk_ari/asterisk
+TMP_DIR=/tmp/cgr_asterisk_ari/asterisk
 # Full path to asterisk binary
 DAEMON=/usr/sbin/asterisk
 ASTVARRUNDIR=$TMP_DIR/run
@@ -32,7 +32,7 @@ ALTCONF=$TUTDIR/etc/asterisk/asterisk.conf
 TRUE=/bin/true
 AST_USER="asterisk"
 AST_GROUP="asterisk"
-VERBOSITY=99
+VERBOSITY=1
 
 
 ### BEGIN INIT INFO

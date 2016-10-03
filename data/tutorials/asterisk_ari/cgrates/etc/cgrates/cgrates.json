@@ -3,7 +3,26 @@
 // Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 // Copyright (C) ITsysCOM GmbH
 
-
+"general": {
+	"http_skip_tls_verify": false,							// if enabled Http Client will accept any TLS certificate
+	"rounding_decimals": 5,									// system level precision for floats
+	"dbdata_encoding": "msgpack",							// encoding used to store object data in strings: <msgpack|json>
+	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline Tariff Plans
+	"httpposter_attempts": 3,								// number of http attempts before considering request failed (eg: *call_url)
+	"http_failed_dir": "/var/spool/cgrates/http_failed",	// directory path where we store failed http requests
+	"default_request_type": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
+	"default_category": "call",								// default category to consider when missing from requests
+	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
+	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	"connect_attempts": 3,									// initial server connect attempts
+	"reconnects": -1,										// number of retries in case of connection lost
+	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
+	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
+	"response_cache_ttl": "0s",								// the life span of a cached response
+	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
+	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
+	"cache_dump_dir": "",									 // cache dump for faster start (leave empty to disable)
+},
 
 "rals": {
 	"enabled": true,
@@ -114,6 +133,9 @@
 "sm_asterisk": {
 	"enabled": true,												// starts Asterisk SessionManager service: <true|false>
 	"create_cdr": true,
+	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
+		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10}
+	],
 },
 
 

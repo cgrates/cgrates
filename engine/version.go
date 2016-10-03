@@ -46,7 +46,7 @@ func CheckVersion(acntDB AccountingStorage) error {
 		// comparing versions
 		if len(CurrentVersion.CompareAndMigrate(dbVersion)) > 0 {
 			// write the new values
-			msg := "Migration needed: please backup cgr data and run cgr-cloader -migrate"
+			msg := "Migration needed: please backup cgr data and run cgr-loader -migrate"
 			utils.Logger.Crit(msg)
 			return errors.New(msg)
 		}
