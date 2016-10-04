@@ -134,7 +134,9 @@ func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
 }
 
 func (rs *RedisStorage) Close() {
+	rs.poolLock.Lock()
 	rs.dbPool.Empty()
+	rs.poolLock.Unlock()
 }
 
 func (rs *RedisStorage) Flush(ignore string) error {
