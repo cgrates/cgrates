@@ -96,10 +96,8 @@ func (rs *RedisStorage) poolInit() (err error) {
 	return err
 }
 
-// This CMD function get a connection from the pool. Send the command and if
-// the problem is a redis.IOError didn't add the connection in the pool and
-// increase the pool with a new connection. Good for timeouts
-
+// This CMD function get a connection from the pool.
+// Handles automatic failover in case of network disconnects
 func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
 	rs.poolLock.RLock()
 	c1, err := rs.dbPool.Get()
@@ -122,6 +120,7 @@ func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
 					return result2
 				}
 			}
+			rs.Close()
 			if err := rs.poolInit(); err != nil {
 				break
 			}
