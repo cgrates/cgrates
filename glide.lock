@@ -64,7 +64,7 @@ imports:
   subpackages:
   - oid
 - name: github.com/mediocregopher/radix.v2
-  version: ae04b3eb3731f94789205d1268e0759371166605
+  version: bb6eabf33bf82d38e985e2757cc13ffdc80818a4
   subpackages:
   - pool
   - redis
