@@ -350,6 +350,16 @@ func TestRSRFilterPass(t *testing.T) {
 	if !fltr.Pass("") {
 		t.Error("Not passing!")
 	}
+	fltr, err = NewRSRFilter("!^$") // Non-empty value
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("CGRateS") {
+		t.Error("Not passing!")
+	}
+	if fltr.Pass("") {
+		t.Error("Passing!")
+	}
 }
 
 func TestRSRFiltersPass(t *testing.T) {
