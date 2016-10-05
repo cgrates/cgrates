@@ -103,7 +103,8 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 // hangupChannel will disconnect from CGRateS side with congestion reason
 func (sma *SMAsterisk) hangupChannel(channelID string) (err error) {
 	_, err = sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("http://%s/ari/channels/%s",
-		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID), url.Values{"reason": {"congestion"}})
+		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
+		url.Values{"reason": {"congestion"}})
 	return
 }
 
