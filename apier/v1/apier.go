@@ -24,6 +24,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
@@ -1075,6 +1076,23 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 			return err
 		}
 	}
+	*reply = utils.OK
+	return nil
+}
+
+type AttrRemoteLock struct {
+	LockIDs []string      // List of IDs to obtain lock for
+	Timeout time.Duration // Automatically unlock on timeout
+}
+
+func (self *ApierV1) RemoteLock(attr AttrRemoteLock, reply *string) error {
+	engine.Guardian.GuardIDs(attr.Timeout, attr.LockIDs...)
+	*reply = utils.OK
+	return nil
+}
+
+func (self *ApierV1) RemoteUnlock(lockIDs []string, reply *string) error {
+	engine.Guardian.UnguardIDs(lockIDs...)
 	*reply = utils.OK
 	return nil
 }
