@@ -24,8 +24,9 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
@@ -328,7 +329,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	// relase tp data
 	dbReader.Init()
 
-	cache2go.Flush()
+	cache.Flush()
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
 
@@ -434,7 +435,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	if err := self.RatingDb.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	cache2go.RemPrefixKey(utils.RATING_PLAN_PREFIX, true, "")
+	cache.RemPrefixKey(utils.RATING_PLAN_PREFIX, true, "")
 	self.RatingDb.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX)
 	*reply = OK
 	return nil
@@ -768,7 +769,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) err
 	}
 
 	// FixMe with CacheS
-	cache2go.Flush()
+	cache.Flush()
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
 
@@ -778,18 +779,18 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) err
 
 func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.CacheStats) error {
 	cs := new(utils.CacheStats)
-	cs.Destinations = cache2go.CountEntries(utils.DESTINATION_PREFIX)
-	cs.ReverseDestinations = cache2go.CountEntries(utils.REVERSE_DESTINATION_PREFIX)
-	cs.RatingPlans = cache2go.CountEntries(utils.RATING_PLAN_PREFIX)
-	cs.RatingProfiles = cache2go.CountEntries(utils.RATING_PROFILE_PREFIX)
-	cs.Actions = cache2go.CountEntries(utils.ACTION_PREFIX)
-	cs.ActionPlans = cache2go.CountEntries(utils.ACTION_PLAN_PREFIX)
-	cs.SharedGroups = cache2go.CountEntries(utils.SHARED_GROUP_PREFIX)
-	cs.DerivedChargers = cache2go.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
-	cs.LcrProfiles = cache2go.CountEntries(utils.LCR_PREFIX)
-	cs.Aliases = cache2go.CountEntries(utils.ALIASES_PREFIX)
-	cs.ReverseAliases = cache2go.CountEntries(utils.REVERSE_ALIASES_PREFIX)
-	cs.ResourceLimits = cache2go.CountEntries(utils.ResourceLimitsPrefix)
+	cs.Destinations = cache.CountEntries(utils.DESTINATION_PREFIX)
+	cs.ReverseDestinations = cache.CountEntries(utils.REVERSE_DESTINATION_PREFIX)
+	cs.RatingPlans = cache.CountEntries(utils.RATING_PLAN_PREFIX)
+	cs.RatingProfiles = cache.CountEntries(utils.RATING_PROFILE_PREFIX)
+	cs.Actions = cache.CountEntries(utils.ACTION_PREFIX)
+	cs.ActionPlans = cache.CountEntries(utils.ACTION_PLAN_PREFIX)
+	cs.SharedGroups = cache.CountEntries(utils.SHARED_GROUP_PREFIX)
+	cs.DerivedChargers = cache.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
+	cs.LcrProfiles = cache.CountEntries(utils.LCR_PREFIX)
+	cs.Aliases = cache.CountEntries(utils.ALIASES_PREFIX)
+	cs.ReverseAliases = cache.CountEntries(utils.REVERSE_ALIASES_PREFIX)
+	cs.ResourceLimits = cache.CountEntries(utils.ResourceLimitsPrefix)
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
 		if err := self.CdrStatsSrv.Call("CDRStatsV1.GetQueueIds", 0, &queueIds); err != nil {
@@ -911,7 +912,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	// relase the tp data
 	loader.Init()
 
-	cache2go.Flush()
+	cache.Flush()
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
 
@@ -1075,6 +1076,23 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 			return err
 		}
 	}
+	*reply = utils.OK
+	return nil
+}
+
+type AttrRemoteLock struct {
+	LockIDs []string      // List of IDs to obtain lock for
+	Timeout time.Duration // Automatically unlock on timeout
+}
+
+func (self *ApierV1) RemoteLock(attr AttrRemoteLock, reply *string) error {
+	engine.Guardian.GuardIDs(attr.Timeout, attr.LockIDs...)
+	*reply = utils.OK
+	return nil
+}
+
+func (self *ApierV1) RemoteUnlock(lockIDs []string, reply *string) error {
+	engine.Guardian.UnguardIDs(lockIDs...)
 	*reply = utils.OK
 	return nil
 }

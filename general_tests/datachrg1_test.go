@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -61,14 +61,14 @@ RP_DATA1,DR_DATA_2,TM2,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false, false)
-	cache2go.Flush()
+	cache.Flush()
 	ratingDb.PreloadRatingCache()
 	acntDb.PreloadAccountingCache()
 
-	if cachedRPlans := cache2go.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
+	if cachedRPlans := cache.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := cache2go.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 0 {
+	if cachedRProfiles := cache.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 0 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
 }

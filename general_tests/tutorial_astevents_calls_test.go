@@ -44,7 +44,7 @@ func TestTutAstCallsInitCfg(t *testing.T) {
 	}
 	// Init config first
 	var err error
-	tutAstCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "asterisk_events", "cgrates", "etc", "cgrates"))
+	tutAstCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "asterisk_ari", "cgrates", "etc", "cgrates"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -78,7 +78,7 @@ func TestTutAstCallsStartAsterisk(t *testing.T) {
 		return
 	}
 	engine.KillProcName("asterisk", 1000)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "asterisk_events", "asterisk", "etc", "init.d", "asterisk"), "start", 2000); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "asterisk_ari", "asterisk", "etc", "init.d", "asterisk"), "start", 2000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -89,7 +89,7 @@ func TestTutAstCallsStartEngine(t *testing.T) {
 		return
 	}
 	engine.KillProcName("cgr-engine", *waitRater)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "asterisk_events", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "asterisk_ari", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -100,7 +100,7 @@ func TestTutAstCallsRestartAsterisk(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "asterisk_events", "asterisk", "etc", "init.d", "asterisk"), "restart", 2000); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "asterisk_ari", "asterisk", "etc", "init.d", "asterisk"), "restart", 2000); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1292,12 +1292,12 @@ func TestActionSetDDestination(t *testing.T) {
 		t.Error("Error storing destination: ", d, err)
 	}
 	ratingStorage.GetReverseDestination("111", false, utils.NonTransactional)
-	x1, found := cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	x1, found := cache.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	ratingStorage.GetReverseDestination("222", false, utils.NonTransactional)
-	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
@@ -1312,21 +1312,21 @@ func TestActionSetDDestination(t *testing.T) {
 	}
 
 	var ok bool
-	x1, ok = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	x1, ok = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, ok = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	x1, ok = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	ratingStorage.GetReverseDestination("333", false, utils.NonTransactional)
-	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
+	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	ratingStorage.GetReverseDestination("666", false, utils.NonTransactional)
-	x1, found = cache2go.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
+	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}

@@ -81,7 +81,7 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 
 /*func CleanStalePrefixes(destIds []string) {
 	utils.Logger.Info("Cleaning stale dest prefixes: " + utils.ToJSON(destIds))
-	prefixMap := cache2go.GetAllEntries(utils.REVERSE_DESTINATION_PREFIX)
+	prefixMap := cache.GetAllEntries(utils.REVERSE_DESTINATION_PREFIX)
 	for prefix, idIDs := range prefixMap {
 		dIDs := idIDs.(map[string]struct{})
 		changed := false
@@ -89,7 +89,7 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 			if _, found := dIDs[searchedDID]; found {
 				if len(dIDs) == 1 {
 					// remove de prefix from cache
-					cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX + prefix)
+					cache.RemKey(utils.REVERSE_DESTINATION_PREFIX + prefix)
 				} else {
 					// delete the destination from list and put the new list in chache
 					delete(dIDs, searchedDID)
@@ -98,7 +98,7 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 			}
 		}
 		if changed {
-			cache2go.Set(utils.REVERSE_DESTINATION_PREFIX+prefix, dIDs)
+			cache.Set(utils.REVERSE_DESTINATION_PREFIX+prefix, dIDs)
 		}
 	}
 }

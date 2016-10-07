@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -63,7 +63,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	}
 	csvr.WriteToDatabase(false, false, false)
 
-	cache2go.Flush()
+	cache.Flush()
 	ratingDbAcntActs.PreloadRatingCache()
 	acntDbAcntActs.PreloadAccountingCache()
 

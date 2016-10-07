@@ -26,7 +26,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -206,7 +206,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	loader.Init() // release the tp data
-	cache2go.Flush()
+	cache.Flush()
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
 

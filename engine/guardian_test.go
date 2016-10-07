@@ -81,6 +81,66 @@ func TestGuardianTimeout(t *testing.T) {
 	}
 }
 
+func TestGuardianGuardIDs(t *testing.T) {
+	lockIDs := []string{"test1", "test2", "test3"}
+	for _, lockID := range lockIDs {
+		if _, hasKey := Guardian.locksMap[lockID]; hasKey {
+			t.Errorf("Unexpected lockID found: %s", lockID)
+		}
+	}
+	tStart := time.Now()
+	lockDur := 2 * time.Millisecond
+	Guardian.GuardIDs(lockDur, lockIDs...)
+	for _, lockID := range lockIDs {
+		if itmLock, hasKey := Guardian.locksMap[lockID]; !hasKey {
+			t.Errorf("Cannot find lock for lockID: %s", lockID)
+		} else if itmLock.cnt != 1 {
+			t.Errorf("Unexpected itmLock found: %+v", itmLock)
+		}
+	}
+	go Guardian.GuardIDs(time.Duration(1*time.Millisecond), lockIDs[1:]...) // to test counter
+	time.Sleep(20 * time.Microsecond)                                       // give time for goroutine to lock
+	if itmLock, hasKey := Guardian.locksMap["test1"]; !hasKey {
+		t.Errorf("Cannot find lock for lockID: %s", "test1")
+	} else if itmLock.cnt != 1 {
+		t.Errorf("Unexpected itmLock found: %+v", itmLock)
+	}
+	if itmLock, hasKey := Guardian.locksMap["test2"]; !hasKey {
+		t.Errorf("Cannot find lock for lockID: %s", "test2")
+	} else if itmLock.cnt != 2 {
+		t.Errorf("Unexpected itmLock found: %+v", itmLock)
+	}
+	if itmLock, hasKey := Guardian.locksMap["test3"]; !hasKey {
+		t.Errorf("Cannot find lock for lockID: %s", "test3")
+	} else if itmLock.cnt != 2 {
+		t.Errorf("Unexpected itmLock found: %+v", itmLock)
+	}
+	Guardian.GuardIDs(0, lockIDs...)
+	if totalLockDur := time.Now().Sub(tStart); totalLockDur < lockDur {
+		t.Errorf("Lock duration too small")
+	}
+	//time.Sleep(1000 * time.Microsecond)
+	if len(Guardian.locksMap) != 3 {
+		t.Errorf("locksMap should be have 3 elements, have: %+v", Guardian.locksMap)
+	} else if itmLock, hasKey := Guardian.locksMap["test1"]; !hasKey {
+		t.Errorf("Cannot find lock for lockID: %s", "test1")
+	} else if itmLock.cnt != 1 {
+		t.Errorf("Unexpected itmLock found: %+v", itmLock)
+	} else if itmLock, hasKey := Guardian.locksMap["test2"]; !hasKey {
+		t.Errorf("Cannot find lock for lockID: %s", "test2")
+	} else if itmLock.cnt != 1 {
+		t.Errorf("Unexpected itmLock found: %+v", itmLock)
+	} else if itmLock, hasKey := Guardian.locksMap["test3"]; !hasKey {
+		t.Errorf("Cannot find lock for lockID: %s", "test2")
+	} else if itmLock.cnt != 1 {
+		t.Errorf("Unexpected itmLock found: %+v", itmLock)
+	}
+	Guardian.UnguardIDs(lockIDs...)
+	if len(Guardian.locksMap) != 0 {
+		t.Errorf("locksMap should be have 0 elements, have: %+v", Guardian.locksMap)
+	}
+}
+
 func BenchmarkGuard(b *testing.B) {
 	for i := 0; i < 100; i++ {
 		go Guardian.Guard(func() (interface{}, error) {

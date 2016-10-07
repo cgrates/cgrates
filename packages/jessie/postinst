@@ -28,7 +28,6 @@ case "$1" in
 
 	configure)
 		adduser --quiet --system --group --disabled-password --shell /bin/false --gecos "CGRateS" cgrates || true
-		chown -R cgrates:cgrates /var/log/cgrates/
 		chown -R cgrates:cgrates /var/spool/cgrates/
 		chown -R cgrates:cgrates /var/lib/cgrates/
 		chown -R cgrates:cgrates /usr/share/cgrates/

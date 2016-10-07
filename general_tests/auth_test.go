@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -76,20 +76,20 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 		t.Error("No account saved")
 	}
 
-	cache2go.Flush()
+	cache.Flush()
 	ratingDbAuth.PreloadRatingCache()
 	acntDbAuth.PreloadAccountingCache()
 
-	if cachedDests := cache2go.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
+	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}
-	if cachedRPlans := cache2go.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 2 {
+	if cachedRPlans := cache.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 2 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := cache2go.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 0 {
+	if cachedRProfiles := cache.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 0 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
-	if cachedActions := cache2go.CountEntries(utils.ACTION_PREFIX); cachedActions != 0 {
+	if cachedActions := cache.CountEntries(utils.ACTION_PREFIX); cachedActions != 0 {
 		t.Error("Wrong number of cached actions found", cachedActions)
 	}
 }

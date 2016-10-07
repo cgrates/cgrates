@@ -20,7 +20,7 @@ package engine
 import (
 	"testing"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -229,9 +229,9 @@ func TestAliasesCache(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting alias: ", err)
 	}
-	a, found := cache2go.Get(utils.ALIASES_PREFIX + key)
+	a, found := cache.Get(utils.ALIASES_PREFIX + key)
 	if !found || a == nil {
-		//log.Printf("Test: %+v", cache2go.GetEntriesKeys(utils.REVERSE_ALIASES_PREFIX))
+		//log.Printf("Test: %+v", cache.GetEntriesKeys(utils.REVERSE_ALIASES_PREFIX))
 		t.Error("Error getting alias from cache: ", err, a)
 	}
 	rKey1 := "minuAccount*rating"
@@ -239,7 +239,7 @@ func TestAliasesCache(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	ra1, found := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey1)
+	ra1, found := cache.Get(utils.REVERSE_ALIASES_PREFIX + rKey1)
 	if !found || len(ra1.([]string)) != 2 {
 		t.Error("Error getting reverse alias 1: ", ra1)
 	}
@@ -248,12 +248,12 @@ func TestAliasesCache(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	ra2, found := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey2)
+	ra2, found := cache.Get(utils.REVERSE_ALIASES_PREFIX + rKey2)
 	if !found || len(ra2.([]string)) != 2 {
 		t.Error("Error getting reverse alias 2: ", ra2)
 	}
 	accountingStorage.RemoveAlias(key, utils.NonTransactional)
-	a, found = cache2go.Get(utils.ALIASES_PREFIX + key)
+	a, found = cache.Get(utils.ALIASES_PREFIX + key)
 	if found {
 		t.Error("Error getting alias from cache: ", found)
 	}
@@ -261,7 +261,7 @@ func TestAliasesCache(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	ra1, found = cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey1)
+	ra1, found = cache.Get(utils.REVERSE_ALIASES_PREFIX + rKey1)
 	if !found || len(ra1.([]string)) != 1 {
 		t.Error("Error getting reverse alias 1: ", ra1)
 	}
@@ -269,7 +269,7 @@ func TestAliasesCache(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	ra2, found = cache2go.Get(utils.REVERSE_ALIASES_PREFIX + rKey2)
+	ra2, found = cache.Get(utils.REVERSE_ALIASES_PREFIX + rKey2)
 	if !found || len(ra2.([]string)) != 1 {
 		t.Error("Error getting reverse alias 2: ", ra2)
 	}

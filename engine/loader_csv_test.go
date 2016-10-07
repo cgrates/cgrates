@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -333,7 +333,7 @@ func init() {
 		log.Print("error in LoadResourceLimits:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
-	cache2go.Flush()
+	cache.Flush()
 	ratingStorage.PreloadRatingCache()
 	accountingStorage.PreloadAccountingCache()
 }

@@ -23,8 +23,3 @@ We got FreeSWITCH_ installed via following commands:
 Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
 
 .. _FreeSWITCH: http://www.freeswitch.org/
-
-
-
-
-

@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -109,14 +109,14 @@ func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
 	newStringIndexes := make(map[string]map[string]utils.StringMap) // Index it transactional
 	var cacheIDsToIndex []string                                    // Cache keys of RLs to be indexed
 	if rlIDs == nil {
-		cacheIDsToIndex = cache2go.GetEntriesKeys(utils.ResourceLimitsPrefix)
+		cacheIDsToIndex = cache.GetEntriesKeys(utils.ResourceLimitsPrefix)
 	} else {
 		for _, rlID := range rlIDs {
 			cacheIDsToIndex = append(cacheIDsToIndex, utils.ResourceLimitsPrefix+rlID)
 		}
 	}
 	for _, cacheKey := range cacheIDsToIndex {
-		x, ok := cache2go.Get(cacheKey)
+		x, ok := cache.Get(cacheKey)
 		if !ok {
 			return utils.ErrNotFound
 		}
@@ -206,7 +206,7 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 			if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
 				continue
 			}
-			x, ok := cache2go.Get(utils.ResourceLimitsPrefix + resName)
+			x, ok := cache.Get(utils.ResourceLimitsPrefix + resName)
 			if !ok {
 				return nil, utils.ErrNotFound
 			}
@@ -234,7 +234,7 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 		if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
 			continue
 		}
-		x, ok := cache2go.Get(utils.ResourceLimitsPrefix + resName)
+		x, ok := cache.Get(utils.ResourceLimitsPrefix + resName)
 		if !ok {
 			return nil, utils.ErrNotFound
 		}
@@ -326,7 +326,7 @@ func (rls *ResourceLimiterService) V1InitiateResourceUsage(attrs utils.AttrRLsRe
 		return utils.ErrResourceUnavailable
 	}
 	for _, rl := range matchingRLForEv {
-		cache2go.Set(utils.ResourceLimitsPrefix+rl.ID, rl, true, "") // no real reason for a transaction
+		cache.Set(utils.ResourceLimitsPrefix+rl.ID, rl, true, "") // no real reason for a transaction
 	}
 	*reply = utils.OK
 	return nil

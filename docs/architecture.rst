@@ -14,7 +14,7 @@ CGRateS has an internal cache.
 
 ::
 
-   "internal_cache" - cache2go
+   "internal_cache" - cache
 
 Operates with different external databases mentioned below. 
 
@@ -145,10 +145,11 @@ Responsible with call control on the Telecommunication Switch side. Operates in 
 
 All call actions are logged into CGRateS's LogDB.
 
-Right now there are **four** session manager types.
+Right now there are **five** session manager types.
    - sm_freeswitch
    - sm_kamailio
    - sm_opensips
+   - sm_asterisk
    - **sm_generic**
 
 - Communicates via:
@@ -163,6 +164,7 @@ Right now there are **four** session manager types.
    - ``"sm_freeswitch": {...}`` 
    - ``"sm_kamailio": {...}``
    - ``"sm_opensips": {...}``
+   - ``"sm_asterisk": {...}``
    - ``"sm_generic": {...}``
 
 2.1.5. DiameterAgent service

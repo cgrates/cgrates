@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -200,7 +200,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 					if _, exists := ap.AccountIDs[accID]; exists {
 						delete(ap.AccountIDs, accID)
 						// clean from cache
-						cache2go.RemKey(utils.ACTION_PLAN_PREFIX+actionPlanID, true, utils.NonTransactional)
+						cache.RemKey(utils.ACTION_PLAN_PREFIX+actionPlanID, true, utils.NonTransactional)
 					}
 				}
 
