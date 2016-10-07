@@ -25,7 +25,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -212,11 +212,11 @@ func (ms *MapStorage) PreloadAccountingCache() error {
 }
 
 func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {
-	transID := cache2go.BeginTransaction()
-	cache2go.RemPrefixKey(prefix, false, transID)
+	transID := cache.BeginTransaction()
+	cache.RemPrefixKey(prefix, false, transID)
 	keyList, err := ms.GetKeysForPrefix(prefix)
 	if err != nil {
-		cache2go.RollbackTransaction(transID)
+		cache.RollbackTransaction(transID)
 		return err
 	}
 	switch prefix {
@@ -224,15 +224,15 @@ func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {
 		for _, key := range keyList {
 			_, err := ms.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
 			if err != nil {
-				cache2go.RollbackTransaction(transID)
+				cache.RollbackTransaction(transID)
 				return err
 			}
 		}
 	default:
-		cache2go.RollbackTransaction(transID)
+		cache.RollbackTransaction(transID)
 		return utils.ErrInvalidKey
 	}
-	cache2go.CommitTransaction(transID)
+	cache.CommitTransaction(transID)
 	return nil
 }
 
@@ -265,7 +265,7 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool, transactionID st
 	defer ms.mu.RUnlock()
 	key = utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*RatingPlan), nil
 			}
@@ -287,10 +287,10 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool, transactionID st
 		rp = new(RatingPlan)
 		err = ms.ms.Unmarshal(out, rp)
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, rp, cCommit, transactionID)
+	cache.Set(key, rp, cCommit, transactionID)
 	return
 }
 
@@ -307,7 +307,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan, transactionID string) (err e
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	cache2go.RemKey(utils.RATING_PLAN_PREFIX+rp.Id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.RATING_PLAN_PREFIX+rp.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -316,7 +316,7 @@ func (ms *MapStorage) GetRatingProfile(key string, skipCache bool, transactionID
 	defer ms.mu.RUnlock()
 	key = utils.RATING_PROFILE_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*RatingProfile), nil
 			}
@@ -328,10 +328,10 @@ func (ms *MapStorage) GetRatingProfile(key string, skipCache bool, transactionID
 		rpf = new(RatingProfile)
 		err = ms.ms.Unmarshal(values, rpf)
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, rpf, cCommit, transactionID)
+	cache.Set(key, rpf, cCommit, transactionID)
 	return
 }
 
@@ -344,7 +344,7 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile, transactionID string)
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
-	cache2go.RemKey(utils.RATING_PROFILE_PREFIX+rpf.Id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.RATING_PROFILE_PREFIX+rpf.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -354,7 +354,7 @@ func (ms *MapStorage) RemoveRatingProfile(key string, transactionID string) (err
 	for k := range ms.dict {
 		if strings.HasPrefix(k, key) {
 			delete(ms.dict, key)
-			cache2go.RemKey(k, cacheCommit(transactionID), transactionID)
+			cache.RemKey(k, cacheCommit(transactionID), transactionID)
 			response := 0
 			rpf := &RatingProfile{Id: key}
 			if historyScribe != nil {
@@ -370,7 +370,7 @@ func (ms *MapStorage) GetLCR(key string, skipCache bool, transactionID string) (
 	defer ms.mu.RUnlock()
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*LCR), nil
 			}
@@ -381,10 +381,10 @@ func (ms *MapStorage) GetLCR(key string, skipCache bool, transactionID string) (
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &lcr)
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, lcr, cCommit, transactionID)
+	cache.Set(key, lcr, cCommit, transactionID)
 	return
 }
 
@@ -393,7 +393,7 @@ func (ms *MapStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(lcr)
 	ms.dict[utils.LCR_PREFIX+lcr.GetId()] = result
-	cache2go.RemKey(utils.LCR_PREFIX+lcr.GetId(), cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.LCR_PREFIX+lcr.GetId(), cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -403,7 +403,7 @@ func (ms *MapStorage) GetDestination(key string, skipCache bool, transactionID s
 	cCommit := cacheCommit(transactionID)
 	key = utils.DESTINATION_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*Destination), nil
 			}
@@ -424,10 +424,10 @@ func (ms *MapStorage) GetDestination(key string, skipCache bool, transactionID s
 		dest = new(Destination)
 		err = ms.ms.Unmarshal(out, dest)
 		if err != nil {
-			cache2go.Set(key, dest, cCommit, transactionID)
+			cache.Set(key, dest, cCommit, transactionID)
 		}
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
 	return
@@ -447,7 +447,7 @@ func (ms *MapStorage) SetDestination(dest *Destination, transactionID string) (e
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -456,7 +456,7 @@ func (ms *MapStorage) GetReverseDestination(prefix string, skipCache bool, trans
 	defer ms.mu.Unlock()
 	prefix = utils.REVERSE_DESTINATION_PREFIX + prefix
 	if !skipCache {
-		if x, ok := cache2go.Get(prefix); ok {
+		if x, ok := cache.Get(prefix); ok {
 			if x != nil {
 				return x.([]string), nil
 			}
@@ -466,10 +466,10 @@ func (ms *MapStorage) GetReverseDestination(prefix string, skipCache bool, trans
 	if idMap, ok := ms.dict.smembers(prefix, ms.ms); ok {
 		ids = idMap.Slice()
 	} else {
-		cache2go.Set(prefix, nil, cacheCommit(transactionID), transactionID)
+		cache.Set(prefix, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(prefix, ids, cacheCommit(transactionID), transactionID)
+	cache.Set(prefix, ids, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -480,7 +480,7 @@ func (ms *MapStorage) SetReverseDestination(dest *Destination, transactionID str
 		ms.mu.Lock()
 		ms.dict.sadd(key, dest.Id, ms.ms)
 		ms.mu.Unlock()
-		cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+		cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	}
 	return
 }
@@ -495,7 +495,7 @@ func (ms *MapStorage) RemoveDestination(destID string, transactionID string) (er
 	ms.mu.Lock()
 	delete(ms.dict, key)
 	ms.mu.Unlock()
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	for _, prefix := range d.Prefixes {
 		ms.mu.Lock()
 		ms.dict.srem(utils.REVERSE_DESTINATION_PREFIX+prefix, destID, ms.ms)
@@ -544,7 +544,7 @@ func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, tr
 		ms.mu.Lock()
 		ms.dict.srem(utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, oldDest.Id, ms.ms)
 		ms.mu.Unlock()
-		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, cCommit, transactionID)
+		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, cCommit, transactionID)
 	}
 
 	// add the id to all new prefixes
@@ -552,7 +552,7 @@ func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, tr
 		ms.mu.Lock()
 		ms.dict.sadd(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, newDest.Id, ms.ms)
 		ms.mu.Unlock()
-		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, cCommit, transactionID)
+		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, cCommit, transactionID)
 	}
 	return err
 }
@@ -563,7 +563,7 @@ func (ms *MapStorage) GetActions(key string, skipCache bool, transactionID strin
 	cCommit := cacheCommit(transactionID)
 	key = utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(Actions), nil
 			}
@@ -573,10 +573,10 @@ func (ms *MapStorage) GetActions(key string, skipCache bool, transactionID strin
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, as, cCommit, transactionID)
+	cache.Set(key, as, cCommit, transactionID)
 	return
 }
 
@@ -586,7 +586,7 @@ func (ms *MapStorage) SetActions(key string, as Actions, transactionID string) (
 	cCommit := cacheCommit(transactionID)
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[utils.ACTION_PREFIX+key] = result
-	cache2go.RemKey(utils.ACTION_PREFIX+key, cCommit, transactionID)
+	cache.RemKey(utils.ACTION_PREFIX+key, cCommit, transactionID)
 	return
 }
 
@@ -594,7 +594,7 @@ func (ms *MapStorage) RemoveActions(key string, transactionID string) (err error
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACTION_PREFIX+key)
-	cache2go.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -603,7 +603,7 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool, transactionID s
 	defer ms.mu.RUnlock()
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*SharedGroup), nil
 			}
@@ -614,10 +614,10 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool, transactionID s
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &sg)
 		if err == nil {
-			cache2go.Set(key, sg, cCommit, transactionID)
+			cache.Set(key, sg, cCommit, transactionID)
 		}
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
 	return
@@ -628,7 +628,7 @@ func (ms *MapStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (err
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sg)
 	ms.dict[utils.SHARED_GROUP_PREFIX+sg.Id] = result
-	cache2go.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -769,7 +769,7 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool, transactionID string)
 	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				al = &Alias{Values: x.(AliasValues)}
 				al.SetId(origKey)
@@ -784,10 +784,10 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool, transactionID string)
 		al.SetId(key[len(utils.ALIASES_PREFIX):])
 		err = ms.ms.Unmarshal(values, &al.Values)
 		if err == nil {
-			cache2go.Set(key, al.Values, cCommit, transactionID)
+			cache.Set(key, al.Values, cCommit, transactionID)
 		}
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
 	return al, nil
@@ -802,7 +802,7 @@ func (ms *MapStorage) SetAlias(al *Alias, transactionID string) error {
 	}
 	key := utils.ALIASES_PREFIX + al.GetId()
 	ms.dict[key] = result
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
 }
 
@@ -811,7 +811,7 @@ func (ms *MapStorage) GetReverseAlias(reverseID string, skipCache bool, transact
 	defer ms.mu.Unlock()
 	key := utils.REVERSE_ALIASES_PREFIX + reverseID
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.([]string), nil
 			}
@@ -823,10 +823,10 @@ func (ms *MapStorage) GetReverseAlias(reverseID string, skipCache bool, transact
 	if idMap, ok := ms.dict.smembers(key, ms.ms); len(idMap) > 0 && ok {
 		values = idMap.Slice()
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, values, cCommit, transactionID)
+	cache.Set(key, values, cCommit, transactionID)
 	return
 }
 
@@ -841,7 +841,7 @@ func (ms *MapStorage) SetReverseAlias(al *Alias, transactionID string) (err erro
 				ms.dict.sadd(rKey, id, ms.ms)
 				ms.mu.Unlock()
 
-				cache2go.RemKey(rKey, cCommit, transactionID)
+				cache.RemKey(rKey, cCommit, transactionID)
 			}
 		}
 	}
@@ -865,14 +865,14 @@ func (ms *MapStorage) RemoveAlias(key string, transactionID string) error {
 	}
 	delete(ms.dict, key)
 	cCommit := cacheCommit(transactionID)
-	cache2go.RemKey(key, cCommit, transactionID)
+	cache.RemKey(key, cCommit, transactionID)
 	for _, value := range al.Values {
 		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
 				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
 				ms.dict.srem(rKey, tmpKey, ms.ms)
-				cache2go.RemKey(rKey, cCommit, transactionID)
+				cache.RemKey(rKey, cCommit, transactionID)
 				/*_, err = ms.GetReverseAlias(rKey, true) // recache
 				if err != nil {
 					return err
@@ -905,7 +905,7 @@ func (ms *MapStorage) GetActionTriggers(key string, skipCache bool, transactionI
 	cCommit := cacheCommit(transactionID)
 	key = utils.ACTION_TRIGGER_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(ActionTriggers), nil
 			}
@@ -915,10 +915,10 @@ func (ms *MapStorage) GetActionTriggers(key string, skipCache bool, transactionI
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &atrs)
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, atrs, cCommit, transactionID)
+	cache.Set(key, atrs, cCommit, transactionID)
 	return
 }
 
@@ -932,7 +932,7 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers, transac
 	}
 	result, err := ms.ms.Marshal(&atrs)
 	ms.dict[utils.ACTION_TRIGGER_PREFIX+key] = result
-	cache2go.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -940,7 +940,7 @@ func (ms *MapStorage) RemoveActionTriggers(key string, transactionID string) (er
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACTION_TRIGGER_PREFIX+key)
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -949,7 +949,7 @@ func (ms *MapStorage) GetActionPlan(key string, skipCache bool, transactionID st
 	defer ms.mu.RUnlock()
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*ActionPlan), nil
 			}
@@ -959,10 +959,10 @@ func (ms *MapStorage) GetActionPlan(key string, skipCache bool, transactionID st
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
-		cache2go.Set(key, nil, cacheCommit(transactionID), transactionID)
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, ats, cacheCommit(transactionID), transactionID)
+	cache.Set(key, ats, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -973,7 +973,7 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool,
 		defer ms.mu.Unlock()
 		// delete the key
 		delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
-		cache2go.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+		cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
 		return
 	}
 	if !overwrite {
@@ -991,7 +991,7 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool,
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(&ats)
 	ms.dict[utils.ACTION_PLAN_PREFIX+key] = result
-	cache2go.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+	cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
 	return
 }
 
@@ -1044,7 +1044,7 @@ func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool, transaction
 	cCommit := cacheCommit(transactionID)
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*utils.DerivedChargers), nil
 			}
@@ -1054,10 +1054,10 @@ func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool, transaction
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &dcs)
 	} else {
-		cache2go.Set(key, nil, cCommit, transactionID)
+		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, dcs, cCommit, transactionID)
+	cache.Set(key, dcs, cCommit, transactionID)
 	return
 }
 
@@ -1068,12 +1068,12 @@ func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers,
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if dcs == nil || len(dcs.Chargers) == 0 {
 		delete(ms.dict, key)
-		cache2go.RemKey(key, cCommit, transactionID)
+		cache.RemKey(key, cCommit, transactionID)
 		return nil
 	}
 	result, err := ms.ms.Marshal(dcs)
 	ms.dict[key] = result
-	cache2go.RemKey(key, cCommit, transactionID)
+	cache.RemKey(key, cCommit, transactionID)
 	return err
 }
 

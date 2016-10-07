@@ -14,7 +14,7 @@ CGRateS has an internal cache.
 
 ::
 
-   "internal_cache" - cache2go
+   "internal_cache" - cache
 
 Operates with different external databases mentioned below. 
 

@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -99,20 +99,20 @@ type CdrServer struct {
 	aliases       rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
 	guard         *GuardianLock
-	responseCache *cache2go.ResponseCache
+	responseCache *cache.ResponseCache
 }
 
 func (self *CdrServer) Timezone() string {
 	return self.cgrCfg.DefaultTimezone
 }
 func (self *CdrServer) SetTimeToLive(timeToLive time.Duration, out *int) error {
-	self.responseCache = cache2go.NewResponseCache(timeToLive)
+	self.responseCache = cache.NewResponseCache(timeToLive)
 	return nil
 }
 
-func (self *CdrServer) getCache() *cache2go.ResponseCache {
+func (self *CdrServer) getCache() *cache.ResponseCache {
 	if self.responseCache == nil {
-		self.responseCache = cache2go.NewResponseCache(0)
+		self.responseCache = cache.NewResponseCache(0)
 	}
 	return self.responseCache
 }
@@ -337,12 +337,12 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 		dcDCauseFld, _ := utils.NewRSRField(dc.DisconnectCauseField)
 		dcRatedFld, _ := utils.NewRSRField(dc.RatedField)
 		dcCostFld, _ := utils.NewRSRField(dc.CostField)
-		
+
 		dcExtraFields := []*utils.RSRField{}
-                for key, _ := range cdr.ExtraFields{
-                        dcExtraFields = append(dcExtraFields, &utils.RSRField{Id: key})
-                }
-		
+		for key, _ := range cdr.ExtraFields {
+			dcExtraFields = append(dcExtraFields, &utils.RSRField{Id: key})
+		}
+
 		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
 			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCauseFld, dcRatedFld, dcCostFld, dcExtraFields, true, self.cgrCfg.DefaultTimezone)
 		if err != nil {
@@ -523,10 +523,10 @@ func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 		return item.Err
 	}
 	if err := self.processCdr(cdr); err != nil {
-		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+		self.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
-	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
+	self.getCache().Cache(cacheKey, &cache.CacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }
@@ -541,10 +541,10 @@ func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) er
 		return item.Err
 	}
 	if err := self.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
-		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+		self.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
-	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
+	self.getCache().Cache(cacheKey, &cache.CacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }

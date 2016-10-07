@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -574,7 +574,7 @@ func main() {
 		return
 	}
 	config.SetCgrConfig(cfg) // Share the config object
-	cache2go.NewCache(cfg.CacheConfig)
+	cache.NewCache(cfg.CacheConfig)
 
 	if *raterEnabled {
 		cfg.RALsEnabled = *raterEnabled

@@ -25,7 +25,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/mediocregopher/radix.v2/pool"
@@ -192,11 +192,11 @@ func (rs *RedisStorage) PreloadAccountingCache() error {
 }
 
 func (rs *RedisStorage) PreloadCacheForPrefix(prefix string) error {
-	transID := cache2go.BeginTransaction()
-	cache2go.RemPrefixKey(prefix, false, transID)
+	transID := cache.BeginTransaction()
+	cache.RemPrefixKey(prefix, false, transID)
 	keyList, err := rs.GetKeysForPrefix(prefix)
 	if err != nil {
-		cache2go.RollbackTransaction(transID)
+		cache.RollbackTransaction(transID)
 		return err
 	}
 	switch prefix {
@@ -204,7 +204,7 @@ func (rs *RedisStorage) PreloadCacheForPrefix(prefix string) error {
 		for _, key := range keyList {
 			_, err := rs.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
 			if err != nil {
-				cache2go.RollbackTransaction(transID)
+				cache.RollbackTransaction(transID)
 				return err
 			}
 		}
@@ -212,14 +212,14 @@ func (rs *RedisStorage) PreloadCacheForPrefix(prefix string) error {
 		for _, key := range keyList {
 			_, err = rs.GetResourceLimit(key[len(utils.ResourceLimitsPrefix):], true, transID)
 			if err != nil {
-				cache2go.RollbackTransaction(transID)
+				cache.RollbackTransaction(transID)
 				return err
 			}
 		}
 	default:
 		return utils.ErrInvalidKey
 	}
-	cache2go.CommitTransaction(transID)
+	cache.CommitTransaction(transID)
 	return nil
 }
 
@@ -290,7 +290,7 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {
 	key = utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*RatingPlan), nil
 			}
@@ -312,7 +312,7 @@ func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 		rp = new(RatingPlan)
 		err = rs.ms.Unmarshal(out, rp)
 	}
-	cache2go.Set(key, rp, cacheCommit(transactionID), transactionID)
+	cache.Set(key, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -327,7 +327,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan, transactionID string) (err
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	cache2go.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
+	cache.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -335,7 +335,7 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool, transaction
 	key = utils.RATING_PROFILE_PREFIX + key
 
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*RatingProfile), nil
 			}
@@ -347,7 +347,7 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool, transaction
 		rpf = new(RatingProfile)
 		err = rs.ms.Unmarshal(values, rpf)
 	}
-	cache2go.Set(key, rpf, cacheCommit(transactionID), transactionID)
+	cache.Set(key, rpf, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -358,7 +358,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile, transactionID strin
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
-	cache2go.RemKey(utils.RATING_PROFILE_PREFIX+rpf.Id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.RATING_PROFILE_PREFIX+rpf.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -371,7 +371,7 @@ func (rs *RedisStorage) RemoveRatingProfile(key string, transactionID string) er
 		if err = rs.Cmd("DEL", key).Err; err != nil {
 			return err
 		}
-		cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+		cache.RemKey(key, cacheCommit(transactionID), transactionID)
 		rpf := &RatingProfile{Id: key}
 		if historyScribe != nil {
 			response := 0
@@ -384,7 +384,7 @@ func (rs *RedisStorage) RemoveRatingProfile(key string, transactionID string) er
 func (rs *RedisStorage) GetLCR(key string, skipCache bool, transactionID string) (lcr *LCR, err error) {
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 
 			if x != nil {
 				return x.(*LCR), nil
@@ -396,10 +396,10 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool, transactionID string)
 	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &lcr)
 	} else {
-		cache2go.Set(key, nil, cacheCommit(transactionID), transactionID)
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, lcr, cacheCommit(transactionID), transactionID)
+	cache.Set(key, lcr, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -407,14 +407,14 @@ func (rs *RedisStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
 	result, err := rs.ms.Marshal(lcr)
 	key := utils.LCR_PREFIX + lcr.GetId()
 	err = rs.Cmd("SET", key, result).Err
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
 	key = utils.DESTINATION_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*Destination), nil
 			}
@@ -436,10 +436,10 @@ func (rs *RedisStorage) GetDestination(key string, skipCache bool, transactionID
 		dest = new(Destination)
 		err = rs.ms.Unmarshal(out, dest)
 		if err != nil {
-			cache2go.Set(key, dest, cacheCommit(transactionID), transactionID)
+			cache.Set(key, dest, cacheCommit(transactionID), transactionID)
 		}
 	} else {
-		cache2go.Set(key, nil, cacheCommit(transactionID), transactionID)
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, err
 	}
 	return
@@ -460,14 +460,14 @@ func (rs *RedisStorage) SetDestination(dest *Destination, transactionID string) 
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) GetReverseDestination(prefix string, skipCache bool, transactionID string) (ids []string, err error) {
 	prefix = utils.REVERSE_DESTINATION_PREFIX + prefix
 	if !skipCache {
-		if x, ok := cache2go.Get(prefix); ok {
+		if x, ok := cache.Get(prefix); ok {
 			if x != nil {
 				return x.([]string), nil
 			}
@@ -475,7 +475,7 @@ func (rs *RedisStorage) GetReverseDestination(prefix string, skipCache bool, tra
 		}
 	}
 	if ids, err = rs.Cmd("SMEMBERS", prefix).List(); len(ids) > 0 && err == nil {
-		cache2go.Set(prefix, ids, cacheCommit(transactionID), transactionID)
+		cache.Set(prefix, ids, cacheCommit(transactionID), transactionID)
 		return ids, nil
 	}
 	return nil, utils.ErrNotFound
@@ -488,7 +488,7 @@ func (rs *RedisStorage) SetReverseDestination(dest *Destination, transactionID s
 		if err != nil {
 			break
 		}
-		cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+		cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	}
 	return
 }
@@ -504,7 +504,7 @@ func (rs *RedisStorage) RemoveDestination(destID, transactionID string) (err err
 	if err != nil {
 		return err
 	}
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	for _, prefix := range d.Prefixes {
 		err = rs.Cmd("SREM", utils.REVERSE_DESTINATION_PREFIX+prefix, destID).Err
 		if err != nil {
@@ -555,7 +555,7 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 		if err != nil {
 			return err
 		}
-		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, cCommit, transactionID)
+		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, cCommit, transactionID)
 	}
 
 	// add the id to all new prefixes
@@ -564,7 +564,7 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 		if err != nil {
 			return err
 		}
-		cache2go.RemKey(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, cCommit, transactionID)
+		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, cCommit, transactionID)
 	}
 	return nil
 }
@@ -572,7 +572,7 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 func (rs *RedisStorage) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
 	key = utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(Actions), nil
 			}
@@ -583,27 +583,27 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool, transactionID str
 	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &as)
 	}
-	cache2go.Set(key, as, cacheCommit(transactionID), transactionID)
+	cache.Set(key, as, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) SetActions(key string, as Actions, transactionID string) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.Cmd("SET", utils.ACTION_PREFIX+key, result).Err
-	cache2go.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) RemoveActions(key string, transactionID string) (err error) {
 	err = rs.Cmd("DEL", utils.ACTION_PREFIX+key).Err
-	cache2go.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool, transactionID string) (sg *SharedGroup, err error) {
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*SharedGroup), nil
 			}
@@ -614,14 +614,14 @@ func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool, transactionID
 	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &sg)
 	}
-	cache2go.Set(key, sg, cacheCommit(transactionID), transactionID)
+	cache.Set(key, sg, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
 	result, err := rs.ms.Marshal(sg)
 	err = rs.Cmd("SET", utils.SHARED_GROUP_PREFIX+sg.Id, result).Err
-	cache2go.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -755,7 +755,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool, transactionID strin
 	key = utils.ALIASES_PREFIX + key
 
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				al = &Alias{Values: x.(AliasValues)}
 				al.SetId(origKey)
@@ -770,10 +770,10 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool, transactionID strin
 		al.SetId(origKey)
 		err = rs.ms.Unmarshal(values, &al.Values)
 	} else {
-		cache2go.Set(key, nil, cacheCommit(transactionID), transactionID)
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, al.Values, cacheCommit(transactionID), transactionID)
+	cache.Set(key, al.Values, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -784,14 +784,14 @@ func (rs *RedisStorage) SetAlias(al *Alias, transactionID string) (err error) {
 	}
 	key := utils.ALIASES_PREFIX + al.GetId()
 	err = rs.Cmd("SET", key, result).Err
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool, transactionID string) (ids []string, err error) {
 	key := utils.REVERSE_ALIASES_PREFIX + reverseID
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.([]string), nil
 			}
@@ -799,10 +799,10 @@ func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool, transa
 		}
 	}
 	if ids, err = rs.Cmd("SMEMBERS", key).List(); len(ids) == 0 || err != nil {
-		cache2go.Set(key, nil, cacheCommit(transactionID), transactionID)
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, ids, cacheCommit(transactionID), transactionID)
+	cache.Set(key, ids, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -817,7 +817,7 @@ func (rs *RedisStorage) SetReverseAlias(al *Alias, transactionID string) (err er
 				if err != nil {
 					break
 				}
-				cache2go.RemKey(rKey, cCommit, transactionID)
+				cache.RemKey(rKey, cCommit, transactionID)
 			}
 		}
 	}
@@ -837,7 +837,7 @@ func (rs *RedisStorage) RemoveAlias(id string, transactionID string) (err error)
 		return err
 	}
 	cCommit := cacheCommit(transactionID)
-	cache2go.RemKey(key, cCommit, transactionID)
+	cache.RemKey(key, cCommit, transactionID)
 
 	for _, value := range al.Values {
 		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
@@ -848,7 +848,7 @@ func (rs *RedisStorage) RemoveAlias(id string, transactionID string) (err error)
 				if err != nil {
 					return err
 				}
-				cache2go.RemKey(rKey, cCommit, transactionID)
+				cache.RemKey(rKey, cCommit, transactionID)
 				/*_, err = rs.GetReverseAlias(rKey, true) // recache
 				if err != nil {
 					return err
@@ -861,7 +861,7 @@ func (rs *RedisStorage) RemoveAlias(id string, transactionID string) (err error)
 
 func (rs *RedisStorage) UpdateReverseAlias(oldAl, newAl *Alias, transactionID string) error {
 	// FIXME: thi can be optimized
-	cache2go.RemPrefixKey(utils.REVERSE_ALIASES_PREFIX, cacheCommit(transactionID), transactionID)
+	cache.RemPrefixKey(utils.REVERSE_ALIASES_PREFIX, cacheCommit(transactionID), transactionID)
 	rs.SetReverseAlias(newAl, transactionID)
 	return nil
 }
@@ -873,7 +873,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool, transactionID 
 	}
 
 	if !skipCache {
-		if x, ok := cache2go.Get(utils.LOADINST_KEY); ok {
+		if x, ok := cache.Get(utils.LOADINST_KEY); ok {
 			if x != nil {
 				items := x.([]*utils.LoadInstance)
 				if len(items) < limit || limit == -1 {
@@ -890,7 +890,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool, transactionID 
 	marshaleds, err := rs.Cmd("LRANGE", utils.LOADINST_KEY, 0, limit).ListBytes()
 	cCommit := cacheCommit(transactionID)
 	if err != nil {
-		cache2go.Set(utils.LOADINST_KEY, nil, cCommit, transactionID)
+		cache.Set(utils.LOADINST_KEY, nil, cCommit, transactionID)
 		return nil, err
 	}
 	loadInsts := make([]*utils.LoadInstance, len(marshaleds))
@@ -902,8 +902,8 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool, transactionID 
 		}
 		loadInsts[idx] = &lInst
 	}
-	cache2go.RemKey(utils.LOADINST_KEY, cCommit, transactionID)
-	cache2go.Set(utils.LOADINST_KEY, loadInsts, cCommit, transactionID)
+	cache.RemKey(utils.LOADINST_KEY, cCommit, transactionID)
+	cache.Set(utils.LOADINST_KEY, loadInsts, cCommit, transactionID)
 	if len(loadInsts) < limit || limit == -1 {
 		return loadInsts, nil
 	}
@@ -933,14 +933,14 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 		return nil, err
 	}, 0, utils.LOADINST_KEY)
 
-	cache2go.RemKey(utils.LOADINST_KEY, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.LOADINST_KEY, cacheCommit(transactionID), transactionID)
 	return err
 }
 
 func (rs *RedisStorage) GetActionTriggers(key string, skipCache bool, transactionID string) (atrs ActionTriggers, err error) {
 	key = utils.ACTION_TRIGGER_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(ActionTriggers), nil
 			}
@@ -951,7 +951,7 @@ func (rs *RedisStorage) GetActionTriggers(key string, skipCache bool, transactio
 	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &atrs)
 	}
-	cache2go.Set(key, atrs, cacheCommit(transactionID), transactionID)
+	cache.Set(key, atrs, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -965,14 +965,14 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers, trans
 		return err
 	}
 	err = rs.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
-	cache2go.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) RemoveActionTriggers(key string, transactionID string) (err error) {
 	key = utils.ACTION_TRIGGER_PREFIX + key
 	err = rs.Cmd("DEL", key).Err
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 
 	return
 }
@@ -980,7 +980,7 @@ func (rs *RedisStorage) RemoveActionTriggers(key string, transactionID string) (
 func (rs *RedisStorage) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*ActionPlan), nil
 			}
@@ -1002,7 +1002,7 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool, transactionID 
 		ats = &ActionPlan{}
 		err = rs.ms.Unmarshal(out, &ats)
 	}
-	cache2go.Set(key, ats, cacheCommit(transactionID), transactionID)
+	cache.Set(key, ats, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1011,7 +1011,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		err = rs.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
-		cache2go.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+		cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
 		return err
 	}
 	if !overwrite {
@@ -1025,7 +1025,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 			}
 		}
 		// do not keep this in cache (will be obsolete)
-		cache2go.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+		cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
 	}
 	result, err := rs.ms.Marshal(ats)
 	if err != nil {
@@ -1036,7 +1036,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	w.Write(result)
 	w.Close()
 	err = rs.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, b.Bytes()).Err
-	cache2go.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+	cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
 	return
 }
 
@@ -1079,7 +1079,7 @@ func (rs *RedisStorage) PopTask() (t *Task, err error) {
 func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*utils.DerivedChargers), nil
 			}
@@ -1090,10 +1090,10 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool, transacti
 	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &dcs)
 	} else {
-		cache2go.Set(key, nil, cacheCommit(transactionID), transactionID)
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache2go.Set(key, dcs, cacheCommit(transactionID), transactionID)
+	cache.Set(key, dcs, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1102,7 +1102,7 @@ func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 	cCommit := cacheCommit(transactionID)
 	if dcs == nil || len(dcs.Chargers) == 0 {
 		err = rs.Cmd("DEL", key).Err
-		cache2go.RemKey(key, cCommit, transactionID)
+		cache.RemKey(key, cCommit, transactionID)
 		return err
 	}
 	marshaled, err := rs.ms.Marshal(dcs)
@@ -1110,7 +1110,7 @@ func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 		return err
 	}
 	err = rs.Cmd("SET", key, marshaled).Err
-	cache2go.RemKey(key, cCommit, transactionID)
+	cache.RemKey(key, cCommit, transactionID)
 	return
 }
 
@@ -1168,7 +1168,7 @@ func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 func (rs *RedisStorage) GetResourceLimit(id string, skipCache bool, transactionID string) (rl *ResourceLimit, err error) {
 	key := utils.ResourceLimitsPrefix + id
 	if !skipCache {
-		if x, ok := cache2go.Get(key); ok {
+		if x, ok := cache.Get(key); ok {
 			if x != nil {
 				return x.(*ResourceLimit), nil
 			}
@@ -1183,7 +1183,7 @@ func (rs *RedisStorage) GetResourceLimit(id string, skipCache bool, transactionI
 				return nil, err
 			}
 		}
-		cache2go.Set(key, rl, cacheCommit(transactionID), transactionID)
+		cache.Set(key, rl, cacheCommit(transactionID), transactionID)
 	}
 	return
 }
@@ -1194,7 +1194,7 @@ func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 	}
 	key := utils.ResourceLimitsPrefix + rl.ID
 	err = rs.Cmd("SET", key, result).Err
-	cache2go.Set(key, rl, cacheCommit(transactionID), transactionID)
+	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
 	return err
 }
 func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) error {
@@ -1202,6 +1202,6 @@ func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) err
 	if err := rs.Cmd("DEL", key).Err; err != nil {
 		return err
 	}
-	cache2go.RemKey(key, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
 }
