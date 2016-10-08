@@ -1207,11 +1207,71 @@ func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) err
 }
 
 func (rs *RedisStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+	mp, err := rs.Cmd("HGETALL", dbKey).Map()
+	if err != nil {
+		return
+	} else if len(mp) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	indexes = make(map[string]map[string]utils.StringMap)
+	for k, v := range mp {
+		var sm utils.StringMap
+		if err = rs.ms.Unmarshal([]byte(v), &sm); err != nil {
+			return
+		}
+		kSplt := strings.Split(k, utils.CONCATENATED_KEY_SEP)
+		if len(kSplt) != 2 {
+			return nil, fmt.Errorf("Malformed key in db: %s", k)
+		}
+		if _, hasKey := indexes[kSplt[0]]; !hasKey {
+			indexes[kSplt[0]] = make(map[string]utils.StringMap)
+		}
+		if _, hasKey := indexes[kSplt[0]][kSplt[1]]; !hasKey {
+			indexes[kSplt[0]][kSplt[1]] = make(utils.StringMap)
+		}
+		indexes[kSplt[0]][kSplt[1]] = sm
+	}
 	return
 }
+
 func (rs *RedisStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
-	return
+	if err = rs.Cmd("DEL", dbKey).Err; err != nil { // DELETE before set
+		return
+	}
+	mp := make(map[string]string)
+	for fldName, fldValMp := range indexes {
+		for fldVal, strMp := range fldValMp {
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[utils.ConcatenatedKey(fldName, fldVal)] = string(encodedMp)
+			}
+		}
+	}
+	return rs.Cmd("HMSET", dbKey, mp).Err
 }
-func (rs *RedisStorage) GetFieldIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+
+func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+	if x, ok := cache.Get(fieldValKey); ok { // Attempt to find in cache first
+		if x != nil {
+			return x.(utils.StringMap), nil
+		}
+		return nil, utils.ErrNotFound
+	}
+	// Not found in cache, check in DB
+	str, err := rs.Cmd("HGET", dbKey, fieldValKey).Str()
+	if err != nil {
+		if err.Error() != "wrong type" {
+			return nil, err
+		}
+		// Case when str is not found
+		err = utils.ErrNotFound
+	}
+	if str != "" {
+		if err = rs.ms.Unmarshal([]byte(str), &itemIDs); err != nil {
+			return
+		}
+	}
+	cache.Set(dbKey, itemIDs, true, utils.NonTransactional)
 	return
 }

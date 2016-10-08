@@ -104,7 +104,7 @@ type AccountingStorage interface {
 	SetStructVersion(*StructVersion) error
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
-	GetFieldIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
+	MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
 }
 
 type CdrStorage interface {

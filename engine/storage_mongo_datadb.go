@@ -1626,6 +1626,6 @@ func (ms *MongoStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]ma
 func (ms *MongoStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	return
 }
-func (ms *MongoStorage) GetFieldIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
 	return
 }

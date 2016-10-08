@@ -29,8 +29,8 @@ import (
 var rds *RedisStorage
 var err error
 
-func TestConnectRedis(t *testing.T) {
-	if !*testLocal {
+func TestRDSitConnectRedis(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
@@ -40,8 +40,8 @@ func TestConnectRedis(t *testing.T) {
 	}
 }
 
-func TestFlush(t *testing.T) {
-	if !*testLocal {
+func TestRDSitFlush(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	if err := rds.Flush(""); err != nil {
@@ -50,8 +50,8 @@ func TestFlush(t *testing.T) {
 	rds.PreloadRatingCache()
 }
 
-func TestSetGetDerivedCharges(t *testing.T) {
-	if !*testLocal {
+func TestRDSitSetGetDerivedCharges(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	keyCharger1 := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
@@ -75,5 +75,96 @@ func TestSetGetDerivedCharges(t *testing.T) {
 		t.Error("Error when retrieving DerivedCHarger", err.Error())
 	} else if !reflect.DeepEqual(rcvCharger, charger1) {
 		t.Errorf("Expecting %v, received: %v", charger1, rcvCharger)
+	}
+}
+
+func TestRDSitSetReqFilterIndexes(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	idxes := map[string]map[string]utils.StringMap{
+		"Account": map[string]utils.StringMap{
+			"1001": utils.StringMap{
+				"RL1": true,
+			},
+			"1002": utils.StringMap{
+				"RL1": true,
+				"RL2": true,
+			},
+			"dan": utils.StringMap{
+				"RL2": true,
+			},
+		},
+		"Subject": map[string]utils.StringMap{
+			"dan": utils.StringMap{
+				"RL2": true,
+			},
+		},
+		utils.NOT_AVAILABLE: map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: utils.StringMap{
+				"RL4": true,
+				"RL5": true,
+			},
+		},
+	}
+	if err := rds.SetReqFilterIndexes(utils.ResourceLimitsIndex, idxes); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRDSitGetReqFilterIndexes(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	eIdxes := map[string]map[string]utils.StringMap{
+		"Account": map[string]utils.StringMap{
+			"1001": utils.StringMap{
+				"RL1": true,
+			},
+			"1002": utils.StringMap{
+				"RL1": true,
+				"RL2": true,
+			},
+			"dan": utils.StringMap{
+				"RL2": true,
+			},
+		},
+		"Subject": map[string]utils.StringMap{
+			"dan": utils.StringMap{
+				"RL2": true,
+			},
+		},
+		utils.NOT_AVAILABLE: map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: utils.StringMap{
+				"RL4": true,
+				"RL5": true,
+			},
+		},
+	}
+	if idxes, err := rds.GetReqFilterIndexes(utils.ResourceLimitsIndex); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, idxes) {
+		t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
+	}
+	if _, err := rds.GetReqFilterIndexes("unknown_key"); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestRDSitMatchReqFilterIndex(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	eMp := utils.StringMap{
+		"RL1": true,
+		"RL2": true,
+	}
+	if rcvMp, err := rds.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey("Account", "1002")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, rcvMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
+	}
+	if _, err := rds.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey("NonexistentField", "1002")); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
