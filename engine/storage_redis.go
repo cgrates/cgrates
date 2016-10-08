@@ -1205,3 +1205,13 @@ func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) err
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
 }
+
+func (rs *RedisStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+	return
+}
+func (rs *RedisStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+	return
+}
+func (rs *RedisStorage) GetFieldIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+	return
+}

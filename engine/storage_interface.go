@@ -102,6 +102,9 @@ type AccountingStorage interface {
 	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetStructVersion() (*StructVersion, error)
 	SetStructVersion(*StructVersion) error
+	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
+	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
+	GetFieldIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
 }
 
 type CdrStorage interface {

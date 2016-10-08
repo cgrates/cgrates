@@ -1620,3 +1620,12 @@ func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 func (ms *MongoStorage) RemoveResourceLimit(id string, transactionID string) error {
 	return nil
 }
+func (ms *MongoStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+	return
+}
+func (ms *MongoStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+	return
+}
+func (ms *MongoStorage) GetFieldIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+	return
+}

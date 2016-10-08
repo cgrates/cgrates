@@ -35,6 +35,7 @@ var (
 	cache    cacheStore
 	cacheMux sync.RWMutex
 	cfg      *config.CacheConfig
+
 	// transaction stuff
 	transactionBuffer map[string][]*transactionItem // Queue tasks based on transactionID
 	transBufMux       sync.Mutex                    // Protects the transactionBuffer
@@ -156,7 +157,7 @@ func CountEntries(prefix string) (result int) {
 	return cache.CountEntriesForPrefix(prefix)
 }
 
-func GetEntriesKeys(prefix string) (keys []string) {
+func GetEntryKeys(prefix string) (keys []string) {
 	cacheMux.RLock()
 	defer cacheMux.RUnlock()
 	return cache.GetKeysForPrefix(prefix)

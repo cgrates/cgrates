@@ -109,7 +109,7 @@ func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
 	newStringIndexes := make(map[string]map[string]utils.StringMap) // Index it transactional
 	var cacheIDsToIndex []string                                    // Cache keys of RLs to be indexed
 	if rlIDs == nil {
-		cacheIDsToIndex = cache.GetEntriesKeys(utils.ResourceLimitsPrefix)
+		cacheIDsToIndex = cache.GetEntryKeys(utils.ResourceLimitsPrefix)
 	} else {
 		for _, rlID := range rlIDs {
 			cacheIDsToIndex = append(cacheIDsToIndex, utils.ResourceLimitsPrefix+rlID)

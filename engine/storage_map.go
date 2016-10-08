@@ -1163,3 +1163,13 @@ func (ms *MapStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) 
 func (ms *MapStorage) RemoveResourceLimit(id string, transactionID string) error {
 	return nil
 }
+
+func (ms *MapStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+	return
+}
+func (ms *MapStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+	return
+}
+func (ms *MapStorage) GetFieldIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+	return
+}
