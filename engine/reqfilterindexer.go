@@ -21,7 +21,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewReqFilterIndexer(dataDB AccountingStorage, dbKey string, overwriteDB bool) (*ReqFilterIndexer, error) {
+func NewReqFilterIndexer(dataDB AccountingStorage, dbKey string) (*ReqFilterIndexer, error) {
 	indexes, err := dataDB.GetReqFilterIndexes(dbKey)
 	if err != nil && err != utils.ErrNotFound {
 		return nil, err
@@ -29,7 +29,7 @@ func NewReqFilterIndexer(dataDB AccountingStorage, dbKey string, overwriteDB boo
 	if indexes == nil {
 		indexes = make(map[string]map[string]utils.StringMap)
 	}
-	return &ReqFilterIndexer{dataDB: dataDB, indexes: indexes, chngdIndxKeys: make(utils.StringMap)}, nil
+	return &ReqFilterIndexer{dataDB: dataDB, dbKey: dbKey, indexes: indexes, chngdIndxKeys: make(utils.StringMap)}, nil
 }
 
 // ReqFilterIndexer is a centralized indexer for all data sources using RequestFilter

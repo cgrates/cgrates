@@ -1183,8 +1183,8 @@ func (rs *RedisStorage) GetResourceLimit(id string, skipCache bool, transactionI
 				return nil, err
 			}
 		}
-		cache.Set(key, rl, cacheCommit(transactionID), transactionID)
 	}
+	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
 	return
 }
 func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) error {
@@ -1192,10 +1192,7 @@ func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 	if err != nil {
 		return err
 	}
-	key := utils.ResourceLimitsPrefix + rl.ID
-	err = rs.Cmd("SET", key, result).Err
-	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
-	return err
+	return rs.Cmd("SET", utils.ResourceLimitsPrefix+rl.ID, result).Err
 }
 func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) error {
 	key := utils.ResourceLimitsPrefix + id
@@ -1252,14 +1249,14 @@ func (rs *RedisStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map
 }
 
 func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
-	if x, ok := cache.Get(fieldValKey); ok { // Attempt to find in cache first
+	if x, ok := cache.Get(dbKey + fieldValKey); ok { // Attempt to find in cache first
 		if x != nil {
 			return x.(utils.StringMap), nil
 		}
 		return nil, utils.ErrNotFound
 	}
 	// Not found in cache, check in DB
-	str, err := rs.Cmd("HGET", dbKey, fieldValKey).Str()
+	fldValBytes, err := rs.Cmd("HGET", dbKey, fieldValKey).Bytes()
 	if err != nil {
 		if err.Error() != "wrong type" {
 			return nil, err
@@ -1267,11 +1264,9 @@ func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 		// Case when str is not found
 		err = utils.ErrNotFound
 	}
-	if str != "" {
-		if err = rs.ms.Unmarshal([]byte(str), &itemIDs); err != nil {
-			return
-		}
+	if err = rs.ms.Unmarshal(fldValBytes, &itemIDs); err != nil {
+		return
 	}
-	cache.Set(dbKey, itemIDs, true, utils.NonTransactional)
+	cache.Set(dbKey+fieldValKey, itemIDs, true, utils.NonTransactional)
 	return
 }

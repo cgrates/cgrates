@@ -1153,23 +1153,101 @@ func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	return
 }
 
-func (ms *MapStorage) GetResourceLimit(id string, skipCache bool, transactionID string) (*ResourceLimit, error) {
-	return nil, nil
+func (ms *MapStorage) GetResourceLimit(id string, skipCache bool, transactionID string) (rl *ResourceLimit, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	key := utils.ResourceLimitsPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x != nil {
+				return x.(*ResourceLimit), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	values, ok := ms.dict[key]
+	if !ok {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &rl)
+	if err != nil {
+		return nil, err
+	}
+	for _, fltr := range rl.Filters {
+		if err := fltr.CompileValues(); err != nil {
+			return nil, err
+		}
+	}
+	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
+	return
 }
 func (ms *MapStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(rl)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.ResourceLimitsPrefix+rl.ID] = result
 	return nil
 }
 
 func (ms *MapStorage) RemoveResourceLimit(id string, transactionID string) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.ResourceLimitsPrefix + id
+	delete(ms.dict, key)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
 }
 
 func (ms *MapStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	values, ok := ms.dict[dbKey]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &indexes)
+	if err != nil {
+		return nil, err
+	}
 	return
 }
 func (ms *MapStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(indexes)
+	if err != nil {
+		return err
+	}
+	ms.dict[dbKey] = result
 	return
 }
 func (ms *MapStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	if x, ok := cache.Get(dbKey + fieldValKey); ok { // Attempt to find in cache first
+		if x != nil {
+			return x.(utils.StringMap), nil
+		}
+		return nil, utils.ErrNotFound
+	}
+	// Not found in cache, check in DB
+	values, ok := ms.dict[dbKey]
+	if !ok {
+		cache.Set(dbKey+fieldValKey, nil, true, utils.NonTransactional)
+		return nil, utils.ErrNotFound
+	}
+	var indexes map[string]map[string]utils.StringMap
+	if err = ms.ms.Unmarshal(values, &indexes); err != nil {
+		return nil, err
+	}
+	keySplt := strings.Split(fieldValKey, ":")
+	if _, hasIt := indexes[keySplt[0]]; hasIt {
+		itemIDs = indexes[keySplt[0]][keySplt[1]]
+	}
+	cache.Set(dbKey+fieldValKey, itemIDs, true, utils.NonTransactional)
 	return
 }
