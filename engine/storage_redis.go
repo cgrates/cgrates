@@ -1263,8 +1263,7 @@ func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 		}
 		// Case when str is not found
 		err = utils.ErrNotFound
-	}
-	if err = rs.ms.Unmarshal(fldValBytes, &itemIDs); err != nil {
+	} else if err = rs.ms.Unmarshal(fldValBytes, &itemIDs); err != nil {
 		return
 	}
 	cache.Set(dbKey+fieldValKey, itemIDs, true, utils.NonTransactional)
