@@ -224,6 +224,7 @@ const (
 	ALIASES_PREFIX                = "als_"
 	REVERSE_ALIASES_PREFIX        = "rls_"
 	ResourceLimitsPrefix          = "rlm_"
+	ResourceLimitsIndex           = "rli_"
 	CDR_STATS_PREFIX              = "cst_"
 	TEMP_DESTINATION_PREFIX       = "tmp_"
 	LOG_CALL_COST_PREFIX          = "cco_"

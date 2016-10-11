@@ -91,126 +91,42 @@ func NewResourceLimiterService(cfg *config.CGRConfig, dataDB AccountingStorage, 
 	if cdrStatS != nil && reflect.ValueOf(cdrStatS).IsNil() {
 		cdrStatS = nil
 	}
-	rls := &ResourceLimiterService{stringIndexes: make(map[string]map[string]utils.StringMap), dataDB: dataDB, cdrStatS: cdrStatS}
+	rls := &ResourceLimiterService{dataDB: dataDB, cdrStatS: cdrStatS}
 	return rls, nil
 }
 
 // ResourcesLimiter is the service handling channel limits
 type ResourceLimiterService struct {
 	sync.RWMutex
-	stringIndexes map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[resourceID]
-	dataDB        AccountingStorage                     // So we can load the data in cache and index it
-	cdrStatS      rpcclient.RpcClientConnection
-}
-
-// Index cached ResourceLimits with MetaString filter types
-func (rls *ResourceLimiterService) indexStringFilters(rlIDs []string) error {
-	utils.Logger.Info("<RLs> Start indexing string filters")
-	newStringIndexes := make(map[string]map[string]utils.StringMap) // Index it transactional
-	var cacheIDsToIndex []string                                    // Cache keys of RLs to be indexed
-	if rlIDs == nil {
-		cacheIDsToIndex = cache.GetEntriesKeys(utils.ResourceLimitsPrefix)
-	} else {
-		for _, rlID := range rlIDs {
-			cacheIDsToIndex = append(cacheIDsToIndex, utils.ResourceLimitsPrefix+rlID)
-		}
-	}
-	for _, cacheKey := range cacheIDsToIndex {
-		x, ok := cache.Get(cacheKey)
-		if !ok {
-			return utils.ErrNotFound
-		}
-		rl := x.(*ResourceLimit)
-		var hasMetaString bool
-		for _, fltr := range rl.Filters {
-			if fltr.Type != MetaString {
-				continue
-			}
-			hasMetaString = true // Mark that we found at least one metatring so we don't need to index globally
-			if _, hastIt := newStringIndexes[fltr.FieldName]; !hastIt {
-				newStringIndexes[fltr.FieldName] = make(map[string]utils.StringMap)
-			}
-			for _, fldVal := range fltr.Values {
-				if _, hasIt := newStringIndexes[fltr.FieldName][fldVal]; !hasIt {
-					newStringIndexes[fltr.FieldName][fldVal] = make(utils.StringMap)
-				}
-				newStringIndexes[fltr.FieldName][fldVal][rl.ID] = true
-			}
-		}
-		if !hasMetaString {
-			if _, hasIt := newStringIndexes[utils.NOT_AVAILABLE]; !hasIt {
-				newStringIndexes[utils.NOT_AVAILABLE] = make(map[string]utils.StringMap)
-			}
-			if _, hasIt := newStringIndexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE]; !hasIt {
-				newStringIndexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] = make(utils.StringMap)
-			}
-			newStringIndexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE][rl.ID] = true // Fields without real field index will be located in map[NOT_AVAILABLE][NOT_AVAILABLE][rl.ID]
-		}
-	}
-	rls.Lock()
-	defer rls.Unlock()
-	if rlIDs == nil { // We have rebuilt complete index
-		rls.stringIndexes = newStringIndexes
-		return nil
-	}
-	// Merge the indexes since we have only performed limited indexing
-	for fldNameKey, mpFldName := range newStringIndexes {
-		if _, hasIt := rls.stringIndexes[fldNameKey]; !hasIt {
-			rls.stringIndexes[fldNameKey] = mpFldName
-		} else {
-			for fldValKey, strMap := range newStringIndexes[fldNameKey] {
-				if _, hasIt := rls.stringIndexes[fldNameKey][fldValKey]; !hasIt {
-					rls.stringIndexes[fldNameKey][fldValKey] = strMap
-				} else {
-					for resIDKey := range newStringIndexes[fldNameKey][fldValKey] {
-						rls.stringIndexes[fldNameKey][fldValKey][resIDKey] = true
-					}
-				}
-			}
-		}
-	}
-	utils.Logger.Info("<RLs> Done indexing string filters")
-	return nil
-}
-
-// Called when cache/re-caching is necessary
-func (rls *ResourceLimiterService) cacheResourceLimits(loadID string, rlIDs []string) error {
-	if rlIDs == nil {
-		utils.Logger.Info("<RLs> Start caching all resource limits")
-	} else if len(rlIDs) == 0 {
-		return nil
-	} else {
-		utils.Logger.Info(fmt.Sprintf("<RLs> Start caching resource limits with ids: %+v", rlIDs))
-	}
-	if err := rls.dataDB.PreloadCacheForPrefix(utils.ResourceLimitsPrefix); err != nil {
-		return err
-	}
-	utils.Logger.Info("<RLs> Done caching resource limits")
-	return rls.indexStringFilters(rlIDs)
+	dataDB   AccountingStorage // So we can load the data in cache and index it
+	cdrStatS rpcclient.RpcClientConnection
 }
 
 func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]interface{}) (map[string]*ResourceLimit, error) {
 	matchingResources := make(map[string]*ResourceLimit)
 	for fldName, fieldValIf := range ev {
-		if _, hasIt := rls.stringIndexes[fldName]; !hasIt {
-			continue
-		}
-		strVal, canCast := utils.CastFieldIfToString(fieldValIf)
+		fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
 		if !canCast {
 			return nil, fmt.Errorf("Cannot cast field: %s into string", fldName)
 		}
-		if _, hasIt := rls.stringIndexes[fldName][strVal]; !hasIt {
-			continue
+		rlIDs, err := rls.dataDB.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey(fldName, fldVal))
+		if err != nil {
+			if err == utils.ErrNotFound {
+				continue
+			}
+			return nil, err
 		}
-		for resName := range rls.stringIndexes[fldName][strVal] {
+		for resName := range rlIDs {
 			if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
 				continue
 			}
-			x, ok := cache.Get(utils.ResourceLimitsPrefix + resName)
-			if !ok {
-				return nil, utils.ErrNotFound
+			rl, err := rls.dataDB.GetResourceLimit(resName, false, utils.NonTransactional)
+			if err != nil {
+				if err == utils.ErrNotFound {
+					continue
+				}
+				return nil, err
 			}
-			rl := x.(*ResourceLimit)
 			now := time.Now()
 			if rl.ActivationTime.After(now) || (!rl.ExpiryTime.IsZero() && rl.ExpiryTime.Before(now)) { // not active
 				continue
@@ -230,15 +146,21 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 		}
 	}
 	// Check un-indexed resources
-	for resName := range rls.stringIndexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] {
+	uIdxRLIDs, err := rls.dataDB.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE))
+	if err != nil && err != utils.ErrNotFound {
+		return nil, err
+	}
+	for resName := range uIdxRLIDs {
 		if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
 			continue
 		}
-		x, ok := cache.Get(utils.ResourceLimitsPrefix + resName)
-		if !ok {
-			return nil, utils.ErrNotFound
+		rl, err := rls.dataDB.GetResourceLimit(resName, false, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				continue
+			}
+			return nil, err
 		}
-		rl := x.(*ResourceLimit)
 		now := time.Now()
 		if rl.ActivationTime.After(now) || (!rl.ExpiryTime.IsZero() && rl.ExpiryTime.Before(now)) { // not active
 			continue
@@ -257,9 +179,6 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 
 // Called to start the service
 func (rls *ResourceLimiterService) ListenAndServe() error {
-	if err := rls.cacheResourceLimits("ResourceLimiterServiceStart", nil); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -269,20 +188,6 @@ func (rls *ResourceLimiterService) ServiceShutdown() error {
 }
 
 // RPC Methods
-
-// Cache/Re-cache
-func (rls *ResourceLimiterService) V1CacheResourceLimits(attrs *utils.AttrRLsCache, reply *string) error {
-	if err := rls.cacheResourceLimits(attrs.LoadID, attrs.ResourceLimitIDs); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-
-// Alias API for external usage
-func (rls *ResourceLimiterService) CacheResourceLimits(attrs *utils.AttrRLsCache, reply *string) error {
-	return rls.V1CacheResourceLimits(attrs, reply)
-}
 
 func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interface{}, reply *[]*ResourceLimit) error {
 	rls.Lock() // Unknown number of RLs updated

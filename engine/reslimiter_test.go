@@ -18,16 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var rLS *ResourceLimiterService
 
+/*
 func TestRLsIndexStringFilters(t *testing.T) {
 	rls := []*ResourceLimit{
 		&ResourceLimit{
@@ -171,8 +170,95 @@ func TestRLsIndexStringFilters(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eIndexes, rLS.stringIndexes)
 	}
 }
+*/
+
+func TestRLsLoadRLs(t *testing.T) {
+	rls := []*ResourceLimit{
+		&ResourceLimit{
+			ID:     "RL1",
+			Weight: 20,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+				&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+				}},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          2,
+			Usage:          make(map[string]*ResourceUsage),
+		},
+		&ResourceLimit{
+			ID:     "RL2",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
+				&RequestFilter{Type: MetaString, FieldName: "Subject", Values: []string{"dan"}},
+			},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          1,
+			UsageTTL:       time.Duration(1 * time.Millisecond),
+			Usage:          make(map[string]*ResourceUsage),
+		},
+		&ResourceLimit{
+			ID:     "RL3",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaString, FieldName: "Subject", Values: []string{"dan"}},
+				&RequestFilter{Type: MetaString, FieldName: "Subject", Values: []string{"1003"}},
+			},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          1,
+			Usage:          make(map[string]*ResourceUsage),
+		},
+		&ResourceLimit{
+			ID:     "RL4",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+49"}},
+			},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          1,
+			Usage:          make(map[string]*ResourceUsage),
+		},
+		&ResourceLimit{
+			ID:     "RL5",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+40"}},
+			},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          1,
+			UsageTTL:       time.Duration(10 * time.Millisecond),
+			Usage:          make(map[string]*ResourceUsage),
+		},
+		&ResourceLimit{ // Add it so we can test expiryTime
+			ID:     "RL6",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaString, FieldName: "Subject", Values: []string{"dan"}},
+			},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			Limit:          1,
+			Usage:          make(map[string]*ResourceUsage),
+		},
+	}
+	rlIdxr, err := NewReqFilterIndexer(accountingStorage, utils.ResourceLimitsIndex)
+	if err != nil {
+		t.Error(err)
+	}
+	for _, rl := range rls {
+		if err := accountingStorage.SetResourceLimit(rl, utils.NonTransactional); err != nil {
+			t.Error(err)
+		}
+		rlIdxr.IndexFilters(rl.ID, rl.Filters)
+	}
+	if err := rlIdxr.StoreIndexes(); err != nil {
+		t.Error(err)
+	}
+}
 
 func TestRLsMatchingResourceLimitsForEvent(t *testing.T) {
+	rLS = &ResourceLimiterService{dataDB: accountingStorage, cdrStatS: nil}
 	eResLimits := map[string]*ResourceLimit{
 		"RL1": &ResourceLimit{
 			ID:     "RL1",

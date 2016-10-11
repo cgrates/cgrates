@@ -1008,7 +1008,7 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 		}
 		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
 		//log.Print("KEY: ", ratingProfileSearchKey)
-		suppliers := cache.GetEntriesKeys(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey)
+		suppliers := cache.GetEntryKeys(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 		for _, supplier := range suppliers {
 			//log.Print("Supplier: ", supplier)
 			split := strings.Split(supplier, ":")

@@ -54,6 +54,7 @@ const (
 	colLht = "load_history"
 	colVer = "versions"
 	colRL  = "resource_limits"
+	colRFI = "request_filter_indexes"
 )
 
 var (
@@ -1611,12 +1612,100 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool, transactionID string) (*ResourceLimit, error) {
-	return nil, nil
+func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool, transactionID string) (rl *ResourceLimit, err error) {
+	key := utils.ResourceLimitsPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x != nil {
+				return x.(*ResourceLimit), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	session, col := ms.conn(colRL)
+	defer session.Close()
+	if err = col.Find(bson.M{"id": id}).One(rl); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
+	return
 }
-func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) error {
-	return nil
+
+func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) (err error) {
+	session, col := ms.conn(colRL)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"id": rl.ID}, rl)
+	return err
 }
+
 func (ms *MongoStorage) RemoveResourceLimit(id string, transactionID string) error {
+	session, col := ms.conn(colRL)
+	defer session.Close()
+	if err := col.Remove(bson.M{"id": id}); err != nil {
+		return err
+	}
+	cache.RemKey(utils.ResourceLimitsPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil
+}
+
+func (ms *MongoStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+	session, col := ms.conn(colRFI)
+	defer session.Close()
+	var result struct {
+		Key   string
+		Value map[string]map[string]utils.StringMap
+	}
+	if err = col.Find(bson.M{"key": dbKey}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
+	return result.Value, nil
+}
+
+func (ms *MongoStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+	session, col := ms.conn(colRFI)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
+		Key   string
+		Value map[string]map[string]utils.StringMap
+	}{dbKey, indexes})
+	return
+}
+
+func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+	fldValSplt := strings.Split(fieldValKey, utils.CONCATENATED_KEY_SEP)
+	if len(fldValSplt) != 2 {
+		return nil, fmt.Errorf("malformed key in query: %s", fldValSplt)
+	}
+	if x, ok := cache.Get(dbKey + fieldValKey); ok { // Attempt to find in cache first
+		if x != nil {
+			return x.(utils.StringMap), nil
+		}
+		return nil, utils.ErrNotFound
+	}
+	session, col := ms.conn(colRFI)
+	defer session.Close()
+	var result struct {
+		Key   string
+		Value map[string]map[string]utils.StringMap
+	}
+	fldKey := "value." + fieldValKey
+	if err = col.Find(
+		bson.M{"key": dbKey, fldKey: bson.M{"$exists": true}}).Select(
+		bson.M{fldKey: true}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+			cache.Set(dbKey+fieldValKey, nil, true, utils.NonTransactional)
+		}
+		return nil, err
+	}
+	itemIDs = result.Value[fldValSplt[0]][fldValSplt[1]]
+	cache.Set(dbKey+fieldValKey, itemIDs, true, utils.NonTransactional)
+	return
 }
