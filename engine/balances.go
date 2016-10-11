@@ -391,7 +391,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		}
 		if debitConnectFee {
 			// this is the first add, debit the connect fee
-			if ub.DebitConnectionFee(cc, moneyBalances, count, true) == false {
+			if ok, _ := ub.DebitConnectionFee(cc, moneyBalances, count, true); ok == false {
 				// found blocker balance
 				return nil, nil
 			}
@@ -510,13 +510,17 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	//log.Print("B: ", utils.ToJSON(b))
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
+
+	var ok bool
+	var debitedBalance Balance
+
 	if err != nil {
 		return nil, err
 	}
 	//log.Print("cc: " + utils.ToJSON(cc))
 	if debitConnectFee {
 		// this is the first add, debit the connect fee
-		if ub.DebitConnectionFee(cc, moneyBalances, count, true) == false {
+		if ok, debitedBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); ok == false {
 			// balance is blocker
 			return nil, nil
 		}
@@ -539,9 +543,21 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
 		//log.Printf("Rate: %+v", ts.RateInterval.Rating)
+
 		for incIndex, inc := range ts.Increments {
 			// check standard subject tags
 			//log.Printf("INC: %+v", inc)
+
+			if ts.RateInterval.Rating.ConnectFee > 0 && incIndex == 0 {
+				inc.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  debitedBalance.Uuid,
+					ID:    debitedBalance.ID,
+					Value: debitedBalance.Value,
+				}
+
+				continue
+			}
+
 			amount := inc.Cost
 			inc.paid = false
 			if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
@@ -580,6 +596,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			}
 
 			if b.GetValue() >= amount {
+
 				b.SubstractValue(amount)
 				cd.MaxCostSoFar += amount
 				inc.BalanceInfo.Monetary = &MonetaryInfo{
@@ -613,6 +630,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		}
 	}
 	//log.Printf("END: %+v", cd.testCallcost)
+
 	if len(cc.Timespans) == 0 {
 		cc = nil
 	}

@@ -374,7 +374,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, directio
 func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR)
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY)
-	//utils.Logger.Info(fmt.Sprintf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances))
+	utils.Logger.Info(fmt.Sprintf("<ACCOUNT> detail des balances: %+v, %+v", usefulMoneyBalances, usefulUnitBalances))
 	//utils.Logger.Info(fmt.Sprintf("STARTCD: %+v", cd))
 	//log.Printf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances)
 	var leftCC *CallCost
@@ -434,7 +434,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			// try every balance multiple times in case one becomes active or ratig changes
 			moneyBalanceChecker = false
 			for _, balance := range usefulMoneyBalances {
-				//utils.Logger.Info(fmt.Sprintf("Money balance: %+v", balance))
+				utils.Logger.Info(fmt.Sprintf("Money balance: %+v", balance))
 				//utils.Logger.Info(fmt.Sprintf("CD BEFORE MONEY: %+v", cd))
 				partCC, debitErr := balance.debitMoney(cd, balance.account, usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
@@ -805,12 +805,19 @@ func (acc *Account) Clone() *Account {
 	return newAcc
 }
 
-func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool, block bool) bool {
+func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool, block bool) (bool, Balance) {
+	utils.Logger.Info("Debit du cout de connection")
+	utils.Logger.Info(fmt.Sprintf("Montant du cout de connection: %+v", cc.GetConnectFee()))
+
+	var debitedBalance Balance
+
 	if cc.deductConnectFee {
 		connectFee := cc.GetConnectFee()
 		//log.Print("CONNECT FEE: %f", connectFee)
 		connectFeePaid := false
+
 		for _, b := range usefulMoneyBalances {
+			utils.Logger.Info(fmt.Sprintf("debit du cout de connection sur la balance: %+v", b))
 			if b.GetValue() >= connectFee {
 				b.SubstractValue(connectFee)
 				// the conect fee is not refundable!
@@ -818,10 +825,11 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 					acc.countUnits(connectFee, utils.MONETARY, cc, b)
 				}
 				connectFeePaid = true
+				debitedBalance = *b
 				break
 			}
 			if b.Blocker && block { // stop here
-				return false
+				return false, *b
 			}
 		}
 		// debit connect fee
@@ -834,9 +842,10 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 			if count {
 				acc.countUnits(connectFee, utils.MONETARY, cc, b)
 			}
+			debitedBalance = *b
 		}
 	}
-	return true
+	return true, debitedBalance
 }
 
 func (acc *Account) matchActionFilter(condition string) (bool, error) {
