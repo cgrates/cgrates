@@ -99,25 +99,6 @@ func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
 }
 
 func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, cacheCfg *config.CacheConfig, loadHistorySize int) (*MongoStorage, error) {
-
-	// We need this object to establish a session to our MongoDB.
-	/*address := fmt.Sprintf("%s:%s", host, port)
-			mongoDBDialInfo := &mgo.DialInfo{
-				Addrs:    []string{address},
-				Timeout:  60 * time.Second,
-				Database: db,
-	Username: user,
-	Password: pass,
-			}
-
-			// Create a session which maintains a pool of socket connections
-			// to our MongoDB.
-			session, err := mgo.DialWithInfo(mongoDBDialInfo)
-			if err != nil {
-				log.Printf("ERR: %v", err)
-				return nil, err
-			}*/
-
 	address := fmt.Sprintf("%s:%s", host, port)
 	if user != "" && pass != "" {
 		address = fmt.Sprintf("%s:%s@%s", user, pass, address)
@@ -1695,7 +1676,7 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 		Key   string
 		Value map[string]map[string]utils.StringMap
 	}
-	fldKey := "value." + fieldValKey
+	fldKey := fmt.Sprintf("value.%s.%s", fldValSplt[0], fldValSplt[1])
 	if err = col.Find(
 		bson.M{"key": dbKey, fldKey: bson.M{"$exists": true}}).Select(
 		bson.M{fldKey: true}).One(&result); err != nil {
