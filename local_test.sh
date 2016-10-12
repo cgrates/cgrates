@@ -4,7 +4,7 @@ gen=$?
 echo 'go test github.com/cgrates/cgrates/apier/v1 -local'
 go test github.com/cgrates/cgrates/apier/v1 -local
 ap1=$?
-echo 'go test github.com/cgrates/cgrates/apier/v2 -local'
+echo 'go test github.com/cgrates/cgrates/apier/v2 -local -integration'
 go test github.com/cgrates/cgrates/apier/v2 -local
 ap2=$?
 echo 'go test github.com/cgrates/cgrates/apier/v2 -tp -config_dir=tutmysql'
