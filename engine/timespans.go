@@ -464,9 +464,10 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 
 	if ts.RateInterval.Rating.ConnectFee > 0 {
+		utils.Logger.Info("creation increment connect fee")
 		inc := &Increment{
 			Duration:    0,
-			Cost:        ts.RateInterval.Rating.ConnectFee,
+			Cost:        0,
 			BalanceInfo: &DebitInfo{},
 		}
 		ts.Increments = append(ts.Increments, inc)

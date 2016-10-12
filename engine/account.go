@@ -374,7 +374,6 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, directio
 func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR)
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY)
-	utils.Logger.Info(fmt.Sprintf("<ACCOUNT> detail des balances: %+v, %+v", usefulMoneyBalances, usefulUnitBalances))
 	//utils.Logger.Info(fmt.Sprintf("STARTCD: %+v", cd))
 	//log.Printf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances)
 	var leftCC *CallCost
@@ -434,9 +433,9 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			// try every balance multiple times in case one becomes active or ratig changes
 			moneyBalanceChecker = false
 			for _, balance := range usefulMoneyBalances {
-				utils.Logger.Info(fmt.Sprintf("Money balance: %+v", balance))
 				//utils.Logger.Info(fmt.Sprintf("CD BEFORE MONEY: %+v", cd))
 				partCC, debitErr := balance.debitMoney(cd, balance.account, usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
+				utils.Logger.Info(fmt.Sprintf("cost E %v ", partCC.Cost))
 				if debitErr != nil {
 					return nil, debitErr
 				}
@@ -453,6 +452,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					//log.Printf("CD: %+v - %+v", cd.TimeStart, cd.TimeEnd)
 					// check if the calldescriptor is covered
 					if cd.GetDuration() <= 0 {
+						utils.Logger.Info("go to commit")
 						goto COMMIT
 					}
 					moneyBalanceChecker = true
