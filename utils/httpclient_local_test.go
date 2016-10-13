@@ -24,6 +24,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
@@ -40,7 +41,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
 	filePath := "/tmp/cgr_test_http_poster.json"
-	if _, _, err := HttpPoster("http://localhost:8080/invalid", true, jsn, CONTENT_JSON, 3, filePath, false); err != nil {
+	if _, err := NewHTTPPoster(true, time.Duration(2*time.Second)).Post("http://localhost:8080/invalid", CONTENT_JSON, jsn, 3, filePath); err != nil {
 		t.Error(err)
 	}
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
@@ -61,7 +62,7 @@ func TestHttpBytesPoster(t *testing.T) {
 		Test2
 		`)
 	filePath := "/tmp/test_http_poster.http"
-	if _, _, err := HttpPoster("http://localhost:8080/invalid", true, content, CONTENT_TEXT, 3, filePath, false); err != nil {
+	if _, err := NewHTTPPoster(true, time.Duration(2*time.Second)).Post("http://localhost:8080/invalid", CONTENT_TEXT, content, 3, filePath); err != nil {
 		t.Error(err)
 	}
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {

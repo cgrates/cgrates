@@ -86,7 +86,8 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB AccountingS
 		stats = nil
 	}
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dataDB: dataDB,
-		rals: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: Guardian}, nil
+		rals: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: Guardian,
+		httpPoster: utils.NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
 }
 
 type CdrServer struct {
@@ -100,6 +101,7 @@ type CdrServer struct {
 	stats         rpcclient.RpcClientConnection
 	guard         *GuardianLock
 	responseCache *cache.ResponseCache
+	httpPoster    *utils.HTTPPoster // used for replication
 }
 
 func (self *CdrServer) Timezone() string {
@@ -477,10 +479,7 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			fallbackPath := path.Join(
 				self.cgrCfg.HttpFailedDir,
 				rplCfg.FallbackFileName())
-			_, _, err := utils.HttpPoster(
-				rplCfg.Address, self.cgrCfg.HttpSkipTlsVerify, body,
-				content, rplCfg.Attempts, fallbackPath, false) // ToDo: Review caching here after we are sure that the connection leak is gone
-			if err != nil {
+			if _, err := self.httpPoster.Post(rplCfg.Address, content, body, rplCfg.Attempts, fallbackPath); err != nil {
 				utils.Logger.Err(fmt.Sprintf(
 					"<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
 				if rplCfg.Synchronous {
