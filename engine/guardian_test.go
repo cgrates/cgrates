@@ -45,7 +45,7 @@ func TestGuardianMultipleKeys(t *testing.T) {
 	}
 	sg.Wait()
 	mustExecDur := time.Duration(maxIter*100) * time.Millisecond
-	if execTime := time.Now().Sub(tStart); execTime < mustExecDur || execTime > mustExecDur+time.Duration(10*time.Millisecond) {
+	if execTime := time.Now().Sub(tStart); execTime < mustExecDur || execTime > mustExecDur+time.Duration(20*time.Millisecond) {
 		t.Errorf("Execution took: %v", execTime)
 	}
 	for _, key := range keys {
@@ -71,7 +71,7 @@ func TestGuardianTimeout(t *testing.T) {
 	}
 	sg.Wait()
 	mustExecDur := time.Duration(maxIter*10) * time.Millisecond
-	if execTime := time.Now().Sub(tStart); execTime < mustExecDur || execTime > mustExecDur+time.Duration(10*time.Millisecond) {
+	if execTime := time.Now().Sub(tStart); execTime < mustExecDur || execTime > mustExecDur+time.Duration(20*time.Millisecond) {
 		t.Errorf("Execution took: %v", execTime)
 	}
 	for _, key := range keys {
