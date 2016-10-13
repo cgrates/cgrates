@@ -83,7 +83,6 @@ func (guard *GuardianLock) unlockItems(itmLocks []*itemLock) {
 
 func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
 	itmLocks := guard.lockItems(lockIDs)
-	defer guard.unlockItems(itmLocks)
 
 	rplyChan := make(chan interface{})
 	errChan := make(chan error)
@@ -109,6 +108,7 @@ func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout ti
 		}
 	}
 
+	guard.unlockItems(itmLocks)
 	return
 }
 
