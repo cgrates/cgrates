@@ -127,6 +127,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 		balance.ID = utils.META_DEFAULT
 		if a.Balance.Value != nil {
 			balance.Value = a.Balance.GetValue()
+			balance.SetDirty() // Mark the balance as dirty since we have modified and it should be checked by action triggers
 		}
 	} else {
 		a.Balance.ModifyBalance(balance)

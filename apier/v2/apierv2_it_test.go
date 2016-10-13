@@ -140,7 +140,6 @@ func TestApierV2itSetAccountActionTriggers(t *testing.T) {
 		GroupID:        utils.StringPointer("MONITOR_MAX_BALANCE"),
 		ThresholdType:  utils.StringPointer(utils.TRIGGER_MAX_BALANCE),
 		ThresholdValue: utils.Float64Pointer(50),
-		BalanceID:      utils.StringPointer(utils.META_DEFAULT),
 		BalanceType:    utils.StringPointer(utils.MONETARY),
 		ActionsID:      utils.StringPointer("DISABLE_ACCOUNT"),
 	}
@@ -186,8 +185,8 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 60.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
-		//} else if !acnt.Disabled {
-		//	t.Fatalf("Received account: %+v", acnt)
+	} else if !acnt.Disabled {
+		t.Fatalf("Received account: %+v", acnt)
 	}
 	attrSetAcnt := AttrSetAccount{
 		Tenant:   "cgrates.org",
