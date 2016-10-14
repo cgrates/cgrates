@@ -908,6 +908,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 						return err
 					}
 				}
+				if rplJsonCfg.Content_fields != nil {
+					if self.CDRSCdrReplication[idx].ContentFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*rplJsonCfg.Content_fields); err != nil {
+						return err
+					}
+				}
 			}
 		}
 	}

@@ -121,7 +121,7 @@
 // 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 // 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 // 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality<""|*internal|x.y.z.y:1234>
-// 	"cdr_replication":[]					// replicate the raw CDR to a number of servers
+// 	"cdr_replication":[],
 // },
 
 
@@ -199,11 +199,7 @@
 // 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
 // 		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
 // 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-// 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-// 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
-// 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
-// 		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
-// 		"mask_length": 0,								// length of the destination suffix to be masked
+// 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT	
 // 		"export_directory": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
 // 		"header_fields": [],							// template of the exported header fields
 // 		"content_fields": [								// template of the exported content fields
@@ -221,7 +217,7 @@
 // 			{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
 // 			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
 // 			{"tag":"Usage", "type": "*composed", "value": "Usage"},
-// 			{"tag":"Cost", "type": "*composed", "value": "Cost"},
+// 			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
 // 		],
 // 		"trailer_fields": [],							// template of the exported trailer fields
 // 	},
@@ -241,8 +237,6 @@
 // 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 // 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 // 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
-// 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
-// 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
 // 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 // },
 
@@ -376,18 +370,18 @@
 
 
 // "pubsubs": {
-// 	"enabled": false,						// starts PubSub service: <true|false>.
+// 	"enabled": false,							// starts PubSub service: <true|false>.
 // },
 
 
 // "aliases": {
-// 	"enabled": false,						// starts Aliases service: <true|false>.
+// 	"enabled": false,							// starts Aliases service: <true|false>.
 // },
 
 
 // "users": {
-// 	"enabled": false,						// starts User service: <true|false>.
-// 	"indexes": [],							// user profile field indexes
+// 	"enabled": false,							// starts User service: <true|false>.
+// 	"indexes": [],								// user profile field indexes
 // },
 
 

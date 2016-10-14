@@ -130,7 +130,6 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 		if rcvedCdrs[0].CGRID != testCdr1.CGRID ||
 			rcvedCdrs[0].ToR != testCdr1.ToR ||
 			rcvedCdrs[0].OriginHost != testCdr1.OriginHost ||
-			rcvedCdrs[0].Source != testCdr1.Source ||
 			rcvedCdrs[0].RequestType != testCdr1.RequestType ||
 			rcvedCdrs[0].Direction != testCdr1.Direction ||
 			rcvedCdrs[0].Tenant != testCdr1.Tenant ||
@@ -154,8 +153,8 @@ func TestCdrsFileFailover(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	time.Sleep(time.Duration(1 * time.Second))
-	failoverContent := []byte(`Account=1001&AnswerTime=2013-12-07T08%3A42%3A26Z&Category=call&Destination=1002&Direction=%2Aout&DisconnectCause=&OriginHost=192.168.1.1&OriginID=httpjsonrpc1&PDD=0&RequestType=%2Apseudoprepaid&SetupTime=2013-12-07T08%3A42%3A24Z&Source=UNKNOWN&Subject=1001&Supplier=&Tenant=cgrates.org&ToR=%2Avoice&Usage=10&field_extr1=val_extr1&fieldextr2=valextr2`)
+	time.Sleep(time.Duration(2 * time.Second))
+	failoverContent := []byte(`CGRID=57548d485d61ebcba55afbe5d939c82a8e9ff670`)
 	var rplCfg *config.CDRReplicationCfg
 	for _, rplCfg = range cdrsMasterCfg.CDRSCdrReplication {
 		if strings.HasSuffix(rplCfg.Address, "invalid") { // Find the config which shold generate the failoback
@@ -174,8 +173,8 @@ func TestCdrsFileFailover(t *testing.T) {
 	filePath := path.Join(cdrsMasterCfg.HttpFailedDir, fileName)
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(failoverContent[11], readBytes[11]) { // Checking just the prefix should do since some content is dynamic
-		t.Errorf("Expecting: %q, received: %q", string(failoverContent[11]), string(readBytes[11]))
+	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
+		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
 	}
 	if err := os.Remove(filePath); err != nil {
 		t.Error("Failed removing file: ", filePath)

@@ -448,6 +448,11 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 // ToDo: Add websocket support
 func (self *CdrServer) replicateCdr(cdr *CDR) error {
 	for _, rplCfg := range self.cgrCfg.CDRSCdrReplication {
+		if len(rplCfg.ContentFields) == 0 {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<CDRReplicator> No content fields defined for replication to address: <%s>, ignoring", rplCfg.Address))
+			return nil
+		}
 		passesFilters := true
 		for _, cdfFltr := range rplCfg.CdrFilter {
 			if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
@@ -461,23 +466,35 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		var body interface{}
 		var content = ""
 		switch rplCfg.Transport {
-		case utils.META_HTTP_POST:
-			content = utils.CONTENT_FORM
-			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
-			if err != nil {
-				return err
-			}
-			body := url.Values{}
-			for fld, val := range expMp {
-				body.Set(fld, val)
-			}
-		case utils.META_HTTP_JSON:
+		case utils.MetaHTTPjsonCDR:
 			content = utils.CONTENT_JSON
 			jsn, err := json.Marshal(cdr)
 			if err != nil {
 				return err
 			}
 			body = jsn
+		case utils.MetaHTTPjsonMap:
+			content = utils.CONTENT_JSON
+			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
+			if err != nil {
+				return err
+			}
+			jsn, err := json.Marshal(expMp)
+			if err != nil {
+				return err
+			}
+			body = jsn
+		case utils.META_HTTP_POST:
+			content = utils.CONTENT_FORM
+			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
+			if err != nil {
+				return err
+			}
+			vals := url.Values{}
+			for fld, val := range expMp {
+				vals.Set(fld, val)
+			}
+			body = vals
 		}
 		var errChan chan error
 		if rplCfg.Synchronous {

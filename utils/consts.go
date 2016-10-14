@@ -54,7 +54,7 @@ var (
 
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
 	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
-		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField}
+		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField, MEDI_RUNID}
 )
 
 const (
@@ -248,8 +248,9 @@ const (
 	META_FILLER                   = "*filler"
 	META_HANDLER                  = "*handler"
 	META_HTTP_POST                = "*http_post"
-	META_HTTP_JSON                = "*http_json"
+	MetaHTTPjsonCDR               = "*http_json_cdr"
 	META_HTTP_JSONRPC             = "*http_jsonrpc"
+	MetaHTTPjsonMap               = "*http_json_map"
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"
 	CONFIG_DIR                    = "/etc/cgrates/"

@@ -12,9 +12,38 @@
 	"enabled": true,			// start the CDR Server service:  <true|false>
 	"store_cdrs": false,		// store cdrs in storDb
 	"cdr_replication":[			// replicate the rated CDR to a number of servers
-			{"transport": "*http_post", "address": "http://127.0.0.1:12080/cdr_http", "attempts": 1},
-			{"transport": "*http_post", "address": "http://127.0.0.1:12080/invalid", "attempts": 1},
-			
+		{
+			"transport": "*http_post", 
+			"address": "http://127.0.0.1:12080/cdr_http", 
+			"attempts": 1,
+			"cdr_filter": "RunID(*default)",
+			"content_fields": [
+				{"tag": "CGRID", "type": "*composed", "value": "CGRID", "field_id": "CGRID"},
+				{"tag":"RunID", "type": "*composed", "value": "RunID", "field_id": "RunID"},
+				{"tag":"TOR", "type": "*composed", "value": "ToR", "field_id": "ToR"},
+				{"tag":"OriginID", "type": "*composed", "value": "OriginID", "field_id": "OriginID"},
+				{"tag":"OriginHost", "type": "*composed", "value": "OriginHost", "field_id": "OriginHost"},
+				{"tag":"RequestType", "type": "*composed", "value": "RequestType", "field_id": "RequestType"},
+				{"tag":"Direction", "type": "*composed", "value": "Direction", "field_id": "Direction"},
+				{"tag":"Tenant", "type": "*composed", "value": "Tenant", "field_id": "Tenant"},
+				{"tag":"Category", "type": "*composed", "value": "Category", "field_id": "Category"},
+				{"tag":"Account", "type": "*composed", "value": "Account", "field_id": "Account"},
+				{"tag":"Subject", "type": "*composed", "value": "Subject", "field_id": "Subject"},
+				{"tag":"Destination", "type": "*composed", "value": "Destination", "field_id": "Destination"},
+				{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "SetupTime"},
+				{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "AnswerTime"},
+				{"tag":"Usage", "type": "*composed", "value": "Usage", "field_id": "Usage"},
+				{"tag":"Cost", "type": "*composed", "value": "Cost", "field_id": "Cost"},
+			],
+		},
+		{
+			"transport": "*http_post", 
+			"address": "http://127.0.0.1:12080/invalid", 
+			"attempts": 1,
+			"content_fields": [
+				{"tag": "CGRID", "type": "*composed", "value": "CGRID", "field_id": "CGRID"},
+			],
+		},		
 	],
 },
 
