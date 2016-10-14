@@ -389,9 +389,13 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		if err != nil {
 			return nil, err
 		}
+
+		var ok bool
+		var debitedConnectionFeeBalance Balance
+
 		if debitConnectFee {
 			// this is the first add, debit the connect fee
-			if ok, _ := ub.DebitConnectionFee(cc, moneyBalances, count, true); ok == false {
+			if ok, debitedConnectionFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); ok == false {
 				// found blocker balance
 				return nil, nil
 			}
@@ -408,8 +412,33 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 				return nil, errors.New("timespan with no rate interval assigned")
 			}
+
+			if ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && debitedConnectionFeeBalance.ID != "" {
+
+				inc := &Increment{
+					Duration: 0,
+					Cost:     ts.RateInterval.Rating.ConnectFee,
+					BalanceInfo: &DebitInfo{
+						Monetary: &MonetaryInfo{
+							UUID:  debitedConnectionFeeBalance.Uuid,
+							ID:    debitedConnectionFeeBalance.ID,
+							Value: debitedConnectionFeeBalance.Value,
+						},
+						AccountID: ub.ID,
+					},
+				}
+
+				incs := []*Increment{inc}
+				ts.Increments = append(incs, ts.Increments...)
+			}
+
 			maxCost, strategy := ts.RateInterval.GetMaxCost()
 			for incIndex, inc := range ts.Increments {
+
+				if incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && debitedConnectionFeeBalance.ID != "" {
+					continue
+				}
+
 				// debit minutes and money
 				amount := inc.Duration.Seconds()
 				if b.Factor != nil {
@@ -511,10 +540,8 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
 
-	utils.Logger.Info(fmt.Sprintf("cost A %v ", cc.Cost))
-
 	var ok bool
-	var debitedBalance Balance
+	var debitedConnectionFeeBalance Balance
 
 	if err != nil {
 		return nil, err
@@ -522,13 +549,11 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	//log.Print("cc: " + utils.ToJSON(cc))
 	if debitConnectFee {
 		// this is the first add, debit the connect fee
-		if ok, debitedBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); ok == false {
+		if ok, debitedConnectionFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); ok == false {
 			// balance is blocker
 			return nil, nil
 		}
 	}
-
-	utils.Logger.Info(fmt.Sprintf("cost B %v ", cc.Cost))
 
 	cc.Timespans.Decompress()
 	//log.Printf("CallCost In Debit: %+v", cc)
@@ -548,20 +573,30 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
 		//log.Printf("Rate: %+v", ts.RateInterval.Rating)
 
+		if ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && debitedConnectionFeeBalance.ID != "" {
+
+			inc := &Increment{
+				Duration: 0,
+				Cost:     ts.RateInterval.Rating.ConnectFee,
+				BalanceInfo: &DebitInfo{
+					Monetary: &MonetaryInfo{
+						UUID:  debitedConnectionFeeBalance.Uuid,
+						ID:    debitedConnectionFeeBalance.ID,
+						Value: debitedConnectionFeeBalance.Value,
+					},
+					AccountID: ub.ID,
+				},
+			}
+
+			incs := []*Increment{inc}
+			ts.Increments = append(incs, ts.Increments...)
+		}
+
 		for incIndex, inc := range ts.Increments {
 			// check standard subject tags
 			//log.Printf("INC: %+v", inc)
 
-			if ts.RateInterval.Rating.ConnectFee > 0 && incIndex == 0 && debitConnectFee {
-				utils.Logger.Info("Ajout increment connect fee")
-				inc.Cost = ts.RateInterval.Rating.ConnectFee
-				inc.BalanceInfo.Monetary = &MonetaryInfo{
-					UUID:  debitedBalance.Uuid,
-					ID:    debitedBalance.ID,
-					Value: debitedBalance.Value,
-				}
-				inc.BalanceInfo.AccountID = ub.ID
-
+			if incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && debitedConnectionFeeBalance.ID != "" {
 				continue
 			}
 
@@ -632,7 +667,6 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				if len(cc.Timespans) == 0 {
 					cc = nil
 				}
-				utils.Logger.Info(fmt.Sprintf("cost C %v ", cc.Cost))
 				return cc, nil
 			}
 		}
@@ -643,7 +677,6 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		cc = nil
 	}
 
-	utils.Logger.Info(fmt.Sprintf("cost D %v ", cc.Cost))
 	return cc, nil
 }
 

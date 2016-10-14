@@ -463,16 +463,6 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	incrementCost := ts.CalculateCost() / float64(nbIncrements)
 	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 
-	if ts.RateInterval.Rating.ConnectFee > 0 {
-		utils.Logger.Info("creation increment connect fee")
-		inc := &Increment{
-			Duration:    0,
-			Cost:        0,
-			BalanceInfo: &DebitInfo{},
-		}
-		ts.Increments = append(ts.Increments, inc)
-	}
-
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:    rateIncrement,
