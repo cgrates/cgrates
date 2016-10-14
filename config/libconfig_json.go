@@ -98,11 +98,12 @@ type CdrsJsonCfg struct {
 }
 
 type CdrReplicationJsonCfg struct {
-	Transport   *string
-	Address     *string
-	Synchronous *bool
-	Attempts    *int
-	Cdr_filter  *string
+	Transport      *string
+	Address        *string
+	Synchronous    *bool
+	Attempts       *int
+	Cdr_filter     *string
+	Content_fields *[]*CdrFieldJsonCfg
 }
 
 // Cdrstats config section

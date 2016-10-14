@@ -475,7 +475,7 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		if rplCfg.Synchronous {
 			errChan = make(chan error)
 		}
-		go func(body interface{}, rplCfg *config.CdrReplicationCfg, content string, errChan chan error) {
+		go func(body interface{}, rplCfg *config.CDRReplicationCfg, content string, errChan chan error) {
 			fallbackPath := path.Join(
 				self.cgrCfg.HttpFailedDir,
 				rplCfg.FallbackFileName())

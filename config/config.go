@@ -241,7 +241,7 @@ type CGRConfig struct {
 	CDRSUserSConns           []*HaPoolConfig      // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSAliaseSConns         []*HaPoolConfig      // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
 	CDRSStatSConns           []*HaPoolConfig      // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
-	CDRSCdrReplication       []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
+	CDRSCdrReplication       []*CDRReplicationCfg // Replicate raw CDRs to a number of servers
 	CDRStatsEnabled          bool                 // Enable CDR Stats service
 	CDRStatsSaveInterval     time.Duration        // Save interval duration
 	CdreProfiles             map[string]*CdreConfig
@@ -887,9 +887,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			}
 		}
 		if jsnCdrsCfg.Cdr_replication != nil {
-			self.CDRSCdrReplication = make([]*CdrReplicationCfg, len(*jsnCdrsCfg.Cdr_replication))
+			self.CDRSCdrReplication = make([]*CDRReplicationCfg, len(*jsnCdrsCfg.Cdr_replication))
 			for idx, rplJsonCfg := range *jsnCdrsCfg.Cdr_replication {
-				self.CDRSCdrReplication[idx] = new(CdrReplicationCfg)
+				self.CDRSCdrReplication[idx] = new(CDRReplicationCfg)
 				if rplJsonCfg.Transport != nil {
 					self.CDRSCdrReplication[idx].Transport = *rplJsonCfg.Transport
 				}

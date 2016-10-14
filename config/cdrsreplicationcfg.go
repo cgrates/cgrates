@@ -23,14 +23,15 @@ import (
 	"net/url"
 )
 
-type CdrReplicationCfg struct {
-	Transport   string
-	Address     string
-	Synchronous bool
-	Attempts    int             // Number of attempts if not success
-	CdrFilter   utils.RSRFields // Only replicate if the filters here are matching
+type CDRReplicationCfg struct {
+	Transport     string
+	Address       string
+	Synchronous   bool
+	Attempts      int             // Number of attempts if not success
+	CdrFilter     utils.RSRFields // Only replicate if the filters here are matching
+	ContentFields []*CfgCdrField
 }
 
-func (rplCfg CdrReplicationCfg) FallbackFileName() string {
+func (rplCfg CDRReplicationCfg) FallbackFileName() string {
 	return fmt.Sprintf("cdr_%s_%s_%s.form", rplCfg.Transport, url.QueryEscape(rplCfg.Address), utils.GenUUID())
 }
