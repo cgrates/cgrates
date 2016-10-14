@@ -727,7 +727,7 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField, costShiftDigits,
 		}
 	}
 	if !passesFilters { // Not passes filters, ignore this replication
-		return "", fmt.Errorf("Filters not passing")
+		return "", fmt.Errorf("filters not passing")
 	}
 	var retVal string // Concatenate the resulting values
 	for _, rsrFld := range cfgCdrFld.Value {
@@ -761,68 +761,72 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField, costShiftDigits,
 	return retVal, nil
 }
 
+func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, costShiftDigits, roundDecimals int, timezone string,
+	httpSkipTlsCheck bool, maskLen int, maskDestID string, groupedCDRs []*CDR) (fmtOut string, err error) {
+	layout := cfgFld.Layout
+	if layout == "" {
+		layout = time.RFC3339
+	}
+	var outVal string
+	switch cfgFld.Type {
+	case utils.META_FILLER:
+		outVal = cfgFld.Value.Id()
+		cfgFld.Padding = "right"
+	case utils.META_CONSTANT:
+		outVal = cfgFld.Value.Id()
+	case utils.MetaDateTime: // Convert the requested field value into datetime with layout
+		rawVal, err := cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
+		if err != nil {
+			return "", err
+		}
+		if dtFld, err := utils.ParseTimeDetectLayout(rawVal, timezone); err != nil { // Only one rule makes sense here
+			return "", err
+		} else {
+			outVal = dtFld.Format(layout)
+		}
+	case utils.META_HTTP_POST:
+		var outValByte []byte
+		httpAddr := cfgFld.Value.Id()
+		jsn, err := json.Marshal(cdr)
+		if err != nil {
+			return "", err
+		}
+		if len(httpAddr) == 0 {
+			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
+		} else if outValByte, err = utils.HttpJsonPost(httpAddr, httpSkipTlsCheck, jsn); err == nil {
+			outVal = string(outValByte)
+			if len(outVal) == 0 && cfgFld.Mandatory {
+				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
+			}
+		}
+	case utils.META_COMBIMED:
+		outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs)
+	case utils.META_COMPOSED:
+		outVal, err = cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
+	case utils.MetaMaskedDestination:
+		if len(maskDestID) != 0 && CachedDestHasPrefix(maskDestID, cdr.Destination) {
+			outVal = "1"
+		} else {
+			outVal = "0"
+		}
+	}
+	if err != nil {
+		return "", err
+	}
+	return utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
+
+}
+
 // Used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
-func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, costShiftDigits, roundDecimals int, timezone string, httpSkipTlsCheck bool, maskLen int, maskDestID string, groupedCDRs []*CDR) ([]string, error) {
-	var err error
-	expRecord := make([]string, len(exportFields))
+func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, costShiftDigits, roundDecimals int, timezone string, httpSkipTlsCheck bool, maskLen int, maskDestID string, groupedCDRs []*CDR) (expRecord []string, err error) {
+	expRecord = make([]string, len(exportFields))
 	for idx, cfgFld := range exportFields {
-		layout := cfgFld.Layout
-		if len(layout) == 0 {
-			layout = time.RFC3339
-		}
-		var outVal string
-		switch cfgFld.Type {
-		case utils.META_FILLER:
-			outVal = cfgFld.Value.Id()
-			cfgFld.Padding = "right"
-		case utils.META_CONSTANT:
-			outVal = cfgFld.Value.Id()
-		case utils.MetaDateTime: // Convert the requested field value into datetime with layout
-			rawVal, err := cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
-			if err != nil {
-				return nil, err
-			}
-			if dtFld, err := utils.ParseTimeDetectLayout(rawVal, timezone); err != nil { // Only one rule makes sense here
-				return nil, err
-			} else {
-				outVal = dtFld.Format(layout)
-			}
-		case utils.META_HTTP_POST:
-			var outValByte []byte
-			httpAddr := cfgFld.Value.Id()
-			jsn, err := json.Marshal(cdr)
-			if err != nil {
-				return nil, err
-			}
-			if len(httpAddr) == 0 {
-				err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-			} else if outValByte, err = utils.HttpJsonPost(httpAddr, httpSkipTlsCheck, jsn); err == nil {
-				outVal = string(outValByte)
-				if len(outVal) == 0 && cfgFld.Mandatory {
-					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
-				}
-			}
-		case utils.META_COMBIMED:
-			outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs)
-		case utils.META_COMPOSED:
-			outVal, err = cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
-		case utils.MetaMaskedDestination:
-			if len(maskDestID) != 0 && CachedDestHasPrefix(maskDestID, cdr.Destination) {
-				outVal = "1"
-			} else {
-				outVal = "0"
-			}
-		}
-
-		if err != nil {
+		if fmtOut, err := cdr.formatField(cfgFld, costShiftDigits, roundDecimals, timezone, httpSkipTlsCheck, maskLen, maskDestID, groupedCDRs); err != nil {
 			return nil, err
+		} else {
+			expRecord[idx] += fmtOut
 		}
-		fmtOut := outVal
-		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			return nil, err
-		}
-		expRecord[idx] += fmtOut
 	}
 	return expRecord, nil
 }
@@ -830,6 +834,12 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, costShiftDigi
 // Part of event interface
 func (cdr *CDR) AsMapStringIface() (map[string]interface{}, error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// AsExportMap converts the CDR into a map[string]string based on export template
+// Used in real-time replication as well as remote exports
+func (cdr *CDR) AsExportMap(exportFields []*config.CfgCdrField, costShiftDigits, roundDecimals int, timezone string, httpSkipTlsCheck bool, maskLen int, maskDestID string, groupedCDRs []*CDR) (map[string]string, error) {
+	return nil, nil
 }
 
 type ExternalCDR struct {
