@@ -43,10 +43,6 @@ func TestCdreCfgClone(t *testing.T) {
 		FieldSeparator:          rune(','),
 		DataUsageMultiplyFactor: 1.0,
 		CostMultiplyFactor:      1.0,
-		CostRoundingDecimals:    -1,
-		CostShiftDigits:         0,
-		MaskDestinationID:       "MASKED_DESTINATIONS",
-		MaskLength:              0,
 		ExportDirectory:         "/var/spool/cgrates/cdre",
 		ContentFields:           initContentFlds,
 	}
@@ -65,10 +61,6 @@ func TestCdreCfgClone(t *testing.T) {
 		FieldSeparator:          rune(','),
 		DataUsageMultiplyFactor: 1.0,
 		CostMultiplyFactor:      1.0,
-		CostRoundingDecimals:    -1,
-		CostShiftDigits:         0,
-		MaskDestinationID:       "MASKED_DESTINATIONS",
-		MaskLength:              0,
 		ExportDirectory:         "/var/spool/cgrates/cdre",
 		HeaderFields:            emptyFields,
 		ContentFields:           eClnContentFlds,
@@ -85,10 +77,6 @@ func TestCdreCfgClone(t *testing.T) {
 	initContentFlds[0].Tag = "Destination"
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) { // MOdifying a field after clone should not affect cloned instance
 		t.Errorf("Cloned result: %+v", clnCdreCfg)
-	}
-	clnCdreCfg.CostShiftDigits = 2
-	if initCdreCfg.CostShiftDigits != 0 {
-		t.Error("Unexpected CostShiftDigits: ", initCdreCfg.CostShiftDigits)
 	}
 	clnCdreCfg.ContentFields[0].FieldId = "destination"
 	if initCdreCfg.ContentFields[0].FieldId != "cgrid" {

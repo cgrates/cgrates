@@ -64,22 +64,42 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 	if jsnCfgFld.Mandatory != nil {
 		cfgFld.Mandatory = *jsnCfgFld.Mandatory
 	}
+	if jsnCfgFld.Cost_shift_digits != nil {
+		cfgFld.CostShiftDigits = *jsnCfgFld.Cost_shift_digits
+	}
+	if jsnCfgFld.Rounding_decimals != nil {
+		cfgFld.RoundingDecimals = *jsnCfgFld.Rounding_decimals
+	}
+	if jsnCfgFld.Timezone != nil {
+		cfgFld.Timezone = *jsnCfgFld.Timezone
+	}
+	if jsnCfgFld.Mask_length != nil {
+		cfgFld.MaskLen = *jsnCfgFld.Mask_length
+	}
+	if jsnCfgFld.Mask_destinationd_id != nil {
+		cfgFld.MaskDestID = *jsnCfgFld.Mask_destinationd_id
+	}
 	return cfgFld, nil
 }
 
 type CfgCdrField struct {
-	Tag         string // Identifier for the administrator
-	Type        string // Type of field
-	FieldId     string // Field identifier
-	HandlerId   string
-	Value       utils.RSRFields
-	Append      bool
-	FieldFilter utils.RSRFields
-	Width       int
-	Strip       string
-	Padding     string
-	Layout      string
-	Mandatory   bool
+	Tag              string // Identifier for the administrator
+	Type             string // Type of field
+	FieldId          string // Field identifier
+	HandlerId        string
+	Value            utils.RSRFields
+	Append           bool
+	FieldFilter      utils.RSRFields
+	Width            int
+	Strip            string
+	Padding          string
+	Layout           string
+	Mandatory        bool
+	CostShiftDigits  int // Used in exports
+	RoundingDecimals int
+	Timezone         string
+	MaskLen          int
+	MaskDestID       string
 }
 
 func CfgCdrFieldsFromCdrFieldsJsonCfg(jsnCfgFldss []*CdrFieldJsonCfg) ([]*CfgCdrField, error) {

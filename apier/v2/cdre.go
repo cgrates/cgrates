@@ -91,22 +91,6 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *attr.CostMultiplyFactor
 	}
-	costShiftDigits := exportTemplate.CostShiftDigits
-	if attr.CostShiftDigits != nil {
-		costShiftDigits = *attr.CostShiftDigits
-	}
-	roundingDecimals := exportTemplate.CostRoundingDecimals
-	if attr.RoundDecimals != nil {
-		roundingDecimals = *attr.RoundDecimals
-	}
-	maskDestId := exportTemplate.MaskDestinationID
-	if attr.MaskDestinationID != nil && len(*attr.MaskDestinationID) != 0 {
-		maskDestId = *attr.MaskDestinationID
-	}
-	maskLen := exportTemplate.MaskLength
-	if attr.MaskLength != nil {
-		maskLen = *attr.MaskLength
-	}
 	cdrsFltr, err := attr.RPCCDRsFilter.AsCDRsFilter(self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -118,7 +102,8 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, ExportID, dataUsageMultiplyFactor, SMSUsageMultiplyFactor, MMSUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify, self.Config.DefaultTimezone)
+	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, ExportID, dataUsageMultiplyFactor, SMSUsageMultiplyFactor,
+		MMSUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor, self.Config.RoundingDecimals, self.Config.HttpSkipTlsVerify)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

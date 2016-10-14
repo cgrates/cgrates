@@ -18,8 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
-	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -116,7 +114,6 @@ func TestCDRStatsLclPostCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	httpClient := new(http.Client)
 	storedCdrs := []*engine.CDR{
 		&engine.CDR{CGRID: utils.Sha1("dsafdsafa", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsafa",
 			OriginHost: "192.168.1.1", Source: "test",
@@ -147,9 +144,10 @@ func TestCDRStatsLclPostCdrs(t *testing.T) {
 			Usage: time.Duration(0) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 	}
-	for _, storedCdr := range storedCdrs {
-		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_http", "127.0.0.1:2080"), storedCdr.AsHttpForm()); err != nil {
-			t.Error(err.Error())
+	for _, cdr := range storedCdrs {
+		var reply string
+		if err := cdrstRpc.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
+			t.Error(err)
 		}
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)

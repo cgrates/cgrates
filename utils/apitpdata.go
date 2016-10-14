@@ -594,10 +594,6 @@ type AttrExpFileCdrs struct {
 	MmsUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
-	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
-	RoundDecimals              *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
-	MaskDestinationId          *string  // Overwrite configured MaskDestId
-	MaskLength                 *int     // Overwrite configured MaskLength, -1 to use general config ones
 	CgrIds                     []string // If provided, it will filter based on the cgrids present in list
 	MediationRunIds            []string // If provided, it will filter on mediation runid
 	TORs                       []string // If provided, filter on TypeOfRecord
@@ -1087,10 +1083,6 @@ type AttrExportCdrsToFile struct {
 	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
-	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
-	RoundDecimals              *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
-	MaskDestinationID          *string  // Overwrite configured MaskDestId
-	MaskLength                 *int     // Overwrite configured MaskLength, -1 to use general config ones
 	Verbose                    bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 	RPCCDRsFilter                       // Inherit the CDR filter attributes
 }

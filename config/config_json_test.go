@@ -255,8 +255,9 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.USAGE)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Cost"),
-			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.COST)},
+			Type:              utils.StringPointer(utils.META_COMPOSED),
+			Value:             utils.StringPointer(utils.COST),
+			Rounding_decimals: utils.IntPointer(4)},
 	}
 	eCfg := map[string]*CdreJsonCfg{
 		utils.META_DEFAULT: &CdreJsonCfg{
@@ -267,10 +268,6 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Mms_usage_multiply_factor:     utils.Float64Pointer(1.0),
 			Generic_usage_multiply_factor: utils.Float64Pointer(1.0),
 			Cost_multiply_factor:          utils.Float64Pointer(1.0),
-			Cost_rounding_decimals:        utils.IntPointer(-1),
-			Cost_shift_digits:             utils.IntPointer(0),
-			Mask_destination_id:           utils.StringPointer("MASKED_DESTINATIONS"),
-			Mask_length:                   utils.IntPointer(0),
 			Export_directory:              utils.StringPointer("/var/spool/cgrates/cdre"),
 			Header_fields:                 &eFields,
 			Content_fields:                &eContentFlds,

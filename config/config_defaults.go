@@ -243,11 +243,7 @@ const CGRATES_CFG_JSON = `
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
 		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
-		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
-		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
-		"mask_length": 0,								// length of the destination suffix to be masked
+		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT	
 		"export_directory": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
@@ -265,7 +261,7 @@ const CGRATES_CFG_JSON = `
 			{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
 			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
 			{"tag":"Usage", "type": "*composed", "value": "Usage"},
-			{"tag":"Cost", "type": "*composed", "value": "Cost"},
+			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
 		],
 		"trailer_fields": [],							// template of the exported trailer fields
 	},

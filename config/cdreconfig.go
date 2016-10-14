@@ -26,10 +26,6 @@ type CdreConfig struct {
 	MMSUsageMultiplyFactor     float64
 	GenericUsageMultiplyFactor float64
 	CostMultiplyFactor         float64
-	CostRoundingDecimals       int
-	CostShiftDigits            int
-	MaskDestinationID          string
-	MaskLength                 int
 	ExportDirectory            string
 	HeaderFields               []*CfgCdrField
 	ContentFields              []*CfgCdrField
@@ -63,18 +59,6 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 	if jsnCfg.Cost_multiply_factor != nil {
 		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
 	}
-	if jsnCfg.Cost_rounding_decimals != nil {
-		self.CostRoundingDecimals = *jsnCfg.Cost_rounding_decimals
-	}
-	if jsnCfg.Cost_shift_digits != nil {
-		self.CostShiftDigits = *jsnCfg.Cost_shift_digits
-	}
-	if jsnCfg.Mask_destination_id != nil {
-		self.MaskDestinationID = *jsnCfg.Mask_destination_id
-	}
-	if jsnCfg.Mask_length != nil {
-		self.MaskLength = *jsnCfg.Mask_length
-	}
 	if jsnCfg.Export_directory != nil {
 		self.ExportDirectory = *jsnCfg.Export_directory
 	}
@@ -106,10 +90,6 @@ func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre.MMSUsageMultiplyFactor = self.MMSUsageMultiplyFactor
 	clnCdre.GenericUsageMultiplyFactor = self.GenericUsageMultiplyFactor
 	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
-	clnCdre.CostRoundingDecimals = self.CostRoundingDecimals
-	clnCdre.CostShiftDigits = self.CostShiftDigits
-	clnCdre.MaskDestinationID = self.MaskDestinationID
-	clnCdre.MaskLength = self.MaskLength
 	clnCdre.ExportDirectory = self.ExportDirectory
 	clnCdre.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
 	for idx, fld := range self.HeaderFields {

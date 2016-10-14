@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"path"
 	"reflect"
 	"strings"
@@ -462,7 +463,14 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		switch rplCfg.Transport {
 		case utils.META_HTTP_POST:
 			content = utils.CONTENT_FORM
-			body = cdr.AsHttpForm()
+			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
+			if err != nil {
+				return err
+			}
+			body := url.Values{}
+			for fld, val := range expMp {
+				body.Set(fld, val)
+			}
 		case utils.META_HTTP_JSON:
 			content = utils.CONTENT_JSON
 			jsn, err := json.Marshal(cdr)

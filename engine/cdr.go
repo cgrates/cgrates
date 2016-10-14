@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -280,35 +279,6 @@ func (cdr *CDR) Clone() *CDR {
 	var clnedCDR CDR
 	utils.Clone(cdr, &clnedCDR)
 	return &clnedCDR
-}
-
-// Ability to send the CgrCdr remotely to another CDR server, we do not include rating variables for now
-func (cdr *CDR) AsHttpForm() url.Values {
-	v := url.Values{}
-	for fld, val := range cdr.ExtraFields {
-		v.Set(fld, val)
-	}
-	v.Set(utils.TOR, cdr.ToR)
-	v.Set(utils.ACCID, cdr.OriginID)
-	v.Set(utils.CDRHOST, cdr.OriginHost)
-	v.Set(utils.CDRSOURCE, cdr.Source)
-	v.Set(utils.REQTYPE, cdr.RequestType)
-	v.Set(utils.DIRECTION, cdr.Direction)
-	v.Set(utils.TENANT, cdr.Tenant)
-	v.Set(utils.CATEGORY, cdr.Category)
-	v.Set(utils.ACCOUNT, cdr.Account)
-	v.Set(utils.SUBJECT, cdr.Subject)
-	v.Set(utils.DESTINATION, cdr.Destination)
-	v.Set(utils.SETUP_TIME, cdr.SetupTime.Format(time.RFC3339))
-	v.Set(utils.PDD, cdr.FieldAsString(&utils.RSRField{Id: utils.PDD}))
-	v.Set(utils.ANSWER_TIME, cdr.AnswerTime.Format(time.RFC3339))
-	v.Set(utils.USAGE, cdr.FormatUsage(utils.SECONDS))
-	v.Set(utils.SUPPLIER, cdr.Supplier)
-	v.Set(utils.DISCONNECT_CAUSE, cdr.DisconnectCause)
-	if cdr.CostDetails != nil {
-		v.Set(utils.COST_DETAILS, cdr.CostDetailsJson())
-	}
-	return v
 }
 
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
@@ -718,7 +688,7 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.CfgCdrField, groupCDRs []*
 }
 
 // Extracts the value specified by cfgHdr out of cdr, used for export values
-func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField, costShiftDigits, roundDecimals int, layout string, maskLen int, maskDestID string) (string, error) {
+func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (string, error) {
 	passesFilters := true
 	for _, cdfFltr := range cfgCdrFld.FieldFilter {
 		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
@@ -741,17 +711,17 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField, costShiftDigits,
 				cdrVal = string(jsonVal)
 			}
 		case utils.COST:
-			cdrVal = cdr.FormatCost(costShiftDigits, roundDecimals)
+			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits, cfgCdrFld.RoundingDecimals)
 		case utils.USAGE:
-			cdrVal = cdr.FormatUsage(layout)
+			cdrVal = cdr.FormatUsage(cfgCdrFld.Layout)
 		case utils.SETUP_TIME:
-			cdrVal = cdr.SetupTime.Format(layout)
+			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
 		case utils.ANSWER_TIME: // Format time based on layout
-			cdrVal = cdr.AnswerTime.Format(layout)
+			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
 		case utils.DESTINATION:
 			cdrVal = cdr.FieldAsString(rsrFld)
-			if maskLen != -1 && len(maskDestID) != 0 && CachedDestHasPrefix(maskDestID, cdrVal) {
-				cdrVal = utils.MaskSuffix(cdrVal, maskLen)
+			if cfgCdrFld.MaskLen != -1 && len(cfgCdrFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgCdrFld.MaskDestID, cdrVal) {
+				cdrVal = utils.MaskSuffix(cdrVal, cfgCdrFld.MaskLen)
 			}
 		default:
 			cdrVal = cdr.FieldAsString(rsrFld)
@@ -761,8 +731,7 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField, costShiftDigits,
 	return retVal, nil
 }
 
-func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, costShiftDigits, roundDecimals int, timezone string,
-	httpSkipTlsCheck bool, maskLen int, maskDestID string, groupedCDRs []*CDR) (fmtOut string, err error) {
+func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR) (fmtOut string, err error) {
 	layout := cfgFld.Layout
 	if layout == "" {
 		layout = time.RFC3339
@@ -775,11 +744,11 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, costShiftDigits, roundDe
 	case utils.META_CONSTANT:
 		outVal = cfgFld.Value.Id()
 	case utils.MetaDateTime: // Convert the requested field value into datetime with layout
-		rawVal, err := cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
+		rawVal, err := cdr.exportFieldValue(cfgFld)
 		if err != nil {
 			return "", err
 		}
-		if dtFld, err := utils.ParseTimeDetectLayout(rawVal, timezone); err != nil { // Only one rule makes sense here
+		if dtFld, err := utils.ParseTimeDetectLayout(rawVal, cfgFld.Timezone); err != nil { // Only one rule makes sense here
 			return "", err
 		} else {
 			outVal = dtFld.Format(layout)
@@ -802,9 +771,9 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, costShiftDigits, roundDe
 	case utils.META_COMBIMED:
 		outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs)
 	case utils.META_COMPOSED:
-		outVal, err = cdr.exportFieldValue(cfgFld, costShiftDigits, roundDecimals, layout, maskLen, maskDestID)
+		outVal, err = cdr.exportFieldValue(cfgFld)
 	case utils.MetaMaskedDestination:
-		if len(maskDestID) != 0 && CachedDestHasPrefix(maskDestID, cdr.Destination) {
+		if len(cfgFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgFld.MaskDestID, cdr.Destination) {
 			outVal = "1"
 		} else {
 			outVal = "0"
@@ -819,10 +788,10 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, costShiftDigits, roundDe
 
 // Used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
-func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, costShiftDigits, roundDecimals int, timezone string, httpSkipTlsCheck bool, maskLen int, maskDestID string, groupedCDRs []*CDR) (expRecord []string, err error) {
+func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR) (expRecord []string, err error) {
 	expRecord = make([]string, len(exportFields))
 	for idx, cfgFld := range exportFields {
-		if fmtOut, err := cdr.formatField(cfgFld, costShiftDigits, roundDecimals, timezone, httpSkipTlsCheck, maskLen, maskDestID, groupedCDRs); err != nil {
+		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs); err != nil {
 			return nil, err
 		} else {
 			expRecord[idx] += fmtOut
@@ -838,8 +807,16 @@ func (cdr *CDR) AsMapStringIface() (map[string]interface{}, error) {
 
 // AsExportMap converts the CDR into a map[string]string based on export template
 // Used in real-time replication as well as remote exports
-func (cdr *CDR) AsExportMap(exportFields []*config.CfgCdrField, costShiftDigits, roundDecimals int, timezone string, httpSkipTlsCheck bool, maskLen int, maskDestID string, groupedCDRs []*CDR) (map[string]string, error) {
-	return nil, nil
+func (cdr *CDR) AsExportMap(exportFields []*config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR) (expMap map[string]string, err error) {
+	expMap = make(map[string]string)
+	for _, cfgFld := range exportFields {
+		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs); err != nil {
+			return nil, err
+		} else {
+			expMap[cfgFld.FieldId] += fmtOut
+		}
+	}
+	return
 }
 
 type ExternalCDR struct {

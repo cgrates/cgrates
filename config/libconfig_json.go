@@ -114,18 +114,23 @@ type CdrStatsJsonCfg struct {
 
 // One cdr field config, used in cdre and cdrc
 type CdrFieldJsonCfg struct {
-	Tag          *string
-	Type         *string
-	Field_id     *string
-	Handler_id   *string
-	Value        *string
-	Append       *bool
-	Width        *int
-	Strip        *string
-	Padding      *string
-	Layout       *string
-	Field_filter *string
-	Mandatory    *bool
+	Tag                  *string
+	Type                 *string
+	Field_id             *string
+	Handler_id           *string
+	Value                *string
+	Append               *bool
+	Width                *int
+	Strip                *string
+	Padding              *string
+	Layout               *string
+	Field_filter         *string
+	Mandatory            *bool
+	Cost_shift_digits    *int
+	Rounding_decimals    *int
+	Timezone             *string
+	Mask_destinationd_id *string
+	Mask_length          *int
 }
 
 // Cdre config section
@@ -137,10 +142,6 @@ type CdreJsonCfg struct {
 	Mms_usage_multiply_factor     *float64
 	Generic_usage_multiply_factor *float64
 	Cost_multiply_factor          *float64
-	Cost_rounding_decimals        *int
-	Cost_shift_digits             *int
-	Mask_destination_id           *string
-	Mask_length                   *int
 	Export_directory              *string
 	Header_fields                 *[]*CdrFieldJsonCfg
 	Content_fields                *[]*CdrFieldJsonCfg

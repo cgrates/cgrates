@@ -87,9 +87,6 @@ func TestMfCdreExport1Instance(t *testing.T) {
 	if mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor != 1.0 {
 		t.Error("Export1 instance has DataUsageMultiplyFormat: ", mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor)
 	}
-	if mfCgrCfg.CdreProfiles[prfl].CostRoundingDecimals != 3.0 {
-		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CostRoundingDecimals)
-	}
 	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 2 {
 		t.Error("Export1 instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
 	}

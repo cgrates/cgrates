@@ -49,7 +49,7 @@ var err error
 
 func NewCdrExporter(cdrs []*engine.CDR, cdrDb engine.CdrStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
 	dataUsageMultiplyFactor, smsUsageMultiplyFactor, mmsUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor float64,
-	costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool, timezone string) (*CdrExporter, error) {
+	cgrPrecision int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -63,13 +63,8 @@ func NewCdrExporter(cdrs []*engine.CDR, cdrDb engine.CdrStorage, exportTpl *conf
 		dataUsageMultiplyFactor: dataUsageMultiplyFactor,
 		mmsUsageMultiplyFactor:  mmsUsageMultiplyFactor,
 		costMultiplyFactor:      costMultiplyFactor,
-		costShiftDigits:         costShiftDigits,
-		roundDecimals:           roundDecimals,
 		cgrPrecision:            cgrPrecision,
-		maskDestId:              maskDestId,
 		httpSkipTlsCheck:        httpSkipTlsCheck,
-		timezone:                timezone,
-		maskLen:                 maskLen,
 		negativeExports:         make(map[string]string),
 	}
 	if err := cdre.processCdrs(); err != nil {
@@ -90,16 +85,14 @@ type CdrExporter struct {
 	mmsUsageMultiplyFactor,
 	genericUsageMultiplyFactor,
 	costMultiplyFactor float64
-	costShiftDigits, roundDecimals, cgrPrecision                                   int
-	maskDestId                                                                     string
-	maskLen                                                                        int
-	httpSkipTlsCheck                                                               bool
-	timezone                                                                       string
-	header, trailer                                                                []string   // Header and Trailer fields
-	content                                                                        [][]string // Rows of cdr fields
-	firstCdrATime, lastCdrATime                                                    time.Time
-	numberOfRecords                                                                int
-	totalDuration, totalDataUsage, totalSmsUsage, totalMmsUsage, totalGenericUsage time.Duration
+	cgrPrecision                int
+	httpSkipTlsCheck            bool
+	header, trailer             []string   // Header and Trailer fields
+	content                     [][]string // Rows of cdr fields
+	firstCdrATime, lastCdrATime time.Time
+	numberOfRecords             int
+	totalDuration, totalDataUsage, totalSmsUsage,
+	totalMmsUsage, totalGenericUsage time.Duration
 
 	totalCost                       float64
 	firstExpOrderId, lastExpOrderId int64
@@ -136,7 +129,7 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 		emulatedCdr := &engine.CDR{ToR: utils.DATA, Usage: cdre.totalDataUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
-		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.cgrPrecision, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 	default:
 		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
@@ -220,7 +213,7 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 	if cdre.costMultiplyFactor != 0.0 {
 		cdr.CostMultiply(cdre.costMultiplyFactor, cdre.cgrPrecision)
 	}
-	cdrRow, err := cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.costShiftDigits, cdre.roundDecimals, cdre.timezone, cdre.httpSkipTlsCheck, cdre.maskLen, cdre.maskDestId, cdre.cdrs)
+	cdrRow, err := cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s and runid: %s, error: %s", cdr.CGRID, cdr.RunID, err.Error()))
 		return err
@@ -255,7 +248,7 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 	}
 	if cdr.Cost != -1 {
 		cdre.totalCost += cdr.Cost
-		cdre.totalCost = utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE)
+		cdre.totalCost = utils.Round(cdre.totalCost, cdre.cgrPrecision, utils.ROUNDING_MIDDLE)
 	}
 	if cdre.firstExpOrderId > cdr.OrderID || cdre.firstExpOrderId == 0 {
 		cdre.firstExpOrderId = cdr.OrderID
