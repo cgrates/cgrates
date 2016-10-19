@@ -36,7 +36,7 @@ import (
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
-	migrateRC8   = flag.String("migrate_rc8", "", "Migrate Accounts, Actions, ActionTriggers, DerivedChargers, ActionPlans and SharedGroups to RC8 structures, possible values: *all,acc,atr,act,dcs,apl,shg")
+	migrateRC8   = flag.String("migrate_rc8", "", "Migrate Accounts, Actions, ActionTriggers, DerivedChargers, ActionPlans and SharedGroups to RC8 structures, possible values: *all,*enforce,acc,atr,act,dcs,apl,shg")
 	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
 	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
 	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
@@ -173,6 +173,11 @@ func main() {
 					log.Print(err.Error())
 				}
 			}
+			if *migrateRC8 == "*enforce" { // Ignore previous data, enforce to latest version information
+				if err := migratorRC8acc.writeVersion(); err != nil {
+					log.Print(err.Error())
+				}
+			}
 		} else if *datadb_type == "mongo" && *tpdb_type == "mongo" {
 			mongoMigratorAcc, err := NewMongoMigrator(*datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass)
 			if err != nil {
@@ -188,6 +193,11 @@ func main() {
 				if err := mongoMigratorRat.migrateActions(); err != nil {
 					log.Print(err.Error())
 				}
+				if err := mongoMigratorAcc.writeVersion(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+			if *migrateRC8 == "*enforce" {
 				if err := mongoMigratorAcc.writeVersion(); err != nil {
 					log.Print(err.Error())
 				}
