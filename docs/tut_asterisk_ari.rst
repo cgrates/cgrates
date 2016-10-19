@@ -20,12 +20,14 @@ Starting Asterisk_ with custom configuration
 ----------------------------------------------
 
 ::
+
  /usr/share/cgrates/tutorials/asterisk_ari/asterisk/etc/init.d/asterisk start
  
 
 To verify that Asterisk_ is running we run the console command:
 
 ::
+
  asterisk -r -s /tmp/cgr_asterisk_ari/asterisk/run/asterisk.ctl
 
    ari show status
