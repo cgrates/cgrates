@@ -135,21 +135,23 @@ func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 
 func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	fsev := ev.(FSEvent)
-	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE || fsev[IGNOREPARK] == "true" { // Do not process this request
+	if fsev[IGNOREPARK] == "true" { // Not for us
 		return
 	}
-	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
-	if err := sm.rater.Call("Responder.GetDerivedMaxSessionTime", ev.AsStoredCdr(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
-	}
-	if maxCallDuration != -1 { // For calls different than unlimited, set limits
-		maxCallDur := time.Duration(maxCallDuration)
-		if maxCallDur <= sm.cfg.MinCallDuration {
-			//utils.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
-			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
-			return
+	if ev.GetReqType(utils.META_DEFAULT) != utils.META_NONE { // Do not process this request
+		var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
+		if err := sm.rater.Call("Responder.GetDerivedMaxSessionTime", ev.AsStoredCdr(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
 		}
-		sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
+		if maxCallDuration != -1 { // For calls different than unlimited, set limits
+			maxCallDur := time.Duration(maxCallDuration)
+			if maxCallDur <= sm.cfg.MinCallDuration {
+				//utils.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
+				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
+				return
+			}
+			sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
+		}
 	}
 	// ComputeLcr
 	if ev.ComputeLcr() {
@@ -201,7 +203,6 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 			return
 		}
 	}
-	// Check ResourceLimits
 	sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
