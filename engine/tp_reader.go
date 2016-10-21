@@ -1148,8 +1148,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 		if aa.ActionPlanId != "" {
 			actionPlan, exists := tpr.actionPlans[aa.ActionPlanId]
 			if !exists {
-				log.Printf("could not get action plan for tag %v", aa.ActionPlanId)
-				// must not continue here
+				return fmt.Errorf("could not get action plan for tag %v", aa.ActionPlanId)
 			}
 			if actionPlan.AccountIDs == nil {
 				actionPlan.AccountIDs = make(utils.StringMap)
