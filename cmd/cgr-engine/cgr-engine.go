@@ -66,6 +66,7 @@ var (
 	cpuprofile        = flag.String("cpuprofile", "", "write cpu profile to file")
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
+	logLevel          = flag.Int("log_level", 8, "Log level (2-alert to 9-debug)")
 
 	cfg   *config.CGRConfig
 	smRpc *v1.SessionManagerV1
@@ -568,6 +569,7 @@ func main() {
 			exitChan <- true
 		}()
 	}
+	utils.Logger.SetLogLevel(*logLevel)
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
