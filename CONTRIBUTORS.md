@@ -50,6 +50,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @andmar | André Maricato |
 | @brendangilmore | Brendan Gilmore |
 | @afone-lboue | Ludovic Boué |
+| @shaneneuerburg | Shane Neuerburg |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
