@@ -20,7 +20,6 @@ package sessionmanager
 import (
 	"errors"
 	"fmt"
-	"log/syslog"
 	"reflect"
 	"strconv"
 	"strings"
@@ -135,21 +134,23 @@ func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 
 func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	fsev := ev.(FSEvent)
-	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE || fsev[IGNOREPARK] == "true" { // Do not process this request
+	if fsev[IGNOREPARK] == "true" { // Not for us
 		return
 	}
-	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
-	if err := sm.rater.Call("Responder.GetDerivedMaxSessionTime", ev.AsStoredCdr(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
-	}
-	if maxCallDuration != -1 { // For calls different than unlimited, set limits
-		maxCallDur := time.Duration(maxCallDuration)
-		if maxCallDur <= sm.cfg.MinCallDuration {
-			//utils.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
-			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
-			return
+	if ev.GetReqType(utils.META_DEFAULT) != utils.META_NONE { // Do not process this request
+		var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
+		if err := sm.rater.Call("Responder.GetDerivedMaxSessionTime", ev.AsStoredCdr(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
 		}
-		sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
+		if maxCallDuration != -1 { // For calls different than unlimited, set limits
+			maxCallDur := time.Duration(maxCallDuration)
+			if maxCallDur <= sm.cfg.MinCallDuration {
+				//utils.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
+				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
+				return
+			}
+			sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
+		}
 	}
 	// ComputeLcr
 	if ev.ComputeLcr() {
@@ -201,7 +202,6 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 			return
 		}
 	}
-	// Check ResourceLimits
 	sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
@@ -269,7 +269,7 @@ func (sm *FSSessionManager) Connect() error {
 	errChan := make(chan error)
 	for _, connCfg := range sm.cfg.EventSocketConns {
 		connId := utils.GenUUID()
-		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, sm.createHandlers(), eventFilters, utils.Logger.(*syslog.Writer), connId)
+		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, sm.createHandlers(), eventFilters, utils.Logger.GetSyslog(), connId)
 		if err != nil {
 			return err
 		} else if !fSock.Connected() {
@@ -283,7 +283,7 @@ func (sm *FSSessionManager) Connect() error {
 			}
 		}()
 		if fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
-			make(map[string][]func(string, string)), make(map[string]string), utils.Logger.(*syslog.Writer), connId); err != nil {
+			make(map[string][]func(string, string)), make(map[string]string), utils.Logger.GetSyslog(), connId); err != nil {
 			return fmt.Errorf("Cannot connect FreeSWITCH senders pool, error: %s", err.Error())
 		} else if fsSenderPool == nil {
 			return errors.New("Cannot connect FreeSWITCH senders pool.")

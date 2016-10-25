@@ -27,15 +27,25 @@ import (
 var Logger LoggerInterface
 
 func init() {
+	Logger = new(StdLogger)
+
+	// Attempt to connect to syslog. We'll fallback to `log` otherwise.
 	var err error
-	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
+	var l *syslog.Writer
+	l, err = syslog.New(syslog.LOG_INFO, "CGRateS")
 	if err != nil {
-		Logger = new(StdLogger)
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
+	} else {
+		Logger.SetSyslog(l)
 	}
 }
 
 type LoggerInterface interface {
+	SetSyslog(log *syslog.Writer)
+	SetLogLevel(level int)
+
+	GetSyslog() *syslog.Writer
+
 	Alert(m string) error
 	Close() error
 	Crit(m string) error
@@ -47,42 +57,132 @@ type LoggerInterface interface {
 	Warning(m string) error
 }
 
-// Logs to standard output
-type StdLogger struct{}
+const (
+	LOGLEVEL_DEBUG     = 9
+	LOGLEVEL_INFO      = 8
+	LOGLEVEL_NOTICE    = 7
+	LOGLEVEL_WARNING   = 6
+	LOGLEVEL_ERROR     = 5
+	LOGLEVEL_CRITICAL  = 4
+	LOGLEVEL_EMERGENCY = 3
+	LOGLEVEL_ALERT     = 2
+)
 
+// Logs to standard output
+type StdLogger struct {
+	logLevel int
+	syslog   *syslog.Writer
+}
+
+func (sl *StdLogger) SetSyslog(l *syslog.Writer) {
+	sl.syslog = l
+}
+func (sl *StdLogger) GetSyslog() *syslog.Writer {
+	return sl.syslog
+}
+func (sl *StdLogger) SetLogLevel(level int) {
+	sl.logLevel = level
+}
 func (sl *StdLogger) Alert(m string) (err error) {
-	log.Print("[ALERT]" + m)
+	if sl.logLevel < LOGLEVEL_ALERT {
+		return
+	}
+
+	if sl.syslog != nil {
+		sl.syslog.Alert(m)
+	} else {
+		log.Print("[ALERT]" + m)
+	}
 	return
 }
 func (sl *StdLogger) Close() (err error) {
+	if sl.syslog != nil {
+		sl.Close()
+	}
 	return
 }
 func (sl *StdLogger) Crit(m string) (err error) {
-	log.Print("[CRITICAL]" + m)
+	if sl.logLevel < LOGLEVEL_CRITICAL {
+		return
+	}
+
+	if sl.syslog != nil {
+		sl.syslog.Crit(m)
+	} else {
+		log.Print("[CRITICAL]" + m)
+	}
 	return
 }
 func (sl *StdLogger) Debug(m string) (err error) {
-	log.Print("[DEBUG]" + m)
+	if sl.logLevel < LOGLEVEL_DEBUG {
+		return
+	}
+
+	if sl.syslog != nil {
+		sl.syslog.Debug(m)
+	} else {
+		log.Print("[DEBUG]" + m)
+	}
 	return
 }
 func (sl *StdLogger) Emerg(m string) (err error) {
-	log.Print("[EMERGENCY]" + m)
+	if sl.logLevel < LOGLEVEL_EMERGENCY {
+		return
+	}
+
+	if sl.syslog != nil {
+		sl.syslog.Emerg(m)
+	} else {
+		log.Print("[EMERGENCY]" + m)
+	}
 	return
 }
 func (sl *StdLogger) Err(m string) (err error) {
-	log.Print("[ERROR]" + m)
+	if sl.logLevel < LOGLEVEL_ERROR {
+		return
+	}
+
+	if sl.syslog != nil {
+		sl.syslog.Err(m)
+	} else {
+		log.Print("[ERROR]" + m)
+	}
 	return
 }
 func (sl *StdLogger) Info(m string) (err error) {
-	log.Print("[INFO]" + m)
+	if sl.logLevel < LOGLEVEL_INFO {
+		return
+	}
+
+	if sl.syslog != nil {
+		sl.syslog.Info(m)
+	} else {
+		log.Print("[INFO]" + m)
+	}
 	return
 }
 func (sl *StdLogger) Notice(m string) (err error) {
-	log.Print("[NOTICE]" + m)
+	if sl.logLevel < LOGLEVEL_NOTICE {
+		return
+	}
+
+	if sl.syslog != nil {
+		sl.syslog.Notice(m)
+	} else {
+		log.Print("[NOTICE]" + m)
+	}
 	return
 }
 func (sl *StdLogger) Warning(m string) (err error) {
-	log.Print("[WARNING]" + m)
+	if sl.logLevel < LOGLEVEL_WARNING {
+		return
+	}
+
+	if sl.syslog != nil {
+		sl.syslog.Warning(m)
+	} else {
+		log.Print("[WARNING]" + m)
+	}
 	return
 }
 
