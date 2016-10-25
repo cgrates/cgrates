@@ -43,29 +43,28 @@ func init() {
 type LoggerInterface interface {
 	SetSyslog(log *syslog.Writer)
 	SetLogLevel(level int)
-
 	GetSyslog() *syslog.Writer
-
-	Alert(m string) error
 	Close() error
-	Crit(m string) error
-	Debug(m string) error
 	Emerg(m string) error
+	Alert(m string) error
+	Crit(m string) error
 	Err(m string) error
-	Info(m string) error
-	Notice(m string) error
 	Warning(m string) error
+	Notice(m string) error
+	Info(m string) error
+	Debug(m string) error
 }
 
+// log severities following rfc3164
 const (
-	LOGLEVEL_DEBUG     = 9
-	LOGLEVEL_INFO      = 8
-	LOGLEVEL_NOTICE    = 7
-	LOGLEVEL_WARNING   = 6
-	LOGLEVEL_ERROR     = 5
-	LOGLEVEL_CRITICAL  = 4
-	LOGLEVEL_EMERGENCY = 3
-	LOGLEVEL_ALERT     = 2
+	LOGLEVEL_EMERGENCY = iota
+	LOGLEVEL_ALERT
+	LOGLEVEL_CRITICAL
+	LOGLEVEL_ERROR
+	LOGLEVEL_WARNING
+	LOGLEVEL_NOTICE
+	LOGLEVEL_INFO
+	LOGLEVEL_DEBUG
 )
 
 // Logs to standard output

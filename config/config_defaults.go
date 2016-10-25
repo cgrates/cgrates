@@ -44,7 +44,8 @@ const CGRATES_CFG_JSON = `
 	"response_cache_ttl": "0s",								// the life span of a cached response
 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
 	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
-	"cache_dump_dir": "",									 // cache dump for faster start (leave empty to disable)
+	"cache_dump_dir": "",									// cache dump for faster start (leave empty to disable)
+	"log_level": 6,											// control the level of messages logged (0-emerg to 7-debug)										
 },
 
 

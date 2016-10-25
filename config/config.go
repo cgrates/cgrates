@@ -220,6 +220,7 @@ type CGRConfig struct {
 	HttpFailedDir            string          // Directory path where we store failed http requests
 	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
+	LogLevel                 int             // system wide log level, nothing higher than this will be logged
 	RALsEnabled              bool            // start standalone server (no balancer)
 	RALsBalancer             string          // balancer address host:port
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
@@ -754,6 +755,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			if self.LockingTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Locking_timeout); err != nil {
 				return err
 			}
+		}
+		if jsnGeneralCfg.Log_level != nil {
+			self.LogLevel = *jsnGeneralCfg.Log_level
 		}
 	}
 

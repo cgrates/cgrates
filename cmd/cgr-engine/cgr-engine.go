@@ -59,14 +59,11 @@ const (
 var (
 	cfgDir            = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
 	version           = flag.Bool("version", false, "Prints the application version.")
-	raterEnabled      = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
-	schedEnabled      = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
-	cdrsEnabled       = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
 	pidFile           = flag.String("pid", "", "Write pid file")
 	cpuprofile        = flag.String("cpuprofile", "", "write cpu profile to file")
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
-	logLevel          = flag.Int("log_level", 8, "Log level (2-alert to 9-debug)")
+	logLevel          = flag.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
 
 	cfg   *config.CGRConfig
 	smRpc *v1.SessionManagerV1
@@ -569,24 +566,20 @@ func main() {
 			exitChan <- true
 		}()
 	}
-	utils.Logger.SetLogLevel(*logLevel)
+
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
+		log.Fatalf("Could not parse config: ", err)
 		return
 	}
+	lgLevel := cfg.LogLevel
+	if *logLevel != -1 { // Modify the log level if provided by command arguments
+		lgLevel = *logLevel
+	}
+	utils.Logger.SetLogLevel(lgLevel)
 	config.SetCgrConfig(cfg) // Share the config object
 	cache.NewCache(cfg.CacheConfig)
 
-	if *raterEnabled {
-		cfg.RALsEnabled = *raterEnabled
-	}
-	if *schedEnabled {
-		cfg.SchedulerEnabled = *schedEnabled
-	}
-	if *cdrsEnabled {
-		cfg.CDRSEnabled = *cdrsEnabled
-	}
 	var ratingDb engine.RatingStorage
 	var accountDb engine.AccountingStorage
 	var loadDb engine.LoadStorage
