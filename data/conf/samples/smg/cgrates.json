@@ -6,6 +6,7 @@
 
 "general": {
     "response_cache_ttl": "1s",
+    "log_level": 8,
 },
 
 "listen": {

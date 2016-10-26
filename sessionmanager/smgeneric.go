@@ -38,11 +38,14 @@ const (
 var ErrPartiallyExecuted = errors.New("Partially executed")
 
 func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection, timezone string) *SMGeneric {
-	gsm := &SMGeneric{cgrCfg: cgrCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone,
-		sessions: make(map[string][]*SMGSession), sessionTerminators: make(map[string]*smgSessionTerminator),
-		sessionIndexes: make(map[string]map[string]utils.StringMap),
-		sessionsMux:    new(sync.RWMutex), sessionIndexMux: new(sync.RWMutex), guard: engine.Guardian}
-	return gsm
+	return &SMGeneric{cgrCfg: cgrCfg,
+		rater:              rater,
+		cdrsrv:             cdrsrv,
+		timezone:           timezone,
+		activeSessions:     make(map[string][]*SMGSession),
+		aSessionsIndex:     make(map[string]map[string]utils.StringMap),
+		passiveSessions:    make(map[string][]*SMGSession),
+		sessionTerminators: make(map[string]*smgSessionTerminator)}
 }
 
 type SMGeneric struct {
@@ -50,12 +53,13 @@ type SMGeneric struct {
 	rater              rpcclient.RpcClientConnection
 	cdrsrv             rpcclient.RpcClientConnection
 	timezone           string
-	sessions           map[string][]*SMGSession              //Group sessions per sessionId, multiple runs based on derived charging
-	sessionTerminators map[string]*smgSessionTerminator      // terminate and cleanup the session if timer expires
-	sessionIndexes     map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[sesionID]
-	sessionsMux        *sync.RWMutex                         // Locks sessions map
-	sessionIndexMux    *sync.RWMutex
-	guard              *engine.GuardianLock // Used to lock on uuid
+	activeSessions     map[string][]*SMGSession // group sessions per sessionId, multiple runs based on derived charging
+	aSessionsMux       sync.RWMutex
+	aSessionsIndex     map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[sesionID]
+	aSIMux             sync.RWMutex                          // protects aSessionsIndex
+	passiveSessions    map[string][]*SMGSession              // group passive sessions
+	pSessionsMux       sync.RWMutex
+	sessionTerminators map[string]*smgSessionTerminator // terminate and cleanup the session if timer expires
 
 }
 type smgSessionTerminator struct {
@@ -68,8 +72,7 @@ type smgSessionTerminator struct {
 
 // Updates the timer for the session to a new ttl and terminate info
 func (smg *SMGeneric) resetTerminatorTimer(uuid string, ttl time.Duration, ttlLastUsed, ttlUsage *time.Duration) {
-	smg.sessionsMux.RLock()
-	defer smg.sessionsMux.RUnlock()
+	smg.aSessionsMux.RLock()
 	if st, found := smg.sessionTerminators[uuid]; found {
 		if ttl != 0 {
 			st.ttl = ttl
@@ -82,6 +85,7 @@ func (smg *SMGeneric) resetTerminatorTimer(uuid string, ttl time.Duration, ttlLa
 		}
 		st.timer.Reset(st.ttl)
 	}
+	smg.aSessionsMux.RUnlock()
 }
 
 // Called when a session timeouts
@@ -90,7 +94,7 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	if tmtr.ttlUsage != nil {
 		debitUsage = *tmtr.ttlUsage
 	}
-	for _, s := range smg.getSession(s.eventStart.GetUUID()) {
+	for _, s := range smg.getASession(s.eventStart.GetUUID()) {
 		s.debit(debitUsage, tmtr.ttlLastUsed)
 	}
 	smg.sessionEnd(s.eventStart.GetUUID(), s.TotalUsage())
@@ -100,10 +104,9 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	smg.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply)
 }
 
-func (smg *SMGeneric) recordSession(uuid string, s *SMGSession) {
-	smg.sessionsMux.Lock()
-	defer smg.sessionsMux.Unlock()
-	smg.sessions[uuid] = append(smg.sessions[uuid], s)
+func (smg *SMGeneric) recordASession(uuid string, s *SMGSession) {
+	smg.aSessionsMux.Lock()
+	smg.activeSessions[uuid] = append(smg.activeSessions[uuid], s)
 	if smg.cgrCfg.SmGenericConfig.SessionTTL != 0 {
 		if _, found := smg.sessionTerminators[uuid]; !found {
 			ttl := smg.cgrCfg.SmGenericConfig.SessionTTL
@@ -131,29 +134,30 @@ func (smg *SMGeneric) recordSession(uuid string, s *SMGSession) {
 
 		}
 	}
-	smg.indexSession(uuid, s)
+	smg.indexASession(uuid, s)
+	smg.aSessionsMux.Unlock()
 }
 
 // Remove session from session list, removes all related in case of multiple runs, true if item was found
-func (smg *SMGeneric) unrecordSession(uuid string) bool {
-	smg.sessionsMux.Lock()
-	defer smg.sessionsMux.Unlock()
-	if _, found := smg.sessions[uuid]; !found {
+func (smg *SMGeneric) unrecordASession(uuid string) bool {
+	smg.aSessionsMux.Lock()
+	defer smg.aSessionsMux.Unlock()
+	if _, found := smg.activeSessions[uuid]; !found {
 		return false
 	}
-	delete(smg.sessions, uuid)
+	delete(smg.activeSessions, uuid)
 	if st, found := smg.sessionTerminators[uuid]; found {
 		st.endChan <- true
 		delete(smg.sessionTerminators, uuid)
 	}
-	smg.unindexSession(uuid)
+	smg.unindexASession(uuid)
 	return true
 }
 
-// indexSession explores settings and builds smg.sessionIndexes based on that
-func (smg *SMGeneric) indexSession(uuid string, s *SMGSession) bool {
-	smg.sessionIndexMux.Lock()
-	defer smg.sessionIndexMux.Unlock()
+// indexASession explores settings and builds smg.aSessionsIndex based on that
+func (smg *SMGeneric) indexASession(uuid string, s *SMGSession) bool {
+	smg.aSIMux.Lock()
+	defer smg.aSIMux.Unlock()
 	ev := s.eventStart
 	for _, fieldName := range smg.cgrCfg.SmGenericConfig.SessionIndexes {
 		fieldVal, err := utils.ReflectFieldAsString(ev, fieldName, "")
@@ -168,32 +172,32 @@ func (smg *SMGeneric) indexSession(uuid string, s *SMGSession) bool {
 		if fieldVal == "" {
 			fieldVal = utils.MetaEmpty
 		}
-		if _, hasFieldName := smg.sessionIndexes[fieldName]; !hasFieldName { // Init it here so we can minimize
-			smg.sessionIndexes[fieldName] = make(map[string]utils.StringMap)
+		if _, hasFieldName := smg.aSessionsIndex[fieldName]; !hasFieldName { // Init it here so we can minimize
+			smg.aSessionsIndex[fieldName] = make(map[string]utils.StringMap)
 		}
-		if _, hasFieldVal := smg.sessionIndexes[fieldName][fieldVal]; !hasFieldVal {
-			smg.sessionIndexes[fieldName][fieldVal] = make(utils.StringMap)
+		if _, hasFieldVal := smg.aSessionsIndex[fieldName][fieldVal]; !hasFieldVal {
+			smg.aSessionsIndex[fieldName][fieldVal] = make(utils.StringMap)
 		}
-		smg.sessionIndexes[fieldName][fieldVal][uuid] = true
+		smg.aSessionsIndex[fieldName][fieldVal][uuid] = true
 	}
 	return true
 }
 
-// unindexSession removes a session from indexes
-func (smg *SMGeneric) unindexSession(uuid string) bool {
-	smg.sessionIndexMux.Lock()
-	defer smg.sessionIndexMux.Unlock()
+// unindexASession removes a session from indexes
+func (smg *SMGeneric) unindexASession(uuid string) bool {
+	smg.aSIMux.Lock()
+	defer smg.aSIMux.Unlock()
 	var found bool
-	for fldName := range smg.sessionIndexes {
-		for fldVal := range smg.sessionIndexes[fldName] {
-			if _, hasUUID := smg.sessionIndexes[fldName][fldVal][uuid]; hasUUID {
+	for fldName := range smg.aSessionsIndex {
+		for fldVal := range smg.aSessionsIndex[fldName] {
+			if _, hasUUID := smg.aSessionsIndex[fldName][fldVal][uuid]; hasUUID {
 				found = true
-				delete(smg.sessionIndexes[fldName][fldVal], uuid)
-				if len(smg.sessionIndexes[fldName][fldVal]) == 0 {
-					delete(smg.sessionIndexes[fldName], fldVal)
+				delete(smg.aSessionsIndex[fldName][fldVal], uuid)
+				if len(smg.aSessionsIndex[fldName][fldVal]) == 0 {
+					delete(smg.aSessionsIndex[fldName], fldVal)
 				}
-				if len(smg.sessionIndexes[fldName]) == 0 {
-					delete(smg.sessionIndexes, fldName)
+				if len(smg.aSessionsIndex[fldName]) == 0 {
+					delete(smg.aSessionsIndex, fldName)
 				}
 			}
 		}
@@ -204,9 +208,9 @@ func (smg *SMGeneric) unindexSession(uuid string) bool {
 // getSessionIDsMatchingIndexes will check inside indexes if it can find sessionIDs matching all filters
 // matchedIndexes returns map[matchedFieldName]possibleMatchedFieldVal so we optimize further to avoid checking them
 func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string) (utils.StringMap, map[string]string) {
-	smg.sessionIndexMux.RLock()
-	defer smg.sessionIndexMux.RUnlock()
-	sessionIDxes := smg.sessionIndexes // Clone here and unlock sooner if getting slow
+	smg.aSIMux.RLock()
+	defer smg.aSIMux.RUnlock()
+	sessionIDxes := smg.aSessionsIndex // Clone here and unlock sooner if getting slow
 	matchedIndexes := make(map[string]string)
 	var matchingSessions utils.StringMap
 	checkNr := 0
@@ -235,10 +239,10 @@ func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string) (uti
 }
 
 func (smg *SMGeneric) getSessionIDsForPrefix(prefix string) []string {
-	smg.sessionsMux.Lock()
-	defer smg.sessionsMux.Unlock()
+	smg.aSessionsMux.Lock()
+	defer smg.aSessionsMux.Unlock()
 	sessionIDs := make([]string, 0)
-	for sessionID := range smg.sessions {
+	for sessionID := range smg.activeSessions {
 		if strings.HasPrefix(sessionID, prefix) {
 			sessionIDs = append(sessionIDs, sessionID)
 		}
@@ -247,16 +251,16 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string) []string {
 }
 
 // Returns sessions/derived for a specific uuid
-func (smg *SMGeneric) getSession(uuid string) []*SMGSession {
-	smg.sessionsMux.RLock()
-	defer smg.sessionsMux.RUnlock()
-	return smg.sessions[uuid]
+func (smg *SMGeneric) getASession(uuid string) []*SMGSession {
+	smg.aSessionsMux.RLock()
+	defer smg.aSessionsMux.RUnlock()
+	return smg.activeSessions[uuid]
 }
 
 // Handle a new session, pass the connectionId so we can communicate on disconnect request
 func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.RpcClientConnection) error {
 	sessionId := evStart.GetUUID()
-	processed, err := smg.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
+	processed, err := engine.Guardian.Guard(func() (interface{}, error) { // Lock it on UUID level
 		var sessionRuns []*engine.SessionRun
 		if err := smg.rater.Call("Responder.GetSessionRuns", evStart.AsStoredCdr(smg.cgrCfg, smg.timezone), &sessionRuns); err != nil {
 			return true, err
@@ -267,7 +271,7 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.Rp
 		for _, sessionRun := range sessionRuns {
 			s := &SMGSession{eventStart: evStart, runId: sessionRun.DerivedCharger.RunID, timezone: smg.timezone,
 				rater: smg.rater, cdrsrv: smg.cdrsrv, cd: sessionRun.CallDescriptor, clntConn: clntConn}
-			smg.recordSession(sessionId, s)
+			smg.recordASession(sessionId, s)
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
 			if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 {
 				s.stopDebit = stopDebitChan
@@ -285,12 +289,12 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.Rp
 
 // End a session from outside
 func (smg *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
-	_, err := smg.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
-		ss := smg.getSession(sessionId)
+	_, err := engine.Guardian.Guard(func() (interface{}, error) { // Lock it on UUID level
+		ss := smg.getASession(sessionId)
 		if len(ss) == 0 { // Not handled by us
 			return nil, nil
 		}
-		if !smg.unrecordSession(sessionId) { // Unreference it early so we avoid concurrency
+		if !smg.unrecordASession(sessionId) { // Unreference it early so we avoid concurrency
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss {
@@ -318,23 +322,23 @@ func (smg *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 
 // Used when an update will relocate an initial session (eg multiple data streams)
 func (smg *SMGeneric) sessionRelocate(sessionID, initialID string) error {
-	_, err := smg.guard.Guard(func() (interface{}, error) { // Lock it on initialID level
+	_, err := engine.Guardian.Guard(func() (interface{}, error) { // Lock it on initialID level
 		if utils.IsSliceMember([]string{sessionID, initialID}, "") { // Not allowed empty params here
 			return nil, utils.ErrMandatoryIeMissing
 		}
-		ssNew := smg.getSession(sessionID) // Already relocated
+		ssNew := smg.getASession(sessionID) // Already relocated
 		if len(ssNew) != 0 {
 			return nil, nil
 		}
-		ss := smg.getSession(initialID)
+		ss := smg.getASession(initialID)
 		if len(ss) == 0 { // No need of relocation
 			return nil, utils.ErrNotFound
 		}
 		for i, s := range ss {
 			s.eventStart[utils.ACCID] = sessionID // Overwrite initialSessionID with new one
-			smg.recordSession(sessionID, s)
+			smg.recordASession(sessionID, s)
 			if i == 0 {
-				smg.unrecordSession(initialID)
+				smg.unrecordASession(initialID)
 			}
 		}
 		return nil, nil
@@ -416,7 +420,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		}
 		return nilDuration, err
 	}
-	aSessions := smg.getSession(gev.GetUUID())
+	aSessions := smg.getASession(gev.GetUUID())
 	if len(aSessions) == 0 {
 		utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionUpdate with no active sessions for event: <%s>", gev.GetUUID()))
 		return nilDuration, utils.ErrServerError
@@ -465,7 +469,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 	var hasActiveSession bool
 	for _, sessionID := range sessionIDs {
 		var s *SMGSession
-		for _, s = range smg.getSession(sessionID) {
+		for _, s = range smg.getASession(sessionID) {
 			break
 		}
 		if s == nil {
@@ -596,10 +600,10 @@ func (smg *SMGeneric) Connect() error {
 }
 
 // Used by APIer to retrieve sessions
-func (smg *SMGeneric) getSessions() map[string][]*SMGSession {
-	smg.sessionsMux.RLock()
-	defer smg.sessionsMux.RUnlock()
-	return smg.sessions
+func (smg *SMGeneric) getASessions() map[string][]*SMGSession {
+	smg.aSessionsMux.RLock()
+	defer smg.aSessionsMux.RUnlock()
+	return smg.activeSessions
 }
 
 func (smg *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSessions []*ActiveSession, counter int, err error) {
@@ -615,7 +619,7 @@ func (smg *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSess
 		}
 	}
 	var remainingSessions []*SMGSession // Survived index matching
-	for sUUID, sGrp := range smg.getSessions() {
+	for sUUID, sGrp := range smg.getASessions() {
 		if _, hasUUID := matchingSessionIDs[sUUID]; !hasUUID && len(checkedFilters) != 0 {
 			continue
 		}
@@ -661,7 +665,7 @@ func (smg *SMGeneric) Timezone() string {
 
 // System shutdown
 func (smg *SMGeneric) Shutdown() error {
-	for ssId := range smg.getSessions() { // Force sessions shutdown
+	for ssId := range smg.getASessions() { // Force sessions shutdown
 		smg.sessionEnd(ssId, time.Duration(smg.cgrCfg.MaxCallDuration))
 	}
 	return nil

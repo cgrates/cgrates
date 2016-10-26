@@ -312,6 +312,9 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 		return err
 	}
 	for _, c := range collections {
+		if strings.HasPrefix(c, "system.") { // cannot drop system ns due to mongo errors
+			continue
+		}
 		if _, err = db.C(c).RemoveAll(bson.M{}); err != nil {
 			return err
 		}
