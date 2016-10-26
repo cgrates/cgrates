@@ -948,9 +948,7 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 	// create timespans and attach lcr entries to them
 	lcrCost := &LCRCost{}
 	for _, lcrActivation := range lcr.Activations {
-		//log.Printf("Activation: %+v", lcrActivation)
 		lcrEntry := lcrActivation.GetLCREntryForPrefix(cd.Destination)
-		//log.Printf("Entry: %+v", lcrEntry)
 		if lcrActivation.ActivationTime.Before(cd.TimeStart) ||
 			lcrActivation.ActivationTime.Equal(cd.TimeStart) {
 			lcrCost.Entry = lcrEntry
@@ -963,8 +961,6 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 	if lcrCost.Entry == nil {
 		return lcrCost, nil
 	}
-
-	//log.Printf("Entry: %+v", lcrCost.Entry)
 	if lcrCost.Entry.Strategy == LCR_STRATEGY_STATIC {
 		for _, supplier := range lcrCost.Entry.GetParams() {
 			lcrCD := cd.Clone()
@@ -1007,10 +1003,23 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 			category = lcr.Category
 		}
 		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
-		//log.Print("KEY: ", ratingProfileSearchKey)
-		suppliers := cache.GetEntryKeys(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey)
+		searchKey := utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey
+		suppliers := cache.GetEntryKeys(searchKey)
+		if len(suppliers) == 0 { // Most probably the data was not cached, do it here, #ToDo: move logic in RAL service
+			suppliers, err = ratingStorage.GetKeysForPrefix(searchKey)
+			if err != nil {
+				return nil, err
+			}
+			transID := utils.GenUUID()
+			for _, dbKey := range suppliers {
+				if _, err := ratingStorage.GetRatingProfile(dbKey[len(utils.RATING_PROFILE_PREFIX):], true, transID); err != nil { // cache the keys here
+					cache.RollbackTransaction(transID)
+					return nil, err
+				}
+			}
+			cache.CommitTransaction(transID)
+		}
 		for _, supplier := range suppliers {
-			//log.Print("Supplier: ", supplier)
 			split := strings.Split(supplier, ":")
 			supplier = split[len(split)-1]
 			lcrCD := cd.Clone()
@@ -1206,9 +1215,7 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 
 			var cc *CallCost
 			var err error
-			//log.Print("CD: ", lcrCD.GetAccountKey())
 			if cd.account, err = accountingStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
-				//log.Print("ACCCOUNT")
 				if cd.account.Disabled {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: fullSupplier,
@@ -1218,10 +1225,8 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 				}
 				cc, err = lcrCD.debit(cd.account, true, true)
 			} else {
-				//log.Print("STANDARD")
 				cc, err = lcrCD.GetCost()
 			}
-			//log.Printf("CC: %+v", cc)
 			if err != nil || cc == nil {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 					Supplier: fullSupplier,

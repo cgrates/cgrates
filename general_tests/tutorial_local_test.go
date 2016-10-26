@@ -36,8 +36,8 @@ var tutFsLocalCfg *config.CGRConfig
 var tutLocalRpc *rpc.Client
 var loadInst utils.LoadInstance // Share load information between tests
 
-func TestTutLocalInitCfg(t *testing.T) {
-	if !*testLocal {
+func TestTutITInitCfg(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
@@ -52,8 +52,8 @@ func TestTutLocalInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestTutLocalResetDataDb(t *testing.T) {
-	if !*testLocal {
+func TestTutITResetDataDb(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	if err := engine.InitDataDb(tutFsLocalCfg); err != nil {
@@ -62,8 +62,8 @@ func TestTutLocalResetDataDb(t *testing.T) {
 }
 
 // Wipe out the cdr database
-func TestTutLocalResetStorDb(t *testing.T) {
-	if !*testLocal {
+func TestTutITResetStorDb(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	if err := engine.InitStorDb(tutFsLocalCfg); err != nil {
@@ -72,8 +72,8 @@ func TestTutLocalResetStorDb(t *testing.T) {
 }
 
 // Start CGR Engine
-func TestTutLocalStartEngine(t *testing.T) {
-	if !*testLocal {
+func TestTutITStartEngine(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	if _, err := engine.StopStartEngine(tutLocalCfgPath, *waitRater); err != nil {
@@ -82,8 +82,8 @@ func TestTutLocalStartEngine(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestTutLocalRpcConn(t *testing.T) {
-	if !*testLocal {
+func TestTutITRpcConn(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	var err error
@@ -94,28 +94,26 @@ func TestTutLocalRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestTutLocalLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testLocal {
+func TestTutITLoadTariffPlanFromFolder(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tutLocalRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
-	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
-		t.Error("Empty loadId received, loadInstance: ", loadInst)
 	}
 	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Check loaded stats
-func TestTutLocalCacheStats(t *testing.T) {
-	if !*testLocal {
+func TestTutITCacheStats(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 7, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1, ResourceLimits: 0,
-		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3}
+	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 4, RatingProfiles: 0, Actions: 7, ActionPlans: 4, SharedGroups: 0, Aliases: 0, ResourceLimits: 0,
+		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
@@ -124,8 +122,8 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 }
 
-func TestTutLocalGetUsers(t *testing.T) {
-	if !*testLocal {
+func TestTutITGetUsers(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	var users engine.UserProfiles
@@ -137,8 +135,8 @@ func TestTutLocalGetUsers(t *testing.T) {
 }
 
 // Check call costs
-func TestTutLocalGetCosts(t *testing.T) {
-	if !*testLocal {
+func TestTutITGetCosts(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
@@ -377,8 +375,8 @@ func TestTutLocalGetCosts(t *testing.T) {
 }
 
 // Check call costs
-func TestTutLocalMaxDebit(t *testing.T) {
-	if !*testLocal {
+func TestTutITMaxDebit(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
@@ -458,8 +456,8 @@ func TestTutLocalMaxDebit(t *testing.T) {
 }
 
 // Check call costs
-func TestTutLocalDerivedMaxSessionTime(t *testing.T) {
-	if !*testLocal {
+func TestTutITDerivedMaxSessionTime(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
@@ -490,8 +488,8 @@ func TestTutLocalDerivedMaxSessionTime(t *testing.T) {
 }
 
 // Check MaxUsage
-func TestTutLocalMaxUsage(t *testing.T) {
-	if !*testLocal {
+func TestTutITMaxUsage(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	setupReq := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
@@ -516,8 +514,8 @@ func TestTutLocalMaxUsage(t *testing.T) {
 }
 
 // Check DebitUsage
-func TestTutLocalDebitUsage(t *testing.T) {
-	if !*testLocal {
+func TestTutITDebitUsage(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	setupReq := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
@@ -533,8 +531,8 @@ func TestTutLocalDebitUsage(t *testing.T) {
 }
 
 // Test CDR from external sources
-func TestTutLocalProcessExternalCdr(t *testing.T) {
-	if !*testLocal {
+func TestTutITProcessExternalCdr(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
@@ -552,8 +550,8 @@ func TestTutLocalProcessExternalCdr(t *testing.T) {
 }
 
 // Test CDR involving UserProfile
-func TestTutLocalProcessExternalCdrUP(t *testing.T) {
-	if !*testLocal {
+func TestTutITProcessExternalCdrUP(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
@@ -633,12 +631,12 @@ func TestTutLocalProcessExternalCdrUP(t *testing.T) {
 	}
 }
 
-func TestTutLocalCostErrors(t *testing.T) {
-	if !*testLocal {
+func TestTutITCostErrors(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "testtutlocal_1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
+		OriginID: "TestTutIT_1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "fake", Account: "2001", Subject: "2001", Destination: "1001", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
 		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -665,7 +663,7 @@ func TestTutLocalCostErrors(t *testing.T) {
 		}
 	}
 	cdr2 := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "testtutlocal_2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
+		OriginID: "TestTutIT_2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "fake", Account: "2002", Subject: "2002", Destination: "1001", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
 		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -690,7 +688,7 @@ func TestTutLocalCostErrors(t *testing.T) {
 		}
 	}
 	cdr3 := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "testtutlocal_3", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
+		OriginID: "TestTutIT_3", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "fake", Account: "1001", Subject: "1001", Destination: "2002", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
 		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -717,8 +715,8 @@ func TestTutLocalCostErrors(t *testing.T) {
 }
 
 // Make sure queueids were created
-func TestTutLocalCdrStats(t *testing.T) {
-	if !*testLocal {
+func TestTutITCdrStats(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	var queueIds []string
@@ -730,9 +728,78 @@ func TestTutLocalCdrStats(t *testing.T) {
 	}
 }
 
+func TestTutITLeastCost(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
+	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
+	cd := engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1005",
+		Account:     "1005",
+		Destination: "1002",
+		TimeStart:   tStart,
+		TimeEnd:     tEnd,
+	}
+	eStLcr := &engine.LCRCost{
+		Entry: &engine.LCREntry{DestinationId: "DST_1002", RPCategory: "lcr_profile2", Strategy: engine.LCR_STRATEGY_LOWEST, StrategyParams: "", Weight: 10.0},
+		SupplierCosts: []*engine.LCRSupplierCost{
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile2:suppl3", Cost: 0.01, Duration: 60 * time.Second},
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile2:suppl1", Cost: 0.6, Duration: 60 * time.Second},
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile2:suppl2", Cost: 1.2, Duration: 60 * time.Second},
+		},
+	}
+	var lcr engine.LCRCost
+	cd.CgrID = "10"
+	cd.RunID = "10"
+	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
+	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1005",
+		Account:     "1005",
+		Destination: "1003",
+		TimeStart:   tStart,
+		TimeEnd:     tEnd,
+	}
+	eStLcr = &engine.LCRCost{
+		Entry: &engine.LCREntry{DestinationId: utils.ANY, RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_LOWEST, StrategyParams: "", Weight: 10.0},
+		SupplierCosts: []*engine.LCRSupplierCost{
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
+		},
+	}
+	eStLcr2 := &engine.LCRCost{
+		Entry: &engine.LCREntry{DestinationId: utils.ANY, RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_LOWEST, StrategyParams: "", Weight: 10.0},
+		SupplierCosts: []*engine.LCRSupplierCost{
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
+		},
+	}
+	cd.CgrID = "11"
+	cd.RunID = "11"
+	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
+	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) && !reflect.DeepEqual(eStLcr2.SupplierCosts, lcr.SupplierCosts) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
+	}
+}
+
 // Check LCR
-func TestTutLocalLcrStatic(t *testing.T) {
-	if !*testLocal {
+func TestTutITLcrStatic(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
@@ -792,8 +859,8 @@ func TestTutLocalLcrStatic(t *testing.T) {
 	}
 }
 
-func TestTutLocalLcrHighestCost(t *testing.T) {
-	if !*testLocal {
+func TestTutITLcrHighestCost(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
@@ -825,8 +892,8 @@ func TestTutLocalLcrHighestCost(t *testing.T) {
 	}
 }
 
-func TestTutLocalLcrQos(t *testing.T) {
-	if !*testLocal {
+func TestTutITLcrQos(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
@@ -941,8 +1008,8 @@ func TestTutLocalLcrQos(t *testing.T) {
 	}
 }
 
-func TestTutLocalLcrQosThreshold(t *testing.T) {
-	if !*testLocal {
+func TestTutITLcrQosThreshold(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
@@ -1069,78 +1136,9 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 	}
 }
 
-func TestTutLocalLeastCost(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
-	cd := engine.CallDescriptor{
-		Direction:   "*out",
-		Category:    "call",
-		Tenant:      "cgrates.org",
-		Subject:     "1005",
-		Account:     "1005",
-		Destination: "1002",
-		TimeStart:   tStart,
-		TimeEnd:     tEnd,
-	}
-	eStLcr := &engine.LCRCost{
-		Entry: &engine.LCREntry{DestinationId: "DST_1002", RPCategory: "lcr_profile2", Strategy: engine.LCR_STRATEGY_LOWEST, StrategyParams: "", Weight: 10.0},
-		SupplierCosts: []*engine.LCRSupplierCost{
-			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile2:suppl3", Cost: 0.01, Duration: 60 * time.Second},
-			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile2:suppl1", Cost: 0.6, Duration: 60 * time.Second},
-			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile2:suppl2", Cost: 1.2, Duration: 60 * time.Second},
-		},
-	}
-	var lcr engine.LCRCost
-	cd.CgrID = "10"
-	cd.RunID = "10"
-	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
-	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
-	}
-	cd = engine.CallDescriptor{
-		Direction:   "*out",
-		Category:    "call",
-		Tenant:      "cgrates.org",
-		Subject:     "1005",
-		Account:     "1005",
-		Destination: "1003",
-		TimeStart:   tStart,
-		TimeEnd:     tEnd,
-	}
-	eStLcr = &engine.LCRCost{
-		Entry: &engine.LCREntry{DestinationId: utils.ANY, RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_LOWEST, StrategyParams: "", Weight: 10.0},
-		SupplierCosts: []*engine.LCRSupplierCost{
-			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
-			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
-		},
-	}
-	eStLcr2 := &engine.LCRCost{
-		Entry: &engine.LCREntry{DestinationId: utils.ANY, RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_LOWEST, StrategyParams: "", Weight: 10.0},
-		SupplierCosts: []*engine.LCRSupplierCost{
-			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
-			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
-		},
-	}
-	cd.CgrID = "11"
-	cd.RunID = "11"
-	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
-	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) && !reflect.DeepEqual(eStLcr2.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
-	}
-}
-
 // Test adding the account via API, using the data previously devined in .csv
-func TestTutLocalSetAccount(t *testing.T) {
-	if !*testLocal {
+func TestTutITSetAccount(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	var reply string
@@ -1247,8 +1245,8 @@ func TestTutLocalSetAccount(t *testing.T) {
 
 /*
 // Make sure all stats queues were updated
-func TestTutLocalCdrStatsAfter(t *testing.T) {
-	if !*testLocal {
+func TestTutITCdrStatsAfter(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	var statMetrics map[string]float64
@@ -1291,8 +1289,8 @@ func TestTutLocalCdrStatsAfter(t *testing.T) {
 }
 */
 
-func TestTutLocalPrepaidCDRWithSMCost(t *testing.T) {
-	if !*testLocal {
+func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid1", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
@@ -1305,7 +1303,7 @@ func TestTutLocalPrepaidCDRWithSMCost(t *testing.T) {
 		RunID:      utils.META_DEFAULT,
 		OriginHost: cdr.OriginHost,
 		OriginID:   cdr.OriginID,
-		CostSource: "TestTutLocalPrepaidCDRWithSMCost",
+		CostSource: "TestTutITPrepaidCDRWithSMCost",
 		Usage:      cdr.Usage.Seconds(),
 		CostDetails: &engine.CallCost{
 			Direction:   utils.OUT,
@@ -1351,8 +1349,8 @@ func TestTutLocalPrepaidCDRWithSMCost(t *testing.T) {
 	}
 }
 
-func TestTutLocalPrepaidCDRWithoutSMCost(t *testing.T) {
-	if !*testLocal {
+func TestTutITPrepaidCDRWithoutSMCost(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid2", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
@@ -1386,8 +1384,8 @@ func TestTutLocalPrepaidCDRWithoutSMCost(t *testing.T) {
 	*/
 }
 
-func TestTutLocalStopCgrEngine(t *testing.T) {
-	if !*testLocal {
+func TestTutITStopCgrEngine(t *testing.T) {
+	if !*testIntegration {
 		return
 	}
 	if err := engine.KillEngine(100); err != nil {
