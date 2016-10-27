@@ -27,6 +27,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"reflect"
+	"time"
 
 	"github.com/cenk/rpc2"
 	"golang.org/x/net/websocket"
@@ -84,10 +85,21 @@ func (s *Server) ServeJSON(addr string) {
 		log.Fatal("ServeJSON listen error:", e)
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at %s.", addr))
+	errCnt := 0
+	var lastErrorTime time.Time
 	for {
 		conn, err := lJSON.Accept()
 		if err != nil {
 			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
+			now := time.Now()
+			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
+				errCnt = 0 // reset error count if last error was more than 5 seconds ago
+			}
+			lastErrorTime = time.Now()
+			errCnt += 1
+			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
+				break
+			}
 			continue
 		}
 		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
@@ -105,10 +117,21 @@ func (s *Server) ServeGOB(addr string) {
 		log.Fatal("ServeGOB listen error:", e)
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at %s.", addr))
+	errCnt := 0
+	var lastErrorTime time.Time
 	for {
 		conn, err := lGOB.Accept()
 		if err != nil {
 			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
+			now := time.Now()
+			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
+				errCnt = 0 // reset error count if last error was more than 5 seconds ago
+			}
+			lastErrorTime = time.Now()
+			errCnt += 1
+			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
+				break
+			}
 			continue
 		}
 
