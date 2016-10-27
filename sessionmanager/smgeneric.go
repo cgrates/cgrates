@@ -94,12 +94,12 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	if tmtr.ttlUsage != nil {
 		debitUsage = *tmtr.ttlUsage
 	}
-	for _, s := range smg.getASession(s.eventStart.GetUUID()) {
+	for _, s := range smg.getASession(s.EventStart.GetUUID()) {
 		s.debit(debitUsage, tmtr.ttlLastUsed)
 	}
-	smg.sessionEnd(s.eventStart.GetUUID(), s.TotalUsage())
-	cdr := s.eventStart.AsStoredCdr(smg.cgrCfg, smg.timezone)
-	cdr.Usage = s.TotalUsage()
+	smg.sessionEnd(s.EventStart.GetUUID(), s.TotalUsage)
+	cdr := s.EventStart.AsStoredCdr(smg.cgrCfg, smg.timezone)
+	cdr.Usage = s.TotalUsage
 	var reply string
 	smg.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply)
 }
@@ -110,7 +110,7 @@ func (smg *SMGeneric) recordASession(uuid string, s *SMGSession) {
 	if smg.cgrCfg.SmGenericConfig.SessionTTL != 0 {
 		if _, found := smg.sessionTerminators[uuid]; !found {
 			ttl := smg.cgrCfg.SmGenericConfig.SessionTTL
-			if ttlEv := s.eventStart.GetSessionTTL(); ttlEv != 0 {
+			if ttlEv := s.EventStart.GetSessionTTL(); ttlEv != 0 {
 				ttl = ttlEv
 			}
 			timer := time.NewTimer(ttl)
@@ -119,8 +119,8 @@ func (smg *SMGeneric) recordASession(uuid string, s *SMGSession) {
 				timer:       timer,
 				endChan:     endChan,
 				ttl:         ttl,
-				ttlLastUsed: s.eventStart.GetSessionTTLLastUsed(),
-				ttlUsage:    s.eventStart.GetSessionTTLUsage(),
+				ttlLastUsed: s.EventStart.GetSessionTTLLastUsed(),
+				ttlUsage:    s.EventStart.GetSessionTTLUsage(),
 			}
 			smg.sessionTerminators[uuid] = terminator
 			go func() {
@@ -158,7 +158,7 @@ func (smg *SMGeneric) unrecordASession(uuid string) bool {
 func (smg *SMGeneric) indexASession(uuid string, s *SMGSession) bool {
 	smg.aSIMux.Lock()
 	defer smg.aSIMux.Unlock()
-	ev := s.eventStart
+	ev := s.EventStart
 	for _, fieldName := range smg.cgrCfg.SmGenericConfig.SessionIndexes {
 		fieldVal, err := utils.ReflectFieldAsString(ev, fieldName, "")
 		if err != nil {
@@ -269,8 +269,8 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.Rp
 		}
 		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
-			s := &SMGSession{eventStart: evStart, runId: sessionRun.DerivedCharger.RunID, timezone: smg.timezone,
-				rater: smg.rater, cdrsrv: smg.cdrsrv, cd: sessionRun.CallDescriptor, clntConn: clntConn}
+			s := &SMGSession{EventStart: evStart, RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.timezone,
+				rater: smg.rater, cdrsrv: smg.cdrsrv, CD: sessionRun.CallDescriptor, clntConn: clntConn}
 			smg.recordASession(sessionId, s)
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
 			if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 {
@@ -298,21 +298,21 @@ func (smg *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss {
-			s.totalUsage = usage // save final usage as totalUsage
+			s.TotalUsage = usage // save final usage as totalUsage
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
 			}
-			aTime, err := s.eventStart.GetAnswerTime(utils.META_DEFAULT, smg.cgrCfg.DefaultTimezone)
+			aTime, err := s.EventStart.GetAnswerTime(utils.META_DEFAULT, smg.cgrCfg.DefaultTimezone)
 			if err != nil || aTime.IsZero() {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %v",
-					sessionId, s.runId, aTime, err))
+					sessionId, s.RunID, aTime, err))
 				continue // Unanswered session
 			}
 			if err := s.close(aTime.Add(usage)); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.RunID, err.Error()))
 			}
 			if err := s.saveOperations(sessionId); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", sessionId, s.RunID, err.Error()))
 			}
 		}
 		return nil, nil
@@ -335,7 +335,7 @@ func (smg *SMGeneric) sessionRelocate(sessionID, initialID string) error {
 			return nil, utils.ErrNotFound
 		}
 		for i, s := range ss {
-			s.eventStart[utils.ACCID] = sessionID // Overwrite initialSessionID with new one
+			s.EventStart[utils.ACCID] = sessionID // Overwrite initialSessionID with new one
 			smg.recordASession(sessionID, s)
 			if i == 0 {
 				smg.unrecordASession(initialID)
@@ -477,7 +477,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 		}
 		hasActiveSession = true
 		if errUsage != nil {
-			usage = s.TotalUsage() - s.lastUsage + lastUsed
+			usage = s.TotalUsage - s.LastUsage + lastUsed
 		}
 		if err := smg.sessionEnd(sessionID, usage); err != nil {
 			interimError = err // Last error will be the one returned as API result
@@ -629,7 +629,7 @@ func (smg *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSess
 	}
 	if len(fltrs) != 0 { // Still have some filters to match
 		for i := 0; i < len(remainingSessions); {
-			sMp, err := remainingSessions[i].eventStart.AsMapStringString()
+			sMp, err := remainingSessions[i].EventStart.AsMapStringString()
 			if err != nil {
 				return nil, 0, err
 			}
@@ -657,6 +657,27 @@ func (smg *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSess
 		aSessions = append(aSessions, s.AsActiveSession(smg.Timezone())) // Expensive for large number of sessions
 	}
 	return
+}
+
+// SetPassiveSession will add or set a previously found session in passive session list
+func (smg *SMGeneric) setPassiveSession(s *SMGSession) {
+	smg.pSessionsMux.Lock()
+	if ss, hasID := smg.passiveSessions[s.EventStart.GetUUID()]; !hasID {
+		smg.passiveSessions[s.EventStart.GetUUID()] = []*SMGSession{s}
+	} else {
+		var exists bool
+		for i, oldS := range ss {
+			if oldS.RunID == s.RunID {
+				smg.passiveSessions[s.EventStart.GetUUID()][i] = s
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			smg.passiveSessions[s.EventStart.GetUUID()] = append(smg.passiveSessions[s.EventStart.GetUUID()], s)
+		}
+	}
+	smg.pSessionsMux.Unlock()
 }
 
 func (smg *SMGeneric) Timezone() string {
@@ -795,5 +816,12 @@ func (smg *SMGeneric) BiRPCV1ActiveSessionsCount(attrs utils.AttrSMGGetActiveSes
 	} else {
 		*reply = count
 	}
+	return nil
+}
+
+// BiRPCV1SetPassiveSession used for replicating SMGSessions
+func (smg *SMGeneric) BiRPCV1SetPassiveSession(s SMGSession, reply *string) error {
+	smg.setPassiveSession(&s)
+	*reply = utils.OK
 	return nil
 }

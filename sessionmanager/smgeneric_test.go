@@ -59,7 +59,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra3":               "",
 	}
 	// Index first session
-	smgSession := &SMGSession{eventStart: smGev}
+	smgSession := &SMGSession{EventStart: smGev}
 	uuid := smGev.GetUUID()
 	smg.indexASession(uuid, smgSession)
 	eIndexes := map[string]map[string]utils.StringMap{
@@ -99,7 +99,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra4":          "info2",
 	}
 	uuid2 := smGev2.GetUUID()
-	smgSession2 := &SMGSession{eventStart: smGev2}
+	smgSession2 := &SMGSession{EventStart: smGev2}
 	smg.indexASession(uuid2, smgSession2)
 	eIndexes = map[string]map[string]utils.StringMap{
 		"Tenant": map[string]utils.StringMap{
@@ -190,7 +190,7 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra2":               5,
 		"Extra3":               "",
 	}
-	smg.recordASession(smGev1.GetUUID(), &SMGSession{eventStart: smGev1})
+	smg.recordASession(smGev1.GetUUID(), &SMGSession{EventStart: smGev1})
 	smGev2 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
@@ -211,7 +211,7 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra1":               "Value1",
 		"Extra3":               "extra3",
 	}
-	smg.recordASession(smGev2.GetUUID(), &SMGSession{eventStart: smGev2})
+	smg.recordASession(smGev2.GetUUID(), &SMGSession{EventStart: smGev2})
 	if aSessions, _, err := smg.ActiveSessions(nil, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
@@ -236,5 +236,109 @@ func TestSMGActiveSessions(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)
+	}
+}
+
+func TestSetPassiveSession(t *testing.T) {
+	smg := NewSMGeneric(smgCfg, nil, nil, "UTC")
+	smGev := SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "12345",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account1",
+		utils.SUBJECT:          "subject1",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "cgrates.org",
+		utils.REQTYPE:          "*prepaid",
+		utils.SETUP_TIME:       "2015-11-09 14:21:24",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "1m23s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	}
+	// Index first session
+	smgSession := &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
+	if len(smg.passiveSessions) != 0 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	}
+	smg.setPassiveSession(smgSession)
+	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 1 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	}
+	// Update session
+	smGev = SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "12345",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account1",
+		utils.SUBJECT:          "subject1",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "cgrates.org",
+		utils.REQTYPE:          "*prepaid",
+		utils.SETUP_TIME:       "2015-11-09 14:21:24",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "2m33s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	}
+	smgSession = &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
+	smg.setPassiveSession(smgSession) // Should only update in place
+	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 1 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	} else if ss[0].EventStart[utils.USAGE] != "2m33s" {
+		t.Errorf("SMGSession.EventStart: %+v", ss[0].EventStart[utils.USAGE])
+	}
+	// Second run
+	smgSession = &SMGSession{EventStart: smGev, RunID: "second_test"}
+	smg.setPassiveSession(smgSession)
+	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 2 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	}
+	// Update session
+	smGev = SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "22345",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account1",
+		utils.SUBJECT:          "subject1",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "cgrates.org",
+		utils.REQTYPE:          "*prepaid",
+		utils.SETUP_TIME:       "2015-11-09 14:21:24",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "2m33s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	}
+	smgSession = &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
+	smg.setPassiveSession(smgSession)
+	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 2 || len(ss) != 1 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	} else if ss[0].EventStart[utils.USAGE] != "2m33s" {
+		t.Errorf("SMGSession.EventStart: %+v", ss[0].EventStart[utils.USAGE])
 	}
 }
