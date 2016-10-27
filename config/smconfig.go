@@ -34,8 +34,9 @@ func NewDfltHaPoolConfig() *HaPoolConfig {
 
 // One connection to Rater
 type HaPoolConfig struct {
-	Address   string
-	Transport string
+	Address     string
+	Transport   string
+	Synchronous bool
 }
 
 func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
@@ -47,6 +48,9 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 	}
 	if jsnCfg.Transport != nil {
 		self.Transport = *jsnCfg.Transport
+	}
+	if jsnCfg.Synchronous != nil {
+		self.Synchronous = *jsnCfg.Synchronous
 	}
 	return nil
 }
@@ -84,17 +88,18 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 }
 
 type SmGenericConfig struct {
-	Enabled            bool
-	ListenBijson       string
-	RALsConns          []*HaPoolConfig
-	CDRsConns          []*HaPoolConfig
-	DebitInterval      time.Duration
-	MinCallDuration    time.Duration
-	MaxCallDuration    time.Duration
-	SessionTTL         time.Duration
-	SessionTTLLastUsed *time.Duration
-	SessionTTLUsage    *time.Duration
-	SessionIndexes     []string
+	Enabled             bool
+	ListenBijson        string
+	RALsConns           []*HaPoolConfig
+	CDRsConns           []*HaPoolConfig
+	SMGReplicationConns []*HaPoolConfig
+	DebitInterval       time.Duration
+	MinCallDuration     time.Duration
+	MaxCallDuration     time.Duration
+	SessionTTL          time.Duration
+	SessionTTLLastUsed  *time.Duration
+	SessionTTLUsage     *time.Duration
+	SessionIndexes      []string
 }
 
 func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
@@ -120,6 +125,13 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
 			self.CDRsConns[idx] = NewDfltHaPoolConfig()
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Smg_replication_conns != nil {
+		self.SMGReplicationConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_replication_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Smg_replication_conns {
+			self.CDRsConns[idx] = NewDfltHaPoolConfig()
+			self.SMGReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Debit_interval != nil {

@@ -273,11 +273,12 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"rals_conns": [
-		{"address": "*internal"}				// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
 	],
 	"cdrs_conns": [
-		{"address": "*internal"}				// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
+	"smg_replication_conns": [],			// replicate sessions towards these SMGs
 	"debit_interval": "0s",					// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
@@ -289,9 +290,9 @@ const CGRATES_CFG_JSON = `
 
 
 "sm_asterisk": {
-	"enabled": false,												// starts Asterisk SessionManager service: <true|false>
-	"create_cdr": false,											// create CDR out of events and sends it to CDRS component
-	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
+	"enabled": false,						// starts Asterisk SessionManager service: <true|false>
+	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
+	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
 	],
 },
@@ -343,21 +344,21 @@ const CGRATES_CFG_JSON = `
 
 
 "sm_opensips": {
-	"enabled": false,					// starts SessionManager service: <true|false>
-	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
+	"enabled": false,						// starts SessionManager service: <true|false>
+	"listen_udp": "127.0.0.1:2020",			// address where to listen for datagram events coming from OpenSIPS
 	"rals_conns": [
-		{"address": "*internal"}		// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
 	],
 	"cdrs_conns": [
-		{"address": "*internal"}		// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
-	"reconnects": 5,					// number of reconnects if connection is lost
-	"create_cdr": false,				// create CDR out of events and sends it to CDRS component
-	"debit_interval": "10s",			// interval to perform debits on.
-	"min_call_duration": "0s",			// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
-	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
-	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
+	"reconnects": 5,						// number of reconnects if connection is lost
+	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
+	"debit_interval": "10s",				// interval to perform debits on.
+	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+	"events_subscribe_interval": "60s",		// automatic events subscription to OpenSIPS, 0 to disable it
+	"mi_addr": "127.0.0.1:8020",			// address where to reach OpenSIPS MI to send session disconnects
 },
 
 

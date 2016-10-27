@@ -182,6 +182,7 @@ type SmGenericJsonCfg struct {
 	Listen_bijson         *string
 	Rals_conns            *[]*HaPoolJsonCfg
 	Cdrs_conns            *[]*HaPoolJsonCfg
+	Smg_replication_conns *[]*HaPoolJsonCfg
 	Debit_interval        *string
 	Min_call_duration     *string
 	Max_call_duration     *string
@@ -214,8 +215,9 @@ type SmFsJsonCfg struct {
 
 // Represents one connection instance towards a rater/cdrs server
 type HaPoolJsonCfg struct {
-	Address   *string
-	Transport *string
+	Address     *string
+	Transport   *string
+	Synchronous *bool
 }
 
 type AstConnJsonCfg struct {

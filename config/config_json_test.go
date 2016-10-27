@@ -409,11 +409,12 @@ func TestSmGenericJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Debit_interval:    utils.StringPointer("0s"),
-		Min_call_duration: utils.StringPointer("0s"),
-		Max_call_duration: utils.StringPointer("3h"),
-		Session_ttl:       utils.StringPointer("0s"),
-		Session_indexes:   utils.StringSlicePointer([]string{}),
+		Smg_replication_conns: &[]*HaPoolJsonCfg{},
+		Debit_interval:        utils.StringPointer("0s"),
+		Min_call_duration:     utils.StringPointer("0s"),
+		Max_call_duration:     utils.StringPointer("3h"),
+		Session_ttl:           utils.StringPointer("0s"),
+		Session_indexes:       utils.StringSlicePointer([]string{}),
 	}
 	if cfg, err := dfCgrJsonCfg.SmGenericJsonCfg(); err != nil {
 		t.Error(err)
