@@ -13,7 +13,7 @@ func TestTimeIs0h(t *testing.T) {
 	}
 	result := TimeIs0h(t1)
 	if result != false {
-		t.Errorf("setting time")
+		t.Errorf("time is 0 when it's supposed to be 2012-11-01T22:08:41+00:00")
 	}
 
 }
