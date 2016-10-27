@@ -51,6 +51,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @brendangilmore | Brendan Gilmore |
 | @afone-lboue | Ludovic Boué |
 | @shaneneuerburg | Shane Neuerburg |
+| @Edwardro22 | Eduard Tamşa |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
