@@ -30,20 +30,20 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
-	eventStart    SMGenericEvent // Event which started
+	EventStart    SMGenericEvent // Event which started
 	stopDebit     chan struct{}  // Channel to communicate with debit loops when closing the session
-	runId         string         // Keep a reference for the derived run
-	timezone      string
+	RunID         string         // Keep a reference for the derived run
+	Timezone      string
+	CD            *engine.CallDescriptor
+	SessionCDs    []*engine.CallDescriptor
+	CallCosts     []*engine.CallCost
+	ExtraDuration time.Duration                 // keeps the current duration debited on top of what heas been asked
+	LastUsage     time.Duration                 // last requested Duration
+	LastDebit     time.Duration                 // last real debited duration
+	TotalUsage    time.Duration                 // sum of lastUsage
+	clntConn      rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
 	rater         rpcclient.RpcClientConnection // Connector to Rater service
 	cdrsrv        rpcclient.RpcClientConnection // Connector to CDRS service
-	cd            *engine.CallDescriptor
-	sessionCds    []*engine.CallDescriptor
-	callCosts     []*engine.CallCost
-	extraDuration time.Duration                 // keeps the current duration debited on top of what heas been asked
-	lastUsage     time.Duration                 // last requested Duration
-	lastDebit     time.Duration                 // last real debited duration
-	totalUsage    time.Duration                 // sum of lastUsage
-	clntConn      rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
 }
 
 // Called in case of automatic debits
@@ -56,19 +56,19 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 			return
 		case <-time.After(sleepDur):
 			if maxDebit, err := self.debit(debitInterval, nil); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit operation on session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit operation on session: %s, error: %s", self.EventStart.GetUUID(), err.Error()))
 				disconnectReason := SYSTEM_ERROR
 				if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 					disconnectReason = err.Error()
 				}
 				if err := self.disconnectSession(disconnectReason); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.EventStart.GetUUID(), err.Error()))
 				}
 				return
 			} else if maxDebit < debitInterval {
 				time.Sleep(maxDebit)
 				if err := self.disconnectSession(INSUFFICIENT_FUNDS); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
+					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.EventStart.GetUUID(), err.Error()))
 				}
 				return
 			}
@@ -83,56 +83,56 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	//utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit, dur: %+v, lastUsed: %+v, session: %+v", dur, lastUsed, self))
 	requestedDuration := dur
 	if lastUsed != nil {
-		self.extraDuration = self.lastDebit - *lastUsed
-		if *lastUsed != self.lastUsage {
+		self.ExtraDuration = self.LastDebit - *lastUsed
+		if *lastUsed != self.LastUsage {
 			// total usage correction
-			self.totalUsage -= self.lastUsage
-			self.totalUsage += *lastUsed
+			self.TotalUsage -= self.LastUsage
+			self.TotalUsage += *lastUsed
 		}
 	}
 	// apply correction from previous run
-	if self.extraDuration < dur {
-		dur -= self.extraDuration
+	if self.ExtraDuration < dur {
+		dur -= self.ExtraDuration
 	} else {
-		self.lastUsage = requestedDuration
-		self.totalUsage += self.lastUsage
-		ccDuration := self.extraDuration // fake ccDuration
-		self.extraDuration -= dur
+		self.LastUsage = requestedDuration
+		self.TotalUsage += self.LastUsage
+		ccDuration := self.ExtraDuration // fake ccDuration
+		self.ExtraDuration -= dur
 		return ccDuration, nil
 	}
-	initialExtraDuration := self.extraDuration
-	self.extraDuration = 0
-	if self.cd.LoopIndex > 0 {
-		self.cd.TimeStart = self.cd.TimeEnd
+	initialExtraDuration := self.ExtraDuration
+	self.ExtraDuration = 0
+	if self.CD.LoopIndex > 0 {
+		self.CD.TimeStart = self.CD.TimeEnd
 	}
-	self.cd.TimeEnd = self.cd.TimeStart.Add(dur)
-	self.cd.DurationIndex += dur
+	self.CD.TimeEnd = self.CD.TimeStart.Add(dur)
+	self.CD.DurationIndex += dur
 	cc := &engine.CallCost{}
-	if err := self.rater.Call("Responder.MaxDebit", self.cd, cc); err != nil {
-		self.lastUsage = 0
-		self.lastDebit = 0
+	if err := self.rater.Call("Responder.MaxDebit", self.CD, cc); err != nil {
+		self.LastUsage = 0
+		self.LastDebit = 0
 		return 0, err
 	}
 	// cd corrections
-	self.cd.TimeEnd = cc.GetEndTime() // set debited timeEnd
+	self.CD.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	// update call duration with real debited duration
 	ccDuration := cc.GetDuration()
 	if ccDuration != dur {
-		self.extraDuration = ccDuration - dur
+		self.ExtraDuration = ccDuration - dur
 	}
 	if ccDuration >= dur {
-		self.lastUsage = requestedDuration
+		self.LastUsage = requestedDuration
 	} else {
-		self.lastUsage = ccDuration
+		self.LastUsage = ccDuration
 	}
-	self.cd.DurationIndex -= dur
-	self.cd.DurationIndex += ccDuration
-	self.cd.MaxCostSoFar += cc.Cost
-	self.cd.LoopIndex += 1
-	self.sessionCds = append(self.sessionCds, self.cd.Clone())
-	self.callCosts = append(self.callCosts, cc)
-	self.lastDebit = initialExtraDuration + ccDuration
-	self.totalUsage += self.lastUsage
+	self.CD.DurationIndex -= dur
+	self.CD.DurationIndex += ccDuration
+	self.CD.MaxCostSoFar += cc.Cost
+	self.CD.LoopIndex += 1
+	self.SessionCDs = append(self.SessionCDs, self.CD.Clone())
+	self.CallCosts = append(self.CallCosts, cc)
+	self.LastDebit = initialExtraDuration + ccDuration
+	self.TotalUsage += self.LastUsage
 	if ccDuration >= dur { // we got what we asked to be debited
 		return requestedDuration, nil
 	}
@@ -144,7 +144,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	if refundDuration == 0 { // Nothing to refund
 		return nil
 	}
-	firstCC := self.callCosts[0] // use merged cc (from close function)
+	firstCC := self.CallCosts[0] // use merged cc (from close function)
 	firstCC.Timespans.Decompress()
 	defer firstCC.Timespans.Compress()
 	var refundIncrements engine.Increments
@@ -185,8 +185,8 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	if len(refundIncrements) > 0 {
 		cd := firstCC.CreateCallDescriptor()
 		cd.Increments = refundIncrements
-		cd.CgrID = self.cd.CgrID
-		cd.RunID = self.cd.RunID
+		cd.CgrID = self.CD.CgrID
+		cd.RunID = self.CD.RunID
 		cd.Increments.Compress()
 		var response float64
 		err := self.rater.Call("Responder.RefundIncrements", cd, &response)
@@ -202,9 +202,9 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 
 // Session has ended, check debits and refund the extra charged duration
 func (self *SMGSession) close(endTime time.Time) error {
-	if len(self.callCosts) != 0 { // We have had at least one cost calculation
-		firstCC := self.callCosts[0]
-		for _, cc := range self.callCosts[1:] {
+	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
+		firstCC := self.CallCosts[0]
+		for _, cc := range self.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
 		end := firstCC.GetEndTime()
@@ -220,7 +220,7 @@ func (self *SMGSession) disconnectSession(reason string) error {
 		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
 	}
 	var reply string
-	if err := self.clntConn.Call("SMGClientV1.DisconnectSession", utils.AttrDisconnectSession{EventStart: self.eventStart, Reason: reason}, &reply); err != nil {
+	if err := self.clntConn.Call("SMGClientV1.DisconnectSession", utils.AttrDisconnectSession{EventStart: self.EventStart, Reason: reason}, &reply); err != nil {
 		return err
 	} else if reply != utils.OK {
 		return errors.New(fmt.Sprintf("Unexpected disconnect reply: %s", reply))
@@ -232,16 +232,16 @@ func (self *SMGSession) disconnectSession(reason string) error {
 // originID could have been changed from original event, hence passing as argument here
 // pass cc as the clone of original to avoid concurrency issues
 func (self *SMGSession) saveOperations(originID string) error {
-	if len(self.callCosts) == 0 {
+	if len(self.CallCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
-	cc := self.callCosts[0] // was merged in close method
+	cc := self.CallCosts[0] // was merged in close method
 	cc.Round()
 	roundIncrements := cc.GetRoundIncrements()
 	if len(roundIncrements) != 0 {
 		cd := cc.CreateCallDescriptor()
-		cd.CgrID = self.cd.CgrID
-		cd.RunID = self.cd.RunID
+		cd.CgrID = self.CD.CgrID
+		cd.RunID = self.CD.RunID
 		cd.Increments = roundIncrements
 		var response float64
 		if err := self.rater.Call("Responder.RefundRounding", cd, &response); err != nil {
@@ -249,21 +249,21 @@ func (self *SMGSession) saveOperations(originID string) error {
 		}
 	}
 	smCost := &engine.SMCost{
-		CGRID:       self.eventStart.GetCgrId(self.timezone),
+		CGRID:       self.EventStart.GetCgrId(self.Timezone),
 		CostSource:  utils.SESSION_MANAGER_SOURCE,
-		RunID:       self.runId,
-		OriginHost:  self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
+		RunID:       self.RunID,
+		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
 		OriginID:    originID,
-		Usage:       self.TotalUsage().Seconds(),
+		Usage:       self.TotalUsage.Seconds(),
 		CostDetails: cc,
 	}
 	if len(smCost.CostDetails.Timespans) > MaxTimespansInCost { // Merge since we will get a callCost too big
 		if err := utils.Clone(cc, &smCost.CostDetails); err != nil { // Avoid concurrency on CC
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not clone callcost for sessionID: %s, runId: %s, error: %s", originID, self.runId, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not clone callcost for sessionID: %s, RunID: %s, error: %s", originID, self.RunID, err.Error()))
 		}
 		go func(smCost *engine.SMCost) { // could take longer than the locked stage
 			if err := self.storeSMCost(smCost); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not store callcost for sessionID: %s, runId: %s, error: %s", originID, self.runId, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not store callcost for sessionID: %s, RunID: %s, error: %s", originID, self.RunID, err.Error()))
 			}
 		}(smCost)
 	} else {
@@ -281,7 +281,7 @@ func (self *SMGSession) storeSMCost(smCost *engine.SMCost) error {
 	var reply string
 	if err := self.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
 		if err == utils.ErrExists {
-			self.refund(self.cd.GetDuration()) // Refund entire duration
+			self.refund(self.CD.GetDuration()) // Refund entire duration
 		} else {
 			return err
 		}
@@ -289,42 +289,38 @@ func (self *SMGSession) storeSMCost(smCost *engine.SMCost) error {
 	return nil
 }
 
-func (self *SMGSession) TotalUsage() time.Duration {
-	return self.totalUsage
-}
-
 func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
-	sTime, _ := self.eventStart.GetSetupTime(utils.META_DEFAULT, timezone)
-	aTime, _ := self.eventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
-	pdd, _ := self.eventStart.GetPdd(utils.META_DEFAULT)
+	sTime, _ := self.EventStart.GetSetupTime(utils.META_DEFAULT, timezone)
+	aTime, _ := self.EventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
+	pdd, _ := self.EventStart.GetPdd(utils.META_DEFAULT)
 	aSession := &ActiveSession{
-		CgrId:       self.eventStart.GetCgrId(timezone),
-		TOR:         self.eventStart.GetTOR(utils.META_DEFAULT),
-		RunId:       self.runId,
-		OriginID:    self.eventStart.GetUUID(),
-		CdrHost:     self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
-		CdrSource:   self.eventStart.GetCdrSource(),
-		ReqType:     self.eventStart.GetReqType(utils.META_DEFAULT),
-		Direction:   self.eventStart.GetDirection(utils.META_DEFAULT),
-		Tenant:      self.eventStart.GetTenant(utils.META_DEFAULT),
-		Category:    self.eventStart.GetCategory(utils.META_DEFAULT),
-		Account:     self.eventStart.GetAccount(utils.META_DEFAULT),
-		Subject:     self.eventStart.GetSubject(utils.META_DEFAULT),
-		Destination: self.eventStart.GetDestination(utils.META_DEFAULT),
+		CgrId:       self.EventStart.GetCgrId(timezone),
+		TOR:         self.EventStart.GetTOR(utils.META_DEFAULT),
+		RunID:       self.RunID,
+		OriginID:    self.EventStart.GetUUID(),
+		CdrHost:     self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
+		CdrSource:   self.EventStart.GetCdrSource(),
+		ReqType:     self.EventStart.GetReqType(utils.META_DEFAULT),
+		Direction:   self.EventStart.GetDirection(utils.META_DEFAULT),
+		Tenant:      self.EventStart.GetTenant(utils.META_DEFAULT),
+		Category:    self.EventStart.GetCategory(utils.META_DEFAULT),
+		Account:     self.EventStart.GetAccount(utils.META_DEFAULT),
+		Subject:     self.EventStart.GetSubject(utils.META_DEFAULT),
+		Destination: self.EventStart.GetDestination(utils.META_DEFAULT),
 		SetupTime:   sTime,
 		AnswerTime:  aTime,
-		Usage:       self.TotalUsage(),
+		Usage:       self.TotalUsage,
 		Pdd:         pdd,
-		ExtraFields: self.eventStart.GetExtraFields(),
-		Supplier:    self.eventStart.GetSupplier(utils.META_DEFAULT),
+		ExtraFields: self.EventStart.GetExtraFields(),
+		Supplier:    self.EventStart.GetSupplier(utils.META_DEFAULT),
 		SMId:        "CGR-DA",
 	}
-	if self.cd != nil {
-		aSession.LoopIndex = self.cd.LoopIndex
-		aSession.DurationIndex = self.cd.DurationIndex
-		aSession.MaxRate = self.cd.MaxRate
-		aSession.MaxRateUnit = self.cd.MaxRateUnit
-		aSession.MaxCostSoFar = self.cd.MaxCostSoFar
+	if self.CD != nil {
+		aSession.LoopIndex = self.CD.LoopIndex
+		aSession.DurationIndex = self.CD.DurationIndex
+		aSession.MaxRate = self.CD.MaxRate
+		aSession.MaxRateUnit = self.CD.MaxRateUnit
+		aSession.MaxCostSoFar = self.CD.MaxCostSoFar
 	}
 	return aSession
 }

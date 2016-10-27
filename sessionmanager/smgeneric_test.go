@@ -59,7 +59,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra3":               "",
 	}
 	// Index first session
-	smgSession := &SMGSession{eventStart: smGev}
+	smgSession := &SMGSession{EventStart: smGev}
 	uuid := smGev.GetUUID()
 	smg.indexASession(uuid, smgSession)
 	eIndexes := map[string]map[string]utils.StringMap{
@@ -99,7 +99,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra4":          "info2",
 	}
 	uuid2 := smGev2.GetUUID()
-	smgSession2 := &SMGSession{eventStart: smGev2}
+	smgSession2 := &SMGSession{EventStart: smGev2}
 	smg.indexASession(uuid2, smgSession2)
 	eIndexes = map[string]map[string]utils.StringMap{
 		"Tenant": map[string]utils.StringMap{
@@ -190,7 +190,7 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra2":               5,
 		"Extra3":               "",
 	}
-	smg.recordASession(smGev1.GetUUID(), &SMGSession{eventStart: smGev1})
+	smg.recordASession(smGev1.GetUUID(), &SMGSession{EventStart: smGev1})
 	smGev2 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
@@ -211,7 +211,7 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra1":               "Value1",
 		"Extra3":               "extra3",
 	}
-	smg.recordASession(smGev2.GetUUID(), &SMGSession{eventStart: smGev2})
+	smg.recordASession(smGev2.GetUUID(), &SMGSession{EventStart: smGev2})
 	if aSessions, _, err := smg.ActiveSessions(nil, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {

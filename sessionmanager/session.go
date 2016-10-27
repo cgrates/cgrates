@@ -300,7 +300,7 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 			SMId:        "UNKNOWN",
 		}
 		if sessionRun.DerivedCharger != nil {
-			aSession.RunId = sessionRun.DerivedCharger.RunID
+			aSession.RunID = sessionRun.DerivedCharger.RunID
 		}
 		if sessionRun.CallDescriptor != nil {
 			aSession.LoopIndex = sessionRun.CallDescriptor.LoopIndex
@@ -345,7 +345,7 @@ type ActiveSession struct {
 	ExtraFields   map[string]string // Extra fields to be stored in CDR
 	SMId          string
 	SMConnId      string
-	RunId         string
+	RunID         string
 	LoopIndex     float64       // indicates the position of this segment in a cost request loop
 	DurationIndex time.Duration // the call duration so far (till TimeEnd)
 	MaxRate       float64
