@@ -238,3 +238,107 @@ func TestSMGActiveSessions(t *testing.T) {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
 }
+
+func TestSetPassiveSession(t *testing.T) {
+	smg := NewSMGeneric(smgCfg, nil, nil, "UTC")
+	smGev := SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "12345",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account1",
+		utils.SUBJECT:          "subject1",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "cgrates.org",
+		utils.REQTYPE:          "*prepaid",
+		utils.SETUP_TIME:       "2015-11-09 14:21:24",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "1m23s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	}
+	// Index first session
+	smgSession := &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
+	if len(smg.passiveSessions) != 0 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	}
+	smg.setPassiveSession(smgSession)
+	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 1 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	}
+	// Update session
+	smGev = SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "12345",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account1",
+		utils.SUBJECT:          "subject1",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "cgrates.org",
+		utils.REQTYPE:          "*prepaid",
+		utils.SETUP_TIME:       "2015-11-09 14:21:24",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "2m33s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	}
+	smgSession = &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
+	smg.setPassiveSession(smgSession) // Should only update in place
+	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 1 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	} else if ss[0].EventStart[utils.USAGE] != "2m33s" {
+		t.Errorf("SMGSession.EventStart: %+v", ss[0].EventStart[utils.USAGE])
+	}
+	// Second run
+	smgSession = &SMGSession{EventStart: smGev, RunID: "second_test"}
+	smg.setPassiveSession(smgSession)
+	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 2 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	}
+	// Update session
+	smGev = SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "22345",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account1",
+		utils.SUBJECT:          "subject1",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "cgrates.org",
+		utils.REQTYPE:          "*prepaid",
+		utils.SETUP_TIME:       "2015-11-09 14:21:24",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "2m33s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	}
+	smgSession = &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
+	smg.setPassiveSession(smgSession)
+	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 2 || len(ss) != 1 {
+		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	} else if ss[0].EventStart[utils.USAGE] != "2m33s" {
+		t.Errorf("SMGSession.EventStart: %+v", ss[0].EventStart[utils.USAGE])
+	}
+}
