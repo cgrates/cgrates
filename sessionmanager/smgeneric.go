@@ -659,6 +659,27 @@ func (smg *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSess
 	return
 }
 
+// SetPassiveSession will add or set a previously found session in passive session list
+func (smg *SMGeneric) setPassiveSession(s *SMGSession) {
+	smg.pSessionsMux.Lock()
+	if ss, hasID := smg.passiveSessions[s.EventStart.GetUUID()]; !hasID {
+		smg.passiveSessions[s.EventStart.GetUUID()] = []*SMGSession{s}
+	} else {
+		var exists bool
+		for i, oldS := range ss {
+			if oldS.RunID == s.RunID {
+				smg.passiveSessions[s.EventStart.GetUUID()][i] = s
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			smg.passiveSessions[s.EventStart.GetUUID()] = append(smg.passiveSessions[s.EventStart.GetUUID()], s)
+		}
+	}
+	smg.pSessionsMux.Unlock()
+}
+
 func (smg *SMGeneric) Timezone() string {
 	return smg.timezone
 }
@@ -795,5 +816,12 @@ func (smg *SMGeneric) BiRPCV1ActiveSessionsCount(attrs utils.AttrSMGGetActiveSes
 	} else {
 		*reply = count
 	}
+	return nil
+}
+
+// BiRPCV1SetPassiveSession used for replicating SMGSessions
+func (smg *SMGeneric) BiRPCV1SetPassiveSession(s SMGSession, reply *string) error {
+	smg.setPassiveSession(&s)
+	*reply = utils.OK
 	return nil
 }
