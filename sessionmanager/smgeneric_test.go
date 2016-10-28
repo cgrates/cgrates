@@ -239,7 +239,7 @@ func TestSMGActiveSessions(t *testing.T) {
 	}
 }
 
-func TestSetPassiveSession(t *testing.T) {
+func TestGetSetPassiveSessions(t *testing.T) {
 	smg := NewSMGeneric(smgCfg, nil, nil, "UTC")
 	smGev := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
@@ -269,9 +269,15 @@ func TestSetPassiveSession(t *testing.T) {
 	if len(smg.passiveSessions) != 0 {
 		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
 	}
+	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 0 {
+		t.Errorf("PassiveSessions: %+v", pSS)
+	}
 	smg.setPassiveSession(smgSession)
 	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 1 {
 		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	}
+	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 1 {
+		t.Errorf("PassiveSessions: %+v", pSS)
 	}
 	// Update session
 	smGev = SMGenericEvent{
@@ -340,5 +346,18 @@ func TestSetPassiveSession(t *testing.T) {
 		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
 	} else if ss[0].EventStart[utils.USAGE] != "2m33s" {
 		t.Errorf("SMGSession.EventStart: %+v", ss[0].EventStart[utils.USAGE])
+	}
+	// Test getPassiveSessions with filters
+	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 2 {
+		t.Errorf("PassiveSessions: %+v", pSS)
+	}
+	if pSS := smg.getPassiveSessions("12345", ""); len(pSS) != 1 || len(pSS["12345"]) != 2 {
+		t.Errorf("PassiveSessions: %+v", pSS)
+	}
+	if pSS := smg.getPassiveSessions("12345", "second_test"); len(pSS) != 1 || len(pSS["12345"]) != 1 {
+		t.Errorf("PassiveSessions: %+v", pSS)
+	}
+	if pSS := smg.getPassiveSessions("aabbcc", ""); len(pSS) != 0 {
+		t.Errorf("PassiveSessions: %+v", pSS)
 	}
 }

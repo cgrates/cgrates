@@ -722,6 +722,34 @@ func (smg *SMGeneric) setPassiveSession(s *SMGSession) {
 	smg.pSessionsMux.Unlock()
 }
 
+func (smg *SMGeneric) getPassiveSessions(originID, runID string) (pss map[string][]*SMGSession) {
+	smg.pSessionsMux.RLock()
+	if originID == "" {
+		if len(smg.passiveSessions) != 0 {
+			pss = smg.passiveSessions
+		}
+	} else {
+		pSSlc := smg.passiveSessions[originID]
+		if runID != "" {
+			var found bool
+			for _, s := range pSSlc {
+				if s.RunID == runID {
+					found = true
+					pSSlc = []*SMGSession{s}
+				}
+			}
+			if !found {
+				pSSlc = []*SMGSession{}
+			}
+		}
+		if len(pSSlc) != 0 {
+			pss = map[string][]*SMGSession{originID: pSSlc}
+		}
+	}
+	smg.pSessionsMux.RUnlock()
+	return
+}
+
 func (smg *SMGeneric) Timezone() string {
 	return smg.timezone
 }
@@ -865,5 +893,22 @@ func (smg *SMGeneric) BiRPCV1ActiveSessionsCount(attrs utils.AttrSMGGetActiveSes
 func (smg *SMGeneric) BiRPCV1SetPassiveSession(s SMGSession, reply *string) error {
 	smg.setPassiveSession(&s)
 	*reply = utils.OK
+	return nil
+}
+
+type AttrGetPassiveSessions struct {
+	OriginID string
+	RunID    string
+}
+
+func (smg *SMGeneric) BiRPCV1GetPassiveSessions(attrs AttrGetPassiveSessions, pSessions *map[string][]*SMGSession) error {
+	if attrs.RunID != "" && attrs.OriginID == "" {
+		return utils.ErrMandatoryIeMissing
+	}
+	pSS := smg.getPassiveSessions(attrs.OriginID, attrs.RunID)
+	if len(pSS) == 0 {
+		return utils.ErrNotFound
+	}
+	*pSessions = pSS
 	return nil
 }
