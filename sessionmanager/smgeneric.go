@@ -38,15 +38,17 @@ const (
 var ErrPartiallyExecuted = errors.New("Partially executed")
 
 // ReplicationConnection represents one connection to a passive node where we will replicate session data
-type SMGReplicationConnection struct {
-	conn rpcclient.RpcClientConnection
-	sync bool
+type SMGReplicationConn struct {
+	Connection  rpcclient.RpcClientConnection
+	Synchronous bool
 }
 
-func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection, timezone string) *SMGeneric {
+func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection,
+	smgReplConns []*SMGReplicationConn, timezone string) *SMGeneric {
 	return &SMGeneric{cgrCfg: cgrCfg,
 		rater:              rater,
 		cdrsrv:             cdrsrv,
+		smgReplConns:       smgReplConns,
 		timezone:           timezone,
 		activeSessions:     make(map[string][]*SMGSession),
 		aSessionsIndex:     make(map[string]map[string]utils.StringMap),
@@ -58,7 +60,7 @@ type SMGeneric struct {
 	cgrCfg             *config.CGRConfig // Separate from smCfg since there can be multiple
 	rater              rpcclient.RpcClientConnection
 	cdrsrv             rpcclient.RpcClientConnection
-	smgReplConns       []*SMGReplicationConnection // list of connections where we will replicate our session data
+	smgReplConns       []*SMGReplicationConn // list of connections where we will replicate our session data
 	timezone           string
 	activeSessions     map[string][]*SMGSession // group sessions per sessionId, multiple runs based on derived charging
 	aSessionsMux       sync.RWMutex
@@ -396,7 +398,7 @@ func (smg *SMGeneric) replicateSessionsForEvent(gev SMGenericEvent) (err error) 
 	}
 	var wg sync.WaitGroup
 	for _, rplConn := range smg.smgReplConns {
-		if rplConn.sync {
+		if rplConn.Synchronous {
 			wg.Add(1)
 		}
 		go func(conn rpcclient.RpcClientConnection, sync bool, ss []*SMGSession) {
@@ -409,7 +411,7 @@ func (smg *SMGeneric) replicateSessionsForEvent(gev SMGenericEvent) (err error) 
 			if sync {
 				wg.Done()
 			}
-		}(rplConn.conn, rplConn.sync, aSessions)
+		}(rplConn.Connection, rplConn.Synchronous, aSessions)
 	}
 	wg.Wait() // wait for synchronous replication to finish
 	return

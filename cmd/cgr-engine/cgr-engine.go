@@ -150,7 +150,18 @@ func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRate
 			return
 		}
 	}
-	sm := sessionmanager.NewSMGeneric(cfg, ralsConns, cdrsConn, cfg.DefaultTimezone)
+	smgReplConns := make([]*sessionmanager.SMGReplicationConn, len(cfg.SmGenericConfig.SMGReplicationConns))
+	for i, replConnCfg := range cfg.SmGenericConfig.SMGReplicationConns {
+		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, cfg.ConnectAttempts, cfg.Reconnects,
+			cfg.ConnectTimeout, cfg.ReplyTimeout, replConnCfg.Transport[1:], nil); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to SMGReplicationConn: <%s>, error: <%s>", replConnCfg.Address, err.Error()))
+			exitChan <- true
+			return
+		} else {
+			smgReplConns[i] = &sessionmanager.SMGReplicationConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
+		}
+	}
+	sm := sessionmanager.NewSMGeneric(cfg, ralsConns, cdrsConn, smgReplConns, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMGeneric> error: %s!", err))
 	}
