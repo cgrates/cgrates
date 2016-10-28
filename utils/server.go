@@ -84,13 +84,13 @@ func (s *Server) ServeJSON(addr string) {
 	if e != nil {
 		log.Fatal("ServeJSON listen error:", e)
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at %s.", addr))
+	Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at <%s>.", addr))
 	errCnt := 0
 	var lastErrorTime time.Time
 	for {
 		conn, err := lJSON.Accept()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
+			Logger.Err(fmt.Sprintf("<CGRServer> JSON accept error: <%s>", err.Error()))
 			now := time.Now()
 			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
@@ -116,13 +116,13 @@ func (s *Server) ServeGOB(addr string) {
 	if e != nil {
 		log.Fatal("ServeGOB listen error:", e)
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at %s.", addr))
+	Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at <%s>.", addr))
 	errCnt := 0
 	var lastErrorTime time.Time
 	for {
 		conn, err := lGOB.Accept()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
+			Logger.Err(fmt.Sprintf("<CGRServer> GOB accept error: <%s>", err.Error()))
 			now := time.Now()
 			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
