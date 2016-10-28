@@ -26,6 +26,9 @@
 	"users_conns": [
 		{"address": "*internal"}
 	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
 },
 
 "scheduler": {
@@ -52,5 +55,10 @@
 	"enabled": true,				// starts User service: <true|false>.
 	"indexes": ["Uuid"],			// user profile field indexes
 },
+
+"aliases": {
+	"enabled": true,							// starts Aliases service: <true|false>.
+},
+
 
 }
