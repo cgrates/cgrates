@@ -22,6 +22,20 @@ import (
 	"testing"
 )
 
+func TestMissingStructFieldsCorrect(t *testing.T) {
+	var attr = struct {
+		Tenant          string
+		Direction       string
+		Account         string
+		Type            string
+		ActionTimingsId string
+	}{"bevoip.eu", "OUT", "danconns0001", META_PREPAID, "mama"}
+	if missing := MissingStructFields(&attr,
+		[]string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
+		t.Error("Found missing field on correct struct", missing)
+	}
+}
+
 func TestStructMapStruct(t *testing.T) {
 	type TestStruct struct {
 		Name    string
