@@ -72,3 +72,22 @@ func TestMapMergeMapsStringIface(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eMergedMap, mergedMap)
 	}
 }
+
+func TestEqual(t *testing.T) {
+	t1 := NewStringMap("val1")
+	t2 := NewStringMap("val2")
+	result := t1.Equal(t2)
+	expected := false
+	if result != expected {
+		t.Error("Expecting:", expected, ", received:", result)
+	}
+}
+
+func TestIsEmpty(t *testing.T) {
+	t1 := NewStringMap("val1")
+	result := t1.IsEmpty()
+	expected := false
+	if result != expected {
+		t.Error("Expecting:", expected, ", received:", result)
+	}
+}
