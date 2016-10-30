@@ -706,3 +706,29 @@ func TestTimePointer(t *testing.T) {
 		t.Error("Expected:", expected, ", received:", result)
 	}
 }
+
+func TestLen(t *testing.T) {
+	t1 := Int64Slice{2112443, 414241412, 41231241}
+	result := t1.Len()
+	expected := 3
+	if result != expected {
+		t.Error("Expected:", expected, ", received:", result)
+	}
+}
+
+func TestSwap(t *testing.T) {
+	t1 := Int64Slice{414241412, 41231241}
+	t1.Swap(0, 1)
+	var expected int64 = 414241412
+	if t1[1] != expected {
+		t.Error("Expected:", expected, ", received:", t1[1])
+	}
+}
+
+func TestLess(t *testing.T) {
+	t1 := Int64Slice{414241412, 41231241}
+	expected := false
+	if t1.Less(0, 1) != expected {
+		t.Error("Expected:", expected, ", received:", t1.Less(1, 2))
+	}
+}
