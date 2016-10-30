@@ -26,6 +26,7 @@ TMP_DIR=/tmp/cgr_asterisk_ari/asterisk
 DAEMON=/usr/sbin/asterisk
 ASTVARRUNDIR=$TMP_DIR/run
 LOGDIR=$TMP_DIR/log
+DBDIR=$TMP_DIR/lib
 CDRDIR=$LOGDIR/cdr-custom
 SPOOLDIR=$TMP_DIR/spool
 ALTCONF=$TUTDIR/etc/asterisk/asterisk.conf
@@ -73,6 +74,11 @@ fi
 if [ ! -d $SPOOLDIR ]; then
   mkdir -p $SPOOLDIR
   chown -R $AST_USER:$AST_GROUP $SPOOLDIR
+fi
+
+if [ ! -d $DBDIR ]; then
+  mkdir -p $DBDIR
+  chown -R $AST_USER:$AST_GROUP $DBDIR
 fi
 
 # Use the LSB standard functions for services management
@@ -138,6 +144,7 @@ case "$1" in
 		ASTARGS="$ASTARGS -n"
 	fi
 	# "start-stop-daemon --oknodo" returns 0 even if Asterisk was already running (as LSB expects):
+	echo "$DAEMON -- $ASTARGS"
 	start-stop-daemon --start --oknodo --exec $DAEMON -- $ASTARGS
 	log_end_msg $?
 	;;

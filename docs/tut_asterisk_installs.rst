@@ -17,6 +17,7 @@ We got Asterisk14_  installed via following commands:
  ./configure --with-pjproject-bundled
  make
  make install
+ adduser --quiet --system --group --disabled-password --shell /bin/false --gecos "Asterisk" asterisk || true
 
 Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
 
