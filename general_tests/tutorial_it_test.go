@@ -111,7 +111,6 @@ func TestTutITCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-
 	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 4, RatingProfiles: 0, Actions: 7, ActionPlans: 4, SharedGroups: 0, Aliases: 0, ResourceLimits: 0,
 		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3}
 	var args utils.AttrCacheStats
@@ -131,6 +130,30 @@ func TestTutITGetUsers(t *testing.T) {
 		t.Error("Got error on UsersV1.GetUsers: ", err.Error())
 	} else if len(users) != 3 {
 		t.Error("Calling UsersV1.GetUsers got users:", len(users))
+	}
+}
+
+func TestTutITGetMatchingAlias(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	args := engine.AttrMatchingAlias{
+		Destination: "1005",
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1006",
+		Subject:     "1006",
+		Context:     utils.ALIAS_CONTEXT_RATING,
+		Target:      "Account",
+		Original:    "1006",
+	}
+	eMatchingAlias := "1002"
+	var matchingAlias string
+	if err := tutLocalRpc.Call("AliasesV1.GetMatchingAlias", args, &matchingAlias); err != nil {
+		t.Error(err)
+	} else if matchingAlias != eMatchingAlias {
+		t.Errorf("Expecting: %s, received: %+v", eMatchingAlias, matchingAlias)
 	}
 }
 
@@ -883,6 +906,24 @@ func TestTutITLcrHighestCost(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
+	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
+	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
+	}
+	// LCR with Alias
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1006",
+		Account:     "1006",
+		Destination: "1002",
+		TimeStart:   tStart,
+		TimeEnd:     tEnd,
+	}
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
