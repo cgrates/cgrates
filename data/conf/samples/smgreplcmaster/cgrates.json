@@ -1,0 +1,30 @@
+{
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"scheduler": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"sm_generic": {
+	"enabled": true,
+	"smg_replication_conns": [
+		{"address": "127.0.0.1:22012", "transport": "*json"},
+	],
+},
+
+}

@@ -1,0 +1,25 @@
+{
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+
+
+"listen": {
+	"rpc_json": ":22012",				// RPC JSON listening address
+	"rpc_gob": ":22013",					// RPC GOB listening address
+	"http": ":22080",					// HTTP listening address
+},
+
+"rals": {
+	"enabled": true,					// enable Rater service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,					// start the CDR Server service:  <true|false>
+},
+
+"sm_generic": {
+	"enabled": true,						// starts SessionManager service: <true|false>
+	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
+},
+
+}
