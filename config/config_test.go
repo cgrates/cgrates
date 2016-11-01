@@ -26,8 +26,9 @@ import (
 )
 
 var cfg *CGRConfig
+var err error
 
-func TestConfigSharing(t *testing.T) {
+func TestCgrCfgConfigSharing(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	SetCgrConfig(cfg)
 	cfgReturn := CgrConfig()
@@ -36,7 +37,7 @@ func TestConfigSharing(t *testing.T) {
 	}
 }
 
-func TestLoadCgrCfgWithDefaults(t *testing.T) {
+func TestCgrCfgLoadWithDefaults(t *testing.T) {
 	JSN_CFG := `
 {
 "sm_freeswitch": {
@@ -127,5 +128,33 @@ func TestCgrCfgCDRC(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrCfg.CdrcProfiles, cgrCfg.CdrcProfiles) {
 		t.Errorf("Expected: %+v, received: %+v", eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0], cgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0])
+	}
+}
+
+func TestCgrCfgLoadJSONDefaults(t *testing.T) {
+	cgrCfg, err = NewCGRConfigFromJsonStringWithDefaults(CGRATES_CFG_JSON)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCgrCfgJSONDefaultsTPdb(t *testing.T) {
+	if cgrCfg.TpDbType != "redis" {
+		t.Error(cgrCfg.TpDbType)
+	}
+	if cgrCfg.TpDbHost != "127.0.0.1" {
+		t.Error(cgrCfg.TpDbHost)
+	}
+	if cgrCfg.TpDbPort != "6379" {
+		t.Error(cgrCfg.TpDbPort)
+	}
+	if cgrCfg.TpDbName != "10" {
+		t.Error(cgrCfg.TpDbName)
+	}
+	if cgrCfg.TpDbUser != "" {
+		t.Error(cgrCfg.TpDbUser)
+	}
+	if cgrCfg.TpDbPass != "" {
+		t.Error(cgrCfg.TpDbPass)
 	}
 }
