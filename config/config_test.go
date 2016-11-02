@@ -395,3 +395,63 @@ func TestCgrCfgJSONDefaultsSMs(t *testing.T) {
 		t.Error(cgrCfg.smAsteriskCfg)
 	}
 }
+
+func TestCgrCfgJSONDefaultsHistoryS(t *testing.T) {
+	if cgrCfg.HistoryServerEnabled != false {
+		t.Error(cgrCfg.HistoryServerEnabled)
+	}
+	if cgrCfg.HistoryDir != "/var/lib/cgrates/history" {
+		t.Error(cgrCfg.HistoryDir)
+	}
+	if cgrCfg.HistorySaveInterval != 1*time.Second {
+		t.Error(cgrCfg.HistorySaveInterval)
+	}
+}
+
+func TestCgrCfgJSONDefaultsPubSubS(t *testing.T) {
+	if cgrCfg.PubSubServerEnabled != false {
+		t.Error(cgrCfg.PubSubServerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsAliasesS(t *testing.T) {
+	if cgrCfg.AliasesServerEnabled != false {
+		t.Error(cgrCfg.AliasesServerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
+	if cgrCfg.UserServerEnabled != false {
+		t.Error(cgrCfg.UserServerEnabled)
+	}
+	if cgrCfg.UserServerIndexes == nil {
+		t.Error(cgrCfg.UserServerIndexes)
+	}
+}
+
+func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
+	if cgrCfg.resourceLimiterCfg == nil {
+		t.Error(cgrCfg.resourceLimiterCfg)
+	}
+}
+
+func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
+	if cgrCfg.MailerServer != "localhost" {
+		t.Error(cgrCfg.MailerServer)
+	}
+	if cgrCfg.MailerAuthUser != "cgrates" {
+		t.Error(cgrCfg.MailerAuthUser)
+	}
+	if cgrCfg.MailerAuthPass != "CGRateS.org" {
+		t.Error(cgrCfg.MailerAuthPass)
+	}
+	if cgrCfg.MailerFromAddr != "cgr-mailer@localhost.localdomain" {
+		t.Error(cgrCfg.MailerFromAddr)
+	}
+}
+
+func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
+	if cgrCfg.sureTaxCfg == nil {
+		t.Error(cgrCfg.sureTaxCfg)
+	}
+}
