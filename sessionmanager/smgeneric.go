@@ -386,7 +386,7 @@ func (smg *SMGeneric) LCRSuppliers(gev SMGenericEvent) ([]string, error) {
 }
 
 // replicateSessionsForEvent will replicate session based on configuration
-func (smg *SMGeneric) replicateSessionsForEvent(gev SMGenericEvent) (err error) {
+func (smg *SMGeneric) replicateSessionsForEvent(gev SMGenericEvent, terminate bool) (err error) {
 	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 {
 		return
 	}
@@ -402,12 +402,12 @@ func (smg *SMGeneric) replicateSessionsForEvent(gev SMGenericEvent) (err error) 
 			wg.Add(1)
 		}
 		go func(conn rpcclient.RpcClientConnection, sync bool, ss []*SMGSession) {
-			for _, s := range ss {
-				var reply string
-				if err := conn.Call("SMGenericV1.SetPassiveSession", s, &reply); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<SMGeneric> replicating session with id <%s>, run: <%s>:  received error: <%s>", gev.GetUUID(), s.RunID))
-				}
+			var reply string
+			argSet := ArgsSetPassiveSessions{OriginID: gev.GetUUID()}
+			if !terminate {
+				argSet.Sessions = ss
 			}
+			conn.Call("SMGenericV1.SetPassiveSessions", argSet, &reply)
 			if sync {
 				wg.Done()
 			}
@@ -419,7 +419,7 @@ func (smg *SMGeneric) replicateSessionsForEvent(gev SMGenericEvent) (err error) 
 
 // Called on session start
 func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClientConnection) (time.Duration, error) {
-	defer smg.replicateSessionsForEvent(gev)
+	defer smg.replicateSessionsForEvent(gev, false)
 	if err := smg.sessionStart(gev, clnt); err != nil {
 		smg.sessionEnd(gev.GetUUID(), 0)
 		return nilDuration, err
@@ -439,7 +439,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 { // Not possible to update a session with debit loop active
 		return 0, errors.New("ACTIVE_DEBIT_LOOP")
 	}
-	defer smg.replicateSessionsForEvent(gev)
+	defer smg.replicateSessionsForEvent(gev, false)
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := smg.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -480,7 +480,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 
 // Called on session end, should stop debit loop
 func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcClientConnection) error {
-	defer smg.replicateSessionsForEvent(gev)
+	defer smg.replicateSessionsForEvent(gev, true)
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := smg.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -703,27 +703,6 @@ func (smg *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSess
 	return
 }
 
-// SetPassiveSession will add or set a previously found session in passive session list
-func (smg *SMGeneric) setPassiveSession(s *SMGSession) {
-	smg.pSessionsMux.Lock()
-	if ss, hasID := smg.passiveSessions[s.EventStart.GetUUID()]; !hasID {
-		smg.passiveSessions[s.EventStart.GetUUID()] = []*SMGSession{s}
-	} else {
-		var exists bool
-		for i, oldS := range ss {
-			if oldS.RunID == s.RunID {
-				smg.passiveSessions[s.EventStart.GetUUID()][i] = s
-				exists = true
-				break
-			}
-		}
-		if !exists {
-			smg.passiveSessions[s.EventStart.GetUUID()] = append(smg.passiveSessions[s.EventStart.GetUUID()], s)
-		}
-	}
-	smg.pSessionsMux.Unlock()
-}
-
 func (smg *SMGeneric) getPassiveSessions(originID, runID string) (pss map[string][]*SMGSession) {
 	smg.pSessionsMux.RLock()
 	if originID == "" {
@@ -891,19 +870,30 @@ func (smg *SMGeneric) BiRPCV1ActiveSessionsCount(attrs utils.AttrSMGGetActiveSes
 	return nil
 }
 
+type ArgsSetPassiveSessions struct {
+	OriginID string
+	Sessions []*SMGSession
+}
+
 // BiRPCV1SetPassiveSession used for replicating SMGSessions
-func (smg *SMGeneric) BiRPCV1SetPassiveSession(s SMGSession, reply *string) error {
-	smg.setPassiveSession(&s)
+func (smg *SMGeneric) BiRPCV1SetPassiveSessions(args ArgsSetPassiveSessions, reply *string) error {
+	smg.pSessionsMux.Lock()
+	if len(args.Sessions) == 0 { // Remove
+		delete(smg.passiveSessions, args.OriginID)
+	} else { // Set with overwrite
+		smg.passiveSessions[args.OriginID] = args.Sessions
+	}
+	smg.pSessionsMux.Unlock()
 	*reply = utils.OK
 	return nil
 }
 
-type AttrGetPassiveSessions struct {
+type ArgsGetPassiveSessions struct {
 	OriginID string
 	RunID    string
 }
 
-func (smg *SMGeneric) BiRPCV1GetPassiveSessions(attrs AttrGetPassiveSessions, pSessions *map[string][]*SMGSession) error {
+func (smg *SMGeneric) BiRPCV1GetPassiveSessions(attrs ArgsGetPassiveSessions, pSessions *map[string][]*SMGSession) error {
 	if attrs.RunID != "" && attrs.OriginID == "" {
 		return utils.ErrMandatoryIeMissing
 	}

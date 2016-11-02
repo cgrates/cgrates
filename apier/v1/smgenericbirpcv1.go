@@ -85,3 +85,11 @@ func (self *SMGenericBiRpcV1) ActiveSessions(clnt *rpc2.Client, attrs utils.Attr
 func (self *SMGenericBiRpcV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
 	return self.sm.BiRPCV1ActiveSessionsCount(attrs, reply)
 }
+
+func (self *SMGenericBiRpcV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSessions, reply *string) error {
+	return self.sm.BiRPCV1SetPassiveSessions(args, reply)
+}
+
+func (self *SMGenericBiRpcV1) GetPassiveSessions(args sessionmanager.ArgsGetPassiveSessions, pSessions *map[string][]*sessionmanager.SMGSession) error {
+	return self.sm.BiRPCV1GetPassiveSessions(args, pSessions)
+}

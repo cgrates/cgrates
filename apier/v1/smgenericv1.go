@@ -126,6 +126,14 @@ func (self *SMGenericV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSession
 	return nil
 }
 
+func (self *SMGenericV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSessions, reply *string) error {
+	return self.sm.BiRPCV1SetPassiveSessions(args, reply)
+}
+
+func (self *SMGenericV1) GetPassiveSessions(args sessionmanager.ArgsGetPassiveSessions, pSessions *map[string][]*sessionmanager.SMGSession) error {
+	return self.sm.BiRPCV1GetPassiveSessions(args, pSessions)
+}
+
 // rpcclient.RpcClientConnection interface
 func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(serviceMethod, ".")

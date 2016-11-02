@@ -239,9 +239,12 @@ func TestSMGActiveSessions(t *testing.T) {
 	}
 }
 
-func TestGetSetPassiveSessions(t *testing.T) {
+func TestGetPassiveSessions(t *testing.T) {
 	smg := NewSMGeneric(smgCfg, nil, nil, nil, "UTC")
-	smGev := SMGenericEvent{
+	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 0 {
+		t.Errorf("PassiveSessions: %+v", pSS)
+	}
+	smGev1 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
 		utils.ACCID:            "12345",
@@ -265,96 +268,44 @@ func TestGetSetPassiveSessions(t *testing.T) {
 		"Extra3":               "",
 	}
 	// Index first session
-	smgSession := &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
-	if len(smg.passiveSessions) != 0 {
-		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
+	smgSession11 := &SMGSession{EventStart: smGev1, RunID: utils.META_DEFAULT}
+	smgSession12 := &SMGSession{EventStart: smGev1, RunID: "second_run"}
+	smGev2 := SMGenericEvent{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.TOR:              "*voice",
+		utils.ACCID:            "23456",
+		utils.DIRECTION:        "*out",
+		utils.ACCOUNT:          "account1",
+		utils.SUBJECT:          "subject1",
+		utils.DESTINATION:      "+4986517174963",
+		utils.CATEGORY:         "call",
+		utils.TENANT:           "cgrates.org",
+		utils.REQTYPE:          "*prepaid",
+		utils.SETUP_TIME:       "2015-11-09 14:21:24",
+		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
+		utils.USAGE:            "1m23s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.CDRHOST:          "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
 	}
-	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 0 {
-		t.Errorf("PassiveSessions: %+v", pSS)
-	}
-	smg.setPassiveSession(smgSession)
-	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 1 {
-		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
-	}
+	smgSession21 := &SMGSession{EventStart: smGev2, RunID: utils.META_DEFAULT}
+	smg.passiveSessions[smGev1.GetUUID()] = []*SMGSession{smgSession11, smgSession12}
 	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
-	// Update session
-	smGev = SMGenericEvent{
-		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
-		utils.ACCID:            "12345",
-		utils.DIRECTION:        "*out",
-		utils.ACCOUNT:          "account1",
-		utils.SUBJECT:          "subject1",
-		utils.DESTINATION:      "+4986517174963",
-		utils.CATEGORY:         "call",
-		utils.TENANT:           "cgrates.org",
-		utils.REQTYPE:          "*prepaid",
-		utils.SETUP_TIME:       "2015-11-09 14:21:24",
-		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
-		utils.USAGE:            "2m33s",
-		utils.LastUsed:         "21s",
-		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier1",
-		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
-		utils.CDRHOST:          "127.0.0.1",
-		"Extra1":               "Value1",
-		"Extra2":               5,
-		"Extra3":               "",
-	}
-	smgSession = &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
-	smg.setPassiveSession(smgSession) // Should only update in place
-	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 1 {
-		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
-	} else if ss[0].EventStart[utils.USAGE] != "2m33s" {
-		t.Errorf("SMGSession.EventStart: %+v", ss[0].EventStart[utils.USAGE])
-	}
-	// Second run
-	smgSession = &SMGSession{EventStart: smGev, RunID: "second_test"}
-	smg.setPassiveSession(smgSession)
-	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 1 || len(ss) != 2 {
-		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
-	}
-	// Update session
-	smGev = SMGenericEvent{
-		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
-		utils.ACCID:            "22345",
-		utils.DIRECTION:        "*out",
-		utils.ACCOUNT:          "account1",
-		utils.SUBJECT:          "subject1",
-		utils.DESTINATION:      "+4986517174963",
-		utils.CATEGORY:         "call",
-		utils.TENANT:           "cgrates.org",
-		utils.REQTYPE:          "*prepaid",
-		utils.SETUP_TIME:       "2015-11-09 14:21:24",
-		utils.ANSWER_TIME:      "2015-11-09 14:22:02",
-		utils.USAGE:            "2m33s",
-		utils.LastUsed:         "21s",
-		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier1",
-		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
-		utils.CDRHOST:          "127.0.0.1",
-		"Extra1":               "Value1",
-		"Extra2":               5,
-		"Extra3":               "",
-	}
-	smgSession = &SMGSession{EventStart: smGev, RunID: utils.META_DEFAULT}
-	smg.setPassiveSession(smgSession)
-	if ss, hasIt := smg.passiveSessions[smGev.GetUUID()]; !hasIt || len(smg.passiveSessions) != 2 || len(ss) != 1 {
-		t.Errorf("PassiveSessions: %+v", smg.passiveSessions)
-	} else if ss[0].EventStart[utils.USAGE] != "2m33s" {
-		t.Errorf("SMGSession.EventStart: %+v", ss[0].EventStart[utils.USAGE])
-	}
-	// Test getPassiveSessions with filters
+	smg.passiveSessions[smGev2.GetUUID()] = []*SMGSession{smgSession21}
 	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 2 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
-	if pSS := smg.getPassiveSessions("12345", ""); len(pSS) != 1 || len(pSS["12345"]) != 2 {
+	if pSS := smg.getPassiveSessions(smGev1.GetUUID(), ""); len(pSS) != 1 || len(pSS[smGev1.GetUUID()]) != 2 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
-	if pSS := smg.getPassiveSessions("12345", "second_test"); len(pSS) != 1 || len(pSS["12345"]) != 1 {
+	if pSS := smg.getPassiveSessions(smGev1.GetUUID(), smgSession12.RunID); len(pSS) != 1 || len(pSS[smGev1.GetUUID()]) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
 	if pSS := smg.getPassiveSessions("aabbcc", ""); len(pSS) != 0 {
