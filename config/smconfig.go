@@ -130,7 +130,7 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 	if jsnCfg.Smg_replication_conns != nil {
 		self.SMGReplicationConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_replication_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Smg_replication_conns {
-			self.CDRsConns[idx] = NewDfltHaPoolConfig()
+			self.SMGReplicationConns[idx] = NewDfltHaPoolConfig()
 			self.SMGReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
