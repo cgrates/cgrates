@@ -138,6 +138,75 @@ func TestCgrCfgLoadJSONDefaults(t *testing.T) {
 	}
 }
 
+func TestCgrCfgJSONDefaultsgeneral(t *testing.T) {
+	if cgrCfg.HttpSkipTlsVerify != false {
+		t.Error(cgrCfg.HttpSkipTlsVerify)
+	}
+	if cgrCfg.RoundingDecimals != 5 {
+		t.Error(cgrCfg.RoundingDecimals)
+	}
+	if cgrCfg.DBDataEncoding != "msgpack" {
+		t.Error(cgrCfg.DBDataEncoding)
+	}
+	if cgrCfg.TpExportPath != "/var/spool/cgrates/tpe" {
+		t.Error(cgrCfg.TpExportPath)
+	}
+	if cgrCfg.HttpPosterAttempts != 3 {
+		t.Error(cgrCfg.HttpPosterAttempts)
+	}
+	if cgrCfg.HttpFailedDir != "/var/spool/cgrates/http_failed" {
+		t.Error(cgrCfg.HttpFailedDir)
+	}
+	if cgrCfg.DefaultReqType != "*rated" {
+		t.Error(cgrCfg.DefaultReqType)
+	}
+	if cgrCfg.DefaultCategory != "call" {
+		t.Error(cgrCfg.DefaultCategory)
+	}
+	if cgrCfg.DefaultTenant != "cgrates.org" {
+		t.Error(cgrCfg.DefaultTenant)
+	}
+	if cgrCfg.DefaultTimezone != "Local" {
+		t.Error(cgrCfg.DefaultTimezone)
+	}
+	if cgrCfg.ConnectAttempts != 3 {
+		t.Error(cgrCfg.ConnectAttempts)
+	}
+	if cgrCfg.Reconnects != -1 {
+		t.Error(cgrCfg.Reconnects)
+	}
+	if cgrCfg.ConnectTimeout != 1*time.Second {
+		t.Error(cgrCfg.ConnectTimeout)
+	}
+	if cgrCfg.ReplyTimeout != 2*time.Second {
+		t.Error(cgrCfg.ReplyTimeout)
+	}
+	if cgrCfg.ResponseCacheTTL != 0*time.Second {
+		t.Error(cgrCfg.ResponseCacheTTL)
+	}
+	if cgrCfg.InternalTtl != 2*time.Minute {
+		t.Error(cgrCfg.InternalTtl)
+	}
+	if cgrCfg.LockingTimeout != 5*time.Second {
+		t.Error(cgrCfg.LockingTimeout)
+	}
+	if cgrCfg.LogLevel != 6 {
+		t.Error(cgrCfg.LogLevel)
+	}
+}
+
+func TestCgrCfgJSONDefaultsListen(t *testing.T) {
+	if cgrCfg.RPCJSONListen != "127.0.0.1:2012" {
+		t.Error(cgrCfg.RPCJSONListen)
+	}
+	if cgrCfg.RPCGOBListen != "127.0.0.1:2013" {
+		t.Error(cgrCfg.RPCGOBListen)
+	}
+	if cgrCfg.HTTPListen != "127.0.0.1:2080" {
+		t.Error(cgrCfg.HTTPListen)
+	}
+}
+
 func TestCgrCfgJSONDefaultsTPdb(t *testing.T) {
 	if cgrCfg.TpDbType != "redis" {
 		t.Error(cgrCfg.TpDbType)
@@ -156,5 +225,173 @@ func TestCgrCfgJSONDefaultsTPdb(t *testing.T) {
 	}
 	if cgrCfg.TpDbPass != "" {
 		t.Error(cgrCfg.TpDbPass)
+	}
+}
+
+func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
+	if cgrCfg.DataDbType != "redis" {
+		t.Error(cgrCfg.DataDbType)
+	}
+	if cgrCfg.DataDbHost != "127.0.0.1" {
+		t.Error(cgrCfg.DataDbHost)
+	}
+	if cgrCfg.DataDbPort != "6379" {
+		t.Error(cgrCfg.DataDbPort)
+	}
+	if cgrCfg.DataDbName != "11" {
+		t.Error(cgrCfg.DataDbName)
+	}
+	if cgrCfg.DataDbUser != "" {
+		t.Error(cgrCfg.DataDbUser)
+	}
+	if cgrCfg.DataDbPass != "" {
+		t.Error(cgrCfg.DataDbPass)
+	}
+	if cgrCfg.LoadHistorySize != 10 {
+		t.Error(cgrCfg.LoadHistorySize)
+	}
+}
+
+func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
+	if cgrCfg.StorDBType != "mysql" {
+		t.Error(cgrCfg.StorDBType)
+	}
+	if cgrCfg.StorDBHost != "127.0.0.1" {
+		t.Error(cgrCfg.StorDBHost)
+	}
+	if cgrCfg.StorDBPort != "3306" {
+		t.Error(cgrCfg.StorDBPort)
+	}
+	if cgrCfg.StorDBName != "cgrates" {
+		t.Error(cgrCfg.StorDBName)
+	}
+	if cgrCfg.StorDBUser != "cgrates" {
+		t.Error(cgrCfg.StorDBUser)
+	}
+	if cgrCfg.StorDBPass != "CGRateS.org" {
+		t.Error(cgrCfg.StorDBPass)
+	}
+	if cgrCfg.StorDBMaxOpenConns != 100 {
+		t.Error(cgrCfg.StorDBMaxOpenConns)
+	}
+	if cgrCfg.StorDBMaxIdleConns != 10 {
+		t.Error(cgrCfg.StorDBMaxIdleConns)
+	}
+	if cgrCfg.StorDBCDRSIndexes == nil {
+		t.Error(cgrCfg.StorDBCDRSIndexes)
+	}
+}
+
+func TestCgrCfgJSONDefaultsBalancer(t *testing.T) {
+	if cgrCfg.BalancerEnabled != false {
+		t.Error(cgrCfg.BalancerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
+	if cgrCfg.RALsEnabled != false {
+		t.Error(cgrCfg.RALsEnabled)
+	}
+	if cgrCfg.RALsBalancer != "" {
+		t.Error(cgrCfg.RALsBalancer)
+	}
+	if cgrCfg.RALsCDRStatSConns == nil {
+		t.Error(cgrCfg.RALsCDRStatSConns)
+	}
+	if cgrCfg.RALsHistorySConns == nil {
+		t.Error(cgrCfg.RALsHistorySConns)
+	}
+	if cgrCfg.RALsPubSubSConns == nil {
+		t.Error(cgrCfg.RALsPubSubSConns)
+	}
+	if cgrCfg.RALsUserSConns == nil {
+		t.Error(cgrCfg.RALsUserSConns)
+	}
+	if cgrCfg.RALsAliasSConns == nil {
+		t.Error(cgrCfg.RALsAliasSConns)
+	}
+	if cgrCfg.RpSubjectPrefixMatching != false {
+		t.Error(cgrCfg.RpSubjectPrefixMatching)
+	}
+	if cgrCfg.LcrSubjectPrefixMatching != false {
+		t.Error(cgrCfg.LcrSubjectPrefixMatching)
+	}
+}
+
+func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
+	if cgrCfg.SchedulerEnabled != false {
+		t.Error(cgrCfg.SchedulerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
+	if cgrCfg.CDRSEnabled != false {
+		t.Error(cgrCfg.CDRSEnabled)
+	}
+	if cgrCfg.CDRSExtraFields != nil {
+		t.Error(cgrCfg.CDRSExtraFields)
+	}
+	if cgrCfg.CDRSStoreCdrs != true {
+		t.Error(cgrCfg.CDRSStoreCdrs)
+	}
+	if cgrCfg.CDRScdrAccountSummary != false {
+		t.Error(cgrCfg.CDRScdrAccountSummary)
+	}
+	if cgrCfg.CDRSSMCostRetries != 5 {
+		t.Error(cgrCfg.CDRSSMCostRetries)
+	}
+	if cgrCfg.CDRSRaterConns == nil {
+		t.Error(cgrCfg.CDRSRaterConns)
+	}
+	if cgrCfg.CDRSPubSubSConns == nil {
+		t.Error(cgrCfg.CDRSPubSubSConns)
+	}
+	if cgrCfg.CDRSUserSConns == nil {
+		t.Error(cgrCfg.CDRSUserSConns)
+	}
+	if cgrCfg.CDRSAliaseSConns == nil {
+		t.Error(cgrCfg.CDRSAliaseSConns)
+	}
+	if cgrCfg.CDRSStatSConns == nil {
+		t.Error(cgrCfg.CDRSStatSConns)
+	}
+	if cgrCfg.CDRSCdrReplication == nil {
+		t.Error(cgrCfg.CDRSCdrReplication)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
+	if cgrCfg.CDRStatsEnabled != false {
+		t.Error(cgrCfg.CDRStatsEnabled)
+	}
+	if cgrCfg.CDRStatsSaveInterval != 1*time.Minute {
+		t.Error(cgrCfg.CDRStatsSaveInterval)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCdrProfiles(t *testing.T) {
+	if cgrCfg.CdreProfiles == nil {
+		t.Error(cgrCfg.CdreProfiles)
+	}
+	if cgrCfg.CdrcProfiles == nil {
+		t.Error(cgrCfg.CdrcProfiles)
+	}
+}
+
+func TestCgrCfgJSONDefaultsSMs(t *testing.T) {
+	if cgrCfg.SmGenericConfig == nil {
+		t.Error(cgrCfg.SmGenericConfig)
+	}
+	if cgrCfg.SmFsConfig == nil {
+		t.Error(cgrCfg.SmFsConfig)
+	}
+	if cgrCfg.SmKamConfig == nil {
+		t.Error(cgrCfg.SmKamConfig)
+	}
+	if cgrCfg.SmOsipsConfig == nil {
+		t.Error(cgrCfg.SmOsipsConfig)
+	}
+	if cgrCfg.smAsteriskCfg == nil {
+		t.Error(cgrCfg.smAsteriskCfg)
 	}
 }
