@@ -138,7 +138,7 @@ func TestCgrCfgLoadJSONDefaults(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsgeneral(t *testing.T) {
+func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.HttpSkipTlsVerify != false {
 		t.Error(cgrCfg.HttpSkipTlsVerify)
 	}
@@ -277,7 +277,8 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDBMaxIdleConns != 10 {
 		t.Error(cgrCfg.StorDBMaxIdleConns)
 	}
-	if cgrCfg.StorDBCDRSIndexes == nil {
+	Eslice:= []string{}
+	if !reflect.DeepEqual(cgrCfg.StorDBCDRSIndexes, Eslice){
 		t.Error(cgrCfg.StorDBCDRSIndexes)
 	}
 }
@@ -289,25 +290,28 @@ func TestCgrCfgJSONDefaultsBalancer(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
+
+	test1 := []*HaPoolConfig{}
+
 	if cgrCfg.RALsEnabled != false {
 		t.Error(cgrCfg.RALsEnabled)
 	}
 	if cgrCfg.RALsBalancer != "" {
 		t.Error(cgrCfg.RALsBalancer)
 	}
-	if cgrCfg.RALsCDRStatSConns == nil {
+if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns,test1) {
 		t.Error(cgrCfg.RALsCDRStatSConns)
 	}
-	if cgrCfg.RALsHistorySConns == nil {
+	if !reflect.DeepEqual(cgrCfg.RALsHistorySConns,test1) {
 		t.Error(cgrCfg.RALsHistorySConns)
 	}
-	if cgrCfg.RALsPubSubSConns == nil {
+	if !reflect.DeepEqual(cgrCfg.RALsPubSubSConns,test1) {
 		t.Error(cgrCfg.RALsPubSubSConns)
 	}
-	if cgrCfg.RALsUserSConns == nil {
+	if !reflect.DeepEqual(cgrCfg.RALsUserSConns,test1) {
 		t.Error(cgrCfg.RALsUserSConns)
 	}
-	if cgrCfg.RALsAliasSConns == nil {
+	if !reflect.DeepEqual(cgrCfg.RALsAliasSConns,test1) {
 		t.Error(cgrCfg.RALsAliasSConns)
 	}
 	if cgrCfg.RpSubjectPrefixMatching != false {
@@ -325,12 +329,18 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
+
+	test1 := []*HaPoolConfig{}
+
 	if cgrCfg.CDRSEnabled != false {
 		t.Error(cgrCfg.CDRSEnabled)
 	}
-	if cgrCfg.CDRSExtraFields != nil {
-		t.Error(cgrCfg.CDRSExtraFields)
+	/*
+	test4:=[]*utils.RSRField{}
+if !reflect.DeepEqual(cgrCfg.CDRSExtraFields,test4) {
+		t.Error(cgrCfg.CDRSExtraFields,test4)
 	}
+*/
 	if cgrCfg.CDRSStoreCdrs != true {
 		t.Error(cgrCfg.CDRSStoreCdrs)
 	}
@@ -340,22 +350,24 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if cgrCfg.CDRSSMCostRetries != 5 {
 		t.Error(cgrCfg.CDRSSMCostRetries)
 	}
-	if cgrCfg.CDRSRaterConns == nil {
+	test3:=[]*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}
+	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, test3) {
 		t.Error(cgrCfg.CDRSRaterConns)
 	}
-	if cgrCfg.CDRSPubSubSConns == nil {
+	if !reflect.DeepEqual(cgrCfg.CDRSPubSubSConns, test1) {
 		t.Error(cgrCfg.CDRSPubSubSConns)
 	}
-	if cgrCfg.CDRSUserSConns == nil {
+	if !reflect.DeepEqual(cgrCfg.CDRSUserSConns, test1) {
 		t.Error(cgrCfg.CDRSUserSConns)
 	}
-	if cgrCfg.CDRSAliaseSConns == nil {
+	if !reflect.DeepEqual(cgrCfg.CDRSAliaseSConns, test1) {
 		t.Error(cgrCfg.CDRSAliaseSConns)
 	}
-	if cgrCfg.CDRSStatSConns == nil {
+	if !reflect.DeepEqual(cgrCfg.CDRSStatSConns, test1) {
 		t.Error(cgrCfg.CDRSStatSConns)
 	}
-	if cgrCfg.CDRSCdrReplication == nil {
+	test2 := []*CDRReplicationCfg{}
+	if !reflect.DeepEqual(cgrCfg.CDRSCdrReplication, test2) {
 		t.Error(cgrCfg.CDRSCdrReplication)
 	}
 }
@@ -434,7 +446,22 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		t.Error(cgrCfg.resourceLimiterCfg)
 	}
 }
+/*
+func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
+test:=*DiameterAgentCfg{
+Enabled:false,
+Listen:"127.0.0.1:3868",
+DictionariesDir: "/usr/share/cgrates/diameter/dict/",
+SMGenericConns:make([]*HaPoolConfig{&HaPoolConfig{
+	Adress: utils.MetaInternal,
+	}}),
+}
 
+if !reflect.DeepEqual(cgrCfg.diameterAgentCfg, test) {
+		t.Error(cgrCfg.diameterAgentCfg)
+	}
+}
+*/
 func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
 	if cgrCfg.MailerServer != "localhost" {
 		t.Error(cgrCfg.MailerServer)
@@ -449,9 +476,36 @@ func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
 		t.Error(cgrCfg.MailerFromAddr)
 	}
 }
-
+/*
 func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
-	if cgrCfg.sureTaxCfg == nil {
+	test2 := SureTaxCfg{
+		Url:"",
+		ClientNumber: "",
+		ValidationKey:	"",
+		BusinessUnit:	"",
+		Timezone:	time.Local,
+		IncludeLocalCost:	false,
+		ReturnFileCode:"0",
+		ResponseGroup:"03",
+		ResponseType:"D4",
+		RegulatoryCode:"03",
+		ClientTracking: utils.RSRFields{utils.CGRID},
+		CustomerNumber: utils.RSRFields{"Subject"},
+		OrigNumber:	"Subject",
+		TermNumber: "Destination",
+		BillToNumber:"",
+		Zipcode:"",
+		P2PZipcode:"",
+		P2PPlus4:"",
+		Units:"^1",
+		UnitType:"^00",
+		TaxIncluded:"^0",
+		TaxSitusRule:"^04",
+		TransTypeCode:"^010101",
+		SalesTypeCode:"^R",
+		TaxExemptionCodeList:""}
+if !reflect.DeepEqual(cgrCfg.sureTaxCfg, test2) {
 		t.Error(cgrCfg.sureTaxCfg)
 	}
 }
+*/
