@@ -138,6 +138,75 @@ func TestCgrCfgLoadJSONDefaults(t *testing.T) {
 	}
 }
 
+func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
+	if cgrCfg.HttpSkipTlsVerify != false {
+		t.Error(cgrCfg.HttpSkipTlsVerify)
+	}
+	if cgrCfg.RoundingDecimals != 5 {
+		t.Error(cgrCfg.RoundingDecimals)
+	}
+	if cgrCfg.DBDataEncoding != "msgpack" {
+		t.Error(cgrCfg.DBDataEncoding)
+	}
+	if cgrCfg.TpExportPath != "/var/spool/cgrates/tpe" {
+		t.Error(cgrCfg.TpExportPath)
+	}
+	if cgrCfg.HttpPosterAttempts != 3 {
+		t.Error(cgrCfg.HttpPosterAttempts)
+	}
+	if cgrCfg.HttpFailedDir != "/var/spool/cgrates/http_failed" {
+		t.Error(cgrCfg.HttpFailedDir)
+	}
+	if cgrCfg.DefaultReqType != "*rated" {
+		t.Error(cgrCfg.DefaultReqType)
+	}
+	if cgrCfg.DefaultCategory != "call" {
+		t.Error(cgrCfg.DefaultCategory)
+	}
+	if cgrCfg.DefaultTenant != "cgrates.org" {
+		t.Error(cgrCfg.DefaultTenant)
+	}
+	if cgrCfg.DefaultTimezone != "Local" {
+		t.Error(cgrCfg.DefaultTimezone)
+	}
+	if cgrCfg.ConnectAttempts != 3 {
+		t.Error(cgrCfg.ConnectAttempts)
+	}
+	if cgrCfg.Reconnects != -1 {
+		t.Error(cgrCfg.Reconnects)
+	}
+	if cgrCfg.ConnectTimeout != 1*time.Second {
+		t.Error(cgrCfg.ConnectTimeout)
+	}
+	if cgrCfg.ReplyTimeout != 2*time.Second {
+		t.Error(cgrCfg.ReplyTimeout)
+	}
+	if cgrCfg.ResponseCacheTTL != 0*time.Second {
+		t.Error(cgrCfg.ResponseCacheTTL)
+	}
+	if cgrCfg.InternalTtl != 2*time.Minute {
+		t.Error(cgrCfg.InternalTtl)
+	}
+	if cgrCfg.LockingTimeout != 5*time.Second {
+		t.Error(cgrCfg.LockingTimeout)
+	}
+	if cgrCfg.LogLevel != 6 {
+		t.Error(cgrCfg.LogLevel)
+	}
+}
+
+func TestCgrCfgJSONDefaultsListen(t *testing.T) {
+	if cgrCfg.RPCJSONListen != "127.0.0.1:2012" {
+		t.Error(cgrCfg.RPCJSONListen)
+	}
+	if cgrCfg.RPCGOBListen != "127.0.0.1:2013" {
+		t.Error(cgrCfg.RPCGOBListen)
+	}
+	if cgrCfg.HTTPListen != "127.0.0.1:2080" {
+		t.Error(cgrCfg.HTTPListen)
+	}
+}
+
 func TestCgrCfgJSONDefaultsTPdb(t *testing.T) {
 	if cgrCfg.TpDbType != "redis" {
 		t.Error(cgrCfg.TpDbType)
@@ -158,3 +227,290 @@ func TestCgrCfgJSONDefaultsTPdb(t *testing.T) {
 		t.Error(cgrCfg.TpDbPass)
 	}
 }
+
+func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
+	if cgrCfg.DataDbType != "redis" {
+		t.Error(cgrCfg.DataDbType)
+	}
+	if cgrCfg.DataDbHost != "127.0.0.1" {
+		t.Error(cgrCfg.DataDbHost)
+	}
+	if cgrCfg.DataDbPort != "6379" {
+		t.Error(cgrCfg.DataDbPort)
+	}
+	if cgrCfg.DataDbName != "11" {
+		t.Error(cgrCfg.DataDbName)
+	}
+	if cgrCfg.DataDbUser != "" {
+		t.Error(cgrCfg.DataDbUser)
+	}
+	if cgrCfg.DataDbPass != "" {
+		t.Error(cgrCfg.DataDbPass)
+	}
+	if cgrCfg.LoadHistorySize != 10 {
+		t.Error(cgrCfg.LoadHistorySize)
+	}
+}
+
+func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
+	if cgrCfg.StorDBType != "mysql" {
+		t.Error(cgrCfg.StorDBType)
+	}
+	if cgrCfg.StorDBHost != "127.0.0.1" {
+		t.Error(cgrCfg.StorDBHost)
+	}
+	if cgrCfg.StorDBPort != "3306" {
+		t.Error(cgrCfg.StorDBPort)
+	}
+	if cgrCfg.StorDBName != "cgrates" {
+		t.Error(cgrCfg.StorDBName)
+	}
+	if cgrCfg.StorDBUser != "cgrates" {
+		t.Error(cgrCfg.StorDBUser)
+	}
+	if cgrCfg.StorDBPass != "CGRateS.org" {
+		t.Error(cgrCfg.StorDBPass)
+	}
+	if cgrCfg.StorDBMaxOpenConns != 100 {
+		t.Error(cgrCfg.StorDBMaxOpenConns)
+	}
+	if cgrCfg.StorDBMaxIdleConns != 10 {
+		t.Error(cgrCfg.StorDBMaxIdleConns)
+	}
+	Eslice := []string{}
+	if !reflect.DeepEqual(cgrCfg.StorDBCDRSIndexes, Eslice) {
+		t.Error(cgrCfg.StorDBCDRSIndexes)
+	}
+}
+
+func TestCgrCfgJSONDefaultsBalancer(t *testing.T) {
+	if cgrCfg.BalancerEnabled != false {
+		t.Error(cgrCfg.BalancerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
+
+	test1 := []*HaPoolConfig{}
+
+	if cgrCfg.RALsEnabled != false {
+		t.Error(cgrCfg.RALsEnabled)
+	}
+	if cgrCfg.RALsBalancer != "" {
+		t.Error(cgrCfg.RALsBalancer)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns, test1) {
+		t.Error(cgrCfg.RALsCDRStatSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsHistorySConns, test1) {
+		t.Error(cgrCfg.RALsHistorySConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsPubSubSConns, test1) {
+		t.Error(cgrCfg.RALsPubSubSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsUserSConns, test1) {
+		t.Error(cgrCfg.RALsUserSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsAliasSConns, test1) {
+		t.Error(cgrCfg.RALsAliasSConns)
+	}
+	if cgrCfg.RpSubjectPrefixMatching != false {
+		t.Error(cgrCfg.RpSubjectPrefixMatching)
+	}
+	if cgrCfg.LcrSubjectPrefixMatching != false {
+		t.Error(cgrCfg.LcrSubjectPrefixMatching)
+	}
+}
+
+func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
+	if cgrCfg.SchedulerEnabled != false {
+		t.Error(cgrCfg.SchedulerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
+
+	test1 := []*HaPoolConfig{}
+
+	if cgrCfg.CDRSEnabled != false {
+		t.Error(cgrCfg.CDRSEnabled)
+	}
+
+	/*	test4 := ParseRSRFieldsMustCompile("", utils.RSRFields{&utils.RSRField{Id: ""}})
+
+		if !reflect.DeepEqual(cgrCfg.CDRSExtraFields, test4) {
+			t.Error(cgrCfg.CDRSExtraFields, test4)
+		}
+	*/
+	if cgrCfg.CDRSStoreCdrs != true {
+		t.Error(cgrCfg.CDRSStoreCdrs)
+	}
+	if cgrCfg.CDRScdrAccountSummary != false {
+		t.Error(cgrCfg.CDRScdrAccountSummary)
+	}
+	if cgrCfg.CDRSSMCostRetries != 5 {
+		t.Error(cgrCfg.CDRSSMCostRetries)
+	}
+	test3 := []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}
+	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, test3) {
+		t.Error(cgrCfg.CDRSRaterConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSPubSubSConns, test1) {
+		t.Error(cgrCfg.CDRSPubSubSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSUserSConns, test1) {
+		t.Error(cgrCfg.CDRSUserSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSAliaseSConns, test1) {
+		t.Error(cgrCfg.CDRSAliaseSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSStatSConns, test1) {
+		t.Error(cgrCfg.CDRSStatSConns)
+	}
+	test2 := []*CDRReplicationCfg{}
+	if !reflect.DeepEqual(cgrCfg.CDRSCdrReplication, test2) {
+		t.Error(cgrCfg.CDRSCdrReplication)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
+	if cgrCfg.CDRStatsEnabled != false {
+		t.Error(cgrCfg.CDRStatsEnabled)
+	}
+	if cgrCfg.CDRStatsSaveInterval != 1*time.Minute {
+		t.Error(cgrCfg.CDRStatsSaveInterval)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCdrProfiles(t *testing.T) {
+	if cgrCfg.CdreProfiles == nil {
+		t.Error(cgrCfg.CdreProfiles)
+	}
+	if cgrCfg.CdrcProfiles == nil {
+		t.Error(cgrCfg.CdrcProfiles)
+	}
+}
+
+func TestCgrCfgJSONDefaultsSMs(t *testing.T) {
+	if cgrCfg.SmGenericConfig == nil {
+		t.Error(cgrCfg.SmGenericConfig)
+	}
+	if cgrCfg.SmFsConfig == nil {
+		t.Error(cgrCfg.SmFsConfig)
+	}
+	if cgrCfg.SmKamConfig == nil {
+		t.Error(cgrCfg.SmKamConfig)
+	}
+	if cgrCfg.SmOsipsConfig == nil {
+		t.Error(cgrCfg.SmOsipsConfig)
+	}
+	if cgrCfg.smAsteriskCfg == nil {
+		t.Error(cgrCfg.smAsteriskCfg)
+	}
+}
+
+func TestCgrCfgJSONDefaultsHistoryS(t *testing.T) {
+	if cgrCfg.HistoryServerEnabled != false {
+		t.Error(cgrCfg.HistoryServerEnabled)
+	}
+	if cgrCfg.HistoryDir != "/var/lib/cgrates/history" {
+		t.Error(cgrCfg.HistoryDir)
+	}
+	if cgrCfg.HistorySaveInterval != 1*time.Second {
+		t.Error(cgrCfg.HistorySaveInterval)
+	}
+}
+
+func TestCgrCfgJSONDefaultsPubSubS(t *testing.T) {
+	if cgrCfg.PubSubServerEnabled != false {
+		t.Error(cgrCfg.PubSubServerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsAliasesS(t *testing.T) {
+	if cgrCfg.AliasesServerEnabled != false {
+		t.Error(cgrCfg.AliasesServerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
+	if cgrCfg.UserServerEnabled != false {
+		t.Error(cgrCfg.UserServerEnabled)
+	}
+	if cgrCfg.UserServerIndexes == nil {
+		t.Error(cgrCfg.UserServerIndexes)
+	}
+}
+
+func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
+	if cgrCfg.resourceLimiterCfg == nil {
+		t.Error(cgrCfg.resourceLimiterCfg)
+	}
+}
+
+/*
+func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
+test:=*DiameterAgentCfg{
+Enabled:false,
+Listen:"127.0.0.1:3868",
+DictionariesDir: "/usr/share/cgrates/diameter/dict/",
+SMGenericConns:make([]*HaPoolConfig{&HaPoolConfig{
+	Adress: utils.MetaInternal,
+	}}),
+}
+
+if !reflect.DeepEqual(cgrCfg.diameterAgentCfg, test) {
+		t.Error(cgrCfg.diameterAgentCfg)
+	}
+}
+*/
+func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
+	if cgrCfg.MailerServer != "localhost" {
+		t.Error(cgrCfg.MailerServer)
+	}
+	if cgrCfg.MailerAuthUser != "cgrates" {
+		t.Error(cgrCfg.MailerAuthUser)
+	}
+	if cgrCfg.MailerAuthPass != "CGRateS.org" {
+		t.Error(cgrCfg.MailerAuthPass)
+	}
+	if cgrCfg.MailerFromAddr != "cgr-mailer@localhost.localdomain" {
+		t.Error(cgrCfg.MailerFromAddr)
+	}
+}
+
+/*
+func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
+
+	test2 := SureTaxCfg{
+		Url:                  "",
+		ClientNumber:         "",
+		ValidationKey:        "",
+		BusinessUnit:         "",
+		Timezone:             time.Local,
+		IncludeLocalCost:     false,
+		ReturnFileCode:       "0",
+		ResponseGroup:        "03",
+		ResponseType:         "D4",
+		RegulatoryCode:       "03",
+		ClientTracking:       utils.ParseRSRFieldsMustCompile("CGRID", utils.INFIELD_SEP),
+		CustomerNumber:       utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP),
+		OrigNumber:           utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP),
+		TermNumber:           utils.ParseRSRFieldsMustCompile("Destination", utils.INFIELD_SEP),
+		BillToNumber:         utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
+		Zipcode:              utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
+		P2PZipcode:           utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
+		P2PPlus4:             utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
+		Units:                utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
+		UnitType:             utils.ParseRSRFieldsMustCompile("00", utils.INFIELD_SEP),
+		TaxIncluded:          utils.ParseRSRFieldsMustCompile("0", utils.INFIELD_SEP),
+		TaxSitusRule:         utils.ParseRSRFieldsMustCompile("04", utils.INFIELD_SEP),
+		TransTypeCode:        utils.ParseRSRFieldsMustCompile("010101", utils.INFIELD_SEP),
+		SalesTypeCode:        utils.ParseRSRFieldsMustCompile("R", utils.INFIELD_SEP),
+		TaxExemptionCodeList: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg, test2) {
+		t.Error(cgrCfg.sureTaxCfg)
+	}
+}
+*/
