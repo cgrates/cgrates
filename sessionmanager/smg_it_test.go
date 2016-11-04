@@ -823,3 +823,12 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 
 }
+
+func TestSMGVoiceSessionStopCgrEngine(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+}
