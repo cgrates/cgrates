@@ -277,8 +277,13 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDBMaxIdleConns != 10 {
 		t.Error(cgrCfg.StorDBMaxIdleConns)
 	}
+<<<<<<< HEAD
 	Eslice := []string{}
 	if !reflect.DeepEqual(cgrCfg.StorDBCDRSIndexes, Eslice) {
+=======
+	Eslice:= []string{}
+	if !reflect.DeepEqual(cgrCfg.StorDBCDRSIndexes, Eslice){
+>>>>>>> bd888f6d386e0aede528038fdaa1715844f52623
 		t.Error(cgrCfg.StorDBCDRSIndexes)
 	}
 }
@@ -299,6 +304,7 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if cgrCfg.RALsBalancer != "" {
 		t.Error(cgrCfg.RALsBalancer)
 	}
+<<<<<<< HEAD
 	if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns, test1) {
 		t.Error(cgrCfg.RALsCDRStatSConns)
 	}
@@ -312,6 +318,21 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		t.Error(cgrCfg.RALsUserSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.RALsAliasSConns, test1) {
+=======
+if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns,test1) {
+		t.Error(cgrCfg.RALsCDRStatSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsHistorySConns,test1) {
+		t.Error(cgrCfg.RALsHistorySConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsPubSubSConns,test1) {
+		t.Error(cgrCfg.RALsPubSubSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsUserSConns,test1) {
+		t.Error(cgrCfg.RALsUserSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsAliasSConns,test1) {
+>>>>>>> bd888f6d386e0aede528038fdaa1715844f52623
 		t.Error(cgrCfg.RALsAliasSConns)
 	}
 	if cgrCfg.RpSubjectPrefixMatching != false {
@@ -335,6 +356,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if cgrCfg.CDRSEnabled != false {
 		t.Error(cgrCfg.CDRSEnabled)
 	}
+<<<<<<< HEAD
 
 	/*	test4 := ParseRSRFieldsMustCompile("", utils.RSRFields{&utils.RSRField{Id: ""}})
 
@@ -342,6 +364,14 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 			t.Error(cgrCfg.CDRSExtraFields, test4)
 		}
 	*/
+=======
+	/*
+	test4:=[]*utils.RSRField{}
+if !reflect.DeepEqual(cgrCfg.CDRSExtraFields,test4) {
+		t.Error(cgrCfg.CDRSExtraFields,test4)
+	}
+*/
+>>>>>>> bd888f6d386e0aede528038fdaa1715844f52623
 	if cgrCfg.CDRSStoreCdrs != true {
 		t.Error(cgrCfg.CDRSStoreCdrs)
 	}
@@ -351,7 +381,11 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if cgrCfg.CDRSSMCostRetries != 5 {
 		t.Error(cgrCfg.CDRSSMCostRetries)
 	}
+<<<<<<< HEAD
 	test3 := []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}
+=======
+	test3:=[]*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}
+>>>>>>> bd888f6d386e0aede528038fdaa1715844f52623
 	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, test3) {
 		t.Error(cgrCfg.CDRSRaterConns)
 	}
@@ -447,7 +481,10 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		t.Error(cgrCfg.resourceLimiterCfg)
 	}
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> bd888f6d386e0aede528038fdaa1715844f52623
 /*
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 test:=*DiameterAgentCfg{
@@ -478,6 +515,7 @@ func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
 		t.Error(cgrCfg.MailerFromAddr)
 	}
 }
+<<<<<<< HEAD
 
 /*
 func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
@@ -510,6 +548,37 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 		TaxExemptionCodeList: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg, test2) {
+=======
+/*
+func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
+	test2 := SureTaxCfg{
+		Url:"",
+		ClientNumber: "",
+		ValidationKey:	"",
+		BusinessUnit:	"",
+		Timezone:	time.Local,
+		IncludeLocalCost:	false,
+		ReturnFileCode:"0",
+		ResponseGroup:"03",
+		ResponseType:"D4",
+		RegulatoryCode:"03",
+		ClientTracking: utils.RSRFields{utils.CGRID},
+		CustomerNumber: utils.RSRFields{"Subject"},
+		OrigNumber:	"Subject",
+		TermNumber: "Destination",
+		BillToNumber:"",
+		Zipcode:"",
+		P2PZipcode:"",
+		P2PPlus4:"",
+		Units:"^1",
+		UnitType:"^00",
+		TaxIncluded:"^0",
+		TaxSitusRule:"^04",
+		TransTypeCode:"^010101",
+		SalesTypeCode:"^R",
+		TaxExemptionCodeList:""}
+if !reflect.DeepEqual(cgrCfg.sureTaxCfg, test2) {
+>>>>>>> bd888f6d386e0aede528038fdaa1715844f52623
 		t.Error(cgrCfg.sureTaxCfg)
 	}
 }
