@@ -71,6 +71,7 @@ type SMGeneric struct {
 	passiveSessions    map[string][]*SMGSession              // group passive sessions
 	pSessionsMux       sync.RWMutex
 	sessionTerminators map[string]*smgSessionTerminator // terminate and cleanup the session if timer expires
+	sTsMux             sync.Mutex                       // protects sessionTerminators
 	responseCache      *cache.ResponseCache             // cache replies here
 }
 type smgSessionTerminator struct {
@@ -81,7 +82,45 @@ type smgSessionTerminator struct {
 	ttlUsage    *time.Duration
 }
 
-// Updates the timer for the session to a new ttl and terminate info
+// setSessionTerminator installs a new terminator for a session
+func (smg *SMGeneric) setSessionTerminator(s *SMGSession) {
+	ttl := smg.cgrCfg.SmGenericConfig.SessionTTL
+	if ttlEv := s.EventStart.GetSessionTTL(); ttlEv != 0 {
+		ttl = ttlEv
+	}
+	if ttl == 0 {
+		return
+	}
+	smg.sTsMux.Lock()
+	defer smg.sTsMux.Unlock()
+	uuid := s.EventStart.GetUUID()
+	if _, found := smg.sessionTerminators[uuid]; found { // already there, no need to set up
+		return
+	}
+	timer := time.NewTimer(ttl)
+	endChan := make(chan bool, 1)
+	terminator := &smgSessionTerminator{
+		timer:       timer,
+		endChan:     endChan,
+		ttl:         ttl,
+		ttlLastUsed: s.EventStart.GetSessionTTLLastUsed(),
+		ttlUsage:    s.EventStart.GetSessionTTLUsage(),
+	}
+	smg.sessionTerminators[uuid] = terminator
+	go func() {
+		select {
+		case <-timer.C:
+			smg.ttlTerminate(s, terminator)
+		case <-endChan:
+			timer.Stop()
+		}
+		smg.sTsMux.Lock()
+		delete(smg.sessionTerminators, uuid)
+		smg.sTsMux.Unlock()
+	}()
+}
+
+// resetTerminatorTimer updates the timer for the session to a new ttl and terminate info
 func (smg *SMGeneric) resetTerminatorTimer(uuid string, ttl time.Duration, ttlLastUsed, ttlUsage *time.Duration) {
 	smg.aSessionsMux.RLock()
 	if st, found := smg.sessionTerminators[uuid]; found {
@@ -99,7 +138,7 @@ func (smg *SMGeneric) resetTerminatorTimer(uuid string, ttl time.Duration, ttlLa
 	smg.aSessionsMux.RUnlock()
 }
 
-// Called when a session timeouts
+// ttlTerminate is called when a session times-out
 func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	debitUsage := tmtr.ttl
 	if tmtr.ttlUsage != nil {
@@ -123,33 +162,7 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 func (smg *SMGeneric) recordASession(uuid string, s *SMGSession) {
 	smg.aSessionsMux.Lock()
 	smg.activeSessions[uuid] = append(smg.activeSessions[uuid], s)
-	if smg.cgrCfg.SmGenericConfig.SessionTTL != 0 {
-		if _, found := smg.sessionTerminators[uuid]; !found {
-			ttl := smg.cgrCfg.SmGenericConfig.SessionTTL
-			if ttlEv := s.EventStart.GetSessionTTL(); ttlEv != 0 {
-				ttl = ttlEv
-			}
-			timer := time.NewTimer(ttl)
-			endChan := make(chan bool, 1)
-			terminator := &smgSessionTerminator{
-				timer:       timer,
-				endChan:     endChan,
-				ttl:         ttl,
-				ttlLastUsed: s.EventStart.GetSessionTTLLastUsed(),
-				ttlUsage:    s.EventStart.GetSessionTTLUsage(),
-			}
-			smg.sessionTerminators[uuid] = terminator
-			go func() {
-				select {
-				case <-timer.C:
-					smg.ttlTerminate(s, terminator)
-				case <-endChan:
-					timer.Stop()
-				}
-			}()
-
-		}
-	}
+	smg.setSessionTerminator(s)
 	smg.indexASession(uuid, s)
 	smg.aSessionsMux.Unlock()
 }
@@ -164,7 +177,6 @@ func (smg *SMGeneric) unrecordASession(uuid string) bool {
 	delete(smg.activeSessions, uuid)
 	if st, found := smg.sessionTerminators[uuid]; found {
 		st.endChan <- true
-		delete(smg.sessionTerminators, uuid)
 	}
 	smg.unindexASession(uuid)
 	return true
