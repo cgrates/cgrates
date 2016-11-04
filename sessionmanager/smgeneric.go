@@ -105,7 +105,11 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	if tmtr.ttlUsage != nil {
 		debitUsage = *tmtr.ttlUsage
 	}
-	for _, s := range smg.getASession(s.EventStart.GetUUID()) {
+	aSessions := smg.getASession(s.EventStart.GetUUID())
+	if len(aSessions) == 0 { // will not continue if the session is not longer active
+		return
+	}
+	for _, s := range aSessions {
 		s.debit(debitUsage, tmtr.ttlLastUsed)
 	}
 	smg.sessionEnd(s.EventStart.GetUUID(), s.TotalUsage)
