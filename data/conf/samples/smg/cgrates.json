@@ -5,7 +5,6 @@
 // Starts rater, scheduler
 
 "general": {
-    "response_cache_ttl": "1s",
     "log_level": 8,
 },
 
