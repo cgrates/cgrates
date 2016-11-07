@@ -279,7 +279,7 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 	pdd, _ := s.eventStart.GetPdd(utils.META_DEFAULT)
 	for _, sessionRun := range s.sessionRuns {
 		aSession := &ActiveSession{
-			CgrId:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
+			CGRID:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			TOR:         utils.VOICE,
 			OriginID:    s.eventStart.GetUUID(),
 			CdrHost:     s.eventStart.GetOriginatorIP(utils.META_DEFAULT),
@@ -325,7 +325,7 @@ func (s *Session) AsMapStringIface() (map[string]interface{}, error) {
 
 // Will be used when displaying active sessions via RPC
 type ActiveSession struct {
-	CgrId         string
+	CGRID         string
 	TOR           string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
 	OriginID      string            // represents the unique accounting id given by the telecom switch generating the CDR
 	CdrHost       string            // represents the IP address of the host generating the CDR (automatically populated by the server)

@@ -132,14 +132,15 @@ func TestSMGRplcInitiate(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
 	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if _, hasOriginID := pSessions[smgEv.GetUUID()]; !hasOriginID {
+	} else if _, hasOriginID := pSessions[cgrID]; !hasOriginID {
 		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if pSessions[smgEv.GetUUID()][0].TotalUsage != time.Duration(90*time.Second) {
-		t.Errorf("PassiveSession: %+v", pSessions[smgEv.GetUUID()][0])
+	} else if pSessions[cgrID][0].TotalUsage != time.Duration(90*time.Second) {
+		t.Errorf("PassiveSession: %+v", pSessions[cgrID][0])
 	}
 }
 
@@ -160,15 +161,16 @@ func TestSMGRplcUpdate(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
 	var pSessions map[string][]*SMGSession
 	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if _, hasOriginID := pSessions[smgEv.GetUUID()]; !hasOriginID {
+	} else if _, hasOriginID := pSessions[cgrID]; !hasOriginID {
 		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if pSessions[smgEv.GetUUID()][0].TotalUsage != time.Duration(150*time.Second) {
-		t.Errorf("PassiveSession: %+v", pSessions[smgEv.GetUUID()][0])
+	} else if pSessions[cgrID][0].TotalUsage != time.Duration(150*time.Second) {
+		t.Errorf("PassiveSession: %+v", pSessions[cgrID][0])
 	}
 }
 

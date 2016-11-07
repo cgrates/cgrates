@@ -35,6 +35,11 @@ var (
 
 type SMGenericEvent map[string]interface{}
 
+func (ev SMGenericEvent) HasField(fieldName string) (hasField bool) {
+	_, hasField = ev[fieldName]
+	return
+}
+
 func (self SMGenericEvent) GetName() string {
 	result, _ := utils.ConvertIfaceToString(self[utils.EVENT_NAME])
 	return result
@@ -48,19 +53,22 @@ func (self SMGenericEvent) GetTOR(fieldName string) string {
 	return result
 }
 
-func (self SMGenericEvent) GetCgrId(timezone string) string {
-	//setupTime, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
-	//return utils.Sha1(self.GetUUID(), setupTime.UTC().String())
-	return utils.Sha1(self.GetUUID())
+func (self SMGenericEvent) GetCGRID(oIDFieldName string) string {
+	return utils.Sha1(self.GetOriginID(oIDFieldName), self.GetOriginatorIP(utils.META_DEFAULT))
 }
 
-func (self SMGenericEvent) GetUUID() string {
-	result, _ := utils.ConvertIfaceToString(self[utils.ACCID])
+// GetOriginID returns the OriginID from event
+// fieldName offers the possibility to extract info from other fields, eg: InitialOriginID
+func (self SMGenericEvent) GetOriginID(fieldName string) string {
+	if fieldName == utils.META_DEFAULT {
+		fieldName = utils.ACCID
+	}
+	result, _ := utils.ConvertIfaceToString(self[fieldName])
 	return result
 }
 
 func (self SMGenericEvent) GetSessionIds() []string {
-	return []string{self.GetUUID()}
+	return []string{self.GetOriginID(utils.META_DEFAULT)}
 }
 
 func (self SMGenericEvent) GetDirection(fieldName string) string {
@@ -321,11 +329,11 @@ func (self SMGenericEvent) MissingParameter(timezone string) bool {
 func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
 	switch rsrFld.Id {
 	case utils.CGRID:
-		return rsrFld.ParseValue(self.GetCgrId(timezone))
+		return rsrFld.ParseValue(self.GetCGRID(utils.META_DEFAULT))
 	case utils.TOR:
 		return rsrFld.ParseValue(utils.VOICE)
 	case utils.ACCID:
-		return rsrFld.ParseValue(self.GetUUID())
+		return rsrFld.ParseValue(self.GetOriginID(utils.META_DEFAULT))
 	case utils.CDRHOST:
 		return rsrFld.ParseValue(self.GetOriginatorIP(utils.META_DEFAULT))
 	case utils.CDRSOURCE:
@@ -378,9 +386,9 @@ func (self SMGenericEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 
 func (self SMGenericEvent) AsStoredCdr(cfg *config.CGRConfig, timezone string) *engine.CDR {
 	storCdr := engine.NewCDRWithDefaults(cfg)
-	storCdr.CGRID = self.GetCgrId(timezone)
+	storCdr.CGRID = self.GetCGRID(utils.META_DEFAULT)
 	storCdr.ToR = utils.FirstNonEmpty(self.GetTOR(utils.META_DEFAULT), storCdr.ToR) // Keep default if none in the event
-	storCdr.OriginID = self.GetUUID()
+	storCdr.OriginID = self.GetOriginID(utils.META_DEFAULT)
 	storCdr.OriginHost = self.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = self.GetCdrSource()
 	storCdr.RequestType = utils.FirstNonEmpty(self.GetReqType(utils.META_DEFAULT), storCdr.RequestType)

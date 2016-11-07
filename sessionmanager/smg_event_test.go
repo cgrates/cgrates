@@ -54,11 +54,11 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	if smGev.GetName() != "TEST_EVENT" {
 		t.Error("Unexpected: ", smGev.GetName())
 	}
-	if smGev.GetCgrId("UTC") != "8cb2237d0679ca88db6464eac60da96345513964" {
-		t.Error("Unexpected: ", smGev.GetCgrId("UTC"))
+	if smGev.GetCGRID(utils.META_DEFAULT) != "cade401f46f046311ed7f62df3dfbb84adb98aad" {
+		t.Error("Unexpected: ", smGev.GetCGRID(utils.META_DEFAULT))
 	}
-	if smGev.GetUUID() != "12345" {
-		t.Error("Unexpected: ", smGev.GetUUID())
+	if smGev.GetOriginID(utils.META_DEFAULT) != "12345" {
+		t.Error("Unexpected: ", smGev.GetOriginID(utils.META_DEFAULT))
 	}
 	if !reflect.DeepEqual(smGev.GetSessionIds(), []string{"12345"}) {
 		t.Error("Unexpected: ", smGev.GetSessionIds())
@@ -152,7 +152,7 @@ func TestSMGenericEventAsStoredCdr(t *testing.T) {
 	smGev[utils.CDRHOST] = "10.0.3.15"
 	smGev["Extra1"] = "Value1"
 	smGev["Extra2"] = 5
-	eStoredCdr := &engine.CDR{CGRID: "8cb2237d0679ca88db6464eac60da96345513964",
+	eStoredCdr := &engine.CDR{CGRID: "70c4d16dce41d1f2777b4e8442cff39cf87f5f19",
 		ToR: utils.SMS, OriginID: "12345", OriginHost: "10.0.3.15", Source: "SMG_TEST_EVENT", RequestType: utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "account1", Subject: "subject1",
 		Destination: "+4986517174963", SetupTime: time.Date(2015, 11, 9, 14, 21, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 9, 14, 22, 2, 0, time.UTC),

@@ -30,6 +30,7 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
+	CGRID         string         // Unique identifier for this session
 	EventStart    SMGenericEvent // Event which started
 	stopDebit     chan struct{}  // Channel to communicate with debit loops when closing the session
 	RunID         string         // Keep a reference for the derived run
@@ -42,7 +43,7 @@ type SMGSession struct {
 	LastDebit     time.Duration                 // last real debited duration
 	TotalUsage    time.Duration                 // sum of lastUsage
 	clntConn      rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
-	rater         rpcclient.RpcClientConnection // Connector to Rater service
+	rals          rpcclient.RpcClientConnection // Connector to rals service
 	cdrsrv        rpcclient.RpcClientConnection // Connector to CDRS service
 }
 
@@ -56,19 +57,19 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 			return
 		case <-time.After(sleepDur):
 			if maxDebit, err := self.debit(debitInterval, nil); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit operation on session: %s, error: %s", self.EventStart.GetUUID(), err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit operation on session: %s, error: %s", self.CGRID, err.Error()))
 				disconnectReason := SYSTEM_ERROR
 				if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 					disconnectReason = err.Error()
 				}
 				if err := self.disconnectSession(disconnectReason); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.EventStart.GetUUID(), err.Error()))
+					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.CGRID, err.Error()))
 				}
 				return
 			} else if maxDebit < debitInterval {
 				time.Sleep(maxDebit)
 				if err := self.disconnectSession(INSUFFICIENT_FUNDS); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.EventStart.GetUUID(), err.Error()))
+					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.CGRID, err.Error()))
 				}
 				return
 			}
@@ -108,7 +109,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.CD.TimeEnd = self.CD.TimeStart.Add(dur)
 	self.CD.DurationIndex += dur
 	cc := &engine.CallCost{}
-	if err := self.rater.Call("Responder.MaxDebit", self.CD, cc); err != nil {
+	if err := self.rals.Call("Responder.MaxDebit", self.CD, cc); err != nil {
 		self.LastUsage = 0
 		self.LastDebit = 0
 		return 0, err
@@ -189,7 +190,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 		cd.RunID = self.CD.RunID
 		cd.Increments.Compress()
 		var response float64
-		err := self.rater.Call("Responder.RefundIncrements", cd, &response)
+		err := self.rals.Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {
 			return err
 		}
@@ -231,7 +232,7 @@ func (self *SMGSession) disconnectSession(reason string) error {
 // Merge the sum of costs and sends it to CDRS for storage
 // originID could have been changed from original event, hence passing as argument here
 // pass cc as the clone of original to avoid concurrency issues
-func (self *SMGSession) saveOperations(originID string) error {
+func (self *SMGSession) saveOperations(cgrID string) error {
 	if len(self.CallCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
@@ -244,26 +245,26 @@ func (self *SMGSession) saveOperations(originID string) error {
 		cd.RunID = self.CD.RunID
 		cd.Increments = roundIncrements
 		var response float64
-		if err := self.rater.Call("Responder.RefundRounding", cd, &response); err != nil {
+		if err := self.rals.Call("Responder.RefundRounding", cd, &response); err != nil {
 			return err
 		}
 	}
 	smCost := &engine.SMCost{
-		CGRID:       self.EventStart.GetCgrId(self.Timezone),
+		CGRID:       self.CGRID,
 		CostSource:  utils.SESSION_MANAGER_SOURCE,
 		RunID:       self.RunID,
 		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
-		OriginID:    originID,
+		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
 		Usage:       self.TotalUsage.Seconds(),
 		CostDetails: cc,
 	}
 	if len(smCost.CostDetails.Timespans) > MaxTimespansInCost { // Merge since we will get a callCost too big
 		if err := utils.Clone(cc, &smCost.CostDetails); err != nil { // Avoid concurrency on CC
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not clone callcost for sessionID: %s, RunID: %s, error: %s", originID, self.RunID, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not clone callcost for sessionID: %s, RunID: %s, error: %s", cgrID, self.RunID, err.Error()))
 		}
 		go func(smCost *engine.SMCost) { // could take longer than the locked stage
 			if err := self.storeSMCost(smCost); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not store callcost for sessionID: %s, RunID: %s, error: %s", originID, self.RunID, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not store callcost for sessionID: %s, RunID: %s, error: %s", cgrID, self.RunID, err.Error()))
 			}
 		}(smCost)
 	} else {
@@ -294,10 +295,10 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 	aTime, _ := self.EventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
 	pdd, _ := self.EventStart.GetPdd(utils.META_DEFAULT)
 	aSession := &ActiveSession{
-		CgrId:       self.EventStart.GetCgrId(timezone),
+		CGRID:       self.CGRID,
 		TOR:         self.EventStart.GetTOR(utils.META_DEFAULT),
 		RunID:       self.RunID,
-		OriginID:    self.EventStart.GetUUID(),
+		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
 		CdrHost:     self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
 		CdrSource:   self.EventStart.GetCdrSource(),
 		ReqType:     self.EventStart.GetReqType(utils.META_DEFAULT),

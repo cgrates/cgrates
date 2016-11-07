@@ -230,7 +230,7 @@ func (sma *SMAsterisk) ServiceShutdown() error {
 
 // Internal method to disconnect session in asterisk
 func (sma *SMAsterisk) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
-	channelID := SMGenericEvent(args.EventStart).GetUUID()
+	channelID := SMGenericEvent(args.EventStart).GetOriginID(utils.META_DEFAULT)
 	if err := sma.hangupChannel(channelID); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), channelID))
 	}
