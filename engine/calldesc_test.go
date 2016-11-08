@@ -284,7 +284,7 @@ func TestGetCostRounding(t *testing.T) {
 func TestDebitRounding(t *testing.T) {
 	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2017, time.February, 2, 17, 33, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "round", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "round", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, AllowNegative: true}
 	result, _ := cd.Debit()
 	if result.Cost != 0.30006 || result.GetConnectFee() != 0 { // should be 0.3 :(
 		t.Error("bad cost", utils.ToIJSON(result))
@@ -294,7 +294,7 @@ func TestDebitRounding(t *testing.T) {
 func TestDebitPerformRounding(t *testing.T) {
 	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2017, time.February, 2, 17, 33, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "round", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, PerformRounding: true}
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "round", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, PerformRounding: true, AllowNegative: true}
 	result, _ := cd.Debit()
 	if result.Cost != 0.3001 || result.GetConnectFee() != 0 { // should be 0.3 :(
 		t.Error("bad cost", utils.ToIJSON(result))
@@ -793,15 +793,16 @@ func TestDebitRatingInfoOnZeroTime(t *testing.T) {
 		at.Execute()
 	}
 	cd := &CallDescriptor{
-		Direction:    "*out",
-		Category:     "call",
-		Tenant:       "cgrates.org",
-		Subject:      "dy",
-		Account:      "dy",
-		Destination:  "0723123113",
-		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
-		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
-		MaxCostSoFar: 0,
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "dy",
+		Account:       "dy",
+		Destination:   "0723123113",
+		TimeStart:     time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:       time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		MaxCostSoFar:  0,
+		AllowNegative: true,
 	}
 	cc, err := cd.Debit()
 	if err != nil ||
@@ -918,6 +919,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 		TimeEnd:         time.Date(2016, 3, 4, 13, 53, 00, 0, time.UTC),
 		MaxCostSoFar:    0,
 		PerformRounding: true,
+		AllowNegative:   true,
 	}
 	acc, err := accountingStorage.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
@@ -1202,14 +1204,15 @@ func TestMaxDebitDurationNoGreatherThanInitialDuration(t *testing.T) {
 
 func TestDebitAndMaxDebit(t *testing.T) {
 	cd1 := &CallDescriptor{
-		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
-		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 10, 0, time.UTC),
-		Direction:   "*out",
-		Category:    "0",
-		Tenant:      "vdf",
-		Subject:     "minu_from_tm",
-		Account:     "minu",
-		Destination: "0723",
+		TimeStart:     time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 10, 21, 18, 34, 10, 0, time.UTC),
+		Direction:     "*out",
+		Category:      "0",
+		Tenant:        "vdf",
+		Subject:       "minu_from_tm",
+		Account:       "minu",
+		Destination:   "0723",
+		AllowNegative: true,
 	}
 	cd2 := cd1.Clone()
 	cc1, err1 := cd1.Debit()

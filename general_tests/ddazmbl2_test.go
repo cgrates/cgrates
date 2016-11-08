@@ -144,14 +144,15 @@ func TestExecuteActions2(t *testing.T) {
 
 func TestDebit2(t *testing.T) {
 	cd := &engine.CallDescriptor{
-		Direction:   "*out",
-		Category:    "call",
-		Tenant:      "cgrates.org",
-		Subject:     "12345",
-		Account:     "12345",
-		Destination: "447956933443",
-		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 10, 0, time.UTC),
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "12345",
+		Account:       "12345",
+		Destination:   "447956933443",
+		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, 3, 4, 6, 0, 10, 0, time.UTC),
+		AllowNegative: true,
 	}
 	if cc, err := cd.Debit(); err != nil {
 		t.Error(err)
