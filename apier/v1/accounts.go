@@ -392,7 +392,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(accID); err != nil {
-		// create account if not exists
+		// create account if does not exist
 		account := &engine.Account{
 			ID: accID,
 		}

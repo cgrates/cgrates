@@ -59,7 +59,11 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals rpcclient.RpcClientConnection, 
 		activeSessions:     make(map[string][]*SMGSession),
 		aSessionsIdxCfg:    aSessIdxCfg,
 		aSessionsIndex:     make(map[string]map[string]utils.StringMap),
+		aSessionsRIndex:    make(map[string][]*riFieldNameVal),
 		passiveSessions:    make(map[string][]*SMGSession),
+		pSessionsIdxCfg:    utils.StringMap{utils.ACCID: true},
+		pSessionsIndex:     make(map[string]map[string]utils.StringMap),
+		pSessionsRIndex:    make(map[string][]*riFieldNameVal),
 		sessionTerminators: make(map[string]*smgSessionTerminator),
 		responseCache:      cache.NewResponseCache(cgrCfg.ResponseCacheTTL)}
 }
@@ -74,12 +78,22 @@ type SMGeneric struct {
 	aSessionsMux       sync.RWMutex
 	aSessionsIdxCfg    utils.StringMap                       // index configuration
 	aSessionsIndex     map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[cgrID]
+	aSessionsRIndex    map[string][]*riFieldNameVal          // reverse indexes for active sessions, used on remove
 	aSIMux             sync.RWMutex                          // protects aSessionsIndex
 	passiveSessions    map[string][]*SMGSession              // group passive sessions
 	pSessionsMux       sync.RWMutex
-	sessionTerminators map[string]*smgSessionTerminator // terminate and cleanup the session if timer expires
-	sTsMux             sync.Mutex                       // protects sessionTerminators
-	responseCache      *cache.ResponseCache             // cache replies here
+	pSessionsIdxCfg    utils.StringMap
+	pSessionsIndex     map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[cgrID]
+	pSessionsRIndex    map[string][]*riFieldNameVal          // reverse indexes for active sessions, used on remove
+	pSIMux             sync.RWMutex                          // protects pSessionsIndex
+	sessionTerminators map[string]*smgSessionTerminator      // terminate and cleanup the session if timer expires
+	sTsMux             sync.Mutex                            // protects sessionTerminators
+	responseCache      *cache.ResponseCache                  // cache replies here
+}
+
+// riFieldNameVal is a reverse index entry
+type riFieldNameVal struct {
+	fieldName, fieldValue string
 }
 
 type smgSessionTerminator struct {
@@ -213,29 +227,81 @@ func (smg *SMGeneric) indexASession(s *SMGSession) bool {
 			smg.aSessionsIndex[fieldName][fieldVal] = make(utils.StringMap)
 		}
 		smg.aSessionsIndex[fieldName][fieldVal][s.CGRID] = true
+		if _, hasIt := smg.aSessionsRIndex[s.CGRID]; !hasIt {
+			smg.aSessionsRIndex[s.CGRID] = make([]*riFieldNameVal, 0)
+		}
+		smg.aSessionsRIndex[s.CGRID] = append(smg.aSessionsRIndex[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
 	}
 	return true
 }
 
 // unindexASession removes a session from indexes
-func (smg *SMGeneric) unindexASession(cgrID string) (found bool) {
+func (smg *SMGeneric) unindexASession(cgrID string) bool {
 	smg.aSIMux.Lock()
 	defer smg.aSIMux.Unlock()
-	for fldName := range smg.aSessionsIndex {
-		for fldVal := range smg.aSessionsIndex[fldName] {
-			if _, hasCGRID := smg.aSessionsIndex[fldName][fldVal][cgrID]; hasCGRID {
-				found = true
-				delete(smg.aSessionsIndex[fldName][fldVal], cgrID)
-				if len(smg.aSessionsIndex[fldName][fldVal]) == 0 {
-					delete(smg.aSessionsIndex[fldName], fldVal)
-				}
-				if len(smg.aSessionsIndex[fldName]) == 0 {
-					delete(smg.aSessionsIndex, fldName)
-				}
-			}
+	if _, hasIt := smg.aSessionsRIndex[cgrID]; !hasIt {
+		return false
+	}
+	for _, riFNV := range smg.aSessionsRIndex[cgrID] {
+		delete(smg.aSessionsIndex[riFNV.fieldName][riFNV.fieldValue], cgrID)
+		if len(smg.aSessionsIndex[riFNV.fieldName][riFNV.fieldValue]) == 0 {
+			delete(smg.aSessionsIndex[riFNV.fieldName], riFNV.fieldValue)
+		}
+		if len(smg.aSessionsIndex[riFNV.fieldName]) == 0 {
+			delete(smg.aSessionsIndex, riFNV.fieldName)
 		}
 	}
-	return
+	delete(smg.aSessionsRIndex, cgrID)
+	return true
+}
+
+// indexASession explores settings and builds smg.pSessionsIndex based on that
+func (smg *SMGeneric) indexPSession(s *SMGSession) bool {
+	smg.pSIMux.Lock()
+	defer smg.pSIMux.Unlock()
+	for fieldName := range smg.pSessionsIdxCfg {
+		fieldVal, err := utils.ReflectFieldAsString(s.EventStart, fieldName, "")
+		if err != nil {
+			if err == utils.ErrNotFound {
+				fieldVal = utils.NOT_AVAILABLE
+			} else {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Error retrieving field: %s from event: %+v", fieldName, s.EventStart))
+				continue
+			}
+		}
+		if fieldVal == "" {
+			fieldVal = utils.MetaEmpty
+		}
+		if _, hasFieldName := smg.pSessionsIndex[fieldName]; !hasFieldName { // Init it here so we can minimize
+			smg.pSessionsIndex[fieldName] = make(map[string]utils.StringMap)
+		}
+		if _, hasFieldVal := smg.pSessionsIndex[fieldName][fieldVal]; !hasFieldVal {
+			smg.pSessionsIndex[fieldName][fieldVal] = make(utils.StringMap)
+		}
+		smg.pSessionsIndex[fieldName][fieldVal][s.CGRID] = true
+		smg.pSessionsRIndex[s.CGRID] = append(smg.pSessionsRIndex[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
+	}
+	return true
+}
+
+// unindexASession removes a session from indexes
+func (smg *SMGeneric) unindexPSession(cgrID string) bool {
+	smg.pSIMux.Lock()
+	defer smg.pSIMux.Unlock()
+	if _, hasIt := smg.aSessionsRIndex[cgrID]; !hasIt {
+		return false
+	}
+	for _, riFNV := range smg.aSessionsRIndex[cgrID] {
+		delete(smg.aSessionsIndex[riFNV.fieldName][riFNV.fieldValue], cgrID)
+		if len(smg.aSessionsIndex[riFNV.fieldName][riFNV.fieldValue]) == 0 {
+			delete(smg.aSessionsIndex[riFNV.fieldName], riFNV.fieldValue)
+		}
+		if len(smg.aSessionsIndex[riFNV.fieldName]) == 0 {
+			delete(smg.aSessionsIndex, riFNV.fieldName)
+		}
+	}
+	delete(smg.aSessionsRIndex, cgrID)
+	return true
 }
 
 // getSessionIDsMatchingIndexes will check inside indexes if it can find sessionIDs matching all filters
