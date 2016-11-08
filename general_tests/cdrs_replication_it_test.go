@@ -96,7 +96,8 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1, time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil)
+	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1,
+		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -113,13 +114,15 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	cdrsSlaveRpc, err := rpcclient.NewRpcClient("tcp", "127.0.0.1:12012", 1, 1, time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil)
+	cdrsSlaveRpc, err := rpcclient.NewRpcClient("tcp", "127.0.0.1:12012", 1, 1,
+		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
 	var rcvedCdrs []*engine.ExternalCDR
-	if err := cdrsSlaveRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
+	if err := cdrsSlaveRpc.Call("ApierV2.GetCdrs",
+		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))

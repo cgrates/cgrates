@@ -698,7 +698,8 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	}
 	var client rpcclient.RpcClientConnection
 	if req.Address != utils.MetaInternal {
-		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0, config.CgrConfig().ConnectTimeout, config.CgrConfig().ReplyTimeout, req.Transport, nil); err != nil {
+		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0,
+			config.CgrConfig().ConnectTimeout, config.CgrConfig().ReplyTimeout, req.Transport, nil, false); err != nil {
 			return err
 		}
 	} else {
