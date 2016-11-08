@@ -288,19 +288,19 @@ func (smg *SMGeneric) indexPSession(s *SMGSession) bool {
 func (smg *SMGeneric) unindexPSession(cgrID string) bool {
 	smg.pSIMux.Lock()
 	defer smg.pSIMux.Unlock()
-	if _, hasIt := smg.aSessionsRIndex[cgrID]; !hasIt {
+	if _, hasIt := smg.pSessionsRIndex[cgrID]; !hasIt {
 		return false
 	}
-	for _, riFNV := range smg.aSessionsRIndex[cgrID] {
-		delete(smg.aSessionsIndex[riFNV.fieldName][riFNV.fieldValue], cgrID)
-		if len(smg.aSessionsIndex[riFNV.fieldName][riFNV.fieldValue]) == 0 {
-			delete(smg.aSessionsIndex[riFNV.fieldName], riFNV.fieldValue)
+	for _, riFNV := range smg.pSessionsRIndex[cgrID] {
+		delete(smg.pSessionsIndex[riFNV.fieldName][riFNV.fieldValue], cgrID)
+		if len(smg.pSessionsIndex[riFNV.fieldName][riFNV.fieldValue]) == 0 {
+			delete(smg.pSessionsIndex[riFNV.fieldName], riFNV.fieldValue)
 		}
-		if len(smg.aSessionsIndex[riFNV.fieldName]) == 0 {
-			delete(smg.aSessionsIndex, riFNV.fieldName)
+		if len(smg.pSessionsIndex[riFNV.fieldName]) == 0 {
+			delete(smg.pSessionsIndex, riFNV.fieldName)
 		}
 	}
-	delete(smg.aSessionsRIndex, cgrID)
+	delete(smg.pSessionsRIndex, cgrID)
 	return true
 }
 
@@ -510,16 +510,11 @@ func (smg *SMGeneric) getPassiveSessions(cgrID, runID string) (pss map[string][]
 	return
 }
 
-// deletePassiveSessions is used to remove a reference from the passiveSessions table
-// ToDo: test it
-func (smg *SMGeneric) deletePassiveSessions(cgrID string) {
-	smg.pSessionsMux.Lock()
-	delete(smg.passiveSessions, cgrID)
-	smg.pSessionsMux.Unlock()
-}
-
 // setPassiveSession is called when a session is set via RPC in passive sessions table
 func (smg *SMGeneric) setPassiveSessions(cgrID string, ss []*SMGSession) (err error) {
+	if len(ss) == 0 {
+		return
+	}
 	for _, cacheKey := range []string{"InitiateSession" + cgrID, "UpdateSession" + cgrID, "TerminateSession" + cgrID} {
 		if _, err := smg.responseCache.Get(cacheKey); err == nil { // Stop processing passive when there has been an update over active RPC
 			if _, hasCGRID := smg.passiveSessions[cgrID]; hasCGRID {
@@ -531,6 +526,9 @@ func (smg *SMGeneric) setPassiveSessions(cgrID string, ss []*SMGSession) (err er
 	smg.unrecordASession(cgrID)
 	smg.pSessionsMux.Lock()
 	smg.passiveSessions[cgrID] = ss
+	for _, s := range ss {
+		smg.indexPSession(s)
+	}
 	smg.pSessionsMux.Unlock()
 	return
 }
@@ -549,6 +547,15 @@ func (smg *SMGeneric) removePassiveSessions(cgrID string) (err error) {
 	smg.unrecordASession(cgrID)
 	smg.deletePassiveSessions(cgrID)
 	return
+}
+
+// deletePassiveSessions is used to remove a reference from the passiveSessions table
+// ToDo: test it
+func (smg *SMGeneric) deletePassiveSessions(cgrID string) {
+	smg.pSessionsMux.Lock()
+	smg.unindexPSession(cgrID)
+	delete(smg.passiveSessions, cgrID)
+	smg.pSessionsMux.Unlock()
 }
 
 // passiveToActive will transition the sessions from passive to active table
