@@ -450,16 +450,16 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 
 /*
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
-test:=*DiameterAgentCfg{
-Enabled:false,
-Listen:"127.0.0.1:3868",
-DictionariesDir: "/usr/share/cgrates/diameter/dict/",
-SMGenericConns:make([]*HaPoolConfig{&HaPoolConfig{
-	Adress: utils.MetaInternal,
-	}}),
-}
+	test := DiameterAgentCfg{
+		Enabled:         false,
+		Listen:          "127.0.0.1:3868",
+		DictionariesDir: "/usr/share/cgrates/diameter/dict/",
+		SMGenericConns: make([]*HaPoolConfig{&HaPoolConfig{
+			Adress: utils.MetaInternal,
+		}}),
+	}
 
-if !reflect.DeepEqual(cgrCfg.diameterAgentCfg, test) {
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg, test) {
 		t.Error(cgrCfg.diameterAgentCfg)
 	}
 }
@@ -479,14 +479,18 @@ func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 /*
-	test2 := SureTaxCfg{
+func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
+	localt, err := time.LoadLocation("Local")
+	if err != nil {
+		t.Error("time parsing error", err)
+	}
+	test2 := &SureTaxCfg{
 		Url:                  "",
 		ClientNumber:         "",
 		ValidationKey:        "",
 		BusinessUnit:         "",
-		Timezone:             time.Local,
+		Timezone:             localt,
 		IncludeLocalCost:     false,
 		ReturnFileCode:       "0",
 		ResponseGroup:        "03",
@@ -508,8 +512,80 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 		SalesTypeCode:        utils.ParseRSRFieldsMustCompile("R", utils.INFIELD_SEP),
 		TaxExemptionCodeList: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg, test2) {
-		t.Error(cgrCfg.sureTaxCfg)
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Url, test2.Url) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Url, test2.Url)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ClientNumber, test2.ClientNumber) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ClientNumber, test2.ClientNumber)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ValidationKey, test2.ValidationKey) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ValidationKey, test2.ValidationKey)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.BusinessUnit, test2.BusinessUnit) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.BusinessUnit, test2.BusinessUnit)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Timezone, test2.Timezone) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Timezone, test2.Timezone)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.IncludeLocalCost, test2.IncludeLocalCost) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.IncludeLocalCost, test2.IncludeLocalCost)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ReturnFileCode, test2.ReturnFileCode) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ReturnFileCode, test2.ReturnFileCode)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ResponseGroup, test2.ResponseGroup) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ResponseGroup, test2.ResponseGroup)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ResponseType, test2.ResponseType) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ResponseType, test2.ResponseType)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.RegulatoryCode, test2.RegulatoryCode) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.RegulatoryCode, test2.RegulatoryCode)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ClientTracking, test2.ClientTracking) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ClientTracking, test2.ClientTracking)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.CustomerNumber, test2.CustomerNumber) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.CustomerNumber, test2.CustomerNumber)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.OrigNumber, test2.OrigNumber) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.OrigNumber, test2.OrigNumber)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TermNumber, test2.TermNumber) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TermNumber, test2.TermNumber)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.BillToNumber, test2.BillToNumber) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.BillToNumber, test2.BillToNumber)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Zipcode, test2.Zipcode) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Zipcode, test2.Zipcode)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.P2PZipcode, test2.P2PZipcode) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.P2PZipcode, test2.P2PZipcode)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.P2PPlus4, test2.P2PPlus4) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.P2PPlus4, test2.P2PPlus4)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Units, test2.Units) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Units, test2.Units)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.UnitType, test2.UnitType) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.UnitType, test2.UnitType)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxIncluded, test2.TaxIncluded) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxIncluded, test2.TaxIncluded)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxSitusRule, test2.TaxSitusRule) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxSitusRule, test2.TaxSitusRule)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TransTypeCode, test2.TransTypeCode) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TransTypeCode, test2.TransTypeCode)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.SalesTypeCode, test2.SalesTypeCode) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.SalesTypeCode, test2.SalesTypeCode)
+	}
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxExemptionCodeList, test2.TaxExemptionCodeList) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxExemptionCodeList, test2.TaxExemptionCodeList)
 	}
 }
 */
