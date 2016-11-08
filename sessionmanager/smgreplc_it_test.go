@@ -182,19 +182,21 @@ func TestSMGRplcUpdate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	/*
-		cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
-			// Make sure session was replicated
-			if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err != nil {
-				t.Error(err)
-			} else if len(pSessions) != 1 {
-				t.Errorf("PassiveSessions: %+v", pSessions)
-			} else if _, hasOriginID := pSessions[cgrID]; !hasOriginID {
-				t.Errorf("PassiveSessions: %+v", pSessions)
-			} else if pSessions[cgrID][0].TotalUsage != time.Duration(150*time.Second) {
-				t.Errorf("PassiveSession: %+v", pSessions[cgrID][0])
-			}
-	*/
+	// Master should not longer have activeSession
+	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{OriginID: utils.StringPointer("123451")}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
+	// Make sure session was replicated
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err != nil {
+		t.Error(err)
+	} else if len(pSessions) != 1 {
+		t.Errorf("PassiveSessions: %+v", pSessions)
+	} else if _, hasOriginID := pSessions[cgrID]; !hasOriginID {
+		t.Errorf("PassiveSessions: %+v", pSessions)
+	} else if pSessions[cgrID][0].TotalUsage != time.Duration(150*time.Second) {
+		t.Errorf("PassiveSession: %+v", pSessions[cgrID][0])
+	}
 
 }
 
@@ -208,15 +210,21 @@ func TestSMGRplcTerminate(t *testing.T) {
 		utils.USAGE:      "3m",
 	}
 	var reply string
-	if err := smgRplcSlvRPC.Call("SMGenericV1.TerminateSession", smgEv, &reply); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession", smgEv, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
+	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{OriginID: utils.StringPointer("123451")}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err, aSessions)
+	}
 	if err := smgRplcSlvRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{OriginID: utils.StringPointer("123451")}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	var pSessions map[string][]*SMGSession
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
 	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

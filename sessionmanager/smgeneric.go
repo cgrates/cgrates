@@ -675,14 +675,15 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 	var hasActiveSession bool
 	for _, sessionID := range sessionIDs {
 		defer smg.replicateSessions(sessionID)
-		var s *SMGSession
-		for _, s = range smg.getASession(sessionID) {
-			break
-		}
-		if s == nil {
-			continue // No session active, will not be able to close it anyway
+		aSessions := smg.getASession(sessionID)
+		if len(aSessions) == 0 {
+			if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionTerminate with no active sessions for cgrID: <%s>", cgrID))
+				continue
+			}
 		}
 		hasActiveSession = true
+		s := aSessions[0]
 		if errUsage != nil {
 			usage = s.TotalUsage - s.LastUsage + lastUsed
 		}
