@@ -808,10 +808,8 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT),
-		OriginID: utils.StringPointer(smgEv.GetOriginID(utils.META_DEFAULT))}, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 0 {
-		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+		OriginID: utils.StringPointer(smgEv.GetOriginID(utils.META_DEFAULT))}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err, aSessions)
 	}
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{smgEv.GetDestination(utils.META_DEFAULT)}}

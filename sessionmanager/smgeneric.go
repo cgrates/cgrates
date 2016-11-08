@@ -445,6 +445,7 @@ func (smg *SMGeneric) getPassiveSessions(cgrID, runID string) (pss map[string][]
 }
 
 // deletePassiveSessions is used to remove a reference from the passiveSessions table
+// ToDo: test it
 func (smg *SMGeneric) deletePassiveSessions(cgrID string) {
 	smg.pSessionsMux.Lock()
 	delete(smg.passiveSessions, cgrID)
@@ -469,6 +470,7 @@ func (smg *SMGeneric) setPassiveSessions(cgrID string, ss []*SMGSession) (err er
 }
 
 // remPassiveSession is called when a session is removed via RPC from passive sessions table
+// ToDo: test
 func (smg *SMGeneric) removePassiveSessions(cgrID string) (err error) {
 	for _, cacheKey := range []string{"InitiateSession" + cgrID, "UpdateSession" + cgrID, "TerminateSession" + cgrID} {
 		if _, err := smg.responseCache.Get(cacheKey); err == nil { // Stop processing passive when there has been an update over active RPC
@@ -483,14 +485,18 @@ func (smg *SMGeneric) removePassiveSessions(cgrID string) (err error) {
 	return
 }
 
+// passiveToActive will transition the sessions from passive to active table
+// ToDo: test
 func (smg *SMGeneric) passiveToActive(cgrID string) (pSS []*SMGSession) {
 	pSessions := smg.getPassiveSessions(cgrID, "")
-	if len(pSS) == 0 {
+	if len(pSessions) == 0 {
 		return
 	}
 	pSS = pSessions[cgrID]
 	for _, s := range pSS {
 		smg.recordASession(s)
+		s.rals = smg.rals
+		s.cdrsrv = smg.cdrsrv
 	}
 	smg.deletePassiveSessions(cgrID)
 	return
@@ -609,9 +615,11 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	}
 	aSessions := smg.getASession(cgrID)
 	if len(aSessions) == 0 {
-		utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionUpdate with no active sessions for event: <%s>", cgrID))
-		err = utils.ErrServerError
-		return
+		if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
+			utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionUpdate with no active sessions for event: <%s>", cgrID))
+			err = utils.ErrServerError
+			return
+		}
 	}
 	for _, s := range aSessions {
 		var maxDur time.Duration
@@ -994,6 +1002,8 @@ func (smg *SMGeneric) BiRPCV1ActiveSessions(clnt rpcclient.RpcClientConnection, 
 	aSessions, _, err := smg.ActiveSessions(attrs.AsMapStringString(), false)
 	if err != nil {
 		return utils.NewErrServerError(err)
+	} else if len(aSessions) == 0 {
+		return utils.ErrNotFound
 	}
 	*reply = aSessions
 	return nil

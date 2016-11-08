@@ -109,12 +109,7 @@ func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *str
 }
 
 func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, reply *[]*sessionmanager.ActiveSession) error {
-	aSessions, _, err := self.sm.ActiveSessions(attrs.AsMapStringString(), false)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = aSessions
-	return nil
+	return self.sm.BiRPCV1ActiveSessions(nil, attrs, reply)
 }
 
 func (self *SMGenericV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {

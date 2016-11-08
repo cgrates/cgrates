@@ -194,10 +194,8 @@ func TestRPCITDirectedRPC(t *testing.T) {
 		return
 	}
 	var sessions []*sessionmanager.ActiveSession
-	if err := rpcPoolFirst.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{}, &sessions); err != nil {
-		t.Error(err) // {"id":2,"result":null,"error":"rpc: can't find service SMGenericV1.ActiveSessions"}
-	} else if len(sessions) != 0 {
-		t.Errorf("Received sessions: %+v", sessions)
+	if err := rpcPoolFirst.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{}, &sessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
