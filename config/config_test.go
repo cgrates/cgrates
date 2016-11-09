@@ -384,8 +384,90 @@ func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
 
 /*
 func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
-
+	eContentFlds := []*CfgCdrField{
+		&CfgCdrField{
+			Tag:   "CGRID",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("CGRID", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "RunID",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("RunID", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "ToR",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("ToR", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "OriginID",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("OriginID", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "RequestType",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("RequestType", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "Direction",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Direction", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "Tenant",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Tenant", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "Category",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Category", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "Account",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Account", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "Subject",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:   "Destination",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Destination", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:    "SetupTime",
+			Type:   "*composed",
+			Value:  utils.ParseRSRFieldsMustCompile("SetupTime", utils.INFIELD_SEP),
+			Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{
+			Tag:    "AnswerTime",
+			Type:   "*composed",
+			Value:  utils.ParseRSRFieldsMustCompile("AnswerTime", utils.INFIELD_SEP),
+			Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{
+			Tag:   "Usage",
+			Type:  "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Usage", utils.INFIELD_SEP)},
+		&CfgCdrField{
+			Tag:              "Cost",
+			Type:             "*composed",
+			Value:            utils.ParseRSRFieldsMustCompile("Cost", utils.INFIELD_SEP),
+			RoundingDecimals: 4},
+	}
+	test := map[string]*CdreConfig{
+		"*default": {
+			CdrFormat:                  "csv",
+			FieldSeparator:             ',',
+			DataUsageMultiplyFactor:    1,
+			SMSUsageMultiplyFactor:     1,
+			MMSUsageMultiplyFactor:     1,
+			GenericUsageMultiplyFactor: 1,
+			CostMultiplyFactor:         1,
+			ExportDirectory:            "/var/spool/cgrates/cdre",
+			HeaderFields:               []*CfgCdrField{},
+			ContentFields:              eContentFlds,
+			TrailerFields:              []*CfgCdrField{},
+		}}
+	if !reflect.DeepEqual(cgrCfg.CdreProfiles, test) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.CdreProfiles, test)
+	}
 }
+
 
 func TestCgrCfgJSONDefaultsCdrcProfiles(t *testing.T) {
 
