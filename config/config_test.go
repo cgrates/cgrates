@@ -335,11 +335,11 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if cgrCfg.CDRSEnabled != false {
 		t.Error(cgrCfg.CDRSEnabled)
 	}
-
-	/*	test4 := ParseRSRFieldsMustCompile("", utils.RSRFields{&utils.RSRField{Id: ""}})
+	/*
+		test4 := *utils.NewRSRField("")
 
 		if !reflect.DeepEqual(cgrCfg.CDRSExtraFields, test4) {
-			t.Error(cgrCfg.CDRSExtraFields, test4)
+			t.Errorf("expecting: %+v, received: %+v", cgrCfg.CDRSExtraFields, test4)
 		}
 	*/
 	if cgrCfg.CDRSStoreCdrs != true {
@@ -382,15 +382,15 @@ func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsCdrProfiles(t *testing.T) {
-	if cgrCfg.CdreProfiles == nil {
-		t.Error(cgrCfg.CdreProfiles)
-	}
-	if cgrCfg.CdrcProfiles == nil {
-		t.Error(cgrCfg.CdrcProfiles)
-	}
+/*
+func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
+
 }
 
+func TestCgrCfgJSONDefaultsCdrcProfiles(t *testing.T) {
+
+}
+*/
 func TestCgrCfgJSONDefaultsSMs(t *testing.T) {
 	if cgrCfg.SmGenericConfig == nil {
 		t.Error(cgrCfg.SmGenericConfig)
@@ -448,22 +448,31 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	}
 }
 
-/*
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	test := DiameterAgentCfg{
 		Enabled:         false,
 		Listen:          "127.0.0.1:3868",
 		DictionariesDir: "/usr/share/cgrates/diameter/dict/",
-		SMGenericConns: make([]*HaPoolConfig{&HaPoolConfig{
-			Adress: utils.MetaInternal,
-		}}),
+		SMGenericConns:  []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 	}
 
-	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg, test) {
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Enabled, test.Enabled) {
+		t.Error(cgrCfg.diameterAgentCfg.Enabled)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Listen, test.Listen) {
+		t.Error(cgrCfg.diameterAgentCfg.Listen)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.DictionariesDir, test.DictionariesDir) {
+		t.Error(cgrCfg.diameterAgentCfg.DictionariesDir)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Listen, test.Listen) {
 		t.Error(cgrCfg.diameterAgentCfg)
 	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.SMGenericConns, test.SMGenericConns) {
+		t.Error(cgrCfg.diameterAgentCfg.SMGenericConns)
+	}
 }
-*/
+
 func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
 	if cgrCfg.MailerServer != "localhost" {
 		t.Error(cgrCfg.MailerServer)
@@ -479,7 +488,6 @@ func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
 	}
 }
 
-/*
 func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 	localt, err := time.LoadLocation("Local")
 	if err != nil {
@@ -504,12 +512,12 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 		Zipcode:              utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 		P2PZipcode:           utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 		P2PPlus4:             utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
-		Units:                utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
-		UnitType:             utils.ParseRSRFieldsMustCompile("00", utils.INFIELD_SEP),
-		TaxIncluded:          utils.ParseRSRFieldsMustCompile("0", utils.INFIELD_SEP),
-		TaxSitusRule:         utils.ParseRSRFieldsMustCompile("04", utils.INFIELD_SEP),
-		TransTypeCode:        utils.ParseRSRFieldsMustCompile("010101", utils.INFIELD_SEP),
-		SalesTypeCode:        utils.ParseRSRFieldsMustCompile("R", utils.INFIELD_SEP),
+		Units:                utils.ParseRSRFieldsMustCompile("^1", utils.INFIELD_SEP),
+		UnitType:             utils.ParseRSRFieldsMustCompile("^00", utils.INFIELD_SEP),
+		TaxIncluded:          utils.ParseRSRFieldsMustCompile("^0", utils.INFIELD_SEP),
+		TaxSitusRule:         utils.ParseRSRFieldsMustCompile("^04", utils.INFIELD_SEP),
+		TransTypeCode:        utils.ParseRSRFieldsMustCompile("^010101", utils.INFIELD_SEP),
+		SalesTypeCode:        utils.ParseRSRFieldsMustCompile("^R", utils.INFIELD_SEP),
 		TaxExemptionCodeList: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Url, test2.Url) {
@@ -567,25 +575,24 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.P2PPlus4, test2.P2PPlus4)
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Units, test2.Units) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Units, test2.Units)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Units[0], test2.Units[0])
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.UnitType, test2.UnitType) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.UnitType, test2.UnitType)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.UnitType[0], test2.UnitType[0])
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxIncluded, test2.TaxIncluded) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxIncluded, test2.TaxIncluded)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxIncluded[0], test2.TaxIncluded[0])
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxSitusRule, test2.TaxSitusRule) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxSitusRule, test2.TaxSitusRule)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxSitusRule[0], test2.TaxSitusRule[0])
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TransTypeCode, test2.TransTypeCode) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TransTypeCode, test2.TransTypeCode)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TransTypeCode[0], test2.TransTypeCode[0])
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.SalesTypeCode, test2.SalesTypeCode) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.SalesTypeCode, test2.SalesTypeCode)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.SalesTypeCode[0], test2.SalesTypeCode[0])
 	}
 	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxExemptionCodeList, test2.TaxExemptionCodeList) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxExemptionCodeList, test2.TaxExemptionCodeList)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxExemptionCodeList[0], test2.TaxExemptionCodeList[0])
 	}
 }
-*/
