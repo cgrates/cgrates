@@ -685,7 +685,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	if len(aSessions) == 0 {
 		if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionUpdate with no active sessions for event: <%s>", cgrID))
-			err = utils.ErrServerError
+			err = rpcclient.ErrSessionNotFound
 			return
 		}
 	}
@@ -765,7 +765,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 		}
 	}
 	if !hasActiveSession {
-		err = utils.ErrNoActiveSession
+		err = rpcclient.ErrSessionNotFound
 		return
 	}
 	return
@@ -1035,22 +1035,27 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 }
 
 // Interim updates, returns remaining duration from the RALs
-func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) error {
+func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) (err error) {
 	if minMaxUsage, err := smg.UpdateSession(ev, clnt); err != nil {
-		return utils.NewErrServerError(err)
+		if err != rpcclient.ErrSessionNotFound {
+			err = utils.NewErrServerError(err)
+		}
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
 	}
-	return nil
+	return
 }
 
 // Called on session end, should stop debit loop
-func (smg *SMGeneric) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, reply *string) error {
-	if err := smg.TerminateSession(ev, clnt); err != nil {
-		return utils.NewErrServerError(err)
+func (smg *SMGeneric) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, reply *string) (err error) {
+	if err = smg.TerminateSession(ev, clnt); err != nil {
+		if err != rpcclient.ErrSessionNotFound {
+			err = utils.NewErrServerError(err)
+		}
+	} else {
+		*reply = utils.OK
 	}
-	*reply = utils.OK
-	return nil
+	return
 }
 
 // Called on individual Events (eg SMS)

@@ -20,7 +20,6 @@ package v1
 import (
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -38,74 +37,37 @@ type SMGenericV1 struct {
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *SMGenericV1) MaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	maxUsageDur, err := self.sm.MaxUsage(ev)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if maxUsageDur == time.Duration(-1) {
-		*maxUsage = -1.0
-	} else {
-		*maxUsage = maxUsageDur.Seconds()
-	}
-	return nil
+	return self.sm.BiRPCV1MaxUsage(nil, ev, maxUsage)
 }
 
 // Returns list of suppliers which can be used for the request
 func (self *SMGenericV1) LCRSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	if supls, err := self.sm.LCRSuppliers(ev); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*suppliers = supls
-	}
-	return nil
+	return self.sm.BiRPCV1LCRSuppliers(nil, ev, suppliers)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
 func (self *SMGenericV1) InitiateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.InitiateSession(ev, nil); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*maxUsage = minMaxUsage.Seconds()
-	}
-	return nil
+	return self.sm.BiRPCV1InitiateSession(nil, ev, maxUsage)
 }
 
 // Interim updates, returns remaining duration from the rater
 func (self *SMGenericV1) UpdateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.UpdateSession(ev, nil); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*maxUsage = minMaxUsage.Seconds()
-	}
-	return nil
+	return self.sm.BiRPCV1UpdateSession(nil, ev, maxUsage)
 }
 
 // Called on session end, should stop debit loop
 func (self *SMGenericV1) TerminateSession(ev sessionmanager.SMGenericEvent, reply *string) error {
-	if err := self.sm.TerminateSession(ev, nil); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
+	return self.sm.BiRPCV1TerminateSession(nil, ev, reply)
 }
 
 // Called on individual Events (eg SMS)
 func (self *SMGenericV1) ChargeEvent(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := self.sm.ChargeEvent(ev); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*maxUsage = minMaxUsage.Seconds()
-	}
-	return nil
+	return self.sm.BiRPCV1ChargeEvent(nil, ev, maxUsage)
 }
 
 // Called on session end, should send the CDR to CDRS
 func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *string) error {
-	if err := self.sm.ProcessCDR(ev); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
+	return self.sm.BiRPCV1ProcessCDR(nil, ev, reply)
 }
 
 func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, reply *[]*sessionmanager.ActiveSession) error {
@@ -113,12 +75,7 @@ func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, re
 }
 
 func (self *SMGenericV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
-	if _, count, err := self.sm.ActiveSessions(attrs.AsMapStringString(), true); err != nil {
-		return err
-	} else {
-		*reply = count
-	}
-	return nil
+	return self.sm.BiRPCV1ActiveSessionsCount(attrs, reply)
 }
 
 func (self *SMGenericV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSessions, reply *string) error {
