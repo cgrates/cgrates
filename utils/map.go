@@ -164,6 +164,14 @@ func (sm StringMap) GetOne() string {
 	return ""
 }
 
+func (sm StringMap) Join(mps ...StringMap) {
+	for _, mp := range mps {
+		for k, v := range mp {
+			sm[k] = v
+		}
+	}
+}
+
 /*
 func NoDots(m map[string]struct{}) map[string]struct{} {
 	return MapKeysReplace(m, ".", "．")
