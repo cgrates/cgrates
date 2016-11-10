@@ -29,8 +29,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/abbot/go-http-auth"
 	"github.com/cenk/rpc2"
-	"golang.org/x/net/websocket"
 )
 import _ "net/http/pprof"
 
@@ -140,17 +140,23 @@ func (s *Server) ServeGOB(addr string) {
 	}
 }
 
-func (s *Server) ServeHTTP(addr string) {
+func handleRequest(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+	res := NewRPCRequest(r.Body).Call()
+	io.Copy(w, res)
+}
+
+func (s *Server) ServeHTTP(addr string, useBasicAuth bool, basicAuthRealm string, htpasswdFile string) {
 	if s.rpcEnabled {
-		http.HandleFunc("/jsonrpc", func(w http.ResponseWriter, req *http.Request) {
-			defer req.Body.Close()
-			w.Header().Set("Content-Type", "application/json")
-			res := NewRPCRequest(req.Body).Call()
-			io.Copy(w, res)
-		})
-		http.Handle("/ws", websocket.Handler(func(ws *websocket.Conn) {
-			jsonrpc.ServeConn(ws)
-		}))
+		if useBasicAuth {
+			Logger.Info(fmt.Sprintf("Configuring CGRateS HTTP server to use basic auth (realm: %s, htpasswd: %s).", basicAuthRealm, htpasswdFile))
+			secrets := auth.HtpasswdFileProvider(htpasswdFile)
+			authenticator := auth.NewBasicAuthenticator(basicAuthRealm, secrets)
+			http.HandleFunc("/jsonrpc", auth.JustCheck(authenticator, handleRequest))
+		} else {
+			http.HandleFunc("/jsonrpc", handleRequest)
+		}
 		s.httpEnabled = true
 	}
 	if !s.httpEnabled {

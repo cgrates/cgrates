@@ -46,6 +46,13 @@ type ListenJsonCfg struct {
 	Http     *string
 }
 
+// HTTP API config section
+type HTTPApiJsonCfg struct {
+	Use_basic_auth   *bool
+	Basic_auth_realm *string
+	Htpasswd_file    *string
+}
+
 // Database config
 type DbJsonCfg struct {
 	Db_type           *string

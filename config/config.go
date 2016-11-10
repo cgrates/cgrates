@@ -203,6 +203,9 @@ type CGRConfig struct {
 	RPCJSONListen            string        // RPC JSON listening address
 	RPCGOBListen             string        // RPC GOB listening address
 	HTTPListen               string        // HTTP listening address
+	HTTPApiUseBasicAuth      bool          // Use basic auth for HTTP API
+	HTTPApiBasicAuthRealm    string        // Basic auth realm URL
+	HTTPApiHtpasswdFile      string        // Basic auth htpasswd file path
 	DefaultReqType           string        // Use this request type if not defined on top
 	DefaultCategory          string        // set default type of record
 	DefaultTenant            string        // set default tenant
@@ -503,6 +506,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
+	jsnHttpApiCfg, err := jsnCfg.HttpApiJsonCfg()
+	if err != nil {
+		return err
+	}
+
 	jsnTpDbCfg, err := jsnCfg.DbJsonCfg(TPDB_JSN)
 	if err != nil {
 		return err
@@ -776,6 +784,18 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnListenCfg.Http != nil {
 			self.HTTPListen = *jsnListenCfg.Http
+		}
+	}
+
+	if jsnHttpApiCfg != nil {
+		if jsnHttpApiCfg.Use_basic_auth != nil {
+			self.HTTPApiUseBasicAuth = *jsnHttpApiCfg.Use_basic_auth
+		}
+		if jsnHttpApiCfg.Basic_auth_realm != nil {
+			self.HTTPApiBasicAuthRealm = *jsnHttpApiCfg.Basic_auth_realm
+		}
+		if jsnHttpApiCfg.Htpasswd_file != nil {
+			self.HTTPApiHtpasswdFile = *jsnHttpApiCfg.Htpasswd_file
 		}
 	}
 
