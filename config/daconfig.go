@@ -97,16 +97,20 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
 			rp := new(DARequestProcessor)
+			var haveID bool
 			for _, rpSet := range self.RequestProcessors {
 				if reqProcJsn.Id != nil && rpSet.Id == *reqProcJsn.Id {
 					rp = rpSet // Will load data into the one set
+					haveID = true
 					break
 				}
 			}
 			if err := rp.loadFromJsonCfg(reqProcJsn); err != nil {
 				return nil
 			}
-			self.RequestProcessors = append(self.RequestProcessors, rp)
+			if !haveID {
+				self.RequestProcessors = append(self.RequestProcessors, rp)
+			}
 		}
 	}
 	return nil

@@ -332,12 +332,12 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	eHaPoolCfg := []*HaPoolConfig{}
 	eCDRReCfg := []*CDRReplicationCfg{}
 	iHaPoolCfg := []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}
-	eCdrExtr := []string{}
+	var eCdrExtr []*utils.RSRField
 
 	if cgrCfg.CDRSEnabled != false {
 		t.Error(cgrCfg.CDRSEnabled)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSExtraFields, eCdrExtr) {
+	if !reflect.DeepEqual(eCdrExtr, cgrCfg.CDRSExtraFields) {
 		t.Errorf(" expecting: %+v, received: %+v", eCdrExtr, cgrCfg.CDRSExtraFields)
 	}
 	if cgrCfg.CDRSStoreCdrs != true {
@@ -429,7 +429,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		MinCallDuration:     0 * time.Second,
 		MaxCallDuration:     3 * time.Hour,
 		SessionTTL:          0 * time.Second,
-		SessionIndexes:      []string{},
+		SessionIndexes:      utils.StringMap{},
 	}
 
 	if !reflect.DeepEqual(cgrCfg.SmGenericConfig, eSmGeCfg) {
@@ -582,7 +582,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 			&CfgCdrField{Tag: "Destination", FieldId: "Destination", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Service-Information>IN-Information>Real-Called-Number", utils.INFIELD_SEP), Mandatory: true},
 			&CfgCdrField{Tag: "SetupTime", FieldId: "SetupTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp", utils.INFIELD_SEP), Mandatory: true},
 			&CfgCdrField{Tag: "AnswerTime", FieldId: "AnswerTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "Usage", FieldId: "Usage", Type: "*handler", HandlerId: "*ccr_usage"},
+			&CfgCdrField{Tag: "Usage", FieldId: "Usage", Type: "*handler", HandlerId: "*ccr_usage", Mandatory: true},
 			&CfgCdrField{Tag: "SubscriberID", FieldId: "SubscriberId", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true},
 		},
 		CCAFields: []*CfgCdrField{
@@ -642,9 +642,8 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.ProductName, testDA.ProductName) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.ProductName, testDA.ProductName)
 	}
-
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.RequestProcessors, testDA.RequestProcessors) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.RequestProcessors, testDA.RequestProcessors)
+		t.Errorf("expecting: %+v, received: %+v", testDA.RequestProcessors, cgrCfg.diameterAgentCfg.RequestProcessors)
 	}
 }
 
