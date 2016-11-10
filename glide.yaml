@@ -39,3 +39,5 @@ import:
 - package: github.com/hashicorp/golang-lru
 - package: github.com/cgrates/aringo
 - package: github.com/bit4bit/gami
+- package: github.com/abbot/go-http-auth
+  version: ~0.3.0

@@ -530,7 +530,12 @@ func startRpc(server *utils.Server, internalRaterChan,
 	}
 	go server.ServeJSON(cfg.RPCJSONListen)
 	go server.ServeGOB(cfg.RPCGOBListen)
-	go server.ServeHTTP(cfg.HTTPListen)
+	go server.ServeHTTP(
+		cfg.HTTPListen,
+		cfg.HTTPApiUseBasicAuth,
+		cfg.HTTPApiBasicAuthRealm,
+		cfg.HTTPApiHtpasswdFile,
+	)
 }
 
 func writePid() {
