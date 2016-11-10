@@ -132,7 +132,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 }
 
 func TestCgrCfgLoadJSONDefaults(t *testing.T) {
-	cgrCfg, err = NewCGRConfigFromJsonStringWithDefaults(CGRATES_CFG_JSON)
+	cgrCfg, err = NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
