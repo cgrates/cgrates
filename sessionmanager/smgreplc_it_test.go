@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var smgRplcMasterCfgPath, smgRplcSlaveCfgPath string
@@ -125,6 +126,13 @@ func TestSMGRplcInitiate(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	var maxUsage float64
+	if err := smgRplcMstrRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err == nil && err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
+		t.Error(err)
+	}
+	var reply string
+	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession", smgEv, &reply); err == nil && err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
+		t.Error(err)
+	}
 	if err := smgRplcMstrRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
