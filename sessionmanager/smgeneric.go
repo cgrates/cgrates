@@ -49,19 +49,18 @@ type SMGReplicationConn struct {
 
 func NewSMGeneric(cgrCfg *config.CGRConfig, rals rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection,
 	smgReplConns []*SMGReplicationConn, timezone string) *SMGeneric {
-	aSessIdxCfg := cgrCfg.SmGenericConfig.SessionIndexes
-	aSessIdxCfg[utils.ACCID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
+	ssIdxCfg := cgrCfg.SmGenericConfig.SessionIndexes
+	ssIdxCfg[utils.ACCID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 	return &SMGeneric{cgrCfg: cgrCfg,
 		rals:               rals,
 		cdrsrv:             cdrsrv,
 		smgReplConns:       smgReplConns,
 		Timezone:           timezone,
 		activeSessions:     make(map[string][]*SMGSession),
-		aSessionsIdxCfg:    aSessIdxCfg,
+		ssIdxCfg:           ssIdxCfg,
 		aSessionsIndex:     make(map[string]map[string]map[string]utils.StringMap),
 		aSessionsRIndex:    make(map[string][]*riFieldNameVal),
 		passiveSessions:    make(map[string][]*SMGSession),
-		pSessionsIdxCfg:    utils.StringMap{utils.ACCID: true},
 		pSessionsIndex:     make(map[string]map[string]map[string]utils.StringMap),
 		pSessionsRIndex:    make(map[string][]*riFieldNameVal),
 		sessionTerminators: make(map[string]*smgSessionTerminator),
@@ -76,13 +75,12 @@ type SMGeneric struct {
 	Timezone           string
 	activeSessions     map[string][]*SMGSession // group sessions per sessionId, multiple runs based on derived charging
 	aSessionsMux       sync.RWMutex
-	aSessionsIdxCfg    utils.StringMap                                  // index configuration
+	ssIdxCfg           utils.StringMap                                  // index configuration
 	aSessionsIndex     map[string]map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue][runID]utils.StringMap[cgrID]
 	aSessionsRIndex    map[string][]*riFieldNameVal                     // reverse indexes for active sessions, used on remove
 	aSIMux             sync.RWMutex                                     // protects aSessionsIndex
 	passiveSessions    map[string][]*SMGSession                         // group passive sessions
 	pSessionsMux       sync.RWMutex
-	pSessionsIdxCfg    utils.StringMap
 	pSessionsIndex     map[string]map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue][runID]utils.StringMap[cgrID]
 	pSessionsRIndex    map[string][]*riFieldNameVal                     // reverse indexes for active sessions, used on remove
 	pSIMux             sync.RWMutex                                     // protects pSessionsIndex
@@ -207,18 +205,16 @@ func (smg *SMGeneric) unrecordASession(cgrID string) bool {
 // uses different tables and mutex-es depending on active/passive session
 func (smg *SMGeneric) indexSession(s *SMGSession, passiveSessions bool) bool {
 	idxMux := smg.aSIMux
-	idxCfg := smg.aSessionsIdxCfg
 	ssIndx := smg.aSessionsIndex
 	ssRIdx := smg.aSessionsRIndex
 	if passiveSessions {
 		idxMux = smg.pSIMux
-		idxCfg = smg.pSessionsIdxCfg
 		ssIndx = smg.pSessionsIndex
 		ssRIdx = smg.pSessionsRIndex
 	}
 	idxMux.Lock()
 	defer idxMux.Unlock()
-	for fieldName := range idxCfg {
+	for fieldName := range smg.ssIdxCfg {
 		fieldVal, err := utils.ReflectFieldAsString(s.EventStart, fieldName, "")
 		if err != nil {
 			if err == utils.ErrNotFound {
