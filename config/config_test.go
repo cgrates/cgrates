@@ -329,17 +329,15 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
-
 	test1 := []*HaPoolConfig{}
 
 	if cgrCfg.CDRSEnabled != false {
 		t.Error(cgrCfg.CDRSEnabled)
 	}
 	/*
-		test4 := *utils.NewRSRField("")
-
+		test4 := nil
 		if !reflect.DeepEqual(cgrCfg.CDRSExtraFields, test4) {
-			t.Errorf("expecting: %+v, received: %+v", cgrCfg.CDRSExtraFields, test4)
+			t.Errorf("received: %+v, expecting: %+v", cgrCfg.CDRSExtraFields, test4)
 		}
 	*/
 	if cgrCfg.CDRSStoreCdrs != true {
@@ -369,7 +367,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	}
 	test2 := []*CDRReplicationCfg{}
 	if !reflect.DeepEqual(cgrCfg.CDRSCdrReplication, test2) {
-		t.Error(cgrCfg.CDRSCdrReplication)
+		t.Error(cgrCfg.CDRSCdrReplication, test2)
 	}
 }
 
@@ -382,72 +380,24 @@ func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
 	}
 }
 
-/*
 func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
+	eFields := []*CfgCdrField{}
 	eContentFlds := []*CfgCdrField{
-		&CfgCdrField{
-			Tag:   "CGRID",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("CGRID", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "RunID",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("RunID", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "ToR",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("ToR", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "OriginID",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("OriginID", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "RequestType",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("RequestType", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "Direction",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("Direction", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "Tenant",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("Tenant", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "Category",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("Category", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "Account",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("Account", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "Subject",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:   "Destination",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("Destination", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:    "SetupTime",
-			Type:   "*composed",
-			Value:  utils.ParseRSRFieldsMustCompile("SetupTime", utils.INFIELD_SEP),
-			Layout: "2006-01-02T15:04:05Z07:00"},
-		&CfgCdrField{
-			Tag:    "AnswerTime",
-			Type:   "*composed",
-			Value:  utils.ParseRSRFieldsMustCompile("AnswerTime", utils.INFIELD_SEP),
-			Layout: "2006-01-02T15:04:05Z07:00"},
-		&CfgCdrField{
-			Tag:   "Usage",
-			Type:  "*composed",
-			Value: utils.ParseRSRFieldsMustCompile("Usage", utils.INFIELD_SEP)},
-		&CfgCdrField{
-			Tag:              "Cost",
-			Type:             "*composed",
-			Value:            utils.ParseRSRFieldsMustCompile("Cost", utils.INFIELD_SEP),
-			RoundingDecimals: 4},
+		&CfgCdrField{Tag: "CGRID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("CGRID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "RunID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("RunID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "TOR", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("ToR", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "OriginID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("OriginID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "RequestType", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("RequestType", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Direction", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Direction", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Tenant", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Tenant", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Category", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Category", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Account", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Account", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Subject", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Destination", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Destination", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "SetupTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("SetupTime", utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{Tag: "AnswerTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("AnswerTime", utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{Tag: "Usage", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Usage", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Cost", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Cost", utils.INFIELD_SEP), RoundingDecimals: 4},
 	}
 	test := map[string]*CdreConfig{
 		"*default": {
@@ -459,35 +409,104 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 			GenericUsageMultiplyFactor: 1,
 			CostMultiplyFactor:         1,
 			ExportDirectory:            "/var/spool/cgrates/cdre",
-			HeaderFields:               []*CfgCdrField{},
+			HeaderFields:               eFields,
 			ContentFields:              eContentFlds,
-			TrailerFields:              []*CfgCdrField{},
+			TrailerFields:              eFields,
 		}}
 	if !reflect.DeepEqual(cgrCfg.CdreProfiles, test) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.CdreProfiles, test)
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.CdreProfiles, test)
 	}
 }
 
+func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
+	test := &SmGenericConfig{
+		Enabled:             false,
+		ListenBijson:        "127.0.0.1:2014",
+		RALsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		CDRsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		SMGReplicationConns: []*HaPoolConfig{},
+		DebitInterval:       0 * time.Second,
+		MinCallDuration:     0 * time.Second,
+		MaxCallDuration:     3 * time.Hour,
+		SessionTTL:          0 * time.Second,
+		SessionIndexes:      []string{},
+	}
 
-func TestCgrCfgJSONDefaultsCdrcProfiles(t *testing.T) {
+	if !reflect.DeepEqual(cgrCfg.SmGenericConfig, test) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmGenericConfig, test)
+	}
 
 }
-*/
-func TestCgrCfgJSONDefaultsSMs(t *testing.T) {
-	if cgrCfg.SmGenericConfig == nil {
-		t.Error(cgrCfg.SmGenericConfig)
+
+func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
+	test := &SmFsConfig{
+		Enabled:             false,
+		RALsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		CDRsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		RLsConns:            []*HaPoolConfig{},
+		CreateCdr:           false,
+		ExtraFields:         nil,
+		DebitInterval:       10 * time.Second,
+		MinCallDuration:     0 * time.Second,
+		MaxCallDuration:     3 * time.Hour,
+		MinDurLowBalance:    5 * time.Second,
+		LowBalanceAnnFile:   "",
+		EmptyBalanceContext: "",
+		EmptyBalanceAnnFile: "",
+		SubscribePark:       true,
+		ChannelSyncInterval: 5 * time.Minute,
+		MaxWaitConnection:   2 * time.Second,
+		EventSocketConns:    []*FsConnConfig{&FsConnConfig{Address: "127.0.0.1:8021", Password: "ClueCon", Reconnects: 5}},
 	}
-	if cgrCfg.SmFsConfig == nil {
-		t.Error(cgrCfg.SmFsConfig)
+
+	if !reflect.DeepEqual(cgrCfg.SmFsConfig, test) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmFsConfig, test)
 	}
-	if cgrCfg.SmKamConfig == nil {
-		t.Error(cgrCfg.SmKamConfig)
+}
+
+func TestCgrCfgJSONDefaultsSMKamConfig(t *testing.T) {
+	test := &SmKamConfig{
+		Enabled:         false,
+		RALsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		CDRsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		CreateCdr:       false,
+		DebitInterval:   10 * time.Second,
+		MinCallDuration: 0 * time.Second,
+		MaxCallDuration: 3 * time.Hour,
+		EvapiConns:      []*KamConnConfig{&KamConnConfig{Address: "127.0.0.1:8448", Reconnects: 5}},
 	}
-	if cgrCfg.SmOsipsConfig == nil {
-		t.Error(cgrCfg.SmOsipsConfig)
+	if !reflect.DeepEqual(cgrCfg.SmKamConfig, test) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.CdreProfiles, test)
 	}
-	if cgrCfg.smAsteriskCfg == nil {
-		t.Error(cgrCfg.smAsteriskCfg)
+}
+
+func TestCgrCfgJSONDefaultsSMOsipsConfig(t *testing.T) {
+	test := &SmOsipsConfig{
+		Enabled:   false,
+		ListenUdp: "127.0.0.1:2020",
+		RALsConns: []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		CDRsConns: []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		//"reconnects": 5,						// number of reconnects if connection is lost
+		CreateCdr:               false,
+		DebitInterval:           10 * time.Second,
+		MinCallDuration:         0 * time.Second,
+		MaxCallDuration:         3 * time.Hour,
+		EventsSubscribeInterval: 60 * time.Second,
+		MiAddr:                  "127.0.0.1:8020",
+	}
+	if !reflect.DeepEqual(cgrCfg.SmOsipsConfig, test) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmOsipsConfig, test)
+	}
+}
+
+func TestCgrCfgJSONDefaultsSMAsteriskCfg(t *testing.T) {
+	test := &SMAsteriskCfg{
+		Enabled:       false,
+		CreateCDR:     false,
+		AsteriskConns: []*AsteriskConnCfg{&AsteriskConnCfg{Address: "127.0.0.1:8088", User: "cgrates", Password: "CGRateS.org", ConnectAttempts: 3, Reconnects: 5}},
+	}
+	if !reflect.DeepEqual(cgrCfg.smAsteriskCfg, test) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.smAsteriskCfg, test)
 	}
 }
 
@@ -519,39 +538,108 @@ func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 	if cgrCfg.UserServerEnabled != false {
 		t.Error(cgrCfg.UserServerEnabled)
 	}
-	if cgrCfg.UserServerIndexes == nil {
-		t.Error(cgrCfg.UserServerIndexes)
+	test := []string{}
+	if !reflect.DeepEqual(cgrCfg.UserServerIndexes, test) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.UserServerIndexes, test)
 	}
 }
 
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
-	if cgrCfg.resourceLimiterCfg == nil {
-		t.Error(cgrCfg.resourceLimiterCfg)
+	test := &ResourceLimiterConfig{
+		Enabled:           false,
+		CDRStatConns:      []*HaPoolConfig{},
+		CacheDumpInterval: 0 * time.Second,
+		UsageTTL:          3 * time.Hour,
 	}
+	if !reflect.DeepEqual(cgrCfg.resourceLimiterCfg, test) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.resourceLimiterCfg, test)
+	}
+
 }
 
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
-	test := DiameterAgentCfg{
-		Enabled:         false,
-		Listen:          "127.0.0.1:3868",
-		DictionariesDir: "/usr/share/cgrates/diameter/dict/",
-		SMGenericConns:  []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
+	reqqproc := []*DARequestProcessor{&DARequestProcessor{
+		Id:                "*default",
+		DryRun:            false,
+		PublishEvent:      false,
+		RequestFilter:     utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type(0)", utils.INFIELD_SEP),
+		Flags:             utils.StringMap{},
+		ContinueOnSuccess: false,
+		AppendCCA:         true,
+		CCRFields: []*CfgCdrField{
+			&CfgCdrField{Tag: "TOR", FieldId: "ToR", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "OriginID", FieldId: "OriginID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Session-Id", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "RequestType", FieldId: "RequestType", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "Direction", FieldId: "Direction", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "Tenant", FieldId: "Tenant", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "Category", FieldId: "Category", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "Account", FieldId: "Account", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "Subject", FieldId: "Subject", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "Destination", FieldId: "Destination", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Service-Information>IN-Information>Real-Called-Number", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "SetupTime", FieldId: "SetupTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "AnswerTime", FieldId: "AnswerTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp", utils.INFIELD_SEP), Mandatory: true},
+			&CfgCdrField{Tag: "Usage", FieldId: "Usage", Type: "*handler", HandlerId: "*ccr_usage"},
+			&CfgCdrField{Tag: "SubscriberID", FieldId: "SubscriberId", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true},
+		},
+		CCAFields: []*CfgCdrField{
+			&CfgCdrField{Tag: "GrantedUnits", FieldId: "Granted-Service-Unit>CC-Time", Type: "*handler", HandlerId: "*cca_usage", Mandatory: true}},
+	},
+	}
+	test := &DiameterAgentCfg{
+		Enabled:           false,
+		Listen:            "127.0.0.1:3868",
+		DictionariesDir:   "/usr/share/cgrates/diameter/dict/",
+		SMGenericConns:    []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		PubSubConns:       []*HaPoolConfig{},
+		CreateCDR:         true,
+		DebitInterval:     5 * time.Minute,
+		Timezone:          "",
+		OriginHost:        "CGR-DA",
+		OriginRealm:       "cgrates.org",
+		VendorId:          0,
+		ProductName:       "CGRateS",
+		RequestProcessors: reqqproc,
 	}
 
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Enabled, test.Enabled) {
-		t.Error(cgrCfg.diameterAgentCfg.Enabled)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.Enabled, test.Enabled)
 	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Listen, test.Listen) {
-		t.Error(cgrCfg.diameterAgentCfg.Listen)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.Listen, test.Listen)
 	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.DictionariesDir, test.DictionariesDir) {
-		t.Error(cgrCfg.diameterAgentCfg.DictionariesDir)
-	}
-	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Listen, test.Listen) {
-		t.Error(cgrCfg.diameterAgentCfg)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.DictionariesDir, test.DictionariesDir)
 	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.SMGenericConns, test.SMGenericConns) {
-		t.Error(cgrCfg.diameterAgentCfg.SMGenericConns)
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.SMGenericConns, test.SMGenericConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.PubSubConns, test.PubSubConns) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.PubSubConns, test.PubSubConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.CreateCDR, test.CreateCDR) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.CreateCDR, test.CreateCDR)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.DebitInterval, test.DebitInterval) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.DebitInterval, test.DebitInterval)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Timezone, test.Timezone) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.Timezone, test.Timezone)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.OriginHost, test.OriginHost) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.OriginHost, test.OriginHost)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.OriginRealm, test.OriginRealm) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.OriginRealm, test.OriginRealm)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.VendorId, test.VendorId) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.VendorId, test.VendorId)
+	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.ProductName, test.ProductName) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.ProductName, test.ProductName)
+	}
+
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.RequestProcessors, test.RequestProcessors) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.RequestProcessors, test.RequestProcessors)
 	}
 }
 
@@ -602,79 +690,7 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 		SalesTypeCode:        utils.ParseRSRFieldsMustCompile("^R", utils.INFIELD_SEP),
 		TaxExemptionCodeList: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Url, test2.Url) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Url, test2.Url)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ClientNumber, test2.ClientNumber) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ClientNumber, test2.ClientNumber)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ValidationKey, test2.ValidationKey) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ValidationKey, test2.ValidationKey)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.BusinessUnit, test2.BusinessUnit) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.BusinessUnit, test2.BusinessUnit)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Timezone, test2.Timezone) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Timezone, test2.Timezone)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.IncludeLocalCost, test2.IncludeLocalCost) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.IncludeLocalCost, test2.IncludeLocalCost)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ReturnFileCode, test2.ReturnFileCode) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ReturnFileCode, test2.ReturnFileCode)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ResponseGroup, test2.ResponseGroup) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ResponseGroup, test2.ResponseGroup)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ResponseType, test2.ResponseType) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ResponseType, test2.ResponseType)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.RegulatoryCode, test2.RegulatoryCode) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.RegulatoryCode, test2.RegulatoryCode)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.ClientTracking, test2.ClientTracking) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.ClientTracking, test2.ClientTracking)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.CustomerNumber, test2.CustomerNumber) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.CustomerNumber, test2.CustomerNumber)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.OrigNumber, test2.OrigNumber) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.OrigNumber, test2.OrigNumber)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TermNumber, test2.TermNumber) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TermNumber, test2.TermNumber)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.BillToNumber, test2.BillToNumber) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.BillToNumber, test2.BillToNumber)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Zipcode, test2.Zipcode) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Zipcode, test2.Zipcode)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.P2PZipcode, test2.P2PZipcode) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.P2PZipcode, test2.P2PZipcode)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.P2PPlus4, test2.P2PPlus4) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.P2PPlus4, test2.P2PPlus4)
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.Units, test2.Units) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.Units[0], test2.Units[0])
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.UnitType, test2.UnitType) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.UnitType[0], test2.UnitType[0])
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxIncluded, test2.TaxIncluded) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxIncluded[0], test2.TaxIncluded[0])
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxSitusRule, test2.TaxSitusRule) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxSitusRule[0], test2.TaxSitusRule[0])
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TransTypeCode, test2.TransTypeCode) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TransTypeCode[0], test2.TransTypeCode[0])
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.SalesTypeCode, test2.SalesTypeCode) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.SalesTypeCode[0], test2.SalesTypeCode[0])
-	}
-	if !reflect.DeepEqual(cgrCfg.sureTaxCfg.TaxExemptionCodeList, test2.TaxExemptionCodeList) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.sureTaxCfg.TaxExemptionCodeList[0], test2.TaxExemptionCodeList[0])
+	if !reflect.DeepEqual(cgrCfg.sureTaxCfg, test2) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.sureTaxCfg, test2)
 	}
 }
