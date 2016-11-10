@@ -196,7 +196,7 @@ func TestRPCITDirectedRPC(t *testing.T) {
 		return
 	}
 	var sessions []*sessionmanager.ActiveSession
-	if err := rpcPoolFirst.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{}, &sessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rpcPoolFirst.Call("SMGenericV1.ActiveSessions", map[string]string{}, &sessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

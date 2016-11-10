@@ -70,20 +70,24 @@ func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *str
 	return self.sm.BiRPCV1ProcessCDR(nil, ev, reply)
 }
 
-func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, reply *[]*sessionmanager.ActiveSession) error {
+func (self *SMGenericV1) ActiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
 	return self.sm.BiRPCV1ActiveSessions(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
-	return self.sm.BiRPCV1ActiveSessionsCount(attrs, reply)
+func (self *SMGenericV1) ActiveSessionsCount(attrs map[string]string, reply *int) error {
+	return self.sm.BiRPCV1ActiveSessionsCount(nil, attrs, reply)
+}
+
+func (self *SMGenericV1) PassiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+	return self.sm.BiRPCV1PassiveSessions(nil, attrs, reply)
+}
+
+func (self *SMGenericV1) PassiveSessionsCount(attrs map[string]string, reply *int) error {
+	return self.sm.BiRPCV1PassiveSessionsCount(nil, attrs, reply)
 }
 
 func (self *SMGenericV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSessions, reply *string) error {
-	return self.sm.BiRPCV1SetPassiveSessions(args, reply)
-}
-
-func (self *SMGenericV1) GetPassiveSessions(args sessionmanager.ArgsGetPassiveSessions, pSessions *map[string][]*sessionmanager.SMGSession) error {
-	return self.sm.BiRPCV1GetPassiveSessions(args, pSessions)
+	return self.sm.BiRPCV1SetPassiveSessions(nil, args, reply)
 }
 
 // rpcclient.RpcClientConnection interface

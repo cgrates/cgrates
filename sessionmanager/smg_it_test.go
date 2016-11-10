@@ -639,7 +639,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	var aSessions []*ActiveSession
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer("12360")}, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.ACCID: "12360"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -672,7 +672,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 	if maxUsage != 120 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer("12360")}, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.ACCID: "12360"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -757,8 +757,8 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	var aSessions []*ActiveSession
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT),
-		OriginID: utils.StringPointer(smgEv.GetOriginID(utils.META_DEFAULT))}, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+		utils.ACCID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -792,8 +792,8 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT),
-		OriginID: utils.StringPointer(smgEv.GetOriginID(utils.META_DEFAULT))}, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+		utils.ACCID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -807,8 +807,8 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT),
-		OriginID: utils.StringPointer(smgEv.GetOriginID(utils.META_DEFAULT))}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+		utils.ACCID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	var cdrs []*engine.ExternalCDR

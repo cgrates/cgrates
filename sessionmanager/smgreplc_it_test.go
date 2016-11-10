@@ -105,8 +105,8 @@ func TestSMGRplcInitiate(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	var pSessions map[string][]*SMGSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var pSessions []*ActiveSession
+	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	smgEv := SMGenericEvent{
@@ -132,23 +132,20 @@ func TestSMGRplcInitiate(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
-	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{OriginID: utils.StringPointer("123451")}, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
 	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", map[string]string{utils.ACCID: "123451"}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if _, hasOriginID := pSessions[cgrID]; !hasOriginID {
-		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if pSessions[cgrID][0].TotalUsage != time.Duration(90*time.Second) {
-		t.Errorf("PassiveSession: %+v", pSessions[cgrID][0])
+	} else if pSessions[0].Usage != time.Duration(90*time.Second) {
+		t.Errorf("PassiveSession: %+v", aSessions[0])
 	}
 }
 
@@ -170,32 +167,32 @@ func TestSMGRplcUpdate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{OriginID: utils.StringPointer("123451")}, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
 	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
-	var pSessions map[string][]*SMGSession
+	var pSessions []*ActiveSession
 	// Make sure we don't have passive session on active host
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// Master should not longer have activeSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{OriginID: utils.StringPointer("123451")}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
 	// Make sure session was replicated
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if _, hasOriginID := pSessions[cgrID]; !hasOriginID {
-		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if pSessions[cgrID][0].TotalUsage != time.Duration(150*time.Second) {
-		t.Errorf("PassiveSession: %+v", pSessions[cgrID][0])
+	} else if pSessions[0].CGRID != cgrID {
+		t.Errorf("PassiveSession: %+v", pSessions[0])
+	} else if pSessions[0].Usage != time.Duration(150*time.Second) {
+		t.Errorf("PassiveSession: %+v", pSessions[0])
 	}
 
 }
@@ -215,17 +212,17 @@ func TestSMGRplcTerminate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{OriginID: utils.StringPointer("123451")}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{OriginID: utils.StringPointer("123451")}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	var pSessions map[string][]*SMGSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", ArgsGetPassiveSessions{}, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

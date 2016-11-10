@@ -87,7 +87,7 @@ type SMGeneric struct {
 	pSessionsRIndex    map[string][]*riFieldNameVal                     // reverse indexes for active sessions, used on remove
 	pSIMux             sync.RWMutex                                     // protects pSessionsIndex
 	sessionTerminators map[string]*smgSessionTerminator                 // terminate and cleanup the session if timer expires
-	sTsMux             sync.Mutex                                       // protects sessionTerminators
+	sTsMux             sync.RWMutex                                     // protects sessionTerminators
 	responseCache      *cache.ResponseCache                             // cache replies here
 }
 
@@ -143,7 +143,7 @@ func (smg *SMGeneric) setSessionTerminator(s *SMGSession) {
 
 // resetTerminatorTimer updates the timer for the session to a new ttl and terminate info
 func (smg *SMGeneric) resetTerminatorTimer(cgrID string, ttl time.Duration, ttlLastUsed, ttlUsage *time.Duration) {
-	smg.aSessionsMux.RLock()
+	smg.sTsMux.RLock()
 	if st, found := smg.sessionTerminators[cgrID]; found {
 		if ttl != 0 {
 			st.ttl = ttl
@@ -156,7 +156,7 @@ func (smg *SMGeneric) resetTerminatorTimer(cgrID string, ttl time.Duration, ttlL
 		}
 		st.timer.Reset(st.ttl)
 	}
-	smg.aSessionsMux.RUnlock()
+	smg.sTsMux.RUnlock()
 }
 
 // ttlTerminate is called when a session times-out
@@ -165,11 +165,11 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	if tmtr.ttlUsage != nil {
 		debitUsage = *tmtr.ttlUsage
 	}
-	aSessions := smg.getASession(s.CGRID)
+	aSessions := smg.getSessions(s.CGRID, false)
 	if len(aSessions) == 0 { // will not continue if the session is not longer active
 		return
 	}
-	for _, s := range aSessions {
+	for _, s := range aSessions[s.CGRID] {
 		s.debit(debitUsage, tmtr.ttlLastUsed)
 	}
 	smg.sessionEnd(s.CGRID, s.TotalUsage)
@@ -344,13 +344,6 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 	return
 }
 
-// Returns sessions/derived for a specific uuid
-func (smg *SMGeneric) getASession(cgrID string) []*SMGSession {
-	smg.aSessionsMux.RLock()
-	defer smg.aSessionsMux.RUnlock()
-	return smg.activeSessions[cgrID]
-}
-
 // sessionStart will handle a new session, pass the connectionId so we can communicate on disconnect request
 func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.RpcClientConnection) error {
 	cgrID := evStart.GetCGRID(utils.META_DEFAULT)
@@ -387,7 +380,7 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.Rp
 // sessionEnd will end a session from outside
 func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
 	_, err := engine.Guardian.Guard(func() (interface{}, error) { // Lock it on UUID level
-		ss := smg.getASession(cgrID)
+		ss := smg.getSessions(cgrID, false)
 		if len(ss) == 0 {
 			if ss = smg.passiveToActive(cgrID); len(ss) == 0 {
 				return nil, nil // ToDo: handle here also debits
@@ -396,7 +389,7 @@ func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
 		if !smg.unrecordASession(cgrID) { // Unreference it early so we avoid concurrency
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
-		for idx, s := range ss {
+		for idx, s := range ss[cgrID] {
 			s.TotalUsage = usage // save final usage as totalUsage
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
@@ -415,7 +408,7 @@ func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
 			}
 		}
 		return nil, nil
-	}, time.Duration(2)*time.Second, cgrID)
+	}, smg.cgrCfg.LockingTimeout, cgrID)
 	return err
 }
 
@@ -425,20 +418,20 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 		if utils.IsSliceMember([]string{initialID, cgrID, newOriginID}, "") { // Not allowed empty params here
 			return nil, utils.ErrMandatoryIeMissing
 		}
-		ssNew := smg.getASession(cgrID)
+		ssNew := smg.getSessions(cgrID, false)
 		if len(ssNew) != 0 { // Already relocated
 			return nil, nil
 		}
-		if pSSNew := smg.getPassiveSessions(cgrID, ""); len(pSSNew) != 0 { // passive sessions recorded, will be recovered so no need of relocation
+		if pSSNew := smg.getSessions(cgrID, true); len(pSSNew) != 0 { // passive sessions recorded, will be recovered so no need of relocation
 			return nil, nil
 		}
-		ss := smg.getASession(initialID)
+		ss := smg.getSessions(initialID, false)
 		if len(ss) == 0 { // No need of relocation
 			if ss = smg.passiveToActive(initialID); len(ss) == 0 {
 				return nil, utils.ErrNotFound
 			}
 		}
-		for i, s := range ss {
+		for i, s := range ss[initialID] {
 			s.CGRID = cgrID                         // Overwrite initial CGRID with new one
 			s.EventStart[utils.ACCID] = newOriginID // Overwrite OriginID for session indexing
 			smg.recordASession(s)
@@ -447,7 +440,7 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 			}
 		}
 		return nil, nil
-	}, time.Duration(2)*time.Second, initialID)
+	}, smg.cgrCfg.LockingTimeout, initialID)
 	return err
 }
 
@@ -477,31 +470,23 @@ func (smg *SMGeneric) replicateSessions(cgrID string) (err error) {
 	return
 }
 
-func (smg *SMGeneric) getPassiveSessions(cgrID, runID string) (pss map[string][]*SMGSession) {
-	smg.pSessionsMux.RLock()
-	if cgrID == "" {
-		if len(smg.passiveSessions) != 0 {
-			pss = smg.passiveSessions
-		}
-	} else {
-		pSSlc := smg.passiveSessions[cgrID]
-		if runID != "" {
-			var found bool
-			for _, s := range pSSlc {
-				if s.RunID == runID {
-					found = true
-					pSSlc = []*SMGSession{s}
-				}
-			}
-			if !found {
-				pSSlc = []*SMGSession{}
-			}
-		}
-		if len(pSSlc) != 0 {
-			pss = map[string][]*SMGSession{cgrID: pSSlc}
-		}
+// getSessions is used to return in a thread-safe manner active or passive sessions
+func (smg *SMGeneric) getSessions(cgrID string, passiveSessions bool) (aSS map[string][]*SMGSession) {
+	ssMux := smg.aSessionsMux
+	ssMp := smg.activeSessions
+	if passiveSessions {
+		ssMux = smg.pSessionsMux
+		ssMp = smg.passiveSessions
 	}
-	smg.pSessionsMux.RUnlock()
+	ssMux.RLock()
+	defer ssMux.RUnlock()
+	if len(cgrID) == 0 {
+		return ssMp
+	}
+	aSS = make(map[string][]*SMGSession)
+	if ss, hasCGRID := ssMp[cgrID]; hasCGRID {
+		aSS[cgrID] = ss
+	}
 	return
 }
 
@@ -555,18 +540,77 @@ func (smg *SMGeneric) deletePassiveSessions(cgrID string) {
 
 // passiveToActive will transition the sessions from passive to active table
 // ToDo: test
-func (smg *SMGeneric) passiveToActive(cgrID string) (pSS []*SMGSession) {
-	pSessions := smg.getPassiveSessions(cgrID, "")
+func (smg *SMGeneric) passiveToActive(cgrID string) (pSessions map[string][]*SMGSession) {
+	pSessions = smg.getSessions(cgrID, true)
 	if len(pSessions) == 0 {
 		return
 	}
-	pSS = pSessions[cgrID]
-	for _, s := range pSS {
+	for _, s := range pSessions[cgrID] {
 		smg.recordASession(s)
 		s.rals = smg.rals
 		s.cdrsrv = smg.cdrsrv
 	}
 	smg.deletePassiveSessions(cgrID)
+	return
+}
+
+// asActiveSessions returns sessions from either active or passive table as []*ActiveSession
+func (smg *SMGeneric) asActiveSessions(fltrs map[string]string, count, passiveSessions bool) (aSessions []*ActiveSession, counter int, err error) {
+	aSessions = make([]*ActiveSession, 0) // Make sure we return at least empty list and not nil
+	// Check first based on indexes so we can downsize the list of matching sessions
+	matchingSessionIDs, checkedFilters := smg.getSessionIDsMatchingIndexes(fltrs, passiveSessions)
+	if len(matchingSessionIDs) == 0 && len(checkedFilters) != 0 {
+		return
+	}
+	for fltrFldName := range fltrs {
+		if _, alreadyChecked := checkedFilters[fltrFldName]; alreadyChecked && fltrFldName != utils.MEDI_RUNID { // Optimize further checks, RunID should stay since it can create bugs
+			delete(fltrs, fltrFldName)
+		}
+	}
+	var remainingSessions []*SMGSession // Survived index matching
+	var ss map[string][]*SMGSession
+	if passiveSessions {
+		ss = smg.getSessions(fltrs[utils.CGRID], true)
+	} else {
+		ss = smg.getSessions(fltrs[utils.CGRID], false)
+	}
+	for cgrID, sGrp := range ss {
+		if _, hasCGRID := matchingSessionIDs[cgrID]; !hasCGRID && len(checkedFilters) != 0 {
+			continue
+		}
+		for _, s := range sGrp {
+			remainingSessions = append(remainingSessions, s)
+		}
+	}
+	if len(fltrs) != 0 { // Still have some filters to match
+		for i := 0; i < len(remainingSessions); {
+			sMp, err := remainingSessions[i].EventStart.AsMapStringString()
+			if err != nil {
+				return nil, 0, err
+			}
+			if _, hasRunID := sMp[utils.MEDI_RUNID]; !hasRunID {
+				sMp[utils.MEDI_RUNID] = utils.META_DEFAULT
+			}
+			matchingAll := true
+			for fltrFldName, fltrFldVal := range fltrs {
+				if fldVal, hasIt := sMp[fltrFldName]; !hasIt || fltrFldVal != fldVal { // No Match
+					matchingAll = false
+					break
+				}
+			}
+			if !matchingAll {
+				remainingSessions = append(remainingSessions[:i], remainingSessions[i+1:]...)
+				continue // if we have stripped, don't increase index so we can check next element by next run
+			}
+			i++
+		}
+	}
+	if count {
+		return nil, len(remainingSessions), nil
+	}
+	for _, s := range remainingSessions {
+		aSessions = append(aSessions, s.AsActiveSession(smg.Timezone)) // Expensive for large number of sessions
+	}
 	return
 }
 
@@ -681,7 +725,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		}
 		return
 	}
-	aSessions := smg.getASession(cgrID)
+	aSessions := smg.getSessions(cgrID, false)
 	if len(aSessions) == 0 {
 		if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionUpdate with no active sessions for event: <%s>", cgrID))
@@ -689,7 +733,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 			return
 		}
 	}
-	for _, s := range aSessions {
+	for _, s := range aSessions[cgrID] {
 		var maxDur time.Duration
 		if maxDur, err = s.debit(maxUsage, lastUsed); err != nil {
 			return
@@ -748,7 +792,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 	var hasActiveSession bool
 	for _, sessionID := range sessionIDs {
 		defer smg.replicateSessions(sessionID)
-		aSessions := smg.getASession(sessionID)
+		aSessions := smg.getSessions(sessionID, false)
 		if len(aSessions) == 0 {
 			if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionTerminate with no active sessions for cgrID: <%s>", cgrID))
@@ -756,7 +800,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 			}
 		}
 		hasActiveSession = true
-		s := aSessions[0]
+		s := aSessions[sessionID][0]
 		if errUsage != nil {
 			usage = s.TotalUsage - s.LastUsage + lastUsed
 		}
@@ -895,69 +939,9 @@ func (smg *SMGeneric) Connect() error {
 	return nil
 }
 
-// Used by APIer to retrieve sessions
-func (smg *SMGeneric) getASessions() map[string][]*SMGSession {
-	smg.aSessionsMux.RLock()
-	defer smg.aSessionsMux.RUnlock()
-	return smg.activeSessions
-}
-
-func (smg *SMGeneric) ActiveSessions(fltrs map[string]string, count bool) (aSessions []*ActiveSession, counter int, err error) {
-	aSessions = make([]*ActiveSession, 0) // Make sure we return at least empty list and not nil
-	// Check first based on indexes so we can downsize the list of matching sessions
-	matchingSessionIDs, checkedFilters := smg.getSessionIDsMatchingIndexes(fltrs, false)
-	if len(matchingSessionIDs) == 0 && len(checkedFilters) != 0 {
-		return
-	}
-	for fltrFldName := range fltrs {
-		if _, alreadyChecked := checkedFilters[fltrFldName]; alreadyChecked && fltrFldName != utils.MEDI_RUNID { // Optimize further checks, RunID should stay since it can create bugs
-			delete(fltrs, fltrFldName)
-		}
-	}
-	var remainingSessions []*SMGSession // Survived index matching
-	for sUUID, sGrp := range smg.getASessions() {
-		if _, hasUUID := matchingSessionIDs[sUUID]; !hasUUID && len(checkedFilters) != 0 {
-			continue
-		}
-		for _, s := range sGrp {
-			remainingSessions = append(remainingSessions, s)
-		}
-	}
-	if len(fltrs) != 0 { // Still have some filters to match
-		for i := 0; i < len(remainingSessions); {
-			sMp, err := remainingSessions[i].EventStart.AsMapStringString()
-			if err != nil {
-				return nil, 0, err
-			}
-			if _, hasRunID := sMp[utils.MEDI_RUNID]; !hasRunID {
-				sMp[utils.MEDI_RUNID] = utils.META_DEFAULT
-			}
-			matchingAll := true
-			for fltrFldName, fltrFldVal := range fltrs {
-				if fldVal, hasIt := sMp[fltrFldName]; !hasIt || fltrFldVal != fldVal { // No Match
-					matchingAll = false
-					break
-				}
-			}
-			if !matchingAll {
-				remainingSessions = append(remainingSessions[:i], remainingSessions[i+1:]...)
-				continue // if we have stripped, don't increase index so we can check next element by next run
-			}
-			i++
-		}
-	}
-	if count {
-		return nil, len(remainingSessions), nil
-	}
-	for _, s := range remainingSessions {
-		aSessions = append(aSessions, s.AsActiveSession(smg.Timezone)) // Expensive for large number of sessions
-	}
-	return
-}
-
 // System shutdown
 func (smg *SMGeneric) Shutdown() error {
-	for ssId := range smg.getASessions() { // Force sessions shutdown
+	for ssId := range smg.getSessions("", false) { // Force sessions shutdown
 		smg.sessionEnd(ssId, time.Duration(smg.cgrCfg.MaxCallDuration))
 	}
 	return nil
@@ -1036,7 +1020,8 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 
 // Interim updates, returns remaining duration from the RALs
 func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) (err error) {
-	if minMaxUsage, err := smg.UpdateSession(ev, clnt); err != nil {
+	var minMaxUsage time.Duration
+	if minMaxUsage, err = smg.UpdateSession(ev, clnt); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1077,8 +1062,13 @@ func (smg *SMGeneric) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection, ev S
 	return nil
 }
 
-func (smg *SMGeneric) BiRPCV1ActiveSessions(clnt rpcclient.RpcClientConnection, attrs utils.AttrSMGGetActiveSessions, reply *[]*ActiveSession) error {
-	aSessions, _, err := smg.ActiveSessions(attrs.AsMapStringString(), false)
+func (smg *SMGeneric) BiRPCV1ActiveSessions(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *[]*ActiveSession) error {
+	for fldName, fldVal := range fltr {
+		if fldVal == "" {
+			fltr[fldName] = utils.META_NONE
+		}
+	}
+	aSessions, _, err := smg.asActiveSessions(fltr, false, false)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(aSessions) == 0 {
@@ -1088,8 +1078,43 @@ func (smg *SMGeneric) BiRPCV1ActiveSessions(clnt rpcclient.RpcClientConnection, 
 	return nil
 }
 
-func (smg *SMGeneric) BiRPCV1ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
-	if _, count, err := smg.ActiveSessions(attrs.AsMapStringString(), true); err != nil {
+func (smg *SMGeneric) BiRPCV1ActiveSessionsCount(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *int) error {
+	for fldName, fldVal := range fltr {
+		if fldVal == "" {
+			fltr[fldName] = utils.META_NONE
+		}
+	}
+	if _, count, err := smg.asActiveSessions(fltr, true, false); err != nil {
+		return err
+	} else {
+		*reply = count
+	}
+	return nil
+}
+
+func (smg *SMGeneric) BiRPCV1PassiveSessions(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *[]*ActiveSession) error {
+	for fldName, fldVal := range fltr {
+		if fldVal == "" {
+			fltr[fldName] = utils.META_NONE
+		}
+	}
+	aSessions, _, err := smg.asActiveSessions(fltr, false, true)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	} else if len(aSessions) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = aSessions
+	return nil
+}
+
+func (smg *SMGeneric) BiRPCV1PassiveSessionsCount(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *int) error {
+	for fldName, fldVal := range fltr {
+		if fldVal == "" {
+			fltr[fldName] = utils.META_NONE
+		}
+	}
+	if _, count, err := smg.asActiveSessions(fltr, true, true); err != nil {
 		return err
 	} else {
 		*reply = count
@@ -1103,7 +1128,7 @@ type ArgsSetPassiveSessions struct {
 }
 
 // BiRPCV1SetPassiveSession used for replicating SMGSessions
-func (smg *SMGeneric) BiRPCV1SetPassiveSessions(args ArgsSetPassiveSessions, reply *string) (err error) {
+func (smg *SMGeneric) BiRPCV1SetPassiveSessions(clnt rpcclient.RpcClientConnection, args ArgsSetPassiveSessions, reply *string) (err error) {
 	if len(args.Sessions) == 0 {
 		err = smg.removePassiveSessions(args.CGRID)
 	} else {
@@ -1113,21 +1138,4 @@ func (smg *SMGeneric) BiRPCV1SetPassiveSessions(args ArgsSetPassiveSessions, rep
 		*reply = utils.OK
 	}
 	return
-}
-
-type ArgsGetPassiveSessions struct {
-	CGRID string
-	RunID string
-}
-
-func (smg *SMGeneric) BiRPCV1GetPassiveSessions(attrs ArgsGetPassiveSessions, pSessions *map[string][]*SMGSession) error {
-	if attrs.RunID != "" && attrs.CGRID == "" {
-		return utils.ErrMandatoryIeMissing
-	}
-	pSS := smg.getPassiveSessions(attrs.CGRID, attrs.RunID)
-	if len(pSS) == 0 {
-		return utils.ErrNotFound
-	}
-	*pSessions = pSS
-	return nil
 }

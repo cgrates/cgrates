@@ -31,7 +31,6 @@ func init() {
 	smgCfg, _ = config.NewDefaultCGRConfig()
 	smgCfg.SmGenericConfig.SessionIndexes = utils.StringMap{"Tenant": true,
 		"Account": true, "Extra3": true, "Extra4": true}
-
 }
 
 func TestSMGSessionIndexing(t *testing.T) {
@@ -436,27 +435,27 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra3":               "extra3",
 	}
 	smg.recordASession(&SMGSession{CGRID: smGev2.GetCGRID(utils.META_DEFAULT), RunID: utils.META_DEFAULT, EventStart: smGev2})
-	if aSessions, _, err := smg.ActiveSessions(nil, false); err != nil {
+	if aSessions, _, err := smg.asActiveSessions(nil, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
-	if aSessions, _, err := smg.ActiveSessions(map[string]string{"Tenant": "itsyscom.com"}, false); err != nil {
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{"Tenant": "itsyscom.com"}, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
-	if aSessions, _, err := smg.ActiveSessions(map[string]string{utils.TOR: "*voice"}, false); err != nil {
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.TOR: "*voice"}, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
-	if aSessions, _, err := smg.ActiveSessions(map[string]string{"Extra3": utils.MetaEmpty}, false); err != nil {
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{"Extra3": utils.MetaEmpty}, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
-	if aSessions, _, err := smg.ActiveSessions(map[string]string{utils.SUPPLIER: "supplier2"}, false); err != nil {
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.SUPPLIER: "supplier2"}, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)
@@ -465,7 +464,7 @@ func TestSMGActiveSessions(t *testing.T) {
 
 func TestGetPassiveSessions(t *testing.T) {
 	smg := NewSMGeneric(smgCfg, nil, nil, nil, "UTC")
-	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 0 {
+	if pSS := smg.getSessions("", true); len(pSS) != 0 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
 	smGev1 := SMGenericEvent{
@@ -518,21 +517,18 @@ func TestGetPassiveSessions(t *testing.T) {
 		"Extra2":               5,
 		"Extra3":               "",
 	}
-	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 1 {
+	if pSS := smg.getSessions("", true); len(pSS) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
 	smgSession21 := &SMGSession{CGRID: smGev2.GetCGRID(utils.META_DEFAULT), EventStart: smGev2, RunID: utils.META_DEFAULT}
 	smg.passiveSessions[smgSession21.CGRID] = []*SMGSession{smgSession21}
-	if pSS := smg.getPassiveSessions("", ""); len(pSS) != 2 {
+	if pSS := smg.getSessions("", true); len(pSS) != 2 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
-	if pSS := smg.getPassiveSessions(smgSession11.CGRID, ""); len(pSS) != 1 || len(pSS[smgSession11.CGRID]) != 2 {
+	if pSS := smg.getSessions(smgSession11.CGRID, true); len(pSS) != 1 || len(pSS[smgSession11.CGRID]) != 2 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
-	if pSS := smg.getPassiveSessions(smgSession11.CGRID, smgSession12.RunID); len(pSS) != 1 || len(pSS[smgSession11.CGRID]) != 1 {
-		t.Errorf("PassiveSessions: %+v", pSS)
-	}
-	if pSS := smg.getPassiveSessions("aabbcc", ""); len(pSS) != 0 {
+	if pSS := smg.getSessions("aabbcc", true); len(pSS) != 0 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
 }

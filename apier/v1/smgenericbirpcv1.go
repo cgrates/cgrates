@@ -20,7 +20,6 @@ package v1
 import (
 	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/sessionmanager"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewSMGenericBiRpcV1(sm *sessionmanager.SMGeneric) *SMGenericBiRpcV1 {
@@ -78,18 +77,18 @@ func (self *SMGenericBiRpcV1) ProcessCDR(clnt *rpc2.Client, ev sessionmanager.SM
 	return self.sm.BiRPCV1ProcessCDR(clnt, ev, reply)
 }
 
-func (self *SMGenericBiRpcV1) ActiveSessions(clnt *rpc2.Client, attrs utils.AttrSMGGetActiveSessions, reply *[]*sessionmanager.ActiveSession) error {
+func (self *SMGenericBiRpcV1) ActiveSessions(clnt *rpc2.Client, attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
 	return self.sm.BiRPCV1ActiveSessions(clnt, attrs, reply)
 }
 
-func (self *SMGenericBiRpcV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
-	return self.sm.BiRPCV1ActiveSessionsCount(attrs, reply)
+func (self *SMGenericBiRpcV1) ActiveSessionsCount(clnt *rpc2.Client, attrs map[string]string, reply *int) error {
+	return self.sm.BiRPCV1ActiveSessionsCount(clnt, attrs, reply)
 }
 
-func (self *SMGenericBiRpcV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSessions, reply *string) error {
-	return self.sm.BiRPCV1SetPassiveSessions(args, reply)
+func (self *SMGenericBiRpcV1) ṔassiveSessions(clnt *rpc2.Client, attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+	return self.sm.BiRPCV1ActiveSessions(clnt, attrs, reply)
 }
 
-func (self *SMGenericBiRpcV1) GetPassiveSessions(args sessionmanager.ArgsGetPassiveSessions, pSessions *map[string][]*sessionmanager.SMGSession) error {
-	return self.sm.BiRPCV1GetPassiveSessions(args, pSessions)
+func (self *SMGenericBiRpcV1) PassiveSessionsCount(clnt *rpc2.Client, attrs map[string]string, reply *int) error {
+	return self.sm.BiRPCV1ActiveSessionsCount(clnt, attrs, reply)
 }
