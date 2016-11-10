@@ -695,10 +695,8 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		err = errors.New("ACTIVE_DEBIT_LOOP")
 		return
 	}
-	defer smg.replicateSessions(gev.GetCGRID(utils.META_DEFAULT))
 	if gev.HasField(utils.InitialOriginID) {
 		initialCGRID := gev.GetCGRID(utils.InitialOriginID)
-		defer smg.replicateSessions(initialCGRID)
 		err = smg.sessionRelocate(initialCGRID, cgrID, gev.GetOriginID(utils.META_DEFAULT))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
 			err = smg.sessionStart(gev, clnt)
@@ -706,6 +704,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		if err != nil {
 			return
 		}
+		smg.replicateSessions(initialCGRID)
 	}
 	smg.resetTerminatorTimer(cgrID, gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
@@ -729,6 +728,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 			return
 		}
 	}
+	defer smg.replicateSessions(gev.GetCGRID(utils.META_DEFAULT))
 	for _, s := range aSessions[cgrID] {
 		var maxDur time.Duration
 		if maxDur, err = s.debit(maxUsage, lastUsed); err != nil {
@@ -750,7 +750,6 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Err: err})
 	if gev.HasField(utils.InitialOriginID) {
 		initialCGRID := gev.GetCGRID(utils.InitialOriginID)
-		defer smg.replicateSessions(initialCGRID)
 		err = smg.sessionRelocate(initialCGRID, cgrID, gev.GetOriginID(utils.META_DEFAULT))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
 			err = smg.sessionStart(gev, clnt)
@@ -758,6 +757,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 		if err != nil && err != utils.ErrMandatoryIeMissing {
 			return
 		}
+		smg.replicateSessions(initialCGRID)
 	}
 	sessionIDs := []string{cgrID}
 	if gev.HasField(utils.OriginIDPrefix) { // OriginIDPrefix is present, OriginID will not be anymore considered
@@ -787,7 +787,6 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 	}
 	var hasActiveSession bool
 	for _, sessionID := range sessionIDs {
-		defer smg.replicateSessions(sessionID)
 		aSessions := smg.getSessions(sessionID, false)
 		if len(aSessions) == 0 {
 			if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
@@ -796,6 +795,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 			}
 		}
 		hasActiveSession = true
+		defer smg.replicateSessions(sessionID)
 		s := aSessions[sessionID][0]
 		if errUsage != nil {
 			usage = s.TotalUsage - s.LastUsage + lastUsed
