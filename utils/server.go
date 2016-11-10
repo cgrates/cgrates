@@ -29,7 +29,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/abbot/go-http-auth"
 	"github.com/cenk/rpc2"
 )
 import _ "net/http/pprof"
@@ -147,13 +146,11 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, res)
 }
 
-func (s *Server) ServeHTTP(addr string, useBasicAuth bool, basicAuthRealm string, htpasswdFile string) {
+func (s *Server) ServeHTTP(addr string, useBasicAuth bool, userList map[string]string) {
 	if s.rpcEnabled {
 		if useBasicAuth {
-			Logger.Info(fmt.Sprintf("Configuring CGRateS HTTP server to use basic auth (realm: %s, htpasswd: %s).", basicAuthRealm, htpasswdFile))
-			secrets := auth.HtpasswdFileProvider(htpasswdFile)
-			authenticator := auth.NewBasicAuthenticator(basicAuthRealm, secrets)
-			http.HandleFunc("/jsonrpc", auth.JustCheck(authenticator, handleRequest))
+			Logger.Info("Configuring CGRateS HTTP server to use basic auth")
+			http.HandleFunc("/jsonrpc", use(handleRequest, basicAuth(userList)))
 		} else {
 			http.HandleFunc("/jsonrpc", handleRequest)
 		}

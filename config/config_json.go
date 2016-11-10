@@ -29,7 +29,7 @@ const (
 	GENERAL_JSN          = "general"
 	CACHE_JSN            = "cache"
 	LISTEN_JSN           = "listen"
-	HTTP_API_JSN         = "http_api"
+	HTTP_JSN             = "http"
 	TPDB_JSN             = "tariffplan_db"
 	DATADB_JSN           = "data_db"
 	STORDB_JSN           = "stor_db"
@@ -119,12 +119,12 @@ func (self CgrJsonCfg) ListenJsonCfg() (*ListenJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) HttpApiJsonCfg() (*HTTPApiJsonCfg, error) {
-	rawCfg, hasKey := self[HTTP_API_JSN]
+func (self CgrJsonCfg) HttpJsonCfg() (*HTTPJsonCfg, error) {
+	rawCfg, hasKey := self[HTTP_JSN]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(HTTPApiJsonCfg)
+	cfg := new(HTTPJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

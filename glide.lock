@@ -1,8 +1,6 @@
-hash: cfda8a78a96bf7b3b471463d5ddf3330d6ae2089d5ac7c9a31b0f312e6518595
-updated: 2016-11-10T08:26:28.162167756-07:00
+hash: da953ea34fabe4e21f4dde6344f3b7ab5a75e02122a1c17af5ea434058fc77fb
+updated: 2016-09-06T20:33:01.649869367+02:00
 imports:
-- name: github.com/abbot/go-http-auth
-  version: efc9484eee77263a11f158ef4f30fcc30298a942
 - name: github.com/bit4bit/gami
   version: 3a7f98e7efce7ed7f22c2169b666910b8abb15dc
 - name: github.com/cenk/hub
@@ -28,17 +26,13 @@ imports:
   - internal/parser/findutil
   - internal/parser/intfns
   - internal/parser/pathexpr
-  - literals/boollit
-  - literals/numlit
-  - literals/strlit
+  - internal/xconst
+  - internal/xsort
   - tree
   - tree/xmltree
   - tree/xmltree/xmlbuilder
   - tree/xmltree/xmlele
   - tree/xmltree/xmlnode
-  - xconst
-  - xfn
-  - xsort
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
@@ -82,11 +76,6 @@ imports:
   version: 5cd0f2b3b6cca8e3a0a4101821e41a73cb59bed6
   subpackages:
   - codec
-- name: golang.org/x/crypto
-  version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
-  subpackages:
-  - bcrypt
-  - blowfish
 - name: golang.org/x/net
   version: 1358eff22f0dd0c54fc521042cc607f6ff4b531a
   subpackages:

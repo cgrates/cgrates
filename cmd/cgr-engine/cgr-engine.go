@@ -532,9 +532,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 	go server.ServeGOB(cfg.RPCGOBListen)
 	go server.ServeHTTP(
 		cfg.HTTPListen,
-		cfg.HTTPApiUseBasicAuth,
-		cfg.HTTPApiBasicAuthRealm,
-		cfg.HTTPApiHtpasswdFile,
+		cfg.HTTPUseBasicAuth,
+		cfg.HTTPAuthUsers,
 	)
 }
 
