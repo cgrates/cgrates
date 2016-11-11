@@ -439,7 +439,40 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	return nil
 }
 
-func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error {
+// Deprecated attrs
+type V1AttrSetActions struct {
+	ActionsId string        // Actions id
+	Overwrite bool          // If previously defined, will be overwritten
+	Actions   []*V1TPAction // Set of actions this Actions profile will perform
+}
+type V1TPActions struct {
+	TPid      string        // Tariff plan id
+	ActionsId string        // Actions id
+	Actions   []*V1TPAction // Set of actions this Actions profile will perform
+}
+
+type V1TPAction struct {
+	Identifier      string  // Identifier mapped in the code
+	BalanceId       string  // Balance identification string (account scope)
+	BalanceUuid     string  // Balance identification string (global scope)
+	BalanceType     string  // Type of balance the action will operate on
+	Directions      string  // Balance direction
+	Units           float64 // Number of units to add/deduct
+	ExpiryTime      string  // Time when the units will expire
+	Filter          string  // The condition on balances that is checked before the action
+	TimingTags      string  // Timing when balance is active
+	DestinationIds  string  // Destination profile id
+	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
+	Categories      string  // category filter for balances
+	SharedGroups    string  // Reference to a shared group
+	BalanceWeight   string  // Balance weight
+	ExtraParameters string
+	BalanceBlocker  string
+	BalanceDisabled string
+	Weight          float64 // Action's weight
+}
+
+func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -461,15 +494,6 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	}
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
-		var vf *utils.ValueFormula
-		if apiAct.Units != "" {
-			if x, err := utils.ParseBalanceFilterValue(apiAct.Units); err == nil {
-				vf = x
-			} else {
-				return err
-			}
-		}
-
 		var weight *float64
 		if apiAct.BalanceWeight != "" {
 			if x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64); err == nil {
@@ -490,7 +514,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 				Uuid:           utils.StringPointer(apiAct.BalanceUuid),
 				ID:             utils.StringPointer(apiAct.BalanceId),
 				Type:           utils.StringPointer(apiAct.BalanceType),
-				Value:          vf,
+				Value:          &utils.ValueFormula{Static: apiAct.Units},
 				Weight:         weight,
 				Directions:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Directions)),
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),

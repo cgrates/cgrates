@@ -23,6 +23,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/apier/v1"
@@ -319,5 +320,73 @@ func (self *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.
 	}
 
 	*reply = dests
+	return nil
+}
+
+func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	for _, action := range attrs.Actions {
+		requiredFields := []string{"Identifier", "Weight"}
+		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
+			requiredFields = append(requiredFields, "Direction", "Units")
+		}
+		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
+			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), action.Identifier, missing)
+		}
+	}
+	if !attrs.Overwrite {
+		if exists, err := self.RatingDb.HasData(utils.ACTION_PREFIX, attrs.ActionsId); err != nil {
+			return utils.NewErrServerError(err)
+		} else if exists {
+			return utils.ErrExists
+		}
+	}
+	storeActions := make(engine.Actions, len(attrs.Actions))
+	for idx, apiAct := range attrs.Actions {
+		var vf *utils.ValueFormula
+		if apiAct.Units != "" {
+			if x, err := utils.ParseBalanceFilterValue(apiAct.Units); err == nil {
+				vf = x
+			} else {
+				return err
+			}
+		}
+
+		var weight *float64
+		if apiAct.BalanceWeight != "" {
+			if x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64); err == nil {
+				weight = &x
+			} else {
+				return err
+			}
+		}
+
+		a := &engine.Action{
+			Id:               attrs.ActionsId,
+			ActionType:       apiAct.Identifier,
+			Weight:           apiAct.Weight,
+			ExpirationString: apiAct.ExpiryTime,
+			ExtraParameters:  apiAct.ExtraParameters,
+			Filter:           apiAct.Filter,
+			Balance: &engine.BalanceFilter{ // TODO: update this part
+				Uuid:           utils.StringPointer(apiAct.BalanceUuid),
+				ID:             utils.StringPointer(apiAct.BalanceId),
+				Type:           utils.StringPointer(apiAct.BalanceType),
+				Value:          vf,
+				Weight:         weight,
+				Directions:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Directions)),
+				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
+				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
+				SharedGroups:   utils.StringMapPointer(utils.ParseStringMap(apiAct.SharedGroups)),
+			},
+		}
+		storeActions[idx] = a
+	}
+	if err := self.RatingDb.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
 	return nil
 }
