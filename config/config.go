@@ -203,6 +203,8 @@ type CGRConfig struct {
 	RPCJSONListen            string            // RPC JSON listening address
 	RPCGOBListen             string            // RPC GOB listening address
 	HTTPListen               string            // HTTP listening address
+	HTTPJsonRPCURL           string            // JSON RPC relative URL ("" to disable)
+	HTTPWSURL                string            // WebSocket relative URL ("" to disable)
 	HTTPUseBasicAuth         bool              // Use basic auth for HTTP API
 	HTTPAuthUsers            map[string]string // Basic auth user:password map (base64 passwords)
 	DefaultReqType           string            // Use this request type if not defined on top
@@ -787,6 +789,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	if jsnHttpCfg != nil {
+		if jsnHttpCfg.Json_rpc_url != nil {
+			self.HTTPJsonRPCURL = *jsnHttpCfg.Json_rpc_url
+		}
+		if jsnHttpCfg.Ws_url != nil {
+			self.HTTPWSURL = *jsnHttpCfg.Ws_url
+		}
 		if jsnHttpCfg.Use_basic_auth != nil {
 			self.HTTPUseBasicAuth = *jsnHttpCfg.Use_basic_auth
 		}

@@ -48,6 +48,8 @@ type ListenJsonCfg struct {
 
 // HTTP config section
 type HTTPJsonCfg struct {
+	Json_rpc_url   *string
+	Ws_url         *string
 	Use_basic_auth *bool
 	Auth_users     *map[string]string
 }
