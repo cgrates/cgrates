@@ -29,10 +29,8 @@ import (
 	"reflect"
 	"time"
 
-	"golang.org/x/net/websocket"
-
 	"github.com/cenk/rpc2"
-
+	"golang.org/x/net/websocket"
 	_ "net/http/pprof"
 )
 
@@ -152,8 +150,8 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string, useBasicAuth bool, userList map[string]string) {
 	if s.rpcEnabled && jsonRPCURL != "" {
 		s.httpEnabled = true
+		Logger.Info("<HTTP> enabling handler for JSON-RPC")
 		if useBasicAuth {
-			Logger.Info("Configuring CGRateS HTTP server to use basic auth")
 			http.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
 		} else {
 			http.HandleFunc(jsonRPCURL, handleRequest)
@@ -162,7 +160,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string, useB
 
 	if s.rpcEnabled && wsRPCURL != "" {
 		s.httpEnabled = true
-		Logger.Info("Configuring CGRateS HTTP server to handle WebSocket connections")
+		Logger.Info("<HTTP> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
 			jsonrpc.ServeConn(ws)
 		})
@@ -178,8 +176,10 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string, useB
 	if !s.httpEnabled {
 		return
 	}
-
-	Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
+	if useBasicAuth {
+		Logger.Info("<HTTP> enabling basic auth")
+	}
+	Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
 	http.ListenAndServe(addr, nil)
 }
 
