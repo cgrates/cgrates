@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -72,7 +74,6 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 			for _, actionTriggerID := range *attr.ActionTriggerIDs {
 				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
 				if err != nil {
-
 					return 0, err
 				}
 				for _, at := range atrs {
@@ -550,5 +551,83 @@ func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 		}
 	}
 	*atrs = allAttrs
+	return nil
+}
+
+type AttrAddActionTrigger struct {
+	ActionTriggersId      string
+	Tenant                string
+	Account               string
+	ThresholdType         string
+	ThresholdValue        float64
+	BalanceId             string
+	BalanceType           string
+	BalanceDirection      string
+	BalanceDestinationIds string
+	BalanceRatingSubject  string
+	BalanceWeight         float64
+	BalanceExpiryTime     string
+	BalanceSharedGroup    string
+	Weight                float64
+	ActionsId             string
+}
+
+// Deprecated in rc8, replaced by AddAccountActionTriggers
+func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
+	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	at := &engine.ActionTrigger{
+		ID:             attr.ActionTriggersId,
+		ThresholdType:  attr.ThresholdType,
+		ThresholdValue: attr.ThresholdValue,
+		Balance:        new(engine.BalanceFilter),
+		Weight:         attr.Weight,
+		ActionsID:      attr.ActionsId,
+	}
+	if attr.BalanceId != "" {
+		at.Balance.ID = utils.StringPointer(attr.BalanceId)
+	}
+	if attr.BalanceType != "" {
+		at.Balance.Type = utils.StringPointer(attr.BalanceType)
+	}
+	if attr.BalanceDirection != "" {
+		at.Balance.Directions = &utils.StringMap{attr.BalanceDirection: true}
+	}
+	if attr.BalanceDestinationIds != "" {
+		dstIDsMp := utils.StringMapFromSlice(strings.Split(attr.BalanceDestinationIds, utils.INFIELD_SEP))
+		at.Balance.DestinationIDs = &dstIDsMp
+	}
+	if attr.BalanceRatingSubject != "" {
+		at.Balance.RatingSubject = utils.StringPointer(attr.BalanceRatingSubject)
+	}
+	if attr.BalanceWeight != 0.0 {
+		at.Balance.Weight = utils.Float64Pointer(attr.BalanceWeight)
+	}
+	if balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime, self.Config.DefaultTimezone); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		at.Balance.ExpirationDate = &balExpiryTime
+	}
+	if attr.BalanceSharedGroup != "" {
+		at.Balance.SharedGroups = &utils.StringMap{attr.BalanceSharedGroup: true}
+	}
+	acntID := utils.AccountKey(attr.Tenant, attr.Account)
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+		acnt, err := self.AccountDb.GetAccount(acntID)
+		if err != nil {
+			return 0, err
+		}
+		acnt.ActionTriggers = append(acnt.ActionTriggers, at)
+
+		if err = self.AccountDb.SetAccount(acnt); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	}, 0, acntID)
+	if err != nil {
+		return err
+	}
+	*reply = OK
 	return nil
 }

@@ -1007,6 +1007,49 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	if !*testLocal {
 		return
 	}
+	var reply string
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "dan32", BalanceType: "*monetary", Value: 1.5}
+	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+	// Add balance to a previously known account
+	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan32", BalanceDirection: "*out", BalanceType: "*monetary",
+		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
+	if err := rater.Call("ApierV1.AddTriggeredAction", attrsAddTrigger, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddTriggeredAction received: %s", reply)
+	}
+	reply2 := ""
+	attrs2 := new(AttrAddActionTrigger)
+	*attrs2 = *attrsAddTrigger
+	attrs2.Account = "dan10" // Does not exist so it should error when adding triggers on it
+	// Add trigger to an account which does n exist
+	if err := rater.Call("ApierV1.AddTriggeredAction", attrs2, &reply2); err == nil {
+		t.Error("Expecting error on ApierV1.AddTriggeredAction.", err, reply2)
+	}
+}
+
+// Test here GetAccountActionTriggers
+func TestApierGetAccountActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply engine.ActionTriggers
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan32"}
+	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
+	} else if len(reply) != 1 || reply[0].ActionsID != "WARN_VIA_HTTP" {
+		t.Errorf("Unexpected action triggers received %v", reply)
+	}
+}
+
+func TestApierAddTriggeredAction2(t *testing.T) {
+	if !*testLocal {
+		return
+	}
 	reply := ""
 	// Add balance to a previously known account
 	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
@@ -1026,7 +1069,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 }
 
 // Test here GetAccountActionTriggers
-func TestApierGetAccountActionTriggers(t *testing.T) {
+func TestApierGetAccountActionTriggers2(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1275,7 +1318,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(2 * time.Second))
+	time.Sleep(time.Duration(1 * time.Second))
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
