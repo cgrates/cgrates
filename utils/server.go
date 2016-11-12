@@ -29,10 +29,12 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/cenk/rpc2"
 	"golang.org/x/net/websocket"
+
+	"github.com/cenk/rpc2"
+
+	_ "net/http/pprof"
 )
-import _ "net/http/pprof"
 
 type Server struct {
 	rpcEnabled  bool
@@ -140,22 +142,43 @@ func (s *Server) ServeGOB(addr string) {
 	}
 }
 
-func (s *Server) ServeHTTP(addr string) {
-	if s.rpcEnabled {
-		http.HandleFunc("/jsonrpc", func(w http.ResponseWriter, req *http.Request) {
-			defer req.Body.Close()
-			w.Header().Set("Content-Type", "application/json")
-			res := NewRPCRequest(req.Body).Call()
-			io.Copy(w, res)
-		})
-		http.Handle("/ws", websocket.Handler(func(ws *websocket.Conn) {
-			jsonrpc.ServeConn(ws)
-		}))
+func handleRequest(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+	res := NewRPCRequest(r.Body).Call()
+	io.Copy(w, res)
+}
+
+func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string, useBasicAuth bool, userList map[string]string) {
+	if s.rpcEnabled && jsonRPCURL != "" {
 		s.httpEnabled = true
+		if useBasicAuth {
+			Logger.Info("Configuring CGRateS HTTP server to use basic auth")
+			http.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
+		} else {
+			http.HandleFunc(jsonRPCURL, handleRequest)
+		}
 	}
+
+	if s.rpcEnabled && wsRPCURL != "" {
+		s.httpEnabled = true
+		Logger.Info("Configuring CGRateS HTTP server to handle WebSocket connections")
+		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
+			jsonrpc.ServeConn(ws)
+		})
+		if useBasicAuth {
+			http.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
+				wsHandler.ServeHTTP(w, r)
+			}, basicAuth(userList)))
+		} else {
+			http.Handle(wsRPCURL, wsHandler)
+		}
+	}
+
 	if !s.httpEnabled {
 		return
 	}
+
 	Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
 	http.ListenAndServe(addr, nil)
 }

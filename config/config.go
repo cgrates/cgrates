@@ -200,22 +200,26 @@ type CGRConfig struct {
 	StorDBCDRSIndexes        []string
 	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
 	CacheConfig              *CacheConfig
-	RPCJSONListen            string        // RPC JSON listening address
-	RPCGOBListen             string        // RPC GOB listening address
-	HTTPListen               string        // HTTP listening address
-	DefaultReqType           string        // Use this request type if not defined on top
-	DefaultCategory          string        // set default type of record
-	DefaultTenant            string        // set default tenant
-	DefaultTimezone          string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Reconnects               int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
-	ConnectTimeout           time.Duration // timeout for RPC connection attempts
-	ReplyTimeout             time.Duration // timeout replies if not reaching back
-	ConnectAttempts          int           // number of initial connection attempts before giving up
-	ResponseCacheTTL         time.Duration // the life span of a cached response
-	InternalTtl              time.Duration // maximum duration to wait for internal connections before giving up
-	RoundingDecimals         int           // Number of decimals to round end prices at
-	HttpSkipTlsVerify        bool          // If enabled Http Client will accept any TLS certificate
-	TpExportPath             string        // Path towards export folder for offline Tariff Plans
+	RPCJSONListen            string            // RPC JSON listening address
+	RPCGOBListen             string            // RPC GOB listening address
+	HTTPListen               string            // HTTP listening address
+	HTTPJsonRPCURL           string            // JSON RPC relative URL ("" to disable)
+	HTTPWSURL                string            // WebSocket relative URL ("" to disable)
+	HTTPUseBasicAuth         bool              // Use basic auth for HTTP API
+	HTTPAuthUsers            map[string]string // Basic auth user:password map (base64 passwords)
+	DefaultReqType           string            // Use this request type if not defined on top
+	DefaultCategory          string            // set default type of record
+	DefaultTenant            string            // set default tenant
+	DefaultTimezone          string            // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Reconnects               int               // number of recconect attempts in case of connection lost <-1 for infinite | nb>
+	ConnectTimeout           time.Duration     // timeout for RPC connection attempts
+	ReplyTimeout             time.Duration     // timeout replies if not reaching back
+	ConnectAttempts          int               // number of initial connection attempts before giving up
+	ResponseCacheTTL         time.Duration     // the life span of a cached response
+	InternalTtl              time.Duration     // maximum duration to wait for internal connections before giving up
+	RoundingDecimals         int               // Number of decimals to round end prices at
+	HttpSkipTlsVerify        bool              // If enabled Http Client will accept any TLS certificate
+	TpExportPath             string            // Path towards export folder for offline Tariff Plans
 	HttpPosterAttempts       int
 	HttpFailedDir            string          // Directory path where we store failed http requests
 	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
@@ -503,6 +507,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
+	jsnHttpCfg, err := jsnCfg.HttpJsonCfg()
+	if err != nil {
+		return err
+	}
+
 	jsnTpDbCfg, err := jsnCfg.DbJsonCfg(TPDB_JSN)
 	if err != nil {
 		return err
@@ -776,6 +785,21 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnListenCfg.Http != nil {
 			self.HTTPListen = *jsnListenCfg.Http
+		}
+	}
+
+	if jsnHttpCfg != nil {
+		if jsnHttpCfg.Json_rpc_url != nil {
+			self.HTTPJsonRPCURL = *jsnHttpCfg.Json_rpc_url
+		}
+		if jsnHttpCfg.Ws_url != nil {
+			self.HTTPWSURL = *jsnHttpCfg.Ws_url
+		}
+		if jsnHttpCfg.Use_basic_auth != nil {
+			self.HTTPUseBasicAuth = *jsnHttpCfg.Use_basic_auth
+		}
+		if jsnHttpCfg.Auth_users != nil {
+			self.HTTPAuthUsers = *jsnHttpCfg.Auth_users
 		}
 	}
 

@@ -45,7 +45,7 @@ const CGRATES_CFG_JSON = `
 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
 	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
 	"cache_dump_dir": "",									// cache dump for faster start (leave empty to disable)
-	"log_level": 6,											// control the level of messages logged (0-emerg to 7-debug)										
+	"log_level": 6,											// control the level of messages logged (0-emerg to 7-debug)
 },
 
 
@@ -69,6 +69,14 @@ const CGRATES_CFG_JSON = `
 	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
 	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
 	"http": "127.0.0.1:2080",				// HTTP listening address
+},
+
+
+"http": {                        // HTTP API configuration
+  "json_rpc_url": "/jsonrpc",    // JSON RPC relative URL ("" to disable)
+  "ws_url": "/ws",               // WebSockets relative URL ("" to disable)
+  "use_basic_auth": false,       // use basic authentication
+  "auth_users": {}               // basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 },
 
 
@@ -244,7 +252,7 @@ const CGRATES_CFG_JSON = `
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
 		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT	
+		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"export_directory": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
