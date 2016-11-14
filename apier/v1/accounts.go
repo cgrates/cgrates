@@ -438,7 +438,6 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	}
 	at.SetActions(engine.Actions{a})
 	if err := at.Execute(); err != nil {
-		*reply = err.Error()
 		return err
 	}
 	*reply = OK

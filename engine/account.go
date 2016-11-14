@@ -48,7 +48,6 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")
 
 	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")
-	//log.Printf("Credit: %v Unit: %v", creditBalances, unitBalances)
 	// gather all balances from shared groups
 	var extendedCreditBalances Balances
 	for _, cb := range creditBalances {
@@ -93,46 +92,64 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
-	if a.Balance.Type == nil {
-		return errors.New("missing balance type")
-	}
-	balanceType := *a.Balance.Type
 	if acc.BalanceMap == nil {
-		acc.BalanceMap = make(map[string]Balances, 1)
+		acc.BalanceMap = make(map[string]Balances)
 	}
-	var previousSharedGroups utils.StringMap // kept for comparison
 	var balance *Balance
 	var found bool
-	for _, b := range acc.BalanceMap[balanceType] {
-		if b.IsExpired() {
-			continue
+	var previousSharedGroups utils.StringMap            // kept for comparison
+	if a.Balance.Uuid != nil && *a.Balance.Uuid != "" { // balance uuid match
+		for balanceType := range acc.BalanceMap {
+			for _, b := range acc.BalanceMap[balanceType] {
+				if b.Uuid == *a.Balance.Uuid && !b.IsExpired() {
+					previousSharedGroups = b.SharedGroups
+					balance = b
+					found = true
+					break // only set one balance
+				}
+			}
+			if found {
+				break
+			}
 		}
-		if (a.Balance.Uuid != nil && b.Uuid == *a.Balance.Uuid) ||
-			(a.Balance.ID != nil && b.ID == *a.Balance.ID) {
-			previousSharedGroups = b.SharedGroups
-			balance = b
-			found = true
-			break // only set one balance
+		if !found {
+			return fmt.Errorf("cannot find balance with uuid: <%s>", *a.Balance.Uuid)
+		}
+	} else { // balance id match
+		for balanceType := range acc.BalanceMap {
+			for _, b := range acc.BalanceMap[balanceType] {
+				if a.Balance.ID != nil && b.ID == *a.Balance.ID && !b.IsExpired() {
+					previousSharedGroups = b.SharedGroups
+					balance = b
+					found = true
+					break // only set one balance
+				}
+			}
+			if found {
+				break
+			}
+		}
+		// if it is not found then we create it
+		if !found {
+			if a.Balance.Type == nil { // cannot create the entry in the balance map without this info
+				return errors.New("missing balance type")
+			}
+			balance = &Balance{}
+			balance.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
+			acc.BalanceMap[*a.Balance.Type] = append(acc.BalanceMap[*a.Balance.Type], balance)
 		}
 	}
 
-	// if it is not found then we add it to the list
-	if balance == nil {
-		balance = &Balance{}
-		balance.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
-		acc.BalanceMap[balanceType] = append(acc.BalanceMap[balanceType], balance)
-	}
-
-	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT {
-		balance.ID = utils.META_DEFAULT
+	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT { // treat it separately since modifyBalance sets expiry and others parameters, not specific for *default
 		if a.Balance.Value != nil {
+			balance.ID = *a.Balance.ID
 			balance.Value = a.Balance.GetValue()
 			balance.SetDirty() // Mark the balance as dirty since we have modified and it should be checked by action triggers
 		}
 	} else {
 		a.Balance.ModifyBalance(balance)
 	}
-
+	// modify if necessary the shared groups here
 	if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
 		_, err := Guardian.Guard(func() (interface{}, error) {
 			for sgID := range balance.SharedGroups {
