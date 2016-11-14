@@ -205,7 +205,7 @@ func (smg *SMGeneric) unrecordASession(cgrID string) bool {
 
 // indexSession explores settings and builds SessionsIndex
 // uses different tables and mutex-es depending on active/passive session
-func (smg *SMGeneric) indexSession(s *SMGSession, passiveSessions bool) bool {
+func (smg *SMGeneric) indexSession(s *SMGSession, passiveSessions bool) {
 	idxMux := smg.aSIMux
 	ssIndx := smg.aSessionsIndex
 	ssRIdx := smg.aSessionsRIndex
@@ -244,25 +244,24 @@ func (smg *SMGeneric) indexSession(s *SMGSession, passiveSessions bool) bool {
 		}
 		ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{runID: s.RunID, fieldName: fieldName, fieldValue: fieldVal})
 	}
-	return true
+	return
 }
 
 // unindexASession removes a session from indexes
 func (smg *SMGeneric) unindexSession(cgrID string, passiveSessions bool) bool {
 	idxMux := smg.aSIMux
-	ssRIdx := smg.aSessionsRIndex
 	ssIndx := smg.aSessionsIndex
+	ssRIdx := smg.aSessionsRIndex
 	if passiveSessions {
 		idxMux = smg.pSIMux
-		ssRIdx = smg.pSessionsRIndex
 		ssIndx = smg.pSessionsIndex
-	}
-
-	if _, hasIt := ssRIdx[cgrID]; !hasIt {
-		return false
+		ssRIdx = smg.pSessionsRIndex
 	}
 	idxMux.Lock()
 	defer idxMux.Unlock()
+	if _, hasIt := ssRIdx[cgrID]; !hasIt {
+		return false
+	}
 	for _, riFNV := range ssRIdx[cgrID] {
 		delete(ssIndx[riFNV.fieldName][riFNV.fieldValue][riFNV.runID], cgrID)
 		if len(ssIndx[riFNV.fieldName][riFNV.fieldValue][riFNV.runID]) == 0 {
@@ -495,9 +494,7 @@ func (smg *SMGeneric) setPassiveSessions(cgrID string, ss []*SMGSession) (err er
 	}
 	for _, cacheKey := range []string{"InitiateSession" + cgrID, "UpdateSession" + cgrID, "TerminateSession" + cgrID} {
 		if _, err := smg.responseCache.Get(cacheKey); err == nil { // Stop processing passive when there has been an update over active RPC
-			if _, hasCGRID := smg.passiveSessions[cgrID]; hasCGRID {
-				smg.deletePassiveSessions(cgrID)
-			}
+			smg.deletePassiveSessions(cgrID)
 			return ErrActiveSession
 		}
 	}

@@ -189,10 +189,10 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	bClone := a.Balance.CreateBalance()
 	//log.Print("Bclone: ", utils.ToJSON(a.Balance))
 	if bClone == nil {
-		return errors.New("nil balance")
+		return errors.New("nil balance in action")
 	}
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]Balances, 1)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	found := false
 	balanceType := a.Balance.GetType()
