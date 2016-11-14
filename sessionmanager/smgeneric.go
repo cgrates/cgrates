@@ -194,9 +194,11 @@ func (smg *SMGeneric) unrecordASession(cgrID string) bool {
 		return false
 	}
 	delete(smg.activeSessions, cgrID)
+	smg.sTsMux.RLock()
 	if st, found := smg.sessionTerminators[cgrID]; found {
 		st.endChan <- true
 	}
+	smg.sTsMux.RUnlock()
 	smg.unindexSession(cgrID, false)
 	return true
 }
