@@ -41,6 +41,8 @@ var err error
 var ral1ID, ral2ID, ralRmtID string
 
 var testRemoteRALs = flag.Bool("remote_rals", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
+var RemoteRALsAddr1 = "172.16.254.80:2012"
+var RemoteRALsAddr2 = "127.0.0.1:2012"
 
 func TestRPCITInitCfg(t *testing.T) {
 	if !*testIntegration {
@@ -213,104 +215,6 @@ func TestRPCITTimeout(t *testing.T) {
 	}
 }
 
-// Special tests involving remote server (manually set)
-// The server network will be manually disconnected without TCP close
-func TestRPCITRmtRpcConnPool(t *testing.T) {
-	if !*testRemoteRALs {
-		return
-	}
-	rpcPoolFirst = rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST, 0)
-	rpcRALRmt, err := rpcclient.NewRpcClient("tcp", "172.16.254.83:2012", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rpcPoolFirst.AddClient(rpcRALRmt)
-	rpcRAL1, err = rpcclient.NewRpcClient("tcp", rpcITCfg1.RPCJSONListen, 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rpcPoolFirst.AddClient(rpcRAL1)
-}
-
-func TestRPCITRmtStatusFirstInitial(t *testing.T) {
-	if !*testRemoteRALs {
-		return
-	}
-	var status map[string]interface{}
-	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
-		t.Error(err)
-	} else if status[utils.InstanceID].(string) == "" {
-		t.Error("Empty InstanceID received")
-	} else if status[utils.InstanceID].(string) == ral1ID {
-		t.Fatal("Should receive ralID different than first one")
-	} else {
-		ralRmtID = status[utils.InstanceID].(string)
-	}
-	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
-		t.Error(err)
-	} else if status[utils.InstanceID].(string) != ralRmtID {
-		t.Errorf("Expecting: %s, received: %s", ralRmtID, status[utils.InstanceID].(string))
-	}
-}
-
-func TestRPCITRmtStatusFirstFailover(t *testing.T) {
-	if !*testRemoteRALs {
-		return
-	}
-	fmt.Println("Ready for doing failover")
-	remaining := 5
-	for i := 0; i < remaining; i++ {
-		fmt.Printf("\n\t%d", remaining-i)
-		time.Sleep(1 * time.Second)
-	}
-	fmt.Println("\n\nExecuting query ...")
-	var status map[string]interface{}
-	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
-		t.Error(err)
-	} else if status[utils.InstanceID].(string) == "" {
-		t.Error("Empty InstanceID received")
-	} else if status[utils.InstanceID].(string) != ral1ID {
-		t.Fatal("Did not do failover")
-	}
-	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
-		t.Error(err)
-	} else if status[utils.InstanceID].(string) == "" {
-		t.Error("Empty InstanceID received")
-	} else if status[utils.InstanceID].(string) != ral1ID {
-		t.Fatal("Did not do failover")
-	}
-}
-
-func TestRPCITRmtStatusFirstFailback(t *testing.T) {
-	if !*testRemoteRALs {
-		return
-	}
-	fmt.Println("Ready for doing failback")
-	remaining := 10
-	for i := 0; i < remaining; i++ {
-		fmt.Printf("\n\t%d", remaining-i)
-		time.Sleep(1 * time.Second)
-	}
-	fmt.Println("\n\nExecuting query ...")
-	var status map[string]interface{}
-	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
-		t.Error(err)
-	} else if status[utils.InstanceID].(string) == "" {
-		t.Error("Empty InstanceID received")
-	} else if status[utils.InstanceID].(string) != ralRmtID {
-		t.Fatal("Did not do failback")
-	}
-	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
-		t.Error(err)
-	} else if status[utils.InstanceID].(string) == "" {
-		t.Error("Empty InstanceID received")
-	} else if status[utils.InstanceID].(string) != ralRmtID {
-		t.Fatal("Did not do failback")
-	}
-}
-
 // Connect rpc client to rater
 func TestRPCITRpcConnPoolBcast(t *testing.T) {
 	if !*testIntegration {
@@ -449,6 +353,106 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	}
 }
 */
+
+// Special tests involving remote server (manually set)
+// The server network will be manually disconnected without TCP close
+func TestRPCITRmtRpcConnPool(t *testing.T) {
+	if !*testRemoteRALs {
+		return
+	}
+	rpcPoolFirst = rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST, 0)
+	rpcRALRmt, err := rpcclient.NewRpcClient("tcp", RemoteRALsAddr1, 1, 1,
+		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rpcPoolFirst.AddClient(rpcRALRmt)
+	rpcRAL1, err = rpcclient.NewRpcClient("tcp", RemoteRALsAddr2, 1, 1,
+		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rpcPoolFirst.AddClient(rpcRAL1)
+}
+
+func TestRPCITRmtStatusFirstInitial(t *testing.T) {
+	if !*testRemoteRALs {
+		return
+	}
+	var status map[string]interface{}
+	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
+		t.Error(err)
+	} else if status[utils.InstanceID].(string) == "" {
+		t.Error("Empty InstanceID received")
+	} else {
+		ralRmtID = status[utils.InstanceID].(string)
+	}
+	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
+		t.Error(err)
+	} else if status[utils.InstanceID].(string) != ralRmtID {
+		t.Errorf("Expecting: %s, received: %s", ralRmtID, status[utils.InstanceID].(string))
+	}
+}
+
+func TestRPCITRmtStatusFirstFailover(t *testing.T) {
+	if !*testRemoteRALs {
+		return
+	}
+	fmt.Println("Ready for doing failover")
+	remaining := 5
+	for i := 0; i < remaining; i++ {
+		fmt.Printf("\n\t%d", remaining-i)
+		time.Sleep(1 * time.Second)
+	}
+	fmt.Println("\n\nExecuting query ...")
+	var status map[string]interface{}
+	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
+		t.Error(err)
+	} else if status[utils.InstanceID].(string) == "" {
+		t.Error("Empty InstanceID received")
+	} else if status[utils.InstanceID].(string) == ralRmtID {
+		t.Fatal("Did not failover")
+	} else {
+		ralRmtID = status[utils.InstanceID].(string)
+	}
+	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
+		t.Error(err)
+	} else if status[utils.InstanceID].(string) == "" {
+		t.Error("Empty InstanceID received")
+	} else if status[utils.InstanceID].(string) != ralRmtID {
+		t.Fatal("Did not do failover")
+	}
+}
+
+func TestRPCITRmtStatusFirstFailback(t *testing.T) {
+	if !*testRemoteRALs {
+		return
+	}
+	fmt.Println("Ready for doing failback")
+	remaining := 10
+	for i := 0; i < remaining; i++ {
+		fmt.Printf("\n\t%d", remaining-i)
+		time.Sleep(1 * time.Second)
+	}
+	fmt.Println("\n\nExecuting query ...")
+	var status map[string]interface{}
+	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
+		t.Error(err)
+	} else if status[utils.InstanceID].(string) == "" {
+		t.Error("Empty InstanceID received")
+	} else if status[utils.InstanceID].(string) == ralRmtID {
+		t.Fatal("Did not do failback")
+	} else {
+		ralRmtID = status[utils.InstanceID].(string)
+	}
+	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
+		t.Error(err)
+	} else if status[utils.InstanceID].(string) == "" {
+		t.Error("Empty InstanceID received")
+	} else if status[utils.InstanceID].(string) != ralRmtID {
+		t.Fatal("Did not do failback")
+	}
+}
 
 func TestRPCITStopCgrEngine(t *testing.T) {
 	if !*testIntegration {
