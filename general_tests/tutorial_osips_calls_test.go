@@ -1,3 +1,5 @@
+// +build calls
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -15,6 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package general_tests
 
 import (
@@ -37,9 +40,6 @@ var tutOsipsCallsRpc *rpc.Client
 var tutOsipsCallsPjSuaListener *os.File
 
 func TestTutOsipsCallsInitCfg(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	// Init config first
 	var err error
 	tutOsipsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "osips_async", "cgrates", "etc", "cgrates"))
@@ -52,9 +52,6 @@ func TestTutOsipsCallsInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestTutOsipsCallsResetDataDb(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.InitDataDb(tutOsipsCallsCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -62,9 +59,6 @@ func TestTutOsipsCallsResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestTutOsipsCallsResetStorDb(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.InitStorDb(tutOsipsCallsCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -72,9 +66,6 @@ func TestTutOsipsCallsResetStorDb(t *testing.T) {
 
 // start FS server
 func TestTutOsipsCallsStartOsips(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	engine.KillProcName("opensips", 3000)
 	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "opensips", "etc", "init.d", "opensips"), "start", 3000); err != nil {
 		t.Fatal(err)
@@ -83,9 +74,6 @@ func TestTutOsipsCallsStartOsips(t *testing.T) {
 
 // Start CGR Engine
 func TestTutOsipsCallsStartEngine(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	engine.KillProcName("cgr-engine", *waitRater)
 	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 		t.Fatal(err)
@@ -94,9 +82,6 @@ func TestTutOsipsCallsStartEngine(t *testing.T) {
 
 // Restart FS so we make sure reconnects are working
 func TestTutOsipsCallsRestartOsips(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "opensips", "etc", "init.d", "opensips"), "restart", 3000); err != nil {
 		t.Fatal(err)
 	}
@@ -104,9 +89,6 @@ func TestTutOsipsCallsRestartOsips(t *testing.T) {
 
 // Connect rpc client to rater
 func TestTutOsipsCallsRpcConn(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var err error
 	tutOsipsCallsRpc, err = jsonrpc.Dial("tcp", tutOsipsCallsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -116,9 +98,6 @@ func TestTutOsipsCallsRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestTutOsipsCallsLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	reply := ""
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tutOsipsCallsRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
@@ -131,9 +110,6 @@ func TestTutOsipsCallsLoadTariffPlanFromFolder(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutOsipsCallsAccountsBefore(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
@@ -173,9 +149,6 @@ func TestTutOsipsCallsAccountsBefore(t *testing.T) {
 
 // Make sure all stats queues are in place
 func TestTutOsipsCallsCdrStatsBefore(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	//eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
 	var statMetrics map[string]float64
 	eMetrics := map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
@@ -218,9 +191,6 @@ func TestTutOsipsCallsCdrStatsBefore(t *testing.T) {
 
 // Start Pjsua as listener and register it to receive calls
 func TestTutOsipsCallsStartPjsuaListener(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var err error
 	acnts := []*engine.PjsuaAccount{
 		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
@@ -236,9 +206,6 @@ func TestTutOsipsCallsStartPjsuaListener(t *testing.T) {
 
 // Call from 1001 (prepaid) to 1002
 func TestTutOsipsCallsCall1001To1002(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(67)*time.Second, 5071); err != nil {
 		t.Fatal(err)
@@ -247,9 +214,6 @@ func TestTutOsipsCallsCall1001To1002(t *testing.T) {
 
 // Call from 1001 (prepaid) to 1003
 func TestTutOsipsCallsCall1001To1003(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*"}, "sip:1003@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(65)*time.Second, 5072); err != nil {
 		t.Fatal(err)
@@ -257,9 +221,6 @@ func TestTutOsipsCallsCall1001To1003(t *testing.T) {
 }
 
 func TestTutOsipsCallsCall1002To1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(61)*time.Second, 5073); err != nil {
 		t.Fatal(err)
@@ -267,9 +228,6 @@ func TestTutOsipsCallsCall1002To1001(t *testing.T) {
 }
 
 func TestTutOsipsCallsCall1003To1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(63)*time.Second, 5074); err != nil {
 		t.Fatal(err)
@@ -277,9 +235,6 @@ func TestTutOsipsCallsCall1003To1001(t *testing.T) {
 }
 
 func TestTutOsipsCallsCall1004To1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(62)*time.Second, 5075); err != nil {
 		t.Fatal(err)
@@ -287,9 +242,6 @@ func TestTutOsipsCallsCall1004To1001(t *testing.T) {
 }
 
 func TestTutOsipsCallsCall1006To1002(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(64)*time.Second, 5076); err != nil {
 		t.Fatal(err)
@@ -297,9 +249,6 @@ func TestTutOsipsCallsCall1006To1002(t *testing.T) {
 }
 
 func TestTutOsipsCallsCall1007To1002(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(66)*time.Second, 5077); err != nil {
 		t.Fatal(err)
@@ -308,9 +257,6 @@ func TestTutOsipsCallsCall1007To1002(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutOsipsCallsAccount1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	time.Sleep(time.Duration(70) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
@@ -325,9 +271,6 @@ func TestTutOsipsCallsAccount1001(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutOsipsCalls1001Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	//var cgrId string // Share  with getCostDetails
 	//var cCost engine.CallCost
@@ -405,9 +348,6 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutOsipsCalls1002Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1002"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -432,9 +372,6 @@ func TestTutOsipsCalls1002Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutOsipsCalls1003Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1003"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -460,9 +397,6 @@ func TestTutOsipsCalls1003Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutOsipsCalls1004Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1004"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -488,9 +422,6 @@ func TestTutOsipsCalls1004Cdrs(t *testing.T) {
 
 // Make sure aliasing was done for 1006 and we have no CDRs for it
 func TestTutOsipsCalls1006Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1006"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -502,9 +433,6 @@ func TestTutOsipsCalls1006Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutOsipsCalls1007Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1007"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -532,9 +460,6 @@ func TestTutOsipsCalls1007Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutOsipsCallsAccountFraud1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply string
 	attrAddBlnc := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Value: 101}
 	if err := tutOsipsCallsRpc.Call("ApierV1.AddBalance", attrAddBlnc, &reply); err != nil {
@@ -546,9 +471,6 @@ func TestTutOsipsCallsAccountFraud1001(t *testing.T) {
 
 // Based on Fraud automatic mitigation, our account should be disabled
 func TestTutOsipsCallsAccountDisabled1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
@@ -559,26 +481,16 @@ func TestTutOsipsCallsAccountDisabled1001(t *testing.T) {
 }
 
 func TestTutOsipsCallsStopPjsuaListener(t *testing.T) {
-	if !*testCalls {
-		return
-	}
-
 	tutOsipsCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
 	time.Sleep(time.Duration(1) * time.Second)      // Allow pjsua to finish it's tasks, eg un-REGISTER
 }
 
 func TestTutOsipsCallsStopCgrEngine(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestTutOsipsCallsStopOpensips(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	engine.KillProcName("opensips", 100)
 }

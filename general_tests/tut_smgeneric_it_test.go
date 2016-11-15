@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -15,6 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package general_tests
 
 import (
@@ -36,9 +39,6 @@ var tutSMGRpc *rpc.Client
 var smgLoadInst utils.LoadInstance // Share load information between tests
 
 func TestTutSMGInitCfg(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", "smgeneric")
 	// Init config first
 	var err error
@@ -52,9 +52,6 @@ func TestTutSMGInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestTutSMGResetDataDb(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	if err := engine.InitDataDb(tutSMGCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -62,9 +59,6 @@ func TestTutSMGResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestTutSMGResetStorDb(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	if err := engine.InitStorDb(tutSMGCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -72,9 +66,6 @@ func TestTutSMGResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestTutSMGStartEngine(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	if _, err := engine.StopStartEngine(tutSMGCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -82,9 +73,6 @@ func TestTutSMGStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestTutSMGRpcConn(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	var err error
 	tutSMGRpc, err = jsonrpc.Dial("tcp", tutSMGCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -94,9 +82,6 @@ func TestTutSMGRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestTutSMGLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tutSMGRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &smgLoadInst); err != nil {
 		t.Error(err)
@@ -106,9 +91,6 @@ func TestTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 
 // Check loaded stats
 func TestTutSMGCacheStats(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	var rcvStats *utils.CacheStats
 
 	expectedStats := &utils.CacheStats{RatingPlans: 4, Actions: 7, ActionPlans: 4, CdrStats: 6, Users: 3}
@@ -167,9 +149,6 @@ func TestTutSMGAccountsBefore(t *testing.T) {
 */
 
 func TestTutSMGStopCgrEngine(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

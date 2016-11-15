@@ -15,6 +15,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
+// +build integration
+
 package general_tests
 
 import (
@@ -66,9 +69,6 @@ func stopEngine() error {
 }
 
 func TestMCDRCLoadConfig(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	var err error
 	cfgPath = path.Join(*dataDir, "conf", "samples", "multiplecdrc")
 	if cfg, err = config.NewCGRConfigFromFolder(cfgPath); err != nil {
@@ -78,27 +78,18 @@ func TestMCDRCLoadConfig(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestMCDRCResetDataDb(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	if err := engine.InitDataDb(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestMCDRCEmptyTables(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	if err := engine.InitStorDb(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestMCDRCCreateCdrDirs(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	for _, cdrcProfiles := range cfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
 			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
@@ -115,9 +106,6 @@ func TestMCDRCCreateCdrDirs(t *testing.T) {
 
 // Connect rpc client to rater
 func TestMCDRCRpcConn(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	startEngine()
 	var err error
 	rater, err = jsonrpc.Dial("tcp", cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
@@ -128,9 +116,6 @@ func TestMCDRCRpcConn(t *testing.T) {
 
 // Test here LoadTariffPlanFromFolder
 func TestMCDRCApierLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	reply := ""
 	// Simple test that command is executed without errors
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
@@ -144,9 +129,6 @@ func TestMCDRCApierLoadTariffPlanFromFolder(t *testing.T) {
 
 // The default scenario, out of cdrc defined in .cfg file
 func TestMCDRCHandleCdr1File(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	var fileContent1 = `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,rated,*out,cgrates.org,call,1001,1001,+4986517174963,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10000000000,1.0100,val_extra3,"",val_extra1
 dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,rated,*out,cgrates.org,call,1001,1001,+4986517174964,2013-11-07 09:42:25 +0000 UTC,2013-11-07 09:42:26 +0000 UTC,20000000000,1.0100,val_extra3,"",val_extra1
 `
@@ -162,9 +144,6 @@ dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,rated,*out,cgra
 
 // Scenario out of first .xml config
 func TestMCDRCHandleCdr2File(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	var fileContent = `616350843,20131022145011,20131022172857,3656,1001,,,data,mo,640113,0.000000,1.222656,1.222660
 616199016,20131022154924,20131022154955,3656,1001,086517174963,,voice,mo,31,0.000000,0.000000,0.000000
 800873243,20140516063739,20140516063739,9774,1001,+49621621391,,sms,mo,1,0.00000,0.00000,0.00000`
@@ -180,9 +159,6 @@ func TestMCDRCHandleCdr2File(t *testing.T) {
 
 // Scenario out of second .xml config
 func TestMCDRCHandleCdr3File(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	var fileContent = `4986517174960;4986517174963;Sample Mobile;08.04.2014  22:14:29;08.04.2014  22:14:29;1;193;Offeak;0,072728833;31619
 4986517174960;4986517174964;National;08.04.2014  20:34:55;08.04.2014  20:34:55;1;21;Offeak;0,0079135;311`
 	fileName := "file3.csv"
@@ -196,8 +172,5 @@ func TestMCDRCHandleCdr3File(t *testing.T) {
 }
 
 func TestMCDRCStopEngine(t *testing.T) {
-	if !*testLocal {
-		return
-	}
 	stopEngine()
 }

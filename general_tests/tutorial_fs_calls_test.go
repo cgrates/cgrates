@@ -1,3 +1,5 @@
+// +build calls
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -15,6 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package general_tests
 
 import (
@@ -37,9 +40,6 @@ var tutFsCallsRpc *rpc.Client
 var tutFsCallsPjSuaListener *os.File
 
 func TestTutFsCallsInitCfg(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	// Init config first
 	var err error
 	tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "cgrates"))
@@ -52,9 +52,6 @@ func TestTutFsCallsInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestTutFsCallsResetDataDb(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.InitDataDb(tutFsCallsCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -62,9 +59,6 @@ func TestTutFsCallsResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestTutFsCallsResetStorDb(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.InitStorDb(tutFsCallsCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -72,9 +66,6 @@ func TestTutFsCallsResetStorDb(t *testing.T) {
 
 // start FS server
 func TestTutFsCallsStartFS(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	engine.KillProcName("freeswitch", 5000)
 	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
 		t.Fatal(err)
@@ -83,9 +74,6 @@ func TestTutFsCallsStartFS(t *testing.T) {
 
 // Start CGR Engine
 func TestTutFsCallsStartEngine(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	engine.KillProcName("cgr-engine", *waitRater)
 	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 		t.Fatal(err)
@@ -94,9 +82,6 @@ func TestTutFsCallsStartEngine(t *testing.T) {
 
 // Restart FS so we make sure reconnects are working
 func TestTutFsCallsRestartFS(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "restart", 5000); err != nil {
 		t.Fatal(err)
 	}
@@ -104,9 +89,6 @@ func TestTutFsCallsRestartFS(t *testing.T) {
 
 // Connect rpc client to rater
 func TestTutFsCallsRpcConn(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var err error
 	tutFsCallsRpc, err = jsonrpc.Dial("tcp", tutFsCallsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -116,9 +98,6 @@ func TestTutFsCallsRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestTutFsCallsLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	reply := ""
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tutFsCallsRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
@@ -131,9 +110,6 @@ func TestTutFsCallsLoadTariffPlanFromFolder(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutFsCallsAccountsBefore(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
@@ -173,9 +149,6 @@ func TestTutFsCallsAccountsBefore(t *testing.T) {
 
 // Make sure all stats queues are in place
 func TestTutFsCallsCdrStatsBefore(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	//eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
 	var statMetrics map[string]float64
 	eMetrics := map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
@@ -218,9 +191,6 @@ func TestTutFsCallsCdrStatsBefore(t *testing.T) {
 
 // Start Pjsua as listener and register it to receive calls
 func TestTutFsCallsStartPjsuaListener(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var err error
 	acnts := []*engine.PjsuaAccount{
 		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
@@ -236,9 +206,6 @@ func TestTutFsCallsStartPjsuaListener(t *testing.T) {
 
 // Call from 1001 (prepaid) to 1002
 func TestTutFsCallsCall1001To1002(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(67)*time.Second, 5071); err != nil {
 		t.Fatal(err)
@@ -247,9 +214,6 @@ func TestTutFsCallsCall1001To1002(t *testing.T) {
 
 // Call from 1001 (prepaid) to 1003
 func TestTutFsCallsCall1001To1003(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*"}, "sip:1003@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(65)*time.Second, 5072); err != nil {
 		t.Fatal(err)
@@ -257,9 +221,6 @@ func TestTutFsCallsCall1001To1003(t *testing.T) {
 }
 
 func TestTutFsCallsCall1002To1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(61)*time.Second, 5073); err != nil {
 		t.Fatal(err)
@@ -267,9 +228,6 @@ func TestTutFsCallsCall1002To1001(t *testing.T) {
 }
 
 func TestTutFsCallsCall1003To1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(63)*time.Second, 5074); err != nil {
 		t.Fatal(err)
@@ -277,9 +235,6 @@ func TestTutFsCallsCall1003To1001(t *testing.T) {
 }
 
 func TestTutFsCallsCall1004To1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(62)*time.Second, 5075); err != nil {
 		t.Fatal(err)
@@ -287,9 +242,6 @@ func TestTutFsCallsCall1004To1001(t *testing.T) {
 }
 
 func TestTutFsCallsCall1006To1002(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(64)*time.Second, 5076); err != nil {
 		t.Fatal(err)
@@ -297,9 +249,6 @@ func TestTutFsCallsCall1006To1002(t *testing.T) {
 }
 
 func TestTutFsCallsCall1007To1002(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(66)*time.Second, 5077); err != nil {
 		t.Fatal(err)
@@ -308,9 +257,6 @@ func TestTutFsCallsCall1007To1002(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutFsCallsAccount1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	time.Sleep(time.Duration(80) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
@@ -325,9 +271,6 @@ func TestTutFsCallsAccount1001(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutFsCalls1001Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	//var CGRID string // Share  with getCostDetails
 	//var cCost engine.CallCost
@@ -406,9 +349,6 @@ func TestTutFsCalls1001Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutFsCalls1002Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1002"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -433,9 +373,6 @@ func TestTutFsCalls1002Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutFsCalls1003Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1003"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -461,9 +398,6 @@ func TestTutFsCalls1003Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutFsCalls1004Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1004"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -489,9 +423,6 @@ func TestTutFsCalls1004Cdrs(t *testing.T) {
 
 // Make sure we don't have any CDRs for 1006 since it should have been aliased to 1002
 func TestTutFsCalls1006Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1006"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -503,9 +434,6 @@ func TestTutFsCalls1006Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutFsCalls1007Cdrs(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Accounts: []string{"1007"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -533,9 +461,6 @@ func TestTutFsCalls1007Cdrs(t *testing.T) {
 
 // Make sure account was debited properly
 func TestTutFsCallsAccountFraud1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply string
 	attrAddBlnc := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Value: 101}
 	if err := tutFsCallsRpc.Call("ApierV1.AddBalance", attrAddBlnc, &reply); err != nil {
@@ -547,9 +472,6 @@ func TestTutFsCallsAccountFraud1001(t *testing.T) {
 
 // Based on Fraud automatic mitigation, our account should be disabled
 func TestTutFsCallsAccountDisabled1001(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
@@ -560,26 +482,16 @@ func TestTutFsCallsAccountDisabled1001(t *testing.T) {
 }
 
 func TestTutFsCallsStopPjsuaListener(t *testing.T) {
-	if !*testCalls {
-		return
-	}
-
 	tutFsCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
 	time.Sleep(time.Duration(1) * time.Second)   // Allow pjsua to finish it's tasks, eg un-REGISTER
 }
 
 func TestTutFsCallsStopCgrEngine(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestTutFsCallsStopFS(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	engine.KillProcName("freeswitch", 1000)
 }

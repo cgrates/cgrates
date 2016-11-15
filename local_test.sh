@@ -28,8 +28,8 @@ cfg=$?
 echo 'go test github.com/cgrates/cgrates/utils -local'
 go test github.com/cgrates/cgrates/utils -local
 utl=$?
-echo 'go test github.com/cgrates/cgrates/general_tests -local -integration'
-go test github.com/cgrates/cgrates/general_tests -local -integration
+echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration'
+go test github.com/cgrates/cgrates/general_tests -tags=integration
 gnr=$?
 echo 'go test github.com/cgrates/cgrates/agents -integration'
 go test github.com/cgrates/cgrates/agents -integration

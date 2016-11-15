@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -15,10 +17,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package general_tests
 
 import (
-	"flag"
 	"io/ioutil"
 	"os"
 	"path"
@@ -37,12 +39,7 @@ var cdrsMasterCfgPath, cdrsSlaveCfgPath string
 var cdrsMasterCfg, cdrsSlaveCfg *config.CGRConfig
 var cdrsMasterRpc *rpcclient.RpcClient
 
-var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
-
 func TestCdrsInitConfig(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var err error
 	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsreplicationmaster")
 	if cdrsMasterCfg, err = config.NewCGRConfigFromFolder(cdrsMasterCfgPath); err != nil {
@@ -56,9 +53,6 @@ func TestCdrsInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func TestCdrsInitCdrDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if err := engine.InitStorDb(cdrsMasterCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -74,18 +68,12 @@ func TestCdrsInitCdrDb(t *testing.T) {
 }
 
 func TestCdrsStartMasterEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCdrsStartSlaveEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if _, err := engine.StartEngine(cdrsSlaveCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -93,9 +81,6 @@ func TestCdrsStartSlaveEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestCdrsHttpCdrReplication(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
 	if err != nil {
@@ -153,9 +138,6 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 
 // Connect rpc client to rater
 func TestCdrsFileFailover(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	time.Sleep(time.Duration(2 * time.Second))
 	failoverContent := []byte(`CGRID=57548d485d61ebcba55afbe5d939c82a8e9ff670`)
 	var rplCfg *config.CDRReplicationCfg

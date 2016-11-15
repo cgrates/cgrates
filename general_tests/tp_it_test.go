@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -15,10 +17,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package general_tests
 
 import (
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -38,9 +40,6 @@ var tpRPC *rpc.Client
 var tpLoadInst utils.LoadInstance // Share load information between tests
 
 func TestTpInitCfg(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
@@ -54,9 +53,6 @@ func TestTpInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestTpResetDataDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if err := engine.InitDataDb(tpCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -64,9 +60,6 @@ func TestTpResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestTpResetStorDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if err := engine.InitStorDb(tpCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -74,21 +67,13 @@ func TestTpResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestTpStartEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
-	fmt.Printf("Before starting: %v\n", time.Now())
 	if _, err := engine.StopStartEngine(tpCfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("After starting: %v\n", time.Now())
 }
 
 // Connect rpc client to rater
 func TestTpRpcConn(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var err error
 	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -98,9 +83,6 @@ func TestTpRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestTpLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
 	if err := tpRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &tpLoadInst); err != nil {
 		t.Error(err)
@@ -109,9 +91,6 @@ func TestTpLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 func TestTpBalanceCounter(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
 		Direction:     "*out",
@@ -139,9 +118,6 @@ func TestTpBalanceCounter(t *testing.T) {
 }
 
 func TestTpActionTriggers(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var atrs engine.ActionTriggers
 	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
 		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
@@ -177,9 +153,6 @@ func TestTpActionTriggers(t *testing.T) {
 }
 
 func TestTpZeroCost(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1012"}
 	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
@@ -212,9 +185,6 @@ func TestTpZeroCost(t *testing.T) {
 }
 
 func TestTpZeroNegativeCost(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
 		Direction:     "*out",
@@ -243,9 +213,6 @@ func TestTpZeroNegativeCost(t *testing.T) {
 }
 
 func TestTpExecuteActionCgrRpc(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var reply string
 	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{ActionsId: "RPC"}, &reply); err != nil {
 		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
@@ -260,9 +227,6 @@ func TestTpExecuteActionCgrRpc(t *testing.T) {
 }
 
 func TestTpExecuteActionCgrRpcAcc(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var reply string
 	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
 		Tenant:    "cgrates.org",
@@ -281,9 +245,6 @@ func TestTpExecuteActionCgrRpcAcc(t *testing.T) {
 }
 
 func TestTpExecuteActionCgrRpcCdrStats(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var reply string
 	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
 		ActionsId: "RPC_CDRSTATS",
@@ -299,9 +260,6 @@ func TestTpExecuteActionCgrRpcCdrStats(t *testing.T) {
 }
 
 func TestTpCreateExecuteActionMatch(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var reply string
 	if err := tpRPC.Call("ApierV2.SetActions", utils.AttrSetActions{
 		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
@@ -351,9 +309,6 @@ func TestTpCreateExecuteActionMatch(t *testing.T) {
 }
 
 func TestTpSetRemoveActions(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var reply string
 	if err := tpRPC.Call("ApierV2.SetActions", utils.AttrSetActions{
 		ActionsId: "TO_BE_DELETED",
@@ -395,12 +350,6 @@ func TestTpSetRemoveActions(t *testing.T) {
 }
 
 func TestTpRemoveActionsRefenced(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
-
-	// no more reference check for sake of speed!
-
 	actionsMap := make(map[string]engine.Actions)
 	if err := tpRPC.Call("ApierV2.GetActions", v2.AttrGetActions{
 		ActionIDs: []string{"TOPUP_VOICE"},
@@ -427,9 +376,6 @@ func TestTpRemoveActionsRefenced(t *testing.T) {
 }
 
 func TestTpApierResetAccountActionTriggers(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005"}
 	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
@@ -456,9 +402,6 @@ func TestTpApierResetAccountActionTriggers(t *testing.T) {
 }
 
 func TestTpStopCgrEngine(t *testing.T) {
-	if !*testCalls {
-		return
-	}
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

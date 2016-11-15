@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -15,6 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package general_tests
 
 import (
@@ -37,9 +40,6 @@ var tutLocalRpc *rpc.Client
 var loadInst utils.LoadInstance // Share load information between tests
 
 func TestTutITInitCfg(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
@@ -53,9 +53,6 @@ func TestTutITInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestTutITResetDataDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if err := engine.InitDataDb(tutFsLocalCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -63,9 +60,6 @@ func TestTutITResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestTutITResetStorDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if err := engine.InitStorDb(tutFsLocalCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -73,9 +67,6 @@ func TestTutITResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestTutITStartEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if _, err := engine.StopStartEngine(tutLocalCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -83,9 +74,6 @@ func TestTutITStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestTutITRpcConn(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var err error
 	tutLocalRpc, err = jsonrpc.Dial("tcp", tutFsLocalCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -95,9 +83,6 @@ func TestTutITRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestTutITLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tutLocalRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
@@ -107,9 +92,6 @@ func TestTutITLoadTariffPlanFromFolder(t *testing.T) {
 
 // Check loaded stats
 func TestTutITCacheStats(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 4, RatingProfiles: 0, Actions: 7, ActionPlans: 4, SharedGroups: 0, Aliases: 0, ResourceLimits: 0,
 		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3}
@@ -122,9 +104,6 @@ func TestTutITCacheStats(t *testing.T) {
 }
 
 func TestTutITGetUsers(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var users engine.UserProfiles
 	if err := tutLocalRpc.Call("UsersV1.GetUsers", engine.UserProfile{}, &users); err != nil {
 		t.Error("Got error on UsersV1.GetUsers: ", err.Error())
@@ -134,9 +113,6 @@ func TestTutITGetUsers(t *testing.T) {
 }
 
 func TestTutITGetMatchingAlias(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	args := engine.AttrMatchingAlias{
 		Destination: "1005",
 		Direction:   "*out",
@@ -159,9 +135,6 @@ func TestTutITGetMatchingAlias(t *testing.T) {
 
 // Check call costs
 func TestTutITGetCosts(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 	tEnd, _ := utils.ParseDate("2014-08-04T13:00:20Z")
 	cd := engine.CallDescriptor{
@@ -399,9 +372,6 @@ func TestTutITGetCosts(t *testing.T) {
 
 // Check call costs
 func TestTutITMaxDebit(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
 		Direction:     "*out",
@@ -480,9 +450,6 @@ func TestTutITMaxDebit(t *testing.T) {
 
 // Check call costs
 func TestTutITDerivedMaxSessionTime(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
 	ev := engine.CDR{
 		CGRID:       utils.Sha1("testevent1", tStart.String()),
@@ -512,9 +479,6 @@ func TestTutITDerivedMaxSessionTime(t *testing.T) {
 
 // Check MaxUsage
 func TestTutITMaxUsage(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	setupReq := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
 		Account: "1003", Subject: "1003", Destination: "1001",
 		SetupTime: "2014-08-04T13:00:00Z", Usage: "1",
@@ -538,9 +502,6 @@ func TestTutITMaxUsage(t *testing.T) {
 
 // Check DebitUsage
 func TestTutITDebitUsage(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	setupReq := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
 		Account: "1003", Subject: "1003", Destination: "1001",
 		AnswerTime: "2014-08-04T13:00:00Z", Usage: "1",
@@ -555,9 +516,6 @@ func TestTutITDebitUsage(t *testing.T) {
 
 // Test CDR from external sources
 func TestTutITProcessExternalCdr(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
 		OriginID: "testextcdr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001", Supplier: "SUPPL1",
@@ -574,9 +532,6 @@ func TestTutITProcessExternalCdr(t *testing.T) {
 
 // Test CDR involving UserProfile
 func TestTutITProcessExternalCdrUP(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
 		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, Direction: utils.OUT,
 		RequestType: utils.USERS, Tenant: utils.USERS, Account: utils.USERS, Destination: "1001", Supplier: "SUPPL1",
@@ -655,9 +610,6 @@ func TestTutITProcessExternalCdrUP(t *testing.T) {
 }
 
 func TestTutITCostErrors(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
 		OriginID: "TestTutIT_1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "fake", Account: "2001", Subject: "2001", Destination: "1001", Supplier: "SUPPL1",
@@ -739,9 +691,6 @@ func TestTutITCostErrors(t *testing.T) {
 
 // Make sure queueids were created
 func TestTutITCdrStats(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var queueIds []string
 	eQueueIds := []string{"CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
 	if err := tutLocalRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
@@ -752,9 +701,6 @@ func TestTutITCdrStats(t *testing.T) {
 }
 
 func TestTutITLeastCost(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 	cd := engine.CallDescriptor{
@@ -822,9 +768,6 @@ func TestTutITLeastCost(t *testing.T) {
 
 // Check LCR
 func TestTutITLcrStatic(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 	cd := engine.CallDescriptor{
@@ -883,9 +826,6 @@ func TestTutITLcrStatic(t *testing.T) {
 }
 
 func TestTutITLcrHighestCost(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 	cd := engine.CallDescriptor{
@@ -934,9 +874,6 @@ func TestTutITLcrHighestCost(t *testing.T) {
 }
 
 func TestTutITLcrQos(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 	cd := engine.CallDescriptor{
@@ -1050,9 +987,6 @@ func TestTutITLcrQos(t *testing.T) {
 }
 
 func TestTutITLcrQosThreshold(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 	cd := engine.CallDescriptor{
@@ -1179,9 +1113,6 @@ func TestTutITLcrQosThreshold(t *testing.T) {
 
 // Test adding the account via API, using the data previously devined in .csv
 func TestTutITSetAccount(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	var reply string
 	attrs := &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, ReloadScheduler: true}
 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
@@ -1331,9 +1262,6 @@ func TestTutITCdrStatsAfter(t *testing.T) {
 */
 
 func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid1", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testprepaid1", OriginHost: "192.168.1.1", Source: "TEST_PREPAID_CDR_SMCOST1", RequestType: utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
@@ -1391,9 +1319,6 @@ func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
 }
 
 func TestTutITPrepaidCDRWithoutSMCost(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid2", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testprepaid2", OriginHost: "192.168.1.1", Source: "TEST_PREPAID_CDR_NO_SMCOST1", RequestType: utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
@@ -1426,9 +1351,6 @@ func TestTutITPrepaidCDRWithoutSMCost(t *testing.T) {
 }
 
 func TestTutITStopCgrEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
