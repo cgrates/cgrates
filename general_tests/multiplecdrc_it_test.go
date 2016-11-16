@@ -42,7 +42,7 @@ var cfgPath string
 var cfg *config.CGRConfig
 var rater *rpc.Client
 
-var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
+var testIT  = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.") 
 var testCalls = flag.Bool("calls", false, "Run test calls simulation, not by default.")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
