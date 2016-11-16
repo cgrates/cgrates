@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -30,16 +32,17 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var testIT = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
+var (
+	testIT    = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
+	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
+)
 
 var apierCfgPath string
 var apierCfg *config.CGRConfig
 var apierRPC *rpc.Client
 
 func TestApierV2itLoadConfig(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	apierCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	if apierCfg, err = config.NewCGRConfigFromFolder(tpCfgPath); err != nil {
 		t.Error(err)
@@ -48,9 +51,6 @@ func TestApierV2itLoadConfig(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestApierV2itResetDataDb(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	if err := engine.InitDataDb(apierCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -58,9 +58,6 @@ func TestApierV2itResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestApierV2itResetStorDb(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	if err := engine.InitStorDb(apierCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -68,9 +65,6 @@ func TestApierV2itResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestApierV2itStartEngine(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	if _, err := engine.StopStartEngine(apierCfgPath, 200); err != nil { // Mongo requires more time to start
 		t.Fatal(err)
 	}
@@ -78,9 +72,6 @@ func TestApierV2itStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestApierV2itRpcConn(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	apierRPC, err = jsonrpc.Dial("tcp", apierCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
@@ -88,9 +79,6 @@ func TestApierV2itRpcConn(t *testing.T) {
 }
 
 func TestApierV2itAddBalance(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "dan",
@@ -112,9 +100,6 @@ func TestApierV2itAddBalance(t *testing.T) {
 }
 
 func TestApierV2itSetAction(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	attrs := utils.AttrSetActions{ActionsId: "DISABLE_ACCOUNT", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: engine.DISABLE_ACCOUNT, Weight: 10.0},
 	}}
@@ -131,9 +116,6 @@ func TestApierV2itSetAction(t *testing.T) {
 }
 
 func TestApierV2itSetAccountActionTriggers(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	attrs := AttrSetAccountActionTriggers{
 		Tenant:         "cgrates.org",
 		Account:        "dan",
@@ -165,9 +147,6 @@ func TestApierV2itSetAccountActionTriggers(t *testing.T) {
 }
 
 func TestApierV2itFraudMitigation(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "dan",
@@ -206,9 +185,6 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 }
 
 func TestApierV2itKillEngine(t *testing.T) {
-	if !*testIT {
-		return
-	}
 	if err := engine.KillEngine(delay); err != nil {
 		t.Error(err)
 	}

@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -83,6 +84,13 @@ func KillEngine(waitEngine int) error {
 	}
 	time.Sleep(time.Duration(waitEngine) * time.Millisecond)
 	return nil
+}
+
+// KillEngineTest is included in tests to shutdown the CGRateS processes
+func KillEngineTest(t *testing.T) {
+	if err := KillEngine(100); err != nil {
+		t.Error(err)
+	}
 }
 
 func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {

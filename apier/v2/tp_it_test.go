@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -18,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -31,26 +32,58 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var testTP = flag.Bool("tp", false, "Perform the tests for TariffPlans, not by default.") // Separate from integration so we can run on multiple DBs without involving all other tests on each run
-var configDIR = flag.String("config_dir", "tutmysql", "Relative path towards a config directory under samples prefix")
-
 var tpCfgPath string
 var tpCfg *config.CGRConfig
 var tpRPC *rpc.Client
 var err error
-
-var testTPid = "V2TestTPit"
 var delay int
+var configDIR string // relative path towards a config directory under samples prefix
 
-func TestTPitLoadConfig(t *testing.T) {
-	if !*testTP {
-		return
+var (
+	testTPid = "V2TestTPit"
+)
+
+// subtests to be executed for each confDIR
+var sTestsTutIT = []func(t *testing.T){
+	testTPitLoadConfig,
+	testTPitResetDataDb,
+	testTPitResetStorDb,
+	testTPitStartEngine,
+	testTPitRpcConn,
+	testTPitTimings,
+	testTPitDestinations,
+	engine.KillEngineTest,
+}
+
+// Tests starting here
+
+func TestITMySQLTutorial(t *testing.T) {
+	configDIR = "tutmysql"
+	for _, stest := range sTestsTutIT {
+		t.Run(configDIR, stest)
 	}
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", *configDIR)
+}
+
+func TestITpgTutorial(t *testing.T) {
+	configDIR = "tutpostgres"
+	for _, stest := range sTestsTutIT {
+		t.Run(configDIR, stest)
+	}
+}
+
+func TestITMongoTutorial(t *testing.T) {
+	configDIR = "tutmongo"
+	for _, stest := range sTestsTutIT {
+		t.Run(configDIR, stest)
+	}
+}
+
+func testTPitLoadConfig(t *testing.T) {
+	tpCfgPath = path.Join(*dataDir, "conf", "samples", configDIR)
 	if tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath); err != nil {
 		t.Error(err)
 	}
-	switch *configDIR {
+	switch configDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		delay = 4000
 	default:
@@ -59,40 +92,28 @@ func TestTPitLoadConfig(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestTPitResetDataDb(t *testing.T) {
-	if !*testTP {
-		return
-	}
+func testTPitResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(tpCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestTPitResetStorDb(t *testing.T) {
-	if !*testTP {
-		return
-	}
+func testTPitResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(tpCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestTPitStartEngine(t *testing.T) {
-	if !*testTP {
-		return
-	}
+func testTPitStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(tpCfgPath, delay); err != nil { // Mongo requires more time to start
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestTPitRpcConn(t *testing.T) {
-	if !*testTP {
-		return
-	}
+func testTPitRpcConn(t *testing.T) {
 	var err error
 	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -100,10 +121,7 @@ func TestTPitRpcConn(t *testing.T) {
 	}
 }
 
-func TestTPitTimings(t *testing.T) {
-	if !*testTP {
-		return
-	}
+func testTPitTimings(t *testing.T) {
 	// PEAK,*any,*any,*any,1;2;3;4;5,08:00:00
 	tmPeak := &utils.ApierTPTiming{
 		TPid:      testTPid,
@@ -186,10 +204,7 @@ func TestTPitTimings(t *testing.T) {
 	}
 }
 
-func TestTPitDestinations(t *testing.T) {
-	if !*testTP {
-		return
-	}
+func testTPitDestinations(t *testing.T) {
 	var reply string
 	// DST_1002,1002
 	dst1002 := &utils.TPDestination{TPid: testTPid, DestinationId: "DST_1002", Prefixes: []string{"1002"}}
@@ -236,13 +251,4 @@ func TestTPitDestinations(t *testing.T) {
 		t.Errorf("Calling ApierV2.GetTPDestinationIds expected: %v, received: %v", expectedDstIds, rplyDstIds)
 	}
 
-}
-
-func TestTPitKillEngine(t *testing.T) {
-	if !*testTP {
-		return
-	}
-	if err := engine.KillEngine(delay); err != nil {
-		t.Error(err)
-	}
 }
