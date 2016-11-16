@@ -227,15 +227,12 @@ func testTPitDestinations(t *testing.T) {
 		}
 	}
 	// Test get
-	/*
-		 FixMe for mongodb
-			var rplyDst *utils.TPDestination
-			if err := tpRPC.Call("ApierV2.GetTPDestination", v1.AttrGetTPDestination{testTPid, dstDEMobile.DestinationId}, &rplyDst); err != nil {
-				t.Error("Calling ApierV2.GetTPDestination, got error: ", err.Error())
-			} else if len(dstDEMobile.Prefixes) != len(rplyDst.Prefixes) {
-				t.Errorf("Calling ApierV2.GetTPDestination expected: %v, received: %v", dstDEMobile, rplyDst)
-			}
-	*/
+	var rplyDst *utils.TPDestination
+	if err := tpRPC.Call("ApierV2.GetTPDestination", v1.AttrGetTPDestination{testTPid, dstDEMobile.DestinationId}, &rplyDst); err != nil {
+		t.Error("Calling ApierV2.GetTPDestination, got error: ", err.Error())
+	} else if len(dstDEMobile.Prefixes) != len(rplyDst.Prefixes) {
+		t.Errorf("Calling ApierV2.GetTPDestination expected: %v, received: %v", dstDEMobile, rplyDst)
+	}
 	// Test remove
 	if err := tpRPC.Call("ApierV2.RemTPDestination", v1.AttrGetTPDestination{testTPid, dstDUMMY.DestinationId}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPTiming, got error: ", err.Error())
@@ -250,5 +247,4 @@ func testTPitDestinations(t *testing.T) {
 	} else if len(expectedDstIds) != len(rplyDstIds) {
 		t.Errorf("Calling ApierV2.GetTPDestinationIds expected: %v, received: %v", expectedDstIds, rplyDstIds)
 	}
-
 }

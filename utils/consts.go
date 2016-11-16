@@ -334,4 +334,7 @@ const (
 	EVT_ACTION_TRIGGER_FIRED     = "ACTION_TRIGGER_FIRED"
 	EVT_ACTION_TIMING_FIRED      = "ACTION_TRIGGER_FIRED"
 	SMAsterisk                   = "sm_asterisk"
+	TariffPlanDB                 = "tariffplan_db"
+	DataDB                       = "data_db"
+	StorDB                       = "stor_db"
 )

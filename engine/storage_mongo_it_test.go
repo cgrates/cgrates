@@ -38,7 +38,8 @@ func TestMGOitConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mgoITDB, err = NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort, mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass, nil, mgoITCfg.CacheConfig, mgoITCfg.LoadHistorySize); err != nil {
+	if mgoITDB, err = NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort, mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
+		utils.StorDB, nil, mgoITCfg.CacheConfig, mgoITCfg.LoadHistorySize); err != nil {
 		t.Fatal(err)
 	}
 }

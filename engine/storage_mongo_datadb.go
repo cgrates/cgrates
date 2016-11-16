@@ -85,20 +85,7 @@ var (
 	CostLow            = strings.ToLower(utils.COST)
 )
 
-type MongoStorage struct {
-	session         *mgo.Session
-	db              string
-	ms              Marshaler
-	cacheCfg        *config.CacheConfig
-	loadHistorySize int
-}
-
-func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
-	sessionCopy := ms.session.Copy()
-	return sessionCopy, sessionCopy.DB(ms.db).C(col)
-}
-
-func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, cacheCfg *config.CacheConfig, loadHistorySize int) (*MongoStorage, error) {
+func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string, cacheCfg *config.CacheConfig, loadHistorySize int) (ms *MongoStorage, err error) {
 	address := fmt.Sprintf("%s:%s", host, port)
 	if user != "" && pass != "" {
 		address = fmt.Sprintf("%s:%s@%s", user, pass, address)
@@ -107,169 +94,169 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string, ca
 	if err != nil {
 		return nil, err
 	}
-
-	ndb := session.DB(db)
 	session.SetMode(mgo.Strong, true)
-	index := mgo.Index{
+	return &MongoStorage{db: db, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(), cacheCfg: cacheCfg, loadHistorySize: loadHistorySize, cdrsIndexes: cdrsIndexes}, nil
+}
+
+type MongoStorage struct {
+	session         *mgo.Session
+	db              string
+	storageType     string // tariffplandb, datadb, stordb
+	ms              Marshaler
+	cacheCfg        *config.CacheConfig
+	loadHistorySize int
+	cdrsIndexes     []string
+}
+
+func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
+	sessionCopy := ms.session.Copy()
+	return sessionCopy, sessionCopy.DB(ms.db).C(col)
+}
+
+func (ms *MongoStorage) EnsureIndexes() (err error) {
+	dbSession, _ := ms.conn("")
+	defer dbSession.Close()
+	db := dbSession.DB(ms.db)
+	idx := mgo.Index{
 		Key:        []string{"key"},
 		Unique:     true,  // Prevent two documents from having the same index key
 		DropDups:   false, // Drop documents with the same index key as a previously indexed one
 		Background: false, // Build index in background and return immediately
 		Sparse:     false, // Only index documents containing the Key fields
 	}
-	collections := []string{colAct, colApl, colAtr, colDcs, colAls, colRls, colUsr, colLcr, colLht, colRpl, colDst, colRds}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
+	for _, col := range []string{colAct, colApl, colAtr, colDcs, colAls, colRls, colUsr, colLcr, colLht, colRpl, colDst, colRds} {
+		if err = db.C(col).EnsureIndex(idx); err != nil {
+			return
 		}
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{"id"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{colRpf, colShg, colAcc, colCrs}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
+	for _, col := range []string{colRpf, colShg, colAcc, colCrs} {
+		if err = db.C(col).EnsureIndex(idx); err != nil {
+			return
 		}
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{"tpid", "tag"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
+	for _, col := range []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS,
+		utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS} {
+		if err = db.C(col).EnsureIndex(idx); err != nil {
+			return
 		}
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{"tpid", "direction", "tenant", "category", "subject", "loadid"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{utils.TBL_TP_RATE_PROFILES}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
-		}
+	if err = db.C(utils.TBL_TP_RATE_PROFILES).EnsureIndex(idx); err != nil {
+		return
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{"tpid", "direction", "tenant", "category", "account", "subject"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{utils.TBL_TP_LCRS}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
-		}
+	if err = db.C(utils.TBL_TP_LCRS).EnsureIndex(idx); err != nil {
+		return
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{"tpid", "tenant", "username"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{utils.TBL_TP_USERS}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
-		}
+	if err = db.C(utils.TBL_TP_USERS).EnsureIndex(idx); err != nil {
+		return
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{"tpid", "direction", "tenant", "category", "account", "subject", "context"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{utils.TBL_TP_LCRS}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
-		}
+	if err = db.C(utils.TBL_TP_LCRS).EnsureIndex(idx); err != nil {
+		return
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{"tpid", "direction", "tenant", "category", "subject", "account", "loadid"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{utils.TBL_TP_DERIVED_CHARGERS}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
-		}
+	if err = db.C(utils.TBL_TP_DERIVED_CHARGERS).EnsureIndex(idx); err != nil {
+		return
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{"tpid", "direction", "tenant", "account", "loadid"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{utils.TBL_TP_DERIVED_CHARGERS}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
-		}
+	if err = db.C(utils.TBL_TP_DERIVED_CHARGERS).EnsureIndex(idx); err != nil {
+		return
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{CGRIDLow, RunIDLow, OriginIDLow},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	if err = ndb.C(utils.TBL_CDRS).EnsureIndex(index); err != nil {
-		return nil, err
+	if err = db.C(utils.TBL_CDRS).EnsureIndex(idx); err != nil {
+		return
 	}
-	for _, idxKey := range cdrsIndexes {
-		index = mgo.Index{
+	for _, idxKey := range ms.cdrsIndexes {
+		idx = mgo.Index{
 			Key:        []string{idxKey},
 			Unique:     false,
 			DropDups:   false,
 			Background: false,
 			Sparse:     false,
 		}
-		if err = ndb.C(utils.TBL_CDRS).EnsureIndex(index); err != nil {
-			return nil, err
+		if err = db.C(utils.TBL_CDRS).EnsureIndex(idx); err != nil {
+			return
 		}
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{CGRIDLow, RunIDLow},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
-		return nil, err
+	if err = db.C(utils.TBLSMCosts).EnsureIndex(idx); err != nil {
+		return
 	}
-	index = mgo.Index{
+	idx = mgo.Index{
 		Key:        []string{OriginHostLow, OriginIDLow},
 		Unique:     false,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
-		return nil, err
+	if err = db.C(utils.TBLSMCosts).EnsureIndex(idx); err != nil {
+		return
 	}
-	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler(), cacheCfg: cacheCfg, loadHistorySize: loadHistorySize}, err
+	return
 }
 
 func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool) {
@@ -327,7 +314,6 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
 	if !ok {
 		return utils.ErrInvalidKey
 	}
-
 	session, col := ms.conn(colName)
 	defer session.Close()
 
