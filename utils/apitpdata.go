@@ -40,7 +40,7 @@ type Paginator struct {
 
 type TPDestination struct {
 	TPid          string   // Tariff plan id
-	DestinationId string   // Destination id
+	DestinationID string   // Destination id
 	Prefixes      []string // Prefixes attached to this destination
 }
 

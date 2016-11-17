@@ -24,7 +24,7 @@ import (
 
 // Creates a new destination within a tariff plan
 func (self *ApierV1) SetTPDestination(attrs utils.TPDestination, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationID", "Prefixes"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ds := engine.APItoModelDestination(&attrs)
@@ -46,7 +46,6 @@ func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.T
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if storData, err := self.StorDb.GetTpDestinations(attrs.TPid, attrs.DestinationId); err != nil {
-
 		return utils.NewErrServerError(err)
 	} else if len(storData) == 0 {
 		return utils.ErrNotFound
@@ -57,7 +56,7 @@ func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.T
 		}
 		*reply = utils.TPDestination{
 			TPid:          attrs.TPid,
-			DestinationId: dsts[attrs.DestinationId].Id,
+			DestinationID: dsts[attrs.DestinationId].Id,
 			Prefixes:      dsts[attrs.DestinationId].Prefixes}
 	}
 	return nil

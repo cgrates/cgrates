@@ -53,7 +53,7 @@ func TestModelHelperCsvDump(t *testing.T) {
 func TestTPDestinationAsExportSlice(t *testing.T) {
 	tpDst := &utils.TPDestination{
 		TPid:          "TEST_TPID",
-		DestinationId: "TEST_DEST",
+		DestinationID: "TEST_DEST",
 		Prefixes:      []string{"49", "49176", "49151"},
 	}
 	expectedSlc := [][]string{
