@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -2166,13 +2167,94 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 	if acc.BalanceMap[utils.MONETARY][0].Value != 9 {
 		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
 	}
-	cdrs := make([]*CDR, 0)
-	json.Unmarshal([]byte(at.actions[2].ExpirationString), &cdrs)
+
+	cdrs, _, _ := cdrStorage.GetCDRs(
+		&utils.CDRsFilter{
+			Sources:  []string{"*cdrlog"},
+			Accounts: []string{"bv"},
+		}, false)
+
 	if len(cdrs) != 2 ||
 		cdrs[0].ExtraFields["BalanceValue"] != "11.1" ||
 		cdrs[1].ExtraFields["BalanceValue"] != "9" {
 		t.Errorf("Wrong cdrlogs: %", utils.ToIJSON(cdrs))
 	}
+}
+
+func TestActionCdrlogMultipleAccounts(t *testing.T) {
+
+	accs := make(map[string]bool)
+
+	for i := 10; i < 5000; i++ {
+
+		si := strconv.Itoa(i)
+
+		err := accountingStorage.SetAccount(&Account{
+			ID: "cgrates.org:lm" + si,
+			BalanceMap: map[string]Balances{
+				utils.MONETARY: Balances{&Balance{
+					ID:    "*default",
+					Uuid:  "25a02c82-f09f-4c6e-bacf-8ed4b076475a" + si,
+					Value: float64(i),
+				}},
+			},
+		})
+
+		if err != nil {
+			t.Error("Error setting account: ", err)
+		} else {
+			accs["cgrates.org:lm"+si] = true
+		}
+	}
+
+	at := &ActionTiming{
+		accountIDs: accs,
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				Id:         "RECUR_FOR_V3HSILLMILLD5G",
+				ActionType: DEBIT,
+				Balance: &BalanceFilter{
+					ID:    utils.StringPointer("*default"),
+					Value: &utils.ValueFormula{Static: 2},
+					Type:  utils.StringPointer(utils.MONETARY),
+				},
+			},
+			&Action{
+				Id:              "c",
+				ActionType:      CDRLOG,
+				ExtraParameters: `{"BalanceID":"BalanceID","BalanceUUID":"BalanceUUID","ActionID":"ActionID","BalanceValue":"BalanceValue"}`,
+			},
+		},
+	}
+
+	err = at.Execute()
+
+	for i := 10; i < 5000; i++ {
+
+		si := strconv.Itoa(i)
+
+		acc, err := accountingStorage.GetAccount("cgrates.org:lm" + si)
+		if err != nil || acc == nil {
+			t.Error("Error getting account: ", acc, err)
+		}
+		if acc.BalanceMap[utils.MONETARY][0].Value != float64(i-2) {
+			t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+		}
+
+		cdrs, _, _ := cdrStorage.GetCDRs(
+			&utils.CDRsFilter{
+				Sources:  []string{"*cdrlog"},
+				Accounts: []string{"lm" + si},
+			}, false)
+
+		if len(cdrs) != 1 ||
+			cdrs[0].ExtraFields["BalanceValue"] != strconv.Itoa(i-2) {
+			t.Errorf("Wrong cdrlogs: %", utils.ToIJSON(cdrs))
+		}
+
+	}
+
 }
 
 type TestRPCParameters struct {

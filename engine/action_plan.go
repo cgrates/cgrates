@@ -289,6 +289,13 @@ func (at *ActionTiming) Execute() (err error) {
 			}
 			transactionFailed := false
 			removeAccountActionFound := false
+
+			// var acs []*Action
+			// for _, a := range aac {
+			//	act := a.Clone()
+			//	acs = append(acs, act)
+			// }
+
 			for _, a := range aac {
 				// check action filter
 				if len(a.Filter) > 0 {

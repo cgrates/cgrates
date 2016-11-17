@@ -46,6 +46,7 @@ func init() {
 	case "map":
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
+		cdrStorage, _ = NewMapStorage()
 	case "mongo":
 		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", utils.TariffPlanDB, nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
