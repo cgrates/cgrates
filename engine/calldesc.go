@@ -47,11 +47,11 @@ func init() {
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	case "mongo":
-		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
+		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", utils.TariffPlanDB, nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
+		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", utils.DataDB, nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}

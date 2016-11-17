@@ -242,7 +242,8 @@ func (smg *SMGeneric) indexSession(s *SMGSession, passiveSessions bool) {
 		if _, hasIt := ssRIdx[s.CGRID]; !hasIt {
 			ssRIdx[s.CGRID] = make([]*riFieldNameVal, 0)
 		}
-		ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{runID: s.RunID, fieldName: fieldName, fieldValue: fieldVal})
+		riFlds := ssRIdx[s.CGRID] // attempt to avoid map concurrency write panic
+		ssRIdx[s.CGRID] = append(riFlds, &riFieldNameVal{runID: s.RunID, fieldName: fieldName, fieldValue: fieldVal})
 	}
 	return
 }
