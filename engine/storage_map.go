@@ -1284,6 +1284,12 @@ func (ms *MapStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) (cdrs []*C
 			}
 		}
 
+		for _, runID := range qryFltr.RunIDs {
+			if cdr.RunID != runID {
+				add = false
+			}
+		}
+
 		if add {
 			l++
 			cdrs = append(cdrs, cdr)
