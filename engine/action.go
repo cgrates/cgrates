@@ -536,6 +536,7 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 }
 
 func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+
 	var accID string
 	if ub != nil {
 		accID = ub.ID
@@ -554,10 +555,12 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 	if accID == "" {
 		return utils.ErrInvalidKey
 	}
+
 	if err := accountingStorage.RemoveAccount(accID); err != nil {
 		utils.Logger.Err(fmt.Sprintf("Could not remove account Id: %s: %v", accID, err))
 		return err
 	}
+
 	_, err := Guardian.Guard(func() (interface{}, error) {
 		// clean the account id from all action plans
 		allAPs, err := ratingStorage.GetAllActionPlans()
@@ -567,9 +570,11 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		}
 		//var dirtyAps []string
 		for key, ap := range allAPs {
+
 			if _, exists := ap.AccountIDs[accID]; exists {
+
 				// save action plan
-				delete(ap.AccountIDs, key)
+				delete(ap.AccountIDs, accID)
 				ratingStorage.SetActionPlan(key, ap, true, utils.NonTransactional)
 				//dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
 			}
