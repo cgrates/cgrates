@@ -111,15 +111,15 @@ func (self *TPCSVImporter) importDestinations(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTpDestinations(self.TPid, "")
+	tps, err := self.csvr.GetTPDestinations(self.TPid, "")
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].Tpid = self.TPid
+		tps[i].TPid = self.TPid
 	}
 
-	return self.StorDb.SetTpDestinations(tps)
+	return self.StorDb.SetTPDestinations(tps)
 }
 
 func (self *TPCSVImporter) importRates(fn string) error {

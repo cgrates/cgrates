@@ -126,7 +126,7 @@ type LoadReader interface {
 	GetTpIds() ([]string, error)
 	GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
 	GetTpTimings(string, string) ([]TpTiming, error)
-	GetTpDestinations(string, string) ([]TpDestination, error)
+	GetTPDestinations(string, string) ([]*utils.TPDestination, error)
 	GetTpRates(string, string) ([]TpRate, error)
 	GetTpDestinationRates(string, string, *utils.Paginator) ([]TpDestinationRate, error)
 	GetTpRatingPlans(string, string, *utils.Paginator) ([]TpRatingPlan, error)
@@ -147,7 +147,7 @@ type LoadReader interface {
 type LoadWriter interface {
 	RemTpData(string, string, map[string]string) error
 	SetTpTimings([]TpTiming) error
-	SetTpDestinations([]TpDestination) error
+	SetTPDestinations([]*utils.TPDestination) error
 	SetTpRates([]TpRate) error
 	SetTpDestinationRates([]TpDestinationRate) error
 	SetTpRatingPlans([]TpRatingPlan) error

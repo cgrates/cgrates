@@ -198,6 +198,25 @@ func (tps TpDestinations) GetDestinations() (map[string]*Destination, error) {
 	return destinations, nil
 }
 
+// AsTPDestination converts TpDestinations into *utils.TPDestination
+func (tps TpDestinations) AsTPDestinations() (tpDsts []*utils.TPDestination) {
+	uTPDestsMp := make(map[string]*utils.TPDestination) // Should save us some CPU if we index here for big number of destinations to search
+	for _, tpDt := range tps {
+		if uTPDst, hasIt := uTPDestsMp[tpDt.Tag]; !hasIt {
+			uTPDestsMp[tpDt.Tag] = &utils.TPDestination{TPid: tpDt.Tpid, Tag: tpDt.Tag, Prefixes: []string{tpDt.Prefix}}
+		} else {
+			uTPDst.Prefixes = append(uTPDst.Prefixes, tpDt.Prefix)
+		}
+	}
+	tpDsts = make([]*utils.TPDestination, len(uTPDestsMp))
+	i := 0
+	for _, uTPDest := range uTPDestsMp {
+		tpDsts[i] = uTPDest
+		i++
+	}
+	return
+}
+
 type TpTimings []TpTiming
 
 func (tps TpTimings) GetTimings() (map[string]*utils.TPTiming, error) {

@@ -175,7 +175,6 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 				return
 			}
 		}
-
 		idx = mgo.Index{
 			Key:        []string{"tpid", "direction", "tenant", "category", "subject", "loadid"},
 			Unique:     true,

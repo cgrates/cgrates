@@ -127,14 +127,14 @@ func (ms *MongoStorage) GetTpTimings(tpid, tag string) ([]TpTiming, error) {
 	return results, err
 }
 
-func (ms *MongoStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, error) {
+func (ms *MongoStorage) GetTPDestinations(tpid, tag string) ([]*utils.TPDestination, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if tag != "" {
 		filter["tag"] = tag
 	}
-	var results []TpDestination
+	var results []*utils.TPDestination
 	session, col := ms.conn(utils.TBL_TP_DESTINATIONS)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
@@ -453,22 +453,18 @@ func (ms *MongoStorage) SetTpTimings(tps []TpTiming) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTpDestinations(tps []TpDestination) error {
-	if len(tps) == 0 {
-		return nil
+func (ms *MongoStorage) SetTPDestinations(tpDsts []*utils.TPDestination) (err error) {
+	if len(tpDsts) == 0 {
+		return
 	}
-	m := make(map[string]bool)
 	session, col := ms.conn(utils.TBL_TP_DESTINATIONS)
 	defer session.Close()
 	tx := col.Bulk()
-	for _, tp := range tps {
-		if found, _ := m[tp.Tag]; !found {
-			m[tp.Tag] = true
-			tx.Upsert(bson.M{"tpid": tp.Tpid, "tag": tp.Tag}, tp)
-		}
+	for _, tp := range tpDsts {
+		tx.Upsert(bson.M{"tpid": tp.TPid, "tag": tp.Tag}, tp)
 	}
-	_, err := tx.Run()
-	return err
+	_, err = tx.Run()
+	return
 }
 
 func (ms *MongoStorage) SetTpRates(tps []TpRate) error {

@@ -38,10 +38,22 @@ type Paginator struct {
 	SearchTerm string // Global matching pattern in items returned, partially used in some APIs
 }
 
-type TPDestination struct {
+// Deprecated version of TPDestination
+type V1TPDestination struct {
 	TPid          string   // Tariff plan id
-	DestinationID string   // Destination id
+	DestinationId string   // Destination id
 	Prefixes      []string // Prefixes attached to this destination
+}
+
+func (v1TPDst *V1TPDestination) AsTPDestination() *TPDestination {
+	return &TPDestination{TPid: v1TPDst.TPid, Tag: v1TPDst.DestinationId, Prefixes: v1TPDst.Prefixes}
+}
+
+// TPDestination represents one destination in storDB
+type TPDestination struct {
+	TPid     string   // Tariff plan id
+	Tag      string   // Destination id
+	Prefixes []string // Prefixes attached to this destination
 }
 
 // This file deals with tp_* data definition

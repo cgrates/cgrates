@@ -26,6 +26,11 @@ import (
 	"github.com/cgrates/cgrates/history"
 )
 
+func NewDestinationFromTPDestination(tpDst *utils.TPDestination) *Destination {
+	return &Destination{Id: tpDst.Tag, Prefixes: tpDst.Prefixes}
+
+}
+
 /*
 Structure that gathers multiple destination prefixes under a common id.
 */

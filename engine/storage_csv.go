@@ -106,7 +106,7 @@ func (csvs *CSVStorage) GetTpTimings(tpid, tag string) ([]TpTiming, error) {
 	return tpTimings, nil
 }
 
-func (csvs *CSVStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, error) {
+func (csvs *CSVStorage) GetTPDestinations(tpid, tag string) ([]*utils.TPDestination, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.destinationsFn, csvs.sep, getColumnCount(TpDestination{}))
 	if err != nil {
 		//log.Print("Could not load destinations file: ", err)
@@ -131,7 +131,7 @@ func (csvs *CSVStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, er
 			tpDests = append(tpDests, d)
 		}
 	}
-	return tpDests, nil
+	return TpDestinations(tpDests).AsTPDestinations(), nil
 }
 
 func (csvs *CSVStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
