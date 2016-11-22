@@ -161,6 +161,8 @@ func GetCloned(key string) (cln interface{}, err error) {
 		return nil, utils.NewCGRError(utils.Cache,
 			utils.NotFoundCaps, utils.ItemNotFound,
 			fmt.Sprintf("item with key <%s> was not found in <%s>", key))
+	} else if origVal == nil {
+		return nil, nil
 	}
 	if _, canClone := origVal.(utils.Cloner); !canClone {
 		return nil, utils.NewCGRError(utils.Cache,

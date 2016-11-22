@@ -1374,11 +1374,14 @@ func (ms *MongoStorage) RemoveActionTriggers(key string, transactionID string) e
 
 func (ms *MongoStorage) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
 	if !skipCache {
-		if x, ok := cache.Get(utils.ACTION_PLAN_PREFIX + key); ok {
-			if x != nil {
-				return x.(*ActionPlan), nil
+		if x, err := cache.GetCloned(key); err != nil {
+			if err.Error() != utils.ItemNotFound { // Only consider cache if item was found
+				return nil, err
 			}
+		} else if x == nil { // item was placed nil in cache
 			return nil, utils.ErrNotFound
+		} else {
+			return x.(*ActionPlan), nil
 		}
 	}
 	var kv struct {
