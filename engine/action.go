@@ -567,7 +567,7 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		}
 		//var dirtyAps []string
 		for key, ap := range allAPs {
-			if _, exists := ap.AccountIDs[accID]; !exists {
+			if _, exists := ap.AccountIDs[accID]; exists {
 				// save action plan
 				delete(ap.AccountIDs, key)
 				ratingStorage.SetActionPlan(key, ap, true, utils.NonTransactional)
