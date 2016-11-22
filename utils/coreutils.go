@@ -444,6 +444,11 @@ func Clone(a, b interface{}) error {
 	return nil
 }
 
+// Cloner is an interface for objects to clone themselves into interface
+type Cloner interface {
+	Clone() (interface{}, error)
+}
+
 // Used as generic function logic for various fields
 
 // Attributes

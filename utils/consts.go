@@ -303,4 +303,10 @@ const (
 	TariffPlanDB                 = "tariffplan_db"
 	DataDB                       = "data_db"
 	StorDB                       = "stor_db"
+	Cache                        = "cache"
+	NotFoundCaps                 = "NOT_FOUND"
+	ItemNotFound                 = "item not found"
+	ItemNotCloneable             = "item not cloneable"
+	NotCloneableCaps             = "NOT_CLONEABLE"
+	ServerErrorCaps              = "SERVER_ERROR"
 )
