@@ -337,6 +337,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("CDRStatS not enabled but requested by CDRS component.")
 			}
 		}
+		for _, rplCfg := range self.CDRSCdrReplication {
+			if utils.IsSliceMember([]string{utils.MetaHTTPjsonMap, utils.META_HTTP_POST}, rplCfg.Transport) &&
+				len(rplCfg.ContentFields) == 0 {
+				return fmt.Errorf("<CDRS> No content fields defined for replication to address: <%s>", rplCfg.Address)
+			}
+		}
 	}
 	// CDRC sanity checks
 	for _, cdrcCfgs := range self.CdrcProfiles {

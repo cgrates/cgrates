@@ -448,11 +448,6 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 // ToDo: Add websocket support
 func (self *CdrServer) replicateCdr(cdr *CDR) error {
 	for _, rplCfg := range self.cgrCfg.CDRSCdrReplication {
-		if len(rplCfg.ContentFields) == 0 {
-			utils.Logger.Warning(fmt.Sprintf(
-				"<CDRReplicator> No content fields defined for replication to address: <%s>, ignoring", rplCfg.Address))
-			return nil
-		}
 		passesFilters := true
 		for _, cdfFltr := range rplCfg.CdrFilter {
 			if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
