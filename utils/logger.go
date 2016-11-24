@@ -32,7 +32,7 @@ func init() {
 	// Attempt to connect to syslog. We'll fallback to `log` otherwise.
 	var err error
 	var l *syslog.Writer
-	l, err = syslog.New(syslog.LOG_INFO, "CGRateS")
+	l, err = syslog.New(syslog.LOG_INFO, "CGRateS ")
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 	} else {
@@ -73,20 +73,33 @@ type StdLogger struct {
 	syslog   *syslog.Writer
 }
 
+func (sl *StdLogger) Close() (err error) {
+	if sl.syslog != nil {
+		sl.Close()
+	}
+	return
+}
+
+//SetSyslog sets the logger for the server
 func (sl *StdLogger) SetSyslog(l *syslog.Writer) {
 	sl.syslog = l
 }
+
+// GetSyslog returns the logger for the server
 func (sl *StdLogger) GetSyslog() *syslog.Writer {
 	return sl.syslog
 }
+
+// SetLogLevel changes the log level
 func (sl *StdLogger) SetLogLevel(level int) {
 	sl.logLevel = level
 }
+
+// Alert logs to syslog with alert level
 func (sl *StdLogger) Alert(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_ALERT {
 		return
 	}
-
 	if sl.syslog != nil {
 		sl.syslog.Alert(m)
 	} else {
@@ -94,17 +107,12 @@ func (sl *StdLogger) Alert(m string) (err error) {
 	}
 	return
 }
-func (sl *StdLogger) Close() (err error) {
-	if sl.syslog != nil {
-		sl.Close()
-	}
-	return
-}
+
+// Crit logs to syslog with critical level
 func (sl *StdLogger) Crit(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_CRITICAL {
 		return
 	}
-
 	if sl.syslog != nil {
 		sl.syslog.Crit(m)
 	} else {
@@ -112,11 +120,12 @@ func (sl *StdLogger) Crit(m string) (err error) {
 	}
 	return
 }
+
+// Debug logs to syslog with debug level
 func (sl *StdLogger) Debug(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_DEBUG {
 		return
 	}
-
 	if sl.syslog != nil {
 		sl.syslog.Debug(m)
 	} else {
@@ -124,11 +133,12 @@ func (sl *StdLogger) Debug(m string) (err error) {
 	}
 	return
 }
+
+// Emerg logs to syslog with emergency level
 func (sl *StdLogger) Emerg(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_EMERGENCY {
 		return
 	}
-
 	if sl.syslog != nil {
 		sl.syslog.Emerg(m)
 	} else {
@@ -136,11 +146,12 @@ func (sl *StdLogger) Emerg(m string) (err error) {
 	}
 	return
 }
+
+// Err logs to syslog with error level
 func (sl *StdLogger) Err(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_ERROR {
 		return
 	}
-
 	if sl.syslog != nil {
 		sl.syslog.Err(m)
 	} else {
@@ -148,11 +159,12 @@ func (sl *StdLogger) Err(m string) (err error) {
 	}
 	return
 }
+
+// Info logs to syslog with info level
 func (sl *StdLogger) Info(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_INFO {
 		return
 	}
-
 	if sl.syslog != nil {
 		sl.syslog.Info(m)
 	} else {
@@ -160,11 +172,12 @@ func (sl *StdLogger) Info(m string) (err error) {
 	}
 	return
 }
+
+// Notice logs to syslog with notice level
 func (sl *StdLogger) Notice(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_NOTICE {
 		return
 	}
-
 	if sl.syslog != nil {
 		sl.syslog.Notice(m)
 	} else {
@@ -172,6 +185,8 @@ func (sl *StdLogger) Notice(m string) (err error) {
 	}
 	return
 }
+
+// Warning logs to syslog with warning level
 func (sl *StdLogger) Warning(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_WARNING {
 		return
@@ -185,6 +200,7 @@ func (sl *StdLogger) Warning(m string) (err error) {
 	return
 }
 
+// LogStack logs to syslog the stack trace using debug level
 func LogStack() {
 	buf := make([]byte, 300)
 	runtime.Stack(buf, false)

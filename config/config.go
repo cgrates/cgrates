@@ -710,6 +710,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	if jsnGeneralCfg != nil {
+		if jsnGeneralCfg.Instance_id != nil && *jsnGeneralCfg.Instance_id != "" {
+			self.InstanceID = *jsnGeneralCfg.Instance_id
+		}
 		if jsnGeneralCfg.Dbdata_encoding != nil {
 			self.DBDataEncoding = *jsnGeneralCfg.Dbdata_encoding
 		}

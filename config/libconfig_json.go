@@ -19,6 +19,8 @@ package config
 
 // General config section
 type GeneralJsonCfg struct {
+	Instance_id          *string
+	Log_level            *int
 	Http_skip_tls_verify *bool
 	Rounding_decimals    *int
 	Dbdata_encoding      *string
@@ -36,7 +38,6 @@ type GeneralJsonCfg struct {
 	Response_cache_ttl   *string
 	Internal_ttl         *string
 	Locking_timeout      *string
-	Log_level            *int
 }
 
 // Listen config section

@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/syslog"
 	//	_ "net/http/pprof"
 	"os"
 	"runtime"
@@ -551,6 +552,17 @@ func writePid() {
 	}
 }
 
+// initLogger will initialize syslog writter, needs to be called after config init
+func initLogger(cfg *config.CGRConfig) error {
+	if l, err := syslog.New(syslog.LOG_INFO,
+		fmt.Sprintf("CGRateS <%s> ", cfg.InstanceID)); err != nil {
+		return err
+	} else {
+		utils.Logger.SetSyslog(l)
+	}
+	return nil
+}
+
 func main() {
 	flag.Parse()
 	if *version {
@@ -583,10 +595,16 @@ func main() {
 			exitChan <- true
 		}()
 	}
-
+	// Init config
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
 		log.Fatalf("Could not parse config: ", err)
+		return
+	}
+	config.SetCgrConfig(cfg) // Share the config object
+	// init syslog
+	if err = initLogger(cfg); err != nil {
+		log.Fatalf("Could not initialize sylog connection, err: <%s>", err.Error())
 		return
 	}
 	lgLevel := cfg.LogLevel
@@ -594,7 +612,8 @@ func main() {
 		lgLevel = *logLevel
 	}
 	utils.Logger.SetLogLevel(lgLevel)
-	config.SetCgrConfig(cfg) // Share the config object
+
+	// Init cache
 	cache.NewCache(cfg.CacheConfig)
 
 	var ratingDb engine.RatingStorage

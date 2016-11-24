@@ -38,6 +38,8 @@ func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
 
 func TestDfGeneralJsonCfg(t *testing.T) {
 	eCfg := &GeneralJsonCfg{
+		Instance_id:          utils.StringPointer(""),
+		Log_level:            utils.IntPointer(utils.LOGLEVEL_INFO),
 		Http_skip_tls_verify: utils.BoolPointer(false),
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
@@ -55,7 +57,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Response_cache_ttl:   utils.StringPointer("0s"),
 		Internal_ttl:         utils.StringPointer("2m"),
 		Locking_timeout:      utils.StringPointer("5s"),
-		Log_level:            utils.IntPointer(utils.LOGLEVEL_INFO)}
+	}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
