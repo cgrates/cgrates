@@ -888,14 +888,15 @@ func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
 	var err error
 	cd := &CallDescriptor{
-		CgrID:       self.GetId(),
-		TOR:         self.ToR,
-		Direction:   self.Direction,
-		Tenant:      self.Tenant,
-		Category:    self.Category,
-		Subject:     self.Subject,
-		Account:     self.Account,
-		Destination: self.Destination,
+		CgrID:         self.GetId(),
+		TOR:           self.ToR,
+		Direction:     self.Direction,
+		Tenant:        self.Tenant,
+		Category:      self.Category,
+		Subject:       self.Subject,
+		Account:       self.Account,
+		Destination:   self.Destination,
+		AllowNegative: true,
 	}
 	timeStr := self.AnswerTime
 	if len(timeStr) == 0 { // In case of auth, answer time will not be defined, so take it out of setup one
