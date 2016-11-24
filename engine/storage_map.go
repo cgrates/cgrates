@@ -1251,3 +1251,54 @@ func (ms *MapStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs ut
 	cache.Set(dbKey+fieldValKey, itemIDs, true, utils.NonTransactional)
 	return
 }
+
+func (ms *MapStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
+
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(cdr)
+	ms.dict[cdr.CGRID+cdr.RunID+cdr.Source] = result
+	return err
+}
+
+func (ms *MapStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) (cdrs []*CDR, l int64, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	for _, value := range ms.dict {
+
+		l = 0
+		add := true
+
+		cdr := &CDR{}
+		err = ms.ms.Unmarshal(value, cdr)
+
+		for _, source := range qryFltr.Sources {
+			if cdr.Source != source {
+				add = false
+			}
+		}
+
+		for _, account := range qryFltr.Accounts {
+			if cdr.Account != account {
+				add = false
+			}
+		}
+
+		for _, runID := range qryFltr.RunIDs {
+			if cdr.RunID != runID {
+				add = false
+			}
+		}
+
+		if add {
+			l++
+			cdrs = append(cdrs, cdr)
+		}
+
+	}
+	return cdrs, l, err
+}
+
+func (ms *MapStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) (smcs []*SMCost, err error) {
+	return nil, nil
+}

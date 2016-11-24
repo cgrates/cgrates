@@ -85,6 +85,7 @@ func (a *Action) Clone() *Action {
 		Id:         a.Id,
 		ActionType: a.ActionType,
 		//BalanceType:      a.BalanceType,
+		Filter:           a.Filter,
 		ExtraParameters:  a.ExtraParameters,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
