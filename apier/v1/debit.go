@@ -26,34 +26,26 @@ import (
 // account to go negative if the cost calculated is greater than the balance
 func (apier *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) error {
 	return apier.DebitUsageWithOptions(AttrDebitUsageWithOptions{
-		Options:     AttrDebitUsageOptions{AllowNegative: true},
-		UsageRecord: usageRecord,
+		UsageRecord:          &usageRecord,
+		AllowNegativeAccount: true,
 	}, reply)
-}
-
-// AttrDebitUsageOptions represents options that
-// are applied to the DebitUsage request
-type AttrDebitUsageOptions struct {
-	AllowNegative bool
 }
 
 // AttrDebitUsageWithOptions represents the DebitUsage request
 type AttrDebitUsageWithOptions struct {
-	Options     AttrDebitUsageOptions
-	UsageRecord engine.UsageRecord
+	UsageRecord          *engine.UsageRecord
+	AllowNegativeAccount bool // allow account to go negative during debit
 }
 
 // DebitUsageWithOptions will debit the account based on the usage cost with
 // additional options to control if the balance can go negative
-func (apier *ApierV1) DebitUsageWithOptions(usageRecordWithOptions AttrDebitUsageWithOptions, reply *string) error {
-	var usageRecord = &usageRecordWithOptions.UsageRecord
-	var options = &usageRecordWithOptions.Options
-
+func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, reply *string) error {
+	usageRecord := args.UsageRecord
 	if missing := utils.MissingStructFields(usageRecord, []string{"Account", "Destination", "Usage"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	err := engine.LoadUserProfile(usageRecord, "")
+	err := engine.LoadUserProfile(args.UsageRecord, "")
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -83,13 +75,10 @@ func (apier *ApierV1) DebitUsageWithOptions(usageRecordWithOptions AttrDebitUsag
 	}
 
 	// Get the call descriptor from the usage record
-	cd, err := usageRecord.AsCallDescriptor(apier.Config.DefaultTimezone)
+	cd, err := usageRecord.AsCallDescriptor(apier.Config.DefaultTimezone, !args.AllowNegativeAccount)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-
-	// Apply options
-	cd.AllowNegative = options.AllowNegative
 
 	// Calculate the cost for usage and debit the account
 	var cc engine.CallCost

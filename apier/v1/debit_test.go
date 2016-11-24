@@ -18,8 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"flag"
-	"os"
 	"testing"
 	"time"
 
@@ -34,7 +32,7 @@ var (
 	responder         *engine.Responder
 )
 
-func TestMain(m *testing.M) {
+func init() {
 	apierDebitStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
 	responder := new(engine.Responder)
@@ -47,9 +45,6 @@ func TestMain(m *testing.M) {
 		Config:    cfg,
 		Responder: responder,
 	}
-
-	flag.Parse()
-	os.Exit(m.Run())
 }
 
 func TestDebitUsageWithOptions(t *testing.T) {
@@ -123,11 +118,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 		t.Error(err)
 	}
 
-	allowNegativeOpt := AttrDebitUsageOptions{
-		AllowNegative: false,
-	}
-
-	usageRecord := engine.UsageRecord{
+	usageRecord := &engine.UsageRecord{
 		Tenant:      cgrTenant,
 		Account:     "account1",
 		Destination: "*any",
@@ -140,7 +131,8 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	}
 
 	var reply string
-	if err := apierDebit.DebitUsageWithOptions(AttrDebitUsageWithOptions{Options: allowNegativeOpt, UsageRecord: usageRecord}, &reply); err != nil {
+	if err := apierDebit.DebitUsageWithOptions(AttrDebitUsageWithOptions{UsageRecord: usageRecord,
+		AllowNegativeAccount: false}, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -151,6 +143,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	}
 	eAcntVal := 9.0
 	if resolvedAccount.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, resolvedAccount.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Errorf("Expected: %f, received: %f", eAcntVal,
+			resolvedAccount.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
