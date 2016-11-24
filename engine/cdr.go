@@ -212,6 +212,8 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		}
 	case utils.TOR:
 		cdr.ToR += fieldVal
+	case utils.MEDI_RUNID:
+		cdr.RunID += fieldVal
 	case utils.ACCID:
 		cdr.OriginID += fieldVal
 	case utils.REQTYPE:

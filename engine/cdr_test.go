@@ -495,6 +495,11 @@ func TestCDRParseFieldValue(t *testing.T) {
 	} else if cdr.OrderID != 5 {
 		t.Errorf("Received cdr: %+v", cdr)
 	}
+	if err := cdr.ParseFieldValue(utils.MEDI_RUNID, "*default", ""); err != nil {
+		t.Error(err)
+	} else if cdr.RunID != "*default" {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
 }
 
 func TestCDRAsExportRecord(t *testing.T) {
