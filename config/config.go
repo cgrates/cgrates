@@ -257,7 +257,6 @@ type CGRConfig struct {
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
 	smAsteriskCfg            *SMAsteriskCfg           // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
-	HistoryServer            string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled     bool                     // Starts History as server: <true|false>.
 	HistoryDir               string                   // Location on disk where to store history files.
 	HistorySaveInterval      time.Duration            // The timout duration between pubsub writes
