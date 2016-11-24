@@ -360,7 +360,6 @@ const CGRATES_CFG_JSON = `
 	"cdrs_conns": [
 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
-	"reconnects": 5,						// number of reconnects if connection is lost
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 	"debit_interval": "10s",				// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
