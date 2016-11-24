@@ -501,35 +501,98 @@ func TestActionTimingPriorityListWeight(t *testing.T) {
 	}
 }
 
-/*
 func TestActionPlansRemoveMember(t *testing.T) {
-	at1 := &ActionPlan{
-		Uuid:       "some uuid",
+
+	account1 := &Account{ID: "one"}
+	account2 := &Account{ID: "two"}
+
+	accountingStorage.SetAccount(account1)
+	accountingStorage.SetAccount(account2)
+
+	ap1 := &ActionPlan{
 		Id:         "test",
-		AccountIDs: []string{"one", "two", "three"},
-		ActionsID:  "TEST_ACTIONS",
+		AccountIDs: utils.StringMap{"one": true},
+		ActionTimings: []*ActionTiming{
+			&ActionTiming{
+				Uuid: "uuid1",
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "MINI",
+			},
+		},
 	}
-	at2 := &ActionPlan{
-		Uuid:       "some uuid22",
+
+	ap2 := &ActionPlan{
 		Id:         "test2",
-		AccountIDs: []string{"three", "four"},
-		ActionsID:  "TEST_ACTIONS2",
+		AccountIDs: utils.StringMap{"two": true},
+		ActionTimings: []*ActionTiming{
+			&ActionTiming{
+				Uuid: "uuid2",
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "MINI",
+			},
+		},
 	}
-	ats := ActionPlans{at1, at2}
-	if outAts := RemActionPlan(ats, "", "four"); len(outAts[1].AccountIds) != 1 {
-		t.Error("Expecting fewer balance ids", outAts[1].AccountIds)
+
+	err := ratingStorage.SetActionPlan(ap1.Id, ap1, true, utils.NonTransactional)
+
+	if err != nil {
+		t.Errorf("Set action plan test: %v", err)
 	}
-	if ats = RemActionPlan(ats, "", "three"); len(ats) != 1 {
-		t.Error("Expecting fewer actionTimings", ats)
+
+	err = ratingStorage.SetActionPlan(ap2.Id, ap2, true, utils.NonTransactional)
+
+	if err != nil {
+		t.Errorf("Set action plan test 2: %v", err)
 	}
-	if ats = RemActionPlan(ats, "some_uuid22", ""); len(ats) != 1 {
-		t.Error("Expecting fewer actionTimings members", ats)
+
+	actions := []*Action{
+		&Action{
+			Id:         "REMOVE",
+			ActionType: REMOVE_ACCOUNT,
+		},
 	}
-	ats2 := ActionPlans{at1, at2}
-	if ats2 = RemActionPlan(ats2, "", ""); len(ats2) != 0 {
-		t.Error("Should have no members anymore", ats2)
+
+	ratingStorage.SetActions(actions[0].Id, actions, utils.NonTransactional)
+
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"one": true},
+		Timing:     &RateInterval{},
+		actions:    actions,
 	}
-}*/
+
+	if err = at.Execute(); err != nil {
+		t.Errorf("Execute Action: %v", err)
+	}
+
+	apr, err1 := ratingStorage.GetActionPlan("test", false, utils.NonTransactional)
+
+	if err1 != nil {
+		t.Errorf("Get action plan test: %v", err1)
+	}
+
+	if _, exist := apr.AccountIDs["one"]; exist {
+		t.Errorf("Account one is not deleted ")
+	}
+
+}
 
 func TestActionTriggerMatchNil(t *testing.T) {
 	at := &ActionTrigger{

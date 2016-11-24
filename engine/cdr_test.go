@@ -473,8 +473,10 @@ func TestUsageReqAsCD(t *testing.T) {
 		Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", Usage: "0.00000001",
 	}
-	eCD := &CallDescriptor{CgrID: "9473e7b2e075d168b9da10ae957ee68fe5a217e4", TOR: req.ToR, Direction: req.Direction, Tenant: req.Tenant, Category: req.Category, Account: req.Account, Subject: req.Subject, Destination: req.Destination, TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Add(time.Duration(10))}
-	if cd, err := req.AsCallDescriptor(""); err != nil {
+	eCD := &CallDescriptor{CgrID: "9473e7b2e075d168b9da10ae957ee68fe5a217e4", TOR: req.ToR, Direction: req.Direction, Tenant: req.Tenant,
+		Category: req.Category, Account: req.Account, Subject: req.Subject, Destination: req.Destination,
+		TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Add(time.Duration(10)), DenyNegativeAccount: true}
+	if cd, err := req.AsCallDescriptor("", true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCD, cd) {
 		t.Errorf("Expected: %+v, received: %+v", eCD, cd)
@@ -491,6 +493,11 @@ func TestCDRParseFieldValue(t *testing.T) {
 	if err := cdr.ParseFieldValue(utils.ORDERID, "5", ""); err != nil {
 		t.Error(err)
 	} else if cdr.OrderID != 5 {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
+	if err := cdr.ParseFieldValue(utils.MEDI_RUNID, "*default", ""); err != nil {
+		t.Error(err)
+	} else if cdr.RunID != "*default" {
 		t.Errorf("Received cdr: %+v", cdr)
 	}
 }
@@ -534,5 +541,30 @@ func TestCDRAsExportRecord(t *testing.T) {
 	// Test time parse error
 	if _, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil); err == nil {
 		t.Error("Should give error here, got none.")
+	}
+}
+
+func TestCDRAsExportMap(t *testing.T) {
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+	eCDRMp := map[string]string{
+		utils.CGRID:       cdr.CGRID,
+		utils.DESTINATION: "004986517174963",
+		"FieldExtra1":     "val_extr1",
+	}
+	expFlds := []*config.CfgCdrField{
+		&config.CfgCdrField{FieldId: utils.CGRID, Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.CGRID, utils.INFIELD_SEP)},
+		&config.CfgCdrField{FieldId: utils.DESTINATION, Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("~Destination:s/^\\+(\\d+)$/00${1}/", utils.INFIELD_SEP)},
+		&config.CfgCdrField{FieldId: "FieldExtra1", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("field_extr1", utils.INFIELD_SEP)},
+	}
+	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCDRMp, cdrMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eCDRMp, cdrMp)
 	}
 }

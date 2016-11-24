@@ -223,7 +223,7 @@ const CGRATES_CFG_JSON = `
 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
 		],
 		"trailer_fields": [],							// template of the import trailer fields
-		"cache_dump_fields": [
+		"cache_dump_fields": [							// template used when dumping cached CDR, eg: partial CDRs
 			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
 			{"tag": "RunID", "type": "*composed", "value": "RunID"},
 			{"tag": "TOR", "type": "*composed", "value": "ToR"},

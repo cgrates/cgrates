@@ -27,14 +27,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCsvRecordForkCdr(t *testing.T) {
+func TestCsvRecordToCDR(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.META_COMPOSED, FieldId: utils.SUPPLIER, Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "DisconnectCauseTest", Type: utils.META_COMPOSED, FieldId: utils.DISCONNECT_CAUSE,
-		Value: []*utils.RSRField{&utils.RSRField{Id: "16"}}})
-	//
+	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "RunID", Type: utils.META_COMPOSED,
+		FieldId: utils.MEDI_RUNID, Value: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)})
+	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.META_COMPOSED,
+		FieldId: utils.SUPPLIER, Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
+	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "DisconnectCauseTest", Type: utils.META_COMPOSED,
+		FieldId: utils.DISCONNECT_CAUSE, Value: []*utils.RSRField{&utils.RSRField{Id: "16"}}})
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
@@ -49,6 +51,7 @@ func TestCsvRecordForkCdr(t *testing.T) {
 	}
 	expectedCdr := &engine.CDR{
 		CGRID:           utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
+		RunID:           "*default",
 		ToR:             cdrRow[2],
 		OriginID:        cdrRow[3],
 		OriginHost:      "0.0.0.0", // Got it over internal interface

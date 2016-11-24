@@ -212,6 +212,8 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		}
 	case utils.TOR:
 		cdr.ToR += fieldVal
+	case utils.MEDI_RUNID:
+		cdr.RunID += fieldVal
 	case utils.ACCID:
 		cdr.OriginID += fieldVal
 	case utils.REQTYPE:
@@ -866,7 +868,8 @@ type UsageRecord struct {
 
 func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 	var err error
-	cdr := &CDR{CGRID: self.GetId(), ToR: self.ToR, RequestType: self.RequestType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category, Account: self.Account, Subject: self.Subject, Destination: self.Destination}
+	cdr := &CDR{CGRID: self.GetId(), ToR: self.ToR, RequestType: self.RequestType, Direction: self.Direction,
+		Tenant: self.Tenant, Category: self.Category, Account: self.Account, Subject: self.Subject, Destination: self.Destination}
 	if cdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
 		return nil, err
 	}
@@ -885,17 +888,18 @@ func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 	return cdr, nil
 }
 
-func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
+func (self *UsageRecord) AsCallDescriptor(timezone string, denyNegative bool) (*CallDescriptor, error) {
 	var err error
 	cd := &CallDescriptor{
-		CgrID:       self.GetId(),
-		TOR:         self.ToR,
-		Direction:   self.Direction,
-		Tenant:      self.Tenant,
-		Category:    self.Category,
-		Subject:     self.Subject,
-		Account:     self.Account,
-		Destination: self.Destination,
+		CgrID:               self.GetId(),
+		TOR:                 self.ToR,
+		Direction:           self.Direction,
+		Tenant:              self.Tenant,
+		Category:            self.Category,
+		Subject:             self.Subject,
+		Account:             self.Account,
+		Destination:         self.Destination,
+		DenyNegativeAccount: denyNegative,
 	}
 	timeStr := self.AnswerTime
 	if len(timeStr) == 0 { // In case of auth, answer time will not be defined, so take it out of setup one

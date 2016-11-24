@@ -225,25 +225,22 @@ func (self *SQLStorage) SetTpTimings(timings []TpTiming) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTpDestinations(dests []TpDestination) error {
+func (self *SQLStorage) SetTPDestinations(dests []*utils.TPDestination) error {
 	if len(dests) == 0 {
 		return nil
 	}
-	m := make(map[string]bool)
-
 	tx := self.db.Begin()
-	for _, dest := range dests {
-		if found, _ := m[dest.Tag]; !found {
-			m[dest.Tag] = true
-			if err := tx.Where(&TpDestination{Tpid: dest.Tpid, Tag: dest.Tag}).Delete(TpDestination{}).Error; err != nil {
+	for _, dst := range dests {
+		// Remove previous
+		if err := tx.Where(&TpDestination{Tpid: dst.TPid, Tag: dst.Tag}).Delete(TpDestination{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, dstPrfx := range dst.Prefixes {
+			if err := tx.Save(&TpDestination{Tpid: dst.TPid, Tag: dst.Tag, Prefix: dstPrfx}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
-		}
-		save := tx.Save(&dest)
-		if save.Error != nil {
-			tx.Rollback()
-			return save.Error
 		}
 	}
 	tx.Commit()
@@ -1015,8 +1012,8 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	return cdrs, 0, nil
 }
 
-func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, error) {
-	var tpDests []TpDestination
+func (self *SQLStorage) GetTPDestinations(tpid, tag string) (uTPDsts []*utils.TPDestination, err error) {
+	var tpDests TpDestinations
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
@@ -1024,8 +1021,7 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, er
 	if err := q.Find(&tpDests).Error; err != nil {
 		return nil, err
 	}
-
-	return tpDests, nil
+	return tpDests.AsTPDestinations(), nil
 }
 
 func (self *SQLStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {

@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cache
 
 import (
+	"fmt"
+	"reflect"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -149,6 +151,31 @@ func Get(key string) (interface{}, bool) {
 	cacheMux.RLock()
 	defer cacheMux.RUnlock()
 	return cache.Get(key)
+}
+
+func GetCloned(key string) (cln interface{}, err error) {
+	cacheMux.RLock()
+	defer cacheMux.RUnlock()
+	origVal, hasIt := cache.Get(key)
+	if !hasIt {
+		return nil, utils.NewCGRError(utils.Cache,
+			utils.NotFoundCaps, utils.ItemNotFound,
+			fmt.Sprintf("item with key <%s> was not found in <%s>", key))
+	} else if origVal == nil {
+		return nil, nil
+	}
+	if _, canClone := origVal.(utils.Cloner); !canClone {
+		return nil, utils.NewCGRError(utils.Cache,
+			utils.NotCloneableCaps, utils.ItemNotCloneable,
+			fmt.Sprintf("item with key <%s> is not following cloner interface", key))
+	}
+	retVals := reflect.ValueOf(origVal).MethodByName("Clone").Call(nil) // Call Clone method on the object
+	errIf := retVals[1].Interface()
+	var notNil bool
+	if err, notNil = errIf.(error); notNil {
+		return
+	}
+	return retVals[0].Interface(), nil
 }
 
 func CountEntries(prefix string) (result int) {

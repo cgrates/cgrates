@@ -22,29 +22,50 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (self *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) error {
-	if missing := utils.MissingStructFields(&usageRecord, []string{"Account", "Destination", "Usage"}); len(missing) != 0 {
+// DebitUsage will debit the balance for the usage cost, allowing the
+// account to go negative if the cost calculated is greater than the balance
+func (apier *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) error {
+	return apier.DebitUsageWithOptions(AttrDebitUsageWithOptions{
+		UsageRecord:          &usageRecord,
+		AllowNegativeAccount: true,
+	}, reply)
+}
+
+// AttrDebitUsageWithOptions represents the DebitUsage request
+type AttrDebitUsageWithOptions struct {
+	UsageRecord          *engine.UsageRecord
+	AllowNegativeAccount bool // allow account to go negative during debit
+}
+
+// DebitUsageWithOptions will debit the account based on the usage cost with
+// additional options to control if the balance can go negative
+func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, reply *string) error {
+	usageRecord := args.UsageRecord
+	if missing := utils.MissingStructFields(usageRecord, []string{"Account", "Destination", "Usage"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	err := engine.LoadUserProfile(usageRecord, "")
+
+	err := engine.LoadUserProfile(args.UsageRecord, "")
 	if err != nil {
 		*reply = err.Error()
 		return err
 	}
+
+	// Set values for optional parameters
 	if usageRecord.ToR == "" {
 		usageRecord.ToR = utils.VOICE
 	}
 	if usageRecord.RequestType == "" {
-		usageRecord.RequestType = self.Config.DefaultReqType
+		usageRecord.RequestType = apier.Config.DefaultReqType
 	}
 	if usageRecord.Direction == "" {
 		usageRecord.Direction = utils.OUT
 	}
 	if usageRecord.Tenant == "" {
-		usageRecord.Tenant = self.Config.DefaultTenant
+		usageRecord.Tenant = apier.Config.DefaultTenant
 	}
 	if usageRecord.Category == "" {
-		usageRecord.Category = self.Config.DefaultCategory
+		usageRecord.Category = apier.Config.DefaultCategory
 	}
 	if usageRecord.Subject == "" {
 		usageRecord.Subject = usageRecord.Account
@@ -52,14 +73,19 @@ func (self *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) e
 	if usageRecord.AnswerTime == "" {
 		usageRecord.AnswerTime = utils.META_NOW
 	}
-	cd, err := usageRecord.AsCallDescriptor(self.Config.DefaultTimezone)
+
+	// Get the call descriptor from the usage record
+	cd, err := usageRecord.AsCallDescriptor(apier.Config.DefaultTimezone, !args.AllowNegativeAccount)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
+
+	// Calculate the cost for usage and debit the account
 	var cc engine.CallCost
-	if err := self.Responder.Debit(cd, &cc); err != nil {
+	if err := apier.Responder.Debit(cd, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
+
 	*reply = OK
 	return nil
 }

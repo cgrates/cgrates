@@ -151,16 +151,17 @@ type CallDescriptor struct {
 	TOR                                   string            // used unit balances selector
 	ExtraFields                           map[string]string // Extra fields, mostly used for user profile matching
 	// session limits
-	MaxRate         float64
-	MaxRateUnit     time.Duration
-	MaxCostSoFar    float64
-	CgrID           string
-	RunID           string
-	ForceDuration   bool // for Max debit if less than duration return err
-	PerformRounding bool // flag for rating info rounding
-	DryRun          bool
-	account         *Account
-	testCallcost    *CallCost // testing purpose only!
+	MaxRate             float64
+	MaxRateUnit         time.Duration
+	MaxCostSoFar        float64
+	CgrID               string
+	RunID               string
+	ForceDuration       bool // for Max debit if less than duration return err
+	PerformRounding     bool // flag for rating info rounding
+	DryRun              bool
+	DenyNegativeAccount bool // prevent account going on negative during debit
+	account             *Account
+	testCallcost        *CallCost // testing purpose only!
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {
@@ -700,7 +701,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	} else {
 		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
-				cc, err = cd.debit(account, cd.DryRun, true)
+				cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
 				return 0, err
 			}, 0, memberIds.Slice()...)
 		} else {
@@ -755,7 +756,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 					cd.DurationIndex -= initialDuration - remainingDuration
 				}
 				//log.Print("Remaining duration: ", remainingDuration)
-				cc, err = cd.debit(account, cd.DryRun, true)
+				cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
 				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
 			}, 0, memberIDs.Slice()...)

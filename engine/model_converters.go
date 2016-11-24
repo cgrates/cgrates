@@ -51,14 +51,14 @@ func APItoModelDestination(dest *utils.TPDestination) (result []TpDestination) {
 	for _, p := range dest.Prefixes {
 		result = append(result, TpDestination{
 			Tpid:   dest.TPid,
-			Tag:    dest.DestinationId,
+			Tag:    dest.Tag,
 			Prefix: p,
 		})
 	}
 	if len(dest.Prefixes) == 0 {
 		result = append(result, TpDestination{
 			Tpid: dest.TPid,
-			Tag:  dest.DestinationId,
+			Tag:  dest.Tag,
 		})
 	}
 	return

@@ -60,6 +60,14 @@ func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 	return
 }
 
+func (apl *ActionPlan) Clone() (interface{}, error) {
+	cln := new(ActionPlan)
+	if err := utils.Clone(*apl, cln); err != nil {
+		return nil, err
+	}
+	return interface{}(cln), nil
+}
+
 func (t *Task) Execute() error {
 	return (&ActionTiming{
 		Uuid:       t.Uuid,

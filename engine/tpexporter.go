@@ -95,7 +95,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpDestinations(self.tpID, ""); err != nil {
+	if storData, err := self.storDb.GetTPDestinations(self.tpID, ""); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {

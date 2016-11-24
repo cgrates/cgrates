@@ -4,7 +4,7 @@ Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
+the Free Software Foundation, either version 3 of the License, or56
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -52,9 +52,9 @@ func TestModelHelperCsvDump(t *testing.T) {
 
 func TestTPDestinationAsExportSlice(t *testing.T) {
 	tpDst := &utils.TPDestination{
-		TPid:          "TEST_TPID",
-		DestinationId: "TEST_DEST",
-		Prefixes:      []string{"49", "49176", "49151"},
+		TPid:     "TEST_TPID",
+		Tag:      "TEST_DEST",
+		Prefixes: []string{"49", "49176", "49151"},
 	}
 	expectedSlc := [][]string{
 		[]string{"TEST_DEST", "49"},
@@ -73,6 +73,18 @@ func TestTPDestinationAsExportSlice(t *testing.T) {
 	if !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
 	}
+}
+
+func TestTpDestinationsAsTPDestinations(t *testing.T) {
+	tpd1 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+491"}
+	tpd2 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+492"}
+	tpd3 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+493"}
+	eTPDestinations := []*utils.TPDestination{&utils.TPDestination{TPid: "TEST_TPID", Tag: "TEST_DEST",
+		Prefixes: []string{"+491", "+492", "+493"}}}
+	if tpDst := TpDestinations([]TpDestination{tpd1, tpd2, tpd3}).AsTPDestinations(); !reflect.DeepEqual(eTPDestinations, tpDst) {
+		t.Errorf("Expecting: %+v, received: %+v", eTPDestinations, tpDst)
+	}
+
 }
 
 func TestTPRateAsExportSlice(t *testing.T) {

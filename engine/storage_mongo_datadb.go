@@ -95,7 +95,15 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 		return nil, err
 	}
 	session.SetMode(mgo.Strong, true)
-	return &MongoStorage{db: db, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(), cacheCfg: cacheCfg, loadHistorySize: loadHistorySize, cdrsIndexes: cdrsIndexes}, nil
+	ms = &MongoStorage{db: db, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(), cacheCfg: cacheCfg, loadHistorySize: loadHistorySize, cdrsIndexes: cdrsIndexes}
+	if cNames, err := session.DB(ms.db).CollectionNames(); err != nil {
+		return nil, err
+	} else if len(cNames) == 0 { // create indexes only if database is empty
+		if err = ms.EnsureIndexes(); err != nil {
+			return nil, err
+		}
+	}
+	return
 }
 
 type MongoStorage struct {
@@ -113,8 +121,9 @@ func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
 	return sessionCopy, sessionCopy.DB(ms.db).C(col)
 }
 
+// EnsureIndexes creates db indexes
 func (ms *MongoStorage) EnsureIndexes() (err error) {
-	dbSession, _ := ms.conn("")
+	dbSession := ms.session.Copy()
 	defer dbSession.Close()
 	db := dbSession.DB(ms.db)
 	idx := mgo.Index{
@@ -166,7 +175,6 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 				return
 			}
 		}
-
 		idx = mgo.Index{
 			Key:        []string{"tpid", "direction", "tenant", "category", "subject", "loadid"},
 			Unique:     true,
@@ -305,22 +313,9 @@ func (ms *MongoStorage) Close() {
 }
 
 func (ms *MongoStorage) Flush(ignore string) (err error) {
-	session := ms.session.Copy()
-	defer session.Close()
-	db := session.DB(ms.db)
-	collections, err := db.CollectionNames()
-	if err != nil {
-		return err
-	}
-	for _, c := range collections {
-		if strings.HasPrefix(c, "system.") { // cannot drop system ns due to mongo errors
-			continue
-		}
-		if _, err = db.C(c).RemoveAll(bson.M{}); err != nil {
-			return err
-		}
-	}
-	return nil
+	dbSession := ms.session.Copy()
+	defer dbSession.Close()
+	return dbSession.DB(ms.db).DropDatabase()
 }
 
 func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
@@ -1379,11 +1374,14 @@ func (ms *MongoStorage) RemoveActionTriggers(key string, transactionID string) e
 
 func (ms *MongoStorage) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
 	if !skipCache {
-		if x, ok := cache.Get(utils.ACTION_PLAN_PREFIX + key); ok {
-			if x != nil {
-				return x.(*ActionPlan), nil
+		if x, err := cache.GetCloned(key); err != nil {
+			if err.Error() != utils.ItemNotFound { // Only consider cache if item was found
+				return nil, err
 			}
+		} else if x == nil { // item was placed nil in cache
 			return nil, utils.ErrNotFound
+		} else {
+			return x.(*ActionPlan), nil
 		}
 	}
 	var kv struct {

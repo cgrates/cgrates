@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -107,24 +108,36 @@ func (tpr *TpReader) Init() {
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
-	tpDests, err := tpr.lr.GetTpDestinations(tpr.tpid, tag)
-
-	dest := &Destination{Id: tag}
-	for _, tpDest := range tpDests {
-		dest.AddPrefix(tpDest.Prefix)
+	tpDests, err := tpr.lr.GetTPDestinations(tpr.tpid, tag)
+	if err != nil {
+		return false, err
+	} else if len(tpDests) == 0 {
+		return false, nil
 	}
-	tpr.ratingStorage.SetDestination(dest, utils.NonTransactional)
-	tpr.ratingStorage.SetReverseDestination(dest, utils.NonTransactional)
-	return len(tpDests) > 0, err
+	transID := utils.GenUUID()
+	for _, tpDst := range tpDests {
+		dst := NewDestinationFromTPDestination(tpDst)
+		// ToDo: Fix transactions at onlineDB level
+		if err = tpr.ratingStorage.SetDestination(dst, transID); err != nil {
+			cache.RollbackTransaction(transID)
+		}
+		if err = tpr.ratingStorage.SetReverseDestination(dst, transID); err != nil {
+			cache.RollbackTransaction(transID)
+		}
+	}
+	cache.CommitTransaction(transID)
+	return true, nil
 }
 
 func (tpr *TpReader) LoadDestinations() (err error) {
-	tps, err := tpr.lr.GetTpDestinations(tpr.tpid, "")
+	tps, err := tpr.lr.GetTPDestinations(tpr.tpid, "")
 	if err != nil {
-		return err
+		return
 	}
-	tpr.destinations, err = TpDestinations(tps).GetDestinations()
-	return err
+	for _, tpDst := range tps {
+		tpr.destinations[tpDst.Tag] = NewDestinationFromTPDestination(tpDst)
+	}
+	return
 }
 
 func (tpr *TpReader) LoadTimings() (err error) {
@@ -248,10 +261,13 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				if drate.DestinationId == utils.ANY {
 					continue // no need of loading the destinations in this case
 				}
-				tpDests, err := tpr.lr.GetTpDestinations(tpr.tpid, drate.DestinationId)
-				dms, err := TpDestinations(tpDests).GetDestinations()
+				tpDests, err := tpr.lr.GetTPDestinations(tpr.tpid, drate.DestinationId)
 				if err != nil {
 					return false, err
+				}
+				dms := make([]*Destination, len(tpDests))
+				for i, tpDst := range tpDests {
+					dms[i] = NewDestinationFromTPDestination(tpDst)
 				}
 				destsExist := len(dms) != 0
 				if !destsExist && tpr.ratingStorage != nil {
