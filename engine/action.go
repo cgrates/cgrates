@@ -750,7 +750,7 @@ func (apl Actions) Sort() {
 }
 
 func (apl *Actions) Clone() (interface{}, error) {
-	cln := new(Actions)
+	//cln := new(Actions)
 	if err := utils.Clone(*apl, cln); err != nil {
 		return nil, err
 	}
