@@ -2338,7 +2338,7 @@ func TestClonedAction(t *testing.T) {
 }
 
 func TestClonedActions(t *testing.T) {
-	actions := &Actions{
+	actions := Actions{
 		&Action{
 			Id:         "RECUR_FOR_V3HSILLMILLD1G",
 			ActionType: TOPUP,
@@ -2367,13 +2367,48 @@ func TestClonedActions(t *testing.T) {
 		t.Error("error cloning actions: ", err)
 	}
 
-	clonedActions := clone.(*Actions)
-
-	if !reflect.DeepEqual(actions, clonedActions) {
-		t.Error("error cloning actions: ", utils.ToIJSON(clonedActions))
+	if !reflect.DeepEqual(actions, clone) {
+		t.Error("error cloning actions: ", utils.ToIJSON(clone))
 	}
 
 }
+
+/**
+func TestCacheGetClonedActions(t *testing.T) {
+	actions := Actions{
+		&Action{
+			Id:         "RECUR_FOR_V3HSILLMILLD1G",
+			ActionType: TOPUP,
+			Balance: &BalanceFilter{
+				ID:    utils.StringPointer("*default"),
+				Value: &utils.ValueFormula{Static: 1},
+				Type:  utils.StringPointer(utils.MONETARY),
+			},
+			Weight: float64(30),
+		},
+		&Action{
+			Id:         "RECUR_FOR_V3HSILLMILLD5G",
+			ActionType: DEBIT,
+			Balance: &BalanceFilter{
+				ID:    utils.StringPointer("*default"),
+				Value: &utils.ValueFormula{Static: 2},
+				Type:  utils.StringPointer(utils.MONETARY),
+			},
+			Weight: float64(20),
+		},
+	}
+	cache.Set("MYTEST", actions, true, "")
+	clned, err := cache.GetCloned("MYTEST")
+	if err != nil {
+		t.Error(err)
+	}
+	aCloned := clned.(Actions)
+	if !reflect.DeepEqual(actions, aCloned) {
+		t.Errorf("Expecting: %+v, received: %+v", actions, aCloned)
+	}
+}
+
+*/
 
 /**************** Benchmarks ********************************/
 
