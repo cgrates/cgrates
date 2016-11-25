@@ -154,7 +154,8 @@ func TestActionsLocalSetCdrlogTopup(t *testing.T) {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG}, Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
+	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
@@ -167,7 +168,7 @@ func TestActionsLocalSetCdrlogTopup(t *testing.T) {
 		rcvedCdrs[0].Subject != "dan2905" ||
 		rcvedCdrs[0].Usage != "1" ||
 		rcvedCdrs[0].RunID != TOPUP ||
-		strconv.FormatFloat(-rcvedCdrs[0].Cost, 'f', -1, 64) != attrsAA.Actions[0].Units {
+		strconv.FormatFloat(rcvedCdrs[0].Cost, 'f', -1, 64) != attrsAA.Actions[0].Units {
 		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}
 }
