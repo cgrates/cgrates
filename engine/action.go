@@ -81,15 +81,9 @@ const (
 )
 
 func (a *Action) Clone() *Action {
-	return &Action{
-		Id:         a.Id,
-		ActionType: a.ActionType,
-		//BalanceType:      a.BalanceType,
-		ExtraParameters:  a.ExtraParameters,
-		ExpirationString: a.ExpirationString,
-		Weight:           a.Weight,
-		Balance:          a.Balance,
-	}
+	var clonedAction Action
+	utils.Clone(a, &clonedAction)
+	return &clonedAction
 }
 
 type actionTypeFunc func(*Account, *StatsQueueTriggered, *Action, Actions) error
@@ -753,4 +747,12 @@ func (apl Actions) Less(j, i int) bool {
 
 func (apl Actions) Sort() {
 	sort.Sort(apl)
+}
+
+func (apl *Actions) Clone() (interface{}, error) {
+	cln := new(Actions)
+	if err := utils.Clone(*apl, cln); err != nil {
+		return nil, err
+	}
+	return interface{}(cln), nil
 }

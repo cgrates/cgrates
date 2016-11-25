@@ -2318,6 +2318,63 @@ func TestValueFormulaDebit(t *testing.T) {
 	}
 }
 
+func TestClonedAction(t *testing.T) {
+	a := &Action{
+		Id:         "test1",
+		ActionType: TOPUP,
+		Balance: &BalanceFilter{
+			ID:    utils.StringPointer("*default"),
+			Value: &utils.ValueFormula{Static: 1},
+			Type:  utils.StringPointer(utils.MONETARY),
+		},
+		Weight: float64(10),
+	}
+
+	clone := a.Clone()
+
+	if !reflect.DeepEqual(a, clone) {
+		t.Error("error cloning action: ", utils.ToIJSON(clone))
+	}
+}
+
+func TestClonedActions(t *testing.T) {
+	actions := &Actions{
+		&Action{
+			Id:         "RECUR_FOR_V3HSILLMILLD1G",
+			ActionType: TOPUP,
+			Balance: &BalanceFilter{
+				ID:    utils.StringPointer("*default"),
+				Value: &utils.ValueFormula{Static: 1},
+				Type:  utils.StringPointer(utils.MONETARY),
+			},
+			Weight: float64(30),
+		},
+		&Action{
+			Id:         "RECUR_FOR_V3HSILLMILLD5G",
+			ActionType: DEBIT,
+			Balance: &BalanceFilter{
+				ID:    utils.StringPointer("*default"),
+				Value: &utils.ValueFormula{Static: 2},
+				Type:  utils.StringPointer(utils.MONETARY),
+			},
+			Weight: float64(20),
+		},
+	}
+
+	clone, err := actions.Clone()
+
+	if err != nil {
+		t.Error("error cloning actions: ", err)
+	}
+
+	clonedActions := clone.(*Actions)
+
+	if !reflect.DeepEqual(actions, clonedActions) {
+		t.Error("error cloning actions: ", utils.ToIJSON(clonedActions))
+	}
+
+}
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {
