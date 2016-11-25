@@ -899,12 +899,12 @@ func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID str
 		if x, err := cache.GetCloned(utils.ACTION_PREFIX + key); err != nil {
 			if err.Error() != utils.ItemNotFound {
 				return nil, err
- 			}
+			}
 		} else if x == nil {
- 			return nil, utils.ErrNotFound
+			return nil, utils.ErrNotFound
 		} else {
 			return x.(Actions), nil
- 		}
+		}
 	}
 	var result struct {
 		Key   string
@@ -1377,7 +1377,7 @@ func (ms *MongoStorage) RemoveActionTriggers(key string, transactionID string) e
 
 func (ms *MongoStorage) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
 	if !skipCache {
-		if x, err := cache.GetCloned(key); err != nil {
+		if x, err := cache.GetCloned(utils.ACTION_PLAN_PREFIX + key); err != nil {
 			if err.Error() != utils.ItemNotFound { // Only consider cache if item was found
 				return nil, err
 			}
