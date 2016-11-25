@@ -2373,6 +2373,43 @@ func TestClonedActions(t *testing.T) {
 
 }
 
+/**
+func TestCacheGetClonedActions(t *testing.T) {
+	actions := Actions{
+		&Action{
+			Id:         "RECUR_FOR_V3HSILLMILLD1G",
+			ActionType: TOPUP,
+			Balance: &BalanceFilter{
+				ID:    utils.StringPointer("*default"),
+				Value: &utils.ValueFormula{Static: 1},
+				Type:  utils.StringPointer(utils.MONETARY),
+			},
+			Weight: float64(30),
+		},
+		&Action{
+			Id:         "RECUR_FOR_V3HSILLMILLD5G",
+			ActionType: DEBIT,
+			Balance: &BalanceFilter{
+				ID:    utils.StringPointer("*default"),
+				Value: &utils.ValueFormula{Static: 2},
+				Type:  utils.StringPointer(utils.MONETARY),
+			},
+			Weight: float64(20),
+		},
+	}
+	cache.Set("MYTEST", actions, true, "")
+	clned, err := cache.GetCloned("MYTEST")
+	if err != nil {
+		t.Error(err)
+	}
+	aCloned := clned.(Actions)
+	if !reflect.DeepEqual(actions, aCloned) {
+		t.Errorf("Expecting: %+v, received: %+v", actions, aCloned)
+	}
+}
+
+*/
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {
