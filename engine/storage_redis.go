@@ -572,11 +572,14 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 func (rs *RedisStorage) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
 	key = utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(Actions), nil
+		if x, err := cache.GetCloned(key); err != nil {
+			if err.Error() != utils.ItemNotFound {
+				return nil, err
 			}
+		} else if x == nil {
 			return nil, utils.ErrNotFound
+		} else {
+			return x.(Actions), nil
 		}
 	}
 	var values []byte
