@@ -896,11 +896,15 @@ func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 
 func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
 	if !skipCache {
-		if x, ok := cache.Get(utils.ACTION_PREFIX + key); ok {
-			if x != nil {
-				return x.(Actions), nil
+		if x, err := cache.GetCloned(utils.ACTION_PREFIX + key); err != nil {
+
+			if err.Error() != utils.ItemNotFound {
+				return nil, err
 			}
+		} else if x == nil {
 			return nil, utils.ErrNotFound
+		} else {
+			return x.(Actions), nil
 		}
 	}
 	var result struct {

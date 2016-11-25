@@ -297,7 +297,14 @@ func (at *ActionTiming) Execute() (err error) {
 			}
 			transactionFailed := false
 			removeAccountActionFound := false
+
+			var acs []*Action
 			for _, a := range aac {
+				act := a.Clone()
+				acs = append(acs, act)
+			}
+
+			for _, a := range acs {
 				// check action filter
 				if len(a.Filter) > 0 {
 					matched, err := acc.matchActionFilter(a.Filter)
@@ -327,7 +334,7 @@ func (at *ActionTiming) Execute() (err error) {
 					transactionFailed = true
 					break
 				}
-				if err := actionFunction(acc, nil, a, aac); err != nil {
+				if err := actionFunction(acc, nil, a, acs); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					transactionFailed = true
 					break

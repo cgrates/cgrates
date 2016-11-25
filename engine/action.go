@@ -85,6 +85,7 @@ func (a *Action) Clone() *Action {
 		Id:         a.Id,
 		ActionType: a.ActionType,
 		//BalanceType:      a.BalanceType,
+		Filter:           a.Filter,
 		ExtraParameters:  a.ExtraParameters,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
@@ -753,4 +754,14 @@ func (apl Actions) Less(j, i int) bool {
 
 func (apl Actions) Sort() {
 	sort.Sort(apl)
+}
+
+func (apl Actions) Clone() (interface{}, error) {
+	var acs []*Action
+	for _, a := range apl {
+		act := a.Clone()
+		acs = append(acs, act)
+	}
+	return acs, nil
+
 }
