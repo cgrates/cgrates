@@ -749,10 +749,11 @@ func (apl Actions) Sort() {
 	sort.Sort(apl)
 }
 
-func (apl *Actions) Clone() (interface{}, error) {
-	//cln := new(Actions)
-	if err := utils.Clone(*apl, cln); err != nil {
+func (apl Actions) Clone() (Actions, error) {
+
+	var cln Actions
+	if err := utils.Clone(apl, &cln); err != nil {
 		return nil, err
 	}
-	return interface{}(cln), nil
+	return cln, nil
 }
