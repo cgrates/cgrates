@@ -128,7 +128,6 @@ func (s *Session) Close(ev engine.Event) error {
 		if len(sr.CallCosts) == 0 {
 			continue // why would we have 0 callcosts
 		}
-		//utils.Logger.Debug(fmt.Sprintf("ALL CALLCOSTS: %s", utils.ToJSON(sr.CallCosts)))
 		lastCC := sr.CallCosts[len(sr.CallCosts)-1]
 		lastCC.Timespans.Decompress()
 		// put credit back
@@ -143,9 +142,7 @@ func (s *Session) Close(ev engine.Event) error {
 			return err
 		}
 		hangupTime := startTime.Add(duration)
-		//utils.Logger.Debug(fmt.Sprintf("BEFORE REFUND: %s", utils.ToJSON(lastCC)))
 		err = s.Refund(lastCC, hangupTime)
-		//utils.Logger.Debug(fmt.Sprintf("AFTER REFUND: %s", utils.ToJSON(lastCC)))
 		if err != nil {
 			return err
 		}
@@ -157,7 +154,6 @@ func (s *Session) Close(ev engine.Event) error {
 func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refundDuration := end.Sub(hangupTime)
-	//utils.Logger.Debug(fmt.Sprintf("HANGUPTIME: %s REFUNDDURATION: %s", hangupTime.String(), refundDuration.String()))
 	var refundIncrements engine.Increments
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
@@ -214,7 +210,6 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			return err
 		}
 	}
-	//utils.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
 	lastCC.Cost -= refundIncrements.GetTotalCost()
 	lastCC.UpdateRatedUsage()
 	lastCC.Timespans.Compress()

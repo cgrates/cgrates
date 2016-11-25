@@ -201,19 +201,15 @@ func SureTaxProcessCdr(cdr *CDR) error {
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		//utils.Logger.Debug(fmt.Sprintf("Unexpected response body received, error: %s\n", err.Error()))
 		return err
 	}
 	if resp.StatusCode > 299 {
-		//utils.Logger.Debug(fmt.Sprintf("Unexpected code received: %d\n", resp.StatusCode))
 		return fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
 	}
-	//utils.Logger.Debug(fmt.Sprintf("Received raw answer from SureTax: %s\n", string(respBody)))
 	var respFull SureTaxResponse
 	if err := json.Unmarshal(respBody, &respFull); err != nil {
 		return err
 	}
-	//utils.Logger.Debug(fmt.Sprintf("Received answer from SureTax: %+v\n", respFull))
 	var stResp STResponse
 	if err := json.Unmarshal([]byte(respFull.D), &stResp); err != nil {
 		return err

@@ -81,7 +81,6 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
-	//utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit, dur: %+v, lastUsed: %+v, session: %+v", dur, lastUsed, self))
 	requestedDuration := dur
 	if lastUsed != nil {
 		self.ExtraDuration = self.LastDebit - *lastUsed

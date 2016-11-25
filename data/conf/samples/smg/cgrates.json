@@ -5,7 +5,7 @@
 // Starts rater, scheduler
 
 "general": {
-    "log_level": 8,
+    "log_level": 7,
 },
 
 "listen": {

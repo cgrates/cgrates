@@ -332,9 +332,12 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 		ssIndx = smg.pSessionsIndex
 	}
 	idxMux.RLock()
-	for originID := range ssIndx[utils.ACCID][utils.META_DEFAULT] {
+	// map[OriginID:map[12372-1:map[*default:511654dc4da7ce4706276cb458437cdd81d0e2b3]]]
+	for originID := range ssIndx[utils.ACCID] {
 		if strings.HasPrefix(originID, prefix) {
-			cgrIDs = append(cgrIDs, ssIndx[utils.ACCID][originID][utils.META_DEFAULT].Slice()...)
+			if _, hasDefaultRun := ssIndx[utils.ACCID][originID][utils.META_DEFAULT]; hasDefaultRun {
+				cgrIDs = append(cgrIDs, ssIndx[utils.ACCID][originID][utils.META_DEFAULT].Slice()...)
+			}
 		}
 	}
 	idxMux.RUnlock()
@@ -864,7 +867,6 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 				cd.CgrID = cgrID
 				cd.RunID = sR.CallDescriptor.RunID
 				cd.Increments.Compress()
-				//utils.Logger.Info(fmt.Sprintf("Refunding session run callcost: %s", utils.ToJSON(cd)))
 				var response float64
 				err = smg.rals.Call("Responder.RefundIncrements", cd, &response)
 				if err != nil {
