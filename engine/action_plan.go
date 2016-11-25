@@ -65,7 +65,7 @@ func (apl *ActionPlan) Clone() (interface{}, error) {
 	if err := utils.Clone(*apl, cln); err != nil {
 		return nil, err
 	}
-	return interface{}(cln), nil
+	return cln, nil
 }
 
 func (t *Task) Execute() error {

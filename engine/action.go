@@ -89,23 +89,21 @@ type actionTypeFunc func(*Account, *StatsQueueTriggered, *Action, Actions) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	actionFuncMap := map[string]actionTypeFunc{
-		LOG:             logAction,
-		CDRLOG:          cdrLogAction,
-		RESET_TRIGGERS:  resetTriggersAction,
-		SET_RECURRENT:   setRecurrentAction,
-		UNSET_RECURRENT: unsetRecurrentAction,
-		ALLOW_NEGATIVE:  allowNegativeAction,
-		DENY_NEGATIVE:   denyNegativeAction,
-		RESET_ACCOUNT:   resetAccountAction,
-		TOPUP_RESET:     topupResetAction,
-		TOPUP:           topupAction,
-		DEBIT_RESET:     debitResetAction,
-		DEBIT:           debitAction,
-		RESET_COUNTERS:  resetCountersAction,
-		ENABLE_ACCOUNT:  enableAccountAction,
-		DISABLE_ACCOUNT: disableAccountAction,
-		//case ENABLE_DISABLE_BALANCE:
-		//	return enableDisableBalanceAction, true
+		LOG:                       logAction,
+		CDRLOG:                    cdrLogAction,
+		RESET_TRIGGERS:            resetTriggersAction,
+		SET_RECURRENT:             setRecurrentAction,
+		UNSET_RECURRENT:           unsetRecurrentAction,
+		ALLOW_NEGATIVE:            allowNegativeAction,
+		DENY_NEGATIVE:             denyNegativeAction,
+		RESET_ACCOUNT:             resetAccountAction,
+		TOPUP_RESET:               topupResetAction,
+		TOPUP:                     topupAction,
+		DEBIT_RESET:               debitResetAction,
+		DEBIT:                     debitAction,
+		RESET_COUNTERS:            resetCountersAction,
+		ENABLE_ACCOUNT:            enableAccountAction,
+		DISABLE_ACCOUNT:           disableAccountAction,
 		CALL_URL:                  callUrl,
 		CALL_URL_ASYNC:            callUrlAsync,
 		MAIL_ASYNC:                mailAsync,
@@ -748,8 +746,7 @@ func (apl Actions) Sort() {
 	sort.Sort(apl)
 }
 
-func (apl *Actions) Clone() (interface{}, error) {
-
+func (apl Actions) Clone() (interface{}, error) {
 	var cln Actions
 	if err := utils.Clone(apl, &cln); err != nil {
 		return nil, err

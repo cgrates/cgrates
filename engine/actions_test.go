@@ -2373,7 +2373,6 @@ func TestClonedActions(t *testing.T) {
 
 }
 
-/**
 func TestCacheGetClonedActions(t *testing.T) {
 	actions := Actions{
 		&Action{
@@ -2407,8 +2406,6 @@ func TestCacheGetClonedActions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", actions, aCloned)
 	}
 }
-
-*/
 
 /**************** Benchmarks ********************************/
 
