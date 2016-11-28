@@ -269,6 +269,43 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
+// CacheDataFromDB loads data to cache
+// prfx represents the cache prefix, ids should be nil if all available data should be loaded
+// mustBeCached specifies that data needs to be cached in order to be retrieved from db
+func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
+	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX}, prfx) {
+		return utils.NewCGRError(utils.REDIS,
+			utils.MandatoryIEMissingCaps,
+			utils.UnsupportedCachePrefix,
+			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prfx))
+	}
+	if ids == nil {
+		if ids, err = rs.GetKeysForPrefix(prfx); err != nil {
+			return utils.NewCGRError(utils.REDIS,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
+		}
+	}
+	for _, dataID := range ids {
+		if mustBeCached {
+			if _, hasIt := cache.Get(prfx + dataID); !hasIt { // only cache if previously there
+				continue
+			}
+		}
+		switch prfx {
+		case utils.DESTINATION_PREFIX:
+			if _, err = rs.GetDestination(dataID, false, utils.NonTransactional); err != nil {
+				return utils.NewCGRError(utils.REDIS,
+					utils.ServerErrorCaps,
+					err.Error(),
+					fmt.Sprintf("redis error <%s> querying GetDestination for prefix: <%s>, dataID: <%s>", prfx, dataID))
+			}
+		}
+	}
+	return
+}
+
 func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	r := rs.Cmd("KEYS", prefix+"*")
 	if r.Err != nil {
@@ -411,6 +448,7 @@ func (rs *RedisStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
 	return
 }
 
+// GetDestination retrieves a destination with id from  tp_db
 func (rs *RedisStorage) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
 	key = utils.DESTINATION_PREFIX + key
 	if !skipCache {
@@ -422,7 +460,13 @@ func (rs *RedisStorage) GetDestination(key string, skipCache bool, transactionID
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); len(values) > 0 && err == nil {
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	} else {
 		b := bytes.NewBuffer(values)
 		r, err := zlib.NewReader(b)
 		if err != nil {
@@ -436,12 +480,10 @@ func (rs *RedisStorage) GetDestination(key string, skipCache bool, transactionID
 		dest = new(Destination)
 		err = rs.ms.Unmarshal(out, dest)
 		if err != nil {
-			cache.Set(key, dest, cacheCommit(transactionID), transactionID)
+			return nil, err
 		}
-	} else {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-		return nil, err
 	}
+	cache.Set(key, dest, cacheCommit(transactionID), transactionID)
 	return
 }
 

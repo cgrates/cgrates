@@ -468,6 +468,12 @@ func (ms *MongoStorage) PreloadCacheForPrefix(prefix string) error {
 	return nil
 }
 
+// CacheDataFromDB loads data to cache,
+// prefix represents the cache prefix, IDs should be nil if all available data should be loaded
+func (ms *MongoStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) (err error) {
+	return
+}
+
 func (ms *MongoStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	var category, subject string
 	length := len(utils.DESTINATION_PREFIX)

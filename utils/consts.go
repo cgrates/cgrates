@@ -309,4 +309,6 @@ const (
 	ItemNotCloneable             = "item not cloneable"
 	NotCloneableCaps             = "NOT_CLONEABLE"
 	ServerErrorCaps              = "SERVER_ERROR"
+	MandatoryIEMissingCaps       = "MANDATORY_IE_MISSING"
+	UnsupportedCachePrefix       = "unsupported cache prefix"
 )

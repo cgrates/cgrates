@@ -72,6 +72,8 @@ type RatingStorage interface {
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
+	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
+	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error
 }
 
 type AccountingStorage interface {
@@ -105,6 +107,8 @@ type AccountingStorage interface {
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
+	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
+	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error
 }
 
 type CdrStorage interface {

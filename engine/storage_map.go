@@ -236,6 +236,12 @@ func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {
 	return nil
 }
 
+// CacheDataFromDB loads data to cache,
+// prefix represents the cache prefix, IDs should be nil if all available data should be loaded
+func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) (err error) {
+	return
+}
+
 func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()

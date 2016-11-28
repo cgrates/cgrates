@@ -22,6 +22,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -166,5 +167,32 @@ func TestRDSitMatchReqFilterIndex(t *testing.T) {
 	}
 	if _, err := rds.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey("NonexistentField", "1002")); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
+	}
+}
+
+func TestRDSitCacheDataFromDB(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
+	if err := rds.SetDestination(dst, ""); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := rds.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
+		t.Error("Should not be in cache")
+	}
+	if err := rds.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); !hasIt {
+		t.Error("Did not cache")
+	} else if !reflect.DeepEqual(dst, itm.(*Destination)) {
+		t.Error("Wrong item in the cache")
 	}
 }
