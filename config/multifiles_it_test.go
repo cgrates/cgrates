@@ -20,12 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"flag"
-	"github.com/cgrates/cgrates/utils"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
-var testIT  = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
 var mfCgrCfg *CGRConfig
 
 func TestMfInitConfig(t *testing.T) {

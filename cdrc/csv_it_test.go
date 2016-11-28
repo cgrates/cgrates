@@ -53,7 +53,6 @@ var cdrcCfgs []*config.CdrcConfig
 var cdrcCfg *config.CdrcConfig
 var cdrcRpc *rpc.Client
 
-var testIT  = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 

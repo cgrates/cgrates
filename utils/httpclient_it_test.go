@@ -21,14 +21,12 @@ package utils
 
 import (
 	"encoding/json"
-	"flag"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 )
-var testIT  = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
 
 type TestContent struct {
 	Var1 string

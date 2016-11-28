@@ -29,7 +29,6 @@ import (
 )
 
 // Arguments received via test command
-var testIT  = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 
 // Sample HttpJsonPost, more for usage purposes

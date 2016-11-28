@@ -60,7 +60,6 @@ var cfgPath string
 var cfg *config.CGRConfig
 var rater *rpc.Client
 
-var testIT = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")

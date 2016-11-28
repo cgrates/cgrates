@@ -40,7 +40,6 @@ import (
 	"github.com/fiorix/go-diameter/diam/dict"
 )
 
-var testIT = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var interations = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
