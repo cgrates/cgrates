@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -19,7 +21,6 @@ package engine
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"path"
 	"strconv"
@@ -30,12 +31,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
-
 func TestITCDRsMySQL(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mysql"))
 	if err != nil {
 		t.Error(err)
@@ -52,9 +49,7 @@ func TestITCDRsMySQL(t *testing.T) {
 }
 
 func TestITCDRsPSQL(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "postgres"))
 	if err != nil {
 		t.Error(err)
@@ -71,9 +66,7 @@ func TestITCDRsPSQL(t *testing.T) {
 }
 
 func TestITCDRsMongo(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mongo"))
 	if err != nil {
 		t.Error(err)

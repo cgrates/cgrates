@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -34,10 +36,7 @@ var cdrstCfgPath string
 var cdrstCfg *config.CGRConfig
 var cdrstRpc *rpc.Client
 
-func TestCDRStatsLclLoadConfig(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitLoadConfig(t *testing.T) {
 	var err error
 	cdrstCfgPath = path.Join(*dataDir, "conf", "samples", "cdrstats")
 	if cdrstCfg, err = config.NewCGRConfigFromFolder(cfgPath); err != nil {
@@ -45,29 +44,20 @@ func TestCDRStatsLclLoadConfig(t *testing.T) {
 	}
 }
 
-func TestCDRStatsLclInitDataDb(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitInitDataDb(t *testing.T) {
 	if err := engine.InitDataDb(cdrstCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestCDRStatsLclStartEngine(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cdrstCfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestCDRStatsLclRpcConn(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitRpcConn(t *testing.T) {
 	var err error
 	cdrstRpc, err = jsonrpc.Dial("tcp", cdrstCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -75,10 +65,7 @@ func TestCDRStatsLclRpcConn(t *testing.T) {
 	}
 }
 
-func TestCDRStatsLclLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitLoadTariffPlanFromFolder(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "cdrstats")}
@@ -90,10 +77,7 @@ func TestCDRStatsLclLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestCDRStatsLclGetQueueIds2(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitGetQueueIds2(t *testing.T) {
 	var queueIds []string
 	eQueueIds := []string{"CDRST3", "CDRST4"}
 	if err := cdrstRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
@@ -110,10 +94,7 @@ func TestCDRStatsLclGetQueueIds2(t *testing.T) {
 	}
 }
 
-func TestCDRStatsLclPostCdrs(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitPostCdrs(t *testing.T) {
 	storedCdrs := []*engine.CDR{
 		&engine.CDR{CGRID: utils.Sha1("dsafdsafa", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsafa",
 			OriginHost: "192.168.1.1", Source: "test",
@@ -153,10 +134,7 @@ func TestCDRStatsLclPostCdrs(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
 
-func TestCDRStatsLclGetMetrics1(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitGetMetrics1(t *testing.T) {
 	var rcvMetrics2 map[string]float64
 	expectedMetrics2 := map[string]float64{"ASR": 75, "ACD": 15}
 	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "CDRST4"}, &rcvMetrics2); err != nil {
@@ -167,10 +145,7 @@ func TestCDRStatsLclGetMetrics1(t *testing.T) {
 }
 
 // Test stats persistence
-func TestCDRStatsLclStatsPersistence(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitStatsPersistence(t *testing.T) {
 	time.Sleep(time.Duration(2) * time.Second) // Allow stats to be updated in dataDb
 	if _, err := engine.StopStartEngine(cdrstCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
@@ -189,10 +164,7 @@ func TestCDRStatsLclStatsPersistence(t *testing.T) {
 	}
 }
 
-func TestCDRStatsLclResetMetrics(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitResetMetrics(t *testing.T) {
 	var reply string
 	if err := cdrstRpc.Call("CDRStatsV1.ResetQueues", utils.AttrCDRStatsReloadQueues{StatsQueueIds: []string{"CDRST4"}}, &reply); err != nil {
 		t.Error("Calling CDRStatsV1.ResetQueues, got error: ", err.Error())
@@ -209,10 +181,7 @@ func TestCDRStatsLclResetMetrics(t *testing.T) {
 	}
 }
 
-func TestCDRStatsLclKillEngine(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestCDRStatsitKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}

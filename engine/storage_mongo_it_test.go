@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -29,9 +31,7 @@ import (
 var mgoITDB *MongoStorage
 
 func TestMGOitConnect(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var err error
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
@@ -45,18 +45,14 @@ func TestMGOitConnect(t *testing.T) {
 }
 
 func TestMGOitFlush(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := mgoITDB.Flush(""); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestMGOitSetReqFilterIndexes(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	idxes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -88,9 +84,7 @@ func TestMGOitSetReqFilterIndexes(t *testing.T) {
 }
 
 func TestMGOitGetReqFilterIndexes(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	eIdxes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -127,9 +121,7 @@ func TestMGOitGetReqFilterIndexes(t *testing.T) {
 }
 
 func TestMGOitMatchReqFilterIndex(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	eMp := utils.StringMap{
 		"RL1": true,
 		"RL2": true,
