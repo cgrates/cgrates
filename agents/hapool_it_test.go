@@ -33,7 +33,6 @@ import (
 var cgrRater1Cmd, cgrSmg1Cmd *exec.Cmd
 
 func TestHaPoolInitCfg(t *testing.T) {
-
 	daCfgPath = path.Join(*dataDir, "conf", "samples", "hapool", "cgrrater1")
 	// Init config first
 	var err error
@@ -57,7 +56,6 @@ func TestHaPoolResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestHaPoolStartEngine(t *testing.T) {
-
 	engine.KillEngine(*waitRater) // just to make sure
 	var err error
 	cgrRater1 := path.Join(*dataDir, "conf", "samples", "hapool", "cgrrater1")

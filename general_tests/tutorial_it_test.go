@@ -1218,7 +1218,6 @@ func TestTutITSetAccount(t *testing.T) {
 /*
 // Make sure all stats queues were updated
 func TestTutITCdrStatsAfter(t *testing.T) {
-
 	var statMetrics map[string]float64
 	eMetrics := map[string]float64{engine.ACD: 90.2, engine.ASR: 100, engine.TCC: 1.675, engine.TCD: 451, engine.ACC: 0.335}
 	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST1"}, &statMetrics); err != nil {

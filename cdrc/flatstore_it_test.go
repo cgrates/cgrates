@@ -58,7 +58,6 @@ var part2 = `INVITE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4ccb@0:0:0:0:0
 INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475`
 
 func TestFlatstoreitInitCfg(t *testing.T) {
-
 	var err error
 	flatstoreCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcflatstore")
 	if flatstoreCfg, err = config.NewCGRConfigFromFolder(flatstoreCfgPath); err != nil {
@@ -68,7 +67,6 @@ func TestFlatstoreitInitCfg(t *testing.T) {
 
 // InitDb so we can rely on count
 func TestFlatstoreitInitCdrDb(t *testing.T) {
-
 	if err := engine.InitStorDb(flatstoreCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +74,6 @@ func TestFlatstoreitInitCdrDb(t *testing.T) {
 
 // Creates cdr files and moves them into processing folder
 func TestFlatstoreitCreateCdrFiles(t *testing.T) {
-
 	if flatstoreCfg == nil {
 		t.Fatal("Empty default cdrc configuration")
 	}
@@ -100,7 +97,6 @@ func TestFlatstoreitCreateCdrFiles(t *testing.T) {
 }
 
 func TestFlatstoreitStartEngine(t *testing.T) {
-
 	if _, err := engine.StopStartEngine(flatstoreCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +104,6 @@ func TestFlatstoreitStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestFlatstoreitRpcConn(t *testing.T) {
-
 	var err error
 	flatstoreRpc, err = jsonrpc.Dial("tcp", flatstoreCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -117,7 +112,6 @@ func TestFlatstoreitRpcConn(t *testing.T) {
 }
 
 func TestFlatstoreitProcessFiles(t *testing.T) {
-
 	if err := ioutil.WriteFile(path.Join("/tmp", "acc_1.log"), []byte(fullSuccessfull), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
