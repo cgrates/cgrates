@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -30,19 +32,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
 var waitRater = flag.Int("wait_rater", 150, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 
 var daCfgPath string
 var daCfg *config.CGRConfig
 var smgRPC *rpc.Client
-var err error
 
 func TestSMGVoiceInitCfg(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	daCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
 	// Init config first
 	var err error
@@ -56,9 +54,7 @@ func TestSMGVoiceInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestSMGVoiceResetDataDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := engine.InitDataDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -66,9 +62,7 @@ func TestSMGVoiceResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestSMGVoiceResetStorDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := engine.InitStorDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -76,9 +70,7 @@ func TestSMGVoiceResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestSMGVoiceStartEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if _, err := engine.StopStartEngine(daCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -86,9 +78,7 @@ func TestSMGVoiceStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGVoiceApierRpcConn(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var err error
 	smgRPC, err = jsonrpc.Dial("tcp", daCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -98,9 +88,7 @@ func TestSMGVoiceApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestSMGVoiceTPFromFolder(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
 	if err := smgRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
@@ -110,9 +98,7 @@ func TestSMGVoiceTPFromFolder(t *testing.T) {
 }
 
 func TestSMGVoiceMonetaryRefund(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
@@ -171,9 +157,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 }
 
 func TestSMGVoiceVoiceRefund(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
@@ -232,9 +216,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 }
 
 func TestSMGVoiceMixedRefund(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
@@ -306,9 +288,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 }
 
 func TestSMGVoiceLastUsed(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 8.790000
@@ -423,9 +403,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 }
 
 func TestSMGVoiceLastUsedEnd(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 7.59000
@@ -514,9 +492,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 }
 
 func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 6.59000
@@ -605,9 +581,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 }
 
 func TestSMGVoiceSessionTTL(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 5.590000
@@ -711,9 +685,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 }
 
 func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestTTLWithRelocate", BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestTTLWithRelocate"),
 		Value: utils.Float64Pointer(300), RatingSubject: utils.StringPointer("*zero50ms")}
 	var reply string
@@ -831,9 +803,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 }
 
 func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestRelocateWithOriginIDPrefix",
 		BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestRelocateWithOriginIDPrefix"),
 		Value: utils.Float64Pointer(300), RatingSubject: utils.StringPointer("*zero1s")}
@@ -974,9 +944,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 }
 
 func TestSMGVoiceSessionStopCgrEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

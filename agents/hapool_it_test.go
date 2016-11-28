@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -31,9 +33,7 @@ import (
 var cgrRater1Cmd, cgrSmg1Cmd *exec.Cmd
 
 func TestHaPoolInitCfg(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	daCfgPath = path.Join(*dataDir, "conf", "samples", "hapool", "cgrrater1")
 	// Init config first
 	var err error
@@ -57,9 +57,7 @@ func TestHaPoolResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestHaPoolStartEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	engine.KillEngine(*waitRater) // just to make sure
 	var err error
 	cgrRater1 := path.Join(*dataDir, "conf", "samples", "hapool", "cgrrater1")

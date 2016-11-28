@@ -28,6 +28,7 @@ import (
 )
 
 var cfg, _ = config.NewDefaultCGRConfig()
+var err error
 
 func TestSMGenericEventParseFields(t *testing.T) {
 	smGev := SMGenericEvent{}
