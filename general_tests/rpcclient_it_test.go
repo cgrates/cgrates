@@ -279,7 +279,6 @@ func TestRPCITLclStatusBcastRALs1Up(t *testing.T) {
 
 /*
 func TestRPCITStatusBcastCmd(t *testing.T) {
-
 	var stats utils.CacheStats
 	if err := rpcRAL1.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)

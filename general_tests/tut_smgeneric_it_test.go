@@ -105,7 +105,6 @@ func TestTutSMGCacheStats(t *testing.T) {
 /*
 // Make sure account was debited properly
 func TestTutSMGAccountsBefore(t *testing.T) {
-
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {

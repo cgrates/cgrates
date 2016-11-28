@@ -40,7 +40,6 @@ var smgV1Rpc *rpc.Client
 var smgV1LoadInst utils.LoadInstance // Share load information between tests
 
 func TestSMGV1InitCfg(t *testing.T) {
-
 	smgV1CfgPath = path.Join(*dataDir, "conf", "samples", "smgeneric")
 	// Init config first
 	var err error
@@ -54,7 +53,6 @@ func TestSMGV1InitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestSMGV1ResetDataDb(t *testing.T) {
-
 	if err := engine.InitDataDb(smgV1Cfg); err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +60,6 @@ func TestSMGV1ResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestSMGV1ResetStorDb(t *testing.T) {
-
 	if err := engine.InitStorDb(smgV1Cfg); err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +67,6 @@ func TestSMGV1ResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestSMGV1StartEngine(t *testing.T) {
-
 	if _, err := engine.StopStartEngine(smgV1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +74,6 @@ func TestSMGV1StartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGV1RpcConn(t *testing.T) {
-
 	var err error
 	smgV1Rpc, err = jsonrpc.Dial("tcp", smgV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -88,7 +83,6 @@ func TestSMGV1RpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestSMGV1LoadTariffPlanFromFolder(t *testing.T) {
-
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := smgV1Rpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &smgV1LoadInst); err != nil {
 		t.Error(err)
@@ -100,9 +94,7 @@ func TestSMGV1LoadTariffPlanFromFolder(t *testing.T) {
 
 // Check loaded stats
 func TestSMGV1CacheStats(t *testing.T) {
-
 	var rcvStats *utils.CacheStats
-
 	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 4, RatingProfiles: 0, Actions: 7, ActionPlans: 4, SharedGroups: 0, Aliases: 0, ResourceLimits: 0,
 		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3}
 	var args utils.AttrCacheStats
@@ -115,7 +107,6 @@ func TestSMGV1CacheStats(t *testing.T) {
 
 // Make sure account was debited properly
 func TestSMGV1AccountsBefore(t *testing.T) {
-
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := smgV1Rpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
@@ -128,7 +119,6 @@ func TestSMGV1AccountsBefore(t *testing.T) {
 
 // Make sure account was debited properly
 func TestSMGV1GetMaxUsage(t *testing.T) {
-
 	setupReq := &sessionmanager.SMGenericEvent{utils.REQTYPE: utils.META_PREPAID, utils.TENANT: "cgrates.org",
 		utils.ACCOUNT: "1003", utils.DESTINATION: "1002", utils.SETUP_TIME: "2015-11-10T15:20:00Z"}
 	var maxTime float64
@@ -140,7 +130,6 @@ func TestSMGV1GetMaxUsage(t *testing.T) {
 }
 
 func TestSMGV1StopCgrEngine(t *testing.T) {
-	
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

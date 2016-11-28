@@ -40,7 +40,6 @@ var daCfg *config.CGRConfig
 var smgRPC *rpc.Client
 
 func TestSMGVoiceInitCfg(t *testing.T) {
-
 	daCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
 	// Init config first
 	var err error
@@ -54,7 +53,6 @@ func TestSMGVoiceInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestSMGVoiceResetDataDb(t *testing.T) {
-
 	if err := engine.InitDataDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +60,6 @@ func TestSMGVoiceResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestSMGVoiceResetStorDb(t *testing.T) {
-
 	if err := engine.InitStorDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +75,6 @@ func TestSMGVoiceStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGVoiceApierRpcConn(t *testing.T) {
-
 	var err error
 	smgRPC, err = jsonrpc.Dial("tcp", daCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -88,7 +84,6 @@ func TestSMGVoiceApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestSMGVoiceTPFromFolder(t *testing.T) {
-
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
 	if err := smgRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
@@ -98,7 +93,6 @@ func TestSMGVoiceTPFromFolder(t *testing.T) {
 }
 
 func TestSMGVoiceMonetaryRefund(t *testing.T) {
-
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
@@ -157,7 +151,6 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 }
 
 func TestSMGVoiceVoiceRefund(t *testing.T) {
-
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
@@ -216,7 +209,6 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 }
 
 func TestSMGVoiceMixedRefund(t *testing.T) {
-
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
@@ -288,7 +280,6 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 }
 
 func TestSMGVoiceLastUsed(t *testing.T) {
-
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 8.790000
@@ -403,7 +394,6 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 }
 
 func TestSMGVoiceLastUsedEnd(t *testing.T) {
-
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 7.59000
@@ -492,7 +482,6 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 }
 
 func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
-
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 6.59000
@@ -581,7 +570,6 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 }
 
 func TestSMGVoiceSessionTTL(t *testing.T) {
-
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 5.590000
@@ -685,7 +673,6 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 }
 
 func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
-
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestTTLWithRelocate", BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestTTLWithRelocate"),
 		Value: utils.Float64Pointer(300), RatingSubject: utils.StringPointer("*zero50ms")}
 	var reply string
@@ -803,7 +790,6 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 }
 
 func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
-
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestRelocateWithOriginIDPrefix",
 		BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestRelocateWithOriginIDPrefix"),
 		Value: utils.Float64Pointer(300), RatingSubject: utils.StringPointer("*zero1s")}
@@ -944,7 +930,6 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 }
 
 func TestSMGVoiceSessionStopCgrEngine(t *testing.T) {
-
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

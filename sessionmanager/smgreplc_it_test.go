@@ -52,7 +52,6 @@ func TestSMGRplcInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestSMGRplcResetDB(t *testing.T) {
-
 	if err := engine.InitDataDb(smgRplcMasterCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +62,6 @@ func TestSMGRplcResetDB(t *testing.T) {
 
 // Start CGR Engine
 func TestSMGRplcStartEngine(t *testing.T) {
-
 	if _, err := engine.StopStartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil { // Start slave before master
 		t.Fatal(err)
 	}
@@ -74,7 +72,6 @@ func TestSMGRplcStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGRplcApierRpcConn(t *testing.T) {
-
 	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +82,6 @@ func TestSMGRplcApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestSMGRplcTPFromFolder(t *testing.T) {
-
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
 	if err := smgRplcMstrRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
@@ -95,7 +91,6 @@ func TestSMGRplcTPFromFolder(t *testing.T) {
 }
 
 func TestSMGRplcInitiate(t *testing.T) {
-
 	var pSessions []*ActiveSession
 	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -149,7 +144,6 @@ func TestSMGRplcInitiate(t *testing.T) {
 
 // Update on slave
 func TestSMGRplcUpdate(t *testing.T) {
-
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME: "TEST_EVENT",
 		utils.ACCID:      "123451",
@@ -194,7 +188,6 @@ func TestSMGRplcUpdate(t *testing.T) {
 }
 
 func TestSMGRplcTerminate(t *testing.T) {
-
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME: "TEST_EVENT",
 		utils.ACCID:      "123451",
@@ -222,7 +215,6 @@ func TestSMGRplcTerminate(t *testing.T) {
 }
 
 func TestSMGRplcStopCgrEngine(t *testing.T) {
-
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

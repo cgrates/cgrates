@@ -75,7 +75,6 @@ TRL0001DDB     ABC                                     Some Connect A.B.        
 `
 
 func TestFwvitInitCfg(t *testing.T) {
-
 	var err error
 	fwvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcfwv")
 	if fwvCfg, err = config.NewCGRConfigFromFolder(fwvCfgPath); err != nil {
@@ -85,7 +84,6 @@ func TestFwvitInitCfg(t *testing.T) {
 
 // Creates cdr files and moves them into processing folder
 func TestFwvitCreateCdrFiles(t *testing.T) {
-
 	if fwvCfg == nil {
 		t.Fatal("Empty default cdrc configuration")
 	}
@@ -109,7 +107,6 @@ func TestFwvitCreateCdrFiles(t *testing.T) {
 }
 
 func TestFwvitStartEngine(t *testing.T) {
-
 	if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +114,6 @@ func TestFwvitStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestFwvitRpcConn(t *testing.T) {
-
 	var err error
 	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -126,7 +122,6 @@ func TestFwvitRpcConn(t *testing.T) {
 }
 
 func TestFwvitProcessFiles(t *testing.T) {
-
 	fileName := "test1.fwv"
 	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0644); err != nil {
 		t.Fatal(err.Error)

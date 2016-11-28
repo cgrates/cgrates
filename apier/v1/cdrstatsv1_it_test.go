@@ -45,7 +45,6 @@ func TestCDRStatsitLoadConfig(t *testing.T) {
 }
 
 func TestCDRStatsitInitDataDb(t *testing.T) {
-
 	if err := engine.InitDataDb(cdrstCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +78,6 @@ func TestCDRStatsitLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 func TestCDRStatsitGetQueueIds2(t *testing.T) {
-
 	var queueIds []string
 	eQueueIds := []string{"CDRST3", "CDRST4"}
 	if err := cdrstRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
@@ -97,7 +95,6 @@ func TestCDRStatsitGetQueueIds2(t *testing.T) {
 }
 
 func TestCDRStatsitPostCdrs(t *testing.T) {
-
 	storedCdrs := []*engine.CDR{
 		&engine.CDR{CGRID: utils.Sha1("dsafdsafa", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsafa",
 			OriginHost: "192.168.1.1", Source: "test",
@@ -138,7 +135,6 @@ func TestCDRStatsitPostCdrs(t *testing.T) {
 }
 
 func TestCDRStatsitGetMetrics1(t *testing.T) {
-
 	var rcvMetrics2 map[string]float64
 	expectedMetrics2 := map[string]float64{"ASR": 75, "ACD": 15}
 	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "CDRST4"}, &rcvMetrics2); err != nil {
@@ -150,7 +146,6 @@ func TestCDRStatsitGetMetrics1(t *testing.T) {
 
 // Test stats persistence
 func TestCDRStatsitStatsPersistence(t *testing.T) {
-
 	time.Sleep(time.Duration(2) * time.Second) // Allow stats to be updated in dataDb
 	if _, err := engine.StopStartEngine(cdrstCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
@@ -170,7 +165,6 @@ func TestCDRStatsitStatsPersistence(t *testing.T) {
 }
 
 func TestCDRStatsitResetMetrics(t *testing.T) {
-
 	var reply string
 	if err := cdrstRpc.Call("CDRStatsV1.ResetQueues", utils.AttrCDRStatsReloadQueues{StatsQueueIds: []string{"CDRST4"}}, &reply); err != nil {
 		t.Error("Calling CDRStatsV1.ResetQueues, got error: ", err.Error())
@@ -188,7 +182,6 @@ func TestCDRStatsitResetMetrics(t *testing.T) {
 }
 
 func TestCDRStatsitKillEngine(t *testing.T) {
-
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}

@@ -66,7 +66,6 @@ accid22;*postpaid;itsyscom.com;1001;+4986517174963;2013-02-03 19:54:00;123;val_e
 accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"";val_extra1`
 
 func TestCsvITInitConfig(t *testing.T) {
-
 	var err error
 	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
 	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
@@ -76,14 +75,12 @@ func TestCsvITInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func TestCsvITInitCdrDb(t *testing.T) {
-
 	if err := engine.InitStorDb(csvCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCsvITCreateCdrDirs(t *testing.T) {
-
 	for _, cdrcProfiles := range csvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
 			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
@@ -99,7 +96,6 @@ func TestCsvITCreateCdrDirs(t *testing.T) {
 }
 
 func TestCsvITStartEngine(t *testing.T) {
-
 	if _, err := engine.StopStartEngine(csvCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +103,6 @@ func TestCsvITStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestCsvITRpcConn(t *testing.T) {
-
 	var err error
 	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -117,7 +112,6 @@ func TestCsvITRpcConn(t *testing.T) {
 
 // The default scenario, out of cdrc defined in .cfg file
 func TestCsvITHandleCdr1File(t *testing.T) {
-
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
@@ -130,7 +124,6 @@ func TestCsvITHandleCdr1File(t *testing.T) {
 
 // Scenario out of first .xml config
 func TestCsvITHandleCdr2File(t *testing.T) {
-
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent2), 0644); err != nil {
@@ -142,7 +135,6 @@ func TestCsvITHandleCdr2File(t *testing.T) {
 }
 
 func TestCsvITProcessedFiles(t *testing.T) {
-
 	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
 	if outContent1, err := ioutil.ReadFile("/tmp/cdrctests/csvit1/out/file1.csv"); err != nil {
 		t.Error(err)
@@ -157,7 +149,6 @@ func TestCsvITProcessedFiles(t *testing.T) {
 }
 
 func TestCsvITAnalyseCDRs(t *testing.T) {
-
 	var reply []*engine.ExternalCDR
 	if err := cdrcRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -173,7 +164,6 @@ func TestCsvITAnalyseCDRs(t *testing.T) {
 }
 
 func TestCsvITKillEngine(t *testing.T) {
-
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}

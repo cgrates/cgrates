@@ -170,7 +170,6 @@ func TestCdrsFileFailover(t *testing.T) {
 // Performance test, check `lsof -a -p 8427 | wc -l`
 
 func TestCdrsHttpCdrReplication2(t *testing.T) {
-
 	cdrs := make([]*engine.CDR, 0)
 	for i := 0; i < 10000; i++ {
 		cdr := &engine.CDR{OriginID: fmt.Sprintf("httpjsonrpc_%d", i),
