@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -27,12 +29,9 @@ import (
 )
 
 var rds *RedisStorage
-var err error
 
 func TestRDSitConnectRedis(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cfg, _ := config.NewDefaultCGRConfig()
 	rds, err = NewRedisStorage(fmt.Sprintf("%s:%s", cfg.TpDbHost, cfg.TpDbPort), 4, cfg.TpDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
 	if err != nil {
@@ -41,9 +40,7 @@ func TestRDSitConnectRedis(t *testing.T) {
 }
 
 func TestRDSitFlush(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := rds.Flush(""); err != nil {
 		t.Error("Failed to Flush redis database", err.Error())
 	}
@@ -51,9 +48,7 @@ func TestRDSitFlush(t *testing.T) {
 }
 
 func TestRDSitSetGetDerivedCharges(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	keyCharger1 := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
 	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{
 		&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
@@ -79,9 +74,7 @@ func TestRDSitSetGetDerivedCharges(t *testing.T) {
 }
 
 func TestRDSitSetReqFilterIndexes(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	idxes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -113,9 +106,7 @@ func TestRDSitSetReqFilterIndexes(t *testing.T) {
 }
 
 func TestRDSitGetReqFilterIndexes(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	eIdxes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -152,9 +143,7 @@ func TestRDSitGetReqFilterIndexes(t *testing.T) {
 }
 
 func TestRDSitMatchReqFilterIndex(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	eMp := utils.StringMap{
 		"RL1": true,
 		"RL2": true,

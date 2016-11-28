@@ -136,7 +136,7 @@ func TestFlatstoreitProcessFiles(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	time.Sleep(time.Duration(2) * time.Second) // Give time for processing to happen and the .unparired file to be written
+	time.Sleep(time.Duration(3) * time.Second) // Give time for processing to happen and the .unparired file to be written
 	filesInDir, _ := ioutil.ReadDir(flatstoreCdrcCfg.CdrInDir)
 	if len(filesInDir) != 0 {
 		t.Errorf("Files in cdrcInDir: %+v", filesInDir)
