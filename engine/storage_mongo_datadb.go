@@ -468,9 +468,40 @@ func (ms *MongoStorage) PreloadCacheForPrefix(prefix string) error {
 	return nil
 }
 
-// CacheDataFromDB loads data to cache,
-// prefix represents the cache prefix, IDs should be nil if all available data should be loaded
-func (ms *MongoStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) (err error) {
+// CacheDataFromDB loads data to cache
+// prfx represents the cache prefix, ids should be nil if all available data should be loaded
+// mustBeCached specifies that data needs to be cached in order to be retrieved from db
+func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
+	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX}, prfx) {
+		return utils.NewCGRError(utils.REDIS,
+			utils.MandatoryIEMissingCaps,
+			utils.UnsupportedCachePrefix,
+			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prfx))
+	}
+	if ids == nil {
+		if ids, err = ms.GetKeysForPrefix(prfx); err != nil {
+			return utils.NewCGRError(utils.REDIS,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
+		}
+	}
+	for _, dataID := range ids {
+		if mustBeCached {
+			if _, hasIt := cache.Get(prfx + dataID); !hasIt { // only cache if previously there
+				continue
+			}
+		}
+		switch prfx {
+		case utils.DESTINATION_PREFIX:
+			if _, err = ms.GetDestination(dataID, false, utils.NonTransactional); err != nil {
+				return utils.NewCGRError(utils.REDIS,
+					utils.ServerErrorCaps,
+					err.Error(),
+					fmt.Sprintf("redis error <%s> querying GetDestination for prefix: <%s>, dataID: <%s>", prfx, dataID))
+			}
+		}
+	}
 	return
 }
 

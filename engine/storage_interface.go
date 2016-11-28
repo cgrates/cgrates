@@ -73,7 +73,7 @@ type RatingStorage interface {
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
-	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error
+	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }
 
 type AccountingStorage interface {
