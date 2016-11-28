@@ -1393,7 +1393,7 @@ func TestApierExportCdrsToFile(t *testing.T) {
 }
 */
 
-func TestApierLocalGetCdrs(t *testing.T) {
+func TestApierITGetCdrs(t *testing.T) {
 
 	var reply []*engine.ExternalCDR
 	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
@@ -1404,7 +1404,7 @@ func TestApierLocalGetCdrs(t *testing.T) {
 	}
 }
 
-func TestApierLocalProcessCdr(t *testing.T) {
+func TestApierITProcessCdr(t *testing.T) {
 
 	var reply string
 	cdr := engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
@@ -1427,7 +1427,7 @@ func TestApierLocalProcessCdr(t *testing.T) {
 	}
 }
 
-func TestApierLocalSetDC(t *testing.T) {
+func TestApierITSetDC(t *testing.T) {
 
 	dcs1 := []*utils.DerivedCharger{
 		&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
@@ -1444,7 +1444,7 @@ func TestApierLocalSetDC(t *testing.T) {
 	}
 }
 
-func TestApierLocalGetDC(t *testing.T) {
+func TestApierITGetDC(t *testing.T) {
 
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
 	eDcs := utils.DerivedChargers{DestinationIDs: utils.NewStringMap(),
@@ -1462,7 +1462,7 @@ func TestApierLocalGetDC(t *testing.T) {
 	}
 }
 
-func TestApierLocalRemDC(t *testing.T) {
+func TestApierITRemDC(t *testing.T) {
 
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
 	var reply string
@@ -1473,7 +1473,7 @@ func TestApierLocalRemDC(t *testing.T) {
 	}
 }
 
-func TestApierLocalSetDestination(t *testing.T) {
+func TestApierITSetDestination(t *testing.T) {
 
 	attrs := utils.AttrSetDestination{Id: "TEST_SET_DESTINATION", Prefixes: []string{"+4986517174963", "+4986517174960"}}
 	var reply string
@@ -1500,7 +1500,7 @@ func TestApierLocalSetDestination(t *testing.T) {
 	}
 }
 
-func TestApierLocalGetAliases(t *testing.T) {
+func TestApierITGetAliases(t *testing.T) {
 
 	var alias engine.Alias
 	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
@@ -1516,7 +1516,7 @@ func TestApierLocalGetAliases(t *testing.T) {
 	}
 }
 
-func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
+func TestApierITAddRatingSubjectAliases(t *testing.T) {
 
 	addRtSubjAliases := &AttrAddRatingSubjectAliases{Tenant: "cgrates.org", Category: "call", Subject: "1001", Aliases: []string{"2001", "2002", "2003"}}
 	var rply string
@@ -1534,7 +1534,7 @@ func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
 	}
 }
 
-func TestApierLocalRemRatingSubjectAliases(t *testing.T) {
+func TestApierITRemRatingSubjectAliases(t *testing.T) {
 
 	tenantRatingSubj := engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}
 	var rply string
@@ -1550,7 +1550,7 @@ func TestApierLocalRemRatingSubjectAliases(t *testing.T) {
 	}
 }
 
-func TestApierLocalAddAccountAliases(t *testing.T) {
+func TestApierITAddAccountAliases(t *testing.T) {
 
 	addAcntAliases := &AttrAddAccountAliases{Tenant: "cgrates.org", Category: "call", Account: "1001", Aliases: []string{"2001", "2002", "2003"}}
 	var rply string
@@ -1568,7 +1568,7 @@ func TestApierLocalAddAccountAliases(t *testing.T) {
 	}
 }
 
-func TestApierLocalRemAccountAliases(t *testing.T) {
+func TestApierITRemAccountAliases(t *testing.T) {
 
 	tenantAcnt := engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}
 	var rply string
@@ -1584,7 +1584,7 @@ func TestApierLocalRemAccountAliases(t *testing.T) {
 	}
 }
 
-func TestApierLocalGetScheduledActions(t *testing.T) {
+func TestApierITGetScheduledActions(t *testing.T) {
 
 	var rply []*ScheduledActions
 	if err := rater.Call("ApierV1.GetScheduledActions", AttrsGetScheduledActions{}, &rply); err != nil {
@@ -1592,7 +1592,7 @@ func TestApierLocalGetScheduledActions(t *testing.T) {
 	}
 }
 
-func TestApierLocalGetDataCost(t *testing.T) {
+func TestApierITGetDataCost(t *testing.T) {
 
 	attrs := AttrGetDataCost{Direction: "*out", Category: "data", Tenant: "cgrates.org", Account: "1001", Subject: "1001", StartTime: time.Now(), Usage: 640113}
 	var rply *engine.DataCost
