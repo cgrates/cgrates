@@ -111,6 +111,75 @@ type AccountingStorage interface {
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error
 }
 
+// OnlineStorage contains methods to use for administering online data
+type OnlineStorage interface {
+	Storage
+	HasData(string, string) (bool, error)
+	PreloadRatingCache() error
+	GetRatingPlan(string, bool, string) (*RatingPlan, error)
+	SetRatingPlan(*RatingPlan, string) error
+	GetRatingProfile(string, bool, string) (*RatingProfile, error)
+	SetRatingProfile(*RatingProfile, string) error
+	RemoveRatingProfile(string, string) error
+	GetDestination(string, bool, string) (*Destination, error)
+	SetDestination(*Destination, string) error
+	RemoveDestination(string, string) error
+	SetReverseDestination(*Destination, string) error
+	GetReverseDestination(string, bool, string) ([]string, error)
+	UpdateReverseDestination(*Destination, *Destination, string) error
+	GetLCR(string, bool, string) (*LCR, error)
+	SetLCR(*LCR, string) error
+	SetCdrStats(*CdrStats) error
+	GetCdrStats(string) (*CdrStats, error)
+	GetAllCdrStats() ([]*CdrStats, error)
+	GetDerivedChargers(string, bool, string) (*utils.DerivedChargers, error)
+	SetDerivedChargers(string, *utils.DerivedChargers, string) error
+	GetActions(string, bool, string) (Actions, error)
+	SetActions(string, Actions, string) error
+	RemoveActions(string, string) error
+	GetSharedGroup(string, bool, string) (*SharedGroup, error)
+	SetSharedGroup(*SharedGroup, string) error
+	GetActionTriggers(string, bool, string) (ActionTriggers, error)
+	SetActionTriggers(string, ActionTriggers, string) error
+	RemoveActionTriggers(string, string) error
+	GetActionPlan(string, bool, string) (*ActionPlan, error)
+	SetActionPlan(string, *ActionPlan, bool, string) error
+	GetAllActionPlans() (map[string]*ActionPlan, error)
+	PushTask(*Task) error
+	PopTask() (*Task, error)
+	PreloadAccountingCache() error
+	GetAccount(string) (*Account, error)
+	SetAccount(*Account) error
+	RemoveAccount(string) error
+	GetCdrStatsQueue(string) (*StatsQueue, error)
+	SetCdrStatsQueue(*StatsQueue) error
+	GetSubscribers() (map[string]*SubscriberData, error)
+	SetSubscriber(string, *SubscriberData) error
+	RemoveSubscriber(string) error
+	SetUser(*UserProfile) error
+	GetUser(string) (*UserProfile, error)
+	GetUsers() ([]*UserProfile, error)
+	RemoveUser(string) error
+	SetAlias(*Alias, string) error
+	GetAlias(string, bool, string) (*Alias, error)
+	RemoveAlias(string, string) error
+	SetReverseAlias(*Alias, string) error
+	GetReverseAlias(string, bool, string) ([]string, error)
+	UpdateReverseAlias(*Alias, *Alias, string) error
+	GetResourceLimit(string, bool, string) (*ResourceLimit, error)
+	SetResourceLimit(*ResourceLimit, string) error
+	RemoveResourceLimit(string, string) error
+	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
+	AddLoadHistory(*utils.LoadInstance, int, string) error
+	GetStructVersion() (*StructVersion, error)
+	SetStructVersion(*StructVersion) error
+	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
+	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
+	MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
+	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
+	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
+}
+
 type CdrStorage interface {
 	Storage
 	SetCDR(*CDR, bool) error

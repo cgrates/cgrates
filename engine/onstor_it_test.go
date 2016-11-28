@@ -21,6 +21,7 @@ package engine
 
 import (
 	"fmt"
+	"path"
 	"reflect"
 	"testing"
 
@@ -29,24 +30,64 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var rds *RedisStorage
+var (
+	rdsITdb *RedisStorage
+	mgoITdb *MongoStorage
+	onStor  OnlineStorage
+)
 
-func TestRDSitConnectRedis(t *testing.T) {
+// subtests to be executed for each confDIR
+var sTestsOnStorIT = []func(t *testing.T){
+	testOnStorITFlush,
+	testOnStorITSetGetDerivedCharges,
+	testOnStorITSetReqFilterIndexes,
+	testOnStorITGetReqFilterIndexes,
+	testOnStorITMatchReqFilterIndex,
+	testOnStorITCacheDataFromDB,
+}
+
+func TestOnStorITRedisConnect(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	rds, err = NewRedisStorage(fmt.Sprintf("%s:%s", cfg.TpDbHost, cfg.TpDbPort), 4, cfg.TpDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
+	rdsITdb, err = NewRedisStorage(fmt.Sprintf("%s:%s", cfg.TpDbHost, cfg.TpDbPort), 4, cfg.TpDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
 }
 
-func TestRDSitFlush(t *testing.T) {
-	if err := rds.Flush(""); err != nil {
-		t.Error("Failed to Flush redis database", err.Error())
+func TestOnStorITMongoConnect(t *testing.T) {
+	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
+	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
+	if err != nil {
+		t.Fatal(err)
 	}
-	rds.PreloadRatingCache()
+	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort, mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
+		utils.StorDB, nil, mgoITCfg.CacheConfig, mgoITCfg.LoadHistorySize); err != nil {
+		t.Fatal(err)
+	}
 }
 
-func TestRDSitSetGetDerivedCharges(t *testing.T) {
+func TestOnStorITRedis(t *testing.T) {
+	onStor = rdsITdb
+	for _, stest := range sTestsOnStorIT {
+		t.Run("TestOnStorITRedis", stest)
+	}
+}
+
+func TestOnStorITMongo(t *testing.T) {
+	onStor = mgoITdb
+	for _, stest := range sTestsOnStorIT {
+		t.Run("TestOnStorITMongo", stest)
+	}
+}
+
+func testOnStorITFlush(t *testing.T) {
+	if err := onStor.Flush(""); err != nil {
+		t.Error("Failed to Flush redis database", err.Error())
+	}
+	onStor.PreloadRatingCache()
+}
+
+func testOnStorITSetGetDerivedCharges(t *testing.T) {
 	keyCharger1 := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
 	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{
 		&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
@@ -54,24 +95,24 @@ func TestRDSitSetGetDerivedCharges(t *testing.T) {
 		&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}}
-	if err := rds.SetDerivedChargers(keyCharger1, charger1, utils.NonTransactional); err != nil {
+	if err := onStor.SetDerivedChargers(keyCharger1, charger1, utils.NonTransactional); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
 	// Retrieve from db
-	if rcvCharger, err := rds.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err != nil {
+	if rcvCharger, err := onStor.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err != nil {
 		t.Error("Error when retrieving DerivedCHarger", err.Error())
 	} else if !reflect.DeepEqual(rcvCharger, charger1) {
 		t.Errorf("Expecting %v, received: %v", charger1, rcvCharger)
 	}
 	// Retrieve from cache
-	if rcvCharger, err := rds.GetDerivedChargers(keyCharger1, false, utils.NonTransactional); err != nil {
+	if rcvCharger, err := onStor.GetDerivedChargers(keyCharger1, false, utils.NonTransactional); err != nil {
 		t.Error("Error when retrieving DerivedCHarger", err.Error())
 	} else if !reflect.DeepEqual(rcvCharger, charger1) {
 		t.Errorf("Expecting %v, received: %v", charger1, rcvCharger)
 	}
 }
 
-func TestRDSitSetReqFilterIndexes(t *testing.T) {
+func testOnStorITSetReqFilterIndexes(t *testing.T) {
 	idxes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -97,12 +138,12 @@ func TestRDSitSetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := rds.SetReqFilterIndexes(utils.ResourceLimitsIndex, idxes); err != nil {
+	if err := onStor.SetReqFilterIndexes(utils.ResourceLimitsIndex, idxes); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestRDSitGetReqFilterIndexes(t *testing.T) {
+func testOnStorITGetReqFilterIndexes(t *testing.T) {
 	eIdxes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -128,46 +169,48 @@ func TestRDSitGetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if idxes, err := rds.GetReqFilterIndexes(utils.ResourceLimitsIndex); err != nil {
+	if idxes, err := onStor.GetReqFilterIndexes(utils.ResourceLimitsIndex); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, idxes) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
 	}
-	if _, err := rds.GetReqFilterIndexes("unknown_key"); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.GetReqFilterIndexes("unknown_key"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
-func TestRDSitMatchReqFilterIndex(t *testing.T) {
+func testOnStorITMatchReqFilterIndex(t *testing.T) {
 	eMp := utils.StringMap{
 		"RL1": true,
 		"RL2": true,
 	}
-	if rcvMp, err := rds.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey("Account", "1002")); err != nil {
+	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourceLimitsIndex,
+		utils.ConcatenatedKey("Account", "1002")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
-	if _, err := rds.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey("NonexistentField", "1002")); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.MatchReqFilterIndex(utils.ResourceLimitsIndex,
+		utils.ConcatenatedKey("NonexistentField", "1002")); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
-func TestRDSitCacheDataFromDB(t *testing.T) {
+func testOnStorITCacheDataFromDB(t *testing.T) {
 	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
-	if err := rds.SetDestination(dst, ""); err != nil {
+	if err := onStor.SetDestination(dst, ""); err != nil {
 		t.Error(err)
 	}
 	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := rds.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
+	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
 		t.Error(err)
 	}
 	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
 		t.Error("Should not be in cache")
 	}
-	if err := rds.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); !hasIt {
