@@ -20,7 +20,7 @@
 
  "cdrc": [
  	{
-		"id": "*default",
+		"id": "part1",
 		"enabled": true,
 		"cdr_format": "partial_csv",
 		"cdr_in_dir": "/tmp/cdrctests/partcsv1/in",	// absolute path towards the directory where the CDRs are stored

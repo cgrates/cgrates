@@ -46,8 +46,8 @@ var partCsvFileContent1 = `4986517174963,004986517174964,DE-National,04.07.2016 
 var partCsvFileContent2 = `4986517174963,004986517174964,DE-National,04.07.2016 19:00:00,04.07.2016 18:58:55,0,15,Offpeak,0.003360,498651,partial`
 var partCsvFileContent3 = `4986517174964,004986517174960,DE-National,04.07.2016 19:05:55,04.07.2016 19:05:55,0,23,Offpeak,0.003360,498651,partial`
 
-var eCacheDumpFile1 = `4986517174963_004986517174964_04.07.2016 18:58:55,1467651600,*rated,086517174963,+4986517174964,2016-07-04T18:58:55+02:00,2016-07-04T18:58:55+02:00,15,-1.00000
-4986517174963_004986517174964_04.07.2016 18:58:55,1467651535,*rated,086517174963,+4986517174964,2016-07-04T18:58:55+02:00,2016-07-04T18:58:55+02:00,65,-1.00000
+var eCacheDumpFile1 = `4986517174963_004986517174964_04.07.2016 18:58:55,1467651535,*rated,086517174963,+4986517174964,2016-07-04T18:58:55+02:00,2016-07-04T18:58:55+02:00,65,-1
+4986517174963_004986517174964_04.07.2016 18:58:55,1467651600,*rated,086517174963,+4986517174964,2016-07-04T18:58:55+02:00,2016-07-04T18:58:55+02:00,15,-1
 `
 
 func TestPartcsvITInitConfig(t *testing.T) {
@@ -149,6 +149,9 @@ func TestPartcsvITProcessedFiles(t *testing.T) {
 		t.Errorf("Expecting: %q, received: %q", partCsvFileContent2, string(outContent2))
 	}
 	filesInDir, _ := ioutil.ReadDir(partcsvCDRCDirOut1)
+	if len(filesInDir) == 0 {
+		t.Errorf("No files found in folder: <%s>", partcsvCDRCDirOut1)
+	}
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		if strings.HasPrefix(file.Name(), "4986517174963_004986517174964") {

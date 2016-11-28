@@ -154,9 +154,6 @@ func TestRDSitMatchReqFilterIndex(t *testing.T) {
 }
 
 func TestRDSitCacheDataFromDB(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
 	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
 	if err := rds.SetDestination(dst, ""); err != nil {
 		t.Error(err)
