@@ -35,6 +35,8 @@ import (
 	"github.com/fiorix/go-diameter/diam/dict"
 )
 
+var err error
+
 func TestDisectUsageForCCR(t *testing.T) {
 	if reqType, reqNr, reqCCTime, usedCCTime := disectUsageForCCR(time.Duration(0)*time.Second, time.Duration(300)*time.Second, false); reqType != 1 || reqNr != 0 || reqCCTime != 300 || usedCCTime != 0 {
 		t.Error(reqType, reqNr, reqCCTime, usedCCTime)

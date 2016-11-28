@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -49,9 +51,7 @@ var eCacheDumpFile1 = `4986517174963_004986517174964_04.07.2016 18:58:55,1467651
 `
 
 func TestPartcsvITInitConfig(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	var err error
 	partpartcsvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrc_partcsv")
 	if partcsvCfg, err = config.NewCGRConfigFromFolder(partpartcsvCfgPath); err != nil {
@@ -61,18 +61,14 @@ func TestPartcsvITInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func TestPartcsvITInitCdrDb(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	if err := engine.InitStorDb(partcsvCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestPartcsvITCreateCdrDirs(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	for path, cdrcProfiles := range partcsvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
 			if path == "/tmp/cdrctests/partcsv1/in" {
@@ -93,9 +89,7 @@ func TestPartcsvITCreateCdrDirs(t *testing.T) {
 }
 
 func TestPartcsvITStartEngine(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	if _, err := engine.StopStartEngine(partpartcsvCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -103,9 +97,7 @@ func TestPartcsvITStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestPartcsvITRpcConn(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	var err error
 	partcsvRPC, err = jsonrpc.Dial("tcp", partcsvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -115,9 +107,7 @@ func TestPartcsvITRpcConn(t *testing.T) {
 
 // The default scenario, out of cdrc defined in .cfg file
 func TestPartcsvITHandleCdr1File(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent1), 0644); err != nil {
@@ -130,9 +120,7 @@ func TestPartcsvITHandleCdr1File(t *testing.T) {
 
 // Scenario out of first .xml config
 func TestPartcsvITHandleCdr2File(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent2), 0644); err != nil {
@@ -145,9 +133,7 @@ func TestPartcsvITHandleCdr2File(t *testing.T) {
 
 // Scenario out of first .xml config
 func TestPartcsvITHandleCdr3File(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	fileName := "file3.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent3), 0644); err != nil {
@@ -159,9 +145,7 @@ func TestPartcsvITHandleCdr3File(t *testing.T) {
 }
 
 func TestPartcsvITProcessedFiles(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	time.Sleep(time.Duration(3 * time.Second))
 	if outContent1, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, "file1.csv")); err != nil {
 		t.Error(err)
@@ -194,9 +178,7 @@ func TestPartcsvITProcessedFiles(t *testing.T) {
 }
 
 func TestPartcsvITAnalyseCDRs(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	var reply []*engine.ExternalCDR
 	if err := partcsvRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -217,9 +199,7 @@ func TestPartcsvITAnalyseCDRs(t *testing.T) {
 }
 
 func TestPartcsvITKillEngine(t *testing.T) {
-	if !*testIT {
-		return
-	}
+
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}

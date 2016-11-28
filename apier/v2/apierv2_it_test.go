@@ -33,7 +33,6 @@ import (
 )
 
 var (
-	testIT    = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
 )

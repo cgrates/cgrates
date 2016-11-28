@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var err error
 var (
 	//referenceDate = time.Date(2013, 7, 10, 10, 30, 0, 0, time.Local)
 	//referenceDate = time.Date(2013, 12, 31, 23, 59, 59, 0, time.Local)

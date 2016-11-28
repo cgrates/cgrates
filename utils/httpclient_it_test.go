@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -19,7 +21,6 @@ package utils
 
 import (
 	"encoding/json"
-	"flag"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -27,17 +28,13 @@ import (
 	"time"
 )
 
-var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
-
 type TestContent struct {
 	Var1 string
 	Var2 string
 }
 
 func TestHttpJsonPoster(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
 	filePath := "/tmp/cgr_test_http_poster.json"
@@ -55,9 +52,7 @@ func TestHttpJsonPoster(t *testing.T) {
 }
 
 func TestHttpBytesPoster(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+
 	content := []byte(`Test
 		Test2
 		`)

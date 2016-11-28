@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -38,7 +40,6 @@ import (
 	"github.com/fiorix/go-diameter/diam/dict"
 )
 
-var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var interations = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
@@ -48,13 +49,11 @@ var daCfgPath string
 var daCfg *config.CGRConfig
 var apierRpc *rpc.Client
 var dmtClient *DiameterClient
-var err error
+
 var rplyTimeout time.Duration
 
 func TestDmtAgentInitCfg(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	daCfgPath = path.Join(*dataDir, "conf", "samples", "dmtagent")
 	// Init config first
 	var err error
@@ -69,9 +68,7 @@ func TestDmtAgentInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestDmtAgentResetDataDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := engine.InitDataDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -79,9 +76,7 @@ func TestDmtAgentResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestDmtAgentResetStorDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := engine.InitStorDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -89,18 +84,14 @@ func TestDmtAgentResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestDmtAgentStartEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cfgDefaults, _ := config.NewDefaultCGRConfig()
 	loadDictionaries(cfgDefaults.DiameterAgentCfg().DictionariesDir, "UNIT_TEST")
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
@@ -160,9 +151,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 }
 
 func TestDmtAgentPopulateCCTotalOctets(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	daRP := &config.DARequestProcessor{CCAFields: []*config.CfgCdrField{
 		&config.CfgCdrField{Tag: "GrantedUnit", FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(^$)", utils.INFIELD_SEP),
 			FieldId: "Multiple-Services-Credit-Control>Granted-Service-Unit>CC-Time", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("CGRMaxUsage", utils.INFIELD_SEP), Mandatory: true},
@@ -193,9 +182,7 @@ func TestDmtAgentPopulateCCTotalOctets(t *testing.T) {
 
 // Connect rpc client to rater
 func TestDmtAgentApierRpcConn(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var err error
 	apierRpc, err = jsonrpc.Dial("tcp", daCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -205,9 +192,7 @@ func TestDmtAgentApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestDmtAgentTPFromFolder(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
 	if err := apierRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
@@ -217,9 +202,7 @@ func TestDmtAgentTPFromFolder(t *testing.T) {
 }
 
 func TestConnectDiameterClient(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	dmtClient, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm,
 		daCfg.DiameterAgentCfg().VendorId, daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DictionariesDir)
 	if err != nil {
@@ -229,9 +212,7 @@ func TestConnectDiameterClient(t *testing.T) {
 
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:47:26Z"'
 func TestDmtAgentSendCCRInit(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
 		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
@@ -273,9 +254,7 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:52:26Z"'
 func TestDmtAgentSendCCRUpdate(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
 		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
@@ -312,9 +291,7 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:57:26Z"'
 func TestDmtAgentSendCCRUpdate2(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
 		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
@@ -350,9 +327,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 }
 
 func TestDmtAgentSendCCRTerminate(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
 		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
@@ -391,9 +366,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 }
 
 func TestDmtAgentSendCCRSMS(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testccr2"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -484,9 +457,7 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 }
 
 func TestDmtAgentSendCCRSMSWrongAccount(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testccr3"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -553,9 +524,7 @@ func TestDmtAgentSendCCRSMSWrongAccount(t *testing.T) {
 
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:47:26Z"'
 func TestDmtAgentSendCCRInitWrongAccount(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr4", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
 		OriginID: "testccr4", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "non_existent", Subject: "non_existent", Destination: "1004", Supplier: "SUPPL1",
@@ -586,9 +555,7 @@ func TestDmtAgentSendCCRInitWrongAccount(t *testing.T) {
 }
 
 func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testccr5"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -661,9 +628,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 }
 
 func TestDmtAgentCdrs(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, ToRs: []string{utils.VOICE}}
 	if err := apierRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
@@ -681,9 +646,7 @@ func TestDmtAgentCdrs(t *testing.T) {
 }
 
 func TestDmtAgentSendDataGrpInit(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testdatagrp"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -749,9 +712,7 @@ func TestDmtAgentSendDataGrpInit(t *testing.T) {
 }
 
 func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testdatagrp"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -843,9 +804,7 @@ func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
 }
 
 func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testdatagrp"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -923,9 +882,7 @@ func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
 }
 
 func TestDmtAgentSendDataGrpCDRs(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{CGRIDs: []string{utils.Sha1("testdatagrp")}}
 	if err := apierRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
@@ -937,9 +894,7 @@ func TestDmtAgentSendDataGrpCDRs(t *testing.T) {
 
 /*
 func TestDmtAgentDryRun1(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -971,9 +926,7 @@ func TestDmtAgentDryRun1(t *testing.T) {
 */
 
 func TestDmtAgentDryRun1(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -1049,9 +1002,7 @@ func TestDmtAgentDryRun1(t *testing.T) {
 
 /*
 func TestDmtAgentLoadCER(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	m := diam.NewRequest(diam.CapabilitiesExchange, 4, dict.Default)
 	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
 	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
@@ -1073,9 +1024,7 @@ func TestDmtAgentLoadCER(t *testing.T) {
 */
 
 func TestDmtAgentStopEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
