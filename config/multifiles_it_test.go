@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -23,14 +25,11 @@ import (
 	"testing"
 )
 
-var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, disabled by default.") // This flag will be passed here via "go test -local" args
-
+var testIT  = flag.Bool("integration", false, "Perform the tests only on local test environment, not by default.")
 var mfCgrCfg *CGRConfig
 
 func TestMfInitConfig(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+
 	var err error
 	if mfCgrCfg, err = NewCGRConfigFromFolder("/usr/share/cgrates/conf/samples/multifiles"); err != nil {
 		t.Fatal("Got config error: ", err.Error())
@@ -38,9 +37,7 @@ func TestMfInitConfig(t *testing.T) {
 }
 
 func TestMfGeneralItems(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+
 	if mfCgrCfg.DefaultReqType != utils.META_PSEUDOPREPAID { // Twice reconfigured
 		t.Error("DefaultReqType: ", mfCgrCfg.DefaultReqType)
 	}
@@ -50,9 +47,7 @@ func TestMfGeneralItems(t *testing.T) {
 }
 
 func TestMfCdreDefaultInstance(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+
 	for _, prflName := range []string{"*default", "export1"} {
 		if _, hasIt := mfCgrCfg.CdreProfiles[prflName]; !hasIt {
 			t.Error("Cdre does not contain profile ", prflName)
@@ -77,9 +72,7 @@ func TestMfCdreDefaultInstance(t *testing.T) {
 }
 
 func TestMfCdreExport1Instance(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+
 	prfl := "export1"
 	if mfCgrCfg.CdreProfiles[prfl].CdrFormat != "csv" {
 		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CdrFormat)

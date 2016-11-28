@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -55,10 +57,8 @@ var part1 = `BYE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4ccb@0:0:0:0:0:0:
 var part2 = `INVITE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4ccb@0:0:0:0:0:0:0:0|200|OK|1436454647|*postpaid|1002|1003||1877:893549742
 INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475`
 
-func TestFlatstoreLclInitCfg(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestFlatstoreitInitCfg(t *testing.T) {
+
 	var err error
 	flatstoreCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcflatstore")
 	if flatstoreCfg, err = config.NewCGRConfigFromFolder(flatstoreCfgPath); err != nil {
@@ -67,20 +67,16 @@ func TestFlatstoreLclInitCfg(t *testing.T) {
 }
 
 // InitDb so we can rely on count
-func TestFlatstoreLclInitCdrDb(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestFlatstoreitInitCdrDb(t *testing.T) {
+
 	if err := engine.InitStorDb(flatstoreCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Creates cdr files and moves them into processing folder
-func TestFlatstoreLclCreateCdrFiles(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestFlatstoreitCreateCdrFiles(t *testing.T) {
+
 	if flatstoreCfg == nil {
 		t.Fatal("Empty default cdrc configuration")
 	}
@@ -103,20 +99,16 @@ func TestFlatstoreLclCreateCdrFiles(t *testing.T) {
 	}
 }
 
-func TestFlatstoreLclStartEngine(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestFlatstoreitStartEngine(t *testing.T) {
+
 	if _, err := engine.StopStartEngine(flatstoreCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestFlatstoreLclRpcConn(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestFlatstoreitRpcConn(t *testing.T) {
+
 	var err error
 	flatstoreRpc, err = jsonrpc.Dial("tcp", flatstoreCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -124,10 +116,8 @@ func TestFlatstoreLclRpcConn(t *testing.T) {
 	}
 }
 
-func TestFlatstoreLclProcessFiles(t *testing.T) {
-	if !*testLocal {
-		return
-	}
+func TestFlatstoreitProcessFiles(t *testing.T) {
+
 	if err := ioutil.WriteFile(path.Join("/tmp", "acc_1.log"), []byte(fullSuccessfull), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
