@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -29,9 +31,7 @@ import (
 )
 
 func TestSMGDataInitCfg(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	daCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
 	// Init config first
 	var err error
@@ -45,9 +45,7 @@ func TestSMGDataInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func TestSMGDataResetDataDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := engine.InitDataDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -55,9 +53,7 @@ func TestSMGDataResetDataDb(t *testing.T) {
 
 // Wipe out the cdr database
 func TestSMGDataResetStorDb(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if err := engine.InitStorDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -65,9 +61,7 @@ func TestSMGDataResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestSMGDataStartEngine(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	if _, err := engine.StopStartEngine(daCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -75,9 +69,7 @@ func TestSMGDataStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGDataApierRpcConn(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var err error
 	smgRPC, err = jsonrpc.Dial("tcp", daCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -87,9 +79,7 @@ func TestSMGDataApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestSMGDataTPFromFolder(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
 	var loadInst utils.LoadInstance
 	if err := smgRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
@@ -99,9 +89,7 @@ func TestSMGDataTPFromFolder(t *testing.T) {
 }
 
 func TestSMGDataLastUsedData(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
 	eAcntVal := 50000000000.000000
@@ -194,9 +182,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 }
 
 func TestSMGDataLastUsedMultipleData(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
 	eAcntVal := 49999979520.000000
@@ -392,9 +378,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 }
 
 func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1011"}
 	eAcntVal := 50000.0
@@ -436,9 +420,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 }
 
 func TestSMGDataTTLExpired(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
 	eAcntVal := 49999897600.000000
@@ -485,9 +467,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 }
 
 func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
 	eAcntVal := 49998842880.000000
@@ -571,9 +551,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 }
 
 func TestSMGDataMultipleDataNoUsage(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
 	eAcntVal := 49997767680.000000
@@ -769,9 +747,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 }
 
 func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
+
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
 	eAcntVal := 49997767680.000000
