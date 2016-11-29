@@ -2090,5 +2090,8 @@
     <avp name="3GPP-SGSN-IPv6-Address" code="15" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
+    <avp name="3GPP-GPRS-Negotiated-QoS-profile" code="5" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+      <data type="UTF8String" />
+    </avp>
   </application>
 </diameter>
