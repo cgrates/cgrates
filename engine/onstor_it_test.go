@@ -47,6 +47,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheDestinations,
 	testOnStorITCacheReverseDestinations,
 	testOnStorITCacheRatingPlan,
+	testOnStorITCacheRatingProfile,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -307,5 +308,31 @@ func testOnStorITCacheRatingPlan(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcvRp := itm.(*RatingPlan); !reflect.DeepEqual(rp, rcvRp) {
 		t.Error("Wrong item in the cache")
+	}
+}
+
+func testOnStorITCacheRatingProfile(t *testing.T) {
+	rpf := &RatingProfile{
+		Id: "*out:test:0:trp",
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
+			RatingPlanId:    "TDRT",
+			FallbackKeys:    []string{"*out:test:0:danb", "*out:test:0:rif"},
+			CdrStatQueueIds: []string{},
+		}},
+	}
+	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.RATING_PROFILE_PREFIX + rpf.Id); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.RATING_PROFILE_PREFIX + rpf.Id); !hasIt {
+		t.Error("Did not cache")
+	} else if rcvRp := itm.(*RatingProfile); !reflect.DeepEqual(rpf.Id, rcvRp.Id) { // fixme
+		t.Error("Wrong item in the cache", rcvRp)
 	}
 }

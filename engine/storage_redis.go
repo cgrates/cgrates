@@ -275,7 +275,8 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
 func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
 	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
-		utils.RATING_PLAN_PREFIX}, prfx) {
+		utils.RATING_PLAN_PREFIX,
+		utils.RATING_PROFILE_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -302,6 +303,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetReverseDestination(dataID, false, utils.NonTransactional)
 		case utils.RATING_PLAN_PREFIX:
 			_, err = rs.GetRatingPlan(dataID, false, utils.NonTransactional)
+		case utils.RATING_PROFILE_PREFIX:
+			_, err = rs.GetRatingProfile(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -335,26 +338,34 @@ func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 	key = utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*RatingPlan), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*RatingPlan), nil
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		b := bytes.NewBuffer(values)
-		r, err := zlib.NewReader(b)
-		if err != nil {
-			return nil, err
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
 		}
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			return nil, err
-		}
-		r.Close()
-		rp = new(RatingPlan)
-		err = rs.ms.Unmarshal(out, rp)
+		return nil, err
+	}
+	b := bytes.NewBuffer(values)
+	r, err := zlib.NewReader(b)
+	if err != nil {
+		return nil, err
+	}
+	out, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	r.Close()
+	rp = new(RatingPlan)
+	err = rs.ms.Unmarshal(out, rp)
+	if err != nil {
+		return nil, err
 	}
 	cache.Set(key, rp, cacheCommit(transactionID), transactionID)
 	return
@@ -377,19 +388,24 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan, transactionID string) (err
 
 func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool, transactionID string) (rpf *RatingProfile, err error) {
 	key = utils.RATING_PROFILE_PREFIX + key
-
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*RatingProfile), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*RatingProfile), nil
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		rpf = new(RatingProfile)
-		err = rs.ms.Unmarshal(values, rpf)
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &rpf); err != nil {
+		return
 	}
 	cache.Set(key, rpf, cacheCommit(transactionID), transactionID)
 	return
@@ -397,12 +413,18 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool, transaction
 
 func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile, transactionID string) (err error) {
 	result, err := rs.ms.Marshal(rpf)
-	err = rs.Cmd("SET", utils.RATING_PROFILE_PREFIX+rpf.Id, result).Err
-	if err == nil && historyScribe != nil {
+	if err != nil {
+		return err
+	}
+	key := utils.RATING_PROFILE_PREFIX + rpf.Id
+	if err = rs.Cmd("SET", key, result).Err; err != nil {
+		return
+	}
+	if historyScribe != nil {
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
-	cache.RemKey(utils.RATING_PROFILE_PREFIX+rpf.Id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -460,10 +482,10 @@ func (rs *RedisStorage) GetDestination(key string, skipCache bool, transactionID
 	key = utils.DESTINATION_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*Destination), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*Destination), nil
 		}
 	}
 	var values []byte
@@ -472,23 +494,21 @@ func (rs *RedisStorage) GetDestination(key string, skipCache bool, transactionID
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
+		return
+	}
+	b := bytes.NewBuffer(values)
+	r, err := zlib.NewReader(b)
+	if err != nil {
 		return nil, err
-	} else {
-		b := bytes.NewBuffer(values)
-		r, err := zlib.NewReader(b)
-		if err != nil {
-			return nil, err
-		}
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			return nil, err
-		}
-		r.Close()
-		dest = new(Destination)
-		err = rs.ms.Unmarshal(out, dest)
-		if err != nil {
-			return nil, err
-		}
+	}
+	out, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	r.Close()
+	err = rs.ms.Unmarshal(out, &dest)
+	if err != nil {
+		return nil, err
 	}
 	cache.Set(key, dest, cacheCommit(transactionID), transactionID)
 	return
@@ -504,8 +524,10 @@ func (rs *RedisStorage) SetDestination(dest *Destination, transactionID string) 
 	w.Write(result)
 	w.Close()
 	key := utils.DESTINATION_PREFIX + dest.Id
-	err = rs.Cmd("SET", key, b.Bytes()).Err
-	if err == nil && historyScribe != nil {
+	if err = rs.Cmd("SET", key, b.Bytes()).Err; err != nil {
+		return err
+	}
+	if historyScribe != nil {
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
@@ -513,28 +535,31 @@ func (rs *RedisStorage) SetDestination(dest *Destination, transactionID string) 
 	return
 }
 
-func (rs *RedisStorage) GetReverseDestination(prefix string, skipCache bool, transactionID string) (ids []string, err error) {
-	prefix = utils.REVERSE_DESTINATION_PREFIX + prefix
+func (rs *RedisStorage) GetReverseDestination(key string, skipCache bool, transactionID string) (ids []string, err error) {
+	key = utils.REVERSE_DESTINATION_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(prefix); ok {
-			if x != nil {
-				return x.([]string), nil
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.([]string), nil
 		}
 	}
-	if ids, err = rs.Cmd("SMEMBERS", prefix).List(); len(ids) > 0 && err == nil {
-		cache.Set(prefix, ids, cacheCommit(transactionID), transactionID)
-		return ids, nil
+	if ids, err = rs.Cmd("SMEMBERS", key).List(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-	return nil, utils.ErrNotFound
+	cache.Set(key, ids, cacheCommit(transactionID), transactionID)
+	return
 }
 
 func (rs *RedisStorage) SetReverseDestination(dest *Destination, transactionID string) (err error) {
 	for _, p := range dest.Prefixes {
 		key := utils.REVERSE_DESTINATION_PREFIX + p
-		err = rs.Cmd("SADD", key, dest.Id).Err
-		if err != nil {
+		if err = rs.Cmd("SADD", key, dest.Id).Err; err != nil {
 			break
 		}
 		cache.RemKey(key, cacheCommit(transactionID), transactionID)
