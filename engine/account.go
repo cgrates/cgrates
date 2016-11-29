@@ -416,6 +416,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				if debitErr != nil {
 					return nil, debitErr
 				}
+
 				//utils.Logger.Info(fmt.Sprintf("CD AFTER UNIT: %+v", cd))
 				if partCC != nil {
 					//log.Printf("partCC: %+v", partCC.Timespans[0])
@@ -511,9 +512,13 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 	if leftCC.Cost > 0 && goNegative {
 		initialLength := len(cc.Timespans)
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
+
+		var debitedConnectFeeBalance Balance
+		var ok bool
+
 		if initialLength == 0 {
 			// this is the first add, debit the connect fee
-			ub.DebitConnectionFee(cc, usefulMoneyBalances, count, true)
+			ok, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, usefulMoneyBalances, count, true)
 		}
 		//log.Printf("Left CC: %+v ", leftCC)
 		// get the default money balanance
@@ -526,7 +531,33 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
 			}
-			for _, increment := range ts.Increments {
+
+			if ts.RateInterval.Rating.ConnectFee > 0 && ok {
+
+				inc := &Increment{
+					Duration: 0,
+					Cost:     ts.RateInterval.Rating.ConnectFee,
+					BalanceInfo: &DebitInfo{
+						Monetary: &MonetaryInfo{
+							UUID:  debitedConnectFeeBalance.Uuid,
+							ID:    debitedConnectFeeBalance.ID,
+							Value: debitedConnectFeeBalance.Value,
+						},
+						AccountID: ub.ID,
+					},
+				}
+
+				incs := []*Increment{inc}
+				ts.Increments = append(incs, ts.Increments...)
+			}
+
+			for incIndex, increment := range ts.Increments {
+
+				if incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && ok {
+					// go to nextincrement
+					continue
+				}
+
 				cost := increment.Cost
 				defaultBalance := ub.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
@@ -824,6 +855,8 @@ func (acc *Account) Clone() *Account {
 }
 
 func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool, block bool) (bool, Balance) {
+	var debitedBalance Balance
+
 	if cc.deductConnectFee {
 		connectFee := cc.GetConnectFee()
 		//log.Print("CONNECT FEE: %f", connectFee)
@@ -836,10 +869,11 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 					acc.countUnits(connectFee, utils.MONETARY, cc, b)
 				}
 				connectFeePaid = true
+				debitedBalance = *b
 				break
 			}
 			if b.Blocker && block { // stop here
-				return false
+				return false, debitedBalance
 			}
 		}
 		// debit connect fee
@@ -848,13 +882,14 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 			// there are no money for the connect fee; go negative
 			b := acc.GetDefaultMoneyBalance()
 			b.SubstractValue(connectFee)
+			debitedBalance = *b
 			// the conect fee is not refundable!
 			if count {
 				acc.countUnits(connectFee, utils.MONETARY, cc, b)
 			}
 		}
 	}
-	return true
+	return true, debitedBalance
 }
 
 func (acc *Account) matchActionFilter(condition string) (bool, error) {

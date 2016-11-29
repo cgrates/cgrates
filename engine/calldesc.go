@@ -370,6 +370,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		}
 		//log.Printf("After SplitByRatingPlan: %+v", utils.ToJSON(timespans))
 		// split on days
+
 		for i := 0; i < len(timespans); i++ {
 			rp := timespans[i].ratingInfo
 			newTs := timespans[i].SplitByDay()
@@ -386,6 +387,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	}
 	//log.Printf("After SplitByDay: %+v", utils.ToJSON(timespans))
 	// split on rate intervals
+
 	for i := 0; i < len(timespans); i++ {
 		//log.Printf("==============%v==================", i)
 		//log.Printf("TS: %+v", timespans[i])
@@ -501,6 +503,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 }
 
 func (cd *CallDescriptor) getCost() (*CallCost, error) {
+
 	// check for 0 duration
 	if cd.GetDuration() == 0 {
 		cc := cd.CreateCallCost()
