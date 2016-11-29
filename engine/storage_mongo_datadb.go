@@ -473,7 +473,9 @@ func (ms *MongoStorage) PreloadCacheForPrefix(prefix string) error {
 // prfx represents the cache prefix, ids should be nil if all available data should be loaded
 // mustBeCached specifies that data needs to be cached in order to be retrieved from db
 func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
-	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX}, prfx) {
+	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
+		utils.RATING_PLAN_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -495,12 +497,17 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		}
 		switch prfx {
 		case utils.DESTINATION_PREFIX:
-			if _, err = ms.GetDestination(dataID, false, utils.NonTransactional); err != nil {
-				return utils.NewCGRError(utils.REDIS,
-					utils.ServerErrorCaps,
-					err.Error(),
-					fmt.Sprintf("redis error <%s> querying GetDestination for prefix: <%s>, dataID: <%s>", prfx, dataID))
-			}
+			_, err = ms.GetDestination(dataID, false, utils.NonTransactional)
+		case utils.REVERSE_DESTINATION_PREFIX:
+			_, err = ms.GetReverseDestination(dataID, false, utils.NonTransactional)
+		case utils.RATING_PLAN_PREFIX:
+			_, err = ms.GetRatingPlan(dataID, false, utils.NonTransactional)
+		}
+		if err != nil {
+			return utils.NewCGRError(utils.REDIS,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error <%s> querying mongo for category: <%s>, dataID: <%s>", prfx, dataID))
 		}
 	}
 	return
@@ -657,7 +664,7 @@ func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan, transactionID string) erro
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	cache.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
+	//cache.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
 	return err
 }
 

@@ -273,7 +273,9 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
 // prfx represents the cache prefix, ids should be nil if all available data should be loaded
 // mustBeCached specifies that data needs to be cached in order to be retrieved from db
 func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
-	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX}, prfx) {
+	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
+		utils.RATING_PLAN_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -295,12 +297,17 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		}
 		switch prfx {
 		case utils.DESTINATION_PREFIX:
-			if _, err = rs.GetDestination(dataID, false, utils.NonTransactional); err != nil {
-				return utils.NewCGRError(utils.REDIS,
-					utils.ServerErrorCaps,
-					err.Error(),
-					fmt.Sprintf("redis error <%s> querying GetDestination for prefix: <%s>, dataID: <%s>", prfx, dataID))
-			}
+			_, err = rs.GetDestination(dataID, false, utils.NonTransactional)
+		case utils.REVERSE_DESTINATION_PREFIX:
+			_, err = rs.GetReverseDestination(dataID, false, utils.NonTransactional)
+		case utils.RATING_PLAN_PREFIX:
+			_, err = rs.GetRatingPlan(dataID, false, utils.NonTransactional)
+		}
+		if err != nil {
+			return utils.NewCGRError(utils.REDIS,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error <%s> querying redis for category: <%s>, dataID: <%s>", prfx, dataID))
 		}
 	}
 	return
@@ -364,7 +371,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan, transactionID string) (err
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	cache.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
+	//cache.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 

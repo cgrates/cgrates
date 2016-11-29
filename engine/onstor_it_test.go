@@ -24,6 +24,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
@@ -43,7 +44,9 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITSetReqFilterIndexes,
 	testOnStorITGetReqFilterIndexes,
 	testOnStorITMatchReqFilterIndex,
-	testOnStorITCacheDataFromDB,
+	testOnStorITCacheDestinations,
+	testOnStorITCacheReverseDestinations,
+	testOnStorITCacheRatingPlan,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -82,8 +85,9 @@ func TestOnStorITMongo(t *testing.T) {
 
 func testOnStorITFlush(t *testing.T) {
 	if err := onStor.Flush(""); err != nil {
-		t.Error("Failed to Flush redis database", err.Error())
+		t.Error(err)
 	}
+	cache.Flush()
 }
 
 func testOnStorITSetGetDerivedCharges(t *testing.T) {
@@ -204,9 +208,12 @@ func testOnStorITMatchReqFilterIndex(t *testing.T) {
 	}
 }
 
-func testOnStorITCacheDataFromDB(t *testing.T) {
+func testOnStorITCacheDestinations(t *testing.T) {
+	if err := onStor.CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
+		t.Error(err)
+	}
 	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
-	if err := onStor.SetDestination(dst, ""); err != nil {
+	if err := onStor.SetDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
@@ -224,6 +231,81 @@ func testOnStorITCacheDataFromDB(t *testing.T) {
 	if itm, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); !hasIt {
 		t.Error("Did not cache")
 	} else if !reflect.DeepEqual(dst, itm.(*Destination)) {
+		t.Error("Wrong item in the cache")
+	}
+}
+
+func testOnStorITCacheReverseDestinations(t *testing.T) {
+	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
+	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	for _, prfx := range dst.Prefixes {
+		if _, hasIt := cache.Get(utils.REVERSE_DESTINATION_PREFIX + dst.Id); hasIt {
+			t.Errorf("Prefix: %s already in cache", prfx)
+		}
+	}
+	if err := onStor.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dst.Prefixes, false); err != nil {
+		t.Error(err)
+	}
+	for _, prfx := range dst.Prefixes {
+		if itm, hasIt := cache.Get(utils.REVERSE_DESTINATION_PREFIX + prfx); !hasIt {
+			t.Error("Did not cache")
+		} else if !reflect.DeepEqual([]string{dst.Id}, itm.([]string)) {
+			t.Error("Wrong item in the cache")
+		}
+	}
+}
+
+func testOnStorITCacheRatingPlan(t *testing.T) {
+	rp := &RatingPlan{
+		Id: "TEST_RP_CACHE",
+		Timings: map[string]*RITiming{
+			"59a981b9": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"ebefae11": &RIRate{
+				ConnectFee: 0,
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.2,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"GERMANY": []*RPRate{
+				&RPRate{
+					Timing: "59a981b9",
+					Rating: "ebefae11",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.RATING_PLAN_PREFIX + rp.Id); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.RATING_PLAN_PREFIX + rp.Id); !hasIt {
+		t.Error("Did not cache")
+	} else if rcvRp := itm.(*RatingPlan); !reflect.DeepEqual(rp, rcvRp) {
 		t.Error("Wrong item in the cache")
 	}
 }
