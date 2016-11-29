@@ -823,7 +823,7 @@ func (acc *Account) Clone() *Account {
 	return newAcc
 }
 
-func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool, block bool) bool {
+func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool, block bool) (bool, Balance) {
 	if cc.deductConnectFee {
 		connectFee := cc.GetConnectFee()
 		//log.Print("CONNECT FEE: %f", connectFee)
