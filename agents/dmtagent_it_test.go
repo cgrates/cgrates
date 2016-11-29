@@ -21,8 +21,6 @@ package agents
 
 import (
 	"flag"
-	//"net"
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -952,8 +950,6 @@ func TestDmtAgentDryRun1(t *testing.T) {
 	if _, err := ccr.NewAVP("Framed-IP-Address", avp.Mbit, 0, datatype.UTF8String("10.228.16.4")); err != nil {
 		t.Error(err)
 	}
-	tStart := time.Now()
-	maxLoops := 100000
 	for i := 0; i < *interations; i++ {
 		if err := dmtClient.SendMessage(ccr); err != nil {
 			t.Error(err)
@@ -972,8 +968,6 @@ func TestDmtAgentDryRun1(t *testing.T) {
 			}
 		*/
 	}
-	totalDur := time.Now().Sub(tStart)
-	fmt.Printf("Total duration: %v resulting %f ops per second\n", totalDur, float64(maxLoops)/totalDur.Seconds())
 }
 
 /*
