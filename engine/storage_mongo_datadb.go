@@ -95,7 +95,8 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 		return nil, err
 	}
 	session.SetMode(mgo.Strong, true)
-	ms = &MongoStorage{db: db, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(), cacheCfg: cacheCfg, loadHistorySize: loadHistorySize, cdrsIndexes: cdrsIndexes}
+	ms = &MongoStorage{db: db, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(),
+		cacheCfg: cacheCfg, loadHistorySize: loadHistorySize, cdrsIndexes: cdrsIndexes}
 	if cNames, err := session.DB(ms.db).CollectionNames(); err != nil {
 		return nil, err
 	} else if len(cNames) == 0 { // create indexes only if database is empty
@@ -1705,11 +1706,12 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 	if len(fldValSplt) != 2 {
 		return nil, fmt.Errorf("malformed key in query: %s", fldValSplt)
 	}
-	if x, ok := cache.Get(dbKey + fieldValKey); ok { // Attempt to find in cache first
-		if x != nil {
-			return x.(utils.StringMap), nil
+	cacheKey := dbKey + fieldValKey
+	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
+		if x == nil {
+			return nil, utils.ErrNotFound
 		}
-		return nil, utils.ErrNotFound
+		return x.(utils.StringMap), nil
 	}
 	session, col := ms.conn(colRFI)
 	defer session.Close()
@@ -1723,11 +1725,11 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 		bson.M{fldKey: true}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
-			cache.Set(dbKey+fieldValKey, nil, true, utils.NonTransactional)
+			cache.Set(cacheKey, nil, true, utils.NonTransactional)
 		}
 		return nil, err
 	}
 	itemIDs = result.Value[fldValSplt[0]][fldValSplt[1]]
-	cache.Set(dbKey+fieldValKey, itemIDs, true, utils.NonTransactional)
+	cache.Set(cacheKey, itemIDs, true, utils.NonTransactional)
 	return
 }

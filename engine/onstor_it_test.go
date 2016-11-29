@@ -84,17 +84,20 @@ func testOnStorITFlush(t *testing.T) {
 	if err := onStor.Flush(""); err != nil {
 		t.Error("Failed to Flush redis database", err.Error())
 	}
-	onStor.PreloadRatingCache()
 }
 
 func testOnStorITSetGetDerivedCharges(t *testing.T) {
 	keyCharger1 := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
-	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{
-		&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-	}}
+	if _, err := onStor.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err == nil {
+		t.Error("DC exists")
+	}
+	charger1 := &utils.DerivedChargers{DestinationIDs: make(utils.StringMap),
+		Chargers: []*utils.DerivedCharger{
+			&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+				AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+				AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+		}}
 	if err := onStor.SetDerivedChargers(keyCharger1, charger1, utils.NonTransactional); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
@@ -102,6 +105,11 @@ func testOnStorITSetGetDerivedCharges(t *testing.T) {
 	if rcvCharger, err := onStor.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err != nil {
 		t.Error("Error when retrieving DerivedCHarger", err.Error())
 	} else if !reflect.DeepEqual(rcvCharger, charger1) {
+		for i, eChrg := range charger1.Chargers {
+			if !reflect.DeepEqual(eChrg, rcvCharger.Chargers[i]) {
+				t.Logf("Expecting: %+v, received: %+v", eChrg, rcvCharger.Chargers[i])
+			}
+		}
 		t.Errorf("Expecting %v, received: %v", charger1, rcvCharger)
 	}
 	// Retrieve from cache

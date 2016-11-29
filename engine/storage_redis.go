@@ -1297,23 +1297,24 @@ func (rs *RedisStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map
 }
 
 func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
-	if x, ok := cache.Get(dbKey + fieldValKey); ok { // Attempt to find in cache first
-		if x != nil {
-			return x.(utils.StringMap), nil
+	cacheKey := dbKey + fieldValKey
+	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
+		if x == nil {
+			return nil, utils.ErrNotFound
 		}
-		return nil, utils.ErrNotFound
+		return x.(utils.StringMap), nil
 	}
 	// Not found in cache, check in DB
 	fldValBytes, err := rs.Cmd("HGET", dbKey, fieldValKey).Bytes()
 	if err != nil {
-		if err.Error() != "wrong type" {
-			return nil, err
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(cacheKey, nil, true, utils.NonTransactional)
+			err = utils.ErrNotFound
 		}
-		// Case when str is not found
-		err = utils.ErrNotFound
+		return nil, err
 	} else if err = rs.ms.Unmarshal(fldValBytes, &itemIDs); err != nil {
 		return
 	}
-	cache.Set(dbKey+fieldValKey, itemIDs, true, utils.NonTransactional)
+	cache.Set(cacheKey, itemIDs, true, utils.NonTransactional)
 	return
 }
