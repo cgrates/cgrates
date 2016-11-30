@@ -141,6 +141,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
+
 	if refundDuration == 0 { // Nothing to refund
 		return nil
 	}
@@ -154,12 +155,16 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 		if refundDuration <= tsDuration {
 
 			lastRefundedIncrementIndex := -1
+
 			for j := len(ts.Increments) - 1; j >= 0; j-- {
 				increment := ts.Increments[j]
+
 				if increment.Duration <= refundDuration {
+
 					refundIncrements = append(refundIncrements, increment)
 					refundDuration -= increment.Duration
 					lastRefundedIncrementIndex = j
+
 				} else {
 					break //increment duration is larger, cannot refund increment
 				}
