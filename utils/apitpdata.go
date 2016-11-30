@@ -632,6 +632,7 @@ func (self *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) 
 	cdrFltr := &CDRsFilter{
 		CGRIDs:              self.CgrIds,
 		RunIDs:              self.MediationRunIds,
+		NotRunIDs:           []string{MetaRaw}, // In exportv1 automatically filter out *raw CDRs
 		ToRs:                self.TORs,
 		OriginHosts:         self.CdrHosts,
 		Sources:             self.CdrSources,
