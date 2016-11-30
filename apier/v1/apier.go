@@ -452,20 +452,20 @@ type V1TPActions struct {
 }
 
 type V1TPAction struct {
-	Identifier      string  // Identifier mapped in the code
-	BalanceId       string  // Balance identification string (account scope)
-	BalanceUuid     string  // Balance identification string (global scope)
-	BalanceType     string  // Type of balance the action will operate on
-	Directions      string  // Balance direction
-	Units           float64 // Number of units to add/deduct
-	ExpiryTime      string  // Time when the units will expire
-	Filter          string  // The condition on balances that is checked before the action
-	TimingTags      string  // Timing when balance is active
-	DestinationIds  string  // Destination profile id
-	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
-	Categories      string  // category filter for balances
-	SharedGroups    string  // Reference to a shared group
-	BalanceWeight   string  // Balance weight
+	Identifier      string   // Identifier mapped in the code
+	BalanceId       string   // Balance identification string (account scope)
+	BalanceUuid     string   // Balance identification string (global scope)
+	BalanceType     string   // Type of balance the action will operate on
+	Directions      string   // Balance direction
+	Units           float64  // Number of units to add/deduct
+	ExpiryTime      string   // Time when the units will expire
+	Filter          string   // The condition on balances that is checked before the action
+	TimingTags      string   // Timing when balance is active
+	DestinationIds  string   // Destination profile id
+	RatingSubject   string   // Reference a rate subject defined in RatingProfiles
+	Categories      string   // category filter for balances
+	SharedGroups    string   // Reference to a shared group
+	BalanceWeight   *float64 // Balance weight
 	ExtraParameters string
 	BalanceBlocker  string
 	BalanceDisabled string
@@ -494,15 +494,6 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) error {
 	}
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
-		var weight *float64
-		if apiAct.BalanceWeight != "" {
-			if x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64); err == nil {
-				weight = &x
-			} else {
-				return err
-			}
-		}
-
 		a := &engine.Action{
 			Id:               attrs.ActionsId,
 			ActionType:       apiAct.Identifier,
@@ -515,7 +506,7 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) error {
 				ID:             utils.StringPointer(apiAct.BalanceId),
 				Type:           utils.StringPointer(apiAct.BalanceType),
 				Value:          &utils.ValueFormula{Static: apiAct.Units},
-				Weight:         weight,
+				Weight:         apiAct.BalanceWeight,
 				Directions:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Directions)),
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
 				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
