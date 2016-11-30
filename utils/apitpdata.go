@@ -1090,7 +1090,7 @@ type AttrExportCdrsToFile struct {
 	ExportID                   *string  // Optional exportid
 	ExportDirectory            *string  // If provided it overwrites the configured export directory
 	ExportFileName             *string  // If provided the output filename will be set to this
-	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
+	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
 	SMSUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
 	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)

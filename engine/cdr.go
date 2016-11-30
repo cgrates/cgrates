@@ -41,7 +41,7 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 		}
 	}
 	if len(cdr.CGRID) == 0 { // Populate CGRID if not present
-		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.UTC().String())
+		cdr.ComputeCGRID()
 	}
 	if extCdr.AnswerTime != "" {
 		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime, timezone); err != nil {
@@ -111,6 +111,10 @@ type CDR struct {
 func (cdr *CDR) CostDetailsJson() string {
 	mrshled, _ := json.Marshal(cdr.CostDetails)
 	return string(mrshled)
+}
+
+func (cdr *CDR) ComputeCGRID() {
+	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.UTC().String())
 }
 
 // Used to multiply usage on export

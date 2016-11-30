@@ -311,4 +311,6 @@ const (
 	ServerErrorCaps              = "SERVER_ERROR"
 	MandatoryIEMissingCaps       = "MANDATORY_IE_MISSING"
 	UnsupportedCachePrefix       = "unsupported cache prefix"
+	CDRSCtx                      = "cdrs"
+	MandatoryInfoMissing         = "mandatory information missing"
 )

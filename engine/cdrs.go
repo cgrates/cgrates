@@ -175,6 +175,9 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	if !cdr.Rated { // Enforce the RunID if CDR is not rated
 		cdr.RunID = utils.MetaRaw
 	}
+	if cdr.RunID == utils.MetaRaw {
+		cdr.Cost = -1.0
+	}
 	if self.cgrCfg.CDRSStoreCdrs { // Store RawCDRs, this we do sync so we can reply with the status
 		if cdr.CostDetails != nil {
 			cdr.CostDetails.UpdateCost()
@@ -534,6 +537,9 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 // Internally used and called from CDRSv1
 // Cached requests for HA setups
 func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
+	if len(cdr.CGRID) == 0 { // Populate CGRID if not present
+		cdr.ComputeCGRID()
+	}
 	cacheKey := "V1ProcessCDR" + cdr.CGRID + cdr.RunID
 	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
@@ -552,6 +558,11 @@ func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 
 // RPC method, differs from storeSMCost through it's signature
 func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) error {
+	if attr.Cost.CGRID == "" {
+		return utils.NewCGRError(utils.CDRSCtx,
+			utils.MandatoryIEMissingCaps, fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing),
+			"SMCost: %+v with empty CGRID")
+	}
 	cacheKey := "V1StoreSMCost" + attr.Cost.CGRID + attr.Cost.RunID + attr.Cost.OriginID
 	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
