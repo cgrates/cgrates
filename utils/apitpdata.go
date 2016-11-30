@@ -1096,6 +1096,7 @@ type AttrExportCdrsToFile struct {
 	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
+	RoundingDecimals           *int     // force rounding to this value
 	Verbose                    bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 	RPCCDRsFilter                       // Inherit the CDR filter attributes
 }
