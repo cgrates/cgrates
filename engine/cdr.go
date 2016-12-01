@@ -709,13 +709,6 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (string, error) 
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
 		switch rsrFld.Id {
-		case utils.COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
-			if cdr.CostDetails == nil {
-				cdrVal = ""
-			} else {
-				jsonVal, _ := json.Marshal(cdr.CostDetails)
-				cdrVal = string(jsonVal)
-			}
 		case utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits, cfgCdrFld.RoundingDecimals)
 		case utils.USAGE:

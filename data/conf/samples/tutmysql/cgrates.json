@@ -4,14 +4,18 @@
 // Used for cgradmin
 // Starts rater, scheduler
 
+"general": {
+	"log_level": 7,
+},
+
 "listen": {
-	"rpc_json": ":2012",				// RPC JSON listening address
-	"rpc_gob": ":2013",					// RPC GOB listening address
-	"http": ":2080",					// HTTP listening address
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
 },
 
 "rals": {
-	"enabled": true,					// enable Rater service: <true|false>
+	"enabled": true,
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
@@ -27,11 +31,11 @@
 },
 
 "scheduler": {
-	"enabled": true,					// start Scheduler service: <true|false>
+	"enabled": true,
 },
 
 "cdrs": {
-	"enabled": true,					// start the CDR Server service:  <true|false>
+	"enabled": true,
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
@@ -64,6 +68,25 @@
 
 "aliases": {
 	"enabled": true,							// starts Aliases service: <true|false>.
+},
+
+"cdre": {
+	"TestTutITExportCDR": {
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "RunID"},
+			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
+			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
+			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "Category"},
+			{"tag":"Account", "type": "*composed", "value": "Account"},
+			{"tag":"Destination", "type": "*composed", "value": "Destination"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "type": "*composed", "value": "Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
+			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+		],
+	},
 },
 
 }

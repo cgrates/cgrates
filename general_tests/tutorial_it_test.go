@@ -1379,13 +1379,13 @@ func TestTutITExportCDR(t *testing.T) {
 	var replyExport utils.ExportedFileCdrs
 	exportArgs := utils.AttrExportCdrsToFile{ExportDirectory: utils.StringPointer("/tmp"),
 		ExportFileName: utils.StringPointer("TestTutITExportCDR.csv"),
-		RPCCDRsFilter:  utils.RPCCDRsFilter{CGRIDs: []string{cdr.CGRID}}}
+		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
+		RPCCDRsFilter:  utils.RPCCDRsFilter{CGRIDs: []string{cdr.CGRID}, NotRunIDs: []string{utils.MetaRaw}}}
 	if err := tutLocalRpc.Call("ApierV2.ExportCdrsToFile", exportArgs, &replyExport); err != nil {
 		t.Error(err)
 	}
-	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,*voice,testexportcdr1,*rated,*out,cgrates.org,call,1001,1001,1003,2016-11-30T18:05:24+01:00,2016-11-30T18:06:04+01:00,98,1.3334
-f0a92222a7d21b4d9f72744aabe82daef52e20d8,*raw,*voice,testexportcdr1,*rated,*out,cgrates.org,call,1001,1001,1003,2016-11-30T18:05:24+01:00,2016-11-30T18:06:04+01:00,98,-1.0000
-f0a92222a7d21b4d9f72744aabe82daef52e20d8,derived_run1,*voice,testexportcdr1,*rated,*out,cgrates.org,call,1001,1002,1003,2016-11-30T18:05:24+01:00,2016-11-30T18:06:04+01:00,98,1.3334
+	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.3334,RETA
+f0a92222a7d21b4d9f72744aabe82daef52e20d8,derived_run1,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.3334,RETA
 `
 	if expContent, err := ioutil.ReadFile(path.Join(*exportArgs.ExportDirectory, *exportArgs.ExportFileName)); err != nil {
 		t.Error(err)
