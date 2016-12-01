@@ -184,7 +184,6 @@ func (self *TPRatingPlanBinding) Timing() *TPTiming {
 
 // Used to rebuild a TPRatingProfile (empty RatingPlanActivations) out of it's key in nosqldb
 func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, error) {
-	// *out:cgrates.org:call:*any
 	s := strings.Split(keyId, ":")
 	if len(s) != 4 {
 		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)

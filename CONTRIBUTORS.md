@@ -49,7 +49,6 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @marcinkowalczyk | Marcin Kowalczyk |
 | @andmar | André Maricato |
 | @brendangilmore | Brendan Gilmore |
-| @afone-lboue | Ludovic Boué |
 | @shaneneuerburg | Shane Neuerburg |
 | @Edwardro22 | Eduard Tamşa |
 | @KuikenArjan | Arjan Kuiken |

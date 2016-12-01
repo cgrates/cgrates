@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -1387,10 +1388,14 @@ func TestTutITExportCDR(t *testing.T) {
 	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.3334,RETA
 f0a92222a7d21b4d9f72744aabe82daef52e20d8,derived_run1,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.3334,RETA
 `
-	if expContent, err := ioutil.ReadFile(path.Join(*exportArgs.ExportDirectory, *exportArgs.ExportFileName)); err != nil {
+	expFilePath := path.Join(*exportArgs.ExportDirectory, *exportArgs.ExportFileName)
+	if expContent, err := ioutil.ReadFile(expFilePath); err != nil {
 		t.Error(err)
 	} else if eExportContent != string(expContent) {
 		t.Errorf("Expecting: <%q>, received: <%q>", eExportContent, string(expContent))
+	}
+	if err := os.Remove(expFilePath); err != nil {
+		t.Error(err)
 	}
 
 }
