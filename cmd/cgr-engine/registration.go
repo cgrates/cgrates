@@ -25,8 +25,6 @@ import (
 	"syscall"
 
 	"github.com/cgrates/cgrates/balancer2go"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -40,22 +38,6 @@ func stopBalancerSignalHandler(bal *balancer2go.Balancer, exitChan chan bool) {
 	sig := <-c
 	utils.Logger.Info(fmt.Sprintf("Caught signal %v, sending shutdown to engines\n", sig))
 	bal.Shutdown("Responder.Shutdown")
-	exitChan <- true
-}
-
-func generalSignalHandler(internalCdrStatSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
-	c := make(chan os.Signal)
-	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-
-	sig := <-c
-	utils.Logger.Info(fmt.Sprintf("Caught signal %v, shuting down cgr-engine\n", sig))
-	var dummyInt int
-	select {
-	case cdrStats := <-internalCdrStatSChan:
-		cdrStats.Call("CDRStatsV1.Stop", dummyInt, &dummyInt)
-	default:
-	}
-
 	exitChan <- true
 }
 
@@ -115,18 +97,6 @@ func registerToBalancer(exitChan chan bool) {
 		exitChan <- true
 	}
 	utils.Logger.Info("Registration finished!")
-}
-
-// Listens for the HUP system signal and gracefuly reloads the timers from database.
-func reloadSchedulerSingnalHandler(sched *scheduler.Scheduler, getter engine.RatingStorage) {
-	for {
-		c := make(chan os.Signal)
-		signal.Notify(c, syscall.SIGHUP)
-		sig := <-c
-
-		utils.Logger.Info(fmt.Sprintf("Caught signal %v, reloading action timings.\n", sig))
-		sched.Reload(true)
-	}
 }
 
 /*

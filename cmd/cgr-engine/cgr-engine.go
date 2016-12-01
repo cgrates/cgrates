@@ -418,7 +418,6 @@ func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneCh
 	cacheDoneChan <- cacheDone
 	utils.Logger.Info("Starting CGRateS Scheduler.")
 	sched := scheduler.NewScheduler(ratingDb)
-	go reloadSchedulerSingnalHandler(sched, ratingDb)
 	time.Sleep(1)
 	internalSchedulerChan <- sched
 	sched.Reload(true)
