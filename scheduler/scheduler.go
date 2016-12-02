@@ -37,15 +37,20 @@ type Scheduler struct {
 }
 
 func NewScheduler(storage engine.RatingStorage) *Scheduler {
-	return &Scheduler{
+	s := &Scheduler{
 		restartLoop: make(chan bool),
 		storage:     storage,
 	}
+	s.Reload()
+	return s
 }
 
 func (s *Scheduler) Loop() {
 	s.schedulerStarted = true
 	for {
+		if !s.schedulerStarted { // shutdown requested
+			break
+		}
 		for len(s.queue) == 0 { //hang here if empty
 			<-s.restartLoop
 		}
@@ -86,7 +91,7 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) Reload(protect bool) {
+func (s *Scheduler) Reload() {
 	s.loadActionPlans()
 	s.restart()
 }
@@ -155,4 +160,12 @@ func (s *Scheduler) restart() {
 
 func (s *Scheduler) GetQueue() engine.ActionTimingPriorityList {
 	return s.queue
+}
+
+func (s *Scheduler) Shutdown() error {
+	s.schedulerStarted = false // disable loop on next run
+	s.restartLoop <- true      // cancel waiting tasks
+	if s.timer != nil {
+		s.timer.Stop()
+	}
 }
