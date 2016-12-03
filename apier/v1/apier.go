@@ -45,10 +45,10 @@ type ApierV1 struct {
 	CdrDb       engine.CdrStorage
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
-	ServManager *servmanager.ServiceManager
 	CdrStatsSrv rpcclient.RpcClientConnection
 	Users       rpcclient.RpcClientConnection
 	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
+	ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -1114,4 +1114,16 @@ func (self *ApierV1) RemoteUnlock(lockIDs []string, reply *string) error {
 	engine.Guardian.UnguardIDs(lockIDs...)
 	*reply = utils.OK
 	return nil
+}
+
+func (v1 *ApierV1) StartService(args servmanager.ArgStartService, reply *string) (err error) {
+	return v1.ServManager.V1StartService(args, reply)
+}
+
+func (v1 *ApierV1) StopService(args servmanager.ArgStartService, reply *string) (err error) {
+	return v1.ServManager.V1StopService(args, reply)
+}
+
+func (v1 *ApierV1) ServiceStatus(args servmanager.ArgStartService, reply *string) (err error) {
+	return v1.ServManager.V1ServiceStatus(args, reply)
 }

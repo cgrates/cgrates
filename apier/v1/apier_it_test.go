@@ -37,6 +37,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1603,6 +1604,49 @@ func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromStorDb: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.LoadTariffPlanFromStorDb got reply: ", reply)
+	}
+}
+
+func TestApierStartStopServiceStatus(t *testing.T) {
+	var reply string
+	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.RunningCaps {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.StopService", servmanager.ArgStartService{ServiceID: "INVALID"},
+		&reply); err == nil || err.Error() != utils.UnsupportedServiceIDCaps {
+		t.Error(err)
+	}
+	if err := rater.Call("ApierV1.StopService", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.StoppedCaps {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.StartService", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.RunningCaps {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.ReloadScheduler", reply, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadScheduler: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.ReloadScheduler got reply: ", reply)
 	}
 }
 

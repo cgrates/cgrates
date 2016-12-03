@@ -126,7 +126,7 @@ func (srvMngr *ServiceManager) Call(serviceMethod string, args interface{}, repl
 	return err
 }
 
-// ArgShutdownService are passed to ShutdownService RPC method
+// ArgShutdownService are passed to Start/StopService/Status RPC methods
 type ArgStartService struct {
 	ServiceID string
 }
