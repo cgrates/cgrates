@@ -732,3 +732,9 @@ func TestLess(t *testing.T) {
 		t.Error("Expected:", expected, ", received:", t1.Less(1, 2))
 	}
 }
+
+func TestCapitalizedMessage(t *testing.T) {
+	if capMsg := CapitalizedMessage(ServiceAlreadyRunning); capMsg != "SERVICE_ALREADY_RUNNING" {
+		t.Errorf("Received: <%s>", capMsg)
+	}
+}

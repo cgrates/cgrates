@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/scheduler"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -43,9 +43,9 @@ type ApierV1 struct {
 	RatingDb    engine.RatingStorage
 	AccountDb   engine.AccountingStorage
 	CdrDb       engine.CdrStorage
-	Sched       *scheduler.Scheduler
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
+	ServManager *servmanager.ServiceManager
 	CdrStatsSrv rpcclient.RpcClientConnection
 	Users       rpcclient.RpcClientConnection
 	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
@@ -333,9 +333,11 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
 
-	if len(aps) != 0 && self.Sched != nil {
-		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
-		self.Sched.Reload(true)
+	if len(aps) != 0 {
+		sched := self.ServManager.GetScheduler()
+		if sched != nil {
+			sched.Reload()
+		}
 	}
 
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
@@ -621,10 +623,11 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler {
-		if self.Sched == nil {
-			return errors.New("SCHEDULER_NOT_ENABLED")
+		sched := self.ServManager.GetScheduler()
+		if sched == nil {
+			return errors.New(utils.SchedulerNotRunningCaps)
 		}
-		self.Sched.Reload(true)
+		sched.Reload()
 	}
 	*reply = OK
 	return nil
@@ -672,19 +675,21 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if self.Sched != nil {
-		self.Sched.Reload(true)
+	sched := self.ServManager.GetScheduler()
+	if sched != nil {
+		sched.Reload()
 	}
 	*reply = OK
 	return nil
 }
 
-func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
-	if self.Sched == nil {
-		return utils.ErrNotFound
+func (self *ApierV1) ReloadScheduler(ignore string, reply *string) error {
+	sched := self.ServManager.GetScheduler()
+	if sched == nil {
+		return errors.New(utils.SchedulerNotRunningCaps)
 	}
-	self.Sched.Reload(true)
-	*reply = OK
+	sched.Reload()
+	*reply = utils.OK
 	return nil
 }
 
@@ -928,10 +933,11 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	cache.Flush()
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
-
-	if len(aps) != 0 && self.Sched != nil {
-		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
-		self.Sched.Reload(true)
+	if len(aps) != 0 {
+		sched := self.ServManager.GetScheduler()
+		if sched != nil {
+			sched.Reload()
+		}
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
 		var out int

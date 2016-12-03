@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
@@ -207,10 +208,11 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 		return utils.NewErrServerError(err)
 	}
 	if attr.ReloadScheduler && len(dirtyActionPlans) > 0 {
-		// reload scheduler
-		if self.Sched != nil {
-			self.Sched.Reload(true)
+		sched := self.ServManager.GetScheduler()
+		if sched == nil {
+			return errors.New(utils.SchedulerNotRunningCaps)
 		}
+		sched.Reload()
 	}
 	*reply = utils.OK // This will mark saving of the account, error still can show up in actionTimingsId
 	return nil

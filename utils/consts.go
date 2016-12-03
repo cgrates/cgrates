@@ -313,4 +313,12 @@ const (
 	UnsupportedCachePrefix       = "unsupported cache prefix"
 	CDRSCtx                      = "cdrs"
 	MandatoryInfoMissing         = "mandatory information missing"
+	UnsupportedServiceIDCaps     = "UNSUPPORTED_SERVICE_ID"
+	ServiceManager               = "service_manager"
+	ServiceAlreadyRunning        = "service already running"
+	ServiceNotRunning            = "service not running"
+	RunningCaps                  = "RUNNING"
+	StoppedCaps                  = "STOPPED"
+	SchedulerNotRunningCaps      = "SCHEDULLER_NOT_RUNNING"
+	MetaScheduler                = "*scheduler"
 )

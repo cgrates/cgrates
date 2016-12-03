@@ -79,8 +79,9 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	}, 0, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if self.Sched != nil {
-		self.Sched.Reload(true)
+	sched := self.ServManager.GetScheduler()
+	if sched != nil {
+		sched.Reload()
 	}
 	*reply = v1.OK
 	return nil
@@ -211,9 +212,12 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
 
-	if len(aps) != 0 && self.Sched != nil {
-		utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
-		self.Sched.Reload(true)
+	if len(aps) != 0 {
+		sched := self.ServManager.GetScheduler()
+		if sched != nil {
+			utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
+			sched.Reload()
+		}
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
 		var out int

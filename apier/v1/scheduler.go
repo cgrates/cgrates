@@ -112,11 +112,12 @@ type ScheduledActions struct {
 }
 
 func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *[]*ScheduledActions) error {
-	if self.Sched == nil {
-		return errors.New("SCHEDULER_NOT_ENABLED")
+	sched := self.ServManager.GetScheduler()
+	if sched == nil {
+		return errors.New(utils.SchedulerNotRunningCaps)
 	}
 	schedActions := make([]*ScheduledActions, 0) // needs to be initialized if remains empty
-	scheduledActions := self.Sched.GetQueue()
+	scheduledActions := sched.GetQueue()
 	for _, qActions := range scheduledActions {
 		sas := &ScheduledActions{ActionsId: qActions.ActionsID, ActionPlanId: qActions.GetActionPlanID(), ActionTimingUuid: qActions.Uuid, Accounts: len(qActions.GetAccountIDs())}
 		if attrs.SearchTerm != "" &&

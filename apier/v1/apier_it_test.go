@@ -99,18 +99,9 @@ func TestApierInitStorDb(t *testing.T) {
 
 // Finds cgr-engine executable and starts it with default configuration
 func TestApierStartEngine(t *testing.T) {
-	enginePath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		t.Fatal("Cannot find cgr-engine executable")
+	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
+		t.Fatal(err)
 	}
-	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	engine := exec.Command(enginePath, "-config_dir", cfgPath)
-	//engine.Stderr = os.Stderr
-	if err := engine.Start(); err != nil {
-		t.Fatal("Cannot start cgr-engine: ", err.Error())
-	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
 }
 
 // Connect rpc client to rater
