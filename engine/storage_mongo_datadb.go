@@ -476,7 +476,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
-		utils.RATING_PROFILE_PREFIX}, prfx) {
+		utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -484,7 +485,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 	}
 	if ids == nil {
 		if ids, err = ms.GetKeysForPrefix(prfx); err != nil {
-			return utils.NewCGRError(utils.REDIS,
+			return utils.NewCGRError(utils.MONGO,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
@@ -505,9 +506,11 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetRatingPlan(dataID, false, utils.NonTransactional)
 		case utils.RATING_PROFILE_PREFIX:
 			_, err = ms.GetRatingProfile(dataID, false, utils.NonTransactional)
+		case utils.ACTION_PREFIX:
+			_, err = ms.GetActions(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
-			return utils.NewCGRError(utils.REDIS,
+			return utils.NewCGRError(utils.MONGO,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("error <%s> querying mongo for category: <%s>, dataID: <%s>", prfx, dataID))
@@ -671,7 +674,8 @@ func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan, transactionID string) erro
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	//cache.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.RATING_PLAN_PREFIX+rp.Id,
+		cacheCommit(transactionID), transactionID)
 	return err
 }
 
@@ -709,8 +713,9 @@ func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile, transactionID string
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(false), &response)
 	}
-	cache.RemKey(utils.RATING_PROFILE_PREFIX+rp.Id, cacheCommit(transactionID), transactionID)
-	return err
+	cache.RemKey(utils.RATING_PROFILE_PREFIX+rp.Id,
+		cacheCommit(transactionID), transactionID)
+	return
 }
 
 func (ms *MongoStorage) RemoveRatingProfile(key, transactionID string) error {
@@ -960,8 +965,9 @@ func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 }
 
 func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
+	cacheKey := utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, err := cache.GetCloned(utils.ACTION_PREFIX + key); err != nil {
+		if x, err := cache.GetCloned(cacheKey); err != nil {
 			if err.Error() != utils.ItemNotFound {
 				return nil, err
 			}
@@ -977,10 +983,14 @@ func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID str
 	}
 	session, col := ms.conn(colAct)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&result)
-	if err == nil {
-		as = result.Value
+	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
+	as = result.Value
 	cache.Set(utils.ACTION_PREFIX+key, as, cacheCommit(transactionID), transactionID)
 	return
 }

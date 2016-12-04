@@ -48,6 +48,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheReverseDestinations,
 	testOnStorITCacheRatingPlan,
 	testOnStorITCacheRatingProfile,
+	testOnStorITCacheActions,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -314,12 +315,13 @@ func testOnStorITCacheRatingPlan(t *testing.T) {
 func testOnStorITCacheRatingProfile(t *testing.T) {
 	rpf := &RatingProfile{
 		Id: "*out:test:0:trp",
-		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
-			ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
-			RatingPlanId:    "TDRT",
-			FallbackKeys:    []string{"*out:test:0:danb", "*out:test:0:rif"},
-			CdrStatQueueIds: []string{},
-		}},
+		RatingPlanActivations: RatingPlanActivations{
+			&RatingPlanActivation{
+				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+				RatingPlanId:    "TDRT",
+				FallbackKeys:    []string{"*out:test:0:danb", "*out:test:0:rif"},
+				CdrStatQueueIds: []string{},
+			}},
 	}
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -332,7 +334,62 @@ func testOnStorITCacheRatingProfile(t *testing.T) {
 	}
 	if itm, hasIt := cache.Get(utils.RATING_PROFILE_PREFIX + rpf.Id); !hasIt {
 		t.Error("Did not cache")
-	} else if rcvRp := itm.(*RatingProfile); !reflect.DeepEqual(rpf.Id, rcvRp.Id) { // fixme
-		t.Error("Wrong item in the cache", rcvRp)
+	} else if rcvRp := itm.(*RatingProfile); !reflect.DeepEqual(rpf, rcvRp) {
+		t.Errorf("Expecting: %+v, received: %+v", rpf, rcvRp)
+	}
+}
+
+func testOnStorITCacheActions(t *testing.T) {
+	acts := Actions{
+		&Action{
+			Id:               "MINI",
+			ActionType:       TOPUP_RESET,
+			ExpirationString: UNLIMITED,
+			Weight:           10,
+			Balance: &BalanceFilter{
+				Type:       utils.StringPointer(utils.MONETARY),
+				Uuid:       utils.StringPointer(utils.GenUUID()),
+				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Value: &utils.ValueFormula{Static: 10,
+					Params: make(map[string]interface{})},
+				Weight:   utils.Float64Pointer(10),
+				Disabled: utils.BoolPointer(false),
+				Timings:  make([]*RITiming, 0),
+				Blocker:  utils.BoolPointer(false),
+			},
+		},
+		&Action{
+			Id:               "MINI",
+			ActionType:       TOPUP,
+			ExpirationString: UNLIMITED,
+			Weight:           10,
+			Balance: &BalanceFilter{
+				Type:       utils.StringPointer(utils.VOICE),
+				Uuid:       utils.StringPointer(utils.GenUUID()),
+				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Value: &utils.ValueFormula{Static: 100,
+					Params: make(map[string]interface{})},
+				Weight:         utils.Float64Pointer(10),
+				RatingSubject:  utils.StringPointer("test"),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
+				Disabled:       utils.BoolPointer(false),
+				Timings:        make([]*RITiming, 0),
+				Blocker:        utils.BoolPointer(false),
+			},
+		},
+	}
+	if err := onStor.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.ACTION_PREFIX + acts[0].Id); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.ACTION_PREFIX, []string{acts[0].Id}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.ACTION_PREFIX + acts[0].Id); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(Actions); !reflect.DeepEqual(acts, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", acts, rcv)
 	}
 }

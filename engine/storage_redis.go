@@ -276,7 +276,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
-		utils.RATING_PROFILE_PREFIX}, prfx) {
+		utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -305,6 +306,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetRatingPlan(dataID, false, utils.NonTransactional)
 		case utils.RATING_PROFILE_PREFIX:
 			_, err = rs.GetRatingProfile(dataID, false, utils.NonTransactional)
+		case utils.ACTION_PREFIX:
+			_, err = rs.GetActions(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -657,8 +660,15 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool, transactionID str
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &as)
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &as); err != nil {
+		return
 	}
 	cache.Set(key, as, cacheCommit(transactionID), transactionID)
 	return
