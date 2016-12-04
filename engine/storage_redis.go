@@ -277,7 +277,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
 		utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX}, prfx) {
+		utils.ACTION_PREFIX,
+		utils.ACTION_PLAN_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -308,6 +309,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetRatingProfile(dataID, false, utils.NonTransactional)
 		case utils.ACTION_PREFIX:
 			_, err = rs.GetActions(dataID, false, utils.NonTransactional)
+		case utils.ACTION_PLAN_PREFIX:
+			_, err = rs.GetActionPlan(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -1078,19 +1081,25 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool, transactionID 
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		b := bytes.NewBuffer(values)
-		r, err := zlib.NewReader(b)
-		if err != nil {
-			return nil, err
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
 		}
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			return nil, err
-		}
-		r.Close()
-		ats = &ActionPlan{}
-		err = rs.ms.Unmarshal(out, &ats)
+		return
+	}
+	b := bytes.NewBuffer(values)
+	r, err := zlib.NewReader(b)
+	if err != nil {
+		return nil, err
+	}
+	out, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	r.Close()
+	if err = rs.ms.Unmarshal(out, &ats); err != nil {
+		return
 	}
 	cache.Set(key, ats, cacheCommit(transactionID), transactionID)
 	return
@@ -1098,11 +1107,12 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool, transactionID 
 
 func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
+	dbKey := utils.ACTION_PLAN_PREFIX + key
 	if len(ats.ActionTimings) == 0 {
 		// delete the key
-		err = rs.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
-		cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
-		return err
+		err = rs.Cmd("DEL", dbKey).Err
+		cache.RemKey(dbKey, cCommit, transactionID)
+		return
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
@@ -1114,8 +1124,6 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 				ats.AccountIDs[accID] = true
 			}
 		}
-		// do not keep this in cache (will be obsolete)
-		cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
 	}
 	result, err := rs.ms.Marshal(ats)
 	if err != nil {
@@ -1125,8 +1133,10 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	err = rs.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, b.Bytes()).Err
-	cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+	if err = rs.Cmd("SET", dbKey, b.Bytes()).Err; err != nil {
+		return
+	}
+	cache.RemKey(dbKey, cCommit, transactionID)
 	return
 }
 

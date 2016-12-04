@@ -49,6 +49,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheRatingPlan,
 	testOnStorITCacheRatingProfile,
 	testOnStorITCacheActions,
+	testOnStorITCacheActionPlan,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -391,5 +392,56 @@ func testOnStorITCacheActions(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(Actions); !reflect.DeepEqual(acts, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", acts, rcv)
+	}
+}
+
+func testOnStorITCacheActionPlan(t *testing.T) {
+	ap := &ActionPlan{
+		Id:         "MORE_MINUTES",
+		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
+		ActionTimings: []*ActionTiming{
+			&ActionTiming{
+				Uuid: utils.GenUUID(),
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "MINI",
+			},
+			&ActionTiming{
+				Uuid: utils.GenUUID(),
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "SHARED",
+			},
+		},
+	}
+	if err := onStor.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.ACTION_PLAN_PREFIX + ap.Id); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.ACTION_PLAN_PREFIX + ap.Id); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*ActionPlan); !reflect.DeepEqual(ap, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", ap, rcv)
 	}
 }
