@@ -278,7 +278,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.RATING_PLAN_PREFIX,
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
-		utils.ACTION_PLAN_PREFIX}, prfx) {
+		utils.ACTION_PLAN_PREFIX,
+		utils.SHARED_GROUP_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -311,6 +312,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetActions(dataID, false, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
 			_, err = rs.GetActionPlan(dataID, false, utils.NonTransactional)
+		case utils.SHARED_GROUP_PREFIX:
+			_, err = rs.GetSharedGroup(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -694,22 +697,32 @@ func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool, transactionID
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*SharedGroup), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*SharedGroup), nil
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &sg)
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &sg); err != nil {
+		return
 	}
 	cache.Set(key, sg, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
-	result, err := rs.ms.Marshal(sg)
+	var result []byte
+	if result, err = rs.ms.Marshal(sg); err != nil {
+		return
+	}
 	err = rs.Cmd("SET", utils.SHARED_GROUP_PREFIX+sg.Id, result).Err
 	cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
 	return

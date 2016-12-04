@@ -50,6 +50,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheRatingProfile,
 	testOnStorITCacheActions,
 	testOnStorITCacheActionPlan,
+	testOnStorITCacheSharedGroup,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -443,5 +444,32 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ActionPlan); !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", ap, rcv)
+	}
+}
+
+func testOnStorITCacheSharedGroup(t *testing.T) {
+	sg := &SharedGroup{
+		Id: "SG1",
+		AccountParameters: map[string]*SharingParameters{
+			"*any": &SharingParameters{
+				Strategy:      "*lowest",
+				RatingSubject: "",
+			},
+		},
+		MemberIds: make(utils.StringMap),
+	}
+	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.SHARED_GROUP_PREFIX + sg.Id); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{sg.Id}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.SHARED_GROUP_PREFIX + sg.Id); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*SharedGroup); !reflect.DeepEqual(sg, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", sg, rcv)
 	}
 }
