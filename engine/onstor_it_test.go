@@ -51,6 +51,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheActions,
 	testOnStorITCacheActionPlan,
 	testOnStorITCacheSharedGroup,
+	testOnStorITCacheDerivedChargers,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -471,5 +472,35 @@ func testOnStorITCacheSharedGroup(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*SharedGroup); !reflect.DeepEqual(sg, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", sg, rcv)
+	}
+}
+
+func testOnStorITCacheDerivedChargers(t *testing.T) {
+	dcs := &utils.DerivedChargers{
+		DestinationIDs: make(utils.StringMap),
+		Chargers: []*utils.DerivedCharger{
+			&utils.DerivedCharger{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/", RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
+				TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT, AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
+				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
+				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
+			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
+				CategoryField: utils.META_DEFAULT, AccountField: "ivo", SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
+				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
+				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
+		}}
+	keyDCS := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
+	if err := onStor.SetDerivedChargers(keyDCS, dcs, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.DERIVEDCHARGERS_PREFIX + keyDCS); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{keyDCS}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.DERIVEDCHARGERS_PREFIX + keyDCS); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*utils.DerivedChargers); !reflect.DeepEqual(dcs, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", dcs, rcv)
 	}
 }

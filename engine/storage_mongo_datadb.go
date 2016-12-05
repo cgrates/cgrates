@@ -479,7 +479,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
-		utils.SHARED_GROUP_PREFIX}, prfx) {
+		utils.SHARED_GROUP_PREFIX,
+		utils.DERIVEDCHARGERS_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -514,6 +515,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetActionPlan(dataID, false, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
 			_, err = ms.GetSharedGroup(dataID, false, utils.NonTransactional)
+		case utils.DERIVEDCHARGERS_PREFIX:
+			_, err = ms.GetDerivedChargers(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -1588,12 +1591,13 @@ func (ms *MongoStorage) PopTask() (t *Task, err error) {
 }
 
 func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
+	cacheKey := utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.DERIVEDCHARGERS_PREFIX + key); ok {
-			if x != nil {
-				return x.(*utils.DerivedChargers), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*utils.DerivedChargers), nil
 		}
 	}
 	var kv struct {
@@ -1602,37 +1606,41 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool, transacti
 	}
 	session, col := ms.conn(colDcs)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&kv)
 	cCommit := cacheCommit(transactionID)
-	if err == nil {
-		dcs = kv.Value
-	} else {
-		cache.Set(utils.DERIVEDCHARGERS_PREFIX+key, nil, cCommit, transactionID)
-		return nil, utils.ErrNotFound
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cCommit, transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-	cache.Set(utils.DERIVEDCHARGERS_PREFIX+key, dcs, cCommit, transactionID)
+	dcs = kv.Value
+	cache.Set(cacheKey, dcs, cCommit, transactionID)
 	return
 }
 
 func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
+	cacheKey := utils.DERIVEDCHARGERS_PREFIX + key
 	if dcs == nil || len(dcs.Chargers) == 0 {
-		cache.RemKey(utils.DERIVEDCHARGERS_PREFIX+key, cCommit, transactionID)
+
 		session, col := ms.conn(colDcs)
 		defer session.Close()
-		err = col.Remove(bson.M{"key": key})
-		if err != mgo.ErrNotFound {
-			return err
+		if err = col.Remove(bson.M{"key": key}); err != nil && err != mgo.ErrNotFound {
+			return
 		}
+		cache.RemKey(cacheKey, cCommit, transactionID)
 		return nil
 	}
 	session, col := ms.conn(colDcs)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"key": key}, &struct {
+	if _, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value *utils.DerivedChargers
-	}{Key: key, Value: dcs})
-	cache.RemKey(utils.DERIVEDCHARGERS_PREFIX+key, cCommit, transactionID)
+	}{Key: key, Value: dcs}); err != nil {
+		return
+	}
+	cache.RemKey(cacheKey, cCommit, transactionID)
 	return err
 }
 
