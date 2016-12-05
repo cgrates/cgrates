@@ -53,6 +53,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheSharedGroup,
 	testOnStorITCacheDerivedChargers,
 	testOnStorITCacheLCR,
+	testOnStorITCacheAlias,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -548,5 +549,51 @@ func testOnStorITCacheLCR(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*LCR); !reflect.DeepEqual(lcr, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", lcr, rcv)
+	}
+}
+
+func testOnStorITCacheAlias(t *testing.T) {
+	als := &Alias{
+		Direction: "*out",
+		Tenant:    "cgrates.org",
+		Category:  "call",
+		Account:   "dan",
+		Subject:   "dan",
+		Context:   "*rating",
+		Values: AliasValues{
+			&AliasValue{
+				DestinationId: "EU_LANDLINE",
+				Pairs: AliasPairs{
+					"Subject": map[string]string{
+						"dan": "dan1",
+						"rif": "rif1",
+					},
+					"Cli": map[string]string{
+						"0723": "0724",
+					},
+				},
+				Weight: 10,
+			},
+
+			&AliasValue{
+				DestinationId: "GLOBAL1",
+				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan2"}},
+				Weight:        20,
+			},
+		},
+	}
+	if err := onStor.SetAlias(als, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.ALIASES_PREFIX + als.GetId()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.ALIASES_PREFIX, []string{als.GetId()}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.ALIASES_PREFIX + als.GetId()); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*Alias); !reflect.DeepEqual(als, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", als, rcv)
 	}
 }

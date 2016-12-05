@@ -481,7 +481,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.ACTION_PLAN_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.LCR_PREFIX}, prfx) {
+		utils.LCR_PREFIX,
+		utils.ALIASES_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -520,6 +521,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetDerivedChargers(dataID, false, utils.NonTransactional)
 		case utils.LCR_PREFIX:
 			_, err = ms.GetLCR(dataID, false, utils.NonTransactional)
+		case utils.ALIASES_PREFIX:
+			_, err = ms.GetAlias(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -1203,19 +1206,16 @@ func (ms *MongoStorage) RemoveUser(key string) (err error) {
 }
 
 func (ms *MongoStorage) GetAlias(key string, skipCache bool, transactionID string) (al *Alias, err error) {
-	origKey := key
-	key = utils.ALIASES_PREFIX + key
+	cacheKey := utils.ALIASES_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				al = &Alias{Values: x.(AliasValues)}
-				al.SetId(origKey)
-				return al, nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			al = x.(*Alias)
+			return
 		}
 	}
-
 	var kv struct {
 		Key   string
 		Value AliasValues
@@ -1223,26 +1223,28 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool, transactionID strin
 	session, col := ms.conn(colAls)
 	defer session.Close()
 	cCommit := cacheCommit(transactionID)
-	if err = col.Find(bson.M{"key": origKey}).One(&kv); err == nil {
-		al = &Alias{Values: kv.Value}
-		al.SetId(origKey)
-		if err == nil {
-			cache.Set(key, al.Values, cCommit, transactionID)
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
 		}
-	} else {
-		cache.Set(key, nil, cCommit, transactionID)
-		return nil, utils.ErrNotFound
+		return
 	}
+	al = &Alias{Values: kv.Value}
+	al.SetId(key)
+	cache.Set(cacheKey, al, cCommit, transactionID)
 	return
 }
 
 func (ms *MongoStorage) SetAlias(al *Alias, transactionID string) (err error) {
 	session, col := ms.conn(colAls)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"key": al.GetId()}, &struct {
+	if _, err = col.Upsert(bson.M{"key": al.GetId()}, &struct {
 		Key   string
 		Value AliasValues
-	}{Key: al.GetId(), Value: al.Values})
+	}{Key: al.GetId(), Value: al.Values}); err != nil {
+		return
+	}
 	cache.RemKey(utils.ALIASES_PREFIX+al.GetId(), cacheCommit(transactionID), transactionID)
 	return err
 }

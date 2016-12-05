@@ -281,7 +281,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.ACTION_PLAN_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.LCR_PREFIX}, prfx) {
+		utils.LCR_PREFIX,
+		utils.ALIASES_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -320,6 +321,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetDerivedChargers(dataID, false, utils.NonTransactional)
 		case utils.LCR_PREFIX:
 			_, err = rs.GetLCR(dataID, false, utils.NonTransactional)
+		case utils.ALIASES_PREFIX:
+			_, err = rs.GetAlias(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -868,39 +871,44 @@ func (rs *RedisStorage) RemoveUser(key string) (err error) {
 }
 
 func (rs *RedisStorage) GetAlias(key string, skipCache bool, transactionID string) (al *Alias, err error) {
-	origKey := key
-	key = utils.ALIASES_PREFIX + key
-
+	cacheKey := utils.ALIASES_PREFIX + key
+	cCommit := cacheCommit(transactionID)
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				al = &Alias{Values: x.(AliasValues)}
-				al.SetId(origKey)
-				return al, nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			al = x.(*Alias)
+			return
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		al = &Alias{Values: make(AliasValues, 0)}
-		al.SetId(origKey)
-		err = rs.ms.Unmarshal(values, &al.Values)
-	} else {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-		return nil, utils.ErrNotFound
+	if values, err = rs.Cmd("GET", cacheKey).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cCommit, transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-	cache.Set(key, al.Values, cacheCommit(transactionID), transactionID)
+	al = &Alias{Values: make(AliasValues, 0)}
+	al.SetId(key)
+	if err = rs.ms.Unmarshal(values, &al.Values); err != nil {
+		return
+	}
+	cache.Set(cacheKey, al, cCommit, transactionID)
 	return
 }
 
 func (rs *RedisStorage) SetAlias(al *Alias, transactionID string) (err error) {
-	result, err := rs.ms.Marshal(al.Values)
+	var result []byte
+	result, err = rs.ms.Marshal(al.Values)
 	if err != nil {
-		return err
+		return
 	}
 	key := utils.ALIASES_PREFIX + al.GetId()
-	err = rs.Cmd("SET", key, result).Err
+	if err = rs.Cmd("SET", key, result).Err; err != nil {
+		return
+	}
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
