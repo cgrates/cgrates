@@ -52,6 +52,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheActionPlan,
 	testOnStorITCacheSharedGroup,
 	testOnStorITCacheDerivedChargers,
+	testOnStorITCacheLCR,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -502,5 +503,50 @@ func testOnStorITCacheDerivedChargers(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*utils.DerivedChargers); !reflect.DeepEqual(dcs, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", dcs, rcv)
+	}
+}
+
+func testOnStorITCacheLCR(t *testing.T) {
+	lcr := &LCR{
+		Tenant:    "cgrates.org",
+		Category:  "call",
+		Direction: "*out",
+		Account:   "*any",
+		Subject:   "*any",
+		Activations: []*LCRActivation{
+			&LCRActivation{
+				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				Entries: []*LCREntry{
+					&LCREntry{
+						DestinationId:  "EU_LANDLINE",
+						RPCategory:     "LCR_STANDARD",
+						Strategy:       "*static",
+						StrategyParams: "ivo;dan;rif",
+						Weight:         10,
+					},
+					&LCREntry{
+						DestinationId:  "*any",
+						RPCategory:     "LCR_STANDARD",
+						Strategy:       "*lowest_cost",
+						StrategyParams: "",
+						Weight:         20,
+					},
+				},
+			},
+		},
+	}
+	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.LCR_PREFIX + lcr.GetId()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.LCR_PREFIX, []string{lcr.GetId()}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.LCR_PREFIX + lcr.GetId()); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*LCR); !reflect.DeepEqual(lcr, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", lcr, rcv)
 	}
 }

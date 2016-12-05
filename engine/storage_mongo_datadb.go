@@ -480,7 +480,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
-		utils.DERIVEDCHARGERS_PREFIX}, prfx) {
+		utils.DERIVEDCHARGERS_PREFIX,
+		utils.LCR_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -517,6 +518,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetSharedGroup(dataID, false, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
 			_, err = ms.GetDerivedChargers(dataID, false, utils.NonTransactional)
+		case utils.LCR_PREFIX:
+			_, err = ms.GetLCR(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -747,12 +750,13 @@ func (ms *MongoStorage) RemoveRatingProfile(key, transactionID string) error {
 }
 
 func (ms *MongoStorage) GetLCR(key string, skipCache bool, transactionID string) (lcr *LCR, err error) {
+	cacheKey := utils.LCR_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.LCR_PREFIX + key); ok {
-			if x != nil {
-				return x.(*LCR), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*LCR), nil
 		}
 	}
 	var result struct {
@@ -762,25 +766,28 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool, transactionID string)
 	session, col := ms.conn(colLcr)
 	defer session.Close()
 	cCommit := cacheCommit(transactionID)
-	if err = col.Find(bson.M{"key": key}).One(&result); err == nil {
-		lcr = result.Value
-	} else {
-		cache.Set(utils.LCR_PREFIX+key, nil, cCommit, transactionID)
-		return nil, utils.ErrNotFound
+	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-	cache.Set(utils.LCR_PREFIX+key, lcr, cCommit, transactionID)
+	cache.Set(cacheKey, result.Value, cCommit, transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetLCR(lcr *LCR, transactionID string) error {
+func (ms *MongoStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
 	session, col := ms.conn(colLcr)
 	defer session.Close()
-	_, err := col.Upsert(bson.M{"key": lcr.GetId()}, &struct {
+	if _, err = col.Upsert(bson.M{"key": lcr.GetId()}, &struct {
 		Key   string
 		Value *LCR
-	}{lcr.GetId(), lcr})
+	}{lcr.GetId(), lcr}); err != nil {
+		return
+	}
 	cache.RemKey(utils.LCR_PREFIX+lcr.GetId(), cacheCommit(transactionID), transactionID)
-	return err
+	return
 }
 
 func (ms *MongoStorage) GetDestination(key string, skipCache bool, transactionID string) (result *Destination, err error) {

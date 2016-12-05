@@ -280,7 +280,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
-		utils.DERIVEDCHARGERS_PREFIX}, prfx) {
+		utils.DERIVEDCHARGERS_PREFIX,
+		utils.LCR_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -317,6 +318,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetSharedGroup(dataID, false, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
 			_, err = rs.GetDerivedChargers(dataID, false, utils.NonTransactional)
+		case utils.LCR_PREFIX:
+			_, err = rs.GetLCR(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -463,28 +466,36 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool, transactionID string)
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-
-			if x != nil {
-				return x.(*LCR), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*LCR), nil
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &lcr)
-	} else {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-		return nil, utils.ErrNotFound
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &lcr); err != nil {
+		return
 	}
 	cache.Set(key, lcr, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
-	result, err := rs.ms.Marshal(lcr)
+	var result []byte
+	if result, err = rs.ms.Marshal(lcr); err != nil {
+		return
+	}
 	key := utils.LCR_PREFIX + lcr.GetId()
-	err = rs.Cmd("SET", key, result).Err
+	if err = rs.Cmd("SET", key, result).Err; err != nil {
+		return
+	}
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
