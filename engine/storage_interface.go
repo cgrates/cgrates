@@ -34,6 +34,9 @@ type Storage interface {
 	GetKeysForPrefix(string) ([]string, error)
 	PreloadCacheForPrefix(string) error
 	RebuildReverseForPrefix(string) error
+	GetVersions(itm string) (vrs Versions, err error)
+	SetVersions(vrs Versions) (err error)
+	RemoveVersions(vrs Versions) (err error)
 }
 
 // Interface for storage providers.
@@ -178,6 +181,12 @@ type OnlineStorage interface {
 	MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
+}
+
+type StorDB interface {
+	CdrStorage
+	LoadReader
+	LoadWriter
 }
 
 type CdrStorage interface {

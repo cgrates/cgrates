@@ -463,3 +463,13 @@ type TpResourceLimit struct {
 	ActionTriggerIds string  `index:"7" re:""`
 	CreatedAt        time.Time
 }
+
+type TBLVersion struct {
+	ID      uint
+	Item    string
+	Version int64
+}
+
+func (t TBLVersion) TableName() string {
+	return utils.TBLVersions
+}

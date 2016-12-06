@@ -1413,3 +1413,15 @@ func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 	cache.Set(cacheKey, itemIDs, true, utils.NonTransactional)
 	return
 }
+
+func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
+	return
+}
+
+func (rs *RedisStorage) SetVersions(vrs Versions) (err error) {
+	return
+}
+
+func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
+	return
+}

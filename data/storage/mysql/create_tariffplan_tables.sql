@@ -409,4 +409,14 @@ CREATE TABLE tp_resource_limits (
   UNIQUE KEY `unique_tp_resource_limits` (`tpid`, `tag`)
 );
 
+DROP TABLE IF EXISTS versions;
+CREATE TABLE versions (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `item` varchar(64) NOT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `item` (`item`)
+);
+
+
 

@@ -64,6 +64,7 @@ const (
 	TBLSMCosts                    = "sm_costs"
 	TBLTPResourceLimits           = "tp_resource_limits"
 	TBL_CDRS                      = "cdrs"
+	TBLVersions                   = "versions"
 	TIMINGS_CSV                   = "Timings.csv"
 	DESTINATIONS_CSV              = "Destinations.csv"
 	RATES_CSV                     = "Rates.csv"

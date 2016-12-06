@@ -1365,3 +1365,50 @@ func (self *SQLStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits,
 	}
 	return tpResourceLimits, nil
 }
+
+// GetVersions returns slice of all versions or a specific version if tag is specified
+func (self *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
+	q := self.db.Model(&TBLVersion{})
+	if itm != "" {
+		q = self.db.Where(&TBLVersion{Item: itm})
+	}
+	var verModels []*TBLVersion
+	if err = q.Find(&verModels).Error; err != nil {
+		return
+	}
+	vrs = make(Versions)
+	for _, verModel := range verModels {
+		vrs[verModel.Item] = verModel.Version
+	}
+	return
+}
+
+// SetVersions will set a slice of versions, updating existing
+func (self *SQLStorage) SetVersions(vrs Versions) (err error) {
+	tx := self.db.Begin()
+	for key, val := range vrs {
+		vrModel := &TBLVersion{Item: key, Version: val}
+		if err = tx.Save(vrModel).Error; err != nil {
+			if err = tx.Model(&TBLVersion{}).Where(
+				TBLVersion{Item: vrModel.Item}).Updates(TBLVersion{Version: val}).Error; err != nil {
+				tx.Rollback()
+				return
+			}
+		}
+	}
+	tx.Commit()
+	return
+}
+
+// RemoveVersions will remove specific versions out of storage
+func (self *SQLStorage) RemoveVersions(vrs Versions) (err error) {
+	tx := self.db.Begin()
+	for key := range vrs {
+		if err = tx.Delete(&TBLVersion{Item: key}).Error; err != nil {
+			tx.Rollback()
+			return
+		}
+	}
+	tx.Commit()
+	return
+}
