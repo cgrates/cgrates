@@ -59,6 +59,7 @@ func testStorDBitFlush(t *testing.T) {
 }
 
 func testStorDBitCRUDVersions(t *testing.T) {
+	// CREATE
 	vrs := Versions{utils.COST_DETAILS: 1}
 	if err := storDB.SetVersions(vrs); err != nil {
 		t.Error(err)
@@ -68,7 +69,34 @@ func testStorDBitCRUDVersions(t *testing.T) {
 	} else if !reflect.DeepEqual(vrs, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", vrs, rcv)
 	}
+	// UPDATE
+	vrs = Versions{utils.COST_DETAILS: 2, "OTHER_KEY": 1}
+	if err := storDB.SetVersions(vrs); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := storDB.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", vrs, rcv)
+	}
+	// REMOVE
+	vrs = Versions{"OTHER_KEY": 1}
 	if err := storDB.RemoveVersions(vrs); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := storDB.GetVersions(utils.COST_DETAILS); err != nil {
+		t.Error(err)
+	} else if len(rcv) != 1 || rcv[utils.COST_DETAILS] != 2 {
+		t.Errorf("Received: %+v", rcv)
+	}
+	if _, err := storDB.GetVersions("UNKNOWN"); err != nil {
+		t.Error(err)
+	}
+	vrs = Versions{"UNKNOWN": 1}
+	if err := storDB.RemoveVersions(vrs); err != nil {
+		t.Error(err)
+	}
+	if err := storDB.RemoveVersions(nil); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := storDB.GetVersions(""); err != nil {

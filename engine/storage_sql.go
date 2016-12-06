@@ -1402,9 +1402,13 @@ func (self *SQLStorage) SetVersions(vrs Versions) (err error) {
 
 // RemoveVersions will remove specific versions out of storage
 func (self *SQLStorage) RemoveVersions(vrs Versions) (err error) {
+	if len(vrs) == 0 { // Remove all if no key provided
+		err = self.db.Delete(TBLVersion{}).Error
+		return
+	}
 	tx := self.db.Begin()
 	for key := range vrs {
-		if err = tx.Delete(&TBLVersion{Item: key}).Error; err != nil {
+		if err = tx.Where(&TBLVersion{Item: key}).Delete(TBLVersion{}).Error; err != nil {
 			tx.Rollback()
 			return
 		}
