@@ -78,18 +78,18 @@ func (srvMngr *ServiceManager) StartScheduler(waitCache bool) error {
 func (srvMngr *ServiceManager) StopScheduler() error {
 	var sched *scheduler.Scheduler
 	srvMngr.Lock()
-	schedRunning := srvMngr.sched != nil
-	if schedRunning {
+	if srvMngr.sched != nil {
 		sched = srvMngr.sched
 		srvMngr.sched = nil // optimize the lock and release here
 	}
 	srvMngr.Unlock()
-	if !schedRunning {
+	if sched == nil {
 		return utils.NewCGRError(utils.ServiceManager,
 			utils.CapitalizedMessage(utils.ServiceAlreadyRunning),
 			utils.ServiceAlreadyRunning,
 			"the scheduler is not running")
 	}
+	srvMngr.cfg.SchedulerEnabled = false
 	sched.Shutdown()
 	return nil
 }
