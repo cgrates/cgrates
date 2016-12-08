@@ -327,4 +327,5 @@ const (
 	UnsupportedMigrationTask     = "unsupported migration task"
 	NoStorDBConnection           = "not connected to StorDB"
 	UndefinedVersion             = "undefined version"
+	MetaSetVersions              = "*set_versions"
 )

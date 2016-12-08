@@ -26,13 +26,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(storDB engine.StorDB, storDBType string) *Migrator {
-	return &Migrator{storDB: storDB, storDBType: storDBType}
+func NewMigrator(storDB engine.Storage) *Migrator {
+	return &Migrator{storDB: storDB}
 }
 
 type Migrator struct {
-	storDB     engine.StorDB
-	storDBType string // Useful to convert back to real
+	storDB engine.Storage
 }
 
 func (m *Migrator) Migrate(taskID string) (err error) {
@@ -42,6 +41,13 @@ func (m *Migrator) Migrate(taskID string) (err error) {
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedMigrationTask,
 			fmt.Sprintf("task <%s> is not a supported migration task", taskID))
+	case utils.MetaSetVersions:
+		if err := m.storDB.SetVersions(engine.CurrentStorDBVersions()); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
+		}
 	case utils.MetaCostDetails:
 		err = m.migrateCostDetails()
 	}
@@ -54,9 +60,6 @@ func (m *Migrator) migrateCostDetails() (err error) {
 			utils.MandatoryIEMissingCaps,
 			utils.NoStorDBConnection,
 			"no connection to StorDB")
-	}
-	if !utils.IsSliceMember([]string{utils.MYSQL, utils.POSTGRES}, m.storDBType) {
-		return // CostDetails are migrated only for MySQL and Postgres
 	}
 	vrs, err := m.storDB.GetVersions(utils.COST_DETAILS)
 	if err != nil {

@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/migrator"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -37,7 +38,7 @@ var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
 	migrateRC8   = flag.String("migrate_rc8", "", "Migrate Accounts, Actions, ActionTriggers, DerivedChargers, ActionPlans and SharedGroups to RC8 structures, possible values: *all,*enforce,acc,atr,act,dcs,apl,shg")
-	migrate      = flag.String("migrate", "", "Fire up automatic migration <*all|*cost_details>")
+	migrate      = flag.String("migrate", "", "Fire up automatic migration <*cost_details|*set_versions>")
 	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
 	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
 	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
@@ -206,6 +207,18 @@ func main() {
 		}
 
 		log.Print("Done!")
+		return
+	}
+	if migrate != nil { // Run migrator
+		storDB, err := engine.ConfigureStorStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
+			cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := migrator.NewMigrator(storDB).Migrate(*migrate); err != nil {
+			log.Fatal(err)
+		}
+		log.Print("Done migrating!")
 		return
 	}
 	// Init necessary db connections, only if not already
