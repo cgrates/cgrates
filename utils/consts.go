@@ -322,4 +322,9 @@ const (
 	StoppedCaps                  = "STOPPED"
 	SchedulerNotRunningCaps      = "SCHEDULLER_NOT_RUNNING"
 	MetaScheduler                = "*scheduler"
+	MetaCostDetails              = "*cost_details"
+	Migrator                     = "migrator"
+	UnsupportedMigrationTask     = "unsupported migration task"
+	NoStorDBConnection           = "not connected to StorDB"
+	UndefinedVersion             = "undefined version"
 )
