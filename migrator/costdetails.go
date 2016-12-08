@@ -23,10 +23,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 )
 
-type CallCostMigrator interface {
-	AsCallCost() (*engine.CallCost, error)
-}
-
 type v1CallCost struct {
 	Direction, Category, Tenant, Subject, Account, Destination, TOR string
 	Cost                                                            float64
@@ -69,5 +65,50 @@ type v1UnitInfo struct {
 
 func (v1cc *v1CallCost) AsCallCost() (cc *engine.CallCost, err error) {
 	cc = new(engine.CallCost)
+	cc.Direction = v1cc.Direction
+	cc.Category = v1cc.Category
+	cc.Tenant = v1cc.Tenant
+	cc.Account = v1cc.Account
+	cc.Subject = v1cc.Subject
+	cc.Destination = v1cc.Destination
+	cc.TOR = v1cc.TOR
+	cc.Cost = v1cc.Cost
+	cc.Timespans = make(engine.TimeSpans, len(v1cc.Timespans))
+	for i, v1ts := range v1cc.Timespans {
+		cc.Timespans[i] = &engine.TimeSpan{TimeStart: v1ts.TimeStart,
+			TimeEnd:        v1ts.TimeEnd,
+			Cost:           v1ts.Cost,
+			RateInterval:   v1ts.RateInterval,
+			DurationIndex:  v1ts.DurationIndex,
+			Increments:     make(engine.Increments, len(v1ts.Increments)),
+			MatchedSubject: v1ts.MatchedSubject,
+			MatchedPrefix:  v1ts.MatchedPrefix,
+			MatchedDestId:  v1ts.MatchedDestId,
+			RatingPlanId:   v1ts.RatingPlanId,
+		}
+		for j, v1Incrm := range v1ts.Increments {
+			cc.Timespans[i].Increments[j] = &engine.Increment{
+				Duration:       v1Incrm.Duration,
+				Cost:           v1Incrm.Cost,
+				CompressFactor: v1Incrm.CompressFactor,
+				BalanceInfo: &engine.DebitInfo{
+					AccountID: v1Incrm.BalanceInfo.AccountId,
+				},
+			}
+			if v1Incrm.BalanceInfo.UnitBalanceUuid != "" {
+				cc.Timespans[i].Increments[j].BalanceInfo.Unit = &engine.UnitInfo{
+					UUID:          v1Incrm.BalanceInfo.UnitBalanceUuid,
+					Value:         v1Incrm.UnitInfo.Quantity,
+					DestinationID: v1Incrm.UnitInfo.DestinationId,
+					TOR:           v1Incrm.UnitInfo.TOR,
+				}
+			} else if v1Incrm.BalanceInfo.MoneyBalanceUuid != "" {
+				cc.Timespans[i].Increments[j].BalanceInfo.Monetary = &engine.MonetaryInfo{
+					UUID: v1Incrm.BalanceInfo.MoneyBalanceUuid,
+					//Value: v1Incrm.UnitInfo.Quantity,
+				}
+			}
+		}
+	}
 	return
 }

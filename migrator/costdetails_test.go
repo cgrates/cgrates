@@ -19,7 +19,6 @@ package migrator
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 )
 
@@ -31,7 +30,12 @@ func TestV1CostDetailsAsCostDetails1(t *testing.T) {
 	if err := json.Unmarshal([]byte(v1TmspsStr1), &v1tmsps); err != nil {
 		t.Error(err)
 	}
-	fmt.Printf("Timespans: %+v\n", v1tmsps[0])
+	v1CC := &v1CallCost{Timespans: v1tmsps}
+	if _, err := v1CC.AsCallCost(); err != nil {
+		t.Error(err)
+	}
+	// ToDo: Test here the content
+
 }
 
 func TestV1CostDetailsAsCostDetails2(t *testing.T) {
@@ -39,5 +43,8 @@ func TestV1CostDetailsAsCostDetails2(t *testing.T) {
 	if err := json.Unmarshal([]byte(v1TmspsStr2), &v1tmsps); err != nil {
 		t.Error(err)
 	}
-	fmt.Printf("Timespans: %+v\n", v1tmsps[0])
+	v1CC := &v1CallCost{Timespans: v1tmsps}
+	if _, err := v1CC.AsCallCost(); err != nil {
+		t.Error(err)
+	}
 }

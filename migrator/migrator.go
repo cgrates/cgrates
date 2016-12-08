@@ -70,7 +70,7 @@ func (m *Migrator) migrateCostDetails() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for CostDetails model")
 	}
-	if vrs[utils.COST_DETAILS] != 1 {
+	if vrs[utils.COST_DETAILS] != 1 { // Right now we only support migrating from version 1
 		return
 	}
 	storSQL := m.storDB.(*engine.SQLStorage)
