@@ -328,4 +328,5 @@ const (
 	NoStorDBConnection           = "not connected to StorDB"
 	UndefinedVersion             = "undefined version"
 	MetaSetVersions              = "*set_versions"
+	UnsupportedDB                = "unsupported database"
 )

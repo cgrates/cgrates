@@ -215,7 +215,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if err := migrator.NewMigrator(storDB).Migrate(*migrate); err != nil {
+		if err := migrator.NewMigrator(storDB, *stor_db_type).Migrate(*migrate); err != nil {
 			log.Fatal(err)
 		}
 		log.Print("Done migrating!")

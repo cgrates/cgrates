@@ -26,12 +26,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(storDB engine.Storage) *Migrator {
-	return &Migrator{storDB: storDB}
+func NewMigrator(storDB engine.Storage, storDBType string) *Migrator {
+	return &Migrator{storDB: storDB, storDBType: storDBType}
 }
 
 type Migrator struct {
-	storDB engine.Storage
+	storDB     engine.Storage
+	storDBType string
 }
 
 func (m *Migrator) Migrate(taskID string) (err error) {
@@ -76,8 +77,19 @@ func (m *Migrator) migrateCostDetails() (err error) {
 	if vrs[utils.COST_DETAILS] != 1 { // Right now we only support migrating from version 1
 		return
 	}
-	storSQL := m.storDB.(*engine.SQLStorage)
-	rows, err := storSQL.Db.Query("SELECT id, tor, direction, tenant, category, account, subject, destination, cost, cost_details FROM cdrs WHERE run_id!= '*raw' and cost_details NOT NULL")
+	var storSQL *sql.DB
+	switch m.storDBType {
+	case utils.MYSQL:
+		storSQL = m.storDB.(*engine.MySQLStorage).Db
+	case utils.POSTGRES:
+		storSQL = m.storDB.(*engine.PostgresStorage).Db
+	default:
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("unsupported database type: <%s>", m.storDBType))
+	}
+	rows, err := storSQL.Query("SELECT id, tor, direction, tenant, category, account, subject, destination, cost, cost_details FROM cdrs WHERE run_id!= '*raw' and cost_details IS NOT NULL AND deleted_at IS NULL")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -111,7 +123,7 @@ func (m *Migrator) migrateCostDetails() (err error) {
 				fmt.Sprintf("<Migrator> Error: <%s> when converting into CallCost CDR with id: <%d>", err.Error(), id))
 			continue
 		}
-		if _, err := storSQL.Db.Exec(fmt.Sprintf("UPDATE cdrs SET cost_details='%s' WHERE id=%d", cc.AsJSON(), id)); err != nil {
+		if _, err := storSQL.Exec(fmt.Sprintf("UPDATE cdrs SET cost_details='%s' WHERE id=%d", cc.AsJSON(), id)); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<Migrator> Error: <%s> updating CDR with id <%d> into StorDB", err.Error(), id))
 			continue
