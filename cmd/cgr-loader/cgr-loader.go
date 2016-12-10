@@ -209,7 +209,7 @@ func main() {
 		log.Print("Done!")
 		return
 	}
-	if migrate != nil { // Run migrator
+	if migrate != nil && *migrate != "" { // Run migrator
 		storDB, err := engine.ConfigureStorStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 			cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		if err != nil {
