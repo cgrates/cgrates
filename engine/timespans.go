@@ -462,6 +462,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
 	incrementCost := ts.CalculateCost() / float64(nbIncrements)
 	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:    rateIncrement,
