@@ -113,6 +113,11 @@ func (cdr *CDR) CostDetailsJson() string {
 	return string(mrshled)
 }
 
+func (cdr *CDR) AccountSummaryJson() string {
+	mrshled, _ := json.Marshal(cdr.AccountSummary)
+	return string(mrshled)
+}
+
 func (cdr *CDR) ComputeCGRID() {
 	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.UTC().String())
 }
@@ -200,7 +205,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 	case utils.COST_DETAILS:
 		return rsrFld.ParseValue(cdr.CostDetailsJson())
 	case utils.ACCOUNT_SUMMARY:
-		return rsrFld.ParseValue(cdr.AccountSummary())
+		return rsrFld.ParseValue(cdr.AccountSummaryJson())
 	case utils.PartialField:
 		return rsrFld.ParseValue(strconv.FormatBool(cdr.Partial))
 	default:

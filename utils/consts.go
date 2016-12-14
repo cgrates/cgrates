@@ -329,4 +329,5 @@ const (
 	UndefinedVersion             = "undefined version"
 	MetaSetVersions              = "*set_versions"
 	UnsupportedDB                = "unsupported database"
+	ACCOUNT_SUMMARY              = "AccountSummary"
 )
