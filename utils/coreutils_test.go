@@ -630,6 +630,15 @@ func TestClone(t *testing.T) {
 	if b != a {
 		t.Error("Expected:", a, ", received:", b)
 	}
+	// Clone from an interface
+	c := "mystr"
+	ifaceC := interface{}(c)
+	clndIface := reflect.Indirect(reflect.New(reflect.TypeOf(ifaceC))).Interface().(string)
+	if err := Clone(ifaceC, &clndIface); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ifaceC, clndIface) {
+		t.Errorf("Expecting: %+v, received: %+v", ifaceC, clndIface)
+	}
 }
 
 func TestIntPointer(t *testing.T) {

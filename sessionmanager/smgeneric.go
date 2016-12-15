@@ -450,7 +450,10 @@ func (smg *SMGeneric) replicateSessions(cgrID string) (err error) {
 		return
 	}
 	smg.aSessionsMux.RLock()
-	aSessions := smg.activeSessions[cgrID]
+	var aSessions []*SMGSession
+	if err = utils.Clone(smg.activeSessions[cgrID], &aSessions); err != nil {
+		return
+	}
 	smg.aSessionsMux.RUnlock()
 	var wg sync.WaitGroup
 	for _, rplConn := range smg.smgReplConns {

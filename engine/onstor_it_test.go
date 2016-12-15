@@ -597,3 +597,7 @@ func testOnStorITCacheAlias(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", als, rcv)
 	}
 }
+
+func testOnStorITCacheResourceLimit(t *testing.T) {
+
+}
