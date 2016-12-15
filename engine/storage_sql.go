@@ -893,14 +893,22 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		if minUsage, err := utils.ParseDurationWithSecs(qryFltr.MinUsage); err != nil {
 			return nil, 0, err
 		} else {
-			q = q.Where("usage >= ?", minUsage.Seconds())
+			if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+				q = q.Where("`usage` >= ?", minUsage.Seconds())
+			} else {
+				q = q.Where("usage >= ?", minUsage.Seconds())
+			}
 		}
 	}
 	if len(qryFltr.MaxUsage) != 0 {
 		if maxUsage, err := utils.ParseDurationWithSecs(qryFltr.MaxUsage); err != nil {
 			return nil, 0, err
 		} else {
-			q = q.Where("usage < ?", maxUsage.Seconds())
+			if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+				q = q.Where("`usage` < ?", maxUsage.Seconds())
+			} else {
+				q = q.Where("usage < ?", maxUsage.Seconds())
+			}
 		}
 
 	}
