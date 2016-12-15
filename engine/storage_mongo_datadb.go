@@ -482,7 +482,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX,
-		utils.ALIASES_PREFIX}, prfx) {
+		utils.ALIASES_PREFIX,
+		utils.ResourceLimitsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -523,6 +524,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetLCR(dataID, false, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
 			_, err = ms.GetAlias(dataID, false, utils.NonTransactional)
+		case utils.ResourceLimitsPrefix:
+			_, err = ms.GetResourceLimit(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -1710,20 +1713,26 @@ func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool, transactionI
 	key := utils.ResourceLimitsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*ResourceLimit), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*ResourceLimit), nil
 		}
 	}
 	session, col := ms.conn(colRL)
 	defer session.Close()
+	rl = new(ResourceLimit)
 	if err = col.Find(bson.M{"id": id}).One(rl); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
-		return nil, err
+		return
+	}
+	for _, fltr := range rl.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
 	}
 	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
 	return
@@ -1733,14 +1742,14 @@ func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 	session, col := ms.conn(colRL)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"id": rl.ID}, rl)
-	return err
+	return
 }
 
-func (ms *MongoStorage) RemoveResourceLimit(id string, transactionID string) error {
+func (ms *MongoStorage) RemoveResourceLimit(id string, transactionID string) (err error) {
 	session, col := ms.conn(colRL)
 	defer session.Close()
-	if err := col.Remove(bson.M{"id": id}); err != nil {
-		return err
+	if err = col.Remove(bson.M{"id": id}); err != nil {
+		return
 	}
 	cache.RemKey(utils.ResourceLimitsPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil

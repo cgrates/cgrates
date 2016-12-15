@@ -54,6 +54,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheDerivedChargers,
 	testOnStorITCacheLCR,
 	testOnStorITCacheAlias,
+	testOnStorITCacheResourceLimit,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -599,5 +600,33 @@ func testOnStorITCacheAlias(t *testing.T) {
 }
 
 func testOnStorITCacheResourceLimit(t *testing.T) {
-
+	rL := &ResourceLimit{
+		ID:     "RL2",
+		Weight: 10,
+		Filters: []*RequestFilter{
+			&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
+			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+			}},
+		ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+		ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+		Limit:          1,
+		ActionTriggers: make(ActionTriggers, 0),
+		UsageTTL:       time.Duration(1 * time.Millisecond),
+		Usage:          make(map[string]*ResourceUsage),
+	}
+	if err := onStor.SetResourceLimit(rL, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.ResourceLimitsPrefix + rL.ID); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.ResourceLimitsPrefix, []string{rL.ID}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.ResourceLimitsPrefix + rL.ID); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*ResourceLimit); !reflect.DeepEqual(rL, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", rL.ActivationTime, rcv.ActivationTime)
+	}
 }

@@ -282,7 +282,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX,
-		utils.ALIASES_PREFIX}, prfx) {
+		utils.ALIASES_PREFIX,
+		utils.ResourceLimitsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -323,6 +324,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetLCR(dataID, false, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
 			_, err = rs.GetAlias(dataID, false, utils.NonTransactional)
+		case utils.ResourceLimitsPrefix:
+			_, err = rs.GetResourceLimit(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -1312,24 +1315,32 @@ func (rs *RedisStorage) GetResourceLimit(id string, skipCache bool, transactionI
 	key := utils.ResourceLimitsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*ResourceLimit), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*ResourceLimit), nil
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &rl)
-		for _, fltr := range rl.Filters {
-			if err := fltr.CompileValues(); err != nil {
-				return nil, err
-			}
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &rl); err != nil {
+		return
+	}
+	for _, fltr := range rl.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
 		}
 	}
 	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
 	return
 }
+
 func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) error {
 	result, err := rs.ms.Marshal(rl)
 	if err != nil {
@@ -1337,13 +1348,13 @@ func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 	}
 	return rs.Cmd("SET", utils.ResourceLimitsPrefix+rl.ID, result).Err
 }
-func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) error {
+func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) (err error) {
 	key := utils.ResourceLimitsPrefix + id
-	if err := rs.Cmd("DEL", key).Err; err != nil {
-		return err
+	if err = rs.Cmd("DEL", key).Err; err != nil {
+		return
 	}
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
-	return nil
+	return
 }
 
 func (rs *RedisStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
