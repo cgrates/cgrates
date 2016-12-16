@@ -184,7 +184,6 @@ func (self *TPRatingPlanBinding) Timing() *TPTiming {
 
 // Used to rebuild a TPRatingProfile (empty RatingPlanActivations) out of it's key in nosqldb
 func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, error) {
-	// *out:cgrates.org:call:*any
 	s := strings.Split(keyId, ":")
 	if len(s) != 4 {
 		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
@@ -632,6 +631,7 @@ func (self *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) 
 	cdrFltr := &CDRsFilter{
 		CGRIDs:              self.CgrIds,
 		RunIDs:              self.MediationRunIds,
+		NotRunIDs:           []string{MetaRaw}, // In exportv1 automatically filter out *raw CDRs
 		ToRs:                self.TORs,
 		OriginHosts:         self.CdrHosts,
 		Sources:             self.CdrSources,
@@ -1089,12 +1089,13 @@ type AttrExportCdrsToFile struct {
 	ExportID                   *string  // Optional exportid
 	ExportDirectory            *string  // If provided it overwrites the configured export directory
 	ExportFileName             *string  // If provided the output filename will be set to this
-	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
+	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
 	SMSUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
 	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
+	RoundingDecimals           *int     // force rounding to this value
 	Verbose                    bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 	RPCCDRsFilter                       // Inherit the CDR filter attributes
 }

@@ -473,7 +473,17 @@ func (ms *MongoStorage) PreloadCacheForPrefix(prefix string) error {
 // prfx represents the cache prefix, ids should be nil if all available data should be loaded
 // mustBeCached specifies that data needs to be cached in order to be retrieved from db
 func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
-	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX}, prfx) {
+	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
+		utils.RATING_PLAN_PREFIX,
+		utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX,
+		utils.ACTION_PLAN_PREFIX,
+		utils.SHARED_GROUP_PREFIX,
+		utils.DERIVEDCHARGERS_PREFIX,
+		utils.LCR_PREFIX,
+		utils.ALIASES_PREFIX,
+		utils.ResourceLimitsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -481,7 +491,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 	}
 	if ids == nil {
 		if ids, err = ms.GetKeysForPrefix(prfx); err != nil {
-			return utils.NewCGRError(utils.REDIS,
+			return utils.NewCGRError(utils.MONGO,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
@@ -495,12 +505,33 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		}
 		switch prfx {
 		case utils.DESTINATION_PREFIX:
-			if _, err = ms.GetDestination(dataID, false, utils.NonTransactional); err != nil {
-				return utils.NewCGRError(utils.REDIS,
-					utils.ServerErrorCaps,
-					err.Error(),
-					fmt.Sprintf("redis error <%s> querying GetDestination for prefix: <%s>, dataID: <%s>", prfx, dataID))
-			}
+			_, err = ms.GetDestination(dataID, false, utils.NonTransactional)
+		case utils.REVERSE_DESTINATION_PREFIX:
+			_, err = ms.GetReverseDestination(dataID, false, utils.NonTransactional)
+		case utils.RATING_PLAN_PREFIX:
+			_, err = ms.GetRatingPlan(dataID, false, utils.NonTransactional)
+		case utils.RATING_PROFILE_PREFIX:
+			_, err = ms.GetRatingProfile(dataID, false, utils.NonTransactional)
+		case utils.ACTION_PREFIX:
+			_, err = ms.GetActions(dataID, false, utils.NonTransactional)
+		case utils.ACTION_PLAN_PREFIX:
+			_, err = ms.GetActionPlan(dataID, false, utils.NonTransactional)
+		case utils.SHARED_GROUP_PREFIX:
+			_, err = ms.GetSharedGroup(dataID, false, utils.NonTransactional)
+		case utils.DERIVEDCHARGERS_PREFIX:
+			_, err = ms.GetDerivedChargers(dataID, false, utils.NonTransactional)
+		case utils.LCR_PREFIX:
+			_, err = ms.GetLCR(dataID, false, utils.NonTransactional)
+		case utils.ALIASES_PREFIX:
+			_, err = ms.GetAlias(dataID, false, utils.NonTransactional)
+		case utils.ResourceLimitsPrefix:
+			_, err = ms.GetResourceLimit(dataID, false, utils.NonTransactional)
+		}
+		if err != nil {
+			return utils.NewCGRError(utils.MONGO,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error <%s> querying mongo for category: <%s>, dataID: <%s>", prfx, dataID))
 		}
 	}
 	return
@@ -602,12 +633,13 @@ func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
 }
 
 func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {
+	cacheKey := utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.RATING_PLAN_PREFIX + key); ok {
-			if x != nil {
-				return x.(*RatingPlan), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*RatingPlan), nil
 		}
 	}
 	rp = new(RatingPlan)
@@ -617,24 +649,27 @@ func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 	}
 	session, col := ms.conn(colRpl)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&kv)
-	if err == nil {
-		b := bytes.NewBuffer(kv.Value)
-		r, err := zlib.NewReader(b)
-		if err != nil {
-			return nil, err
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
 		}
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			return nil, err
-		}
-		r.Close()
-		err = ms.ms.Unmarshal(out, &rp)
-		if err != nil {
-			return nil, err
-		}
+		return
 	}
-	cache.Set(utils.RATING_PLAN_PREFIX+key, rp, cacheCommit(transactionID), transactionID)
+	b := bytes.NewBuffer(kv.Value)
+	r, err := zlib.NewReader(b)
+	if err != nil {
+		return nil, err
+	}
+	out, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	r.Close()
+	if err = ms.ms.Unmarshal(out, &rp); err != nil {
+		return nil, err
+	}
+	cache.Set(cacheKey, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -657,41 +692,48 @@ func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan, transactionID string) erro
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	cache.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.RATING_PLAN_PREFIX+rp.Id,
+		cacheCommit(transactionID), transactionID)
 	return err
 }
 
 func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool, transactionID string) (rp *RatingProfile, err error) {
+	cacheKey := utils.RATING_PROFILE_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.RATING_PROFILE_PREFIX + key); ok {
-			if x != nil {
-				return x.(*RatingProfile), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*RatingProfile), nil
 		}
 	}
-	rp = new(RatingProfile)
 	session, col := ms.conn(colRpf)
 	defer session.Close()
-	err = col.Find(bson.M{"id": key}).One(rp)
-	if err == nil {
-		cache.Set(utils.RATING_PROFILE_PREFIX+key, rp, cacheCommit(transactionID), transactionID)
-	} else {
-		cache.Set(utils.RATING_PROFILE_PREFIX+key, nil, cacheCommit(transactionID), transactionID)
+	rp = new(RatingProfile)
+	if err = col.Find(bson.M{"id": key}).One(rp); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
+	cache.Set(cacheKey, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile, transactionID string) error {
+func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile, transactionID string) (err error) {
 	session, col := ms.conn(colRpf)
 	defer session.Close()
-	_, err := col.Upsert(bson.M{"id": rp.Id}, rp)
-	if err == nil && historyScribe != nil {
+	if _, err = col.Upsert(bson.M{"id": rp.Id}, rp); err != nil {
+		return
+	}
+	if historyScribe != nil {
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(false), &response)
 	}
-	cache.RemKey(utils.RATING_PROFILE_PREFIX+rp.Id, cacheCommit(transactionID), transactionID)
-	return err
+	cache.RemKey(utils.RATING_PROFILE_PREFIX+rp.Id,
+		cacheCommit(transactionID), transactionID)
+	return
 }
 
 func (ms *MongoStorage) RemoveRatingProfile(key, transactionID string) error {
@@ -714,12 +756,13 @@ func (ms *MongoStorage) RemoveRatingProfile(key, transactionID string) error {
 }
 
 func (ms *MongoStorage) GetLCR(key string, skipCache bool, transactionID string) (lcr *LCR, err error) {
+	cacheKey := utils.LCR_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.LCR_PREFIX + key); ok {
-			if x != nil {
-				return x.(*LCR), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*LCR), nil
 		}
 	}
 	var result struct {
@@ -729,66 +772,71 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool, transactionID string)
 	session, col := ms.conn(colLcr)
 	defer session.Close()
 	cCommit := cacheCommit(transactionID)
-	if err = col.Find(bson.M{"key": key}).One(&result); err == nil {
-		lcr = result.Value
-	} else {
-		cache.Set(utils.LCR_PREFIX+key, nil, cCommit, transactionID)
-		return nil, utils.ErrNotFound
+	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-	cache.Set(utils.LCR_PREFIX+key, lcr, cCommit, transactionID)
+	cache.Set(cacheKey, result.Value, cCommit, transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetLCR(lcr *LCR, transactionID string) error {
+func (ms *MongoStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
 	session, col := ms.conn(colLcr)
 	defer session.Close()
-	_, err := col.Upsert(bson.M{"key": lcr.GetId()}, &struct {
+	if _, err = col.Upsert(bson.M{"key": lcr.GetId()}, &struct {
 		Key   string
 		Value *LCR
-	}{lcr.GetId(), lcr})
+	}{lcr.GetId(), lcr}); err != nil {
+		return
+	}
 	cache.RemKey(utils.LCR_PREFIX+lcr.GetId(), cacheCommit(transactionID), transactionID)
-	return err
+	return
 }
 
 func (ms *MongoStorage) GetDestination(key string, skipCache bool, transactionID string) (result *Destination, err error) {
+	cacheKey := utils.DESTINATION_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.DESTINATION_PREFIX + key); ok {
-			if x != nil {
-				return x.(*Destination), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*Destination), nil
 		}
 	}
-	result = new(Destination)
 	var kv struct {
 		Key   string
 		Value []byte
 	}
 	session, col := ms.conn(colDst)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&kv)
-	if err == nil {
-		b := bytes.NewBuffer(kv.Value)
-		r, err := zlib.NewReader(b)
-		if err != nil {
-			return nil, err
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
 		}
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			return nil, err
-		}
-		r.Close()
-		err = ms.ms.Unmarshal(out, &result)
-		if err != nil {
-			return nil, err
-		}
+		return
 	}
+	b := bytes.NewBuffer(kv.Value)
+	r, err := zlib.NewReader(b)
 	if err != nil {
-		result = nil
+		return nil, err
 	}
-	cache.Set(utils.DESTINATION_PREFIX+key, result, cacheCommit(transactionID), transactionID)
+	out, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	r.Close()
+	err = ms.ms.Unmarshal(out, &result)
+	if err != nil {
+		return nil, err
+	}
+	cache.Set(cacheKey, result, cacheCommit(transactionID), transactionID)
 	return
 }
+
 func (ms *MongoStorage) SetDestination(dest *Destination, transactionID string) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	if err != nil {
@@ -800,25 +848,28 @@ func (ms *MongoStorage) SetDestination(dest *Destination, transactionID string) 
 	w.Close()
 	session, col := ms.conn(colDst)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"key": dest.Id}, &struct {
+	if _, err = col.Upsert(bson.M{"key": dest.Id}, &struct {
 		Key   string
 		Value []byte
-	}{Key: dest.Id, Value: b.Bytes()})
-	cache.RemKey(utils.DESTINATION_PREFIX+dest.Id, cacheCommit(transactionID), transactionID)
-	if err == nil && historyScribe != nil {
+	}{Key: dest.Id, Value: b.Bytes()}); err != nil {
+		return
+	}
+	if historyScribe != nil {
 		var response int
 		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
+	cache.RemKey(utils.DESTINATION_PREFIX+dest.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool, transactionID string) (ids []string, err error) {
+	cacheKey := utils.REVERSE_DESTINATION_PREFIX + prefix
 	if !skipCache {
-		if x, ok := cache.Get(utils.REVERSE_DESTINATION_PREFIX + prefix); ok {
-			if x != nil {
-				return x.([]string), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.([]string), nil
 		}
 	}
 	var result struct {
@@ -827,24 +878,27 @@ func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool, tra
 	}
 	session, col := ms.conn(colRds)
 	defer session.Close()
-	err = col.Find(bson.M{"key": prefix}).One(&result)
-	if err == nil {
-		ids = result.Value
+	if err = col.Find(bson.M{"key": prefix}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-	cache.Set(utils.REVERSE_DESTINATION_PREFIX+prefix, ids, cacheCommit(transactionID), transactionID)
+	ids = result.Value
+	cache.Set(cacheKey, ids, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (ms *MongoStorage) SetReverseDestination(dest *Destination, transactionID string) (err error) {
 	session, col := ms.conn(colRds)
 	defer session.Close()
-	cCommig := cacheCommit(transactionID)
+	cCommit := cacheCommit(transactionID)
 	for _, p := range dest.Prefixes {
-		_, err = col.Upsert(bson.M{"key": p}, bson.M{"$addToSet": bson.M{"value": dest.Id}})
-		if err != nil {
+		if _, err = col.Upsert(bson.M{"key": p}, bson.M{"$addToSet": bson.M{"value": dest.Id}}); err != nil {
 			break
 		}
-		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+p, cCommig, transactionID)
+		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+p, cCommit, transactionID)
 	}
 	return
 }
@@ -933,8 +987,9 @@ func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 }
 
 func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
+	cacheKey := utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, err := cache.GetCloned(utils.ACTION_PREFIX + key); err != nil {
+		if x, err := cache.GetCloned(cacheKey); err != nil {
 			if err.Error() != utils.ItemNotFound {
 				return nil, err
 			}
@@ -950,10 +1005,14 @@ func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID str
 	}
 	session, col := ms.conn(colAct)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&result)
-	if err == nil {
-		as = result.Value
+	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
+	as = result.Value
 	cache.Set(utils.ACTION_PREFIX+key, as, cacheCommit(transactionID), transactionID)
 	return
 }
@@ -978,30 +1037,35 @@ func (ms *MongoStorage) RemoveActions(key string, transactionID string) error {
 }
 
 func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool, transactionID string) (sg *SharedGroup, err error) {
+	cacheKey := utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.SHARED_GROUP_PREFIX + key); ok {
-			if x != nil {
-				return x.(*SharedGroup), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*SharedGroup), nil
 		}
 	}
 	session, col := ms.conn(colShg)
 	defer session.Close()
 	sg = &SharedGroup{}
-	err = col.Find(bson.M{"id": key}).One(sg)
-	if err == nil {
-		cache.Set(utils.SHARED_GROUP_PREFIX+key, sg, cacheCommit(transactionID), transactionID)
-	} else {
-		cache.Set(utils.SHARED_GROUP_PREFIX+key, nil, cacheCommit(transactionID), transactionID)
+	if err = col.Find(bson.M{"id": key}).One(sg); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
+	cache.Set(cacheKey, sg, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (ms *MongoStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
 	session, col := ms.conn(colShg)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"id": sg.Id}, sg)
+	if _, err = col.Upsert(bson.M{"id": sg.Id}, sg); err != nil {
+		return
+	}
 	cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
 	return err
 }
@@ -1145,19 +1209,16 @@ func (ms *MongoStorage) RemoveUser(key string) (err error) {
 }
 
 func (ms *MongoStorage) GetAlias(key string, skipCache bool, transactionID string) (al *Alias, err error) {
-	origKey := key
-	key = utils.ALIASES_PREFIX + key
+	cacheKey := utils.ALIASES_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				al = &Alias{Values: x.(AliasValues)}
-				al.SetId(origKey)
-				return al, nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			al = x.(*Alias)
+			return
 		}
 	}
-
 	var kv struct {
 		Key   string
 		Value AliasValues
@@ -1165,26 +1226,28 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool, transactionID strin
 	session, col := ms.conn(colAls)
 	defer session.Close()
 	cCommit := cacheCommit(transactionID)
-	if err = col.Find(bson.M{"key": origKey}).One(&kv); err == nil {
-		al = &Alias{Values: kv.Value}
-		al.SetId(origKey)
-		if err == nil {
-			cache.Set(key, al.Values, cCommit, transactionID)
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
 		}
-	} else {
-		cache.Set(key, nil, cCommit, transactionID)
-		return nil, utils.ErrNotFound
+		return
 	}
+	al = &Alias{Values: kv.Value}
+	al.SetId(key)
+	cache.Set(cacheKey, al, cCommit, transactionID)
 	return
 }
 
 func (ms *MongoStorage) SetAlias(al *Alias, transactionID string) (err error) {
 	session, col := ms.conn(colAls)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"key": al.GetId()}, &struct {
+	if _, err = col.Upsert(bson.M{"key": al.GetId()}, &struct {
 		Key   string
 		Value AliasValues
-	}{Key: al.GetId(), Value: al.Values})
+	}{Key: al.GetId(), Value: al.Values}); err != nil {
+		return
+	}
 	cache.RemKey(utils.ALIASES_PREFIX+al.GetId(), cacheCommit(transactionID), transactionID)
 	return err
 }
@@ -1414,8 +1477,9 @@ func (ms *MongoStorage) RemoveActionTriggers(key string, transactionID string) e
 }
 
 func (ms *MongoStorage) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
+	cacheKey := utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
-		if x, err := cache.GetCloned(utils.ACTION_PLAN_PREFIX + key); err != nil {
+		if x, err := cache.GetCloned(cacheKey); err != nil {
 			if err.Error() != utils.ItemNotFound { // Only consider cache if item was found
 				return nil, err
 			}
@@ -1431,39 +1495,42 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool, transactionID 
 	}
 	session, col := ms.conn(colApl)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&kv)
-	if err == nil {
-		b := bytes.NewBuffer(kv.Value)
-		r, err := zlib.NewReader(b)
-		if err != nil {
-			return nil, err
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
 		}
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			return nil, err
-		}
-		r.Close()
-		err = ms.ms.Unmarshal(out, &ats)
-		if err != nil {
-			return nil, err
-		}
+		return
 	}
-	cache.Set(utils.ACTION_PLAN_PREFIX+key, ats, cacheCommit(transactionID), transactionID)
+	b := bytes.NewBuffer(kv.Value)
+	r, err := zlib.NewReader(b)
+	if err != nil {
+		return nil, err
+	}
+	out, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	r.Close()
+	if err = ms.ms.Unmarshal(out, &ats); err != nil {
+		return nil, err
+	}
+	cache.Set(cacheKey, ats, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool, transactionID string) error {
+func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool, transactionID string) (err error) {
 	session, col := ms.conn(colApl)
 	defer session.Close()
+	dbKey := utils.ACTION_PLAN_PREFIX + key
 	// clean dots from account ids map
 	cCommit := cacheCommit(transactionID)
 	if len(ats.ActionTimings) == 0 {
-		cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
-		err := col.Remove(bson.M{"key": key})
-		if err != mgo.ErrNotFound {
-			return err
+		cache.RemKey(dbKey, cCommit, transactionID)
+		if err = col.Remove(bson.M{"key": key}); err != nil && err == mgo.ErrNotFound {
+			err = nil // NotFound is good
 		}
-		return nil
+		return
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
@@ -1484,11 +1551,13 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	_, err = col.Upsert(bson.M{"key": key}, &struct {
+	if _, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value []byte
-	}{Key: key, Value: b.Bytes()})
-	cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+	}{Key: key, Value: b.Bytes()}); err != nil {
+		return
+	}
+	cache.RemKey(dbKey, cCommit, transactionID)
 	return err
 }
 
@@ -1534,12 +1603,13 @@ func (ms *MongoStorage) PopTask() (t *Task, err error) {
 }
 
 func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
+	cacheKey := utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.DERIVEDCHARGERS_PREFIX + key); ok {
-			if x != nil {
-				return x.(*utils.DerivedChargers), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*utils.DerivedChargers), nil
 		}
 	}
 	var kv struct {
@@ -1548,37 +1618,41 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool, transacti
 	}
 	session, col := ms.conn(colDcs)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&kv)
 	cCommit := cacheCommit(transactionID)
-	if err == nil {
-		dcs = kv.Value
-	} else {
-		cache.Set(utils.DERIVEDCHARGERS_PREFIX+key, nil, cCommit, transactionID)
-		return nil, utils.ErrNotFound
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cCommit, transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-	cache.Set(utils.DERIVEDCHARGERS_PREFIX+key, dcs, cCommit, transactionID)
+	dcs = kv.Value
+	cache.Set(cacheKey, dcs, cCommit, transactionID)
 	return
 }
 
 func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
+	cacheKey := utils.DERIVEDCHARGERS_PREFIX + key
 	if dcs == nil || len(dcs.Chargers) == 0 {
-		cache.RemKey(utils.DERIVEDCHARGERS_PREFIX+key, cCommit, transactionID)
+
 		session, col := ms.conn(colDcs)
 		defer session.Close()
-		err = col.Remove(bson.M{"key": key})
-		if err != mgo.ErrNotFound {
-			return err
+		if err = col.Remove(bson.M{"key": key}); err != nil && err != mgo.ErrNotFound {
+			return
 		}
+		cache.RemKey(cacheKey, cCommit, transactionID)
 		return nil
 	}
 	session, col := ms.conn(colDcs)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"key": key}, &struct {
+	if _, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value *utils.DerivedChargers
-	}{Key: key, Value: dcs})
-	cache.RemKey(utils.DERIVEDCHARGERS_PREFIX+key, cCommit, transactionID)
+	}{Key: key, Value: dcs}); err != nil {
+		return
+	}
+	cache.RemKey(cacheKey, cCommit, transactionID)
 	return err
 }
 
@@ -1639,20 +1713,26 @@ func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool, transactionI
 	key := utils.ResourceLimitsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*ResourceLimit), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*ResourceLimit), nil
 		}
 	}
 	session, col := ms.conn(colRL)
 	defer session.Close()
+	rl = new(ResourceLimit)
 	if err = col.Find(bson.M{"id": id}).One(rl); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
-		return nil, err
+		return
+	}
+	for _, fltr := range rl.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
 	}
 	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
 	return
@@ -1662,14 +1742,14 @@ func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 	session, col := ms.conn(colRL)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"id": rl.ID}, rl)
-	return err
+	return
 }
 
-func (ms *MongoStorage) RemoveResourceLimit(id string, transactionID string) error {
+func (ms *MongoStorage) RemoveResourceLimit(id string, transactionID string) (err error) {
 	session, col := ms.conn(colRL)
 	defer session.Close()
-	if err := col.Remove(bson.M{"id": id}); err != nil {
-		return err
+	if err = col.Remove(bson.M{"id": id}); err != nil {
+		return
 	}
 	cache.RemKey(utils.ResourceLimitsPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil

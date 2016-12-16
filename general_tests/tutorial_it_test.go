@@ -21,8 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -1345,6 +1347,57 @@ func TestTutITPrepaidCDRWithoutSMCost(t *testing.T) {
 			}
 		}
 	*/
+}
+
+func TestTutITExportCDR(t *testing.T) {
+	cdr := &engine.CDR{ToR: utils.VOICE, OriginID: "testexportcdr1", OriginHost: "192.168.1.1", Source: "TestTutITExportCDR", RequestType: utils.META_RATED,
+		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
+		SetupTime: time.Date(2016, 11, 30, 17, 5, 24, 0, time.UTC), AnswerTime: time.Date(2016, 11, 30, 17, 6, 4, 0, time.UTC),
+		Usage: time.Duration(98) * time.Second, Supplier: "suppl1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
+	cdr.ComputeCGRID()
+	var reply string
+	if err := tutLocalRpc.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(50) * time.Millisecond) // Give time for CDR to be processed
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
+	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].OriginID != cdr.OriginID {
+			t.Errorf("Unexpected OriginID for Cdr received: %+v", cdrs[0])
+		}
+		if cdrs[0].Cost != 1.3334 {
+			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
+		}
+	}
+	var replyExport utils.ExportedFileCdrs
+	exportArgs := utils.AttrExportCdrsToFile{ExportDirectory: utils.StringPointer("/tmp"),
+		ExportFileName: utils.StringPointer("TestTutITExportCDR.csv"),
+		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
+		RPCCDRsFilter:  utils.RPCCDRsFilter{CGRIDs: []string{cdr.CGRID}, NotRunIDs: []string{utils.MetaRaw}}}
+	if err := tutLocalRpc.Call("ApierV2.ExportCdrsToFile", exportArgs, &replyExport); err != nil {
+		t.Error(err)
+	}
+	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.3334,RETA
+f0a92222a7d21b4d9f72744aabe82daef52e20d8,derived_run1,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.3334,RETA
+`
+	expFilePath := path.Join(*exportArgs.ExportDirectory, *exportArgs.ExportFileName)
+	if expContent, err := ioutil.ReadFile(expFilePath); err != nil {
+		t.Error(err)
+	} else if eExportContent != string(expContent) {
+		t.Errorf("Expecting: <%q>, received: <%q>", eExportContent, string(expContent))
+	}
+	if err := os.Remove(expFilePath); err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestTutITStopCgrEngine(t *testing.T) {

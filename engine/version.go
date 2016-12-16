@@ -238,3 +238,10 @@ func (sv *StructVersion) CompareAndMigrate(dbVer *StructVersion) []*MigrationInf
 	}
 	return migrationInfoList
 }
+
+func CurrentStorDBVersions() Versions {
+	return Versions{utils.COST_DETAILS: 2}
+}
+
+// Versions will keep trac of various item versions
+type Versions map[string]int64 // map[item]versionNr

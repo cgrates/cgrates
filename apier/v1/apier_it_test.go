@@ -37,6 +37,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -99,18 +100,9 @@ func TestApierInitStorDb(t *testing.T) {
 
 // Finds cgr-engine executable and starts it with default configuration
 func TestApierStartEngine(t *testing.T) {
-	enginePath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		t.Fatal("Cannot find cgr-engine executable")
+	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
+		t.Fatal(err)
 	}
-	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	engine := exec.Command(enginePath, "-config_dir", cfgPath)
-	//engine.Stderr = os.Stderr
-	if err := engine.Start(); err != nil {
-		t.Fatal("Cannot start cgr-engine: ", err.Error())
-	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
 }
 
 // Connect rpc client to rater
@@ -1612,6 +1604,49 @@ func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromStorDb: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.LoadTariffPlanFromStorDb got reply: ", reply)
+	}
+}
+
+func TestApierStartStopServiceStatus(t *testing.T) {
+	var reply string
+	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.RunningCaps {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.StopService", servmanager.ArgStartService{ServiceID: "INVALID"},
+		&reply); err == nil || err.Error() != utils.UnsupportedServiceIDCaps {
+		t.Error(err)
+	}
+	if err := rater.Call("ApierV1.StopService", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.StoppedCaps {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.StartService", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.RunningCaps {
+		t.Errorf("Received: <%s>", reply)
+	}
+	if err := rater.Call("ApierV1.ReloadScheduler", reply, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadScheduler: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.ReloadScheduler got reply: ", reply)
 	}
 }
 

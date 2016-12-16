@@ -102,8 +102,12 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
+	roundingDecimals := self.Config.RoundingDecimals
+	if attr.RoundingDecimals != nil {
+		roundingDecimals = *attr.RoundingDecimals
+	}
 	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, ExportID, dataUsageMultiplyFactor, SMSUsageMultiplyFactor,
-		MMSUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor, self.Config.RoundingDecimals, self.Config.HttpSkipTlsVerify)
+		MMSUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

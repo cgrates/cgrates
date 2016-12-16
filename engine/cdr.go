@@ -41,7 +41,7 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 		}
 	}
 	if len(cdr.CGRID) == 0 { // Populate CGRID if not present
-		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.UTC().String())
+		cdr.ComputeCGRID()
 	}
 	if extCdr.AnswerTime != "" {
 		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime, timezone); err != nil {
@@ -111,6 +111,15 @@ type CDR struct {
 func (cdr *CDR) CostDetailsJson() string {
 	mrshled, _ := json.Marshal(cdr.CostDetails)
 	return string(mrshled)
+}
+
+func (cdr *CDR) AccountSummaryJson() string {
+	mrshled, _ := json.Marshal(cdr.AccountSummary)
+	return string(mrshled)
+}
+
+func (cdr *CDR) ComputeCGRID() {
+	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.UTC().String())
 }
 
 // Used to multiply usage on export
@@ -195,6 +204,8 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(strconv.FormatFloat(cdr.Cost, 'f', -1, 64)) // Recommended to use FormatCost
 	case utils.COST_DETAILS:
 		return rsrFld.ParseValue(cdr.CostDetailsJson())
+	case utils.ACCOUNT_SUMMARY:
+		return rsrFld.ParseValue(cdr.AccountSummaryJson())
 	case utils.PartialField:
 		return rsrFld.ParseValue(strconv.FormatBool(cdr.Partial))
 	default:
@@ -705,13 +716,6 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (string, error) 
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
 		switch rsrFld.Id {
-		case utils.COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
-			if cdr.CostDetails == nil {
-				cdrVal = ""
-			} else {
-				jsonVal, _ := json.Marshal(cdr.CostDetails)
-				cdrVal = string(jsonVal)
-			}
 		case utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits, cfgCdrFld.RoundingDecimals)
 		case utils.USAGE:

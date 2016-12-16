@@ -630,6 +630,15 @@ func TestClone(t *testing.T) {
 	if b != a {
 		t.Error("Expected:", a, ", received:", b)
 	}
+	// Clone from an interface
+	c := "mystr"
+	ifaceC := interface{}(c)
+	clndIface := reflect.Indirect(reflect.New(reflect.TypeOf(ifaceC))).Interface().(string)
+	if err := Clone(ifaceC, &clndIface); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ifaceC, clndIface) {
+		t.Errorf("Expecting: %+v, received: %+v", ifaceC, clndIface)
+	}
 }
 
 func TestIntPointer(t *testing.T) {
@@ -730,5 +739,11 @@ func TestLess(t *testing.T) {
 	expected := false
 	if t1.Less(0, 1) != expected {
 		t.Error("Expected:", expected, ", received:", t1.Less(1, 2))
+	}
+}
+
+func TestCapitalizedMessage(t *testing.T) {
+	if capMsg := CapitalizedMessage(ServiceAlreadyRunning); capMsg != "SERVICE_ALREADY_RUNNING" {
+		t.Errorf("Received: <%s>", capMsg)
 	}
 }

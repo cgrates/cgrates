@@ -28,24 +28,29 @@ import (
 )
 
 type Scheduler struct {
-	queue       engine.ActionTimingPriorityList
-	timer       *time.Timer
-	restartLoop chan bool
-	sync.Mutex
+	sync.RWMutex
+	queue            engine.ActionTimingPriorityList
+	timer            *time.Timer
+	restartLoop      chan bool
 	storage          engine.RatingStorage
 	schedulerStarted bool
 }
 
 func NewScheduler(storage engine.RatingStorage) *Scheduler {
-	return &Scheduler{
+	s := &Scheduler{
 		restartLoop: make(chan bool),
 		storage:     storage,
 	}
+	s.Reload()
+	return s
 }
 
 func (s *Scheduler) Loop() {
 	s.schedulerStarted = true
 	for {
+		if !s.schedulerStarted { // shutdown requested
+			break
+		}
 		for len(s.queue) == 0 { //hang here if empty
 			<-s.restartLoop
 		}
@@ -86,7 +91,7 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) Reload(protect bool) {
+func (s *Scheduler) Reload() {
 	s.loadActionPlans()
 	s.restart()
 }
@@ -153,6 +158,17 @@ func (s *Scheduler) restart() {
 	}
 }
 
-func (s *Scheduler) GetQueue() engine.ActionTimingPriorityList {
-	return s.queue
+func (s *Scheduler) GetQueue() (queue engine.ActionTimingPriorityList) {
+	s.RLock()
+	utils.Clone(s.queue, &queue)
+	defer s.RUnlock()
+	return queue
+}
+
+func (s *Scheduler) Shutdown() {
+	s.schedulerStarted = false // disable loop on next run
+	s.restartLoop <- true      // cancel waiting tasks
+	if s.timer != nil {
+		s.timer.Stop()
+	}
 }

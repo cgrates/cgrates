@@ -623,3 +623,10 @@ func (slc Int64Slice) Swap(i, j int) {
 func (slc Int64Slice) Less(i, j int) bool {
 	return slc[i] < slc[j]
 }
+
+// CapitalizeErrorMessage returns the capitalized version of an error, useful in APIs
+func CapitalizedMessage(errMessage string) (capStr string) {
+	capStr = strings.ToUpper(errMessage)
+	capStr = strings.Replace(capStr, " ", "_", -1)
+	return
+}

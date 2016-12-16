@@ -1260,3 +1260,15 @@ func (ms *MapStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs ut
 	cache.Set(dbKey+fieldValKey, itemIDs, true, utils.NonTransactional)
 	return
 }
+
+func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
+	return
+}
+
+func (ms *MapStorage) SetVersions(vrs Versions) (err error) {
+	return
+}
+
+func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
+	return
+}

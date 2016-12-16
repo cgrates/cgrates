@@ -713,7 +713,18 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("Filter on DestinationPrefix and NotDestinationPrefix, unexpected number of CDRs returned: %+v", CDRs)
 	}
-
+	// Filter on MinUsage
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinUsage: "125"}, false); err != nil {
+		return err
+	} else if len(CDRs) != 2 {
+		return fmt.Errorf("Filter on MinUsage, unexpected number of CDRs returned: %d", len(CDRs))
+	}
+	// Filter on MaxUsage
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxUsage: "1ms"}, false); err != nil {
+		return err
+	} else if len(CDRs) != 1 {
+		return fmt.Errorf("Unexpected number of CDRs returned: %d", len(CDRs))
+	}
 	// Filter on MaxCost
 	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxCost: utils.Float64Pointer(0.0)}, false); err != nil {

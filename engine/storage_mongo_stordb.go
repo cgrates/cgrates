@@ -979,3 +979,15 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	}
 	return cdrs, 0, nil
 }
+
+func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
+	return
+}
+
+func (ms *MongoStorage) SetVersions(vrs Versions) (err error) {
+	return
+}
+
+func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
+	return
+}

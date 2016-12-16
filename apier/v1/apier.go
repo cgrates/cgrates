@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/scheduler"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -43,12 +43,12 @@ type ApierV1 struct {
 	RatingDb    engine.RatingStorage
 	AccountDb   engine.AccountingStorage
 	CdrDb       engine.CdrStorage
-	Sched       *scheduler.Scheduler
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
 	CdrStatsSrv rpcclient.RpcClientConnection
 	Users       rpcclient.RpcClientConnection
 	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
+	ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -333,9 +333,11 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
 
-	if len(aps) != 0 && self.Sched != nil {
-		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
-		self.Sched.Reload(true)
+	if len(aps) != 0 {
+		sched := self.ServManager.GetScheduler()
+		if sched != nil {
+			sched.Reload()
+		}
 	}
 
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
@@ -452,20 +454,20 @@ type V1TPActions struct {
 }
 
 type V1TPAction struct {
-	Identifier      string  // Identifier mapped in the code
-	BalanceId       string  // Balance identification string (account scope)
-	BalanceUuid     string  // Balance identification string (global scope)
-	BalanceType     string  // Type of balance the action will operate on
-	Directions      string  // Balance direction
-	Units           float64 // Number of units to add/deduct
-	ExpiryTime      string  // Time when the units will expire
-	Filter          string  // The condition on balances that is checked before the action
-	TimingTags      string  // Timing when balance is active
-	DestinationIds  string  // Destination profile id
-	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
-	Categories      string  // category filter for balances
-	SharedGroups    string  // Reference to a shared group
-	BalanceWeight   string  // Balance weight
+	Identifier      string   // Identifier mapped in the code
+	BalanceId       string   // Balance identification string (account scope)
+	BalanceUuid     string   // Balance identification string (global scope)
+	BalanceType     string   // Type of balance the action will operate on
+	Directions      string   // Balance direction
+	Units           float64  // Number of units to add/deduct
+	ExpiryTime      string   // Time when the units will expire
+	Filter          string   // The condition on balances that is checked before the action
+	TimingTags      string   // Timing when balance is active
+	DestinationIds  string   // Destination profile id
+	RatingSubject   string   // Reference a rate subject defined in RatingProfiles
+	Categories      string   // category filter for balances
+	SharedGroups    string   // Reference to a shared group
+	BalanceWeight   *float64 // Balance weight
 	ExtraParameters string
 	BalanceBlocker  string
 	BalanceDisabled string
@@ -494,15 +496,6 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) error {
 	}
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
-		var weight *float64
-		if apiAct.BalanceWeight != "" {
-			if x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64); err == nil {
-				weight = &x
-			} else {
-				return err
-			}
-		}
-
 		a := &engine.Action{
 			Id:               attrs.ActionsId,
 			ActionType:       apiAct.Identifier,
@@ -515,7 +508,7 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) error {
 				ID:             utils.StringPointer(apiAct.BalanceId),
 				Type:           utils.StringPointer(apiAct.BalanceType),
 				Value:          &utils.ValueFormula{Static: apiAct.Units},
-				Weight:         weight,
+				Weight:         apiAct.BalanceWeight,
 				Directions:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Directions)),
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
 				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
@@ -630,10 +623,11 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler {
-		if self.Sched == nil {
-			return errors.New("SCHEDULER_NOT_ENABLED")
+		sched := self.ServManager.GetScheduler()
+		if sched == nil {
+			return errors.New(utils.SchedulerNotRunningCaps)
 		}
-		self.Sched.Reload(true)
+		sched.Reload()
 	}
 	*reply = OK
 	return nil
@@ -681,19 +675,21 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if self.Sched != nil {
-		self.Sched.Reload(true)
+	sched := self.ServManager.GetScheduler()
+	if sched != nil {
+		sched.Reload()
 	}
 	*reply = OK
 	return nil
 }
 
-func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
-	if self.Sched == nil {
-		return utils.ErrNotFound
+func (self *ApierV1) ReloadScheduler(ignore string, reply *string) error {
+	sched := self.ServManager.GetScheduler()
+	if sched == nil {
+		return errors.New(utils.SchedulerNotRunningCaps)
 	}
-	self.Sched.Reload(true)
-	*reply = OK
+	sched.Reload()
+	*reply = utils.OK
 	return nil
 }
 
@@ -937,10 +933,11 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	cache.Flush()
 	self.RatingDb.PreloadRatingCache()
 	self.AccountDb.PreloadAccountingCache()
-
-	if len(aps) != 0 && self.Sched != nil {
-		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
-		self.Sched.Reload(true)
+	if len(aps) != 0 {
+		sched := self.ServManager.GetScheduler()
+		if sched != nil {
+			sched.Reload()
+		}
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
 		var out int
@@ -1117,4 +1114,16 @@ func (self *ApierV1) RemoteUnlock(lockIDs []string, reply *string) error {
 	engine.Guardian.UnguardIDs(lockIDs...)
 	*reply = utils.OK
 	return nil
+}
+
+func (v1 *ApierV1) StartService(args servmanager.ArgStartService, reply *string) (err error) {
+	return v1.ServManager.V1StartService(args, reply)
+}
+
+func (v1 *ApierV1) StopService(args servmanager.ArgStartService, reply *string) (err error) {
+	return v1.ServManager.V1StopService(args, reply)
+}
+
+func (v1 *ApierV1) ServiceStatus(args servmanager.ArgStartService, reply *string) (err error) {
+	return v1.ServManager.V1ServiceStatus(args, reply)
 }

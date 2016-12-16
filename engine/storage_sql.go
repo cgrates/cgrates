@@ -893,14 +893,22 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		if minUsage, err := utils.ParseDurationWithSecs(qryFltr.MinUsage); err != nil {
 			return nil, 0, err
 		} else {
-			q = q.Where("usage >= ?", minUsage.Seconds())
+			if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+				q = q.Where("`usage` >= ?", minUsage.Seconds())
+			} else {
+				q = q.Where("usage >= ?", minUsage.Seconds())
+			}
 		}
 	}
 	if len(qryFltr.MaxUsage) != 0 {
 		if maxUsage, err := utils.ParseDurationWithSecs(qryFltr.MaxUsage); err != nil {
 			return nil, 0, err
 		} else {
-			q = q.Where("usage < ?", maxUsage.Seconds())
+			if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+				q = q.Where("`usage` < ?", maxUsage.Seconds())
+			} else {
+				q = q.Where("usage < ?", maxUsage.Seconds())
+			}
 		}
 
 	}
@@ -1364,4 +1372,55 @@ func (self *SQLStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits,
 		return nil, err
 	}
 	return tpResourceLimits, nil
+}
+
+// GetVersions returns slice of all versions or a specific version if tag is specified
+func (self *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
+	q := self.db.Model(&TBLVersion{})
+	if itm != "" {
+		q = self.db.Where(&TBLVersion{Item: itm})
+	}
+	var verModels []*TBLVersion
+	if err = q.Find(&verModels).Error; err != nil {
+		return
+	}
+	vrs = make(Versions)
+	for _, verModel := range verModels {
+		vrs[verModel.Item] = verModel.Version
+	}
+	return
+}
+
+// SetVersions will set a slice of versions, updating existing
+func (self *SQLStorage) SetVersions(vrs Versions) (err error) {
+	tx := self.db.Begin()
+	for key, val := range vrs {
+		vrModel := &TBLVersion{Item: key, Version: val}
+		if err = tx.Save(vrModel).Error; err != nil {
+			if err = tx.Model(&TBLVersion{}).Where(
+				TBLVersion{Item: vrModel.Item}).Updates(TBLVersion{Version: val}).Error; err != nil {
+				tx.Rollback()
+				return
+			}
+		}
+	}
+	tx.Commit()
+	return
+}
+
+// RemoveVersions will remove specific versions out of storage
+func (self *SQLStorage) RemoveVersions(vrs Versions) (err error) {
+	if len(vrs) == 0 { // Remove all if no key provided
+		err = self.db.Delete(TBLVersion{}).Error
+		return
+	}
+	tx := self.db.Begin()
+	for key := range vrs {
+		if err = tx.Where(&TBLVersion{Item: key}).Delete(TBLVersion{}).Error; err != nil {
+			tx.Rollback()
+			return
+		}
+	}
+	tx.Commit()
+	return
 }

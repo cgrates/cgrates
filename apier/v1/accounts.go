@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -130,8 +131,12 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
 	}
-	if attrs.ReloadScheduler && self.Sched != nil {
-		self.Sched.Reload(true)
+	if attrs.ReloadScheduler {
+		sched := self.ServManager.GetScheduler()
+		if sched == nil {
+			return errors.New(utils.SchedulerNotRunningCaps)
+		}
+		sched.Reload()
 	}
 	*reply = OK
 	return nil
@@ -235,10 +240,11 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		return utils.NewErrServerError(err)
 	}
 	if attr.ReloadScheduler && schedulerReloadNeeded {
-		// reload scheduler
-		if self.Sched != nil {
-			self.Sched.Reload(true)
+		sched := self.ServManager.GetScheduler()
+		if sched == nil {
+			return errors.New(utils.SchedulerNotRunningCaps)
 		}
+		sched.Reload()
 	}
 	*reply = OK // This will mark saving of the account, error still can show up in actionTimingsId
 	return nil
@@ -288,12 +294,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if attr.ReloadScheduler && len(dirtyActionPlans) > 0 {
-		// reload scheduler
-		if self.Sched != nil {
-			self.Sched.Reload(true)
-		}
-	}
+
 	*reply = OK
 	return nil
 }

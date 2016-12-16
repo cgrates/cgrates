@@ -39,6 +39,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/scheduler"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -412,22 +413,20 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, cdrDb engine
 	internalCdrSChan <- cdrServer // Signal that cdrS is operational
 }
 
-func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneChan chan struct{}, ratingDb engine.RatingStorage, exitChan chan bool) {
+func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneChan chan struct{}, ratingDB engine.RatingStorage, exitChan chan bool) {
 	// Wait for cache to load data before starting
 	cacheDone := <-cacheDoneChan
 	cacheDoneChan <- cacheDone
 	utils.Logger.Info("Starting CGRateS Scheduler.")
-	sched := scheduler.NewScheduler(ratingDb)
-	go reloadSchedulerSingnalHandler(sched, ratingDb)
-	time.Sleep(1)
+	sched := scheduler.NewScheduler(ratingDB)
 	internalSchedulerChan <- sched
-	sched.Reload(true)
+
 	sched.Loop()
 	exitChan <- true // Should not get out of loop though
 }
 
-func startCdrStats(internalCdrStatSChan chan rpcclient.RpcClientConnection, ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, server *utils.Server) {
-	cdrStats := engine.NewStats(ratingDb, accountDb, cfg.CDRStatsSaveInterval)
+func startCdrStats(internalCdrStatSChan chan rpcclient.RpcClientConnection, ratingDB engine.RatingStorage, accountDb engine.AccountingStorage, server *utils.Server) {
+	cdrStats := engine.NewStats(ratingDB, accountDb, cfg.CDRStatsSaveInterval)
 	server.RpcRegister(cdrStats)
 	server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
 	internalCdrStatSChan <- cdrStats
@@ -616,19 +615,19 @@ func main() {
 	// Init cache
 	cache.NewCache(cfg.CacheConfig)
 
-	var ratingDb engine.RatingStorage
+	var ratingDB engine.RatingStorage
 	var accountDb engine.AccountingStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	if cfg.RALsEnabled || cfg.SchedulerEnabled || cfg.CDRStatsEnabled { // Only connect to dataDb if necessary
-		ratingDb, err = engine.ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort,
+		ratingDB, err = engine.ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort,
 			cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
 		}
-		defer ratingDb.Close()
-		engine.SetRatingStorage(ratingDb)
+		defer ratingDB.Close()
+		engine.SetRatingStorage(ratingDB)
 	}
 	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled || cfg.AliasesServerEnabled || cfg.UserServerEnabled {
 		accountDb, err = engine.ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
@@ -672,7 +671,6 @@ func main() {
 	internalBalancerChan := make(chan *balancer2go.Balancer, 1)
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
 	cacheDoneChan := make(chan struct{}, 1)
-	internalSchedulerChan := make(chan *scheduler.Scheduler, 1)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrStatSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalHistorySChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -681,6 +679,10 @@ func main() {
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan *sessionmanager.SMGeneric, 1)
 	internalRLSChan := make(chan rpcclient.RpcClientConnection, 1)
+
+	// Start ServiceManager
+	srvManager := servmanager.NewServiceManager(cfg, ratingDB, exitChan, cacheDoneChan)
+
 	// Start balancer service
 	if cfg.BalancerEnabled {
 		go startBalancer(internalBalancerChan, &stopHandled, exitChan) // Not really needed async here but to cope with uniformity
@@ -688,13 +690,13 @@ func main() {
 
 	// Start rater service
 	if cfg.RALsEnabled {
-		go startRater(internalRaterChan, cacheDoneChan, internalBalancerChan, internalSchedulerChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
-			server, ratingDb, accountDb, loadDb, cdrDb, &stopHandled, exitChan)
+		go startRater(internalRaterChan, cacheDoneChan, internalBalancerChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
+			srvManager, server, ratingDB, accountDb, loadDb, cdrDb, &stopHandled, exitChan)
 	}
 
 	// Start Scheduler
 	if cfg.SchedulerEnabled {
-		go startScheduler(internalSchedulerChan, cacheDoneChan, ratingDb, exitChan)
+		go srvManager.StartScheduler(true)
 	}
 
 	// Start CDR Server
@@ -705,7 +707,7 @@ func main() {
 
 	// Start CDR Stats server
 	if cfg.CDRStatsEnabled {
-		go startCdrStats(internalCdrStatSChan, ratingDb, accountDb, server)
+		go startCdrStats(internalCdrStatSChan, ratingDB, accountDb, server)
 	}
 
 	// Start CDRC components if necessary

@@ -54,7 +54,7 @@ imports:
   subpackages:
   - simplelru
 - name: github.com/jinzhu/gorm
-  version: f26fa242cc1bf884f9a4f98849f70fb8e73f441f
+  version: 0f2ceb5a775714a46bc344976324e3e439f8cdcc
 - name: github.com/jinzhu/inflection
   version: 74387dc39a75e970e7a3ae6a3386b5bd2e5c5cff
 - name: github.com/kr/pty
