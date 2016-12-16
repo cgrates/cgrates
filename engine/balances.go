@@ -411,7 +411,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				return nil, errors.New("timespan with no rate interval assigned")
 			}
 
-			if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && ok {
+			if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && cc.deductConnectFee && ok {
 
 				inc := &Increment{
 					Duration: 0,
@@ -433,7 +433,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			maxCost, strategy := ts.RateInterval.GetMaxCost()
 			for incIndex, inc := range ts.Increments {
 
-				if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && ok {
+				if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && cc.deductConnectFee && ok {
 					// go to nextincrement
 					continue
 				}
@@ -569,7 +569,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			return nil, errors.New("timespan with no rate interval assigned")
 		}
 
-		if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && ok {
+		if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && cc.deductConnectFee && ok {
 
 			inc := &Increment{
 				Duration: 0,
@@ -595,7 +595,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			// check standard subject tags
 			//log.Printf("INC: %+v", inc)
 
-			if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && ok {
+			if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && cc.deductConnectFee && ok {
 				// go to nextincrement
 				continue
 			}

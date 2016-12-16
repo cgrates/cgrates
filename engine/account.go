@@ -532,7 +532,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				ts.createIncrementsSlice()
 			}
 
-			if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && ok {
+			if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && cc.deductConnectFee && ok {
 
 				inc := &Increment{
 					Duration: 0,
@@ -553,7 +553,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 
 			for incIndex, increment := range ts.Increments {
 
-				if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && ok {
+				if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && cc.deductConnectFee && ok {
 					// go to nextincrement
 					continue
 				}
