@@ -184,6 +184,7 @@ FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""
 EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300,10,false,false,10
 NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50,10,false,false,10
 VF,*debit,,,,*monetary,*out,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
+TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,*out,,*any,,,*unlimited,,1000,20,false,false,10
 `
 	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -850,7 +851,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 15 {
+	if len(csvr.actions) != 16 {
 		t.Error("Failed to load actions: ", len(csvr.actions))
 	}
 	as1 := csvr.actions["MINI"]
@@ -946,6 +947,30 @@ func TestLoadActions(t *testing.T) {
 	}
 	if !reflect.DeepEqual(as3, expected) {
 		t.Errorf("Error loading action: %+v", as3[0].Balance)
+	}
+	asGnrc := csvr.actions["TOPUP_RST_GNR_1000"]
+	//TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,*out,,*any,,,*unlimited,,1000,20,false,false,10
+	expected = []*Action{
+		&Action{
+			Id:               "TOPUP_RST_GNR_1000",
+			ActionType:       TOPUP_RESET,
+			ExtraParameters:  `{"*voice": 60.0,"*data":1024.0,"*sms":1.0}`,
+			Weight:           10,
+			ExpirationString: utils.UNLIMITED,
+			Balance: &BalanceFilter{
+				Uuid:       asGnrc[0].Balance.Uuid,
+				Type:       utils.StringPointer(utils.GENERIC),
+				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				//DestinationIDs: utils.StringMapPointer(utils.NewStringMap("*any")),
+				Value:    &utils.ValueFormula{Static: 1000},
+				Weight:   utils.Float64Pointer(20),
+				Disabled: utils.BoolPointer(false),
+				Blocker:  utils.BoolPointer(false),
+			},
+		},
+	}
+	if !reflect.DeepEqual(asGnrc, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected[0].Balance, asGnrc[0].Balance)
 	}
 }
 
