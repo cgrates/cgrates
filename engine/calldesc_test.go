@@ -1425,6 +1425,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 	if cc.GetDuration() != 49*time.Second {
 		t.Error("Error obtaining max debit duration: ", cc.GetDuration())
 	}
+
 	if cc.Cost != 0.91 {
 		t.Error("Error in max debit cost: ", cc.Cost)
 	}

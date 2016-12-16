@@ -385,13 +385,15 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	} else {
 		// get the cost from balance
 		//log.Printf("::::::: %+v", cd)
+		var debitedConnectFeeBalance Balance
+		var ok bool
 		cc, err = b.GetCost(cd, true)
 		if err != nil {
 			return nil, err
 		}
 		if debitConnectFee {
 			// this is the first add, debit the connect fee
-			if ub.DebitConnectionFee(cc, moneyBalances, count, true) == false {
+			if ok, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); !ok {
 				// found blocker balance
 				return nil, nil
 			}
@@ -408,8 +410,34 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 				return nil, errors.New("timespan with no rate interval assigned")
 			}
+
+			if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && cc.deductConnectFee && ok {
+
+				inc := &Increment{
+					Duration: 0,
+					Cost:     ts.RateInterval.Rating.ConnectFee,
+					BalanceInfo: &DebitInfo{
+						Monetary: &MonetaryInfo{
+							UUID:  debitedConnectFeeBalance.Uuid,
+							ID:    debitedConnectFeeBalance.ID,
+							Value: debitedConnectFeeBalance.Value,
+						},
+						AccountID: ub.ID,
+					},
+				}
+
+				incs := []*Increment{inc}
+				ts.Increments = append(incs, ts.Increments...)
+			}
+
 			maxCost, strategy := ts.RateInterval.GetMaxCost()
 			for incIndex, inc := range ts.Increments {
+
+				if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && cc.deductConnectFee && ok {
+					// go to nextincrement
+					continue
+				}
+
 				// debit minutes and money
 				amount := inc.Duration.Seconds()
 				if b.Factor != nil {
@@ -513,10 +541,14 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	if err != nil {
 		return nil, err
 	}
+
+	var debitedConnectFeeBalance Balance
+	var ok bool
 	//log.Print("cc: " + utils.ToJSON(cc))
 	if debitConnectFee {
+
 		// this is the first add, debit the connect fee
-		if ub.DebitConnectionFee(cc, moneyBalances, count, true) == false {
+		if ok, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); !ok {
 			// balance is blocker
 			return nil, nil
 		}
@@ -536,12 +568,38 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 			return nil, errors.New("timespan with no rate interval assigned")
 		}
+
+		if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && cc.deductConnectFee && ok {
+
+			inc := &Increment{
+				Duration: 0,
+				Cost:     ts.RateInterval.Rating.ConnectFee,
+				BalanceInfo: &DebitInfo{
+					Monetary: &MonetaryInfo{
+						UUID:  debitedConnectFeeBalance.Uuid,
+						ID:    debitedConnectFeeBalance.ID,
+						Value: debitedConnectFeeBalance.Value,
+					},
+					AccountID: ub.ID,
+				},
+			}
+
+			incs := []*Increment{inc}
+			ts.Increments = append(incs, ts.Increments...)
+		}
+
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
 		//log.Printf("Rate: %+v", ts.RateInterval.Rating)
 		for incIndex, inc := range ts.Increments {
 			// check standard subject tags
 			//log.Printf("INC: %+v", inc)
+
+			if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && cc.deductConnectFee && ok {
+				// go to nextincrement
+				continue
+			}
+
 			amount := inc.Cost
 			inc.paid = false
 			if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {

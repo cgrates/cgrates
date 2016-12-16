@@ -696,7 +696,15 @@ func (nts *TimeSpan) copyRatingInfo(ts *TimeSpan) {
 
 // returns a time for the specified second in the time span
 func (ts *TimeSpan) GetTimeStartForIncrement(index int) time.Time {
-	return ts.TimeStart.Add(time.Duration(int64(index) * ts.Increments[0].Duration.Nanoseconds()))
+
+	start := ts.TimeStart
+	for incIndex, inc := range ts.Increments {
+		if incIndex < index {
+			start = start.Add(time.Duration(inc.Duration.Nanoseconds()))
+		}
+	}
+	return start
+	//return ts.TimeStart.Add(time.Duration(int64(index) * ts.Increments[0].Duration.Nanoseconds()))
 }
 
 func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
