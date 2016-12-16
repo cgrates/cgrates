@@ -283,7 +283,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix}, prfx) {
+		utils.ResourceLimitsPrefix,
+		utils.REVERSE_ALIASES_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -326,6 +327,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetAlias(dataID, false, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
 			_, err = rs.GetResourceLimit(dataID, false, utils.NonTransactional)
+		case utils.REVERSE_ALIASES_PREFIX:
+			_, err = rs.GetReverseAlias(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -920,15 +923,23 @@ func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool, transa
 	key := utils.REVERSE_ALIASES_PREFIX + reverseID
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.([]string), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.([]string), nil
 		}
 	}
-	if ids, err = rs.Cmd("SMEMBERS", key).List(); len(ids) == 0 || err != nil {
+	if ids, err = rs.Cmd("SMEMBERS", key).List(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if len(ids) == 0 {
 		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-		return nil, utils.ErrNotFound
+		err = utils.ErrNotFound
+		return
 	}
 	cache.Set(key, ids, cacheCommit(transactionID), transactionID)
 	return
@@ -941,15 +952,13 @@ func (rs *RedisStorage) SetReverseAlias(al *Alias, transactionID string) (err er
 			for _, alias := range pairs {
 				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
 				id := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-				err = rs.Cmd("SADD", rKey, id).Err
-				if err != nil {
+				if err = rs.Cmd("SADD", rKey, id).Err; err != nil {
 					break
 				}
 				cache.RemKey(rKey, cCommit, transactionID)
 			}
 		}
 	}
-
 	return
 }
 

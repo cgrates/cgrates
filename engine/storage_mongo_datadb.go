@@ -483,7 +483,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix}, prfx) {
+		utils.ResourceLimitsPrefix,
+		utils.REVERSE_ALIASES_PREFIX}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -526,6 +527,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetAlias(dataID, false, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
 			_, err = ms.GetResourceLimit(dataID, false, utils.NonTransactional)
+		case utils.REVERSE_ALIASES_PREFIX:
+			_, err = ms.GetReverseAlias(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -1253,12 +1256,13 @@ func (ms *MongoStorage) SetAlias(al *Alias, transactionID string) (err error) {
 }
 
 func (ms *MongoStorage) GetReverseAlias(reverseID string, skipCache bool, transactionID string) (ids []string, err error) {
+	cacheKey := utils.REVERSE_ALIASES_PREFIX + reverseID
 	if !skipCache {
-		if x, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + reverseID); ok {
-			if x != nil {
-				return x.([]string), nil
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.([]string), nil
 		}
 	}
 	var result struct {
@@ -1267,14 +1271,15 @@ func (ms *MongoStorage) GetReverseAlias(reverseID string, skipCache bool, transa
 	}
 	session, col := ms.conn(colRls)
 	defer session.Close()
-	if err = col.Find(bson.M{"key": reverseID}).One(&result); err == nil {
-		ids = result.Value
-		cache.Set(utils.REVERSE_ALIASES_PREFIX+reverseID, ids, cacheCommit(transactionID), transactionID)
-	} else {
-		cache.Set(utils.REVERSE_ALIASES_PREFIX+reverseID, nil, cacheCommit(transactionID), transactionID)
-		return nil, utils.ErrNotFound
+	if err = col.Find(bson.M{"key": reverseID}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-
+	ids = result.Value
+	cache.Set(cacheKey, ids, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1287,8 +1292,7 @@ func (ms *MongoStorage) SetReverseAlias(al *Alias, transactionID string) (err er
 			for _, alias := range pairs {
 				rKey := strings.Join([]string{alias, target, al.Context}, "")
 				id := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-				_, err = col.Upsert(bson.M{"key": rKey}, bson.M{"$addToSet": bson.M{"value": id}})
-				if err != nil {
+				if _, err = col.Upsert(bson.M{"key": rKey}, bson.M{"$addToSet": bson.M{"value": id}}); err != nil {
 					break
 				}
 				cache.RemKey(rKey, cCommit, transactionID)

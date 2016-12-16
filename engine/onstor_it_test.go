@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -54,6 +55,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheDerivedChargers,
 	testOnStorITCacheLCR,
 	testOnStorITCacheAlias,
+	testOnStorITCacheReverseAlias,
 	testOnStorITCacheResourceLimit,
 }
 
@@ -596,6 +598,54 @@ func testOnStorITCacheAlias(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*Alias); !reflect.DeepEqual(als, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", als, rcv)
+	}
+}
+
+func testOnStorITCacheReverseAlias(t *testing.T) {
+	als := &Alias{
+		Direction: "*out",
+		Tenant:    "itsyscom.com",
+		Category:  "call",
+		Account:   "dan",
+		Subject:   "dan",
+		Context:   "*rating",
+		Values: AliasValues{
+			&AliasValue{
+				DestinationId: "EU",
+				Pairs: AliasPairs{
+					"Account": map[string]string{
+						"dan": "dan1",
+						"rif": "rif1",
+					},
+					"Calling": map[string]string{
+						"11234": "2234",
+					},
+				},
+				Weight: 10,
+			},
+
+			&AliasValue{
+				DestinationId: "US",
+				Pairs:         AliasPairs{"Account": map[string]string{"dan": "dan2"}},
+				Weight:        20,
+			},
+		},
+	}
+	if err := onStor.SetReverseAlias(als, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	rvAlsID := strings.Join([]string{als.Values[1].Pairs["Account"]["dan"], "Account", als.Context}, "")
+	if _, hasIt := cache.Get(utils.REVERSE_ALIASES_PREFIX + rvAlsID); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, []string{rvAlsID}, false); err != nil {
+		t.Error(err)
+	}
+	eRvrsAls := []string{utils.ConcatenatedKey(als.GetId(), als.Values[1].DestinationId)}
+	if itm, hasIt := cache.Get(utils.REVERSE_ALIASES_PREFIX + rvAlsID); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.([]string); !reflect.DeepEqual(eRvrsAls, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eRvrsAls, rcv)
 	}
 }
 
