@@ -169,9 +169,9 @@ func (cc *CallCost) UpdateCost() {
 
 func (cc *CallCost) updateCost() {
 	cost := 0.0
-	if cc.deductConnectFee { // add back the connectFee
-		cost += cc.GetConnectFee()
-	}
+	//if cc.deductConnectFee { // add back the connectFee
+	//	cost += cc.GetConnectFee()
+	//}
 	for _, ts := range cc.Timespans {
 		ts.Cost = ts.CalculateCost()
 		cost += ts.Cost
