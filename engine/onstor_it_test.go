@@ -651,7 +651,7 @@ func testOnStorITCacheReverseAlias(t *testing.T) {
 
 func testOnStorITCacheResourceLimit(t *testing.T) {
 	rL := &ResourceLimit{
-		ID:     "RL2",
+		ID:     "RL_TEST",
 		Weight: 10,
 		Filters: []*RequestFilter{
 			&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
