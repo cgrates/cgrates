@@ -207,6 +207,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, replicate bool) error {
 	cdrRuns, err := self.deriveCdrs(cdr)
 	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CDRS> Deriving CDR %+v, got error: %s", cdrRun, err.Error()))
 		return err
 	}
 	var ratedCDRs []*CDR // Gather all CDRs received from rating subsystem
