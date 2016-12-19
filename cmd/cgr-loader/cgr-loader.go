@@ -379,7 +379,7 @@ func main() {
 		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
 		rlIDs, _ = tpReader.GetLoadedIds(utils.ResourceLimitsPrefix)
 	}
-	actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+	aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	var statsQueueIds []string
 	if cdrstats != nil {
 		statsQueueIds, _ = tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
@@ -400,23 +400,24 @@ func main() {
 			log.Print("Reloading cache")
 		}
 		if *flush {
-			dstIds, rplIds, rpfIds, lcrIds = nil, nil, nil, nil // Should reload all these on flush
+			dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds, rlIDs, aps = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil // Should reload all these on flush
 		}
 		if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{
-			DestinationIds:   &dstIds,
-			RatingPlanIds:    &rplIds,
-			RatingProfileIds: &rpfIds,
-			ActionIds:        &actIds,
-			SharedGroupIds:   &shgIds,
-			Aliases:          &alsIds,
-			LCRIds:           &lcrIds,
-			DerivedChargers:  &dcsIds,
-			ResourceLimits:   &rlIDs,
+			DestinationIDs:    &dstIds,
+			RatingPlanIDs:     &rplIds,
+			RatingProfileIDs:  &rpfIds,
+			ActionIDs:         &actIds,
+			ActionPlanIDs:     &aps,
+			SharedGroupIDs:    &shgIds,
+			AliasIDs:          &alsIds,
+			LCRids:            &lcrIds,
+			DerivedChargerIDs: &dcsIds,
+			ResourceLimitIDs:  &rlIDs,
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
 
-		if len(actTmgIds) != 0 {
+		if len(aps) != 0 {
 			if *verbose {
 				log.Print("Reloading scheduler")
 			}

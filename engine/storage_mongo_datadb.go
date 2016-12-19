@@ -483,8 +483,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix,
-		utils.REVERSE_ALIASES_PREFIX}, prfx) {
+		utils.REVERSE_ALIASES_PREFIX,
+		utils.ResourceLimitsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -497,6 +497,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 				err.Error(),
 				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
 		}
+		cache.RemPrefixKey(prfx, true, utils.NonTransactional)
 	}
 	for _, dataID := range ids {
 		if mustBeCached {
@@ -525,10 +526,10 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetLCR(dataID, false, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
 			_, err = ms.GetAlias(dataID, false, utils.NonTransactional)
-		case utils.ResourceLimitsPrefix:
-			_, err = ms.GetResourceLimit(dataID, false, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, false, utils.NonTransactional)
+		case utils.ResourceLimitsPrefix:
+			_, err = ms.GetResourceLimit(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -695,8 +696,6 @@ func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan, transactionID string) erro
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	cache.RemKey(utils.RATING_PLAN_PREFIX+rp.Id,
-		cacheCommit(transactionID), transactionID)
 	return err
 }
 
@@ -734,8 +733,6 @@ func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile, transactionID string
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(false), &response)
 	}
-	cache.RemKey(utils.RATING_PROFILE_PREFIX+rp.Id,
-		cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -795,7 +792,6 @@ func (ms *MongoStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
 	}{lcr.GetId(), lcr}); err != nil {
 		return
 	}
-	cache.RemKey(utils.LCR_PREFIX+lcr.GetId(), cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -861,7 +857,6 @@ func (ms *MongoStorage) SetDestination(dest *Destination, transactionID string) 
 		var response int
 		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
-	cache.RemKey(utils.DESTINATION_PREFIX+dest.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -896,12 +891,10 @@ func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool, tra
 func (ms *MongoStorage) SetReverseDestination(dest *Destination, transactionID string) (err error) {
 	session, col := ms.conn(colRds)
 	defer session.Close()
-	cCommit := cacheCommit(transactionID)
 	for _, p := range dest.Prefixes {
 		if _, err = col.Upsert(bson.M{"key": p}, bson.M{"$addToSet": bson.M{"value": dest.Id}}); err != nil {
 			break
 		}
-		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+p, cCommit, transactionID)
 	}
 	return
 }
@@ -984,7 +977,6 @@ func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 		if err != nil {
 			return err
 		}
-		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, cCommit, transactionID)
 	}
 	return nil
 }
@@ -1027,7 +1019,6 @@ func (ms *MongoStorage) SetActions(key string, as Actions, transactionID string)
 		Key   string
 		Value Actions
 	}{Key: key, Value: as})
-	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return err
 }
 
@@ -1069,7 +1060,6 @@ func (ms *MongoStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (e
 	if _, err = col.Upsert(bson.M{"id": sg.Id}, sg); err != nil {
 		return
 	}
-	cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
 	return err
 }
 
@@ -1251,7 +1241,6 @@ func (ms *MongoStorage) SetAlias(al *Alias, transactionID string) (err error) {
 	}{Key: al.GetId(), Value: al.Values}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ALIASES_PREFIX+al.GetId(), cacheCommit(transactionID), transactionID)
 	return err
 }
 
@@ -1286,7 +1275,6 @@ func (ms *MongoStorage) GetReverseAlias(reverseID string, skipCache bool, transa
 func (ms *MongoStorage) SetReverseAlias(al *Alias, transactionID string) (err error) {
 	session, col := ms.conn(colRls)
 	defer session.Close()
-	cCommit := cacheCommit(transactionID)
 	for _, value := range al.Values {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
@@ -1295,7 +1283,6 @@ func (ms *MongoStorage) SetReverseAlias(al *Alias, transactionID string) (err er
 				if _, err = col.Upsert(bson.M{"key": rKey}, bson.M{"$addToSet": bson.M{"value": id}}); err != nil {
 					break
 				}
-				cache.RemKey(rKey, cCommit, transactionID)
 			}
 		}
 	}
@@ -1561,7 +1548,6 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	}{Key: key, Value: b.Bytes()}); err != nil {
 		return
 	}
-	cache.RemKey(dbKey, cCommit, transactionID)
 	return err
 }
 
@@ -1656,7 +1642,6 @@ func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 	}{Key: key, Value: dcs}); err != nil {
 		return
 	}
-	cache.RemKey(cacheKey, cCommit, transactionID)
 	return err
 }
 

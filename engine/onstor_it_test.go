@@ -57,6 +57,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheAlias,
 	testOnStorITCacheReverseAlias,
 	testOnStorITCacheResourceLimit,
+	// ToDo: test cache flush for a prefix
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -493,7 +494,7 @@ func testOnStorITCacheDerivedChargers(t *testing.T) {
 				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
 				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
 		}}
-	keyDCS := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
+	keyDCS := utils.ConcatenatedKey("*out", "itsyscom.com", "call", "dan", "dan")
 	if err := onStor.SetDerivedChargers(keyDCS, dcs, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}

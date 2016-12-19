@@ -152,6 +152,8 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	// modify if necessary the shared groups here
 	if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
 		_, err := Guardian.Guard(func() (interface{}, error) {
+			sgs := make([]string, len(balance.SharedGroups))
+			i := 0
 			for sgID := range balance.SharedGroups {
 				// add shared group member
 				sg, err := ratingStorage.GetSharedGroup(sgID, false, utils.NonTransactional)
@@ -168,7 +170,9 @@ func (acc *Account) setBalanceAction(a *Action) error {
 						ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
 					}
 				}
+				i++
 			}
+			ratingStorage.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
 			return 0, nil
 		}, 0, balance.SharedGroups.Slice()...)
 		if err != nil {
@@ -240,6 +244,8 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		}
 		ub.BalanceMap[balanceType] = append(ub.BalanceMap[balanceType], bClone)
 		_, err := Guardian.Guard(func() (interface{}, error) {
+			sgs := make([]string, len(bClone.SharedGroups))
+			i := 0
 			for sgId := range bClone.SharedGroups {
 				// add shared group member
 				sg, err := ratingStorage.GetSharedGroup(sgId, false, utils.NonTransactional)
@@ -256,7 +262,9 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 						ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
 					}
 				}
+				i++
 			}
+			ratingStorage.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
 			return 0, nil
 		}, 0, bClone.SharedGroups.Slice()...)
 		if err != nil {
@@ -268,33 +276,6 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	return nil
 }
 
-/*
-func (ub *Account) enableDisableBalanceAction(a *Action) error {
-	if a == nil {
-		return errors.New("nil action")
-	}
-
-	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]Balances)
-	}
-	found := false
-	id := a.BalanceType
-	disabled := a.Balance.Disabled
-	a.Balance.Disabled = !disabled // match for the opposite
-	for _, b := range ub.BalanceMap[id] {
-		if b.MatchFilter(a.Balance, false) {
-			b.Disabled = disabled
-			b.dirty = true
-			found = true
-		}
-	}
-	a.Balance.Disabled = disabled // restore balance aaction as it is cached
-	if !found {
-		return utils.ErrNotFound
-	}
-	return nil
-}
-*/
 func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) Balances {
 	var balances Balances
 	balances = append(balances, ub.BalanceMap[tor]...)

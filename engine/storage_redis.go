@@ -283,8 +283,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix,
-		utils.REVERSE_ALIASES_PREFIX}, prfx) {
+		utils.REVERSE_ALIASES_PREFIX,
+		utils.ResourceLimitsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -297,6 +297,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 				err.Error(),
 				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
 		}
+		cache.RemPrefixKey(prfx, true, utils.NonTransactional)
 	}
 	for _, dataID := range ids {
 		if mustBeCached {
@@ -325,10 +326,10 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetLCR(dataID, false, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
 			_, err = rs.GetAlias(dataID, false, utils.NonTransactional)
-		case utils.ResourceLimitsPrefix:
-			_, err = rs.GetResourceLimit(dataID, false, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = rs.GetReverseAlias(dataID, false, utils.NonTransactional)
+		case utils.ResourceLimitsPrefix:
+			_, err = rs.GetResourceLimit(dataID, false, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -406,7 +407,6 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan, transactionID string) (err
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	//cache.Set(utils.RATING_PLAN_PREFIX+rp.Id, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -448,7 +448,6 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile, transactionID strin
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -505,7 +504,6 @@ func (rs *RedisStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
 	if err = rs.Cmd("SET", key, result).Err; err != nil {
 		return
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -563,7 +561,6 @@ func (rs *RedisStorage) SetDestination(dest *Destination, transactionID string) 
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -594,7 +591,6 @@ func (rs *RedisStorage) SetReverseDestination(dest *Destination, transactionID s
 		if err = rs.Cmd("SADD", key, dest.Id).Err; err != nil {
 			break
 		}
-		cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	}
 	return
 }
@@ -670,7 +666,6 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 		if err != nil {
 			return err
 		}
-		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, cCommit, transactionID)
 	}
 	return nil
 }
@@ -706,7 +701,6 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool, transactionID str
 func (rs *RedisStorage) SetActions(key string, as Actions, transactionID string) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.Cmd("SET", utils.ACTION_PREFIX+key, result).Err
-	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -747,7 +741,6 @@ func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (e
 		return
 	}
 	err = rs.Cmd("SET", utils.SHARED_GROUP_PREFIX+sg.Id, result).Err
-	cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -915,7 +908,6 @@ func (rs *RedisStorage) SetAlias(al *Alias, transactionID string) (err error) {
 	if err = rs.Cmd("SET", key, result).Err; err != nil {
 		return
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -946,7 +938,6 @@ func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool, transa
 }
 
 func (rs *RedisStorage) SetReverseAlias(al *Alias, transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
 	for _, value := range al.Values {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
@@ -955,7 +946,6 @@ func (rs *RedisStorage) SetReverseAlias(al *Alias, transactionID string) (err er
 				if err = rs.Cmd("SADD", rKey, id).Err; err != nil {
 					break
 				}
-				cache.RemKey(rKey, cCommit, transactionID)
 			}
 		}
 	}
@@ -1183,7 +1173,6 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	if err = rs.Cmd("SET", dbKey, b.Bytes()).Err; err != nil {
 		return
 	}
-	cache.RemKey(dbKey, cCommit, transactionID)
 	return
 }
 
@@ -1265,7 +1254,6 @@ func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 	if err = rs.Cmd("SET", key, marshaled).Err; err != nil {
 		return
 	}
-	cache.RemKey(key, cCommit, transactionID)
 	return
 }
 

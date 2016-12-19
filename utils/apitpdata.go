@@ -561,18 +561,18 @@ type AttrGetAccounts struct {
 
 // Data used to do remote cache reloads via api
 type AttrReloadCache struct {
-	DestinationIds        *[]string
-	ReverseDestinationIds *[]string
-	RatingPlanIds         *[]string
-	RatingProfileIds      *[]string
-	ActionIds             *[]string
-	ActionPlanIds         *[]string
-	SharedGroupIds        *[]string
-	LCRIds                *[]string
-	DerivedChargers       *[]string
-	Aliases               *[]string
-	ReverseAliases        *[]string
-	ResourceLimits        *[]string
+	DestinationIDs        *[]string
+	ReverseDestinationIDs *[]string
+	RatingPlanIDs         *[]string
+	RatingProfileIDs      *[]string
+	ActionIDs             *[]string
+	ActionPlanIDs         *[]string
+	SharedGroupIDs        *[]string
+	LCRids                *[]string
+	DerivedChargerIDs     *[]string
+	AliasIDs              *[]string
+	ReverseAliasIDs       *[]string
+	ResourceLimitIDs      *[]string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache

@@ -111,6 +111,7 @@ func Set(key string, value interface{}, commit bool, transID string) {
 	}
 }
 
+// RemKey removes a specific item from cache
 func RemKey(key string, commit bool, transID string) {
 	if commit {
 		if transID == "" { // Lock per operation not transaction
@@ -125,6 +126,7 @@ func RemKey(key string, commit bool, transID string) {
 	}
 }
 
+// RemPrefixKey removes a complete category of data out of cache
 func RemPrefixKey(prefix string, commit bool, transID string) {
 	if commit {
 		if transID == "" { // Lock locally

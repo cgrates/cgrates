@@ -156,10 +156,17 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 						}
 					}
 				}
+				apIDs := make([]string, len(dirtyActionPlans))
+				i := 0
 				for actionPlanID, ap := range dirtyActionPlans {
 					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
+					apIDs[i] = actionPlanID
+					i++
+				}
+				if err := self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
+					return 0, err
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)

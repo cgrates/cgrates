@@ -97,21 +97,30 @@ func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) err
 	return nil
 }
 
-func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *string) error {
+func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"Id", "Prefixes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-
-	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.HasData(utils.DESTINATION_PREFIX, attrs.Id); err != nil {
-			return utils.NewErrServerError(err)
-		} else if exists {
-			return utils.ErrExists
-		}
-	}
 	dest := &engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
+	var oldDest *engine.Destination
+	if oldDest, err = self.RatingDb.GetDestination(attrs.Id, false, utils.NonTransactional); err != nil {
+		if err != utils.ErrNotFound {
+			return utils.NewErrServerError(err)
+		}
+	} else if !attrs.Overwrite {
+		return utils.ErrExists
+	}
 	if err := self.RatingDb.SetDestination(dest, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
+	}
+	if err = self.RatingDb.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.Id}, true); err != nil {
+		return
+	}
+	if err = self.RatingDb.UpdateReverseDestination(oldDest, dest, utils.NonTransactional); err != nil {
+		return
+	}
+	if err = self.RatingDb.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dest.Prefixes, true); err != nil {
+		return
 	}
 	*reply = OK
 	return nil
@@ -276,51 +285,21 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	if err := dbReader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	// Make sure the items are in the cache
-	dstIds, _ := dbReader.GetLoadedIds(utils.DESTINATION_PREFIX)
-	dstKeys := make([]string, len(dstIds))
-	for idx, dId := range dstIds {
-		dstKeys[idx] = utils.DESTINATION_PREFIX + dId // Cache expects them as redis keys
-	}
-	rplIds, _ := dbReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
-	rpKeys := make([]string, len(rplIds))
-	for idx, rpId := range rplIds {
-		rpKeys[idx] = utils.RATING_PLAN_PREFIX + rpId
-	}
-	rpfIds, _ := dbReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
-	rpfKeys := make([]string, len(rpfIds))
-	for idx, rpfId := range rpfIds {
-		rpfKeys[idx] = utils.RATING_PROFILE_PREFIX + rpfId
-	}
-	actIds, _ := dbReader.GetLoadedIds(utils.ACTION_PREFIX)
-	actKeys := make([]string, len(actIds))
-	for idx, actId := range actIds {
-		actKeys[idx] = utils.ACTION_PREFIX + actId
-	}
-	aplIds, _ := dbReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	aplKeys := make([]string, len(aplIds))
-	for idx, aplId := range aplIds {
-		aplKeys[idx] = utils.ACTION_PLAN_PREFIX + aplId
-	}
-	shgIds, _ := dbReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-	shgKeys := make([]string, len(shgIds))
-	for idx, shgId := range shgIds {
-		shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
-	}
-	aliases, _ := dbReader.GetLoadedIds(utils.ALIASES_PREFIX)
-	alsKeys := make([]string, len(aliases))
-	for idx, alias := range aliases {
-		alsKeys[idx] = utils.ALIASES_PREFIX + alias
-	}
-	lcrIds, _ := dbReader.GetLoadedIds(utils.LCR_PREFIX)
-	lcrKeys := make([]string, len(lcrIds))
-	for idx, lcrId := range lcrIds {
-		lcrKeys[idx] = utils.LCR_PREFIX + lcrId
-	}
-	dcs, _ := dbReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
-	dcsKeys := make([]string, len(dcs))
-	for idx, dc := range dcs {
-		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
+	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+	for _, prfx := range []string{utils.DESTINATION_PREFIX,
+		utils.RATING_PLAN_PREFIX,
+		utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX,
+		utils.ACTION_PLAN_PREFIX,
+		utils.SHARED_GROUP_PREFIX,
+		utils.DERIVEDCHARGERS_PREFIX,
+		utils.LCR_PREFIX,
+		utils.ALIASES_PREFIX,
+		utils.ResourceLimitsPrefix} {
+		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
+		if err := self.RatingDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
 	aps, _ := dbReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	cstKeys, _ := dbReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
@@ -328,10 +307,6 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 
 	// relase tp data
 	dbReader.Init()
-
-	cache.Flush()
-	self.RatingDb.PreloadRatingCache()
-	self.AccountDb.PreloadAccountingCache()
 
 	if len(aps) != 0 {
 		sched := self.ServManager.GetScheduler()
@@ -396,7 +371,7 @@ type AttrSetRatingProfile struct {
 }
 
 // Sets a specific rating profile working with data directly in the RatingDb without involving storDb
-func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) error {
+func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "TOR", "Direction", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -437,6 +412,9 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	if err := self.RatingDb.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	if err = self.RatingDb.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{keyId}, true); err != nil {
+		return
+	}
 	*reply = OK
 	return nil
 }
@@ -474,7 +452,7 @@ type V1TPAction struct {
 	Weight          float64 // Action's weight
 }
 
-func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) error {
+func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -519,6 +497,9 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) error {
 	}
 	if err := self.RatingDb.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
+	}
+	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PREFIX, []string{attrs.ActionsId}, true); err != nil {
+		utils.NewErrServerError(err)
 	}
 	*reply = OK
 	return nil
@@ -580,7 +561,7 @@ type AttrActionPlan struct {
 	Weight    float64 // Binding's weight
 }
 
-func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error {
+func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -620,6 +601,9 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		})
 	}
 	if err := self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler {
@@ -693,104 +677,152 @@ func (self *ApierV1) ReloadScheduler(ignore string, reply *string) error {
 	return nil
 }
 
-func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys, aplKeys, shgKeys, lcrKeys, dcsKeys, alsKeys, rlKeys []string
-
-	if attrs.DestinationIds == nil {
-		dstKeys = nil // Reload all
-	} else if len(*attrs.DestinationIds) > 0 {
-		dstKeys = make([]string, len(*attrs.DestinationIds))
-		for idx, dId := range *attrs.DestinationIds {
-			dstKeys[idx] = utils.DESTINATION_PREFIX + dId // Cache expects them as redis keys
+func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (err error) {
+	var dataIDs []string
+	// Reload Destinations
+	if attrs.ReverseDestinationIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.DestinationIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.DestinationIDs))
+		for idx, dId := range *attrs.DestinationIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.RatingPlanIds == nil {
-		rpKeys = nil
-	} else if len(*attrs.RatingPlanIds) > 0 {
-		rpKeys = make([]string, len(*attrs.RatingPlanIds))
-		for idx, rpId := range *attrs.RatingPlanIds {
-			rpKeys[idx] = utils.RATING_PLAN_PREFIX + rpId
+	if err = self.RatingDb.CacheDataFromDB(utils.DESTINATION_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// Reload ReverseDestinations
+	if attrs.ReverseDestinationIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ReverseDestinationIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ReverseDestinationIDs))
+		for idx, dId := range *attrs.ReverseDestinationIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.RatingProfileIds == nil {
-		rpfKeys = nil
-	} else if len(*attrs.RatingProfileIds) > 0 {
-		rpfKeys = make([]string, len(*attrs.RatingProfileIds))
-		for idx, rpfId := range *attrs.RatingProfileIds {
-			rpfKeys[idx] = utils.RATING_PROFILE_PREFIX + rpfId
+	if err = self.RatingDb.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// RatingPlans
+	if attrs.RatingPlanIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.RatingPlanIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.RatingPlanIDs))
+		for idx, dId := range *attrs.RatingPlanIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.ActionIds == nil {
-		actKeys = nil
-	} else if len(*attrs.ActionIds) > 0 {
-		actKeys = make([]string, len(*attrs.ActionIds))
-		for idx, actId := range *attrs.ActionIds {
-			actKeys[idx] = utils.ACTION_PREFIX + actId
+	if err = self.RatingDb.CacheDataFromDB(utils.RATING_PLAN_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// RatingProfiles
+	if attrs.RatingProfileIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.RatingProfileIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.RatingProfileIDs))
+		for idx, dId := range *attrs.RatingProfileIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.ActionPlanIds == nil {
-		aplKeys = nil
-	} else if len(*attrs.ActionPlanIds) > 0 {
-		aplKeys = make([]string, len(*attrs.ActionPlanIds))
-		for idx, aplId := range *attrs.ActionPlanIds {
-			aplKeys[idx] = utils.ACTION_PLAN_PREFIX + aplId
+	if err = self.RatingDb.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// Actions
+	if attrs.ActionIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ActionIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ActionIDs))
+		for idx, dId := range *attrs.ActionIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.SharedGroupIds == nil {
-		shgKeys = nil
-	} else if len(*attrs.SharedGroupIds) > 0 {
-		shgKeys = make([]string, len(*attrs.SharedGroupIds))
-		for idx, shgId := range *attrs.SharedGroupIds {
-			shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
+	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// ActionPlans
+	if attrs.ActionPlanIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ActionPlanIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ActionPlanIDs))
+		for idx, dId := range *attrs.ActionPlanIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.LCRIds == nil {
-		lcrKeys = nil
-	} else if len(*attrs.LCRIds) > 0 {
-		lcrKeys = make([]string, len(*attrs.LCRIds))
-		for idx, lcrId := range *attrs.LCRIds {
-			lcrKeys[idx] = utils.LCR_PREFIX + lcrId
+	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// SharedGroups
+	if attrs.SharedGroupIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.SharedGroupIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.SharedGroupIDs))
+		for idx, dId := range *attrs.SharedGroupIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.DerivedChargers == nil {
-		dcsKeys = nil
-	} else if len(*attrs.DerivedChargers) > 0 {
-		dcsKeys = make([]string, len(*attrs.DerivedChargers))
-		for idx, dc := range *attrs.DerivedChargers {
-			dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
+	if err = self.RatingDb.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// LCR Profiles
+	if attrs.LCRids == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.LCRids) > 0 {
+		dataIDs = make([]string, len(*attrs.LCRids))
+		for idx, dId := range *attrs.LCRids {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.Aliases == nil {
-		alsKeys = nil
-	} else if len(*attrs.Aliases) > 0 {
-		alsKeys = make([]string, len(*attrs.Aliases))
-		for idx, alias := range *attrs.Aliases {
-			alsKeys[idx] = utils.ALIASES_PREFIX + alias
+	if err = self.RatingDb.CacheDataFromDB(utils.LCR_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// DerivedChargers
+	if attrs.DerivedChargerIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.DerivedChargerIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.DerivedChargerIDs))
+		for idx, dId := range *attrs.DerivedChargerIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	if attrs.ResourceLimits == nil {
-		rlKeys = nil
-	} else if len(*attrs.ResourceLimits) > 0 {
-		rlKeys = make([]string, len(*attrs.ResourceLimits))
-		for idx, rlID := range *attrs.ResourceLimits {
-			rlKeys[idx] = utils.ResourceLimitsPrefix + rlID
+	if err = self.RatingDb.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// Aliases
+	if attrs.AliasIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.AliasIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.AliasIDs))
+		for idx, dId := range *attrs.AliasIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
 		}
 	}
-
-	// FixMe with CacheS
-	cache.Flush()
-	self.RatingDb.PreloadRatingCache()
-	self.AccountDb.PreloadAccountingCache()
-
+	if err = self.AccountDb.CacheDataFromDB(utils.ALIASES_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// ReverseAliases
+	if attrs.ReverseAliasIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ReverseAliasIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ReverseAliasIDs))
+		for idx, dId := range *attrs.ReverseAliasIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
+		}
+	}
+	if err = self.AccountDb.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// ResourceLimits
+	if attrs.ResourceLimitIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ResourceLimitIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ResourceLimitIDs))
+		for idx, dId := range *attrs.ResourceLimitIDs {
+			dataIDs[idx] = dId // Cache expects them as redis keys
+		}
+	}
+	if err = self.AccountDb.CacheDataFromDB(utils.ResourceLimitsPrefix, dataIDs, true); err != nil {
+		return
+	}
 	*reply = utils.OK
 	return nil
 }
@@ -876,63 +908,29 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	if err := loader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	// Make sure the items are in the cache
-	dstIds, _ := loader.GetLoadedIds(utils.DESTINATION_PREFIX)
-	dstKeys := make([]string, len(dstIds))
-	for idx, dId := range dstIds {
-		dstKeys[idx] = utils.DESTINATION_PREFIX + dId // Cache expects them as redis keys
-	}
-	rplIds, _ := loader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
-	rpKeys := make([]string, len(rplIds))
-	for idx, rpId := range rplIds {
-		rpKeys[idx] = utils.RATING_PLAN_PREFIX + rpId
-	}
-	rpfIds, _ := loader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
-	rpfKeys := make([]string, len(rpfIds))
-	for idx, rpfId := range rpfIds {
-		rpfKeys[idx] = utils.RATING_PROFILE_PREFIX + rpfId
-	}
-	actIds, _ := loader.GetLoadedIds(utils.ACTION_PREFIX)
-	actKeys := make([]string, len(actIds))
-	for idx, actId := range actIds {
-		actKeys[idx] = utils.ACTION_PREFIX + actId
-	}
-	aplIds, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	aplKeys := make([]string, len(aplIds))
-	for idx, aplId := range aplIds {
-		aplKeys[idx] = utils.ACTION_PLAN_PREFIX + aplId
-	}
-	shgIds, _ := loader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-	shgKeys := make([]string, len(shgIds))
-	for idx, shgId := range shgIds {
-		shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
-	}
-	aliases, _ := loader.GetLoadedIds(utils.ALIASES_PREFIX)
-	alsKeys := make([]string, len(aliases))
-	for idx, alias := range aliases {
-		alsKeys[idx] = utils.ALIASES_PREFIX + alias
-	}
-	lcrIds, _ := loader.GetLoadedIds(utils.LCR_PREFIX)
-	lcrKeys := make([]string, len(lcrIds))
-	for idx, lcrId := range lcrIds {
-		lcrKeys[idx] = utils.LCR_PREFIX + lcrId
-	}
-	dcs, _ := loader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
-	dcsKeys := make([]string, len(dcs))
-	for idx, dc := range dcs {
-		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
+	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+	for _, prfx := range []string{utils.DESTINATION_PREFIX,
+		utils.RATING_PLAN_PREFIX,
+		utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX,
+		utils.ACTION_PLAN_PREFIX,
+		utils.SHARED_GROUP_PREFIX,
+		utils.DERIVEDCHARGERS_PREFIX,
+		utils.LCR_PREFIX,
+		utils.ALIASES_PREFIX,
+		utils.ResourceLimitsPrefix} {
+		loadedIDs, _ := loader.GetLoadedIds(prfx)
+		if err := self.RatingDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 
 	// relase the tp data
 	loader.Init()
 
-	cache.Flush()
-	self.RatingDb.PreloadRatingCache()
-	self.AccountDb.PreloadAccountingCache()
 	if len(aps) != 0 {
 		sched := self.ServManager.GetScheduler()
 		if sched != nil {

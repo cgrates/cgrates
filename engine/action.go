@@ -483,7 +483,7 @@ func mailAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) err
 	return nil
 }
 
-func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	var ddcDestId string
 	for _, bchain := range ub.BalanceMap {
 		for _, b := range bchain {
@@ -511,12 +511,19 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 		}
 		newDest := &Destination{Id: ddcDestId, Prefixes: prefixes}
 		oldDest, err := ratingStorage.GetDestination(ddcDestId, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
 		// update destid in storage
-		ratingStorage.SetDestination(newDest, utils.NonTransactional)
+		if err = ratingStorage.SetDestination(newDest, utils.NonTransactional); err != nil {
+			return err
+		}
+		if err = ratingStorage.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
+			return err
+		}
 
 		if err == nil && oldDest != nil {
-			err = ratingStorage.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional)
-			if err != nil {
+			if err = ratingStorage.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -560,6 +567,8 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 			return 0, err
 		}
 		//var dirtyAps []string
+		aps := make([]string, len(allAPs))
+		i := 0
 		for key, ap := range allAPs {
 
 			if _, exists := ap.AccountIDs[accID]; exists {
@@ -569,12 +578,12 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 				ratingStorage.SetActionPlan(key, ap, true, utils.NonTransactional)
 				//dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
 			}
+			aps[i] = key
+			i++
 		}
-		/*if len(dirtyAps) > 0 {
-			// cache
-			ratingStorage.CacheRatingPrefixValues("RemoveAccountAction", map[string][]string{
-				utils.ACTION_PLAN_PREFIX: dirtyAps})
-		}*/
+		if err = ratingStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, aps, true); err != nil {
+			return 0, err
+		}
 		return 0, nil
 
 	}, 0, utils.ACTION_PLAN_PREFIX)

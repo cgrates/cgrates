@@ -80,7 +80,7 @@ type AttrRemActionTiming struct {
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
-func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) error {
+func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -89,7 +89,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 	}
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+	_, err = engine.Guardian.Guard(func() (interface{}, error) {
 		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
 		if err != nil {
 			return 0, err
@@ -100,7 +100,10 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		if attrs.Tenant != "" && attrs.Account != "" {
 			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
 			delete(ap.AccountIDs, accID)
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			if err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+				return 0, err
+			}
+			err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true)
 			goto UPDATE
 		}
 
@@ -575,96 +578,3 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 	*reply = OK
 	return nil
 }
-
-/* To be removed after the above one proves reliable
-func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-
-	var err error
-	if attr.ExpiryTime != nil {
-		attr.expTime, err = utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
-		if err != nil {
-			*reply = err.Error()
-			return err
-		}
-	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	_, err = engine.Guardian.Guard(func() (interface{}, error) {
-		account, err := self.AccountDb.GetAccount(accID)
-		if err != nil {
-			return 0, utils.ErrNotFound
-		}
-
-		if account.BalanceMap == nil {
-			account.BalanceMap = make(map[string]engine.Balances, 1)
-		}
-		var previousSharedGroups utils.StringMap // kept for comparison
-		var balance *engine.Balance
-		var found bool
-		for _, b := range account.BalanceMap[attr.BalanceType] {
-			if b.IsExpired() {
-				continue
-			}
-			if (attr.BalanceUUID != nil && b.Uuid == *attr.BalanceUUID) ||
-				(attr.BalanceID != nil && b.Id == *attr.BalanceID) {
-				previousSharedGroups = b.SharedGroups
-				balance = b
-				found = true
-				break // only set one balance
-			}
-		}
-
-		// if it is not found then we add it to the list
-		if balance == nil {
-			balance = &engine.Balance{}
-			balance.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
-			account.BalanceMap[attr.BalanceType] = append(account.BalanceMap[attr.BalanceType], balance)
-		}
-
-		if attr.BalanceID != nil && *attr.BalanceID == utils.META_DEFAULT {
-			balance.Id = utils.META_DEFAULT
-			if attr.Value != nil {
-				balance.Value = *attr.Value
-			}
-		} else {
-			attr.SetBalance(balance)
-		}
-
-		if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
-			_, err = engine.Guardian.Guard(func() (interface{}, error) {
-				for sgID := range balance.SharedGroups {
-					// add shared group member
-					sg, err := self.RatingDb.GetSharedGroup(sgID, false)
-					if err != nil || sg == nil {
-						//than is problem
-						utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
-					} else {
-						if _, found := sg.MemberIds[account.Id]; !found {
-							// add member and save
-							if sg.MemberIds == nil {
-								sg.MemberIds = make(utils.StringMap)
-							}
-							sg.MemberIds[account.Id] = true
-							self.RatingDb.SetSharedGroup(sg)
-						}
-					}
-				}
-				return 0, nil
-			}, 0, balance.SharedGroups.Slice()...)
-		}
-
-		account.InitCounters()
-		account.ExecuteActionTriggers(nil)
-		self.AccountDb.SetAccount(account)
-		return 0, nil
-	}, 0, accID)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-*/

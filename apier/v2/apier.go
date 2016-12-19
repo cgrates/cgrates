@@ -391,6 +391,9 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 	if err := self.RatingDb.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	if err := self.RatingDb.CacheDataFromDB(utils.ACTION_PREFIX, []string{attrs.ActionsId}, true); err != nil {
+		utils.NewErrServerError(err)
+	}
 	*reply = utils.OK
 	return nil
 }
