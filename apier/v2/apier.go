@@ -27,7 +27,6 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -51,6 +50,9 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 	rpf := engine.APItoModelRatingProfile(tpRpf)
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadRatingProfilesFiltered(&rpf[0]); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if err := self.RatingDb.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{attrs.RatingProfileId}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = v1.OK
@@ -102,6 +104,9 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	dc := engine.APItoModelDerivedCharger(tpDc)
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if err := self.RatingDb.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{attrs.DerivedChargersId}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = v1.OK
@@ -156,61 +161,34 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	if err := loader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	// Make sure the items are in the cache
-	dstIds, _ := loader.GetLoadedIds(utils.DESTINATION_PREFIX)
-	dstKeys := make([]string, len(dstIds))
-	for idx, dId := range dstIds {
-		dstKeys[idx] = utils.DESTINATION_PREFIX + dId // Cache expects them as redis keys
+
+	utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading cache.")
+	for _, prfx := range []string{utils.DESTINATION_PREFIX,
+		utils.RATING_PLAN_PREFIX,
+		utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX,
+		utils.ACTION_PLAN_PREFIX,
+		utils.SHARED_GROUP_PREFIX,
+		utils.DERIVEDCHARGERS_PREFIX,
+		utils.LCR_PREFIX} {
+		loadedIDs, _ := loader.GetLoadedIds(prfx)
+		if err := self.RatingDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
-	rplIds, _ := loader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
-	rpKeys := make([]string, len(rplIds))
-	for idx, rpId := range rplIds {
-		rpKeys[idx] = utils.RATING_PLAN_PREFIX + rpId
-	}
-	rpfIds, _ := loader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
-	rpfKeys := make([]string, len(rpfIds))
-	for idx, rpfId := range rpfIds {
-		rpfKeys[idx] = utils.RATING_PROFILE_PREFIX + rpfId
-	}
-	actIds, _ := loader.GetLoadedIds(utils.ACTION_PREFIX)
-	actKeys := make([]string, len(actIds))
-	for idx, actId := range actIds {
-		actKeys[idx] = utils.ACTION_PREFIX + actId
-	}
-	aplIds, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	aplKeys := make([]string, len(aplIds))
-	for idx, aplId := range aplIds {
-		aplKeys[idx] = utils.ACTION_PLAN_PREFIX + aplId
-	}
-	shgIds, _ := loader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-	shgKeys := make([]string, len(shgIds))
-	for idx, shgId := range shgIds {
-		shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
-	}
-	aliases, _ := loader.GetLoadedIds(utils.ALIASES_PREFIX)
-	alsKeys := make([]string, len(aliases))
-	for idx, alias := range aliases {
-		alsKeys[idx] = utils.ALIASES_PREFIX + alias
-	}
-	lcrIds, _ := loader.GetLoadedIds(utils.LCR_PREFIX)
-	lcrKeys := make([]string, len(lcrIds))
-	for idx, lcrId := range lcrIds {
-		lcrKeys[idx] = utils.LCR_PREFIX + lcrId
-	}
-	dcs, _ := loader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
-	dcsKeys := make([]string, len(dcs))
-	for idx, dc := range dcs {
-		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
+	for _, prfx := range []string{utils.ALIASES_PREFIX,
+		utils.ResourceLimitsPrefix} {
+		loadedIDs, _ := loader.GetLoadedIds(prfx)
+		if err := self.AccountDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading cache.")
-
 	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
-	loader.Init() // release the tp data
-	cache.Flush()
-	self.RatingDb.PreloadRatingCache()
-	self.AccountDb.PreloadAccountingCache()
+
+	// relase tp data
+	loader.Init()
 
 	if len(aps) != 0 {
 		sched := self.ServManager.GetScheduler()

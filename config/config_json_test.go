@@ -91,6 +91,10 @@ func TestCacheJsonCfg(t *testing.T) {
 			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
 		Reverse_aliases: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),
 			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Derived_chargers: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),
+			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Resource_limits: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),
+			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
 	}
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
 		t.Error(err)

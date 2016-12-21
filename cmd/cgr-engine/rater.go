@@ -71,7 +71,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		}
 
 		if err := ratingDb.PreloadRatingCache(); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+		if err := accountDb.PreloadAccountingCache(); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache accounting error: %s", err.Error()))
 			exitChan <- true
 			return
 		}

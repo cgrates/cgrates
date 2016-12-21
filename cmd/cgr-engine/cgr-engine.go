@@ -458,13 +458,6 @@ func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, 
 		internalAliaseSChan <- aliasesServer
 		return
 	}
-
-	if err := accountDb.PreloadAccountingCache(); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-
 	internalAliaseSChan <- aliasesServer
 }
 

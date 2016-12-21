@@ -366,107 +366,75 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
-func (ms *MongoStorage) PreloadRatingCache() error {
+func (ms *MongoStorage) PreloadRatingCache() (err error) {
 	if ms.cacheCfg == nil {
-		return nil
+		return
 	}
-	if ms.cacheCfg.Destinations != nil && ms.cacheCfg.Destinations.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.DESTINATION_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.Destinations.Precache {
+		if err = ms.CacheDataFromDB(utils.DESTINATION_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-
-	if ms.cacheCfg.ReverseDestinations != nil && ms.cacheCfg.ReverseDestinations.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.ReverseDestinations.Precache {
+		if err = ms.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-
-	if ms.cacheCfg.RatingPlans != nil && ms.cacheCfg.RatingPlans.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.RatingPlans.Precache {
+		if err = ms.CacheDataFromDB(utils.RATING_PLAN_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-
-	if ms.cacheCfg.RatingProfiles != nil && ms.cacheCfg.RatingProfiles.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.RatingProfiles.Precache {
+		if err = ms.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if ms.cacheCfg.Lcr != nil && ms.cacheCfg.Lcr.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.LCR_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.Actions.Precache {
+		if err = ms.CacheDataFromDB(utils.ACTION_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if ms.cacheCfg.CdrStats != nil && ms.cacheCfg.CdrStats.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.CDR_STATS_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.ActionPlans.Precache {
+		if err = ms.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if ms.cacheCfg.Actions != nil && ms.cacheCfg.Actions.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.ACTION_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.SharedGroups.Precache {
+		if err = ms.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if ms.cacheCfg.ActionPlans != nil && ms.cacheCfg.ActionPlans.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.DerivedChargers.Precache {
+		if err = ms.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if ms.cacheCfg.ActionTriggers != nil && ms.cacheCfg.ActionTriggers.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.ACTION_TRIGGER_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.Lcr.Precache {
+		if err = ms.CacheDataFromDB(utils.LCR_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if ms.cacheCfg.SharedGroups != nil && ms.cacheCfg.SharedGroups.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.SHARED_GROUP_PREFIX); err != nil {
-			return err
-		}
-	}
-	// add more prefixes if needed
-	return nil
+	return
 }
 
-func (ms *MongoStorage) PreloadAccountingCache() error {
-	if ms.cacheCfg == nil {
-		return nil
-	}
-	if ms.cacheCfg.Aliases != nil && ms.cacheCfg.Aliases.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.ALIASES_PREFIX); err != nil {
-			return err
+func (ms *MongoStorage) PreloadAccountingCache() (err error) {
+	if ms.cacheCfg.Aliases.Precache {
+		if err = ms.CacheDataFromDB(utils.ALIASES_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-
-	if ms.cacheCfg.ReverseAliases != nil && ms.cacheCfg.ReverseAliases.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
-			return err
+	if ms.cacheCfg.ReverseAliases.Precache {
+		if err = ms.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	return nil
-}
-
-func (ms *MongoStorage) PreloadCacheForPrefix(prefix string) error {
-	transID := cache.BeginTransaction()
-	cache.RemPrefixKey(prefix, false, transID)
-	keyList, err := ms.GetKeysForPrefix(prefix)
-	if err != nil {
-		cache.RollbackTransaction(transID)
-		return err
-	}
-	switch prefix {
-	case utils.RATING_PLAN_PREFIX:
-		for _, key := range keyList {
-			_, err := ms.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
-			if err != nil {
-				cache.RollbackTransaction(transID)
-				return err
-			}
+	if ms.cacheCfg.ResourceLimits.Precache {
+		if err = ms.CacheDataFromDB(utils.ResourceLimitsPrefix, nil, false); err != nil {
+			return
 		}
-	default:
-		return utils.ErrInvalidKey
 	}
-	cache.CommitTransaction(transID)
-	return nil
+	return
 }
 
 // CacheDataFromDB loads data to cache
@@ -490,6 +458,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			utils.UnsupportedCachePrefix,
 			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prfx))
 	}
+	var prefixRemoved bool // Mark prefix reset
 	if ids == nil {
 		if ids, err = ms.GetKeysForPrefix(prfx); err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -497,10 +466,50 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 				err.Error(),
 				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
 		}
+		if mustBeCached { // Only consider loading ids which are already in cache
+			for i := 0; i < len(ids); {
+				if _, hasIt := cache.Get(prfx + ids[i]); !hasIt {
+					ids = append(ids[:i], ids[i+1:]...)
+					continue
+				}
+				i++
+			}
+		}
 		cache.RemPrefixKey(prfx, true, utils.NonTransactional)
+		prefixRemoved = true
+		var nrItems int
+		switch prfx {
+		case utils.DESTINATION_PREFIX:
+			nrItems = ms.cacheCfg.Destinations.Limit
+		case utils.REVERSE_DESTINATION_PREFIX:
+			nrItems = ms.cacheCfg.ReverseDestinations.Limit
+		case utils.RATING_PLAN_PREFIX:
+			nrItems = ms.cacheCfg.RatingPlans.Limit
+		case utils.RATING_PROFILE_PREFIX:
+			nrItems = ms.cacheCfg.RatingProfiles.Limit
+		case utils.ACTION_PREFIX:
+			nrItems = ms.cacheCfg.Actions.Limit
+		case utils.ACTION_PLAN_PREFIX:
+			nrItems = ms.cacheCfg.ActionPlans.Limit
+		case utils.SHARED_GROUP_PREFIX:
+			nrItems = ms.cacheCfg.SharedGroups.Limit
+		case utils.DERIVEDCHARGERS_PREFIX:
+			nrItems = ms.cacheCfg.DerivedChargers.Limit
+		case utils.LCR_PREFIX:
+			nrItems = ms.cacheCfg.Lcr.Limit
+		case utils.ALIASES_PREFIX:
+			nrItems = ms.cacheCfg.Aliases.Limit
+		case utils.REVERSE_ALIASES_PREFIX:
+			nrItems = ms.cacheCfg.ReverseAliases.Limit
+		case utils.ResourceLimitsPrefix:
+			nrItems = ms.cacheCfg.ResourceLimits.Limit
+		}
+		if nrItems != 0 && nrItems < len(ids) { // More ids than cache config allows it, limit here
+			ids = ids[:nrItems]
+		}
 	}
 	for _, dataID := range ids {
-		if mustBeCached {
+		if mustBeCached && !prefixRemoved {
 			if _, hasIt := cache.Get(prfx + dataID); !hasIt { // only cache if previously there
 				continue
 			}

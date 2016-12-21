@@ -263,6 +263,8 @@ type CacheJsonCfg struct {
 	Shared_groups        *CacheParamJsonCfg
 	Aliases              *CacheParamJsonCfg
 	Reverse_aliases      *CacheParamJsonCfg
+	Derived_chargers     *CacheParamJsonCfg
+	Resource_limits      *CacheParamJsonCfg
 }
 
 // Represents one connection instance towards FreeSWITCH

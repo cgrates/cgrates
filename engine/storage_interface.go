@@ -32,7 +32,6 @@ type Storage interface {
 	Close()
 	Flush(string) error
 	GetKeysForPrefix(string) ([]string, error)
-	PreloadCacheForPrefix(string) error
 	RebuildReverseForPrefix(string) error
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions) (err error)

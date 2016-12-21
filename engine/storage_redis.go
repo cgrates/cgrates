@@ -112,115 +112,75 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.Cmd("FLUSHDB").Err
 }
 
-func (rs *RedisStorage) PreloadRatingCache() error {
+func (rs *RedisStorage) PreloadRatingCache() (err error) {
 	if rs.cacheCfg == nil {
-		return nil
+		return
 	}
-	if rs.cacheCfg.Destinations != nil && rs.cacheCfg.Destinations.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.DESTINATION_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.Destinations.Precache {
+		if err = rs.CacheDataFromDB(utils.DESTINATION_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-
-	if rs.cacheCfg.ReverseDestinations != nil && rs.cacheCfg.ReverseDestinations.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.ReverseDestinations.Precache {
+		if err = rs.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-
-	if rs.cacheCfg.RatingPlans != nil && rs.cacheCfg.RatingPlans.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.RatingPlans.Precache {
+		if err = rs.CacheDataFromDB(utils.RATING_PLAN_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-
-	if rs.cacheCfg.RatingProfiles != nil && rs.cacheCfg.RatingProfiles.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.RatingProfiles.Precache {
+		if err = rs.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if rs.cacheCfg.Lcr != nil && rs.cacheCfg.Lcr.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.LCR_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.Actions.Precache {
+		if err = rs.CacheDataFromDB(utils.ACTION_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if rs.cacheCfg.CdrStats != nil && rs.cacheCfg.CdrStats.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.CDR_STATS_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.ActionPlans.Precache {
+		if err = rs.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if rs.cacheCfg.Actions != nil && rs.cacheCfg.Actions.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.ACTION_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.SharedGroups.Precache {
+		if err = rs.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if rs.cacheCfg.ActionPlans != nil && rs.cacheCfg.ActionPlans.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.DerivedChargers.Precache {
+		if err = rs.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if rs.cacheCfg.ActionTriggers != nil && rs.cacheCfg.ActionTriggers.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.ACTION_TRIGGER_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.Lcr.Precache {
+		if err = rs.CacheDataFromDB(utils.LCR_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	if rs.cacheCfg.SharedGroups != nil && rs.cacheCfg.SharedGroups.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.SHARED_GROUP_PREFIX); err != nil {
-			return err
-		}
-	}
-	// add more prefixes if needed
-	return nil
+	return
 }
 
-func (rs *RedisStorage) PreloadAccountingCache() error {
-	if rs.cacheCfg == nil {
-		return nil
-	}
-	if rs.cacheCfg.Aliases != nil && rs.cacheCfg.Aliases.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.ALIASES_PREFIX); err != nil {
-			return err
+func (rs *RedisStorage) PreloadAccountingCache() (err error) {
+	if rs.cacheCfg.Aliases.Precache {
+		if err = rs.CacheDataFromDB(utils.ALIASES_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-
-	if rs.cacheCfg.ReverseAliases != nil && rs.cacheCfg.ReverseAliases.Precache {
-		if err := rs.PreloadCacheForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
-			return err
+	if rs.cacheCfg.ReverseAliases.Precache {
+		if err = rs.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, nil, false); err != nil {
+			return
 		}
 	}
-	return nil
-}
-
-func (rs *RedisStorage) PreloadCacheForPrefix(prefix string) error {
-	transID := cache.BeginTransaction()
-	cache.RemPrefixKey(prefix, false, transID)
-	keyList, err := rs.GetKeysForPrefix(prefix)
-	if err != nil {
-		cache.RollbackTransaction(transID)
-		return err
-	}
-	switch prefix {
-	case utils.RATING_PLAN_PREFIX:
-		for _, key := range keyList {
-			_, err := rs.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
-			if err != nil {
-				cache.RollbackTransaction(transID)
-				return err
-			}
+	if rs.cacheCfg.ResourceLimits.Precache {
+		if err = rs.CacheDataFromDB(utils.ResourceLimitsPrefix, nil, false); err != nil {
+			return
 		}
-	case utils.ResourceLimitsPrefix:
-		for _, key := range keyList {
-			_, err = rs.GetResourceLimit(key[len(utils.ResourceLimitsPrefix):], true, transID)
-			if err != nil {
-				cache.RollbackTransaction(transID)
-				return err
-			}
-		}
-	default:
-		return utils.ErrInvalidKey
 	}
-	cache.CommitTransaction(transID)
-	return nil
+	return
 }
 
 func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
@@ -290,6 +250,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			utils.UnsupportedCachePrefix,
 			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prfx))
 	}
+	var prefixRemoved bool // Mark prefix reset
 	if ids == nil {
 		if ids, err = rs.GetKeysForPrefix(prfx); err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -297,10 +258,50 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 				err.Error(),
 				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
 		}
+		if mustBeCached { // Only consider loading ids which are already in cache
+			for i := 0; i < len(ids); {
+				if _, hasIt := cache.Get(prfx + ids[i]); !hasIt {
+					ids = append(ids[:i], ids[i+1:]...)
+					continue
+				}
+				i++
+			}
+		}
 		cache.RemPrefixKey(prfx, true, utils.NonTransactional)
+		prefixRemoved = true
+		var nrItems int
+		switch prfx {
+		case utils.DESTINATION_PREFIX:
+			nrItems = rs.cacheCfg.Destinations.Limit
+		case utils.REVERSE_DESTINATION_PREFIX:
+			nrItems = rs.cacheCfg.ReverseDestinations.Limit
+		case utils.RATING_PLAN_PREFIX:
+			nrItems = rs.cacheCfg.RatingPlans.Limit
+		case utils.RATING_PROFILE_PREFIX:
+			nrItems = rs.cacheCfg.RatingProfiles.Limit
+		case utils.ACTION_PREFIX:
+			nrItems = rs.cacheCfg.Actions.Limit
+		case utils.ACTION_PLAN_PREFIX:
+			nrItems = rs.cacheCfg.ActionPlans.Limit
+		case utils.SHARED_GROUP_PREFIX:
+			nrItems = rs.cacheCfg.SharedGroups.Limit
+		case utils.DERIVEDCHARGERS_PREFIX:
+			nrItems = rs.cacheCfg.DerivedChargers.Limit
+		case utils.LCR_PREFIX:
+			nrItems = rs.cacheCfg.Lcr.Limit
+		case utils.ALIASES_PREFIX:
+			nrItems = rs.cacheCfg.Aliases.Limit
+		case utils.REVERSE_ALIASES_PREFIX:
+			nrItems = rs.cacheCfg.ReverseAliases.Limit
+		case utils.ResourceLimitsPrefix:
+			nrItems = rs.cacheCfg.ResourceLimits.Limit
+		}
+		if nrItems != 0 && nrItems < len(ids) {
+			ids = ids[:nrItems]
+		}
 	}
 	for _, dataID := range ids {
-		if mustBeCached {
+		if mustBeCached && !prefixRemoved {
 			if _, hasIt := cache.Get(prfx + dataID); !hasIt { // only cache if previously there
 				continue
 			}

@@ -107,7 +107,6 @@ func TestApierStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestApierRpcConn(t *testing.T) {
-
 	var err error
 	rater, err = jsonrpc.Dial("tcp", cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -738,6 +737,14 @@ func TestApierReloadScheduler(t *testing.T) {
 
 // Test here ReloadCache
 func TestApierReloadCache(t *testing.T) {
+	var rcvStats *utils.CacheStats
+	var args utils.AttrCacheStats
+	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 1, RatingProfiles: 0, Actions: 0, ActionPlans: 0}
+	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+	}
 	reply := ""
 	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
@@ -746,14 +753,8 @@ func TestApierReloadCache(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
-}
-
-func TestApierGetCacheStats(t *testing.T) {
-	var rcvStats *utils.CacheStats
-	var args utils.AttrCacheStats
-	err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats)
-	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 1, RatingProfiles: 0, Actions: 0, ActionPlans: 0}
-	if err != nil {
+	expectedStats = &utils.CacheStats{Destinations: 0, RatingPlans: 1, RatingProfiles: 0, Actions: 0, ActionPlans: 0}
+	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)

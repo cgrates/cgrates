@@ -62,6 +62,8 @@ const CGRATES_CFG_JSON = `
 	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": false},
 	"aliases": {"limit": 10000, "ttl":"0s", "precache": false},
 	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": false},
+	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": false},
+	"resource_limits": {"limit": 10000, "ttl":"0s", "precache": false},
 },
 
 

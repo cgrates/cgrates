@@ -61,6 +61,8 @@ type CacheConfig struct {
 	SharedGroups        *CacheParamConfig
 	Aliases             *CacheParamConfig
 	ReverseAliases      *CacheParamConfig
+	DerivedChargers     *CacheParamConfig
+	ResourceLimits      *CacheParamConfig
 }
 
 func (self *CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) error {
@@ -133,6 +135,18 @@ func (self *CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) error {
 	if jsnCfg.Reverse_aliases != nil {
 		self.ReverseAliases = &CacheParamConfig{}
 		if err := self.ReverseAliases.loadFromJsonCfg(jsnCfg.Reverse_aliases); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Derived_chargers != nil {
+		self.DerivedChargers = &CacheParamConfig{}
+		if err := self.DerivedChargers.loadFromJsonCfg(jsnCfg.Derived_chargers); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Resource_limits != nil {
+		self.ResourceLimits = &CacheParamConfig{}
+		if err := self.ResourceLimits.loadFromJsonCfg(jsnCfg.Resource_limits); err != nil {
 			return err
 		}
 	}
