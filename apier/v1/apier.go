@@ -304,6 +304,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX} {
@@ -402,13 +403,8 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	keyId := tpRpf.KeyId()
 	var rpfl *engine.RatingProfile
 	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.HasData(utils.RATING_PROFILE_PREFIX, keyId); err != nil {
+		if rpfl, err = self.RatingDb.GetRatingProfile(keyId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return utils.NewErrServerError(err)
-		} else if exists {
-			var err error
-			if rpfl, err = self.RatingDb.GetRatingProfile(keyId, false, utils.NonTransactional); err != nil {
-				return utils.NewErrServerError(err)
-			}
 		}
 	}
 	if rpfl == nil {
@@ -698,7 +694,7 @@ func (self *ApierV1) ReloadScheduler(ignore string, reply *string) error {
 func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (err error) {
 	var dataIDs []string
 	// Reload Destinations
-	if attrs.ReverseDestinationIDs == nil {
+	if attrs.DestinationIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.DestinationIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.DestinationIDs))
@@ -943,6 +939,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX} {

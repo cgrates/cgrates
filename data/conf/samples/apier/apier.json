@@ -4,6 +4,10 @@
 // Used in apier_local_tests
 // Starts rater, cdrs and mediator connecting over internal channel
 
+"general": {
+    "log_level": 7,
+},
+
 "listen": {
 	"rpc_json": ":2012",			// RPC JSON listening address
 	"rpc_gob": ":2013",			// RPC GOB listening address

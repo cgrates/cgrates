@@ -459,30 +459,26 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceLimitsPrefix}, prfx) {
-		return utils.NewCGRError(utils.REDIS,
+		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
 			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prfx))
 	}
-	var prefixRemoved bool // Mark prefix reset
 	if ids == nil {
-		if ids, err = ms.GetKeysForPrefix(prfx); err != nil {
+		keyIDs, err := ms.GetKeysForPrefix(prfx)
+		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
 				utils.ServerErrorCaps,
 				err.Error(),
-				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prfx))
+				fmt.Sprintf("mongo error <%s> querying keys for prefix: <%s>", prfx))
 		}
 		if mustBeCached { // Only consider loading ids which are already in cache
-			for i := 0; i < len(ids); {
-				if _, hasIt := cache.Get(prfx + ids[i]); !hasIt {
-					ids = append(ids[:i], ids[i+1:]...)
-					continue
+			for _, keyID := range keyIDs {
+				if _, hasIt := cache.Get(keyID); hasIt {
+					ids = append(ids, keyID[len(prfx):])
 				}
-				i++
 			}
 		}
-		cache.RemPrefixKey(prfx, true, utils.NonTransactional)
-		prefixRemoved = true
 		var nrItems int
 		switch prfx {
 		case utils.DESTINATION_PREFIX:
@@ -517,7 +513,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		}
 	}
 	for _, dataID := range ids {
-		if mustBeCached && !prefixRemoved {
+		if mustBeCached {
 			if _, hasIt := cache.Get(prfx + dataID); !hasIt { // only cache if previously there
 				continue
 			}
@@ -952,6 +948,9 @@ func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 	var obsoletePrefixes []string
 	var addedPrefixes []string
 	var found bool
+	if oldDest == nil {
+		oldDest = new(Destination) // so we can process prefixes
+	}
 	for _, oldPrefix := range oldDest.Prefixes {
 		found = false
 		for _, newPrefix := range newDest.Prefixes {
