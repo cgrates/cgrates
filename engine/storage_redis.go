@@ -146,6 +146,11 @@ func (rs *RedisStorage) PreloadRatingCache() (err error) {
 			return
 		}
 	}
+	if rs.cacheCfg.ActionTriggers.Precache {
+		if err = rs.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, nil, false); err != nil {
+			return
+		}
+	}
 	if rs.cacheCfg.SharedGroups.Precache {
 		if err = rs.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, nil, false); err != nil {
 			return

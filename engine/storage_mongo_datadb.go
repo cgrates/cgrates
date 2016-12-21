@@ -400,6 +400,11 @@ func (ms *MongoStorage) PreloadRatingCache() (err error) {
 			return
 		}
 	}
+	if ms.cacheCfg.ActionTriggers.Precache {
+		if err = ms.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, nil, false); err != nil {
+			return
+		}
+	}
 	if ms.cacheCfg.SharedGroups.Precache {
 		if err = ms.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, nil, false); err != nil {
 			return
@@ -519,31 +524,31 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		}
 		switch prfx {
 		case utils.DESTINATION_PREFIX:
-			_, err = ms.GetDestination(dataID, false, utils.NonTransactional)
+			_, err = ms.GetDestination(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_DESTINATION_PREFIX:
-			_, err = ms.GetReverseDestination(dataID, false, utils.NonTransactional)
+			_, err = ms.GetReverseDestination(dataID, true, utils.NonTransactional)
 		case utils.RATING_PLAN_PREFIX:
-			_, err = ms.GetRatingPlan(dataID, false, utils.NonTransactional)
+			_, err = ms.GetRatingPlan(dataID, true, utils.NonTransactional)
 		case utils.RATING_PROFILE_PREFIX:
-			_, err = ms.GetRatingProfile(dataID, false, utils.NonTransactional)
+			_, err = ms.GetRatingProfile(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PREFIX:
-			_, err = ms.GetActions(dataID, false, utils.NonTransactional)
+			_, err = ms.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
-			_, err = ms.GetActionPlan(dataID, false, utils.NonTransactional)
+			_, err = ms.GetActionPlan(dataID, true, utils.NonTransactional)
 		case utils.ACTION_TRIGGER_PREFIX:
 			_, err = ms.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
-			_, err = ms.GetSharedGroup(dataID, false, utils.NonTransactional)
+			_, err = ms.GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
-			_, err = ms.GetDerivedChargers(dataID, false, utils.NonTransactional)
+			_, err = ms.GetDerivedChargers(dataID, true, utils.NonTransactional)
 		case utils.LCR_PREFIX:
-			_, err = ms.GetLCR(dataID, false, utils.NonTransactional)
+			_, err = ms.GetLCR(dataID, true, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
-			_, err = ms.GetAlias(dataID, false, utils.NonTransactional)
+			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
-			_, err = ms.GetReverseAlias(dataID, false, utils.NonTransactional)
+			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
-			_, err = ms.GetResourceLimit(dataID, false, utils.NonTransactional)
+			_, err = ms.GetResourceLimit(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
