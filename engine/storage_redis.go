@@ -239,6 +239,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX,
@@ -283,6 +284,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			nrItems = rs.cacheCfg.Actions.Limit
 		case utils.ACTION_PLAN_PREFIX:
 			nrItems = rs.cacheCfg.ActionPlans.Limit
+		case utils.ACTION_TRIGGER_PREFIX:
+			nrItems = rs.cacheCfg.ActionTriggers.Limit
 		case utils.SHARED_GROUP_PREFIX:
 			nrItems = rs.cacheCfg.SharedGroups.Limit
 		case utils.DERIVEDCHARGERS_PREFIX:
@@ -308,29 +311,31 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		}
 		switch prfx {
 		case utils.DESTINATION_PREFIX:
-			_, err = rs.GetDestination(dataID, false, utils.NonTransactional)
+			_, err = rs.GetDestination(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_DESTINATION_PREFIX:
-			_, err = rs.GetReverseDestination(dataID, false, utils.NonTransactional)
+			_, err = rs.GetReverseDestination(dataID, true, utils.NonTransactional)
 		case utils.RATING_PLAN_PREFIX:
-			_, err = rs.GetRatingPlan(dataID, false, utils.NonTransactional)
+			_, err = rs.GetRatingPlan(dataID, true, utils.NonTransactional)
 		case utils.RATING_PROFILE_PREFIX:
-			_, err = rs.GetRatingProfile(dataID, false, utils.NonTransactional)
+			_, err = rs.GetRatingProfile(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PREFIX:
-			_, err = rs.GetActions(dataID, false, utils.NonTransactional)
+			_, err = rs.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
-			_, err = rs.GetActionPlan(dataID, false, utils.NonTransactional)
+			_, err = rs.GetActionPlan(dataID, true, utils.NonTransactional)
+		case utils.ACTION_TRIGGER_PREFIX:
+			_, err = rs.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
-			_, err = rs.GetSharedGroup(dataID, false, utils.NonTransactional)
+			_, err = rs.GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
-			_, err = rs.GetDerivedChargers(dataID, false, utils.NonTransactional)
+			_, err = rs.GetDerivedChargers(dataID, true, utils.NonTransactional)
 		case utils.LCR_PREFIX:
-			_, err = rs.GetLCR(dataID, false, utils.NonTransactional)
+			_, err = rs.GetLCR(dataID, true, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
-			_, err = rs.GetAlias(dataID, false, utils.NonTransactional)
+			_, err = rs.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
-			_, err = rs.GetReverseAlias(dataID, false, utils.NonTransactional)
+			_, err = rs.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
-			_, err = rs.GetResourceLimit(dataID, false, utils.NonTransactional)
+			_, err = rs.GetResourceLimit(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -1069,15 +1074,22 @@ func (rs *RedisStorage) GetActionTriggers(key string, skipCache bool, transactio
 	key = utils.ACTION_TRIGGER_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(ActionTriggers), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(ActionTriggers), nil
 		}
 	}
 	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &atrs)
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &atrs); err != nil {
+		return
 	}
 	cache.Set(key, atrs, cacheCommit(transactionID), transactionID)
 	return
@@ -1088,12 +1100,13 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers, trans
 		// delete the key
 		return rs.Cmd("DEL", utils.ACTION_TRIGGER_PREFIX+key).Err
 	}
-	result, err := rs.ms.Marshal(atrs)
-	if err != nil {
+	var result []byte
+	if result, err = rs.ms.Marshal(atrs); err != nil {
 		return err
 	}
-	err = rs.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
-	cache.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
+	if err = rs.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err; err != nil {
+		return
+	}
 	return
 }
 

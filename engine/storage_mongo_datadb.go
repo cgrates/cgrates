@@ -447,6 +447,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX,
@@ -491,6 +492,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			nrItems = ms.cacheCfg.Actions.Limit
 		case utils.ACTION_PLAN_PREFIX:
 			nrItems = ms.cacheCfg.ActionPlans.Limit
+		case utils.ACTION_TRIGGER_PREFIX:
+			nrItems = ms.cacheCfg.ActionTriggers.Limit
 		case utils.SHARED_GROUP_PREFIX:
 			nrItems = ms.cacheCfg.SharedGroups.Limit
 		case utils.DERIVEDCHARGERS_PREFIX:
@@ -527,6 +530,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetActions(dataID, false, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
 			_, err = ms.GetActionPlan(dataID, false, utils.NonTransactional)
+		case utils.ACTION_TRIGGER_PREFIX:
+			_, err = ms.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
 			_, err = ms.GetSharedGroup(dataID, false, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
@@ -1425,8 +1430,9 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 }
 
 func (ms *MongoStorage) GetActionTriggers(key string, skipCache bool, transactionID string) (atrs ActionTriggers, err error) {
+	cacheKey := utils.ACTION_TRIGGER_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(utils.ACTION_TRIGGER_PREFIX + key); ok {
+		if x, ok := cache.Get(cacheKey); ok {
 			if x != nil {
 				return x.(ActionTriggers), nil
 			}
@@ -1440,11 +1446,15 @@ func (ms *MongoStorage) GetActionTriggers(key string, skipCache bool, transactio
 	}
 	session, col := ms.conn(colAtr)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&kv)
-	if err == nil {
-		atrs = kv.Value
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
 	}
-	cache.Set(utils.ACTION_TRIGGER_PREFIX+key, atrs, cacheCommit(transactionID), transactionID)
+	atrs = kv.Value
+	cache.Set(cacheKey, atrs, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1462,7 +1472,6 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers, trans
 		Key   string
 		Value ActionTriggers
 	}{Key: key, Value: atrs})
-	cache.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return err
 }
 

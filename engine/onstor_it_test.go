@@ -51,6 +51,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheRatingProfile,
 	testOnStorITCacheActions,
 	testOnStorITCacheActionPlan,
+	testOnStorITCacheActionTriggers,
 	testOnStorITCacheSharedGroup,
 	testOnStorITCacheDerivedChargers,
 	testOnStorITCacheLCR,
@@ -451,6 +452,35 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ActionPlan); !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", ap, rcv)
+	}
+}
+
+func testOnStorITCacheActionTriggers(t *testing.T) {
+	ats := ActionTriggers{
+		&ActionTrigger{
+			ID:                "testOnStorITCacheActionTrigger",
+			Balance:           &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Timings: make([]*RITiming, 0)},
+			ThresholdValue:    2,
+			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
+			ActionsID:         "TEST_ACTIONS",
+			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()},
+	}
+	atsID := ats[0].ID
+	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.ACTION_TRIGGER_PREFIX + atsID); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{atsID}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.ACTION_TRIGGER_PREFIX + atsID); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(ActionTriggers); !reflect.DeepEqual(ats, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", ats, rcv)
 	}
 }
 
