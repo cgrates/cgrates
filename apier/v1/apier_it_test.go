@@ -1441,16 +1441,9 @@ func TestApierITSetDestination(t *testing.T) {
 
 func TestApierITGetAliases(t *testing.T) {
 	var alias engine.Alias
-	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil {
-		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Unexpected error", err.Error())
-	}
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil {
-		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Unexpected error", err.Error())
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out",
+		Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
