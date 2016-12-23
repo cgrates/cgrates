@@ -692,6 +692,7 @@ func TestApierLoadAccountActions(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadAccountActions got reply: ", reply)
 	}
+	time.Sleep(10 * time.Millisecond)
 	expectedStats = &utils.CacheStats{Actions: 1, ActionPlans: 1}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -1169,13 +1170,12 @@ func TestApierTriggersExecute(t *testing.T) {
 // Start fresh before loading from folder
 func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 	TestApierInitDataDb(t)
-	reply := ""
-	arc := new(utils.AttrReloadCache)
+	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	if err := rater.Call("ApierV1.FlushCache", utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
+		t.Error(err)
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+		t.Error("Reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
 	var args utils.AttrCacheStats
@@ -1206,29 +1206,42 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(1 * time.Second))
+	time.Sleep(time.Duration(2 * time.Second))
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
+	expStats := &utils.CacheStats{Destinations: 3, Actions: 6, ActionPlans: 7, Aliases: 1} // We get partial cache info during load, maybe fix this in the future
+	var rcvStats *utils.CacheStats
+	if err := rater.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(expStats, rcvStats) {
+		t.Errorf("Expecting: %+v, received: %+v", expStats, rcvStats)
+	}
 	reply := ""
-	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	if err := rater.Call("ApierV1.PreloadCache", utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error(err)
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
-	var rcvStats *utils.CacheStats
-	var args utils.AttrCacheStats
-	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	//expStats = &utils.CacheStats{Destinations: 3, ReverseDestinations: 5}
+	if err := rater.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error(err)
+		//} else if !reflect.DeepEqual(expStats, rcvStats) {
 	} else {
-		if rcvStats.Destinations != 0 ||
+		if rcvStats.Destinations != 3 ||
+			rcvStats.ReverseDestinations != 5 ||
 			rcvStats.RatingPlans != 5 ||
-			rcvStats.RatingProfiles != 0 ||
-			rcvStats.Actions != 0 ||
-			rcvStats.DerivedChargers != 0 {
-			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+			rcvStats.RatingProfiles != 5 ||
+			rcvStats.Actions != 13 ||
+			rcvStats.ActionPlans != 7 ||
+			rcvStats.SharedGroups != 0 ||
+			rcvStats.DerivedChargers != 3 ||
+			rcvStats.LcrProfiles != 0 ||
+			rcvStats.Aliases != 1 ||
+			rcvStats.ReverseAliases != 2 ||
+			rcvStats.ResourceLimits != 0 {
+			t.Errorf("Expecting: %+v, received: %+v", expStats, rcvStats)
 		}
 	}
 }
@@ -1324,41 +1337,6 @@ func TestApierCdrServer(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
-
-/*
-func TestApierExportCdrsToFile(t *testing.T) {
-    var reply *utils.ExportedFileCdrs
-    req := utils.AttrExpFileCdrs{}
-    //if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
-    //  t.Error("Failed to detect missing parameter")
-    //}
-    dryRun := utils.CDRE_DRYRUN
-    req.CdrFormat = &dryRun
-    tm1, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:22Z")
-    tm2, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:23Z")
-    expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCGRIDs: []string{utils.Sha1("dsafdsaf", tm1.String()),
-        utils.Sha1("adsafdsaf", tm2.String())}}
-    if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
-        t.Error(err.Error())
-    } else if !reflect.DeepEqual(reply, expectReply) {
-        t.Errorf("Unexpected reply: %v", reply)
-    }
-    Need to implement temporary file writing in order to test removal from db, not possible on DRYRUN
-    req.RemoveFromDb = true
-    if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
-        t.Error(err.Error())
-    } else if !reflect.DeepEqual(reply, expectReply) {
-        t.Errorf("Unexpected reply: %v", reply)
-    }
-    expectReply.NumberOfRecords = 0 // We should have deleted previously
-    if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
-        t.Error(err.Error())
-    } else if !reflect.DeepEqual(reply, expectReply) {
-        t.Errorf("Unexpected reply: %v", reply)
-    }
-
-}
-*/
 
 func TestApierITGetCdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
@@ -1486,7 +1464,8 @@ func TestApierITAddRatingSubjectAliases(t *testing.T) {
 	}
 	var alias engine.Alias
 	for _, als := range addRtSubjAliases.Aliases {
-		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: addRtSubjAliases.Tenant, Category: addRtSubjAliases.Category,
+		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out",
+			Tenant: addRtSubjAliases.Tenant, Category: addRtSubjAliases.Category,
 			Account: als, Subject: als}, &alias); err != nil {
 			t.Error("Unexpected error", err.Error())
 		}
@@ -1503,8 +1482,9 @@ func TestApierITRemRatingSubjectAliases(t *testing.T) {
 	}
 	var alias engine.Alias
 	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Unexpected error %v, alias: %+v", err, alias)
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out",
+		Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error %v, alias: %+v, values: %+v", err, alias, alias.Values[0])
 	}
 }
 
@@ -1572,9 +1552,8 @@ func TestApierInitStorDb2(t *testing.T) {
 
 func TestApierReloadCache2(t *testing.T) {
 	reply := ""
-	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
+	if err := rater.Call("ApierV1.FlushCache", utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)

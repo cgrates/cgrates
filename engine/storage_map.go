@@ -132,7 +132,8 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
-func (ms *MapStorage) PreloadRatingCache() error {
+// FixMe
+func (ms *MapStorage) PreloadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error {
 	if ms.cacheCfg == nil {
 		return nil
 	}
@@ -193,7 +194,7 @@ func (ms *MapStorage) PreloadRatingCache() error {
 	return nil
 }
 
-func (ms *MapStorage) PreloadAccountingCache() error {
+func (ms *MapStorage) PreloadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error {
 	if ms.cacheCfg == nil {
 		return nil
 	}

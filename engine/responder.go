@@ -573,18 +573,6 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	return nil
 }
 
-func (rs *Responder) FlushCache(arg *CallDescriptor, reply *float64) (err error) {
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(arg, "Responder.FlushCache")
-	} else {
-		r, e := Guardian.Guard(func() (interface{}, error) {
-			return 0, arg.FlushCache()
-		}, 0, arg.GetAccountKey())
-		*reply, err = r.(float64), e
-	}
-	return
-}
-
 func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err error) {
 	if arg != "" { // Introduce  delay in answer, used in some automated tests
 		if delay, err := utils.ParseDurationWithSecs(arg); err == nil {

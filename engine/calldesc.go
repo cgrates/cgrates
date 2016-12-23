@@ -863,14 +863,6 @@ func (cd *CallDescriptor) RefundRounding() error {
 	return err
 }
 
-func (cd *CallDescriptor) FlushCache() (err error) {
-	cache.Flush()
-	ratingStorage.PreloadRatingCache()
-	accountingStorage.PreloadAccountingCache()
-	return nil
-
-}
-
 // Creates a CallCost structure copying related data from CallDescriptor
 func (cd *CallDescriptor) CreateCallCost() *CallCost {
 	return &CallCost{

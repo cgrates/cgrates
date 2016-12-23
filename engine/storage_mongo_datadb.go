@@ -366,76 +366,76 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
-func (ms *MongoStorage) PreloadRatingCache() (err error) {
-	if ms.cacheCfg == nil {
-		return
-	}
+func (ms *MongoStorage) PreloadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+	//if ms.cacheCfg == nil {
+	//	return
+	//}
 	if ms.cacheCfg.Destinations.Precache {
-		if err = ms.CacheDataFromDB(utils.DESTINATION_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.DESTINATION_PREFIX, dstIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.ReverseDestinations.Precache {
-		if err = ms.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, rvDstIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.RatingPlans.Precache {
-		if err = ms.CacheDataFromDB(utils.RATING_PLAN_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.RATING_PLAN_PREFIX, rplIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.RatingProfiles.Precache {
-		if err = ms.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, rpfIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.Actions.Precache {
-		if err = ms.CacheDataFromDB(utils.ACTION_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.ACTION_PREFIX, actIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.ActionPlans.Precache {
-		if err = ms.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, aplIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.ActionTriggers.Precache {
-		if err = ms.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, atrgIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.SharedGroups.Precache {
-		if err = ms.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, nil, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.DerivedChargers.Precache {
-		if err = ms.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.Lcr.Precache {
-		if err = ms.CacheDataFromDB(utils.LCR_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.LCR_PREFIX, lcrIDs, false); err != nil {
+			return
+		}
+	}
+	if ms.cacheCfg.DerivedChargers.Precache {
+		if err = ms.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, dcIDs, false); err != nil {
 			return
 		}
 	}
 	return
 }
 
-func (ms *MongoStorage) PreloadAccountingCache() (err error) {
+func (ms *MongoStorage) PreloadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
 	if ms.cacheCfg.Aliases.Precache {
-		if err = ms.CacheDataFromDB(utils.ALIASES_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.ALIASES_PREFIX, alsIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.ReverseAliases.Precache {
-		if err = ms.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, rvAlsIDs, false); err != nil {
 			return
 		}
 	}
 	if ms.cacheCfg.ResourceLimits.Precache {
-		if err = ms.CacheDataFromDB(utils.ResourceLimitsPrefix, nil, false); err != nil {
+		if err = ms.CacheDataFromDB(utils.ResourceLimitsPrefix, rlIDs, false); err != nil {
 			return
 		}
 	}
@@ -472,12 +472,13 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 				err.Error(),
 				fmt.Sprintf("mongo error <%s> querying keys for prefix: <%s>", prfx))
 		}
-		if mustBeCached { // Only consider loading ids which are already in cache
-			for _, keyID := range keyIDs {
-				if _, hasIt := cache.Get(keyID); hasIt {
-					ids = append(ids, keyID[len(prfx):])
+		for _, keyID := range keyIDs {
+			if mustBeCached { // Only consider loading ids which are already in cache
+				if _, hasIt := cache.Get(keyID); !hasIt {
+					continue
 				}
 			}
+			ids = append(ids, keyID[len(prfx):])
 		}
 		var nrItems int
 		switch prfx {

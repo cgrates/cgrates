@@ -47,7 +47,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 			return err
 		}
 	}
-	ratingDb.PreloadRatingCache()
+	ratingDb.PreloadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	CheckVersion(accountDb) // Write version before starting
 	return nil
 }

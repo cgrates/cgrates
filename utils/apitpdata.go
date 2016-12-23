@@ -567,12 +567,14 @@ type AttrReloadCache struct {
 	RatingProfileIDs      *[]string
 	ActionIDs             *[]string
 	ActionPlanIDs         *[]string
+	ActionTriggerIDs      *[]string
 	SharedGroupIDs        *[]string
 	LCRids                *[]string
 	DerivedChargerIDs     *[]string
 	AliasIDs              *[]string
 	ReverseAliasIDs       *[]string
 	ResourceLimitIDs      *[]string
+	FlushAll              bool // If provided, cache flush will be executed before any action
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache

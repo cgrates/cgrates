@@ -335,8 +335,8 @@ func init() {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	ratingStorage.PreloadRatingCache()
-	accountingStorage.PreloadAccountingCache()
+	ratingStorage.PreloadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	accountingStorage.PreloadAccountingCache(nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

@@ -692,6 +692,9 @@ func (self *ApierV1) ReloadScheduler(ignore string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (err error) {
+	if attrs.FlushAll {
+		cache.Flush()
+	}
 	var dataIDs []string
 	// Reload Destinations
 	if attrs.DestinationIDs == nil {
@@ -699,7 +702,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.DestinationIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.DestinationIDs))
 		for idx, dId := range *attrs.DestinationIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.DESTINATION_PREFIX, dataIDs, true); err != nil {
@@ -711,7 +714,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.ReverseDestinationIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.ReverseDestinationIDs))
 		for idx, dId := range *attrs.ReverseDestinationIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dataIDs, true); err != nil {
@@ -723,7 +726,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.RatingPlanIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.RatingPlanIDs))
 		for idx, dId := range *attrs.RatingPlanIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.RATING_PLAN_PREFIX, dataIDs, true); err != nil {
@@ -735,7 +738,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.RatingProfileIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.RatingProfileIDs))
 		for idx, dId := range *attrs.RatingProfileIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, dataIDs, true); err != nil {
@@ -747,7 +750,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.ActionIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.ActionIDs))
 		for idx, dId := range *attrs.ActionIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PREFIX, dataIDs, true); err != nil {
@@ -759,7 +762,19 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.ActionPlanIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.ActionPlanIDs))
 		for idx, dId := range *attrs.ActionPlanIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, dataIDs, true); err != nil {
+		return
+	}
+	// ActionTriggers
+	if attrs.ActionTriggerIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ActionTriggerIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ActionTriggerIDs))
+		for idx, dId := range *attrs.ActionTriggerIDs {
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, dataIDs, true); err != nil {
@@ -771,7 +786,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.SharedGroupIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.SharedGroupIDs))
 		for idx, dId := range *attrs.SharedGroupIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, dataIDs, true); err != nil {
@@ -783,7 +798,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.LCRids) > 0 {
 		dataIDs = make([]string, len(*attrs.LCRids))
 		for idx, dId := range *attrs.LCRids {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.LCR_PREFIX, dataIDs, true); err != nil {
@@ -795,7 +810,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.DerivedChargerIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.DerivedChargerIDs))
 		for idx, dId := range *attrs.DerivedChargerIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.RatingDb.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, dataIDs, true); err != nil {
@@ -807,7 +822,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.AliasIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.AliasIDs))
 		for idx, dId := range *attrs.AliasIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.AccountDb.CacheDataFromDB(utils.ALIASES_PREFIX, dataIDs, true); err != nil {
@@ -819,7 +834,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.ReverseAliasIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.ReverseAliasIDs))
 		for idx, dId := range *attrs.ReverseAliasIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.AccountDb.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, dataIDs, true); err != nil {
@@ -831,7 +846,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	} else if len(*attrs.ResourceLimitIDs) > 0 {
 		dataIDs = make([]string, len(*attrs.ResourceLimitIDs))
 		for idx, dId := range *attrs.ResourceLimitIDs {
-			dataIDs[idx] = dId // Cache expects them as redis keys
+			dataIDs[idx] = dId
 		}
 	}
 	if err = self.AccountDb.CacheDataFromDB(utils.ResourceLimitsPrefix, dataIDs, true); err != nil {
@@ -841,15 +856,186 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	return nil
 }
 
-func (self *ApierV1) PreloadCache(ignr string, reply *string) error {
-	if err := self.RatingDb.PreloadRatingCache(); err != nil {
+func (self *ApierV1) PreloadCache(args utils.AttrReloadCache, reply *string) (err error) {
+	if args.FlushAll {
+		cache.Flush()
+	}
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
+	if args.DestinationIDs == nil {
+		dstIDs = nil
+	} else {
+		dstIDs = *args.DestinationIDs
+	}
+	if args.ReverseDestinationIDs == nil {
+		rvDstIDs = nil
+	} else {
+		rvDstIDs = *args.ReverseDestinationIDs
+	}
+	if args.RatingPlanIDs == nil {
+		rplIDs = nil
+	} else {
+		rplIDs = *args.RatingPlanIDs
+	}
+	if args.RatingProfileIDs == nil {
+		rpfIDs = nil
+	} else {
+		rpfIDs = *args.RatingProfileIDs
+	}
+	if args.ActionIDs == nil {
+		actIDs = nil
+	} else {
+		actIDs = *args.ActionIDs
+	}
+	if args.ActionPlanIDs == nil {
+		aplIDs = nil
+	} else {
+		aplIDs = *args.ActionPlanIDs
+	}
+	if args.ActionTriggerIDs == nil {
+		atrgIDs = nil
+	} else {
+		atrgIDs = *args.ActionTriggerIDs
+	}
+	if args.SharedGroupIDs == nil {
+		sgIDs = nil
+	} else {
+		sgIDs = *args.SharedGroupIDs
+	}
+	if args.LCRids == nil {
+		lcrIDs = nil
+	} else {
+		lcrIDs = *args.LCRids
+	}
+	if args.DerivedChargerIDs == nil {
+		dcIDs = nil
+	} else {
+		dcIDs = *args.DerivedChargerIDs
+	}
+	if args.AliasIDs == nil {
+		alsIDs = nil
+	} else {
+		alsIDs = *args.AliasIDs
+	}
+	if args.ReverseAliasIDs == nil {
+		rvAlsIDs = nil
+	} else {
+		rvAlsIDs = *args.ReverseAliasIDs
+	}
+	if args.ResourceLimitIDs == nil {
+		rlIDs = nil
+	} else {
+		rlIDs = *args.ResourceLimitIDs
+	}
+	if err := self.RatingDb.PreloadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.AccountDb.PreloadAccountingCache(); err != nil {
+	if err := self.AccountDb.PreloadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// FlushCache wipes out cache for a prefix or completely
+func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err error) {
+	if args.FlushAll {
+		cache.Flush()
+		*reply = utils.OK
+		return
+	}
+	if args.DestinationIDs == nil {
+		cache.RemPrefixKey(utils.DESTINATION_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.DestinationIDs) != 0 {
+		for _, key := range *args.DestinationIDs {
+			cache.RemKey(utils.DESTINATION_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.ReverseDestinationIDs == nil {
+		cache.RemPrefixKey(utils.REVERSE_DESTINATION_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.ReverseDestinationIDs) != 0 {
+		for _, key := range *args.ReverseDestinationIDs {
+			cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.RatingPlanIDs == nil {
+		cache.RemPrefixKey(utils.RATING_PLAN_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.RatingPlanIDs) != 0 {
+		for _, key := range *args.RatingPlanIDs {
+			cache.RemKey(utils.RATING_PLAN_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.RatingProfileIDs == nil {
+		cache.RemPrefixKey(utils.RATING_PROFILE_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.RatingProfileIDs) != 0 {
+		for _, key := range *args.RatingProfileIDs {
+			cache.RemKey(utils.RATING_PROFILE_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.ActionIDs == nil {
+		cache.RemPrefixKey(utils.ACTION_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.ActionIDs) != 0 {
+		for _, key := range *args.ActionIDs {
+			cache.RemKey(utils.ACTION_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.ActionPlanIDs == nil {
+		cache.RemPrefixKey(utils.ACTION_PLAN_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.ActionPlanIDs) != 0 {
+		for _, key := range *args.ActionPlanIDs {
+			cache.RemKey(utils.ACTION_PLAN_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.ActionTriggerIDs == nil {
+		cache.RemPrefixKey(utils.ACTION_TRIGGER_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.ActionTriggerIDs) != 0 {
+		for _, key := range *args.ActionTriggerIDs {
+			cache.RemKey(utils.ACTION_TRIGGER_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.SharedGroupIDs == nil {
+		cache.RemPrefixKey(utils.SHARED_GROUP_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.SharedGroupIDs) != 0 {
+		for _, key := range *args.SharedGroupIDs {
+			cache.RemKey(utils.SHARED_GROUP_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.LCRids == nil {
+		cache.RemPrefixKey(utils.LCR_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.LCRids) != 0 {
+		for _, key := range *args.LCRids {
+			cache.RemKey(utils.LCR_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.DerivedChargerIDs == nil {
+		cache.RemPrefixKey(utils.DERIVEDCHARGERS_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.DerivedChargerIDs) != 0 {
+		for _, key := range *args.DerivedChargerIDs {
+			cache.RemKey(utils.DERIVEDCHARGERS_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.AliasIDs == nil {
+		cache.RemPrefixKey(utils.ALIASES_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.AliasIDs) != 0 {
+		for _, key := range *args.AliasIDs {
+			cache.RemKey(utils.ALIASES_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.ReverseAliasIDs == nil {
+		cache.RemPrefixKey(utils.REVERSE_ALIASES_PREFIX, true, utils.NonTransactional)
+	} else if len(*args.ReverseAliasIDs) != 0 {
+		for _, key := range *args.ReverseAliasIDs {
+			cache.RemKey(utils.REVERSE_ALIASES_PREFIX+key, true, utils.NonTransactional)
+		}
+	}
+	if args.ResourceLimitIDs == nil {
+		cache.RemPrefixKey(utils.ResourceLimitsPrefix, true, utils.NonTransactional)
+	} else if len(*args.ResourceLimitIDs) != 0 {
+		for _, key := range *args.ResourceLimitIDs {
+			cache.RemKey(utils.ResourceLimitsPrefix+key, true, utils.NonTransactional)
+		}
+	}
+	*reply = utils.OK
+	return
 }
 
 func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.CacheStats) error {
