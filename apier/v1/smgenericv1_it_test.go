@@ -83,25 +83,31 @@ func TestSMGV1RpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestSMGV1LoadTariffPlanFromFolder(t *testing.T) {
+	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := smgV1Rpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &smgV1LoadInst); err != nil {
+	if err := smgV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
-	} else if smgV1LoadInst.RatingLoadID != "" && smgV1LoadInst.AccountingLoadID != "" {
-		t.Error("Non Empty loadId received, loadInstance: ", smgV1LoadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Check loaded stats
 func TestSMGV1CacheStats(t *testing.T) {
+	var reply string
+	if err := smgV1Rpc.Call("ApierV1.PreloadCache", utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "OK" {
+		t.Error(reply)
+	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 4, RatingProfiles: 0, Actions: 7, ActionPlans: 4, SharedGroups: 0, Aliases: 0, ResourceLimits: 0,
-		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3}
+	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 9,
+		Actions: 8, ActionPlans: 4, SharedGroups: 1, DerivedChargers: 1,
+		LcrProfiles: 5, CdrStats: 6, Users: 3, Aliases: 1, ReverseAliases: 2, ResourceLimits: 2}
 	var args utils.AttrCacheStats
-	if err := smgV1Rpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
-		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
+	if err := smgV1Rpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 	}
 }
 
@@ -113,7 +119,7 @@ func TestSMGV1AccountsBefore(t *testing.T) {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
 		jsn, _ := json.Marshal(reply)
-		t.Errorf("Calling ApierV2.GetBalance received: %s", jsn)
+		t.Errorf("Received: %s", jsn)
 	}
 }
 
@@ -125,7 +131,7 @@ func TestSMGV1GetMaxUsage(t *testing.T) {
 	if err := smgV1Rpc.Call("SMGenericV1.MaxUsage", setupReq, &maxTime); err != nil {
 		t.Error(err)
 	} else if maxTime != 2700 {
-		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
+		t.Errorf("Calling ApierV1.MaxUsage got maxTime: %f", maxTime)
 	}
 }
 

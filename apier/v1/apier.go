@@ -1111,7 +1111,6 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 
 	if attrs.Validate {
 		if !loader.IsValid() {
-			*reply = OK
 			return errors.New("invalid data")
 		}
 	}
@@ -1151,6 +1150,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	if len(aps) != 0 {
 		sched := self.ServManager.GetScheduler()
 		if sched != nil {
+			utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
 			sched.Reload()
 		}
 	}
