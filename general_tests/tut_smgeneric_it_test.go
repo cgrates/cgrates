@@ -91,9 +91,16 @@ func TestTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 
 // Check loaded stats
 func TestTutSMGCacheStats(t *testing.T) {
+	var reply string
+	if err := tutSMGRpc.Call("ApierV1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "OK" {
+		t.Error(reply)
+	}
 	var rcvStats *utils.CacheStats
-
-	expectedStats := &utils.CacheStats{RatingPlans: 4, Actions: 7, ActionPlans: 4, CdrStats: 6, Users: 3}
+	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 9,
+		Actions: 8, ActionPlans: 4, SharedGroups: 1, DerivedChargers: 1, LcrProfiles: 5,
+		CdrStats: 6, Users: 3, Aliases: 1, ReverseAliases: 2, ResourceLimits: 2}
 	var args utils.AttrCacheStats
 	if err := tutSMGRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

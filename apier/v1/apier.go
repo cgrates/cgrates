@@ -856,7 +856,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	return nil
 }
 
-func (self *ApierV1) PreloadCache(args utils.AttrReloadCache, reply *string) (err error) {
+func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err error) {
 	if args.FlushAll {
 		cache.Flush()
 	}
@@ -926,10 +926,10 @@ func (self *ApierV1) PreloadCache(args utils.AttrReloadCache, reply *string) (er
 	} else {
 		rlIDs = *args.ResourceLimitIDs
 	}
-	if err := self.RatingDb.PreloadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
+	if err := self.RatingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.AccountDb.PreloadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
+	if err := self.AccountDb.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

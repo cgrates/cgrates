@@ -130,13 +130,12 @@ func TestTpActionTriggers(t *testing.T) {
 		UniqueID:  "Unique atr id",
 		BalanceID: utils.StringPointer("BID1"),
 	}, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetActionTrigger: ", err.Error())
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Calling v1.SetActionTrigger got: %v", reply)
 	}
-
 	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
-		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
+		t.Error(err)
 	} else if len(atrs) != 10 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
 	}

@@ -111,8 +111,8 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		t.Error("No account saved")
 	}
 	cache.Flush()
-	ratingDb.PreloadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	acntDb.PreloadAccountingCache(nil, nil, nil)
+	ratingDb.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	acntDb.LoadAccountingCache(nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

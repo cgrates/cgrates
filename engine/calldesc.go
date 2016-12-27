@@ -46,7 +46,7 @@ func init() {
 	case "map":
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
-	case "mongo":
+	case utils.MONGO:
 		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", utils.TariffPlanDB, nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
@@ -55,7 +55,7 @@ func init() {
 		if err != nil {
 			log.Fatal(err)
 		}
-	case "redis":
+	case utils.REDIS:
 		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)

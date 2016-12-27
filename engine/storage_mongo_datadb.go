@@ -366,76 +366,33 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
-func (ms *MongoStorage) PreloadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
-	//if ms.cacheCfg == nil {
-	//	return
-	//}
-	if ms.cacheCfg.Destinations.Precache {
-		if err = ms.CacheDataFromDB(utils.DESTINATION_PREFIX, dstIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.ReverseDestinations.Precache {
-		if err = ms.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, rvDstIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.RatingPlans.Precache {
-		if err = ms.CacheDataFromDB(utils.RATING_PLAN_PREFIX, rplIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.RatingProfiles.Precache {
-		if err = ms.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, rpfIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.Actions.Precache {
-		if err = ms.CacheDataFromDB(utils.ACTION_PREFIX, actIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.ActionPlans.Precache {
-		if err = ms.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, aplIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.ActionTriggers.Precache {
-		if err = ms.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, atrgIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.SharedGroups.Precache {
-		if err = ms.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.Lcr.Precache {
-		if err = ms.CacheDataFromDB(utils.LCR_PREFIX, lcrIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.DerivedChargers.Precache {
-		if err = ms.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, dcIDs, false); err != nil {
+func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+	for key, ids := range map[string][]string{
+		utils.DESTINATION_PREFIX:         dstIDs,
+		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
+		utils.RATING_PLAN_PREFIX:         rplIDs,
+		utils.RATING_PROFILE_PREFIX:      rpfIDs,
+		utils.ACTION_PREFIX:              actIDs,
+		utils.ACTION_PLAN_PREFIX:         aplIDs,
+		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
+		utils.SHARED_GROUP_PREFIX:        sgIDs,
+		utils.LCR_PREFIX:                 lcrIDs,
+		utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
+	} {
+		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
 			return
 		}
 	}
 	return
 }
 
-func (ms *MongoStorage) PreloadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
-	if ms.cacheCfg.Aliases.Precache {
-		if err = ms.CacheDataFromDB(utils.ALIASES_PREFIX, alsIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.ReverseAliases.Precache {
-		if err = ms.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, rvAlsIDs, false); err != nil {
-			return
-		}
-	}
-	if ms.cacheCfg.ResourceLimits.Precache {
-		if err = ms.CacheDataFromDB(utils.ResourceLimitsPrefix, rlIDs, false); err != nil {
+func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
+	for key, ids := range map[string][]string{
+		utils.ALIASES_PREFIX:         alsIDs,
+		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
+		utils.ResourceLimitsPrefix:   rlIDs,
+	} {
+		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
 			return
 		}
 	}

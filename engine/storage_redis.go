@@ -112,76 +112,33 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.Cmd("FLUSHDB").Err
 }
 
-func (rs *RedisStorage) PreloadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
-	//if rs.cacheCfg == nil {
-	//	return
-	//}
-	if rs.cacheCfg.Destinations.Precache {
-		if err = rs.CacheDataFromDB(utils.DESTINATION_PREFIX, dstIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.ReverseDestinations.Precache {
-		if err = rs.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, rvDstIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.RatingPlans.Precache {
-		if err = rs.CacheDataFromDB(utils.RATING_PLAN_PREFIX, rplIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.RatingProfiles.Precache {
-		if err = rs.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, rpfIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.Actions.Precache {
-		if err = rs.CacheDataFromDB(utils.ACTION_PREFIX, actIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.ActionPlans.Precache {
-		if err = rs.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, aplIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.ActionTriggers.Precache {
-		if err = rs.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, atrgIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.SharedGroups.Precache {
-		if err = rs.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.Lcr.Precache {
-		if err = rs.CacheDataFromDB(utils.LCR_PREFIX, lcrIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.DerivedChargers.Precache {
-		if err = rs.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, dcIDs, false); err != nil {
+func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+	for key, ids := range map[string][]string{
+		utils.DESTINATION_PREFIX:         dstIDs,
+		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
+		utils.RATING_PLAN_PREFIX:         rplIDs,
+		utils.RATING_PROFILE_PREFIX:      rpfIDs,
+		utils.ACTION_PREFIX:              actIDs,
+		utils.ACTION_PLAN_PREFIX:         aplIDs,
+		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
+		utils.SHARED_GROUP_PREFIX:        sgIDs,
+		utils.LCR_PREFIX:                 lcrIDs,
+		utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
+	} {
+		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
 			return
 		}
 	}
 	return
 }
 
-func (rs *RedisStorage) PreloadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
-	if rs.cacheCfg.Aliases.Precache {
-		if err = rs.CacheDataFromDB(utils.ALIASES_PREFIX, alsIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.ReverseAliases.Precache {
-		if err = rs.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, rvAlsIDs, false); err != nil {
-			return
-		}
-	}
-	if rs.cacheCfg.ResourceLimits.Precache {
-		if err = rs.CacheDataFromDB(utils.ResourceLimitsPrefix, rlIDs, false); err != nil {
+func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
+	for key, ids := range map[string][]string{
+		utils.ALIASES_PREFIX:         alsIDs,
+		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
+		utils.ResourceLimitsPrefix:   rlIDs,
+	} {
+		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
 			return
 		}
 	}

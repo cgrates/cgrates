@@ -76,10 +76,10 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	}
 	defer accountDb.Close()
 	engine.SetAccountingStorage(accountDb)
-	if err := ratingDb.PreloadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
+	if err := ratingDb.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
 		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
 	}
-	if err := accountDb.PreloadAccountingCache(nil, nil, nil); err != nil {
+	if err := accountDb.LoadAccountingCache(nil, nil, nil); err != nil {
 		return nilDuration, fmt.Errorf("Cache accounting error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)

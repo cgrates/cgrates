@@ -42,7 +42,7 @@ type Storage interface {
 type RatingStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
-	PreloadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
+	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan, string) error
 	GetRatingProfile(string, bool, string) (*RatingProfile, error)
@@ -80,7 +80,7 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
-	PreloadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error
+	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
@@ -117,7 +117,7 @@ type AccountingStorage interface {
 type OnlineStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
-	PreloadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
+	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan, string) error
 	GetRatingProfile(string, bool, string) (*RatingProfile, error)
@@ -149,7 +149,7 @@ type OnlineStorage interface {
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
-	PreloadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error
+	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error

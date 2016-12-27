@@ -94,9 +94,16 @@ func TestTutITLoadTariffPlanFromFolder(t *testing.T) {
 
 // Check loaded stats
 func TestTutITCacheStats(t *testing.T) {
+	var reply string
+	if err := tutLocalRpc.Call("ApierV1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "OK" {
+		t.Error(reply)
+	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 4, RatingProfiles: 0, Actions: 7, ActionPlans: 4, SharedGroups: 0, Aliases: 0, ResourceLimits: 0,
-		DerivedChargers: 0, LcrProfiles: 0, CdrStats: 6, Users: 3}
+	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 9,
+		Actions: 8, ActionPlans: 4, SharedGroups: 1, DerivedChargers: 1, LcrProfiles: 5,
+		CdrStats: 6, Users: 3, Aliases: 1, ReverseAliases: 2, ResourceLimits: 2}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

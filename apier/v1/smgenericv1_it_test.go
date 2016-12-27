@@ -94,7 +94,7 @@ func TestSMGV1LoadTariffPlanFromFolder(t *testing.T) {
 // Check loaded stats
 func TestSMGV1CacheStats(t *testing.T) {
 	var reply string
-	if err := smgV1Rpc.Call("ApierV1.PreloadCache", utils.AttrReloadCache{}, &reply); err != nil {
+	if err := smgV1Rpc.Call("ApierV1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "OK" {
 		t.Error(reply)

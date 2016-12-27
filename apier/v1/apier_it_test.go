@@ -1219,7 +1219,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.PreloadCache", utils.AttrReloadCache{}, &reply); err != nil {
+	if err := rater.Call("ApierV1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "OK" {
 		t.Error(reply)

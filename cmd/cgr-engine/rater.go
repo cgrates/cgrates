@@ -69,13 +69,52 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 			cacheDoneChan <- struct{}{}
 			return
 		}
-
-		if err := ratingDb.PreloadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
+		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
+		if cfg.CacheConfig.Destinations.Precache {
+			dstIDs = nil // Precache all
+		}
+		if cfg.CacheConfig.ReverseDestinations.Precache {
+			rvDstIDs = nil
+		}
+		if cfg.CacheConfig.RatingPlans.Precache {
+			rplIDs = nil
+		}
+		if cfg.CacheConfig.RatingProfiles.Precache {
+			rpfIDs = nil
+		}
+		if cfg.CacheConfig.Actions.Precache {
+			actIDs = nil
+		}
+		if cfg.CacheConfig.ActionPlans.Precache {
+			aplIDs = nil
+		}
+		if cfg.CacheConfig.ActionTriggers.Precache {
+			atrgIDs = nil
+		}
+		if cfg.CacheConfig.SharedGroups.Precache {
+			sgIDs = nil
+		}
+		if cfg.CacheConfig.Lcr.Precache {
+			lcrIDs = nil
+		}
+		if cfg.CacheConfig.DerivedChargers.Precache {
+			dcIDs = nil
+		}
+		if cfg.CacheConfig.Aliases.Precache {
+			alsIDs = nil
+		}
+		if cfg.CacheConfig.ReverseAliases.Precache {
+			rvAlsIDs = nil
+		}
+		if cfg.CacheConfig.ResourceLimits.Precache {
+			rlIDs = nil
+		}
+		if err := ratingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
 			exitChan <- true
 			return
 		}
-		if err := accountDb.PreloadAccountingCache(nil, nil, nil); err != nil {
+		if err := accountDb.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache accounting error: %s", err.Error()))
 			exitChan <- true
 			return

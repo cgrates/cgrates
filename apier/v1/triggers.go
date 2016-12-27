@@ -402,7 +402,7 @@ type AttrSetActionTrigger struct {
 	ActionsID             *string
 }
 
-func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) error {
+func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) (err error) {
 
 	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -512,14 +512,15 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	if attr.ActionsID != nil {
 		newAtr.ActionsID = *attr.ActionsID
 	}
-
-	if err := self.RatingDb.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
-		*reply = err.Error()
-		return err
+	if err = self.RatingDb.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
+		return
+	}
+	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{attr.GroupID}, true); err != nil {
+		return
 	}
 	//no cache for action triggers
 	*reply = utils.OK
-	return nil
+	return
 }
 
 type AttrGetActionTriggers struct {
