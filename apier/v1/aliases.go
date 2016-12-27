@@ -69,11 +69,12 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 		return errors.New("ALIASES_NOT_ENABLED")
 	}
 	var reverseAliases map[string][]*engine.Alias
-	if err := aliases.Call("AliasesV1.GetReverseAlias", &engine.AttrReverseAlias{Target: "Subject", Alias: tenantRatingSubject.Subject, Context: utils.ALIAS_CONTEXT_RATING}, &reverseAliases); err != nil {
+	if err := aliases.Call("AliasesV1.GetReverseAlias", &engine.AttrReverseAlias{Target: "Subject",
+		Alias: tenantRatingSubject.Subject, Context: utils.ALIAS_CONTEXT_RATING}, &reverseAliases); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	var ignr string
-	//	log.Print("RVAL: ", reverseAliases)
+
 	for _, aliass := range reverseAliases {
 		for _, alias := range aliass {
 			if alias.Tenant != tenantRatingSubject.Tenant {

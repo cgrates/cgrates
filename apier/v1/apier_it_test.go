@@ -1222,7 +1222,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	if err := rater.Call("ApierV1.PreloadCache", utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+		t.Error(reply)
 	}
 	//expStats = &utils.CacheStats{Destinations: 3, ReverseDestinations: 5}
 	if err := rater.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
@@ -1448,6 +1448,13 @@ func TestApierITGetAliases(t *testing.T) {
 }
 
 func TestApierITAddRatingSubjectAliases(t *testing.T) {
+	/*var reply string
+	if err := rater.Call("ApierV1.FlushCache", utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+	}
+	*/
 	addRtSubjAliases := &AttrAddRatingSubjectAliases{Tenant: "cgrates.org", Category: "call", Subject: "1001", Aliases: []string{"2001", "2002", "2003"}}
 	var rply string
 	if err := rater.Call("ApierV1.AddRatingSubjectAliases", addRtSubjAliases, &rply); err != nil {

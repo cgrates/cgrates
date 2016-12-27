@@ -46,7 +46,7 @@ func (al *Alias) ReverseAliasIDs() (rvAl []string) {
 	for _, value := range al.Values {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
-				rvAl = append(rvAl, strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, ""))
+				rvAl = append(rvAl, strings.Join([]string{alias, target, al.Context}, ""))
 			}
 		}
 	}
@@ -195,7 +195,6 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) (err error) 
 	if !attr.Overwrite { // get previous value
 		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId(), false, utils.NonTransactional)
 	}
-
 	if attr.Overwrite || oldAlias == nil {
 		if err = am.accountingDb.SetAlias(attr.Alias, utils.NonTransactional); err != nil {
 			return err
