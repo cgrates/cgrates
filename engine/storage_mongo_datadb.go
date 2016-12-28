@@ -514,16 +514,14 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 	return
 }
 
-func (ms *MongoStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err error) {
 	var category, subject string
-	length := len(utils.DESTINATION_PREFIX)
-	if len(prefix) >= length {
-		category = prefix[:length] // prefix lenght
-		subject = fmt.Sprintf("^%s", prefix[length:])
-	} else {
+	keyLen := len(utils.DESTINATION_PREFIX)
+	if len(prefix) < keyLen {
 		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 	}
-	var result []string
+	category = prefix[:keyLen] // prefix lenght
+	subject = fmt.Sprintf("^%s", prefix[keyLen:])
 	session := ms.session.Copy()
 	defer session.Close()
 	db := session.DB(ms.db)
@@ -535,51 +533,75 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 		for iter.Next(&keyResult) {
 			result = append(result, utils.DESTINATION_PREFIX+keyResult.Key)
 		}
-		return result, nil
+	case utils.REVERSE_DESTINATION_PREFIX:
+		iter := db.C(colRds).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+		for iter.Next(&keyResult) {
+			result = append(result, utils.REVERSE_DESTINATION_PREFIX+keyResult.Key)
+		}
 	case utils.RATING_PLAN_PREFIX:
 		iter := db.C(colRpl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
 			result = append(result, utils.RATING_PLAN_PREFIX+keyResult.Key)
 		}
-		return result, nil
 	case utils.RATING_PROFILE_PREFIX:
 		iter := db.C(colRpf).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.RATING_PROFILE_PREFIX+idResult.Id)
 		}
-		return result, nil
 	case utils.ACTION_PREFIX:
 		iter := db.C(colAct).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
 			result = append(result, utils.ACTION_PREFIX+keyResult.Key)
 		}
-		return result, nil
 	case utils.ACTION_PLAN_PREFIX:
 		iter := db.C(colApl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
 			result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
 		}
-		return result, nil
 	case utils.ACTION_TRIGGER_PREFIX:
 		iter := db.C(colAtr).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
 			result = append(result, utils.ACTION_TRIGGER_PREFIX+keyResult.Key)
 		}
-		return result, nil
+	case utils.SHARED_GROUP_PREFIX:
+		iter := db.C(colShg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.SHARED_GROUP_PREFIX+idResult.Id)
+		}
+	case utils.DERIVEDCHARGERS_PREFIX:
+		iter := db.C(colDcs).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+		for iter.Next(&keyResult) {
+			result = append(result, utils.DERIVEDCHARGERS_PREFIX+keyResult.Key)
+		}
+	case utils.LCR_PREFIX:
+		iter := db.C(colLcr).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+		for iter.Next(&keyResult) {
+			result = append(result, utils.LCR_PREFIX+keyResult.Key)
+		}
 	case utils.ACCOUNT_PREFIX:
 		iter := db.C(colAcc).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.ACCOUNT_PREFIX+idResult.Id)
 		}
-		return result, nil
 	case utils.ALIASES_PREFIX:
 		iter := db.C(colAls).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
 			result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
 		}
-		return result, nil
+	case utils.REVERSE_ALIASES_PREFIX:
+		iter := db.C(colRls).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+		for iter.Next(&keyResult) {
+			result = append(result, utils.REVERSE_ALIASES_PREFIX+keyResult.Key)
+		}
+	case utils.ResourceLimitsPrefix:
+		iter := db.C(colRL).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.ResourceLimitsPrefix+idResult.Id)
+		}
+	default:
+		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 	}
-	return result, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
+	return
 }
 
 func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
