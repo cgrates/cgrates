@@ -38,6 +38,39 @@ type Paginator struct {
 	SearchTerm string // Global matching pattern in items returned, partially used in some APIs
 }
 
+func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
+	if len(in) == 0 {
+		return
+	}
+	var limit, offset int
+	if pgnt.Limit != nil && *pgnt.Limit > 0 {
+		limit = *pgnt.Limit
+	}
+	if pgnt.Offset != nil && *pgnt.Offset > 0 {
+		offset = *pgnt.Offset
+	}
+	if limit == 0 && offset == 0 {
+		return in
+	}
+	if offset > len(in) {
+		return
+	}
+	if offset != 0 {
+		limit = limit + offset
+	}
+	if limit == 0 {
+		limit = len(in[offset:])
+	} else if limit > len(in) {
+		limit = len(in)
+	}
+	ret := in[offset:limit]
+	out = make([]string, len(ret))
+	for i, itm := range ret {
+		out[i] = itm
+	}
+	return
+}
+
 // Deprecated version of TPDestination
 type V1TPDestination struct {
 	TPid          string   // Tariff plan id
@@ -559,8 +592,7 @@ type AttrGetAccounts struct {
 	Limit      int // Limit number of items retrieved
 }
 
-// Data used to do remote cache reloads via api
-type AttrReloadCache struct {
+type ArgsCache struct {
 	DestinationIDs        *[]string
 	ReverseDestinationIDs *[]string
 	RatingPlanIDs         *[]string
@@ -574,7 +606,20 @@ type AttrReloadCache struct {
 	AliasIDs              *[]string
 	ReverseAliasIDs       *[]string
 	ResourceLimitIDs      *[]string
-	FlushAll              bool // If provided, cache flush will be executed before any action
+}
+
+// Data used to do remote cache reloads via api
+type AttrReloadCache struct {
+	ArgsCache
+	FlushAll bool // If provided, cache flush will be executed before any action
+}
+
+type ArgsCacheKeys struct {
+	ArgsCache
+	Paginator
+}
+
+type CacheKeys struct {
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache

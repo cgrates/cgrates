@@ -30,3 +30,32 @@ func TestNewDTCSFromRPKey(t *testing.T) {
 		t.Error("Received: ", dtcs)
 	}
 }
+
+func TestPaginatorPaginateStringSlice(t *testing.T) {
+	eOut := []string{"1", "2", "3", "4"}
+	pgnt := new(Paginator)
+	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	eOut = []string{"1", "2", "3"}
+	pgnt.Limit = IntPointer(3)
+	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	eOut = []string{"2", "3", "4"}
+	pgnt.Offset = IntPointer(1)
+	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	eOut = []string{}
+	pgnt.Offset = IntPointer(4)
+	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	eOut = []string{"3"}
+	pgnt.Offset = IntPointer(2)
+	pgnt.Limit = IntPointer(1)
+	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}

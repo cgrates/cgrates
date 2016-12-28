@@ -110,6 +110,28 @@ func TestTutITCacheStats(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 	}
+	expKeys := utils.ArgsCache{DestinationIDs: &[]string{"DST_1003", "DST_1002", "DST_DE_MOBILE", "DST_1007", "DST_FS"}}
+	var rcvKeys utils.ArgsCache
+	if err := tutLocalRpc.Call("ApierV1.GetCacheKeys", utils.ArgsCacheKeys{ArgsCache: utils.ArgsCache{DestinationIDs: &[]string{}}}, &rcvKeys); err != nil {
+		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
+	} else {
+		if len(*expKeys.DestinationIDs) != len(*rcvKeys.DestinationIDs) {
+			t.Errorf("Expected: %+v, received: %+v", expKeys.DestinationIDs, rcvKeys.DestinationIDs)
+		}
+	}
+	if _, err := engine.StopStartEngine(tutLocalCfgPath, 1500); err != nil {
+		t.Fatal(err)
+	}
+	var err error
+	tutLocalRpc, err = jsonrpc.Dial("tcp", tutFsLocalCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
+		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+	}
 }
 
 func TestTutITGetUsers(t *testing.T) {

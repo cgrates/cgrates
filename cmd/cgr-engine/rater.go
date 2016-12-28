@@ -63,12 +63,13 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	go func() {
 		defer close(cacheTaskChan)
 
-		loadHist, err := accountDb.GetLoadHistory(1, true, utils.NonTransactional)
+		/*loadHist, err := accountDb.GetLoadHistory(1, true, utils.NonTransactional)
 		if err != nil || len(loadHist) == 0 {
 			utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
 			cacheDoneChan <- struct{}{}
 			return
 		}
+		*/
 		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
 		if cfg.CacheConfig.Destinations.Precache {
 			dstIDs = nil // Precache all

@@ -1070,6 +1070,246 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	return nil
 }
 
+// GetCacheKeys returns a list of keys available in cache based on query arguments
+// If keys are provided in arguments, they will be checked for existence
+func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache) (err error) {
+	var ids []string
+	if args.DestinationIDs != nil {
+		if len(*args.DestinationIDs) != 0 {
+			for _, id := range *args.DestinationIDs {
+				if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.DESTINATION_PREFIX) {
+				ids = append(ids, id[len(utils.DESTINATION_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.DestinationIDs = &ids
+		}
+	}
+	if args.ReverseDestinationIDs != nil {
+		ids = nil // reset it
+		if len(*args.ReverseDestinationIDs) != 0 {
+			for _, id := range *args.ReverseDestinationIDs {
+				if _, hasIt := cache.Get(utils.REVERSE_DESTINATION_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.REVERSE_DESTINATION_PREFIX) {
+				ids = append(ids, id[len(utils.REVERSE_DESTINATION_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ReverseDestinationIDs = &ids
+		}
+	}
+	if args.RatingPlanIDs != nil {
+		ids = nil
+		if len(*args.RatingPlanIDs) != 0 {
+			for _, id := range *args.RatingPlanIDs {
+				if _, hasIt := cache.Get(utils.RATING_PLAN_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.RATING_PLAN_PREFIX) {
+				ids = append(ids, id[len(utils.RATING_PLAN_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.RatingPlanIDs = &ids
+		}
+	}
+	if args.RatingProfileIDs != nil {
+		ids = nil
+		if len(*args.RatingProfileIDs) != 0 {
+			for _, id := range *args.RatingProfileIDs {
+				if _, hasIt := cache.Get(utils.RATING_PROFILE_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.RATING_PROFILE_PREFIX) {
+				ids = append(ids, id[len(utils.RATING_PROFILE_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.RatingProfileIDs = &ids
+		}
+	}
+	if args.ActionIDs != nil {
+		ids = nil
+		if len(*args.ActionIDs) != 0 {
+			for _, id := range *args.ActionIDs {
+				if _, hasIt := cache.Get(utils.ACTION_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.ACTION_PREFIX) {
+				ids = append(ids, id[len(utils.ACTION_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ActionIDs = &ids
+		}
+	}
+	if args.ActionPlanIDs != nil {
+		ids = nil
+		if len(*args.ActionPlanIDs) != 0 {
+			for _, id := range *args.ActionPlanIDs {
+				if _, hasIt := cache.Get(utils.ACTION_PLAN_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.ACTION_PLAN_PREFIX) {
+				ids = append(ids, id[len(utils.ACTION_PLAN_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ActionPlanIDs = &ids
+		}
+	}
+	if args.ActionTriggerIDs != nil {
+		ids = nil
+		if len(*args.ActionTriggerIDs) != 0 {
+			for _, id := range *args.ActionTriggerIDs {
+				if _, hasIt := cache.Get(utils.ACTION_TRIGGER_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.ACTION_TRIGGER_PREFIX) {
+				ids = append(ids, id[len(utils.ACTION_TRIGGER_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ActionTriggerIDs = &ids
+		}
+	}
+	if args.SharedGroupIDs != nil {
+		ids = nil
+		if len(*args.SharedGroupIDs) != 0 {
+			for _, id := range *args.SharedGroupIDs {
+				if _, hasIt := cache.Get(utils.SHARED_GROUP_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.SHARED_GROUP_PREFIX) {
+				ids = append(ids, id[len(utils.SHARED_GROUP_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.SharedGroupIDs = &ids
+		}
+	}
+	if args.LCRids != nil {
+		ids = nil
+		if len(*args.LCRids) != 0 {
+			for _, id := range *args.LCRids {
+				if _, hasIt := cache.Get(utils.LCR_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.LCR_PREFIX) {
+				ids = append(ids, id[len(utils.LCR_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.LCRids = &ids
+		}
+	}
+	if args.DerivedChargerIDs != nil {
+		ids = nil
+		if len(*args.DerivedChargerIDs) != 0 {
+			for _, id := range *args.DerivedChargerIDs {
+				if _, hasIt := cache.Get(utils.DERIVEDCHARGERS_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.DERIVEDCHARGERS_PREFIX) {
+				ids = append(ids, id[len(utils.DERIVEDCHARGERS_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.DerivedChargerIDs = &ids
+		}
+	}
+	if args.AliasIDs != nil {
+		ids = nil
+		if len(*args.AliasIDs) != 0 {
+			for _, id := range *args.AliasIDs {
+				if _, hasIt := cache.Get(utils.ALIASES_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.ALIASES_PREFIX) {
+				ids = append(ids, id[len(utils.ALIASES_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.AliasIDs = &ids
+		}
+	}
+	if args.ReverseAliasIDs != nil {
+		ids = nil
+		if len(*args.ReverseAliasIDs) != 0 {
+			for _, id := range *args.ReverseAliasIDs {
+				if _, hasIt := cache.Get(utils.REVERSE_ALIASES_PREFIX + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.REVERSE_ALIASES_PREFIX) {
+				ids = append(ids, id[len(utils.REVERSE_ALIASES_PREFIX):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ReverseAliasIDs = &ids
+		}
+	}
+	if args.ResourceLimitIDs != nil {
+		ids = nil
+		if len(*args.ResourceLimitIDs) != 0 {
+			for _, id := range *args.ResourceLimitIDs {
+				if _, hasIt := cache.Get(utils.ResourceLimitsPrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.ResourceLimitsPrefix) {
+				ids = append(ids, id[len(utils.ResourceLimitsPrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ResourceLimitIDs = &ids
+		}
+	}
+	return
+}
+
 func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")

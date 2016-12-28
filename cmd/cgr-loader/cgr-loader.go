@@ -402,7 +402,7 @@ func main() {
 		if *flush {
 			dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds, rlIDs, aps = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil // Should reload all these on flush
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{
+		if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{ArgsCache: utils.ArgsCache{
 			DestinationIDs:    &dstIds,
 			RatingPlanIDs:     &rplIds,
 			RatingProfileIDs:  &rpfIds,
@@ -413,7 +413,7 @@ func main() {
 			LCRids:            &lcrIds,
 			DerivedChargerIDs: &dcsIds,
 			ResourceLimitIDs:  &rlIDs,
-		}, &reply); err != nil {
+		}}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
 
