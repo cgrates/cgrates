@@ -653,7 +653,7 @@ func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
-		return
+		return nil, err
 	}
 	b := bytes.NewBuffer(kv.Value)
 	r, err := zlib.NewReader(b)
@@ -712,7 +712,7 @@ func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool, transaction
 			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
-		return
+		return nil, err // Make sure we don't return new object on error
 	}
 	cache.Set(cacheKey, rp, cacheCommit(transactionID), transactionID)
 	return
@@ -772,7 +772,7 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool, transactionID string)
 			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
-		return
+		return nil, err
 	}
 	cache.Set(cacheKey, result.Value, cCommit, transactionID)
 	return
@@ -1003,7 +1003,7 @@ func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID str
 			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
-		return
+		return nil, err
 	}
 	as = result.Value
 	cache.Set(utils.ACTION_PREFIX+key, as, cacheCommit(transactionID), transactionID)
@@ -1040,13 +1040,13 @@ func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool, transactionID
 	}
 	session, col := ms.conn(colShg)
 	defer session.Close()
-	sg = &SharedGroup{}
+	sg = new(SharedGroup)
 	if err = col.Find(bson.M{"id": key}).One(sg); err != nil {
 		if err == mgo.ErrNotFound {
 			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
-		return
+		return nil, err
 	}
 	cache.Set(cacheKey, sg, cacheCommit(transactionID), transactionID)
 	return
@@ -1105,10 +1105,13 @@ func (ms *MongoStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error)
 	}
 	session, col := ms.conn(colStq)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&result)
-	if err == nil {
-		sq = result.Value
+	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
 	}
+	sq = result.Value
 	return
 }
 
@@ -1171,10 +1174,13 @@ func (ms *MongoStorage) GetUser(key string) (up *UserProfile, err error) {
 	}
 	session, col := ms.conn(colUsr)
 	defer session.Close()
-	err = col.Find(bson.M{"key": key}).One(&kv)
-	if err == nil {
-		up = kv.Value
+	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
 	}
+	up = kv.Value
 	return
 }
 
@@ -1493,7 +1499,7 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool, transactionID 
 			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
-		return
+		return nil, err
 	}
 	b := bytes.NewBuffer(kv.Value)
 	r, err := zlib.NewReader(b)
@@ -1655,10 +1661,15 @@ func (ms *MongoStorage) SetCdrStats(cs *CdrStats) error {
 }
 
 func (ms *MongoStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
-	cs = &CdrStats{}
+	cs = new(CdrStats)
 	session, col := ms.conn(colCrs)
 	defer session.Close()
-	err = col.Find(bson.M{"id": key}).One(cs)
+	if err = col.Find(bson.M{"id": key}).One(cs); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
 	return
 }
 
@@ -1692,9 +1703,11 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	}
 	session, col := ms.conn(colVer)
 	defer session.Close()
-	err = col.Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result)
-	if err == mgo.ErrNotFound {
-		rsv = nil
+	if err = col.Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
 	}
 	rsv = &result.Value
 	return
@@ -1718,7 +1731,7 @@ func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool, transactionI
 			err = utils.ErrNotFound
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
-		return
+		return nil, err
 	}
 	for _, fltr := range rl.Filters {
 		if err = fltr.CompileValues(); err != nil {

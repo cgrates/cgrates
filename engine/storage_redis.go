@@ -755,17 +755,25 @@ func (rs *RedisStorage) RemoveAccount(key string) (err error) {
 
 func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
 	var values []byte
-	if values, err = rs.Cmd("GET", utils.CDR_STATS_QUEUE_PREFIX+key).Bytes(); err == nil {
-		sq = &StatsQueue{}
-		err = rs.ms.Unmarshal(values, &sq)
+	if values, err = rs.Cmd("GET", utils.CDR_STATS_QUEUE_PREFIX+key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	sq = new(StatsQueue)
+	if err = rs.ms.Unmarshal(values, &sq); err != nil {
+		return nil, err
 	}
 	return
 }
 
 func (rs *RedisStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
-	result, err := rs.ms.Marshal(sq)
-	err = rs.Cmd("SET", utils.CDR_STATS_QUEUE_PREFIX+sq.GetId(), result).Err
-	return
+	var result []byte
+	if result, err = rs.ms.Marshal(sq); err != nil {
+		return
+	}
+	return rs.Cmd("SET", utils.CDR_STATS_QUEUE_PREFIX+sq.GetId(), result).Err
 }
 
 func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
@@ -775,13 +783,18 @@ func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err
 	}
 	result = make(map[string]*SubscriberData)
 	for _, key := range keys {
-		if values, err := rs.Cmd("GET", key).Bytes(); err == nil {
-			sub := &SubscriberData{}
-			err = rs.ms.Unmarshal(values, sub)
-			result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = sub
-		} else {
-			return nil, utils.ErrNotFound
+		var values []byte
+		if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+			if err.Error() == "wrong type" { // did not find the destination
+				err = utils.ErrNotFound
+			}
+			return
 		}
+		sub := new(SubscriberData)
+		if err = rs.ms.Unmarshal(values, sub); err != nil {
+			return nil, err
+		}
+		result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = sub
 	}
 	return
 }
@@ -800,18 +813,24 @@ func (rs *RedisStorage) RemoveSubscriber(key string) (err error) {
 }
 
 func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
-	result, err := rs.ms.Marshal(up)
-	if err != nil {
-		return err
+	var result []byte
+	if result, err = rs.ms.Marshal(up); err != nil {
+		return
 	}
 	return rs.Cmd("SET", utils.USERS_PREFIX+up.GetId(), result).Err
 }
 
 func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
 	var values []byte
-	if values, err = rs.Cmd("GET", utils.USERS_PREFIX+key).Bytes(); err == nil {
-		up = &UserProfile{}
-		err = rs.ms.Unmarshal(values, &up)
+	if values, err = rs.Cmd("GET", utils.USERS_PREFIX+key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	up = new(UserProfile)
+	if err = rs.ms.Unmarshal(values, &up); err != nil {
+		return nil, err
 	}
 	return
 }
@@ -833,7 +852,7 @@ func (rs *RedisStorage) GetUsers() (result []*UserProfile, err error) {
 	return
 }
 
-func (rs *RedisStorage) RemoveUser(key string) (err error) {
+func (rs *RedisStorage) RemoveUser(key string) error {
 	return rs.Cmd("DEL", utils.USERS_PREFIX+key).Err
 }
 
@@ -860,7 +879,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool, transactionID strin
 	al = &Alias{Values: make(AliasValues, 0)}
 	al.SetId(key)
 	if err = rs.ms.Unmarshal(values, &al.Values); err != nil {
-		return
+		return nil, err
 	}
 	cache.Set(cacheKey, al, cCommit, transactionID)
 	return
@@ -1138,18 +1157,15 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 			}
 		}
 	}
-	result, err := rs.ms.Marshal(ats)
-	if err != nil {
-		return err
+	var result []byte
+	if result, err = rs.ms.Marshal(ats); err != nil {
+		return
 	}
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	if err = rs.Cmd("SET", dbKey, b.Bytes()).Err; err != nil {
-		return
-	}
-	return
+	return rs.Cmd("SET", dbKey, b.Bytes()).Err
 }
 
 func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
@@ -1243,8 +1259,14 @@ func (rs *RedisStorage) SetCdrStats(cs *CdrStats) error {
 
 func (rs *RedisStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 	var values []byte
-	if values, err = rs.Cmd("GET", utils.CDR_STATS_PREFIX+key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &cs)
+	if values, err = rs.Cmd("GET", utils.CDR_STATS_PREFIX+key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &cs); err != nil {
+		return
 	}
 	return
 }
@@ -1277,10 +1299,13 @@ func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
 
 func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	var values []byte
-	rsv = &StructVersion{}
-	if values, err = rs.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &rsv)
+	if values, err = rs.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
 	}
+	err = rs.ms.Unmarshal(values, &rsv)
 	return
 }
 
