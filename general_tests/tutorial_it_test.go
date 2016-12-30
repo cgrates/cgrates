@@ -110,13 +110,21 @@ func TestTutITCacheStats(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 	}
-	expKeys := utils.ArgsCache{DestinationIDs: &[]string{"DST_1003", "DST_1002", "DST_DE_MOBILE", "DST_1007", "DST_FS"}}
+	expKeys := utils.ArgsCache{
+		DestinationIDs: &[]string{"DST_1003", "DST_1002", "DST_DE_MOBILE", "DST_1007", "DST_FS"},
+		RatingPlanIDs:  &[]string{"RP_RETAIL1", "RP_GENERIC"},
+	}
 	var rcvKeys utils.ArgsCache
-	if err := tutLocalRpc.Call("ApierV1.GetCacheKeys", utils.ArgsCacheKeys{ArgsCache: utils.ArgsCache{DestinationIDs: &[]string{}}}, &rcvKeys); err != nil {
+	argsAPI := utils.ArgsCacheKeys{ArgsCache: utils.ArgsCache{
+		DestinationIDs: &[]string{}, RatingPlanIDs: &[]string{"RP_RETAIL1", "RP_GENERIC", "NONEXISTENT"}}}
+	if err := tutLocalRpc.Call("ApierV1.GetCacheKeys", argsAPI, &rcvKeys); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
 	} else {
 		if len(*expKeys.DestinationIDs) != len(*rcvKeys.DestinationIDs) {
 			t.Errorf("Expected: %+v, received: %+v", expKeys.DestinationIDs, rcvKeys.DestinationIDs)
+		}
+		if !reflect.DeepEqual(*expKeys.RatingPlanIDs, *rcvKeys.RatingPlanIDs) {
+			t.Errorf("Expected: %+v, received: %+v", expKeys.RatingPlanIDs, rcvKeys.RatingPlanIDs)
 		}
 	}
 	if _, err := engine.StopStartEngine(tutLocalCfgPath, 1500); err != nil {
