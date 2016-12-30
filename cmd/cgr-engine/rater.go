@@ -71,44 +71,44 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		}
 		*/
 		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
-		if cfg.CacheConfig.Destinations.Precache {
-			dstIDs = nil // Precache all
+		if !cfg.CacheConfig.Destinations.Precache {
+			dstIDs = make([]string, 0) // Don't cache any
 		}
-		if cfg.CacheConfig.ReverseDestinations.Precache {
-			rvDstIDs = nil
+		if !cfg.CacheConfig.ReverseDestinations.Precache {
+			rvDstIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.RatingPlans.Precache {
-			rplIDs = nil
+		if !cfg.CacheConfig.RatingPlans.Precache {
+			rplIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.RatingProfiles.Precache {
-			rpfIDs = nil
+		if !cfg.CacheConfig.RatingProfiles.Precache {
+			rpfIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.Actions.Precache {
-			actIDs = nil
+		if !cfg.CacheConfig.Actions.Precache {
+			actIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.ActionPlans.Precache {
-			aplIDs = nil
+		if !cfg.CacheConfig.ActionPlans.Precache {
+			aplIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.ActionTriggers.Precache {
-			atrgIDs = nil
+		if !cfg.CacheConfig.ActionTriggers.Precache {
+			atrgIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.SharedGroups.Precache {
-			sgIDs = nil
+		if !cfg.CacheConfig.SharedGroups.Precache {
+			sgIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.Lcr.Precache {
-			lcrIDs = nil
+		if !cfg.CacheConfig.Lcr.Precache {
+			lcrIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.DerivedChargers.Precache {
-			dcIDs = nil
+		if !cfg.CacheConfig.DerivedChargers.Precache {
+			dcIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.Aliases.Precache {
-			alsIDs = nil
+		if !cfg.CacheConfig.Aliases.Precache {
+			alsIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.ReverseAliases.Precache {
-			rvAlsIDs = nil
+		if !cfg.CacheConfig.ReverseAliases.Precache {
+			rvAlsIDs = make([]string, 0)
 		}
-		if cfg.CacheConfig.ResourceLimits.Precache {
-			rlIDs = nil
+		if !cfg.CacheConfig.ResourceLimits.Precache {
+			rlIDs = make([]string, 0)
 		}
 		if err := ratingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
