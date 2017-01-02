@@ -59,6 +59,8 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheReverseAlias,
 	testOnStorITCacheResourceLimit,
 	// ToDo: test cache flush for a prefix
+	testOnStorITHasData,
+	testOnStorITGetRatingPlan,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -709,5 +711,102 @@ func testOnStorITCacheResourceLimit(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ResourceLimit); !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", rL.ActivationTime, rcv.ActivationTime)
+	}
+}
+
+func testOnStorITHasData(t *testing.T) {
+	rp := &RatingPlan{
+		Id: "TEST_RP_CACHE",
+		Timings: map[string]*RITiming{
+			"59a981b9": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"ebefae11": &RIRate{
+				ConnectFee: 0,
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.2,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"GERMANY": []*RPRate{
+				&RPRate{
+					Timing: "59a981b9",
+					Rating: "ebefae11",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id)
+	if err != nil {
+		t.Error(err)
+	} else if rcv != true {
+		t.Errorf("Expecting: true, received: %v", rcv)
+	}
+}
+
+func testOnStorITGetRatingPlan(t *testing.T) {
+	rp := &RatingPlan{
+		Id: "TEST_RP_CACHE",
+		Timings: map[string]*RITiming{
+			"59a981b9": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"ebefae11": &RIRate{
+				ConnectFee: 0,
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.2,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"GERMANY": []*RPRate{
+				&RPRate{
+					Timing: "59a981b9",
+					Rating: "ebefae11",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.RATING_PLAN_PREFIX)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rp, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rp, rcv)
+
 	}
 }
