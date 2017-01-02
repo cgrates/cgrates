@@ -231,7 +231,7 @@ func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Ac
 	var actionKeys []string
 	var err error
 	if len(attr.ActionIDs) == 0 {
-		if actionKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
+		if actionKeys, err = self.RatingDb.GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
 			return err
 		}
 	} else {
