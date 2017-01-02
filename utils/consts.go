@@ -21,11 +21,13 @@ var (
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
 	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
 		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField, MEDI_RUNID}
+	GitLastLog string // If set, it will be processed as part of versioning
 )
 
 const (
 	CGRateS                       = "CGRateS"
 	VERSION                       = "0.9.1~rc8"
+	GitLastLogFileName            = ".git_lastlog.txt"
 	DIAMETER_FIRMWARE_REVISION    = 918
 	REDIS_MAX_CONNS               = 10
 	POSTGRES                      = "postgres"

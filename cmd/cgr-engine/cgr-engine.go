@@ -558,7 +558,7 @@ func initLogger(cfg *config.CGRConfig) error {
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("CGRateS " + utils.VERSION)
+		fmt.Println(utils.GetCGRVersion())
 		return
 	}
 	if *pidFile != "" {

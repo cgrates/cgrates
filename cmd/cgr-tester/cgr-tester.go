@@ -60,6 +60,7 @@ var (
 	destination     = flag.String("destination", "1002", "The destination to use in queries.")
 	json            = flag.Bool("json", false, "Use JSON RPC")
 	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
+	version         = flag.Bool("version", false, "Prints the application version.")
 	nilDuration     = time.Duration(0)
 )
 
@@ -152,7 +153,10 @@ func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
 
 func main() {
 	flag.Parse()
-
+	if *version {
+		fmt.Println(utils.GetCGRVersion())
+		return
+	}
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
