@@ -54,18 +54,20 @@ func NewCdrExporter(cdrs []*engine.CDR, cdrDb engine.CdrStorage, exportTpl *conf
 		return nil, nil
 	}
 	cdre := &CdrExporter{
-		cdrs:                    cdrs,
-		cdrDb:                   cdrDb,
-		exportTemplate:          exportTpl,
-		cdrFormat:               cdrFormat,
-		fieldSeparator:          fieldSeparator,
-		exportId:                exportId,
-		dataUsageMultiplyFactor: dataUsageMultiplyFactor,
-		mmsUsageMultiplyFactor:  mmsUsageMultiplyFactor,
-		costMultiplyFactor:      costMultiplyFactor,
-		cgrPrecision:            cgrPrecision,
-		httpSkipTlsCheck:        httpSkipTlsCheck,
-		negativeExports:         make(map[string]string),
+		cdrs:                       cdrs,
+		cdrDb:                      cdrDb,
+		exportTemplate:             exportTpl,
+		cdrFormat:                  cdrFormat,
+		fieldSeparator:             fieldSeparator,
+		exportId:                   exportId,
+		dataUsageMultiplyFactor:    dataUsageMultiplyFactor,
+		smsUsageMultiplyFactor:     smsUsageMultiplyFactor,
+		mmsUsageMultiplyFactor:     mmsUsageMultiplyFactor,
+		genericUsageMultiplyFactor: genericUsageMultiplyFactor,
+		costMultiplyFactor:         costMultiplyFactor,
+		cgrPrecision:               cgrPrecision,
+		httpSkipTlsCheck:           httpSkipTlsCheck,
+		negativeExports:            make(map[string]string),
 	}
 	if err := cdre.processCdrs(); err != nil {
 		return nil, err
