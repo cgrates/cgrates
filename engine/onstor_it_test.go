@@ -716,7 +716,7 @@ func testOnStorITCacheResourceLimit(t *testing.T) {
 
 func testOnStorITHasData(t *testing.T) {
 	rp := &RatingPlan{
-		Id: "TEST_RP_CACHE",
+		Id: "HasData",
 		Timings: map[string]*RITiming{
 			"59a981b9": &RITiming{
 				Years:     utils.Years{},
@@ -764,7 +764,7 @@ func testOnStorITHasData(t *testing.T) {
 
 func testOnStorITGetRatingPlan(t *testing.T) {
 	rp := &RatingPlan{
-		Id: "TEST_RP_CACHE",
+		Id: "GetRatingPlan",
 		Timings: map[string]*RITiming{
 			"59a981b9": &RITiming{
 				Years:     utils.Years{},
@@ -802,7 +802,7 @@ func testOnStorITGetRatingPlan(t *testing.T) {
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.RATING_PLAN_PREFIX)
+	rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
