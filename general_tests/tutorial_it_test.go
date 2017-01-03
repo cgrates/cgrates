@@ -1422,8 +1422,8 @@ func TestTutITExportCDR(t *testing.T) {
 	if err := tutLocalRpc.Call("ApierV2.ExportCdrsToFile", exportArgs, &replyExport); err != nil {
 		t.Error(err)
 	}
-	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.3334,RETA
-f0a92222a7d21b4d9f72744aabe82daef52e20d8,derived_run1,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.3334,RETA
+	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA
+f0a92222a7d21b4d9f72744aabe82daef52e20d8,derived_run1,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA
 `
 	expFilePath := path.Join(*exportArgs.ExportDirectory, *exportArgs.ExportFileName)
 	if expContent, err := ioutil.ReadFile(expFilePath); err != nil {

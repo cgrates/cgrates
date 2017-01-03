@@ -152,7 +152,7 @@ func TestWriteCdr(t *testing.T) {
 		t.Error("Unexpected number of records in the stats: ", cdre.numberOfRecords)
 	} else if cdre.totalDuration != cdr.Usage {
 		t.Error("Unexpected total duration in the stats: ", cdre.totalDuration)
-	} else if cdre.totalCost != utils.Round(cdr.Cost, cdre.cgrPrecision, utils.ROUNDING_MIDDLE) {
+	} else if cdre.totalCost != utils.Round(cdr.Cost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE) {
 		t.Error("Unexpected total cost in the stats: ", cdre.totalCost)
 	}
 	if cdre.FirstOrderId() != 1 {
@@ -161,7 +161,7 @@ func TestWriteCdr(t *testing.T) {
 	if cdre.LastOrderId() != 1 {
 		t.Error("Unexpected LastOrderId", cdre.LastOrderId())
 	}
-	if cdre.TotalCost() != utils.Round(cdr.Cost, cdre.cgrPrecision, utils.ROUNDING_MIDDLE) {
+	if cdre.TotalCost() != utils.Round(cdr.Cost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE) {
 		t.Error("Unexpected TotalCost: ", cdre.TotalCost())
 	}
 }
