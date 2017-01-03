@@ -49,7 +49,7 @@ var err error
 
 func NewCdrExporter(cdrs []*engine.CDR, cdrDb engine.CdrStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
 	dataUsageMultiplyFactor, smsUsageMultiplyFactor, mmsUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor float64,
-	cgrPrecision int, httpSkipTlsCheck bool) (*CdrExporter, error) {
+	roundingDecimals int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -65,7 +65,7 @@ func NewCdrExporter(cdrs []*engine.CDR, cdrDb engine.CdrStorage, exportTpl *conf
 		mmsUsageMultiplyFactor:     mmsUsageMultiplyFactor,
 		genericUsageMultiplyFactor: genericUsageMultiplyFactor,
 		costMultiplyFactor:         costMultiplyFactor,
-		cgrPrecision:               cgrPrecision,
+		roundingDecimals:           roundingDecimals,
 		httpSkipTlsCheck:           httpSkipTlsCheck,
 		negativeExports:            make(map[string]string),
 	}
@@ -87,7 +87,7 @@ type CdrExporter struct {
 	mmsUsageMultiplyFactor,
 	genericUsageMultiplyFactor,
 	costMultiplyFactor float64
-	cgrPrecision                int
+	roundingDecimals            int
 	httpSkipTlsCheck            bool
 	header, trailer             []string   // Header and Trailer fields
 	content                     [][]string // Rows of cdr fields
@@ -131,7 +131,7 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 		emulatedCdr := &engine.CDR{ToR: utils.DATA, Usage: cdre.totalDataUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
-		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.cgrPrecision, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 	default:
 		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
@@ -204,18 +204,18 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 	}
 	// Cost multiply
 	if cdre.dataUsageMultiplyFactor != 0.0 && cdr.ToR == utils.DATA {
-		cdr.UsageMultiply(cdre.dataUsageMultiplyFactor, cdre.cgrPrecision)
+		cdr.UsageMultiply(cdre.dataUsageMultiplyFactor, cdre.roundingDecimals)
 	} else if cdre.smsUsageMultiplyFactor != 0 && cdr.ToR == utils.SMS {
-		cdr.UsageMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
+		cdr.UsageMultiply(cdre.smsUsageMultiplyFactor, cdre.roundingDecimals)
 	} else if cdre.mmsUsageMultiplyFactor != 0 && cdr.ToR == utils.MMS {
-		cdr.UsageMultiply(cdre.mmsUsageMultiplyFactor, cdre.cgrPrecision)
+		cdr.UsageMultiply(cdre.mmsUsageMultiplyFactor, cdre.roundingDecimals)
 	} else if cdre.genericUsageMultiplyFactor != 0 && cdr.ToR == utils.GENERIC {
-		cdr.UsageMultiply(cdre.genericUsageMultiplyFactor, cdre.cgrPrecision)
+		cdr.UsageMultiply(cdre.genericUsageMultiplyFactor, cdre.roundingDecimals)
 	}
 	if cdre.costMultiplyFactor != 0.0 {
-		cdr.CostMultiply(cdre.costMultiplyFactor, cdre.cgrPrecision)
+		cdr.CostMultiply(cdre.costMultiplyFactor, cdre.roundingDecimals)
 	}
-	cdrRow, err := cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs)
+	cdrRow, err := cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs, cdre.roundingDecimals)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s and runid: %s, error: %s", cdr.CGRID, cdr.RunID, err.Error()))
 		return err
@@ -250,7 +250,7 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 	}
 	if cdr.Cost != -1 {
 		cdre.totalCost += cdr.Cost
-		cdre.totalCost = utils.Round(cdre.totalCost, cdre.cgrPrecision, utils.ROUNDING_MIDDLE)
+		cdre.totalCost = utils.Round(cdre.totalCost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE)
 	}
 	if cdre.firstExpOrderId > cdr.OrderID || cdre.firstExpOrderId == 0 {
 		cdre.firstExpOrderId = cdr.OrderID
