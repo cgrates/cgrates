@@ -286,6 +286,7 @@ const (
 	HandlerArgSep                = "|"
 	FlagForceDuration            = "fd"
 	InstanceID                   = "InstanceID"
+	ActiveGoroutines             = "ActiveGoroutines"
 	SessionTTL                   = "SessionTTL"
 	SessionTTLLastUsed           = "SessionTTLLastUsed"
 	SessionTTLUsage              = "SessionTTLUsage"
