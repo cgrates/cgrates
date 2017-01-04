@@ -65,8 +65,7 @@ type AttrRemoveDestination struct {
 	Prefixes       []string
 }
 
-func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) error {
-	var err error
+func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) (err error) {
 	for _, dstID := range attr.DestinationIDs {
 		if len(attr.Prefixes) == 0 {
 			if err = self.RatingDb.RemoveDestination(dstID, utils.NonTransactional); err != nil {
@@ -75,7 +74,6 @@ func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string
 			} else {
 				*reply = utils.OK
 			}
-		} else {
 			// TODO list
 			// get destination
 			// remove prefixes
@@ -84,6 +82,18 @@ func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string
 		}
 	}
 	return err
+}
+
+func (v1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (err error) {
+	if prefix == "" {
+		return utils.NewErrMandatoryIeMissing("prefix")
+	}
+	var revLst []string
+	if revLst, err = v1.RatingDb.GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
+		return
+	}
+	*reply = revLst
+	return
 }
 
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
