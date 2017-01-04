@@ -99,7 +99,7 @@ func (v1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (err er
 
 // ComputeReverseDestinations will rebuild complete reverse destinations data
 func (v1 *ApierV1) ComputeReverseDestinations(ignr string, reply *string) (err error) {
-	if err = v1.RatingDb.RebuildReverseForPrefix(utils.DESTINATION_PREFIX); err != nil {
+	if err = v1.RatingDb.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 		return
 	}
 	*reply = utils.OK
