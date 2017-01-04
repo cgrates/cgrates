@@ -106,6 +106,15 @@ func (v1 *ApierV1) ComputeReverseDestinations(ignr string, reply *string) (err e
 	return
 }
 
+// ComputeReverseAliases will rebuild complete reverse aliases data
+func (v1 *ApierV1) ComputeReverseAliases(ignr string, reply *string) (err error) {
+	if err = v1.RatingDb.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
 	if sg, err := apier.RatingDb.GetSharedGroup(sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 		return err
