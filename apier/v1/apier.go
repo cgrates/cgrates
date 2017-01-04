@@ -328,7 +328,9 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		return utils.NewErrServerError(err)
 	}
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
-	for _, prfx := range []string{utils.DESTINATION_PREFIX,
+	for _, prfx := range []string{
+		utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
@@ -342,7 +344,9 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 			return utils.NewErrServerError(err)
 		}
 	}
-	for _, prfx := range []string{utils.ALIASES_PREFIX,
+	for _, prfx := range []string{
+		utils.ALIASES_PREFIX,
+		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceLimitsPrefix} {
 		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
 		if err := self.AccountDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
@@ -1388,7 +1392,9 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return utils.NewErrServerError(err)
 	}
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
-	for _, prfx := range []string{utils.DESTINATION_PREFIX,
+	for _, prfx := range []string{
+		utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
@@ -1402,7 +1408,9 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return utils.NewErrServerError(err)
 		}
 	}
-	for _, prfx := range []string{utils.ALIASES_PREFIX,
+	for _, prfx := range []string{
+		utils.ALIASES_PREFIX,
+		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceLimitsPrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.AccountDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {

@@ -163,7 +163,9 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 
 	utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading cache.")
-	for _, prfx := range []string{utils.DESTINATION_PREFIX,
+	for _, prfx := range []string{
+		utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
@@ -177,7 +179,9 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return utils.NewErrServerError(err)
 		}
 	}
-	for _, prfx := range []string{utils.ALIASES_PREFIX,
+	for _, prfx := range []string{
+		utils.ALIASES_PREFIX,
+		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceLimitsPrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.AccountDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {

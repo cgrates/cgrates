@@ -54,6 +54,8 @@ type TpReader struct {
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
 	resLimits         map[string]*utils.TPResourceLimit
+	revDests,
+	revAliases map[string][]string
 }
 
 func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string) *TpReader {
@@ -105,6 +107,8 @@ func (tpr *TpReader) Init() {
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resLimits = make(map[string]*utils.TPResourceLimit)
+	tpr.revDests = make(map[string][]string)
+	tpr.revAliases = make(map[string][]string)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -136,6 +140,12 @@ func (tpr *TpReader) LoadDestinations() (err error) {
 	}
 	for _, tpDst := range tps {
 		tpr.destinations[tpDst.Tag] = NewDestinationFromTPDestination(tpDst)
+		for _, prfx := range tpr.destinations[tpDst.Tag].Prefixes {
+			if _, hasIt := tpr.revDests[prfx]; !hasIt {
+				tpr.revDests[prfx] = make([]string, 0)
+			}
+			tpr.revDests[prfx] = append(tpr.revDests[prfx], tpDst.Tag)
+		}
 	}
 	return
 }
@@ -1573,6 +1583,12 @@ func (tpr *TpReader) LoadAliases() error {
 				av.Pairs[v.Target] = make(map[string]string)
 			}
 			av.Pairs[v.Target][v.Original] = v.Alias
+			// Report reverse aliases keys which we need to reload late
+			rvAlsKey := v.Alias + v.Target + tal.Context
+			if _, hasIt := tpr.revAliases[rvAlsKey]; !hasIt {
+				tpr.revAliases[rvAlsKey] = make([]string, 0)
+			}
+			tpr.revAliases[rvAlsKey] = append(tpr.revAliases[rvAlsKey], utils.ConcatenatedKey(al.GetId(), v.DestinationId))
 		}
 	}
 	return err
@@ -1683,6 +1699,12 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if verbose {
 			log.Print("\t", d.Id, " : ", d.Prefixes)
+		}
+	}
+	if verbose {
+		log.Print("ReverseDestinations:")
+		for id, vals := range tpr.revDests {
+			log.Printf("\t %s : %+v", id, vals)
 		}
 	}
 	if !disable_reverse && len(tpr.destinations) > 0 {
@@ -1863,6 +1885,12 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", al.GetId())
 		}
 	}
+	if verbose {
+		log.Print("ReverseAliases:")
+		for id, vals := range tpr.revAliases {
+			log.Printf("\t %s : %+v", id, vals)
+		}
+	}
 	if !disable_reverse && len(tpr.aliases) > 0 {
 		if err = tpr.accountingStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
 			return err
@@ -1958,6 +1986,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
+	case utils.REVERSE_DESTINATION_PREFIX:
+		keys := make([]string, len(tpr.revDests))
+		i := 0
+		for k := range tpr.revDests {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
 	case utils.RATING_PLAN_PREFIX:
 		keys := make([]string, len(tpr.ratingPlans))
 		i := 0
@@ -2026,6 +2062,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.aliases))
 		i := 0
 		for k := range tpr.aliases {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.REVERSE_ALIASES_PREFIX:
+		keys := make([]string, len(tpr.revAliases))
+		i := 0
+		for k := range tpr.revAliases {
 			keys[i] = k
 			i++
 		}
