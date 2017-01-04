@@ -505,7 +505,7 @@ func TestCDRParseFieldValue(t *testing.T) {
 func TestCDRAsExportRecord(t *testing.T) {
 	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
-		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
+		Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
 
@@ -515,6 +515,23 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Error(err)
 	} else if expRecord[0] != cdr.Destination {
 		t.Errorf("Expecting: %s, received: %s", cdr.Destination, expRecord[0])
+	}
+	if err := ratingStorage.SetReverseDestination(&Destination{Id: "MASKED_DESTINATIONS", Prefixes: []string{"+4986517174963"}},
+		utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val, MaskDestID: "MASKED_DESTINATIONS", MaskLen: 3}
+	eDst := "+4986517174***"
+	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+		t.Error(err)
+	} else if expRecord[0] != eDst {
+		t.Errorf("Expecting: %s, received: %s", eDst, expRecord[0])
+	}
+	cfgCdrFld = &config.CfgCdrField{Tag: "MaskedDest", Type: utils.MetaMaskedDestination, Value: val, MaskDestID: "MASKED_DESTINATIONS"}
+	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+		t.Error(err)
+	} else if expRecord[0] != "1" {
+		t.Errorf("Expecting: %s, received: %s", "1", expRecord[0])
 	}
 	fltr, _ := utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
 	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val, FieldFilter: fltr, Timezone: "UTC"}

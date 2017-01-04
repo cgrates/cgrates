@@ -73,11 +73,11 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 	if jsnCfgFld.Timezone != nil {
 		cfgFld.Timezone = *jsnCfgFld.Timezone
 	}
-	if jsnCfgFld.Mask_length != nil {
-		cfgFld.MaskLen = *jsnCfgFld.Mask_length
-	}
 	if jsnCfgFld.Mask_destinationd_id != nil {
 		cfgFld.MaskDestID = *jsnCfgFld.Mask_destinationd_id
+	}
+	if jsnCfgFld.Mask_length != nil {
+		cfgFld.MaskLen = *jsnCfgFld.Mask_length
 	}
 	return cfgFld, nil
 }
@@ -98,8 +98,8 @@ type CfgCdrField struct {
 	CostShiftDigits  int // Used in exports
 	RoundingDecimals int
 	Timezone         string
-	MaskLen          int
 	MaskDestID       string
+	MaskLen          int
 }
 
 func CfgCdrFieldsFromCdrFieldsJsonCfg(jsnCfgFldss []*CdrFieldJsonCfg) ([]*CfgCdrField, error) {
