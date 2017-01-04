@@ -84,6 +84,7 @@ func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string
 	return err
 }
 
+// GetReverseDestination retrieves revese destination list for a prefix
 func (v1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (err error) {
 	if prefix == "" {
 		return utils.NewErrMandatoryIeMissing("prefix")
@@ -93,6 +94,15 @@ func (v1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (err er
 		return
 	}
 	*reply = revLst
+	return
+}
+
+// ComputeReverseDestinations will rebuild complete reverse destinations data
+func (v1 *ApierV1) ComputeReverseDestinations(ignr string, reply *string) (err error) {
+	if err = v1.RatingDb.RebuildReverseForPrefix(utils.DESTINATION_PREFIX); err != nil {
+		return
+	}
+	*reply = utils.OK
 	return
 }
 
