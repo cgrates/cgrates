@@ -57,6 +57,7 @@ type CacheConfig struct {
 	CdrStats            *CacheParamConfig
 	Actions             *CacheParamConfig
 	ActionPlans         *CacheParamConfig
+	AccountActionPlans  *CacheParamConfig
 	ActionTriggers      *CacheParamConfig
 	SharedGroups        *CacheParamConfig
 	Aliases             *CacheParamConfig
@@ -111,6 +112,12 @@ func (self *CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) error {
 	if jsnCfg.Action_plans != nil {
 		self.ActionPlans = &CacheParamConfig{}
 		if err := self.ActionPlans.loadFromJsonCfg(jsnCfg.Action_plans); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Account_action_plans != nil {
+		self.AccountActionPlans = &CacheParamConfig{}
+		if err := self.AccountActionPlans.loadFromJsonCfg(jsnCfg.Account_action_plans); err != nil {
 			return err
 		}
 	}

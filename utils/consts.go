@@ -176,6 +176,7 @@ const (
 	FILTER_REGEXP_TPL             = "$1$2$3$4$5"
 	TASKS_KEY                     = "tasks"
 	ACTION_PLAN_PREFIX            = "apl_"
+	AccountActionPlansPrefix      = "aap_"
 	ACTION_TRIGGER_PREFIX         = "atr_"
 	REVERSE_ACTION_TRIGGER_PREFIX = "rtr_"
 	RATING_PLAN_PREFIX            = "rpl_"

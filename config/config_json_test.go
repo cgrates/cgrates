@@ -83,6 +83,8 @@ func TestCacheJsonCfg(t *testing.T) {
 			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
 		Action_plans: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),
 			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Account_action_plans: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),
+			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
 		Action_triggers: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),
 			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
 		Shared_groups: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),

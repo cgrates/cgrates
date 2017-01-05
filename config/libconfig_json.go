@@ -259,6 +259,7 @@ type CacheJsonCfg struct {
 	Cdr_stats            *CacheParamJsonCfg
 	Actions              *CacheParamJsonCfg
 	Action_plans         *CacheParamJsonCfg
+	Account_action_plans *CacheParamJsonCfg
 	Action_triggers      *CacheParamJsonCfg
 	Shared_groups        *CacheParamJsonCfg
 	Aliases              *CacheParamJsonCfg
