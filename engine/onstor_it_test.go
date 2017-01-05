@@ -61,6 +61,13 @@ var sTestsOnStorIT = []func(t *testing.T){
 	// ToDo: test cache flush for a prefix
 	testOnStorITHasData,
 	testOnStorITGetRatingPlan,
+	testOnStorITSetRatingPlan,
+	testOnStorITGetRatingProfile,
+	testOnStorITRemoveRatingProfile,
+	testOnStorITGetDestination,
+	testOnStorITSetDestination,
+	testOnStorITRemoveDestination,
+	testOnStorITGetReverseDestination,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -754,8 +761,7 @@ func testOnStorITHasData(t *testing.T) {
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id)
-	if err != nil {
+	if rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id); err != nil {
 		t.Error(err)
 	} else if rcv != true {
 		t.Errorf("Expecting: true, received: %v", rcv)
@@ -799,14 +805,196 @@ func testOnStorITGetRatingPlan(t *testing.T) {
 			},
 		},
 	}
+	if _, rcvErr := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional)
-	if err != nil {
+	if rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
-
 	}
 }
+
+func testOnStorITSetRatingPlan(t *testing.T) {
+	rp := &RatingPlan{
+		Id: "SetRatingPlan",
+		Timings: map[string]*RITiming{
+			"59a981b9": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"ebefae11": &RIRate{
+				ConnectFee: 0,
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.2,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"GERMANY": []*RPRate{
+				&RPRate{
+					Timing: "59a981b9",
+					Rating: "ebefae11",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rp, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rp, rcv)
+	}
+}
+
+func testOnStorITGetRatingProfile(t *testing.T) {
+	rpf := &RatingProfile{
+		Id: "*out:test:1:trp",
+		RatingPlanActivations: RatingPlanActivations{
+			&RatingPlanActivation{
+				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+				RatingPlanId:    "TDRT",
+				FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:rif"},
+				CdrStatQueueIds: []string{},
+			}},
+	}
+	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr == err {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+	}
+}
+
+func testOnStorITSetRatingProfile(t *testing.T) {
+	rpf := &RatingProfile{
+		Id: "*out:test:2:trp",
+		RatingPlanActivations: RatingPlanActivations{
+			&RatingPlanActivation{
+				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+				RatingPlanId:    "TDRT",
+				FallbackKeys:    []string{"*out:test:2:danb", "*out:test:2:rif"},
+				CdrStatQueueIds: []string{},
+			}},
+	}
+	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+	}
+}
+
+func testOnStorITRemoveRatingProfile(t *testing.T) {
+	rpf := &RatingProfile{
+		Id: "*out:test:3:trp",
+		RatingPlanActivations: RatingPlanActivations{
+			&RatingPlanActivation{
+				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+				RatingPlanId:    "TDRT",
+				FallbackKeys:    []string{"*out:test:3:danb", "*out:test:3:rif"},
+				CdrStatQueueIds: []string{},
+			}},
+	}
+	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+	}
+	if err = onStor.RemoveRatingProfile(rpf.Id, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITGetDestination(t *testing.T) {
+	dst := &Destination{Id: "GetDestination", Prefixes: []string{"+491", "+492", "+493"}}
+	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetDestination(dst, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetDestination(dst.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dst, rcv) {
+		t.Errorf("Expecting: %v, received: %v", dst, rcv)
+	}
+}
+
+func testOnStorITSetDestination(t *testing.T) {
+	dst := &Destination{Id: "SetDestination", Prefixes: []string{"+491", "+492", "+493"}}
+	if err := onStor.SetDestination(dst, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetDestination(dst.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dst, rcv) {
+		t.Errorf("Expecting: %v, received: %v", dst, rcv)
+	}
+}
+
+func testOnStorITRemoveDestination(t *testing.T) {
+	dst := &Destination{Id: "RemoveDestination", Prefixes: []string{"+491", "+492", "+493"}}
+	if err := onStor.SetDestination(dst, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetDestination(dst.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dst, rcv) {
+		t.Errorf("Expecting: %v, received: %v", dst, rcv)
+	}
+	if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr == err {
+		t.Error(rcvErr)
+	}
+}
+
+/* FixMe
+func testOnStorITGetReverseDestination(t *testing.T) {
+	dst := &Destination{Id: "GetReverseDestination", Prefixes: []string{"+491", "+492", "+493"}}
+	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr == err {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
+		t.Errorf("Expecting: %v, received: %v", dst, rcv)
+	}
+}
+*/
