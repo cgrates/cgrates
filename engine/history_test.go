@@ -50,6 +50,6 @@ func TestHistoryDestinations(t *testing.T) {
 {"Id":"SPEC","Prefixes":["0723045"]},
 {"Id":"URG","Prefixes":["112"]}`
 	if !strings.Contains(buf.String(), expected) {
-		t.Error("Error in destination history content:", buf.String())
+		t.Errorf("Expecting: %s, received: %s", expected, buf.String())
 	}
 }
