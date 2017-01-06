@@ -1079,6 +1079,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.RatingProfiles = cache.CountEntries(utils.RATING_PROFILE_PREFIX)
 	cs.Actions = cache.CountEntries(utils.ACTION_PREFIX)
 	cs.ActionPlans = cache.CountEntries(utils.ACTION_PLAN_PREFIX)
+	cs.AccountActionPlans = cache.CountEntries(utils.AccountActionPlansPrefix)
 	cs.SharedGroups = cache.CountEntries(utils.SHARED_GROUP_PREFIX)
 	cs.DerivedChargers = cache.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
 	cs.LcrProfiles = cache.CountEntries(utils.LCR_PREFIX)
@@ -1212,6 +1213,25 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		ids = args.Paginator.PaginateStringSlice(ids)
 		if len(ids) != 0 {
 			reply.ActionPlanIDs = &ids
+		}
+	}
+
+	if args.AccountActionPlanIDs != nil {
+		var ids []string
+		if len(*args.AccountActionPlanIDs) != 0 {
+			for _, id := range *args.AccountActionPlanIDs {
+				if _, hasIt := cache.Get(utils.AccountActionPlansPrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.AccountActionPlansPrefix) {
+				ids = append(ids, id[len(utils.AccountActionPlansPrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.AccountActionPlanIDs = &ids
 		}
 	}
 	if args.ActionTriggerIDs != nil {

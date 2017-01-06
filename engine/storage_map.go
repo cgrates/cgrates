@@ -1022,6 +1022,13 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error
 	return
 }
 
+func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
+	return
+}
+func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string) (err error) {
+	return
+}
+
 func (ms *MapStorage) PushTask(t *Task) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

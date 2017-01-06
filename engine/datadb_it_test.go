@@ -35,7 +35,7 @@ import (
 var (
 	rdsITdb *RedisStorage
 	mgoITdb *MongoStorage
-	onStor  OnlineStorage
+	onStor  DataDB
 )
 
 // subtests to be executed for each confDIR
@@ -51,6 +51,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheRatingProfile,
 	testOnStorITCacheActions,
 	testOnStorITCacheActionPlan,
+	testOnStorITCacheAccountActionPlans,
 	testOnStorITCacheActionTriggers,
 	testOnStorITCacheSharedGroup,
 	testOnStorITCacheDerivedChargers,
@@ -452,6 +453,25 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ActionPlan); !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", ap, rcv)
+	}
+}
+
+func testOnStorITCacheAccountActionPlans(t *testing.T) {
+	acntID := utils.ConcatenatedKey("cgrates.org", "1001")
+	aAPs := []string{"PACKAGE_10_SHARED_A_5", "USE_SHARED_A", "apl_PACKAGE_1001"}
+	if err := onStor.SetAccountActionPlans(acntID, aAPs); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.AccountActionPlansPrefix + acntID); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{acntID}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.AccountActionPlansPrefix + acntID); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.([]string); !reflect.DeepEqual(aAPs, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", aAPs, rcv)
 	}
 }
 

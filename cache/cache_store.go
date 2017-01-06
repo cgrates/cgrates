@@ -152,6 +152,11 @@ func newLruStore() lrustore {
 	} else {
 		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(10000)
 	}
+	if cfg != nil && cfg.AccountActionPlans != nil {
+		c[utils.AccountActionPlansPrefix], _ = lru.New(cfg.AccountActionPlans.Limit)
+	} else {
+		c[utils.AccountActionPlansPrefix], _ = lru.New(10000)
+	}
 	if cfg != nil && cfg.ActionTriggers != nil {
 		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(cfg.ActionTriggers.Limit)
 	} else {

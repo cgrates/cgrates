@@ -72,6 +72,9 @@ type RatingStorage interface {
 	GetActionPlan(string, bool, string) (*ActionPlan, error)
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
+	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
+	SetAccountActionPlans(acntID string, apIDs []string) (err error)
+
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
@@ -114,7 +117,7 @@ type AccountingStorage interface {
 }
 
 // OnlineStorage contains methods to use for administering online data
-type OnlineStorage interface {
+type DataDB interface {
 	Storage
 	HasData(string, string) (bool, error)
 	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
@@ -147,6 +150,8 @@ type OnlineStorage interface {
 	GetActionPlan(string, bool, string) (*ActionPlan, error)
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
+	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
+	SetAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error

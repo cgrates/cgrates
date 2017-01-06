@@ -599,6 +599,7 @@ type ArgsCache struct {
 	RatingProfileIDs      *[]string
 	ActionIDs             *[]string
 	ActionPlanIDs         *[]string
+	AccountActionPlanIDs  *[]string
 	ActionTriggerIDs      *[]string
 	SharedGroupIDs        *[]string
 	LCRids                *[]string
@@ -632,6 +633,7 @@ type CacheStats struct {
 	RatingProfiles      int
 	Actions             int
 	ActionPlans         int
+	AccountActionPlans  int
 	SharedGroups        int
 	DerivedChargers     int
 	LcrProfiles         int

@@ -201,6 +201,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.AccountActionPlansPrefix,
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
@@ -243,6 +244,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			nrItems = rs.cacheCfg.Actions.Limit
 		case utils.ACTION_PLAN_PREFIX:
 			nrItems = rs.cacheCfg.ActionPlans.Limit
+		case utils.AccountActionPlansPrefix:
+			nrItems = rs.cacheCfg.AccountActionPlans.Limit
 		case utils.ACTION_TRIGGER_PREFIX:
 			nrItems = rs.cacheCfg.ActionTriggers.Limit
 		case utils.SHARED_GROUP_PREFIX:
@@ -281,6 +284,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
 			_, err = rs.GetActionPlan(dataID, true, utils.NonTransactional)
+		case utils.AccountActionPlansPrefix:
+			_, err = rs.GetAccountActionPlans(dataID, true, utils.NonTransactional)
 		case utils.ACTION_TRIGGER_PREFIX:
 			_, err = rs.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
@@ -1184,6 +1189,46 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = ap
 	}
 
+	return
+}
+
+func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
+	key := utils.AccountActionPlansPrefix + acntID
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &apIDs); err != nil {
+		return
+	}
+	cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (rs *RedisStorage) SetAccountActionPlans(acntID string, apIDs []string) (err error) {
+	key := utils.AccountActionPlansPrefix + acntID
+	if len(apIDs) == 0 {
+		return rs.Cmd("DEL", key).Err
+	}
+	var result []byte
+	if result, err = rs.ms.Marshal(apIDs); err != nil {
+		return err
+	}
+	if err = rs.Cmd("SET", key, result).Err; err != nil {
+		return
+	}
 	return
 }
 

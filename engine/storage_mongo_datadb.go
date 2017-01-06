@@ -37,6 +37,7 @@ const (
 	colRds = "reverse_destinations"
 	colAct = "actions"
 	colApl = "action_plans"
+	colAAp = "account_action_plans"
 	colTsk = "tasks"
 	colAtr = "action_triggers"
 	colRpl = "rating_plans"
@@ -409,6 +410,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.AccountActionPlansPrefix,
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
@@ -451,6 +453,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			nrItems = ms.cacheCfg.Actions.Limit
 		case utils.ACTION_PLAN_PREFIX:
 			nrItems = ms.cacheCfg.ActionPlans.Limit
+		case utils.AccountActionPlansPrefix:
+			nrItems = ms.cacheCfg.AccountActionPlans.Limit
 		case utils.ACTION_TRIGGER_PREFIX:
 			nrItems = ms.cacheCfg.ActionTriggers.Limit
 		case utils.SHARED_GROUP_PREFIX:
@@ -489,6 +493,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
 			_, err = ms.GetActionPlan(dataID, true, utils.NonTransactional)
+		case utils.AccountActionPlansPrefix:
+			_, err = ms.GetAccountActionPlans(dataID, true, utils.NonTransactional)
 		case utils.ACTION_TRIGGER_PREFIX:
 			_, err = ms.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
@@ -1058,7 +1064,7 @@ func (ms *MongoStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (e
 	if _, err = col.Upsert(bson.M{"id": sg.Id}, sg); err != nil {
 		return
 	}
-	return err
+	return
 }
 
 func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
@@ -1313,7 +1319,6 @@ func (ms *MongoStorage) RemoveAlias(key, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
 	cache.RemKey(key, cCommit, transactionID)
 	session.Close()
-
 	session, col = ms.conn(colRls)
 	defer session.Close()
 	for _, value := range al.Values {
@@ -1574,6 +1579,50 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = ap
 	}
 
+	return
+}
+
+func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
+	cacheKey := utils.AccountActionPlansPrefix + acntID
+	if !skipCache {
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
+	session, col := ms.conn(colAAp)
+	defer session.Close()
+	var kv struct {
+		Key   string
+		Value []string
+	}
+	if err = col.Find(bson.M{"key": acntID}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	apIDs = kv.Value
+	cache.Set(cacheKey, apIDs, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (ms *MongoStorage) SetAccountActionPlans(acntID string, apIDs []string) (err error) {
+	session, col := ms.conn(colAAp)
+	defer session.Close()
+	if len(apIDs) == 0 {
+		if err = col.Remove(bson.M{"key": acntID}); err == nil {
+			cache.RemKey(utils.AccountActionPlansPrefix+acntID, true, utils.NonTransactional)
+		}
+		return
+	}
+	_, err = col.Upsert(bson.M{"key": acntID}, &struct {
+		Key   string
+		Value []string
+	}{Key: acntID, Value: apIDs})
 	return
 }
 
