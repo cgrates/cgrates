@@ -126,6 +126,8 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 				return err
 			}
 		}
+	case utils.AccountActionPlansPrefix:
+		return nil
 	default:
 		return utils.ErrInvalidKey
 	}
@@ -133,7 +135,7 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 }
 
 // FixMe
-func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error {
+func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error {
 	if ms.cacheCfg == nil {
 		return nil
 	}
@@ -1025,7 +1027,7 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error
 func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
 	return
 }
-func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string) (err error) {
+func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
 	return
 }
 

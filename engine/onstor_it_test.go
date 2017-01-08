@@ -459,7 +459,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 func testOnStorITCacheAccountActionPlans(t *testing.T) {
 	acntID := utils.ConcatenatedKey("cgrates.org", "1001")
 	aAPs := []string{"PACKAGE_10_SHARED_A_5", "USE_SHARED_A", "apl_PACKAGE_1001"}
-	if err := onStor.SetAccountActionPlans(acntID, aAPs); err != nil {
+	if err := onStor.SetAccountActionPlans(acntID, aAPs, true); err != nil {
 		t.Error(err)
 	}
 	if _, hasIt := cache.Get(utils.AccountActionPlansPrefix + acntID); hasIt {

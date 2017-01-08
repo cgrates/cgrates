@@ -335,6 +335,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.AccountActionPlansPrefix,
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
@@ -893,7 +894,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if args.FlushAll {
 		cache.Flush()
 	}
-	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
 	if args.DestinationIDs == nil {
 		dstIDs = nil
 	} else {
@@ -923,6 +924,11 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 		aplIDs = nil
 	} else {
 		aplIDs = *args.ActionPlanIDs
+	}
+	if args.AccountActionPlanIDs == nil {
+		aapIDs = nil
+	} else {
+		aapIDs = *args.AccountActionPlanIDs
 	}
 	if args.ActionTriggerIDs == nil {
 		atrgIDs = nil
@@ -959,7 +965,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		rlIDs = *args.ResourceLimitIDs
 	}
-	if err := self.RatingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
+	if err := self.RatingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if err := self.AccountDb.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
@@ -1419,6 +1425,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.AccountActionPlansPrefix,
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,

@@ -42,7 +42,7 @@ type Storage interface {
 type RatingStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
-	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
+	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan, string) error
 	GetRatingProfile(string, bool, string) (*RatingProfile, error)
@@ -73,7 +73,7 @@ type RatingStorage interface {
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
-	SetAccountActionPlans(acntID string, apIDs []string) (err error)
+	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
 
 	PushTask(*Task) error
 	PopTask() (*Task, error)
@@ -120,7 +120,7 @@ type AccountingStorage interface {
 type DataDB interface {
 	Storage
 	HasData(string, string) (bool, error)
-	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
+	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan, string) error
 	GetRatingProfile(string, bool, string) (*RatingProfile, error)
@@ -151,7 +151,7 @@ type DataDB interface {
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
-	SetAccountActionPlans(acntID string, apIDs []string) (err error)
+	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error

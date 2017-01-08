@@ -335,7 +335,7 @@ func init() {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	ratingStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	ratingStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	accountingStorage.LoadAccountingCache(nil, nil, nil)
 }
 

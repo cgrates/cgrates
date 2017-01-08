@@ -23,6 +23,7 @@
 	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": true},
 	"actions": {"limit": 10000, "ttl":"0s", "precache": true},
 	"action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
 	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
 	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
 	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},

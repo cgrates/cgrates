@@ -1225,7 +1225,7 @@ func TestApierComputeReverse(t *testing.T) {
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
-	expStats := &utils.CacheStats{Destinations: 3, Actions: 6, ActionPlans: 7, Aliases: 1} // We get partial cache info during load, maybe fix this in the future
+	expStats := &utils.CacheStats{Destinations: 3, Actions: 6, ActionPlans: 7, AccountActionPlans: 13, Aliases: 1} // We get partial cache info during load, maybe fix this in the future
 	var rcvStats *utils.CacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())

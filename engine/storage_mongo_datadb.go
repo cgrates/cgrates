@@ -289,6 +289,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.REVERSE_DESTINATION_PREFIX: colRds,
 		utils.ACTION_PREFIX:              colAct,
 		utils.ACTION_PLAN_PREFIX:         colApl,
+		utils.AccountActionPlansPrefix:   colAAp,
 		utils.TASKS_KEY:                  colTsk,
 		utils.ACTION_TRIGGER_PREFIX:      colAtr,
 		utils.RATING_PLAN_PREFIX:         colRpl,
@@ -320,54 +321,67 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 	return dbSession.DB(ms.db).DropDatabase()
 }
 
-func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) error {
+func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+		return utils.ErrInvalidKey
+	}
 	colName, ok := ms.getColNameForPrefix(prefix)
 	if !ok {
 		return utils.ErrInvalidKey
 	}
 	session, col := ms.conn(colName)
 	defer session.Close()
-
 	if _, err := col.RemoveAll(bson.M{}); err != nil {
 		return err
 	}
-
+	var keys []string
 	switch prefix {
 	case utils.REVERSE_DESTINATION_PREFIX:
-		keys, err := ms.GetKeysForPrefix(utils.DESTINATION_PREFIX)
-		if err != nil {
-			return err
+		if keys, err = ms.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return
 		}
 		for _, key := range keys {
-			dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
+			dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := ms.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+			if err = ms.SetReverseDestination(dest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
 	case utils.REVERSE_ALIASES_PREFIX:
-		keys, err := ms.GetKeysForPrefix(utils.ALIASES_PREFIX)
-		if err != nil {
-			return err
+		if keys, err = ms.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
+			return
 		}
 		for _, key := range keys {
-			al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], false, utils.NonTransactional)
+			al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], true, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := ms.SetReverseAlias(al, utils.NonTransactional); err != nil {
+			if err = ms.SetReverseAlias(al, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
-	default:
-		return utils.ErrInvalidKey
+	case utils.AccountActionPlansPrefix:
+		if keys, err = ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			apl, err := ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			for acntID := range apl.AccountIDs {
+				if err = ms.SetAccountActionPlans(acntID, []string{apl.Id}, false); err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return nil
 }
 
-func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.DESTINATION_PREFIX:         dstIDs,
 		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
@@ -375,6 +389,7 @@ func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.RATING_PROFILE_PREFIX:      rpfIDs,
 		utils.ACTION_PREFIX:              actIDs,
 		utils.ACTION_PLAN_PREFIX:         aplIDs,
+		utils.AccountActionPlansPrefix:   aapIDs,
 		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
 		utils.SHARED_GROUP_PREFIX:        sgIDs,
 		utils.LCR_PREFIX:                 lcrIDs,
@@ -1610,7 +1625,7 @@ func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, tra
 	return
 }
 
-func (ms *MongoStorage) SetAccountActionPlans(acntID string, apIDs []string) (err error) {
+func (ms *MongoStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
 	session, col := ms.conn(colAAp)
 	defer session.Close()
 	if len(apIDs) == 0 {
@@ -1618,6 +1633,17 @@ func (ms *MongoStorage) SetAccountActionPlans(acntID string, apIDs []string) (er
 			cache.RemKey(utils.AccountActionPlansPrefix+acntID, true, utils.NonTransactional)
 		}
 		return
+	}
+	if !overwrite {
+		if oldAPIds, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return err
+		} else {
+			for _, oldAPid := range oldAPIds {
+				if !utils.IsSliceMember(apIDs, oldAPid) {
+					apIDs = append(apIDs, oldAPid)
+				}
+			}
+		}
 	}
 	_, err = col.Upsert(bson.M{"key": acntID}, &struct {
 		Key   string

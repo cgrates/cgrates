@@ -70,7 +70,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 			return
 		}
 		*/
-		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
+		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
 		if !cfg.CacheConfig.Destinations.Precache {
 			dstIDs = make([]string, 0) // Don't cache any
 		}
@@ -88,6 +88,9 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		}
 		if !cfg.CacheConfig.ActionPlans.Precache {
 			aplIDs = make([]string, 0)
+		}
+		if !cfg.CacheConfig.AccountActionPlans.Precache {
+			aapIDs = make([]string, 0)
 		}
 		if !cfg.CacheConfig.ActionTriggers.Precache {
 			atrgIDs = make([]string, 0)
@@ -110,7 +113,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		if !cfg.CacheConfig.ResourceLimits.Precache {
 			rlIDs = make([]string, 0)
 		}
-		if err := ratingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
+		if err := ratingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
 			exitChan <- true
 			return
