@@ -142,7 +142,7 @@ func TestTutKamCallsAccountsBefore(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005"}
-	if err := tutKamCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err == nil || err.Error() != engine.ErrRedisNotFound.Error() {
+	if err := tutKamCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Got error on ApierV2.GetAccount: %v", err)
 	}
 }

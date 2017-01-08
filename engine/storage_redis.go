@@ -32,10 +32,6 @@ import (
 	"github.com/mediocregopher/radix.v2/redis"
 )
 
-var (
-	ErrRedisNotFound = errors.New("RedisNotFound")
-)
-
 type RedisStorage struct {
 	dbPool          *pool.Pool
 	maxConns        int
@@ -717,7 +713,7 @@ func (rs *RedisStorage) GetAccount(key string) (*Account, error) {
 	if rpl.Err != nil {
 		return nil, rpl.Err
 	} else if rpl.IsType(redis.Nil) {
-		return nil, ErrRedisNotFound
+		return nil, utils.ErrNotFound
 	}
 	values, err := rpl.Bytes()
 	if err != nil {

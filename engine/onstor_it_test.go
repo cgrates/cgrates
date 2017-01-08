@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -64,6 +65,14 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDRatingProfile,
 	testOnStorITCRUDDestination,
 	// ToFix: testOnStorITCRUDReverseDestination,
+	testOnStorITCRUDLCR,
+	testOnStorITCRUDCdrStats,
+	testOnStorITCRUDActions,
+	testOnStorITCRUDSharedGroup,
+	testOnStorITCRUDActionTriggers,
+	testOnStorITCRUDActionPlan,
+	testOnStorITPushPop,
+	testOnStorITCRUDAccount,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -801,7 +810,7 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr == err {
+	if _, rcvErr := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
@@ -825,7 +834,7 @@ func testOnStorITCRUDRatingProfile(t *testing.T) {
 				CdrStatQueueIds: []string{},
 			}},
 	}
-	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr == err {
+	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
@@ -860,16 +869,16 @@ func testOnStorITCRUDDestination(t *testing.T) {
 	if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr == err {
+	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
 
-/* FixMe
+/*
 func testOnStorITCRUDReverseDestination(t *testing.T) {
 	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+491", "+492", "+493"}}
 	dst2 := &Destination{Id: "CRUDReverseDestination2", Prefixes: []string{"+491", "+492", "+493"}}
-	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr == err {
+	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
@@ -880,7 +889,7 @@ func testOnStorITCRUDReverseDestination(t *testing.T) {
 	} else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
 		t.Errorf("Expecting: %v, received: %v", dst, rcv)
 	}
-	if err := onStor.UpdateReverseDestination(dst,dst2, utils.NonTransactional); err != nil {
+	if err := onStor.UpdateReverseDestination(dst, dst2, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetReverseDestination(dst2.Id, true, utils.NonTransactional); err != nil {
@@ -890,3 +899,312 @@ func testOnStorITCRUDReverseDestination(t *testing.T) {
 	}
 }
 */
+
+func testOnStorITCRUDLCR(t *testing.T) {
+	lcr := &LCR{
+		Tenant:    "cgrates.org",
+		Category:  "call",
+		Direction: "*out",
+		Account:   "*any",
+		Subject:   "*any",
+		Activations: []*LCRActivation{
+			&LCRActivation{
+				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				Entries: []*LCREntry{
+					&LCREntry{
+						DestinationId:  "EU_LANDLINE",
+						RPCategory:     "LCR_STANDARD",
+						Strategy:       "*static",
+						StrategyParams: "ivo;dan;rif",
+						Weight:         10,
+					},
+					&LCREntry{
+						DestinationId:  "*any",
+						RPCategory:     "LCR_STANDARD",
+						Strategy:       "*lowest_cost",
+						StrategyParams: "",
+						Weight:         20,
+					},
+				},
+			},
+		},
+	}
+	if _, rcvErr := onStor.GetLCR(utils.LCR_PREFIX+lcr.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(lcr, rcv) {
+		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
+	}
+}
+
+func testOnStorITCRUDCdrStats(t *testing.T) {
+	cdrs := &CdrStats{Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}
+
+	if _, rcvErr := onStor.GetCdrStats(utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetCdrStats(cdrs); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetCdrStats(utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cdrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", cdrs, rcv)
+	}
+	if rcv, err := onStor.GetAllCdrStats(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual([]*CdrStats{cdrs}, rcv) {
+		t.Errorf("Expecting: %v, received: %v", []*CdrStats{cdrs}, rcv)
+	}
+}
+
+func testOnStorITCRUDActions(t *testing.T) {
+	acts := Actions{
+		&Action{
+			Id:               "CRUDActions",
+			ActionType:       TOPUP_RESET,
+			ExpirationString: UNLIMITED,
+			Weight:           10,
+			Balance: &BalanceFilter{
+				Type:       utils.StringPointer(utils.MONETARY),
+				Uuid:       utils.StringPointer(utils.GenUUID()),
+				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Value: &utils.ValueFormula{Static: 10,
+					Params: make(map[string]interface{})},
+				Weight:   utils.Float64Pointer(10),
+				Disabled: utils.BoolPointer(false),
+				Timings:  make([]*RITiming, 0),
+				Blocker:  utils.BoolPointer(false),
+			},
+		},
+		&Action{
+			Id:               "MINI",
+			ActionType:       TOPUP,
+			ExpirationString: UNLIMITED,
+			Weight:           10,
+			Balance: &BalanceFilter{
+				Type:       utils.StringPointer(utils.VOICE),
+				Uuid:       utils.StringPointer(utils.GenUUID()),
+				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Value: &utils.ValueFormula{Static: 100,
+					Params: make(map[string]interface{})},
+				Weight:         utils.Float64Pointer(10),
+				RatingSubject:  utils.StringPointer("test"),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
+				Disabled:       utils.BoolPointer(false),
+				Timings:        make([]*RITiming, 0),
+				Blocker:        utils.BoolPointer(false),
+			},
+		},
+	}
+	if _, rcvErr := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
+		t.Errorf("Expecting: %v, received: %v", acts[0], rcv[0])
+	}
+	if err := onStor.RemoveActions(acts[0].Id, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDSharedGroup(t *testing.T) {
+	sg := &SharedGroup{
+		Id: "SG2",
+		AccountParameters: map[string]*SharingParameters{
+			"*any": &SharingParameters{
+				Strategy:      "*lowest",
+				RatingSubject: "",
+			},
+		},
+		MemberIds: make(utils.StringMap),
+	}
+	if _, rcvErr := onStor.GetSharedGroup(sg.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetSharedGroup(sg.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(sg, rcv) {
+		t.Errorf("Expecting: %v, received: %v", sg, rcv)
+	}
+}
+
+func testOnStorITCRUDActionTriggers(t *testing.T) {
+	ats := ActionTriggers{
+		&ActionTrigger{
+			ID:                "testOnStorITCRUDActionTriggers",
+			Balance:           &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Timings: make([]*RITiming, 0)},
+			ThresholdValue:    2,
+			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
+			ActionsID:         "TEST_ACTIONS",
+			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()},
+	}
+	atsID := ats[0].ID
+	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ats[0], rcv[0]) {
+		t.Errorf("Expecting: %v, received: %v", ats[0], rcv[0])
+	}
+	if err := onStor.RemoveActionTriggers(atsID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDActionPlan(t *testing.T) {
+	ap := &ActionPlan{
+		Id:         "MORE_MINUTES2",
+		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
+		ActionTimings: []*ActionTiming{
+			&ActionTiming{
+				Uuid: utils.GenUUID(),
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "MINI",
+			},
+			&ActionTiming{
+				Uuid: utils.GenUUID(),
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "SHARED",
+			},
+		},
+	}
+	if _, rcvErr := onStor.GetActionPlan(ap.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetActionPlan(ap.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ap, rcv) {
+		t.Errorf("Expecting: %v, received: %v", ap, rcv)
+	}
+	if rcv, err := onStor.GetAllActionPlans(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ap.Id, rcv[ap.Id].Id) {
+		t.Errorf("Expecting: %v, received: %v", ap.Id, rcv[ap.Id].Id)
+	} else if !reflect.DeepEqual(ap.AccountIDs, rcv[ap.Id].AccountIDs) {
+		t.Errorf("Expecting: %v, received: %v", ap.AccountIDs, rcv[ap.Id].AccountIDs)
+	} else if !reflect.DeepEqual(ap.ActionTimings[0].Uuid, rcv[ap.Id].ActionTimings[0].Uuid) {
+		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[0].Timing, rcv[ap.Id].ActionTimings[0].Timing)
+	} else if !reflect.DeepEqual(ap.ActionTimings[0].Uuid, rcv[ap.Id].ActionTimings[0].Uuid) {
+		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[0].Timing, rcv[ap.Id].ActionTimings[0].Timing)
+	} else if !reflect.DeepEqual(ap.ActionTimings[0].Weight, rcv[ap.Id].ActionTimings[0].Weight) {
+		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[0].Weight, rcv[ap.Id].ActionTimings[0].Weight)
+	} else if !reflect.DeepEqual(ap.ActionTimings[0].ActionsID, rcv[ap.Id].ActionTimings[0].ActionsID) {
+		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[0].ActionsID, rcv[ap.Id].ActionTimings[0].ActionsID)
+	} else if !reflect.DeepEqual(ap.ActionTimings[1].Uuid, rcv[ap.Id].ActionTimings[1].Uuid) {
+		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[1].Timing, rcv[ap.Id].ActionTimings[1].Timing)
+	} else if !reflect.DeepEqual(ap.ActionTimings[1].Uuid, rcv[ap.Id].ActionTimings[1].Uuid) {
+		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[1].Timing, rcv[ap.Id].ActionTimings[1].Timing)
+	} else if !reflect.DeepEqual(ap.ActionTimings[1].Weight, rcv[ap.Id].ActionTimings[1].Weight) {
+		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[1].Weight, rcv[ap.Id].ActionTimings[1].Weight)
+	} else if !reflect.DeepEqual(ap.ActionTimings[1].ActionsID, rcv[ap.Id].ActionTimings[1].ActionsID) {
+		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[1].ActionsID, rcv[ap.Id].ActionTimings[1].ActionsID)
+	}
+}
+func testOnStorITCRUDAccount(t *testing.T) {
+
+	acc := &Account{
+		ID:         utils.ConcatenatedKey("cgrates.org", "account2"),
+		BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{Value: 10, Weight: 10}}},
+	}
+
+	if _, rcvErr := onStor.GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetAccount(acc); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetAccount(acc.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(acc.ID, rcv.ID) {
+		t.Errorf("Expecting: %v, received: %v", acc.ID, rcv.ID)
+	} //else if !reflect.DeepEqual(acc.BalanceMap[utils.MONETARY], rcv.BalanceMap[utils.MONETARY]) {
+	//t.Errorf("Expecting: %v, received: %v", acc.BalanceMap[utils.MONETARY], rcv.BalanceMap[utils.MONETARY])
+	//}
+	if err := onStor.RemoveAccount(acc.ID); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+
+}
+
+/*for i := 0; i < 21; i++ {
+	onStor.PopTask()
+}*/
+func testOnStorITPushPop(t *testing.T) {
+	if err := onStor.PushTask(&Task{Uuid: "1"}); err != nil {
+		t.Error("Error pushing task: ", err)
+	}
+	if err := onStor.PushTask(&Task{Uuid: "2"}); err != nil {
+		t.Error("Error pushing task: ", err)
+	}
+	if err := onStor.PushTask(&Task{Uuid: "3"}); err != nil {
+		t.Error("Error pushing task: ", err)
+	}
+	if err := onStor.PushTask(&Task{Uuid: "4"}); err != nil {
+		t.Error("Error pushing task: ", err)
+	}
+	if task, err := onStor.PopTask(); err != nil && task.Uuid != "1" {
+		t.Error("Error poping task: ", task, err)
+	}
+	if task, err := onStor.PopTask(); err != nil && task.Uuid != "2" {
+		t.Error("Error poping task: ", task, err)
+	}
+	if task, err := onStor.PopTask(); err != nil && task.Uuid != "3" {
+		t.Error("Error poping task: ", task, err)
+	}
+	if task, err := onStor.PopTask(); err != nil && task.Uuid != "4" {
+		t.Error("Error poping task: ", task, err)
+	}
+	if task, err := onStor.PopTask(); err == nil && task != nil {
+		t.Errorf("Error poping task %+v, %v ", task, err)
+	}
+}
