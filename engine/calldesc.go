@@ -28,6 +28,7 @@ import (
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -636,7 +637,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		return 0, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
-			if _, err := Guardian.Guard(func() (interface{}, error) {
+			if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
 				duration, err = cd.getMaxSessionDuration(account)
 				return 0, err
 			}, 0, memberIds.Slice()...); err != nil {
@@ -702,7 +703,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		return nil, err
 	} else {
 		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
-			_, err = Guardian.Guard(func() (interface{}, error) {
+			_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 				cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
 				return 0, err
 			}, 0, memberIds.Slice()...)
@@ -724,7 +725,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	} else {
 		//log.Printf("ACC: %+v", account)
 		if memberIDs, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
-			_, err = Guardian.Guard(func() (interface{}, error) {
+			_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				if err != nil && cd.GetDuration() > 0 {
 					return 0, err
@@ -783,7 +784,7 @@ func (cd *CallDescriptor) RefundIncrements() error {
 		}
 	}
 	// start increment refunding loop
-	_, err := Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		accountsCache := make(map[string]*Account)
 		for _, increment := range cd.Increments {
 			account, found := accountsCache[increment.BalanceInfo.AccountID]
@@ -832,7 +833,7 @@ func (cd *CallDescriptor) RefundRounding() error {
 		accMap[inc.BalanceInfo.AccountID] = true
 	}
 	// start increment refunding loop
-	_, err := Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		accountsCache := make(map[string]*Account)
 		for _, increment := range cd.Increments {
 			account, found := accountsCache[increment.BalanceInfo.AccountID]

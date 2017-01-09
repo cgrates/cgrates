@@ -22,19 +22,20 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 )
 
 func NewSessions() *Sessions {
 	return &Sessions{
 		sessionsMux: new(sync.Mutex),
-		guard:       engine.Guardian,
+		guard:       guardian.Guardian,
 	}
 }
 
 type Sessions struct {
 	sessions    []*Session
-	sessionsMux *sync.Mutex          // Lock the list operations
-	guard       *engine.GuardianLock // Used to lock on uuid
+	sessionsMux *sync.Mutex            // Lock the list operations
+	guard       *guardian.GuardianLock // Used to lock on uuid
 }
 
 func (self *Sessions) indexSession(s *Session) {

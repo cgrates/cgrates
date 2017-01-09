@@ -386,7 +386,7 @@ func (am *AliasHandler) Call(serviceMethod string, args interface{}, reply inter
 }
 
 func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) error {
-	if aliasService == nil { // no alias service => no fun
+	if aliasService == nil {
 		return nil
 	}
 	response := Alias{}

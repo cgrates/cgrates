@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -347,7 +348,7 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 // sessionStart will handle a new session, pass the connectionId so we can communicate on disconnect request
 func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.RpcClientConnection) error {
 	cgrID := evStart.GetCGRID(utils.META_DEFAULT)
-	processed, err := engine.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
+	processed, err := guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
 		if pSS := smg.passiveToActive(cgrID); len(pSS) != 0 {
 			return true, nil // ToDo: handle here also debits
 		}
@@ -379,7 +380,7 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.Rp
 
 // sessionEnd will end a session from outside
 func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
-	_, err := engine.Guardian.Guard(func() (interface{}, error) { // Lock it on UUID level
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on UUID level
 		ss := smg.getSessions(cgrID, false)
 		if len(ss) == 0 {
 			if ss = smg.passiveToActive(cgrID); len(ss) == 0 {
@@ -414,7 +415,7 @@ func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
 
 // sessionRelocate is used when an update will relocate an initial session (eg multiple data streams)
 func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) error {
-	_, err := engine.Guardian.Guard(func() (interface{}, error) { // Lock it on initialID level
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on initialID level
 		if utils.IsSliceMember([]string{initialID, cgrID, newOriginID}, "") { // Not allowed empty params here
 			return nil, utils.ErrMandatoryIeMissing
 		}

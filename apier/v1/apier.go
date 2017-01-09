@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -696,7 +697,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
-	if _, err := engine.Guardian.Guard(func() (interface{}, error) {
+	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		aas := engine.APItoModelAccountAction(&attrs)
 		if err := dbReader.LoadAccountActionsFiltered(aas); err != nil {
 			return 0, err
@@ -1516,7 +1517,7 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 		attr.Tenant != "" && attr.Direction == "" {
 		return utils.ErrMandatoryIeMissing
 	}
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		err := self.RatingDb.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
 		if err != nil {
 			return 0, err
@@ -1624,13 +1625,13 @@ type AttrRemoteLock struct {
 }
 
 func (self *ApierV1) RemoteLock(attr AttrRemoteLock, reply *string) error {
-	engine.Guardian.GuardIDs(attr.Timeout, attr.LockIDs...)
+	guardian.Guardian.GuardIDs(attr.Timeout, attr.LockIDs...)
 	*reply = utils.OK
 	return nil
 }
 
 func (self *ApierV1) RemoteUnlock(lockIDs []string, reply *string) error {
-	engine.Guardian.UnguardIDs(lockIDs...)
+	guardian.Guardian.UnguardIDs(lockIDs...)
 	*reply = utils.OK
 	return nil
 }

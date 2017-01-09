@@ -26,13 +26,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func NewUnpairedRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune) (*UnpairedRecordsCache, error) {
 	return &UnpairedRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep,
-		partialRecords: make(map[string]map[string]*UnpairedRecord), guard: engine.Guardian}, nil
+		partialRecords: make(map[string]map[string]*UnpairedRecord), guard: guardian.Guardian}, nil
 }
 
 type UnpairedRecordsCache struct {
@@ -40,7 +40,7 @@ type UnpairedRecordsCache struct {
 	cdrOutDir      string
 	csvSep         rune
 	partialRecords map[string]map[string]*UnpairedRecord // [FileName"][OriginID]*PartialRecord
-	guard          *engine.GuardianLock
+	guard          *guardian.GuardianLock
 }
 
 // Dumps the cache into a .unpaired file in the outdir and cleans cache after

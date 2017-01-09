@@ -22,6 +22,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/gorhill/cronexpr"
 )
@@ -289,7 +290,7 @@ func (at *ActionTiming) Execute() (err error) {
 		return
 	}
 	for accID, _ := range at.accountIDs {
-		_, err = Guardian.Guard(func() (interface{}, error) {
+		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 			acc, err := accountingStorage.GetAccount(accID)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))

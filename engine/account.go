@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 
@@ -151,7 +152,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	}
 	// modify if necessary the shared groups here
 	if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
-		_, err := Guardian.Guard(func() (interface{}, error) {
+		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 			sgs := make([]string, len(balance.SharedGroups))
 			i := 0
 			for sgID := range balance.SharedGroups {
@@ -243,7 +244,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			}
 		}
 		ub.BalanceMap[balanceType] = append(ub.BalanceMap[balanceType], bClone)
-		_, err := Guardian.Guard(func() (interface{}, error) {
+		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 			sgs := make([]string, len(bClone.SharedGroups))
 			i := 0
 			for sgId := range bClone.SharedGroups {

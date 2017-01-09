@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -89,7 +90,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 	}
-	_, err = engine.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
 		if err != nil {
 			return 0, err
@@ -153,7 +154,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	var schedulerReloadNeeded = false
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var ub *engine.Account
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
@@ -163,7 +164,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		}
 		if len(attr.ActionPlanId) != 0 {
 
-			_, err := engine.Guardian.Guard(func() (interface{}, error) {
+			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 				var ap *engine.ActionPlan
 				ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
 				if err != nil {
@@ -259,9 +260,9 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	}
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
-		_, err := engine.Guardian.Guard(func() (interface{}, error) {
+		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 			actionPlansMap, err := self.RatingDb.GetAllActionPlans()
 			if err == utils.ErrNotFound {
 				// no action plans

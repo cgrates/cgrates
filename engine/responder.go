@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -97,7 +98,7 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 		r, e := rs.getCallCost(arg, "Responder.GetCost")
 		*reply, err = *r, e
 	} else {
-		r, e := Guardian.Guard(func() (interface{}, error) {
+		r, e := guardian.Guardian.Guard(func() (interface{}, error) {
 			return arg.GetCost()
 		}, 0, arg.GetAccountKey())
 		if r != nil {
@@ -616,7 +617,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 			utils.Logger.Info("<Balancer> Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
-			_, err = Guardian.Guard(func() (interface{}, error) {
+			_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 				err = client.Call(method, *key, reply)
 				return reply, err
 			}, 0, key.GetAccountKey())
@@ -639,7 +640,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 			utils.Logger.Info("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
-			_, err = Guardian.Guard(func() (interface{}, error) {
+			_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 				err = client.Call(method, *key, &reply)
 				return reply, err
 			}, 0, key.GetAccountKey())
