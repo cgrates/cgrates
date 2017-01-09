@@ -58,6 +58,7 @@ const CGRATES_CFG_JSON = `
 	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": false},
 	"actions": {"limit": 10000, "ttl":"0s", "precache": false},
 	"action_plans": {"limit": 10000, "ttl":"0s", "precache": false},
+	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": false},
 	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": false},
 	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": false},
 	"aliases": {"limit": 10000, "ttl":"0s", "precache": false},

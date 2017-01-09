@@ -21,11 +21,13 @@ var (
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
 	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
 		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField, MEDI_RUNID}
+	GitLastLog string // If set, it will be processed as part of versioning
 )
 
 const (
 	CGRateS                       = "CGRateS"
 	VERSION                       = "0.9.1~rc8"
+	GitLastLogFileName            = ".git_lastlog.txt"
 	DIAMETER_FIRMWARE_REVISION    = 918
 	REDIS_MAX_CONNS               = 10
 	POSTGRES                      = "postgres"
@@ -174,6 +176,7 @@ const (
 	FILTER_REGEXP_TPL             = "$1$2$3$4$5"
 	TASKS_KEY                     = "tasks"
 	ACTION_PLAN_PREFIX            = "apl_"
+	AccountActionPlansPrefix      = "aap_"
 	ACTION_TRIGGER_PREFIX         = "atr_"
 	REVERSE_ACTION_TRIGGER_PREFIX = "rtr_"
 	RATING_PLAN_PREFIX            = "rpl_"
@@ -284,6 +287,7 @@ const (
 	HandlerArgSep                = "|"
 	FlagForceDuration            = "fd"
 	InstanceID                   = "InstanceID"
+	ActiveGoroutines             = "ActiveGoroutines"
 	SessionTTL                   = "SessionTTL"
 	SessionTTLLastUsed           = "SessionTTLLastUsed"
 	SessionTTLUsage              = "SessionTTLUsage"

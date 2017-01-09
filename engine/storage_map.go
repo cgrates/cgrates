@@ -126,6 +126,8 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 				return err
 			}
 		}
+	case utils.AccountActionPlansPrefix:
+		return nil
 	default:
 		return utils.ErrInvalidKey
 	}
@@ -133,7 +135,7 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 }
 
 // FixMe
-func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error {
+func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error {
 	if ms.cacheCfg == nil {
 		return nil
 	}
@@ -470,11 +472,11 @@ func (ms *MapStorage) GetReverseDestination(prefix string, skipCache bool, trans
 			return nil, utils.ErrNotFound
 		}
 	}
-	if idMap, ok := ms.dict.smembers(prefix, ms.ms); ok {
-		ids = idMap.Slice()
-	} else {
+	if idMap, ok := ms.dict.smembers(prefix, ms.ms); !ok {
 		cache.Set(prefix, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
+	} else {
+		ids = idMap.Slice()
 	}
 	cache.Set(prefix, ids, cacheCommit(transactionID), transactionID)
 	return
@@ -483,7 +485,6 @@ func (ms *MapStorage) GetReverseDestination(prefix string, skipCache bool, trans
 func (ms *MapStorage) SetReverseDestination(dest *Destination, transactionID string) (err error) {
 	for _, p := range dest.Prefixes {
 		key := utils.REVERSE_DESTINATION_PREFIX + p
-
 		ms.mu.Lock()
 		ms.dict.sadd(key, dest.Id, ms.ms)
 		ms.mu.Unlock()
@@ -1020,6 +1021,13 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error
 		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = ap
 	}
 
+	return
+}
+
+func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
+	return
+}
+func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
 	return
 }
 

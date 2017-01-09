@@ -64,7 +64,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	csvr.WriteToDatabase(false, false, false)
 
 	cache.Flush()
-	ratingDbAcntActs.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	ratingDbAcntActs.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	acntDbAcntActs.LoadAccountingCache(nil, nil, nil)
 
 	expectAcnt := &engine.Account{ID: "cgrates.org:1"}

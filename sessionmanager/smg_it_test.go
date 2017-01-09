@@ -67,7 +67,6 @@ func TestSMGVoiceResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func TestSMGVoiceStartEngine(t *testing.T) {
-
 	if _, err := engine.StopStartEngine(daCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}

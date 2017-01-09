@@ -85,7 +85,7 @@ var (
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("CGRateS " + utils.VERSION)
+		fmt.Println(utils.GetCGRVersion())
 		return
 	}
 	var errRatingDb, errAccDb, errStorDb, err error

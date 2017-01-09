@@ -68,7 +68,7 @@ func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
 			csvWriter := csv.NewWriter(fileOut)
 			csvWriter.Comma = prc.csvSep
 			for _, cdr := range prc.partialRecords[originID].cdrs {
-				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields, prc.httpSkipTlsCheck, nil)
+				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields, prc.httpSkipTlsCheck, nil, prc.roundDecimals)
 				if err != nil {
 					return nil, err
 				}

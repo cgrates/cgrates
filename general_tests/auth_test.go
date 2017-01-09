@@ -77,7 +77,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	}
 
 	cache.Flush()
-	ratingDbAuth.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	ratingDbAuth.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	acntDbAuth.LoadAccountingCache(nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {

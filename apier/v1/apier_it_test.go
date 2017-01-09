@@ -1209,8 +1209,23 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(2 * time.Second))
 }
 
+// For now just test that they execute without errors
+func TestApierComputeReverse(t *testing.T) {
+	var reply string
+	if err := rater.Call("ApierV1.ComputeReverseDestinations", "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Received: ", reply)
+	}
+	if err := rater.Call("ApierV1.ComputeReverseAliases", "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Received: ", reply)
+	}
+}
+
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
-	expStats := &utils.CacheStats{Destinations: 3, Actions: 6, ActionPlans: 7, Aliases: 1} // We get partial cache info during load, maybe fix this in the future
+	expStats := &utils.CacheStats{Destinations: 3, Actions: 6, ActionPlans: 7, AccountActionPlans: 13, Aliases: 1} // We get partial cache info during load, maybe fix this in the future
 	var rcvStats *utils.CacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -1436,6 +1451,13 @@ func TestApierITSetDestination(t *testing.T) {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(eDestination, rcvDestination) {
 		t.Error("Expecting: %+v, received: %+v", eDestination, rcvDestination)
+	}
+	eRcvIDs := []string{attrs.Id}
+	var rcvIDs []string
+	if err := rater.Call("ApierV1.GetReverseDestination", attrs.Prefixes[0], &rcvIDs); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if !reflect.DeepEqual(eRcvIDs, rcvIDs) {
+		t.Error("Expecting: %+v, received: %+v", eRcvIDs, rcvIDs)
 	}
 }
 

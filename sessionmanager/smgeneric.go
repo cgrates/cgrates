@@ -126,7 +126,7 @@ func (smg *SMGeneric) setSessionTerminator(s *SMGSession) {
 		ttlUsage:    s.EventStart.GetSessionTTLUsage(),
 	}
 	smg.sessionTerminators[s.CGRID] = terminator
-	go func() {
+	go func(cgrID string) {
 		select {
 		case <-timer.C:
 			smg.ttlTerminate(s, terminator)
@@ -134,9 +134,9 @@ func (smg *SMGeneric) setSessionTerminator(s *SMGSession) {
 			timer.Stop()
 		}
 		smg.sTsMux.Lock()
-		delete(smg.sessionTerminators, s.CGRID)
+		delete(smg.sessionTerminators, cgrID)
 		smg.sTsMux.Unlock()
-	}()
+	}(s.CGRID) // Need to pass cgrID since the one from session will change during rename
 }
 
 // resetTerminatorTimer updates the timer for the session to a new ttl and terminate info

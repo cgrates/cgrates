@@ -335,7 +335,7 @@ func init() {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	ratingStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	ratingStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	accountingStorage.LoadAccountingCache(nil, nil, nil)
 }
 
@@ -382,6 +382,30 @@ func TestLoadDestinations(t *testing.T) {
 				t.Error("Faild to load destinations", d)
 			}
 		}
+	}
+}
+
+func TestLoadReverseDestinations(t *testing.T) {
+	eRevDsts := map[string][]string{
+		"444":     []string{"EU_LANDLINE"},
+		"0257":    []string{"NAT"},
+		"112":     []string{"URG"},
+		"49":      []string{"ALL GERMANY"},
+		"+4972":   []string{"PSTN_72"},
+		"999":     []string{"EXOTIC"},
+		"+4970":   []string{"PSTN_70"},
+		"41":      []string{"ALL GERMANY_O2"},
+		"0724":    []string{"RET"},
+		"0723045": []string{"SPEC"},
+		"43":      []string{"GERMANY_PREMIUM ALL"},
+		"0256":    []string{"NAT"},
+		"+49":     []string{"NAT"},
+		"+4971":   []string{"PSTN_71"},
+		"447956":  []string{"DST_UK_Mobile_BIG5"},
+		"0723":    []string{"RET NAT"},
+	}
+	if len(eRevDsts) != len(csvr.revDests) {
+		t.Errorf("Expecting: %+v, received: %+v", eRevDsts, csvr.revDests)
 	}
 }
 
@@ -1334,6 +1358,21 @@ func TestLoadAliases(t *testing.T) {
 			t.Logf("Value: %+v", value)
 		}
 		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
+	}
+}
+
+func TestLoadReverseAliases(t *testing.T) {
+	eRevAliases := map[string][]string{
+		"minuAccount*rating": []string{"*out:cgrates.org:call:remo:remo:*rating:*any", "*out:vdf:0:a1:a1:*rating:*any"},
+		"dan1Subject*rating": []string{"*out:cgrates.org:call:dan:dan:*rating:EU_LANDLINE"},
+		"rif1Subject*rating": []string{"*out:cgrates.org:call:dan:dan:*rating:EU_LANDLINE", "*any:*any:*any:*any:*any:*rating:*any"},
+		"0724Cli*rating":     []string{"*out:cgrates.org:call:dan:dan:*rating:EU_LANDLINE"},
+		"dan2Subject*rating": []string{"*out:cgrates.org:call:dan:dan:*rating:GLOBAL1"},
+		"dan1Account*rating": []string{"*any:*any:*any:*any:*any:*rating:*any"},
+		"minuSubject*rating": []string{"*out:cgrates.org:call:remo:remo:*rating:*any", "*out:vdf:0:a1:a1:*rating:*any"},
+	}
+	if len(eRevAliases) != len(csvr.revAliases) {
+		t.Errorf("Expecting: %+v, received: %+v", eRevAliases, csvr.revAliases)
 	}
 }
 

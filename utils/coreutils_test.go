@@ -747,3 +747,15 @@ func TestCapitalizedMessage(t *testing.T) {
 		t.Errorf("Received: <%s>", capMsg)
 	}
 }
+
+func TestGetCGRVersion(t *testing.T) {
+	GitLastLog = `commit 73014daa0c1d7edcb532d5fe600b8a20d588cdf8
+Author: DanB <danb@cgrates.org>
+Date:   Fri Dec 30 19:48:09 2016 +0100
+
+    Fixes for db driver to avoid returning new values in case of errors`
+	eVers := "CGRateS 0.9.1~rc8 git+73014da (2016-12-30T19:48:09+01:00)"
+	if vers := GetCGRVersion(); vers != eVers {
+		t.Errorf("Expecting: <%s>, received: <%s>", eVers, vers)
+	}
+}

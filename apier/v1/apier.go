@@ -65,8 +65,7 @@ type AttrRemoveDestination struct {
 	Prefixes       []string
 }
 
-func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) error {
-	var err error
+func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) (err error) {
 	for _, dstID := range attr.DestinationIDs {
 		if len(attr.Prefixes) == 0 {
 			if err = self.RatingDb.RemoveDestination(dstID, utils.NonTransactional); err != nil {
@@ -75,7 +74,6 @@ func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string
 			} else {
 				*reply = utils.OK
 			}
-		} else {
 			// TODO list
 			// get destination
 			// remove prefixes
@@ -84,6 +82,37 @@ func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string
 		}
 	}
 	return err
+}
+
+// GetReverseDestination retrieves revese destination list for a prefix
+func (v1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (err error) {
+	if prefix == "" {
+		return utils.NewErrMandatoryIeMissing("prefix")
+	}
+	var revLst []string
+	if revLst, err = v1.RatingDb.GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
+		return
+	}
+	*reply = revLst
+	return
+}
+
+// ComputeReverseDestinations will rebuild complete reverse destinations data
+func (v1 *ApierV1) ComputeReverseDestinations(ignr string, reply *string) (err error) {
+	if err = v1.RatingDb.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// ComputeReverseAliases will rebuild complete reverse aliases data
+func (v1 *ApierV1) ComputeReverseAliases(ignr string, reply *string) (err error) {
+	if err = v1.RatingDb.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
 }
 
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
@@ -299,11 +328,14 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		return utils.NewErrServerError(err)
 	}
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
-	for _, prfx := range []string{utils.DESTINATION_PREFIX,
+	for _, prfx := range []string{
+		utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.AccountActionPlansPrefix,
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
@@ -313,7 +345,9 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 			return utils.NewErrServerError(err)
 		}
 	}
-	for _, prfx := range []string{utils.ALIASES_PREFIX,
+	for _, prfx := range []string{
+		utils.ALIASES_PREFIX,
+		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceLimitsPrefix} {
 		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
 		if err := self.AccountDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
@@ -860,7 +894,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if args.FlushAll {
 		cache.Flush()
 	}
-	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
 	if args.DestinationIDs == nil {
 		dstIDs = nil
 	} else {
@@ -890,6 +924,11 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 		aplIDs = nil
 	} else {
 		aplIDs = *args.ActionPlanIDs
+	}
+	if args.AccountActionPlanIDs == nil {
+		aapIDs = nil
+	} else {
+		aapIDs = *args.AccountActionPlanIDs
 	}
 	if args.ActionTriggerIDs == nil {
 		atrgIDs = nil
@@ -926,7 +965,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		rlIDs = *args.ResourceLimitIDs
 	}
-	if err := self.RatingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
+	if err := self.RatingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if err := self.AccountDb.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
@@ -1046,6 +1085,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.RatingProfiles = cache.CountEntries(utils.RATING_PROFILE_PREFIX)
 	cs.Actions = cache.CountEntries(utils.ACTION_PREFIX)
 	cs.ActionPlans = cache.CountEntries(utils.ACTION_PLAN_PREFIX)
+	cs.AccountActionPlans = cache.CountEntries(utils.AccountActionPlansPrefix)
 	cs.SharedGroups = cache.CountEntries(utils.SHARED_GROUP_PREFIX)
 	cs.DerivedChargers = cache.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
 	cs.LcrProfiles = cache.CountEntries(utils.LCR_PREFIX)
@@ -1179,6 +1219,25 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		ids = args.Paginator.PaginateStringSlice(ids)
 		if len(ids) != 0 {
 			reply.ActionPlanIDs = &ids
+		}
+	}
+
+	if args.AccountActionPlanIDs != nil {
+		var ids []string
+		if len(*args.AccountActionPlanIDs) != 0 {
+			for _, id := range *args.AccountActionPlanIDs {
+				if _, hasIt := cache.Get(utils.AccountActionPlansPrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.AccountActionPlansPrefix) {
+				ids = append(ids, id[len(utils.AccountActionPlansPrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.AccountActionPlanIDs = &ids
 		}
 	}
 	if args.ActionTriggerIDs != nil {
@@ -1359,11 +1418,14 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return utils.NewErrServerError(err)
 	}
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
-	for _, prfx := range []string{utils.DESTINATION_PREFIX,
+	for _, prfx := range []string{
+		utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.AccountActionPlansPrefix,
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
@@ -1373,7 +1435,9 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return utils.NewErrServerError(err)
 		}
 	}
-	for _, prfx := range []string{utils.ALIASES_PREFIX,
+	for _, prfx := range []string{
+		utils.ALIASES_PREFIX,
+		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceLimitsPrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.AccountDb.CacheDataFromDB(prfx, loadedIDs, true); err != nil {

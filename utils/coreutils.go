@@ -630,3 +630,54 @@ func CapitalizedMessage(errMessage string) (capStr string) {
 	capStr = strings.Replace(capStr, " ", "_", -1)
 	return
 }
+
+func GetCGRVersion() (vers string) {
+	vers = fmt.Sprintf("%s %s", CGRateS, VERSION)
+	if GitLastLog == "" {
+		return
+	}
+	rdr := bytes.NewBufferString(GitLastLog)
+	var commitHash string
+	var commitDate time.Time
+	for i := 0; i < 5; i++ { // read a maximum of 5 lines
+		ln, err := rdr.ReadString('\n')
+		if err != nil {
+			Logger.Err(fmt.Sprintf("Building version - error: <%s> reading line from file", err.Error()))
+			return
+		}
+		if ln == "" {
+			return
+		}
+		if strings.HasPrefix(ln, "commit ") {
+			commitSplt := strings.Split(ln, " ")
+			if len(commitSplt) != 2 {
+				Logger.Err("Building version - cannot extract commit hash")
+				fmt.Println(fmt.Sprintf("Building version - cannot extract commit hash"))
+				return
+			}
+			commitHash = commitSplt[1]
+			continue
+		}
+		if strings.HasPrefix(ln, "Date:") {
+			dateSplt := strings.Split(ln, ": ")
+			if len(dateSplt) != 2 {
+				Logger.Err("Building version - cannot split commit date")
+				fmt.Println(fmt.Sprintf("Building version - cannot split commit date"))
+				return
+			}
+			commitDate, err = time.Parse("Mon Jan 2 15:04:05 2006 -0700", strings.TrimSpace(dateSplt[1]))
+			if err != nil {
+				Logger.Err(fmt.Sprintf("Building version - error: <%s> compiling commit date", err.Error()))
+				fmt.Println(fmt.Sprintf("Building version - error: <%s> compiling commit date", err.Error()))
+				return
+			}
+			break
+		}
+	}
+	if commitHash == "" || commitDate.IsZero() {
+		Logger.Err("Cannot find commitHash or commitDate information")
+		return
+	}
+	//CGRateS 0.9.1~rc8 git+73014da (2016-12-30T19:48:09+01:00)
+	return fmt.Sprintf("%s %s git+%s (%s)", CGRateS, VERSION, commitHash[:7], commitDate.Format(time.RFC3339))
+}

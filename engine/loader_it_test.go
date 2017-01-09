@@ -38,7 +38,7 @@ var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario fold
 
 // Create connection to ratingDb
 // Will use 3 different datadbs in order to be able to see differences in data loaded
-func TestConnDataDbs(t *testing.T) {
+func TestLoaderITConnDataDbs(t *testing.T) {
 
 	lCfg, _ = config.NewDefaultCGRConfig()
 	var err error
@@ -72,7 +72,7 @@ func TestConnDataDbs(t *testing.T) {
 }
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
-func TestCreateStorTpTables(t *testing.T) {
+func TestLoaderITCreateStorTpTables(t *testing.T) {
 
 	db, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns)
 	if err != nil {
@@ -89,7 +89,7 @@ func TestCreateStorTpTables(t *testing.T) {
 }
 
 // Loads data from csv files in tp scenario to ratingDbCsv
-func TestLoadFromCSV(t *testing.T) {
+func TestLoaderITLoadFromCSV(t *testing.T) {
 
 	/*var err error
 	for fn, v := range FileValidators {
@@ -168,7 +168,7 @@ func TestLoadFromCSV(t *testing.T) {
 }
 
 // Imports data from csv files in tpScenario to storDb
-func TestImportToStorDb(t *testing.T) {
+func TestLoaderITImportToStorDb(t *testing.T) {
 
 	csvImporter := TPCSVImporter{
 		TPid:     utils.TEST_SQL,
@@ -188,7 +188,7 @@ func TestImportToStorDb(t *testing.T) {
 }
 
 // Loads data from storDb into ratingDb
-func TestLoadFromStorDb(t *testing.T) {
+func TestLoaderITLoadFromStorDb(t *testing.T) {
 
 	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, utils.TEST_SQL, "")
 	if err := loader.LoadDestinations(); err != nil {
@@ -235,7 +235,7 @@ func TestLoadFromStorDb(t *testing.T) {
 	}
 }
 
-func TestLoadIndividualProfiles(t *testing.T) {
+func TestLoaderITLoadIndividualProfiles(t *testing.T) {
 
 	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, utils.TEST_SQL, "")
 	// Load ratingPlans. This will also set destination keys

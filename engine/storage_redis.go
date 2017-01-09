@@ -108,7 +108,7 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.Cmd("FLUSHDB").Err
 }
 
-func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.DESTINATION_PREFIX:         dstIDs,
 		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
@@ -116,6 +116,7 @@ func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.RATING_PROFILE_PREFIX:      rpfIDs,
 		utils.ACTION_PREFIX:              actIDs,
 		utils.ACTION_PLAN_PREFIX:         aplIDs,
+		utils.AccountActionPlansPrefix:   aapIDs,
 		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
 		utils.SHARED_GROUP_PREFIX:        sgIDs,
 		utils.LCR_PREFIX:                 lcrIDs,
@@ -141,48 +142,62 @@ func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (e
 	return
 }
 
-func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) error {
-	keys, err := rs.GetKeysForPrefix(prefix)
+func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+		return utils.ErrInvalidKey
+	}
+	var keys []string
+	keys, err = rs.GetKeysForPrefix(prefix)
 	if err != nil {
-		return err
+		return
 	}
 	for _, key := range keys {
-		err = rs.Cmd("DEL", key).Err
-		if err != nil {
-			return err
+		if err = rs.Cmd("DEL", key).Err; err != nil {
+			return
 		}
 	}
 	switch prefix {
 	case utils.REVERSE_DESTINATION_PREFIX:
-		keys, err = rs.GetKeysForPrefix(utils.DESTINATION_PREFIX)
-		if err != nil {
-			return err
+		if keys, err = rs.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return
 		}
 		for _, key := range keys {
-			dest, err := rs.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
+			dest, err := rs.GetDestination(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := rs.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+			if err = rs.SetReverseDestination(dest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
 	case utils.REVERSE_ALIASES_PREFIX:
-		keys, err = rs.GetKeysForPrefix(utils.ALIASES_PREFIX)
-		if err != nil {
-			return err
+		if keys, err = rs.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
+			return
 		}
 		for _, key := range keys {
-			al, err := rs.GetAlias(key[len(utils.ALIASES_PREFIX):], false, utils.NonTransactional)
+			al, err := rs.GetAlias(key[len(utils.ALIASES_PREFIX):], true, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := rs.SetReverseAlias(al, utils.NonTransactional); err != nil {
+			if err = rs.SetReverseAlias(al, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
-	default:
-		return utils.ErrInvalidKey
+	case utils.AccountActionPlansPrefix:
+		if keys, err = rs.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			apl, err := rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional) // skipCache on get since loader checks and caches empty data for loaded objects
+			if err != nil {
+				return err
+			}
+			for acntID := range apl.AccountIDs {
+				if err = rs.SetAccountActionPlans(acntID, []string{apl.Id}, false); err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return nil
 }
@@ -197,6 +212,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
+		utils.AccountActionPlansPrefix,
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
@@ -239,6 +255,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			nrItems = rs.cacheCfg.Actions.Limit
 		case utils.ACTION_PLAN_PREFIX:
 			nrItems = rs.cacheCfg.ActionPlans.Limit
+		case utils.AccountActionPlansPrefix:
+			nrItems = rs.cacheCfg.AccountActionPlans.Limit
 		case utils.ACTION_TRIGGER_PREFIX:
 			nrItems = rs.cacheCfg.ActionTriggers.Limit
 		case utils.SHARED_GROUP_PREFIX:
@@ -277,6 +295,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
 			_, err = rs.GetActionPlan(dataID, true, utils.NonTransactional)
+		case utils.AccountActionPlansPrefix:
+			_, err = rs.GetAccountActionPlans(dataID, true, utils.NonTransactional)
 		case utils.ACTION_TRIGGER_PREFIX:
 			_, err = rs.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
@@ -1180,6 +1200,57 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = ap
 	}
 
+	return
+}
+
+func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
+	key := utils.AccountActionPlansPrefix + acntID
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &apIDs); err != nil {
+		return
+	}
+	cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (rs *RedisStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
+	key := utils.AccountActionPlansPrefix + acntID
+	if len(apIDs) == 0 {
+		return rs.Cmd("DEL", key).Err
+	}
+	if !overwrite {
+		if oldAPIds, err := rs.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return err
+		} else {
+			for _, oldAPid := range oldAPIds {
+				if !utils.IsSliceMember(apIDs, oldAPid) {
+					apIDs = append(apIDs, oldAPid)
+				}
+			}
+		}
+	}
+	var result []byte
+	if result, err = rs.ms.Marshal(apIDs); err != nil {
+		return err
+	}
+	if err = rs.Cmd("SET", key, result).Err; err != nil {
+		return
+	}
 	return
 }
 
