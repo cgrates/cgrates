@@ -1164,9 +1164,9 @@ func testOnStorITCRUDAccount(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acc.ID, rcv.ID) {
 		t.Errorf("Expecting: %v, received: %v", acc.ID, rcv.ID)
-	} //else if !reflect.DeepEqual(acc.BalanceMap[utils.MONETARY], rcv.BalanceMap[utils.MONETARY]) {
-	//t.Errorf("Expecting: %v, received: %v", acc.BalanceMap[utils.MONETARY], rcv.BalanceMap[utils.MONETARY])
-	//}
+	} /*else if !reflect.DeepEqual(acc.BalanceMap[utils.MONETARY], rcv.BalanceMap[utils.MONETARY]) {
+	t.Errorf("Expecting: %v, received: %v", acc.BalanceMap[utils.MONETARY], rcv.BalanceMap[utils.MONETARY])
+	}*/
 	if err := onStor.RemoveAccount(acc.ID); err != nil {
 		t.Error(err)
 	}
