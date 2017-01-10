@@ -1030,6 +1030,9 @@ func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, trans
 func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
 	return
 }
+func (ms *MapStorage) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
+	return
+}
 
 func (ms *MapStorage) PushTask(t *Task) error {
 	ms.mu.Lock()

@@ -152,6 +152,7 @@ type DataDB interface {
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
 	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
+	RemAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error

@@ -382,7 +382,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	return nil
 }
 
-func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.DESTINATION_PREFIX:         dstIDs,
 		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
@@ -390,7 +390,7 @@ func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.RATING_PROFILE_PREFIX:      rpfIDs,
 		utils.ACTION_PREFIX:              actIDs,
 		utils.ACTION_PLAN_PREFIX:         aplIDs,
-		utils.AccountActionPlansPrefix:   aapIDs,
+		utils.AccountActionPlansPrefix:   aaPlIDs,
 		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
 		utils.SHARED_GROUP_PREFIX:        sgIDs,
 		utils.LCR_PREFIX:                 lcrIDs,
@@ -1598,7 +1598,7 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 	return
 }
 
-func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
+func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
 	cacheKey := utils.AccountActionPlansPrefix + acntID
 	if !skipCache {
 		if x, ok := cache.Get(cacheKey); ok {
@@ -1621,27 +1621,21 @@ func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, tra
 		}
 		return
 	}
-	apIDs = kv.Value
-	cache.Set(cacheKey, apIDs, cacheCommit(transactionID), transactionID)
+	aPlIDs = kv.Value
+	cache.Set(cacheKey, aPlIDs, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
+func (ms *MongoStorage) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	session, col := ms.conn(colAAp)
 	defer session.Close()
-	if len(apIDs) == 0 {
-		if err = col.Remove(bson.M{"key": acntID}); err == nil {
-			cache.RemKey(utils.AccountActionPlansPrefix+acntID, true, utils.NonTransactional)
-		}
-		return
-	}
 	if !overwrite {
-		if oldAPIds, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if oldaPlIDs, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
 		} else {
-			for _, oldAPid := range oldAPIds {
-				if !utils.IsSliceMember(apIDs, oldAPid) {
-					apIDs = append(apIDs, oldAPid)
+			for _, oldAPid := range oldaPlIDs {
+				if !utils.IsSliceMember(aPlIDs, oldAPid) {
+					aPlIDs = append(aPlIDs, oldAPid)
 				}
 			}
 		}
@@ -1649,7 +1643,34 @@ func (ms *MongoStorage) SetAccountActionPlans(acntID string, apIDs []string, ove
 	_, err = col.Upsert(bson.M{"key": acntID}, &struct {
 		Key   string
 		Value []string
-	}{Key: acntID, Value: apIDs})
+	}{Key: acntID, Value: aPlIDs})
+	return
+}
+
+func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (err error) {
+	session, col := ms.conn(colAAp)
+	defer session.Close()
+	if len(aPlIDs) == 0 {
+		return col.Remove(bson.M{"key": acntID})
+	}
+	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(oldAPlIDs); {
+		if utils.IsSliceMember(aPlIDs, oldAPlIDs[i]) {
+			oldAPlIDs = append(oldAPlIDs[:i], oldAPlIDs[i+1:]...)
+			continue // if we have stripped, don't increase index so we can check next element by next run
+		}
+		i++
+	}
+	if len(oldAPlIDs) == 0 { // no more elements, remove the reference
+		return col.Remove(bson.M{"key": acntID})
+	}
+	_, err = col.Upsert(bson.M{"key": acntID}, &struct {
+		Key   string
+		Value []string
+	}{Key: acntID, Value: aPlIDs})
 	return
 }
 
