@@ -1212,29 +1212,24 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	// if err := onStor.RemAccountActionPlans(acntID, aAPs2); err != nil {
 	// 	t.Error(err)
 	// }
-
 	// if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
 	// 	t.Error(err)
 	// } else if !reflect.DeepEqual(aAPs, rcv) {
 	// 	t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
 	// }onstor_it_test.go:1238: Expecting: [PACKAGE_10_SHARED_A_5 apl_PACKAGE_1001], received: [PACKAGE_10_SHARED_A_5 USE_SHARED_A apl_PACKAGE_1001]
-
 	if err := onStor.RemAccountActionPlans(acntID, aAPs); err != nil {
 		t.Error(err)
 	}
 	// if _, rcvErr := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 	// 	t.Error(rcvErr)
 	// }
-
 }
 
 func testOnStorITCRUDAccount(t *testing.T) {
-
 	acc := &Account{
 		ID:         utils.ConcatenatedKey("cgrates.org", "account2"),
 		BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{Value: 10, Weight: 10}}},
 	}
-
 	if _, rcvErr := onStor.GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -1278,18 +1273,15 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 	// 	t.Errorf("Expecting: %v, received: %v", sq.conf.Id, rcv.conf.Id)
 	// }panic: runtime error: invalid memory address or nil pointer dereference [recovered]
 	// panic: runtime error: invalid memory address or nil pointer dereference
-
 }
 
 func testOnStorITCRUDSubscribers(t *testing.T) {
 	time, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	rsr := utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)
 	sub := &SubscriberData{time, rsr}
-
 	//FixMe if _, rcvErr := onStor.GetSubscribers(); rcvErr != utils.ErrNotFound {
 	// 	t.Error(err)//<nil>
 	// }
-
 	if err := onStor.SetSubscriber(utils.NonTransactional, sub); err != nil {
 		t.Error(err)
 	}
@@ -1303,7 +1295,6 @@ func testOnStorITCRUDSubscribers(t *testing.T) {
 	if err := onStor.RemoveSubscriber(utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-
 	//FixMe if _, rcvErr := onStor.GetSubscribers(); rcvErr != utils.ErrNotFound {
 	// 	t.Error(err)//<nil>
 	// }
@@ -1421,7 +1412,6 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 			},
 		},
 	}
-
 	als2 := &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
@@ -1461,7 +1451,6 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 	if err := onStor.SetReverseAlias(als, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-
 	if rcv, err := onStor.GetReverseAlias(rvAlsID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rcv[0]) {
