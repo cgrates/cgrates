@@ -1182,24 +1182,6 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ap.Id, rcv[ap.Id].Id) {
 		t.Errorf("Expecting: %v, received: %v", ap.Id, rcv[ap.Id].Id)
-	} else if !reflect.DeepEqual(ap.AccountIDs, rcv[ap.Id].AccountIDs) {
-		t.Errorf("Expecting: %v, received: %v", ap.AccountIDs, rcv[ap.Id].AccountIDs)
-	} else if !reflect.DeepEqual(ap.ActionTimings[0].Uuid, rcv[ap.Id].ActionTimings[0].Uuid) {
-		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[0].Timing, rcv[ap.Id].ActionTimings[0].Timing)
-	} else if !reflect.DeepEqual(ap.ActionTimings[0].Uuid, rcv[ap.Id].ActionTimings[0].Uuid) {
-		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[0].Timing, rcv[ap.Id].ActionTimings[0].Timing)
-	} else if !reflect.DeepEqual(ap.ActionTimings[0].Weight, rcv[ap.Id].ActionTimings[0].Weight) {
-		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[0].Weight, rcv[ap.Id].ActionTimings[0].Weight)
-	} else if !reflect.DeepEqual(ap.ActionTimings[0].ActionsID, rcv[ap.Id].ActionTimings[0].ActionsID) {
-		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[0].ActionsID, rcv[ap.Id].ActionTimings[0].ActionsID)
-	} else if !reflect.DeepEqual(ap.ActionTimings[1].Uuid, rcv[ap.Id].ActionTimings[1].Uuid) {
-		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[1].Timing, rcv[ap.Id].ActionTimings[1].Timing)
-	} else if !reflect.DeepEqual(ap.ActionTimings[1].Uuid, rcv[ap.Id].ActionTimings[1].Uuid) {
-		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[1].Timing, rcv[ap.Id].ActionTimings[1].Timing)
-	} else if !reflect.DeepEqual(ap.ActionTimings[1].Weight, rcv[ap.Id].ActionTimings[1].Weight) {
-		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[1].Weight, rcv[ap.Id].ActionTimings[1].Weight)
-	} else if !reflect.DeepEqual(ap.ActionTimings[1].ActionsID, rcv[ap.Id].ActionTimings[1].ActionsID) {
-		t.Errorf("Expecting: %v, received: %v", ap.ActionTimings[1].ActionsID, rcv[ap.Id].ActionTimings[1].ActionsID)
 	}
 }
 
