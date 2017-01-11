@@ -803,6 +803,18 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, dataIDs, true); err != nil {
 		return
 	}
+	// AccountActionPlans
+	if attrs.AccountActionPlanIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.AccountActionPlanIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.AccountActionPlanIDs))
+		for idx, dId := range *attrs.AccountActionPlanIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, dataIDs, true); err != nil {
+		return
+	}
 	// ActionTriggers
 	if attrs.ActionTriggerIDs == nil {
 		dataIDs = nil // Reload all

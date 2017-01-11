@@ -85,10 +85,12 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	var accID string
 	if len(attrs.Account) != 0 { // Presence of Account requires complete account details to be provided
 		if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
+		accID = utils.AccountKey(attrs.Tenant, attrs.Account)
 	}
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
@@ -98,8 +100,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 			return 0, utils.ErrNotFound
 		}
 
-		if attrs.Tenant != "" && attrs.Account != "" {
-			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
+		if accID != "" {
 			delete(ap.AccountIDs, accID)
 			if err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 				return 0, err
@@ -131,6 +132,14 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		}
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
+	if accID != "" && attrs.ActionTimingId != "" { // Rebuild index for accounts pointing towards ActionPlans
+		if err = self.RatingDb.RemAccountActionPlans(accID, []string{attrs.ActionTimingId}); err != nil {
+			return
+		}
+		if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+			return
+		}
+	}
 	if err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
@@ -147,14 +156,14 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 }
 
 // Ads a new account into dataDb. If already defined, returns success.
-func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error {
+func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var schedulerReloadNeeded = false
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var ub *engine.Account
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
@@ -219,7 +228,6 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 				return 0, err
 			}
 		}
-
 		if len(attr.ActionTriggersId) != 0 {
 			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
 			if err != nil {
@@ -243,6 +251,15 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
+	if attr.ActionPlanId != "" {
+		if err = self.RatingDb.SetAccountActionPlans(accID, []string{attr.ActionPlanId}, false); err != nil {
+			return
+		}
+		if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+			return
+		}
+
+	}
 	if attr.ReloadScheduler && schedulerReloadNeeded {
 		sched := self.ServManager.GetScheduler()
 		if sched == nil {
@@ -254,13 +271,13 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	return nil
 }
 
-func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) error {
+func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 			actionPlansMap, err := self.RatingDb.GetAllActionPlans()
@@ -298,7 +315,12 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-
+	if err = self.RatingDb.RemAccountActionPlans(accID, nil); err != nil {
+		return
+	}
+	if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+		return
+	}
 	*reply = OK
 	return nil
 }

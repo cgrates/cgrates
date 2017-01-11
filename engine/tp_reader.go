@@ -885,7 +885,6 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				exitingAccountIds[id] = true
 				actionPlan.AccountIDs = exitingAccountIds
 			}
-
 			// write tasks
 			for _, at := range actionPlan.ActionTimings {
 				if at.IsASAP() {
@@ -902,9 +901,14 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				}
 			}
 			// write action plan
-			err = tpr.ratingStorage.SetActionPlan(accountAction.ActionPlanId, actionPlan, false, utils.NonTransactional)
-			if err != nil {
+			if err = tpr.ratingStorage.SetActionPlan(accountAction.ActionPlanId, actionPlan, false, utils.NonTransactional); err != nil {
 				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
+			}
+			if err = tpr.ratingStorage.SetAccountActionPlans(id, []string{accountAction.ActionPlanId}, false); err != nil {
+				return err
+			}
+			if err = tpr.ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{id}, true); err != nil {
+				return err
 			}
 		}
 		// action triggers

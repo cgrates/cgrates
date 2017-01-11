@@ -174,6 +174,12 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			if err != nil {
 				return 0, err
 			}
+			if err = self.RatingDb.SetAccountActionPlans(accID, *attr.ActionPlanIDs, attr.ActionPlansOverwrite); err != nil {
+				return 0, err
+			}
+			if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+				return 0, err
+			}
 		}
 
 		if attr.ActionTriggerIDs != nil {

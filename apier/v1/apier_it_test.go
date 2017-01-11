@@ -693,7 +693,7 @@ func TestApierLoadAccountActions(t *testing.T) {
 		t.Error("Calling ApierV1.LoadAccountActions got reply: ", reply)
 	}
 	time.Sleep(10 * time.Millisecond)
-	expectedStats = &utils.CacheStats{Actions: 1, ActionPlans: 1}
+	expectedStats = &utils.CacheStats{Actions: 1, ActionPlans: 1, AccountActionPlans: 1}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -724,7 +724,7 @@ func TestApierSetRatingProfile(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 	var args utils.AttrCacheStats
-	expectedStats := &utils.CacheStats{RatingProfiles: 1, Actions: 1, ActionPlans: 1}
+	expectedStats := &utils.CacheStats{RatingProfiles: 1, Actions: 1, ActionPlans: 1, AccountActionPlans: 1}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -756,7 +756,7 @@ func TestApierSetRatingProfile(t *testing.T) {
 	} else if cc.Cost != 0 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
-	expectedStats = &utils.CacheStats{ReverseDestinations: 10, RatingPlans: 1, RatingProfiles: 1, Actions: 1, ActionPlans: 1}
+	expectedStats = &utils.CacheStats{ReverseDestinations: 10, RatingPlans: 1, RatingProfiles: 1, Actions: 1, ActionPlans: 1, AccountActionPlans: 1}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -776,7 +776,7 @@ func TestApierReloadCache(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 	var args utils.AttrCacheStats
-	expectedStats := &utils.CacheStats{ReverseDestinations: 10, RatingPlans: 1, RatingProfiles: 1, Actions: 1, ActionPlans: 1}
+	expectedStats := &utils.CacheStats{ReverseDestinations: 10, RatingPlans: 1, RatingProfiles: 1, Actions: 1, ActionPlans: 1, AccountActionPlans: 1}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {

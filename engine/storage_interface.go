@@ -74,7 +74,7 @@ type RatingStorage interface {
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
 	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
-
+	RemAccountActionPlans(acntID string, aPlIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
