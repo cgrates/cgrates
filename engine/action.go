@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 	"github.com/mitchellh/mapstructure"
@@ -559,7 +560,7 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		return err
 	}
 
-	_, err := Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		// clean the account id from all action plans
 		allAPs, err := ratingStorage.GetAllActionPlans()
 		if err != nil && err != utils.ErrNotFound {

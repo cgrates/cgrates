@@ -28,6 +28,7 @@ import (
 
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -73,7 +74,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
 	aa := engine.APItoModelAccountAction(tpAa)
-	if _, err := engine.Guardian.Guard(func() (interface{}, error) {
+	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		if err := dbReader.LoadAccountActionsFiltered(aa); err != nil {
 			return 0, err
 		}

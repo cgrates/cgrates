@@ -23,6 +23,7 @@ import (
 	"math"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -103,7 +104,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	var ub *engine.Account
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
@@ -112,7 +113,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			}
 		}
 		if attr.ActionPlanIDs != nil {
-			_, err := engine.Guardian.Guard(func() (interface{}, error) {
+			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
 				if err != nil {
 					if err == utils.ErrNotFound { // if no action plans just continue

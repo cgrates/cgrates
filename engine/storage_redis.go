@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
@@ -108,7 +109,7 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.Cmd("FLUSHDB").Err
 }
 
-func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.DESTINATION_PREFIX:         dstIDs,
 		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
@@ -116,7 +117,7 @@ func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.RATING_PROFILE_PREFIX:      rpfIDs,
 		utils.ACTION_PREFIX:              actIDs,
 		utils.ACTION_PLAN_PREFIX:         aplIDs,
-		utils.AccountActionPlansPrefix:   aapIDs,
+		utils.AccountActionPlansPrefix:   aaPlIDs,
 		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
 		utils.SHARED_GROUP_PREFIX:        sgIDs,
 		utils.LCR_PREFIX:                 lcrIDs,
@@ -1049,7 +1050,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 	if err != nil {
 		return err
 	}
-	_, err = Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
 		histLen, err := rs.Cmd("LLEN", utils.LOADINST_KEY).Int()
 		if err != nil {
 			return nil, err
@@ -1203,7 +1204,7 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 	return
 }
 
-func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
+func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
 	key := utils.AccountActionPlansPrefix + acntID
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
@@ -1221,37 +1222,52 @@ func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool, tra
 		}
 		return
 	}
-	if err = rs.ms.Unmarshal(values, &apIDs); err != nil {
+	if err = rs.ms.Unmarshal(values, &aPlIDs); err != nil {
 		return
 	}
-	cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
+	cache.Set(key, aPlIDs, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (rs *RedisStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
-	key := utils.AccountActionPlansPrefix + acntID
-	if len(apIDs) == 0 {
-		return rs.Cmd("DEL", key).Err
-	}
+func (rs *RedisStorage) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if !overwrite {
-		if oldAPIds, err := rs.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if oldaPlIDs, err := rs.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
 		} else {
-			for _, oldAPid := range oldAPIds {
-				if !utils.IsSliceMember(apIDs, oldAPid) {
-					apIDs = append(apIDs, oldAPid)
+			for _, oldAPid := range oldaPlIDs {
+				if !utils.IsSliceMember(aPlIDs, oldAPid) {
+					aPlIDs = append(aPlIDs, oldAPid)
 				}
 			}
 		}
 	}
 	var result []byte
-	if result, err = rs.ms.Marshal(apIDs); err != nil {
+	if result, err = rs.ms.Marshal(aPlIDs); err != nil {
 		return err
 	}
-	if err = rs.Cmd("SET", key, result).Err; err != nil {
-		return
+	return rs.Cmd("SET", utils.AccountActionPlansPrefix+acntID, result).Err
+}
+
+func (rs *RedisStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (err error) {
+	key := utils.AccountActionPlansPrefix + acntID
+	if len(aPlIDs) == 0 {
+		return rs.Cmd("DEL", key).Err
 	}
-	return
+	oldaPlIDs, err := rs.GetAccountActionPlans(acntID, true, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(oldaPlIDs); {
+		if utils.IsSliceMember(aPlIDs, oldaPlIDs[i]) {
+			oldaPlIDs = append(oldaPlIDs[:i], oldaPlIDs[i+1:]...)
+			continue // if we have stripped, don't increase index so we can check next element by next run
+		}
+		i++
+	}
+	if len(oldaPlIDs) == 0 { // no more elements, remove the reference
+		return rs.Cmd("DEL", key).Err
+	}
+	return rs.Cmd("SET", key, oldaPlIDs).Err
 }
 
 func (rs *RedisStorage) PushTask(t *Task) error {

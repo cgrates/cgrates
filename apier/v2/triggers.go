@@ -21,6 +21,7 @@ import (
 	"errors"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -159,7 +160,7 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var account *engine.Account
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		if acc, err := self.AccountDb.GetAccount(accID); err == nil {
 			account = acc
 		} else {

@@ -1916,19 +1916,25 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 	if !disable_reverse {
 		if len(tpr.destinations) > 0 {
-			log.Print("Rebuilding Reverse Destinations")
+			if verbose {
+				log.Print("Rebuilding Reverse Destinations")
+			}
 			if err = tpr.ratingStorage.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 				return err
 			}
 		}
 		if len(tpr.acntActionPlans) > 0 {
-			log.Print("Rebuilding Account Action Plans")
+			if verbose {
+				log.Print("Rebuilding Account Action Plans")
+			}
 			if err = tpr.ratingStorage.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 				return err
 			}
 		}
 		if len(tpr.aliases) > 0 {
-			log.Print("Rebuilding Reverse Aliases")
+			if verbose {
+				log.Print("Rebuilding Reverse Aliases")
+			}
 			if err = tpr.accountingStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
 				return err
 			}

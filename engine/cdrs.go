@@ -30,6 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -87,7 +88,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB AccountingS
 		stats = nil
 	}
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dataDB: dataDB,
-		rals: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: Guardian,
+		rals: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: guardian.Guardian,
 		httpPoster: utils.NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
 }
 
@@ -100,7 +101,7 @@ type CdrServer struct {
 	users         rpcclient.RpcClientConnection
 	aliases       rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
-	guard         *GuardianLock
+	guard         *guardian.GuardianLock
 	responseCache *cache.ResponseCache
 	httpPoster    *utils.HTTPPoster // used for replication
 }
