@@ -92,3 +92,7 @@ func (self *SMGenericBiRpcV1) ṔassiveSessions(clnt *rpc2.Client, attrs map[str
 func (self *SMGenericBiRpcV1) PassiveSessionsCount(clnt *rpc2.Client, attrs map[string]string, reply *int) error {
 	return self.sm.BiRPCV1ActiveSessionsCount(clnt, attrs, reply)
 }
+
+func (self *SMGenericBiRpcV1) ReplicateActiveSessions(clnt *rpc2.Client, args sessionmanager.ArgsReplicateActiveSessions, reply *string) error {
+	return self.sm.BiRPCV1ReplicateActiveSessions(clnt, args, reply)
+}

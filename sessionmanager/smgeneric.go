@@ -1141,3 +1141,31 @@ func (smg *SMGeneric) BiRPCV1SetPassiveSessions(clnt rpcclient.RpcClientConnecti
 	}
 	return
 }
+
+type ArgsReplicateActiveSessions struct {
+	Filter      map[string]string
+	Connections []*config.HaPoolConfig
+}
+
+// BiRPCV1ReplicateActiveSessions will replicate active sessions to either args.Connections or the internal configured ones
+// args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
+func (smg *SMGeneric) BiRPCV1ReplicateActiveSessions(clnt rpcclient.RpcClientConnection, args ArgsReplicateActiveSessions, reply *string) (err error) {
+	smgConns := smg.smgReplConns
+	if len(args.Connections) != 0 {
+		smgConns := make([]*SMGReplicationConn, len(args.Connections))
+		for i, replConnCfg := range args.Connections {
+			if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, smg.cgrCfg.ConnectAttempts, smg.cgrCfg.Reconnects,
+				smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout, replConnCfg.Transport[1:], nil, true); err != nil {
+				return err
+			} else {
+				smgConns[i] = &SMGReplicationConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
+			}
+		}
+	}
+	aSs := smg.getSessions(args.Filter[utils.CGRID], false)
+	for cgrID := range aSs {
+		smg.replicateSessions(cgrID, smgConns)
+	}
+	*reply = utils.OK
+	return
+}
