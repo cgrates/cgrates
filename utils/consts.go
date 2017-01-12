@@ -311,7 +311,6 @@ const (
 	Cache                        = "cache"
 	NotFoundCaps                 = "NOT_FOUND"
 	ItemNotFound                 = "item not found"
-	SessionNotFound              = "session not found"
 	ItemNotCloneable             = "item not cloneable"
 	NotCloneableCaps             = "NOT_CLONEABLE"
 	ServerErrorCaps              = "SERVER_ERROR"

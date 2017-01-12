@@ -176,7 +176,7 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	cdr.Usage = s.TotalUsage
 	var reply string
 	smg.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply)
-	smg.replicateSessions(s.CGRID, smg.smgReplConns)
+	smg.replicateSessions(s.CGRID)
 }
 
 func (smg *SMGeneric) recordASession(s *SMGSession) {
@@ -446,26 +446,18 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 }
 
 // replicateSessions will replicate session based on configuration
-func (smg *SMGeneric) replicateSessions(cgrID string, smgReplConns []*SMGReplicationConn) (err error) {
+func (smg *SMGeneric) replicateSessions(cgrID string) (err error) {
 	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 {
 		return
 	}
 	smg.aSessionsMux.RLock()
 	var aSessions []*SMGSession
-	aSs, hasIt := smg.activeSessions[cgrID]
-	if !hasIt {
-		err = utils.NewCGRError(utils.SMG,
-			utils.NotFoundCaps, utils.ItemNotFound,
-			fmt.Sprintf("session with cgrid <%s> was not found in active sessions", cgrID))
-	} else {
-		err = utils.Clone(aSs, &aSessions)
-	}
-	smg.aSessionsMux.RUnlock()
-	if err != nil {
+	if err = utils.Clone(smg.activeSessions[cgrID], &aSessions); err != nil {
 		return
 	}
+	smg.aSessionsMux.RUnlock()
 	var wg sync.WaitGroup
-	for _, rplConn := range smgReplConns {
+	for _, rplConn := range smg.smgReplConns {
 		if rplConn.Synchronous {
 			wg.Add(1)
 		}
@@ -719,7 +711,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		if err != nil {
 			return
 		}
-		smg.replicateSessions(initialCGRID, smg.smgReplConns)
+		smg.replicateSessions(initialCGRID)
 	}
 	smg.resetTerminatorTimer(cgrID, gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
@@ -743,7 +735,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 			return
 		}
 	}
-	defer smg.replicateSessions(gev.GetCGRID(utils.META_DEFAULT), smg.smgReplConns)
+	defer smg.replicateSessions(gev.GetCGRID(utils.META_DEFAULT))
 	for _, s := range aSessions[cgrID] {
 		var maxDur time.Duration
 		if maxDur, err = s.debit(maxUsage, lastUsed); err != nil {
@@ -772,7 +764,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 		if err != nil && err != utils.ErrMandatoryIeMissing {
 			return
 		}
-		smg.replicateSessions(initialCGRID, smg.smgReplConns)
+		smg.replicateSessions(initialCGRID)
 	}
 	sessionIDs := []string{cgrID}
 	if gev.HasField(utils.OriginIDPrefix) { // OriginIDPrefix is present, OriginID will not be anymore considered
@@ -810,7 +802,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 			}
 		}
 		hasActiveSession = true
-		defer smg.replicateSessions(sessionID, smg.smgReplConns)
+		defer smg.replicateSessions(sessionID)
 		s := aSessions[sessionID][0]
 		if errUsage != nil {
 			usage = s.TotalUsage - s.LastUsage + lastUsed
