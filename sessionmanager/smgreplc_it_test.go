@@ -214,6 +214,92 @@ func TestSMGRplcTerminate(t *testing.T) {
 	}
 }
 
+func TestSMGRplcManualReplicate(t *testing.T) {
+	if _, err := engine.StopStartEngine(smgRplcMasterCfgPath, *waitRater); err != nil { // Kill both and start Master
+		t.Fatal(err)
+	}
+	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.RPCJSONListen); err != nil {
+		t.Fatal(err)
+	}
+	smgEv1 := SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.TOR:         utils.VOICE,
+		utils.ACCID:       "123451",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     "1001",
+		utils.SUBJECT:     "1001",
+		utils.DESTINATION: "1004",
+		utils.CATEGORY:    "call",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.USAGE:       "1m30s",
+	}
+	smgEv2 := SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.TOR:         utils.VOICE,
+		utils.ACCID:       "123481",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     "1002",
+		utils.SUBJECT:     "1002",
+		utils.DESTINATION: "1005",
+		utils.CATEGORY:    "call",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.USAGE:       "1m30s",
+	}
+	for _, smgEv := range []SMGenericEvent{smgEv1, smgEv2} {
+		var maxUsage float64
+		if err := smgRplcMstrRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+			t.Error(err)
+		}
+		if maxUsage != 90 {
+			t.Error("Bad max usage: ", maxUsage)
+		}
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+	var aSessions []*ActiveSession
+	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
+		t.Errorf("Received usage: %v", aSessions[0].Usage)
+	}
+	time.Sleep(time.Duration(200) * time.Millisecond) // Do not start slave too early since it will receive the replicated sessions
+	// Start slave, should not have any active session at beginning
+	if _, err := engine.StartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.RPCJSONListen); err != nil {
+		t.Fatal(err)
+	}
+	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err, aSessions)
+	}
+	argsRepl := ArgsReplicateActiveSessions{Connections: []*config.HaPoolConfig{
+		&config.HaPoolConfig{
+			Address:     smgRplcMasterCfg.SmGenericConfig.SMGReplicationConns[0].Address,
+			Transport:   smgRplcMasterCfg.SmGenericConfig.SMGReplicationConns[0].Transport,
+			Synchronous: true},
+	}}
+	var repply string
+	if err := smgRplcMstrRPC.Call("SMGenericV1.ReplicateActiveSessions", argsRepl, &repply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
+		t.Errorf("Received usage: %v", aSessions[0].Usage)
+	}
+}
+
 func TestSMGRplcStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
