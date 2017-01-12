@@ -81,6 +81,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDAlias,
 	testOnStorITCRUDReverseAlias,
 	testOnStorITCRUDResourceLimit,
+	testOnStorITCRUDHistory,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -1280,7 +1281,7 @@ func testOnStorITCRUDSubscribers(t *testing.T) {
 	rsr := utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)
 	sub := &SubscriberData{time, rsr}
 	//FixMe if _, rcvErr := onStor.GetSubscribers(); rcvErr != utils.ErrNotFound {
-	// 	t.Error(err)//<nil>
+	// 	t.Error(rcvErr)//<nil>
 	// }
 	if err := onStor.SetSubscriber(utils.NonTransactional, sub); err != nil {
 		t.Error(err)
@@ -1296,7 +1297,7 @@ func testOnStorITCRUDSubscribers(t *testing.T) {
 		t.Error(err)
 	}
 	//FixMe if _, rcvErr := onStor.GetSubscribers(); rcvErr != utils.ErrNotFound {
-	// 	t.Error(err)//<nil>
+	// 	t.Error(rcvErr)//<nil>
 	// }
 }
 
@@ -1309,7 +1310,7 @@ func testOnStorITCRUDUser(t *testing.T) {
 		},
 	}
 	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
-		t.Error(err)
+		t.Error(rcvErr)
 	}
 	if err := onStor.SetUser(usr); err != nil {
 		t.Error(err)
@@ -1328,7 +1329,7 @@ func testOnStorITCRUDUser(t *testing.T) {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
-		t.Error(err)
+		t.Error(rcvErr)
 	}
 }
 
@@ -1364,7 +1365,7 @@ func testOnStorITCRUDAlias(t *testing.T) {
 	}
 
 	if _, rcvErr := onStor.GetAlias(als.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(err)
+		t.Error(rcvErr)
 	}
 	if err := onStor.SetAlias(als, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1378,7 +1379,7 @@ func testOnStorITCRUDAlias(t *testing.T) {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetAlias(als.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(err)
+		t.Error(rcvErr)
 	}
 }
 
@@ -1445,8 +1446,8 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 	exp := strings.Join([]string{als.Direction, ":", als.Tenant, ":", als.Category, ":", als.Account, ":", als.Subject, ":", als.Context, ":", als.Values[1].DestinationId}, "")
 	// rvAlsID2 := strings.Join([]string{als2.Values[1].Pairs["Account"]["dan"], "Account", als2.Context}, "")
 	// exp2 := strings.Join([]string{als2.Direction, ":", als2.Tenant, ":", als2.Category, ":", als2.Account, ":", als2.Subject, ":", als2.Context, ":", als2.Values[1].DestinationId}, "")
-	// FixMe if _, rcvErr := onStor.GetReverseAlias(rvAlsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(err) //<nil>
+	// if _, rcvErr := onStor.GetReverseAlias(rvAlsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr) //<nil>
 	// }
 	if err := onStor.SetReverseAlias(als, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1459,7 +1460,7 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 	if err := onStor.UpdateReverseAlias(als, als2, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	//FixMe if rcv, err := onStor.GetReverseAlias(rvAlsID2, true, utils.NonTransactional); err != nil {
+	// if rcv, err := onStor.GetReverseAlias(rvAlsID2, true, utils.NonTransactional); err != nil {
 	// 	t.Error(err) //NOT_FOUND
 	// } else if !reflect.DeepEqual(exp2, rcv) {
 	// 	t.Errorf("Expecting: %v, received: %v", exp2, rcv)
@@ -1483,7 +1484,7 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 		Usage:          make(map[string]*ResourceUsage),
 	}
 	if _, rcvErr := onStor.GetResourceLimit(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(err)
+		t.Error(rcvErr)
 	}
 	if err := onStor.SetResourceLimit(rL, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1497,6 +1498,19 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetResourceLimit(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDHistory(t *testing.T) {
+	time, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	ist := &utils.LoadInstance{"Load", "RatingLoad", "Account", time}
+	if err := onStor.AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
 		t.Error(err)
+	}
+	if rcv, err := onStor.GetLoadHistory(1, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(*ist, *rcv[0]) {
+		t.Errorf("Expecting: %v, received: %v", *ist, *rcv[0])
 	}
 }
