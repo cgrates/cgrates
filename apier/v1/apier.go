@@ -667,12 +667,12 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 }
 
 type AttrGetActionPlan struct {
-	Id string
+	ID string
 }
 
 func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
 	var result []*engine.ActionPlan
-	if attr.Id == "" || attr.Id == "*" {
+	if attr.ID == "" || attr.ID == "*" {
 		aplsMap, err := self.RatingDb.GetAllActionPlans()
 		if err != nil {
 			return err
@@ -681,7 +681,7 @@ func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.Acti
 			result = append(result, apls)
 		}
 	} else {
-		apls, err := self.RatingDb.GetActionPlan(attr.Id, false, utils.NonTransactional)
+		apls, err := self.RatingDb.GetActionPlan(attr.ID, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

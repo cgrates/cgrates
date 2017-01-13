@@ -1473,11 +1473,11 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers, trans
 	session, col := ms.conn(colAtr)
 	defer session.Close()
 	if len(atrs) == 0 {
-		err = col.Remove(bson.M{"key": key}) // delete the key
-		if err != mgo.ErrNotFound {
-			return err
+		err = col.Remove(bson.M{"key": key})
+		if err == mgo.ErrNotFound { // Overwrite not found since it is not really mandatory here to be returned
+			err = nil
 		}
-		return nil
+		return
 	}
 	_, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
