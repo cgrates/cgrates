@@ -1089,6 +1089,7 @@ func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
 	defer session.Close()
 	err = col.Find(bson.M{"id": key}).One(result)
 	if err == mgo.ErrNotFound {
+		err = utils.ErrNotFound
 		result = nil
 	}
 	return
@@ -1475,6 +1476,7 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers, trans
 	if len(atrs) == 0 {
 		err = col.Remove(bson.M{"key": key}) // delete the key
 		if err != mgo.ErrNotFound {
+			err = utils.ErrNotFound
 			return err
 		}
 		return nil
