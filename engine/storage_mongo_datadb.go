@@ -1089,6 +1089,7 @@ func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
 	defer session.Close()
 	err = col.Find(bson.M{"id": key}).One(result)
 	if err == mgo.ErrNotFound {
+		err = utils.ErrNotFound
 		result = nil
 	}
 	return
