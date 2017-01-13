@@ -92,7 +92,7 @@ func TestSMGRplcTPFromFolder(t *testing.T) {
 
 func TestSMGRplcInitiate(t *testing.T) {
 	var pSessions []*ActiveSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	smgEv := SMGenericEvent{
@@ -126,14 +126,14 @@ func TestSMGRplcInitiate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
 	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", map[string]string{utils.ACCID: "123451"}, &pSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", map[string]string{utils.ACCID: "123451"}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
@@ -157,7 +157,7 @@ func TestSMGRplcUpdate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -166,16 +166,16 @@ func TestSMGRplcUpdate(t *testing.T) {
 	}
 	var pSessions []*ActiveSession
 	// Make sure we don't have passive session on active host
-	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// Master should not longer have activeSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
 	// Make sure session was replicated
-	if err := smgRplcMstrRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
@@ -199,17 +199,17 @@ func TestSMGRplcTerminate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	var pSessions map[string][]*SMGSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -262,7 +262,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -277,7 +277,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	argsRepl := ArgsReplicateActiveSessions{Connections: []*config.HaPoolConfig{
@@ -291,7 +291,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
-	if err := smgRplcSlvRPC.Call("SMGenericV1.PassiveSessions", nil, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)

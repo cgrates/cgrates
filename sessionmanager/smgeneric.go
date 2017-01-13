@@ -620,7 +620,7 @@ func (smg *SMGeneric) asActiveSessions(fltrs map[string]string, count, passiveSe
 // Methods to apply on sessions, mostly exported through RPC/Bi-RPC
 
 // MaxUsage calculates maximum usage allowed for given gevent
-func (smg *SMGeneric) MaxUsage(gev SMGenericEvent) (maxUsage time.Duration, err error) {
+func (smg *SMGeneric) GetMaxUsage(gev SMGenericEvent) (maxUsage time.Duration, err error) {
 	cacheKey := "MaxUsage" + gev.GetCGRID(utils.META_DEFAULT)
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return (item.Value.(time.Duration)), item.Err
@@ -636,7 +636,7 @@ func (smg *SMGeneric) MaxUsage(gev SMGenericEvent) (maxUsage time.Duration, err 
 	return
 }
 
-func (smg *SMGeneric) LCRSuppliers(gev SMGenericEvent) (suppls []string, err error) {
+func (smg *SMGeneric) GetLCRSuppliers(gev SMGenericEvent) (suppls []string, err error) {
 	cacheKey := "LCRSuppliers" + gev.GetCGRID(utils.META_DEFAULT) + gev.GetAccount(utils.META_DEFAULT) + gev.GetDestination(utils.META_DEFAULT)
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
@@ -987,8 +987,8 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMetho
 	return err
 }
 
-func (smg *SMGeneric) BiRPCV1MaxUsage(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) error {
-	maxUsageDur, err := smg.MaxUsage(ev)
+func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) error {
+	maxUsageDur, err := smg.GetMaxUsage(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1001,8 +1001,8 @@ func (smg *SMGeneric) BiRPCV1MaxUsage(clnt rpcclient.RpcClientConnection, ev SMG
 }
 
 /// Returns list of suppliers which can be used for the request
-func (smg *SMGeneric) BiRPCV1LCRSuppliers(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, suppliers *[]string) error {
-	if supls, err := smg.LCRSuppliers(ev); err != nil {
+func (smg *SMGeneric) BiRPCV1GetLCRSuppliers(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, suppliers *[]string) error {
+	if supls, err := smg.GetLCRSuppliers(ev); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*suppliers = supls
@@ -1064,7 +1064,7 @@ func (smg *SMGeneric) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection, ev S
 	return nil
 }
 
-func (smg *SMGeneric) BiRPCV1ActiveSessions(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *[]*ActiveSession) error {
+func (smg *SMGeneric) BiRPCV1GetActiveSessions(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *[]*ActiveSession) error {
 	for fldName, fldVal := range fltr {
 		if fldVal == "" {
 			fltr[fldName] = utils.META_NONE
@@ -1080,7 +1080,7 @@ func (smg *SMGeneric) BiRPCV1ActiveSessions(clnt rpcclient.RpcClientConnection, 
 	return nil
 }
 
-func (smg *SMGeneric) BiRPCV1ActiveSessionsCount(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *int) error {
+func (smg *SMGeneric) BiRPCV1GetActiveSessionsCount(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *int) error {
 	for fldName, fldVal := range fltr {
 		if fldVal == "" {
 			fltr[fldName] = utils.META_NONE
@@ -1094,7 +1094,7 @@ func (smg *SMGeneric) BiRPCV1ActiveSessionsCount(clnt rpcclient.RpcClientConnect
 	return nil
 }
 
-func (smg *SMGeneric) BiRPCV1PassiveSessions(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *[]*ActiveSession) error {
+func (smg *SMGeneric) BiRPCV1GetPassiveSessions(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *[]*ActiveSession) error {
 	for fldName, fldVal := range fltr {
 		if fldVal == "" {
 			fltr[fldName] = utils.META_NONE
@@ -1110,7 +1110,7 @@ func (smg *SMGeneric) BiRPCV1PassiveSessions(clnt rpcclient.RpcClientConnection,
 	return nil
 }
 
-func (smg *SMGeneric) BiRPCV1PassiveSessionsCount(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *int) error {
+func (smg *SMGeneric) BiRPCV1GetPassiveSessionsCount(clnt rpcclient.RpcClientConnection, fltr map[string]string, reply *int) error {
 	for fldName, fldVal := range fltr {
 		if fldVal == "" {
 			fltr[fldName] = utils.META_NONE

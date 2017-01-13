@@ -33,8 +33,8 @@ type SMGenericBiRpcV1 struct {
 // Publishes methods exported by SMGenericBiRpcV1 as SMGenericV1 (so we can handle standard RPC methods via birpc socket)
 func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		"SMGenericV1.MaxUsage":         self.MaxUsage,
-		"SMGenericV1.LCRSuppliers":     self.LCRSuppliers,
+		"SMGenericV1.GetMaxUsage":      self.GetMaxUsage,
+		"SMGenericV1.GetLCRSuppliers":  self.GetLCRSuppliers,
 		"SMGenericV1.InitiateSession":  self.InitiateSession,
 		"SMGenericV1.UpdateSession":    self.UpdateSession,
 		"SMGenericV1.TerminateSession": self.TerminateSession,
@@ -43,13 +43,13 @@ func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 }
 
 /// Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *SMGenericBiRpcV1) MaxUsage(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	return self.sm.BiRPCV1MaxUsage(clnt, ev, maxUsage)
+func (self *SMGenericBiRpcV1) GetMaxUsage(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+	return self.sm.BiRPCV1GetMaxUsage(clnt, ev, maxUsage)
 }
 
 /// Returns list of suppliers which can be used for the request
-func (self *SMGenericBiRpcV1) LCRSuppliers(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	return self.sm.BiRPCV1LCRSuppliers(clnt, ev, suppliers)
+func (self *SMGenericBiRpcV1) GetLCRSuppliers(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
+	return self.sm.BiRPCV1GetLCRSuppliers(clnt, ev, suppliers)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
@@ -77,20 +77,20 @@ func (self *SMGenericBiRpcV1) ProcessCDR(clnt *rpc2.Client, ev sessionmanager.SM
 	return self.sm.BiRPCV1ProcessCDR(clnt, ev, reply)
 }
 
-func (self *SMGenericBiRpcV1) ActiveSessions(clnt *rpc2.Client, attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
-	return self.sm.BiRPCV1ActiveSessions(clnt, attrs, reply)
+func (self *SMGenericBiRpcV1) GetActiveSessions(clnt *rpc2.Client, attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+	return self.sm.BiRPCV1GetActiveSessions(clnt, attrs, reply)
 }
 
-func (self *SMGenericBiRpcV1) ActiveSessionsCount(clnt *rpc2.Client, attrs map[string]string, reply *int) error {
-	return self.sm.BiRPCV1ActiveSessionsCount(clnt, attrs, reply)
+func (self *SMGenericBiRpcV1) GetActiveSessionsCount(clnt *rpc2.Client, attrs map[string]string, reply *int) error {
+	return self.sm.BiRPCV1GetActiveSessionsCount(clnt, attrs, reply)
 }
 
-func (self *SMGenericBiRpcV1) ṔassiveSessions(clnt *rpc2.Client, attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
-	return self.sm.BiRPCV1ActiveSessions(clnt, attrs, reply)
+func (self *SMGenericBiRpcV1) GetṔassiveSessions(clnt *rpc2.Client, attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+	return self.sm.BiRPCV1GetActiveSessions(clnt, attrs, reply)
 }
 
-func (self *SMGenericBiRpcV1) PassiveSessionsCount(clnt *rpc2.Client, attrs map[string]string, reply *int) error {
-	return self.sm.BiRPCV1ActiveSessionsCount(clnt, attrs, reply)
+func (self *SMGenericBiRpcV1) GetPassiveSessionsCount(clnt *rpc2.Client, attrs map[string]string, reply *int) error {
+	return self.sm.BiRPCV1GetPassiveSessionsCount(clnt, attrs, reply)
 }
 
 func (self *SMGenericBiRpcV1) ReplicateActiveSessions(clnt *rpc2.Client, args sessionmanager.ArgsReplicateActiveSessions, reply *string) error {

@@ -601,7 +601,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	var aSessions []*ActiveSession
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.ACCID: "12360"}, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.ACCID: "12360"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -635,7 +635,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 	if maxUsage != 120 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.ACCID: "12360"}, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.ACCID: "12360"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -712,7 +712,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	var aSessions []*ActiveSession
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
 		utils.ACCID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -748,7 +748,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(20) * time.Millisecond)
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
 		utils.ACCID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -770,7 +770,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
 		utils.ACCID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
@@ -830,7 +830,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	var aSessions []*ActiveSession
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
 		utils.ACCID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -866,7 +866,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(20) * time.Millisecond)
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
 		utils.ACCID: "12372-1"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -898,7 +898,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(10) * time.Millisecond)
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
 		utils.ACCID: "12372-1"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}

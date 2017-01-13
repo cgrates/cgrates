@@ -36,13 +36,13 @@ type SMGenericV1 struct {
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *SMGenericV1) MaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	return self.sm.BiRPCV1MaxUsage(nil, ev, maxUsage)
+func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+	return self.sm.BiRPCV1GetMaxUsage(nil, ev, maxUsage)
 }
 
 // Returns list of suppliers which can be used for the request
-func (self *SMGenericV1) LCRSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	return self.sm.BiRPCV1LCRSuppliers(nil, ev, suppliers)
+func (self *SMGenericV1) GetLCRSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
+	return self.sm.BiRPCV1GetLCRSuppliers(nil, ev, suppliers)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
@@ -70,20 +70,20 @@ func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *str
 	return self.sm.BiRPCV1ProcessCDR(nil, ev, reply)
 }
 
-func (self *SMGenericV1) ActiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
-	return self.sm.BiRPCV1ActiveSessions(nil, attrs, reply)
+func (self *SMGenericV1) GetActiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+	return self.sm.BiRPCV1GetActiveSessions(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) ActiveSessionsCount(attrs map[string]string, reply *int) error {
-	return self.sm.BiRPCV1ActiveSessionsCount(nil, attrs, reply)
+func (self *SMGenericV1) GetActiveSessionsCount(attrs map[string]string, reply *int) error {
+	return self.sm.BiRPCV1GetActiveSessionsCount(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) PassiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
-	return self.sm.BiRPCV1PassiveSessions(nil, attrs, reply)
+func (self *SMGenericV1) GetPassiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+	return self.sm.BiRPCV1GetPassiveSessions(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) PassiveSessionsCount(attrs map[string]string, reply *int) error {
-	return self.sm.BiRPCV1PassiveSessionsCount(nil, attrs, reply)
+func (self *SMGenericV1) GetPassiveSessionsCount(attrs map[string]string, reply *int) error {
+	return self.sm.BiRPCV1GetPassiveSessionsCount(nil, attrs, reply)
 }
 
 func (self *SMGenericV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSessions, reply *string) error {

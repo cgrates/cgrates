@@ -122,7 +122,7 @@ func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 	// Query the SMG via RPC for maxUsage
 	var maxUsage float64
 	smgEv := ev.AsSMGenericEvent()
-	if err := sma.smg.Call("SMGenericV1.MaxUsage", *smgEv, &maxUsage); err != nil {
+	if err := sma.smg.Call("SMGenericV1.GetMaxUsage", *smgEv, &maxUsage); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to authorize session for channelID: %s", err.Error(), ev.ChannelID()))
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))

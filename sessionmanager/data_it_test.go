@@ -213,7 +213,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	aSessions := make([]*ActiveSession, 0)
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -244,7 +244,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1068576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -275,7 +275,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1088576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -306,7 +306,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1108576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -337,7 +337,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1128576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -365,7 +365,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 }
@@ -495,7 +495,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	aSessions := make([]*ActiveSession, 0)
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -535,7 +535,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 }
@@ -578,7 +578,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	aSessions := make([]*ActiveSession, 0)
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -609,7 +609,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -640,7 +640,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -671,7 +671,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -702,7 +702,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -730,7 +730,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 }
@@ -773,7 +773,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	aSessions := make([]*ActiveSession, 0)
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -805,7 +805,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1049176 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -836,7 +836,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1049776 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -867,7 +867,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1050376 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -898,7 +898,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1050976 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
@@ -926,7 +926,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
