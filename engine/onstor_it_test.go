@@ -1278,7 +1278,7 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 
 /*FixMe
 func testOnStorITCRUDSubscribers(t *testing.T) {
-	time, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	time, _ := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 	rsr := utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)
 	sub := &SubscriberData{time, rsr}
 	 if _, rcvErr := onStor.GetSubscribers(); rcvErr != utils.ErrNotFound {
@@ -1504,12 +1504,14 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 }
 
 func testOnStorITCRUDHistory(t *testing.T) {
-	time, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()
 	ist := &utils.LoadInstance{"Load", "RatingLoad", "Account", time}
 	if err := onStor.AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	//FixMe if _, rcvErr := onStor.GetLoadHistory(1, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr)//nil
-	// }
+	if rcv, err := onStor.GetLoadHistory(1, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ist, rcv[0]) {
+		t.Errorf("Expecting: %v, received: %v", ist, rcv[0])
+	}
 }
