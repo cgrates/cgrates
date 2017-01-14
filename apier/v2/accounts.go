@@ -114,45 +114,50 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 		}
 		if attr.ActionPlanIDs != nil {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
-				if err != nil {
-					if err == utils.ErrNotFound { // if no action plans just continue
-						return 0, nil
-					}
+				acntAPids, err := self.RatingDb.GetAccountActionPlans(accID, false, utils.NonTransactional)
+				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}
 				if attr.ActionPlansOverwrite {
 					// clean previous action plans
-					for actionPlanID, ap := range actionPlansMap {
-						if _, exists := ap.AccountIDs[accID]; exists {
-							delete(ap.AccountIDs, accID)
-							dirtyActionPlans[actionPlanID] = ap
+					for i := 0; i < len(acntAPids); {
+						apID := acntAPids[i]
+						if utils.IsSliceMember(*attr.ActionPlanIDs, apID) {
+							i++      // increase index since we don't remove from slice
+							continue // not removing the ones where
 						}
+						ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional)
+						if err != nil {
+							return 0, err
+						}
+						delete(ap.AccountIDs, accID)
+						dirtyActionPlans[apID] = ap
+						acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
 					}
 				}
-				for _, actionPlanID := range *attr.ActionPlanIDs {
-					ap, ok := actionPlansMap[actionPlanID]
-					if !ok {
-						return 0, utils.ErrNotFound
+				for _, apID := range *attr.ActionPlanIDs {
+					if utils.IsSliceMember(acntAPids, apID) {
+						continue // Already there
 					}
-
-					if _, exists := ap.AccountIDs[accID]; !exists {
-						if ap.AccountIDs == nil {
-							ap.AccountIDs = make(utils.StringMap)
-						}
-						ap.AccountIDs[accID] = true
-						dirtyActionPlans[actionPlanID] = ap
-						// create tasks
-						for _, at := range ap.ActionTimings {
-							if at.IsASAP() {
-								t := &engine.Task{
-									Uuid:      utils.GenUUID(),
-									AccountID: accID,
-									ActionsID: at.ActionsID,
-								}
-								if err = self.RatingDb.PushTask(t); err != nil {
-									return 0, err
-								}
+					ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional)
+					if err != nil {
+						return 0, err
+					}
+					if ap.AccountIDs == nil {
+						ap.AccountIDs = make(utils.StringMap)
+					}
+					ap.AccountIDs[accID] = true
+					dirtyActionPlans[apID] = ap
+					// create tasks
+					for _, at := range ap.ActionTimings {
+						if at.IsASAP() {
+							t := &engine.Task{
+								Uuid:      utils.GenUUID(),
+								AccountID: accID,
+								ActionsID: at.ActionsID,
+							}
+							if err = self.RatingDb.PushTask(t); err != nil {
+								return 0, err
 							}
 						}
 					}
@@ -167,6 +172,12 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 					i++
 				}
 				if err := self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
+					return 0, err
+				}
+				if err := self.RatingDb.SetAccountActionPlans(accID, acntAPids, false); err != nil {
+					return 0, err
+				}
+				if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 					return 0, err
 				}
 				return 0, nil
