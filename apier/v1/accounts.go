@@ -134,7 +134,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
 	if accID != "" && attrs.ActionTimingId != "" { // Rebuild index for accounts pointing towards ActionPlans
-		if err = self.RatingDb.RemAccountActionPlans(accID, []string{attrs.ActionTimingId}); err != nil {
+		if err = self.RatingDb.RemAccountActionPlans(accID, []string{attrs.ActionPlanId}); err != nil {
 			return
 		}
 		if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
