@@ -148,6 +148,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 					}
 					ap.AccountIDs[accID] = true
 					dirtyActionPlans[apID] = ap
+					acntAPids = append(acntAPids, apID)
 					// create tasks
 					for _, at := range ap.ActionTimings {
 						if at.IsASAP() {
@@ -174,7 +175,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				if err := self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
-				if err := self.RatingDb.SetAccountActionPlans(accID, acntAPids, false); err != nil {
+				if err := self.RatingDb.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
 				if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
@@ -183,12 +184,6 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
 			if err != nil {
-				return 0, err
-			}
-			if err = self.RatingDb.SetAccountActionPlans(accID, *attr.ActionPlanIDs, attr.ActionPlansOverwrite); err != nil {
-				return 0, err
-			}
-			if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 				return 0, err
 			}
 		}

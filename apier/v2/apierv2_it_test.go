@@ -21,9 +21,12 @@ package v2
 
 import (
 	"flag"
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/cgrates/cgrates/apier/v1"
@@ -40,6 +43,7 @@ var (
 var apierCfgPath string
 var apierCfg *config.CGRConfig
 var apierRPC *rpc.Client
+var dataDB engine.DataDB // share db connection here so we can check data we set through APIs
 
 func TestApierV2itLoadConfig(t *testing.T) {
 	apierCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
@@ -59,6 +63,15 @@ func TestApierV2itResetDataDb(t *testing.T) {
 func TestApierV2itResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(apierCfg); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestApierV2itConnectDataDB(t *testing.T) {
+	rdsDb, _ := strconv.Atoi(apierCfg.TpDbName)
+	if rdsITdb, err := engine.NewRedisStorage(fmt.Sprintf("%s:%s", apierCfg.TpDbHost, apierCfg.TpDbPort), rdsDb, apierCfg.TpDbPass, apierCfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1); err != nil {
+		t.Fatal("Could not connect to Redis", err.Error())
+	} else {
+		dataDB = rdsITdb
 	}
 }
 
@@ -180,6 +193,114 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
 	} else if acnt.Disabled {
 		t.Fatalf("Received account: %+v", acnt)
+	}
+}
+
+func TestApierV2itSetAccountWithAP(t *testing.T) {
+	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
+		Actions: []*utils.TPAction{
+			&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "5.0", Weight: 20.0},
+		}}
+	var reply string
+	if err := apierRPC.Call("ApierV2.SetActions", argActs1, &reply); err != nil {
+		t.Error(err)
+	}
+	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_1",
+		ActionPlan: []*v1.AttrActionPlan{
+			&v1.AttrActionPlan{ActionsId: argActs1.ActionsId, Time: utils.ASAP, Weight: 20.0}}}
+	if _, err := dataDB.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := apierRPC.Call("ApierV1.SetActionPlan", argAP1, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetActionPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.SetActionPlan received: %s", reply)
+	}
+	argSetAcnt1 := AttrSetAccount{
+		Tenant:        "cgrates.org",
+		Account:       "TestApierV2itSetAccountWithAP1",
+		ActionPlanIDs: &[]string{argAP1.Id},
+	}
+	acntID := utils.AccountKey(argSetAcnt1.Tenant, argSetAcnt1.Account)
+	if _, err := dataDB.GetAccountActionPlans(acntID, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := apierRPC.Call("ApierV2.SetAccount", argSetAcnt1, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if ap, err := dataDB.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
+		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
+	}
+	eAAPids := []string{argAP1.Id}
+	if aapIDs, err := dataDB.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
+	}
+	// Set second AP so we can see the proper indexing done
+	argAP2 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_2",
+		ActionPlan: []*v1.AttrActionPlan{
+			&v1.AttrActionPlan{ActionsId: argActs1.ActionsId, MonthDays: "1", Time: "00:00:00", Weight: 20.0}}}
+	if _, err := dataDB.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := apierRPC.Call("ApierV2.SetActionPlan", argAP2, &reply); err != nil {
+		t.Error("Got error on ApierV2.SetActionPlan: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActionPlan received: %s", reply)
+	}
+	// Test adding new AP
+	argSetAcnt2 := AttrSetAccount{
+		Tenant:        "cgrates.org",
+		Account:       "TestApierV2itSetAccountWithAP1",
+		ActionPlanIDs: &[]string{argAP2.Id},
+	}
+	if err := apierRPC.Call("ApierV2.SetAccount", argSetAcnt2, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if ap, err := dataDB.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
+		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
+	}
+	if ap, err := dataDB.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
+		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
+	}
+	eAAPids = []string{argAP1.Id, argAP2.Id}
+	if aapIDs, err := dataDB.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
+	}
+	// test remove and overwrite
+	argSetAcnt2 = AttrSetAccount{
+		Tenant:               "cgrates.org",
+		Account:              "TestApierV2itSetAccountWithAP1",
+		ActionPlanIDs:        &[]string{argAP2.Id},
+		ActionPlansOverwrite: true,
+	}
+	if err := apierRPC.Call("ApierV2.SetAccount", argSetAcnt2, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if ap, err := dataDB.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if _, hasIt := ap.AccountIDs[acntID]; hasIt {
+		t.Errorf("ActionPlan does contain the accountID: %+v", ap)
+	}
+	if ap, err := dataDB.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
+		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
+	}
+	eAAPids = []string{argAP2.Id}
+	if aapIDs, err := dataDB.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
 	}
 }
 
