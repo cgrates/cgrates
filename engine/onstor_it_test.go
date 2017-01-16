@@ -965,8 +965,8 @@ func testOnStorITCRUDLCR(t *testing.T) {
 		Tenant:    "cgrates.org",
 		Category:  "call",
 		Direction: "*out",
-		Account:   "*any",
-		Subject:   "*any",
+		Account:   "testOnStorITCRUDLCR",
+		Subject:   "testOnStorITCRUDLCR",
 		Activations: []*LCRActivation{
 			&LCRActivation{
 				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
@@ -989,21 +989,18 @@ func testOnStorITCRUDLCR(t *testing.T) {
 			},
 		},
 	}
-	/*FixMe @Edwardo22
+
 	if _, rcvErr := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	*/
 	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	/*FixMe @Edwardo22
 	if rcv, err := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(lcr, rcv) {
-		t.Errorf("Expecting: %v, received: %v", lcr, rcv) //rcv nil
+		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
 	}
-	*/
 }
 
 func testOnStorITCRUDCdrStats(t *testing.T) {

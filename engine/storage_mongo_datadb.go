@@ -791,12 +791,13 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool, transactionID string)
 	cCommit := cacheCommit(transactionID)
 	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	cache.Set(cacheKey, result.Value, cCommit, transactionID)
+	lcr = result.Value
+	cache.Set(cacheKey, lcr, cCommit, transactionID)
 	return
 }
 
