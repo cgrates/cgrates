@@ -557,10 +557,10 @@ func (rs *RedisStorage) GetReverseDestination(key string, skipCache bool, transa
 		}
 	}
 	if ids, err = rs.Cmd("SMEMBERS", key).List(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-			err = utils.ErrNotFound
-		}
+		return
+	} else if len(ids) == 0 {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		err = utils.ErrNotFound
 		return
 	}
 	cache.Set(key, ids, cacheCommit(transactionID), transactionID)

@@ -927,17 +927,17 @@ func testOnStorITCRUDDestination(t *testing.T) {
 	if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	// if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr)
-	// }
+	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
 }
 
 func testOnStorITCRUDReverseDestination(t *testing.T) {
 	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+491", "+492", "+493"}}
 	dst2 := &Destination{Id: "CRUDReverseDestination2", Prefixes: []string{"+491", "+492", "+493"}}
-	//FixMe if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr) //<nil>
-	// }
+	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
 	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
