@@ -922,9 +922,12 @@ func (ms *MongoStorage) RemoveDestination(destID string, transactionID string) (
 	// get destination for prefix list
 	d, err := ms.GetDestination(destID, false, transactionID)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			err = nil
+		}
 		return
 	}
-	err = col.Remove(bson.M{"key": key})
+	err = col.Remove(bson.M{"key": destID})
 	if err != nil {
 		return err
 	}

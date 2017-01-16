@@ -924,9 +924,9 @@ func testOnStorITCRUDDestination(t *testing.T) {
 	} else if !reflect.DeepEqual(dst, rcv) {
 		t.Errorf("Expecting: %v, received: %v", dst, rcv)
 	}
-	//FixMe if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
-	// 	t.Error(err)
-	// }
+	if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
 	// if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 	// 	t.Error(rcvErr)
 	// }
