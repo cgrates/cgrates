@@ -1267,7 +1267,11 @@ func (rs *RedisStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 	if len(oldaPlIDs) == 0 { // no more elements, remove the reference
 		return rs.Cmd("DEL", key).Err
 	}
-	return rs.Cmd("SET", key, oldaPlIDs).Err
+	var result []byte
+	if result, err = rs.ms.Marshal(oldaPlIDs); err != nil {
+		return err
+	}
+	return rs.Cmd("SET", key, result).Err
 }
 
 func (rs *RedisStorage) PushTask(t *Task) error {

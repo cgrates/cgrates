@@ -1658,7 +1658,7 @@ func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 	if len(aPlIDs) == 0 {
 		return col.Remove(bson.M{"key": acntID})
 	}
-	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional)
+	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
@@ -1675,7 +1675,7 @@ func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 	_, err = col.Upsert(bson.M{"key": acntID}, &struct {
 		Key   string
 		Value []string
-	}{Key: acntID, Value: aPlIDs})
+	}{Key: acntID, Value: oldAPlIDs})
 	return
 }
 
