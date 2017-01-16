@@ -1330,12 +1330,15 @@ func (ms *MongoStorage) RemoveAlias(key, transactionID string) (err error) {
 		Value AliasValues
 	}
 	session, col := ms.conn(colAls)
-	if err := col.Find(bson.M{"key": origKey}).One(&kv); err == nil {
-		al.Values = kv.Value
-	}
-	err = col.Remove(bson.M{"key": origKey})
-	if err != nil {
+	if err := col.Find(bson.M{"key": origKey}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			err = nil
+		}
 		return err
+	}
+	al.Values = kv.Value
+	if err = col.Remove(bson.M{"key": origKey}); err != nil {
+		return
 	}
 	cCommit := cacheCommit(transactionID)
 	cache.RemKey(key, cCommit, transactionID)
@@ -1347,9 +1350,12 @@ func (ms *MongoStorage) RemoveAlias(key, transactionID string) (err error) {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
 				rKey := alias + target + al.Context
-				err = col.Update(bson.M{"key": rKey}, bson.M{"$pull": bson.M{"value": tmpKey}})
-				if err != nil {
-					return err
+				if err = col.Update(bson.M{"key": rKey}, bson.M{"$pull": bson.M{"value": tmpKey}}); err != nil {
+					if err == mgo.ErrNotFound {
+						err = nil // cancel the error not to be propagated with return bellow
+					} else {
+						return err
+					}
 				}
 				cache.RemKey(utils.REVERSE_ALIASES_PREFIX+rKey, cCommit, transactionID)
 			}
