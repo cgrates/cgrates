@@ -61,6 +61,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheReverseAlias,
 	testOnStorITCacheResourceLimit,
 	// ToDo: test cache flush for a prefix
+	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
 	testOnStorITPushPop,
 	testOnStorITCRUDRatingPlan,
@@ -82,6 +83,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDReverseAlias,
 	testOnStorITCRUDResourceLimit,
 	testOnStorITCRUDHistory,
+	testOnStorITCRUDStructVersion,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -1513,5 +1515,39 @@ func testOnStorITCRUDHistory(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ist, rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", ist, rcv[0])
+	}
+}
+
+func testOnStorITCRUDStructVersion(t *testing.T) {
+	cv := &StructVersion{
+		Destinations:    "1",
+		RatingPlans:     "1",
+		RatingProfiles:  "1",
+		Lcrs:            "1",
+		DerivedChargers: "1",
+		Actions:         "1",
+		ActionPlans:     "1",
+		ActionTriggers:  "1",
+		SharedGroups:    "1",
+		Accounts:        "1",
+		CdrStats:        "1",
+		Users:           "1",
+		Alias:           "1",
+		PubSubs:         "1",
+		LoadHistory:     "1",
+		Cdrs:            "1",
+		SMCosts:         "1",
+		ResourceLimits:  "1",
+	}
+	if _, rcvErr := onStor.GetStructVersion(); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetStructVersion(CurrentVersion); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetStructVersion(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cv, rcv) {
+		t.Errorf("Expecting: %v, received: %v", cv, rcv)
 	}
 }
