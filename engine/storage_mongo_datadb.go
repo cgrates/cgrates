@@ -1364,10 +1364,6 @@ func (ms *MongoStorage) RemoveAlias(key, transactionID string) (err error) {
 	return
 }
 
-func (ms *MongoStorage) UpdateReverseAlias(oldAl, newAl *Alias, transactionID string) error {
-	return nil
-}
-
 // Limit will only retrieve the last n items out of history, newest first
 func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool, transactionID string) (loadInsts []*utils.LoadInstance, err error) {
 	if limit == 0 {

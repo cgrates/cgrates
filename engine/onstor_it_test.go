@@ -1398,16 +1398,16 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 		Direction: "*out",
 		Tenant:    "itsyscom.com",
 		Category:  "call",
-		Account:   "dan",
-		Subject:   "dan",
+		Account:   "testOnStorITCRUDReverseAlias",
+		Subject:   "testOnStorITCRUDReverseAlias",
 		Context:   "*rating",
 		Values: AliasValues{
 			&AliasValue{
 				DestinationId: "EU",
 				Pairs: AliasPairs{
 					"Account": map[string]string{
-						"dan": "dan1",
-						"rif": "rif1",
+						"dan": "testOnStorITCRUDReverseAlias1",
+						"rif": "testOnStorITCRUDReverseAlias2",
 					},
 					"Calling": map[string]string{
 						"11234": "2234",
@@ -1418,47 +1418,16 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 
 			&AliasValue{
 				DestinationId: "US",
-				Pairs:         AliasPairs{"Account": map[string]string{"dan": "dan2"}},
-				Weight:        20,
-			},
-		},
-	}
-	als2 := &Alias{
-		Direction: "*out",
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Account:   "dan",
-		Subject:   "dan",
-		Context:   "*rating",
-		Values: AliasValues{
-			&AliasValue{
-				DestinationId: "EU_LANDLINE",
-				Pairs: AliasPairs{
-					"Subject": map[string]string{
-						"dan": "dan1",
-						"rif": "rif1",
-					},
-					"Cli": map[string]string{
-						"0723": "0724",
-					},
-				},
-				Weight: 10,
-			},
-
-			&AliasValue{
-				DestinationId: "GLOBAL1",
-				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan2"}},
+				Pairs:         AliasPairs{"Account": map[string]string{"dan": "testOnStorITCRUDReverseAlias3"}},
 				Weight:        20,
 			},
 		},
 	}
 	rvAlsID := strings.Join([]string{als.Values[1].Pairs["Account"]["dan"], "Account", als.Context}, "")
 	exp := strings.Join([]string{als.Direction, ":", als.Tenant, ":", als.Category, ":", als.Account, ":", als.Subject, ":", als.Context, ":", als.Values[1].DestinationId}, "")
-	// rvAlsID2 := strings.Join([]string{als2.Values[1].Pairs["Account"]["dan"], "Account", als2.Context}, "")
-	// exp2 := strings.Join([]string{als2.Direction, ":", als2.Tenant, ":", als2.Category, ":", als2.Account, ":", als2.Subject, ":", als2.Context, ":", als2.Values[1].DestinationId}, "")
-	//FixMe if _, rcvErr := onStor.GetReverseAlias(rvAlsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr) //<nil>
-	// }
+	if _, rcvErr := onStor.GetReverseAlias(rvAlsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
 	if err := onStor.SetReverseAlias(als, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -1467,14 +1436,6 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", exp, rcv[0])
 	}
-	if err := onStor.UpdateReverseAlias(als, als2, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	//FixMe if rcv, err := onStor.GetReverseAlias(rvAlsID2, true, utils.NonTransactional); err != nil {
-	// 	t.Error(err) //NOT_FOUND
-	// } else if !reflect.DeepEqual(exp2, rcv) {
-	// 	t.Errorf("Expecting: %v, received: %v", exp2, rcv)
-	// }
 }
 
 func testOnStorITCRUDResourceLimit(t *testing.T) {

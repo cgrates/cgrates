@@ -101,7 +101,6 @@ type AccountingStorage interface {
 	RemoveAlias(string, string) error
 	SetReverseAlias(*Alias, string) error
 	GetReverseAlias(string, bool, string) ([]string, error)
-	UpdateReverseAlias(*Alias, *Alias, string) error
 	GetResourceLimit(string, bool, string) (*ResourceLimit, error)
 	SetResourceLimit(*ResourceLimit, string) error
 	RemoveResourceLimit(string, string) error
@@ -173,7 +172,6 @@ type DataDB interface {
 	RemoveAlias(string, string) error
 	SetReverseAlias(*Alias, string) error
 	GetReverseAlias(string, bool, string) ([]string, error)
-	UpdateReverseAlias(*Alias, *Alias, string) error
 	GetResourceLimit(string, bool, string) (*ResourceLimit, error)
 	SetResourceLimit(*ResourceLimit, string) error
 	RemoveResourceLimit(string, string) error
