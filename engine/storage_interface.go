@@ -36,6 +36,7 @@ type Storage interface {
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions) (err error)
 	RemoveVersions(vrs Versions) (err error)
+	SelectDatabase(dbName string) (err error)
 }
 
 // Interface for storage providers.
@@ -77,8 +78,7 @@ type RatingStorage interface {
 	RemAccountActionPlans(acntID string, aPlIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
-	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
-	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
+	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error
 }
 
 type AccountingStorage interface {
@@ -111,7 +111,6 @@ type AccountingStorage interface {
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
-	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error
 }
 
