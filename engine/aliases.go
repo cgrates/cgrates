@@ -245,11 +245,6 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) (err error) 
 		if err = am.accountingDb.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
 			return
 		}
-		//FIXME: optimize by creating better update reverse alias
-		/*err := am.accountingDb.UpdateReverseAlias(oldAlias, oldAlias)
-		if err != nil {
-			return err
-		}*/
 	}
 
 	*reply = utils.OK

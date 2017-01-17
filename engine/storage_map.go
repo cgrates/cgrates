@@ -894,10 +894,6 @@ func (ms *MapStorage) RemoveAlias(key string, transactionID string) error {
 	return nil
 }
 
-func (ms *MapStorage) UpdateReverseAlias(oldAl, newAl *Alias, transactionID string) error {
-	return nil
-}
-
 func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool, transactionID string) ([]*utils.LoadInstance, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()

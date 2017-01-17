@@ -926,13 +926,8 @@ func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool, transa
 		}
 	}
 	if ids, err = rs.Cmd("SMEMBERS", key).List(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-			err = utils.ErrNotFound
-		}
 		return
-	}
-	if len(ids) == 0 {
+	} else if len(ids) == 0 {
 		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		err = utils.ErrNotFound
 		return
@@ -988,13 +983,6 @@ func (rs *RedisStorage) RemoveAlias(id string, transactionID string) (err error)
 		}
 	}
 	return
-}
-
-func (rs *RedisStorage) UpdateReverseAlias(oldAl, newAl *Alias, transactionID string) error {
-	// FIXME: thi can be optimized
-	cache.RemPrefixKey(utils.REVERSE_ALIASES_PREFIX, cacheCommit(transactionID), transactionID)
-	rs.SetReverseAlias(newAl, transactionID)
-	return nil
 }
 
 // Limit will only retrieve the last n items out of history, newest first
