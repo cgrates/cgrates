@@ -77,7 +77,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDAccountActionPlans,
 	testOnStorITCRUDAccount,
 	testOnStorITCRUDCdrStatsQueue,
-	//FixMe	testOnStorITCRUDSubscribers,
+	testOnStorITCRUDSubscribers,
 	testOnStorITCRUDUser,
 	testOnStorITCRUDAlias,
 	testOnStorITCRUDReverseAlias,
@@ -926,36 +926,40 @@ func testOnStorITCRUDDestination(t *testing.T) {
 	} else if !reflect.DeepEqual(dst, rcv) {
 		t.Errorf("Expecting: %v, received: %v", dst, rcv)
 	}
-	//FixMe if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
-	// 	t.Error(err)
-	// }
-	// if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr)
-	// }
+	if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
 }
 
 func testOnStorITCRUDReverseDestination(t *testing.T) {
 	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+491", "+492", "+493"}}
 	dst2 := &Destination{Id: "CRUDReverseDestination2", Prefixes: []string{"+491", "+492", "+493"}}
-	//FixMe if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr) //<nil>
-	// }
+	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
 	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	//FixMe if rcv, err := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); err != nil {
-	// 	t.Error(err)
-	// } else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
-	// 	t.Errorf("Expecting: %v, received: %v", dst, rcv) //Expecting: CRUDReverseDestination: +491, +492, +493, received: []
-	// }
+	/* FixMe @Edwardo22
+	if rcv, err := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); err != nil {
+	 	t.Error(err)
+	 } else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
+	 	t.Errorf("Expecting: %v, received: %v", dst, rcv) //Expecting: CRUDReverseDestination: +491, +492, +493, received: []
+	 }
+	*/
 	if err := onStor.UpdateReverseDestination(dst, dst2, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	//FixMe if rcv, err := onStor.GetReverseDestination(dst2.Id, true, utils.NonTransactional); err != nil {
-	// 	t.Error(err)
-	// } else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
-	// 	t.Errorf("Expecting: %v, received: %v", dst2, rcv) //Expecting: CRUDReverseDestination2: +491, +492, +493, received: []
-	// }
+	/* FixMe @Edwardo22
+	if rcv, err := onStor.GetReverseDestination(dst2.Id, true, utils.NonTransactional); err != nil {
+	 	t.Error(err)
+	 } else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
+	 	t.Errorf("Expecting: %v, received: %v", dst2, rcv) //Expecting: CRUDReverseDestination2: +491, +492, +493, received: []
+	}
+	*/
 }
 
 func testOnStorITCRUDLCR(t *testing.T) {
@@ -963,8 +967,8 @@ func testOnStorITCRUDLCR(t *testing.T) {
 		Tenant:    "cgrates.org",
 		Category:  "call",
 		Direction: "*out",
-		Account:   "*any",
-		Subject:   "*any",
+		Account:   "testOnStorITCRUDLCR",
+		Subject:   "testOnStorITCRUDLCR",
 		Activations: []*LCRActivation{
 			&LCRActivation{
 				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
@@ -987,17 +991,18 @@ func testOnStorITCRUDLCR(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := onStor.GetLCR(utils.LCR_PREFIX+lcr.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+
+	if _, rcvErr := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	//FixMe  if rcv, err := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); err != nil {
-	// 	t.Error(err)
-	// } else if !reflect.DeepEqual(lcr, rcv) {
-	// 	t.Errorf("Expecting: %v, received: %v", lcr, rcv)//rcv nil
-	// }
+	if rcv, err := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(lcr, rcv) {
+		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
+	}
 }
 
 func testOnStorITCRUDCdrStats(t *testing.T) {
@@ -1212,20 +1217,20 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	} else if !reflect.DeepEqual(expect, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expect, rcv)
 	}
-	// if err := onStor.RemAccountActionPlans(acntID, aAPs2); err != nil {
-	// 	t.Error(err)
-	// }
-	// if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
-	// 	t.Error(err)
-	// } else if !reflect.DeepEqual(aAPs, rcv) {
-	// 	t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
-	// }onstor_it_test.go:1238: Expecting: [PACKAGE_10_SHARED_A_5 apl_PACKAGE_1001], received: [PACKAGE_10_SHARED_A_5 USE_SHARED_A apl_PACKAGE_1001]
+	if err := onStor.RemAccountActionPlans(acntID, aAPs2); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(aAPs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
+	}
 	if err := onStor.RemAccountActionPlans(acntID, aAPs); err != nil {
 		t.Error(err)
 	}
-	// if _, rcvErr := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr)
-	// }
+	if _, rcvErr := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
 }
 
 func testOnStorITCRUDAccount(t *testing.T) {
@@ -1259,7 +1264,12 @@ func testOnStorITCRUDAccount(t *testing.T) {
 func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 	sq := &StatsQueue{
 		conf: &CdrStats{Id: "TTT"},
-		Cdrs: []*QCdr{&QCdr{Cost: 9.0}},
+		Cdrs: []*QCdr{
+			&QCdr{Cost: 9.0,
+				SetupTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				AnswerTime: time.Date(2012, 1, 1, 0, 0, 10, 0, time.UTC).Local(),
+				EventTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			}},
 	}
 	if _, rcvErr := onStor.GetCdrStatsQueue(sq.GetId()); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
@@ -1269,41 +1279,38 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 	}
 	if rcv, err := onStor.GetCdrStatsQueue(sq.GetId()); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(sq.Cdrs[0].Cost, rcv.Cdrs[0].Cost) {
-		t.Errorf("Expecting: %v, received: %v", sq.Cdrs[0].Cost, rcv.Cdrs[0].Cost)
+	} else if !reflect.DeepEqual(sq.Cdrs, rcv.Cdrs) {
+		t.Errorf("Expecting: %v, received: %v", sq.Cdrs, rcv.Cdrs)
 	}
-	// FixMe else if !reflect.DeepEqual(sq.conf.Id, rcv.conf.Id) {
-	// 	t.Errorf("Expecting: %v, received: %v", sq.conf.Id, rcv.conf.Id)
-	// }panic: runtime error: invalid memory address or nil pointer dereference [recovered]
-	// panic: runtime error: invalid memory address or nil pointer dereference
 }
 
-/*FixMe
 func testOnStorITCRUDSubscribers(t *testing.T) {
-	time, _ := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-	rsr := utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)
-	sub := &SubscriberData{time, rsr}
-	 if _, rcvErr := onStor.GetSubscribers(); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr) //<nil>
+	if sbs, err := onStor.GetSubscribers(); err != nil {
+		t.Error(err)
+	} else if len(sbs) != 0 {
+		t.Errorf("Received subscribers: %+v", sbs)
 	}
-	if err := onStor.SetSubscriber(utils.NonTransactional, sub); err != nil {
+	sbsc := &SubscriberData{
+		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
+	sbscID := "testOnStorITCRUDSubscribers"
+	if err := onStor.SetSubscriber(sbscID, sbsc); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetSubscribers(); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(sub.ExpTime, rcv[""].ExpTime) {
-		t.Errorf("Expecting: %v, received: %v", sub.ExpTime, rcv[""].ExpTime)
-	}  else if !reflect.DeepEqual(*sub.Filters[0], *rcv[""].Filters[0]) {
-		t.Errorf("Expecting: %v, received: %v", *sub.Filters[0], *rcv[""].Filters[0])//1321: Expecting: {*default [] *default []}, received: {*default []  []}
+	} else if !reflect.DeepEqual(sbsc.ExpTime, rcv[sbscID].ExpTime) { // Test just ExpTime since RSRField is more complex behind
+		t.Errorf("Expecting: %v, received: %v", sbsc, rcv[sbscID])
 	}
-	if err := onStor.RemoveSubscriber(utils.NonTransactional); err != nil {
+	if err := onStor.RemoveSubscriber(sbscID); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetSubscribers(); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)//<nil>
+	if sbs, err := onStor.GetSubscribers(); err != nil {
+		t.Error(err)
+	} else if len(sbs) != 0 {
+		t.Errorf("Received subscribers: %+v", sbs)
 	}
 }
-*/
 func testOnStorITCRUDUser(t *testing.T) {
 	usr := &UserProfile{
 		Tenant:   "test",
@@ -1378,12 +1385,12 @@ func testOnStorITCRUDAlias(t *testing.T) {
 	} else if !reflect.DeepEqual(als, rcv) {
 		t.Errorf("Expecting: %v, received: %v", als, rcv)
 	}
-	//FixMe if err := onStor.RemoveAlias(als.GetId(), utils.NonTransactional); err != nil {
-	// 	t.Error(err)
-	// }
-	// if _, rcvErr := onStor.GetAlias(als.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr)
-	// }
+	if err := onStor.RemoveAlias(als.GetId(), utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetAlias(als.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
 }
 
 func testOnStorITCRUDReverseAlias(t *testing.T) {

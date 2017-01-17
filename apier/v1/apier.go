@@ -116,6 +116,15 @@ func (v1 *ApierV1) ComputeReverseAliases(ignr string, reply *string) (err error)
 	return
 }
 
+// ComputeReverseAliases will rebuild complete reverse aliases data
+func (v1 *ApierV1) ComputeAccountActionPlans(ignr string, reply *string) (err error) {
+	if err = v1.RatingDb.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
 	if sg, err := apier.RatingDb.GetSharedGroup(sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 		return err
@@ -667,12 +676,12 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 }
 
 type AttrGetActionPlan struct {
-	Id string
+	ID string
 }
 
 func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
 	var result []*engine.ActionPlan
-	if attr.Id == "" || attr.Id == "*" {
+	if attr.ID == "" || attr.ID == "*" {
 		aplsMap, err := self.RatingDb.GetAllActionPlans()
 		if err != nil {
 			return err
@@ -681,7 +690,7 @@ func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.Acti
 			result = append(result, apls)
 		}
 	} else {
-		apls, err := self.RatingDb.GetActionPlan(attr.Id, false, utils.NonTransactional)
+		apls, err := self.RatingDb.GetActionPlan(attr.ID, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

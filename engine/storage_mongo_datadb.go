@@ -791,12 +791,13 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool, transactionID string)
 	cCommit := cacheCommit(transactionID)
 	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	cache.Set(cacheKey, result.Value, cCommit, transactionID)
+	lcr = result.Value
+	cache.Set(cacheKey, lcr, cCommit, transactionID)
 	return
 }
 
@@ -922,9 +923,12 @@ func (ms *MongoStorage) RemoveDestination(destID string, transactionID string) (
 	// get destination for prefix list
 	d, err := ms.GetDestination(destID, false, transactionID)
 	if err != nil {
+		if err == mgo.ErrNotFound {
+			err = nil
+		}
 		return
 	}
-	err = col.Remove(bson.M{"key": key})
+	err = col.Remove(bson.M{"key": destID})
 	if err != nil {
 		return err
 	}
@@ -1326,12 +1330,15 @@ func (ms *MongoStorage) RemoveAlias(key, transactionID string) (err error) {
 		Value AliasValues
 	}
 	session, col := ms.conn(colAls)
-	if err := col.Find(bson.M{"key": origKey}).One(&kv); err == nil {
-		al.Values = kv.Value
-	}
-	err = col.Remove(bson.M{"key": origKey})
-	if err != nil {
+	if err := col.Find(bson.M{"key": origKey}).One(&kv); err != nil {
+		if err == mgo.ErrNotFound {
+			err = nil
+		}
 		return err
+	}
+	al.Values = kv.Value
+	if err = col.Remove(bson.M{"key": origKey}); err != nil {
+		return
 	}
 	cCommit := cacheCommit(transactionID)
 	cache.RemKey(key, cCommit, transactionID)
@@ -1343,9 +1350,12 @@ func (ms *MongoStorage) RemoveAlias(key, transactionID string) (err error) {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
 				rKey := alias + target + al.Context
-				err = col.Update(bson.M{"key": rKey}, bson.M{"$pull": bson.M{"value": tmpKey}})
-				if err != nil {
-					return err
+				if err = col.Update(bson.M{"key": rKey}, bson.M{"$pull": bson.M{"value": tmpKey}}); err != nil {
+					if err == mgo.ErrNotFound {
+						err = nil // cancel the error not to be propagated with return bellow
+					} else {
+						return err
+					}
 				}
 				cache.RemKey(utils.REVERSE_ALIASES_PREFIX+rKey, cCommit, transactionID)
 			}
@@ -1474,11 +1484,11 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers, trans
 	session, col := ms.conn(colAtr)
 	defer session.Close()
 	if len(atrs) == 0 {
-		err = col.Remove(bson.M{"key": key}) // delete the key
-		if err != mgo.ErrNotFound {
-			return err
+		err = col.Remove(bson.M{"key": key})
+		if err == mgo.ErrNotFound { // Overwrite not found since it is not really mandatory here to be returned
+			err = nil
 		}
-		return nil
+		return
 	}
 	_, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
@@ -1654,7 +1664,7 @@ func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 	if len(aPlIDs) == 0 {
 		return col.Remove(bson.M{"key": acntID})
 	}
-	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional)
+	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
@@ -1671,7 +1681,7 @@ func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 	_, err = col.Upsert(bson.M{"key": acntID}, &struct {
 		Key   string
 		Value []string
-	}{Key: acntID, Value: aPlIDs})
+	}{Key: acntID, Value: oldAPlIDs})
 	return
 }
 

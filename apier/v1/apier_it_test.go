@@ -1222,6 +1222,11 @@ func TestApierComputeReverse(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
 	}
+	if err := rater.Call("ApierV1.ComputeAccountActionPlans", "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Received: ", reply)
+	}
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {

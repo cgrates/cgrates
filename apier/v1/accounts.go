@@ -24,7 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -46,27 +45,29 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
-	accountATs := make([]*AccountActionTiming, 0) // needs to be initialized if remains empty
-	allAPs, err := self.RatingDb.GetAllActionPlans()
-	if err != nil {
+	acntID := utils.AccountKey(attrs.Tenant, attrs.Account)
+	acntAPids, err := self.RatingDb.GetAccountActionPlans(acntID, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
 		return utils.NewErrServerError(err)
 	}
-	accID := utils.AccountKey(attrs.Tenant, attrs.Account)
-	for _, ap := range allAPs {
-		if ap == nil {
-			continue
+	var acntAPs []*engine.ActionPlan
+	for _, apID := range acntAPids {
+		if ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
+			return err
+		} else if ap != nil {
+			acntAPs = append(acntAPs, ap)
 		}
-		if _, exists := ap.AccountIDs[accID]; exists {
-			for _, at := range ap.ActionTimings {
-				accountATs = append(accountATs, &AccountActionTiming{
-					ActionPlanId: ap.Id,
-					Uuid:         at.Uuid,
-					ActionsId:    at.ActionsID,
-					NextExecTime: at.GetNextStartTime(time.Now()),
-				})
-			}
+	}
+	accountATs := make([]*AccountActionTiming, 0) // needs to be initialized if remains empty
+	for _, ap := range acntAPs {
+		for _, at := range ap.ActionTimings {
+			accountATs = append(accountATs, &AccountActionTiming{
+				ActionPlanId: ap.Id,
+				Uuid:         at.Uuid,
+				ActionsId:    at.ActionsID,
+				NextExecTime: at.GetNextStartTime(time.Now()),
+			})
 		}
-
 	}
 	*reply = accountATs
 	return nil
@@ -133,7 +134,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
 	if accID != "" && attrs.ActionTimingId != "" { // Rebuild index for accounts pointing towards ActionPlans
-		if err = self.RatingDb.RemAccountActionPlans(accID, []string{attrs.ActionTimingId}); err != nil {
+		if err = self.RatingDb.RemAccountActionPlans(accID, []string{attrs.ActionPlanId}); err != nil {
 			return
 		}
 		if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
@@ -172,7 +173,6 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 			}
 		}
 		if len(attr.ActionPlanId) != 0 {
-
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 				var ap *engine.ActionPlan
 				ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
@@ -203,25 +203,31 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 					}
 				}
 				// clean previous action plans
-				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
-				if err != nil {
-					if err == utils.ErrNotFound { // if no action plans just continue
-						return 0, nil
-					}
+				acntAPids, err := self.RatingDb.GetAccountActionPlans(accID, false, utils.NonTransactional)
+				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}
-				for actionPlanID, ap := range actionPlansMap {
-					if actionPlanID == attr.ActionPlanId {
-						// don't remove it if it's the current one
-						continue
-					}
-					if _, exists := ap.AccountIDs[accID]; exists {
+				for _, apID := range acntAPids {
+					if apID != attr.ActionPlanId {
+						ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional)
+						if err != nil {
+							return 0, err
+						}
 						delete(ap.AccountIDs, accID)
-						// clean from cache
-						cache.RemKey(utils.ACTION_PLAN_PREFIX+actionPlanID, true, utils.NonTransactional)
+						if err = self.RatingDb.SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
+							return 0, err
+						}
+						if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
+							return 0, err
+						}
 					}
 				}
-
+				if err = self.RatingDb.SetAccountActionPlans(accID, []string{attr.ActionPlanId}, false); err != nil {
+					return 0, err
+				}
+				if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+					return 0, err
+				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
 			if err != nil {

@@ -557,10 +557,10 @@ func (rs *RedisStorage) GetReverseDestination(key string, skipCache bool, transa
 		}
 	}
 	if ids, err = rs.Cmd("SMEMBERS", key).List(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-			err = utils.ErrNotFound
-		}
+		return
+	} else if len(ids) == 0 {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		err = utils.ErrNotFound
 		return
 	}
 	cache.Set(key, ids, cacheCommit(transactionID), transactionID)
@@ -1267,7 +1267,11 @@ func (rs *RedisStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 	if len(oldaPlIDs) == 0 { // no more elements, remove the reference
 		return rs.Cmd("DEL", key).Err
 	}
-	return rs.Cmd("SET", key, oldaPlIDs).Err
+	var result []byte
+	if result, err = rs.ms.Marshal(oldaPlIDs); err != nil {
+		return err
+	}
+	return rs.Cmd("SET", key, result).Err
 }
 
 func (rs *RedisStorage) PushTask(t *Task) error {
