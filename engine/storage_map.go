@@ -1028,23 +1028,24 @@ func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, trans
 	key := utils.AccountActionPlansPrefix + acntID
 	var values []byte
 	if !skipCache {
-		if x, err := cache.Get(key); err != nil {
+		if x, ok := cache.Get(key); ok {
 			return nil, utils.ErrNotFound
 		} else {
 			return x.([]string), nil
 		}
 	}
-	if values, err := ms.dict[key]; err != nil {
+	if _, ok := ms.dict[key]; ok {
 		return nil, err
 	} else {
 		if err = ms.ms.Unmarshal(values, &apIDs); err != nil {
-		return nil, err
-	} else {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-		return nil, utils.ErrNotFound
+			return nil, err
+		} else {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			return nil, utils.ErrNotFound
+		}
+		cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
+		return apIDs, nil
 	}
-	cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
-	return
 }
 
 func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {

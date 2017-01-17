@@ -935,31 +935,31 @@ func testOnStorITCRUDDestination(t *testing.T) {
 }
 
 func testOnStorITCRUDReverseDestination(t *testing.T) {
-	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+491", "+492", "+493"}}
-	dst2 := &Destination{Id: "CRUDReverseDestination2", Prefixes: []string{"+491", "+492", "+493"}}
+	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+494", "+495", "+496"}}
+	dst2 := &Destination{Id: "CRUDReverseDestination2", Prefixes: []string{"+497", "+498", "+499"}}
 	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	/* FixMe @Edwardo22
-	if rcv, err := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); err != nil {
-	 	t.Error(err)
-	 } else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
-	 	t.Errorf("Expecting: %v, received: %v", dst, rcv) //Expecting: CRUDReverseDestination: +491, +492, +493, received: []
-	 }
-	*/
+	for i, _ := range dst.Prefixes {
+		if rcv, err := onStor.GetReverseDestination(dst.Prefixes[i], true, utils.NonTransactional); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
+			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
+		}
+	}
 	if err := onStor.UpdateReverseDestination(dst, dst2, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	/* FixMe @Edwardo22
-	if rcv, err := onStor.GetReverseDestination(dst2.Id, true, utils.NonTransactional); err != nil {
-	 	t.Error(err)
-	 } else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
-	 	t.Errorf("Expecting: %v, received: %v", dst2, rcv) //Expecting: CRUDReverseDestination2: +491, +492, +493, received: []
+	for i, _ := range dst.Prefixes {
+		if rcv, err := onStor.GetReverseDestination(dst2.Prefixes[i], true, utils.NonTransactional); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
+			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
+		}
 	}
-	*/
 }
 
 func testOnStorITCRUDLCR(t *testing.T) {
