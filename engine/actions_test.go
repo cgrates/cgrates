@@ -2387,14 +2387,23 @@ func TestCacheGetClonedActions(t *testing.T) {
 			Weight: float64(30),
 		},
 		&Action{
-			Id:         "RECUR_FOR_V3HSILLMILLD5G",
-			ActionType: DEBIT,
+			Id:         "REACT_FOR_V3HSILLMILL",
+			ActionType: SET_BALANCE,
 			Balance: &BalanceFilter{
-				ID:    utils.StringPointer("*default"),
-				Value: &utils.ValueFormula{Static: 2},
-				Type:  utils.StringPointer(utils.MONETARY),
+				ID:    utils.StringPointer("for_v3hsillmill_sms_ill"),
+				Type:  utils.StringPointer(utils.SMS),
+				Value: &utils.ValueFormula{Static: 20000},
+				DestinationIDs: &utils.StringMap{
+					"FRANCE_NATIONAL":      true,
+					"FRANCE_NATIONAL_FREE": false,
+					"ZONE1":                false},
+				Categories: &utils.StringMap{
+					"sms_eurotarif": true,
+					"sms_france":    true},
+				Disabled: utils.BoolPointer(false),
+				Blocker:  utils.BoolPointer(false),
 			},
-			Weight: float64(20),
+			Weight: float64(10),
 		},
 	}
 	cache.Set("MYTEST", actions, true, "")
@@ -2404,7 +2413,7 @@ func TestCacheGetClonedActions(t *testing.T) {
 	}
 	aCloned := clned.(Actions)
 	if !reflect.DeepEqual(actions, aCloned) {
-		t.Errorf("Expecting: %+v, received: %+v", actions, aCloned)
+		t.Errorf("Expecting: %+v, received: %+v", actions[1].Balance, aCloned[1].Balance)
 	}
 }
 
