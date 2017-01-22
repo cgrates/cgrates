@@ -74,7 +74,7 @@ func (t *Task) Execute() error {
 		Uuid:       t.Uuid,
 		ActionsID:  t.ActionsID,
 		accountIDs: utils.StringMap{t.AccountID: true},
-	}).Execute()
+	}).Execute(nil, nil)
 }
 
 func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
@@ -282,7 +282,9 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 	return at.actions, err
 }
 
-func (at *ActionTiming) Execute() (err error) {
+// Execute will execute all actions in an action plan
+// Reports on success/fail via channel if != nil
+func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err error) {
 	at.ResetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
@@ -331,7 +333,13 @@ func (at *ActionTiming) Execute() (err error) {
 				if err := actionFunction(acc, nil, a, aac); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					transactionFailed = true
+					if failedActions != nil {
+						go func() { failedActions <- a }()
+					}
 					break
+				}
+				if successActions != nil {
+					go func() { successActions <- a }()
 				}
 				if a.ActionType == REMOVE_ACCOUNT {
 					removeAccountActionFound = true
@@ -356,11 +364,20 @@ func (at *ActionTiming) Execute() (err error) {
 				// do not allow the action plan to be rescheduled
 				at.Timing = nil
 				utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+				if failedActions != nil {
+					go func() { failedActions <- a }()
+				}
 				break
 			}
 			if err := actionFunction(nil, nil, a, aac); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
+				if failedActions != nil {
+					go func() { failedActions <- a }()
+				}
 				break
+			}
+			if successActions != nil {
+				go func() { successActions <- a }()
 			}
 		}
 	}

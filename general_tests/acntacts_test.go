@@ -83,7 +83,7 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 		ActionsID: "DISABLE_ACNT",
 	}
 	at.SetAccountIDs(utils.StringMap{acnt1Tag: true})
-	if err := at.Execute(); err != nil {
+	if err := at.Execute(nil, nil); err != nil {
 		t.Error(err)
 	}
 	expectAcnt := &engine.Account{ID: "cgrates.org:1", Disabled: true}
@@ -100,7 +100,7 @@ func TestAcntActsEnableAcnt(t *testing.T) {
 		ActionsID: "ENABLE_ACNT",
 	}
 	at.SetAccountIDs(utils.StringMap{acnt1Tag: true})
-	if err := at.Execute(); err != nil {
+	if err := at.Execute(nil, nil); err != nil {
 		t.Error(err)
 	}
 	expectAcnt := &engine.Account{ID: "cgrates.org:1", Disabled: false}

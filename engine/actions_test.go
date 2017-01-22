@@ -419,7 +419,7 @@ func TestActionPlanLogFunction(t *testing.T) {
 	at := &ActionTiming{
 		actions: []*Action{a},
 	}
-	err := at.Execute()
+	err := at.Execute(nil, nil)
 	if err != nil {
 		t.Errorf("Could not execute LOG action: %v", err)
 	}
@@ -438,7 +438,7 @@ func TestActionPlanFunctionNotAvailable(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions:    []*Action{a},
 	}
-	err := at.Execute()
+	err := at.Execute(nil, nil)
 	if err != nil {
 		t.Errorf("Faild to detect wrong function type: %v", err)
 	}
@@ -577,7 +577,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		actions:    actions,
 	}
 
-	if err = at.Execute(); err != nil {
+	if err = at.Execute(nil, nil); err != nil {
 		t.Errorf("Execute Action: %v", err)
 	}
 
@@ -1214,7 +1214,7 @@ func TestRemoveAction(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:remo": true},
 		actions:    Actions{a},
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:remo")
 	if err == nil || afterUb != nil {
 		t.Error("error removing account: ", err, afterUb)
@@ -1233,7 +1233,7 @@ func TestTopupAction(t *testing.T) {
 		actions:    Actions{a},
 	}
 
-	at.Execute()
+	at.Execute(nil, nil)
 	afterUb, _ := accountingStorage.GetAccount("vdf:minu")
 	initialValue := initialUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	afterValue := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
@@ -1254,7 +1254,7 @@ func TestTopupActionLoaded(t *testing.T) {
 		actions:    Actions{a},
 	}
 
-	at.Execute()
+	at.Execute(nil, nil)
 	afterUb, _ := accountingStorage.GetAccount("vdf:minitsboy")
 	initialValue := initialUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	afterValue := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
@@ -1422,7 +1422,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 			},
 		},
 	}
-	err = at.Execute()
+	err = at.Execute(nil, nil)
 	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
@@ -1458,7 +1458,7 @@ func TestActionTransactionBalanceType(t *testing.T) {
 			},
 		},
 	}
-	err = at.Execute()
+	err = at.Execute(nil, nil)
 	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
@@ -1494,7 +1494,7 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 			},
 		},
 	}
-	err = at.Execute()
+	err = at.Execute(nil, nil)
 	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
@@ -1537,7 +1537,7 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 			},
 		},
 	}
-	err = at.Execute()
+	err = at.Execute(nil, nil)
 	acc, err := accountingStorage.GetAccount("cgrates.org:exp")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
@@ -1584,7 +1584,7 @@ func TestActionRemoveBalance(t *testing.T) {
 			},
 		},
 	}
-	err = at.Execute()
+	err = at.Execute(nil, nil)
 	acc, err := accountingStorage.GetAccount("cgrates.org:rembal")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
@@ -1633,7 +1633,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:trans": true},
 		actions:    Actions{a},
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:trans")
 	if err != nil {
@@ -1694,7 +1694,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:trans": true},
 		actions:    Actions{a},
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:trans")
 	if err != nil {
@@ -1760,7 +1760,7 @@ func TestActionConditionalTopup(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:cond": true},
 		actions:    Actions{a},
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:cond")
 	if err != nil {
@@ -1824,7 +1824,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:cond": true},
 		actions:    Actions{a},
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:cond")
 	if err != nil {
@@ -1888,7 +1888,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:cond": true},
 		actions:    Actions{a},
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:cond")
 	if err != nil {
@@ -2038,7 +2038,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:af": true},
 		actions:    Actions{a1, a2, a3, a4, a5},
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:af")
 	if err != nil {
@@ -2109,7 +2109,7 @@ func TestActionSetBalance(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:setb": true},
 		actions:    Actions{a},
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:setb")
 	if err != nil {
@@ -2146,7 +2146,7 @@ func TestActionExpirationTime(t *testing.T) {
 		actions:    a,
 	}
 	for rep := 0; rep < 5; rep++ {
-		at.Execute()
+		at.Execute(nil, nil)
 		afterUb, err := accountingStorage.GetAccount("cgrates.org:expo")
 		if err != nil ||
 			len(afterUb.BalanceMap[utils.VOICE]) != rep+1 {
@@ -2169,7 +2169,7 @@ func TestActionExpNoExp(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:expnoexp": true},
 		actions:    exp,
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:expnoexp")
 	if err != nil ||
 		len(afterUb.BalanceMap[utils.VOICE]) != 2 {
@@ -2222,7 +2222,7 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 			},
 		},
 	}
-	err = at.Execute()
+	err = at.Execute(nil, nil)
 	acc, err := accountingStorage.GetAccount("cgrates.org:bv")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
@@ -2310,7 +2310,7 @@ func TestValueFormulaDebit(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:vf": true},
 		ActionsID:  "VF",
 	}
-	at.Execute()
+	at.Execute(nil, nil)
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:vf")
 	// not an exact value, depends of month
 	v := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()

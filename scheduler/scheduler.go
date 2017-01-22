@@ -29,11 +29,15 @@ import (
 
 type Scheduler struct {
 	sync.RWMutex
-	queue            engine.ActionTimingPriorityList
-	timer            *time.Timer
-	restartLoop      chan bool
-	storage          engine.RatingStorage
-	schedulerStarted bool
+	queue                           engine.ActionTimingPriorityList
+	timer                           *time.Timer
+	restartLoop                     chan bool
+	storage                         engine.RatingStorage
+	schedulerStarted                bool
+	actStatsInterval                time.Duration                 // How long time to keep the stats in memory
+	actSucessChan, actFailedChan    chan *engine.Action           // ActionPlan will pass actions via these channels
+	aSMux, aFMux                    sync.RWMutex                  // protect schedStats
+	actSuccessStats, actFailedStats map[string]map[time.Time]bool // keep here stats regarding executed actions, map[actionType]map[execTime]bool
 }
 
 func NewScheduler(storage engine.RatingStorage) *Scheduler {
@@ -43,6 +47,35 @@ func NewScheduler(storage engine.RatingStorage) *Scheduler {
 	}
 	s.Reload()
 	return s
+}
+
+func (s *Scheduler) updateActStats(act *engine.Action, isFailed bool) {
+	mux := s.aSMux
+	statsMp := s.actSuccessStats
+	if isFailed {
+		mux = s.aFMux
+		statsMp = s.actFailedStats
+	}
+	now := time.Now()
+	mux.Lock()
+	for aType := range statsMp {
+		for t := range statsMp[aType] {
+			if now.Sub(t) > s.actStatsInterval {
+				delete(statsMp[aType], t)
+				if len(statsMp[aType]) == 0 {
+					delete(statsMp, aType)
+				}
+			}
+		}
+	}
+	if act == nil {
+		return
+	}
+	if _, hasIt := statsMp[act.ActionType]; !hasIt {
+		statsMp[act.ActionType] = make(map[time.Time]bool)
+	}
+	statsMp[act.ActionType][now] = true
+	mux.Unlock()
 }
 
 func (s *Scheduler) Loop() {
@@ -61,7 +94,7 @@ func (s *Scheduler) Loop() {
 		now := time.Now()
 		start := a0.GetNextStartTime(now)
 		if start.Equal(now) || start.Before(now) {
-			go a0.Execute()
+			go a0.Execute(s.actSucessChan, s.actFailedChan)
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
 			a0.ResetStartTimeCache()
