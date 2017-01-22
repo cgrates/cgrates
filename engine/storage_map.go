@@ -1024,30 +1024,70 @@ func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, trans
 	key := utils.AccountActionPlansPrefix + acntID
 	var values []byte
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
+		if ap, ok := cache.Get(key); !ok {
 			return nil, utils.ErrNotFound
 		} else {
-			return x.([]string), nil
+			return ap.([]string), nil
 		}
 	}
-	if _, ok := ms.dict[key]; ok {
+	if _, ok := ms.dict[key]; !ok {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		return nil, utils.ErrNotFound
+	}
+
+	if err = ms.ms.Unmarshal(values, &apIDs); err != nil {
 		return nil, err
-	} else {
-		if err = ms.ms.Unmarshal(values, &apIDs); err != nil {
-			return nil, err
-		} else {
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-			return nil, utils.ErrNotFound
-		}
-		cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
-		return apIDs, nil
 	}
+
+	cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
+	return //apIDs, nil
 }
 
 func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
+	if !overwrite {
+		oldaPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
+		if err != nil {
+			return err
+		} else {
+			for _, oldAPid := range oldaPlIDs {
+				if !utils.IsSliceMember(apIDs, oldAPid) {
+					apIDs = append(apIDs, oldAPid)
+				}
+			}
+		}
+	}
+
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	if _, err = ms.ms.Marshal(&apIDs); err != nil {
+		return err
+	}
 	return
 }
+
 func (ms *MapStorage) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.AccountActionPlansPrefix + acntID
+	if len(apIDs) == 0 {
+		delete(ms.dict, key)
+		return
+	}
+	oldaPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(oldaPlIDs); {
+		if utils.IsSliceMember(apIDs, oldaPlIDs[i]) {
+			oldaPlIDs = append(oldaPlIDs[:i], oldaPlIDs[i+1:]...)
+			continue
+		}
+		i++
+	}
+	if len(oldaPlIDs) == 0 {
+		delete(ms.dict, key)
+		return
+	}
 	return
 }
 
