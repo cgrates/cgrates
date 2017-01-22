@@ -53,6 +53,10 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	return nil
 }
 
+func (rs *SQLStorage) SelectDatabase(dbName string) (err error) {
+	return
+}
+
 func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }

@@ -86,6 +86,10 @@ func (ms *MapStorage) Flush(ignore string) error {
 	return nil
 }
 
+func (ms *MapStorage) SelectDatabase(dbName string) (err error) {
+	return
+}
+
 func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 	// FIXME: should do transaction
 	keys, err := ms.GetKeysForPrefix(prefix)

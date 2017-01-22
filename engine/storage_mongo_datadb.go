@@ -322,6 +322,11 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 	return dbSession.DB(ms.db).DropDatabase()
 }
 
+func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
+	ms.db = dbName
+	return
+}
+
 func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey

@@ -761,5 +761,15 @@ func (apl Actions) Clone() (interface{}, error) {
 	if err := utils.Clone(apl, &cln); err != nil {
 		return nil, err
 	}
+	for i, act := range apl { // Fix issues with gob cloning nil pointer towards false value
+		if act.Balance != nil {
+			if act.Balance.Disabled != nil && !*act.Balance.Disabled {
+				cln[i].Balance.Disabled = utils.BoolPointer(*act.Balance.Disabled)
+			}
+			if act.Balance.Blocker != nil && !*act.Balance.Blocker {
+				cln[i].Balance.Blocker = utils.BoolPointer(*act.Balance.Blocker)
+			}
+		}
+	}
 	return cln, nil
 }

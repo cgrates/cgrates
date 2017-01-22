@@ -112,9 +112,8 @@ func newUserMap(accountingDb AccountingStorage, indexes []string) *UserMap {
 	}
 }
 
-func (um *UserMap) ReloadUsers(in string, reply *string) error {
+func (um *UserMap) ReloadUsers(in string, reply *string) (err error) {
 	um.mu.Lock()
-
 	// backup old data
 	oldTable := um.table
 	oldIndex := um.index
@@ -124,19 +123,17 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	um.properties = make(map[string]*prop)
 
 	// load from db
-	if ups, err := um.accountingDb.GetUsers(); err == nil {
-		for _, up := range ups {
-			um.table[up.GetId()] = up.Profile
-			um.properties[up.GetId()] = &prop{weight: up.Weight, masked: up.Masked}
-		}
-	} else {
-		// restore old data before return
+	ups, err := um.accountingDb.GetUsers()
+	if err != nil { // restore old data before return
 		um.table = oldTable
 		um.index = oldIndex
 		um.properties = oldProperties
-
-		*reply = err.Error()
+		um.mu.Unlock()
 		return err
+	}
+	for _, up := range ups {
+		um.table[up.GetId()] = up.Profile
+		um.properties[up.GetId()] = &prop{weight: up.Weight, masked: up.Masked}
 	}
 	um.mu.Unlock()
 
@@ -144,14 +141,15 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 		var s string
 		if err := um.AddIndex(um.indexKeys, &s); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", um.indexKeys, err))
+			um.mu.Lock()
 			um.table = oldTable
 			um.index = oldIndex
 			um.properties = oldProperties
-
-			*reply = err.Error()
+			um.mu.Unlock()
 			return err
 		}
 	}
+
 	*reply = utils.OK
 	return nil
 }
@@ -320,14 +318,19 @@ func (um *UserMap) GetUsers(up *UserProfile, results *UserProfiles) error {
 	return nil
 }
 
+// AddIndex is a method to dynamically add indexes to already existing ones
 func (um *UserMap) AddIndex(indexes []string, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
-	um.indexKeys = append(um.indexKeys, indexes...)
 	for key, values := range um.table {
 		up := &UserProfile{Profile: values}
 		up.SetId(key)
 		um.addIndex(up, indexes)
+	}
+	for _, idxKey := range indexes {
+		if !utils.IsSliceMember(um.indexKeys, idxKey) {
+			um.indexKeys = append(um.indexKeys, idxKey)
+		}
 	}
 	*reply = utils.OK
 	return nil
