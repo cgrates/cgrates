@@ -509,7 +509,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 	accountingStorage.SetAccount(account2)
 
 	ap1 := &ActionPlan{
-		Id:         "test",
+		Id:         "TestActionPlansRemoveMember1",
 		AccountIDs: utils.StringMap{"one": true},
 		ActionTimings: []*ActionTiming{
 			&ActionTiming{
@@ -550,16 +550,27 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		},
 	}
 
-	err := ratingStorage.SetActionPlan(ap1.Id, ap1, true, utils.NonTransactional)
-
-	if err != nil {
-		t.Errorf("Set action plan test: %v", err)
+	if err := ratingStorage.SetActionPlan(ap1.Id, ap1, true, utils.NonTransactional); err != nil {
+		t.Error(err)
 	}
-
-	err = ratingStorage.SetActionPlan(ap2.Id, ap2, true, utils.NonTransactional)
-
-	if err != nil {
-		t.Errorf("Set action plan test 2: %v", err)
+	if err = ratingStorage.SetActionPlan(ap2.Id, ap2, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err = ratingStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap1.Id, ap2.Id}, true); err != nil {
+		t.Error(err)
+	}
+	if err = ratingStorage.SetAccountActionPlans(account1.ID, []string{ap1.Id}, false); err != nil {
+		t.Error(err)
+	}
+	if err = ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account1.ID}, true); err != nil {
+		t.Error(err)
+	}
+	ratingStorage.GetAccountActionPlans(account1.ID, true, utils.NonTransactional) // FixMe: remove here after finishing testing of map
+	if err = ratingStorage.SetAccountActionPlans(account2.ID, []string{ap2.Id}, false); err != nil {
+		t.Error(err)
+	}
+	if err = ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account2.ID}, false); err != nil {
+		t.Error(err)
 	}
 
 	actions := []*Action{
@@ -572,7 +583,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 	ratingStorage.SetActions(actions[0].Id, actions, utils.NonTransactional)
 
 	at := &ActionTiming{
-		accountIDs: utils.StringMap{"one": true},
+		accountIDs: utils.StringMap{account1.ID: true},
 		Timing:     &RateInterval{},
 		actions:    actions,
 	}
@@ -581,13 +592,13 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		t.Errorf("Execute Action: %v", err)
 	}
 
-	apr, err1 := ratingStorage.GetActionPlan("test", false, utils.NonTransactional)
+	apr, err1 := ratingStorage.GetActionPlan(ap1.Id, false, utils.NonTransactional)
 
 	if err1 != nil {
 		t.Errorf("Get action plan test: %v", err1)
 	}
 
-	if _, exist := apr.AccountIDs["one"]; exist {
+	if _, exist := apr.AccountIDs[account1.ID]; exist {
 		t.Errorf("Account one is not deleted ")
 	}
 
