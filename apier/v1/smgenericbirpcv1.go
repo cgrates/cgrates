@@ -33,12 +33,18 @@ type SMGenericBiRpcV1 struct {
 // Publishes methods exported by SMGenericBiRpcV1 as SMGenericV1 (so we can handle standard RPC methods via birpc socket)
 func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		"SMGenericV1.GetMaxUsage":      self.GetMaxUsage,
-		"SMGenericV1.GetLCRSuppliers":  self.GetLCRSuppliers,
-		"SMGenericV1.InitiateSession":  self.InitiateSession,
-		"SMGenericV1.UpdateSession":    self.UpdateSession,
-		"SMGenericV1.TerminateSession": self.TerminateSession,
-		"SMGenericV1.ProcessCDR":       self.ProcessCDR,
+		"SMGenericV1.GetMaxUsage":             self.GetMaxUsage,
+		"SMGenericV1.GetLCRSuppliers":         self.GetLCRSuppliers,
+		"SMGenericV1.InitiateSession":         self.InitiateSession,
+		"SMGenericV1.UpdateSession":           self.UpdateSession,
+		"SMGenericV1.TerminateSession":        self.TerminateSession,
+		"SMGenericV1.ChargeEvent":             self.ChargeEvent,
+		"SMGenericV1.ProcessCDR":              self.ProcessCDR,
+		"SMGenericV1.GetActiveSessions":       self.GetActiveSessions,
+		"SMGenericV1.GetActiveSessionsCount":  self.GetActiveSessionsCount,
+		"SMGenericV1.GetṔassiveSessions":      self.GetṔassiveSessions,
+		"SMGenericV1.GetPassiveSessionsCount": self.GetPassiveSessionsCount,
+		"SMGenericV1.ReplicateActiveSessions": self.ReplicateActiveSessions,
 	}
 }
 

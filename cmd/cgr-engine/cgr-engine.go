@@ -173,10 +173,13 @@ func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRate
 	smgRpc := v1.NewSMGenericV1(sm)
 	server.RpcRegister(smgRpc)
 	// Register BiRpc handlers
-	//server.BiRPCRegister(v1.NewSMGenericBiRpcV1(sm))
-	smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
-	for method, handler := range smgBiRpc.Handlers() {
-		server.BiRPCRegisterName(method, handler)
+	if cfg.SmGenericConfig.ListenBijson != "" {
+		smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
+		for method, handler := range smgBiRpc.Handlers() {
+			server.BiRPCRegisterName(method, handler)
+		}
+		//server.BiRPCRegister(smgBiRpc)
+		go server.ServeBiJSON(cfg.SmGenericConfig.ListenBijson)
 	}
 }
 

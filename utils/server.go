@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/cenk/rpc2"
+	rpc2_jsonrpc "github.com/cenk/rpc2/jsonrpc"
 	"golang.org/x/net/websocket"
 	_ "net/http/pprof"
 )
@@ -191,8 +192,12 @@ func (s *Server) ServeBiJSON(addr string) {
 	if e != nil {
 		log.Fatal("ServeBiJSON listen error:", e)
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at %s.", addr))
-	s.birpcSrv.Accept(lBiJSON)
+	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
+	conn, err := lBiJSON.Accept()
+	if err != nil {
+		log.Fatal(err)
+	}
+	s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
 }
 
 // rpcRequest represents a RPC request.
