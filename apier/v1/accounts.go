@@ -93,6 +93,8 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		}
 		accID = utils.AccountKey(attrs.Tenant, attrs.Account)
 	}
+
+	var remAcntAPids []string // list of accounts who's indexes need modification
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
 		if err != nil {
@@ -103,10 +105,8 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 
 		if accID != "" {
 			delete(ap.AccountIDs, accID)
-			if err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
-				return 0, err
-			}
-			err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true)
+			remAcntAPids = append(remAcntAPids, accID)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
@@ -123,24 +123,33 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		}
 
 		if attrs.ActionPlanId != "" { // delete the entire action plan
-			ap.ActionTimings = nil // will delete the action plan
+			ap.ActionTimings = nil              // will delete the action plan
+			for acntID := range ap.AccountIDs { // Make sure we clear indexes for all accounts
+				remAcntAPids = append(remAcntAPids, acntID)
+			}
 			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
+
 	UPDATE:
 		if err != nil {
 			return 0, err
 		}
+		if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{attrs.ActionPlanId}, true); err != nil {
+			return 0, err
+		}
+		for _, acntID := range remAcntAPids {
+			if err = self.RatingDb.RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
+				return 0, nil
+			}
+		}
+		if len(remAcntAPids) != 0 {
+			if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, remAcntAPids, true); err != nil {
+				return 0, nil
+			}
+		}
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
-	if accID != "" && attrs.ActionTimingId != "" { // Rebuild index for accounts pointing towards ActionPlans
-		if err = self.RatingDb.RemAccountActionPlans(accID, []string{attrs.ActionPlanId}); err != nil {
-			return
-		}
-		if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
-			return
-		}
-	}
 	if err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
