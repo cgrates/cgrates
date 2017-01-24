@@ -194,7 +194,7 @@ func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, 
 
 				at.SetAccountIDs(apl.AccountIDs) // copy the accounts
 				at.SetActionPlanID(apl.Id)
-				err := at.Execute()
+				err := at.Execute(nil, nil)
 				if err != nil {
 					*reply = err.Error()
 					return err
@@ -239,7 +239,7 @@ func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, 
 			current = a0.GetNextStartTime(current)
 			if current.Before(attr.TimeEnd) || current.Equal(attr.TimeEnd) {
 				utils.Logger.Info(fmt.Sprintf("<Replay Scheduler> Executing action %s for time %v", a0.ActionsID, current))
-				err := a0.Execute()
+				err := a0.Execute(nil, nil)
 				if err != nil {
 					*reply = err.Error()
 					return err

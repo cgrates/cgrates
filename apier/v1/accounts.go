@@ -470,7 +470,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
 	at.SetActions(engine.Actions{a})
-	if err := at.Execute(); err != nil {
+	if err := at.Execute(nil, nil); err != nil {
 		return err
 	}
 	*reply = OK
@@ -540,7 +540,7 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
 	at.SetActions(engine.Actions{a})
-	if err := at.Execute(); err != nil {
+	if err := at.Execute(nil, nil); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -600,7 +600,7 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
 	at.SetActions(engine.Actions{a})
-	if err := at.Execute(); err != nil {
+	if err := at.Execute(nil, nil); err != nil {
 		*reply = err.Error()
 		return err
 	}

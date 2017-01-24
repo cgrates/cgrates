@@ -1023,10 +1023,7 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error
 }
 
 func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
 	key := utils.AccountActionPlansPrefix + acntID
-	var values []byte
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1035,24 +1032,25 @@ func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, trans
 			return x.([]string), nil
 		}
 	}
-	if _, ok := ms.dict[key]; !ok {
+	ms.mu.RLock()
+	values, ok := ms.dict[key]
+	ms.mu.RUnlock()
+	if !ok {
 		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		err = utils.ErrNotFound
 		return nil, err
 	}
-
 	if err = ms.ms.Unmarshal(values, &apIDs); err != nil {
 		return nil, err
 	}
-
 	cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
-	return //apIDs, nil
+	return
 }
 
 func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
 	if !overwrite {
 		oldaPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
-		if err != nil {
+		if err != nil && err != utils.ErrNotFound {
 			return err
 		} else {
 			for _, oldAPid := range oldaPlIDs {
@@ -1065,9 +1063,11 @@ func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overw
 
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	if _, err = ms.ms.Marshal(&apIDs); err != nil {
+	result, err := ms.ms.Marshal(apIDs)
+	if err != nil {
 		return err
 	}
+	ms.dict[utils.AccountActionPlansPrefix+acntID] = result
 	return
 }
 

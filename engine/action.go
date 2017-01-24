@@ -561,28 +561,30 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 	}
 
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		// clean the account id from all action plans
-		allAPs, err := ratingStorage.GetAllActionPlans()
+		acntAPids, err := ratingStorage.GetAccountActionPlans(accID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
 			return 0, err
 		}
-		//var dirtyAps []string
-		aps := make([]string, len(allAPs))
-		i := 0
-		for key, ap := range allAPs {
-
-			if _, exists := ap.AccountIDs[accID]; exists {
-
-				// save action plan
-				delete(ap.AccountIDs, accID)
-				ratingStorage.SetActionPlan(key, ap, true, utils.NonTransactional)
-				//dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
+		for _, apID := range acntAPids {
+			ap, err := ratingStorage.GetActionPlan(apID, false, utils.NonTransactional)
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf("Could not retrieve action plan: %s: %v", apID, err))
+				return 0, err
 			}
-			aps[i] = key
-			i++
+			delete(ap.AccountIDs, accID)
+			if err := ratingStorage.SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
+				utils.Logger.Err(fmt.Sprintf("Could not save action plan: %s: %v", apID, err))
+				return 0, err
+			}
 		}
-		if err = ratingStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, aps, true); err != nil {
+		if err = ratingStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
+			return 0, err
+		}
+		if err = ratingStorage.RemAccountActionPlans(accID, nil); err != nil {
+			return 0, err
+		}
+		if err = ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 			return 0, err
 		}
 		return 0, nil
