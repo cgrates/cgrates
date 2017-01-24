@@ -1028,15 +1028,17 @@ func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, trans
 	key := utils.AccountActionPlansPrefix + acntID
 	var values []byte
 	if !skipCache {
-		if ap, ok := cache.Get(key); !ok {
-			return nil, utils.ErrNotFound
-		} else {
-			return ap.([]string), nil
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
 		}
 	}
 	if _, ok := ms.dict[key]; !ok {
 		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-		return nil, utils.ErrNotFound
+		err = utils.ErrNotFound
+		return nil, err
 	}
 
 	if err = ms.ms.Unmarshal(values, &apIDs); err != nil {
