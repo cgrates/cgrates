@@ -680,7 +680,7 @@ func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClie
 		return
 	}
 	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 { // Session handled by debit loop
-		maxUsage = -1
+		maxUsage = time.Duration(-1 * time.Second)
 		return
 	}
 	maxUsage, err = smg.UpdateSession(gev, clnt)
