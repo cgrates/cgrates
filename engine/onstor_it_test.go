@@ -37,7 +37,7 @@ var (
 	rdsITdb   *RedisStorage
 	mgoITdb   *MongoStorage
 	onStor    DataDB
-	OnStorCfg string
+	onStorCfg string
 )
 
 // subtests to be executed for each confDIR
@@ -93,7 +93,7 @@ func TestOnStorITRedisConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
-	OnStorCfg = cfg.DataDbName
+	onStorCfg = cfg.DataDbName
 }
 
 func TestOnStorITRedis(t *testing.T) {
@@ -113,7 +113,7 @@ func TestOnStorITMongoConnect(t *testing.T) {
 		utils.StorDB, nil, mgoITCfg.CacheConfig, mgoITCfg.LoadHistorySize); err != nil {
 		t.Fatal(err)
 	}
-	OnStorCfg = mgoITCfg.StorDBName
+	onStorCfg = mgoITCfg.StorDBName
 }
 func TestOnStorITMongo(t *testing.T) {
 	onStor = mgoITdb
@@ -897,7 +897,7 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 	} else if !reflect.DeepEqual(rp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
 	}
-	// if err = onStor.SelectDatabase(OnStorCfg); err != nil {
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
 }
