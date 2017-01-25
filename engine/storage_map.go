@@ -1037,7 +1037,8 @@ func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, trans
 	ms.mu.RUnlock()
 	if !ok {
 		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-		return nil, utils.ErrNotFound
+		err = utils.ErrNotFound
+		return nil, err
 	}
 	if err = ms.ms.Unmarshal(values, &apIDs); err != nil {
 		return nil, err
