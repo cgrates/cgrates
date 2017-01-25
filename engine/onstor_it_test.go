@@ -34,10 +34,10 @@ import (
 )
 
 var (
-	rdsITdb *RedisStorage
-	mgoITdb *MongoStorage
-	onStor  DataDB
-	dbnames string
+	rdsITdb   *RedisStorage
+	mgoITdb   *MongoStorage
+	onStor    DataDB
+	OnStorCfg string
 )
 
 // subtests to be executed for each confDIR
@@ -93,7 +93,7 @@ func TestOnStorITRedisConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
-	dbnames = cfg.DataDbName
+	OnStorCfg = cfg.DataDbName
 }
 
 func TestOnStorITRedis(t *testing.T) {
@@ -113,7 +113,7 @@ func TestOnStorITMongoConnect(t *testing.T) {
 		utils.StorDB, nil, mgoITCfg.CacheConfig, mgoITCfg.LoadHistorySize); err != nil {
 		t.Fatal(err)
 	}
-	dbnames = mgoITCfg.StorDBName
+	OnStorCfg = mgoITCfg.StorDBName
 }
 func TestOnStorITMongo(t *testing.T) {
 	onStor = mgoITdb
@@ -885,19 +885,19 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
 	}
 	// FixMe
-	//if err = onStor.SelectDatabase("13"); err != nil {
+	// if err = onStor.SelectDatabase("13"); err != nil {
 	// 	t.Error(err)
 	// }
 	// if _, rcvErr := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	// if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
-	// 	t.Error(err)
-	// } else if !reflect.DeepEqual(rp, rcv) {
-	// 	t.Errorf("Expecting: %v, received: %v", rp, rcv)
-	// }
-	// if err = onStor.SelectDatabase(dbnames); err != nil {
+	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rp, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rp, rcv)
+	}
+	// if err = onStor.SelectDatabase(OnStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
 }
