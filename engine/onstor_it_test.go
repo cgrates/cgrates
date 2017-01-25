@@ -34,9 +34,10 @@ import (
 )
 
 var (
-	rdsITdb *RedisStorage
-	mgoITdb *MongoStorage
-	onStor  DataDB
+	rdsITdb   *RedisStorage
+	mgoITdb   *MongoStorage
+	onStor    DataDB
+	onStorCfg string
 )
 
 // subtests to be executed for each confDIR
@@ -66,8 +67,8 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITPushPop,
 	testOnStorITCRUDRatingPlan,
 	testOnStorITCRUDRatingProfile,
-	testOnStorITCRUDDestination,
-	testOnStorITCRUDReverseDestination,
+	testOnStorITCRUDDestinations,
+	testOnStorITCRUDReverseDestinations,
 	testOnStorITCRUDLCR,
 	testOnStorITCRUDCdrStats,
 	testOnStorITCRUDActions,
@@ -92,6 +93,14 @@ func TestOnStorITRedisConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
+	onStorCfg = cfg.DataDbName
+}
+
+func TestOnStorITRedis(t *testing.T) {
+	onStor = rdsITdb
+	for _, stest := range sTestsOnStorIT {
+		t.Run("TestOnStorITRedis", stest)
+	}
 }
 
 func TestOnStorITMongoConnect(t *testing.T) {
@@ -104,15 +113,8 @@ func TestOnStorITMongoConnect(t *testing.T) {
 		utils.StorDB, nil, mgoITCfg.CacheConfig, mgoITCfg.LoadHistorySize); err != nil {
 		t.Fatal(err)
 	}
+	onStorCfg = mgoITCfg.StorDBName
 }
-
-func TestOnStorITRedis(t *testing.T) {
-	onStor = rdsITdb
-	for _, stest := range sTestsOnStorIT {
-		t.Run("TestOnStorITRedis", stest)
-	}
-}
-
 func TestOnStorITMongo(t *testing.T) {
 	onStor = mgoITdb
 	for _, stest := range sTestsOnStorIT {
@@ -253,6 +255,7 @@ func testOnStorITCacheDestinations(t *testing.T) {
 	if err := onStor.SetDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+
 	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
 		t.Error("Already in cache")
 	}
@@ -881,6 +884,22 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 	} else if !reflect.DeepEqual(rp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rp, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rp, rcv)
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 }
 
 func testOnStorITCRUDRatingProfile(t *testing.T) {
@@ -913,7 +932,7 @@ func testOnStorITCRUDRatingProfile(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDDestination(t *testing.T) {
+func testOnStorITCRUDDestinations(t *testing.T) {
 	dst := &Destination{Id: "CRUDDestination2", Prefixes: []string{"+491", "+492", "+493"}}
 	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
@@ -934,7 +953,7 @@ func testOnStorITCRUDDestination(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDReverseDestination(t *testing.T) {
+func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+494", "+495", "+496"}}
 	dst2 := &Destination{Id: "CRUDReverseDestination2", Prefixes: []string{"+497", "+498", "+499"}}
 	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
