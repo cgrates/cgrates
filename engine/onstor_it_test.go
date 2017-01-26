@@ -888,10 +888,10 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 	// if err = onStor.SelectDatabase("13"); err != nil {
 	// 	t.Error(err)
 	// }
-	// if _, rcvErr := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// if _, rcvErr := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 	// 	t.Error(rcvErr)
 	// }
-	//
+
 	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
@@ -924,6 +924,22 @@ func testOnStorITCRUDRatingProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(rpf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetRatingProfile(rpf.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 	if err = onStor.RemoveRatingProfile(rpf.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -945,6 +961,23 @@ func testOnStorITCRUDDestinations(t *testing.T) {
 	} else if !reflect.DeepEqual(dst, rcv) {
 		t.Errorf("Expecting: %v, received: %v", dst, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetDestination(dst.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	// if rcv, err := onStor.GetDestination(dst.Id, false, utils.NonTransactional); err != nil {
+	// 	t.Error(err)
+	// } else if !reflect.DeepEqual(dst, rcv) {
+	// 	t.Errorf("Expecting: %v, received: %v", dst, rcv)
+	// }
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
+
 	if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -979,6 +1012,24 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
 		}
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetReverseDestination(dst2.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	for i, _ := range dst.Prefixes {
+		if rcv, err := onStor.GetReverseDestination(dst2.Prefixes[i], false, utils.NonTransactional); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
+			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
+		}
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 }
 
 func testOnStorITCRUDLCR(t *testing.T) {
@@ -1022,6 +1073,22 @@ func testOnStorITCRUDLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(lcr, rcv) {
 		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetLCR(lcr.GetId(), false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetLCR(lcr.GetId(), false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(lcr, rcv) {
+		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 }
 
 func testOnStorITCRUDCdrStats(t *testing.T) {
@@ -1095,12 +1162,30 @@ func testOnStorITCRUDActions(t *testing.T) {
 	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", acts[0], rcv[0])
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetActions(acts[0].Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	// if rcv, err := onStor.GetActions(acts[0].Id, false, utils.NonTransactional); err != nil {
+	// 	t.Error(err)
+	// } else if !reflect.DeepEqual(acts[0], rcv[0]) {
+	// 	t.Errorf("Expecting: %v, received: %v", acts[0], rcv[0])
+	// }
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
+
 	if err := onStor.RemoveActions(acts[0].Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
+
 }
 
 func testOnStorITCRUDSharedGroup(t *testing.T) {
@@ -1125,6 +1210,22 @@ func testOnStorITCRUDSharedGroup(t *testing.T) {
 	} else if !reflect.DeepEqual(sg, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sg, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetSharedGroup(sg.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+
+	if rcv, err := onStor.GetSharedGroup(sg.Id, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(sg, rcv) {
+		t.Errorf("Expecting: %v, received: %v", sg, rcv)
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 }
 
 func testOnStorITCRUDActionTriggers(t *testing.T) {
@@ -1151,6 +1252,23 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 	} else if !reflect.DeepEqual(ats[0], rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", ats[0], rcv[0])
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetActionTriggers(sg.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetActionTriggers(atsID, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ats[0], rcv[0]) {
+		t.Errorf("Expecting: %v, received: %v", ats[0], rcv[0])
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
+
 	if err := onStor.RemoveActionTriggers(atsID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -1205,11 +1323,28 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 	} else if !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("Expecting: %v, received: %v", ap, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetActionPlan(ap.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	// if rcv, err := onStor.GetActionPlan(ap.Id, false, utils.NonTransactional); err != nil {
+	// 	t.Error(err)
+	// } else if !reflect.DeepEqual(ap, rcv) {
+	// 	t.Errorf("Expecting: %v, received: %v", ap, rcv)
+	// }
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 	if rcv, err := onStor.GetAllActionPlans(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ap.Id, rcv[ap.Id].Id) {
 		t.Errorf("Expecting: %v, received: %v", ap.Id, rcv[ap.Id].Id)
 	}
+
 }
 
 func testOnStorITCRUDAccountActionPlans(t *testing.T) {
@@ -1236,6 +1371,22 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	} else if !reflect.DeepEqual(expect, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expect, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetAccountActionPlans(acntID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expect, rcv) {
+		t.Errorf("Expecting: %v, received: %v", expect, rcv)
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 	if err := onStor.RemAccountActionPlans(acntID, aAPs2); err != nil {
 		t.Error(err)
 	}
@@ -1404,6 +1555,22 @@ func testOnStorITCRUDAlias(t *testing.T) {
 	} else if !reflect.DeepEqual(als, rcv) {
 		t.Errorf("Expecting: %v, received: %v", als, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetAlias(als.GetId(), false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetAlias(als.GetId(), false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(als, rcv) {
+		t.Errorf("Expecting: %v, received: %v", als, rcv)
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 	if err := onStor.RemoveAlias(als.GetId(), utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -1455,6 +1622,22 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", exp, rcv[0])
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetReverseAlias(rvAlsID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetReverseAlias(rvAlsID, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv[0]) {
+		t.Errorf("Expecting: %v, received: %v", exp, rcv[0])
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 }
 
 func testOnStorITCRUDResourceLimit(t *testing.T) {
@@ -1484,6 +1667,22 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
 	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetResourceLimit(rL.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetResourceLimit(rL.ID, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rL, rcv) {
+		t.Errorf("Expecting: %v, received: %v", rL, rcv)
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
 	if err := onStor.RemoveResourceLimit(rL.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
