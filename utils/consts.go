@@ -334,4 +334,7 @@ const (
 	MetaSetVersions              = "*set_versions"
 	UnsupportedDB                = "unsupported database"
 	ACCOUNT_SUMMARY              = "AccountSummary"
+	TxtSuffix                    = ".txt"
+	JSNSuffix                    = ".json"
+	FormSuffix                   = ".form"
 )

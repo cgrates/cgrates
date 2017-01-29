@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -34,6 +35,59 @@ var (
 	CONTENT_FORM = "form"
 	CONTENT_TEXT = "text"
 )
+
+// NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
+func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err error) {
+	ffn = new(FallbackFileName)
+	moduleIdx := strings.Index(fileName, "_")
+	ffn.Module = fileName[:moduleIdx]
+	if !IsSliceMember([]string{"cdr"}, ffn.Module) {
+		return nil, fmt.Errorf("unsupported module: %s", ffn.Module)
+	}
+	fileNameWithoutModule := fileName[moduleIdx+1:]
+	for _, trspt := range []string{MetaHTTPjsonCDR, MetaHTTPjsonMap, META_HTTP_POST} {
+		if strings.HasPrefix(fileNameWithoutModule, trspt) {
+			ffn.Transport = trspt
+			break
+		}
+	}
+	if ffn.Transport == "" {
+		return nil, fmt.Errorf("unsupported transport in fallback file path: %s", fileName)
+	}
+	fileNameWithoutTransport := fileNameWithoutModule[len(ffn.Transport)+1:]
+	reqIDidx := strings.LastIndex(fileNameWithoutTransport, "_")
+	if reqIDidx == -1 {
+		return nil, fmt.Errorf("cannot find request ID in fallback file path: %s", fileName)
+	}
+	if ffn.Address, err = url.QueryUnescape(fileNameWithoutTransport[:reqIDidx]); err != nil {
+		return nil, err
+	}
+	fileNameWithoutAddress := fileNameWithoutTransport[reqIDidx+1:]
+	for _, suffix := range []string{TxtSuffix, JSNSuffix, FormSuffix} {
+		if strings.HasSuffix(fileNameWithoutAddress, suffix) {
+			ffn.FileSuffix = suffix
+			break
+		}
+	}
+	if ffn.FileSuffix == "" {
+		return nil, fmt.Errorf("unsupported suffix in fallback file path: %s", fileName)
+	}
+	ffn.RequestID = fileNameWithoutAddress[:len(fileNameWithoutAddress)-len(ffn.FileSuffix)]
+	return
+}
+
+// FallbackFileName is the struct defining the name of a file where CGRateS will dump data which fails to be sent remotely
+type FallbackFileName struct {
+	Module     string // name of the module writing the file
+	Transport  string // transport used to send data remotely
+	Address    string // remote address where data should have been sent
+	RequestID  string // unique identifier of the request which should make files unique, should not contain _ character
+	FileSuffix string // informative file termination suffix
+}
+
+func (ffn *FallbackFileName) AsString() string {
+	return fmt.Sprintf("%s_%s_%s_%s%s", ffn.Module, ffn.Transport, url.QueryEscape(ffn.Address), ffn.RequestID, ffn.FileSuffix)
+}
 
 // Converts interface to []byte
 func GetBytes(content interface{}) ([]byte, error) {

@@ -18,9 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
 	"github.com/cgrates/cgrates/utils"
-	"net/url"
 )
 
 type CDRReplicationCfg struct {
@@ -33,5 +31,14 @@ type CDRReplicationCfg struct {
 }
 
 func (rplCfg CDRReplicationCfg) FallbackFileName() string {
-	return fmt.Sprintf("cdr_%s_%s_%s.form", rplCfg.Transport, url.QueryEscape(rplCfg.Address), utils.GenUUID())
+	fileSuffix := ".txt"
+	switch rplCfg.Transport {
+	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap:
+		fileSuffix = ".json"
+	case utils.META_HTTP_POST:
+		fileSuffix = ".form"
+	}
+	ffn := &utils.FallbackFileName{Module: "cdr", Transport: rplCfg.Transport, Address: rplCfg.Address,
+		RequestID: utils.GenUUID(), FileSuffix: fileSuffix}
+	return ffn.AsString()
 }
