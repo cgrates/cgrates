@@ -413,9 +413,11 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error
 		return err
 	}
 	cfg := config.CgrConfig()
-	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
+	ffn := &utils.FallbackFileName{Module: "act/" + a.ActionType, Transport: utils.MetaHTTPjson, Address: a.ExtraParameters,
+		RequestID: utils.GenUUID(), FileSuffix: utils.JSNSuffix}
 	_, err = utils.NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
-		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn, config.CgrConfig().HttpPosterAttempts, fallbackPath)
+		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn,
+		config.CgrConfig().HttpPosterAttempts, path.Join(cfg.FailedRequestsDir, ffn.AsString()))
 	return err
 }
 
@@ -433,9 +435,11 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 		return err
 	}
 	cfg := config.CgrConfig()
-	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
+	ffn := &utils.FallbackFileName{Module: "act/" + a.ActionType, Transport: utils.MetaHTTPjson, Address: a.ExtraParameters,
+		RequestID: utils.GenUUID(), FileSuffix: utils.JSNSuffix}
 	go utils.NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
-		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn, config.CgrConfig().HttpPosterAttempts, fallbackPath)
+		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn,
+		config.CgrConfig().HttpPosterAttempts, path.Join(cfg.FailedRequestsDir, ffn.AsString()))
 	return nil
 }
 

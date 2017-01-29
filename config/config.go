@@ -221,7 +221,7 @@ type CGRConfig struct {
 	HttpSkipTlsVerify        bool              // If enabled Http Client will accept any TLS certificate
 	TpExportPath             string            // Path towards export folder for offline Tariff Plans
 	HttpPosterAttempts       int
-	HttpFailedDir            string          // Directory path where we store failed http requests
+	FailedRequestsDir        string          // Directory path where we store failed http requests
 	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
 	LogLevel                 int             // system wide log level, nothing higher than this will be logged
@@ -757,8 +757,8 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnGeneralCfg.Httpposter_attempts != nil {
 			self.HttpPosterAttempts = *jsnGeneralCfg.Httpposter_attempts
 		}
-		if jsnGeneralCfg.Http_failed_dir != nil {
-			self.HttpFailedDir = *jsnGeneralCfg.Http_failed_dir
+		if jsnGeneralCfg.Failed_requests_dir != nil {
+			self.FailedRequestsDir = *jsnGeneralCfg.Failed_requests_dir
 		}
 		if jsnGeneralCfg.Default_timezone != nil {
 			self.DefaultTimezone = *jsnGeneralCfg.Default_timezone

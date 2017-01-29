@@ -218,6 +218,7 @@ const (
 	META_FILLER                   = "*filler"
 	META_HANDLER                  = "*handler"
 	META_HTTP_POST                = "*http_post"
+	MetaHTTPjson                  = "*http_json"
 	MetaHTTPjsonCDR               = "*http_json_cdr"
 	META_HTTP_JSONRPC             = "*http_jsonrpc"
 	MetaHTTPjsonMap               = "*http_json_map"

@@ -502,7 +502,7 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		}
 		go func(body interface{}, rplCfg *config.CDRReplicationCfg, content string, errChan chan error) {
 			fallbackPath := path.Join(
-				self.cgrCfg.HttpFailedDir,
+				self.cgrCfg.FailedRequestsDir,
 				rplCfg.FallbackFileName())
 			if _, err := self.httpPoster.Post(rplCfg.Address, content, body, rplCfg.Attempts, fallbackPath); err != nil {
 				utils.Logger.Err(fmt.Sprintf(

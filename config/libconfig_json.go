@@ -26,7 +26,7 @@ type GeneralJsonCfg struct {
 	Dbdata_encoding      *string
 	Tpexport_dir         *string
 	Httpposter_attempts  *int
-	Http_failed_dir      *string
+	Failed_requests_dir  *string
 	Default_request_type *string
 	Default_category     *string
 	Default_tenant       *string

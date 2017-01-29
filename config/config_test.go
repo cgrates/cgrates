@@ -154,8 +154,8 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.HttpPosterAttempts != 3 {
 		t.Error(cgrCfg.HttpPosterAttempts)
 	}
-	if cgrCfg.HttpFailedDir != "/var/spool/cgrates/http_failed" {
-		t.Error(cgrCfg.HttpFailedDir)
+	if cgrCfg.FailedRequestsDir != "/var/spool/cgrates/failed_requests" {
+		t.Error(cgrCfg.FailedRequestsDir)
 	}
 	if cgrCfg.DefaultReqType != "*rated" {
 		t.Error(cgrCfg.DefaultReqType)
