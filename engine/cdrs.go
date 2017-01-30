@@ -467,14 +467,12 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		var content = ""
 		switch rplCfg.Transport {
 		case utils.MetaHTTPjsonCDR:
-			content = utils.CONTENT_JSON
 			jsn, err := json.Marshal(cdr)
 			if err != nil {
 				return err
 			}
 			body = jsn
 		case utils.MetaHTTPjsonMap:
-			content = utils.CONTENT_JSON
 			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
 			if err != nil {
 				return err
@@ -485,7 +483,6 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			}
 			body = jsn
 		case utils.META_HTTP_POST:
-			content = utils.CONTENT_FORM
 			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
 			if err != nil {
 				return err
@@ -504,7 +501,7 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			fallbackPath := path.Join(
 				self.cgrCfg.FailedRequestsDir,
 				rplCfg.FallbackFileName())
-			if _, err := self.httpPoster.Post(rplCfg.Address, content, body, rplCfg.Attempts, fallbackPath); err != nil {
+			if _, err := self.httpPoster.Post(rplCfg.Address, utils.PosterTransportContentTypes[rplCfg.Transport], body, rplCfg.Attempts, fallbackPath); err != nil {
 				utils.Logger.Err(fmt.Sprintf(
 					"<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
 				if rplCfg.Synchronous {

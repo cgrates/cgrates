@@ -20,6 +20,7 @@ package v1
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
@@ -1667,4 +1668,81 @@ func (v1 *ApierV1) StopService(args servmanager.ArgStartService, reply *string) 
 
 func (v1 *ApierV1) ServiceStatus(args servmanager.ArgStartService, reply *string) (err error) {
 	return v1.ServManager.V1ServiceStatus(args, reply)
+}
+
+type ArgsReplyFailedPosts struct {
+	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
+	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
+	Posters              []string // list of modules for which replay the requests, nil for all
+}
+
+func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (err error) {
+	failedReqsInDir := v1.Config.FailedRequestsDir
+	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != "" {
+		failedReqsInDir = *args.FailedRequestsInDir
+	}
+	failedReqsOutDir := failedReqsInDir
+	if args.FailedRequestsOutDir != nil && *args.FailedRequestsOutDir != "" {
+		failedReqsOutDir = *args.FailedRequestsOutDir
+	}
+	filesInDir, _ := ioutil.ReadDir(failedReqsInDir)
+	if len(filesInDir) == 0 {
+		return utils.ErrNotFound
+	}
+	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
+		filePath := path.Join(failedReqsInDir, file.Name())
+		ffn, err := utils.NewFallbackFileNameFronString(file.Name())
+		if err != nil {
+			return utils.NewErrServerError(err)
+		}
+		if len(args.Posters) != 0 {
+			var allowedModule bool
+			for _, mod := range args.Posters {
+				if strings.HasPrefix(ffn.Module, mod) {
+					allowedModule = true
+					break
+				}
+			}
+			if !allowedModule {
+				continue // this file is not to be processed due to Modules ACL
+			}
+		}
+		var fileContent []byte
+		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+			if fileContent, err = ioutil.ReadFile(filePath); err != nil {
+				return 0, err
+			}
+			if err := os.Remove(filePath); err != nil {
+				return 0, err
+			}
+			return 0, nil
+		}, v1.Config.LockingTimeout, utils.FileLockPrefix+filePath)
+		if err != nil {
+			return utils.NewErrServerError(err)
+		}
+		_, err = utils.NewHTTPPoster(v1.Config.HttpSkipTlsVerify,
+			v1.Config.ReplyTimeout).Post(ffn.Address, utils.PosterTransportContentTypes[ffn.Transport], fileContent,
+			v1.Config.HttpPosterAttempts, path.Join(failedReqsOutDir, file.Name()))
+		if err != nil { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
+			fileOutPath := path.Join(failedReqsOutDir, ffn.AsString())
+			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+				if _, err := os.Stat(fileOutPath); err == nil || !os.IsNotExist(err) {
+					return 0, err
+				}
+				fileOut, err := os.Create(fileOutPath)
+				if err != nil {
+					return 0, err
+				}
+				defer fileOut.Close()
+				if _, err := fileOut.Write(fileContent); err != nil {
+					return 0, err
+				}
+				return 0, nil
+			}, v1.Config.LockingTimeout, utils.FileLockPrefix+fileOutPath)
+			if err != nil {
+				return utils.NewErrServerError(err)
+			}
+		}
+	}
+	return nil
 }

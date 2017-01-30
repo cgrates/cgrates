@@ -30,18 +30,19 @@ import (
 	"time"
 )
 
-var (
-	CONTENT_JSON = "json"
-	CONTENT_FORM = "form"
-	CONTENT_TEXT = "text"
-)
-
 // NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
 func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err error) {
 	ffn = new(FallbackFileName)
-	moduleIdx := strings.Index(fileName, "_")
+	moduleIdx := strings.Index(fileName, HandlerArgSep)
 	ffn.Module = fileName[:moduleIdx]
-	if !IsSliceMember([]string{"cdr"}, ffn.Module) {
+	var supportedModule bool
+	for _, prfx := range []string{ActionsPoster, CDRPoster} {
+		if strings.HasPrefix(ffn.Module, prfx) {
+			supportedModule = true
+			break
+		}
+	}
+	if !supportedModule {
 		return nil, fmt.Errorf("unsupported module: %s", ffn.Module)
 	}
 	fileNameWithoutModule := fileName[moduleIdx+1:]
@@ -55,7 +56,7 @@ func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err 
 		return nil, fmt.Errorf("unsupported transport in fallback file path: %s", fileName)
 	}
 	fileNameWithoutTransport := fileNameWithoutModule[len(ffn.Transport)+1:]
-	reqIDidx := strings.LastIndex(fileNameWithoutTransport, "_")
+	reqIDidx := strings.LastIndex(fileNameWithoutTransport, HandlerArgSep)
 	if reqIDidx == -1 {
 		return nil, fmt.Errorf("cannot find request ID in fallback file path: %s", fileName)
 	}
@@ -81,12 +82,12 @@ type FallbackFileName struct {
 	Module     string // name of the module writing the file
 	Transport  string // transport used to send data remotely
 	Address    string // remote address where data should have been sent
-	RequestID  string // unique identifier of the request which should make files unique, should not contain _ character
+	RequestID  string // unique identifier of the request which should make files unique
 	FileSuffix string // informative file termination suffix
 }
 
 func (ffn *FallbackFileName) AsString() string {
-	return fmt.Sprintf("%s_%s_%s_%s%s", ffn.Module, ffn.Transport, url.QueryEscape(ffn.Address), ffn.RequestID, ffn.FileSuffix)
+	return fmt.Sprintf("%s%s%s%s%s%s%s%s", ffn.Module, HandlerArgSep, ffn.Transport, HandlerArgSep, url.QueryEscape(ffn.Address), HandlerArgSep, ffn.RequestID, ffn.FileSuffix)
 }
 
 // Converts interface to []byte
@@ -179,6 +180,7 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 		}
 		return respBody, nil
 	}
+	Logger.Debug(fmt.Sprintf("<HTTPPoster> Will failover on path: <%s>", fallbackFilePath))
 	// If we got that far, post was not possible, write it on disk
 	fileOut, err := os.Create(fallbackFilePath)
 	if err != nil {
