@@ -152,16 +152,11 @@ func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRate
 			return
 		}
 	}
-	smgReplConns := make([]*sessionmanager.SMGReplicationConn, len(cfg.SmGenericConfig.SMGReplicationConns))
-	for i, replConnCfg := range cfg.SmGenericConfig.SMGReplicationConns {
-		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, cfg.ConnectAttempts, cfg.Reconnects,
-			cfg.ConnectTimeout, cfg.ReplyTimeout, replConnCfg.Transport[1:], nil, true); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to SMGReplicationConn: <%s>, error: <%s>", replConnCfg.Address, err.Error()))
-			exitChan <- true
-			return
-		} else {
-			smgReplConns[i] = &sessionmanager.SMGReplicationConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
-		}
+	smgReplConns, err := sessionmanager.NewSMGReplicationConns(cfg.SmGenericConfig.SMGReplicationConns, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to SMGReplicationConnection error: <%s>", err.Error()))
+		exitChan <- true
+		return
 	}
 	sm := sessionmanager.NewSMGeneric(cfg, ralsConns, cdrsConn, smgReplConns, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
