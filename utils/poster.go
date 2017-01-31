@@ -20,7 +20,7 @@ package utils
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/gob"
+	//"encoding/gob"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -92,6 +92,7 @@ func (ffn *FallbackFileName) AsString() string {
 	return fmt.Sprintf("%s%s%s%s%s%s%s%s", ffn.Module, HandlerArgSep, ffn.Transport, HandlerArgSep, url.QueryEscape(ffn.Address), HandlerArgSep, ffn.RequestID, ffn.FileSuffix)
 }
 
+/*
 // Converts interface to []byte
 func GetBytes(content interface{}) ([]byte, error) {
 	var buf bytes.Buffer
@@ -102,6 +103,7 @@ func GetBytes(content interface{}) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
+*/
 
 // Post without automatic failover
 func HttpJsonPost(url string, skipTlsVerify bool, content []byte) ([]byte, error) {
