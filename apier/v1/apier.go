@@ -1744,5 +1744,6 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 			}
 		}
 	}
+	*reply = utils.OK
 	return nil
 }
