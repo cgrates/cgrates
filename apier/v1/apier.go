@@ -1720,16 +1720,19 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}
+		failoverPath := utils.META_NONE
+		if failedReqsOutDir != utils.META_NONE {
+			failoverPath = path.Join(failedReqsOutDir, file.Name())
+		}
 		_, err = utils.NewHTTPPoster(v1.Config.HttpSkipTlsVerify,
 			v1.Config.ReplyTimeout).Post(ffn.Address, utils.PosterTransportContentTypes[ffn.Transport], fileContent,
-			v1.Config.PosterAttempts, path.Join(failedReqsOutDir, file.Name()))
-		if err != nil { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
-			fileOutPath := path.Join(failedReqsOutDir, ffn.AsString())
+			v1.Config.PosterAttempts, failoverPath)
+		if err != nil && failedReqsOutDir != utils.META_NONE { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				if _, err := os.Stat(fileOutPath); err == nil || !os.IsNotExist(err) {
+				if _, err := os.Stat(failoverPath); err == nil || !os.IsNotExist(err) {
 					return 0, err
 				}
-				fileOut, err := os.Create(fileOutPath)
+				fileOut, err := os.Create(failoverPath)
 				if err != nil {
 					return 0, err
 				}
@@ -1738,7 +1741,7 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 					return 0, err
 				}
 				return 0, nil
-			}, v1.Config.LockingTimeout, utils.FileLockPrefix+fileOutPath)
+			}, v1.Config.LockingTimeout, utils.FileLockPrefix+failoverPath)
 			if err != nil {
 				return utils.NewErrServerError(err)
 			}

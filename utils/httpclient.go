@@ -28,6 +28,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/guardian"
 )
 
 // NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
@@ -136,7 +138,7 @@ type HTTPPoster struct {
 
 // Post with built-in failover
 // Returns also reference towards client so we can close it's connections when done
-func (poster *HTTPPoster) Post(addr string, contentType string, content interface{}, attempts int, fallbackFilePath string) ([]byte, error) {
+func (poster *HTTPPoster) Post(addr string, contentType string, content interface{}, attempts int, fallbackFilePath string) (respBody []byte, err error) {
 	if !IsSliceMember([]string{CONTENT_JSON, CONTENT_FORM, CONTENT_TEXT}, contentType) {
 		return nil, fmt.Errorf("unsupported ContentType: %s", contentType)
 	}
@@ -153,7 +155,6 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 	if contentType == CONTENT_JSON {
 		bodyType = "application/json"
 	}
-	var err error
 	for i := 0; i < attempts; i++ {
 		var resp *http.Response
 		if IsSliceMember([]string{CONTENT_JSON, CONTENT_TEXT}, contentType) {
@@ -167,7 +168,7 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 			continue
 		}
 		defer resp.Body.Close()
-		respBody, err := ioutil.ReadAll(resp.Body)
+		respBody, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
 			time.Sleep(delay())
@@ -180,15 +181,19 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 		}
 		return respBody, nil
 	}
-	Logger.Debug(fmt.Sprintf("<HTTPPoster> Will failover on path: <%s>", fallbackFilePath))
-	// If we got that far, post was not possible, write it on disk
-	fileOut, err := os.Create(fallbackFilePath)
-	if err != nil {
-		return nil, err
+	if fallbackFilePath != META_NONE {
+		// If we got that far, post was not possible, write it on disk
+		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+			fileOut, err := os.Create(fallbackFilePath)
+			if err != nil {
+				return nil, err
+			}
+			defer fileOut.Close()
+			if _, err := fileOut.Write(body); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		}, time.Duration(2*time.Second), FileLockPrefix+fallbackFilePath)
 	}
-	defer fileOut.Close()
-	if _, err := fileOut.Write(body); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return
 }
