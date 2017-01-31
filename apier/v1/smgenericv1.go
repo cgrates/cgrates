@@ -95,7 +95,7 @@ func (self *SMGenericV1) ReplicateActiveSessions(args sessionmanager.ArgsReplica
 }
 
 func (self *SMGenericV1) ReplicatePassiveSessions(args sessionmanager.ArgsReplicateSessions, reply *string) error {
-	return self.sm.BiRPCV1ReplicateActiveSessions(nil, args, reply)
+	return self.sm.BiRPCV1ReplicatePassiveSessions(nil, args, reply)
 }
 
 // rpcclient.RpcClientConnection interface

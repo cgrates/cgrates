@@ -460,7 +460,7 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 
 // replicateSessions will replicate session based on configuration
 func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool, smgReplConns []*SMGReplicationConn) (err error) {
-	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 && !passiveSessions { // Replicating active
+	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 && !passiveSessions { // Replicating active not supported
 		return
 	}
 	ssMux := &smg.aSessionsMux
