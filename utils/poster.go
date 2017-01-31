@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/guardian"
+	"github.com/streadway/amqp"
 )
 
 // NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
@@ -198,4 +199,16 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 		}, time.Duration(2*time.Second), FileLockPrefix+fallbackFilePath)
 	}
 	return
+}
+
+func NewAMQPClient(addr, user, passwd string) (clnt *AMQPClient, err error) {
+	clnt = new(AMQPClient)
+	if clnt.conn, err = amqp.Dial(fmt.Sprintf("amqp:/%s:%s@%s/", user, passwd, addr)); err != nil {
+		return nil, err
+	}
+	return
+}
+
+type AMQPClient struct {
+	conn *amqp.Connection
 }
