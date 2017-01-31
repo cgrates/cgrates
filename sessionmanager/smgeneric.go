@@ -1161,14 +1161,14 @@ func (smg *SMGeneric) BiRPCV1SetPassiveSessions(clnt rpcclient.RpcClientConnecti
 	return
 }
 
-type ArgsReplicateActiveSessions struct {
+type ArgsReplicateSessions struct {
 	Filter      map[string]string
 	Connections []*config.HaPoolConfig
 }
 
 // BiRPCV1ReplicateActiveSessions will replicate active sessions to either args.Connections or the internal configured ones
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
-func (smg *SMGeneric) BiRPCV1ReplicateActiveSessions(clnt rpcclient.RpcClientConnection, args ArgsReplicateActiveSessions, reply *string) (err error) {
+func (smg *SMGeneric) BiRPCV1ReplicateActiveSessions(clnt rpcclient.RpcClientConnection, args ArgsReplicateSessions, reply *string) (err error) {
 	smgConns := smg.smgReplConns
 	if len(args.Connections) != 0 {
 		if smgConns, err = NewSMGReplicationConns(args.Connections, smg.cgrCfg.Reconnects, smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout); err != nil {
@@ -1178,6 +1178,23 @@ func (smg *SMGeneric) BiRPCV1ReplicateActiveSessions(clnt rpcclient.RpcClientCon
 	aSs := smg.getSessions(args.Filter[utils.CGRID], false)
 	for cgrID := range aSs {
 		smg.replicateSessionsWithID(cgrID, false, smgConns)
+	}
+	*reply = utils.OK
+	return
+}
+
+// BiRPCV1ReplicatePassiveSessions will replicate passive sessions to either args.Connections or the internal configured ones
+// args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
+func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientConnection, args ArgsReplicateSessions, reply *string) (err error) {
+	smgConns := smg.smgReplConns
+	if len(args.Connections) != 0 {
+		if smgConns, err = NewSMGReplicationConns(args.Connections, smg.cgrCfg.Reconnects, smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout); err != nil {
+			return
+		}
+	}
+	aSs := smg.getSessions(args.Filter[utils.CGRID], true)
+	for cgrID := range aSs {
+		smg.replicateSessionsWithID(cgrID, true, smgConns)
 	}
 	*reply = utils.OK
 	return

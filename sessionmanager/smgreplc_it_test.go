@@ -280,7 +280,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	argsRepl := ArgsReplicateActiveSessions{Connections: []*config.HaPoolConfig{
+	argsRepl := ArgsReplicateSessions{Connections: []*config.HaPoolConfig{
 		&config.HaPoolConfig{
 			Address:     smgRplcMasterCfg.SmGenericConfig.SMGReplicationConns[0].Address,
 			Transport:   smgRplcMasterCfg.SmGenericConfig.SMGReplicationConns[0].Transport,
