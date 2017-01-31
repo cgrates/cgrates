@@ -418,7 +418,7 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error
 		RequestID: utils.GenUUID(), FileSuffix: utils.JSNSuffix}
 	_, err = utils.NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
 		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn,
-		config.CgrConfig().HttpPosterAttempts, path.Join(cfg.FailedRequestsDir, ffn.AsString()))
+		config.CgrConfig().PosterAttempts, path.Join(cfg.FailedPostsDir, ffn.AsString()))
 	return err
 }
 
@@ -441,7 +441,7 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 		RequestID: utils.GenUUID(), FileSuffix: utils.JSNSuffix}
 	go utils.NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
 		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn,
-		config.CgrConfig().HttpPosterAttempts, path.Join(cfg.FailedRequestsDir, ffn.AsString()))
+		config.CgrConfig().PosterAttempts, path.Join(cfg.FailedPostsDir, ffn.AsString()))
 	return nil
 }
 

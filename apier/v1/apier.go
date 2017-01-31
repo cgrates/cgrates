@@ -1677,7 +1677,7 @@ type ArgsReplyFailedPosts struct {
 }
 
 func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (err error) {
-	failedReqsInDir := v1.Config.FailedRequestsDir
+	failedReqsInDir := v1.Config.FailedPostsDir
 	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != "" {
 		failedReqsInDir = *args.FailedRequestsInDir
 	}
@@ -1722,7 +1722,7 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 		}
 		_, err = utils.NewHTTPPoster(v1.Config.HttpSkipTlsVerify,
 			v1.Config.ReplyTimeout).Post(ffn.Address, utils.PosterTransportContentTypes[ffn.Transport], fileContent,
-			v1.Config.HttpPosterAttempts, path.Join(failedReqsOutDir, file.Name()))
+			v1.Config.PosterAttempts, path.Join(failedReqsOutDir, file.Name()))
 		if err != nil { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
 			fileOutPath := path.Join(failedReqsOutDir, ffn.AsString())
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {

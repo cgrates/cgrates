@@ -146,16 +146,16 @@ func TestCdrsFileFailover(t *testing.T) {
 			break
 		}
 	}
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedRequestsDir)
+	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedPostsDir)
 	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.FailedRequestsDir)
+		t.Fatalf("No files in directory: %s", cdrsMasterCfg.FailedPostsDir)
 	}
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()
 		break
 	}
-	filePath := path.Join(cdrsMasterCfg.FailedRequestsDir, fileName)
+	filePath := path.Join(cdrsMasterCfg.FailedPostsDir, fileName)
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
