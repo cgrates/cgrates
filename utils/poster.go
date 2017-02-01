@@ -20,13 +20,14 @@ package utils
 import (
 	"bytes"
 	"crypto/tls"
-	//"encoding/gob"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/guardian"
@@ -201,14 +202,94 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 	return
 }
 
-func NewAMQPClient(addr, user, passwd string) (clnt *AMQPClient, err error) {
-	clnt = new(AMQPClient)
-	if clnt.conn, err = amqp.Dial(fmt.Sprintf("amqp:/%s:%s@%s/", user, passwd, addr)); err != nil {
+func NewAMQPPoster(addr, user, passwd, posterQueueID string, attempts int, fallbackFileDir string) *AMQPPoster {
+	return &AMQPPoster{dialURL: fmt.Sprintf("amqp:/%s:%s@%s/", user, passwd, addr),
+		posterQueueID: posterQueueID, attempts: attempts, fallbackFileDir: fallbackFileDir}
+}
+
+type AMQPPoster struct {
+	dialURL         string
+	posterQueueID   string // identifier of the CDR queue where we publish
+	attempts        int
+	fallbackFileDir string
+	sync.Mutex      // protect connection
+	conn            *amqp.Connection
+}
+
+// Post is the method being called when we need to post anything in the queue
+// the optional chn will permits channel caching
+func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []byte, fallbackFileName string) (*amqp.Channel, error) {
+	var err error
+	delay := Fib()
+	if chn == nil {
+		for i := 0; i < pstr.attempts; i++ {
+			if chn, err = pstr.NewPostChannel(); err == nil {
+				break
+			}
+			time.Sleep(delay())
+		}
+		if err != nil && fallbackFileName != META_NONE {
+			err = pstr.writeToFile(fallbackFileName, content)
+			return nil, err
+		}
+	}
+	for i := 0; i < pstr.attempts; i++ {
+		if err = chn.Publish(
+			"",                 // exchange
+			pstr.posterQueueID, // routing key
+			false,              // mandatory
+			false,              // immediate
+			amqp.Publishing{
+				ContentType: contentType,
+				Body:        content,
+			}); err == nil {
+			break
+		}
+		time.Sleep(delay())
+	}
+	if err != nil && fallbackFileName != META_NONE {
+		err = pstr.writeToFile(fallbackFileName, content)
 		return nil, err
 	}
+	return chn, nil
+}
+
+func (pstr *AMQPPoster) Close() {
+	pstr.Lock()
+	pstr.conn.Close()
+	pstr.conn = nil
+	pstr.Unlock()
+}
+
+func (pstr *AMQPPoster) NewPostChannel() (postChan *amqp.Channel, err error) {
+	pstr.Lock()
+	if pstr.conn == nil {
+		pstr.conn, err = amqp.Dial(pstr.dialURL)
+	}
+	pstr.Unlock()
+	if err != nil {
+		return nil, err
+	}
+	if postChan, err = pstr.conn.Channel(); err != nil {
+		return
+	}
+	_, err = postChan.QueueDeclare(pstr.posterQueueID, true, false, false, false, nil)
 	return
 }
 
-type AMQPClient struct {
-	conn *amqp.Connection
+// writeToFile writes the content in the file with fileName on amqp.fallbackFileDir
+func (pstr *AMQPPoster) writeToFile(fileName string, content []byte) (err error) {
+	fallbackFilePath := path.Join(pstr.fallbackFileDir, fileName)
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+		fileOut, err := os.Create(fallbackFilePath)
+		if err != nil {
+			return nil, err
+		}
+		defer fileOut.Close()
+		if _, err := fileOut.Write(content); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}, time.Duration(2*time.Second), FileLockPrefix+fallbackFilePath)
+	return
 }
