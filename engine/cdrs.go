@@ -466,13 +466,13 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		var body interface{}
 		var content = ""
 		switch rplCfg.Transport {
-		case utils.MetaHTTPjsonCDR:
+		case utils.MetaHTTPjsonCDR, utils.MetaAMQPjsonCDR:
 			jsn, err := json.Marshal(cdr)
 			if err != nil {
 				return err
 			}
 			body = jsn
-		case utils.MetaHTTPjsonMap:
+		case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap:
 			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
 			if err != nil {
 				return err
@@ -498,18 +498,26 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			errChan = make(chan error)
 		}
 		go func(body interface{}, rplCfg *config.CDRReplicationCfg, content string, errChan chan error) {
+			var err error
 			fallbackPath := path.Join(
 				self.cgrCfg.FailedPostsDir,
 				rplCfg.FallbackFileName())
-			if _, err := self.httpPoster.Post(rplCfg.Address, utils.PosterTransportContentTypes[rplCfg.Transport], body, rplCfg.Attempts, fallbackPath); err != nil {
+			switch rplCfg.Transport {
+			case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
+				_, err = self.httpPoster.Post(rplCfg.Address, utils.PosterTransportContentTypes[rplCfg.Transport], body, rplCfg.Attempts, fallbackPath)
+			case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
+				_, err = utils.AMQPPostersCache.GetAMQPPoster(rplCfg.Address, "cgrates_cdrs", rplCfg.Attempts, self.cgrCfg.FailedPostsDir).Post(
+					nil, utils.PosterTransportContentTypes[rplCfg.Transport], body.([]byte), rplCfg.FallbackFileName())
+			default:
+				utils.Logger.Warning(fmt.Sprintf("<CDRReplicator> Unsupported replication transport: %s", rplCfg.Transport))
+				return
+			}
+			if err != nil {
 				utils.Logger.Err(fmt.Sprintf(
-					"<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
-				if rplCfg.Synchronous {
-					errChan <- err
-				}
+					"<CDRReplicator> Replicating CDR: %+v, transport: %s, got error: %s", cdr, rplCfg.Transport, err.Error()))
 			}
 			if rplCfg.Synchronous {
-				errChan <- nil
+				errChan <- err
 			}
 		}(body, rplCfg, content, errChan)
 		if rplCfg.Synchronous { // Synchronize here

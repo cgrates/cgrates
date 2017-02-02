@@ -34,6 +34,12 @@ import (
 	"github.com/streadway/amqp"
 )
 
+func init() {
+	AMQPPostersCache = &AMQPCachedPosters{cache: make(map[string]*AMQPPoster)} // Initialize the cache for amqpPosters
+}
+
+var AMQPPostersCache *AMQPCachedPosters
+
 // NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
 func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err error) {
 	ffn = new(FallbackFileName)
@@ -50,7 +56,7 @@ func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err 
 		return nil, fmt.Errorf("unsupported module: %s", ffn.Module)
 	}
 	fileNameWithoutModule := fileName[moduleIdx+1:]
-	for _, trspt := range []string{MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST} {
+	for _, trspt := range []string{MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap} {
 		if strings.HasPrefix(fileNameWithoutModule, trspt) {
 			ffn.Transport = trspt
 			break
@@ -202,9 +208,28 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 	return
 }
 
-func NewAMQPPoster(addr, user, passwd, posterQueueID string, attempts int, fallbackFileDir string) *AMQPPoster {
-	return &AMQPPoster{dialURL: fmt.Sprintf("amqp:/%s:%s@%s/", user, passwd, addr),
-		posterQueueID: posterQueueID, attempts: attempts, fallbackFileDir: fallbackFileDir}
+// AMQPPosterCache is used to cache mutliple AMQPPoster connections based on the address
+type AMQPCachedPosters struct {
+	sync.Mutex
+	cache map[string]*AMQPPoster
+}
+
+// GetAMQPPoster creates a new poster only if not already cached
+// uses dialURL as cache key
+func (pc *AMQPCachedPosters) GetAMQPPoster(dialURL, posterQueueID string, attempts int, fallbackFileDir string) (amqpPoster *AMQPPoster) {
+	pc.Lock()
+	defer pc.Unlock()
+	var hasIt bool
+	if _, hasIt = pc.cache[dialURL]; !hasIt {
+		pc.cache[dialURL] = NewAMQPPoster(dialURL, posterQueueID, attempts, fallbackFileDir)
+	}
+	return pc.cache[dialURL]
+}
+
+// dialURL = fmt.Sprintf("amqp:/%s:%s@%s/", user, passwd, addr)
+func NewAMQPPoster(dialURL, posterQueueID string, attempts int, fallbackFileDir string) *AMQPPoster {
+	return &AMQPPoster{dialURL: dialURL, posterQueueID: posterQueueID,
+		attempts: attempts, fallbackFileDir: fallbackFileDir}
 }
 
 type AMQPPoster struct {

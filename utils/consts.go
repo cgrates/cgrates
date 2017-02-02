@@ -27,6 +27,8 @@ var (
 		MetaHTTPjsonMap: CONTENT_JSON,
 		MetaHTTPjson:    CONTENT_JSON,
 		META_HTTP_POST:  CONTENT_FORM,
+		MetaAMQPjsonCDR: CONTENT_JSON,
+		MetaAMQPjsonMap: CONTENT_JSON,
 	}
 )
 
@@ -228,6 +230,8 @@ const (
 	MetaHTTPjsonCDR               = "*http_json_cdr"
 	META_HTTP_JSONRPC             = "*http_jsonrpc"
 	MetaHTTPjsonMap               = "*http_json_map"
+	MetaAMQPjsonCDR               = "*amqp_json_cdr"
+	MetaAMQPjsonMap               = "*amqp_json_map"
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"
 	CONFIG_DIR                    = "/etc/cgrates/"
