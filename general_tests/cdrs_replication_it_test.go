@@ -21,8 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"encoding/json"
 	"io/ioutil"
-	"os"
+	//"os"
 	"path"
 	"reflect"
 	"strings"
@@ -33,6 +34,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/streadway/amqp"
 )
 
 var cdrsMasterCfgPath, cdrsSlaveCfgPath string
@@ -136,6 +138,41 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 	}
 }
 
+func TestCdrsAMQPReplication(t *testing.T) {
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case d := <-msgs:
+		var rcvCDR map[string]string
+		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
+			t.Error(err)
+		}
+		if rcvCDR[utils.CGRID] != utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()) {
+			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
+		}
+	case <-time.After(time.Duration(100 * time.Millisecond)):
+		t.Error("No message received from RabbitMQ")
+	}
+}
+
 // Connect rpc client to rater
 func TestCdrsFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(2 * time.Second))
@@ -161,9 +198,11 @@ func TestCdrsFileFailover(t *testing.T) {
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
 		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
 	}
-	if err := os.Remove(filePath); err != nil {
-		t.Error("Failed removing file: ", filePath)
-	}
+	/*
+		if err := os.Remove(filePath); err != nil {
+			t.Error("Failed removing file: ", filePath)
+		}
+	*/
 }
 
 /*

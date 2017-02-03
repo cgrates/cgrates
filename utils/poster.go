@@ -230,7 +230,7 @@ func (pc *AMQPCachedPosters) GetAMQPPoster(dialURL string, attempts int, fallbac
 	return pc.cache[dialURL], nil
 }
 
-// "amqp://guest:guest@localhost:5672/?queueID=cgr_cdrs"
+// "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
 func NewAMQPPoster(dialURL string, attempts int, fallbackFileDir string) (*AMQPPoster, error) {
 	u, err := url.Parse(dialURL)
 	if err != nil {
