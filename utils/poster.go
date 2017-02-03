@@ -216,20 +216,34 @@ type AMQPCachedPosters struct {
 
 // GetAMQPPoster creates a new poster only if not already cached
 // uses dialURL as cache key
-func (pc *AMQPCachedPosters) GetAMQPPoster(dialURL, posterQueueID string, attempts int, fallbackFileDir string) (amqpPoster *AMQPPoster) {
+func (pc *AMQPCachedPosters) GetAMQPPoster(dialURL string, attempts int, fallbackFileDir string) (amqpPoster *AMQPPoster, err error) {
 	pc.Lock()
 	defer pc.Unlock()
 	var hasIt bool
 	if _, hasIt = pc.cache[dialURL]; !hasIt {
-		pc.cache[dialURL] = NewAMQPPoster(dialURL, posterQueueID, attempts, fallbackFileDir)
+		if pstr, err := NewAMQPPoster(dialURL, attempts, fallbackFileDir); err != nil {
+			return nil, err
+		} else {
+			pc.cache[dialURL] = pstr
+		}
 	}
-	return pc.cache[dialURL]
+	return pc.cache[dialURL], nil
 }
 
-// dialURL = fmt.Sprintf("amqp:/%s:%s@%s/", user, passwd, addr)
-func NewAMQPPoster(dialURL, posterQueueID string, attempts int, fallbackFileDir string) *AMQPPoster {
+// "amqp://guest:guest@localhost:5672/?queueID=cgr_cdrs"
+func NewAMQPPoster(dialURL string, attempts int, fallbackFileDir string) (*AMQPPoster, error) {
+	u, err := url.Parse(dialURL)
+	if err != nil {
+		return nil, err
+	}
+	qry := u.Query()
+	posterQueueID := "cgrates_cdrs"
+	if vals, has := qry["queue_id"]; has && len(vals) != 0 {
+		posterQueueID = vals[0]
+	}
+	dialURL = strings.Split(dialURL, "?")[0] // Take query params out of dialURL
 	return &AMQPPoster{dialURL: dialURL, posterQueueID: posterQueueID,
-		attempts: attempts, fallbackFileDir: fallbackFileDir}
+		attempts: attempts, fallbackFileDir: fallbackFileDir}, nil
 }
 
 type AMQPPoster struct {

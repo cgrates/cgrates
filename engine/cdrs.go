@@ -506,8 +506,12 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
 				_, err = self.httpPoster.Post(rplCfg.Address, utils.PosterTransportContentTypes[rplCfg.Transport], body, rplCfg.Attempts, fallbackPath)
 			case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-				_, err = utils.AMQPPostersCache.GetAMQPPoster(rplCfg.Address, "cgrates_cdrs", rplCfg.Attempts, self.cgrCfg.FailedPostsDir).Post(
-					nil, utils.PosterTransportContentTypes[rplCfg.Transport], body.([]byte), rplCfg.FallbackFileName())
+				var amqpPoster *utils.AMQPPoster
+				amqpPoster, err = utils.AMQPPostersCache.GetAMQPPoster(rplCfg.Address, rplCfg.Attempts, self.cgrCfg.FailedPostsDir)
+				if err == nil { // error will be checked bellow
+					_, err = amqpPoster.Post(
+						nil, utils.PosterTransportContentTypes[rplCfg.Transport], body.([]byte), rplCfg.FallbackFileName())
+				}
 			default:
 				utils.Logger.Warning(fmt.Sprintf("<CDRReplicator> Unsupported replication transport: %s", rplCfg.Transport))
 				return
