@@ -23,7 +23,7 @@ package general_tests
 import (
 	"encoding/json"
 	"io/ioutil"
-	//"os"
+	"os"
 	"path"
 	"reflect"
 	"strings"
@@ -62,7 +62,7 @@ func TestCdrsInitCdrDb(t *testing.T) {
 		t.Fatal(err)
 	}
 	/*
-		if err := os.Mkdir(cdrsMasterCfg.HttpFailedDir, 0700); err != nil {
+		if err := os.Mkdir(cdrsMasterCfg.FailedPostsDir, 0700); err != nil {
 			t.Error(err)
 		}
 	*/
@@ -198,11 +198,9 @@ func TestCdrsFileFailover(t *testing.T) {
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
 		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
 	}
-	/*
-		if err := os.Remove(filePath); err != nil {
-			t.Error("Failed removing file: ", filePath)
-		}
-	*/
+	if err := os.Remove(filePath); err != nil {
+		t.Error("Failed removing file: ", filePath)
+	}
 }
 
 /*
