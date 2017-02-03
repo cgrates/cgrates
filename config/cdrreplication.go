@@ -33,7 +33,7 @@ type CDRReplicationCfg struct {
 func (rplCfg CDRReplicationCfg) FallbackFileName() string {
 	fileSuffix := ".txt"
 	switch rplCfg.Transport {
-	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap:
+	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
 		fileSuffix = ".json"
 	case utils.META_HTTP_POST:
 		fileSuffix = ".form"

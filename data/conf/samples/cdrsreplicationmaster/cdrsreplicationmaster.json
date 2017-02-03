@@ -70,7 +70,7 @@
 			"address": "http://127.0.0.1:12080/invalid", 
 			"attempts": 1,
 			"content_fields": [
-				{"tag": "CGRID", "type": "*composed", "value": "CGRID", "field_id": "CGRID"},
+				{"tag": "OriginID", "type": "*composed", "value": "OriginID", "field_id": "OriginID"},
 			],
 		},
 		{
