@@ -279,8 +279,9 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 			false,              // mandatory
 			false,              // immediate
 			amqp.Publishing{
-				ContentType: contentType,
-				Body:        content,
+				DeliveryMode: amqp.Persistent,
+				ContentType:  contentType,
+				Body:         content,
 			}); err == nil {
 			break
 		}
