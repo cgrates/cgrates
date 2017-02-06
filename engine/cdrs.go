@@ -33,6 +33,7 @@ import (
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/streadway/amqp"
 )
 
 var cdrServer *CdrServer // Share the server so we can use it in http handlers
@@ -509,8 +510,12 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 				var amqpPoster *utils.AMQPPoster
 				amqpPoster, err = utils.AMQPPostersCache.GetAMQPPoster(rplCfg.Address, rplCfg.Attempts, self.cgrCfg.FailedPostsDir)
 				if err == nil { // error will be checked bellow
-					_, err = amqpPoster.Post(
+					var chn *amqp.Channel
+					chn, err = amqpPoster.Post(
 						nil, utils.PosterTransportContentTypes[rplCfg.Transport], body.([]byte), rplCfg.FallbackFileName())
+					if chn != nil {
+						chn.Close()
+					}
 				}
 			default:
 				utils.Logger.Warning(fmt.Sprintf("<CDRReplicator> Unsupported replication transport: %s", rplCfg.Transport))

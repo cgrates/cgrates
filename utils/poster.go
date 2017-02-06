@@ -296,7 +296,9 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 
 func (pstr *AMQPPoster) Close() {
 	pstr.Lock()
-	pstr.conn.Close()
+	if pstr.conn != nil {
+		pstr.conn.Close()
+	}
 	pstr.conn = nil
 	pstr.Unlock()
 }
@@ -304,7 +306,17 @@ func (pstr *AMQPPoster) Close() {
 func (pstr *AMQPPoster) NewPostChannel() (postChan *amqp.Channel, err error) {
 	pstr.Lock()
 	if pstr.conn == nil {
-		pstr.conn, err = amqp.Dial(pstr.dialURL)
+		var conn *amqp.Connection
+		conn, err = amqp.Dial(pstr.dialURL)
+		if err == nil {
+			pstr.conn = conn
+			go func() { // monitor connection errors so we can restart
+				if err := <-pstr.conn.NotifyClose(make(chan *amqp.Error)); err != nil {
+					Logger.Err(fmt.Sprintf("Connection error received: %s", err.Error()))
+					pstr.Close()
+				}
+			}()
+		}
 	}
 	pstr.Unlock()
 	if err != nil {

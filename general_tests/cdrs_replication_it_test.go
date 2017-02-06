@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"reflect"
 	"strings"
@@ -145,7 +146,6 @@ func TestCdrsAMQPReplication(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
 
 	ch, err := conn.Channel()
 	if err != nil {
@@ -173,6 +173,54 @@ func TestCdrsAMQPReplication(t *testing.T) {
 	case <-time.After(time.Duration(100 * time.Millisecond)):
 		t.Error("No message received from RabbitMQ")
 	}
+	conn.Close()
+	// restart RabbitMQ server so we can test reconnects
+	if err := exec.Command("service", "rabbitmq-server", "restart").Run(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(5 * time.Second))
+	testCdr := &engine.CDR{CGRID: utils.Sha1("amqpreconnect", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		ToR: utils.VOICE, OriginID: "amqpreconnect", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_PSEUDOPREPAID,
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID: utils.DEFAULT_RUNID, Cost: 1.201, Rated: true}
+	var reply string
+	if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", testCdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	if conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/"); err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	if ch, err = conn.Channel(); err != nil {
+		t.Fatal(err)
+	}
+	defer ch.Close()
+
+	if q, err = ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil); err != nil {
+		t.Fatal(err)
+	}
+	if msgs, err = ch.Consume(q.Name, "", true, false, false, false, nil); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case d := <-msgs:
+		var rcvCDR map[string]string
+		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
+			t.Error(err)
+		}
+		if rcvCDR[utils.CGRID] != testCdr.CGRID {
+			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
+		}
+	case <-time.After(time.Duration(100 * time.Millisecond)):
+		t.Error("No message received from RabbitMQ")
+	}
+
 }
 
 func TestCdrsHTTPPosterFileFailover(t *testing.T) {
@@ -206,13 +254,15 @@ func TestCdrsHTTPPosterFileFailover(t *testing.T) {
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
 		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
 	}
-	if err := os.Remove(filePath); err != nil {
-		t.Error("Failed removing file: ", filePath)
-	}
+	/*
+		if err := os.Remove(filePath); err != nil {
+			t.Error("Failed removing file: ", filePath)
+		}
+	*/
 }
 
 func TestCdrsAMQPPosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(6 * time.Second))
+	time.Sleep(time.Duration(10 * time.Second))
 	failoverContent := []byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`)
 	var rplCfg *config.CDRReplicationCfg
 	var foundFile bool
@@ -229,12 +279,17 @@ func TestCdrsAMQPPosterFileFailover(t *testing.T) {
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.FailedPostsDir)
 	}
+	foundFile = false
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()
 		if strings.HasPrefix(fileName, "cdr|*amqp_json_map") {
+			foundFile = true
 			break
 		}
+	}
+	if !foundFile {
+		t.Fatal("Could not find the file in folder")
 	}
 	filePath := path.Join(cdrsMasterCfg.FailedPostsDir, fileName)
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
@@ -242,9 +297,11 @@ func TestCdrsAMQPPosterFileFailover(t *testing.T) {
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
 		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
 	}
-	if err := os.Remove(filePath); err != nil {
-		t.Error("Failed removing file: ", filePath)
-	}
+	/*
+		if err := os.Remove(filePath); err != nil {
+			t.Error("Failed removing file: ", filePath)
+		}
+	*/
 }
 
 /*

@@ -67,7 +67,8 @@
 		},
 		{
 			"transport": "*http_post", 
-			"address": "http://127.0.0.1:12080/invalid", 
+			"address": "http://127.0.0.1:12080/invalid",
+			"cdr_filter": "OriginID(httpjsonrpc1)",
 			"attempts": 1,
 			"content_fields": [
 				{"tag": "OriginID", "type": "*composed", "value": "OriginID", "field_id": "OriginID"},
