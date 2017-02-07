@@ -855,6 +855,9 @@ func (attrRateCDRs *AttrRateCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, er
 	} else if attrRateCDRs.RerateRated {
 		cdrFltr.MinCost = Float64Pointer(0.0)
 	}
+	if attrRateCDRs.RerateErrors || attrRateCDRs.RerateRated {
+		cdrFltr.NotRunIDs = append(cdrFltr.NotRunIDs, MetaRaw)
+	}
 	return cdrFltr, nil
 }
 

@@ -971,7 +971,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	// Execute query
 	results := make([]*TBLCDRs, 0)
 	q.Find(&results)
-
 	for _, result := range results {
 		extraFieldsMp := make(map[string]string)
 		if result.ExtraFields != "" {
