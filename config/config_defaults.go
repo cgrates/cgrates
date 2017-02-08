@@ -154,27 +154,27 @@ const CGRATES_CFG_JSON = `
 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality<""|*internal|x.y.z.y:1234>
 	"cdr_replication":[
-//		{
-//			"transport": "*http_post", 						// mechanism to use when replicating
-//			"address": "http://127.0.0.1:12080/cdr_http",	// address where to replicate
-//			"attempts": 1,									// number of attempts for POST before failing on file
-//			"cdr_filter": "",								// filter the CDRs being replicated
-//			"content_fields": [								// template of the replicated content fields
-//				{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
-//				{"tag":"RunID", "type": "*composed", "value": "RunID"},
-//				{"tag":"TOR", "type": "*composed", "value": "ToR"},
-//				{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
-//				{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
-//				{"tag":"Direction", "type": "*composed", "value": "Direction"},
-//				{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
-//				{"tag":"Category", "type": "*composed", "value": "Category"},
-//				{"tag":"Account", "type": "*composed", "value": "Account"},
-//				{"tag":"Subject", "type": "*composed", "value": "Subject"},
-//				{"tag":"Destination", "type": "*composed", "value": "Destination"},
-//				{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-//				{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-//				{"tag":"Usage", "type": "*composed", "value": "Usage"},
-//				{"tag":"Cost", "type": "*composed", "value": "Cost"},
+//		{														// sample replication, not configured by default
+//			"transport": "*amqp_json_map", 						// mechanism to use when replicating
+//			"address": "http://127.0.0.1:12080/cdr_json_map",	// address where to replicate
+//			"attempts": 1,										// number of attempts for POST before failing on file
+//			"cdr_filter": "",									// filter the CDRs being replicated
+//			"content_fields": [									// template of the replicated content fields
+//				{"tag": "CGRID", "type": "*composed", "value": "CGRID", "field_id": "CGRID"},
+//				{"tag":"RunID", "type": "*composed", "value": "RunID", "field_id": "RunID"},
+//				{"tag":"TOR", "type": "*composed", "value": "ToR", "field_id": "ToR"},
+//				{"tag":"OriginID", "type": "*composed", "value": "OriginID", "field_id": "OriginID"},
+//				{"tag":"RequestType", "type": "*composed", "value": "RequestType", "field_id": "RequestType"},
+//				{"tag":"Direction", "type": "*composed", "value": "Direction", "field_id": "Direction"},
+//				{"tag":"Tenant", "type": "*composed", "value": "Tenant", "field_id": "Tenant"},
+//				{"tag":"Category", "type": "*composed", "value": "Category", "field_id": "Category"},
+//				{"tag":"Account", "type": "*composed", "value": "Account", "field_id": "Account"},
+//				{"tag":"Subject", "type": "*composed", "value": "Subject", "field_id": "Subject"},
+//				{"tag":"Destination", "type": "*composed", "value": "Destination", "field_id": "Destination"},
+//				{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "SetupTime"},
+//				{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "AnswerTime"},
+//				{"tag":"Usage", "type": "*composed", "value": "Usage", "field_id": "Usage"},
+//				{"tag":"Cost", "type": "*composed", "value": "Cost", "field_id": "Cost"},
 //			],
 //		},
 	]

@@ -40,6 +40,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/streadway/amqp"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
@@ -1698,10 +1699,10 @@ func TestApierReplayFailedPosts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer fileOut.Close()
 	if _, err := fileOut.Write(fileContent); err != nil {
 		t.Error(err)
 	}
+	fileOut.Close()
 	var reply string
 	if err := rater.Call("ApierV1.ReplayFailedPosts", args, &reply); err != nil {
 		t.Error(err)
@@ -1714,11 +1715,65 @@ func TestApierReplayFailedPosts(t *testing.T) {
 	} else if !reflect.DeepEqual(fileContent, outContent) {
 		t.Errorf("Expecting: %q, received: %q", string(fileContent), string(outContent))
 	}
+	fileName = "cdr|*amqp_json_map|amqp%3A%2F%2Fguest%3Aguest%40localhost%3A5672%2F%3Fqueue_id%3Dcgrates_cdrs|ae8cc4b3-5e60-4396-b82a-64b96a72a03c.json"
+	fileContent = []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)
+	fileInPath := path.Join(*args.FailedRequestsInDir, fileName)
+	fileOut, err = os.Create(fileInPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if _, err := fileOut.Write(fileContent); err != nil {
+		t.Error(err)
+	}
+	fileOut.Close()
+	if err := rater.Call("ApierV1.ReplayFailedPosts", args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply: ", reply)
+	}
+	if _, err := os.Stat(fileInPath); !os.IsNotExist(err) {
+		t.Error("InFile still exists")
+	}
+	if _, err := os.Stat(path.Join(*args.FailedRequestsOutDir, fileName)); !os.IsNotExist(err) {
+		t.Error("OutFile created")
+	}
+	// connect to RabbitMQ server and check if the content was posted there
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	ch, err := conn.Channel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ch.Close()
+	q, err := ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case d := <-msgs:
+		var rcvCDR map[string]string
+		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
+			t.Error(err)
+		}
+		if rcvCDR[utils.CGRID] != "88ed9c38005f07576a1e1af293063833b60edcc6" {
+			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
+		}
+	case <-time.After(time.Duration(100 * time.Millisecond)):
+		t.Error("No message received from RabbitMQ")
+	}
 	for _, dir := range []string{*args.FailedRequestsInDir, *args.FailedRequestsOutDir} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Errorf("Error %s removing folder: %s", err, dir)
 		}
 	}
+
 }
 
 // Simply kill the engine after we are done with tests within this file

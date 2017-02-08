@@ -34,6 +34,7 @@ import (
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/streadway/amqp"
 )
 
 const (
@@ -1673,9 +1674,11 @@ func (v1 *ApierV1) ServiceStatus(args servmanager.ArgStartService, reply *string
 type ArgsReplyFailedPosts struct {
 	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
 	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
-	Posters              []string // list of modules for which replay the requests, nil for all
+	Modules              []string // list of modules for which replay the requests, nil for all
+	Transports           []string // list of transports
 }
 
+// ReplayFailedPosts will repost failed requests found in the FailedRequestsInDir
 func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (err error) {
 	failedReqsInDir := v1.Config.FailedPostsDir
 	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != "" {
@@ -1695,9 +1698,9 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}
-		if len(args.Posters) != 0 {
+		if len(args.Modules) != 0 {
 			var allowedModule bool
-			for _, mod := range args.Posters {
+			for _, mod := range args.Modules {
 				if strings.HasPrefix(ffn.Module, mod) {
 					allowedModule = true
 					break
@@ -1706,6 +1709,9 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 			if !allowedModule {
 				continue // this file is not to be processed due to Modules ACL
 			}
+		}
+		if len(args.Transports) != 0 && !utils.IsSliceMember(args.Transports, ffn.Transport) {
+			continue // this file is not to be processed due to Transports ACL
 		}
 		var fileContent []byte
 		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
@@ -1724,9 +1730,25 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 		if failedReqsOutDir != utils.META_NONE {
 			failoverPath = path.Join(failedReqsOutDir, file.Name())
 		}
-		_, err = utils.NewHTTPPoster(v1.Config.HttpSkipTlsVerify,
-			v1.Config.ReplyTimeout).Post(ffn.Address, utils.PosterTransportContentTypes[ffn.Transport], fileContent,
-			v1.Config.PosterAttempts, failoverPath)
+		switch ffn.Transport {
+		case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
+			_, err = utils.NewHTTPPoster(v1.Config.HttpSkipTlsVerify,
+				v1.Config.ReplyTimeout).Post(ffn.Address, utils.PosterTransportContentTypes[ffn.Transport], fileContent,
+				v1.Config.PosterAttempts, failoverPath)
+		case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
+			var amqpPoster *utils.AMQPPoster
+			amqpPoster, err = utils.AMQPPostersCache.GetAMQPPoster(ffn.Address, v1.Config.PosterAttempts, failedReqsOutDir)
+			if err == nil { // error will be checked bellow
+				var chn *amqp.Channel
+				chn, err = amqpPoster.Post(
+					nil, utils.PosterTransportContentTypes[ffn.Transport], fileContent, file.Name())
+				if chn != nil {
+					chn.Close()
+				}
+			}
+		default:
+			err = fmt.Errorf("unsupported replication transport: %s", ffn.Transport)
+		}
 		if err != nil && failedReqsOutDir != utils.META_NONE { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 				if _, err := os.Stat(failoverPath); err == nil || !os.IsNotExist(err) {

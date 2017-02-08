@@ -501,9 +501,10 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		}
 		go func(body interface{}, rplCfg *config.CDRReplicationCfg, content string, errChan chan error) {
 			var err error
-			fallbackPath := path.Join(
-				self.cgrCfg.FailedPostsDir,
-				rplCfg.FallbackFileName())
+			fallbackPath := utils.META_NONE
+			if rplCfg.FallbackFileName() != utils.META_NONE {
+				fallbackPath = path.Join(self.cgrCfg.FailedPostsDir, rplCfg.FallbackFileName())
+			}
 			switch rplCfg.Transport {
 			case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
 				_, err = self.httpPoster.Post(rplCfg.Address, utils.PosterTransportContentTypes[rplCfg.Transport], body, rplCfg.Attempts, fallbackPath)
@@ -519,8 +520,7 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 					}
 				}
 			default:
-				utils.Logger.Warning(fmt.Sprintf("<CDRReplicator> Unsupported replication transport: %s", rplCfg.Transport))
-				return
+				err = fmt.Errorf("unsupported replication transport: %s", rplCfg.Transport)
 			}
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf(
