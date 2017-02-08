@@ -854,11 +854,11 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 	var maxDurInit bool // Avoid differences between default 0 and received 0
 	for _, sR := range sessionRuns {
 		cc := new(engine.CallCost)
-		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
 		if err = smg.rals.Call("Responder.MaxDebit", sR.CallDescriptor, cc); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not Debit CD: %+v, RunID: %s, error: %s", sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
 			break
 		}
+		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
 		if ccDur := cc.GetDuration(); ccDur == 0 {
 			err = utils.ErrInsufficientCredit
 			break
