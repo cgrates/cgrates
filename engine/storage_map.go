@@ -266,14 +266,13 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 			utils.UnsupportedCachePrefix,
 			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prefix))
 	}
-
 	if IDs == nil {
 		keyIDs, err := ms.GetKeysForPrefix(prefix)
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
 				utils.ServerErrorCaps,
 				err.Error(),
-				fmt.Sprintf("redis error <%s> querying keys for prefix: <%s>", prefix))
+				fmt.Sprintf("MapStorage error <%s> querying keys for prefix: <%s>", prefix))
 		}
 		for _, keyID := range keyIDs {
 			if mustBeCached { // Only consider loading ids which are already in cache
@@ -454,7 +453,9 @@ func (ms *MapStorage) GetRatingProfile(key string, skipCache bool, transactionID
 	cCommit := cacheCommit(transactionID)
 	if values, ok := ms.dict[key]; ok {
 		rpf = new(RatingProfile)
-		err = ms.ms.Unmarshal(values, &rpf)
+		if err = ms.ms.Unmarshal(values, &rpf); err != nil {
+			return nil, err
+		}
 	} else {
 		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
@@ -779,13 +780,14 @@ func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 		return nil, utils.ErrNotFound
 	}
 	ub = &Account{ID: key}
-	err = ms.ms.Unmarshal(values, ub)
+	err = ms.ms.Unmarshal(values, &ub)
 	if err != nil {
 		return nil, err
 	}
 	if len(values) == 0 {
 		return nil, utils.ErrNotFound
 	}
+
 	return
 }
 
@@ -912,28 +914,28 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool, transactionID string)
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	cacheKey := utils.ALIASES_PREFIX + key
+	cCommit := cacheCommit(transactionID)
 	if !skipCache {
 		if x, ok := cache.Get(cacheKey); ok {
-			if x != nil {
-				return x.(*Alias), nil
+			if x == nil {
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
+			return x.(*Alias), nil
 		}
 	}
-	values, ok := ms.dict[cacheKey]
-	if !ok {
-		cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+	if values, ok := ms.dict[cacheKey]; ok {
+		al = &Alias{Values: make(AliasValues, 0)}
+		al.SetId(key)
+		if err = ms.ms.Unmarshal(values, &al.Values); err != nil {
+			return nil, err
+		}
+	} else {
+		cache.Set(cacheKey, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	al = &Alias{Values: make(AliasValues, 0)}
-	al.SetId(key[len(utils.ALIASES_PREFIX):])
-	err = ms.ms.Unmarshal(values, &al.Values)
-	if err != nil {
-		return nil, err
-	}
-
-	cache.Set(key, &al, cacheCommit(transactionID), transactionID)
+	cache.Set(cacheKey, al, cCommit, transactionID)
 	return
+
 }
 
 func (ms *MapStorage) SetAlias(al *Alias, transactionID string) error {
