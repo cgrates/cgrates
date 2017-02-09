@@ -460,7 +460,8 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 
 // replicateSessions will replicate session based on configuration
 func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool, smgReplConns []*SMGReplicationConn) (err error) {
-	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 && !passiveSessions { // Replicating active not supported
+	if len(smgReplConns) == 0 ||
+		(smg.cgrCfg.SmGenericConfig.DebitInterval != 0 && !passiveSessions) { // Replicating active not supported
 		return
 	}
 	ssMux := &smg.aSessionsMux
@@ -470,11 +471,11 @@ func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool
 		ssMp = smg.passiveSessions
 	}
 	ssMux.RLock()
-	var ss []*SMGSession
-	if err = utils.Clone(ssMp[cgrID], &ss); err != nil {
+	ss := ssMp[cgrID]
+	ssMux.RUnlock()
+	if len(ss) == 0 {
 		return
 	}
-	ssMux.RUnlock()
 	var wg sync.WaitGroup
 	for _, rplConn := range smgReplConns {
 		if rplConn.Synchronous {
