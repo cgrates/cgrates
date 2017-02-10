@@ -91,7 +91,6 @@ func (s *Scheduler) Loop() {
 		utils.Logger.Info(fmt.Sprintf("<Scheduler> Scheduler queue length: %v", len(s.queue)))
 		s.Lock()
 		a0 := s.queue[0]
-		utils.Logger.Debug(fmt.Sprintf("Have at scheduled: %+v", a0))
 		utils.Logger.Info(fmt.Sprintf("<Scheduler> Action: %s", a0.ActionsID))
 		now := time.Now()
 		start := a0.GetNextStartTime(now)
@@ -176,7 +175,6 @@ func (s *Scheduler) loadActionPlans() {
 			}
 			at.SetAccountIDs(actionPlan.AccountIDs) // copy the accounts
 			at.SetActionPlanID(actionPlan.Id)
-			utils.Logger.Debug(fmt.Sprintf("Scheduling queue, add at: %+v", at))
 			s.queue = append(s.queue, at)
 
 		}
