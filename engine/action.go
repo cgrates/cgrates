@@ -590,7 +590,7 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		if err = ratingStorage.RemAccountActionPlans(accID, nil); err != nil {
 			return 0, err
 		}
-		if err = ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err != utils.ErrNotFound {
+		if err = ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
 			return 0, err
 		}
 		return 0, nil
