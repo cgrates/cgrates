@@ -330,10 +330,7 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	eHaPoolCfg := []*HaPoolConfig{}
-	eCDRReCfg := []*CDRReplicationCfg{}
-	iHaPoolCfg := []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}
 	var eCdrExtr []*utils.RSRField
-
 	if cgrCfg.CDRSEnabled != false {
 		t.Error(cgrCfg.CDRSEnabled)
 	}
@@ -349,7 +346,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if cgrCfg.CDRSSMCostRetries != 5 {
 		t.Error(cgrCfg.CDRSSMCostRetries)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, iHaPoolCfg) {
+	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}) {
 		t.Error(cgrCfg.CDRSRaterConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.CDRSPubSubSConns, eHaPoolCfg) {
@@ -364,8 +361,8 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.CDRSStatSConns, eHaPoolCfg) {
 		t.Error(cgrCfg.CDRSStatSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSCdrReplication, eCDRReCfg) {
-		t.Error(cgrCfg.CDRSCdrReplication)
+	if cgrCfg.CDRSOnlineCDRExports != nil {
+		t.Error(cgrCfg.CDRSOnlineCDRExports)
 	}
 }
 
@@ -399,20 +396,18 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 	}
 	eCdreCfg := map[string]*CdreConfig{
 		"*default": {
-			CdrFormat:                  "csv",
-			FieldSeparator:             ',',
-			DataUsageMultiplyFactor:    1,
-			SMSUsageMultiplyFactor:     1,
-			MMSUsageMultiplyFactor:     1,
-			GenericUsageMultiplyFactor: 1,
-			CostMultiplyFactor:         1,
-			ExportDirectory:            "/var/spool/cgrates/cdre",
-			HeaderFields:               eFields,
-			ContentFields:              eContentFlds,
-			TrailerFields:              eFields,
+			ExportFormat:        utils.MetaFileCSV,
+			ExportPath:          "/var/spool/cgrates/cdre",
+			Synchronous:         false,
+			Attempts:            1,
+			FieldSeparator:      ',',
+			UsageMultiplyFactor: map[string]float64{utils.ANY: 1.0},
+			CostMultiplyFactor:  1.0,
+			HeaderFields:        eFields,
+			ContentFields:       eContentFlds,
+			TrailerFields:       eFields,
 		},
 	}
-
 	if !reflect.DeepEqual(cgrCfg.CdreProfiles, eCdreCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.CdreProfiles, eCdreCfg)
 	}

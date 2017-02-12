@@ -25,8 +25,8 @@ import (
 )
 
 func TestCdreCfgClone(t *testing.T) {
-	cgrIdRsrs, _ := utils.ParseRSRFields("cgrid", utils.INFIELD_SEP)
-	runIdRsrs, _ := utils.ParseRSRFields("mediation_runid", utils.INFIELD_SEP)
+	cgrIdRsrs := utils.ParseRSRFieldsMustCompile("cgrid", utils.INFIELD_SEP)
+	runIdRsrs := utils.ParseRSRFieldsMustCompile("runid", utils.INFIELD_SEP)
 	emptyFields := []*CfgCdrField{}
 	initContentFlds := []*CfgCdrField{
 		&CfgCdrField{Tag: "CgrId",
@@ -35,16 +35,21 @@ func TestCdreCfgClone(t *testing.T) {
 			Value:   cgrIdRsrs},
 		&CfgCdrField{Tag: "RunId",
 			Type:    "*composed",
-			FieldId: "mediation_runid",
+			FieldId: "runid",
 			Value:   runIdRsrs},
 	}
 	initCdreCfg := &CdreConfig{
-		CdrFormat:               "csv",
-		FieldSeparator:          rune(','),
-		DataUsageMultiplyFactor: 1.0,
-		CostMultiplyFactor:      1.0,
-		ExportDirectory:         "/var/spool/cgrates/cdre",
-		ContentFields:           initContentFlds,
+		ExportFormat:   utils.MetaFileCSV,
+		ExportPath:     "/var/spool/cgrates/cdre",
+		Synchronous:    true,
+		Attempts:       2,
+		FieldSeparator: rune(','),
+		UsageMultiplyFactor: map[string]float64{
+			utils.ANY:  1.0,
+			utils.DATA: 1024,
+		},
+		CostMultiplyFactor: 1.0,
+		ContentFields:      initContentFlds,
 	}
 	eClnContentFlds := []*CfgCdrField{
 		&CfgCdrField{Tag: "CgrId",
@@ -53,24 +58,29 @@ func TestCdreCfgClone(t *testing.T) {
 			Value:   cgrIdRsrs},
 		&CfgCdrField{Tag: "RunId",
 			Type:    "*composed",
-			FieldId: "mediation_runid",
+			FieldId: "runid",
 			Value:   runIdRsrs},
 	}
 	eClnCdreCfg := &CdreConfig{
-		CdrFormat:               "csv",
-		FieldSeparator:          rune(','),
-		DataUsageMultiplyFactor: 1.0,
-		CostMultiplyFactor:      1.0,
-		ExportDirectory:         "/var/spool/cgrates/cdre",
-		HeaderFields:            emptyFields,
-		ContentFields:           eClnContentFlds,
-		TrailerFields:           emptyFields,
+		ExportFormat:   utils.MetaFileCSV,
+		ExportPath:     "/var/spool/cgrates/cdre",
+		Synchronous:    true,
+		Attempts:       2,
+		FieldSeparator: rune(','),
+		UsageMultiplyFactor: map[string]float64{
+			utils.ANY:  1.0,
+			utils.DATA: 1024.0,
+		},
+		CostMultiplyFactor: 1.0,
+		HeaderFields:       emptyFields,
+		ContentFields:      eClnContentFlds,
+		TrailerFields:      emptyFields,
 	}
 	clnCdreCfg := initCdreCfg.Clone()
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) {
 		t.Errorf("Cloned result: %+v", clnCdreCfg)
 	}
-	initCdreCfg.DataUsageMultiplyFactor = 1024.0
+	initCdreCfg.UsageMultiplyFactor[utils.DATA] = 2048.0
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) { // MOdifying a field after clone should not affect cloned instance
 		t.Errorf("Cloned result: %+v", clnCdreCfg)
 	}
