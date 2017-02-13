@@ -151,11 +151,11 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.TpExportPath != "/var/spool/cgrates/tpe" {
 		t.Error(cgrCfg.TpExportPath)
 	}
-	if cgrCfg.HttpPosterAttempts != 3 {
-		t.Error(cgrCfg.HttpPosterAttempts)
+	if cgrCfg.PosterAttempts != 3 {
+		t.Error(cgrCfg.PosterAttempts)
 	}
-	if cgrCfg.HttpFailedDir != "/var/spool/cgrates/http_failed" {
-		t.Error(cgrCfg.HttpFailedDir)
+	if cgrCfg.FailedPostsDir != "/var/spool/cgrates/failed_posts" {
+		t.Error(cgrCfg.FailedPostsDir)
 	}
 	if cgrCfg.DefaultReqType != "*rated" {
 		t.Error(cgrCfg.DefaultReqType)

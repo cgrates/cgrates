@@ -21,7 +21,15 @@ var (
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
 	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
 		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField, MEDI_RUNID}
-	GitLastLog string // If set, it will be processed as part of versioning
+	GitLastLog                  string // If set, it will be processed as part of versioning
+	PosterTransportContentTypes = map[string]string{
+		MetaHTTPjsonCDR: CONTENT_JSON,
+		MetaHTTPjsonMap: CONTENT_JSON,
+		MetaHTTPjson:    CONTENT_JSON,
+		META_HTTP_POST:  CONTENT_FORM,
+		MetaAMQPjsonCDR: CONTENT_JSON,
+		MetaAMQPjsonMap: CONTENT_JSON,
+	}
 )
 
 const (
@@ -218,9 +226,12 @@ const (
 	META_FILLER                   = "*filler"
 	META_HANDLER                  = "*handler"
 	META_HTTP_POST                = "*http_post"
+	MetaHTTPjson                  = "*http_json"
 	MetaHTTPjsonCDR               = "*http_json_cdr"
 	META_HTTP_JSONRPC             = "*http_jsonrpc"
 	MetaHTTPjsonMap               = "*http_json_map"
+	MetaAMQPjsonCDR               = "*amqp_json_cdr"
+	MetaAMQPjsonMap               = "*amqp_json_map"
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"
 	CONFIG_DIR                    = "/etc/cgrates/"
@@ -334,4 +345,13 @@ const (
 	MetaSetVersions              = "*set_versions"
 	UnsupportedDB                = "unsupported database"
 	ACCOUNT_SUMMARY              = "AccountSummary"
+	TxtSuffix                    = ".txt"
+	JSNSuffix                    = ".json"
+	FormSuffix                   = ".form"
+	CONTENT_JSON                 = "json"
+	CONTENT_FORM                 = "form"
+	CONTENT_TEXT                 = "text"
+	FileLockPrefix               = "file_"
+	ActionsPoster                = "act"
+	CDRPoster                    = "cdr"
 )

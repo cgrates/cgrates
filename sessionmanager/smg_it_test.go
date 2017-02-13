@@ -928,6 +928,8 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 
 }
 
+// ToDo: Add test for ChargeEvent with derived charging, one with debit possible and second not so we see refund and error.CreditInsufficient showing up.
+
 func TestSMGVoiceSessionStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)

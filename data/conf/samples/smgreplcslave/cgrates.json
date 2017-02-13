@@ -4,9 +4,9 @@
 
 
 "listen": {
-	"rpc_json": ":22012",				// RPC JSON listening address
-	"rpc_gob": ":22013",					// RPC GOB listening address
-	"http": ":22080",					// HTTP listening address
+	"rpc_json": "127.0.0.1:22012",				// RPC JSON listening address
+	"rpc_gob": "127.0.0.1:22013",					// RPC GOB listening address
+	"http": "127.0.0.1:22080",					// HTTP listening address
 },
 
 "rals": {

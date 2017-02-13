@@ -42,6 +42,19 @@ var (
 	ErrActiveSession     = errors.New("ACTIVE_SESSION")
 )
 
+func NewSMGReplicationConns(conns []*config.HaPoolConfig, reconnects int, connTimeout, replyTimeout time.Duration) (smgConns []*SMGReplicationConn, err error) {
+	smgConns = make([]*SMGReplicationConn, len(conns))
+	for i, replConnCfg := range conns {
+		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, 0, reconnects,
+			connTimeout, replyTimeout, replConnCfg.Transport[1:], nil, true); err != nil {
+			return nil, err
+		} else {
+			smgConns[i] = &SMGReplicationConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
+		}
+	}
+	return
+}
+
 // ReplicationConnection represents one connection to a passive node where we will replicate session data
 type SMGReplicationConn struct {
 	Connection  rpcclient.RpcClientConnection
@@ -176,7 +189,7 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	cdr.Usage = s.TotalUsage
 	var reply string
 	smg.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply)
-	smg.replicateSessions(s.CGRID, smg.smgReplConns)
+	smg.replicateSessionsWithID(s.CGRID, false, smg.smgReplConns)
 }
 
 func (smg *SMGeneric) recordASession(s *SMGSession) {
@@ -446,16 +459,22 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 }
 
 // replicateSessions will replicate session based on configuration
-func (smg *SMGeneric) replicateSessions(cgrID string, smgReplConns []*SMGReplicationConn) (err error) {
-	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 {
+func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool, smgReplConns []*SMGReplicationConn) (err error) {
+	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 && !passiveSessions { // Replicating active not supported
 		return
 	}
-	smg.aSessionsMux.RLock()
-	var aSessions []*SMGSession
-	if err = utils.Clone(smg.activeSessions[cgrID], &aSessions); err != nil {
+	ssMux := &smg.aSessionsMux
+	ssMp := smg.activeSessions // reference it so we don't overwrite the new map without protection
+	if passiveSessions {
+		ssMux = &smg.pSessionsMux
+		ssMp = smg.passiveSessions
+	}
+	ssMux.RLock()
+	var ss []*SMGSession
+	if err = utils.Clone(ssMp[cgrID], &ss); err != nil {
 		return
 	}
-	smg.aSessionsMux.RUnlock()
+	ssMux.RUnlock()
 	var wg sync.WaitGroup
 	for _, rplConn := range smgReplConns {
 		if rplConn.Synchronous {
@@ -468,7 +487,7 @@ func (smg *SMGeneric) replicateSessions(cgrID string, smgReplConns []*SMGReplica
 			if sync {
 				wg.Done()
 			}
-		}(rplConn.Connection, rplConn.Synchronous, aSessions)
+		}(rplConn.Connection, rplConn.Synchronous, ss)
 	}
 	wg.Wait() // wait for synchronous replication to finish
 	return
@@ -680,7 +699,7 @@ func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClie
 		return
 	}
 	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 { // Session handled by debit loop
-		maxUsage = -1
+		maxUsage = time.Duration(-1 * time.Second)
 		return
 	}
 	maxUsage, err = smg.UpdateSession(gev, clnt)
@@ -711,7 +730,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		if err != nil {
 			return
 		}
-		smg.replicateSessions(initialCGRID, smg.smgReplConns)
+		smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns)
 	}
 	smg.resetTerminatorTimer(cgrID, gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
@@ -735,7 +754,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 			return
 		}
 	}
-	defer smg.replicateSessions(gev.GetCGRID(utils.META_DEFAULT), smg.smgReplConns)
+	defer smg.replicateSessionsWithID(gev.GetCGRID(utils.META_DEFAULT), false, smg.smgReplConns)
 	for _, s := range aSessions[cgrID] {
 		var maxDur time.Duration
 		if maxDur, err = s.debit(maxUsage, lastUsed); err != nil {
@@ -764,7 +783,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 		if err != nil && err != utils.ErrMandatoryIeMissing {
 			return
 		}
-		smg.replicateSessions(initialCGRID, smg.smgReplConns)
+		smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns)
 	}
 	sessionIDs := []string{cgrID}
 	if gev.HasField(utils.OriginIDPrefix) { // OriginIDPrefix is present, OriginID will not be anymore considered
@@ -802,7 +821,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 			}
 		}
 		hasActiveSession = true
-		defer smg.replicateSessions(sessionID, smg.smgReplConns)
+		defer smg.replicateSessionsWithID(sessionID, false, smg.smgReplConns)
 		s := aSessions[sessionID][0]
 		if errUsage != nil {
 			usage = s.TotalUsage - s.LastUsage + lastUsed
@@ -872,9 +891,9 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 				cd.RunID = sR.CallDescriptor.RunID
 				cd.Increments.Compress()
 				var response float64
-				err = smg.rals.Call("Responder.RefundIncrements", cd, &response)
-				if err != nil {
-					return
+				errRefund := smg.rals.Call("Responder.RefundIncrements", cd, &response)
+				if errRefund != nil {
+					return 0, errRefund
 				}
 			}
 		}
@@ -1142,29 +1161,40 @@ func (smg *SMGeneric) BiRPCV1SetPassiveSessions(clnt rpcclient.RpcClientConnecti
 	return
 }
 
-type ArgsReplicateActiveSessions struct {
+type ArgsReplicateSessions struct {
 	Filter      map[string]string
 	Connections []*config.HaPoolConfig
 }
 
 // BiRPCV1ReplicateActiveSessions will replicate active sessions to either args.Connections or the internal configured ones
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
-func (smg *SMGeneric) BiRPCV1ReplicateActiveSessions(clnt rpcclient.RpcClientConnection, args ArgsReplicateActiveSessions, reply *string) (err error) {
+func (smg *SMGeneric) BiRPCV1ReplicateActiveSessions(clnt rpcclient.RpcClientConnection, args ArgsReplicateSessions, reply *string) (err error) {
 	smgConns := smg.smgReplConns
 	if len(args.Connections) != 0 {
-		smgConns := make([]*SMGReplicationConn, len(args.Connections))
-		for i, replConnCfg := range args.Connections {
-			if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, smg.cgrCfg.ConnectAttempts, smg.cgrCfg.Reconnects,
-				smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout, replConnCfg.Transport[1:], nil, true); err != nil {
-				return err
-			} else {
-				smgConns[i] = &SMGReplicationConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
-			}
+		if smgConns, err = NewSMGReplicationConns(args.Connections, smg.cgrCfg.Reconnects, smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout); err != nil {
+			return
 		}
 	}
 	aSs := smg.getSessions(args.Filter[utils.CGRID], false)
 	for cgrID := range aSs {
-		smg.replicateSessions(cgrID, smgConns)
+		smg.replicateSessionsWithID(cgrID, false, smgConns)
+	}
+	*reply = utils.OK
+	return
+}
+
+// BiRPCV1ReplicatePassiveSessions will replicate passive sessions to either args.Connections or the internal configured ones
+// args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
+func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientConnection, args ArgsReplicateSessions, reply *string) (err error) {
+	smgConns := smg.smgReplConns
+	if len(args.Connections) != 0 {
+		if smgConns, err = NewSMGReplicationConns(args.Connections, smg.cgrCfg.Reconnects, smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout); err != nil {
+			return
+		}
+	}
+	aSs := smg.getSessions(args.Filter[utils.CGRID], true)
+	for cgrID := range aSs {
+		smg.replicateSessionsWithID(cgrID, true, smgConns)
 	}
 	*reply = utils.OK
 	return

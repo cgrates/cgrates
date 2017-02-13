@@ -114,7 +114,6 @@ type XMLRecordsProcessor struct {
 	timezone         string
 	httpSkipTlsCheck bool
 	cdrcCfgs         []*config.CdrcConfig // individual configs for the folder CDRC is monitoring
-
 }
 
 func (xmlProc *XMLRecordsProcessor) ProcessedRecordsNr() int64 {
@@ -170,7 +169,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 				} else { // Dynamic value extracted using path
 					absolutePath := utils.ParseHierarchyPath(cfgFieldRSR.Id, "")
 					relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-					if elmntText, err := elementText(xmlEntity, relPath.AsString("/", true)); err != nil {
+					if elmntText, err := elementText(xmlEntity, relPath.AsString("/", true)); err != nil && err != utils.ErrNotFound {
 						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
 					} else {
 						fieldVal += cfgFieldRSR.ParseValue(elmntText)

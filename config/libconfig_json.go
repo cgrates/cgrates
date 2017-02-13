@@ -25,8 +25,8 @@ type GeneralJsonCfg struct {
 	Rounding_decimals    *int
 	Dbdata_encoding      *string
 	Tpexport_dir         *string
-	Httpposter_attempts  *int
-	Http_failed_dir      *string
+	Poster_attempts      *int
+	Failed_posts_dir     *string
 	Default_request_type *string
 	Default_category     *string
 	Default_tenant       *string

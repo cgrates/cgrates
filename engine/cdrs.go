@@ -33,6 +33,7 @@ import (
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/streadway/amqp"
 )
 
 var cdrServer *CdrServer // Share the server so we can use it in http handlers
@@ -373,6 +374,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 	if cdr.RequestType == utils.META_NONE {
 		return nil, nil
 	}
+	cdr.ExtraInfo = "" // Clean previous ExtraInfo, useful when re-rating
 	var cdrsRated []*CDR
 	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) && (cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
@@ -466,15 +468,13 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		var body interface{}
 		var content = ""
 		switch rplCfg.Transport {
-		case utils.MetaHTTPjsonCDR:
-			content = utils.CONTENT_JSON
+		case utils.MetaHTTPjsonCDR, utils.MetaAMQPjsonCDR:
 			jsn, err := json.Marshal(cdr)
 			if err != nil {
 				return err
 			}
 			body = jsn
-		case utils.MetaHTTPjsonMap:
-			content = utils.CONTENT_JSON
+		case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap:
 			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
 			if err != nil {
 				return err
@@ -485,7 +485,6 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			}
 			body = jsn
 		case utils.META_HTTP_POST:
-			content = utils.CONTENT_FORM
 			expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
 			if err != nil {
 				return err
@@ -501,18 +500,34 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			errChan = make(chan error)
 		}
 		go func(body interface{}, rplCfg *config.CDRReplicationCfg, content string, errChan chan error) {
-			fallbackPath := path.Join(
-				self.cgrCfg.HttpFailedDir,
-				rplCfg.FallbackFileName())
-			if _, err := self.httpPoster.Post(rplCfg.Address, content, body, rplCfg.Attempts, fallbackPath); err != nil {
-				utils.Logger.Err(fmt.Sprintf(
-					"<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
-				if rplCfg.Synchronous {
-					errChan <- err
+			var err error
+			fallbackPath := utils.META_NONE
+			if rplCfg.FallbackFileName() != utils.META_NONE {
+				fallbackPath = path.Join(self.cgrCfg.FailedPostsDir, rplCfg.FallbackFileName())
+			}
+			switch rplCfg.Transport {
+			case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
+				_, err = self.httpPoster.Post(rplCfg.Address, utils.PosterTransportContentTypes[rplCfg.Transport], body, rplCfg.Attempts, fallbackPath)
+			case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
+				var amqpPoster *utils.AMQPPoster
+				amqpPoster, err = utils.AMQPPostersCache.GetAMQPPoster(rplCfg.Address, rplCfg.Attempts, self.cgrCfg.FailedPostsDir)
+				if err == nil { // error will be checked bellow
+					var chn *amqp.Channel
+					chn, err = amqpPoster.Post(
+						nil, utils.PosterTransportContentTypes[rplCfg.Transport], body.([]byte), rplCfg.FallbackFileName())
+					if chn != nil {
+						chn.Close()
+					}
 				}
+			default:
+				err = fmt.Errorf("unsupported replication transport: %s", rplCfg.Transport)
+			}
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf(
+					"<CDRReplicator> Replicating CDR: %+v, transport: %s, got error: %s", cdr, rplCfg.Transport, err.Error()))
 			}
 			if rplCfg.Synchronous {
-				errChan <- nil
+				errChan <- err
 			}
 		}(body, rplCfg, content, errChan)
 		if rplCfg.Synchronous { // Synchronize here

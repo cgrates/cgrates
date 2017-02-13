@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -39,6 +40,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/streadway/amqp"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
@@ -75,7 +77,6 @@ func TestApierLoadConfig(t *testing.T) {
 
 func TestApierCreateDirs(t *testing.T) {
 	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportDirectory, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out", cfg.HistoryDir} {
-
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}
@@ -1679,17 +1680,101 @@ func TestApierStartStopServiceStatus(t *testing.T) {
 	}
 }
 
-/*
-func TestApierGetCacheStats3(t *testing.T) {
-	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
-	var args utils.AttrCacheStats
-	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
-	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
+func TestApierReplayFailedPosts(t *testing.T) {
+	fileName := "act>*call_url|*http_json|http%3A%2F%2Flocalhost%3A2081|63bed4ea-615e-4096-b1f4-499f64f29b28.json"
+	fileContent := []byte(`{"ID":"cgrates.org:1007","BalanceMap":{"*monetary":[{"Uuid":"367be35a-96ee-40a5-b609-9130661f5f12","ID":"","Value":0,"Directions":{"*out":true},"ExpirationDate":"0001-01-01T00:00:00Z","Weight":10,"DestinationIDs":{},"RatingSubject":"","Categories":{},"SharedGroups":{"SHARED_A":true},"Timings":null,"TimingIDs":{},"Disabled":false,"Factor":null,"Blocker":false}]},"UnitCounters":{"*monetary":[{"CounterType":"*event","Counters":[{"Value":0,"Filter":{"Uuid":null,"ID":"b8531413-10d5-47ad-81ad-2bc272e8f0ca","Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":{"FS_USERS":true},"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null}}]}]},"ActionTriggers":[{"ID":"STANDARD_TRIGGERS","UniqueID":"46ac7b8c-685d-4555-bf73-fa6cfbc2fa21","ThresholdType":"*min_balance","ThresholdValue":2,"Recurrent":false,"MinSleep":0,"ExpirationDate":"0001-01-01T00:00:00Z","ActivationDate":"0001-01-01T00:00:00Z","Balance":{"Uuid":null,"ID":null,"Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null},"Weight":10,"ActionsID":"LOG_WARNING","MinQueuedItems":0,"Executed":true,"LastExecutionTime":"2017-01-31T14:03:57.961651647+01:00"},{"ID":"STANDARD_TRIGGERS","UniqueID":"b8531413-10d5-47ad-81ad-2bc272e8f0ca","ThresholdType":"*max_event_counter","ThresholdValue":5,"Recurrent":false,"MinSleep":0,"ExpirationDate":"0001-01-01T00:00:00Z","ActivationDate":"0001-01-01T00:00:00Z","Balance":{"Uuid":null,"ID":null,"Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":{"FS_USERS":true},"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null},"Weight":10,"ActionsID":"LOG_WARNING","MinQueuedItems":0,"Executed":false,"LastExecutionTime":"0001-01-01T00:00:00Z"},{"ID":"STANDARD_TRIGGERS","UniqueID":"8b424186-7a31-4aef-99c5-35e12e6fed41","ThresholdType":"*max_balance","ThresholdValue":20,"Recurrent":false,"MinSleep":0,"ExpirationDate":"0001-01-01T00:00:00Z","ActivationDate":"0001-01-01T00:00:00Z","Balance":{"Uuid":null,"ID":null,"Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null},"Weight":10,"ActionsID":"LOG_WARNING","MinQueuedItems":0,"Executed":false,"LastExecutionTime":"0001-01-01T00:00:00Z"},{"ID":"STANDARD_TRIGGERS","UniqueID":"28557f3b-139c-4a27-9d17-bda1f54b7c19","ThresholdType":"*max_balance","ThresholdValue":100,"Recurrent":false,"MinSleep":0,"ExpirationDate":"0001-01-01T00:00:00Z","ActivationDate":"0001-01-01T00:00:00Z","Balance":{"Uuid":null,"ID":null,"Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null},"Weight":10,"ActionsID":"DISABLE_AND_LOG","MinQueuedItems":0,"Executed":false,"LastExecutionTime":"0001-01-01T00:00:00Z"}],"AllowNegative":false,"Disabled":false}"`)
+	args := ArgsReplyFailedPosts{
+		FailedRequestsInDir:  utils.StringPointer("/tmp/TestsApierV1/in"),
+		FailedRequestsOutDir: utils.StringPointer("/tmp/TestsApierV1/out"),
 	}
-}*/
+	for _, dir := range []string{*args.FailedRequestsInDir, *args.FailedRequestsOutDir} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Errorf("Error %s removing folder: %s", err, dir)
+		}
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Errorf("Error %s creating folder: %s", err, dir)
+		}
+	}
+	fileOut, err := os.Create(path.Join(*args.FailedRequestsInDir, fileName))
+	if err != nil {
+		t.Error(err)
+	}
+	if _, err := fileOut.Write(fileContent); err != nil {
+		t.Error(err)
+	}
+	fileOut.Close()
+	var reply string
+	if err := rater.Call("ApierV1.ReplayFailedPosts", args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply: ", reply)
+	}
+	outPath := path.Join(*args.FailedRequestsOutDir, fileName)
+	if outContent, err := ioutil.ReadFile(outPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fileContent, outContent) {
+		t.Errorf("Expecting: %q, received: %q", string(fileContent), string(outContent))
+	}
+	fileName = "cdr|*amqp_json_map|amqp%3A%2F%2Fguest%3Aguest%40localhost%3A5672%2F%3Fqueue_id%3Dcgrates_cdrs|ae8cc4b3-5e60-4396-b82a-64b96a72a03c.json"
+	fileContent = []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)
+	fileInPath := path.Join(*args.FailedRequestsInDir, fileName)
+	fileOut, err = os.Create(fileInPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if _, err := fileOut.Write(fileContent); err != nil {
+		t.Error(err)
+	}
+	fileOut.Close()
+	if err := rater.Call("ApierV1.ReplayFailedPosts", args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply: ", reply)
+	}
+	if _, err := os.Stat(fileInPath); !os.IsNotExist(err) {
+		t.Error("InFile still exists")
+	}
+	if _, err := os.Stat(path.Join(*args.FailedRequestsOutDir, fileName)); !os.IsNotExist(err) {
+		t.Error("OutFile created")
+	}
+	// connect to RabbitMQ server and check if the content was posted there
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	ch, err := conn.Channel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ch.Close()
+	q, err := ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case d := <-msgs:
+		var rcvCDR map[string]string
+		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
+			t.Error(err)
+		}
+		if rcvCDR[utils.CGRID] != "88ed9c38005f07576a1e1af293063833b60edcc6" {
+			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
+		}
+	case <-time.After(time.Duration(100 * time.Millisecond)):
+		t.Error("No message received from RabbitMQ")
+	}
+	for _, dir := range []string{*args.FailedRequestsInDir, *args.FailedRequestsOutDir} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Errorf("Error %s removing folder: %s", err, dir)
+		}
+	}
+
+}
 
 // Simply kill the engine after we are done with tests within this file
 func TestApierStopEngine(t *testing.T) {

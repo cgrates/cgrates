@@ -138,7 +138,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 	}
 	var colectNames []string // collection names containing this index
 	if ms.storageType == utils.TariffPlanDB {
-		colectNames = []string{colAct, colApl, colAtr, colDcs, colRls, colRpl, colLcr, colDst, colRds}
+		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRls, colRpl, colLcr, colDst, colRds}
 	} else if ms.storageType == utils.DataDB {
 		colectNames = []string{colAls, colUsr, colLht}
 	}
