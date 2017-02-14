@@ -20,6 +20,7 @@ package scheduler
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -191,11 +192,64 @@ func (s *Scheduler) restart() {
 	}
 }
 
-func (s *Scheduler) GetQueue() (queue engine.ActionTimingPriorityList) {
+type ArgsGetScheduledActions struct {
+	Tenant, Account    *string
+	TimeStart, TimeEnd *time.Time // Filter based on next runTime
+	utils.Paginator
+}
+
+type ScheduledAction struct {
+	NextRunTime                               time.Time
+	Accounts                                  int // Number of acccounts this action will run on
+	ActionPlanID, ActionTimingUUID, ActionsID string
+}
+
+func (s *Scheduler) GetScheduledActions(fltr ArgsGetScheduledActions) (schedActions []*ScheduledAction) {
 	s.RLock()
-	utils.Clone(s.queue, &queue)
-	defer s.RUnlock()
-	return queue
+	for _, at := range s.queue {
+		sas := &ScheduledAction{NextRunTime: at.GetNextStartTime(time.Now()), Accounts: len(at.GetAccountIDs()),
+			ActionPlanID: at.GetActionPlanID(), ActionTimingUUID: at.Uuid, ActionsID: at.ActionsID}
+		if fltr.TimeStart != nil && !fltr.TimeStart.IsZero() && sas.NextRunTime.Before(*fltr.TimeStart) {
+			continue // need to match the filter interval
+		}
+		if fltr.TimeEnd != nil && !fltr.TimeEnd.IsZero() && (sas.NextRunTime.After(*fltr.TimeEnd) || sas.NextRunTime.Equal(*fltr.TimeEnd)) {
+			continue
+		}
+		// filter on account
+		if fltr.Tenant != nil || fltr.Account != nil {
+			found := false
+			for accID := range at.GetAccountIDs() {
+				split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
+				if len(split) != 2 {
+					continue // malformed account id
+				}
+				if fltr.Tenant != nil && *fltr.Tenant != split[0] {
+					continue
+				}
+				if fltr.Account != nil && *fltr.Account != split[1] {
+					continue
+				}
+				found = true
+				break
+			}
+			if !found {
+				continue
+			}
+		}
+		schedActions = append(schedActions, sas)
+	}
+	if fltr.Paginator.Offset != nil {
+		if *fltr.Paginator.Offset <= len(schedActions) {
+			schedActions = schedActions[*fltr.Paginator.Offset:]
+		}
+	}
+	if fltr.Paginator.Limit != nil {
+		if *fltr.Paginator.Limit <= len(schedActions) {
+			schedActions = schedActions[:*fltr.Paginator.Limit]
+		}
+	}
+	s.RUnlock()
+	return
 }
 
 func (s *Scheduler) Shutdown() {
