@@ -52,6 +52,7 @@ type ApierV1 struct {
 	Users       rpcclient.RpcClientConnection
 	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
 	ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
+	HTTPPoster  *utils.HTTPPoster
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {

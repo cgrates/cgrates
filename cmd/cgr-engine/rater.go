@@ -231,7 +231,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	responder := &engine.Responder{Bal: bal, ExitChan: exitChan}
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb,
-		Config: cfg, Responder: responder, ServManager: serviceManager}
+		Config: cfg, Responder: responder, ServManager: serviceManager, HTTPPoster: utils.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout)}
 	if cdrStats != nil { // ToDo: Fix here properly the init of stats
 		responder.Stats = cdrStats
 		apierRpcV1.CdrStatsSrv = cdrStats

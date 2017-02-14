@@ -284,6 +284,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 		utils.META_DEFAULT: &CdreJsonCfg{
 			Export_format:         utils.StringPointer(utils.MetaFileCSV),
 			Export_path:           utils.StringPointer("/var/spool/cgrates/cdre"),
+			Cdr_filter:            utils.StringPointer(""),
 			Synchronous:           utils.BoolPointer(false),
 			Attempts:              utils.IntPointer(1),
 			Field_separator:       utils.StringPointer(","),

@@ -579,7 +579,7 @@ func TestCDRAsExportMap(t *testing.T) {
 		&config.CfgCdrField{FieldId: utils.DESTINATION, Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("~Destination:s/^\\+(\\d+)$/00${1}/", utils.INFIELD_SEP)},
 		&config.CfgCdrField{FieldId: "FieldExtra1", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("field_extr1", utils.INFIELD_SEP)},
 	}
-	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil); err != nil {
+	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, 0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCDRMp, cdrMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eCDRMp, cdrMp)

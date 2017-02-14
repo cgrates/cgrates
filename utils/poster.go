@@ -97,6 +97,9 @@ type FallbackFileName struct {
 }
 
 func (ffn *FallbackFileName) AsString() string {
+	if ffn.FileSuffix == "" { // Autopopulate FileSuffix based on the transport used
+		ffn.FileSuffix = CDREFileSuffixes[ffn.Transport]
+	}
 	return fmt.Sprintf("%s%s%s%s%s%s%s%s", ffn.Module, HandlerArgSep, ffn.Transport, HandlerArgSep, url.QueryEscape(ffn.Address), HandlerArgSep, ffn.RequestID, ffn.FileSuffix)
 }
 

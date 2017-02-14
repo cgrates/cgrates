@@ -147,6 +147,7 @@ type CdrFieldJsonCfg struct {
 type CdreJsonCfg struct {
 	Export_format         *string
 	Export_path           *string
+	Cdr_filter            *string
 	Synchronous           *bool
 	Attempts              *int
 	Field_separator       *string

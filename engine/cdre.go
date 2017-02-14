@@ -15,19 +15,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package cdre
+package engine
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
+	"path"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/streadway/amqp"
 )
 
 const (
@@ -45,68 +49,68 @@ const (
 	META_FORMATCOST    = "*format_cost"
 )
 
-var err error
-
-func NewCdrExporter(cdrs []*engine.CDR, cdrDb engine.CdrStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
-	dataUsageMultiplyFactor, smsUsageMultiplyFactor, mmsUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor float64,
-	roundingDecimals int, httpSkipTlsCheck bool) (*CdrExporter, error) {
+func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreConfig, exportFormat, exportPath, fallbackPath, exportID string,
+	synchronous bool, attempts int, fieldSeparator rune, usageMultiplyFactor utils.FieldMultiplyFactor,
+	costMultiplyFactor float64, roundingDecimals int, httpSkipTlsCheck bool, httpPoster *utils.HTTPPoster) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
-	cdre := &CdrExporter{
-		cdrs:                       cdrs,
-		cdrDb:                      cdrDb,
-		exportTemplate:             exportTpl,
-		cdrFormat:                  cdrFormat,
-		fieldSeparator:             fieldSeparator,
-		exportId:                   exportId,
-		dataUsageMultiplyFactor:    dataUsageMultiplyFactor,
-		smsUsageMultiplyFactor:     smsUsageMultiplyFactor,
-		mmsUsageMultiplyFactor:     mmsUsageMultiplyFactor,
-		genericUsageMultiplyFactor: genericUsageMultiplyFactor,
-		costMultiplyFactor:         costMultiplyFactor,
-		roundingDecimals:           roundingDecimals,
-		httpSkipTlsCheck:           httpSkipTlsCheck,
-		negativeExports:            make(map[string]string),
-	}
-	if err := cdre.processCdrs(); err != nil {
-		return nil, err
+	cdre := &CDRExporter{
+		cdrs:                cdrs,
+		exportTemplate:      exportTemplate,
+		exportFormat:        exportFormat,
+		exportPath:          exportPath,
+		fallbackPath:        fallbackPath,
+		exportID:            exportID,
+		synchronous:         synchronous,
+		attempts:            attempts,
+		fieldSeparator:      fieldSeparator,
+		usageMultiplyFactor: usageMultiplyFactor,
+		costMultiplyFactor:  costMultiplyFactor,
+		roundingDecimals:    roundingDecimals,
+		httpSkipTlsCheck:    httpSkipTlsCheck,
+		httpPoster:          httpPoster,
+		negativeExports:     make(map[string]string),
 	}
 	return cdre, nil
 }
 
-type CdrExporter struct {
-	cdrs           []*engine.CDR
-	cdrDb          engine.CdrStorage // Used to extract cost_details if these are requested
-	exportTemplate *config.CdreConfig
-	cdrFormat      string // csv, fwv
-	fieldSeparator rune
-	exportId       string // Unique identifier or this export
-	dataUsageMultiplyFactor,
-	smsUsageMultiplyFactor, // Multiply the SMS usage (eg: some billing systems billing them as minutes)
-	mmsUsageMultiplyFactor,
-	genericUsageMultiplyFactor,
-	costMultiplyFactor float64
-	roundingDecimals            int
-	httpSkipTlsCheck            bool
-	header, trailer             []string   // Header and Trailer fields
-	content                     [][]string // Rows of cdr fields
+type CDRExporter struct {
+	cdrs                []*CDR
+	exportTemplate      *config.CdreConfig
+	exportFormat        string
+	exportPath          string
+	fallbackPath        string // folder where we save failed CDRs
+	exportID            string // Unique identifier or this export
+	synchronous         bool
+	attempts            int
+	fieldSeparator      rune
+	usageMultiplyFactor utils.FieldMultiplyFactor
+	costMultiplyFactor  float64
+	roundingDecimals    int
+	httpSkipTlsCheck    bool
+	httpPoster          *utils.HTTPPoster
+
+	header, trailer []string   // Header and Trailer fields
+	content         [][]string // Rows of cdr fields
+
 	firstCdrATime, lastCdrATime time.Time
 	numberOfRecords             int
 	totalDuration, totalDataUsage, totalSmsUsage,
 	totalMmsUsage, totalGenericUsage time.Duration
-
 	totalCost                       float64
 	firstExpOrderId, lastExpOrderId int64
 	positiveExports                 []string          // CGRIDs of successfully exported CDRs
+	pEMux                           sync.RWMutex      // protect positiveExports
 	negativeExports                 map[string]string // CGRIDs of failed exports
+	nEMux                           sync.RWMutex      // protect negativeExports
 }
 
 // Handle various meta functions used in header/trailer
-func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
+func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 	switch tag {
 	case META_EXPORTID:
-		return cdre.exportId, nil
+		return cdre.exportID, nil
 	case META_TIMENOW:
 		return time.Now().Format(arg), nil
 	case META_FIRSTCDRATIME:
@@ -116,19 +120,19 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	case META_NRCDRS:
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case META_DURCDRS:
-		emulatedCdr := &engine.CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
+		emulatedCdr := &CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_SMSUSAGE:
-		emulatedCdr := &engine.CDR{ToR: utils.SMS, Usage: cdre.totalSmsUsage}
+		emulatedCdr := &CDR{ToR: utils.SMS, Usage: cdre.totalSmsUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_MMSUSAGE:
-		emulatedCdr := &engine.CDR{ToR: utils.MMS, Usage: cdre.totalMmsUsage}
+		emulatedCdr := &CDR{ToR: utils.MMS, Usage: cdre.totalMmsUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_GENERICUSAGE:
-		emulatedCdr := &engine.CDR{ToR: utils.GENERIC, Usage: cdre.totalGenericUsage}
+		emulatedCdr := &CDR{ToR: utils.GENERIC, Usage: cdre.totalGenericUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_DATAUSAGE:
-		emulatedCdr := &engine.CDR{ToR: utils.DATA, Usage: cdre.totalDataUsage}
+		emulatedCdr := &CDR{ToR: utils.DATA, Usage: cdre.totalDataUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
@@ -138,7 +142,7 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 }
 
 // Compose and cache the header
-func (cdre *CdrExporter) composeHeader() error {
+func (cdre *CDRExporter) composeHeader() (err error) {
 	for _, cfgFld := range cdre.exportTemplate.HeaderFields {
 		var outVal string
 		switch cfgFld.Type {
@@ -167,7 +171,7 @@ func (cdre *CdrExporter) composeHeader() error {
 }
 
 // Compose and cache the trailer
-func (cdre *CdrExporter) composeTrailer() error {
+func (cdre *CDRExporter) composeTrailer() (err error) {
 	for _, cfgFld := range cdre.exportTemplate.TrailerFields {
 		var outVal string
 		switch cfgFld.Type {
@@ -195,35 +199,96 @@ func (cdre *CdrExporter) composeTrailer() error {
 	return nil
 }
 
+func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
+	var body interface{}
+	switch cdre.exportFormat {
+	case utils.MetaHTTPjsonCDR, utils.MetaAMQPjsonCDR:
+		jsn, err := json.Marshal(cdr)
+		if err != nil {
+			return err
+		}
+		body = jsn
+	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap:
+		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals)
+		if err != nil {
+			return err
+		}
+		jsn, err := json.Marshal(expMp)
+		if err != nil {
+			return err
+		}
+		body = jsn
+	case utils.META_HTTP_POST:
+		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals)
+		if err != nil {
+			return err
+		}
+		vals := url.Values{}
+		for fld, val := range expMp {
+			vals.Set(fld, val)
+		}
+		body = vals
+	default:
+		err = fmt.Errorf("unsupported exportFormat: <%s>", cdre.exportFormat)
+	}
+	if err != nil {
+		return
+	}
+	// compute fallbackPath
+	fallbackPath := utils.META_NONE
+	ffn := &utils.FallbackFileName{Module: utils.CDRPoster, Transport: cdre.exportFormat, Address: cdre.exportPath, RequestID: utils.GenUUID()}
+	fallbackFileName := ffn.AsString()
+	if cdre.fallbackPath != utils.META_NONE { // not none, need fallback
+		fallbackPath = path.Join(cdre.fallbackPath, fallbackFileName)
+	}
+	switch cdre.exportFormat {
+	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
+		_, err = cdre.httpPoster.Post(cdre.exportPath, utils.PosterTransportContentTypes[cdre.exportFormat], body, cdre.attempts, fallbackPath)
+	case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
+		var amqpPoster *utils.AMQPPoster
+		amqpPoster, err = utils.AMQPPostersCache.GetAMQPPoster(cdre.exportPath, cdre.attempts, cdre.fallbackPath)
+		if err == nil { // error will be checked bellow
+			var chn *amqp.Channel
+			chn, err = amqpPoster.Post(
+				nil, utils.PosterTransportContentTypes[cdre.exportFormat], body.([]byte), fallbackFileName)
+			if chn != nil {
+				chn.Close()
+			}
+		}
+	}
+	return
+}
+
 // Write individual cdr into content buffer, build stats
-func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
-	if cdr == nil || len(cdr.CGRID) == 0 { // We do not export empty CDRs
-		return nil
-	} else if cdr.ExtraFields == nil { // Avoid assignment in nil map if not initialized
+func (cdre *CDRExporter) processCdr(cdr *CDR) (err error) {
+	if cdr.ExtraFields == nil { // Avoid assignment in nil map if not initialized
 		cdr.ExtraFields = make(map[string]string)
 	}
-	// Cost multiply
-	if cdre.dataUsageMultiplyFactor != 0.0 && cdr.ToR == utils.DATA {
-		cdr.UsageMultiply(cdre.dataUsageMultiplyFactor, cdre.roundingDecimals)
-	} else if cdre.smsUsageMultiplyFactor != 0 && cdr.ToR == utils.SMS {
-		cdr.UsageMultiply(cdre.smsUsageMultiplyFactor, cdre.roundingDecimals)
-	} else if cdre.mmsUsageMultiplyFactor != 0 && cdr.ToR == utils.MMS {
-		cdr.UsageMultiply(cdre.mmsUsageMultiplyFactor, cdre.roundingDecimals)
-	} else if cdre.genericUsageMultiplyFactor != 0 && cdr.ToR == utils.GENERIC {
-		cdr.UsageMultiply(cdre.genericUsageMultiplyFactor, cdre.roundingDecimals)
+	// Usage multiply, find config based on ToR field or *any
+	for _, key := range []string{cdr.ToR, utils.ANY} {
+		if uM, hasIt := cdre.usageMultiplyFactor[key]; hasIt && uM != 1.0 {
+			cdr.UsageMultiply(uM, cdre.roundingDecimals)
+			break
+		}
 	}
 	if cdre.costMultiplyFactor != 0.0 {
 		cdr.CostMultiply(cdre.costMultiplyFactor, cdre.roundingDecimals)
 	}
-	cdrRow, err := cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs, cdre.roundingDecimals)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s and runid: %s, error: %s", cdr.CGRID, cdr.RunID, err.Error()))
-		return err
+	switch cdre.exportFormat {
+	case utils.MetaFileFWV, utils.MetaFileCSV:
+		var cdrRow []string
+		cdrRow, err = cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs, cdre.roundingDecimals)
+		if len(cdrRow) == 0 { // No CDR data, most likely no configuration fields defined
+			return
+		} else {
+			cdre.content = append(cdre.content, cdrRow)
+		}
+	default: // attempt posting CDR
+		err = cdre.postCdr(cdr)
 	}
-	if len(cdrRow) == 0 { // No CDR data, most likely no configuration fields defined
-		return nil
-	} else {
-		cdre.content = append(cdre.content, cdrRow)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CDRE> Cannot export CDR with CGRID: %s and runid: %s, error: %s", cdr.CGRID, cdr.RunID, err.Error()))
+		return
 	}
 	// Done with writing content, compute stats here
 	if cdre.firstCdrATime.IsZero() || cdr.AnswerTime.Before(cdre.firstCdrATime) {
@@ -262,14 +327,41 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 }
 
 // Builds header, content and trailers
-func (cdre *CdrExporter) processCdrs() error {
+func (cdre *CDRExporter) processCdrs() error {
+	var wg sync.WaitGroup
 	for _, cdr := range cdre.cdrs {
-		if err := cdre.processCdr(cdr); err != nil {
-			cdre.negativeExports[cdr.CGRID] = err.Error()
-		} else {
-			cdre.positiveExports = append(cdre.positiveExports, cdr.CGRID)
+		if cdr == nil || len(cdr.CGRID) == 0 { // CDR needs to exist and it's CGRID needs to be populated
+			continue
 		}
+		passesFilters := true
+		for _, cdfFltr := range cdre.exportTemplate.CDRFilter {
+			if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
+				passesFilters = false
+				break
+			}
+		}
+		if !passesFilters { // Not passes filters, ignore this CDR
+			continue
+		}
+		if cdre.synchronous {
+			wg.Add(1)
+		}
+		go func(cdr *CDR) {
+			if err := cdre.processCdr(cdr); err != nil {
+				cdre.nEMux.Lock()
+				cdre.negativeExports[cdr.CGRID] = err.Error()
+				cdre.nEMux.Unlock()
+			} else {
+				cdre.pEMux.Lock()
+				cdre.positiveExports = append(cdre.positiveExports, cdr.CGRID)
+				cdre.pEMux.Unlock()
+			}
+			if cdre.synchronous {
+				wg.Done()
+			}
+		}(cdr)
 	}
+	wg.Wait()
 	// Process header and trailer after processing cdrs since the metatag functions can access stats out of built cdrs
 	if cdre.exportTemplate.HeaderFields != nil {
 		if err := cdre.composeHeader(); err != nil {
@@ -285,7 +377,7 @@ func (cdre *CdrExporter) processCdrs() error {
 }
 
 // Simple write method
-func (cdre *CdrExporter) writeOut(ioWriter io.Writer) error {
+func (cdre *CDRExporter) writeOut(ioWriter io.Writer) error {
 	if len(cdre.header) != 0 {
 		for _, fld := range append(cdre.header, "\n") {
 			if _, err := io.WriteString(ioWriter, fld); err != nil {
@@ -311,7 +403,7 @@ func (cdre *CdrExporter) writeOut(ioWriter io.Writer) error {
 }
 
 // csvWriter specific method
-func (cdre *CdrExporter) writeCsv(csvWriter *csv.Writer) error {
+func (cdre *CDRExporter) writeCsv(csvWriter *csv.Writer) error {
 	csvWriter.Comma = cdre.fieldSeparator
 	if len(cdre.header) != 0 {
 		if err := csvWriter.Write(cdre.header); err != nil {
@@ -332,54 +424,57 @@ func (cdre *CdrExporter) writeCsv(csvWriter *csv.Writer) error {
 	return nil
 }
 
-// General method to write the content out to a file
-func (cdre *CdrExporter) WriteToFile(filePath string) error {
-	fileOut, err := os.Create(filePath)
-	if err != nil {
-		return err
+func (cdre *CDRExporter) ExportCDRs() (err error) {
+	if err = cdre.processCdrs(); err != nil {
+		return
 	}
-	defer fileOut.Close()
-	switch cdre.cdrFormat {
-	case utils.DRYRUN:
-		return nil
-	case utils.CDRE_FIXED_WIDTH:
-		if err := cdre.writeOut(fileOut); err != nil {
-			return utils.NewErrServerError(err)
+	switch cdre.exportFormat {
+	case utils.MetaFileFWV, utils.MetaFileCSV:
+		if len(cdre.content) == 0 {
+			return
 		}
-	case utils.CSV:
-		csvWriter := csv.NewWriter(fileOut)
-		if err := cdre.writeCsv(csvWriter); err != nil {
-			return utils.NewErrServerError(err)
+		fileOut, err := os.Create(cdre.exportPath)
+		if err != nil {
+			return err
 		}
+		defer fileOut.Close()
+		if cdre.exportFormat == utils.MetaFileCSV {
+			return cdre.writeCsv(csv.NewWriter(fileOut))
+		}
+		return cdre.writeOut(fileOut)
 	}
-	return nil
+	return
 }
 
 // Return the first exported Cdr OrderId
-func (cdre *CdrExporter) FirstOrderId() int64 {
+func (cdre *CDRExporter) FirstOrderId() int64 {
 	return cdre.firstExpOrderId
 }
 
 // Return the last exported Cdr OrderId
-func (cdre *CdrExporter) LastOrderId() int64 {
+func (cdre *CDRExporter) LastOrderId() int64 {
 	return cdre.lastExpOrderId
 }
 
 // Return total cost in the exported cdrs
-func (cdre *CdrExporter) TotalCost() float64 {
+func (cdre *CDRExporter) TotalCost() float64 {
 	return cdre.totalCost
 }
 
-func (cdre *CdrExporter) TotalExportedCdrs() int {
+func (cdre *CDRExporter) TotalExportedCdrs() int {
 	return cdre.numberOfRecords
 }
 
 // Return successfully exported CGRIDs
-func (cdre *CdrExporter) PositiveExports() []string {
+func (cdre *CDRExporter) PositiveExports() []string {
+	cdre.pEMux.RLock()
+	defer cdre.pEMux.RUnlock()
 	return cdre.positiveExports
 }
 
 // Return failed exported CGRIDs together with the reason
-func (cdre *CdrExporter) NegativeExports() map[string]string {
+func (cdre *CDRExporter) NegativeExports() map[string]string {
+	cdre.nEMux.RLock()
+	defer cdre.nEMux.RUnlock()
 	return cdre.negativeExports
 }

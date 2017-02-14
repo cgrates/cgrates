@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package cdre
+package engine
 
 import (
 	"bytes"
@@ -25,23 +25,26 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestCsvCdrWriter(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	storedCdr1 := &engine.CDR{
+	storedCdr1 := &CDR{
 		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
 	}
-	cdre, err := NewCdrExporter([]*engine.CDR{storedCdr1}, nil, cfg.CdreProfiles["*default"], utils.CSV, ',', "firstexport", 0.0, 0.0, 0.0, 0.0, 0.0, cfg.RoundingDecimals, cfg.HttpSkipTlsVerify)
+	cdre, err := NewCDRExporter([]*CDR{storedCdr1}, cfg.CdreProfiles["*default"], utils.MetaFileCSV, "", "", "firstexport",
+		true, 1, ',', map[string]float64{}, 0.0, cfg.RoundingDecimals, cfg.HttpSkipTlsVerify, nil)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
+	}
+	if err = cdre.processCdrs(); err != nil {
+		t.Error(err)
 	}
 	csvWriter := csv.NewWriter(writer)
 	if err := cdre.writeCsv(csvWriter); err != nil {
@@ -60,16 +63,19 @@ func TestCsvCdrWriter(t *testing.T) {
 func TestAlternativeFieldSeparator(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	storedCdr1 := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+	storedCdr1 := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
 	}
-	cdre, err := NewCdrExporter([]*engine.CDR{storedCdr1}, nil, cfg.CdreProfiles["*default"], utils.CSV, '|',
-		"firstexport", 0.0, 0.0, 0.0, 0.0, 0.0, cfg.RoundingDecimals, cfg.HttpSkipTlsVerify)
+	cdre, err := NewCDRExporter([]*CDR{storedCdr1}, cfg.CdreProfiles["*default"], utils.MetaFileCSV, "", "", "firstexport",
+		true, 1, '|', map[string]float64{}, 0.0, cfg.RoundingDecimals, cfg.HttpSkipTlsVerify, nil)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
+	}
+	if err = cdre.processCdrs(); err != nil {
+		t.Error(err)
 	}
 	csvWriter := csv.NewWriter(writer)
 	if err := cdre.writeCsv(csvWriter); err != nil {

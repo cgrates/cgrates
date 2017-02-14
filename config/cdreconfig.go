@@ -25,6 +25,8 @@ import (
 type CdreConfig struct {
 	ExportFormat        string
 	ExportPath          string
+	FallbackPath        string
+	CDRFilter           utils.RSRFields
 	Synchronous         bool
 	Attempts            int
 	FieldSeparator      rune
@@ -45,6 +47,11 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 	}
 	if jsnCfg.Export_path != nil {
 		self.ExportPath = *jsnCfg.Export_path
+	}
+	if jsnCfg.Cdr_filter != nil {
+		if self.CDRFilter, err = utils.ParseRSRFields(*jsnCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Synchronous != nil {
 		self.Synchronous = *jsnCfg.Synchronous
