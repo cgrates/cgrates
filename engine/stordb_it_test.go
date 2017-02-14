@@ -167,9 +167,8 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 	if rcv, err := storDB.GetTPDestinations("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		//Fixme: Ensure the order of elements returned by GetTPDestinations
-		if !((reflect.DeepEqual(*(snd[0]), *(rcv[0])) && reflect.DeepEqual(*(snd[1]), *(rcv[1]))) || (reflect.DeepEqual(*(snd[0]), *(rcv[1])) && reflect.DeepEqual(*(snd[1]), *(rcv[0])))) {
-			t.Errorf("Expecting: %+v, received: %+v", *(snd[0]), *(rcv[0]))
+		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
+			t.Errorf("Expecting: %+v, received: %+v", snd[0], rcv[0])
 		}
 	}
 	// UPDATE
@@ -182,9 +181,8 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 	if rcv, err := storDB.GetTPDestinations("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		//Fixme: Ensure the order of elements returned by GetTPDestinations
-		if !((reflect.DeepEqual(*(snd[0]), *(rcv[0])) && reflect.DeepEqual(*(snd[1]), *(rcv[1]))) || (reflect.DeepEqual(*(snd[0]), *(rcv[1])) && reflect.DeepEqual(*(snd[1]), *(rcv[0])))) {
-			t.Errorf("Expecting: %+v, received: %+v", *(snd[0]), *(rcv[0]))
+		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
+			t.Errorf("Expecting: %+v, received: %+v", snd[0], rcv[0])
 		}
 	}
 	// REMOVE
