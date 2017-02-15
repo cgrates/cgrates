@@ -192,7 +192,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		go self.stats.Call("CDRStatsV1.AppendCDR", cdr, &out)
 	}
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
-		self.replicateCdr(cdr)
+		self.replicateCDRs([]*CDR{cdr})
 	}
 
 	if self.rals != nil && !cdr.Rated { // CDRs not rated will be processed by Rating
@@ -280,9 +280,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, rep
 		}
 	}
 	if replicate {
-		for _, ratedCDR := range ratedCDRs {
-			self.replicateCdr(ratedCDR)
-		}
+		self.replicateCDRs(ratedCDRs)
 	}
 	return nil
 }
@@ -448,91 +446,22 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	return cc, nil
 }
 
-func (self *CdrServer) replicateCdr(cdr *CDR) error {
-	return nil
-	/*
-		for _, rplCfg := range self.cgrCfg.CDRSOnlineCDRExports {
-			passesFilters := true
-			for _, cdfFltr := range rplCfg.CdrFilter {
-				if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
-					passesFilters = false
-					break
-				}
-			}
-			if !passesFilters { // Not passes filters, ignore this replication
-				continue
-			}
-			var body interface{}
-			var content = ""
-			switch rplCfg.Transport {
-			case utils.MetaHTTPjsonCDR, utils.MetaAMQPjsonCDR:
-				jsn, err := json.Marshal(cdr)
-				if err != nil {
-					return err
-				}
-				body = jsn
-			case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap:
-				expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
-				if err != nil {
-					return err
-				}
-				jsn, err := json.Marshal(expMp)
-				if err != nil {
-					return err
-				}
-				body = jsn
-			case utils.META_HTTP_POST:
-				expMp, err := cdr.AsExportMap(rplCfg.ContentFields, self.cgrCfg.HttpSkipTlsVerify, nil)
-				if err != nil {
-					return err
-				}
-				vals := url.Values{}
-				for fld, val := range expMp {
-					vals.Set(fld, val)
-				}
-				body = vals
-			}
-			var errChan chan error
-			if rplCfg.Synchronous {
-				errChan = make(chan error)
-			}
-			go func(body interface{}, rplCfg *config.CDRReplicationCfg, content string, errChan chan error) {
-				var err error
-				fallbackPath := utils.META_NONE
-				if rplCfg.FallbackFileName() != utils.META_NONE {
-					fallbackPath = path.Join(self.cgrCfg.FailedPostsDir, rplCfg.FallbackFileName())
-				}
-				switch rplCfg.Transport {
-				case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
-					_, err = self.httpPoster.Post(rplCfg.Address, utils.PosterTransportContentTypes[rplCfg.Transport], body, rplCfg.Attempts, fallbackPath)
-				case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-					var amqpPoster *utils.AMQPPoster
-					amqpPoster, err = utils.AMQPPostersCache.GetAMQPPoster(rplCfg.Address, rplCfg.Attempts, self.cgrCfg.FailedPostsDir)
-					if err == nil { // error will be checked bellow
-						var chn *amqp.Channel
-						chn, err = amqpPoster.Post(
-							nil, utils.PosterTransportContentTypes[rplCfg.Transport], body.([]byte), rplCfg.FallbackFileName())
-						if chn != nil {
-							chn.Close()
-						}
-					}
-				default:
-					err = fmt.Errorf("unsupported replication transport: %s", rplCfg.Transport)
-				}
-				if err != nil {
-					utils.Logger.Err(fmt.Sprintf(
-						"<CDRReplicator> Replicating CDR: %+v, transport: %s, got error: %s", cdr, rplCfg.Transport, err.Error()))
-				}
-				if rplCfg.Synchronous {
-					errChan <- err
-				}
-			}(body, rplCfg, content, errChan)
-			if rplCfg.Synchronous { // Synchronize here
-				<-errChan
-			}
+func (self *CdrServer) replicateCDRs(cdrs []*CDR) (err error) {
+	for _, exportID := range self.cgrCfg.CDRSOnlineCDRExports {
+		expTpl := self.cgrCfg.CdreProfiles[exportID] // not checking for existence of profile since this should be done in a higher layer
+		var cdre *CDRExporter
+		if cdre, err = NewCDRExporter(cdrs, expTpl, expTpl.ExportFormat, expTpl.ExportPath, self.cgrCfg.FailedPostsDir, "CDRSReplication",
+			expTpl.Synchronous, expTpl.Attempts, expTpl.FieldSeparator, expTpl.UsageMultiplyFactor,
+			expTpl.CostMultiplyFactor, self.cgrCfg.RoundingDecimals, self.cgrCfg.HttpSkipTlsVerify, self.httpPoster); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Building CDRExporter for online exports got error: <%s>", err.Error()))
+			continue
 		}
-		return nil
-	*/
+		if err = cdre.ExportCDRs(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Replicating CDR: %+v, got error: <%s>", err.Error()))
+			continue
+		}
+	}
+	return
 }
 
 // Called by rate/re-rate API, FixMe: deprecate it once new APIer structure is operational

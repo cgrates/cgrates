@@ -226,27 +226,21 @@ func TestCdrsAMQPReplication(t *testing.T) {
 func TestCdrsHTTPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(2 * time.Second))
 	failoverContent := []byte(`OriginID=httpjsonrpc1`)
-	var rplCfg *config.CDRReplicationCfg
+	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedPostsDir)
+	if len(filesInDir) == 0 {
+		t.Fatalf("No files in directory: %s", cdrsMasterCfg.FailedPostsDir)
+	}
 	var foundFile bool
-	for _, rplCfg = range cdrsMasterCfg.CDRSCdrReplication {
-		if strings.HasSuffix(rplCfg.Address, "invalid") { // Find the config which shold generate the failoback
+	var fileName string
+	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
+		fileName = file.Name()
+		if strings.Index(fileName, utils.FormSuffix) != -1 {
 			foundFile = true
 			break
 		}
 	}
 	if !foundFile {
 		t.Fatal("Could not find the file in folder")
-	}
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedPostsDir)
-	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.FailedPostsDir)
-	}
-	var fileName string
-	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		fileName = file.Name()
-		if strings.Index(fileName, ".txt") != -1 {
-			break
-		}
 	}
 	filePath := path.Join(cdrsMasterCfg.FailedPostsDir, fileName)
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
@@ -254,32 +248,19 @@ func TestCdrsHTTPPosterFileFailover(t *testing.T) {
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
 		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
 	}
-	/*
-		if err := os.Remove(filePath); err != nil {
-			t.Error("Failed removing file: ", filePath)
-		}
-	*/
+	if err := os.Remove(filePath); err != nil {
+		t.Error("Failed removing file: ", filePath)
+	}
 }
 
 func TestCdrsAMQPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
 	failoverContent := []byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`)
-	var rplCfg *config.CDRReplicationCfg
-	var foundFile bool
-	for _, rplCfg = range cdrsMasterCfg.CDRSCdrReplication {
-		if rplCfg.Address == "amqp://guest:guest@localhost:25672/?queue_id=cgrates_cdrs" { // Find the config which shold generate the failoback
-			foundFile = true
-			break
-		}
-	}
-	if !foundFile {
-		t.Fatal("Could not find the file in folder")
-	}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.FailedPostsDir)
 	}
-	foundFile = false
+	var foundFile bool
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()
