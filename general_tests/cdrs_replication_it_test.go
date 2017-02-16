@@ -42,7 +42,7 @@ var cdrsMasterCfgPath, cdrsSlaveCfgPath string
 var cdrsMasterCfg, cdrsSlaveCfg *config.CGRConfig
 var cdrsMasterRpc *rpcclient.RpcClient
 
-func TestCdrsInitConfig(t *testing.T) {
+func TestCDRsReplcInitConfig(t *testing.T) {
 	var err error
 	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsreplicationmaster")
 	if cdrsMasterCfg, err = config.NewCGRConfigFromFolder(cdrsMasterCfgPath); err != nil {
@@ -55,7 +55,7 @@ func TestCdrsInitConfig(t *testing.T) {
 }
 
 // InitDb so we can rely on count
-func TestCdrsInitCdrDb(t *testing.T) {
+func TestCDRsReplcInitCdrDb(t *testing.T) {
 	if err := engine.InitStorDb(cdrsMasterCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -72,20 +72,20 @@ func TestCdrsInitCdrDb(t *testing.T) {
 
 }
 
-func TestCdrsStartMasterEngine(t *testing.T) {
+func TestCDRsReplcStartMasterEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestCdrsStartSlaveEngine(t *testing.T) {
+func TestCDRsReplcStartSlaveEngine(t *testing.T) {
 	if _, err := engine.StartEngine(cdrsSlaveCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestCdrsHttpCdrReplication(t *testing.T) {
+func TestCDRsReplcHttpCdrReplication(t *testing.T) {
 	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
 	if err != nil {
@@ -141,7 +141,7 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 	}
 }
 
-func TestCdrsAMQPReplication(t *testing.T) {
+func TestCDRsReplcAMQPReplication(t *testing.T) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		t.Fatal(err)
@@ -223,7 +223,7 @@ func TestCdrsAMQPReplication(t *testing.T) {
 
 }
 
-func TestCdrsHTTPPosterFileFailover(t *testing.T) {
+func TestCDRsReplcHTTPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(2 * time.Second))
 	failoverContent := []byte(`OriginID=httpjsonrpc1`)
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedPostsDir)
@@ -253,7 +253,7 @@ func TestCdrsHTTPPosterFileFailover(t *testing.T) {
 	}
 }
 
-func TestCdrsAMQPPosterFileFailover(t *testing.T) {
+func TestCDRsReplcAMQPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
 	failoverContent := []byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`)
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedPostsDir)
@@ -278,11 +278,9 @@ func TestCdrsAMQPPosterFileFailover(t *testing.T) {
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
 		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
 	}
-	/*
-		if err := os.Remove(filePath); err != nil {
-			t.Error("Failed removing file: ", filePath)
-		}
-	*/
+	if err := os.Remove(filePath); err != nil {
+		t.Error("Failed removing file: ", filePath)
+	}
 }
 
 /*
