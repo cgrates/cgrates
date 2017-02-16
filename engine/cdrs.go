@@ -194,9 +194,8 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
 		self.replicateCDRs([]*CDR{cdr})
 	}
-
 	if self.rals != nil && !cdr.Rated { // CDRs not rated will be processed by Rating
-		self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs, self.stats != nil, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
+		go self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs, self.stats != nil, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
 	}
 	return nil
 }
