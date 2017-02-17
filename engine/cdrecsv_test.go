@@ -43,7 +43,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
-	if err = cdre.processCdrs(); err != nil {
+	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
 	csvWriter := csv.NewWriter(writer)
@@ -74,7 +74,7 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
-	if err = cdre.processCdrs(); err != nil {
+	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
 	csvWriter := csv.NewWriter(writer)

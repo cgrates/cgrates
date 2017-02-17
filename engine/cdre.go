@@ -76,6 +76,7 @@ func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreConfig, exportFormat
 }
 
 type CDRExporter struct {
+	sync.RWMutex
 	cdrs                []*CDR
 	exportTemplate      *config.CdreConfig
 	exportFormat        string
@@ -101,9 +102,7 @@ type CDRExporter struct {
 	totalCost                       float64
 	firstExpOrderId, lastExpOrderId int64
 	positiveExports                 []string          // CGRIDs of successfully exported CDRs
-	pEMux                           sync.RWMutex      // protect positiveExports
 	negativeExports                 map[string]string // CGRIDs of failed exports
-	nEMux                           sync.RWMutex      // protect negativeExports
 }
 
 // Handle various meta functions used in header/trailer
@@ -165,7 +164,9 @@ func (cdre *CDRExporter) composeHeader() (err error) {
 			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
+		cdre.Lock()
 		cdre.header = append(cdre.header, fmtOut)
+		cdre.Unlock()
 	}
 	return nil
 }
@@ -194,7 +195,9 @@ func (cdre *CDRExporter) composeTrailer() (err error) {
 			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
+		cdre.Lock()
 		cdre.trailer = append(cdre.trailer, fmtOut)
+		cdre.Unlock()
 	}
 	return nil
 }
@@ -260,7 +263,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 }
 
 // Write individual cdr into content buffer, build stats
-func (cdre *CDRExporter) processCdr(cdr *CDR) (err error) {
+func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	if cdr.ExtraFields == nil { // Avoid assignment in nil map if not initialized
 		cdr.ExtraFields = make(map[string]string)
 	}
@@ -281,7 +284,9 @@ func (cdre *CDRExporter) processCdr(cdr *CDR) (err error) {
 		if len(cdrRow) == 0 { // No CDR data, most likely no configuration fields defined
 			return
 		} else {
+			cdre.Lock()
 			cdre.content = append(cdre.content, cdrRow)
+			cdre.Unlock()
 		}
 	default: // attempt posting CDR
 		err = cdre.postCdr(cdr)
@@ -327,15 +332,15 @@ func (cdre *CDRExporter) processCdr(cdr *CDR) (err error) {
 }
 
 // Builds header, content and trailers
-func (cdre *CDRExporter) processCdrs() error {
+func (cdre *CDRExporter) processCDRs() (err error) {
 	var wg sync.WaitGroup
 	for _, cdr := range cdre.cdrs {
 		if cdr == nil || len(cdr.CGRID) == 0 { // CDR needs to exist and it's CGRID needs to be populated
 			continue
 		}
 		passesFilters := true
-		for _, cdfFltr := range cdre.exportTemplate.CDRFilter {
-			if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
+		for _, cdrFltr := range cdre.exportTemplate.CDRFilter {
+			if !cdrFltr.FilterPasses(cdr.FieldAsString(cdrFltr)) {
 				passesFilters = false
 				break
 			}
@@ -343,20 +348,22 @@ func (cdre *CDRExporter) processCdrs() error {
 		if !passesFilters { // Not passes filters, ignore this CDR
 			continue
 		}
-		if cdre.synchronous {
-			wg.Add(1)
+		if cdre.synchronous ||
+			utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
+			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
 		go func(cdr *CDR) {
-			if err := cdre.processCdr(cdr); err != nil {
-				cdre.nEMux.Lock()
+			if err := cdre.processCDR(cdr); err != nil {
+				cdre.Lock()
 				cdre.negativeExports[cdr.CGRID] = err.Error()
-				cdre.nEMux.Unlock()
+				cdre.Unlock()
 			} else {
-				cdre.pEMux.Lock()
+				cdre.Lock()
 				cdre.positiveExports = append(cdre.positiveExports, cdr.CGRID)
-				cdre.pEMux.Unlock()
+				cdre.Unlock()
 			}
-			if cdre.synchronous {
+			if cdre.synchronous ||
+				utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
 				wg.Done()
 			}
 		}(cdr)
@@ -364,20 +371,22 @@ func (cdre *CDRExporter) processCdrs() error {
 	wg.Wait()
 	// Process header and trailer after processing cdrs since the metatag functions can access stats out of built cdrs
 	if cdre.exportTemplate.HeaderFields != nil {
-		if err := cdre.composeHeader(); err != nil {
-			return err
+		if err = cdre.composeHeader(); err != nil {
+			return
 		}
 	}
 	if cdre.exportTemplate.TrailerFields != nil {
-		if err := cdre.composeTrailer(); err != nil {
-			return err
+		if err = cdre.composeTrailer(); err != nil {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // Simple write method
 func (cdre *CDRExporter) writeOut(ioWriter io.Writer) error {
+	cdre.Lock()
+	defer cdre.Unlock()
 	if len(cdre.header) != 0 {
 		for _, fld := range append(cdre.header, "\n") {
 			if _, err := io.WriteString(ioWriter, fld); err != nil {
@@ -405,6 +414,8 @@ func (cdre *CDRExporter) writeOut(ioWriter io.Writer) error {
 // csvWriter specific method
 func (cdre *CDRExporter) writeCsv(csvWriter *csv.Writer) error {
 	csvWriter.Comma = cdre.fieldSeparator
+	cdre.RLock()
+	defer cdre.RUnlock()
 	if len(cdre.header) != 0 {
 		if err := csvWriter.Write(cdre.header); err != nil {
 			return err
@@ -425,12 +436,14 @@ func (cdre *CDRExporter) writeCsv(csvWriter *csv.Writer) error {
 }
 
 func (cdre *CDRExporter) ExportCDRs() (err error) {
-	if err = cdre.processCdrs(); err != nil {
+	if err = cdre.processCDRs(); err != nil {
 		return
 	}
-	switch cdre.exportFormat {
-	case utils.MetaFileFWV, utils.MetaFileCSV:
-		if len(cdre.content) == 0 {
+	if utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) { // files are written after processing all CDRs
+		cdre.RLock()
+		contLen := len(cdre.content)
+		cdre.RUnlock()
+		if contLen == 0 {
 			return
 		}
 		fileOut, err := os.Create(cdre.exportPath)
@@ -467,14 +480,14 @@ func (cdre *CDRExporter) TotalExportedCdrs() int {
 
 // Return successfully exported CGRIDs
 func (cdre *CDRExporter) PositiveExports() []string {
-	cdre.pEMux.RLock()
-	defer cdre.pEMux.RUnlock()
+	cdre.RLock()
+	defer cdre.RUnlock()
 	return cdre.positiveExports
 }
 
 // Return failed exported CGRIDs together with the reason
 func (cdre *CDRExporter) NegativeExports() map[string]string {
-	cdre.nEMux.RLock()
-	defer cdre.nEMux.RUnlock()
+	cdre.RLock()
+	defer cdre.RUnlock()
 	return cdre.negativeExports
 }

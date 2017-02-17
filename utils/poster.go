@@ -40,6 +40,28 @@ func init() {
 
 var AMQPPostersCache *AMQPCachedPosters
 
+// Post without automatic failover
+func HttpJsonPost(url string, skipTlsVerify bool, content []byte) ([]byte, error) {
+	tr := &http.Transport{
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: skipTlsVerify},
+		DisableKeepAlives: true,
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Post(url, "application/json", bytes.NewBuffer(content))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode > 299 {
+		return respBody, fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
+	}
+	return respBody, nil
+}
+
 // NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
 func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err error) {
 	ffn = new(FallbackFileName)
@@ -101,41 +123,6 @@ func (ffn *FallbackFileName) AsString() string {
 		ffn.FileSuffix = CDREFileSuffixes[ffn.Transport]
 	}
 	return fmt.Sprintf("%s%s%s%s%s%s%s%s", ffn.Module, HandlerArgSep, ffn.Transport, HandlerArgSep, url.QueryEscape(ffn.Address), HandlerArgSep, ffn.RequestID, ffn.FileSuffix)
-}
-
-/*
-// Converts interface to []byte
-func GetBytes(content interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(content)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-*/
-
-// Post without automatic failover
-func HttpJsonPost(url string, skipTlsVerify bool, content []byte) ([]byte, error) {
-	tr := &http.Transport{
-		TLSClientConfig:   &tls.Config{InsecureSkipVerify: skipTlsVerify},
-		DisableKeepAlives: true,
-	}
-	client := &http.Client{Transport: tr}
-	resp, err := client.Post(url, "application/json", bytes.NewBuffer(content))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode > 299 {
-		return respBody, fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
-	}
-	return respBody, nil
 }
 
 func NewHTTPPoster(skipTLSVerify bool, replyTimeout time.Duration) *HTTPPoster {

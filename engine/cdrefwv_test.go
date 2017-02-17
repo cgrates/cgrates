@@ -130,7 +130,7 @@ func TestWriteCdr(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = cdre.processCdrs(); err != nil {
+	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
 	eHeader := "10   VOIfwv_107111308420018011511340001                                                                                                         \n"
@@ -208,7 +208,7 @@ func TestWriteCdrs(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = cdre.processCdrs(); err != nil {
+	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
 	if err := cdre.writeOut(wrBuf); err != nil {
