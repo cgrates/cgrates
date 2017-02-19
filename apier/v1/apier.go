@@ -632,40 +632,58 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), at.ActionsId, missing)
 		}
 	}
-	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.HasData(utils.ACTION_PLAN_PREFIX, attrs.Id); err != nil {
-			return utils.NewErrServerError(err)
-		} else if exists {
-			return utils.ErrExists
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+		var prevAccountIDs utils.StringMap
+		if prevAP, err := self.RatingDb.GetActionPlan(attrs.Id, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return 0, err
+		} else if err == nil && !attrs.Overwrite {
+			utils.Logger.Debug(fmt.Sprintf("SetActionPlan, prevAP: %+v, err: %v", prevAP, err))
+			return 0, utils.ErrExists
+		} else if prevAP != nil {
+			prevAccountIDs = prevAP.AccountIDs
 		}
-	}
-	ap := &engine.ActionPlan{
-		Id: attrs.Id,
-	}
-	for _, apiAtm := range attrs.ActionPlan {
-		if exists, err := self.RatingDb.HasData(utils.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
-			return utils.NewErrServerError(err)
-		} else if !exists {
-			return fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
+		ap := &engine.ActionPlan{
+			Id: attrs.Id,
 		}
-		timing := new(engine.RITiming)
-		timing.Years.Parse(apiAtm.Years, ";")
-		timing.Months.Parse(apiAtm.Months, ";")
-		timing.MonthDays.Parse(apiAtm.MonthDays, ";")
-		timing.WeekDays.Parse(apiAtm.WeekDays, ";")
-		timing.StartTime = apiAtm.Time
-		ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
-			Uuid:      utils.GenUUID(),
-			Weight:    apiAtm.Weight,
-			Timing:    &engine.RateInterval{Timing: timing},
-			ActionsID: apiAtm.ActionsId,
-		})
-	}
-	if err := self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
-		return utils.NewErrServerError(err)
+		for _, apiAtm := range attrs.ActionPlan {
+			if exists, err := self.RatingDb.HasData(utils.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
+				return 0, err
+			} else if !exists {
+				return 0, fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
+			}
+			timing := new(engine.RITiming)
+			timing.Years.Parse(apiAtm.Years, ";")
+			timing.Months.Parse(apiAtm.Months, ";")
+			timing.MonthDays.Parse(apiAtm.MonthDays, ";")
+			timing.WeekDays.Parse(apiAtm.WeekDays, ";")
+			timing.StartTime = apiAtm.Time
+			ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
+				Uuid:      utils.GenUUID(),
+				Weight:    apiAtm.Weight,
+				Timing:    &engine.RateInterval{Timing: timing},
+				ActionsID: apiAtm.ActionsId,
+			})
+		}
+		if err := self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+			return 0, err
+		}
+		if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
+			return 0, err
+		}
+		for acntID := range prevAccountIDs {
+			if err := self.RatingDb.RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
+				return 0, err
+			}
+		}
+		if len(prevAccountIDs) != 0 {
+			if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, prevAccountIDs.Slice(), true); err != nil {
+				return 0, err
+			}
+		}
+		return 0, nil
+	}, 0, utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return err
 	}
 	if attrs.ReloadScheduler {
 		sched := self.ServManager.GetScheduler()

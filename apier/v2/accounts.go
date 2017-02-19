@@ -227,7 +227,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if attr.ReloadScheduler {
+	if attr.ReloadScheduler && len(dirtyActionPlans) != 0 {
 		sched := self.ServManager.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
