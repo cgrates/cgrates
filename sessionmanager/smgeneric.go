@@ -473,9 +473,6 @@ func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool
 	ssMux.RLock()
 	ss := ssMp[cgrID]
 	ssMux.RUnlock()
-	if len(ss) == 0 {
-		return
-	}
 	var wg sync.WaitGroup
 	for _, rplConn := range smgReplConns {
 		if rplConn.Synchronous {

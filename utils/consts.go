@@ -347,6 +347,7 @@ const (
 	SchedulerNotRunningCaps      = "SCHEDULLER_NOT_RUNNING"
 	MetaScheduler                = "*scheduler"
 	MetaCostDetails              = "*cost_details"
+	MetaAccounts                 = "*accounts"
 	Migrator                     = "migrator"
 	UnsupportedMigrationTask     = "unsupported migration task"
 	NoStorDBConnection           = "not connected to StorDB"
