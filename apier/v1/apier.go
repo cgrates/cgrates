@@ -635,9 +635,8 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var prevAccountIDs utils.StringMap
 		if prevAP, err := self.RatingDb.GetActionPlan(attrs.Id, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return 0, err
+			return 0, utils.NewErrServerError(err)
 		} else if err == nil && !attrs.Overwrite {
-			utils.Logger.Debug(fmt.Sprintf("SetActionPlan, prevAP: %+v, err: %v", prevAP, err))
 			return 0, utils.ErrExists
 		} else if prevAP != nil {
 			prevAccountIDs = prevAP.AccountIDs
@@ -647,7 +646,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 		}
 		for _, apiAtm := range attrs.ActionPlan {
 			if exists, err := self.RatingDb.HasData(utils.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
-				return 0, err
+				return 0, utils.NewErrServerError(err)
 			} else if !exists {
 				return 0, fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
 			}
@@ -665,19 +664,20 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 			})
 		}
 		if err := self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
-			return 0, err
+			return 0, utils.NewErrServerError(err)
 		}
 		if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
-			return 0, err
+			return 0, utils.NewErrServerError(err)
 		}
 		for acntID := range prevAccountIDs {
 			if err := self.RatingDb.RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
-				return 0, err
+				return 0, utils.NewErrServerError(err)
 			}
 		}
 		if len(prevAccountIDs) != 0 {
-			if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, prevAccountIDs.Slice(), true); err != nil {
-				return 0, err
+			if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, prevAccountIDs.Slice(), true); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				return 0, utils.NewErrServerError(err)
 			}
 		}
 		return 0, nil
