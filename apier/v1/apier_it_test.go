@@ -38,6 +38,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/streadway/amqp"
@@ -76,7 +77,7 @@ func TestApierLoadConfig(t *testing.T) {
 }
 
 func TestApierCreateDirs(t *testing.T) {
-	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportDirectory, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out", cfg.HistoryDir} {
+	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportPath, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out", cfg.HistoryDir} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}
@@ -1097,6 +1098,16 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 	}
 }
 
+// Make sure we have scheduled actions
+func TestApierITGetScheduledActionsForAccount(t *testing.T) {
+	var rply []*scheduler.ScheduledAction
+	if err := rater.Call("ApierV1.GetScheduledActions", scheduler.ArgsGetScheduledActions{Tenant: utils.StringPointer("cgrates.org"), Account: utils.StringPointer("dan7")}, &rply); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else if len(rply) == 0 {
+		t.Errorf("ScheduledActions: %+v", rply)
+	}
+}
+
 // Test here RemoveActionTiming
 func TestApierRemUniqueIDActionTiming(t *testing.T) {
 	var rmReply string
@@ -1549,8 +1560,8 @@ func TestApierITRemAccountAliases(t *testing.T) {
 }
 
 func TestApierITGetScheduledActions(t *testing.T) {
-	var rply []*ScheduledActions
-	if err := rater.Call("ApierV1.GetScheduledActions", AttrsGetScheduledActions{}, &rply); err != nil {
+	var rply []*scheduler.ScheduledAction
+	if err := rater.Call("ApierV1.GetScheduledActions", scheduler.ArgsGetScheduledActions{}, &rply); err != nil {
 		t.Error("Unexpected error: ", err)
 	}
 }

@@ -104,7 +104,7 @@ type CdrsJsonCfg struct {
 	Users_conns         *[]*HaPoolJsonCfg
 	Aliases_conns       *[]*HaPoolJsonCfg
 	Cdrstats_conns      *[]*HaPoolJsonCfg
-	Cdr_replication     *[]*CdrReplicationJsonCfg
+	Online_cdr_exports  *[]string
 }
 
 type CdrReplicationJsonCfg struct {
@@ -145,17 +145,17 @@ type CdrFieldJsonCfg struct {
 
 // Cdre config section
 type CdreJsonCfg struct {
-	Cdr_format                    *string
-	Field_separator               *string
-	Data_usage_multiply_factor    *float64
-	Sms_usage_multiply_factor     *float64
-	Mms_usage_multiply_factor     *float64
-	Generic_usage_multiply_factor *float64
-	Cost_multiply_factor          *float64
-	Export_directory              *string
-	Header_fields                 *[]*CdrFieldJsonCfg
-	Content_fields                *[]*CdrFieldJsonCfg
-	Trailer_fields                *[]*CdrFieldJsonCfg
+	Export_format         *string
+	Export_path           *string
+	Cdr_filter            *string
+	Synchronous           *bool
+	Attempts              *int
+	Field_separator       *string
+	Usage_multiply_factor *map[string]float64
+	Cost_multiply_factor  *float64
+	Header_fields         *[]*CdrFieldJsonCfg
+	Content_fields        *[]*CdrFieldJsonCfg
+	Trailer_fields        *[]*CdrFieldJsonCfg
 }
 
 // Cdrc config section

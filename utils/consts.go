@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 var (
-	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
+	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap}
 	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
 		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField, MEDI_RUNID}
 	GitLastLog                  string // If set, it will be processed as part of versioning
@@ -29,6 +29,15 @@ var (
 		META_HTTP_POST:  CONTENT_FORM,
 		MetaAMQPjsonCDR: CONTENT_JSON,
 		MetaAMQPjsonMap: CONTENT_JSON,
+	}
+	CDREFileSuffixes = map[string]string{
+		MetaHTTPjsonCDR: JSNSuffix,
+		MetaHTTPjsonMap: JSNSuffix,
+		MetaAMQPjsonCDR: JSNSuffix,
+		MetaAMQPjsonMap: JSNSuffix,
+		META_HTTP_POST:  FormSuffix,
+		MetaFileCSV:     CSVSuffix,
+		MetaFileFWV:     FWVSuffix,
 	}
 )
 
@@ -338,6 +347,7 @@ const (
 	SchedulerNotRunningCaps      = "SCHEDULLER_NOT_RUNNING"
 	MetaScheduler                = "*scheduler"
 	MetaCostDetails              = "*cost_details"
+	MetaAccounts                 = "*accounts"
 	Migrator                     = "migrator"
 	UnsupportedMigrationTask     = "unsupported migration task"
 	NoStorDBConnection           = "not connected to StorDB"
@@ -348,10 +358,14 @@ const (
 	TxtSuffix                    = ".txt"
 	JSNSuffix                    = ".json"
 	FormSuffix                   = ".form"
+	CSVSuffix                    = ".csv"
+	FWVSuffix                    = ".fwv"
 	CONTENT_JSON                 = "json"
 	CONTENT_FORM                 = "form"
 	CONTENT_TEXT                 = "text"
 	FileLockPrefix               = "file_"
 	ActionsPoster                = "act"
 	CDRPoster                    = "cdr"
+	MetaFileCSV                  = "*file_csv"
+	MetaFileFWV                  = "*file_fwv"
 )

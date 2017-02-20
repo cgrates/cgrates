@@ -87,6 +87,10 @@ func (ms *MapStorage) Flush(ignore string) error {
 	return nil
 }
 
+func (ms *MapStorage) Marshaler() Marshaler {
+	return ms.ms
+}
+
 func (ms *MapStorage) SelectDatabase(dbName string) (err error) {
 	return
 }

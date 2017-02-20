@@ -17,13 +17,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import (
+	"github.com/cgrates/cgrates/scheduler"
+)
 
 func init() {
 	c := &CmdGetScheduledActions{
 		name:      "scheduler_queue",
 		rpcMethod: "ApierV1.GetScheduledActions",
-		rpcParams: &v1.AttrsGetScheduledActions{},
+		rpcParams: &scheduler.ArgsGetScheduledActions{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -33,7 +35,7 @@ func init() {
 type CmdGetScheduledActions struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrsGetScheduledActions
+	rpcParams *scheduler.ArgsGetScheduledActions
 	*CommandExecuter
 }
 
@@ -47,7 +49,7 @@ func (self *CmdGetScheduledActions) RpcMethod() string {
 
 func (self *CmdGetScheduledActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrsGetScheduledActions{}
+		self.rpcParams = &scheduler.ArgsGetScheduledActions{}
 	}
 	return self.rpcParams
 }
@@ -57,6 +59,6 @@ func (self *CmdGetScheduledActions) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetScheduledActions) RpcResult() interface{} {
-	s := make([]*v1.ScheduledActions, 0)
+	s := make([]*scheduler.ScheduledAction, 0)
 	return &s
 }

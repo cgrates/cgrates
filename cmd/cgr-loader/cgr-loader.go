@@ -210,12 +210,21 @@ func main() {
 		return
 	}
 	if migrate != nil && *migrate != "" { // Run migrator
+		ratingDb, err := engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
+			*tpdb_user, *tpdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+		if err != nil {
+			log.Fatal(err)
+		}
+		accountDb, err := engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+		if err != nil {
+			log.Fatal(err)
+		}
 		storDB, err := engine.ConfigureStorStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 			cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if err := migrator.NewMigrator(storDB, *stor_db_type).Migrate(*migrate); err != nil {
+		if err := migrator.NewMigrator(ratingDb, accountDb, *datadb_type, storDB, *stor_db_type).Migrate(*migrate); err != nil {
 			log.Fatal(err)
 		}
 		log.Print("Done migrating!")

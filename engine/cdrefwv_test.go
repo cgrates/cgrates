@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package cdre
+package engine
 
 import (
 	"bytes"
@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -111,12 +110,12 @@ func TestWriteCdr(t *testing.T) {
 		t.Error(err)
 	}
 	cdreCfg := &config.CdreConfig{
-		CdrFormat:     utils.CDRE_FIXED_WIDTH,
+		ExportFormat:  utils.MetaFileFWV,
 		HeaderFields:  hdrCfgFlds,
 		ContentFields: contentCfgFlds,
 		TrailerFields: trailerCfgFlds,
 	}
-	cdr := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		ToR: utils.VOICE, OrderID: 1, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
@@ -125,9 +124,13 @@ func TestWriteCdr(t *testing.T) {
 		Usage:      time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	cdre, err := NewCdrExporter([]*engine.CDR{cdr}, nil, cdreCfg, utils.CDRE_FIXED_WIDTH, ',', "fwv_1", 0.0, 0.0, 0.0, 0.0, 0.0,
-		cfg.RoundingDecimals, cfg.HttpSkipTlsVerify)
+
+	cdre, err := NewCDRExporter([]*CDR{cdr}, cdreCfg, utils.MetaFileFWV, "", "", "fwv_1",
+		true, 1, '|', map[string]float64{}, 0.0, cfg.RoundingDecimals, cfg.HttpSkipTlsVerify, nil)
 	if err != nil {
+		t.Error(err)
+	}
+	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
 	eHeader := "10   VOIfwv_107111308420018011511340001                                                                                                         \n"
@@ -169,12 +172,12 @@ func TestWriteCdr(t *testing.T) {
 func TestWriteCdrs(t *testing.T) {
 	wrBuf := &bytes.Buffer{}
 	cdreCfg := &config.CdreConfig{
-		CdrFormat:     utils.CDRE_FIXED_WIDTH,
+		ExportFormat:  utils.MetaFileFWV,
 		HeaderFields:  hdrCfgFlds,
 		ContentFields: contentCfgFlds,
 		TrailerFields: trailerCfgFlds,
 	}
-	cdr1 := &engine.CDR{CGRID: utils.Sha1("aaa1", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	cdr1 := &CDR{CGRID: utils.Sha1("aaa1", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		ToR: utils.VOICE, OrderID: 2, OriginID: "aaa1", OriginHost: "192.168.1.1", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1010",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
@@ -182,7 +185,7 @@ func TestWriteCdrs(t *testing.T) {
 		Usage:      time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 2.25,
 		ExtraFields: map[string]string{"productnumber": "12341", "fieldextr2": "valextr2"},
 	}
-	cdr2 := &engine.CDR{CGRID: utils.Sha1("aaa2", time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String()),
+	cdr2 := &CDR{CGRID: utils.Sha1("aaa2", time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String()),
 		ToR: utils.VOICE, OrderID: 4, OriginID: "aaa2", OriginHost: "192.168.1.2", RequestType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1002", Subject: "1002", Destination: "1011",
 		SetupTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC),
@@ -190,8 +193,8 @@ func TestWriteCdrs(t *testing.T) {
 		Usage:      time.Duration(5) * time.Minute, RunID: utils.DEFAULT_RUNID, Cost: 1.40001,
 		ExtraFields: map[string]string{"productnumber": "12342", "fieldextr2": "valextr2"},
 	}
-	cdr3 := &engine.CDR{}
-	cdr4 := &engine.CDR{CGRID: utils.Sha1("aaa3", time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC).String()),
+	cdr3 := &CDR{}
+	cdr4 := &CDR{CGRID: utils.Sha1("aaa3", time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC).String()),
 		ToR: utils.VOICE, OrderID: 3, OriginID: "aaa4", OriginHost: "192.168.1.4", RequestType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1004", Subject: "1004", Destination: "1013",
 		SetupTime:  time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC),
@@ -200,9 +203,12 @@ func TestWriteCdrs(t *testing.T) {
 		ExtraFields: map[string]string{"productnumber": "12344", "fieldextr2": "valextr2"},
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdre, err := NewCdrExporter([]*engine.CDR{cdr1, cdr2, cdr3, cdr4}, nil, cdreCfg, utils.CDRE_FIXED_WIDTH, ',',
-		"fwv_1", 0.0, 0.0, 0.0, 0.0, 0.0, cfg.RoundingDecimals, cfg.HttpSkipTlsVerify)
+	cdre, err := NewCDRExporter([]*CDR{cdr1, cdr2, cdr3, cdr4}, cdreCfg, utils.MetaFileFWV, "", "", "fwv_1",
+		true, 1, ',', map[string]float64{}, 0.0, cfg.RoundingDecimals, cfg.HttpSkipTlsVerify, nil)
 	if err != nil {
+		t.Error(err)
+	}
+	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
 	if err := cdre.writeOut(wrBuf); err != nil {

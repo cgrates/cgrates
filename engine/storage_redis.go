@@ -109,6 +109,10 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.Cmd("FLUSHDB").Err
 }
 
+func (rs *RedisStorage) Marshaler() Marshaler {
+	return rs.ms
+}
+
 func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 	return rs.Cmd("SELECT", dbName).Err
 }

@@ -1137,23 +1137,6 @@ func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 	return cdrFltr, nil
 }
 
-type AttrExportCdrsToFile struct {
-	CdrFormat                  *string  // Cdr output file format <utils.CdreCdrFormats>
-	FieldSeparator             *string  // Separator used between fields
-	ExportID                   *string  // Optional exportid
-	ExportDirectory            *string  // If provided it overwrites the configured export directory
-	ExportFileName             *string  // If provided the output filename will be set to this
-	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|>
-	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
-	SMSUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
-	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
-	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
-	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
-	RoundingDecimals           *int     // force rounding to this value
-	Verbose                    bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
-	RPCCDRsFilter                       // Inherit the CDR filter attributes
-}
-
 type AttrSetActions struct {
 	ActionsId string      // Actions id
 	Overwrite bool        // If previously defined, will be overwritten

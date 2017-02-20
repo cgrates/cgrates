@@ -170,10 +170,10 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	var schedulerReloadNeeded = false
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	var ub *engine.Account
+	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+		var ub *engine.Account
 		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
@@ -181,19 +181,38 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				ID: accID,
 			}
 		}
-		if len(attr.ActionPlanId) != 0 {
+		if attr.ActionPlanId != "" {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				var ap *engine.ActionPlan
-				ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
-				if err != nil {
+				acntAPids, err := self.RatingDb.GetAccountActionPlans(accID, false, utils.NonTransactional)
+				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}
-				if _, exists := ap.AccountIDs[accID]; !exists {
+				// clean previous action plans
+				for i := 0; i < len(acntAPids); {
+					apID := acntAPids[i]
+					if apID == attr.ActionPlanId {
+						i++ // increase index since we don't remove from slice
+						continue
+					}
+					ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional)
+					if err != nil {
+						return 0, err
+					}
+					delete(ap.AccountIDs, accID)
+					dirtyActionPlans[apID] = ap
+					acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
+				}
+				if !utils.IsSliceMember(acntAPids, attr.ActionPlanId) { // Account not yet attached to action plan, do it here
+					ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
+					if err != nil {
+						return 0, err
+					}
 					if ap.AccountIDs == nil {
 						ap.AccountIDs = make(utils.StringMap)
 					}
 					ap.AccountIDs[accID] = true
-					schedulerReloadNeeded = true
+					dirtyActionPlans[attr.ActionPlanId] = ap
+					acntAPids = append(acntAPids, attr.ActionPlanId)
 					// create tasks
 					for _, at := range ap.ActionTimings {
 						if at.IsASAP() {
@@ -207,31 +226,20 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 							}
 						}
 					}
-					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, true, utils.NonTransactional); err != nil {
+				}
+				apIDs := make([]string, len(dirtyActionPlans))
+				i := 0
+				for actionPlanID, ap := range dirtyActionPlans {
+					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
+					apIDs[i] = actionPlanID
+					i++
 				}
-				// clean previous action plans
-				acntAPids, err := self.RatingDb.GetAccountActionPlans(accID, false, utils.NonTransactional)
-				if err != nil && err != utils.ErrNotFound {
+				if err := self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
-				for _, apID := range acntAPids {
-					if apID != attr.ActionPlanId {
-						ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional)
-						if err != nil {
-							return 0, err
-						}
-						delete(ap.AccountIDs, accID)
-						if err = self.RatingDb.SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
-							return 0, err
-						}
-						if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
-							return 0, err
-						}
-					}
-				}
-				if err = self.RatingDb.SetAccountActionPlans(accID, []string{attr.ActionPlanId}, false); err != nil {
+				if err := self.RatingDb.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
 				if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
@@ -243,7 +251,8 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				return 0, err
 			}
 		}
-		if len(attr.ActionTriggersId) != 0 {
+
+		if attr.ActionTriggersId != "" {
 			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
 			if err != nil {
 				return 0, err
@@ -251,6 +260,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 			ub.ActionTriggers = atrs
 			ub.InitCounters()
 		}
+
 		if attr.AllowNegative != nil {
 			ub.AllowNegative = *attr.AllowNegative
 		}
@@ -266,23 +276,14 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if attr.ActionPlanId != "" {
-		if err = self.RatingDb.SetAccountActionPlans(accID, []string{attr.ActionPlanId}, false); err != nil {
-			return
-		}
-		if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
-			return
-		}
-
-	}
-	if attr.ReloadScheduler && schedulerReloadNeeded {
+	if attr.ReloadScheduler && len(dirtyActionPlans) != 0 {
 		sched := self.ServManager.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
 		}
 		sched.Reload()
 	}
-	*reply = OK // This will mark saving of the account, error still can show up in actionTimingsId
+	*reply = utils.OK // This will mark saving of the account, error still can show up in actionTimingsId
 	return nil
 }
 

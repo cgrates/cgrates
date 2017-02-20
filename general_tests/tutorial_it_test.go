@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -1414,22 +1415,26 @@ func TestTutITExportCDR(t *testing.T) {
 			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
 		}
 	}
-	var replyExport utils.ExportedFileCdrs
-	exportArgs := utils.AttrExportCdrsToFile{ExportDirectory: utils.StringPointer("/tmp"),
+	var replyExport v1.RplExportedCDRs
+	exportArgs := v1.ArgExportCDRs{
+		ExportPath:     utils.StringPointer("/tmp"),
 		ExportFileName: utils.StringPointer("TestTutITExportCDR.csv"),
 		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
 		RPCCDRsFilter:  utils.RPCCDRsFilter{CGRIDs: []string{cdr.CGRID}, NotRunIDs: []string{utils.MetaRaw}}}
-	if err := tutLocalRpc.Call("ApierV2.ExportCdrsToFile", exportArgs, &replyExport); err != nil {
+	if err := tutLocalRpc.Call("ApierV1.ExportCDRs", exportArgs, &replyExport); err != nil {
 		t.Error(err)
 	}
 	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA
 f0a92222a7d21b4d9f72744aabe82daef52e20d8,derived_run1,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA
 `
-	expFilePath := path.Join(*exportArgs.ExportDirectory, *exportArgs.ExportFileName)
+	eExportContent2 := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,derived_run1,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA
+f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA
+`
+	expFilePath := path.Join(*exportArgs.ExportPath, *exportArgs.ExportFileName)
 	if expContent, err := ioutil.ReadFile(expFilePath); err != nil {
 		t.Error(err)
-	} else if eExportContent != string(expContent) {
-		t.Errorf("Expecting: <%q>, received: <%q>", eExportContent, string(expContent))
+	} else if eExportContent != string(expContent) && eExportContent2 != string(expContent) { // CDRs are showing up randomly so we cannot predict order of export
+		t.Errorf("Expecting: <%q> or <%q> received: <%q>", eExportContent, eExportContent2, string(expContent))
 	}
 	if err := os.Remove(expFilePath); err != nil {
 		t.Error(err)

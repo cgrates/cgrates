@@ -54,6 +54,8 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @KuikenArjan | Arjan Kuiken |
 | @Dobby16 | Arjan Kuiken |
 | @pauls1024 | Paul Smith |
+| @alin104n | Alin Ioanovici |
+| @wasimbaig | Wasim Baig |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |

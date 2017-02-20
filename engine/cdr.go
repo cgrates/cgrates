@@ -792,6 +792,11 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool, g
 
 }
 
+// Part of event interface
+func (cdr *CDR) AsMapStringIface() (map[string]interface{}, error) {
+	return nil, utils.ErrNotImplemented
+}
+
 // Used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int) (expRecord []string, err error) {
@@ -812,16 +817,17 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, httpSkipTlsCh
 	return expRecord, nil
 }
 
-// Part of event interface
-func (cdr *CDR) AsMapStringIface() (map[string]interface{}, error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // AsExportMap converts the CDR into a map[string]string based on export template
 // Used in real-time replication as well as remote exports
-func (cdr *CDR) AsExportMap(exportFields []*config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR) (expMap map[string]string, err error) {
+func (cdr *CDR) AsExportMap(exportFields []*config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
 	for _, cfgFld := range exportFields {
+		if roundingDecs != 0 {
+			clnFld := new(config.CfgCdrField) // Clone so we can modify the rounding decimals without affecting the template
+			*clnFld = *cfgFld
+			clnFld.RoundingDecimals = roundingDecs
+			cfgFld = clnFld
+		}
 		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs); err != nil {
 			return nil, err
 		} else {

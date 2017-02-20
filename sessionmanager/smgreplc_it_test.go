@@ -37,7 +37,6 @@ var smgRplcMasterCfg, smgRplcSlaveCfg *config.CGRConfig
 var smgRplcMstrRPC, smgRplcSlvRPC *rpc.Client
 
 func TestSMGRplcInitCfg(t *testing.T) {
-
 	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcmaster")
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromFolder(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)

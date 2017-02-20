@@ -28,7 +28,6 @@ import (
 var mfCgrCfg *CGRConfig
 
 func TestMfInitConfig(t *testing.T) {
-
 	var err error
 	if mfCgrCfg, err = NewCGRConfigFromFolder("/usr/share/cgrates/conf/samples/multifiles"); err != nil {
 		t.Fatal("Got config error: ", err.Error())
@@ -36,7 +35,6 @@ func TestMfInitConfig(t *testing.T) {
 }
 
 func TestMfGeneralItems(t *testing.T) {
-
 	if mfCgrCfg.DefaultReqType != utils.META_PSEUDOPREPAID { // Twice reconfigured
 		t.Error("DefaultReqType: ", mfCgrCfg.DefaultReqType)
 	}
@@ -46,18 +44,17 @@ func TestMfGeneralItems(t *testing.T) {
 }
 
 func TestMfCdreDefaultInstance(t *testing.T) {
-
 	for _, prflName := range []string{"*default", "export1"} {
 		if _, hasIt := mfCgrCfg.CdreProfiles[prflName]; !hasIt {
 			t.Error("Cdre does not contain profile ", prflName)
 		}
 	}
 	prfl := "*default"
-	if mfCgrCfg.CdreProfiles[prfl].CdrFormat != "csv" {
-		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CdrFormat)
+	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
+		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
 	}
-	if mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor != 1024.0 {
-		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor)
+	if mfCgrCfg.CdreProfiles[prfl].CostMultiplyFactor != 1024.0 {
+		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CostMultiplyFactor)
 	}
 	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 0 {
 		t.Error("Default instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
@@ -71,13 +68,12 @@ func TestMfCdreDefaultInstance(t *testing.T) {
 }
 
 func TestMfCdreExport1Instance(t *testing.T) {
-
 	prfl := "export1"
-	if mfCgrCfg.CdreProfiles[prfl].CdrFormat != "csv" {
-		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CdrFormat)
+	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
+		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
 	}
-	if mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor != 1.0 {
-		t.Error("Export1 instance has DataUsageMultiplyFormat: ", mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor)
+	if mfCgrCfg.CdreProfiles[prfl].CostMultiplyFactor != 1.0 {
+		t.Error("Export1 instance has DataUsageMultiplyFormat: ", mfCgrCfg.CdreProfiles[prfl].CostMultiplyFactor)
 	}
 	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 2 {
 		t.Error("Export1 instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))

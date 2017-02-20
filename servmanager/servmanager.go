@@ -85,8 +85,8 @@ func (srvMngr *ServiceManager) StopScheduler() error {
 	srvMngr.Unlock()
 	if sched == nil {
 		return utils.NewCGRError(utils.ServiceManager,
-			utils.CapitalizedMessage(utils.ServiceAlreadyRunning),
-			utils.ServiceAlreadyRunning,
+			utils.CapitalizedMessage(utils.ServiceNotRunning),
+			utils.ServiceNotRunning,
 			"the scheduler is not running")
 	}
 	srvMngr.cfg.SchedulerEnabled = false
