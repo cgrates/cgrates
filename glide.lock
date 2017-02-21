@@ -36,7 +36,7 @@ imports:
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
-  version: 81dbef1b2e101aef372726366d5ecbf7de15f9da
+  version: d742356e99f1457ee1fb8ddc238c932e9f5ca87b
   subpackages:
   - diam
   - diam/avp
