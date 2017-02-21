@@ -128,6 +128,7 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 	if err := cdrc.Run(); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("Cdrc run error: %s", err.Error()))
 		exitChan <- true // If run stopped, something is bad, stop the application
+		return
 	}
 }
 
@@ -435,6 +436,7 @@ func startHistoryServer(internalHistorySChan chan rpcclient.RpcClientConnection,
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
 		exitChan <- true
+		return
 	}
 	server.RpcRegisterName("HistoryV1", scribeServer)
 	internalHistorySChan <- scribeServer
@@ -583,6 +585,7 @@ func main() {
 		go func() { // Schedule shutdown
 			time.Sleep(shutdownDur)
 			exitChan <- true
+			return
 		}()
 	}
 	// Init config
