@@ -442,8 +442,13 @@ func startHistoryServer(internalHistorySChan chan rpcclient.RpcClientConnection,
 	internalHistorySChan <- scribeServer
 }
 
-func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, accountDb engine.AccountingStorage, server *utils.Server) {
-	pubSubServer := engine.NewPubSub(accountDb, cfg.HttpSkipTlsVerify)
+func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
+	pubSubServer, err := engine.NewPubSub(accountDb, cfg.HttpSkipTlsVerify)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<PubSubS> Could not start, error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
 	server.RpcRegisterName("PubSubV1", pubSubServer)
 	internalPubSubSChan <- pubSubServer
 }
@@ -749,7 +754,7 @@ func main() {
 
 	// Start PubSubS service
 	if cfg.PubSubServerEnabled {
-		go startPubSubServer(internalPubSubSChan, accountDb, server)
+		go startPubSubServer(internalPubSubSChan, accountDb, server, exitChan)
 	}
 
 	// Start Aliases service

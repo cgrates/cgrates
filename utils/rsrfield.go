@@ -288,3 +288,12 @@ func (flds RSRFields) Id() string {
 	}
 	return flds[0].Id
 }
+
+func (flds RSRFields) ParseRules() (err error) {
+	for _, rsrFld := range flds {
+		if err = rsrFld.ParseRules(); err != nil {
+			break
+		}
+	}
+	return
+}
