@@ -317,7 +317,8 @@ func (osm *OsipsSessionManager) processCdrStop(osipsEv *OsipsEvent) error {
 	defer osm.cdrSEMux.Unlock()
 	var osipsEvStart *OsipsEvent
 	var hasIt bool
-	if dialogId := osipsEv.DialogId(); dialogId == "" {
+	dialogId := osipsEv.DialogId()
+	if dialogId == "" {
 		return errors.New("Missing dialog_id")
 	}
 	osm.cdrSEMux.RLock()
