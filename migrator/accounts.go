@@ -70,28 +70,3 @@ type v1UnitsCounter struct {
 	//	Units     float64
 	Balances v1BalanceChain // first balance is the general one (no destination)
 }
-
-type v1ActionTriggers []*v1ActionTrigger
-
-type v1ActionTrigger struct {
-	Id                    string
-	ThresholdType         string
-	ThresholdValue        float64
-	Recurrent             bool
-	MinSleep              time.Duration
-	BalanceId             string
-	BalanceType           string
-	BalanceDirection      string
-	BalanceDestinationIds string
-	BalanceWeight         float64
-	BalanceExpirationDate time.Time
-	BalanceTimingTags     string
-	BalanceRatingSubject  string
-	BalanceCategory       string
-	BalanceSharedGroup    string
-	BalanceDisabled       bool
-	Weight                float64
-	ActionsId             string
-	MinQueuedItems        int
-	Executed              bool
-}
