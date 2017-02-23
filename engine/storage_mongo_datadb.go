@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
@@ -89,15 +88,17 @@ var (
 )
 
 func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string, cacheCfg *config.CacheConfig, loadHistorySize int) (ms *MongoStorage, err error) {
-	info := &mgo.DialInfo{
-		Addrs:    []string{host},
-		Timeout:  60 * time.Second,
-		Database: db,
-		Username: user,
-		Password: pass,
+	url := host
+	if port != "" {
+		url += ":" + port
 	}
-
-	session, err := mgo.DialWithInfo(info)
+	if user != "" && pass != "" {
+		url = fmt.Sprintf("%s:%s@%s", user, pass, url)
+	}
+	if db != "" {
+		url += "/" + db
+	}
+	session, err := mgo.Dial(url)
 	if err != nil {
 		return nil, err
 	}
