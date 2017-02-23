@@ -105,7 +105,7 @@ func (rsrf *RSRField) IsParsed() bool {
 func (rsrf *RSRField) ParseRules() error {
 	if newRSRFld, err := NewRSRField(rsrf.Rules); err != nil {
 		return err
-	} else {
+	} else if newRSRFld != nil {
 		rsrf.staticValue = newRSRFld.staticValue
 		rsrf.RSRules = newRSRFld.RSRules
 		rsrf.filters = newRSRFld.filters
