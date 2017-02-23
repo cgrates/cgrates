@@ -28,7 +28,7 @@ import (
 
 var v1ActionTriggers1 = `[{"BalanceType": "*monetary","BalanceDirection": "*out","ThresholdType":"*max_balance", "ThresholdValue" :2, "ActionsId": "TEST_ACTIONS", "Executed": true}]`
 
-func TestV1ActionTriggersAsActionTriggers1(t *testing.T) {
+func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
 	atrs := engine.ActionTriggers{&engine.ActionTrigger{
 		Balance: &engine.BalanceFilter{
 			Type:       utils.StringPointer(utils.MONETARY),
@@ -50,15 +50,3 @@ func TestV1ActionTriggersAsActionTriggers1(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", atrs, newatrs)
 	}
 }
-
-//var v1ActionTriggers2 = `[{"BalanceType": "utils.MONETARY", "ThresholdValue" :2, "ActionsId": "TEST_ACTIONS", "Executed": true}]`
-// func TestV1ActionTriggersAsActionTriggers2(t *testing.T) {
-// 	var v1actstrgrs v1ActionTriggers
-// 	if err := json.Unmarshal([]byte(v1ActionTriggers2), &v1actstrgrs); err != nil {
-// 		t.Error(err)
-// 	}
-// 	v1Act := &v1actstrgrs
-// 	if _, err := v1Act.AsActionTriggers(); err != nil {
-// 		t.Error(err)
-// 	}
-// }
