@@ -74,7 +74,7 @@ func (b *v1Balance) IsDefault() bool {
 }
 
 func (v1Acc v1Account) AsAccount() (ac engine.Account) {
-	// transfer data into new structurse
+	// transfer data into new structure
 	ac = engine.Account{
 		ID:             v1Acc.Id,
 		BalanceMap:     make(map[string]engine.Balances, len(v1Acc.BalanceMap)),
