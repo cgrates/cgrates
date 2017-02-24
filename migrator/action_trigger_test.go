@@ -26,10 +26,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var v1ActionTriggers1 = `[{"BalanceType": "*monetary","BalanceDirection": "*out","ThresholdType":"*max_balance", "ThresholdValue" :2, "ActionsId": "TEST_ACTIONS", "Executed": true}]`
+var v1ActionTriggers1 = `{"BalanceType": "*monetary","BalanceDirection": "*out","ThresholdType":"*max_balance", "ThresholdValue" :2, "ActionsId": "TEST_ACTIONS", "Executed": true}`
 
 func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
-	atrs := engine.ActionTriggers{&engine.ActionTrigger{
+	atrs := &engine.ActionTrigger{
 		Balance: &engine.BalanceFilter{
 			Type:       utils.StringPointer(utils.MONETARY),
 			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
@@ -38,15 +38,14 @@ func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
 		ThresholdValue: 2,
 		ActionsID:      "TEST_ACTIONS",
 		Executed:       true,
-	},
 	}
-	var v1actstrgrs v1ActionTriggers
+	var v1actstrgrs v1ActionTrigger
 	if err := json.Unmarshal([]byte(v1ActionTriggers1), &v1actstrgrs); err != nil {
 		t.Error(err)
 	}
-	if newatrs, err := v1actstrgrs.AsActionTriggers(); err != nil {
+	if newatrs, err := v1actstrgrs.AsActionTrigger(); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(atrs, newatrs) {
-		t.Errorf("Expecting: %+v, received: %+v", atrs, newatrs)
+	} else if !reflect.DeepEqual(*atrs, newatrs) {
+		t.Errorf("Expecting: %+v, received: %+v", *atrs, newatrs)
 	}
 }

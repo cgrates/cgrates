@@ -56,6 +56,12 @@ type v1Balance struct {
 	TimingIDs      string
 	Disabled       bool
 }
+type v1UnitsCounter struct {
+	Direction   string
+	BalanceType string
+	//	Units     float64
+	Balances v1BalanceChain // first balance is the general one (no destination)
+}
 
 func (b *v1Balance) IsDefault() bool {
 	return (b.DestinationIds == "" || b.DestinationIds == utils.ANY) &&
@@ -65,13 +71,6 @@ func (b *v1Balance) IsDefault() bool {
 		b.SharedGroup == "" &&
 		b.Weight == 0 &&
 		b.Disabled == false
-}
-
-type v1UnitsCounter struct {
-	Direction   string
-	BalanceType string
-	//	Units     float64
-	Balances v1BalanceChain // first balance is the general one (no destination)
 }
 
 func (v1Acc v1Account) AsAccount() (ac engine.Account, err error) {

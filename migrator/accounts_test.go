@@ -26,24 +26,17 @@ import (
 )
 
 func TestV1AccountAsAccount(t *testing.T) {
-	v1b1 := &v1Balance{Value: 10, Weight: 10, DestinationIds: "NAT"}
-	v1Acc := &v1Account{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.VOICE: v1BalanceChain{v1b1}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21}}}}
-
+	v1b := &v1Balance{Value: 10, Weight: 10, DestinationIds: "NAT"}
+	v1Acc := &v1Account{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21}}}}
 	v2 := &engine.Balance{Uuid: "", ID: "", Value: 10, Directions: utils.StringMap{"*OUT": true}, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}, RatingSubject: "", Categories: utils.NewStringMap(""), SharedGroups: utils.NewStringMap(""), TimingIDs: utils.NewStringMap("")}
 	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, DestinationIDs: utils.NewStringMap(""), RatingSubject: "", Categories: utils.NewStringMap(""), SharedGroups: utils.NewStringMap(""), TimingIDs: utils.NewStringMap("")}
 	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.VOICE: engine.Balances{v2}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
-
-	def := v1b1.IsDefault()
-	if def != false {
+	if def := v1b.IsDefault(); def != false {
 		t.Errorf("Expecting: false, received: true")
 	}
-
-	newAcc, err := v1Acc.AsAccount()
-	if err != nil {
+	if newAcc, err := v1Acc.AsAccount(); err != nil {
 		t.Error(err)
-	}
-	if !reflect.DeepEqual(*testAccount, newAcc) {
+	} else if !reflect.DeepEqual(*testAccount, newAcc) {
 		t.Errorf("Expecting: %+v, received: %+v", *testAccount, newAcc)
-		t.Errorf(" \n")
 	}
 }
