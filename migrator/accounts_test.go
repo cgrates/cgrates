@@ -34,9 +34,8 @@ func TestV1AccountAsAccount(t *testing.T) {
 	if def := v1b.IsDefault(); def != false {
 		t.Errorf("Expecting: false, received: true")
 	}
-	if newAcc, err := v1Acc.AsAccount(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(*testAccount, newAcc) {
+	newAcc := v1Acc.AsAccount()
+	if !reflect.DeepEqual(*testAccount, newAcc) {
 		t.Errorf("Expecting: %+v, received: %+v", *testAccount, newAcc)
 	}
 }

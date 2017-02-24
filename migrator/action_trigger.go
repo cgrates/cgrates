@@ -33,7 +33,8 @@ type v1ActionTrigger struct {
 
 type v1ActionTriggers []*v1ActionTrigger
 
-func (v1Act v1ActionTrigger) AsActionTrigger() (at engine.ActionTrigger, err error) {
+func (v1Act v1ActionTrigger) AsActionTrigger() (at engine.ActionTrigger) {
+
 	at = engine.ActionTrigger{
 		UniqueID:       v1Act.Id,
 		ThresholdType:  v1Act.ThresholdType,

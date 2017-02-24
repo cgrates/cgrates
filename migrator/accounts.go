@@ -73,7 +73,7 @@ func (b *v1Balance) IsDefault() bool {
 		b.Disabled == false
 }
 
-func (v1Acc v1Account) AsAccount() (ac engine.Account, err error) {
+func (v1Acc v1Account) AsAccount() (ac engine.Account) {
 	// transfer data into new structurse
 	ac = engine.Account{
 		ID:             v1Acc.Id,

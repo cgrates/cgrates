@@ -35,7 +35,7 @@ type v1Action struct {
 
 type v1Actions []*v1Action
 
-func (v1Act v1Action) AsAction() (act engine.Action, err error) {
+func (v1Act v1Action) AsAction() (act engine.Action) {
 	act = engine.Action{
 		Id:               v1Act.Id,
 		ActionType:       v1Act.ActionType,

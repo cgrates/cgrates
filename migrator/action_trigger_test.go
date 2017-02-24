@@ -43,9 +43,8 @@ func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
 	if err := json.Unmarshal([]byte(v1ActionTriggers1), &v1actstrgrs); err != nil {
 		t.Error(err)
 	}
-	if newatrs, err := v1actstrgrs.AsActionTrigger(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(*atrs, newatrs) {
+	newatrs := v1actstrgrs.AsActionTrigger()
+	if !reflect.DeepEqual(*atrs, newatrs) {
 		t.Errorf("Expecting: %+v, received: %+v", *atrs, newatrs)
 	}
 }

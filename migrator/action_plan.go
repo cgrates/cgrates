@@ -46,7 +46,7 @@ func (at *v1ActionPlan) IsASAP() bool {
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
 
-func (v1AP v1ActionPlan) AsActionPlan() (ap engine.ActionPlan, err error) {
+func (v1AP v1ActionPlan) AsActionPlan() (ap engine.ActionPlan) {
 	for idx, actionId := range v1AP.AccountIds {
 		idElements := strings.Split(actionId, utils.CONCATENATED_KEY_SEP)
 		if len(idElements) != 3 {

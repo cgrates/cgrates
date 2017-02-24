@@ -28,9 +28,8 @@ import (
 func TestV1ActionPlanAsActionPlan(t *testing.T) {
 	v1ap := &v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: new(engine.RITiming)}}
 	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: new(engine.RITiming)}}}}
-	if newap, err := v1ap.AsActionPlan(); err != nil {
-		t.Error(err)
-	} else if ap.Id != newap.Id || !reflect.DeepEqual(ap.AccountIDs, newap.AccountIDs) {
+	newap := v1ap.AsActionPlan()
+	if ap.Id != newap.Id || !reflect.DeepEqual(ap.AccountIDs, newap.AccountIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", *ap, newap)
 	} else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, newap.ActionTimings[0].Timing) {
 		t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, newap.ActionTimings[0].Timing)
