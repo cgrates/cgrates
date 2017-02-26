@@ -56,7 +56,7 @@ func (m *Migrator) migrateAccounts() (err error) {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 	}
 	return
 }
