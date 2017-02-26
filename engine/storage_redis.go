@@ -1506,7 +1506,7 @@ func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetVersions(vrs Versions) (err error) {
+func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	return
 }
 

@@ -1340,7 +1340,7 @@ func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
 	return
 }
 
-func (ms *MapStorage) SetVersions(vrs Versions) (err error) {
+func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	return
 }
 

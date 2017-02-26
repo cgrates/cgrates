@@ -18,21 +18,21 @@ CREATE TABLE cdrs (
  account VARCHAR(128) NOT NULL,
  subject VARCHAR(128) NOT NULL,
  destination VARCHAR(128) NOT NULL,
- setup_time TIMESTAMP NOT NULL,
+ setup_time TIMESTAMP WITH TIME ZONE NOT NULL,
  pdd NUMERIC(12,9) NOT NULL,
- answer_time TIMESTAMP NOT NULL,
+ answer_time TIMESTAMP WITH TIME ZONE NOT NULL,
  usage NUMERIC(30,9) NOT NULL,
  supplier VARCHAR(128) NOT NULL,
  disconnect_cause VARCHAR(64) NOT NULL,
- extra_fields jsonb,
+ extra_fields jsonb NOT NULL,
  cost_source VARCHAR(64) NOT NULL,
  cost NUMERIC(20,4) DEFAULT NULL,
  cost_details jsonb,
  account_summary jsonb,
  extra_info text,
- created_at TIMESTAMP,
- updated_at TIMESTAMP NULL,
- deleted_at TIMESTAMP NULL,
+ created_at TIMESTAMP WITH TIME ZONE,
+ updated_at TIMESTAMP WITH TIME ZONE NULL,
+ deleted_at TIMESTAMP WITH TIME ZONE NULL,
  UNIQUE (cgrid, run_id, origin_id)
 );
 ;
@@ -50,8 +50,8 @@ CREATE TABLE sm_costs (
   cost_source VARCHAR(64) NOT NULL,
   usage NUMERIC(30,9) NOT NULL,
   cost_details jsonb,
-  created_at TIMESTAMP,
-  deleted_at TIMESTAMP NULL,
+  created_at TIMESTAMP WITH TIME ZONE,
+  deleted_at TIMESTAMP WITH TIME ZONE NULL,
   UNIQUE (cgrid, run_id)
 );
 DROP INDEX IF EXISTS cgrid_smcost_idx;

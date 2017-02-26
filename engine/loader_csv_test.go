@@ -268,7 +268,7 @@ cgrates.org,mas,true,another,value,10
 `
 
 	resLimits = `
-#Id,FilterType,FilterFieldName,FilterValues,ActivationTime,Weight,Limit,ActionTriggers
+#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationTime,Weight,Limit,ActionTriggers
 ResGroup1,*string,Account,1001;1002,2014-07-29T15:00:00Z,10,2,
 ResGroup1,*string_prefix,Destination,10;20,2014-07-29T15:00:00Z,10,,
 ResGroup1,*cdr_stats,,CDRST1:*min_ASR:34;CDRST_1001:*min_ASR:20,,,,
