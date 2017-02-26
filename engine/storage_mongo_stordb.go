@@ -845,7 +845,7 @@ func (ms *MongoStorage) RemoveSMCost(smc *SMCost) error {
 	defer session.Close()
 	tx := col.Bulk()
 	tx.Remove(bson.M{"cgrid": smc.CGRID, "runid": smc.RunID}, smc)
-	_, err = tx.Run()
+	_, err := tx.Run()
 	return err
 }
 
