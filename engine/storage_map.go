@@ -71,11 +71,13 @@ func (s storage) smembers(key string, ms Marshaler) (idMap utils.StringMap, ok b
 }
 
 func NewMapStorage() (*MapStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(), cacheCfg: &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(), cacheCfg: config.CgrConfig().CacheConfig}, nil
 }
 
-func NewMapStorageJson() (*MapStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: new(JSONBufMarshaler), cacheCfg: &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}}, nil
+func NewMapStorageJson() (mpStorage *MapStorage, err error) {
+	mpStorage, err = NewMapStorage()
+	mpStorage.ms = new(JSONBufMarshaler)
+	return
 }
 
 func (ms *MapStorage) Close() {}
@@ -96,7 +98,7 @@ func (ms *MapStorage) SelectDatabase(dbName string) (err error) {
 }
 
 func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
-	// FIXME: should do transaction
+	// ToDo: should do transaction
 	keys, err := ms.GetKeysForPrefix(prefix)
 	if err != nil {
 		return err
@@ -143,7 +145,6 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
-// FixMe
 func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error {
 	if ms.cacheCfg == nil {
 		return nil

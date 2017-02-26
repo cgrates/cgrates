@@ -1213,25 +1213,24 @@ func TestActionMakeNegative(t *testing.T) {
 	}
 }
 
-// FixMe
-// func TestRemoveAction(t *testing.T) {
-// 	if _, err := accountingStorage.GetAccount("cgrates.org:remo"); err != nil {
-// 		t.Errorf("account to be removed not found: %v", err)
-// 	}
-// 	a := &Action{
-// 		ActionType: REMOVE_ACCOUNT,
-// 	}
-//
-// 	at := &ActionTiming{
-// 		accountIDs: utils.StringMap{"cgrates.org:remo": true},
-// 		actions:    Actions{a},
-// 	}
-// 	at.Execute(nil, nil)
-// 	afterUb, err := accountingStorage.GetAccount("cgrates.org:remo")
-// 	if err == nil || afterUb != nil {
-// 		t.Error("error removing account: ", err, afterUb)
-// 	}
-// }
+func TestRemoveAction(t *testing.T) {
+	if _, err := accountingStorage.GetAccount("cgrates.org:remo"); err != nil {
+		t.Errorf("account to be removed not found: %v", err)
+	}
+	a := &Action{
+		ActionType: REMOVE_ACCOUNT,
+	}
+
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:remo": true},
+		actions:    Actions{a},
+	}
+	at.Execute(nil, nil)
+	afterUb, err := accountingStorage.GetAccount("cgrates.org:remo")
+	if err == nil || afterUb != nil {
+		t.Error("error removing account: ", err, afterUb)
+	}
+}
 
 func TestTopupAction(t *testing.T) {
 	initialUb, _ := accountingStorage.GetAccount("vdf:minu")
@@ -2313,26 +2312,6 @@ func TestCgrRpcAction(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
-//FixMe
-// func TestValueFormulaDebit(t *testing.T) {
-// 	if _, err := accountingStorage.GetAccount("cgrates.org:vf"); err != nil {
-// 		t.Errorf("account to be removed not found: %v", err)
-// 	}
-//
-// 	at := &ActionTiming{
-// 		accountIDs: utils.StringMap{"cgrates.org:vf": true},
-// 		ActionsID:  "VF",
-// 	}
-// 	at.Execute(nil, nil)
-// 	afterUb, err := accountingStorage.GetAccount("cgrates.org:vf")
-// 	// not an exact value, depends of month
-// 	v := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
-// 	if err != nil || v > -0.30 || v < -0.35 {
-// 		t.Error("error debiting account: ", err, utils.ToIJSON(afterUb))
-// 	}
-// }
-=======
 func TestValueFormulaDebit(t *testing.T) {
 	if _, err := accountingStorage.GetAccount("cgrates.org:vf"); err != nil {
 		t.Errorf("account to be removed not found: %v", err)
@@ -2350,7 +2329,6 @@ func TestValueFormulaDebit(t *testing.T) {
 		t.Error("error debiting account: ", err, utils.ToIJSON(afterUb), v)
 	}
 }
->>>>>>> c6d07d6701a472079c21729212dbec7ac43e9cb7
 
 func TestClonedAction(t *testing.T) {
 	a := &Action{
