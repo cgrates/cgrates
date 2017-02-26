@@ -190,7 +190,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				// clean previous action plans
 				for i := 0; i < len(acntAPids); {
 					apID := acntAPids[i]
-					if attr.ActionPlanId == apID {
+					if apID == attr.ActionPlanId {
 						i++ // increase index since we don't remove from slice
 						continue
 					}
@@ -276,7 +276,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if attr.ReloadScheduler && len(dirtyActionPlans) > 0 {
+	if attr.ReloadScheduler && len(dirtyActionPlans) != 0 {
 		sched := self.ServManager.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -103,6 +104,7 @@ type OsipsSessionManager struct {
 	miConn          *osipsdagram.OsipsMiDatagramConnector // Pool of connections used to various OpenSIPS servers, keep reference towards events received so we can issue commands always to the same remote
 	sessions        *Sessions
 	cdrStartEvents  map[string]*OsipsEvent // Used when building CDRs, ToDo: secure access to map
+	cdrSEMux        sync.RWMutex
 }
 
 // Called when firing up the session manager, will stay connected for the duration of the daemon running
@@ -299,7 +301,9 @@ func (osm *OsipsSessionManager) processCdrStart(osipsEv *OsipsEvent) error {
 	if dialogId := osipsEv.DialogId(); dialogId == "" {
 		return errors.New("Missing dialog_id")
 	} else {
+		osm.cdrSEMux.Lock()
 		osm.cdrStartEvents[dialogId] = osipsEv
+		osm.cdrSEMux.Unlock()
 	}
 	return nil
 }
@@ -309,15 +313,23 @@ func (osm *OsipsSessionManager) processCdrStop(osipsEv *OsipsEvent) error {
 	if osm.cdrsrv == nil {
 		return nil
 	}
+	osm.cdrSEMux.Lock()
+	defer osm.cdrSEMux.Unlock()
 	var osipsEvStart *OsipsEvent
 	var hasIt bool
-	if dialogId := osipsEv.DialogId(); dialogId == "" {
+	dialogId := osipsEv.DialogId()
+	if dialogId == "" {
 		return errors.New("Missing dialog_id")
-	} else if osipsEvStart, hasIt = osm.cdrStartEvents[dialogId]; !hasIt {
-		return errors.New("Missing event start info")
-	} else {
-		delete(osm.cdrStartEvents, dialogId) // Cleanup the event once we got it
 	}
+	osm.cdrSEMux.RLock()
+	osipsEvStart, hasIt = osm.cdrStartEvents[dialogId]
+	osm.cdrSEMux.RUnlock()
+	if !hasIt {
+		return errors.New("Missing event start info")
+	}
+	osm.cdrSEMux.Lock()
+	delete(osm.cdrStartEvents, dialogId) // Cleanup the event once we got it
+	osm.cdrSEMux.Unlock()
 	if err := osipsEvStart.updateDurationFromEvent(osipsEv); err != nil {
 		return err
 	}

@@ -31,9 +31,7 @@ func TestV1CostDetailsAsCostDetails1(t *testing.T) {
 		t.Error(err)
 	}
 	v1CC := &v1CallCost{Timespans: v1tmsps}
-	if _, err := v1CC.AsCallCost(); err != nil {
-		t.Error(err)
-	}
+	_ = v1CC.AsCallCost()
 	// ToDo: Test here the content
 
 }
@@ -44,7 +42,6 @@ func TestV1CostDetailsAsCostDetails2(t *testing.T) {
 		t.Error(err)
 	}
 	v1CC := &v1CallCost{Timespans: v1tmsps}
-	if _, err := v1CC.AsCallCost(); err != nil {
-		t.Error(err)
-	}
+	_ = v1CC.AsCallCost()
+
 }

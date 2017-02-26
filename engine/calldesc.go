@@ -45,6 +45,10 @@ func init() {
 	var err error
 	switch DB {
 	case "map":
+		if cgrCfg := config.CgrConfig(); cgrCfg == nil {
+			cgrCfg, _ = config.NewDefaultCGRConfig()
+			config.SetCgrConfig(cgrCfg)
+		}
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	case utils.MONGO:

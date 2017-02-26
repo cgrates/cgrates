@@ -57,7 +57,7 @@
 
 "cdre": {
 	"*default": {
-		"export_dir": "/tmp/cgrates/cdr/cdrexport/csv",			// path where the exported CDRs will be placed
+		"export_path": "/tmp/cgrates/cdr/cdrexport/csv",			// path where the exported CDRs will be placed
 	}
 },
 

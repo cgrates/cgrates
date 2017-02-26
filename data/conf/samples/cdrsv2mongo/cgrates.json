@@ -4,6 +4,10 @@
 // Used in apier_local_tests
 // Starts rater, cdrs and mediator connecting over internal channel
 
+"general": {
+    "log_level": 7,
+},
+
 "stor_db": {
 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
 	"db_port": 27017, 						// the port to reach the stordb

@@ -19,7 +19,6 @@ package engine
 
 import (
 	"reflect"
-	"regexp"
 	"testing"
 	"time"
 
@@ -97,9 +96,7 @@ func TestSearchExtraFieldInSlice(t *testing.T) {
 }
 
 func TestSearchReplaceInExtraFields(t *testing.T) {
-	fsCdrCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "read_codec"},
-		&utils.RSRField{Id: "sip_user_agent", RSRules: []*utils.ReSearchReplace{&utils.ReSearchReplace{SearchRegexp: regexp.MustCompile(`([A-Za-z]*).+`), ReplaceTemplate: "$1"}}},
-		&utils.RSRField{Id: "write_codec"}}
+	fsCdrCfg.CDRSExtraFields = utils.ParseRSRFieldsMustCompile(`read_codec;~sip_user_agent:s/([A-Za-z]*).+/$1/;write_codec`, utils.INFIELD_SEP)
 	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
 	extraFields := fsCdr.getExtraFields()
 	if len(extraFields) != 3 {
@@ -147,11 +144,11 @@ func TestDDazRSRExtraFields(t *testing.T) {
 }`)
 	var err error
 	fsCdrCfg, err = config.NewCGRConfigFromJsonString(eFieldsCfg)
+	expCdrExtra := utils.ParseRSRFieldsMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error("Could not parse the config", err.Error())
-	} else if !reflect.DeepEqual(fsCdrCfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",
-		RSRules: []*utils.ReSearchReplace{&utils.ReSearchReplace{SearchRegexp: regexp.MustCompile(`(\d+)`), ReplaceTemplate: "+$1"}}}}) {
-		t.Errorf("Unexpected value for config CdrsExtraFields: %v", fsCdrCfg.CDRSExtraFields)
+	} else if !reflect.DeepEqual(expCdrExtra[0], fsCdrCfg.CDRSExtraFields[0]) { // Kinda deepEqual bug since without index does not match
+		t.Errorf("Expecting: %+v, received: %+v", expCdrExtra, fsCdrCfg.CDRSExtraFields)
 	}
 	fsCdr, err := NewFSCdr(simpleJsonCdr, fsCdrCfg)
 	if err != nil {
@@ -159,6 +156,6 @@ func TestDDazRSRExtraFields(t *testing.T) {
 	}
 	extraFields := fsCdr.getExtraFields()
 	if extraFields["effective_caller_id_number"] != "+4986517174963" {
-		t.Error("Unexpected effective_caller_id_number received", extraFields["effective_caller_id_number"])
+		t.Errorf("Unexpected effective_caller_id_number received: %+v", extraFields["effective_caller_id_number"])
 	}
 }

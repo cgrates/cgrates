@@ -241,14 +241,14 @@ type CGRConfig struct {
 	CDRSStoreCdrs            bool              // store cdrs in storDb
 	CDRScdrAccountSummary    bool
 	CDRSSMCostRetries        int
-	CDRSRaterConns           []*HaPoolConfig      // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	CDRSPubSubSConns         []*HaPoolConfig      // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
-	CDRSUserSConns           []*HaPoolConfig      // address where to reach the users service: <""|internal|x.y.z.y:1234>
-	CDRSAliaseSConns         []*HaPoolConfig      // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
-	CDRSStatSConns           []*HaPoolConfig      // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
-	CDRSCdrReplication       []*CDRReplicationCfg // Replicate raw CDRs to a number of servers
-	CDRStatsEnabled          bool                 // Enable CDR Stats service
-	CDRStatsSaveInterval     time.Duration        // Save interval duration
+	CDRSRaterConns           []*HaPoolConfig // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
+	CDRSPubSubSConns         []*HaPoolConfig // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
+	CDRSUserSConns           []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
+	CDRSAliaseSConns         []*HaPoolConfig // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
+	CDRSStatSConns           []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	CDRSOnlineCDRExports     []string        // list of CDRE templates to use for real-time CDR exports
+	CDRStatsEnabled          bool            // Enable CDR Stats service
+	CDRStatsSaveInterval     time.Duration   // Save interval duration
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	SmGenericConfig          *SmGenericConfig
@@ -336,10 +336,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("CDRStatS not enabled but requested by CDRS component.")
 			}
 		}
-		for _, rplCfg := range self.CDRSCdrReplication {
-			if utils.IsSliceMember([]string{utils.MetaHTTPjsonMap, utils.META_HTTP_POST}, rplCfg.Transport) &&
-				len(rplCfg.ContentFields) == 0 {
-				return fmt.Errorf("<CDRS> No content fields defined for replication to address: <%s>", rplCfg.Address)
+		for _, cdrePrfl := range self.CDRSOnlineCDRExports {
+			if _, hasIt := self.CdreProfiles[cdrePrfl]; !hasIt {
+				return fmt.Errorf("<CDRS> Cannot find CDR export template with ID: <%s>", cdrePrfl)
 			}
 		}
 	}
@@ -922,33 +921,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 				self.CDRSStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
 		}
-		if jsnCdrsCfg.Cdr_replication != nil {
-			self.CDRSCdrReplication = make([]*CDRReplicationCfg, len(*jsnCdrsCfg.Cdr_replication))
-			for idx, rplJsonCfg := range *jsnCdrsCfg.Cdr_replication {
-				self.CDRSCdrReplication[idx] = new(CDRReplicationCfg)
-				if rplJsonCfg.Transport != nil {
-					self.CDRSCdrReplication[idx].Transport = *rplJsonCfg.Transport
-				}
-				if rplJsonCfg.Address != nil {
-					self.CDRSCdrReplication[idx].Address = *rplJsonCfg.Address
-				}
-				if rplJsonCfg.Synchronous != nil {
-					self.CDRSCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
-				}
-				self.CDRSCdrReplication[idx].Attempts = 1
-				if rplJsonCfg.Attempts != nil {
-					self.CDRSCdrReplication[idx].Attempts = *rplJsonCfg.Attempts
-				}
-				if rplJsonCfg.Cdr_filter != nil {
-					if self.CDRSCdrReplication[idx].CdrFilter, err = utils.ParseRSRFields(*rplJsonCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
-						return err
-					}
-				}
-				if rplJsonCfg.Content_fields != nil {
-					if self.CDRSCdrReplication[idx].ContentFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*rplJsonCfg.Content_fields); err != nil {
-						return err
-					}
-				}
+		if jsnCdrsCfg.Online_cdr_exports != nil {
+			for _, expProfile := range *jsnCdrsCfg.Online_cdr_exports {
+				self.CDRSOnlineCDRExports = append(self.CDRSOnlineCDRExports, expProfile)
 			}
 		}
 	}

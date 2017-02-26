@@ -59,7 +59,7 @@ type PubSub struct {
 	accountDb   AccountingStorage
 }
 
-func NewPubSub(accountDb AccountingStorage, ttlVerify bool) *PubSub {
+func NewPubSub(accountDb AccountingStorage, ttlVerify bool) (*PubSub, error) {
 	ps := &PubSub{
 		ttlVerify:   ttlVerify,
 		subscribers: make(map[string]*SubscriberData),
@@ -68,10 +68,17 @@ func NewPubSub(accountDb AccountingStorage, ttlVerify bool) *PubSub {
 		accountDb:   accountDb,
 	}
 	// load subscribers
-	if subs, err := accountDb.GetSubscribers(); err == nil {
+	if subs, err := accountDb.GetSubscribers(); err != nil {
+		return nil, err
+	} else {
 		ps.subscribers = subs
 	}
-	return ps
+	for _, sData := range ps.subscribers {
+		if err := sData.Filters.ParseRules(); err != nil { // Parse rules into regexp objects
+			utils.Logger.Err(fmt.Sprintf("<PubSub> Error <%s> when parsing rules out of subscriber data: %+v", err.Error(), sData))
+		}
+	}
+	return ps, nil
 }
 
 func (ps *PubSub) saveSubscriber(key string) {

@@ -205,3 +205,15 @@ func MergeMapsStringIface(mps ...map[string]interface{}) (outMp map[string]inter
 	}
 	return
 }
+
+// FieldMultiplyFactor defines multiply factors for different field values
+// original defined for CDRE component
+type FieldMultiplyFactor map[string]float64
+
+func (fmp FieldMultiplyFactor) Clone() (cln FieldMultiplyFactor) {
+	cln = make(FieldMultiplyFactor, len(fmp))
+	for k, v := range fmp {
+		cln[k] = v
+	}
+	return
+}

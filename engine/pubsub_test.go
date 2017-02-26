@@ -25,7 +25,10 @@ import (
 )
 
 func TestSubscribe(t *testing.T) {
-	ps := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(accountingStorage, false)
+	if err != nil {
+		t.Error(err)
+	}
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventFilter: "EventName/test",
@@ -41,7 +44,10 @@ func TestSubscribe(t *testing.T) {
 }
 
 func TestSubscribeSave(t *testing.T) {
-	ps := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(accountingStorage, false)
+	if err != nil {
+		t.Error(err)
+	}
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventFilter: "EventName/test",
@@ -58,7 +64,10 @@ func TestSubscribeSave(t *testing.T) {
 }
 
 func TestSubscribeNoTransport(t *testing.T) {
-	ps := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(accountingStorage, false)
+	if err != nil {
+		t.Error(err)
+	}
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventFilter: "EventName/test",
@@ -71,7 +80,10 @@ func TestSubscribeNoTransport(t *testing.T) {
 }
 
 func TestSubscribeNoExpire(t *testing.T) {
-	ps := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(accountingStorage, false)
+	if err != nil {
+		t.Error(err)
+	}
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventFilter: "EventName/test",
@@ -87,7 +99,10 @@ func TestSubscribeNoExpire(t *testing.T) {
 }
 
 func TestUnsubscribe(t *testing.T) {
-	ps := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(accountingStorage, false)
+	if err != nil {
+		t.Error(err)
+	}
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventFilter: "EventName/test",
@@ -110,7 +125,10 @@ func TestUnsubscribe(t *testing.T) {
 }
 
 func TestUnsubscribeSave(t *testing.T) {
-	ps := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(accountingStorage, false)
+	if err != nil {
+		t.Error(err)
+	}
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventFilter: "EventName/test",
@@ -134,7 +152,10 @@ func TestUnsubscribeSave(t *testing.T) {
 }
 
 func TestPublishExpired(t *testing.T) {
-	ps := NewPubSub(accountingStorage, true)
+	ps, err := NewPubSub(accountingStorage, true)
+	if err != nil {
+		t.Error(err)
+	}
 	ps.pubFunc = func(url string, ttl bool, obj []byte) ([]byte, error) {
 		return nil, nil
 	}
@@ -156,7 +177,10 @@ func TestPublishExpired(t *testing.T) {
 }
 
 func TestPublishExpiredSave(t *testing.T) {
-	ps := NewPubSub(accountingStorage, true)
+	ps, err := NewPubSub(accountingStorage, true)
+	if err != nil {
+		t.Error(err)
+	}
 	ps.pubFunc = func(url string, ttl bool, obj []byte) ([]byte, error) {
 		return nil, nil
 	}

@@ -42,6 +42,7 @@ type Storage interface {
 // Interface for storage providers.
 type RatingStorage interface {
 	Storage
+	Marshaler() Marshaler
 	HasData(string, string) (bool, error)
 	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
@@ -83,6 +84,7 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
+	Marshaler() Marshaler
 	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
@@ -117,6 +119,7 @@ type AccountingStorage interface {
 // OnlineStorage contains methods to use for administering online data
 type DataDB interface {
 	Storage
+	Marshaler() Marshaler
 	HasData(string, string) (bool, error)
 	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)

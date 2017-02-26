@@ -133,31 +133,42 @@
 // 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 // 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 // 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality<""|*internal|x.y.z.y:1234>
-// 	"cdr_replication":[
-// //		{														// sample replication, not configured by default
-// //			"transport": "*amqp_json_map", 						// mechanism to use when replicating
-// //			"address": "http://127.0.0.1:12080/cdr_json_map",	// address where to replicate
-// //			"attempts": 1,										// number of attempts for POST before failing on file
-// //			"cdr_filter": "",									// filter the CDRs being replicated
-// //			"content_fields": [									// template of the replicated content fields
-// //				{"tag": "CGRID", "type": "*composed", "value": "CGRID", "field_id": "CGRID"},
-// //				{"tag":"RunID", "type": "*composed", "value": "RunID", "field_id": "RunID"},
-// //				{"tag":"TOR", "type": "*composed", "value": "ToR", "field_id": "ToR"},
-// //				{"tag":"OriginID", "type": "*composed", "value": "OriginID", "field_id": "OriginID"},
-// //				{"tag":"RequestType", "type": "*composed", "value": "RequestType", "field_id": "RequestType"},
-// //				{"tag":"Direction", "type": "*composed", "value": "Direction", "field_id": "Direction"},
-// //				{"tag":"Tenant", "type": "*composed", "value": "Tenant", "field_id": "Tenant"},
-// //				{"tag":"Category", "type": "*composed", "value": "Category", "field_id": "Category"},
-// //				{"tag":"Account", "type": "*composed", "value": "Account", "field_id": "Account"},
-// //				{"tag":"Subject", "type": "*composed", "value": "Subject", "field_id": "Subject"},
-// //				{"tag":"Destination", "type": "*composed", "value": "Destination", "field_id": "Destination"},
-// //				{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "SetupTime"},
-// //				{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "AnswerTime"},
-// //				{"tag":"Usage", "type": "*composed", "value": "Usage", "field_id": "Usage"},
-// //				{"tag":"Cost", "type": "*composed", "value": "Cost", "field_id": "Cost"},
-// //			],
-// //		},
-// 	]
+// 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
+// },
+
+
+// "cdre": {
+// 	"*default": {
+// 		"export_format": "*file_csv",					// exported CDRs format <*file_csv|*file_fwv|*http_post|*http_json_cdr|*http_json_map|*amqp_json_cdr|*amqp_json_map>
+// 		"export_path": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
+// 		"cdr_filter": "",								// filter CDRs exported by this template
+// 		"synchronous": false,							// block processing until export has a result
+// 		"attempts": 1,									// Number of attempts if not success
+// 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
+// 		"usage_multiply_factor": {
+// 			"*any": 1									// multiply usage based on ToR field or *any for all
+// 		},
+// 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
+// 		"header_fields": [],							// template of the exported header fields
+// 		"content_fields": [								// template of the exported content fields
+// 			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
+// 			{"tag":"RunID", "type": "*composed", "value": "RunID"},
+// 			{"tag":"TOR", "type": "*composed", "value": "ToR"},
+// 			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
+// 			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
+// 			{"tag":"Direction", "type": "*composed", "value": "Direction"},
+// 			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
+// 			{"tag":"Category", "type": "*composed", "value": "Category"},
+// 			{"tag":"Account", "type": "*composed", "value": "Account"},
+// 			{"tag":"Subject", "type": "*composed", "value": "Subject"},
+// 			{"tag":"Destination", "type": "*composed", "value": "Destination"},
+// 			{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+// 			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+// 			{"tag":"Usage", "type": "*composed", "value": "Usage"},
+// 			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
+// 		],
+// 		"trailer_fields": [],							// template of the exported trailer fields
+// 	},
 // },
 
 
@@ -225,39 +236,6 @@
 // 		],
 // 	},
 // ],
-
-
-// "cdre": {
-// 	"*default": {
-// 		"cdr_format": "csv",							// exported CDRs format <csv>
-// 		"field_separator": ",",
-// 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
-// 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-// 		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
-// 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-// 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-// 		"export_directory": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
-// 		"header_fields": [],							// template of the exported header fields
-// 		"content_fields": [								// template of the exported content fields
-// 			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
-// 			{"tag":"RunID", "type": "*composed", "value": "RunID"},
-// 			{"tag":"TOR", "type": "*composed", "value": "ToR"},
-// 			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
-// 			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
-// 			{"tag":"Direction", "type": "*composed", "value": "Direction"},
-// 			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
-// 			{"tag":"Category", "type": "*composed", "value": "Category"},
-// 			{"tag":"Account", "type": "*composed", "value": "Account"},
-// 			{"tag":"Subject", "type": "*composed", "value": "Subject"},
-// 			{"tag":"Destination", "type": "*composed", "value": "Destination"},
-// 			{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-// 			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-// 			{"tag":"Usage", "type": "*composed", "value": "Usage"},
-// 			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
-// 		],
-// 		"trailer_fields": [],							// template of the exported trailer fields
-// 	},
-// },
 
 
 // "sm_generic": {

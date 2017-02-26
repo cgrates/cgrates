@@ -71,7 +71,7 @@
 
 "cdre": {
 	"CDRE-FW1": {
-		"cdr_format": "fwv",
+		"export_format": "*file_fwv",
 		"field_separator": "",
 		"header_fields": [
 			{"tag": "ToR", "type": "constant", "value": "10", "width": 2},

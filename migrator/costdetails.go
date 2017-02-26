@@ -18,10 +18,99 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
+
+func (m *Migrator) migrateCostDetails() (err error) {
+	if m.storDB == nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.NoStorDBConnection,
+			"no connection to StorDB")
+	}
+	vrs, err := m.storDB.GetVersions(utils.COST_DETAILS)
+	if err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when querying storDB for versions", err.Error()))
+	} else if len(vrs) == 0 {
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion,
+			"version number is not defined for CostDetails model")
+	}
+	if vrs[utils.COST_DETAILS] != 1 { // Right now we only support migrating from version 1
+		return
+	}
+	var storSQL *sql.DB
+	switch m.storDBType {
+	case utils.MYSQL:
+		storSQL = m.storDB.(*engine.MySQLStorage).Db
+	case utils.POSTGRES:
+		storSQL = m.storDB.(*engine.PostgresStorage).Db
+	default:
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("unsupported database type: <%s>", m.storDBType))
+	}
+	rows, err := storSQL.Query("SELECT id, tor, direction, tenant, category, account, subject, destination, cost, cost_details FROM cdrs WHERE run_id!= '*raw' and cost_details IS NOT NULL AND deleted_at IS NULL")
+	if err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when querying storDB for cdrs", err.Error()))
+	}
+	defer rows.Close()
+	for cnt := 0; rows.Next(); cnt++ {
+		var id int64
+		var ccDirection, ccCategory, ccTenant, ccSubject, ccAccount, ccDestination, ccTor sql.NullString
+		var ccCost sql.NullFloat64
+		var tts []byte
+		if err := rows.Scan(&id, &ccTor, &ccDirection, &ccTenant, &ccCategory, &ccAccount, &ccSubject, &ccDestination, &ccCost, &tts); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when scanning at count: <%d>", err.Error(), cnt))
+		}
+		var v1tmsps v1TimeSpans
+		if err := json.Unmarshal(tts, &v1tmsps); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<Migrator> Unmarshalling timespans at CDR with id: <%d>, error: <%s>", id, err.Error()))
+			continue
+		}
+		v1CC := &v1CallCost{Direction: ccDirection.String, Category: ccCategory.String, Tenant: ccTenant.String,
+			Subject: ccSubject.String, Account: ccAccount.String, Destination: ccDestination.String, TOR: ccTor.String,
+			Cost: ccCost.Float64, Timespans: v1tmsps}
+		cc := v1CC.AsCallCost()
+		if cc == nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<Migrator> Error: <%s> when converting into CallCost CDR with id: <%d>", err.Error(), id))
+			continue
+		}
+		if _, err := storSQL.Exec(fmt.Sprintf("UPDATE cdrs SET cost_details='%s' WHERE id=%d", cc.AsJSON(), id)); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<Migrator> Error: <%s> updating CDR with id <%d> into StorDB", err.Error(), id))
+			continue
+		}
+	}
+	// All done, update version wtih current one
+	vrs = engine.Versions{utils.COST_DETAILS: engine.CurrentStorDBVersions()[utils.COST_DETAILS]}
+	if err := m.storDB.SetVersions(vrs); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
+	}
+	return
+}
 
 type v1CallCost struct {
 	Direction, Category, Tenant, Subject, Account, Destination, TOR string
@@ -63,7 +152,7 @@ type v1UnitInfo struct {
 	TOR           string
 }
 
-func (v1cc *v1CallCost) AsCallCost() (cc *engine.CallCost, err error) {
+func (v1cc *v1CallCost) AsCallCost() (cc *engine.CallCost) {
 	cc = new(engine.CallCost)
 	cc.Direction = v1cc.Direction
 	cc.Category = v1cc.Category

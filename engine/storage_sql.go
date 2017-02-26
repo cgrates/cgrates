@@ -61,7 +61,7 @@ func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (ms *SQLStorage) RebuildReverseForPrefix(prefix string) error {
+func (self *SQLStorage) RebuildReverseForPrefix(prefix string) error {
 	return utils.ErrNotImplemented
 }
 

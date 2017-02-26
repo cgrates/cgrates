@@ -17,12 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
 	c := &CmdExportCdrs{
 		name:      "cdrs_export",
-		rpcMethod: "ApierV2.ExportCdrsToFile",
+		rpcMethod: "ApierV1.ExportCDRs",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -32,7 +32,7 @@ func init() {
 type CmdExportCdrs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrExportCdrsToFile
+	rpcParams *v1.ArgExportCDRs
 	*CommandExecuter
 }
 
@@ -46,7 +46,7 @@ func (self *CmdExportCdrs) RpcMethod() string {
 
 func (self *CmdExportCdrs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrExportCdrsToFile{}
+		self.rpcParams = new(v1.ArgExportCDRs)
 	}
 	return self.rpcParams
 }
@@ -56,5 +56,5 @@ func (self *CmdExportCdrs) PostprocessRpcParams() error {
 }
 
 func (self *CmdExportCdrs) RpcResult() interface{} {
-	return &utils.AttrExportCdrsToFile{}
+	return new(v1.ArgExportCDRs)
 }

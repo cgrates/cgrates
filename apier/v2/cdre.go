@@ -25,13 +25,38 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/cgrates/cgrates/cdre"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Export Cdrs to file
-func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *utils.ExportedFileCdrs) error {
-	var err error
+type AttrExportCdrsToFile struct {
+	CdrFormat                  *string  // Cdr output file format <utils.CdreCdrFormats>
+	FieldSeparator             *string  // Separator used between fields
+	ExportID                   *string  // Optional exportid
+	ExportDirectory            *string  // If provided it overwrites the configured export directory
+	ExportFileName             *string  // If provided the output filename will be set to this
+	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|>
+	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
+	SMSUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
+	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
+	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
+	RoundingDecimals           *int     // force rounding to this value
+	Verbose                    bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	utils.RPCCDRsFilter                 // Inherit the CDR filter attributes
+}
+
+type ExportedFileCdrs struct {
+	ExportedFilePath          string            // Full path to the newly generated export file
+	TotalRecords              int               // Number of CDRs to be exported
+	TotalCost                 float64           // Sum of all costs in exported CDRs
+	FirstOrderId, LastOrderId int64             // The order id of the last exported CDR
+	ExportedCgrIds            []string          // List of successfuly exported cgrids in the file
+	UnexportedCgrIds          map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
+}
+
+// Deprecated, please use ApierV1.ExportCDRs instead
+func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *ExportedFileCdrs) (err error) {
 	cdreReloadStruct := <-self.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
 	defer func() { self.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
 	exportTemplate := self.Config.CdreProfiles[utils.META_DEFAULT]
@@ -41,11 +66,11 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 			return fmt.Errorf("%s:ExportTemplate", utils.ErrNotFound)
 		}
 	}
-	cdrFormat := exportTemplate.CdrFormat
+	exportFormat := exportTemplate.ExportFormat
 	if attr.CdrFormat != nil && len(*attr.CdrFormat) != 0 {
-		cdrFormat = strings.ToLower(*attr.CdrFormat)
+		exportFormat = strings.ToLower(*attr.CdrFormat)
 	}
-	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
+	if !utils.IsSliceMember(utils.CDRExportFormats, exportFormat) {
 		return utils.NewErrMandatoryIeMissing("CdrFormat")
 	}
 	fieldSep := exportTemplate.FieldSeparator
@@ -55,37 +80,34 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError, "Invalid")
 		}
 	}
-	eDir := exportTemplate.ExportDirectory
+	eDir := exportTemplate.ExportPath
 	if attr.ExportDirectory != nil && len(*attr.ExportDirectory) != 0 {
 		eDir = *attr.ExportDirectory
 	}
-	ExportID := strconv.FormatInt(time.Now().Unix(), 10)
+	exportID := strconv.FormatInt(time.Now().Unix(), 10)
 	if attr.ExportID != nil && len(*attr.ExportID) != 0 {
-		ExportID = *attr.ExportID
+		exportID = *attr.ExportID
 	}
-	fileName := fmt.Sprintf("cdre_%s.%s", ExportID, cdrFormat)
+	fileName := fmt.Sprintf("cdre_%s.%s", exportID, exportFormat)
 	if attr.ExportFileName != nil && len(*attr.ExportFileName) != 0 {
 		fileName = *attr.ExportFileName
 	}
 	filePath := path.Join(eDir, fileName)
-	if cdrFormat == utils.DRYRUN {
+	if exportFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}
-	dataUsageMultiplyFactor := exportTemplate.DataUsageMultiplyFactor
+	usageMultiplyFactor := exportTemplate.UsageMultiplyFactor
 	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
-		dataUsageMultiplyFactor = *attr.DataUsageMultiplyFactor
+		usageMultiplyFactor[utils.DATA] = *attr.DataUsageMultiplyFactor
 	}
-	SMSUsageMultiplyFactor := exportTemplate.SMSUsageMultiplyFactor
 	if attr.SMSUsageMultiplyFactor != nil && *attr.SMSUsageMultiplyFactor != 0.0 {
-		SMSUsageMultiplyFactor = *attr.SMSUsageMultiplyFactor
+		usageMultiplyFactor[utils.SMS] = *attr.SMSUsageMultiplyFactor
 	}
-	MMSUsageMultiplyFactor := exportTemplate.MMSUsageMultiplyFactor
 	if attr.MMSUsageMultiplyFactor != nil && *attr.MMSUsageMultiplyFactor != 0.0 {
-		MMSUsageMultiplyFactor = *attr.MMSUsageMultiplyFactor
+		usageMultiplyFactor[utils.MMS] = *attr.MMSUsageMultiplyFactor
 	}
-	genericUsageMultiplyFactor := exportTemplate.GenericUsageMultiplyFactor
 	if attr.GenericUsageMultiplyFactor != nil && *attr.GenericUsageMultiplyFactor != 0.0 {
-		genericUsageMultiplyFactor = *attr.GenericUsageMultiplyFactor
+		usageMultiplyFactor[utils.GENERIC] = *attr.GenericUsageMultiplyFactor
 	}
 	costMultiplyFactor := exportTemplate.CostMultiplyFactor
 	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
@@ -99,26 +121,27 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
+		*reply = ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
 	roundingDecimals := self.Config.RoundingDecimals
 	if attr.RoundingDecimals != nil {
 		roundingDecimals = *attr.RoundingDecimals
 	}
-	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, ExportID, dataUsageMultiplyFactor, SMSUsageMultiplyFactor,
-		MMSUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify)
+	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat, filePath, utils.META_NONE, exportID,
+		exportTemplate.Synchronous, exportTemplate.Attempts, fieldSep, usageMultiplyFactor,
+		costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if cdrexp.TotalExportedCdrs() == 0 {
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
-		return nil
-	}
-	if err := cdrexp.WriteToFile(filePath); err != nil {
+	if err := cdrexp.ExportCDRs(); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
+	if cdrexp.TotalExportedCdrs() == 0 {
+		*reply = ExportedFileCdrs{ExportedFilePath: ""}
+		return nil
+	}
+	*reply = ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
 	if !attr.Verbose {
 		reply.ExportedCgrIds = cdrexp.PositiveExports()
 		reply.UnexportedCgrIds = cdrexp.NegativeExports()

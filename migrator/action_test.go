@@ -15,4 +15,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package cdre
+package migrator
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/cgrates/engine"
+)
+
+func TestV1ActionsAsActions(t *testing.T) {
+	v1act := &v1Action{Id: "", ActionType: "", BalanceType: "", Direction: "INBOUND", ExtraParameters: "", ExpirationString: "", Balance: &v1Balance{}}
+	act := &engine.Action{Id: "", ActionType: "", ExtraParameters: "", ExpirationString: "", Weight: 0.00, Balance: &engine.BalanceFilter{}}
+	newact := v1act.AsAction()
+	if !reflect.DeepEqual(*act, newact) {
+		t.Errorf("Expecting: %+v, received: %+v", *act, newact)
+	}
+}

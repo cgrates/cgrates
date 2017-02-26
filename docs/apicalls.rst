@@ -21,7 +21,7 @@ Account
 Destination
 	Destination call id to be matched
 TimeStart, TimeEnd
-	The start end end of the call in question
+	The start and end of the call in question
 Amount
 	The amount requested in various API calls (e.g. DebitSMS amount)
 
@@ -52,7 +52,7 @@ Timespans
 
 As stated before the balancer (or the rater directly) can be accesed via json rpc. 
 
-The smallest python snippet to acces the CGRateS balancer is this:
+The smallest python snippet to access the CGRateS balancer is this:
 
 ::
 
@@ -83,24 +83,22 @@ GetCost
 	Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 
 Debit
-    Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method) from user's money balance.
-
+    	Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method) from user's money balance.
 
 MaxDebit
-    Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method) from user's money balance.
-    This methods combines the Debit and GetMaxSessionTime and will debit the max available time as returned by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
-
+    	Interface method used to add/subtract an amount of cents or bonus seconds (as returned by GetCost method) from user's money balance.
+    	This methods combines the Debit and GetMaxSessionTime and will debit the max available time as returned by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
 
 DebitBalance
-	Interface method used to add/substract an amount of cents from user's money budget.
+	Interface method used to add/subtract an amount of cents from user's money budget.
 	The amount filed has to be filled in call descriptor.
 
 DebitSMS
-	Interface method used to add/substract an amount of units from user's SMS budget.
+	Interface method used to add/subtract an amount of units from user's SMS budget.
 	The amount filed has to be filled in call descriptor.
 
 DebitSeconds
-	Interface method used to add/substract an amount of seconds from user's minutes budget.
+	Interface method used to add/subtract an amount of seconds from user's minutes budget.
 	The amount filed has to be filled in call descriptor.
 
 GetMaxSessionTime
@@ -113,7 +111,7 @@ AddRecievedCallSeconds
 	The amount filed has to be filled in call descriptor.
 
 FlushCache
-    Cleans all internal cached (Destinations, RatingProfiles)
+	Cleans all internal cached (Destinations, RatingProfiles)
 
 
 Tariff plan importer APIs

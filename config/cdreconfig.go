@@ -17,19 +17,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package config
 
+import (
+	"github.com/cgrates/cgrates/utils"
+)
+
 // One instance of CdrExporter
 type CdreConfig struct {
-	CdrFormat                  string
-	FieldSeparator             rune
-	DataUsageMultiplyFactor    float64
-	SMSUsageMultiplyFactor     float64
-	MMSUsageMultiplyFactor     float64
-	GenericUsageMultiplyFactor float64
-	CostMultiplyFactor         float64
-	ExportDirectory            string
-	HeaderFields               []*CfgCdrField
-	ContentFields              []*CfgCdrField
-	TrailerFields              []*CfgCdrField
+	ExportFormat        string
+	ExportPath          string
+	FallbackPath        string
+	CDRFilter           utils.RSRFields
+	Synchronous         bool
+	Attempts            int
+	FieldSeparator      rune
+	UsageMultiplyFactor utils.FieldMultiplyFactor
+	CostMultiplyFactor  float64
+	HeaderFields        []*CfgCdrField
+	ContentFields       []*CfgCdrField
+	TrailerFields       []*CfgCdrField
 }
 
 func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
@@ -37,30 +42,37 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 		return nil
 	}
 	var err error
-	if jsnCfg.Cdr_format != nil {
-		self.CdrFormat = *jsnCfg.Cdr_format
+	if jsnCfg.Export_format != nil {
+		self.ExportFormat = *jsnCfg.Export_format
+	}
+	if jsnCfg.Export_path != nil {
+		self.ExportPath = *jsnCfg.Export_path
+	}
+	if jsnCfg.Cdr_filter != nil {
+		if self.CDRFilter, err = utils.ParseRSRFields(*jsnCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Synchronous != nil {
+		self.Synchronous = *jsnCfg.Synchronous
+	}
+	if jsnCfg.Attempts != nil {
+		self.Attempts = *jsnCfg.Attempts
 	}
 	if jsnCfg.Field_separator != nil && len(*jsnCfg.Field_separator) > 0 { // Make sure we got at least one character so we don't get panic here
 		sepStr := *jsnCfg.Field_separator
 		self.FieldSeparator = rune(sepStr[0])
 	}
-	if jsnCfg.Data_usage_multiply_factor != nil {
-		self.DataUsageMultiplyFactor = *jsnCfg.Data_usage_multiply_factor
-	}
-	if jsnCfg.Sms_usage_multiply_factor != nil {
-		self.SMSUsageMultiplyFactor = *jsnCfg.Sms_usage_multiply_factor
-	}
-	if jsnCfg.Mms_usage_multiply_factor != nil {
-		self.MMSUsageMultiplyFactor = *jsnCfg.Mms_usage_multiply_factor
-	}
-	if jsnCfg.Generic_usage_multiply_factor != nil {
-		self.GenericUsageMultiplyFactor = *jsnCfg.Generic_usage_multiply_factor
+	if jsnCfg.Usage_multiply_factor != nil {
+		if self.UsageMultiplyFactor == nil { // not yet initialized
+			self.UsageMultiplyFactor = make(map[string]float64, len(*jsnCfg.Usage_multiply_factor))
+		}
+		for k, v := range *jsnCfg.Usage_multiply_factor {
+			self.UsageMultiplyFactor[k] = v
+		}
 	}
 	if jsnCfg.Cost_multiply_factor != nil {
 		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
-	}
-	if jsnCfg.Export_directory != nil {
-		self.ExportDirectory = *jsnCfg.Export_directory
 	}
 	if jsnCfg.Header_fields != nil {
 		if self.HeaderFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Header_fields); err != nil {
@@ -83,14 +95,16 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 // Clone itself into a new CdreConfig
 func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre := new(CdreConfig)
-	clnCdre.CdrFormat = self.CdrFormat
+	clnCdre.ExportFormat = self.ExportFormat
+	clnCdre.ExportPath = self.ExportPath
+	clnCdre.Synchronous = self.Synchronous
+	clnCdre.Attempts = self.Attempts
 	clnCdre.FieldSeparator = self.FieldSeparator
-	clnCdre.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor
-	clnCdre.SMSUsageMultiplyFactor = self.SMSUsageMultiplyFactor
-	clnCdre.MMSUsageMultiplyFactor = self.MMSUsageMultiplyFactor
-	clnCdre.GenericUsageMultiplyFactor = self.GenericUsageMultiplyFactor
+	clnCdre.UsageMultiplyFactor = make(map[string]float64, len(self.UsageMultiplyFactor))
+	for k, v := range self.UsageMultiplyFactor {
+		clnCdre.UsageMultiplyFactor[k] = v
+	}
 	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
-	clnCdre.ExportDirectory = self.ExportDirectory
 	clnCdre.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld

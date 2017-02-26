@@ -88,11 +88,17 @@ var (
 )
 
 func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string, cacheCfg *config.CacheConfig, loadHistorySize int) (ms *MongoStorage, err error) {
-	address := fmt.Sprintf("%s:%s", host, port)
-	if user != "" && pass != "" {
-		address = fmt.Sprintf("%s:%s@%s", user, pass, address)
+	url := host
+	if port != "" {
+		url += ":" + port
 	}
-	session, err := mgo.Dial(address)
+	if user != "" && pass != "" {
+		url = fmt.Sprintf("%s:%s@%s", user, pass, url)
+	}
+	if db != "" {
+		url += "/" + db
+	}
+	session, err := mgo.Dial(url)
 	if err != nil {
 		return nil, err
 	}
@@ -320,6 +326,15 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 	dbSession := ms.session.Copy()
 	defer dbSession.Close()
 	return dbSession.DB(ms.db).DropDatabase()
+}
+
+func (ms *MongoStorage) Marshaler() Marshaler {
+	return ms.ms
+}
+
+// DB returnes a database object with cloned session inside
+func (ms *MongoStorage) DB() *mgo.Database {
+	return ms.session.Copy().DB(ms.db)
 }
 
 func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
