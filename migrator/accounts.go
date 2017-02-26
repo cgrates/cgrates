@@ -25,10 +25,70 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"gopkg.in/mgo.v2/bson"
+)
+
+const (
+	v1AccountDBPrefix = "ubl_"
+	v1AccountTBL      = "userbalances"
 )
 
 func (m *Migrator) migrateAccounts() (err error) {
+	var acntV1Keys []string
+	acntV1Keys, err = m.dataDB.GetKeysForPrefix(v1AccountDBPrefix)
+	if err != nil {
+		return
+	}
+	for _, acntV1Key := range acntV1Keys {
+		v1Acnt, err := m.getV1AccountFromDB(acntV1Key)
+		if err != nil {
+			return err
+		}
+		if acnt := v1Acnt.AsAccount(); acnt != nil {
+			if err = m.dataDB.SetAccount(acnt); err != nil {
+				return err
+			}
+		}
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+	if err = m.dataDB.SetVersions(vrs); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
+	}
 	return
+}
+
+func (m *Migrator) getV1AccountFromDB(key string) (*v1Account, error) {
+	switch m.dataDBType {
+	case utils.REDIS:
+		dataDB := m.dataDB.(*engine.RedisStorage)
+		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
+			return nil, err
+		} else {
+			v1Acnt := &v1Account{Id: key}
+			if err := m.mrshlr.Unmarshal(strVal, v1Acnt); err != nil {
+				return nil, err
+			}
+			return v1Acnt, nil
+		}
+	case utils.MONGO:
+		dataDB := m.dataDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
+		defer mgoDB.Session.Close()
+		v1Acnt := new(v1Account)
+		if err := mgoDB.C(v1AccountTBL).Find(bson.M{"id": key}).One(v1Acnt); err != nil {
+			return nil, err
+		}
+		return v1Acnt, nil
+	default:
+		return nil, utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for getV1AccountFromDB method", m.dataDBType))
+	}
 }
 
 type v1Account struct {
@@ -73,9 +133,9 @@ func (b *v1Balance) IsDefault() bool {
 		b.Disabled == false
 }
 
-func (v1Acc v1Account) AsAccount() (ac engine.Account) {
+func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 	// transfer data into new structure
-	ac = engine.Account{
+	ac = &engine.Account{
 		ID:             v1Acc.Id,
 		BalanceMap:     make(map[string]engine.Balances, len(v1Acc.BalanceMap)),
 		UnitCounters:   make(engine.UnitCounters, len(v1Acc.UnitCounters)),

@@ -332,9 +332,9 @@ func (ms *MongoStorage) Marshaler() Marshaler {
 	return ms.ms
 }
 
-// CloneSession returns a clone of the existing session so we can perform queries from outside of engine package
-func (ms *MongoStorage) CloneSession() *mgo.Session {
-	return ms.session.Copy()
+// DB returnes a database object with cloned session inside
+func (ms *MongoStorage) DB() *mgo.Database {
+	return ms.session.Copy().DB(ms.db)
 }
 
 func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {

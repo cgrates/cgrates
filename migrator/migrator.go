@@ -24,8 +24,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(tpDB engine.RatingStorage, dataDB engine.AccountingStorage, dataDBType string, storDB engine.Storage, storDBType string) *Migrator {
-	return &Migrator{tpDB: tpDB, dataDB: dataDB, dataDBType: dataDBType, storDB: storDB, storDBType: storDBType}
+func NewMigrator(tpDB engine.RatingStorage, dataDB engine.AccountingStorage, dataDBType, dataDBEncoding string,
+	storDB engine.Storage, storDBType string) *Migrator {
+	var mrshlr engine.Marshaler
+	if dataDBEncoding == utils.MSGPACK {
+		mrshlr = engine.NewCodecMsgpackMarshaler()
+	} else if dataDBEncoding == utils.JSON {
+		mrshlr = new(engine.JSONMarshaler)
+	}
+	return &Migrator{tpDB: tpDB, dataDB: dataDB, dataDBType: dataDBType,
+		storDB: storDB, storDBType: storDBType, mrshlr: mrshlr}
 }
 
 type Migrator struct {
@@ -34,6 +42,7 @@ type Migrator struct {
 	dataDBType string
 	storDB     engine.Storage
 	storDBType string
+	mrshlr     engine.Marshaler
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods

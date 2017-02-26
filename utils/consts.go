@@ -368,4 +368,5 @@ const (
 	CDRPoster                    = "cdr"
 	MetaFileCSV                  = "*file_csv"
 	MetaFileFWV                  = "*file_fwv"
+	Accounts                     = "Accounts"
 )
