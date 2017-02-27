@@ -103,7 +103,7 @@ func (m *Migrator) migrateCostDetails() (err error) {
 	}
 	// All done, update version wtih current one
 	vrs = engine.Versions{utils.COST_DETAILS: engine.CurrentStorDBVersions()[utils.COST_DETAILS]}
-	if err := m.storDB.SetVersions(vrs); err != nil {
+	if err := m.storDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
