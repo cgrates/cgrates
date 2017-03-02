@@ -140,7 +140,7 @@ func (self *CdrServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 	if checkDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
 			smCosts, err := self.cdrDb.GetSMCosts(smCost.CGRID, smCost.RunID, "", "")
-			if err != nil {
+			if err != nil && err.Error() != utils.NotFoundCaps {
 				return nil, err
 			}
 			if len(smCosts) != 0 {
@@ -374,8 +374,12 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		var smCosts []*SMCost
+		cgrID := cdr.CGRID
+		if _, hasIT := cdr.ExtraFields[utils.OriginIDPrefix]; hasIT {
+			cgrID = "" // for queries involving originIDPrefix we ignore CGRID
+		}
 		for i := 0; i < self.cgrCfg.CDRSSMCostRetries; i++ {
-			smCosts, err = self.cdrDb.GetSMCosts(cdr.CGRID, cdr.RunID, cdr.OriginHost, cdr.ExtraFields[utils.OriginIDPrefix])
+			smCosts, err = self.cdrDb.GetSMCosts(cgrID, cdr.RunID, cdr.OriginHost, cdr.ExtraFields[utils.OriginIDPrefix])
 			if err == nil && len(smCosts) != 0 {
 				break
 			}
