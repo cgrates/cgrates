@@ -34,9 +34,10 @@ func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.
 		attrs.RunId = utils.META_DEFAULT
 	}
 	if smcs, err := apier.CdrDb.GetSMCosts(attrs.CgrId, attrs.RunId, "", ""); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(smcs) == 0 {
-		return utils.ErrNotFound
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *smcs[0]
 	}

@@ -1,12 +1,12 @@
 4.2. Tariff Plans
 =================
-Major concept within CGRateS architecture, implement mechanisms to load rating as well as account data into CGRateS. 
-For importing the data into CGRateS database(s) we are using **csv** *files*. 
+Major concept within CGRateS architecture, implement mechanisms to load rating as well as account data into CGRateS.
+For importing the data into CGRateS database(s) we are using **csv** *files*.
 The import process can be started as many times it is desired with one ore more csv files
 and the existing values are overwritten.
 
-.. important:: If **-flushdb** option is used when importing data with cgr-loader, 
-               then the database **is cleaned** before importing. 
+.. important:: If **-flushdb** option is used when importing data with cgr-loader,
+               then the database **is cleaned** before importing.
 
 For more details see the **cgr-loader** tool from the tutorial chapter.
 
@@ -52,7 +52,7 @@ Describes the time periods that have different rates attached to them.
 
 [1] - Years:
     Integers separated by semicolons (;) specifying the years for this time period.
-    
+
     **\*any** in case of always.
 
 [2] - Months:
@@ -72,7 +72,7 @@ Describes the time periods that have different rates attached to them.
 
 [5] - Time:
     The start time for this time period.
-    
+
     If you set it to **\*asap** (was **\*now**) it will be replaced with the time of the data importing.
 
 4.2.3. Rates
@@ -119,12 +119,12 @@ various timings.
 
 4.2.4. Destination Rates
 ~~~~~~~~~~~~~~~~~~~~~~~
-Attach rates to destinations. 
+Attach rates to destinations.
 
 ::
 
     "DestinationRates.csv" - csv
-    "tp_destination_rates" - stor_db 
+    "tp_destination_rates" - stor_db
 
 .. csv-table::
     :file: ../data/tariffplans/tutorial/DestinationRates.csv
@@ -340,7 +340,7 @@ trigger resetting.
     TBD
 
 [8] - BalanceTag:
-    Specifies the balance counter by which this action will be triggered. 
+    Specifies the balance counter by which this action will be triggered.
     Can be:
 
     + **MONETARY**
@@ -495,7 +495,7 @@ TBD
     TBD
 
 [8] - DestinationIds:
-    The destination id/tag described in the **Destinations** file. (*Destinations.csv* - Id) 
+    The destination id/tag described in the **Destinations** file. (*Destinations.csv* - Id)
 
     This field is used only if the BalanceId is MINUTES. Specifies the
     destination of the minutes to be operated.
@@ -866,7 +866,7 @@ TBD
 [2] - FilterFieldName
    TBD
 
-[3] - FilterValues
+[3] - FilterFieldValues
    TBD
 
 [4] - ActivationTime

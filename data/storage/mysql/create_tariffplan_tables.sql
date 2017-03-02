@@ -402,7 +402,7 @@ CREATE TABLE tp_resource_limits (
   `activation_time` varchar(24) NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `limit` varchar(64) NOT NULL,
-  `action_triggers` varchar(64) NOT NULL,
+  `action_trigger_ids` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),

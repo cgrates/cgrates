@@ -11,7 +11,7 @@ CREATE TABLE tp_timings (
   month_days VARCHAR(255) NOT NULL,
   week_days VARCHAR(255) NOT NULL,
   time VARCHAR(32) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE  (tpid, tag)
 );
 CREATE INDEX tptimings_tpid_idx ON tp_timings (tpid);
@@ -27,7 +27,7 @@ CREATE TABLE tp_destinations (
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
   prefix VARCHAR(24) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, tag, prefix)
 );
 CREATE INDEX tpdests_tpid_idx ON tp_destinations (tpid);
@@ -47,7 +47,7 @@ CREATE TABLE tp_rates (
   rate_unit VARCHAR(16) NOT NULL,
   rate_increment VARCHAR(16) NOT NULL,
   group_interval_start VARCHAR(16) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, tag, group_interval_start)
 );
 CREATE INDEX tprates_tpid_idx ON tp_rates (tpid);
@@ -68,7 +68,7 @@ CREATE TABLE tp_destination_rates (
   rounding_decimals SMALLINT NOT NULL,
   max_cost NUMERIC(7,4) NOT NULL,
   max_cost_strategy VARCHAR(16) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, tag , destinations_tag)
 );
 CREATE INDEX tpdestrates_tpid_idx ON tp_destination_rates (tpid);
@@ -86,7 +86,7 @@ CREATE TABLE tp_rating_plans (
   destrates_tag VARCHAR(64) NOT NULL,
   timing_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, tag, destrates_tag, timing_tag)
 );
 CREATE INDEX tpratingplans_tpid_idx ON tp_rating_plans (tpid);
@@ -110,7 +110,7 @@ CREATE TABLE tp_rating_profiles (
   rating_plan_tag VARCHAR(64) NOT NULL,
   fallback_subjects VARCHAR(64),
   cdr_stat_queue_ids VARCHAR(64),
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, loadid, tenant, category, direction, subject, activation_time)
 );
 CREATE INDEX tpratingprofiles_tpid_idx ON tp_rating_profiles (tpid);
@@ -128,7 +128,7 @@ CREATE TABLE tp_shared_groups (
   account VARCHAR(64) NOT NULL,
   strategy VARCHAR(24) NOT NULL,
   rating_subject VARCHAR(24) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, tag, account , strategy , rating_subject)
 );
 CREATE INDEX tpsharedgroups_tpid_idx ON tp_shared_groups (tpid);
@@ -160,7 +160,7 @@ CREATE TABLE tp_actions (
   extra_parameters VARCHAR(256) NOT NULL,
   filter VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, tag, action, balance_tag, balance_type, directions, expiry_time, timing_tags, destination_tags, shared_groups, balance_weight, weight)
 );
 CREATE INDEX tpactions_tpid_idx ON tp_actions (tpid);
@@ -178,7 +178,7 @@ CREATE TABLE tp_action_plans (
   actions_tag VARCHAR(64) NOT NULL,
   timing_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE  (tpid, tag, actions_tag)
 );
 CREATE INDEX tpactionplans_tpid_idx ON tp_action_plans (tpid);
@@ -215,7 +215,7 @@ CREATE TABLE tp_action_triggers (
   min_queued_items INTEGER NOT NULL,
   actions_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, tag, balance_tag, balance_type, balance_directions, threshold_type, threshold_value, balance_destination_tags, actions_tag)
 );
 CREATE INDEX tpactiontrigers_tpid_idx ON tp_action_triggers (tpid);
@@ -236,7 +236,7 @@ CREATE TABLE tp_account_actions (
   action_triggers_tag VARCHAR(64),
   allow_negative BOOLEAN NOT NULL,
   disabled BOOLEAN NOT NULL,
-  created_at TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, loadid, tenant, account)
 );
 CREATE INDEX tpaccountactions_tpid_idx ON tp_account_actions (tpid);
@@ -261,7 +261,7 @@ CREATE TABLE tp_lcr_rules (
   strategy_params VARCHAR(256) NOT NULL,
   activation_time VARCHAR(24) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
-  created_at TIMESTAMP
+  created_at TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tplcr_tpid_idx ON tp_lcr_rules (tpid);
 CREATE INDEX tplcr_idx ON tp_lcr_rules (tpid,tenant,category,direction,account,subject,destination_tag);
@@ -298,7 +298,7 @@ CREATE TABLE tp_derived_chargers (
   disconnect_cause_field  VARCHAR(64) NOT NULL,
   rated_field  VARCHAR(64) NOT NULL,
   cost_field  VARCHAR(64) NOT NULL,
-  created_at TIMESTAMP
+  created_at TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tpderivedchargers_tpid_idx ON tp_derived_chargers (tpid);
 CREATE INDEX tpderivedchargers_idx ON tp_derived_chargers (tpid,loadid,direction,tenant,category,account,subject);
@@ -337,7 +337,7 @@ CREATE TABLE tp_cdr_stats (
   rated_subjects VARCHAR(64) NOT NULL,
   cost_interval VARCHAR(24) NOT NULL,
   action_triggers VARCHAR(64) NOT NULL,
-  created_at TIMESTAMP
+  created_at TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tpcdrstats_tpid_idx ON tp_cdr_stats (tpid);
 CREATE INDEX tpcdrstats_idx ON tp_cdr_stats (tpid,tag);
@@ -356,7 +356,7 @@ CREATE TABLE tp_users (
   attribute_name VARCHAR(64) NOT NULL,
   attribute_value VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
-  created_at TIMESTAMP
+  created_at TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tpusers_tpid_idx ON tp_users (tpid);
 CREATE INDEX tpusers_idx ON tp_users (tpid,tenant,user_name);
@@ -381,7 +381,7 @@ CREATE TABLE tp_aliases (
   "original" varchar(64) NOT NULL,
   "alias" varchar(64) NOT NULL,
   "weight" NUMERIC(8,2) NOT NULL,
-  "created_at" TIMESTAMP
+  "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tpaliases_tpid_idx ON tp_aliases (tpid);
 CREATE INDEX tpaliases_idx ON tp_aliases ("tpid","direction","tenant","category","account","subject","context","target");
@@ -397,9 +397,19 @@ CREATE TABLE tp_resource_limits (
   "activation_time" varchar(24) NOT NULL,
   "weight" decimal(8,2) NOT NULL,
   "limit" varchar(64) NOT NULL,
-  "action_triggers" varchar(64) NOT NULL,
-  "created_at" TIMESTAMP
+  "action_trigger_ids" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_resource_limits_idx ON tp_resource_limits (tpid);
 CREATE INDEX tp_resource_limits_unique ON tp_resource_limits  ("tpid", "tag");
+
+DROP TABLE IF EXISTS versions;
+CREATE TABLE versions (
+  "id" SERIAL PRIMARY KEY,
+  "item" varchar(64) NOT NULL,
+  "version" INTEGER NOT NULL,
+  UNIQUE (item)
+);
+
+
 

@@ -20,13 +20,11 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/cgrates/utils"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 )
-
-type PostgresStorage struct {
-	*SQLStorage
-}
 
 func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (*PostgresStorage, error) {
 	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password)
@@ -43,4 +41,31 @@ func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdl
 	//db.LogMode(true)
 
 	return &PostgresStorage{&SQLStorage{Db: db.DB(), db: db}}, nil
+}
+
+type PostgresStorage struct {
+	*SQLStorage
+}
+
+func (self *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+	tx := self.db.Begin()
+	if overwrite {
+		tx.Table(utils.TBLVersions).Delete(nil)
+	}
+	for key, val := range vrs {
+		vrModel := &TBLVersion{Item: key, Version: val}
+		if !overwrite {
+			if err = tx.Model(&TBLVersion{}).Where(
+				TBLVersion{Item: vrModel.Item}).Delete(TBLVersion{Version: val}).Error; err != nil {
+				tx.Rollback()
+				return
+			}
+		}
+		if err = tx.Save(vrModel).Error; err != nil {
+			tx.Rollback()
+			return
+		}
+	}
+	tx.Commit()
+	return
 }
