@@ -38,7 +38,6 @@ var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario fold
 // Create connection to dataDb
 // Will use 3 different datadbs in order to be able to see differences in data loaded
 func TestLoaderITConnDataDbs(t *testing.T) {
-
 	lCfg, _ = config.NewDefaultCGRConfig()
 	var err error
 	if dataDbCsv, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "7",
@@ -62,7 +61,6 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
 func TestLoaderITCreateStorTpTables(t *testing.T) {
-
 	db, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns)
 	if err != nil {
 		t.Error("Error on opening database connection: ", err)
@@ -79,7 +77,6 @@ func TestLoaderITCreateStorTpTables(t *testing.T) {
 
 // Loads data from csv files in tp scenario to dataDbCsv
 func TestLoaderITLoadFromCSV(t *testing.T) {
-
 	/*var err error
 	for fn, v := range FileValidators {
 		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
@@ -158,7 +155,6 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 
 // Imports data from csv files in tpScenario to storDb
 func TestLoaderITImportToStorDb(t *testing.T) {
-
 	csvImporter := TPCSVImporter{
 		TPid:     utils.TEST_SQL,
 		StorDb:   storDb,
@@ -180,46 +176,46 @@ func TestLoaderITImportToStorDb(t *testing.T) {
 func TestLoaderITLoadFromStorDb(t *testing.T) {
 
 	loader := NewTpReader(dataDbStor, dataDbStor, storDb, utils.TEST_SQL, "")
-	if err := loader.LoadDestinations(); err != nil {
+	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
-	if err := loader.LoadTimings(); err != nil {
+	if err := loader.LoadTimings(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading timings: ", err.Error())
 	}
-	if err := loader.LoadRates(); err != nil {
+	if err := loader.LoadRates(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading rates: ", err.Error())
 	}
-	if err := loader.LoadDestinationRates(); err != nil {
+	if err := loader.LoadDestinationRates(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destination rates: ", err.Error())
 	}
-	if err := loader.LoadRatingPlans(); err != nil {
+	if err := loader.LoadRatingPlans(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading rating plans: ", err.Error())
 	}
-	if err := loader.LoadRatingProfiles(); err != nil {
+	if err := loader.LoadRatingProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading rating profiles: ", err.Error())
 	}
-	if err := loader.LoadActions(); err != nil {
+	if err := loader.LoadActions(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading actions: ", err.Error())
 	}
-	if err := loader.LoadActionPlans(); err != nil {
+	if err := loader.LoadActionPlans(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading action timings: ", err.Error())
 	}
-	if err := loader.LoadActionTriggers(); err != nil {
+	if err := loader.LoadActionTriggers(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading action triggers: ", err.Error())
 	}
-	if err := loader.LoadAccountActions(); err != nil {
+	if err := loader.LoadAccountActions(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading account actions: ", err.Error())
 	}
-	if err := loader.LoadDerivedChargers(); err != nil {
+	if err := loader.LoadDerivedChargers(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading derived chargers: ", err.Error())
 	}
-	if err := loader.LoadLCRs(); err != nil {
+	if err := loader.LoadLCRs(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading lcr rules: ", err.Error())
 	}
-	if err := loader.LoadUsers(); err != nil {
+	if err := loader.LoadUsers(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading users: ", err.Error())
 	}
-	if err := loader.LoadAliases(); err != nil {
+	if err := loader.LoadAliases(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading aliases: ", err.Error())
 	}
 }

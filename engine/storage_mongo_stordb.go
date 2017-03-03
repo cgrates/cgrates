@@ -861,7 +861,7 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 		filter[OriginHostLow] = originHost
 	}
 	if originIDPrefix != "" {
-		filter["$regex"] = bson.RegEx{Pattern: fmt.Sprintf("^%s", originIDPrefix)}
+		filter[OriginIDLow] = bson.M{"$regex": bson.RegEx{Pattern: fmt.Sprintf("^%s", originIDPrefix)}}
 	}
 	// Execute query
 	session, col := ms.conn(utils.TBLSMCosts)

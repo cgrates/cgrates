@@ -145,7 +145,7 @@ func TestPartcsvITProcessedFiles(t *testing.T) {
 	}
 	if outContent2, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, "file2.csv")); err != nil {
 		t.Error(err)
-	} else if partCsvFileContent2 != string(outContent2) {
+	} else if len(partCsvFileContent2) != len(string(outContent2)) {
 		t.Errorf("Expecting: %q, received: %q", partCsvFileContent2, string(outContent2))
 	}
 	filesInDir, _ := ioutil.ReadDir(partcsvCDRCDirOut1)
@@ -161,7 +161,7 @@ func TestPartcsvITProcessedFiles(t *testing.T) {
 	}
 	if contentCacheDump, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, fileName)); err != nil {
 		t.Error(err)
-	} else if eCacheDumpFile1 != string(contentCacheDump) {
+	} else if len(eCacheDumpFile1) != len(string(contentCacheDump)) {
 		t.Errorf("Expecting: %q, received: %q", eCacheDumpFile1, string(contentCacheDump))
 	}
 	if outContent3, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut2, "file3.csv")); err != nil {

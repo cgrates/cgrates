@@ -1003,7 +1003,9 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	}
 	// Execute query
 	results := make([]*TBLCDRs, 0)
-	q.Find(&results)
+	if err := q.Find(&results).Error; err != nil {
+		return nil, 0, err
+	}
 	for _, result := range results {
 		extraFieldsMp := make(map[string]string)
 		if result.ExtraFields != "" {
