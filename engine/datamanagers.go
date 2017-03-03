@@ -20,7 +20,7 @@ package engine
 import ()
 
 type TPDataManager struct {
-	tpDB RatingStorage
+	tpDB DataDB
 }
 
 func (tpdm *TPDataManager) HasData(category, subject string) (bool, error) {

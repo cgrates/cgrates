@@ -24,21 +24,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(tpDB engine.RatingStorage, dataDB engine.AccountingStorage, dataDBType, dataDBEncoding string,
-	storDB engine.Storage, storDBType string) *Migrator {
+func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string) *Migrator {
 	var mrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
 		mrshlr = engine.NewCodecMsgpackMarshaler()
 	} else if dataDBEncoding == utils.JSON {
 		mrshlr = new(engine.JSONMarshaler)
 	}
-	return &Migrator{tpDB: tpDB, dataDB: dataDB, dataDBType: dataDBType,
+	return &Migrator{dataDB: dataDB, dataDBType: dataDBType,
 		storDB: storDB, storDBType: storDBType, mrshlr: mrshlr}
 }
 
 type Migrator struct {
-	tpDB       engine.RatingStorage // ToDo: unify the databases when ready
-	dataDB     engine.AccountingStorage
+	dataDB     engine.DataDB
 	dataDBType string
 	storDB     engine.Storage
 	storDBType string

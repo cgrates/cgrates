@@ -521,7 +521,7 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 	if rs.Bal != nil {
 		return errors.New("BALANCER_UNSUPPORTED_METHOD")
 	}
-	if dcsH, err := HandleGetDerivedChargers(ratingStorage, attrs); err != nil {
+	if dcsH, err := HandleGetDerivedChargers(dataStorage, attrs); err != nil {
 		return err
 	} else if dcsH != nil {
 		*dcs = *dcsH
@@ -598,8 +598,7 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	if rs.Bal != nil {
 		rs.Bal.Shutdown("Responder.Shutdown")
 	}
-	ratingStorage.Close()
-	accountingStorage.Close()
+	dataStorage.Close()
 	cdrStorage.Close()
 	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"

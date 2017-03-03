@@ -33,7 +33,7 @@ type Scheduler struct {
 	queue                           engine.ActionTimingPriorityList
 	timer                           *time.Timer
 	restartLoop                     chan bool
-	storage                         engine.RatingStorage
+	storage                         engine.DataDB
 	schedulerStarted                bool
 	actStatsInterval                time.Duration                 // How long time to keep the stats in memory
 	actSucessChan, actFailedChan    chan *engine.Action           // ActionPlan will pass actions via these channels
@@ -41,7 +41,7 @@ type Scheduler struct {
 	actSuccessStats, actFailedStats map[string]map[time.Time]bool // keep here stats regarding executed actions, map[actionType]map[execTime]bool
 }
 
-func NewScheduler(storage engine.RatingStorage) *Scheduler {
+func NewScheduler(storage engine.DataDB) *Scheduler {
 	s := &Scheduler{
 		restartLoop: make(chan bool),
 		storage:     storage,

@@ -27,14 +27,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var ratingDb3 engine.RatingStorage
-var acntDb3 engine.AccountingStorage
+var dataDB3 engine.DataDB
 
 func TestSetStorage3(t *testing.T) {
-	ratingDb3, _ = engine.NewMapStorageJson()
-	engine.SetRatingStorage(ratingDb3)
-	acntDb3, _ = engine.NewMapStorageJson()
-	engine.SetAccountingStorage(acntDb3)
+	dataDB3, _ = engine.NewMapStorageJson()
+	engine.SetDataStorage(dataDB3)
 }
 
 func TestLoadCsvTp3(t *testing.T) {
@@ -61,7 +58,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	users := ``
 	aliases := ``
 	resLimits := ``
-	csvr := engine.NewTpReader(ratingDb3, acntDb3, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+	csvr := engine.NewTpReader(dataDB3, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
@@ -103,14 +100,14 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false, false)
-	if acnt, err := acntDb3.GetAccount("cgrates.org:12346"); err != nil {
+	if acnt, err := dataDB3.GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
 	cache.Flush()
-	ratingDb3.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	acntDb3.LoadAccountingCache(nil, nil, nil)
+	dataDB3.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB3.LoadAccountingCache(nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
@@ -127,9 +124,9 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 }
 
 func TestExecuteActions3(t *testing.T) {
-	scheduler.NewScheduler(ratingDb3).Reload()
+	scheduler.NewScheduler(dataDB3).Reload()
 	time.Sleep(10 * time.Millisecond) // Give time to scheduler to topup the account
-	if acnt, err := acntDb3.GetAccount("cgrates.org:12346"); err != nil {
+	if acnt, err := dataDB3.GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
@@ -154,7 +151,7 @@ func TestDebit3(t *testing.T) {
 	} else if cc.Cost != 0.01 {
 		t.Error("Wrong cost returned: ", cc.Cost)
 	}
-	acnt, err := acntDb3.GetAccount("cgrates.org:12346")
+	acnt, err := dataDB3.GetAccount("cgrates.org:12346")
 	if err != nil {
 		t.Error(err)
 	}

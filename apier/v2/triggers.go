@@ -161,7 +161,7 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.AccountDb.GetAccount(accID); err == nil {
+		if acc, err := self.DataDB.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -183,7 +183,7 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 			}
 		}
 		account.ExecuteActionTriggers(nil)
-		if err := self.AccountDb.SetAccount(account); err != nil {
+		if err := self.DataDB.SetAccount(account); err != nil {
 			return 0, err
 		}
 		return 0, nil
