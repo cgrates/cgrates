@@ -83,7 +83,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader := NewTpReader(dataDbCsv, dataDbCsv, NewFileCSVStorage(utils.CSV_SEP,
+	loader := NewTpReader(dataDbCsv, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
@@ -175,7 +175,7 @@ func TestLoaderITImportToStorDb(t *testing.T) {
 // Loads data from storDb into dataDb
 func TestLoaderITLoadFromStorDb(t *testing.T) {
 
-	loader := NewTpReader(dataDbStor, dataDbStor, storDb, utils.TEST_SQL, "")
+	loader := NewTpReader(dataDbStor, storDb, utils.TEST_SQL, "")
 	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -222,7 +222,7 @@ func TestLoaderITLoadFromStorDb(t *testing.T) {
 
 func TestLoaderITLoadIndividualProfiles(t *testing.T) {
 
-	loader := NewTpReader(dataDbApier, dataDbApier, storDb, utils.TEST_SQL, "")
+	loader := NewTpReader(dataDbApier, storDb, utils.TEST_SQL, "")
 	// Load ratingPlans. This will also set destination keys
 	if ratingPlans, err := storDb.GetTpRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")
