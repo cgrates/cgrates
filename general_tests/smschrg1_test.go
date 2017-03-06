@@ -27,10 +27,8 @@ import (
 )
 
 func TestSMSSetStorageSmsChrg1(t *testing.T) {
-	ratingDb, _ = engine.NewMapStorageJson()
-	engine.SetRatingStorage(ratingDb)
-	acntDb, _ = engine.NewMapStorageJson()
-	engine.SetAccountingStorage(acntDb)
+	dataDB, _ = engine.NewMapStorageJson()
+	engine.SetDataStorage(dataDB)
 }
 
 func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
@@ -39,7 +37,7 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 	destinationRates := `DR_SMS_1,*any,RT_SMS_5c,*up,4,0,`
 	ratingPlans := `RP_SMS1,DR_SMS_1,ALWAYS,10`
 	ratingProfiles := `*out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,,`
-	csvr := engine.NewTpReader(ratingDb, acntDb, engine.NewStringCSVStorage(',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
+	csvr := engine.NewTpReader(dataDB, engine.NewStringCSVStorage(',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		"", "", "", "", "", "", "", "", "", "", ""), "", "")
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
@@ -58,8 +56,8 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	ratingDb.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	acntDb.LoadAccountingCache(nil, nil, nil)
+	dataDB.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB.LoadAccountingCache(nil, nil, nil)
 
 	if cachedRPlans := cache.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)

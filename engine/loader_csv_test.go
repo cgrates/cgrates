@@ -280,7 +280,7 @@ ResGroup2,*destinations,Destination,DST_FS,2014-07-29T15:00:00Z,10,2,
 var csvr *TpReader
 
 func init() {
-	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+	csvr = NewTpReader(dataStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits), testTPID, "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
@@ -335,8 +335,8 @@ func init() {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	ratingStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	accountingStorage.LoadAccountingCache(nil, nil, nil)
+	dataStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataStorage.LoadAccountingCache(nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -1029,7 +1029,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	if !reflect.DeepEqual(sg2, expected) {
 		t.Error("Error loading shared group: ", sg2.AccountParameters)
 	}
-	/*sg, _ := accountingStorage.GetSharedGroup("SG1", false)
+	/*sg, _ := dataStorage.GetSharedGroup("SG1", false)
 	  if len(sg.Members) != 0 {
 	      t.Errorf("Memebers should be empty: %+v", sg)
 	  }
@@ -1039,7 +1039,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	  atm.Execute()
 	  atm.actions, atm.stCache = nil, time.Time{}
 
-	  sg, _ = accountingStorage.GetSharedGroup("SG1", false)
+	  sg, _ = dataStorage.GetSharedGroup("SG1", false)
 	  if len(sg.Members) != 1 {
 	      t.Errorf("Memebers should not be empty: %+v", sg)
 	  }*/
@@ -1220,12 +1220,12 @@ func TestLoadAccountActions(t *testing.T) {
 		t.Errorf("Error loading account action: %+v", utils.ToIJSON(aa.UnitCounters[utils.VOICE][0].Counters[0].Filter))
 	}
 	// test that it does not overwrite balances
-	existing, err := accountingStorage.GetAccount(aa.ID)
+	existing, err := dataStorage.GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The account was not set before load: %+v", existing)
 	}
-	accountingStorage.SetAccount(aa)
-	existing, err = accountingStorage.GetAccount(aa.ID)
+	dataStorage.SetAccount(aa)
+	existing, err = dataStorage.GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The set account altered the balances: %+v", existing)
 	}

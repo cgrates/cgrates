@@ -505,8 +505,8 @@ func TestActionPlansRemoveMember(t *testing.T) {
 	account1 := &Account{ID: "one"}
 	account2 := &Account{ID: "two"}
 
-	accountingStorage.SetAccount(account1)
-	accountingStorage.SetAccount(account2)
+	dataStorage.SetAccount(account1)
+	dataStorage.SetAccount(account2)
 
 	ap1 := &ActionPlan{
 		Id:         "TestActionPlansRemoveMember1",
@@ -550,26 +550,26 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		},
 	}
 
-	if err := ratingStorage.SetActionPlan(ap1.Id, ap1, true, utils.NonTransactional); err != nil {
+	if err := dataStorage.SetActionPlan(ap1.Id, ap1, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err = ratingStorage.SetActionPlan(ap2.Id, ap2, true, utils.NonTransactional); err != nil {
+	if err = dataStorage.SetActionPlan(ap2.Id, ap2, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err = ratingStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap1.Id, ap2.Id}, true); err != nil {
+	if err = dataStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap1.Id, ap2.Id}, true); err != nil {
 		t.Error(err)
 	}
-	if err = ratingStorage.SetAccountActionPlans(account1.ID, []string{ap1.Id}, false); err != nil {
+	if err = dataStorage.SetAccountActionPlans(account1.ID, []string{ap1.Id}, false); err != nil {
 		t.Error(err)
 	}
-	if err = ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account1.ID}, true); err != nil {
+	if err = dataStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account1.ID}, true); err != nil {
 		t.Error(err)
 	}
-	ratingStorage.GetAccountActionPlans(account1.ID, true, utils.NonTransactional) // FixMe: remove here after finishing testing of map
-	if err = ratingStorage.SetAccountActionPlans(account2.ID, []string{ap2.Id}, false); err != nil {
+	dataStorage.GetAccountActionPlans(account1.ID, true, utils.NonTransactional) // FixMe: remove here after finishing testing of map
+	if err = dataStorage.SetAccountActionPlans(account2.ID, []string{ap2.Id}, false); err != nil {
 		t.Error(err)
 	}
-	if err = ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account2.ID}, false); err != nil {
+	if err = dataStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account2.ID}, false); err != nil {
 		t.Error(err)
 	}
 
@@ -580,7 +580,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		},
 	}
 
-	ratingStorage.SetActions(actions[0].Id, actions, utils.NonTransactional)
+	dataStorage.SetActions(actions[0].Id, actions, utils.NonTransactional)
 
 	at := &ActionTiming{
 		accountIDs: utils.StringMap{account1.ID: true},
@@ -592,7 +592,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		t.Errorf("Execute Action: %v", err)
 	}
 
-	apr, err1 := ratingStorage.GetActionPlan(ap1.Id, false, utils.NonTransactional)
+	apr, err1 := dataStorage.GetActionPlan(ap1.Id, false, utils.NonTransactional)
 
 	if err1 != nil {
 		t.Errorf("Get action plan test: %v", err1)
@@ -1130,7 +1130,7 @@ func TestActionTriggerLogging(t *testing.T) {
 		Weight:         10.0,
 		ActionsID:      "TEST_ACTIONS",
 	}
-	as, err := ratingStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
+	as, err := dataStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting actions for the action timing: ", as, err)
 	}
@@ -1142,7 +1142,7 @@ func TestActionTriggerLogging(t *testing.T) {
 	})
 	//expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"
 	var key string
-	atMap, _ := ratingStorage.GetAllActionPlans()
+	atMap, _ := dataStorage.GetAllActionPlans()
 	for k, v := range atMap {
 		_ = k
 		_ = v
@@ -1188,7 +1188,7 @@ func TestActionPlanLogging(t *testing.T) {
 	})
 	//expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*|TOPUP|MONETARY|OUT|10|0"
 	var key string
-	atMap, _ := ratingStorage.GetAllActionPlans()
+	atMap, _ := dataStorage.GetAllActionPlans()
 	for k, v := range atMap {
 		_ = k
 		_ = v
@@ -1214,7 +1214,7 @@ func TestActionMakeNegative(t *testing.T) {
 }
 
 func TestRemoveAction(t *testing.T) {
-	if _, err := accountingStorage.GetAccount("cgrates.org:remo"); err != nil {
+	if _, err := dataStorage.GetAccount("cgrates.org:remo"); err != nil {
 		t.Errorf("account to be removed not found: %v", err)
 	}
 	a := &Action{
@@ -1226,14 +1226,14 @@ func TestRemoveAction(t *testing.T) {
 		actions:    Actions{a},
 	}
 	at.Execute(nil, nil)
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:remo")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:remo")
 	if err == nil || afterUb != nil {
 		t.Error("error removing account: ", err, afterUb)
 	}
 }
 
 func TestTopupAction(t *testing.T) {
-	initialUb, _ := accountingStorage.GetAccount("vdf:minu")
+	initialUb, _ := dataStorage.GetAccount("vdf:minu")
 	a := &Action{
 		ActionType: TOPUP,
 		Balance:    &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 25}, DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Weight: utils.Float64Pointer(20)},
@@ -1245,7 +1245,7 @@ func TestTopupAction(t *testing.T) {
 	}
 
 	at.Execute(nil, nil)
-	afterUb, _ := accountingStorage.GetAccount("vdf:minu")
+	afterUb, _ := dataStorage.GetAccount("vdf:minu")
 	initialValue := initialUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	afterValue := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	if afterValue != initialValue+25 {
@@ -1254,7 +1254,7 @@ func TestTopupAction(t *testing.T) {
 }
 
 func TestTopupActionLoaded(t *testing.T) {
-	initialUb, _ := accountingStorage.GetAccount("vdf:minitsboy")
+	initialUb, _ := dataStorage.GetAccount("vdf:minitsboy")
 	a := &Action{
 		ActionType: TOPUP,
 		Balance:    &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 25}, DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Weight: utils.Float64Pointer(20)},
@@ -1266,7 +1266,7 @@ func TestTopupActionLoaded(t *testing.T) {
 	}
 
 	at.Execute(nil, nil)
-	afterUb, _ := accountingStorage.GetAccount("vdf:minitsboy")
+	afterUb, _ := dataStorage.GetAccount("vdf:minitsboy")
 	initialValue := initialUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	afterValue := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	if afterValue != initialValue+25 {
@@ -1360,24 +1360,24 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
 	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
-	ratingStorage.SetDestination(origD, utils.NonTransactional)
-	ratingStorage.SetReverseDestination(origD, utils.NonTransactional)
+	dataStorage.SetDestination(origD, utils.NonTransactional)
+	dataStorage.SetReverseDestination(origD, utils.NonTransactional)
 	// check redis and cache
-	if d, err := ratingStorage.GetDestination("*ddc_test", false, utils.NonTransactional); err != nil || !reflect.DeepEqual(d, origD) {
+	if d, err := dataStorage.GetDestination("*ddc_test", false, utils.NonTransactional); err != nil || !reflect.DeepEqual(d, origD) {
 		t.Error("Error storing destination: ", d, err)
 	}
-	ratingStorage.GetReverseDestination("111", false, utils.NonTransactional)
+	dataStorage.GetReverseDestination("111", false, utils.NonTransactional)
 	x1, found := cache.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	ratingStorage.GetReverseDestination("222", false, utils.NonTransactional)
+	dataStorage.GetReverseDestination("222", false, utils.NonTransactional)
 	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "666": 1}}, nil, nil)
-	d, err := ratingStorage.GetDestination("*ddc_test", false, utils.NonTransactional)
+	d, err := dataStorage.GetDestination("*ddc_test", false, utils.NonTransactional)
 	if err != nil ||
 		d.Id != origD.Id ||
 		len(d.Prefixes) != 2 ||
@@ -1395,12 +1395,12 @@ func TestActionSetDDestination(t *testing.T) {
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	ratingStorage.GetReverseDestination("333", false, utils.NonTransactional)
+	dataStorage.GetReverseDestination("333", false, utils.NonTransactional)
 	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	ratingStorage.GetReverseDestination("666", false, utils.NonTransactional)
+	dataStorage.GetReverseDestination("666", false, utils.NonTransactional)
 	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
@@ -1408,7 +1408,7 @@ func TestActionSetDDestination(t *testing.T) {
 }
 
 func TestActionTransactionFuncType(t *testing.T) {
-	err := accountingStorage.SetAccount(&Account{
+	err := dataStorage.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -1434,7 +1434,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
+	acc, err := dataStorage.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -1444,7 +1444,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 }
 
 func TestActionTransactionBalanceType(t *testing.T) {
-	err := accountingStorage.SetAccount(&Account{
+	err := dataStorage.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -1470,7 +1470,7 @@ func TestActionTransactionBalanceType(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
+	acc, err := dataStorage.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -1480,7 +1480,7 @@ func TestActionTransactionBalanceType(t *testing.T) {
 }
 
 func TestActionTransactionBalanceNotType(t *testing.T) {
-	err := accountingStorage.SetAccount(&Account{
+	err := dataStorage.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -1506,7 +1506,7 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
+	acc, err := dataStorage.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -1516,7 +1516,7 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 }
 
 func TestActionWithExpireWithoutExpire(t *testing.T) {
-	err := accountingStorage.SetAccount(&Account{
+	err := dataStorage.SetAccount(&Account{
 		ID: "cgrates.org:exp",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -1549,7 +1549,7 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := accountingStorage.GetAccount("cgrates.org:exp")
+	acc, err := dataStorage.GetAccount("cgrates.org:exp")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
 	}
@@ -1560,7 +1560,7 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 }
 
 func TestActionRemoveBalance(t *testing.T) {
-	err := accountingStorage.SetAccount(&Account{
+	err := dataStorage.SetAccount(&Account{
 		ID: "cgrates.org:rembal",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
@@ -1596,7 +1596,7 @@ func TestActionRemoveBalance(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := accountingStorage.GetAccount("cgrates.org:rembal")
+	acc, err := dataStorage.GetAccount("cgrates.org:rembal")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
 	}
@@ -1607,7 +1607,7 @@ func TestActionRemoveBalance(t *testing.T) {
 }
 
 func TestActionTransferMonetaryDefault(t *testing.T) {
-	err := accountingStorage.SetAccount(
+	err := dataStorage.SetAccount(
 		&Account{
 			ID: "cgrates.org:trans",
 			BalanceMap: map[string]Balances{
@@ -1646,7 +1646,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:trans")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:trans")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -1663,7 +1663,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 }
 
 func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
-	err := accountingStorage.SetAccount(
+	err := dataStorage.SetAccount(
 		&Account{
 			ID: "cgrates.org:trans",
 			BalanceMap: map[string]Balances{
@@ -1707,7 +1707,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:trans")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:trans")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -1724,7 +1724,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 }
 
 func TestActionConditionalTopup(t *testing.T) {
-	err := accountingStorage.SetAccount(
+	err := dataStorage.SetAccount(
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
@@ -1773,7 +1773,7 @@ func TestActionConditionalTopup(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:cond")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:cond")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -1788,7 +1788,7 @@ func TestActionConditionalTopup(t *testing.T) {
 }
 
 func TestActionConditionalTopupNoMatch(t *testing.T) {
-	err := accountingStorage.SetAccount(
+	err := dataStorage.SetAccount(
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
@@ -1837,7 +1837,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:cond")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:cond")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -1851,7 +1851,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 }
 
 func TestActionConditionalTopupExistingBalance(t *testing.T) {
-	err := accountingStorage.SetAccount(
+	err := dataStorage.SetAccount(
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
@@ -1901,7 +1901,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:cond")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:cond")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -1915,7 +1915,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 }
 
 func TestActionConditionalDisabledIfNegative(t *testing.T) {
-	err := accountingStorage.SetAccount(
+	err := dataStorage.SetAccount(
 		&Account{
 			ID: "cgrates.org:af",
 			BalanceMap: map[string]Balances{
@@ -2051,7 +2051,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:af")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:af")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -2068,7 +2068,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 }
 
 func TestActionSetBalance(t *testing.T) {
-	err := accountingStorage.SetAccount(
+	err := dataStorage.SetAccount(
 		&Account{
 			ID: "cgrates.org:setb",
 			BalanceMap: map[string]Balances{
@@ -2122,7 +2122,7 @@ func TestActionSetBalance(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:setb")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:setb")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -2137,7 +2137,7 @@ func TestActionSetBalance(t *testing.T) {
 }
 
 func TestActionCSVFilter(t *testing.T) {
-	act, err := ratingStorage.GetActions("FILTER", false, utils.NonTransactional)
+	act, err := dataStorage.GetActions("FILTER", false, utils.NonTransactional)
 	if err != nil {
 		t.Error("error getting actions: ", err)
 	}
@@ -2147,7 +2147,7 @@ func TestActionCSVFilter(t *testing.T) {
 }
 
 func TestActionExpirationTime(t *testing.T) {
-	a, err := ratingStorage.GetActions("EXP", false, utils.NonTransactional)
+	a, err := dataStorage.GetActions("EXP", false, utils.NonTransactional)
 	if err != nil || a == nil {
 		t.Error("Error getting actions: ", err)
 	}
@@ -2158,7 +2158,7 @@ func TestActionExpirationTime(t *testing.T) {
 	}
 	for rep := 0; rep < 5; rep++ {
 		at.Execute(nil, nil)
-		afterUb, err := accountingStorage.GetAccount("cgrates.org:expo")
+		afterUb, err := dataStorage.GetAccount("cgrates.org:expo")
 		if err != nil ||
 			len(afterUb.BalanceMap[utils.VOICE]) != rep+1 {
 			t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
@@ -2167,11 +2167,11 @@ func TestActionExpirationTime(t *testing.T) {
 }
 
 func TestActionExpNoExp(t *testing.T) {
-	exp, err := ratingStorage.GetActions("EXP", false, utils.NonTransactional)
+	exp, err := dataStorage.GetActions("EXP", false, utils.NonTransactional)
 	if err != nil || exp == nil {
 		t.Error("Error getting actions: ", err)
 	}
-	noexp, err := ratingStorage.GetActions("NOEXP", false, utils.NonTransactional)
+	noexp, err := dataStorage.GetActions("NOEXP", false, utils.NonTransactional)
 	if err != nil || noexp == nil {
 		t.Error("Error getting actions: ", err)
 	}
@@ -2181,7 +2181,7 @@ func TestActionExpNoExp(t *testing.T) {
 		actions:    exp,
 	}
 	at.Execute(nil, nil)
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:expnoexp")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:expnoexp")
 	if err != nil ||
 		len(afterUb.BalanceMap[utils.VOICE]) != 2 {
 		t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
@@ -2189,7 +2189,7 @@ func TestActionExpNoExp(t *testing.T) {
 }
 
 func TestActionCdrlogBalanceValue(t *testing.T) {
-	err := accountingStorage.SetAccount(&Account{
+	err := dataStorage.SetAccount(&Account{
 		ID: "cgrates.org:bv",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -2234,7 +2234,7 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := accountingStorage.GetAccount("cgrates.org:bv")
+	acc, err := dataStorage.GetAccount("cgrates.org:bv")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -2313,7 +2313,7 @@ func TestCgrRpcAction(t *testing.T) {
 }
 
 func TestValueFormulaDebit(t *testing.T) {
-	if _, err := accountingStorage.GetAccount("cgrates.org:vf"); err != nil {
+	if _, err := dataStorage.GetAccount("cgrates.org:vf"); err != nil {
 		t.Errorf("account to be removed not found: %v", err)
 	}
 
@@ -2322,7 +2322,7 @@ func TestValueFormulaDebit(t *testing.T) {
 		ActionsID:  "VF",
 	}
 	at.Execute(nil, nil)
-	afterUb, err := accountingStorage.GetAccount("cgrates.org:vf")
+	afterUb, err := dataStorage.GetAccount("cgrates.org:vf")
 	// not an exact value, depends of month
 	v := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	if err != nil || v > -0.30 || v < -0.36 {

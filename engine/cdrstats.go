@@ -122,7 +122,7 @@ func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 	if len(cs.DestinationIds) > 0 {
 		found := false
 		for _, p := range utils.SplitPrefix(cdr.Destination, MIN_PREFIX_MATCH) {
-			if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+			if destIDs, err := dataStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 				for _, idID := range destIDs {
 					if utils.IsSliceMember(cs.DestinationIds, idID) {
 						found = true

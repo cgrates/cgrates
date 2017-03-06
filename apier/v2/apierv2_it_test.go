@@ -67,8 +67,8 @@ func TestApierV2itResetStorDb(t *testing.T) {
 }
 
 func TestApierV2itConnectDataDB(t *testing.T) {
-	rdsDb, _ := strconv.Atoi(apierCfg.TpDbName)
-	if rdsITdb, err := engine.NewRedisStorage(fmt.Sprintf("%s:%s", apierCfg.TpDbHost, apierCfg.TpDbPort), rdsDb, apierCfg.TpDbPass, apierCfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1); err != nil {
+	rdsDb, _ := strconv.Atoi(apierCfg.DataDbName)
+	if rdsITdb, err := engine.NewRedisStorage(fmt.Sprintf("%s:%s", apierCfg.DataDbHost, apierCfg.DataDbPort), rdsDb, apierCfg.DataDbPass, apierCfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1); err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	} else {
 		dataDB = rdsITdb

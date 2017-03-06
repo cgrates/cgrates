@@ -33,22 +33,15 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	ratingDb, err := ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort, cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
+	dataDB, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 	if err != nil {
 		return err
 	}
-	accountDb, err := ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName,
-		cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
-	if err != nil {
+	if err := dataDB.Flush(""); err != nil {
 		return err
 	}
-	for _, db := range []Storage{ratingDb, accountDb} {
-		if err := db.Flush(""); err != nil {
-			return err
-		}
-	}
-	ratingDb.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	CheckVersion(accountDb) // Write version before starting
+	dataDB.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	CheckVersion(dataDB) // Write version before starting
 	return nil
 }
 
@@ -98,8 +91,8 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return StartEngine(cfgPath, waitEngine)
 }
 
-func LoadTariffPlanFromFolder(tpPath, timezone string, ratingDb RatingStorage, accountingDb AccountingStorage, disable_reverse bool) error {
-	loader := NewTpReader(ratingDb, accountingDb, NewFileCSVStorage(utils.CSV_SEP,
+func LoadTariffPlanFromFolder(tpPath, timezone string, dataDB DataDB, disable_reverse bool) error {
+	loader := NewTpReader(dataDB, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(tpPath, utils.DESTINATIONS_CSV),
 		path.Join(tpPath, utils.TIMINGS_CSV),
 		path.Join(tpPath, utils.RATES_CSV),

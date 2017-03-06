@@ -242,12 +242,12 @@ func TestRLsLoadRLs(t *testing.T) {
 			Usage:          make(map[string]*ResourceUsage),
 		},
 	}
-	rlIdxr, err := NewReqFilterIndexer(accountingStorage, utils.ResourceLimitsIndex)
+	rlIdxr, err := NewReqFilterIndexer(dataStorage, utils.ResourceLimitsIndex)
 	if err != nil {
 		t.Error(err)
 	}
 	for _, rl := range rls {
-		if err := accountingStorage.SetResourceLimit(rl, utils.NonTransactional); err != nil {
+		if err := dataStorage.SetResourceLimit(rl, utils.NonTransactional); err != nil {
 			t.Error(err)
 		}
 		rlIdxr.IndexFilters(rl.ID, rl.Filters)
@@ -258,7 +258,7 @@ func TestRLsLoadRLs(t *testing.T) {
 }
 
 func TestRLsMatchingResourceLimitsForEvent(t *testing.T) {
-	rLS = &ResourceLimiterService{dataDB: accountingStorage, cdrStatS: nil}
+	rLS = &ResourceLimiterService{dataDB: dataStorage, cdrStatS: nil}
 	eResLimits := map[string]*ResourceLimit{
 		"RL1": &ResourceLimit{
 			ID:     "RL1",

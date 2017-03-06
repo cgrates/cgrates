@@ -153,7 +153,7 @@ func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel st
 	return false, nil
 }
 
-// ToDo when Timings will be available in TPdb
+// ToDo when Timings will be available in DataDb
 func (fltr *RequestFilter) passTimings(req interface{}, extraFieldsLabel string) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
@@ -167,7 +167,7 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 		return false, err
 	}
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
-		if destIDs, err := ratingStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+		if destIDs, err := dataStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, dID := range destIDs {
 				for _, valDstID := range fltr.Values {
 					if valDstID == dID {

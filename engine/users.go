@@ -85,16 +85,16 @@ type prop struct {
 }
 
 type UserMap struct {
-	table        map[string]map[string]string
-	properties   map[string]*prop
-	index        map[string]map[string]bool
-	indexKeys    []string
-	accountingDb AccountingStorage
-	mu           sync.RWMutex
+	table      map[string]map[string]string
+	properties map[string]*prop
+	index      map[string]map[string]bool
+	indexKeys  []string
+	dataDB     DataDB
+	mu         sync.RWMutex
 }
 
-func NewUserMap(accountingDb AccountingStorage, indexes []string) (*UserMap, error) {
-	um := newUserMap(accountingDb, indexes)
+func NewUserMap(dataDB DataDB, indexes []string) (*UserMap, error) {
+	um := newUserMap(dataDB, indexes)
 	var reply string
 	if err := um.ReloadUsers("", &reply); err != nil {
 		return nil, err
@@ -102,13 +102,13 @@ func NewUserMap(accountingDb AccountingStorage, indexes []string) (*UserMap, err
 	return um, nil
 }
 
-func newUserMap(accountingDb AccountingStorage, indexes []string) *UserMap {
+func newUserMap(dataDB DataDB, indexes []string) *UserMap {
 	return &UserMap{
-		table:        make(map[string]map[string]string),
-		properties:   make(map[string]*prop),
-		index:        make(map[string]map[string]bool),
-		indexKeys:    indexes,
-		accountingDb: accountingDb,
+		table:      make(map[string]map[string]string),
+		properties: make(map[string]*prop),
+		index:      make(map[string]map[string]bool),
+		indexKeys:  indexes,
+		dataDB:     dataDB,
 	}
 }
 
@@ -123,7 +123,7 @@ func (um *UserMap) ReloadUsers(in string, reply *string) (err error) {
 	um.properties = make(map[string]*prop)
 
 	// load from db
-	ups, err := um.accountingDb.GetUsers()
+	ups, err := um.dataDB.GetUsers()
 	if err != nil { // restore old data before return
 		um.table = oldTable
 		um.index = oldIndex
@@ -157,7 +157,7 @@ func (um *UserMap) ReloadUsers(in string, reply *string) (err error) {
 func (um *UserMap) SetUser(up *UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
-	if err := um.accountingDb.SetUser(up); err != nil {
+	if err := um.dataDB.SetUser(up); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -171,7 +171,7 @@ func (um *UserMap) SetUser(up *UserProfile, reply *string) error {
 func (um *UserMap) RemoveUser(up *UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
-	if err := um.accountingDb.RemoveUser(up.GetId()); err != nil {
+	if err := um.dataDB.RemoveUser(up.GetId()); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -215,7 +215,7 @@ func (um *UserMap) UpdateUser(up *UserProfile, reply *string) error {
 		Weight:   up.Weight,
 		Profile:  m,
 	}
-	if err := um.accountingDb.SetUser(finalUp); err != nil {
+	if err := um.dataDB.SetUser(finalUp); err != nil {
 		*reply = err.Error()
 		return err
 	}

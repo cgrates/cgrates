@@ -448,9 +448,9 @@ func BenchmarkRatingPlanRestore(b *testing.B) {
 			EndTime:   "15:00:00"}}
 	rp := &RatingPlan{Id: "test"}
 	rp.AddRateInterval("NAT", i)
-	ratingStorage.SetRatingPlan(rp, utils.NonTransactional)
+	dataStorage.SetRatingPlan(rp, utils.NonTransactional)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ratingStorage.GetRatingPlan(rp.Id, true, utils.NonTransactional)
+		dataStorage.GetRatingPlan(rp.Id, true, utils.NonTransactional)
 	}
 }

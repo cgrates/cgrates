@@ -54,7 +54,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	internalCdrStatSChan chan rpcclient.RpcClientConnection, internalHistorySChan chan rpcclient.RpcClientConnection,
 	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
-	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
+	dataDB engine.DataDB, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
 	var waitTasks []chan struct{}
 
 	//Cache load
@@ -63,7 +63,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	go func() {
 		defer close(cacheTaskChan)
 
-		/*loadHist, err := accountDb.GetLoadHistory(1, true, utils.NonTransactional)
+		/*loadHist, err := dataDB.GetLoadHistory(1, true, utils.NonTransactional)
 		if err != nil || len(loadHist) == 0 {
 			utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
 			cacheDoneChan <- struct{}{}
@@ -113,12 +113,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		if !cfg.CacheConfig.ResourceLimits.Precache {
 			rlIDs = make([]string, 0)
 		}
-		if err := ratingDb.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
+		if err := dataDB.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
 			exitChan <- true
 			return
 		}
-		if err := accountDb.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
+		if err := dataDB.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache accounting error: %s", err.Error()))
 			exitChan <- true
 			return
@@ -230,7 +230,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	}
 	responder := &engine.Responder{Bal: bal, ExitChan: exitChan}
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
-	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb,
+	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, DataDB: dataDB, CdrDb: cdrDb,
 		Config: cfg, Responder: responder, ServManager: serviceManager, HTTPPoster: utils.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout)}
 	if cdrStats != nil { // ToDo: Fix here properly the init of stats
 		responder.Stats = cdrStats

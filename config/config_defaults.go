@@ -54,7 +54,7 @@ const CGRATES_CFG_JSON = `
 	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": false},	// control reverse destinations index caching
 	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},				// control rating plans caching
 	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": false},			// control rating profiles caching
-	"lcr": {"limit": 10000, "ttl":"0s", "precache": false},						// control lcr rules caching					
+	"lcr": {"limit": 10000, "ttl":"0s", "precache": false},						// control lcr rules caching
 	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": false},				// control cdr stats queues caching
 	"actions": {"limit": 10000, "ttl":"0s", "precache": false},					// control actions caching
 	"action_plans": {"limit": 10000, "ttl":"0s", "precache": false},			// control action plans caching
@@ -80,16 +80,6 @@ const CGRATES_CFG_JSON = `
 	"ws_url": "/ws",						// WebSockets relative URL ("" to disable)
 	"use_basic_auth": false,				// use basic authentication
 	"auth_users": {}						// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
-},
-
-
-"tariffplan_db": {							// database used to store active tariff plan configuration
-	"db_type": "redis",						// tariffplan_db type: <redis|mongo>
-	"db_host": "127.0.0.1",					// tariffplan_db host address
-	"db_port": 6379, 						// port to reach the tariffplan_db
-	"db_name": "10", 						// tariffplan_db name to connect to
-	"db_user": "", 							// sername to use when connecting to tariffplan_db
-	"db_password": "", 						// password to use when connecting to tariffplan_db
 },
 
 

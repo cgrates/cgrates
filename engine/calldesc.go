@@ -49,23 +49,14 @@ func init() {
 			cgrCfg, _ = config.NewDefaultCGRConfig()
 			config.SetCgrConfig(cgrCfg)
 		}
-		ratingStorage, _ = NewMapStorage()
-		accountingStorage, _ = NewMapStorage()
+		dataStorage, _ = NewMapStorage()
 	case utils.MONGO:
-		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "", utils.TariffPlanDB, nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
-		if err != nil {
-			log.Fatal(err)
-		}
-		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "", utils.DataDB, nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
+		dataStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_data_test", "", "", utils.DataDB, nil, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case utils.REDIS:
-		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
-		if err != nil {
-			log.Fatal(err)
-		}
-		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
+		dataStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, &config.CacheConfig{RatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -73,8 +64,7 @@ func init() {
 }
 
 var (
-	ratingStorage            RatingStorage
-	accountingStorage        AccountingStorage
+	dataStorage              DataDB
 	cdrStorage               CdrStorage
 	debitPeriod              = 10 * time.Second
 	globalRoundingDecimals   = 6
@@ -87,12 +77,8 @@ var (
 )
 
 // Exported method to set the storage getter.
-func SetRatingStorage(sg RatingStorage) {
-	ratingStorage = sg
-}
-
-func SetAccountingStorage(ag AccountingStorage) {
-	accountingStorage = ag
+func SetDataStorage(sg DataDB) {
+	dataStorage = sg
 }
 
 // Sets the global rounding method and decimal precision for GetCost method
@@ -186,7 +172,7 @@ func (cd *CallDescriptor) AddRatingInfo(ris ...*RatingInfo) {
 // Gets and caches the user balance information.
 func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 	if cd.account == nil {
-		cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey())
+		cd.account, err = dataStorage.GetAccount(cd.GetAccountKey())
 	}
 	if cd.account != nil && cd.account.Disabled {
 		return nil, utils.ErrAccountDisabled
@@ -685,7 +671,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 	cc.UpdateRatedUsage()
 	cc.Timespans.Compress()
 	if !dryRun {
-		accountingStorage.SetAccount(account)
+		dataStorage.SetAccount(account)
 	}
 	if cd.PerformRounding {
 		cc.Round()
@@ -793,11 +779,11 @@ func (cd *CallDescriptor) RefundIncrements() error {
 		for _, increment := range cd.Increments {
 			account, found := accountsCache[increment.BalanceInfo.AccountID]
 			if !found {
-				if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
+				if acc, err := dataStorage.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
 					account = acc
 					accountsCache[increment.BalanceInfo.AccountID] = account
 					// will save the account only once at the end of the function
-					defer accountingStorage.SetAccount(account)
+					defer dataStorage.SetAccount(account)
 				}
 			}
 			if account == nil {
@@ -842,11 +828,11 @@ func (cd *CallDescriptor) RefundRounding() error {
 		for _, increment := range cd.Increments {
 			account, found := accountsCache[increment.BalanceInfo.AccountID]
 			if !found {
-				if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
+				if acc, err := dataStorage.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
 					account = acc
 					accountsCache[increment.BalanceInfo.AccountID] = account
 					// will save the account only once at the end of the function
-					defer accountingStorage.SetAccount(account)
+					defer dataStorage.SetAccount(account)
 				}
 			}
 			if account == nil {
@@ -928,7 +914,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		keyVariants = append(keyVariants[:1], append(partialSubjects, keyVariants[1:]...)...)
 	}
 	for _, key := range keyVariants {
-		if lcr, err := ratingStorage.GetLCR(key, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if lcr, err := dataStorage.GetLCR(key, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return nil, err
 		} else if err == nil && lcr != nil {
 			return lcr, nil
@@ -971,7 +957,7 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 			fullSupplier := utils.ConcatenatedKey(lcrCD.Direction, lcrCD.Tenant, lcrCD.Category, lcrCD.Subject)
 			var cc *CallCost
 			var err error
-			if cd.account, err = accountingStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
+			if cd.account, err = dataStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
 				if cd.account.Disabled {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: fullSupplier,
@@ -1007,13 +993,13 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 		searchKey := utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey
 		suppliers := cache.GetEntryKeys(searchKey)
 		if len(suppliers) == 0 { // Most probably the data was not cached, do it here, #ToDo: move logic in RAL service
-			suppliers, err = ratingStorage.GetKeysForPrefix(searchKey)
+			suppliers, err = dataStorage.GetKeysForPrefix(searchKey)
 			if err != nil {
 				return nil, err
 			}
 			transID := utils.GenUUID()
 			for _, dbKey := range suppliers {
-				if _, err := ratingStorage.GetRatingProfile(dbKey[len(utils.RATING_PROFILE_PREFIX):], true, transID); err != nil { // cache the keys here
+				if _, err := dataStorage.GetRatingProfile(dbKey[len(utils.RATING_PROFILE_PREFIX):], true, transID); err != nil { // cache the keys here
 					cache.RollbackTransaction(transID)
 					return nil, err
 				}
@@ -1216,7 +1202,7 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 
 			var cc *CallCost
 			var err error
-			if cd.account, err = accountingStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
+			if cd.account, err = dataStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
 				if cd.account.Disabled {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: fullSupplier,

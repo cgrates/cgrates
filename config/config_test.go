@@ -207,27 +207,6 @@ func TestCgrCfgJSONDefaultsListen(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsTPdb(t *testing.T) {
-	if cgrCfg.TpDbType != "redis" {
-		t.Error(cgrCfg.TpDbType)
-	}
-	if cgrCfg.TpDbHost != "127.0.0.1" {
-		t.Error(cgrCfg.TpDbHost)
-	}
-	if cgrCfg.TpDbPort != "6379" {
-		t.Error(cgrCfg.TpDbPort)
-	}
-	if cgrCfg.TpDbName != "10" {
-		t.Error(cgrCfg.TpDbName)
-	}
-	if cgrCfg.TpDbUser != "" {
-		t.Error(cgrCfg.TpDbUser)
-	}
-	if cgrCfg.TpDbPass != "" {
-		t.Error(cgrCfg.TpDbPass)
-	}
-}
-
 func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	if cgrCfg.DataDbType != "redis" {
 		t.Error(cgrCfg.DataDbType)

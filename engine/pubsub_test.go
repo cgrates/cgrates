@@ -25,7 +25,7 @@ import (
 )
 
 func TestSubscribe(t *testing.T) {
-	ps, err := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(dataStorage, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -44,7 +44,7 @@ func TestSubscribe(t *testing.T) {
 }
 
 func TestSubscribeSave(t *testing.T) {
-	ps, err := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(dataStorage, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -57,14 +57,14 @@ func TestSubscribeSave(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	subs, err := accountingStorage.GetSubscribers()
+	subs, err := dataStorage.GetSubscribers()
 	if err != nil || len(subs) != 1 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}
 }
 
 func TestSubscribeNoTransport(t *testing.T) {
-	ps, err := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(dataStorage, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -80,7 +80,7 @@ func TestSubscribeNoTransport(t *testing.T) {
 }
 
 func TestSubscribeNoExpire(t *testing.T) {
-	ps, err := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(dataStorage, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -99,7 +99,7 @@ func TestSubscribeNoExpire(t *testing.T) {
 }
 
 func TestUnsubscribe(t *testing.T) {
-	ps, err := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(dataStorage, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -125,7 +125,7 @@ func TestUnsubscribe(t *testing.T) {
 }
 
 func TestUnsubscribeSave(t *testing.T) {
-	ps, err := NewPubSub(accountingStorage, false)
+	ps, err := NewPubSub(dataStorage, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -145,14 +145,14 @@ func TestUnsubscribeSave(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error unsubscribing: ", err)
 	}
-	subs, err := accountingStorage.GetSubscribers()
+	subs, err := dataStorage.GetSubscribers()
 	if err != nil || len(subs) != 0 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}
 }
 
 func TestPublishExpired(t *testing.T) {
-	ps, err := NewPubSub(accountingStorage, true)
+	ps, err := NewPubSub(dataStorage, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -177,7 +177,7 @@ func TestPublishExpired(t *testing.T) {
 }
 
 func TestPublishExpiredSave(t *testing.T) {
-	ps, err := NewPubSub(accountingStorage, true)
+	ps, err := NewPubSub(dataStorage, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -193,14 +193,14 @@ func TestPublishExpiredSave(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	subs, err := accountingStorage.GetSubscribers()
+	subs, err := dataStorage.GetSubscribers()
 	if err != nil || len(subs) != 1 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}
 	if err := ps.Publish(map[string]string{"EventFilter": "test"}, &r); err != nil {
 		t.Error("Error publishing: ", err)
 	}
-	subs, err = accountingStorage.GetSubscribers()
+	subs, err = dataStorage.GetSubscribers()
 	if err != nil || len(subs) != 0 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}

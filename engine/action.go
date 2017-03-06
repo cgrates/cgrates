@@ -517,20 +517,20 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 			i++
 		}
 		newDest := &Destination{Id: ddcDestId, Prefixes: prefixes}
-		oldDest, err := ratingStorage.GetDestination(ddcDestId, false, utils.NonTransactional)
+		oldDest, err := dataStorage.GetDestination(ddcDestId, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		// update destid in storage
-		if err = ratingStorage.SetDestination(newDest, utils.NonTransactional); err != nil {
+		if err = dataStorage.SetDestination(newDest, utils.NonTransactional); err != nil {
 			return err
 		}
-		if err = ratingStorage.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
+		if err = dataStorage.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
 			return err
 		}
 
 		if err == nil && oldDest != nil {
-			if err = ratingStorage.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional); err != nil {
+			if err = dataStorage.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -561,36 +561,36 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		return utils.ErrInvalidKey
 	}
 
-	if err := accountingStorage.RemoveAccount(accID); err != nil {
+	if err := dataStorage.RemoveAccount(accID); err != nil {
 		utils.Logger.Err(fmt.Sprintf("Could not remove account Id: %s: %v", accID, err))
 		return err
 	}
 
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acntAPids, err := ratingStorage.GetAccountActionPlans(accID, false, utils.NonTransactional)
+		acntAPids, err := dataStorage.GetAccountActionPlans(accID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
 			return 0, err
 		}
 		for _, apID := range acntAPids {
-			ap, err := ratingStorage.GetActionPlan(apID, false, utils.NonTransactional)
+			ap, err := dataStorage.GetActionPlan(apID, false, utils.NonTransactional)
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf("Could not retrieve action plan: %s: %v", apID, err))
 				return 0, err
 			}
 			delete(ap.AccountIDs, accID)
-			if err := ratingStorage.SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
+			if err := dataStorage.SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Could not save action plan: %s: %v", apID, err))
 				return 0, err
 			}
 		}
-		if err = ratingStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
+		if err = dataStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
 			return 0, err
 		}
-		if err = ratingStorage.RemAccountActionPlans(accID, nil); err != nil {
+		if err = dataStorage.RemAccountActionPlans(accID, nil); err != nil {
 			return 0, err
 		}
-		if err = ratingStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		if err = dataStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
 			return 0, err
 		}
 		return 0, nil

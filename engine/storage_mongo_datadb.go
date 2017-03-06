@@ -118,7 +118,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 type MongoStorage struct {
 	session         *mgo.Session
 	db              string
-	storageType     string // tariffplandb, datadb, stordb
+	storageType     string // datadb, stordb
 	ms              Marshaler
 	cacheCfg        *config.CacheConfig
 	loadHistorySize int
@@ -143,10 +143,8 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 		Sparse:     false, // Only index documents containing the Key fields
 	}
 	var colectNames []string // collection names containing this index
-	if ms.storageType == utils.TariffPlanDB {
-		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRls, colRpl, colLcr, colDst, colRds}
-	} else if ms.storageType == utils.DataDB {
-		colectNames = []string{colAls, colUsr, colLht}
+	if ms.storageType == utils.DataDB {
+		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRls, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht}
 	}
 	for _, col := range colectNames {
 		if err = db.C(col).EnsureIndex(idx); err != nil {
@@ -160,10 +158,8 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 		Background: false,
 		Sparse:     false,
 	}
-	if ms.storageType == utils.TariffPlanDB {
-		colectNames = []string{colRpf, colShg, colCrs}
-	} else if ms.storageType == utils.DataDB {
-		colectNames = []string{colAcc}
+	if ms.storageType == utils.DataDB {
+		colectNames = []string{colRpf, colShg, colCrs, colAcc}
 	}
 	for _, col := range colectNames {
 		if err = db.C(col).EnsureIndex(idx); err != nil {
