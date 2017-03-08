@@ -193,12 +193,12 @@ func TestSMGa1ITDataSession1(t *testing.T) {
 	if err = smgA1rpc.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
+	if err := smgA1rpc.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); err != nil {
+		t.Error(err)
+	} else if rpl != utils.OK {
+		t.Errorf("Received reply: %s", rpl)
+	}
 	/*
-		if err := smgA1rpc.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); err != nil {
-			t.Error(err)
-		} else if rpl != utils.OK {
-			t.Errorf("Received reply: %s", rpl)
-		}
 		var cdrs []*engine.ExternalCDR
 		req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
 		if err := smgA1rpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {

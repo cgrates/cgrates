@@ -82,6 +82,8 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
+	//utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit, dur: %f, lastUsed: %v, ExtraDuration: %f, lastUsage: %f, lastDebit: %f, totalUsage: %f",
+	//	dur.Seconds(), lastUsed, self.ExtraDuration.Seconds(), self.LastUsage.Seconds(), self.LastDebit.Seconds(), self.TotalUsage.Seconds()))
 	requestedDuration := dur
 	if lastUsed != nil {
 		self.ExtraDuration = self.LastDebit - *lastUsed
@@ -206,18 +208,29 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	return nil
 }
 
-// Session has ended, check debits and refund the extra charged duration
-func (self *SMGSession) close(endTime time.Time) error {
+// mergeCCs will merge the CallCosts recorded for this session
+func (self *SMGSession) mergeCCs() {
 	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
 		firstCC := self.CallCosts[0]
 		for _, cc := range self.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		end := firstCC.GetEndTime()
-		refundDuration := end.Sub(endTime)
-		self.refund(refundDuration)
 	}
-	return nil
+}
+
+// Session has ended, check debits and refund the extra charged duration
+func (self *SMGSession) close(endTime time.Time) (err error) {
+	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
+		self.mergeCCs()
+		chargedEndTime := self.CallCosts[0].GetEndTime()
+		if endTime.After(chargedEndTime) { // we did not charge enough, make a debit here
+			_, err = self.debit(endTime.Sub(chargedEndTime), nil)
+			self.mergeCCs() // merge again so we can store the right value in db
+		} else {
+			err = self.refund(chargedEndTime.Sub(endTime))
+		}
+	}
+	return
 }
 
 // Send disconnect order to remote connection
