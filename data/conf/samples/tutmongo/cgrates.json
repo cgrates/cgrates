@@ -4,6 +4,7 @@
 
 "general": {
 	"log_level": 7,
+	"reply_timeout": "30s",
 },
 
 "listen": {
@@ -14,20 +15,17 @@
 
  "tariffplan_db": {
  	"db_type": "mongo",
- 	"db_password": "",
 	"db_port": 27017,
 },
 
 
 "data_db": {
 	"db_type": "mongo",
-	"db_password": "",
 	"db_port": 27017,
 },
 
 "stor_db": {
 	"db_type": "mongo",
-	"db_password": "",
 	"db_port": 27017,
 },
 
@@ -74,6 +72,10 @@
 },
 
 "aliases": {
+	"enabled": true,
+},
+
+"sm_generic": {
 	"enabled": true,
 },
 
