@@ -46,7 +46,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	acntID := utils.AccountKey(attrs.Tenant, attrs.Account)
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		acntAPids, err := self.RatingDb.GetAccountActionPlans(acntID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return nil, utils.NewErrServerError(err)
@@ -71,11 +71,12 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 				})
 			}
 		}
+		return accountATs, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}
-	*reply = accountATs
+	*reply = acntATsIf.([]*AccountActionTiming)
 	return nil
 }
 
