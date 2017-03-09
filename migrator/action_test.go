@@ -28,7 +28,7 @@ func TestV1ActionsAsActions(t *testing.T) {
 	v1act := &v1Action{Id: "", ActionType: "", BalanceType: "", Direction: "INBOUND", ExtraParameters: "", ExpirationString: "", Balance: &v1Balance{}}
 	act := &engine.Action{Id: "", ActionType: "", ExtraParameters: "", ExpirationString: "", Weight: 0.00, Balance: &engine.BalanceFilter{}}
 	newact := v1act.AsAction()
-	if !reflect.DeepEqual(*act, newact) {
-		t.Errorf("Expecting: %+v, received: %+v", *act, newact)
+	if !reflect.DeepEqual(act, newact) {
+		t.Errorf("Expecting: %+v, received: %+v", act, newact)
 	}
 }

@@ -18,8 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type v1Action struct {
@@ -35,8 +38,67 @@ type v1Action struct {
 
 type v1Actions []*v1Action
 
-func (v1Act v1Action) AsAction() (act engine.Action) {
-	act = engine.Action{
+func (m *Migrator) migrateActions() (err error) {
+	var acts engine.Actions
+	var actv1keys []string
+	actv1keys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_PREFIX)
+	if err != nil {
+		return
+	}
+	for _, actv1key := range actv1keys {
+		v1act, err := m.getV1ActionFromDB(actv1key)
+		if err != nil {
+			return err
+		}
+		act := v1act.AsAction()
+		acts = append(acts, act)
+		if err := m.tpDB.SetActions(act.Id, acts, utils.NonTransactional); err != nil {
+			return err
+		}
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.ACTION_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_PREFIX]}
+		if err = m.tpDB.SetVersions(vrs); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+		}
+	}
+	return
+}
+
+func (m *Migrator) getV1ActionFromDB(key string) (v1act *v1Action, err error) {
+	switch m.dataDBType {
+	case utils.REDIS:
+		tpDB := m.tpDB.(*engine.RedisStorage)
+		if strVal, err := tpDB.Cmd("GET", key).Bytes(); err != nil {
+			return nil, err
+		} else {
+			v1act := &v1Action{Id: key}
+			if err := m.mrshlr.Unmarshal(strVal, v1act); err != nil {
+				return nil, err
+			}
+			return v1act, nil
+		}
+	case utils.MONGO:
+		tpDB := m.tpDB.(*engine.MongoStorage)
+		mgoDB := tpDB.DB()
+		defer mgoDB.Session.Close()
+		v1act := new(v1Action)
+		if err := mgoDB.C(v1AccountTBL).Find(bson.M{"id": key}).One(v1act); err != nil {
+			return nil, err
+		}
+		return v1act, nil
+	default:
+		return nil, utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for getV1ActionPlansFromDB method", m.dataDBType))
+	}
+}
+
+func (v1Act v1Action) AsAction() (act *engine.Action) {
+	act = &engine.Action{
 		Id:               v1Act.Id,
 		ActionType:       v1Act.ActionType,
 		ExtraParameters:  v1Act.ExtraParameters,

@@ -64,6 +64,15 @@ func (m *Migrator) Migrate(taskID string) (err error) {
 		err = m.migrateCostDetails()
 	case utils.MetaAccounts:
 		err = m.migrateAccounts()
+	case "migrateActionPlans":
+		err = m.migrateActionPlans()
+	case "migrateActionTriggers":
+		err = m.migrateActionTriggers()
+	case "migrateActions":
+		err = m.migrateActions()
+	case "migrateSharedGroups":
+		err = m.migrateSharedGroups()
 	}
+
 	return
 }

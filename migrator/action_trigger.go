@@ -1,8 +1,11 @@
 package migrator
 
 import (
+	"fmt"
 	"strings"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -33,10 +36,73 @@ type v1ActionTrigger struct {
 
 type v1ActionTriggers []*v1ActionTrigger
 
-func (v1Act v1ActionTrigger) AsActionTrigger() (at engine.ActionTrigger) {
+func (m *Migrator) migrateActionTriggers() (err error) {
+	var atrrs engine.ActionTriggers
+	var v1atrskeys []string
+	v1atrskeys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
+	if err != nil {
+		return
+	}
+	for _, v1atrskey := range v1atrskeys {
+		v1atrs, err := m.getV1ActionTriggerFromDB(v1atrskey)
+		if err != nil {
+			return err
+		}
+		v1atr := v1atrs
+		if v1atrs != nil {
+			atr := v1atr.AsActionTrigger()
+			atrrs = append(atrrs, atr)
 
-	at = engine.ActionTrigger{
-		UniqueID:       v1Act.Id,
+			if err := m.tpDB.SetActionTriggers(atr.ID, atrrs, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
+	if err = m.tpDB.SetVersions(vrs); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+	}
+	return
+}
+
+func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger, err error) {
+	switch m.dataDBType {
+	case utils.REDIS:
+		tpDB := m.tpDB.(*engine.RedisStorage)
+		if strVal, err := tpDB.Cmd("GET", key).Bytes(); err != nil {
+			return nil, err
+		} else {
+			v1Atr := &v1ActionTrigger{Id: key}
+			if err := m.mrshlr.Unmarshal(strVal, &v1Atr); err != nil {
+				return nil, err
+			}
+			return v1Atr, nil
+		}
+	case utils.MONGO:
+		tpDB := m.tpDB.(*engine.MongoStorage)
+		mgoDB := tpDB.DB()
+		defer mgoDB.Session.Close()
+		v1Atr := new(v1ActionTrigger)
+		if err := mgoDB.C(v1AccountTBL).Find(bson.M{"id": key}).One(v1Atr); err != nil {
+			return nil, err
+		}
+		return v1Atr, nil
+	default:
+		return nil, utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for getV1ActionTriggerFromDB method", m.dataDBType))
+	}
+}
+
+func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {
+	at = &engine.ActionTrigger{
+		ID: v1Act.Id,
+		//		UniqueID:       utils.GenUUID(),
 		ThresholdType:  v1Act.ThresholdType,
 		ThresholdValue: v1Act.ThresholdValue,
 		Recurrent:      v1Act.Recurrent,

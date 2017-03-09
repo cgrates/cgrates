@@ -91,6 +91,38 @@ func (m *Migrator) getV1AccountFromDB(key string) (*v1Account, error) {
 	}
 }
 
+func (m *Migrator) SetV1onRedis(key string, bl []byte) (err error) {
+	dataDB := m.dataDB.(*engine.RedisStorage)
+	if err = dataDB.Cmd("SET", key, bl).Err; err != nil {
+		return err
+	}
+	return
+}
+
+func (m *Migrator) FlushRedis() (err error) {
+	dataDB := m.dataDB.(*engine.RedisStorage)
+	if err = dataDB.Cmd("FLUSHALL").Err; err != nil {
+		return err
+	}
+	return
+}
+
+func (m *Migrator) FlushMongo() (err error) {
+	dataDB := m.dataDB.(*engine.MongoStorage)
+	mgoDB := dataDB.DB()
+	defer mgoDB.Session.Close()
+	cols, err := mgoDB.CollectionNames()
+	for _, col := range cols {
+		if err := mgoDB.C(col).DropCollection(); err != nil {
+			return err
+		}
+	}
+	if err != nil {
+		return err
+	}
+	return
+}
+
 type v1Account struct {
 	Id             string
 	BalanceMap     map[string]v1BalanceChain

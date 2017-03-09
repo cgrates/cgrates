@@ -26,10 +26,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var v1ActionTriggers1 = `{"BalanceType": "*monetary","BalanceDirection": "*out","ThresholdType":"*max_balance", "ThresholdValue" :2, "ActionsId": "TEST_ACTIONS", "Executed": true}`
+var v1ActionTriggers1 = `{"Id" : "Test","BalanceType": "*monetary","BalanceDirection": "*out","ThresholdType":"*max_balance", "ThresholdValue" :2, "ActionsId": "TEST_ACTIONS", "Executed": true}`
 
 func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
 	atrs := &engine.ActionTrigger{
+		ID: "Test",
 		Balance: &engine.BalanceFilter{
 			Type:       utils.StringPointer(utils.MONETARY),
 			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
@@ -44,7 +45,7 @@ func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
 		t.Error(err)
 	}
 	newatrs := v1actstrgrs.AsActionTrigger()
-	if !reflect.DeepEqual(*atrs, newatrs) {
-		t.Errorf("Expecting: %+v, received: %+v", *atrs, newatrs)
+	if !reflect.DeepEqual(atrs, newatrs) {
+		t.Errorf("Expecting: %+v, received: %+v", atrs, newatrs)
 	}
 }

@@ -22,9 +22,15 @@ import (
 	"strings"
 	"time"
 
+	"gopkg.in/mgo.v2/bson"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+// const (
+// 	v1AccountDBPrefix = "ubl_"
+// )
 
 type v1ActionPlan struct {
 	Uuid       string // uniquely identify the timing
@@ -46,15 +52,72 @@ func (at *v1ActionPlan) IsASAP() bool {
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
 
-func (v1AP v1ActionPlan) AsActionPlan() (ap engine.ActionPlan) {
+func (m *Migrator) migrateActionPlans() (err error) {
+	var apsv1keys []string
+	apsv1keys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return
+	}
+	for _, apsv1key := range apsv1keys {
+		v1aps, err := m.getV1ActionPlansFromDB(apsv1key)
+		if err != nil {
+			return err
+		}
+		aps := v1aps.AsActionPlan()
+		if err = m.tpDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
+			return err
+		}
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.ACTION_PLAN_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_PLAN_PREFIX]}
+	if err = m.tpDB.SetVersions(vrs); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating ActionPlans version into StorDB", err.Error()))
+	}
+	return
+}
+
+func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlan, err error) {
+	switch m.dataDBType {
+	case utils.REDIS:
+		tpDB := m.tpDB.(*engine.RedisStorage)
+		if strVal, err := tpDB.Cmd("GET", key).Bytes(); err != nil {
+			return nil, err
+		} else {
+			v1aps := &v1ActionPlan{Id: key}
+			if err := m.mrshlr.Unmarshal(strVal, v1aps); err != nil {
+				return nil, err
+			}
+			return v1aps, nil
+		}
+	case utils.MONGO:
+		tpDB := m.tpDB.(*engine.MongoStorage)
+		mgoDB := tpDB.DB()
+		defer mgoDB.Session.Close()
+		v1aps := new(v1ActionPlan)
+		if err := mgoDB.C(v1AccountTBL).Find(bson.M{"id": key}).One(v1aps); err != nil {
+			return nil, err
+		}
+		return v1aps, nil
+	default:
+		return nil, utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for getV1ActionPlansFromDB method", m.dataDBType))
+	}
+}
+
+func (v1AP v1ActionPlan) AsActionPlan() (ap *engine.ActionPlan) {
 	for idx, actionId := range v1AP.AccountIds {
-		idElements := strings.Split(actionId, utils.CONCATENATED_KEY_SEP)
-		if len(idElements) != 3 {
+		idElements := strings.Split(actionId, "_")
+		if len(idElements) != 2 {
 			continue
 		}
-		v1AP.AccountIds[idx] = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
+		v1AP.AccountIds[idx] = idElements[1]
 	}
-	ap = engine.ActionPlan{
+	ap = &engine.ActionPlan{
 		Id:         v1AP.Id,
 		AccountIDs: make(utils.StringMap),
 	}
