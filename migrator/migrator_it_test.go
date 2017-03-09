@@ -78,7 +78,7 @@ func TestOnStorITMongoConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	onStorCfg = mgoITCfg.StorDBName
-	mig = NewMigrator(mgoITdb, mgoITdb, utils.MONGO, utils.JSON, mgoITdb, utils.MONGO)
+	//mig = NewMigrator(mgoITdb, mgoITdb, utils.MONGO, utils.JSON, mgoITdb, utils.MONGO)
 }
 
 func TestOnStorITMongo(t *testing.T) {
