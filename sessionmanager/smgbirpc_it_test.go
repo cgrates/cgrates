@@ -151,7 +151,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	if err = smgBiRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(50 * time.Millisecond)) // Give time for  debits to occur
+	time.Sleep(time.Duration(100 * time.Millisecond)) // Give time for  debits to occur
 	if err := smgRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 0 {

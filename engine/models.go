@@ -451,17 +451,17 @@ func (t TBLSMCosts) TableName() string {
 }
 
 type TpResourceLimit struct {
-	ID               int64
-	Tpid             string
-	Tag              string  `index:"0" re:""`
-	FilterType       string  `index:"1" re:"^\*[A-Za-z].*"`
-	FilterFieldName  string  `index:"2" re:""`
-	FilterValues     string  `index:"3" re:""`
-	ActivationTime   string  `index:"4" re:""`
-	Weight           float64 `index:"5" re:"\d+\.?\d*"`
-	Limit            string  `index:"6" re:""`
-	ActionTriggerIds string  `index:"7" re:""`
-	CreatedAt        time.Time
+	ID                int64
+	Tpid              string
+	Tag               string  `index:"0" re:""`
+	FilterType        string  `index:"1" re:"^\*[A-Za-z].*"`
+	FilterFieldName   string  `index:"2" re:""`
+	FilterFieldValues string  `index:"3" re:""`
+	ActivationTime    string  `index:"4" re:""`
+	Weight            float64 `index:"5" re:"\d+\.?\d*"`
+	Limit             string  `index:"6" re:""`
+	ActionTriggerIds  string  `index:"7" re:""`
+	CreatedAt         time.Time
 }
 
 type TBLVersion struct {

@@ -867,7 +867,7 @@ func (tps TpResourceLimits) AsTPResourceLimits() map[string]*utils.TPResourceLim
 			resLimit.Filters = append(resLimit.Filters, &utils.TPRequestFilter{
 				Type:      tp.FilterType,
 				FieldName: tp.FilterFieldName,
-				Values:    strings.Split(tp.FilterValues, utils.INFIELD_SEP)})
+				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
 		if tp.ActionTriggerIds != "" {
 			resLimit.ActionTriggerIDs = append(resLimit.ActionTriggerIDs, strings.Split(tp.ActionTriggerIds, utils.INFIELD_SEP)...)

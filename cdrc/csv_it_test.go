@@ -155,12 +155,9 @@ func TestCsvITAnalyseCDRs(t *testing.T) {
 	} else if len(reply) != 6 { // 1 injected, 1 rated, 1 *raw and it's pair in *default run
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := cdrcRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{DestinationPrefixes: []string{"08651"}}, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 0 { // Original 08651 was converted
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	if err := cdrcRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{DestinationPrefixes: []string{"08651"}}, &reply); err == nil || err.Error() != utils.NotFoundCaps {
+		t.Error("Unexpected error: ", err) // Original 08651 was converted
 	}
-
 }
 
 func TestCsvITKillEngine(t *testing.T) {

@@ -34,7 +34,7 @@ type Storage interface {
 	GetKeysForPrefix(string) ([]string, error)
 	RebuildReverseForPrefix(string) error
 	GetVersions(itm string) (vrs Versions, err error)
-	SetVersions(vrs Versions) (err error)
+	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
 	SelectDatabase(dbName string) (err error)
 }
@@ -199,6 +199,7 @@ type CdrStorage interface {
 	SetCDR(*CDR, bool) error
 	SetSMCost(smc *SMCost) error
 	GetSMCosts(cgrid, runid, originHost, originIDPrfx string) ([]*SMCost, error)
+	RemoveSMCost(*SMCost) error
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 
@@ -249,6 +250,7 @@ type LoadWriter interface {
 	SetTpActionPlans([]TpActionPlan) error
 	SetTpActionTriggers([]TpActionTrigger) error
 	SetTpAccountActions([]TpAccountAction) error
+	SetTpResourceLimits(TpResourceLimits) error
 }
 
 type Marshaler interface {

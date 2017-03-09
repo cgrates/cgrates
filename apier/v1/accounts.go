@@ -46,30 +46,37 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	acntID := utils.AccountKey(attrs.Tenant, attrs.Account)
-	acntAPids, err := self.RatingDb.GetAccountActionPlans(acntID, false, utils.NonTransactional)
-	if err != nil && err != utils.ErrNotFound {
-		return utils.NewErrServerError(err)
-	}
-	var acntAPs []*engine.ActionPlan
-	for _, apID := range acntAPids {
-		if ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
-			return err
-		} else if ap != nil {
-			acntAPs = append(acntAPs, ap)
+	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
+		acntAPids, err := self.RatingDb.GetAccountActionPlans(acntID, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return nil, utils.NewErrServerError(err)
 		}
-	}
-	accountATs := make([]*AccountActionTiming, 0) // needs to be initialized if remains empty
-	for _, ap := range acntAPs {
-		for _, at := range ap.ActionTimings {
-			accountATs = append(accountATs, &AccountActionTiming{
-				ActionPlanId: ap.Id,
-				Uuid:         at.Uuid,
-				ActionsId:    at.ActionsID,
-				NextExecTime: at.GetNextStartTime(time.Now()),
-			})
+		var acntAPs []*engine.ActionPlan
+		for _, apID := range acntAPids {
+			if ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
+				return nil, err
+			} else if ap != nil {
+				acntAPs = append(acntAPs, ap)
+			}
 		}
+
+		accountATs := make([]*AccountActionTiming, 0) // needs to be initialized if remains empty
+		for _, ap := range acntAPs {
+			for _, at := range ap.ActionTimings {
+				accountATs = append(accountATs, &AccountActionTiming{
+					ActionPlanId: ap.Id,
+					Uuid:         at.Uuid,
+					ActionsId:    at.ActionsID,
+					NextExecTime: at.GetNextStartTime(time.Now()),
+				})
+			}
+		}
+		return accountATs, nil
+	}, 0, utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return err
 	}
-	*reply = accountATs
+	*reply = acntATsIf.([]*AccountActionTiming)
 	return nil
 }
 

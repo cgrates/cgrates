@@ -825,10 +825,10 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(20) * time.Millisecond)
 	if maxUsage != 120 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
+	time.Sleep(time.Duration(20) * time.Millisecond)
 	var aSessions []*ActiveSession
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
 		utils.ACCID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {

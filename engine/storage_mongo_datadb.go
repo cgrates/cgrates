@@ -640,6 +640,11 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.ResourceLimitsPrefix+idResult.Id)
 		}
+	case utils.AccountActionPlansPrefix:
+		iter := db.C(colRL).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.AccountActionPlansPrefix+keyResult.Key)
+		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 	}

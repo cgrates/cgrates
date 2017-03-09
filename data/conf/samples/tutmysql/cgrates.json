@@ -112,4 +112,8 @@
 	"enabled": true,							// starts Aliases service: <true|false>.
 },
 
+"sm_generic": {
+	"enabled": true,
+},
+
 }

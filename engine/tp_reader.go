@@ -1618,58 +1618,57 @@ func (tpr *TpReader) LoadResourceLimits() error {
 	return tpr.LoadResourceLimitsFiltered("")
 }
 
-func (tpr *TpReader) LoadAll() error {
-	var err error
-	if err = tpr.LoadDestinations(); err != nil {
-		return err
+func (tpr *TpReader) LoadAll() (err error) {
+	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadTimings(); err != nil {
-		return err
+	if err = tpr.LoadTimings(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadRates(); err != nil {
-		return err
+	if err = tpr.LoadRates(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadDestinationRates(); err != nil {
-		return err
+	if err = tpr.LoadDestinationRates(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadRatingPlans(); err != nil {
-		return err
+	if err = tpr.LoadRatingPlans(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadRatingProfiles(); err != nil {
-		return err
+	if err = tpr.LoadRatingProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadSharedGroups(); err != nil {
-		return err
+	if err = tpr.LoadSharedGroups(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadLCRs(); err != nil {
-		return err
+	if err = tpr.LoadLCRs(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadActions(); err != nil {
-		return err
+	if err = tpr.LoadActions(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadActionPlans(); err != nil {
-		return err
+	if err = tpr.LoadActionPlans(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadActionTriggers(); err != nil {
-		return err
+	if err = tpr.LoadActionTriggers(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadAccountActions(); err != nil {
-		return err
+	if err = tpr.LoadAccountActions(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadDerivedChargers(); err != nil {
-		return err
+	if err = tpr.LoadDerivedChargers(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadCdrStats(); err != nil {
-		return err
+	if err = tpr.LoadCdrStats(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadUsers(); err != nil {
-		return err
+	if err = tpr.LoadUsers(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadAliases(); err != nil {
-		return err
+	if err = tpr.LoadAliases(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
-	if err = tpr.LoadResourceLimits(); err != nil {
-		return err
+	if err = tpr.LoadResourceLimits(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
 	}
 	return nil
 }

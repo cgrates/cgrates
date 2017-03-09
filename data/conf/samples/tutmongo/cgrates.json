@@ -1,38 +1,37 @@
 {
 // CGRateS Configuration file
-//
-// Used for cgradmin
-// Starts rater, scheduler
+
 
 "general": {
 	"log_level": 7,
+	"reply_timeout": "30s",
 },
 
 "listen": {
-	"rpc_json": ":2012",				// RPC JSON listening address
-	"rpc_gob": ":2013",					// RPC GOB listening address
-	"http": ":2080",					// HTTP listening address
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
 },
 
- "tariffplan_db": {							// database used to store active tariff plan configuration
- 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
-	"db_port": 27017, 						// the port to reach the stordb
+ "tariffplan_db": {
+ 	"db_type": "mongo",
+	"db_port": 27017,
 },
 
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
-	"db_port": 27017, 						// the port to reach the stordb
+"data_db": {
+	"db_type": "mongo",
+	"db_port": 27017,
 },
 
 "stor_db": {
-	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
-	"db_port": 27017, 						// the port to reach the stordb
+	"db_type": "mongo",
+	"db_port": 27017,
 },
 
 
 "rals": {
-	"enabled": true,					// enable Rater service: <true|false>
+	"enabled": true,
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
@@ -48,32 +47,36 @@
 },
 
 "scheduler": {
-	"enabled": true,					// start Scheduler service: <true|false>
+	"enabled": true,
 },
 
 "cdrs": {
-	"enabled": true,					// start the CDR Server service:  <true|false>
+	"enabled": true,
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
 },
 
 "cdrstats": {
-	"enabled": true,					// starts the cdrstats service: <true|false>
+	"enabled": true,
 },
 
 "pubsubs": {
-	"enabled": true,				// starts PubSub service: <true|false>.
+	"enabled": true,
 },
 
 
 "users": {
-	"enabled": true,				// starts User service: <true|false>.
-	"indexes": ["Uuid"],			// user profile field indexes
+	"enabled": true,
+	"indexes": ["Uuid"],
 },
 
 "aliases": {
-	"enabled": true,							// starts Aliases service: <true|false>.
+	"enabled": true,
+},
+
+"sm_generic": {
+	"enabled": true,
 },
 
 

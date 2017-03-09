@@ -109,7 +109,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.CD.TimeEnd = self.CD.TimeStart.Add(dur)
 	self.CD.DurationIndex += dur
 	cc := &engine.CallCost{}
-	if err := self.rals.Call("Responder.MaxDebit", self.CD, cc); err != nil {
+	if err := self.rals.Call("Responder.MaxDebit", self.CD, cc); err != nil || cc.GetDuration() == 0 {
 		self.LastUsage = 0
 		self.LastDebit = 0
 		return 0, err
@@ -206,18 +206,38 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	return nil
 }
 
-// Session has ended, check debits and refund the extra charged duration
-func (self *SMGSession) close(endTime time.Time) error {
+// mergeCCs will merge the CallCosts recorded for this session
+func (self *SMGSession) mergeCCs() {
 	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
 		firstCC := self.CallCosts[0]
 		for _, cc := range self.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		end := firstCC.GetEndTime()
-		refundDuration := end.Sub(endTime)
-		self.refund(refundDuration)
 	}
-	return nil
+}
+
+// Session has ended, check debits and refund the extra charged duration
+func (self *SMGSession) close(endTime time.Time) (err error) {
+	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
+		chargedEndTime := self.CallCosts[len(self.CallCosts)-1].GetEndTime()
+		if endTime.After(chargedEndTime) { // we did not charge enough, make a manual debit here
+			extraDur := endTime.Sub(chargedEndTime)
+			if self.CD.LoopIndex > 0 {
+				self.CD.TimeStart = self.CD.TimeEnd
+			}
+			self.CD.TimeEnd = self.CD.TimeStart.Add(extraDur)
+			self.CD.DurationIndex += extraDur
+			cc := &engine.CallCost{}
+			if err = self.rals.Call("Responder.Debit", self.CD, cc); err == nil {
+				self.CallCosts = append(self.CallCosts, cc)
+				self.mergeCCs() // merge again so we can store the right value in db
+			}
+		} else {
+			self.mergeCCs()
+			err = self.refund(chargedEndTime.Sub(endTime))
+		}
+	}
+	return
 }
 
 // Send disconnect order to remote connection

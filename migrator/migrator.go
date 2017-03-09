@@ -54,7 +54,7 @@ func (m *Migrator) Migrate(taskID string) (err error) {
 			utils.UnsupportedMigrationTask,
 			fmt.Sprintf("task <%s> is not a supported migration task", taskID))
 	case utils.MetaSetVersions:
-		if err := m.storDB.SetVersions(engine.CurrentStorDBVersions()); err != nil {
+		if err := m.storDB.SetVersions(engine.CurrentStorDBVersions(), false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
