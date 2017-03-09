@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"encoding/json"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -198,17 +199,33 @@ func TestSMGa1ITDataSession1(t *testing.T) {
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)
 	}
-	/*
-		var cdrs []*engine.ExternalCDR
-		req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
-		if err := smgA1rpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
-			t.Error("Unexpected error: ", err.Error())
-		} else if len(cdrs) != 1 {
-			t.Error("Unexpected number of CDRs returned: ", len(cdrs))
-		} else {
-			if cdrs[0].Usage != "60" {
-				t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
-			}
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
+	if err := smgA1rpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "2202800" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
 		}
-	*/
+		var cc engine.CallCost
+		if err := json.Unmarshal([]byte(cdrs[0].CostDetails), &cc); err != nil {
+			t.Error(err)
+		}
+		if len(cc.Timespans) != 3 {
+			t.Errorf("Unexpected number of timespans: %+v", cc.Timespans)
+		}
+		if cc.RatedUsage != 2202800 {
+			t.Errorf("RatingUsage expected: %f received %f, callcost: %+v ", 2202800.0, cc.RatedUsage, cc)
+		}
+	}
+	expBalance := float64(10000000000 - 2202800) // initial - total usage
+	var acnt *engine.Account
+	if err := smgA1rpc.Call("ApierV2.GetAccount",
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "rpdata1"}, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != expBalance { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Expecting: %f, received: %f", expBalance, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	}
 }

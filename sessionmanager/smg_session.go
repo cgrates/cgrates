@@ -82,8 +82,6 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
-	//utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit, dur: %f, lastUsed: %v, ExtraDuration: %f, lastUsage: %f, lastDebit: %f, totalUsage: %f",
-	//	dur.Seconds(), lastUsed, self.ExtraDuration.Seconds(), self.LastUsage.Seconds(), self.LastDebit.Seconds(), self.TotalUsage.Seconds()))
 	requestedDuration := dur
 	if lastUsed != nil {
 		self.ExtraDuration = self.LastDebit - *lastUsed
@@ -111,7 +109,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.CD.TimeEnd = self.CD.TimeStart.Add(dur)
 	self.CD.DurationIndex += dur
 	cc := &engine.CallCost{}
-	if err := self.rals.Call("Responder.MaxDebit", self.CD, cc); err != nil {
+	if err := self.rals.Call("Responder.MaxDebit", self.CD, cc); err != nil || cc.GetDuration() == 0 {
 		self.LastUsage = 0
 		self.LastDebit = 0
 		return 0, err
@@ -221,12 +219,21 @@ func (self *SMGSession) mergeCCs() {
 // Session has ended, check debits and refund the extra charged duration
 func (self *SMGSession) close(endTime time.Time) (err error) {
 	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
-		self.mergeCCs()
-		chargedEndTime := self.CallCosts[0].GetEndTime()
-		if endTime.After(chargedEndTime) { // we did not charge enough, make a debit here
-			_, err = self.debit(endTime.Sub(chargedEndTime), nil)
-			self.mergeCCs() // merge again so we can store the right value in db
+		chargedEndTime := self.CallCosts[len(self.CallCosts)-1].GetEndTime()
+		if endTime.After(chargedEndTime) { // we did not charge enough, make a manual debit here
+			extraDur := endTime.Sub(chargedEndTime)
+			if self.CD.LoopIndex > 0 {
+				self.CD.TimeStart = self.CD.TimeEnd
+			}
+			self.CD.TimeEnd = self.CD.TimeStart.Add(extraDur)
+			self.CD.DurationIndex += extraDur
+			cc := &engine.CallCost{}
+			if err = self.rals.Call("Responder.Debit", self.CD, cc); err == nil {
+				self.CallCosts = append(self.CallCosts, cc)
+				self.mergeCCs() // merge again so we can store the right value in db
+			}
 		} else {
+			self.mergeCCs()
 			err = self.refund(chargedEndTime.Sub(endTime))
 		}
 	}
