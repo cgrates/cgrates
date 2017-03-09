@@ -272,6 +272,8 @@ const CGRATES_CFG_JSON = `
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
+	//"min_session_ttl": "",				// activates session_ttl randomization as minimum possible session_ttl
+	//"max_session_ttl": "",				// used in case of session_ttl randomization as maximum possible session_ttl, unlimited if not defined
 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
