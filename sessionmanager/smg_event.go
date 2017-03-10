@@ -20,6 +20,7 @@ package sessionmanager
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -185,17 +186,47 @@ func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) 
 }
 
 // GetSessionTTL retrieves SessionTTL setting out of SMGenericEvent
-func (self SMGenericEvent) GetSessionTTL() time.Duration {
+func (self SMGenericEvent) GetSessionTTL(sesTTL time.Duration, cfgSessionTTLMaxDelay *time.Duration) time.Duration {
 	valIf, hasVal := self[utils.SessionTTL]
-	if !hasVal {
-		return time.Duration(0)
+	if hasVal {
+		ttlStr, converted := utils.ConvertIfaceToString(valIf)
+		if !converted {
+			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot convert SessionTTL, disabling functionality for event: <%s>",
+				self.GetCGRID(utils.META_DEFAULT)))
+			return time.Duration(0)
+		}
+		var err error
+		if sesTTL, err = utils.ParseDurationWithSecs(ttlStr); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot parse SessionTTL, disabling functionality for event: <%s>",
+				self.GetCGRID(utils.META_DEFAULT)))
+			return time.Duration(0)
+		}
 	}
-	ttlStr, converted := utils.ConvertIfaceToString(valIf)
-	if !converted {
-		return time.Duration(0)
+	// Variable sessionTTL
+	var sessionTTLMaxDelay int64
+	if cfgSessionTTLMaxDelay != nil {
+		sessionTTLMaxDelay = cfgSessionTTLMaxDelay.Nanoseconds() / 1000000 // Milliseconds precision
 	}
-	ttl, _ := utils.ParseDurationWithSecs(ttlStr)
-	return ttl
+	if sesTTLMaxDelayIf, hasVal := self[utils.SessionTTLMaxDelay]; hasVal {
+		maxTTLDelaxStr, converted := utils.ConvertIfaceToString(sesTTLMaxDelayIf)
+		if !converted {
+			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot convert SessionTTLMaxDelay, disabling functionality for event: <%s>",
+				self.GetCGRID(utils.META_DEFAULT)))
+			return time.Duration(0)
+		}
+		if maxTTLDelay, err := utils.ParseDurationWithSecs(maxTTLDelaxStr); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot parse SessionTTLMaxDelay, disabling functionality for event: <%s>",
+				self.GetCGRID(utils.META_DEFAULT)))
+			return time.Duration(0)
+		} else {
+			sessionTTLMaxDelay = maxTTLDelay.Nanoseconds() / 1000000
+		}
+	}
+	if sessionTTLMaxDelay != 0 {
+		rand.Seed(time.Now().Unix())
+		sesTTL += time.Duration(rand.Int63n(sessionTTLMaxDelay) * 1000000)
+	}
+	return sesTTL
 }
 
 // GetSessionTTLLastUsed retrieves SessionTTLLastUsed setting out of SMGenericEvent

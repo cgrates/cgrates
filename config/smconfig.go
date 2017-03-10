@@ -97,8 +97,7 @@ type SmGenericConfig struct {
 	MinCallDuration     time.Duration
 	MaxCallDuration     time.Duration
 	SessionTTL          time.Duration
-	MinSessionTTL       *time.Duration
-	MaxSessionTTL       *time.Duration
+	SessionTTLMaxDelay  *time.Duration
 	SessionTTLLastUsed  *time.Duration
 	SessionTTLUsage     *time.Duration
 	SessionIndexes      utils.StringMap
@@ -156,18 +155,11 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 			return err
 		}
 	}
-	if jsnCfg.Min_session_ttl != nil {
-		if minSesTTL, err := utils.ParseDurationWithSecs(*jsnCfg.Min_session_ttl); err != nil {
+	if jsnCfg.Session_ttl_max_delay != nil {
+		if maxTTLDelay, err := utils.ParseDurationWithSecs(*jsnCfg.Session_ttl_max_delay); err != nil {
 			return err
 		} else {
-			self.MinSessionTTL = &minSesTTL
-		}
-	}
-	if jsnCfg.Max_session_ttl != nil {
-		if maxSesTTL, err := utils.ParseDurationWithSecs(*jsnCfg.Max_session_ttl); err != nil {
-			return err
-		} else {
-			self.MaxSessionTTL = &maxSesTTL
+			self.SessionTTLMaxDelay = &maxTTLDelay
 		}
 	}
 	if jsnCfg.Session_ttl_last_used != nil {

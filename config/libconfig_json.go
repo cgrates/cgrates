@@ -196,8 +196,7 @@ type SmGenericJsonCfg struct {
 	Min_call_duration     *string
 	Max_call_duration     *string
 	Session_ttl           *string
-	Min_session_ttl       *string
-	Max_session_ttl       *string
+	Session_ttl_max_delay *string
 	Session_ttl_last_used *string
 	Session_ttl_usage     *string
 	Session_indexes       *[]string

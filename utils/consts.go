@@ -309,6 +309,7 @@ const (
 	InstanceID                   = "InstanceID"
 	ActiveGoroutines             = "ActiveGoroutines"
 	SessionTTL                   = "SessionTTL"
+	SessionTTLMaxDelay           = "SessionTTLMaxDelay"
 	SessionTTLLastUsed           = "SessionTTLLastUsed"
 	SessionTTLUsage              = "SessionTTLUsage"
 	HandlerSubstractUsage        = "*substract_usage"

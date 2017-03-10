@@ -35,6 +35,7 @@ import (
 
 const (
 	MaxTimespansInCost = 50
+	MaxSessionTTL      = 10000 // maximum session TTL in miliseconds
 )
 
 var (
@@ -118,10 +119,8 @@ type smgSessionTerminator struct {
 
 // setSessionTerminator installs a new terminator for a session
 func (smg *SMGeneric) setSessionTerminator(s *SMGSession) {
-	ttl := smg.cgrCfg.SmGenericConfig.SessionTTL
-	if ttlEv := s.EventStart.GetSessionTTL(); ttlEv != 0 {
-		ttl = ttlEv
-	}
+	ttl := s.EventStart.GetSessionTTL(smg.cgrCfg.SmGenericConfig.SessionTTL,
+		smg.cgrCfg.SmGenericConfig.SessionTTLMaxDelay)
 	if ttl == 0 {
 		return
 	}
@@ -730,7 +729,9 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		}
 		smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns)
 	}
-	smg.resetTerminatorTimer(cgrID, gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
+	smg.resetTerminatorTimer(cgrID,
+		gev.GetSessionTTL(smg.cgrCfg.SmGenericConfig.SessionTTL, smg.cgrCfg.SmGenericConfig.SessionTTLMaxDelay),
+		gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
 	var evLastUsed time.Duration
 	if evLastUsed, err = gev.GetLastUsed(utils.META_DEFAULT); err == nil {

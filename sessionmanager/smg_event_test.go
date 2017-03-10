@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -129,6 +130,26 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	}
 	if extrFlds := smGev.GetExtraFields(); !reflect.DeepEqual(extrFlds, map[string]string{"Extra1": "Value1", "Extra2": "5", "LastUsed": "21s"}) {
 		t.Error("Unexpected: ", extrFlds)
+	}
+}
+
+func TestSMGenericEventGetSessionTTL(t *testing.T) {
+	smGev := SMGenericEvent{}
+	smGev[utils.EVENT_NAME] = "TEST_SESSION_TTL"
+	cfgSesTTL := time.Duration(5 * time.Second)
+	if sTTL := smGev.GetSessionTTL(time.Duration(5*time.Second), nil); sTTL != cfgSesTTL {
+		t.Errorf("Expecting: %v, received: %v", cfgSesTTL, sTTL)
+	}
+	smGev[utils.SessionTTL] = "6s"
+	eSesTTL := time.Duration(6 * time.Second)
+	if sTTL := smGev.GetSessionTTL(time.Duration(5*time.Second), nil); sTTL != eSesTTL {
+		t.Errorf("Expecting: %v, received: %v", eSesTTL, sTTL)
+	}
+	sesTTLMaxDelay := time.Duration(10 * time.Second)
+	if sTTL := smGev.GetSessionTTL(time.Duration(5*time.Second), &sesTTLMaxDelay); sTTL == eSesTTL || sTTL > eSesTTL+sesTTLMaxDelay {
+		t.Errorf("Received: %v", sTTL)
+	} else {
+		fmt.Println(sTTL)
 	}
 }
 
