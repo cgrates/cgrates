@@ -24,10 +24,12 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessionmanager"
@@ -35,49 +37,49 @@ import (
 )
 
 var (
-	smgA1CfgPath string
-	smgA1Cfg     *config.CGRConfig
-	smgA1rpc     *rpc.Client
+	a1CfgPath string
+	a1Cfg     *config.CGRConfig
+	a1rpc     *rpc.Client
 )
 
-func TestSMGa1ITLoadConfig(t *testing.T) {
-	smgA1CfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	if smgA1Cfg, err = config.NewCGRConfigFromFolder(smgA1CfgPath); err != nil {
+func TestA1itLoadConfig(t *testing.T) {
+	a1CfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	if a1Cfg, err = config.NewCGRConfigFromFolder(a1CfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestSMGa1ITResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(smgA1Cfg); err != nil {
+func TestA1itResetDataDB(t *testing.T) {
+	if err := engine.InitDataDb(a1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSMGa1ITResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(smgA1Cfg); err != nil {
+func TestA1itResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(a1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSMGa1ITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(smgA1CfgPath, *waitRater); err != nil {
+func TestA1itStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(a1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSMGa1ITRPCConn(t *testing.T) {
+func TestA1itRPCConn(t *testing.T) {
 	time.Sleep(1500 * time.Millisecond) // flushdb takes time in mongo
 	var err error
-	smgA1rpc, err = jsonrpc.Dial("tcp", smgA1Cfg.RPCJSONListen)
+	a1rpc, err = jsonrpc.Dial("tcp", a1Cfg.RPCJSONListen)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSMGa1ITLoadTPFromFolder(t *testing.T) {
+func TestA1itLoadTPFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "smg_a1")}
-	if err := smgA1rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "a1")}
+	if err := a1rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -95,26 +97,26 @@ func TestSMGa1ITLoadTPFromFolder(t *testing.T) {
 		TimeEnd:     tEnd,
 	}
 	var cc engine.CallCost
-	if err := smgA1rpc.Call("Responder.GetCost", cd, &cc); err != nil {
+	if err := a1rpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.Cost != 0.0 || cc.RatedUsage != 10240 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
 	}
 }
 
-func TestSMGa1ITAddBalance1(t *testing.T) {
+func TestA1itAddBalance1(t *testing.T) {
 	var reply string
 	argAdd := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "rpdata1",
 		BalanceType: utils.DATA, BalanceId: utils.StringPointer("rpdata1_test"),
 		Value: 10000000000}
-	if err := smgA1rpc.Call("ApierV1.AddBalance", argAdd, &reply); err != nil {
+	if err := a1rpc.Call("ApierV1.AddBalance", argAdd, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf(reply)
 	}
 	argGet := &utils.AttrGetAccount{Tenant: argAdd.Tenant, Account: argAdd.Account}
 	var acnt *engine.Account
-	if err := smgA1rpc.Call("ApierV2.GetAccount", argGet, &acnt); err != nil {
+	if err := a1rpc.Call("ApierV2.GetAccount", argGet, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		if acnt.BalanceMap[utils.DATA].GetTotalValue() != argAdd.Value { // We expect 11.5 since we have added in the previous test 1.5
@@ -123,7 +125,7 @@ func TestSMGa1ITAddBalance1(t *testing.T) {
 	}
 }
 
-func TestSMGa1ITDataSession1(t *testing.T) {
+func TestA1itDataSession1(t *testing.T) {
 	smgEv := sessionmanager.SMGenericEvent{
 		utils.EVENT_NAME:         "INITIATE_SESSION",
 		utils.TOR:                utils.DATA,
@@ -143,12 +145,11 @@ func TestSMGa1ITDataSession1(t *testing.T) {
 		utils.SessionTTLUsage:    "0s",
 	}
 	var maxUsage float64
-	if err := smgA1rpc.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := a1rpc.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	} else if maxUsage != 10240 {
 		t.Error("Received: ", maxUsage)
 	}
-
 	smgEv = sessionmanager.SMGenericEvent{
 		utils.EVENT_NAME:         "UPDATE_SESSION",
 		utils.ACCOUNT:            "rpdata1",
@@ -169,7 +170,7 @@ func TestSMGa1ITDataSession1(t *testing.T) {
 		utils.ANSWER_TIME:        "2017-03-03 11:39:32 +0100 CET",
 		utils.USAGE:              "2097152",
 	}
-	if err := smgA1rpc.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
+	if err := a1rpc.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	} else if maxUsage != 2097152 {
 		t.Error("Bad max usage: ", maxUsage)
@@ -191,17 +192,17 @@ func TestSMGa1ITDataSession1(t *testing.T) {
 		utils.TOR:            utils.DATA,
 	}
 	var rpl string
-	if err = smgA1rpc.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = a1rpc.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	if err := smgA1rpc.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); err != nil {
+	if err := a1rpc.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); err != nil {
 		t.Error(err)
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)
 	}
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
-	if err := smgA1rpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+	if err := a1rpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -222,10 +223,84 @@ func TestSMGa1ITDataSession1(t *testing.T) {
 	}
 	expBalance := float64(10000000000 - 2202800) // initial - total usage
 	var acnt *engine.Account
-	if err := smgA1rpc.Call("ApierV2.GetAccount",
+	if err := a1rpc.Call("ApierV2.GetAccount",
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "rpdata1"}, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != expBalance { // We expect 11.5 since we have added in the previous test 1.5
 		t.Errorf("Expecting: %f, received: %f", expBalance, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	}
+}
+
+func TestA1itConcurrentAPs(t *testing.T) {
+	var wg sync.WaitGroup
+	acnts := []string{"acnt1", "acnt2"}
+	// Set initial action plans
+	for _, acnt := range acnts {
+		wg.Add(1)
+		go func(acnt string) {
+			attrSetAcnt := v2.AttrSetAccount{
+				Tenant:        "cgrates.org",
+				Account:       acnt,
+				ActionPlanIDs: &[]string{"PACKAGE_1"},
+			}
+			var reply string
+			if err := a1rpc.Call("ApierV2.SetAccount", attrSetAcnt, &reply); err != nil {
+				t.Error(err)
+			}
+			wg.Done()
+		}(acnt)
+	}
+	wg.Wait()
+	// Make sure action plan was properly set
+	var aps []*engine.ActionPlan
+	if err := a1rpc.Call("ApierV1.GetActionPlan", v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
+		t.Error(err)
+	} else if len(aps[0].AccountIDs.Slice()) != len(acnts) {
+		t.Errorf("Received: %+v", aps[0])
+	}
+	// Change offer
+	for _, acnt := range acnts {
+		wg.Add(1)
+		go func(acnt string) {
+			var atms []*v1.AccountActionTiming
+			if err := a1rpc.Call("ApierV1.GetAccountActionPlan",
+				v1.AttrAcntAction{Tenant: "cgrates.org", Account: acnt}, &atms); err != nil {
+				t.Error(err)
+			} else if len(atms) != 2 || atms[0].ActionPlanId != "PACKAGE_1" {
+				t.Errorf("Received: %+v", atms)
+			}
+			var reply string
+			if err := a1rpc.Call("ApierV1.RemActionTiming",
+				v1.AttrRemActionTiming{Tenant: "cgrates.org", Account: acnt, ActionPlanId: "PACKAGE_1"}, &reply); err != nil {
+				t.Error(err)
+			}
+			attrSetAcnt := v2.AttrSetAccount{
+				Tenant:        "cgrates.org",
+				Account:       acnt,
+				ActionPlanIDs: &[]string{"PACKAGE_2"},
+			}
+			if err := a1rpc.Call("ApierV2.SetAccount", attrSetAcnt, &reply); err != nil {
+				t.Error(err)
+			}
+			wg.Done()
+		}(acnt)
+	}
+	wg.Wait()
+	// Make sure action plan was properly rem/set
+	if err := a1rpc.Call("ApierV1.GetActionPlan", v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
+		t.Error(err)
+	} else if len(aps[0].AccountIDs.Slice()) != 0 {
+		t.Errorf("Received: %+v", aps[0])
+	}
+	if err := a1rpc.Call("ApierV1.GetActionPlan", v1.AttrGetActionPlan{ID: "PACKAGE_2"}, &aps); err != nil {
+		t.Error(err)
+	} else if len(aps[0].AccountIDs.Slice()) != len(acnts) {
+		t.Errorf("Received: %+v", aps[0])
+	}
+}
+
+func TestA1itStopCgrEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
 	}
 }
