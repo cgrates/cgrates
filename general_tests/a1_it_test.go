@@ -21,6 +21,7 @@ package general_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -233,7 +234,10 @@ func TestA1itDataSession1(t *testing.T) {
 
 func TestA1itConcurrentAPs(t *testing.T) {
 	var wg sync.WaitGroup
-	acnts := []string{"acnt1", "acnt2"}
+	var acnts []string
+	for i := 0; i < 1000; i++ {
+		acnts = append(acnts, fmt.Sprintf("acnt_%d", i))
+	}
 	// Set initial action plans
 	for _, acnt := range acnts {
 		wg.Add(1)
@@ -260,25 +264,32 @@ func TestA1itConcurrentAPs(t *testing.T) {
 	}
 	// Change offer
 	for _, acnt := range acnts {
-		wg.Add(1)
+		wg.Add(3)
 		go func(acnt string) {
 			var atms []*v1.AccountActionTiming
 			if err := a1rpc.Call("ApierV1.GetAccountActionPlan",
 				v1.AttrAcntAction{Tenant: "cgrates.org", Account: acnt}, &atms); err != nil {
 				t.Error(err)
-			} else if len(atms) != 2 || atms[0].ActionPlanId != "PACKAGE_1" {
-				t.Errorf("Received: %+v", atms)
+				//} else if len(atms) != 2 || atms[0].ActionPlanId != "PACKAGE_1" {
+				//	t.Errorf("Received: %+v", atms)
 			}
+			wg.Done()
+		}(acnt)
+		go func(acnt string) {
 			var reply string
 			if err := a1rpc.Call("ApierV1.RemActionTiming",
 				v1.AttrRemActionTiming{Tenant: "cgrates.org", Account: acnt, ActionPlanId: "PACKAGE_1"}, &reply); err != nil {
 				t.Error(err)
 			}
+			wg.Done()
+		}(acnt)
+		go func(acnt string) {
 			attrSetAcnt := v2.AttrSetAccount{
 				Tenant:        "cgrates.org",
 				Account:       acnt,
 				ActionPlanIDs: &[]string{"PACKAGE_2"},
 			}
+			var reply string
 			if err := a1rpc.Call("ApierV2.SetAccount", attrSetAcnt, &reply); err != nil {
 				t.Error(err)
 			}
@@ -287,11 +298,13 @@ func TestA1itConcurrentAPs(t *testing.T) {
 	}
 	wg.Wait()
 	// Make sure action plan was properly rem/set
+	aps = []*engine.ActionPlan{}
 	if err := a1rpc.Call("ApierV1.GetActionPlan", v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps[0].AccountIDs.Slice()) != 0 {
 		t.Errorf("Received: %+v", aps[0])
 	}
+	aps = []*engine.ActionPlan{}
 	if err := a1rpc.Call("ApierV1.GetActionPlan", v1.AttrGetActionPlan{ID: "PACKAGE_2"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps[0].AccountIDs.Slice()) != len(acnts) {

@@ -116,7 +116,6 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
-
 		if attrs.ActionTimingId != "" { // delete only a action timing from action plan
 			for i, at := range ap.ActionTimings {
 				if at.Uuid == attrs.ActionTimingId {
