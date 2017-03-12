@@ -94,7 +94,7 @@ func TestGuardianGuardIDs(t *testing.T) {
 	for _, lockID := range lockIDs {
 		if itmLock, hasKey := Guardian.locksMap[lockID]; !hasKey {
 			t.Errorf("Cannot find lock for lockID: %s", lockID)
-		} else if itmLock.cnt != 1 {
+		} else if itmLock.count() != 1 {
 			t.Errorf("Unexpected itmLock found: %+v", itmLock)
 		}
 	}
@@ -102,17 +102,17 @@ func TestGuardianGuardIDs(t *testing.T) {
 	time.Sleep(20 * time.Microsecond)                                       // give time for goroutine to lock
 	if itmLock, hasKey := Guardian.locksMap["test1"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test1")
-	} else if itmLock.cnt != 1 {
+	} else if itmLock.count() != 1 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	}
 	if itmLock, hasKey := Guardian.locksMap["test2"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test2")
-	} else if itmLock.cnt != 2 {
+	} else if itmLock.count() != 2 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	}
 	if itmLock, hasKey := Guardian.locksMap["test3"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test3")
-	} else if itmLock.cnt != 2 {
+	} else if itmLock.count() != 2 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	}
 	Guardian.GuardIDs(0, lockIDs...)
@@ -124,15 +124,15 @@ func TestGuardianGuardIDs(t *testing.T) {
 		t.Errorf("locksMap should be have 3 elements, have: %+v", Guardian.locksMap)
 	} else if itmLock, hasKey := Guardian.locksMap["test1"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test1")
-	} else if itmLock.cnt != 1 {
+	} else if itmLock.count() != 1 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	} else if itmLock, hasKey := Guardian.locksMap["test2"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test2")
-	} else if itmLock.cnt != 1 {
+	} else if itmLock.count() != 1 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	} else if itmLock, hasKey := Guardian.locksMap["test3"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test2")
-	} else if itmLock.cnt != 1 {
+	} else if itmLock.count() != 1 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	}
 	Guardian.UnguardIDs(lockIDs...)

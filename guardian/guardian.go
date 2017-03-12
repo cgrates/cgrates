@@ -19,6 +19,7 @@ package guardian
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -32,19 +33,23 @@ func newItemLock(keyID string) *itemLock {
 // itemLock represents one lock with key autodestroy
 type itemLock struct {
 	keyID string // store it so we know what to destroy
-	cnt   int
+	cnt   int64
 	sync.Mutex
 }
 
 // unlock() executes combined lock with autoremoving lock from Guardian
 func (il *itemLock) unlock() {
-	il.cnt--
-	if il.cnt == 0 { // last lock in the queue
+	atomic.AddInt64(&il.cnt, -1)
+	if il.count() == 0 { // last lock in the queue
 		Guardian.Lock()
 		delete(Guardian.locksMap, il.keyID)
 		Guardian.Unlock()
 	}
 	il.Unlock()
+}
+
+func (il *itemLock) count() int64 {
+	return atomic.LoadInt64(&il.cnt)
 }
 
 // GuardianLock is an optimized locking system per locking key
@@ -64,7 +69,7 @@ func (guard *GuardianLock) lockItems(lockIDs []string) (itmLocks []*itemLock) {
 			itmLock = newItemLock(lockID)
 			Guardian.locksMap[lockID] = itmLock
 		}
-		itmLock.cnt++
+		atomic.AddInt64(&itmLock.cnt, 1)
 		itmLocks = append(itmLocks, itmLock)
 	}
 	guard.Unlock()
