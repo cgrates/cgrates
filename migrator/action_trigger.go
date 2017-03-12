@@ -37,38 +37,65 @@ type v1ActionTrigger struct {
 type v1ActionTriggers []*v1ActionTrigger
 
 func (m *Migrator) migrateActionTriggers() (err error) {
-	var atrrs engine.ActionTriggers
-	var v1atrskeys []string
-	v1atrskeys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
-	if err != nil {
-		return
-	}
-	for _, v1atrskey := range v1atrskeys {
-		v1atrs, err := m.getV1ActionTriggerFromDB(v1atrskey)
+	switch m.dataDBType {
+	case utils.REDIS:
+		var atrrs engine.ActionTriggers
+		var v1atrskeys []string
+		v1atrskeys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {
-			return err
+			return
 		}
-		v1atr := v1atrs
-		if v1atrs != nil {
-			atr := v1atr.AsActionTrigger()
-			atrrs = append(atrrs, atr)
-
-			if err := m.tpDB.SetActionTriggers(atr.ID, atrrs, utils.NonTransactional); err != nil {
+		for _, v1atrskey := range v1atrskeys {
+			v1atrs, err := m.getV1ActionTriggerFromDB(v1atrskey)
+			if err != nil {
 				return err
 			}
+			v1atr := v1atrs
+			if v1atrs != nil {
+				atr := v1atr.AsActionTrigger()
+				atrrs = append(atrrs, atr)
+			}
+			if err := m.tpDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
+				return err
+			}
+
+		}
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
+		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating ActionTrigger version into StorDB", err.Error()))
+		}
+		return
+	case utils.MONGO:
+		dataDB := m.tpDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
+		defer mgoDB.Session.Close()
+		var atrrs engine.ActionTriggers
+		var v1atr v1ActionTrigger
+		iter := mgoDB.C(utils.ACTION_TRIGGER_PREFIX).Find(nil).Iter()
+		for iter.Next(&v1atr) {
+			atr := v1atr.AsActionTrigger()
+			atrrs = append(atrrs, atr)
+		}
+		if err := m.tpDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
+			return err
+		}
+
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
+		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating ActionTrigger version into StorDB", err.Error()))
 		}
 	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
-	if err = m.tpDB.SetVersions(vrs); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
-	}
 	return
-}
 
+}
 func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger, err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
@@ -87,7 +114,7 @@ func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger,
 		mgoDB := tpDB.DB()
 		defer mgoDB.Session.Close()
 		v1Atr := new(v1ActionTrigger)
-		if err := mgoDB.C(v1AccountTBL).Find(bson.M{"id": key}).One(v1Atr); err != nil {
+		if err := mgoDB.C(utils.ACTION_TRIGGER_PREFIX).Find(bson.M{"id": key}).One(v1Atr); err != nil {
 			return nil, err
 		}
 		return v1Atr, nil

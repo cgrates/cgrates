@@ -32,29 +32,52 @@ type v1SharedGroup struct {
 }
 
 func (m *Migrator) migrateSharedGroups() (err error) {
-	var sgv1keys []string
-	sgv1keys, err = m.tpDB.GetKeysForPrefix(utils.SHARED_GROUP_PREFIX)
-	if err != nil {
-		return
-	}
-	for _, sgv1key := range sgv1keys {
-		v1sg, err := m.getv1SharedGroupFromDB(sgv1key)
+	switch m.dataDBType {
+	case utils.REDIS:
+		var sgv1keys []string
+		sgv1keys, err = m.tpDB.GetKeysForPrefix(utils.SHARED_GROUP_PREFIX)
 		if err != nil {
-			return err
+			return
 		}
-		sg := v1sg.AsSharedGroup()
-		if err = m.tpDB.SetSharedGroup(sg, utils.NonTransactional); err != nil {
-			return err
+		for _, sgv1key := range sgv1keys {
+			v1sg, err := m.getv1SharedGroupFromDB(sgv1key)
+			if err != nil {
+				return err
+			}
+			sg := v1sg.AsSharedGroup()
+			if err = m.tpDB.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+				return err
+			}
 		}
-
-	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.SHARED_GROUP_PREFIX: engine.CurrentStorDBVersions()[utils.SHARED_GROUP_PREFIX]}
-	if err = m.tpDB.SetVersions(vrs); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating SharedGroup version into tpDB", err.Error()))
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.SHARED_GROUP_PREFIX: engine.CurrentStorDBVersions()[utils.SHARED_GROUP_PREFIX]}
+		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating SharedGroup version into tpDB", err.Error()))
+		}
+		return
+	case utils.MONGO:
+		dataDB := m.tpDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
+		defer mgoDB.Session.Close()
+		var v1sg v1SharedGroup
+		iter := mgoDB.C(utils.SHARED_GROUP_PREFIX).Find(nil).Iter()
+		for iter.Next(&v1sg) {
+			sg := v1sg.AsSharedGroup()
+			if err = m.tpDB.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.SHARED_GROUP_PREFIX: engine.CurrentStorDBVersions()[utils.SHARED_GROUP_PREFIX]}
+		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating SharedGroup version into tpDB", err.Error()))
+		}
 	}
 	return
 }
@@ -77,7 +100,7 @@ func (m *Migrator) getv1SharedGroupFromDB(key string) (*v1SharedGroup, error) {
 		mgoDB := tpDB.DB()
 		defer mgoDB.Session.Close()
 		v1SG := new(v1SharedGroup)
-		if err := mgoDB.C(v1AccountTBL).Find(bson.M{"id": key}).One(v1SG); err != nil {
+		if err := mgoDB.C(utils.SHARED_GROUP_PREFIX).Find(bson.M{"id": key}).One(v1SG); err != nil {
 			return nil, err
 		}
 		return v1SG, nil

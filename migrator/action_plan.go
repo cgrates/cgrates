@@ -53,30 +53,56 @@ func (at *v1ActionPlan) IsASAP() bool {
 }
 
 func (m *Migrator) migrateActionPlans() (err error) {
-	var apsv1keys []string
-	apsv1keys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
-	if err != nil {
-		return
-	}
-	for _, apsv1key := range apsv1keys {
-		v1aps, err := m.getV1ActionPlansFromDB(apsv1key)
+	switch m.dataDBType {
+	case utils.REDIS:
+		var apsv1keys []string
+		apsv1keys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 		if err != nil {
-			return err
+			return
 		}
-		aps := v1aps.AsActionPlan()
-		if err = m.tpDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
-			return err
+		for _, apsv1key := range apsv1keys {
+			v1aps, err := m.getV1ActionPlansFromDB(apsv1key)
+			if err != nil {
+				return err
+			}
+			aps := v1aps.AsActionPlan()
+			if err = m.tpDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
+				return err
+			}
 		}
-	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.ACTION_PLAN_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_PLAN_PREFIX]}
-	if err = m.tpDB.SetVersions(vrs); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating ActionPlans version into StorDB", err.Error()))
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.ACTION_PLAN_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_PLAN_PREFIX]}
+		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating ActionPlans version into StorDB", err.Error()))
+		}
+		return
+	case utils.MONGO:
+		dataDB := m.tpDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
+		defer mgoDB.Session.Close()
+		var acp v1ActionPlan
+		iter := mgoDB.C(utils.ACTION_PLAN_PREFIX).Find(nil).Iter()
+		for iter.Next(&acp) {
+			aps := acp.AsActionPlan()
+			if err = m.tpDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+		}
 	}
 	return
+
 }
 
 func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlan, err error) {
@@ -97,7 +123,7 @@ func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlan, err 
 		mgoDB := tpDB.DB()
 		defer mgoDB.Session.Close()
 		v1aps := new(v1ActionPlan)
-		if err := mgoDB.C(v1AccountTBL).Find(bson.M{"id": key}).One(v1aps); err != nil {
+		if err := mgoDB.C(utils.ACTION_PLAN_PREFIX).Find(bson.M{"id": key}).One(v1aps); err != nil {
 			return nil, err
 		}
 		return v1aps, nil
