@@ -55,10 +55,9 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 				atr := v1atr.AsActionTrigger()
 				atrrs = append(atrrs, atr)
 			}
-			if err := m.tpDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
-				return err
-			}
-
+		}
+		if err := m.tpDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
+			return err
 		}
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
@@ -83,7 +82,6 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 		if err := m.tpDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
 			return err
 		}
-
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
 		if err = m.tpDB.SetVersions(vrs, false); err != nil {
@@ -92,9 +90,13 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating ActionTrigger version into StorDB", err.Error()))
 		}
+		return
+	default:
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for migrateActionTriggers method", m.dataDBType))
 	}
-	return
-
 }
 func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger, err error) {
 	switch m.dataDBType {

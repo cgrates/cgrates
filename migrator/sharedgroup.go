@@ -78,8 +78,13 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating SharedGroup version into tpDB", err.Error()))
 		}
+		return
+	default:
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for migrateSharedGroups method", m.dataDBType))
 	}
-	return
 }
 
 func (m *Migrator) getv1SharedGroupFromDB(key string) (*v1SharedGroup, error) {

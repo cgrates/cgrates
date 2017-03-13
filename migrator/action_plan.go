@@ -91,7 +91,6 @@ func (m *Migrator) migrateActionPlans() (err error) {
 				return err
 			}
 		}
-
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
 		if err = m.dataDB.SetVersions(vrs, false); err != nil {
@@ -100,9 +99,13 @@ func (m *Migrator) migrateActionPlans() (err error) {
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 		}
+		return
+	default:
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for migrateActionPlans method", m.dataDBType))
 	}
-	return
-
 }
 
 func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlan, err error) {

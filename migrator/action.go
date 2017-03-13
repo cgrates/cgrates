@@ -83,7 +83,6 @@ func (m *Migrator) migrateActions() (err error) {
 		if err := m.tpDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 			return err
 		}
-
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ACTION_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_PREFIX]}
 		if err = m.tpDB.SetVersions(vrs, false); err != nil {
@@ -92,8 +91,14 @@ func (m *Migrator) migrateActions() (err error) {
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 		}
+		return
+
+	default:
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for migrateActions method", m.dataDBType))
 	}
-	return
 }
 
 func (m *Migrator) getV1ActionFromDB(key string) (v1act *v1Action, err error) {

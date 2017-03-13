@@ -74,7 +74,6 @@ func (m *Migrator) migrateAccounts() (err error) {
 				}
 			}
 		}
-
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
 		if err = m.dataDB.SetVersions(vrs, false); err != nil {
@@ -83,10 +82,15 @@ func (m *Migrator) migrateAccounts() (err error) {
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 		}
+		return
+	default:
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for migrateAccounts method", m.dataDBType))
 	}
-	return
-
 }
+
 func (m *Migrator) getV1AccountFromDB(key string) (*v1Account, error) {
 	switch m.dataDBType {
 	case utils.REDIS:

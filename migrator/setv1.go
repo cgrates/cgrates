@@ -27,7 +27,7 @@ func (m *Migrator) SetV1onRedis(key string, bl []byte) (err error) {
 	return
 }
 
-func (m *Migrator) SetV1onMongoAccount(pref string, key string, x *v1Account) (err error) {
+func (m *Migrator) SetV1onMongoAccount(pref string, x *v1Account) (err error) {
 	dataDB := m.dataDB.(*engine.MongoStorage)
 	mgoDB := dataDB.DB()
 	defer mgoDB.Session.Close()
@@ -37,7 +37,7 @@ func (m *Migrator) SetV1onMongoAccount(pref string, key string, x *v1Account) (e
 	return
 }
 
-func (m *Migrator) SetV1onMongoAction(pref string, key string, x *v1Action) (err error) {
+func (m *Migrator) SetV1onMongoAction(pref string, x *v1Action) (err error) {
 	dataDB := m.dataDB.(*engine.MongoStorage)
 	mgoDB := dataDB.DB()
 	defer mgoDB.Session.Close()
@@ -47,7 +47,7 @@ func (m *Migrator) SetV1onMongoAction(pref string, key string, x *v1Action) (err
 	return
 }
 
-func (m *Migrator) SetV1onMongoActionPlan(pref string, key string, x *v1ActionPlan) (err error) {
+func (m *Migrator) SetV1onMongoActionPlan(pref string, x *v1ActionPlan) (err error) {
 	dataDB := m.dataDB.(*engine.MongoStorage)
 	mgoDB := dataDB.DB()
 	defer mgoDB.Session.Close()
@@ -57,7 +57,7 @@ func (m *Migrator) SetV1onMongoActionPlan(pref string, key string, x *v1ActionPl
 	return
 }
 
-func (m *Migrator) SetV1onMongoActionTrigger(pref string, key string, x *v1ActionTrigger) (err error) {
+func (m *Migrator) SetV1onMongoActionTrigger(pref string, x *v1ActionTrigger) (err error) {
 	dataDB := m.dataDB.(*engine.MongoStorage)
 	mgoDB := dataDB.DB()
 	defer mgoDB.Session.Close()
@@ -67,7 +67,7 @@ func (m *Migrator) SetV1onMongoActionTrigger(pref string, key string, x *v1Actio
 	return
 }
 
-func (m *Migrator) SetV1onMongoSharedGroup(pref string, key string, x *v1SharedGroup) (err error) {
+func (m *Migrator) SetV1onMongoSharedGroup(pref string, x *v1SharedGroup) (err error) {
 	dataDB := m.dataDB.(*engine.MongoStorage)
 	mgoDB := dataDB.DB()
 	defer mgoDB.Session.Close()
