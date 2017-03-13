@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -29,6 +30,8 @@ import (
 var v1ActionTriggers1 = `{"Id" : "Test","BalanceType": "*monetary","BalanceDirection": "*out","ThresholdType":"*max_balance", "ThresholdValue" :2, "ActionsId": "TEST_ACTIONS", "Executed": true}`
 
 func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
+	tim := time.Date(0001, time.January, 1, 0, 0, 0, 0, time.UTC)
+
 	atrs := &engine.ActionTrigger{
 		ID: "Test",
 		Balance: &engine.BalanceFilter{
@@ -39,6 +42,7 @@ func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
 		ThresholdValue: 2,
 		ActionsID:      "TEST_ACTIONS",
 		Executed:       true,
+		ActivationDate: tim,
 	}
 	var v1actstrgrs v1ActionTrigger
 	if err := json.Unmarshal([]byte(v1ActionTriggers1), &v1actstrgrs); err != nil {

@@ -76,3 +76,12 @@ func (m *Migrator) SetV1onMongoSharedGroup(pref string, x *v1SharedGroup) (err e
 	}
 	return
 }
+func (m *Migrator) DropV1Colection(pref string) (err error) {
+	dataDB := m.dataDB.(*engine.MongoStorage)
+	mgoDB := dataDB.DB()
+	defer mgoDB.Session.Close()
+	if err := mgoDB.C(pref).DropCollection(); err != nil {
+		return err
+	}
+	return
+}

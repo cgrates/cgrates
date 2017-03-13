@@ -109,12 +109,12 @@ func testOnStorITFlush(t *testing.T) {
 }
 
 func testMigratorAccounts(t *testing.T) {
-	v1b := &v1Balance{Value: 10, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{}}}
-	v1Acc := &v1Account{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{}}}}}}
+	v1b := &v1Balance{Value: 10, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
+	v1Acc := &v1Account{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
 	v2 := &engine.Balance{Uuid: "", ID: "", Value: 10, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
-		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{}}, TimingIDs: utils.NewStringMap("")}
+		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
 	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
-		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{}}, TimingIDs: utils.NewStringMap()}
+		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
 	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.VOICE: engine.Balances{v2}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
 	switch {
 	case dbtype == utils.REDIS:
@@ -150,40 +150,15 @@ func testMigratorAccounts(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting account ", err.Error())
 		}
-		// if !reflect.DeepEqual(testAccount, result) {
-		// 	t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
-		// }
-		if !reflect.DeepEqual(testAccount.ActionTriggers, result.ActionTriggers) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.ActionTriggers, result.ActionTriggers)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].ID, result.BalanceMap["*monetary"][0].ID) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].ID, result.BalanceMap["*monetary"][0].ID)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].Uuid, result.BalanceMap["*monetary"][0].Uuid) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].Uuid, result.BalanceMap["*monetary"][0].Uuid)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].Value, result.BalanceMap["*monetary"][0].Value) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].Value, result.BalanceMap["*monetary"][0].Value)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].Directions, result.BalanceMap["*monetary"][0].Directions) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].Directions, result.BalanceMap["*monetary"][0].Directions)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].ExpirationDate, result.BalanceMap["*monetary"][0].ExpirationDate) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].ExpirationDate, result.BalanceMap["*monetary"][0].ExpirationDate)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].Weight, result.BalanceMap["*monetary"][0].Weight) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].Weight, result.BalanceMap["*monetary"][0].Weight)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].DestinationIDs, result.BalanceMap["*monetary"][0].DestinationIDs) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].DestinationIDs, result.BalanceMap["*monetary"][0].DestinationIDs)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].RatingSubject, result.BalanceMap["*monetary"][0].RatingSubject) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].RatingSubject, result.BalanceMap["*monetary"][0].RatingSubject)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].Categories, result.BalanceMap["*monetary"][0].Categories) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].Categories, result.BalanceMap["*monetary"][0].Categories)
-		} else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].SharedGroups, result.BalanceMap["*monetary"][0].SharedGroups) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].SharedGroups, result.BalanceMap["*monetary"][0].SharedGroups)
-		} //FixMe else if !reflect.DeepEqual(testAccount.BalanceMap["*monetary"][0].Timings[0], result.BalanceMap["*monetary"][0].Timings[0]) {
-		//	t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*monetary"][0].Timings[0], result.BalanceMap["*monetary"][0].Timings[0])
-		//	}
+		if !reflect.DeepEqual(testAccount, result) {
+			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
+		}
 	}
 }
 
 func testMigratorActionPlans(t *testing.T) {
-	v1ap := &v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: new(engine.RITiming)}}
-	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: new(engine.RITiming)}}}}
+	v1ap := &v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
+	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
 	switch {
 	case dbtype == utils.REDIS:
 		bit, err := mig.mrshlr.Marshal(v1ap)
@@ -226,7 +201,7 @@ func testMigratorActionPlans(t *testing.T) {
 		if ap.Id != result.Id || !reflect.DeepEqual(ap.AccountIDs, result.AccountIDs) {
 			t.Errorf("Expecting: %+v, received: %+v", *ap, result)
 		} else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
-			//FixMe		t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
+			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
 		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
 			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
@@ -236,13 +211,14 @@ func testMigratorActionPlans(t *testing.T) {
 func testMigratorActionTriggers(t *testing.T) {
 	tim := time.Date(0001, time.January, 1, 0, 0, 0, 0, time.UTC)
 	v1atrs := &v1ActionTrigger{
-		Id:               "Test",
-		BalanceType:      "*monetary",
-		BalanceDirection: "*out",
-		ThresholdType:    "*max_balance",
-		ThresholdValue:   2,
-		ActionsId:        "TEST_ACTIONS",
-		Executed:         true,
+		Id:                    "Test",
+		BalanceType:           "*monetary",
+		BalanceDirection:      "*out",
+		ThresholdType:         "*max_balance",
+		ThresholdValue:        2,
+		ActionsId:             "TEST_ACTIONS",
+		Executed:              true,
+		BalanceExpirationDate: tim,
 	}
 	atrs := engine.ActionTriggers{
 		&engine.ActionTrigger{
@@ -291,21 +267,50 @@ func testMigratorActionTriggers(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating ActionTriggers ", err.Error())
 		}
-		//result
-		_, err = mig.tpDB.GetActionTriggers(v1atrs.Id, true, utils.NonTransactional)
+		result, err := mig.tpDB.GetActionTriggers(v1atrs.Id, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting ActionTriggers ", err.Error())
 		}
 		//FixMe The flush doesn't seem to clear this collection
-		// if !reflect.DeepEqual(atrs, result) {
-		// 	t.Errorf("Expecting: %+v, received: %+v", atrs, result)
-		// }
+		if !reflect.DeepEqual(atrs[0].ID, result[0].ID) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ID, result[0].ID)
+		} else if !reflect.DeepEqual(atrs[0].UniqueID, result[0].UniqueID) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].UniqueID, result[0].UniqueID)
+		} else if !reflect.DeepEqual(atrs[0].ThresholdType, result[0].ThresholdType) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ThresholdType, result[0].ThresholdType)
+		} else if !reflect.DeepEqual(atrs[0].ThresholdValue, result[0].ThresholdValue) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ThresholdValue, result[0].ThresholdValue)
+		} else if !reflect.DeepEqual(atrs[0].Recurrent, result[0].Recurrent) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Recurrent, result[0].Recurrent)
+		} else if !reflect.DeepEqual(atrs[0].MinSleep, result[0].MinSleep) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].MinSleep, result[0].MinSleep)
+		} else if !reflect.DeepEqual(atrs[0].ExpirationDate, result[0].ExpirationDate) {
+			//	t.Errorf("Expecting: %+v, received: %+v", atrs[0].ExpirationDate, result[0].ExpirationDate)
+		} else if !reflect.DeepEqual(atrs[0].MinSleep, result[0].MinSleep) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].MinSleep, result[0].MinSleep)
+		} else if !reflect.DeepEqual(atrs[0].ActivationDate, result[0].ActivationDate) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ActivationDate, result[0].ActivationDate)
+		} else if !reflect.DeepEqual(atrs[0].Balance, result[0].Balance) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance, result[0].Balance)
+		} else if !reflect.DeepEqual(atrs[0].ActionsID, result[0].ActionsID) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ActionsID, result[0].ActionsID)
+		} else if !reflect.DeepEqual(atrs[0].MinQueuedItems, result[0].MinQueuedItems) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].MinQueuedItems, result[0].MinQueuedItems)
+		} else if !reflect.DeepEqual(atrs[0].Executed, result[0].Executed) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Executed, result[0].Executed)
+		} else if !reflect.DeepEqual(atrs[0].LastExecutionTime, result[0].LastExecutionTime) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].LastExecutionTime, result[0].LastExecutionTime)
+		}
+		err = mig.DropV1Colection(utils.ACTION_TRIGGER_PREFIX)
+		if err != nil {
+			t.Error("Error when flushing v1 ActionTriggers ", err.Error())
+		}
 	}
 }
 
 func testMigratorActions(t *testing.T) {
-	v1act := &v1Action{Id: "test", ActionType: "", BalanceType: "", Direction: "INBOUND", ExtraParameters: "", ExpirationString: "", Balance: &v1Balance{}}
-	act := engine.Actions{&engine.Action{Id: "test", ActionType: "", ExtraParameters: "", ExpirationString: "", Weight: 0.00, Balance: &engine.BalanceFilter{}}}
+	v1act := &v1Action{Id: "test", ActionType: "", BalanceType: "", Direction: "INBOUND", ExtraParameters: "", ExpirationString: "", Balance: &v1Balance{Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}
+	act := engine.Actions{&engine.Action{Id: "test", ActionType: "", ExtraParameters: "", ExpirationString: "", Weight: 0.00, Balance: &engine.BalanceFilter{Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
 	switch {
 	case dbtype == utils.REDIS:
 		bit, err := mig.mrshlr.Marshal(v1act)
@@ -337,16 +342,17 @@ func testMigratorActions(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Actions ", err.Error())
 		}
-		//FixMe
-		//result
-		_, err = mig.tpDB.GetActions(v1act.Id, true, utils.NonTransactional)
+		result, err := mig.tpDB.GetActions(v1act.Id, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Actions ", err.Error())
 		}
-		//FixMe The flush doesn't seem to clear this collection
-		// if !reflect.DeepEqual(act, result) {
-		// 	t.Errorf("Expecting: %+v, received: %+v", act, result)
-		// }
+		if !reflect.DeepEqual(act[0].Balance.Timings, result[0].Balance.Timings) {
+			t.Errorf("Expecting: %+v, received: %+v", act[0].Balance.Timings, result[0].Balance.Timings)
+		}
+		err = mig.DropV1Colection(utils.ACTION_PREFIX)
+		if err != nil {
+			t.Error("Error when flushing v1 Actions ", err.Error())
+		}
 	}
 }
 

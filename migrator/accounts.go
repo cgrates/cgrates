@@ -46,7 +46,8 @@ func (m *Migrator) migrateAccounts() (err error) {
 			if err != nil {
 				return err
 			}
-			if acnt := v1Acnt.AsAccount(); acnt != nil {
+			if v1Acnt != nil {
+				acnt := v1Acnt.AsAccount()
 				if err = m.dataDB.SetAccount(acnt); err != nil {
 					return err
 				}
@@ -200,6 +201,7 @@ func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 				Timings:        oldBal.Timings,
 				TimingIDs:      utils.ParseStringMap(oldBal.TimingIDs),
 				Disabled:       oldBal.Disabled,
+				Factor:         engine.ValueFactor{},
 			}
 		}
 	}
