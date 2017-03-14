@@ -58,6 +58,8 @@ DROP INDEX IF EXISTS cgrid_smcost_idx;
 CREATE INDEX cgrid_smcost_idx ON sm_costs (cgrid, run_id);
 DROP INDEX IF EXISTS origin_smcost_idx;
 CREATE INDEX origin_smcost_idx ON sm_costs (origin_host, origin_id);
+DROP INDEX IF EXISTS run_origin_smcost_idx;
+CREATE INDEX run_origin_smcost_idx ON sm_costs (run_id, origin_id);
 DROP INDEX IF EXISTS deleted_at_smcost_idx;
 CREATE INDEX deleted_at_smcost_idx ON sm_costs (deleted_at);
 

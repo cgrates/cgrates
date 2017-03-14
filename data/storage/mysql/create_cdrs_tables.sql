@@ -52,5 +52,6 @@ CREATE TABLE sm_costs (
   PRIMARY KEY (`id`),
   UNIQUE KEY costid (cgrid, run_id),
   KEY origin_idx (origin_host, origin_id),
+  KEY origin_idx (run_id, origin_id),
   KEY deleted_at_idx (deleted_at)
 );
