@@ -209,7 +209,8 @@ func testMigratorActionPlans(t *testing.T) {
 }
 
 func testMigratorActionTriggers(t *testing.T) {
-	tim := time.Date(0001, time.January, 1, 0, 0, 0, 0, time.UTC)
+	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()
+	var v1Atr v1ActionTrigger
 	v1atrs := &v1ActionTrigger{
 		Id:                    "Test",
 		BalanceType:           "*monetary",
@@ -224,8 +225,10 @@ func testMigratorActionTriggers(t *testing.T) {
 		&engine.ActionTrigger{
 			ID: "Test",
 			Balance: &engine.BalanceFilter{
-				Type:       utils.StringPointer(utils.MONETARY),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Timings:        []*engine.RITiming{},
+				ExpirationDate: utils.TimePointer(tim),
+				Type:           utils.StringPointer(utils.MONETARY),
+				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			},
 			ExpirationDate:    tim,
 			LastExecutionTime: tim,
@@ -242,6 +245,9 @@ func testMigratorActionTriggers(t *testing.T) {
 		if err != nil {
 			t.Error("Error when marshaling ", err.Error())
 		}
+		if err := mig.mrshlr.Unmarshal(bit, &v1Atr); err != nil {
+			t.Error("Error when setting v1 ActionTriggers ", err.Error())
+		}
 		setv1id := utils.ACTION_TRIGGER_PREFIX + v1atrs.Id
 		err = mig.SetV1onRedis(setv1id, bit)
 		if err != nil {
@@ -255,23 +261,6 @@ func testMigratorActionTriggers(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting ActionTriggers ", err.Error())
 		}
-		if !reflect.DeepEqual(atrs, result) {
-			t.Errorf("Expecting: %+v, received: %+v", atrs, result)
-		}
-	case dbtype == utils.MONGO:
-		err := mig.SetV1onMongoActionTrigger(utils.ACTION_TRIGGER_PREFIX, v1atrs)
-		if err != nil {
-			t.Error("Error when setting v1 ActionTriggers ", err.Error())
-		}
-		err = mig.Migrate("migrateActionTriggers")
-		if err != nil {
-			t.Error("Error when migrating ActionTriggers ", err.Error())
-		}
-		result, err := mig.tpDB.GetActionTriggers(v1atrs.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting ActionTriggers ", err.Error())
-		}
-		//FixMe The flush doesn't seem to clear this collection
 		if !reflect.DeepEqual(atrs[0].ID, result[0].ID) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ID, result[0].ID)
 		} else if !reflect.DeepEqual(atrs[0].UniqueID, result[0].UniqueID) {
@@ -285,13 +274,13 @@ func testMigratorActionTriggers(t *testing.T) {
 		} else if !reflect.DeepEqual(atrs[0].MinSleep, result[0].MinSleep) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].MinSleep, result[0].MinSleep)
 		} else if !reflect.DeepEqual(atrs[0].ExpirationDate, result[0].ExpirationDate) {
-			//	t.Errorf("Expecting: %+v, received: %+v", atrs[0].ExpirationDate, result[0].ExpirationDate)
-		} else if !reflect.DeepEqual(atrs[0].MinSleep, result[0].MinSleep) {
-			t.Errorf("Expecting: %+v, received: %+v", atrs[0].MinSleep, result[0].MinSleep)
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ExpirationDate, result[0].ExpirationDate)
 		} else if !reflect.DeepEqual(atrs[0].ActivationDate, result[0].ActivationDate) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ActivationDate, result[0].ActivationDate)
 		} else if !reflect.DeepEqual(atrs[0].Balance, result[0].Balance) {
-			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance, result[0].Balance)
+			//	t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance, result[0].Balance)
+		} else if !reflect.DeepEqual(atrs[0].Weight, result[0].Weight) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Weight, result[0].Weight)
 		} else if !reflect.DeepEqual(atrs[0].ActionsID, result[0].ActionsID) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ActionsID, result[0].ActionsID)
 		} else if !reflect.DeepEqual(atrs[0].MinQueuedItems, result[0].MinQueuedItems) {
@@ -300,6 +289,57 @@ func testMigratorActionTriggers(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Executed, result[0].Executed)
 		} else if !reflect.DeepEqual(atrs[0].LastExecutionTime, result[0].LastExecutionTime) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].LastExecutionTime, result[0].LastExecutionTime)
+		}
+		//Testing each field of balance
+		if !reflect.DeepEqual(atrs[0].Balance.Uuid, result[0].Balance.Uuid) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Uuid, result[0].Balance.Uuid)
+		} else if !reflect.DeepEqual(atrs[0].Balance.ID, result[0].Balance.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.ID, result[0].Balance.ID)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Type, result[0].Balance.Type) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Type, result[0].Balance.Type)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Value, result[0].Balance.Value) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Value, result[0].Balance.Value)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Directions, result[0].Balance.Directions) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Directions, result[0].Balance.Directions)
+		} else if !reflect.DeepEqual(atrs[0].Balance.ExpirationDate, result[0].Balance.ExpirationDate) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.ExpirationDate, result[0].Balance.ExpirationDate)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Weight, result[0].Balance.Weight) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Weight, result[0].Balance.Weight)
+		} else if !reflect.DeepEqual(atrs[0].Balance.DestinationIDs, result[0].Balance.DestinationIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.DestinationIDs, result[0].Balance.DestinationIDs)
+		} else if !reflect.DeepEqual(atrs[0].Balance.RatingSubject, result[0].Balance.RatingSubject) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.RatingSubject, result[0].Balance.RatingSubject)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Categories, result[0].Balance.Categories) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Categories, result[0].Balance.Categories)
+		} else if !reflect.DeepEqual(atrs[0].Balance.SharedGroups, result[0].Balance.SharedGroups) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.SharedGroups, result[0].Balance.SharedGroups)
+		} else if !reflect.DeepEqual(atrs[0].Balance.TimingIDs, result[0].Balance.TimingIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.TimingIDs, result[0].Balance.TimingIDs)
+		} else if !reflect.DeepEqual(atrs[0].Balance.TimingIDs, result[0].Balance.TimingIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Timings, result[0].Balance.Timings)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Disabled, result[0].Balance.Disabled) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Disabled, result[0].Balance.Disabled)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Factor, result[0].Balance.Factor) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Factor, result[0].Balance.Factor)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Blocker, result[0].Balance.Blocker) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Blocker, result[0].Balance.Blocker)
+		}
+
+	case dbtype == utils.MONGO:
+		err := mig.SetV1onMongoActionTrigger(utils.ACTION_TRIGGER_PREFIX, v1atrs)
+		if err != nil {
+			t.Error("Error when setting v1 ActionTriggers ", err.Error())
+		}
+		err = mig.Migrate("migrateActionTriggers")
+		if err != nil {
+			t.Error("Error when migrating ActionTriggers ", err.Error())
+		}
+		result, err := mig.tpDB.GetActionTriggers(v1atrs.Id, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting ActionTriggers ", err.Error())
+		}
+		if !reflect.DeepEqual(atrs[0], result[0]) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0], result[0])
 		}
 		err = mig.DropV1Colection(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {

@@ -129,7 +129,6 @@ func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger,
 }
 
 func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {
-	tim := time.Date(0001, time.January, 1, 0, 0, 0, 0, time.UTC)
 	at = &engine.ActionTrigger{
 		ID: v1Act.Id,
 		//	UniqueID:       utils.GenUUID(),
@@ -141,7 +140,6 @@ func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {
 		ActionsID:      v1Act.ActionsId,
 		MinQueuedItems: v1Act.MinQueuedItems,
 		Executed:       v1Act.Executed,
-		ActivationDate: tim,
 	}
 	bf := &engine.BalanceFilter{}
 	if v1Act.BalanceId != "" {
@@ -176,6 +174,9 @@ func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {
 	}
 	if !v1Act.BalanceExpirationDate.IsZero() {
 		bf.ExpirationDate = utils.TimePointer(v1Act.BalanceExpirationDate)
+		at.ExpirationDate = v1Act.BalanceExpirationDate
+		at.LastExecutionTime = v1Act.BalanceExpirationDate
+		at.ActivationDate = v1Act.BalanceExpirationDate
 	}
 	at.Balance = bf
 	if at.ThresholdType == "*min_counter" ||
