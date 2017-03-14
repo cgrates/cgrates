@@ -19,6 +19,7 @@ package guardian
 
 import (
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -94,7 +95,7 @@ func TestGuardianGuardIDs(t *testing.T) {
 	for _, lockID := range lockIDs {
 		if itmLock, hasKey := Guardian.locksMap[lockID]; !hasKey {
 			t.Errorf("Cannot find lock for lockID: %s", lockID)
-		} else if itmLock.count() != 1 {
+		} else if atomic.LoadInt64(&itmLock.cnt) != 1 {
 			t.Errorf("Unexpected itmLock found: %+v", itmLock)
 		}
 	}
@@ -102,42 +103,41 @@ func TestGuardianGuardIDs(t *testing.T) {
 	time.Sleep(20 * time.Microsecond)                                       // give time for goroutine to lock
 	if itmLock, hasKey := Guardian.locksMap["test1"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test1")
-	} else if itmLock.count() != 1 {
+	} else if atomic.LoadInt64(&itmLock.cnt) != 1 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	}
 	if itmLock, hasKey := Guardian.locksMap["test2"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test2")
-	} else if itmLock.count() != 2 {
+	} else if atomic.LoadInt64(&itmLock.cnt) != 2 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	}
 	if itmLock, hasKey := Guardian.locksMap["test3"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test3")
-	} else if itmLock.count() != 2 {
+	} else if atomic.LoadInt64(&itmLock.cnt) != 2 {
 		t.Errorf("Unexpected itmLock found: %+v", itmLock)
 	}
 	Guardian.GuardIDs(0, lockIDs...)
 	if totalLockDur := time.Now().Sub(tStart); totalLockDur < lockDur {
 		t.Errorf("Lock duration too small")
 	}
-	//time.Sleep(1000 * time.Microsecond)
 	if len(Guardian.locksMap) != 3 {
 		t.Errorf("locksMap should be have 3 elements, have: %+v", Guardian.locksMap)
 	} else if itmLock, hasKey := Guardian.locksMap["test1"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test1")
-	} else if itmLock.count() != 1 {
-		t.Errorf("Unexpected itmLock found: %+v", itmLock)
-	} else if itmLock, hasKey := Guardian.locksMap["test2"]; !hasKey {
+	} else if cnt := atomic.LoadInt64(&itmLock.cnt); cnt != 1 {
+		t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, "test1")
+	} else if _, hasKey := Guardian.locksMap["test2"]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", "test2")
-	} else if itmLock.count() != 1 {
-		t.Errorf("Unexpected itmLock found: %+v", itmLock)
+	} else if cnt = atomic.LoadInt64(&itmLock.cnt); cnt != 1 {
+		t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, "test2")
 	} else if itmLock, hasKey := Guardian.locksMap["test3"]; !hasKey {
-		t.Errorf("Cannot find lock for lockID: %s", "test2")
-	} else if itmLock.count() != 1 {
-		t.Errorf("Unexpected itmLock found: %+v", itmLock)
+		t.Errorf("Cannot find lock for lockID: %s", "test3")
+	} else if cnt = atomic.LoadInt64(&itmLock.cnt); cnt != 1 {
+		t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, "test3")
 	}
 	Guardian.UnguardIDs(lockIDs...)
 	if len(Guardian.locksMap) != 0 {
-		t.Errorf("locksMap should be have 0 elements, have: %+v", Guardian.locksMap)
+		t.Errorf("locksMap should have 0 elements, has: %+v", Guardian.locksMap)
 	}
 }
 

@@ -40,16 +40,12 @@ type itemLock struct {
 // unlock() executes combined lock with autoremoving lock from Guardian
 func (il *itemLock) unlock() {
 	atomic.AddInt64(&il.cnt, -1)
-	if il.count() == 0 { // last lock in the queue
+	if atomic.LoadInt64(&il.cnt) == 0 { // last lock in the queue
 		Guardian.Lock()
 		delete(Guardian.locksMap, il.keyID)
 		Guardian.Unlock()
 	}
 	il.Unlock()
-}
-
-func (il *itemLock) count() int64 {
-	return atomic.LoadInt64(&il.cnt)
 }
 
 // GuardianLock is an optimized locking system per locking key
