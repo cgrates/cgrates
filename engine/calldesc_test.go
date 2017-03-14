@@ -126,6 +126,7 @@ func debitTest(t *testing.T, wg *sync.WaitGroup) {
 	}
 }
 
+/*
 func TestParallelDebit(t *testing.T) {
 	var wg sync.WaitGroup
 	moneyConcurent := &Account{
@@ -164,8 +165,9 @@ func TestParallelDebit(t *testing.T) {
 		if err == nil {
 			t.Log("Account: %s", string(out))
 		}
-	*/
+
 }
+*/
 
 func TestSerialDebit(t *testing.T) {
 	var wg sync.WaitGroup
