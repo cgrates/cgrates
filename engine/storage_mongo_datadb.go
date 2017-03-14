@@ -286,6 +286,16 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 		if err = db.C(utils.TBLSMCosts).EnsureIndex(idx); err != nil {
 			return
 		}
+		idx = mgo.Index{
+			Key:        []string{RunIDLow, OriginIDLow},
+			Unique:     false,
+			DropDups:   false,
+			Background: false,
+			Sparse:     false,
+		}
+		if err = db.C(utils.TBLSMCosts).EnsureIndex(idx); err != nil {
+			return
+		}
 	}
 	return
 }
