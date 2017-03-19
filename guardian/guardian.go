@@ -42,16 +42,18 @@ func (il *itemLock) unlock() {
 	atomic.AddInt64(&il.cnt, -1)
 	if atomic.LoadInt64(&il.cnt) == 0 { // last lock in the queue
 		Guardian.Lock()
-		delete(Guardian.locksMap, il.keyID)
+		if il.cnt == 0 { // assurance that our counter was not modified in between read and lock
+			delete(Guardian.locksMap, il.keyID)
+		}
 		Guardian.Unlock()
 	}
-	il.Unlock()
+	il.Unlock() // will unlock a single count so the next one waiting for lock can proceed
 }
 
 // GuardianLock is an optimized locking system per locking key
 type GuardianLock struct {
-	locksMap   map[string]*itemLock
-	sync.Mutex // protects the maps
+	locksMap     map[string]*itemLock
+	sync.RWMutex // protects the maps
 }
 
 // lockItems locks a set of lockIDs
@@ -60,10 +62,10 @@ func (guard *GuardianLock) lockItems(lockIDs []string) (itmLocks []*itemLock) {
 	guard.Lock()
 	for _, lockID := range lockIDs {
 		var itmLock *itemLock
-		itmLock, exists := Guardian.locksMap[lockID]
+		itmLock, exists := guard.locksMap[lockID]
 		if !exists {
 			itmLock = newItemLock(lockID)
-			Guardian.locksMap[lockID] = itmLock
+			guard.locksMap[lockID] = itmLock
 		}
 		atomic.AddInt64(&itmLock.cnt, 1)
 		itmLocks = append(itmLocks, itmLock)
@@ -113,7 +115,7 @@ func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout ti
 	return
 }
 
-// GuardTimed aquires a lock for duration, returning an identifier which can be used later to cancel the lock or find it's status
+// GuardTimed aquires a lock for duration
 func (guard *GuardianLock) GuardIDs(timeout time.Duration, lockIDs ...string) {
 	guard.lockItems(lockIDs)
 	if timeout != 0 {
@@ -126,10 +128,9 @@ func (guard *GuardianLock) GuardIDs(timeout time.Duration, lockIDs ...string) {
 }
 
 // UnguardTimed attempts to unlock a set of locks based on their locksUUID
-// Returns false if locks were not found
 func (guard *GuardianLock) UnguardIDs(lockIDs ...string) {
 	var itmLocks []*itemLock
-	guard.Lock()
+	guard.RLock()
 	for _, lockID := range lockIDs {
 		var itmLock *itemLock
 		itmLock, exists := Guardian.locksMap[lockID]
@@ -137,7 +138,7 @@ func (guard *GuardianLock) UnguardIDs(lockIDs ...string) {
 			itmLocks = append(itmLocks, itmLock)
 		}
 	}
-	guard.Unlock()
+	guard.RUnlock()
 	guard.unlockItems(itmLocks)
 	return
 }
