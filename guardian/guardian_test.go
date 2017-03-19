@@ -141,16 +141,13 @@ func TestGuardianGuardIDs(t *testing.T) {
 	if len(Guardian.locksMap) != 3 {
 		t.Errorf("locksMap should be have 3 elements, have: %+v", Guardian.locksMap)
 	}
-	/*
-		// Only good for debugging since there is duration involved failing often, last test is more relevant for operations on counters
-		for _, lkID := range lockIDs {
-			if itmLock, hasKey := Guardian.locksMap[lkID]; !hasKey {
-				t.Errorf("Cannot find lock for lockID: %s", lkID)
-			} else if cnt := atomic.LoadInt64(&itmLock.cnt); cnt != 1 {
-				t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, lkID)
-			}
+	for _, lkID := range lockIDs {
+		if itmLock, hasKey := Guardian.locksMap[lkID]; !hasKey {
+			t.Errorf("Cannot find lock for lockID: %s", lkID)
+		} else if cnt := atomic.LoadInt64(&itmLock.cnt); cnt != 1 {
+			t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, lkID)
 		}
-	*/
+	}
 	Guardian.RUnlock()
 	Guardian.UnguardIDs(lockIDs...)
 	time.Sleep(time.Duration(50) * time.Millisecond)
