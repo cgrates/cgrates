@@ -36,8 +36,28 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
+
+func NewCounterGen(limit int64) *CounterGen {
+	return &CounterGen{limit: limit}
+}
+
+type CounterGen struct {
+	cnt, limit int64
+	sync.Mutex
+}
+
+func (cg *CounterGen) Gen() int64 {
+	cg.Lock()
+	defer cg.Unlock()
+	cg.cnt += 1
+	if cg.cnt > cg.limit {
+		cg.cnt = 0
+	}
+	return cg.cnt
+}
 
 // Returns first non empty string out of vals. Useful to extract defaults
 func FirstNonEmpty(vals ...string) string {

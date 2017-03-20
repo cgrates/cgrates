@@ -1519,7 +1519,7 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 		&CDR{
 			CGRID:       "88ed9c38005f07576a1e1af293063833b60edcc6",
 			RunID:       "1",
-			OrderID:     1,
+			OrderID:     0,
 			OriginHost:  "host1",
 			OriginID:    "1",
 			CostDetails: &CallCost{Timespans: TimeSpans{}},
@@ -1528,7 +1528,7 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 		&CDR{
 			CGRID:       "88ed9c38005f07576a1e1af293063833b60edcc2",
 			RunID:       "2",
-			OrderID:     2,
+			OrderID:     0,
 			OriginHost:  "host2",
 			OriginID:    "2",
 			CostDetails: &CallCost{Timespans: TimeSpans{}},
