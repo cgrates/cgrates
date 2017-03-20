@@ -112,7 +112,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 			return nil, err
 		}
 	}
-	ms.cnter = utils.NewCounterGen(1000)
+	ms.cnter = utils.NewCounterGen(0)
 	return
 }
 
