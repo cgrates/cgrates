@@ -112,7 +112,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 			return nil, err
 		}
 	}
-	ms.Counter = utils.NewCounterGen(1000)
+	ms.cnter = utils.NewCounterGen(1000)
 	return
 }
 
@@ -124,7 +124,7 @@ type MongoStorage struct {
 	cacheCfg        *config.CacheConfig
 	loadHistorySize int
 	cdrsIndexes     []string
-	Counter         *utils.CounterGen
+	cnter           *utils.CounterGen
 }
 
 func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
