@@ -40,8 +40,11 @@ import (
 	"time"
 )
 
-func NewCounterGen(limit int64) *CounterGen {
-	return &CounterGen{limit: limit}
+func NewCounterGen(start, limit int64) *CounterGen {
+	return &CounterGen{
+		cnt:   start,
+		limit: limit,
+	}
 }
 
 type CounterGen struct {
@@ -53,7 +56,7 @@ func (cg *CounterGen) Gen() int64 {
 	cg.Lock()
 	defer cg.Unlock()
 	cg.cnt += 1
-	if cg.cnt > cg.limit {
+	if cg.limit > 0 && cg.cnt > cg.limit {
 		cg.cnt = 0
 	}
 	return cg.cnt
