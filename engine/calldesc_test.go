@@ -116,73 +116,27 @@ func populateDB() {
 }
 
 func debitTest(t *testing.T, wg *sync.WaitGroup) {
-	defer wg.Done()
 	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2017, time.February, 2, 17, 30, 59, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Account: "moneyp", Subject: "nt", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
-	_, err := cd.Debit()
-	if err != nil {
+	if _, err := cd.Debit(); err != nil {
 		t.Errorf("Error debiting balance: %s", err)
 	}
+	wg.Done()
 }
-
-/*
-func TestParallelDebit(t *testing.T) {
-	var wg sync.WaitGroup
-	moneyConcurent := &Account{
-		ID: "cgrates.org:moneyp",
-		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
-				&Balance{Value: 10000, Weight: 10},
-			}},
-	}
-	if accountingStorage != nil && ratingStorage != nil {
-		accountingStorage.SetAccount(moneyConcurent)
-	} else {
-		t.Log("Could not connect to db!")
-		return
-	}
-	debitsToDo := 50
-	for i := 0; i < debitsToDo; i++ {
-		wg.Add(1)
-		go debitTest(t, &wg)
-	}
-	wg.Wait()
-	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2017, time.February, 2, 17, 30, 59, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Account: "moneyp", Subject: "nt", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
-
-	acc, err := cd.getAccount()
-
-	if err != nil {
-		t.Errorf("Error debiting balance: %+v", err)
-	}
-	if acc.BalanceMap[utils.MONETARY][0].GetValue() != float64(10000-(debitsToDo*60)) {
-		t.Errorf("Balance does not match: %f, expected %f", acc.BalanceMap[utils.MONETARY][0].GetValue(), float64(10000-(debitsToDo*60)))
-	}
-	/*
-		out, err := json.Marshal(acc)
-		if err == nil {
-			t.Log("Account: %s", string(out))
-		}
-
-}
-*/
 
 func TestSerialDebit(t *testing.T) {
 	var wg sync.WaitGroup
+	initialBalance := 10000.0
 	moneyConcurent := &Account{
 		ID: "cgrates.org:moneyp",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
-				&Balance{Value: 10000, Weight: 10},
+				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
-	if accountingStorage != nil && ratingStorage != nil {
-		accountingStorage.SetAccount(moneyConcurent)
-	} else {
-		t.Log("Could not connect to db!")
-		return
+	if err := accountingStorage.SetAccount(moneyConcurent); err != nil {
+		t.Error(err)
 	}
 	debitsToDo := 50
 	for i := 0; i < debitsToDo; i++ {
@@ -195,12 +149,53 @@ func TestSerialDebit(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Account: "moneyp", Subject: "nt", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
 
 	acc, err := cd.getAccount()
-
 	if err != nil {
 		t.Errorf("Error debiting balance: %+v", err)
 	}
-	if acc.BalanceMap[utils.MONETARY][0].GetValue() != float64(10000-(debitsToDo*60)) {
-		t.Errorf("Balance does not match: %f, expected %f", acc.BalanceMap[utils.MONETARY][0].GetValue(), float64(10000-(debitsToDo*60)))
+	expBalance := initialBalance - float64(debitsToDo*60)
+	if acc.BalanceMap[utils.MONETARY][0].GetValue() != expBalance {
+		t.Errorf("Balance does not match: %f, expected %f", acc.BalanceMap[utils.MONETARY][0].GetValue(), expBalance)
+	}
+	/*
+		out, err := json.Marshal(acc)
+		if err == nil {
+			t.Log("Account: %s", string(out))
+		}
+	*/
+
+}
+
+func TestParallelDebit(t *testing.T) {
+	var wg sync.WaitGroup
+	initialBalance := 10000.0
+	moneyConcurent := &Account{
+		ID: "cgrates.org:moneyp",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Value: initialBalance, Weight: 10},
+			}},
+	}
+	if err := accountingStorage.SetAccount(moneyConcurent); err != nil {
+		t.Error(err)
+	}
+	debitsToDo := 50
+	for i := 0; i < debitsToDo; i++ {
+		wg.Add(1)
+		go debitTest(t, &wg)
+	}
+	wg.Wait()
+	time.Sleep(time.Duration(10 * time.Millisecond))
+	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2017, time.February, 2, 17, 30, 59, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Account: "moneyp", Subject: "nt", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
+
+	acc, err := cd.getAccount()
+	if err != nil {
+		t.Errorf("Error debiting balance: %+v", err)
+	}
+	expBalance := initialBalance - float64(debitsToDo*60)
+	if acc.BalanceMap[utils.MONETARY][0].GetValue() != expBalance {
+		t.Errorf("Balance does not match: %f, expected %f", acc.BalanceMap[utils.MONETARY][0].GetValue(), expBalance)
 	}
 	/*
 		out, err := json.Marshal(acc)
@@ -392,8 +387,9 @@ func TestDebitPerformRounding(t *testing.T) {
 	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2017, time.February, 2, 17, 33, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "round", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, PerformRounding: true}
-	result, _ := cd.Debit()
-	if result.Cost != 0.3001 || result.GetConnectFee() != 0 { // should be 0.3 :(
+	if result, err := cd.Debit(); err != nil {
+		t.Error(err)
+	} else if result.Cost != 0.3001 || result.GetConnectFee() != 0 { // should be 0.3 :(
 		t.Error("bad cost", utils.ToIJSON(result))
 	}
 }

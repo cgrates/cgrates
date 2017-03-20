@@ -110,7 +110,6 @@ func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout ti
 		case reply = <-rplyChan:
 		}
 	}
-
 	guard.unlockItems(itmLocks)
 	return
 }
