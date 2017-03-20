@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
@@ -112,7 +113,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 			return nil, err
 		}
 	}
-	ms.cnter = utils.NewCounterGen(0)
+	ms.cnter = utils.NewCounterGen(time.Now().UnixNano(), 0)
 	return
 }
 

@@ -40,9 +40,9 @@ import (
 	"time"
 )
 
-func NewCounterGen(limit int64) *CounterGen {
+func NewCounterGen(start, limit int64) *CounterGen {
 	return &CounterGen{
-		cnt:   time.Now().UnixNano(),
+		cnt:   start,
 		limit: limit,
 	}
 }
