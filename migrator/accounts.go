@@ -34,31 +34,62 @@ const (
 )
 
 func (m *Migrator) migrateAccounts() (err error) {
-	var acntV1Keys []string
-	acntV1Keys, err = m.dataDB.GetKeysForPrefix(v1AccountDBPrefix)
-	if err != nil {
-		return
-	}
-	for _, acntV1Key := range acntV1Keys {
-		v1Acnt, err := m.getV1AccountFromDB(acntV1Key)
+	switch m.dataDBType {
+	case utils.REDIS:
+		var acntV1Keys []string
+		acntV1Keys, err = m.dataDB.GetKeysForPrefix(v1AccountDBPrefix)
 		if err != nil {
-			return err
+			return
 		}
-		if acnt := v1Acnt.AsAccount(); acnt != nil {
-			if err = m.dataDB.SetAccount(acnt); err != nil {
+		for _, acntV1Key := range acntV1Keys {
+			v1Acnt, err := m.getV1AccountFromDB(acntV1Key)
+			if err != nil {
 				return err
 			}
+			if v1Acnt != nil {
+				acnt := v1Acnt.AsAccount()
+				if err = m.dataDB.SetAccount(acnt); err != nil {
+					return err
+				}
+			}
 		}
-	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-	if err = m.dataDB.SetVersions(vrs, false); err != nil {
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+		}
+		return
+	case utils.MONGO:
+		dataDB := m.dataDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
+		defer mgoDB.Session.Close()
+		var accn v1Account
+		iter := mgoDB.C(v1AccountDBPrefix).Find(nil).Iter()
+		for iter.Next(&accn) {
+			if acnt := accn.AsAccount(); acnt != nil {
+				if err = m.dataDB.SetAccount(acnt); err != nil {
+					return err
+				}
+			}
+		}
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+		}
+		return
+	default:
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for migrateAccounts method", m.dataDBType))
 	}
-	return
 }
 
 func (m *Migrator) getV1AccountFromDB(key string) (*v1Account, error) {
@@ -170,6 +201,7 @@ func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 				Timings:        oldBal.Timings,
 				TimingIDs:      utils.ParseStringMap(oldBal.TimingIDs),
 				Disabled:       oldBal.Disabled,
+				Factor:         engine.ValueFactor{},
 			}
 		}
 	}

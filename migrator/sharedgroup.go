@@ -18,8 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type v1SharedGroup struct {
@@ -28,8 +31,94 @@ type v1SharedGroup struct {
 	MemberIds         []string
 }
 
-func (v1SG v1SharedGroup) AsSharedGroup() (sg engine.SharedGroup) {
-	sg = engine.SharedGroup{
+func (m *Migrator) migrateSharedGroups() (err error) {
+	switch m.dataDBType {
+	case utils.REDIS:
+		var sgv1keys []string
+		sgv1keys, err = m.tpDB.GetKeysForPrefix(utils.SHARED_GROUP_PREFIX)
+		if err != nil {
+			return
+		}
+		for _, sgv1key := range sgv1keys {
+			v1sg, err := m.getv1SharedGroupFromDB(sgv1key)
+			if err != nil {
+				return err
+			}
+			sg := v1sg.AsSharedGroup()
+			if err = m.tpDB.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.SHARED_GROUP_PREFIX: engine.CurrentStorDBVersions()[utils.SHARED_GROUP_PREFIX]}
+		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating SharedGroup version into tpDB", err.Error()))
+		}
+		return
+	case utils.MONGO:
+		dataDB := m.tpDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
+		defer mgoDB.Session.Close()
+		var v1sg v1SharedGroup
+		iter := mgoDB.C(utils.SHARED_GROUP_PREFIX).Find(nil).Iter()
+		for iter.Next(&v1sg) {
+			sg := v1sg.AsSharedGroup()
+			if err = m.tpDB.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.SHARED_GROUP_PREFIX: engine.CurrentStorDBVersions()[utils.SHARED_GROUP_PREFIX]}
+		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating SharedGroup version into tpDB", err.Error()))
+		}
+		return
+	default:
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for migrateSharedGroups method", m.dataDBType))
+	}
+}
+
+func (m *Migrator) getv1SharedGroupFromDB(key string) (*v1SharedGroup, error) {
+	switch m.dataDBType {
+	case utils.REDIS:
+		tpDB := m.tpDB.(*engine.RedisStorage)
+		if strVal, err := tpDB.Cmd("GET", key).Bytes(); err != nil {
+			return nil, err
+		} else {
+			v1SG := &v1SharedGroup{Id: key}
+			if err := m.mrshlr.Unmarshal(strVal, v1SG); err != nil {
+				return nil, err
+			}
+			return v1SG, nil
+		}
+	case utils.MONGO:
+		tpDB := m.tpDB.(*engine.MongoStorage)
+		mgoDB := tpDB.DB()
+		defer mgoDB.Session.Close()
+		v1SG := new(v1SharedGroup)
+		if err := mgoDB.C(utils.SHARED_GROUP_PREFIX).Find(bson.M{"id": key}).One(v1SG); err != nil {
+			return nil, err
+		}
+		return v1SG, nil
+	default:
+		return nil, utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			utils.UnsupportedDB,
+			fmt.Sprintf("error: unsupported: <%s> for getv1SharedGroupFromDB method", m.dataDBType))
+	}
+}
+
+func (v1SG v1SharedGroup) AsSharedGroup() (sg *engine.SharedGroup) {
+	sg = &engine.SharedGroup{
 		Id:                v1SG.Id,
 		AccountParameters: v1SG.AccountParameters,
 		MemberIds:         make(utils.StringMap),

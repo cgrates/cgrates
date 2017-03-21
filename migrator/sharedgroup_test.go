@@ -41,8 +41,8 @@ func TestV1SharedGroupAsSharedGroup(t *testing.T) {
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
 	newsg := v1sg.AsSharedGroup()
-	if !reflect.DeepEqual(*sg, newsg) {
-		t.Errorf("Expecting: %+v, received: %+v", *sg, newsg)
+	if !reflect.DeepEqual(sg, newsg) {
+		t.Errorf("Expecting: %+v, received: %+v", sg, newsg)
 	}
 
 }

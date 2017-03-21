@@ -18,33 +18,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"encoding/json"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var v1ActionTriggers1 = `{"BalanceType": "*monetary","BalanceDirection": "*out","ThresholdType":"*max_balance", "ThresholdValue" :2, "ActionsId": "TEST_ACTIONS", "Executed": true}`
-
 func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
+	tim := time.Date(0001, time.January, 1, 2, 0, 0, 0, time.UTC).Local()
+	v1atrs := &v1ActionTrigger{
+		Id:                    "Test",
+		BalanceType:           "*monetary",
+		BalanceDirection:      "*out",
+		ThresholdType:         "*max_balance",
+		ThresholdValue:        2,
+		ActionsId:             "TEST_ACTIONS",
+		Executed:              true,
+		BalanceExpirationDate: tim,
+	}
 	atrs := &engine.ActionTrigger{
+		ID: "Test",
 		Balance: &engine.BalanceFilter{
-			Type:       utils.StringPointer(utils.MONETARY),
-			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+			ExpirationDate: utils.TimePointer(tim),
+			Type:           utils.StringPointer(utils.MONETARY),
+			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
-		ActionsID:      "TEST_ACTIONS",
-		Executed:       true,
+		ExpirationDate:    tim,
+		LastExecutionTime: tim,
+		ActivationDate:    tim,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue:    2,
+		ActionsID:         "TEST_ACTIONS",
+		Executed:          true,
 	}
-	var v1actstrgrs v1ActionTrigger
-	if err := json.Unmarshal([]byte(v1ActionTriggers1), &v1actstrgrs); err != nil {
-		t.Error(err)
-	}
-	newatrs := v1actstrgrs.AsActionTrigger()
-	if !reflect.DeepEqual(*atrs, newatrs) {
-		t.Errorf("Expecting: %+v, received: %+v", *atrs, newatrs)
+
+	newatrs := v1atrs.AsActionTrigger()
+	if !reflect.DeepEqual(atrs, newatrs) {
+		t.Errorf("Expecting: %+v, received: %+v", atrs, newatrs)
 	}
 }
