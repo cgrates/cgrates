@@ -1017,17 +1017,26 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if len(qryFltr.ExtraFields) != 0 {
 		var extrafields []bson.M
 		for field, value := range qryFltr.ExtraFields {
-			extrafields = append(extrafields, bson.M{"extrafields." + field: value})
+			if value == utils.MetaExists {
+				extrafields = append(extrafields, bson.M{"extrafields." + field: bson.M{"$exists": true}})
+			} else {
+				extrafields = append(extrafields, bson.M{"extrafields." + field: value})
+			}
 		}
-		filters["$or"] = extrafields
+		filters["$and"] = extrafields
 	}
 
 	if len(qryFltr.NotExtraFields) != 0 {
 		var extrafields []bson.M
-		for field, value := range qryFltr.ExtraFields {
-			extrafields = append(extrafields, bson.M{"extrafields." + field: value})
+		for field, value := range qryFltr.NotExtraFields {
+			if value == utils.MetaExists {
+				extrafields = append(extrafields, bson.M{"extrafields." + field: bson.M{"$exists": false}})
+			} else {
+				extrafields = append(extrafields, bson.M{"extrafields." + field: bson.M{"$ne": value}})
+			}
+
 		}
-		filters["$not"] = bson.M{"$or": extrafields}
+		filters["$and"] = extrafields
 	}
 
 	if qryFltr.MinCost != nil {
