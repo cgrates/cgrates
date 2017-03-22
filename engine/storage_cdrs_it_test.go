@@ -66,7 +66,6 @@ func TestITCDRsPSQL(t *testing.T) {
 }
 
 func TestITCDRsMongo(t *testing.T) {
-
 	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mongo"))
 	if err != nil {
 		t.Error(err)
@@ -492,7 +491,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Usage:           time.Duration(1) * time.Second,
 			Supplier:        "SUPPLIER3",
 			DisconnectCause: "SENT_OK",
-			ExtraFields:     map[string]string{"Hdr4": "HdrVal4"},
+			ExtraFields:     map[string]string{"Service-Context-Id": "voice@huawei.com"},
 			CostSource:      "rater",
 			Cost:            0.15,
 		},
@@ -803,5 +802,18 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	} else if len(cdrs) != 9 {
 		return fmt.Errorf("testGetCDRs #88, unexpected number of CDRs returned after remove: %d", len(cdrs))
 	}
+	// Filter on ExtraFields
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"}}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #89, err: %v", err)
+	} else if len(CDRs) != 1 {
+		return fmt.Errorf("testGetCDRs #90, unexpected number of CDRs returned:  %+v", CDRs)
+	}
+	// Filter *exists on ExtraFields
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ExtraFields: map[string]string{"Service-Context-Id": "*exists"}}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #89, err: %v", err)
+	} else if len(CDRs) != 1 {
+		return fmt.Errorf("testGetCDRs #90, unexpected number of CDRs returned:  %+v", CDRs)
+	}
+
 	return nil
 }

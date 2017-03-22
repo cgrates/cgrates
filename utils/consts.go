@@ -186,6 +186,7 @@ const (
 	IN                            = "*in"
 	META_OUT                      = "*out"
 	META_ANY                      = "*any"
+	MetaExists                    = "*exists"
 	CDR_IMPORT                    = "cdr_import"
 	CDR_EXPORT                    = "cdr_export"
 	ASR                           = "ASR"

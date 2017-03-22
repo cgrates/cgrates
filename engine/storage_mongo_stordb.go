@@ -1017,7 +1017,11 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if len(qryFltr.ExtraFields) != 0 {
 		var extrafields []bson.M
 		for field, value := range qryFltr.ExtraFields {
-			extrafields = append(extrafields, bson.M{"extrafields." + field: value})
+			if value == utils.MetaExists {
+				extrafields = append(extrafields, bson.M{"extrafields." + field: bson.M{"$exists": true}})
+			} else {
+				extrafields = append(extrafields, bson.M{"extrafields." + field: value})
+			}
 		}
 		filters["$or"] = extrafields
 	}
