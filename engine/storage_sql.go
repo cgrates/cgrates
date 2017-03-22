@@ -892,9 +892,13 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		needAnd := false
 		for field, value := range qryFltr.NotExtraFields {
 			if needAnd {
-				qIds.WriteString(" OR")
+				qIds.WriteString(" AND")
 			}
-			qIds.WriteString(fmt.Sprintf(` extra_fields LIKE '%%"%s":"%s"%%'`, field, value))
+			if value == utils.MetaExists {
+				qIds.WriteString(fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":%%'", field))
+			} else {
+				qIds.WriteString(fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":\"%s\"%%'", field, value))
+			}
 			needAnd = true
 		}
 		qIds.WriteString(" )")

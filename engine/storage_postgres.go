@@ -195,7 +195,7 @@ func (self *PostgresStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]
 				qIds.WriteString(" OR")
 			}
 			if value == utils.MetaExists {
-				qIds.WriteString(fmt.Sprintf(" (extra_fields ->> '%s') IS NOT NULL", field))
+				qIds.WriteString(fmt.Sprintf(" extra_fields ?'%s'", field))
 			} else {
 				qIds.WriteString(fmt.Sprintf(" (extra_fields ->> '%s') = '%s'", field, value))
 			}
@@ -209,9 +209,13 @@ func (self *PostgresStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]
 		needAnd := false
 		for field, value := range qryFltr.NotExtraFields {
 			if needAnd {
-				qIds.WriteString(" OR")
+				qIds.WriteString(" AND")
 			}
-			qIds.WriteString(fmt.Sprintf(" extra_fields -> '%s' = '%s'", field, value))
+			if value == utils.MetaExists {
+				qIds.WriteString(fmt.Sprintf(" NOT extra_fields ?'%s'", field))
+			} else {
+				qIds.WriteString(fmt.Sprintf(" NOT (extra_fields ?'%s' AND (extra_fields ->> '%s') = '%s')", field, field, value))
+			}
 			needAnd = true
 		}
 		qIds.WriteString(" )")
