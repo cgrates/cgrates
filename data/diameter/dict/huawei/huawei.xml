@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <diameter>
-  <application id="4">
+  <application id="4" type="acct">
     <vendor id="2011" name="Huawei" />
     <avp name="IN-Information" code="20300" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="2011">
       <data type="Grouped">
