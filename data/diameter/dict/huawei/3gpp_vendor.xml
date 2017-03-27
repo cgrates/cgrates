@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <diameter>
-  <application id="4">
+  <application id="4" type="acct">
     <vendor id="10415" name="3GPP" />
     <avp name="3GPP-Charging-Characteristics" code="13" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
