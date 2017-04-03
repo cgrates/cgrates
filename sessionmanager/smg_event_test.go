@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -148,8 +147,6 @@ func TestSMGenericEventGetSessionTTL(t *testing.T) {
 	sesTTLMaxDelay := time.Duration(10 * time.Second)
 	if sTTL := smGev.GetSessionTTL(time.Duration(5*time.Second), &sesTTLMaxDelay); sTTL == eSesTTL || sTTL > eSesTTL+sesTTLMaxDelay {
 		t.Errorf("Received: %v", sTTL)
-	} else {
-		fmt.Println(sTTL)
 	}
 }
 
