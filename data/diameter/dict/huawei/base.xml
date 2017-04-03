@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <diameter>
-  <application id="4" type="acct">
+  <application id="4" type="auth">
     <!-- Diameter Credit Control Application -->
     <!-- http://tools.ietf.org/html/rfc4006 -->
     <command code="272" short="CC" name="Credit-Control">

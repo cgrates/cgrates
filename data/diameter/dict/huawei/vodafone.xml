@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <diameter>
-  <application id="4" type="acct">
+  <application id="4" type="auth">
     <vendor id="12645" name="Vodafone" />
     <avp name="Reporting-Reason" code="261" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="12645">
       <data type="Enumerated">

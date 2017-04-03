@@ -191,7 +191,7 @@ func TestDmtAgentTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(1000) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestConnectDiameterClient(t *testing.T) {
+func TestDmtAgentConnectDiameterClient(t *testing.T) {
 	dmtClient, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm,
 		daCfg.DiameterAgentCfg().VendorId, daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DictionariesDir)
 	if err != nil {

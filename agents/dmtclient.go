@@ -49,8 +49,9 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		RetransmitInterval: time.Second,
 		EnableWatchdog:     true,
 		WatchdogInterval:   5 * time.Second,
-		AcctApplicationID: []*diam.AVP{
-			diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(4)), // RFC 4006
+		AuthApplicationID: []*diam.AVP{
+			// Advertise support for credit control application
+			diam.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4)), // RFC 4006
 		},
 	}
 	if len(dictsDir) != 0 {
