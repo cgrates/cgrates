@@ -229,6 +229,8 @@ func (smg *SMGeneric) indexSession(s *SMGSession, passiveSessions bool) {
 	}
 	idxMux.Lock()
 	defer idxMux.Unlock()
+	s.mux.RLock()
+	defer s.mux.RUnlock()
 	for fieldName := range smg.ssIdxCfg {
 		fieldVal, err := utils.ReflectFieldAsString(s.EventStart, fieldName, "")
 		if err != nil {

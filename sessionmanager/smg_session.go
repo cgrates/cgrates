@@ -84,6 +84,8 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
+	self.mux.Lock()
+	defer self.mux.Unlock()
 	requestedDuration := dur
 	if lastUsed != nil {
 		self.ExtraDuration = self.LastDebit - *lastUsed
@@ -219,6 +221,8 @@ func (self *SMGSession) mergeCCs() {
 
 // Session has ended, check debits and refund the extra charged duration
 func (self *SMGSession) close(endTime time.Time) (err error) {
+	self.mux.Lock()
+	defer self.mux.Unlock()
 	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
 		chargedEndTime := self.CallCosts[len(self.CallCosts)-1].GetEndTime()
 		if endTime.After(chargedEndTime) { // we did not charge enough, make a manual debit here
@@ -263,6 +267,8 @@ func (self *SMGSession) saveOperations(cgrID string) error {
 	if len(self.CallCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
+	self.mux.Lock()
+	self.mux.Unlock()
 	cc := self.CallCosts[0] // was merged in close method
 	cc.Round()
 	roundIncrements := cc.GetRoundIncrements()
@@ -318,6 +324,8 @@ func (self *SMGSession) storeSMCost(smCost *engine.SMCost) error {
 }
 
 func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
+	self.mux.RLock()
+	defer self.mux.RUnlock()
 	sTime, _ := self.EventStart.GetSetupTime(utils.META_DEFAULT, timezone)
 	aTime, _ := self.EventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
 	pdd, _ := self.EventStart.GetPdd(utils.META_DEFAULT)
