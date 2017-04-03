@@ -33,7 +33,7 @@ var (
 func init() {
 	apierAcntsAcntStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	apierAcnts = &ApierV1{AccountDb: engine.AccountingStorage(apierAcntsAcntStorage), Config: cfg}
+	apierAcnts = &ApierV1{DataDB: engine.DataDB(apierAcntsAcntStorage), Config: cfg}
 }
 
 func TestSetAccounts(t *testing.T) {

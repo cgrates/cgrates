@@ -30,7 +30,6 @@ const (
 	CACHE_JSN            = "cache"
 	LISTEN_JSN           = "listen"
 	HTTP_JSN             = "http"
-	TPDB_JSN             = "tariffplan_db"
 	DATADB_JSN           = "data_db"
 	STORDB_JSN           = "stor_db"
 	BALANCER_JSN         = "balancer"

@@ -68,7 +68,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB AccountingStorage, rater, pubsub, users, aliases, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB DataDB, rater, pubsub, users, aliases, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
 	if rater == nil || reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -92,7 +92,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB AccountingS
 type CdrServer struct {
 	cgrCfg        *config.CGRConfig
 	cdrDb         CdrStorage
-	dataDB        AccountingStorage
+	dataDB        DataDB
 	rals          rpcclient.RpcClientConnection
 	pubsub        rpcclient.RpcClientConnection
 	users         rpcclient.RpcClientConnection

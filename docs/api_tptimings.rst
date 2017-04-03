@@ -10,7 +10,7 @@ Creates a new timing within a tariff plan.
 
   type ApierTPTiming struct {
         TPid      string // Tariff plan id
-        TimingId  string // Timing id
+        ID        string // Timing id
         Years     string // semicolon separated list of years this timing is valid on, \*any supported
         Months    string // semicolon separated list of months this timing is valid on, \*any supported
         MonthDays string // semicolon separated list of month's days this timing is valid on, \*any supported
@@ -18,7 +18,7 @@ Creates a new timing within a tariff plan.
         Time      string // String representing the time this timing starts on
   }
 
- Mandatory parameters: ``[]string{"TPid", "TimingId", "Years", "Months", "MonthDays", "WeekDays", "Time"}``
+ Mandatory parameters: ``[]string{"TPid", "ID", "Years", "Months", "MonthDays", "WeekDays", "Time"}``
 
  *JSON sample*:
  ::
@@ -32,7 +32,7 @@ Creates a new timing within a tariff plan.
             "Months": "*any",
             "TPid": "TEST_SQL",
             "Time": "00:00:00",
-            "TimingId": "ALWAYS",
+            "ID": "ALWAYS",
             "WeekDays": "*any",
             "Years": "*any"
         }
@@ -91,11 +91,11 @@ Queries specific Timing on tariff plan.
     "params": [
         {
             "TPid": "TEST_SQL",
-            "TimingId": "ALWAYS"
+            "ID": "ALWAYS"
         }
     ]
   }
-   
+
 
 **Reply**:
 
@@ -104,7 +104,7 @@ Queries specific Timing on tariff plan.
 
   type ApierTPTiming struct {
         TPid      string // Tariff plan id
-        TimingId  string // Timing id
+        ID        string // Timing id
         Years     string // semicolon separated list of years this timing is valid on, \*any supported
         Months    string // semicolon separated list of months this timing is valid on, \*any supported
         MonthDays string // semicolon separated list of month's days this timing is valid on, \*any supported

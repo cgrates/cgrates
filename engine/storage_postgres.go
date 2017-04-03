@@ -76,7 +76,7 @@ func (self *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err erro
 // Todo: Make it a template method using interfaces so as not to repeat code
 func (self *PostgresStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var cdrs []*CDR
-	q := self.db.Table(utils.TBL_CDRS).Select("*")
+	q := self.db.Table(utils.TBLCDRs).Select("*")
 	if qryFltr.Unscoped {
 		q = q.Unscoped()
 	}
@@ -182,10 +182,10 @@ func (self *PostgresStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]
 		q = q.Where("disconnect_cause not in (?)", qryFltr.NotDisconnectCauses)
 	}
 	if len(qryFltr.Costs) != 0 {
-		q = q.Where(utils.TBL_CDRS+".cost in (?)", qryFltr.Costs)
+		q = q.Where(utils.TBLCDRs+".cost in (?)", qryFltr.Costs)
 	}
 	if len(qryFltr.NotCosts) != 0 {
-		q = q.Where(utils.TBL_CDRS+".cost not in (?)", qryFltr.NotCosts)
+		q = q.Where(utils.TBLCDRs+".cost not in (?)", qryFltr.NotCosts)
 	}
 	if len(qryFltr.ExtraFields) != 0 { // Extra fields searches, implemented as contains in extra field
 		qIds := bytes.NewBufferString("(")
@@ -222,10 +222,10 @@ func (self *PostgresStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]
 		q = q.Where(qIds.String())
 	}
 	if qryFltr.OrderIDStart != nil { // Keep backwards compatible by testing 0 value
-		q = q.Where(utils.TBL_CDRS+".id >= ?", *qryFltr.OrderIDStart)
+		q = q.Where(utils.TBLCDRs+".id >= ?", *qryFltr.OrderIDStart)
 	}
 	if qryFltr.OrderIDEnd != nil {
-		q = q.Where(utils.TBL_CDRS+".id < ?", *qryFltr.OrderIDEnd)
+		q = q.Where(utils.TBLCDRs+".id < ?", *qryFltr.OrderIDEnd)
 	}
 	if qryFltr.SetupTimeStart != nil {
 		q = q.Where("setup_time >= ?", qryFltr.SetupTimeStart)

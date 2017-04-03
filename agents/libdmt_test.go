@@ -169,7 +169,7 @@ func TestFieldOutVal(t *testing.T) {
 	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
-		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
 	cfgFld = &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
 		Value: utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Time", utils.INFIELD_SEP), Mandatory: true}
@@ -177,7 +177,7 @@ func TestFieldOutVal(t *testing.T) {
 	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
-		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
 	// With filter on ProcessorVars
 	cfgFld = &config.CfgCdrField{Tag: "ComposedTestWithProcessorVarsFilter", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
@@ -190,7 +190,7 @@ func TestFieldOutVal(t *testing.T) {
 	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), map[string]string{"CGRError": "INSUFFICIENT_CREDIT"}); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
-		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
 	// Without filter, we shoud get always the first subscriptionId
 	cfgFld = &config.CfgCdrField{Tag: "Grouped1", Type: utils.MetaGrouped, FieldId: "Account",
@@ -199,7 +199,7 @@ func TestFieldOutVal(t *testing.T) {
 	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
-		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
 	// Without groupedAVP, we shoud get the first subscriptionId
 	cfgFld = &config.CfgCdrField{Tag: "Grouped2", Type: utils.MetaGrouped, FieldId: "Account",
@@ -209,7 +209,7 @@ func TestFieldOutVal(t *testing.T) {
 	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
-		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
 }
 

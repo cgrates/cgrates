@@ -39,18 +39,12 @@ var (
 	memprofile      = flag.String("memprofile", "", "write memory profile to this file")
 	runs            = flag.Int("runs", 10000, "stress cycle number")
 	parallel        = flag.Int("parallel", 0, "run n requests in parallel")
-	ratingdb_type   = flag.String("ratingdb_type", cgrConfig.TpDbType, "The type of the RatingDb database <redis>")
-	ratingdb_host   = flag.String("ratingdb_host", cgrConfig.TpDbHost, "The RatingDb host to connect to.")
-	ratingdb_port   = flag.String("ratingdb_port", cgrConfig.TpDbPort, "The RatingDb port to bind to.")
-	ratingdb_name   = flag.String("ratingdb_name", cgrConfig.TpDbName, "The name/number of the RatingDb to connect to.")
-	ratingdb_user   = flag.String("ratingdb_user", cgrConfig.TpDbUser, "The RatingDb user to sign in as.")
-	ratingdb_pass   = flag.String("ratingdb_passwd", cgrConfig.TpDbPass, "The RatingDb user's password.")
-	accountdb_type  = flag.String("accountdb_type", cgrConfig.DataDbType, "The type of the AccountingDb database <redis>")
-	accountdb_host  = flag.String("accountdb_host", cgrConfig.DataDbHost, "The AccountingDb host to connect to.")
-	accountdb_port  = flag.String("accountdb_port", cgrConfig.DataDbPort, "The AccountingDb port to bind to.")
-	accountdb_name  = flag.String("accountdb_name", cgrConfig.DataDbName, "The name/number of the AccountingDb to connect to.")
-	accountdb_user  = flag.String("accountdb_user", cgrConfig.DataDbUser, "The AccountingDb user to sign in as.")
-	accountdb_pass  = flag.String("accountdb_passwd", cgrConfig.DataDbPass, "The AccountingDb user's password.")
+	datadb_type     = flag.String("datadb_type", cgrConfig.DataDbType, "The type of the DataDb database <redis>")
+	datadb_host     = flag.String("datadb_host", cgrConfig.DataDbHost, "The DataDb host to connect to.")
+	datadb_port     = flag.String("datadb_port", cgrConfig.DataDbPort, "The DataDb port to bind to.")
+	datadb_name     = flag.String("datadb_name", cgrConfig.DataDbName, "The name/number of the DataDb to connect to.")
+	datadb_user     = flag.String("datadb_user", cgrConfig.DataDbUser, "The DataDb user to sign in as.")
+	datadb_pass     = flag.String("datadb_pass", cgrConfig.DataDbPass, "The DataDb user's password.")
 	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.DBDataEncoding, "The encoding used to store object data in strings.")
 	raterAddress    = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
 	tor             = flag.String("tor", utils.VOICE, "The type of record to use in queries.")
@@ -65,22 +59,16 @@ var (
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
-	ratingDb, err := engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, *ratingdb_user, *ratingdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+	dataDb, err := engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 	if err != nil {
-		return nilDuration, fmt.Errorf("Could not connect to rating database: %s", err.Error())
+		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
-	defer ratingDb.Close()
-	engine.SetRatingStorage(ratingDb)
-	accountDb, err := engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
-	if err != nil {
-		return nilDuration, fmt.Errorf("Could not connect to accounting database: %s", err.Error())
-	}
-	defer accountDb.Close()
-	engine.SetAccountingStorage(accountDb)
-	if err := ratingDb.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
+	defer dataDb.Close()
+	engine.SetDataStorage(dataDb)
+	if err := dataDb.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
 		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
 	}
-	if err := accountDb.LoadAccountingCache(nil, nil, nil); err != nil {
+	if err := dataDb.LoadAccountingCache(nil, nil, nil); err != nil {
 		return nilDuration, fmt.Errorf("Cache accounting error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)

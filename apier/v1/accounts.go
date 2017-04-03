@@ -47,13 +47,13 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	}
 	acntID := utils.AccountKey(attrs.Tenant, attrs.Account)
 	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acntAPids, err := self.RatingDb.GetAccountActionPlans(acntID, false, utils.NonTransactional)
+		acntAPids, err := self.DataDB.GetAccountActionPlans(acntID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return nil, utils.NewErrServerError(err)
 		}
 		var acntAPs []*engine.ActionPlan
 		for _, apID := range acntAPids {
-			if ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
+			if ap, err := self.DataDB.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
 				return nil, err
 			} else if ap != nil {
 				acntAPs = append(acntAPs, ap)
@@ -103,7 +103,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 
 	var remAcntAPids []string // list of accounts who's indexes need modification
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
+		ap, err := self.DataDB.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
 		if err != nil {
 			return 0, err
 		} else if ap == nil {
@@ -113,7 +113,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		if accID != "" {
 			delete(ap.AccountIDs, accID)
 			remAcntAPids = append(remAcntAPids, accID)
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = self.DataDB.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 		if attrs.ActionTimingId != "" { // delete only a action timing from action plan
@@ -124,7 +124,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 					break
 				}
 			}
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = self.DataDB.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
@@ -133,7 +133,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 			for acntID := range ap.AccountIDs { // Make sure we clear indexes for all accounts
 				remAcntAPids = append(remAcntAPids, acntID)
 			}
-			err = self.RatingDb.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = self.DataDB.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
@@ -141,16 +141,16 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		if err != nil {
 			return 0, err
 		}
-		if err = self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{attrs.ActionPlanId}, true); err != nil {
+		if err = self.DataDB.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{attrs.ActionPlanId}, true); err != nil {
 			return 0, err
 		}
 		for _, acntID := range remAcntAPids {
-			if err = self.RatingDb.RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
+			if err = self.DataDB.RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
 				return 0, nil
 			}
 		}
 		if len(remAcntAPids) != 0 {
-			if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, remAcntAPids, true); err != nil {
+			if err = self.DataDB.CacheDataFromDB(utils.AccountActionPlansPrefix, remAcntAPids, true); err != nil {
 				return 0, nil
 			}
 		}
@@ -180,7 +180,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var ub *engine.Account
-		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {
+		if bal, _ := self.DataDB.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
@@ -189,7 +189,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		}
 		if attr.ActionPlanId != "" {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				acntAPids, err := self.RatingDb.GetAccountActionPlans(accID, false, utils.NonTransactional)
+				acntAPids, err := self.DataDB.GetAccountActionPlans(accID, false, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}
@@ -200,7 +200,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 						i++ // increase index since we don't remove from slice
 						continue
 					}
-					ap, err := self.RatingDb.GetActionPlan(apID, false, utils.NonTransactional)
+					ap, err := self.DataDB.GetActionPlan(apID, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -209,7 +209,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 					acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
 				}
 				if !utils.IsSliceMember(acntAPids, attr.ActionPlanId) { // Account not yet attached to action plan, do it here
-					ap, err := self.RatingDb.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
+					ap, err := self.DataDB.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -227,7 +227,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 								AccountID: accID,
 								ActionsID: at.ActionsID,
 							}
-							if err = self.RatingDb.PushTask(t); err != nil {
+							if err = self.DataDB.PushTask(t); err != nil {
 								return 0, err
 							}
 						}
@@ -236,19 +236,19 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				apIDs := make([]string, len(dirtyActionPlans))
 				i := 0
 				for actionPlanID, ap := range dirtyActionPlans {
-					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
+					if err := self.DataDB.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
 					apIDs[i] = actionPlanID
 					i++
 				}
-				if err := self.RatingDb.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
+				if err := self.DataDB.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
-				if err := self.RatingDb.SetAccountActionPlans(accID, acntAPids, true); err != nil {
+				if err := self.DataDB.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
-				if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+				if err = self.DataDB.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 					return 0, err
 				}
 				return 0, nil
@@ -259,7 +259,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		}
 
 		if attr.ActionTriggersId != "" {
-			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
+			atrs, err := self.DataDB.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
 			if err != nil {
 				return 0, err
 			}
@@ -274,7 +274,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 			ub.Disabled = *attr.Disabled
 		}
 		// All prepared, save account
-		if err := self.AccountDb.SetAccount(ub); err != nil {
+		if err := self.DataDB.SetAccount(ub); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -302,7 +302,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-			actionPlansMap, err := self.RatingDb.GetAllActionPlans()
+			actionPlansMap, err := self.DataDB.GetAllActionPlans()
 			if err == utils.ErrNotFound {
 				// no action plans
 				return 0, nil
@@ -319,7 +319,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			}
 
 			for actionPlanID, ap := range dirtyActionPlans {
-				if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
+				if err := self.DataDB.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 					return 0, err
 				}
 			}
@@ -329,7 +329,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			return 0, err
 		}
 
-		if err := self.AccountDb.RemoveAccount(accID); err != nil {
+		if err := self.DataDB.RemoveAccount(accID); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -337,10 +337,10 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.RatingDb.RemAccountActionPlans(accID, nil); err != nil {
+	if err = self.DataDB.RemAccountActionPlans(accID, nil); err != nil {
 		return
 	}
-	if err = self.RatingDb.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+	if err = self.DataDB.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 		return
 	}
 	*reply = OK
@@ -354,7 +354,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+		if accountKeys, err = self.DataDB.GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {
@@ -377,7 +377,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	}
 	retAccounts := make([]interface{}, 0)
 	for _, acntKey := range limitedAccounts {
-		if acnt, err := self.AccountDb.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+		if acnt, err := self.DataDB.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
 			retAccounts = append(retAccounts, acnt.AsOldStructure())
@@ -390,7 +390,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 // Get balance
 func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
 	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
-	userBalance, err := self.AccountDb.GetAccount(tag)
+	userBalance, err := self.DataDB.GetAccount(tag)
 	if err != nil {
 		return err
 	}
@@ -440,12 +440,12 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 		expTime = &expTimeVal
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetAccount(accID); err != nil {
+	if _, err := self.DataDB.GetAccount(accID); err != nil {
 		// create account if does not exist
 		account := &engine.Account{
 			ID: accID,
 		}
-		if err := self.AccountDb.SetAccount(account); err != nil {
+		if err := self.DataDB.SetAccount(account); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -511,12 +511,12 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 		expTime = &expTimeVal
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetAccount(accID); err != nil {
+	if _, err := self.DataDB.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
 			ID: accID,
 		}
-		if err := self.AccountDb.SetAccount(account); err != nil {
+		if err := self.DataDB.SetAccount(account); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -578,7 +578,7 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 		expTime = &expTimeVal
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetAccount(accID); err != nil {
+	if _, err := self.DataDB.GetAccount(accID); err != nil {
 		return utils.ErrNotFound
 	}
 

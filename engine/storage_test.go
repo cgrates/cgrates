@@ -74,7 +74,7 @@ func TestMsgpackTime(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixShort(t *testing.T) {
-	dest, err := ratingStorage.GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dataStorage.GetDestination("NAT", true, utils.NonTransactional)
 	precision := dest.containsPrefix("0723")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -82,7 +82,7 @@ func TestStorageDestinationContainsPrefixShort(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixLong(t *testing.T) {
-	dest, err := ratingStorage.GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dataStorage.GetDestination("NAT", true, utils.NonTransactional)
 	precision := dest.containsPrefix("0723045326")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -90,7 +90,7 @@ func TestStorageDestinationContainsPrefixLong(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
-	dest, err := ratingStorage.GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dataStorage.GetDestination("NAT", true, utils.NonTransactional)
 	precision := dest.containsPrefix("072")
 	if err != nil || precision != 0 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -98,15 +98,15 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 }
 
 func TestStorageCacheRefresh(t *testing.T) {
-	ratingStorage.SetDestination(&Destination{"T11", []string{"0"}}, utils.NonTransactional)
-	ratingStorage.GetDestination("T11", false, utils.NonTransactional)
-	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}}, utils.NonTransactional)
+	dataStorage.SetDestination(&Destination{"T11", []string{"0"}}, utils.NonTransactional)
+	dataStorage.GetDestination("T11", false, utils.NonTransactional)
+	dataStorage.SetDestination(&Destination{"T11", []string{"1"}}, utils.NonTransactional)
 	t.Log("Test cache refresh")
-	err := ratingStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	err := dataStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Error("Error cache rating: ", err)
 	}
-	d, err := ratingStorage.GetDestination("T11", false, utils.NonTransactional)
+	d, err := dataStorage.GetDestination("T11", false, utils.NonTransactional)
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
 		t.Error("Error refreshing cache:", d)
@@ -144,23 +144,23 @@ func TestStorageGetAliases(t *testing.T) {
 			},
 		},
 	}
-	accountingStorage.SetAlias(ala, utils.NonTransactional)
-	accountingStorage.SetReverseAlias(ala, utils.NonTransactional)
-	accountingStorage.SetAlias(alb, utils.NonTransactional)
-	accountingStorage.SetReverseAlias(alb, utils.NonTransactional)
-	foundAlias, err := accountingStorage.GetAlias(ala.GetId(), true, utils.NonTransactional)
+	dataStorage.SetAlias(ala, utils.NonTransactional)
+	dataStorage.SetReverseAlias(ala, utils.NonTransactional)
+	dataStorage.SetAlias(alb, utils.NonTransactional)
+	dataStorage.SetReverseAlias(alb, utils.NonTransactional)
+	foundAlias, err := dataStorage.GetAlias(ala.GetId(), true, utils.NonTransactional)
 	if err != nil || len(foundAlias.Values) != 1 {
 		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
 	}
-	foundAlias, err = accountingStorage.GetAlias(alb.GetId(), true, utils.NonTransactional)
+	foundAlias, err = dataStorage.GetAlias(alb.GetId(), true, utils.NonTransactional)
 	if err != nil || len(foundAlias.Values) != 1 {
 		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
 	}
-	foundAlias, err = accountingStorage.GetAlias(ala.GetId(), false, utils.NonTransactional)
+	foundAlias, err = dataStorage.GetAlias(ala.GetId(), false, utils.NonTransactional)
 	if err != nil || len(foundAlias.Values) != 1 {
 		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
 	}
-	foundAlias, err = accountingStorage.GetAlias(alb.GetId(), false, utils.NonTransactional)
+	foundAlias, err = dataStorage.GetAlias(alb.GetId(), false, utils.NonTransactional)
 	if err != nil || len(foundAlias.Values) != 1 {
 		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
 	}
@@ -183,7 +183,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Subject:   "b1",
 		Context:   "*other",
 	}
-	accountingStorage.GetReverseAlias("aaa"+"Subject"+utils.ALIAS_CONTEXT_RATING, false, utils.NonTransactional)
+	dataStorage.GetReverseAlias("aaa"+"Subject"+utils.ALIAS_CONTEXT_RATING, false, utils.NonTransactional)
 	if x, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.ALIAS_CONTEXT_RATING); ok {
 		aliasKeys := x.([]string)
 		if len(aliasKeys) != 1 {
@@ -192,7 +192,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 	} else {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	accountingStorage.GetReverseAlias("aaa"+"Account"+"*other", false, utils.NonTransactional)
+	dataStorage.GetReverseAlias("aaa"+"Account"+"*other", false, utils.NonTransactional)
 	if x, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + "*other"); ok {
 		aliasKeys := x.([]string)
 		if len(aliasKeys) != 1 {
@@ -220,8 +220,8 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 		Subject:   "b1",
 		Context:   "*other",
 	}
-	accountingStorage.RemoveAlias(ala.GetId(), utils.NonTransactional)
-	accountingStorage.RemoveAlias(alb.GetId(), utils.NonTransactional)
+	dataStorage.RemoveAlias(ala.GetId(), utils.NonTransactional)
+	dataStorage.RemoveAlias(alb.GetId(), utils.NonTransactional)
 
 	if _, ok := cache.Get(utils.ALIASES_PREFIX + ala.GetId()); ok {
 		t.Error("Error removing cached alias: ", ok)
@@ -239,7 +239,7 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 }
 
 func TestStorageDisabledAccount(t *testing.T) {
-	acc, err := accountingStorage.GetAccount("cgrates.org:alodis")
+	acc, err := dataStorage.GetAccount("cgrates.org:alodis")
 	if err != nil || acc == nil {
 		t.Error("Error loading disabled user account: ", err, acc)
 	}
@@ -251,18 +251,17 @@ func TestStorageDisabledAccount(t *testing.T) {
 // Install fails to detect them and starting server will panic, these tests will fix this
 func TestStoreInterfaces(t *testing.T) {
 	rds := new(RedisStorage)
-	var _ RatingStorage = rds
-	var _ AccountingStorage = rds
+	var _ DataDB = rds
 	sql := new(SQLStorage)
 	var _ CdrStorage = sql
 }
 
 func TestDifferentUuid(t *testing.T) {
-	a1, err := accountingStorage.GetAccount("cgrates.org:12345")
+	a1, err := dataStorage.GetAccount("cgrates.org:12345")
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
-	a2, err := accountingStorage.GetAccount("cgrates.org:123456")
+	a2, err := dataStorage.GetAccount("cgrates.org:123456")
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
@@ -275,34 +274,34 @@ func TestDifferentUuid(t *testing.T) {
 func TestStorageTask(t *testing.T) {
 	// clean previous unused tasks
 	for i := 0; i < 21; i++ {
-		ratingStorage.PopTask()
+		dataStorage.PopTask()
 	}
 
-	if err := ratingStorage.PushTask(&Task{Uuid: "1"}); err != nil {
+	if err := dataStorage.PushTask(&Task{Uuid: "1"}); err != nil {
 		t.Error("Error pushing task: ", err)
 	}
-	if err := ratingStorage.PushTask(&Task{Uuid: "2"}); err != nil {
+	if err := dataStorage.PushTask(&Task{Uuid: "2"}); err != nil {
 		t.Error("Error pushing task: ", err)
 	}
-	if err := ratingStorage.PushTask(&Task{Uuid: "3"}); err != nil {
+	if err := dataStorage.PushTask(&Task{Uuid: "3"}); err != nil {
 		t.Error("Error pushing task: ", err)
 	}
-	if err := ratingStorage.PushTask(&Task{Uuid: "4"}); err != nil {
+	if err := dataStorage.PushTask(&Task{Uuid: "4"}); err != nil {
 		t.Error("Error pushing task: ", err)
 	}
-	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "1" {
+	if task, err := dataStorage.PopTask(); err != nil && task.Uuid != "1" {
 		t.Error("Error poping task: ", task, err)
 	}
-	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "2" {
+	if task, err := dataStorage.PopTask(); err != nil && task.Uuid != "2" {
 		t.Error("Error poping task: ", task, err)
 	}
-	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "3" {
+	if task, err := dataStorage.PopTask(); err != nil && task.Uuid != "3" {
 		t.Error("Error poping task: ", task, err)
 	}
-	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "4" {
+	if task, err := dataStorage.PopTask(); err != nil && task.Uuid != "4" {
 		t.Error("Error poping task: ", task, err)
 	}
-	if task, err := ratingStorage.PopTask(); err == nil && task != nil {
+	if task, err := dataStorage.PopTask(); err == nil && task != nil {
 		t.Errorf("Error poping task %+v, %v ", task, err)
 	}
 }

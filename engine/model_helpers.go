@@ -203,7 +203,7 @@ func (tps TpDestinations) AsTPDestinations() (tpDsts []*utils.TPDestination) {
 	uTPDestsMp := make(map[string]*utils.TPDestination) // Should save us some CPU if we index here for big number of destinations to search
 	for _, tpDt := range tps {
 		if uTPDst, hasIt := uTPDestsMp[tpDt.Tag]; !hasIt {
-			uTPDestsMp[tpDt.Tag] = &utils.TPDestination{TPid: tpDt.Tpid, Tag: tpDt.Tag, Prefixes: []string{tpDt.Prefix}}
+			uTPDestsMp[tpDt.Tag] = &utils.TPDestination{TPid: tpDt.Tpid, ID: tpDt.Tag, Prefixes: []string{tpDt.Prefix}}
 		} else {
 			uTPDst.Prefixes = append(uTPDst.Prefixes, tpDt.Prefix)
 		}
@@ -223,7 +223,7 @@ func (tps TpTimings) GetTimings() (map[string]*utils.TPTiming, error) {
 	timings := make(map[string]*utils.TPTiming)
 	for _, tp := range tps {
 		rt := &utils.TPTiming{}
-		rt.TimingId = tp.Tag
+		rt.ID = tp.Tag
 		rt.Years.Parse(tp.Years, utils.INFIELD_SEP)
 		rt.Months.Parse(tp.Months, utils.INFIELD_SEP)
 		rt.MonthDays.Parse(tp.MonthDays, utils.INFIELD_SEP)
@@ -247,7 +247,7 @@ func (tps TpTimings) GetApierTimings() (map[string]*utils.ApierTPTiming, error) 
 	for _, tp := range tps {
 		rt := &utils.ApierTPTiming{
 			TPid:      tp.Tpid,
-			TimingId:  tp.Tag,
+			ID:        tp.Tag,
 			Years:     tp.Years,
 			Months:    tp.Months,
 			MonthDays: tp.MonthDays,
@@ -257,6 +257,14 @@ func (tps TpTimings) GetApierTimings() (map[string]*utils.ApierTPTiming, error) 
 		timings[tp.Tag] = rt
 	}
 	return timings, nil
+}
+
+func (tps TpTimings) AsTPTimings() (result []*utils.ApierTPTiming) {
+	ats, _ := tps.GetApierTimings()
+	for _, tp := range ats {
+		result = append(result, tp)
+	}
+	return result
 }
 
 type TpRates []TpRate
@@ -271,7 +279,7 @@ func (tps TpRates) GetRates() (map[string]*utils.TPRate, error) {
 		}
 		r := &utils.TPRate{
 			TPid:      tp.Tpid,
-			RateId:    tp.Tag,
+			ID:        tp.Tag,
 			RateSlots: []*utils.RateSlot{rs},
 		}
 
@@ -286,14 +294,50 @@ func (tps TpRates) GetRates() (map[string]*utils.TPRate, error) {
 	return rates, nil
 }
 
+func (tps TpRates) GetRatesA() (map[string]*utils.TPRate, error) {
+	rpfs := make(map[string]*utils.TPRate)
+	for _, tpRpf := range tps {
+		rp := &utils.TPRate{
+			TPid: tpRpf.Tpid,
+			ID:   tpRpf.Tag,
+		}
+		ra := &utils.RateSlot{
+			ConnectFee:         tpRpf.ConnectFee,
+			Rate:               tpRpf.Rate,
+			RateUnit:           tpRpf.RateUnit,
+			RateIncrement:      tpRpf.RateIncrement,
+			GroupIntervalStart: tpRpf.GroupIntervalStart,
+		}
+		if existingRpf, exists := rpfs[rp.ID]; !exists {
+			rp.RateSlots = []*utils.RateSlot{ra}
+			rpfs[rp.ID] = rp
+		} else { // Exists, update
+			existingRpf.RateSlots = append(existingRpf.RateSlots, ra)
+		}
+
+	}
+	return rpfs, nil
+}
+
+func (tps TpRates) AsTPRates() (result []*utils.TPRate, err error) {
+	if utps, err := tps.GetRatesA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
+}
+
 type TpDestinationRates []TpDestinationRate
 
 func (tps TpDestinationRates) GetDestinationRates() (map[string]*utils.TPDestinationRate, error) {
 	rts := make(map[string]*utils.TPDestinationRate)
 	for _, tpDr := range tps {
 		dr := &utils.TPDestinationRate{
-			TPid:              tpDr.Tpid,
-			DestinationRateId: tpDr.Tag,
+			TPid: tpDr.Tpid,
+			ID:   tpDr.Tag,
 			DestinationRates: []*utils.DestinationRate{
 				&utils.DestinationRate{
 					DestinationId:    tpDr.DestinationsTag,
@@ -317,6 +361,17 @@ func (tps TpDestinationRates) GetDestinationRates() (map[string]*utils.TPDestina
 	return rts, nil
 }
 
+func (tps TpDestinationRates) AsTPDestinationRates() (result []*utils.TPDestinationRate, err error) {
+	if utps, err := tps.GetDestinationRates(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
+}
+
 type TpRatingPlans []TpRatingPlan
 
 func (tps TpRatingPlans) GetRatingPlans() (map[string][]*utils.TPRatingPlanBinding, error) {
@@ -338,6 +393,40 @@ func (tps TpRatingPlans) GetRatingPlans() (map[string][]*utils.TPRatingPlanBindi
 	return rpbns, nil
 }
 
+func (tps TpRatingPlans) GetRatingPlansA() (map[string]*utils.TPRatingPlan, error) {
+	rps := make(map[string]*utils.TPRatingPlan)
+	for _, tp := range tps {
+		rp := &utils.TPRatingPlan{
+			TPid: tp.Tpid,
+			ID:   tp.Tag,
+		}
+		rpb := &utils.TPRatingPlanBinding{
+			DestinationRatesId: tp.DestratesTag,
+			TimingId:           tp.TimingTag,
+			Weight:             tp.Weight,
+		}
+		if existingRpf, exists := rps[rp.ID]; !exists {
+			rp.RatingPlanBindings = []*utils.TPRatingPlanBinding{rpb}
+			rps[rp.ID] = rp
+		} else {
+			existingRpf.RatingPlanBindings = append(existingRpf.RatingPlanBindings, rpb)
+		}
+
+	}
+	return rps, nil
+}
+
+func (tps TpRatingPlans) AsTPRatingPlans() (result []*utils.TPRatingPlan, err error) {
+	if utps, err := tps.GetRatingPlansA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
+}
+
 func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) (i *RateInterval) {
 	i = &RateInterval{
 		Timing: &RITiming{
@@ -346,7 +435,7 @@ func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) 
 			MonthDays: rpl.Timing().MonthDays,
 			WeekDays:  rpl.Timing().WeekDays,
 			StartTime: rpl.Timing().StartTime,
-			tag:       rpl.Timing().TimingId,
+			tag:       rpl.Timing().ID,
 		},
 		Weight: rpl.Weight,
 		Rating: &RIRate{
@@ -355,7 +444,7 @@ func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) 
 			RoundingDecimals: dr.RoundingDecimals,
 			MaxCost:          dr.MaxCost,
 			MaxCostStrategy:  dr.MaxCostStrategy,
-			tag:              dr.Rate.RateId,
+			tag:              dr.Rate.ID,
 		},
 	}
 	for _, rl := range dr.Rate.RateSlots {
@@ -389,15 +478,26 @@ func (tps TpRatingProfiles) GetRatingProfiles() (map[string]*utils.TPRatingProfi
 			FallbackSubjects: tpRpf.FallbackSubjects,
 			CdrStatQueueIds:  tpRpf.CdrStatQueueIds,
 		}
-		if existingRpf, exists := rpfs[rp.KeyId()]; !exists {
+		if existingRpf, exists := rpfs[rp.KeyIdA()]; !exists {
 			rp.RatingPlanActivations = []*utils.TPRatingActivation{ra}
-			rpfs[rp.KeyId()] = rp
+			rpfs[rp.KeyIdA()] = rp
 		} else { // Exists, update
 			existingRpf.RatingPlanActivations = append(existingRpf.RatingPlanActivations, ra)
 		}
 
 	}
 	return rpfs, nil
+}
+
+func (tps TpRatingProfiles) AsTPRatingProfiles() (result []*utils.TPRatingProfile, err error) {
+	if utps, err := tps.GetRatingProfiles(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
 }
 
 type TpSharedGroups []TpSharedGroup
@@ -412,6 +512,39 @@ func (tps TpSharedGroups) GetSharedGroups() (map[string][]*utils.TPSharedGroup, 
 		})
 	}
 	return sgs, nil
+}
+
+func (tps TpSharedGroups) GetSharedGroupsA() (map[string]*utils.TPSharedGroups, error) {
+	result := make(map[string]*utils.TPSharedGroups)
+	for _, tp := range tps {
+		sgs := &utils.TPSharedGroups{
+			TPid: tp.Tpid,
+			ID:   tp.Tag,
+		}
+		sg := &utils.TPSharedGroup{
+			Account:       tp.Account,
+			Strategy:      tp.Strategy,
+			RatingSubject: tp.RatingSubject,
+		}
+		if existing, exists := result[sgs.ID]; !exists {
+			sgs.SharedGroups = []*utils.TPSharedGroup{sg}
+			result[sgs.ID] = sgs
+		} else {
+			existing.SharedGroups = append(existing.SharedGroups, sg)
+		}
+	}
+	return result, nil
+}
+
+func (tps TpSharedGroups) AsTPSharedGroups() (result []*utils.TPSharedGroups, err error) {
+	if utps, err := tps.GetSharedGroupsA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
 }
 
 type TpActions []TpAction
@@ -444,6 +577,53 @@ func (tps TpActions) GetActions() (map[string][]*utils.TPAction, error) {
 	return as, nil
 }
 
+func (tps TpActions) GetActionsA() (map[string]*utils.TPActions, error) {
+	result := make(map[string]*utils.TPActions)
+	for _, tp := range tps {
+		as := &utils.TPActions{
+			TPid: tp.Tpid,
+			ID:   tp.Tag,
+		}
+		a := &utils.TPAction{
+			Identifier:      tp.Action,
+			BalanceId:       tp.BalanceTag,
+			BalanceType:     tp.BalanceType,
+			Directions:      tp.Directions,
+			Units:           tp.Units,
+			ExpiryTime:      tp.ExpiryTime,
+			Filter:          tp.Filter,
+			TimingTags:      tp.TimingTags,
+			DestinationIds:  tp.DestinationTags,
+			RatingSubject:   tp.RatingSubject,
+			Categories:      tp.Categories,
+			SharedGroups:    tp.SharedGroups,
+			BalanceWeight:   tp.BalanceWeight,
+			BalanceBlocker:  tp.BalanceBlocker,
+			BalanceDisabled: tp.BalanceDisabled,
+			ExtraParameters: tp.ExtraParameters,
+			Weight:          tp.Weight,
+		}
+		if existing, exists := result[as.ID]; !exists {
+			as.Actions = []*utils.TPAction{a}
+			result[as.ID] = as
+		} else {
+			existing.Actions = append(existing.Actions, a)
+		}
+	}
+	return result, nil
+}
+
+func (tps TpActions) AsTPActions() (result []*utils.TPActions, err error) {
+	if utps, err := tps.GetActionsA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
+}
+
 type TpActionPlans []TpActionPlan
 
 func (tps TpActionPlans) GetActionPlans() (map[string][]*utils.TPActionTiming, error) {
@@ -452,6 +632,39 @@ func (tps TpActionPlans) GetActionPlans() (map[string][]*utils.TPActionTiming, e
 		ats[tpAp.Tag] = append(ats[tpAp.Tag], &utils.TPActionTiming{ActionsId: tpAp.ActionsTag, TimingId: tpAp.TimingTag, Weight: tpAp.Weight})
 	}
 	return ats, nil
+}
+
+func (tps TpActionPlans) GetActionPlansA() (map[string]*utils.TPActionPlan, error) {
+	result := make(map[string]*utils.TPActionPlan)
+	for _, tp := range tps {
+		as := &utils.TPActionPlan{
+			TPid: tp.Tpid,
+			ID:   tp.Tag,
+		}
+		a := &utils.TPActionTiming{
+			ActionsId: tp.ActionsTag,
+			TimingId:  tp.TimingTag,
+			Weight:    tp.Weight,
+		}
+		if existing, exists := result[as.ID]; !exists {
+			as.ActionPlan = []*utils.TPActionTiming{a}
+			result[as.ID] = as
+		} else {
+			existing.ActionPlan = append(existing.ActionPlan, a)
+		}
+	}
+	return result, nil
+}
+
+func (tps TpActionPlans) AsTPActionPlans() (result []*utils.TPActionPlan, err error) {
+	if utps, err := tps.GetActionPlansA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
 }
 
 type TpActionTriggers []TpActionTrigger
@@ -489,6 +702,59 @@ func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTri
 	return ats, nil
 }
 
+func (tps TpActionTriggers) GetActionTriggersA() (map[string]*utils.TPActionTriggers, error) {
+	result := make(map[string]*utils.TPActionTriggers)
+	for _, tp := range tps {
+		ats := &utils.TPActionTriggers{
+			TPid: tp.Tpid,
+			ID:   tp.Tag,
+		}
+		at := &utils.TPActionTrigger{
+			Id:                    tp.Tag,
+			UniqueID:              tp.UniqueId,
+			ThresholdType:         tp.ThresholdType,
+			ThresholdValue:        tp.ThresholdValue,
+			Recurrent:             tp.Recurrent,
+			MinSleep:              tp.MinSleep,
+			ExpirationDate:        tp.ExpiryTime,
+			ActivationDate:        tp.ActivationTime,
+			BalanceId:             tp.BalanceTag,
+			BalanceType:           tp.BalanceType,
+			BalanceDirections:     tp.BalanceDirections,
+			BalanceDestinationIds: tp.BalanceDestinationTags,
+			BalanceWeight:         tp.BalanceWeight,
+			BalanceExpirationDate: tp.BalanceExpiryTime,
+			BalanceTimingTags:     tp.BalanceTimingTags,
+			BalanceRatingSubject:  tp.BalanceRatingSubject,
+			BalanceCategories:     tp.BalanceCategories,
+			BalanceSharedGroups:   tp.BalanceSharedGroups,
+			BalanceBlocker:        tp.BalanceBlocker,
+			BalanceDisabled:       tp.BalanceDisabled,
+			Weight:                tp.Weight,
+			ActionsId:             tp.ActionsTag,
+			MinQueuedItems:        tp.MinQueuedItems,
+		}
+		if existing, exists := result[ats.ID]; !exists {
+			ats.ActionTriggers = []*utils.TPActionTrigger{at}
+			result[ats.ID] = ats
+		} else {
+			existing.ActionTriggers = append(existing.ActionTriggers, at)
+		}
+	}
+	return result, nil
+}
+
+func (tps TpActionTriggers) AsTPActionTriggers() (result []*utils.TPActionTriggers, err error) {
+	if utps, err := tps.GetActionTriggersA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
+}
+
 type TpAccountActions []TpAccountAction
 
 func (tps TpAccountActions) GetAccountActions() (map[string]*utils.TPAccountActions, error) {
@@ -509,12 +775,23 @@ func (tps TpAccountActions) GetAccountActions() (map[string]*utils.TPAccountActi
 	return aas, nil
 }
 
+func (tps TpAccountActions) AsTPAccountActions() (result []*utils.TPAccountActions, err error) {
+	if utps, err := tps.GetAccountActions(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
+}
+
 type TpDerivedChargers []TpDerivedCharger
 
 func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedChargers, error) {
 	dcs := make(map[string]*utils.TPDerivedChargers)
 	for _, tpDcMdl := range tps {
-		tpDc := &utils.TPDerivedChargers{TPid: tpDcMdl.Tpid, Loadid: tpDcMdl.Loadid, Direction: tpDcMdl.Direction, Tenant: tpDcMdl.Tenant, Category: tpDcMdl.Category,
+		tpDc := &utils.TPDerivedChargers{TPid: tpDcMdl.Tpid, LoadId: tpDcMdl.Loadid, Direction: tpDcMdl.Direction, Tenant: tpDcMdl.Tenant, Category: tpDcMdl.Category,
 			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject, DestinationIds: tpDcMdl.DestinationIds}
 		tag := tpDc.GetDerivedChargesId()
 		if _, hasIt := dcs[tag]; !hasIt {
@@ -542,6 +819,17 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, nDc)
 	}
 	return dcs, nil
+}
+
+func (tps TpDerivedChargers) AsTPDerivedChargers() (result []*utils.TPDerivedChargers, err error) {
+	if utps, err := tps.GetDerivedChargers(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
 }
 
 type TpCdrStats []TpCdrstat
@@ -577,6 +865,60 @@ func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 		})
 	}
 	return css, nil
+}
+
+func (tps TpCdrStats) GetCdrStatsA() (map[string]*utils.TPCdrStats, error) {
+	result := make(map[string]*utils.TPCdrStats)
+	for _, tp := range tps {
+		css := &utils.TPCdrStats{
+			TPid: tp.Tpid,
+			ID:   tp.Tag,
+		}
+		cs := &utils.TPCdrStat{
+			QueueLength:      strconv.Itoa(tp.QueueLength),
+			TimeWindow:       tp.TimeWindow,
+			Metrics:          tp.Metrics,
+			SaveInterval:     tp.SaveInterval,
+			SetupInterval:    tp.SetupInterval,
+			TORs:             tp.Tors,
+			CdrHosts:         tp.CdrHosts,
+			CdrSources:       tp.CdrSources,
+			ReqTypes:         tp.ReqTypes,
+			Directions:       tp.Directions,
+			Tenants:          tp.Tenants,
+			Categories:       tp.Categories,
+			Accounts:         tp.Accounts,
+			Subjects:         tp.Subjects,
+			DestinationIds:   tp.DestinationIds,
+			PddInterval:      tp.PddInterval,
+			UsageInterval:    tp.UsageInterval,
+			Suppliers:        tp.Suppliers,
+			DisconnectCauses: tp.DisconnectCauses,
+			MediationRunIds:  tp.MediationRunids,
+			RatedAccounts:    tp.RatedAccounts,
+			RatedSubjects:    tp.RatedSubjects,
+			CostInterval:     tp.CostInterval,
+			ActionTriggers:   tp.ActionTriggers}
+		if existing, exists := result[css.ID]; !exists {
+			css.CdrStats = []*utils.TPCdrStat{cs}
+			result[css.ID] = css
+		} else {
+			existing.CdrStats = append(existing.CdrStats, cs)
+		}
+
+	}
+	return result, nil
+}
+
+func (tps TpCdrStats) AsTPCdrStats() (result []*utils.TPCdrStats, err error) {
+	if utps, err := tps.GetCdrStatsA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
 }
 
 func UpdateCdrStats(cs *CdrStats, triggers ActionTriggers, tpCs *utils.TPCdrStat, timezone string) {
@@ -789,6 +1131,41 @@ func (tps TpUsers) GetUsers() (map[string]*utils.TPUsers, error) {
 	return users, nil
 }
 
+func (tps TpUsers) GetUsersA() (map[string]*utils.TPUsers, error) {
+	users := make(map[string]*utils.TPUsers)
+	for _, tp := range tps {
+		var user *utils.TPUsers
+		var found bool
+		if user, found = users[tp.GetId()]; !found {
+			user = &utils.TPUsers{
+				TPid:     tp.Tpid,
+				Tenant:   tp.Tenant,
+				UserName: tp.UserName,
+				Masked:   tp.Masked,
+				Weight:   tp.Weight,
+			}
+			users[tp.GetId()] = user
+		}
+		user.Profile = append(user.Profile,
+			&utils.TPUserProfile{
+				AttrName:  tp.AttributeName,
+				AttrValue: tp.AttributeValue,
+			})
+	}
+	return users, nil
+}
+
+func (tps TpUsers) AsTPUsers() (result []*utils.TPUsers, err error) {
+	if utps, err := tps.GetUsersA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
+}
+
 type TpAliases []TpAlias
 
 func (tps TpAliases) GetAliases() (map[string]*utils.TPAliases, error) {
@@ -816,6 +1193,17 @@ func (tps TpAliases) GetAliases() (map[string]*utils.TPAliases, error) {
 		})
 	}
 	return als, nil
+}
+
+func (tps TpAliases) AsTPAliases() (result []*utils.TPAliases, err error) {
+	if utps, err := tps.GetAliases(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
 }
 
 type TpLcrRules []TpLcrRule
@@ -847,32 +1235,78 @@ func (tps TpLcrRules) GetLcrRules() (map[string]*utils.TPLcrRules, error) {
 	return lcrs, nil
 }
 
+func (tps TpLcrRules) GetLcrRulesA() (map[string]*utils.TPLcrRules, error) {
+	lcrs := make(map[string]*utils.TPLcrRules)
+	for _, tp := range tps {
+		var lcr *utils.TPLcrRules
+		var found bool
+		if lcr, found = lcrs[tp.GetLcrRuleId()]; !found {
+			lcr = &utils.TPLcrRules{
+				TPid:      tp.Tpid,
+				Direction: tp.Direction,
+				Tenant:    tp.Tenant,
+				Category:  tp.Category,
+				Account:   tp.Account,
+				Subject:   tp.Subject,
+			}
+			lcrs[tp.GetLcrRuleId()] = lcr
+		}
+		lcr.Rules = append(lcr.Rules, &utils.TPLcrRule{
+			DestinationId:  tp.DestinationTag,
+			RpCategory:     tp.RpCategory,
+			Strategy:       tp.Strategy,
+			StrategyParams: tp.StrategyParams,
+			ActivationTime: tp.ActivationTime,
+			Weight:         tp.Weight,
+		})
+	}
+	return lcrs, nil
+}
+
+func (tps TpLcrRules) AsTPLcrRules() (result []*utils.TPLcrRules, err error) {
+	if utps, err := tps.GetLcrRulesA(); err != nil {
+		return nil, err
+	} else {
+		for _, tp := range utps {
+			result = append(result, tp)
+		}
+		return result, nil
+	}
+}
+
 type TpResourceLimits []*TpResourceLimit
 
-// Converts model received from StorDB or .csv into API format (optimized version for TP)
-func (tps TpResourceLimits) AsTPResourceLimits() map[string]*utils.TPResourceLimit {
-	resLimits := make(map[string]*utils.TPResourceLimit)
-	for _, tp := range tps {
-		resLimit, found := resLimits[tp.Tag]
+// AsTPResourceLimit converts TpResourceLimits into *utils.TPResourceLimit
+func (trls TpResourceLimits) AsTPResourceLimits() (tpRLs []*utils.TPResourceLimit) {
+	tpRLsMap := make(map[string]*utils.TPResourceLimit)
+	for _, tpRL := range trls {
+		resLimit, found := tpRLsMap[tpRL.Tag]
 		if !found {
 			resLimit = &utils.TPResourceLimit{
-				TPID:           tp.Tpid,
-				ID:             tp.Tag,
-				ActivationTime: tp.ActivationTime,
-				Weight:         tp.Weight,
-				Limit:          tp.Limit,
+				TPid:           tpRL.Tpid,
+				ID:             tpRL.Tag,
+				ActivationTime: tpRL.ActivationTime,
+				Weight:         tpRL.Weight,
+				Limit:          tpRL.Limit,
 			}
 		}
-		if tp.FilterType != "" {
+		if tpRL.ActionTriggerIds != "" {
+			resLimit.ActionTriggerIDs = append(resLimit.ActionTriggerIDs, strings.Split(tpRL.ActionTriggerIds, utils.INFIELD_SEP)...)
+		}
+		if tpRL.FilterType != "" {
 			resLimit.Filters = append(resLimit.Filters, &utils.TPRequestFilter{
-				Type:      tp.FilterType,
-				FieldName: tp.FilterFieldName,
-				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
+				Type:      tpRL.FilterType,
+				FieldName: tpRL.FilterFieldName,
+				Values:    strings.Split(tpRL.FilterFieldValues, utils.INFIELD_SEP)})
 		}
-		if tp.ActionTriggerIds != "" {
-			resLimit.ActionTriggerIDs = append(resLimit.ActionTriggerIDs, strings.Split(tp.ActionTriggerIds, utils.INFIELD_SEP)...)
-		}
-		resLimits[tp.Tag] = resLimit
+		tpRLsMap[tpRL.Tag] = resLimit
 	}
-	return resLimits
+
+	tpRLs = make([]*utils.TPResourceLimit, len(tpRLsMap))
+	i := 0
+	for _, tpRL := range tpRLsMap {
+		tpRLs[i] = tpRL
+		i++
+	}
+	return
 }

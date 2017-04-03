@@ -125,7 +125,7 @@ func testTPitTimings(t *testing.T) {
 	// PEAK,*any,*any,*any,1;2;3;4;5,08:00:00
 	tmPeak := &utils.ApierTPTiming{
 		TPid:      testTPid,
-		TimingId:  "PEAK",
+		ID:        "PEAK",
 		Years:     "*any",
 		Months:    "*any",
 		MonthDays: "*any",
@@ -135,7 +135,7 @@ func testTPitTimings(t *testing.T) {
 	// OFFPEAK_MORNING,*any,*any,*any,1;2;3;4;5,00:00:00
 	tmOffPeakMorning := &utils.ApierTPTiming{
 		TPid:      testTPid,
-		TimingId:  "OFFPEAK_MORNING",
+		ID:        "OFFPEAK_MORNING",
 		Years:     "*any",
 		Months:    "*any",
 		MonthDays: "*any",
@@ -145,7 +145,7 @@ func testTPitTimings(t *testing.T) {
 	// OFFPEAK_EVENING,*any,*any,*any,1;2;3;4;5,19:00:00
 	tmOffPeakEvening := &utils.ApierTPTiming{
 		TPid:      testTPid,
-		TimingId:  "OFFPEAK_EVENING",
+		ID:        "OFFPEAK_EVENING",
 		Years:     "*any",
 		Months:    "*any",
 		MonthDays: "*any",
@@ -155,7 +155,7 @@ func testTPitTimings(t *testing.T) {
 	// OFFPEAK_WEEKEND,*any,*any,*any,6;7,00:00:00
 	tmOffPeakWeekend := &utils.ApierTPTiming{
 		TPid:      testTPid,
-		TimingId:  "OFFPEAK_WEEKEND",
+		ID:        "OFFPEAK_WEEKEND",
 		Years:     "*any",
 		Months:    "*any",
 		MonthDays: "*any",
@@ -165,7 +165,7 @@ func testTPitTimings(t *testing.T) {
 	// DUMMY, only used for the purpose of testing remove function
 	tmDummyRemove := &utils.ApierTPTiming{
 		TPid:      testTPid,
-		TimingId:  "DUMMY_REMOVE",
+		ID:        "DUMMY_REMOVE",
 		Years:     "*any",
 		Months:    "*any",
 		MonthDays: "*any",
@@ -183,13 +183,13 @@ func testTPitTimings(t *testing.T) {
 	}
 	// Test get
 	var rplyTmDummy *utils.ApierTPTiming
-	if err := tpRPC.Call("ApierV2.GetTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.TimingId}, &rplyTmDummy); err != nil {
+	if err := tpRPC.Call("ApierV2.GetTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &rplyTmDummy); err != nil {
 		t.Error("Calling ApierV2.GetTPTiming, got error: ", err.Error())
 	} else if !reflect.DeepEqual(tmDummyRemove, rplyTmDummy) {
 		t.Errorf("Calling ApierV2.GetTPTiming expected: %v, received: %v", tmDummyRemove, rplyTmDummy)
 	}
 	// Test remove
-	if err := tpRPC.Call("ApierV2.RemTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.TimingId}, &reply); err != nil {
+	if err := tpRPC.Call("ApierV2.RemTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &reply); err != nil {
 		t.Error("Calling ApierV2.RemTPTiming, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV2.RemTPTiming received: ", reply)
@@ -207,18 +207,18 @@ func testTPitTimings(t *testing.T) {
 func testTPitDestinations(t *testing.T) {
 	var reply string
 	// DST_1002,1002
-	dst1002 := &utils.TPDestination{TPid: testTPid, Tag: "DST_1002", Prefixes: []string{"1002"}}
+	dst1002 := &utils.TPDestination{TPid: testTPid, ID: "DST_1002", Prefixes: []string{"1002"}}
 	// DST_1003,1003
-	dst1003 := &utils.TPDestination{TPid: testTPid, Tag: "DST_1003", Prefixes: []string{"1003"}}
+	dst1003 := &utils.TPDestination{TPid: testTPid, ID: "DST_1003", Prefixes: []string{"1003"}}
 	// DST_1007,1007
-	dst1007 := &utils.TPDestination{TPid: testTPid, Tag: "DST_1007", Prefixes: []string{"1007"}}
+	dst1007 := &utils.TPDestination{TPid: testTPid, ID: "DST_1007", Prefixes: []string{"1007"}}
 	// DST_FS,10
-	dstFS := &utils.TPDestination{TPid: testTPid, Tag: "DST_FS", Prefixes: []string{"10"}}
+	dstFS := &utils.TPDestination{TPid: testTPid, ID: "DST_FS", Prefixes: []string{"10"}}
 	// DST_DE_MOBILE,+49151
 	// DST_DE_MOBILE,+49161
 	// DST_DE_MOBILE,+49171
-	dstDEMobile := &utils.TPDestination{TPid: testTPid, Tag: "DST_DE_MOBILE", Prefixes: []string{"+49151", "+49161", "+49171"}}
-	dstDUMMY := &utils.TPDestination{TPid: testTPid, Tag: "DUMMY_REMOVE", Prefixes: []string{"999"}}
+	dstDEMobile := &utils.TPDestination{TPid: testTPid, ID: "DST_DE_MOBILE", Prefixes: []string{"+49151", "+49161", "+49171"}}
+	dstDUMMY := &utils.TPDestination{TPid: testTPid, ID: "DUMMY_REMOVE", Prefixes: []string{"999"}}
 	for _, dst := range []*utils.TPDestination{dst1002, dst1003, dst1007, dstFS, dstDEMobile, dstDUMMY} {
 		if err := tpRPC.Call("ApierV2.SetTPDestination", dst, &reply); err != nil {
 			t.Error("Got error on ApierV2.SetTPDestination: ", err.Error())
@@ -228,13 +228,13 @@ func testTPitDestinations(t *testing.T) {
 	}
 	// Test get
 	var rplyDst *utils.TPDestination
-	if err := tpRPC.Call("ApierV2.GetTPDestination", AttrGetTPDestination{testTPid, dstDEMobile.Tag}, &rplyDst); err != nil {
+	if err := tpRPC.Call("ApierV2.GetTPDestination", AttrGetTPDestination{testTPid, dstDEMobile.ID}, &rplyDst); err != nil {
 		t.Error("Calling ApierV2.GetTPDestination, got error: ", err.Error())
 	} else if len(dstDEMobile.Prefixes) != len(rplyDst.Prefixes) {
 		t.Errorf("Calling ApierV2.GetTPDestination expected: %v, received: %v", dstDEMobile, rplyDst)
 	}
 	// Test remove
-	if err := tpRPC.Call("ApierV2.RemTPDestination", AttrGetTPDestination{testTPid, dstDUMMY.Tag}, &reply); err != nil {
+	if err := tpRPC.Call("ApierV2.RemTPDestination", AttrGetTPDestination{testTPid, dstDUMMY.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)

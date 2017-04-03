@@ -28,10 +28,10 @@ After *post-install* actions are performed, CGRateS will be configured in **/etc
 3.2. Using source
 -----------------
 
-For developing CGRateS and switching between its versions, we are using the **new vendor directory feature** introduced in go 1.6. 
+For developing CGRateS and switching between its versions, we are using the **new vendor directory feature** introduced in go 1.6.
 In a nutshell all the dependencies are installed and used from a folder named *vendor* placed in the root of the project.
 
-To manage this *vendor* folder we use a tool named `glide`_ which will download specific versions of the external packages used by CGRateS. 
+To manage this *vendor* folder we use a tool named `glide`_ which will download specific versions of the external packages used by CGRateS.
 To configure the project with `glide`_ use the following commands:
 
 ::
@@ -42,7 +42,7 @@ To configure the project with `glide`_ use the following commands:
    glide install
    ./build.sh
 
-The **glide install** command will install the external dependencies versions, specified in the **glide.lock** file, in the vendor folder. 
+The **glide install** command will install the external dependencies versions, specified in the **glide.lock** file, in the vendor folder.
 There are different versions for each CGRateS branch, versions that are recorded in the **lock** file when the GCRateS releases are made (using **glide update** command).
 
 .. note:: The *vendor* folder **should not** be registered with the VCS we are using.
@@ -66,7 +66,7 @@ For its operation CGRateS uses **one or more** database types, depending on its 
 At present we support the following databases:
 
 - `Redis`_
-Can be used as ``tariffplan_db`` - ``data_db`` .
+Can be used as ``data_db`` .
 Optimized for real-time information access.
 Once installed there should be no special requirements in terms of setup since no schema is necessary.
 
@@ -91,7 +91,7 @@ Once PostgreSQL is installed, CGRateS database needs to be set-up out of provide
    ./setup_cgr_db.sh
 
 - `MongoDB`_
-Can be used as ``tariffplan_db`` - ``data_db`` - ``stor_db`` .
+Can be used as ``data_db`` - ``stor_db`` .
 It is the first database that can be used to store all kinds of data stored from CGRateS from accounts, tariff plans to cdrs and logs.
 This is provided as an alternative to Redis and/or MySQL/PostgreSQL and right now there are NO plans to drop support for any of them soon.
 
@@ -111,7 +111,7 @@ Once MongoDB is installed, CGRateS database needs to be set-up out of provided s
 3.3.2.Git
 ~~~~~~~~~
 
-The **historys** (History Service) component will use `Git`_ to archive *tariff plan changes* in a local repository, 
+The **historys** (History Service) component will use `Git`_ to archive *tariff plan changes* in a local repository,
 hence `Git`_ installation is necessary if you want to use this service.
 
 .. _Git: http://git-scm.com

@@ -30,7 +30,7 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if account, err := self.AccountDb.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account)); err != nil {
+	if account, err := self.DataDB.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		ats := account.ActionTriggers
@@ -63,7 +63,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.AccountDb.GetAccount(accID); err == nil {
+		if acc, err := self.DataDB.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -73,7 +73,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 				account.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
 			for _, actionTriggerID := range *attr.ActionTriggerIDs {
-				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
+				atrs, err := self.DataDB.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
 				if err != nil {
 					return 0, err
 				}
@@ -94,7 +94,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 			}
 		}
 		account.InitCounters()
-		if err := self.AccountDb.SetAccount(account); err != nil {
+		if err := self.DataDB.SetAccount(account); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -121,7 +121,7 @@ func (self *ApierV1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTri
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		var account *engine.Account
-		if acc, err := self.AccountDb.GetAccount(accID); err == nil {
+		if acc, err := self.DataDB.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -137,7 +137,7 @@ func (self *ApierV1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTri
 		}
 		account.ActionTriggers = newActionTriggers
 		account.InitCounters()
-		if err := self.AccountDb.SetAccount(account); err != nil {
+		if err := self.DataDB.SetAccount(account); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -166,7 +166,7 @@ func (self *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTrigg
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.AccountDb.GetAccount(accID); err == nil {
+		if acc, err := self.DataDB.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -182,7 +182,7 @@ func (self *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTrigg
 		if attr.Executed == false {
 			account.ExecuteActionTriggers(nil)
 		}
-		if err := self.AccountDb.SetAccount(account); err != nil {
+		if err := self.DataDB.SetAccount(account); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -231,7 +231,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.AccountDb.GetAccount(accID); err == nil {
+		if acc, err := self.DataDB.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -324,7 +324,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 
 		}
 		account.ExecuteActionTriggers(nil)
-		if err := self.AccountDb.SetAccount(account); err != nil {
+		if err := self.DataDB.SetAccount(account); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -347,7 +347,7 @@ func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *st
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attr.UniqueID == "" {
-		err := self.RatingDb.RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
+		err := self.DataDB.RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 		} else {
@@ -355,7 +355,7 @@ func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *st
 		}
 		return err
 	} else {
-		atrs, err := self.RatingDb.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
+		atrs, err := self.DataDB.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -368,7 +368,7 @@ func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *st
 			remainingAtrs = append(remainingAtrs, atr)
 		}
 		// set the cleared list back
-		err = self.RatingDb.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional)
+		err = self.DataDB.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 		} else {
@@ -409,7 +409,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	atrs, _ := self.RatingDb.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
+	atrs, _ := self.DataDB.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
 	var newAtr *engine.ActionTrigger
 	if attr.UniqueID != "" {
 		//search for exiting one
@@ -513,10 +513,10 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	if attr.ActionsID != nil {
 		newAtr.ActionsID = *attr.ActionsID
 	}
-	if err = self.RatingDb.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
+	if err = self.DataDB.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = self.RatingDb.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{attr.GroupID}, true); err != nil {
+	if err = self.DataDB.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{attr.GroupID}, true); err != nil {
 		return
 	}
 	//no cache for action triggers
@@ -532,7 +532,7 @@ func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 	var allAttrs engine.ActionTriggers
 	if len(attr.GroupIDs) > 0 {
 		for _, key := range attr.GroupIDs {
-			getAttrs, err := self.RatingDb.GetActionTriggers(key, false, utils.NonTransactional)
+			getAttrs, err := self.DataDB.GetActionTriggers(key, false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -540,12 +540,12 @@ func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 		}
 
 	} else {
-		keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
+		keys, err := self.DataDB.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {
 			return err
 		}
 		for _, key := range keys {
-			getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
+			getAttrs, err := self.DataDB.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -616,13 +616,13 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	}
 	acntID := utils.AccountKey(attr.Tenant, attr.Account)
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acnt, err := self.AccountDb.GetAccount(acntID)
+		acnt, err := self.DataDB.GetAccount(acntID)
 		if err != nil {
 			return 0, err
 		}
 		acnt.ActionTriggers = append(acnt.ActionTriggers, at)
 
-		if err = self.AccountDb.SetAccount(acnt); err != nil {
+		if err = self.DataDB.SetAccount(acnt); err != nil {
 			return 0, err
 		}
 		return 0, nil

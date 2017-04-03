@@ -73,19 +73,19 @@ func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
 
 // Deprecated version of TPDestination
 type V1TPDestination struct {
-	TPid          string   // Tariff plan id
-	DestinationId string   // Destination id
-	Prefixes      []string // Prefixes attached to this destination
+	TPid     string   // Tariff plan id
+	ID       string   // Destination id
+	Prefixes []string // Prefixes attached to this destination
 }
 
 func (v1TPDst *V1TPDestination) AsTPDestination() *TPDestination {
-	return &TPDestination{TPid: v1TPDst.TPid, Tag: v1TPDst.DestinationId, Prefixes: v1TPDst.Prefixes}
+	return &TPDestination{TPid: v1TPDst.TPid, ID: v1TPDst.ID, Prefixes: v1TPDst.Prefixes}
 }
 
 // TPDestination represents one destination in storDB
 type TPDestination struct {
 	TPid     string   // Tariff plan id
-	Tag      string   // Destination id
+	ID       string   // Destination id
 	Prefixes []string // Prefixes attached to this destination
 }
 
@@ -93,7 +93,7 @@ type TPDestination struct {
 
 type TPRate struct {
 	TPid      string      // Tariff plan id
-	RateId    string      // Rate id
+	ID        string      // Rate id
 	RateSlots []*RateSlot // One or more RateSlots
 }
 
@@ -144,9 +144,9 @@ func (self *RateSlot) GroupIntervalStartDuration() time.Duration {
 }
 
 type TPDestinationRate struct {
-	TPid              string             // Tariff plan id
-	DestinationRateId string             // DestinationRate profile id
-	DestinationRates  []*DestinationRate // Set of destinationid-rateid bindings
+	TPid             string             // Tariff plan id
+	ID               string             // DestinationRate profile id
+	DestinationRates []*DestinationRate // Set of destinationid-rateid bindings
 }
 
 type DestinationRate struct {
@@ -161,7 +161,7 @@ type DestinationRate struct {
 
 type ApierTPTiming struct {
 	TPid      string // Tariff plan id
-	TimingId  string // Timing id
+	ID        string // Timing id
 	Years     string // semicolon separated list of years this timing is valid on, *any supported
 	Months    string // semicolon separated list of months this timing is valid on, *any supported
 	MonthDays string // semicolon separated list of month's days this timing is valid on, *any supported
@@ -170,7 +170,7 @@ type ApierTPTiming struct {
 }
 
 type TPTiming struct {
-	TimingId  string
+	ID        string
 	Years     Years
 	Months    Months
 	MonthDays MonthDays
@@ -181,7 +181,7 @@ type TPTiming struct {
 
 func NewTiming(timingInfo ...string) (rt *TPTiming) {
 	rt = &TPTiming{}
-	rt.TimingId = timingInfo[0]
+	rt.ID = timingInfo[0]
 	rt.Years.Parse(timingInfo[1], INFIELD_SEP)
 	rt.Months.Parse(timingInfo[2], INFIELD_SEP)
 	rt.MonthDays.Parse(timingInfo[3], INFIELD_SEP)
@@ -196,7 +196,7 @@ func NewTiming(timingInfo ...string) (rt *TPTiming) {
 
 type TPRatingPlan struct {
 	TPid               string                 // Tariff plan id
-	RatingPlanId       string                 // RatingPlan profile id
+	ID                 string                 // RatingPlan profile id
 	RatingPlanBindings []*TPRatingPlanBinding // Set of destinationid-rateid bindings
 }
 
@@ -237,6 +237,10 @@ type TPRatingProfile struct {
 // Used as key in nosql db (eg: redis)
 func (self *TPRatingProfile) KeyId() string {
 	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.Category, self.Subject)
+}
+
+func (self *TPRatingProfile) KeyIdA() string {
+	return fmt.Sprintf("%s:%s:%s:%s:%s", self.LoadId, self.Direction, self.Tenant, self.Category, self.Subject)
 }
 
 func (rpf *TPRatingProfile) GetRatingProfilesId() string {
@@ -301,9 +305,9 @@ type AttrTPRatingProfileIds struct {
 }
 
 type TPActions struct {
-	TPid      string      // Tariff plan id
-	ActionsId string      // Actions id
-	Actions   []*TPAction // Set of actions this Actions profile will perform
+	TPid    string      // Tariff plan id
+	ID      string      // Actions id
+	Actions []*TPAction // Set of actions this Actions profile will perform
 }
 
 type TPAction struct {
@@ -328,9 +332,9 @@ type TPAction struct {
 }
 
 type TPSharedGroups struct {
-	TPid           string
-	SharedGroupsId string
-	SharedGroups   []*TPSharedGroup
+	TPid         string
+	ID           string
+	SharedGroups []*TPSharedGroup
 }
 
 type TPSharedGroup struct {
@@ -358,6 +362,35 @@ type TPLcrRule struct {
 	Weight         float64
 }
 
+func (lcr *TPLcrRules) SetId(id string) error {
+	ids := strings.Split(id, CONCATENATED_KEY_SEP)
+	if len(ids) != 5 {
+		return fmt.Errorf("wrong LcrRule Id: %s", id)
+	}
+	lcr.Direction = ids[0]
+	lcr.Tenant = ids[1]
+	lcr.Category = ids[2]
+	lcr.Account = ids[3]
+	lcr.Subject = ids[4]
+	return nil
+}
+
+type TpAlias struct {
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Group     string
+	Values    []*AliasValue
+}
+
+type AliasValue struct {
+	DestinationId string
+	Alias         string
+	Weight        float64
+}
+
 type TPAliases struct {
 	TPid      string
 	Direction string
@@ -377,13 +410,31 @@ type TPAliasValue struct {
 	Weight        float64
 }
 
+func (a *TPAliases) GetId() string {
+	return ConcatenatedKey(a.Direction, a.Tenant, a.Category, a.Account, a.Subject, a.Context)
+}
+
+func (a *TPAliases) SetId(id string) error {
+	vals := strings.Split(id, CONCATENATED_KEY_SEP)
+	if len(vals) != 6 {
+		return ErrInvalidKey
+	}
+	a.Direction = vals[0]
+	a.Tenant = vals[1]
+	a.Category = vals[2]
+	a.Account = vals[3]
+	a.Subject = vals[4]
+	a.Context = vals[5]
+	return nil
+}
+
 type TPUsers struct {
 	TPid     string
 	Tenant   string
-	Masked   bool
 	UserName string
-	Profile  []*TPUserProfile
+	Masked   bool
 	Weight   float64
+	Profile  []*TPUserProfile
 }
 
 type TPUserProfile struct {
@@ -391,10 +442,24 @@ type TPUserProfile struct {
 	AttrValue string
 }
 
+func (u *TPUsers) GetId() string {
+	return ConcatenatedKey(u.Tenant, u.UserName)
+}
+
+func (tu *TPUsers) SetId(id string) error {
+	vals := strings.Split(id, CONCATENATED_KEY_SEP)
+	if len(vals) != 2 {
+		return ErrInvalidKey
+	}
+	tu.Tenant = vals[0]
+	tu.UserName = vals[1]
+	return nil
+}
+
 type TPCdrStats struct {
-	TPid       string
-	CdrStatsId string
-	CdrStats   []*TPCdrStat
+	TPid     string
+	ID       string
+	CdrStats []*TPCdrStat
 }
 
 type TPCdrStat struct {
@@ -426,7 +491,7 @@ type TPCdrStat struct {
 
 type TPDerivedChargers struct {
 	TPid            string
-	Loadid          string
+	LoadId          string
 	Direction       string
 	Tenant          string
 	Category        string
@@ -434,40 +499,6 @@ type TPDerivedChargers struct {
 	Subject         string
 	DestinationIds  string
 	DerivedChargers []*TPDerivedCharger
-}
-
-// Key used in dataDb to identify DerivedChargers set
-func (tpdc *TPDerivedChargers) GetDerivedChargersKey() string {
-	return DerivedChargersKey(tpdc.Direction, tpdc.Tenant, tpdc.Category, tpdc.Account, tpdc.Subject)
-
-}
-
-func (tpdc *TPDerivedChargers) GetDerivedChargesId() string {
-	return tpdc.Loadid +
-		CONCATENATED_KEY_SEP +
-		tpdc.Direction +
-		CONCATENATED_KEY_SEP +
-		tpdc.Tenant +
-		CONCATENATED_KEY_SEP +
-		tpdc.Category +
-		CONCATENATED_KEY_SEP +
-		tpdc.Account +
-		CONCATENATED_KEY_SEP +
-		tpdc.Subject
-}
-
-func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
-	ids := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(ids) != 6 {
-		return fmt.Errorf("Wrong TP Derived Charge Id: %s", id)
-	}
-	tpdc.Loadid = ids[0]
-	tpdc.Direction = ids[1]
-	tpdc.Tenant = ids[2]
-	tpdc.Category = ids[3]
-	tpdc.Account = ids[4]
-	tpdc.Subject = ids[5]
-	return nil
 }
 
 type TPDerivedCharger struct {
@@ -490,10 +521,44 @@ type TPDerivedCharger struct {
 	RatedField           string
 }
 
+// Key used in dataDb to identify DerivedChargers set
+func (tpdc *TPDerivedChargers) GetDerivedChargersKey() string {
+	return DerivedChargersKey(tpdc.Direction, tpdc.Tenant, tpdc.Category, tpdc.Account, tpdc.Subject)
+
+}
+
+func (tpdc *TPDerivedChargers) GetDerivedChargesId() string {
+	return tpdc.LoadId +
+		CONCATENATED_KEY_SEP +
+		tpdc.Direction +
+		CONCATENATED_KEY_SEP +
+		tpdc.Tenant +
+		CONCATENATED_KEY_SEP +
+		tpdc.Category +
+		CONCATENATED_KEY_SEP +
+		tpdc.Account +
+		CONCATENATED_KEY_SEP +
+		tpdc.Subject
+}
+
+func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
+	ids := strings.Split(id, CONCATENATED_KEY_SEP)
+	if len(ids) != 6 {
+		return fmt.Errorf("Wrong TP Derived Charge Id: %s", id)
+	}
+	tpdc.LoadId = ids[0]
+	tpdc.Direction = ids[1]
+	tpdc.Tenant = ids[2]
+	tpdc.Category = ids[3]
+	tpdc.Account = ids[4]
+	tpdc.Subject = ids[5]
+	return nil
+}
+
 type TPActionPlan struct {
-	TPid         string            // Tariff plan id
-	ActionPlanId string            // ActionPlan id
-	ActionPlan   []*TPActionTiming // Set of ActionTiming bindings this profile will group
+	TPid       string            // Tariff plan id
+	ID         string            // ActionPlan id
+	ActionPlan []*TPActionTiming // Set of ActionTiming bindings this profile will group
 }
 
 type TPActionTiming struct {
@@ -503,9 +568,9 @@ type TPActionTiming struct {
 }
 
 type TPActionTriggers struct {
-	TPid             string             // Tariff plan id
-	ActionTriggersId string             // action trigger id
-	ActionTriggers   []*TPActionTrigger // Set of triggers grouped in this profile
+	TPid           string             // Tariff plan id
+	ID             string             // action trigger id
+	ActionTriggers []*TPActionTrigger // Set of triggers grouped in this profile
 }
 
 type TPActionTrigger struct {
@@ -532,7 +597,6 @@ type TPActionTrigger struct {
 	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached
 	Weight                float64 // weight
-
 }
 
 // Used to rebuild a TPAccountActions (empty ActionTimingsId and ActionTriggersId) out of it's key in nosqldb
@@ -557,11 +621,11 @@ type TPAccountActions struct {
 }
 
 // Returns the id used in some nosql dbs (eg: redis)
-func (self *TPAccountActions) KeyId() string {
-	return fmt.Sprintf("%s:%s", self.Tenant, self.Account)
+func (aa *TPAccountActions) KeyId() string {
+	return fmt.Sprintf("%s:%s", aa.Tenant, aa.Account)
 }
 
-func (aa *TPAccountActions) GetAccountActionsId() string {
+func (aa *TPAccountActions) GetId() string {
 	return aa.LoadId +
 		CONCATENATED_KEY_SEP +
 		aa.Tenant +
@@ -1174,22 +1238,6 @@ type AttrGetCallCost struct {
 	RunId string // Run Id
 }
 
-type TpAlias struct {
-	Direction string
-	Tenant    string
-	Category  string
-	Account   string
-	Subject   string
-	Group     string
-	Values    []*AliasValue
-}
-
-type AliasValue struct {
-	DestinationId string
-	Alias         string
-	Weight        float64
-}
-
 type AttrRateCDRs struct {
 	RPCCDRsFilter
 	StoreCDRs     *bool
@@ -1217,7 +1265,7 @@ type AttrSetBalance struct {
 }
 
 type TPResourceLimit struct {
-	TPID             string
+	TPid             string
 	ID               string             // Identifier of this limit
 	Filters          []*TPRequestFilter // Filters for the request
 	ActivationTime   string             // Time when this limit becomes active

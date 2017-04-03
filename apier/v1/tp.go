@@ -93,6 +93,6 @@ func (self *ApierV1) ImportTPZipFile(attrs AttrImportTPZipFile, reply *string) e
 		return err
 	}
 	os.RemoveAll(tmpDir)
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }

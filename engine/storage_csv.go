@@ -78,7 +78,7 @@ func openStringCSVStorage(data string, comma rune, nrFields int) (csvReader *csv
 	return
 }
 
-func (csvs *CSVStorage) GetTpTimings(tpid, tag string) ([]TpTiming, error) {
+func (csvs *CSVStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.timingsFn, csvs.sep, getColumnCount(TpTiming{}))
 	if err != nil {
 		//log.Print("Could not load timings file: ", err)
@@ -88,7 +88,7 @@ func (csvs *CSVStorage) GetTpTimings(tpid, tag string) ([]TpTiming, error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpTimings []TpTiming
+	var tpTimings TpTimings
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in timings csv: ", err)
@@ -103,10 +103,10 @@ func (csvs *CSVStorage) GetTpTimings(tpid, tag string) ([]TpTiming, error) {
 			tpTimings = append(tpTimings, tm)
 		}
 	}
-	return tpTimings, nil
+	return tpTimings.AsTPTimings(), nil
 }
 
-func (csvs *CSVStorage) GetTPDestinations(tpid, tag string) ([]*utils.TPDestination, error) {
+func (csvs *CSVStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestination, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.destinationsFn, csvs.sep, getColumnCount(TpDestination{}))
 	if err != nil {
 		//log.Print("Could not load destinations file: ", err)
@@ -116,7 +116,7 @@ func (csvs *CSVStorage) GetTPDestinations(tpid, tag string) ([]*utils.TPDestinat
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpDests []TpDestination
+	var tpDests TpDestinations
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in destinations csv: ", err)
@@ -131,10 +131,10 @@ func (csvs *CSVStorage) GetTPDestinations(tpid, tag string) ([]*utils.TPDestinat
 			tpDests = append(tpDests, d)
 		}
 	}
-	return TpDestinations(tpDests).AsTPDestinations(), nil
+	return tpDests.AsTPDestinations(), nil
 }
 
-func (csvs *CSVStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
+func (csvs *CSVStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.ratesFn, csvs.sep, getColumnCount(TpRate{}))
 	if err != nil {
 		//log.Print("Could not load rates file: ", err)
@@ -144,7 +144,7 @@ func (csvs *CSVStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpRates []TpRate
+	var tpRates TpRates
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in rates csv: ", err)
@@ -159,10 +159,14 @@ func (csvs *CSVStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
 			tpRates = append(tpRates, r)
 		}
 	}
-	return tpRates, nil
+	if rs, err := tpRates.AsTPRates(); err != nil {
+		return nil, err
+	} else {
+		return rs, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpDestinationRates(tpid, tag string, p *utils.Paginator) ([]TpDestinationRate, error) {
+func (csvs *CSVStorage) GetTPDestinationRates(tpid, id string, p *utils.Paginator) ([]*utils.TPDestinationRate, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.destinationratesFn, csvs.sep, getColumnCount(TpDestinationRate{}))
 	if err != nil {
 		//log.Print("Could not load destination_rates file: ", err)
@@ -172,7 +176,7 @@ func (csvs *CSVStorage) GetTpDestinationRates(tpid, tag string, p *utils.Paginat
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpDestinationRates []TpDestinationRate
+	var tpDestinationRates TpDestinationRates
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in destinationrates csv: ", err)
@@ -187,10 +191,14 @@ func (csvs *CSVStorage) GetTpDestinationRates(tpid, tag string, p *utils.Paginat
 			tpDestinationRates = append(tpDestinationRates, dr)
 		}
 	}
-	return tpDestinationRates, nil
+	if drs, err := tpDestinationRates.AsTPDestinationRates(); err != nil {
+		return nil, err
+	} else {
+		return drs, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpRatingPlans(tpid, tag string, p *utils.Paginator) ([]TpRatingPlan, error) {
+func (csvs *CSVStorage) GetTPRatingPlans(tpid, id string, p *utils.Paginator) ([]*utils.TPRatingPlan, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.destinationratetimingsFn, csvs.sep, getColumnCount(TpRatingPlan{}))
 	if err != nil {
 		//log.Print("Could not load rate plans file: ", err)
@@ -200,7 +208,7 @@ func (csvs *CSVStorage) GetTpRatingPlans(tpid, tag string, p *utils.Paginator) (
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpRatingPlans []TpRatingPlan
+	var tpRatingPlans TpRatingPlans
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in rating plans csv: ", err)
@@ -215,10 +223,14 @@ func (csvs *CSVStorage) GetTpRatingPlans(tpid, tag string, p *utils.Paginator) (
 			tpRatingPlans = append(tpRatingPlans, rp)
 		}
 	}
-	return tpRatingPlans, nil
+	if rps, err := tpRatingPlans.AsTPRatingPlans(); err != nil {
+		return nil, err
+	} else {
+		return rps, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpRatingProfiles(filter *TpRatingProfile) ([]TpRatingProfile, error) {
+func (csvs *CSVStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.ratingprofilesFn, csvs.sep, getColumnCount(TpRatingProfile{}))
 	if err != nil {
 		//log.Print("Could not load rating profiles file: ", err)
@@ -228,7 +240,7 @@ func (csvs *CSVStorage) GetTpRatingProfiles(filter *TpRatingProfile) ([]TpRating
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpRatingProfiles []TpRatingProfile
+	var tpRatingProfiles TpRatingProfiles
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line rating profiles csv: ", err)
@@ -240,16 +252,20 @@ func (csvs *CSVStorage) GetTpRatingProfiles(filter *TpRatingProfile) ([]TpRating
 		} else {
 			rpf := tpRate.(TpRatingProfile)
 			if filter != nil {
-				rpf.Tpid = filter.Tpid
-				rpf.Loadid = filter.Loadid
+				rpf.Tpid = filter.TPid
+				rpf.Loadid = filter.LoadId
 			}
 			tpRatingProfiles = append(tpRatingProfiles, rpf)
 		}
 	}
-	return tpRatingProfiles, nil
+	if rps, err := tpRatingProfiles.AsTPRatingProfiles(); err != nil {
+		return nil, err
+	} else {
+		return rps, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, error) {
+func (csvs *CSVStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.sharedgroupsFn, csvs.sep, getColumnCount(TpSharedGroup{}))
 	if err != nil {
 		//log.Print("Could not load shared groups file: ", err)
@@ -259,8 +275,7 @@ func (csvs *CSVStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, er
 	if fp != nil {
 		defer fp.Close()
 	}
-
-	var tpSharedGroups []TpSharedGroup
+	var tpSharedGroups TpSharedGroups
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in shared groups csv: ", err)
@@ -275,10 +290,14 @@ func (csvs *CSVStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, er
 			tpSharedGroups = append(tpSharedGroups, sg)
 		}
 	}
-	return tpSharedGroups, nil
+	if sgs, err := tpSharedGroups.AsTPSharedGroups(); err != nil {
+		return nil, err
+	} else {
+		return sgs, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpLCRs(filter *TpLcrRule) ([]TpLcrRule, error) {
+func (csvs *CSVStorage) GetTPLCRs(filter *utils.TPLcrRules) ([]*utils.TPLcrRules, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.lcrFn, csvs.sep, getColumnCount(TpLcrRule{}))
 	if err != nil {
 		//log.Print("Could not load LCR rules file: ", err)
@@ -288,7 +307,7 @@ func (csvs *CSVStorage) GetTpLCRs(filter *TpLcrRule) ([]TpLcrRule, error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpLCRs []TpLcrRule
+	var tpLCRs TpLcrRules
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if tpRate, err := csvLoad(TpLcrRule{}, record); err != nil {
 			if err != nil {
@@ -299,15 +318,19 @@ func (csvs *CSVStorage) GetTpLCRs(filter *TpLcrRule) ([]TpLcrRule, error) {
 		} else {
 			lcr := tpRate.(TpLcrRule)
 			if filter != nil {
-				lcr.Tpid = filter.Tpid
+				lcr.Tpid = filter.TPid
 			}
 			tpLCRs = append(tpLCRs, lcr)
 		}
 	}
-	return tpLCRs, nil
+	if lrs, err := tpLCRs.AsTPLcrRules(); err != nil {
+		return nil, err
+	} else {
+		return lrs, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpActions(tpid, tag string) ([]TpAction, error) {
+func (csvs *CSVStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.actionsFn, csvs.sep, getColumnCount(TpAction{}))
 	if err != nil {
 		//log.Print("Could not load action file: ", err)
@@ -317,7 +340,7 @@ func (csvs *CSVStorage) GetTpActions(tpid, tag string) ([]TpAction, error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpActions []TpAction
+	var tpActions TpActions
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in actions csv: ", err)
@@ -332,10 +355,14 @@ func (csvs *CSVStorage) GetTpActions(tpid, tag string) ([]TpAction, error) {
 			tpActions = append(tpActions, a)
 		}
 	}
-	return tpActions, nil
+	if as, err := tpActions.AsTPActions(); err != nil {
+		return nil, err
+	} else {
+		return as, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpActionPlans(tpid, tag string) ([]TpActionPlan, error) {
+func (csvs *CSVStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.actiontimingsFn, csvs.sep, getColumnCount(TpActionPlan{}))
 	if err != nil {
 		//log.Print("Could not load action plans file: ", err)
@@ -345,7 +372,7 @@ func (csvs *CSVStorage) GetTpActionPlans(tpid, tag string) ([]TpActionPlan, erro
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpActionPlans []TpActionPlan
+	var tpActionPlans TpActionPlans
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if tpRate, err := csvLoad(TpActionPlan{}, record); err != nil {
 			log.Print("error loading action plan: ", err)
@@ -356,10 +383,14 @@ func (csvs *CSVStorage) GetTpActionPlans(tpid, tag string) ([]TpActionPlan, erro
 			tpActionPlans = append(tpActionPlans, ap)
 		}
 	}
-	return tpActionPlans, nil
+	if aps, err := tpActionPlans.AsTPActionPlans(); err != nil {
+		return nil, err
+	} else {
+		return aps, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger, error) {
+func (csvs *CSVStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.actiontriggersFn, csvs.sep, getColumnCount(TpActionTrigger{}))
 	if err != nil {
 		//log.Print("Could not load action triggers file: ", err)
@@ -369,7 +400,7 @@ func (csvs *CSVStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpActionTriggers []TpActionTrigger
+	var tpActionTriggers TpActionTriggers
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in action triggers csv: ", err)
@@ -384,10 +415,14 @@ func (csvs *CSVStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger
 			tpActionTriggers = append(tpActionTriggers, at)
 		}
 	}
-	return tpActionTriggers, nil
+	if ats, err := tpActionTriggers.AsTPActionTriggers(); err != nil {
+		return nil, err
+	} else {
+		return ats, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpAccountActions(filter *TpAccountAction) ([]TpAccountAction, error) {
+func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.accountactionsFn, csvs.sep, getColumnCount(TpAccountAction{}))
 	if err != nil {
 		//log.Print("Could not load account actions file: ", err)
@@ -397,7 +432,7 @@ func (csvs *CSVStorage) GetTpAccountActions(filter *TpAccountAction) ([]TpAccoun
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpAccountActions []TpAccountAction
+	var tpAccountActions TpAccountActions
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in account actions csv: ", err)
@@ -409,16 +444,20 @@ func (csvs *CSVStorage) GetTpAccountActions(filter *TpAccountAction) ([]TpAccoun
 		} else {
 			aa := tpAa.(TpAccountAction)
 			if filter != nil {
-				aa.Tpid = filter.Tpid
-				aa.Loadid = filter.Loadid
+				aa.Tpid = filter.TPid
+				aa.Loadid = filter.LoadId
 			}
 			tpAccountActions = append(tpAccountActions, aa)
 		}
 	}
-	return tpAccountActions, nil
+	if ats, err := tpAccountActions.AsTPAccountActions(); err != nil {
+		return nil, err
+	} else {
+		return ats, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDerivedCharger, error) {
+func (csvs *CSVStorage) GetTPDerivedChargers(filter *utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.derivedChargersFn, csvs.sep, getColumnCount(TpDerivedCharger{}))
 	if err != nil {
 		//log.Print("Could not load derivedChargers file: ", err)
@@ -428,7 +467,7 @@ func (csvs *CSVStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpDerivedChargers []TpDerivedCharger
+	var tpDerivedChargers TpDerivedChargers
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in derived chargers csv: ", err)
@@ -440,16 +479,20 @@ func (csvs *CSVStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 		} else {
 			dc := tp.(TpDerivedCharger)
 			if filter != nil {
-				dc.Tpid = filter.Tpid
-				dc.Loadid = filter.Loadid
+				dc.Tpid = filter.TPid
+				dc.Loadid = filter.LoadId
 			}
 			tpDerivedChargers = append(tpDerivedChargers, dc)
 		}
 	}
-	return tpDerivedChargers, nil
+	if dcs, err := tpDerivedChargers.AsTPDerivedChargers(); err != nil {
+		return nil, err
+	} else {
+		return dcs, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrstat, error) {
+func (csvs *CSVStorage) GetTPCdrStats(tpid, id string) ([]*utils.TPCdrStats, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.cdrStatsFn, csvs.sep, getColumnCount(TpCdrstat{}))
 	if err != nil {
 		//log.Print("Could not load cdr stats file: ", err)
@@ -459,7 +502,7 @@ func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrstat, error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpCdrStats []TpCdrstat
+	var tpCdrStats TpCdrStats
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in cdr stats csv: ", err)
@@ -474,10 +517,14 @@ func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrstat, error) {
 			tpCdrStats = append(tpCdrStats, cs)
 		}
 	}
-	return tpCdrStats, nil
+	if css, err := tpCdrStats.AsTPCdrStats(); err != nil {
+		return nil, err
+	} else {
+		return css, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpUsers(filter *TpUser) ([]TpUser, error) {
+func (csvs *CSVStorage) GetTPUsers(filter *utils.TPUsers) ([]*utils.TPUsers, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.usersFn, csvs.sep, getColumnCount(TpUser{}))
 	if err != nil {
 		//log.Print("Could not load users file: ", err)
@@ -487,7 +534,7 @@ func (csvs *CSVStorage) GetTpUsers(filter *TpUser) ([]TpUser, error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpUsers []TpUser
+	var tpUsers TpUsers
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in users csv: ", err)
@@ -499,15 +546,19 @@ func (csvs *CSVStorage) GetTpUsers(filter *TpUser) ([]TpUser, error) {
 		} else {
 			u := tpUser.(TpUser)
 			if filter != nil {
-				u.Tpid = filter.Tpid
+				u.Tpid = filter.TPid
 			}
 			tpUsers = append(tpUsers, u)
 		}
 	}
-	return tpUsers, nil
+	if us, err := tpUsers.AsTPUsers(); err != nil {
+		return nil, err
+	} else {
+		return us, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
+func (csvs *CSVStorage) GetTPAliases(filter *utils.TPAliases) ([]*utils.TPAliases, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.aliasesFn, csvs.sep, getColumnCount(TpAlias{}))
 	if err != nil {
 		//log.Print("Could not load aliases file: ", err)
@@ -517,7 +568,7 @@ func (csvs *CSVStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpAliases []TpAlias
+	var tpAliases TpAliases
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in aliases csv: ", err)
@@ -529,15 +580,19 @@ func (csvs *CSVStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 		} else {
 			u := tpAlias.(TpAlias)
 			if filter != nil {
-				u.Tpid = filter.Tpid
+				u.Tpid = filter.TPid
 			}
 			tpAliases = append(tpAliases, u)
 		}
 	}
-	return tpAliases, nil
+	if as, err := tpAliases.AsTPAliases(); err != nil {
+		return nil, err
+	} else {
+		return as, nil
+	}
 }
 
-func (csvs *CSVStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits, error) {
+func (csvs *CSVStorage) GetTPResourceLimits(tpid, id string) ([]*utils.TPResourceLimit, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.resLimitsFn, csvs.sep, getColumnCount(TpResourceLimit{}))
 	if err != nil {
 		//log.Print("Could not load resource limits file: ", err)
@@ -562,7 +617,7 @@ func (csvs *CSVStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits,
 			tpResLimits = append(tpResLimits, &tpLimit)
 		}
 	}
-	return tpResLimits, nil
+	return tpResLimits.AsTPResourceLimits(), nil
 }
 
 func (csvs *CSVStorage) GetTpIds() ([]string, error) {

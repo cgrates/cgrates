@@ -119,19 +119,6 @@ func TestDfListenJsonCfg(t *testing.T) {
 
 func TestDfDbJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
-		Db_type:     utils.StringPointer("redis"),
-		Db_host:     utils.StringPointer("127.0.0.1"),
-		Db_port:     utils.IntPointer(6379),
-		Db_name:     utils.StringPointer("10"),
-		Db_user:     utils.StringPointer(""),
-		Db_password: utils.StringPointer(""),
-	}
-	if cfg, err := dfCgrJsonCfg.DbJsonCfg(TPDB_JSN); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
-	}
-	eCfg = &DbJsonCfg{
 		Db_type:           utils.StringPointer("redis"),
 		Db_host:           utils.StringPointer("127.0.0.1"),
 		Db_port:           utils.IntPointer(6379),
@@ -300,7 +287,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		expect, _ := json.Marshal(eCfg)
 		received, _ := json.Marshal(cfg)
-		t.Errorf("Expecting: %s, received: %s", string(expect), string(received))
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", string(expect), string(received))
 	}
 }
 

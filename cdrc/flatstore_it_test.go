@@ -143,6 +143,6 @@ func TestFlatstoreitProcessFiles(t *testing.T) {
 	if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CdrOutDir, "acc_3.log.unpaired")); err != nil {
 		t.Error(err)
 	} else if len(ePartContent) != len(string(partContent)) {
-		t.Errorf("Expecting: %s, received: %s", ePartContent, string(partContent))
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", ePartContent, string(partContent))
 	}
 }

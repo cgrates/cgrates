@@ -18,52 +18,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Creates a new SharedGroups profile within a tariff plan
 func (self *ApierV1) SetTPSharedGroups(attrs utils.TPSharedGroups, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupsId", "SharedGroups"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "SharedGroups"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	/*for _, action := range attrs.SharedGroups {
-		requiredFields := []string{"Identifier", "Weight"}
-		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
-			requiredFields = append(requiredFields, "Direction", "Units")
-		}
-		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:SharedGroup:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
-		}
-	}*/
-	sg := engine.APItoModelSharedGroup(&attrs)
-	if err := self.StorDb.SetTpSharedGroups(sg); err != nil {
+	if err := self.StorDb.SetTPSharedGroups([]*utils.TPSharedGroups{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }
 
 type AttrGetTPSharedGroups struct {
-	TPid           string // Tariff plan id
-	SharedGroupsId string // SharedGroup id
+	TPid string // Tariff plan id
+	ID   string // SharedGroup id
 }
 
 // Queries specific SharedGroup on tariff plan
 func (self *ApierV1) GetTPSharedGroups(attrs AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupsId"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sgs, err := self.StorDb.GetTpSharedGroups(attrs.TPid, attrs.SharedGroupsId); err != nil {
+	if sgs, err := self.StorDb.GetTPSharedGroups(attrs.TPid, attrs.ID); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(sgs) == 0 {
 		return utils.ErrNotFound
 	} else {
-		sgMap, err := engine.TpSharedGroups(sgs).GetSharedGroups()
-		if err != nil {
-			return err
-		}
-		*reply = utils.TPSharedGroups{TPid: attrs.TPid, SharedGroupsId: attrs.SharedGroupsId, SharedGroups: sgMap[attrs.SharedGroupsId]}
+		*reply = *sgs[0]
 	}
 	return nil
 }
@@ -78,7 +63,7 @@ func (self *ApierV1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_SHARED_GROUPS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSharedGroups, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -90,13 +75,13 @@ func (self *ApierV1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[
 
 // Removes specific SharedGroups on Tariff plan
 func (self *ApierV1) RemTPSharedGroups(attrs AttrGetTPSharedGroups, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupsId"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, map[string]string{"tag": attrs.SharedGroupsId}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPSharedGroups, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
-		*reply = "OK"
+		*reply = utils.OK
 	}
 	return nil
 }

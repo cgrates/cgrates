@@ -56,7 +56,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
 		var apsv1keys []string
-		apsv1keys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+		apsv1keys, err = m.dataDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 		if err != nil {
 			return
 		}
@@ -66,13 +66,13 @@ func (m *Migrator) migrateActionPlans() (err error) {
 				return err
 			}
 			aps := v1aps.AsActionPlan()
-			if err = m.tpDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
+			if err = m.dataDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ACTION_PLAN_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_PLAN_PREFIX]}
-		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -80,14 +80,14 @@ func (m *Migrator) migrateActionPlans() (err error) {
 		}
 		return
 	case utils.MONGO:
-		dataDB := m.tpDB.(*engine.MongoStorage)
+		dataDB := m.dataDB.(*engine.MongoStorage)
 		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
 		var acp v1ActionPlan
 		iter := mgoDB.C(utils.ACTION_PLAN_PREFIX).Find(nil).Iter()
 		for iter.Next(&acp) {
 			aps := acp.AsActionPlan()
-			if err = m.tpDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
+			if err = m.dataDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -111,8 +111,8 @@ func (m *Migrator) migrateActionPlans() (err error) {
 func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlan, err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
-		tpDB := m.tpDB.(*engine.RedisStorage)
-		if strVal, err := tpDB.Cmd("GET", key).Bytes(); err != nil {
+		dataDB := m.dataDB.(*engine.RedisStorage)
+		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
 			return nil, err
 		} else {
 			v1aps := &v1ActionPlan{Id: key}
@@ -122,8 +122,8 @@ func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlan, err 
 			return v1aps, nil
 		}
 	case utils.MONGO:
-		tpDB := m.tpDB.(*engine.MongoStorage)
-		mgoDB := tpDB.DB()
+		dataDB := m.dataDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
 		v1aps := new(v1ActionPlan)
 		if err := mgoDB.C(utils.ACTION_PLAN_PREFIX).Find(bson.M{"id": key}).One(v1aps); err != nil {

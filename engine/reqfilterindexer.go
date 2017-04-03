@@ -21,7 +21,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewReqFilterIndexer(dataDB AccountingStorage, dbKey string) (*ReqFilterIndexer, error) {
+func NewReqFilterIndexer(dataDB DataDB, dbKey string) (*ReqFilterIndexer, error) {
 	indexes, err := dataDB.GetReqFilterIndexes(dbKey)
 	if err != nil && err != utils.ErrNotFound {
 		return nil, err
@@ -37,7 +37,7 @@ func NewReqFilterIndexer(dataDB AccountingStorage, dbKey string) (*ReqFilterInde
 // not thread safe, meant to be used as logic within other code blocks
 type ReqFilterIndexer struct {
 	indexes       map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[resourceID]
-	dataDB        AccountingStorage
+	dataDB        DataDB
 	dbKey         string          // get/store the result from/into this key
 	chngdIndxKeys utils.StringMap // keep record of the changed fieldName:fieldValue pair so we can re-cache wisely
 }

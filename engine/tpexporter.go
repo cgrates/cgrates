@@ -87,7 +87,7 @@ func (self *TPExporter) Run() error {
 	self.removeFiles() // Make sure we clean the folder before starting with new one
 	toExportMap := make(map[string][]interface{})
 
-	if storData, err := self.storDb.GetTpTimings(self.tpID, ""); err != nil {
+	if storData, err := self.storDb.GetTPTimings(self.tpID, ""); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -103,7 +103,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpRates(self.tpID, ""); err != nil {
+	if storData, err := self.storDb.GetTPRates(self.tpID, ""); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -111,15 +111,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpRates(self.tpID, ""); err != nil {
-		return err
-	} else {
-		for _, sd := range storData {
-			toExportMap[utils.RATES_CSV] = append(toExportMap[utils.RATES_CSV], sd)
-		}
-	}
-
-	if storData, err := self.storDb.GetTpDestinationRates(self.tpID, "", nil); err != nil {
+	if storData, err := self.storDb.GetTPDestinationRates(self.tpID, "", nil); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -127,7 +119,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpRatingPlans(self.tpID, "", nil); err != nil {
+	if storData, err := self.storDb.GetTPRatingPlans(self.tpID, "", nil); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -135,7 +127,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpRatingProfiles(&TpRatingProfile{Tpid: self.tpID}); err != nil {
+	if storData, err := self.storDb.GetTPRatingProfiles(&utils.TPRatingProfile{TPid: self.tpID}); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -143,7 +135,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpSharedGroups(self.tpID, ""); err != nil {
+	if storData, err := self.storDb.GetTPSharedGroups(self.tpID, ""); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -151,7 +143,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpActions(self.tpID, ""); err != nil {
+	if storData, err := self.storDb.GetTPActions(self.tpID, ""); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -159,7 +151,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpActionPlans(self.tpID, ""); err != nil {
+	if storData, err := self.storDb.GetTPActionPlans(self.tpID, ""); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -167,7 +159,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpActionTriggers(self.tpID, ""); err != nil {
+	if storData, err := self.storDb.GetTPActionTriggers(self.tpID, ""); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -175,7 +167,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpAccountActions(&TpAccountAction{Tpid: self.tpID}); err != nil {
+	if storData, err := self.storDb.GetTPAccountActions(&utils.TPAccountActions{TPid: self.tpID}); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -183,7 +175,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpDerivedChargers(&TpDerivedCharger{Tpid: self.tpID}); err != nil {
+	if storData, err := self.storDb.GetTPDerivedChargers(&utils.TPDerivedChargers{TPid: self.tpID}); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -191,7 +183,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpCdrStats(self.tpID, ""); err != nil {
+	if storData, err := self.storDb.GetTPCdrStats(self.tpID, ""); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {

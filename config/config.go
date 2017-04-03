@@ -176,12 +176,6 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
 	InstanceID               string // Identifier for this engine instance
-	TpDbType                 string
-	TpDbHost                 string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	TpDbPort                 string // The port to bind to.
-	TpDbName                 string // The name of the database to connect to.
-	TpDbUser                 string // The user to sign in as.
-	TpDbPass                 string // The user's password.
 	DataDbType               string
 	DataDbHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	DataDbPort               string // The port to bind to.
@@ -516,11 +510,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
-	jsnTpDbCfg, err := jsnCfg.DbJsonCfg(TPDB_JSN)
-	if err != nil {
-		return err
-	}
-
 	jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN)
 	if err != nil {
 		return err
@@ -629,28 +618,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	jsnSureTaxCfg, err := jsnCfg.SureTaxJsonCfg()
 	if err != nil {
 		return err
-	}
-
-	// All good, start populating config variables
-	if jsnTpDbCfg != nil {
-		if jsnTpDbCfg.Db_type != nil {
-			self.TpDbType = *jsnTpDbCfg.Db_type
-		}
-		if jsnTpDbCfg.Db_host != nil {
-			self.TpDbHost = *jsnTpDbCfg.Db_host
-		}
-		if jsnTpDbCfg.Db_port != nil {
-			self.TpDbPort = strconv.Itoa(*jsnTpDbCfg.Db_port)
-		}
-		if jsnTpDbCfg.Db_name != nil {
-			self.TpDbName = *jsnTpDbCfg.Db_name
-		}
-		if jsnTpDbCfg.Db_user != nil {
-			self.TpDbUser = *jsnTpDbCfg.Db_user
-		}
-		if jsnTpDbCfg.Db_password != nil {
-			self.TpDbPass = *jsnTpDbCfg.Db_password
-		}
 	}
 
 	if jsnDataDbCfg != nil {

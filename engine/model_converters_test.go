@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -25,8 +27,9 @@ import (
 )
 
 func TestAPItoResourceLimit(t *testing.T) {
+
 	tpRL := &utils.TPResourceLimit{
-		TPID: testTPID,
+		TPid: testTPID,
 		ID:   "ResGroup1",
 		Filters: []*utils.TPRequestFilter{
 			&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},

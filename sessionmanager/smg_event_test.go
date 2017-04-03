@@ -225,6 +225,6 @@ func TestSMGenericEventGetFieldAsString(t *testing.T) {
 	if strVal, err := smGev.GetFieldAsString(utils.TOR); err != nil {
 		t.Error(err)
 	} else if strVal != eFldVal {
-		t.Errorf("Expecting: %s, received: %s", eFldVal, strVal)
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", eFldVal, strVal)
 	}
 }
