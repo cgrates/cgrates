@@ -471,7 +471,18 @@ func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool
 	}
 	ssMux.RLock()
 	ss := ssMp[cgrID]
+	if len(ss) != 0 {
+		ss[0].mux.RLock() // lock session so we can clone it after releasing the map lock
+	}
 	ssMux.RUnlock()
+	var ssCln []*SMGSession
+	err = utils.Clone(ss, &ssCln)
+	if len(ss) != 0 {
+		ss[0].mux.RUnlock()
+	}
+	if err != nil {
+		return
+	}
 	var wg sync.WaitGroup
 	for _, rplConn := range smgReplConns {
 		if rplConn.Synchronous {
@@ -484,7 +495,7 @@ func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool
 			if sync {
 				wg.Done()
 			}
-		}(rplConn.Connection, rplConn.Synchronous, ss)
+		}(rplConn.Connection, rplConn.Synchronous, ssCln)
 	}
 	wg.Wait() // wait for synchronous replication to finish
 	return

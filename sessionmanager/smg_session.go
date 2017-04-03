@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -31,6 +32,7 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
+	mux           sync.RWMutex   // protects the SMGSession in places where is concurrently accessed
 	CGRID         string         // Unique identifier for this session
 	EventStart    SMGenericEvent // Event which started
 	stopDebit     chan struct{}  // Channel to communicate with debit loops when closing the session
@@ -142,7 +144,6 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
-
 	if refundDuration == 0 { // Nothing to refund
 		return nil
 	}
