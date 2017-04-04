@@ -878,7 +878,7 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 
 func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	if cdr.OrderID == 0 {
-		cdr.OrderID = ms.cnter.Gen()
+		cdr.OrderID = ms.cnter.Next()
 	}
 	session, col := ms.conn(utils.TBLCDRs)
 	defer session.Close()

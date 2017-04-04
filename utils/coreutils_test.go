@@ -20,6 +20,7 @@ package utils
 import (
 	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 )
@@ -757,5 +758,33 @@ Date:   Fri Dec 30 19:48:09 2016 +0100
 	eVers := "CGRateS 0.9.1~rc8 git+73014da (2016-12-30T19:48:09+01:00)"
 	if vers := GetCGRVersion(); vers != eVers {
 		t.Errorf("Expecting: <%s>, received: <%s>", eVers, vers)
+	}
+}
+
+func TestCounter(t *testing.T) {
+	var nmax int64 = 10000
+	ch := make(chan int64, nmax)
+	wg := new(sync.WaitGroup)
+	cnter := NewCounter(0, nmax-1)
+	var i int64
+	for i = 1; i <= nmax; i++ {
+		wg.Add(1)
+		go func() {
+			ch <- cnter.Next()
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	m := make(map[int64]bool)
+	for i = 1; i <= nmax; i++ {
+		m[<-ch] = true
+	}
+	for i = 1; i <= nmax-1; i++ {
+		if !m[i] {
+			t.Errorf("Missing value: %d", i)
+		}
+	}
+	if cnter.Value() != 0 {
+		t.Error("Counter was not reseted to 0")
 	}
 }
