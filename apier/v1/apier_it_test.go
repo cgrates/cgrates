@@ -184,13 +184,13 @@ func TestApierTPTiming(t *testing.T) {
 // Test here TPTiming APIs
 func TestApierTPDestination(t *testing.T) {
 	reply := ""
-	dstDe := &utils.V1TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY", Prefixes: []string{"+49"}}
-	dstDeMobile := &utils.V1TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
-	dstFs := &utils.V1TPDestination{TPid: utils.TEST_SQL, ID: "FS_USERS", Prefixes: []string{"10"}}
-	dstDe2 := new(utils.V1TPDestination)
+	dstDe := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY", Prefixes: []string{"+49"}}
+	dstDeMobile := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
+	dstFs := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "FS_USERS", Prefixes: []string{"10"}}
+	dstDe2 := new(utils.TPDestination)
 	*dstDe2 = *dstDe // Data which we use for remove, still keeping the sample data to check proper loading
 	dstDe2.ID = "GERMANY2"
-	for _, dst := range []*utils.V1TPDestination{dstDe, dstDeMobile, dstFs, dstDe2} {
+	for _, dst := range []*utils.TPDestination{dstDe, dstDeMobile, dstFs, dstDe2} {
 		if err := rater.Call("ApierV1.SetTPDestination", dst, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPDestination: ", err.Error())
 		} else if reply != "OK" {
@@ -204,13 +204,13 @@ func TestApierTPDestination(t *testing.T) {
 		t.Error("Calling ApierV1.SetTPDestination got reply: ", reply)
 	}
 	// Check missing params
-	if err := rater.Call("ApierV1.SetTPDestination", new(utils.V1TPDestination), &reply); err == nil {
+	if err := rater.Call("ApierV1.SetTPDestination", new(utils.TPDestination), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
 	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID Prefixes]" {
 		t.Error("Calling ApierV1.SetTPDestination got unexpected error: ", err.Error())
 	}
 	// Test get
-	var rplyDstDe2 *utils.V1TPDestination
+	var rplyDstDe2 *utils.TPDestination
 	if err := rater.Call("ApierV1.GetTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &rplyDstDe2); err != nil {
 		t.Error("Calling ApierV1.GetTPDestination, got error: ", err.Error())
 	} else if !reflect.DeepEqual(dstDe2, rplyDstDe2) {

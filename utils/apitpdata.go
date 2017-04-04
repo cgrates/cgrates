@@ -71,22 +71,15 @@ func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
 	return
 }
 
-// Deprecated version of TPDestination
-type V1TPDestination struct {
-	TPid     string   // Tariff plan id
-	ID       string   // Destination id
-	Prefixes []string // Prefixes attached to this destination
-}
-
-func (v1TPDst *V1TPDestination) AsTPDestination() *TPDestination {
-	return &TPDestination{TPid: v1TPDst.TPid, ID: v1TPDst.ID, Prefixes: v1TPDst.Prefixes}
-}
-
 // TPDestination represents one destination in storDB
 type TPDestination struct {
 	TPid     string   // Tariff plan id
 	ID       string   // Destination id
 	Prefixes []string // Prefixes attached to this destination
+}
+
+func (v1TPDst *TPDestination) AsTPDestination() *TPDestination {
+	return &TPDestination{TPid: v1TPDst.TPid, ID: v1TPDst.ID, Prefixes: v1TPDst.Prefixes}
 }
 
 // This file deals with tp_* data definition

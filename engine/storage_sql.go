@@ -214,7 +214,7 @@ func (self *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 			tx.Rollback()
 			return err
 		}
-		t := APItoModelTimingTmp(timing)
+		t := APItoModelTiming(timing)
 		if err := tx.Save(&t).Error; err != nil {
 			return err
 		}

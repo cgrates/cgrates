@@ -22,7 +22,7 @@ import (
 )
 
 // Creates a new destination within a tariff plan
-func (self *ApierV1) SetTPDestination(attrs utils.V1TPDestination, reply *string) error {
+func (self *ApierV1) SetTPDestination(attrs utils.TPDestination, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "Prefixes"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -39,7 +39,7 @@ type AttrGetTPDestination struct {
 }
 
 // Queries a specific destination
-func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.V1TPDestination) error {
+func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.TPDestination) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -49,7 +49,7 @@ func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.V
 		return utils.ErrNotFound
 	} else {
 		tpDst := tpDsts[0]
-		*reply = utils.V1TPDestination{TPid: tpDst.TPid,
+		*reply = utils.TPDestination{TPid: tpDst.TPid,
 			ID: tpDst.ID, Prefixes: tpDst.Prefixes}
 	}
 	return nil

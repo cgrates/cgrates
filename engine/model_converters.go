@@ -23,31 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func APItoModelTiming(t *utils.ApierTPTiming) (result *TpTiming) {
-	return &TpTiming{
-		Tpid:      t.TPid,
-		Tag:       t.ID,
-		Years:     t.Years,
-		Months:    t.Months,
-		MonthDays: t.MonthDays,
-		WeekDays:  t.WeekDays,
-		Time:      t.Time,
-	}
-}
-
-func APItoModelApierTiming(t *utils.ApierTPTiming) (result *TpTiming) {
-	return &TpTiming{
-		Tpid:      t.TPid,
-		Tag:       t.ID,
-		Years:     t.Years,
-		Months:    t.Months,
-		MonthDays: t.MonthDays,
-		WeekDays:  t.WeekDays,
-		Time:      t.Time,
-	}
-}
-
-func APItoModelTimingTmp(t *utils.ApierTPTiming) (result TpTiming) {
+func APItoModelTiming(t *utils.ApierTPTiming) (result TpTiming) {
 	return TpTiming{
 		Tpid:      t.TPid,
 		Tag:       t.ID,
@@ -62,14 +38,14 @@ func APItoModelTimingTmp(t *utils.ApierTPTiming) (result TpTiming) {
 func APItoModelTimings(ts []*utils.ApierTPTiming) (result TpTimings) {
 	for _, t := range ts {
 		if t != nil {
-			at := APItoModelTimingTmp(t)
+			at := APItoModelTiming(t)
 			result = append(result, at)
 		}
 	}
 	return result
 }
 
-func APItoModelDestination(d *utils.TPDestination) (result []TpDestination) {
+func APItoModelDestination(d *utils.TPDestination) (result TpDestinations) {
 	if d != nil {
 		for _, p := range d.Prefixes {
 			result = append(result, TpDestination{
@@ -120,12 +96,12 @@ func APItoModelRates(rs []*utils.TPRate) (result TpRates) {
 	return result
 }
 
-func APItoModelDestinationRate(drs *utils.TPDestinationRate) (result TpDestinationRates) {
-	if drs != nil {
-		for _, dr := range drs.DestinationRates {
+func APItoModelDestinationRate(d *utils.TPDestinationRate) (result TpDestinationRates) {
+	if d != nil {
+		for _, dr := range d.DestinationRates {
 			result = append(result, TpDestinationRate{
-				Tpid:             drs.TPid,
-				Tag:              drs.ID,
+				Tpid:             d.TPid,
+				Tag:              d.ID,
 				DestinationsTag:  dr.DestinationId,
 				RatesTag:         dr.RateId,
 				RoundingMethod:   dr.RoundingMethod,
@@ -134,10 +110,10 @@ func APItoModelDestinationRate(drs *utils.TPDestinationRate) (result TpDestinati
 				MaxCostStrategy:  dr.MaxCostStrategy,
 			})
 		}
-		if len(drs.DestinationRates) == 0 {
+		if len(d.DestinationRates) == 0 {
 			result = append(result, TpDestinationRate{
-				Tpid: drs.TPid,
-				Tag:  drs.ID,
+				Tpid: d.TPid,
+				Tag:  d.ID,
 			})
 		}
 	}
@@ -155,21 +131,21 @@ func APItoModelDestinationRates(drs []*utils.TPDestinationRate) (result TpDestin
 	return result
 }
 
-func APItoModelRatingPlan(rps *utils.TPRatingPlan) (result []TpRatingPlan) {
-	if rps != nil {
-		for _, rpb := range rps.RatingPlanBindings {
+func APItoModelRatingPlan(rp *utils.TPRatingPlan) (result TpRatingPlans) {
+	if rp != nil {
+		for _, rpb := range rp.RatingPlanBindings {
 			result = append(result, TpRatingPlan{
-				Tpid:         rps.TPid,
-				Tag:          rps.ID,
+				Tpid:         rp.TPid,
+				Tag:          rp.ID,
 				DestratesTag: rpb.DestinationRatesId,
 				TimingTag:    rpb.TimingId,
 				Weight:       rpb.Weight,
 			})
 		}
-		if len(rps.RatingPlanBindings) == 0 {
+		if len(rp.RatingPlanBindings) == 0 {
 			result = append(result, TpRatingPlan{
-				Tpid: rps.TPid,
-				Tag:  rps.ID,
+				Tpid: rp.TPid,
+				Tag:  rp.ID,
 			})
 		}
 	}
@@ -185,7 +161,7 @@ func APItoModelRatingPlans(rps []*utils.TPRatingPlan) (result TpRatingPlans) {
 	return result
 }
 
-func APItoModelRatingProfile(rp *utils.TPRatingProfile) (result []TpRatingProfile) {
+func APItoModelRatingProfile(rp *utils.TPRatingProfile) (result TpRatingProfiles) {
 	if rp != nil {
 		for _, rpa := range rp.RatingPlanActivations {
 			result = append(result, TpRatingProfile{
@@ -265,7 +241,7 @@ func APItoModelLcrRules(ts []*utils.TPLcrRules) (result TpLcrRules) {
 	return result
 }
 
-func APItoModelAction(as *utils.TPActions) (result []TpAction) {
+func APItoModelAction(as *utils.TPActions) (result TpActions) {
 	if as != nil {
 		for _, a := range as.Actions {
 			result = append(result, TpAction{
@@ -309,21 +285,21 @@ func APItoModelActions(as []*utils.TPActions) (result TpActions) {
 	return result
 }
 
-func APItoModelActionPlan(aps *utils.TPActionPlan) (result []TpActionPlan) {
-	if aps != nil {
-		for _, ap := range aps.ActionPlan {
+func APItoModelActionPlan(a *utils.TPActionPlan) (result TpActionPlans) {
+	if a != nil {
+		for _, ap := range a.ActionPlan {
 			result = append(result, TpActionPlan{
-				Tpid:       aps.TPid,
-				Tag:        aps.ID,
+				Tpid:       a.TPid,
+				Tag:        a.ID,
 				ActionsTag: ap.ActionsId,
 				TimingTag:  ap.TimingId,
 				Weight:     ap.Weight,
 			})
 		}
-		if len(aps.ActionPlan) == 0 {
+		if len(a.ActionPlan) == 0 {
 			result = append(result, TpActionPlan{
-				Tpid: aps.TPid,
-				Tag:  aps.ID,
+				Tpid: a.TPid,
+				Tag:  a.ID,
 			})
 		}
 	}
@@ -339,7 +315,7 @@ func APItoModelActionPlans(aps []*utils.TPActionPlan) (result TpActionPlans) {
 	return result
 }
 
-func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result []TpActionTrigger) {
+func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result TpActionTriggers) {
 	if ats != nil {
 		for _, at := range ats.ActionTriggers {
 			result = append(result, TpActionTrigger{
@@ -401,16 +377,16 @@ func APItoModelAccountAction(aa *utils.TPAccountActions) *TpAccountAction {
 	}
 }
 
-func APItoModelAccountActions(ts []*utils.TPAccountActions) (result TpAccountActions) {
-	for _, t := range ts {
-		if t != nil {
-			result = append(result, *APItoModelAccountAction(t))
+func APItoModelAccountActions(aas []*utils.TPAccountActions) (result TpAccountActions) {
+	for _, aa := range aas {
+		if aa != nil {
+			result = append(result, *APItoModelAccountAction(aa))
 		}
 	}
 	return result
 }
 
-func APItoModelSharedGroup(sgs *utils.TPSharedGroups) (result []TpSharedGroup) {
+func APItoModelSharedGroup(sgs *utils.TPSharedGroups) (result TpSharedGroups) {
 	if sgs != nil {
 		for _, sg := range sgs.SharedGroups {
 			result = append(result, TpSharedGroup{
@@ -440,7 +416,7 @@ func APItoModelSharedGroups(sgs []*utils.TPSharedGroups) (result TpSharedGroups)
 	return result
 }
 
-func APItoModelDerivedCharger(dcs *utils.TPDerivedChargers) (result []TpDerivedCharger) {
+func APItoModelDerivedCharger(dcs *utils.TPDerivedChargers) (result TpDerivedChargers) {
 	if dcs != nil {
 		for _, dc := range dcs.DerivedChargers {
 			result = append(result, TpDerivedCharger{
@@ -494,7 +470,7 @@ func APItoModelDerivedChargers(dcs []*utils.TPDerivedChargers) (result TpDerived
 	return result
 }
 
-func APItoModelCdrStat(css *utils.TPCdrStats) (result []TpCdrstat) {
+func APItoModelCdrStat(css *utils.TPCdrStats) (result TpCdrStats) {
 	if css != nil {
 		for _, cs := range css.CdrStats {
 			ql, _ := strconv.Atoi(cs.QueueLength)
@@ -625,8 +601,8 @@ func APItoModelUsersA(ts []*utils.TPUsers) (result TpUsers) {
 
 func APItoModelResourceLimit(rl *utils.TPResourceLimit) TpResourceLimits {
 	result := TpResourceLimits{}
-	for _, flt := range rl.Filters {
-		tprl := &TpResourceLimit{
+	for _, f := range rl.Filters {
+		tp := &TpResourceLimit{
 			Tpid:           rl.TPid,
 			Tag:            rl.ID,
 			ActivationTime: rl.ActivationTime,
@@ -635,24 +611,24 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) TpResourceLimits {
 		}
 		for i, atid := range rl.ActionTriggerIDs {
 			if i != 0 {
-				tprl.ActionTriggerIds = tprl.ActionTriggerIds + utils.INFIELD_SEP + atid
+				tp.ActionTriggerIds = tp.ActionTriggerIds + utils.INFIELD_SEP + atid
 			} else {
-				tprl.ActionTriggerIds = atid
+				tp.ActionTriggerIds = atid
 			}
 		}
-		tprl.FilterType = flt.Type
-		tprl.FilterFieldName = flt.FieldName
-		for i, val := range flt.Values {
+		tp.FilterType = f.Type
+		tp.FilterFieldName = f.FieldName
+		for i, val := range f.Values {
 			if i != 0 {
-				tprl.FilterFieldValues = tprl.FilterFieldValues + utils.INFIELD_SEP + val
+				tp.FilterFieldValues = tp.FilterFieldValues + utils.INFIELD_SEP + val
 			} else {
-				tprl.FilterFieldValues = val
+				tp.FilterFieldValues = val
 			}
 		}
-		result = append(result, tprl)
+		result = append(result, tp)
 	}
 	if len(rl.Filters) == 0 {
-		tprl := &TpResourceLimit{
+		tp := &TpResourceLimit{
 			Tpid:           rl.TPid,
 			Tag:            rl.ID,
 			ActivationTime: rl.ActivationTime,
@@ -661,20 +637,20 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) TpResourceLimits {
 		}
 		for i, atid := range rl.ActionTriggerIDs {
 			if i != 0 {
-				tprl.ActionTriggerIds = tprl.ActionTriggerIds + utils.INFIELD_SEP + atid
+				tp.ActionTriggerIds = tp.ActionTriggerIds + utils.INFIELD_SEP + atid
 			} else {
-				tprl.ActionTriggerIds = atid
+				tp.ActionTriggerIds = atid
 			}
 		}
-		result = append(result, tprl)
+		result = append(result, tp)
 	}
 	return result
 }
 
 func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceLimit, err error) {
 	rl = &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight, Filters: make([]*RequestFilter, len(tpRL.Filters)), Usage: make(map[string]*ResourceUsage)}
-	for i, tpFltr := range tpRL.Filters {
-		rf := &RequestFilter{Type: tpFltr.Type, FieldName: tpFltr.FieldName, Values: tpFltr.Values}
+	for i, f := range tpRL.Filters {
+		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}

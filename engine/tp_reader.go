@@ -155,7 +155,6 @@ func (tpr *TpReader) LoadTimings() (err error) {
 	if err != nil {
 		return err
 	}
-
 	tpr.timings, err = APItoModelTimings(tps).GetTimings()
 	// add *any timing tag
 	tpr.timings[utils.ANY] = &utils.TPTiming{
@@ -230,7 +229,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 		return false, nil
 	}
 
-	bindings, err := APItoModelRatingPlans(mpRpls).GetRatingPlans()
+	bindings, err := APItoModelRatingPlans(mpRpls).GetRatingPlanBindings()
 	if err != nil {
 		return false, err
 	}
@@ -309,7 +308,7 @@ func (tpr *TpReader) LoadRatingPlans() (err error) {
 	if err != nil {
 		return err
 	}
-	bindings, err := APItoModelRatingPlans(tps).GetRatingPlans()
+	bindings, err := APItoModelRatingPlans(tps).GetRatingPlanBindings()
 
 	if err != nil {
 		return err

@@ -174,10 +174,10 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 	expectedSlc := [][]string{
 		[]string{"TEST_TIMING", "*any", "*any", "*any", "1;2;4", "00:00:01"},
 	}
-	ms := APItoModelApierTiming(tpTiming)
+	ms := APItoModelTiming(tpTiming)
 	var slc [][]string
 
-	lc, err := csvDump(*ms)
+	lc, err := csvDump(ms)
 	if err != nil {
 		t.Error("Error dumping to csv: ", err)
 	}
