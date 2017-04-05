@@ -1,5 +1,5 @@
 #
-# OpenSIPS startup options
+# OpenSIPS 2.2.x startup options 
 #
 
 # Set to yes to enable opensips, once configured properly.
