@@ -5,7 +5,10 @@ Loading **CGRateS** Tariff Plans
 --------------------------------
 
 Before proceeding to this step, you should have **CGRateS** installed and
-started with custom configuration, depending on the tutorial you have followed.
+started with custom configuration, depending on the tutorial you have followed.  
+This process assumes redis/mysql are used as DB.  If mongodb is used, use cgr-
+loader options -tpdb_type, -tpdb_port, -stordb_type, -stordb_port, -datadb_type, 
+-datadb_port
 
 For our tutorial we load again prepared data out of shared folder, containing
 following rules:
