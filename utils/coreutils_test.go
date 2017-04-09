@@ -762,6 +762,20 @@ Date:   Fri Dec 30 19:48:09 2016 +0100
 }
 
 func TestCounter(t *testing.T) {
+	var cmax int64 = 10000
+	var i int64
+	cnter := NewCounter(0, cmax)
+	for i = 1; i <= cmax; i++ {
+		if i != cnter.Next() {
+			t.Error("Counter has unexpected value")
+		}
+	}
+	if cnter.Next() != 0 {
+		t.Error("Counter did not reset")
+	}
+}
+
+func TestCounterConcurrent(t *testing.T) {
 	var nmax int64 = 10000
 	ch := make(chan int64, nmax)
 	wg := new(sync.WaitGroup)
