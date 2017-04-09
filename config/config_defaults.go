@@ -86,7 +86,7 @@ const CGRATES_CFG_JSON = `
 "tariffplan_db": {							// database used to store active tariff plan configuration
 	"db_type": "redis",						// tariffplan_db type: <redis|mongo>
 	"db_host": "127.0.0.1",					// tariffplan_db host address
-	"db_port": 6379, 						// port to reach the tariffplan_db
+	"db_port": 6379, 						// port to reach the tariffplan_db <6379|27017> redis|mongo
 	"db_name": "10", 						// tariffplan_db name to connect to
 	"db_user": "", 							// sername to use when connecting to tariffplan_db
 	"db_password": "", 						// password to use when connecting to tariffplan_db
@@ -96,7 +96,7 @@ const CGRATES_CFG_JSON = `
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "redis",						// data_db type: <redis|mongo>
 	"db_host": "127.0.0.1",					// data_db host address
-	"db_port": 6379, 						// data_db port to reach the database
+	"db_port": 6379, 						// data_db port to reach the database <6379|27017> redis|mongo
 	"db_name": "11", 						// data_db database name to connect to
 	"db_user": "", 							// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
@@ -107,7 +107,7 @@ const CGRATES_CFG_JSON = `
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_type": "mysql",						// stor database type to use: <mongo|mysql|postgres>
 	"db_host": "127.0.0.1",					// the host to connect to
-	"db_port": 3306,						// the port to reach the stordb
+	"db_port": 3306,						// the port to reach the stordb <3306|27017> mysql|mongo
 	"db_name": "cgrates",					// stor database name
 	"db_user": "cgrates",					// username to use when connecting to stordb
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
