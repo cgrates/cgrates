@@ -162,6 +162,11 @@ func (ms *MongoStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
 	if len(results) == 0 {
 		return results, utils.ErrNotFound
 	}
+	for _, r := range results {
+		for _, rs := range r.RateSlots {
+			rs.SetDurations()
+		}
+	}
 	return results, err
 }
 

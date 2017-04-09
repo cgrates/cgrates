@@ -355,6 +355,10 @@ type TPLcrRule struct {
 	Weight         float64
 }
 
+func (lcr *TPLcrRules) GetLcrRuleId() string {
+	return LCRKey(lcr.Direction, lcr.Tenant, lcr.Category, lcr.Account, lcr.Subject)
+}
+
 func (lcr *TPLcrRules) SetId(id string) error {
 	ids := strings.Split(id, CONCATENATED_KEY_SEP)
 	if len(ids) != 5 {

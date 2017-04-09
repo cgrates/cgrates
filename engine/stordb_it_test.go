@@ -302,6 +302,9 @@ func testStorDBitCRUDTpRates(t *testing.T) {
 			},
 		},
 	}
+	snd[0].RateSlots[0].SetDurations()
+	snd[0].RateSlots[1].SetDurations()
+	snd[1].RateSlots[0].SetDurations()
 	if err := storDB.SetTPRates(snd); err != nil {
 		t.Error(err)
 	}
@@ -316,6 +319,8 @@ func testStorDBitCRUDTpRates(t *testing.T) {
 	// UPDATE
 	snd[0].RateSlots[0].GroupIntervalStart = "3s"
 	snd[1].RateSlots[0].GroupIntervalStart = "3s"
+	snd[0].RateSlots[0].SetDurations()
+	snd[1].RateSlots[0].SetDurations()
 	if err := storDB.SetTPRates(snd); err != nil {
 		t.Error(err)
 	}

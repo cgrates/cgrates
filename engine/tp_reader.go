@@ -155,7 +155,7 @@ func (tpr *TpReader) LoadTimings() (err error) {
 	if err != nil {
 		return err
 	}
-	tpr.timings, err = APItoModelTimings(tps).GetTimings()
+	tpr.timings, err = MapTPTimings(tps)
 	// add *any timing tag
 	tpr.timings[utils.ANY] = &utils.TPTiming{
 		ID:        utils.ANY,
@@ -183,7 +183,7 @@ func (tpr *TpReader) LoadRates() (err error) {
 	if err != nil {
 		return err
 	}
-	tpr.rates, err = APItoModelRates(tps).GetRates()
+	tpr.rates, err = MapTPRates(tps)
 	return err
 }
 
@@ -192,7 +192,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 	if err != nil {
 		return err
 	}
-	tpr.destinationRates, err = APItoModelDestinationRates(tps).GetDestinationRates()
+	tpr.destinationRates, err = MapTPDestinationRates(tps)
 	if err != nil {
 		return err
 	}
@@ -229,10 +229,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 		return false, nil
 	}
 
-	bindings, err := APItoModelRatingPlans(mpRpls).GetRatingPlanBindings()
-	if err != nil {
-		return false, err
-	}
+	bindings := MapTPRatingPlanBindings(mpRpls)
 
 	for tag, rplBnds := range bindings {
 		ratingPlan := &RatingPlan{Id: tag}
@@ -241,7 +238,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 			if err != nil || len(tptm) == 0 {
 				return false, fmt.Errorf("no timing with id %s: %v", rp.TimingId, err)
 			}
-			tm, err := APItoModelTimings(tptm).GetTimings()
+			tm, err := MapTPTimings(tptm)
 			if err != nil {
 				return false, err
 			}
@@ -251,7 +248,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 			if err != nil || len(tpdrm) == 0 {
 				return false, fmt.Errorf("no DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
 			}
-			drm, err := APItoModelDestinationRates(tpdrm).GetDestinationRates()
+			drm, err := MapTPDestinationRates(tpdrm)
 			if err != nil {
 				return false, err
 			}
@@ -260,7 +257,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				if err != nil || len(tprt) == 0 {
 					return false, fmt.Errorf("no Rates profile with id %s: %v", drate.RateId, err)
 				}
-				rt, err := APItoModelRates(tprt).GetRates()
+				rt, err := MapTPRates(tprt)
 				if err != nil {
 					return false, err
 				}
@@ -308,12 +305,7 @@ func (tpr *TpReader) LoadRatingPlans() (err error) {
 	if err != nil {
 		return err
 	}
-	bindings, err := APItoModelRatingPlans(tps).GetRatingPlanBindings()
-
-	if err != nil {
-		return err
-	}
-
+	bindings := MapTPRatingPlanBindings(tps)
 	for tag, rplBnds := range bindings {
 		for _, rplBnd := range rplBnds {
 			t, exists := tpr.timings[rplBnd.TimingId]
@@ -345,7 +337,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 		return fmt.Errorf("no RateProfile for filter %v, error: %v", qriedRpf, err)
 	}
 
-	rpfs, err := APItoModelRatingProfiles(mpTpRpfs).GetRatingProfiles()
+	rpfs, err := MapTPRatingProfiles(mpTpRpfs)
 	if err != nil {
 		return err
 	}
@@ -385,8 +377,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 	if err != nil {
 		return err
 	}
-	mpTpRpfs, err := APItoModelRatingProfiles(tps).GetRatingProfiles()
-
+	mpTpRpfs, err := MapTPRatingProfiles(tps)
 	if err != nil {
 		return err
 	}
@@ -424,10 +415,7 @@ func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error)
 	if err != nil {
 		return err
 	}
-	storSgs, err := APItoModelSharedGroups(tps).GetSharedGroups()
-	if err != nil {
-		return err
-	}
+	storSgs := MapTPSharedGroup(tps)
 	for tag, tpSgs := range storSgs {
 		sg, exists := tpr.sharedGroups[tag]
 		if !exists {
@@ -463,7 +451,6 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 	if err != nil {
 		return err
 	}
-
 	for _, tpLcr := range tps {
 		if tpLcr != nil {
 			for _, rule := range tpLcr.Rules {
@@ -544,11 +531,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 	if err != nil {
 		return err
 	}
-
-	storActs, err := APItoModelActions(tps).GetActions()
-	if err != nil {
-		return err
-	}
+	storActs := MapTPActions(tps)
 	// map[string][]*Action
 	for tag, tpacts := range storActs {
 		acts := make([]*Action, len(tpacts))
@@ -655,11 +638,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 	if err != nil {
 		return err
 	}
-
-	storAps, err := APItoModelActionPlans(tps).GetActionPlans()
-	if err != nil {
-		return err
-	}
+	storAps := MapTPActionTimings(tps)
 	for atId, ats := range storAps {
 		for _, at := range ats {
 
@@ -708,10 +687,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 	if err != nil {
 		return err
 	}
-	storAts, err := APItoModelActionTriggers(tps).GetActionTriggers()
-	if err != nil {
-		return err
-	}
+	storAts := MapTPActionTriggers(tps)
 	for key, atrsLst := range storAts {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, atr := range atrsLst {
@@ -811,7 +787,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 	if err != nil {
 		return errors.New(err.Error() + ": " + fmt.Sprintf("%+v", qriedAA))
 	}
-	storAas, err := APItoModelAccountActions(accountActions).GetAccountActions()
+	storAas, err := MapTPAccountActions(accountActions)
 	if err != nil {
 		return err
 	}
@@ -833,10 +809,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			} else if len(tpap) == 0 {
 				return fmt.Errorf("no action plan with id <%s>", accountAction.ActionPlanId)
 			}
-			aps, err := APItoModelActionPlans(tpap).GetActionPlans()
-			if err != nil {
-				return err
-			}
+			aps := MapTPActionTimings(tpap)
 			var actionPlan *ActionPlan
 			ats := aps[accountAction.ActionPlanId]
 			for _, at := range ats {
@@ -855,7 +828,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					} else if len(tptm) == 0 {
 						return fmt.Errorf("no timing with id <%s>", at.TimingId)
 					}
-					tm, err := APItoModelTimings(tptm).GetTimings()
+					tm, err := MapTPTimings(tptm)
 					if err != nil {
 						return err
 					}
@@ -920,11 +893,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			if err != nil {
 				return errors.New(err.Error() + " (ActionTriggers): " + accountAction.ActionTriggersId)
 			}
-			atrs, err := APItoModelActionTriggers(tpatrs).GetActionTriggers()
-			if err != nil {
-				return err
-			}
-
+			atrs := MapTPActionTriggers(tpatrs)
 			atrsMap := make(map[string][]*ActionTrigger)
 			for key, atrsLst := range atrs {
 				atrs := make([]*ActionTrigger, len(atrsLst))
@@ -1025,10 +994,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			if err != nil {
 				return err
 			}
-			as, err := APItoModelActions(tpas).GetActions()
-			if err != nil {
-				return err
-			}
+			as := MapTPActions(tpas)
 			for tag, tpacts := range as {
 				acts := make([]*Action, len(tpacts))
 				for idx, tpact := range tpacts {
@@ -1153,7 +1119,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 	if err != nil {
 		return err
 	}
-	storAts, err := APItoModelAccountActions(tps).GetAccountActions()
+	storAts, err := MapTPAccountActions(tps)
 	if err != nil {
 		return err
 	}
@@ -1202,7 +1168,7 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers
 	if err != nil {
 		return err
 	}
-	storDcs, err := APItoModelDerivedChargers(tps).GetDerivedChargers()
+	storDcs, err := MapTPDerivedChargers(tps)
 	if err != nil {
 		return err
 	}
@@ -1244,10 +1210,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 	if err != nil {
 		return err
 	}
-	storStats, err := APItoModelCdrStats(tps).GetCdrStats()
-	if err != nil {
-		return err
-	}
+	storStats := MapTPCdrStats(tps)
 	var actionIDs []string // collect action ids
 	for tag, tpStats := range storStats {
 		for _, tpStat := range tpStats {
@@ -1265,11 +1228,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 					if err != nil {
 						return errors.New(err.Error() + " (ActionTriggers): " + triggerTag)
 					}
-					atrsM, err := APItoModelActionTriggers(tpatrs).GetActionTriggers()
-					if err != nil {
-						return err
-					}
-
+					atrsM := MapTPActionTriggers(tpatrs)
 					for _, atrsLst := range atrsM {
 						atrs := make([]*ActionTrigger, len(atrsLst))
 						for idx, atr := range atrsLst {
@@ -1378,10 +1337,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 			if err != nil {
 				return err
 			}
-			as, err := APItoModelActions(tpas).GetActions()
-			if err != nil {
-				return err
-			}
+			as := MapTPActions(tpas)
 			for tag, tpacts := range as {
 				acts := make([]*Action, len(tpacts))
 				for idx, tpact := range tpacts {
@@ -1508,7 +1464,7 @@ func (tpr *TpReader) LoadUsers() error {
 	if err != nil {
 		return err
 	}
-	userMap, err := APItoModelUsersA(tps).GetUsers()
+	userMap, err := MapTPUsers(tps)
 	if err != nil {
 		return err
 	}
@@ -1569,7 +1525,7 @@ func (tpr *TpReader) LoadAliases() error {
 	if err != nil {
 		return err
 	}
-	alMap, err := APItoModelAliasesA(tps).GetAliases()
+	alMap, err := MapTPAliases(tps)
 	if err != nil {
 		return err
 	}
