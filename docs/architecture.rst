@@ -72,24 +72,7 @@ it will start on demand **one or more** service(s), outlined below.
 .. hint::  # cgr-engine -config_dir=/etc/cgrates
 
 
-2.1.1. Balancer service
-~~~~~~~~~~~~~~~~~~~~~~~
-*Optional* component, used as proxy/balancer to a pool of RAL workers.
-The RALs will register their availability to the Balancer thus implementing **dynamic HA functionality**.
-**HA functionality** can be archived also *without* the **Balancer**.
-
-- Communicates via:
-   - RPC
-   - internal/in-process *within the same running* **cgr-engine** process.
-
-- Operates with the following CGRateS database(s): ::
-
-   - none
-
-- Config section in the CGRateS configuration file:
-   - ``"balancer": {...}``
-
-2.1.2. RALs service
+2.1.1. RALs service
 ~~~~~~~~~~~~~~~~~~~~
 Responsible with the following tasks:
 
@@ -110,7 +93,7 @@ Responsible with the following tasks:
 - Config section in the CGRateS configuration file:
    - ``"rals": {...}``
 
-2.1.3. Scheduler service
+2.1.2. Scheduler service
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Used to execute periodic/scheduled tasks.
 
@@ -124,7 +107,7 @@ Used to execute periodic/scheduled tasks.
 - Config section in the CGRateS configuration file:
    - ``"scheduler": {...}``
 
-2.1.4. SessionManager service
+2.1.3. SessionManager service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Responsible with call control on the Telecommunication Switch side. Operates in two different modes (per call or globally):
 
@@ -164,7 +147,7 @@ Right now there are **five** session manager types.
    - ``"sm_asterisk": {...}``
    - ``"sm_generic": {...}``
 
-2.1.5. DiameterAgent service
+2.1.4. DiameterAgent service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Responsible for the communication with Diameter server via diameter protocol.
 Despite the name it is a flexible **Diameter Server**.
@@ -180,7 +163,7 @@ Despite the name it is a flexible **Diameter Server**.
 - Config section in the CGRateS configuration file:
    - ``"diameter_agent": {...}``
 
-2.1.6. CDRS service
+2.1.5. CDRS service
 ~~~~~~~~~~~~~~~~~~~
 Centralized CDR server and CDR (raw or rated) **replicator**.
 
@@ -196,7 +179,7 @@ Centralized CDR server and CDR (raw or rated) **replicator**.
 - Config section in the CGRateS configuration file:
    - ``"cdrs": {...}``
 
-2.1.7. CDRStats service
+2.1.6. CDRStats service
 ~~~~~~~~~~~~~~~~~~~~~~~
 Computes real-time CDR stats. Capable with real-time fraud detection and mitigation with actions triggered.
 
@@ -211,7 +194,7 @@ Computes real-time CDR stats. Capable with real-time fraud detection and mitigat
 - Config section in the CGRateS configuration file:
    - ``"cdrstats": {...}``
 
-2.1.8. CDRC service
+2.1.7. CDRC service
 ~~~~~~~~~~~~~~~~~~~
 Gathers offline CDRs and post them to CDR Server - (CDRS component)
 
@@ -226,7 +209,7 @@ Gathers offline CDRs and post them to CDR Server - (CDRS component)
 - Config section in the CGRateS configuration file:
    - ``"cdrc": {...}``
 
-2.1.9. History service
+2.1.8. History service
 ~~~~~~~~~~~~~~~~~~~~~~
 Archives rate changes in human readable JSON format using **GIT**.
 
@@ -241,7 +224,7 @@ Archives rate changes in human readable JSON format using **GIT**.
 - Config section in the CGRateS configuration file:
    - ``"historys": {...}``
 
-2.1.10. Aliases service
+2.1.9. Aliases service
 ~~~~~~~~~~~~~~~~~~~~~~~
 Generic purpose **aliasing** system.
 
@@ -261,7 +244,7 @@ Possible applications:
 - Config section in the CGRateS configuration file:
    - ``"aliases": {...}``
 
-2.1.11. User service
+2.1.10. User service
 ~~~~~~~~~~~~~~~~~~~~
 Generic purpose **user** system to maintain user profiles (LDAP similarity).
 
@@ -276,7 +259,7 @@ Generic purpose **user** system to maintain user profiles (LDAP similarity).
 - Config section in the CGRateS configuration file:
    - ``"users": {...}``
 
-2.1.12. PubSub service
+2.1.11. PubSub service
 ~~~~~~~~~~~~~~~~~~~~~~
 PubSub service used to expose internal events to interested external components (eg: balance ops)
 
@@ -292,7 +275,7 @@ PubSub service used to expose internal events to interested external components 
    - ``"pubsubs": {...}``
 
 
-2.1.13. Resource Limiter service
+2.1.12. Resource Limiter service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Resource Limiter service used to limit resources during authorization (eg: maximum calls per destination for an account)
 
@@ -307,7 +290,7 @@ Resource Limiter service used to limit resources during authorization (eg: maxim
 - Config section in the CGRateS configuration file:
    - ``"rls": {...}``
 
-2.1.14. APIER RPC service
+2.1.13. APIER RPC service
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 RPC service used to expose external access towards internal components.
 
@@ -316,7 +299,7 @@ RPC service used to expose external access towards internal components.
    - JSON over HTTP
    - JSON over WebSocket
 
-2.1.15. Cdre
+2.1.14. Cdre
 ~~~~~~~~~~~~
 Component to retrieve rated CDRs from internal CDRs database.
 
@@ -329,7 +312,7 @@ Component to retrieve rated CDRs from internal CDRs database.
 - Config section in the CGRateS configuration file:
    - ``"cdre": {...}``
 
-2.1.16. Mailer
+2.1.15. Mailer
 ~~~~~~~~~~~~~~
 TBD
 
@@ -340,7 +323,7 @@ TBD
 - Config section in the CGRateS configuration file:
    - ``"mailer": {...}``
 
-2.1.17. Suretax
+2.1.16. Suretax
 ~~~~~~~~~~~~~~~
 TBD
 
@@ -446,7 +429,7 @@ Can be used to:
 
 2.3. cgr-console
 ----------------
-Command line tool used to interface with the RALs (and/or Balancer) service. Able to execute **sub-commands**.
+Command line tool used to interface with the RALs service. Able to execute **sub-commands**.
 
 ::
 

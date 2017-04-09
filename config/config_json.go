@@ -32,7 +32,6 @@ const (
 	HTTP_JSN             = "http"
 	DATADB_JSN           = "data_db"
 	STORDB_JSN           = "stor_db"
-	BALANCER_JSN         = "balancer"
 	RALS_JSN             = "rals"
 	SCHEDULER_JSN        = "scheduler"
 	CDRS_JSN             = "cdrs"
@@ -136,18 +135,6 @@ func (self CgrJsonCfg) DbJsonCfg(section string) (*DbJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(DbJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) BalancerJsonCfg() (*BalancerJsonCfg, error) {
-	rawCfg, hasKey := self[BALANCER_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(BalancerJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

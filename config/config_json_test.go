@@ -150,17 +150,8 @@ func TestDfDbJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfBalancerJsonCfg(t *testing.T) {
-	eCfg := &BalancerJsonCfg{Enabled: utils.BoolPointer(false)}
-	if cfg, err := dfCgrJsonCfg.BalancerJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
-	}
-}
-
 func TestDfRalsJsonCfg(t *testing.T) {
-	eCfg := &RalsJsonCfg{Enabled: utils.BoolPointer(false), Balancer: utils.StringPointer(""), Cdrstats_conns: &[]*HaPoolJsonCfg{},
+	eCfg := &RalsJsonCfg{Enabled: utils.BoolPointer(false), Cdrstats_conns: &[]*HaPoolJsonCfg{},
 		Historys_conns: &[]*HaPoolJsonCfg{}, Pubsubs_conns: &[]*HaPoolJsonCfg{}, Users_conns: &[]*HaPoolJsonCfg{}, Aliases_conns: &[]*HaPoolJsonCfg{},
 		Rp_subject_prefix_matching: utils.BoolPointer(false), Lcr_subject_prefix_matching: utils.BoolPointer(false)}
 	if cfg, err := dfCgrJsonCfg.RalsJsonCfg(); err != nil {

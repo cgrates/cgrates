@@ -1,6 +1,6 @@
 API Calls
 =========
-The general API usage of the CGRateS involves creating a CallDescriptor structure sending it to the balancer via JSON/GOB RPC and getting a response from the balancer in form of a CallCost structure or a numeric value for requested information.
+The general API usage of the CGRateS involves creating a CallDescriptor structure sending it to the rater via JSON/GOB RPC and getting a response from the rater in form of a CallCost structure or a numeric value for requested information.
 
 CallDescriptor structure
 ------------------------
@@ -48,11 +48,11 @@ Cost
 ConnectFee
 	The requested connection cost
 Timespans
-	The timespans in witch the initial TimeStart-TimeEnd was split in for cost determination with all pricing and cost information attached. 
+	The timespans in witch the initial TimeStart-TimeEnd was split in for cost determination with all pricing and cost information attached.
 
-As stated before the balancer (or the rater directly) can be accesed via json rpc. 
+As stated before the rater can be accesed via json rpc.
 
-The smallest python snippet to access the CGRateS balancer is this:
+The smallest python snippet to access the CGRateS rater is this:
 
 ::
 
@@ -76,7 +76,7 @@ In the stress folder you can find a better example of python client using a clas
 	rpc =JSONClient(("127.0.0.1", 2001))
 	result = rpc.call("Responder.Get", cd)
 	print result
-	
+
 Call API
 --------
 GetCost
@@ -102,7 +102,7 @@ DebitSeconds
 	The amount filed has to be filled in call descriptor.
 
 GetMaxSessionTime
-	Returns the approximate max allowed session for user budget. It will try the max amount received in the call descriptor 
+	Returns the approximate max allowed session for user budget. It will try the max amount received in the call descriptor
 	and will decrease it by 10% for nine times. So if the user has little credit it will still allow 10% of the initial amount.
 	If the user has no credit then it will return 0.
 
@@ -336,7 +336,7 @@ SetAcount
 		Type            string // <*prepaid|*postpaid>
 		ActionTimingsId string
 	}
-	
+
 Example
 	AddAccount(attr \*AttrAddAccount, reply \*string)
 

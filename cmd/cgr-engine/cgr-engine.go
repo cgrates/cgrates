@@ -32,7 +32,6 @@ import (
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
-	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
@@ -657,7 +656,6 @@ func main() {
 	// Async starts here, will follow cgrates.json start order
 
 	// Define internal connections via channels
-	internalBalancerChan := make(chan *balancer2go.Balancer, 1)
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
 	cacheDoneChan := make(chan struct{}, 1)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -672,14 +670,9 @@ func main() {
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dataDB, exitChan, cacheDoneChan)
 
-	// Start balancer service
-	if cfg.BalancerEnabled {
-		go startBalancer(internalBalancerChan, &stopHandled, exitChan) // Not really needed async here but to cope with uniformity
-	}
-
 	// Start rater service
 	if cfg.RALsEnabled {
-		go startRater(internalRaterChan, cacheDoneChan, internalBalancerChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
+		go startRater(internalRaterChan, cacheDoneChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
 			srvManager, server, dataDB, loadDb, cdrDb, &stopHandled, exitChan)
 	}
 

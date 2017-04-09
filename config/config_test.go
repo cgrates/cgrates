@@ -262,21 +262,12 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsBalancer(t *testing.T) {
-	if cgrCfg.BalancerEnabled != false {
-		t.Error(cgrCfg.BalancerEnabled)
-	}
-}
-
 func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 
 	eHaPoolcfg := []*HaPoolConfig{}
 
 	if cgrCfg.RALsEnabled != false {
 		t.Error(cgrCfg.RALsEnabled)
-	}
-	if cgrCfg.RALsBalancer != "" {
-		t.Error(cgrCfg.RALsBalancer)
 	}
 	if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns, eHaPoolcfg) {
 		t.Error(cgrCfg.RALsCDRStatSConns)

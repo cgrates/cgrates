@@ -19,11 +19,9 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
-	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/servmanager"
@@ -42,15 +40,8 @@ import (
 	gob.Register(engine.AliasValues{})
 }*/
 
-func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled *bool, exitChan chan bool) {
-	bal := balancer2go.NewBalancer()
-	go stopBalancerSignalHandler(bal, exitChan)
-	*stopHandled = true
-	internalBalancerChan <- bal
-}
-
 // Starts rater and reports on chan
-func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneChan chan struct{}, internalBalancerChan chan *balancer2go.Balancer,
+func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneChan chan struct{},
 	internalCdrStatSChan chan rpcclient.RpcClientConnection, internalHistorySChan chan rpcclient.RpcClientConnection,
 	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
@@ -127,28 +118,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		cacheDoneChan <- struct{}{}
 	}()
 
-	var bal *balancer2go.Balancer
-	if cfg.RALsBalancer != "" { // Connection to balancer
-		balTaskChan := make(chan struct{})
-		waitTasks = append(waitTasks, balTaskChan)
-		go func() {
-			defer close(balTaskChan)
-			if cfg.RALsBalancer == utils.MetaInternal {
-				select {
-				case bal = <-internalBalancerChan:
-					internalBalancerChan <- bal // Put it back if someone else is interested about
-				case <-time.After(cfg.InternalTtl):
-					utils.Logger.Crit("<Rater>: Internal balancer connection timeout.")
-					exitChan <- true
-					return
-				}
-			} else {
-				go registerToBalancer(exitChan)
-				go stopRaterSignalHandler(internalCdrStatSChan, exitChan)
-				*stopHandled = true
-			}
-		}()
-	}
 	var cdrStats *rpcclient.RpcClientPool
 	if len(cfg.RALsCDRStatSConns) != 0 { // Connections to CDRStats
 		cdrstatTaskChan := make(chan struct{})
@@ -228,7 +197,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	for _, chn := range waitTasks {
 		<-chn
 	}
-	responder := &engine.Responder{Bal: bal, ExitChan: exitChan}
+	responder := &engine.Responder{ExitChan: exitChan}
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, DataDB: dataDB, CdrDb: cdrDb,
 		Config: cfg, Responder: responder, ServManager: serviceManager, HTTPPoster: utils.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout)}

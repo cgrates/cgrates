@@ -106,15 +106,8 @@ const CGRATES_CFG_JSON = `
 	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
 },
 
-
-"balancer": {
-	"enabled": false,						// start Balancer service: <true|false>
-},
-
-
 "rals": {
 	"enabled": false,						// enable Rater service: <true|false>
-	"balancer": "",							// register to balancer as worker: <""|*internal|x.y.z.y:1234>
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"historys_conns": [],					// address where to reach the history service, empty to disable history functionality: <""|*internal|x.y.z.y:1234>
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>

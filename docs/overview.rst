@@ -2,33 +2,32 @@
 
 1. Overview
 ===========
-Starting as a pure **billing engine**, CGRateS has evolved over the years into a reliable **real-time charging framework** able to accommodate various business cases in a *generic way*. 
-Meant to be pluggable into existing billing infrastructure and as non-intrusive as possible, 
+Starting as a pure **billing engine**, CGRateS has evolved over the years into a reliable **real-time charging framework** able to accommodate various business cases in a *generic way*.
+Meant to be pluggable into existing billing infrastructure and as non-intrusive as possible,
 CGRateS passes the decisions about logic flow to system administrators and incorporates as less as possible business logic.
 
 Being an *"engine style"* the project focuses on providing best ratio between **functionality** (
-over 15 daemons/services implemented, 
-Multi-tenancy, 
-derived charging - eg: chaining of the business resellers, 
-account bundles, 
-LCR, 
-CDRStatS, 
-Diameter Server, 
-A-Number rating, 
+over 15 daemons/services implemented,
+Multi-tenancy,
+derived charging - eg: chaining of the business resellers,
+account bundles,
+LCR,
+CDRStatS,
+Diameter Server,
+A-Number rating,
 built-in High-Availability support
-agile in developing new features 
-) 
+agile in developing new features
+)
 and **performance** (
-dedicated benchmark tool, 
-asynchronous request processing, 
-own transactional cache with majority of handled data loaded on start or reloaded during runtime, 
-built-in balancer
-) 
+dedicated benchmark tool,
+asynchronous request processing,
+own transactional cache with majority of handled data loaded on start or reloaded during runtime,
+)
 however not loosing focus of **quality** (over 1300 tests part of the build environment).
 
 Modular and flexible, CGRateS provides APIs over a variety of simultaneously accessible communication interfaces:
  - **In-process**           : optimal when there is no need to split services over different processes.
- - **JSON over TCP**        : most preferred due to its simplicity and readability. 
+ - **JSON over TCP**        : most preferred due to its simplicity and readability.
  - **JSON over HTTP**       : popular due to fast interoperability development.
  - **JSON over Websockets** : useful where 2 ways interaction over same TCP socket is required.
  - **GOB over TCP**         : slightly faster than JSON one but only accessible for the moment out of Go (`<https://golang.org/>`_).
@@ -46,7 +45,7 @@ CGRateS is capable of four charging modes
    - Session authorization via events
    - Charging done at the end of the session out of CDR received
    - Advantage: less CPU intensive due to less events processed
-   - Disadvantage: as balance updates happen only at the end of the session there can be costs discrepancy in case of multiple sessions out of same account 
+   - Disadvantage: as balance updates happen only at the end of the session there can be costs discrepancy in case of multiple sessions out of same account
      (including going on negative balance).
 
 - \*postpaid
@@ -67,16 +66,16 @@ CGRateS is capable of four charging modes
 - Primary component, offering the most functionality out of the subsystems.
 - Computes replies based on static list of "rules" defined in TariffPlan.
 
-2.1.1. Rater 
+2.1.1. Rater
 ~~~~~~~~~~~~
 - Defines the performance of the system as a whole being the "heart" component
 - Support for multiple TypeOfRecord (**\*voice**, **\*data**, **\*sms**, **\*generic**)
 - Time based calculations (activation time in the future/rate-destination timely coupled) with granular time definitions (year, month, month day, weekday, time in seconds)
 - Compressed destination prefixes, helping on faster destination match as well as memory consumption
-- Advanced Rating capabilities: 
-  ConnectFee (charged at beginning of the session); 
-  RateUnit (automatic divider for the cost); 
-  RateIncrement (increase verbosity of the charging interval); 
+- Advanced Rating capabilities:
+  ConnectFee (charged at beginning of the session);
+  RateUnit (automatic divider for the cost);
+  RateIncrement (increase verbosity of the charging interval);
   Grouped interval rating inside the call duration (charging each second within a session independently)
 - Per destination rounding: control number of decimals displayed in costs, decide rounding methods (**\*up**, **\*down**, **\*middle**)
 - Control of the MaxSessionCost with decision on action taken on threshold hit (**\*free**, **\*disconnect**)
@@ -127,7 +126,7 @@ CGRateS is capable of four charging modes
 - In-memory / performance oriented
 - Unlimited StatQueues computing the same CDR event
 - Flexible queue configuration (QueueLength, TimeWindow, Metrics, CDR field filters)
-- Fraud detection with automatic mitigation through action triggers 
+- Fraud detection with automatic mitigation through action triggers
 
 2.4. AliaseS
 ------------
@@ -205,7 +204,7 @@ CGRateS is capable of four charging modes
 3. CGRateS Peripherals
 ======================
 Packaged together due to common usage
- 
+
 3.1. cgr-engine
 ---------------
 - Configured via .json files, encorporating CGRateS subsystems mentioned above
@@ -241,10 +240,10 @@ Packaged together due to common usage
 4.1. Fraud detection within Accounting:
 ---------------------------------------
 - Events are happening in real-time, being available during updates (eg: every n seconds of a session).
-- Thresholds set by the administrator are reacting by calling a set of predefined actions **synchronously** 
+- Thresholds set by the administrator are reacting by calling a set of predefined actions **synchronously**
   (with the advantage of having account in locked state, eg. no other events are possible until decision is made) or **asynchronously** (unlocking the accounts faster)
-- Two types of thresholds can be set 
-   - **min-/max-balance** monitoring balance values 
+- Two types of thresholds can be set
+   - **min-/max-balance** monitoring balance values
    - **min-/max-usage** counters (eg: amount of minutes to specific destination).
 - Middle session control (sessions can be disconnected as fraud is detected
 
