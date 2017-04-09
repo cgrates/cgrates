@@ -22,13 +22,15 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type MySQLStorage struct {
-	*SQLStorage
+	SQLStorage
 }
 
-func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (*MySQLStorage, error) {
+func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true", user, password, host, port, name)
 	db, err := gorm.Open("mysql", connectString)
 	if err != nil {
@@ -40,6 +42,44 @@ func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleCo
 	db.DB().SetMaxIdleConns(maxIdleConn)
 	db.DB().SetMaxOpenConns(maxConn)
 	//db.LogMode(true)
+	mySQLStorage := new(MySQLStorage)
+	mySQLStorage.db = db
+	mySQLStorage.Db = db.DB()
+	return &SQLStorage{db.DB(), db, mySQLStorage, mySQLStorage}, nil
+}
 
-	return &MySQLStorage{&SQLStorage{Db: db.DB(), db: db}}, nil
+// SetVersions will set a slice of versions, updating existing
+func (self *MySQLStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+	tx := self.db.Begin()
+	if overwrite {
+		tx.Table(utils.TBLVersions).Delete(nil)
+	}
+	for key, val := range vrs {
+		vrModel := &TBLVersion{Item: key, Version: val}
+		if err = tx.Save(vrModel).Error; err != nil {
+			if err = tx.Model(&TBLVersion{}).Where(
+				TBLVersion{Item: vrModel.Item}).Updates(TBLVersion{Version: val}).Error; err != nil {
+				tx.Rollback()
+				return
+			}
+		}
+	}
+	tx.Commit()
+	return
+}
+
+func (self *MySQLStorage) extraFieldsExistsQry(field string) string {
+	return fmt.Sprintf(" extra_fields LIKE '%%\"%s\":%%'", field)
+}
+
+func (self *MySQLStorage) extraFieldsValueQry(field, value string) string {
+	return fmt.Sprintf(" extra_fields LIKE '%%\"%s\":\"%s\"%%'", field, value)
+}
+
+func (self *MySQLStorage) notExtraFieldsExistsQry(field string) string {
+	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":%%'", field)
+}
+
+func (self *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
+	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":\"%s\"%%'", field, value)
 }

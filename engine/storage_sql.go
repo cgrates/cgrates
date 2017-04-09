@@ -31,9 +31,18 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+type SQLImpl interface {
+	extraFieldsExistsQry(string) string
+	extraFieldsValueQry(string, string) string
+	notExtraFieldsExistsQry(string) string
+	notExtraFieldsValueQry(string, string) string
+}
+
 type SQLStorage struct {
 	Db *sql.DB
 	db *gorm.DB
+	StorDB
+	SQLImpl
 }
 
 func (self *SQLStorage) Close() {
@@ -878,9 +887,9 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 				qIds.WriteString(" OR")
 			}
 			if value == utils.MetaExists {
-				qIds.WriteString(fmt.Sprintf(" extra_fields LIKE '%%\"%s\":%%'", field))
+				qIds.WriteString(self.SQLImpl.extraFieldsExistsQry(field))
 			} else {
-				qIds.WriteString(fmt.Sprintf(" extra_fields LIKE '%%\"%s\":\"%s\"%%'", field, value))
+				qIds.WriteString(self.SQLImpl.extraFieldsValueQry(field, value))
 			}
 			needOr = true
 		}
@@ -895,9 +904,9 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 				qIds.WriteString(" AND")
 			}
 			if value == utils.MetaExists {
-				qIds.WriteString(fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":%%'", field))
+				qIds.WriteString(self.SQLImpl.notExtraFieldsExistsQry(field))
 			} else {
-				qIds.WriteString(fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":\"%s\"%%'", field, value))
+				qIds.WriteString(self.SQLImpl.notExtraFieldsValueQry(field, value))
 			}
 			needAnd = true
 		}
@@ -1475,26 +1484,6 @@ func (self *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
 	for _, verModel := range verModels {
 		vrs[verModel.Item] = verModel.Version
 	}
-	return
-}
-
-// SetVersions will set a slice of versions, updating existing
-func (self *SQLStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	tx := self.db.Begin()
-	if overwrite {
-		tx.Table(utils.TBLVersions).Delete(nil)
-	}
-	for key, val := range vrs {
-		vrModel := &TBLVersion{Item: key, Version: val}
-		if err = tx.Save(vrModel).Error; err != nil {
-			if err = tx.Model(&TBLVersion{}).Where(
-				TBLVersion{Item: vrModel.Item}).Updates(TBLVersion{Version: val}).Error; err != nil {
-				tx.Rollback()
-				return
-			}
-		}
-	}
-	tx.Commit()
 	return
 }
 
