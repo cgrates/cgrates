@@ -27,7 +27,7 @@ import (
 )
 
 type MySQLStorage struct {
-	*SQLStorage
+	SQLStorage
 }
 
 func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (*SQLStorage, error) {
@@ -43,6 +43,8 @@ func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleCo
 	db.DB().SetMaxOpenConns(maxConn)
 	//db.LogMode(true)
 	mySQLStorage := new(MySQLStorage)
+	mySQLStorage.db = db
+	mySQLStorage.Db = db.DB()
 	return &SQLStorage{db.DB(), db, mySQLStorage, mySQLStorage}, nil
 }
 

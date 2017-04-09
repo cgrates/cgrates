@@ -40,11 +40,13 @@ func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdl
 	db.DB().SetMaxOpenConns(maxConn)
 	//db.LogMode(true)
 	postgressStorage := new(PostgresStorage)
+	postgressStorage.db = db
+	postgressStorage.Db = db.DB()
 	return &SQLStorage{db.DB(), db, postgressStorage, postgressStorage}, nil
 }
 
 type PostgresStorage struct {
-	*SQLStorage
+	SQLStorage
 }
 
 func (self *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
