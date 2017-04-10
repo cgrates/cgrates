@@ -122,7 +122,7 @@ func TestDfDbJsonCfg(t *testing.T) {
 		Db_type:           utils.StringPointer("redis"),
 		Db_host:           utils.StringPointer("127.0.0.1"),
 		Db_port:           utils.IntPointer(6379),
-		Db_name:           utils.StringPointer("11"),
+		Db_name:           utils.StringPointer("10"),
 		Db_user:           utils.StringPointer(""),
 		Db_password:       utils.StringPointer(""),
 		Load_history_size: utils.IntPointer(10),

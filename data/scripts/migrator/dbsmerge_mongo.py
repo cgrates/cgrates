@@ -1,24 +1,22 @@
 #!/usr/bin/python
 
 # depends:
-#   ^ pymongo
-# asserts:
-#   ^ destination mongo database exists and the destination user can auth on it
+#   ^ pymongo # install via: easy_install pymongo 
 # behaviour:
 #   ^ the script will "move" the collections if source and target server are the same
 #     but will "copy" (dump/restore) if source and target servers are different
 
 from_host   = '127.0.0.1'
 from_port   = '27017'
-from_db     = 'cgrates2'
+from_db     = '11'
 from_user   = 'cgrates'
-from_pass   = 'CGRateS.org'
+from_pass   = ''
 
 to_host     = '127.0.0.1'
 to_port     = '27017'
-to_db       = 'cgrates2'
+to_db       = '10'
 to_user     = 'cgrates'
-to_pass     = 'CGRateS.org'
+to_pass     = ''
 
 dump_folder = 'dump'
 
@@ -27,6 +25,8 @@ from urllib import quote_plus
 from collections import OrderedDict
 
 mongo_from_url = 'mongodb://' + from_user + ':' + quote_plus(from_pass) + '@'+ from_host + ':' + from_port + '/' + from_db
+if from_pass == '': # disabled auth
+  mongo_from_url = 'mongodb://' + from_host + ':' + from_port + '/' + from_db
 client = MongoClient(mongo_from_url)
 
 db = client[from_db]
@@ -39,10 +39,13 @@ if len(cols) > 0:
             print('Migrating on same server...')
             print('Found %d collections on source. Moving...' % len(cols))
             i = 0
-            for col in db.collection_names():
+            for col in cols:
                 i += 1
                 print('Moving colection %s (%d of %d)...' % (col, i, len(cols)))
-                client.admin.command(OrderedDict([('renameCollection', from_db + '.' + col), ('to', to_db + '.' + col)]))
+                try:
+                  client.admin.command(OrderedDict([('renameCollection', from_db + '.' + col), ('to', to_db + '.' + col)]))
+                except:
+                  continue
     # different servers
     else:
         import subprocess

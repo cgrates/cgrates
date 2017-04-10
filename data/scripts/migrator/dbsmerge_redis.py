@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # depends:
-#   ^ redis
+#   ^ redis # install via easy_install redis
 # asserts:
 #   ^ destination redis is not password protected when connected from source redis server
 #     (https://github.com/antirez/redis/pull/2507)
@@ -10,12 +10,12 @@
 
 from_host   = '127.0.0.1'
 from_port   = 6379
-from_db     = 0
+from_db     = 11
 from_pass   = ''
 
 to_host     = '127.0.0.1'
-to_port     = 6380
-to_db       = 0
+to_port     = 6379
+to_db       = 10
 to_pass     = '' # Not used
 
 keymask     = '*'

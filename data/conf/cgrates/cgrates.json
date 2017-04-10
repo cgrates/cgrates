@@ -67,7 +67,7 @@
 // 	"db_type": "redis",						// data_db type: <redis|mongo>
 // 	"db_host": "127.0.0.1",					// data_db host address
 // 	"db_port": 6379, 						// data_db port to reach the database
-// 	"db_name": "11", 						// data_db database name to connect to
+// 	"db_name": "10", 						// data_db database name to connect to
 // 	"db_user": "", 							// username to use when connecting to data_db
 // 	"db_password": "", 						// password to use when connecting to data_db
 // 	"load_history_size": 10,				// Number of records in the load history

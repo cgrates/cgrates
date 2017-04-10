@@ -217,7 +217,7 @@ func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	if cgrCfg.DataDbPort != "6379" {
 		t.Error(cgrCfg.DataDbPort)
 	}
-	if cgrCfg.DataDbName != "11" {
+	if cgrCfg.DataDbName != "10" {
 		t.Error(cgrCfg.DataDbName)
 	}
 	if cgrCfg.DataDbUser != "" {
