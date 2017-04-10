@@ -85,8 +85,8 @@ func TestAccountStorageStoreRestore(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
-	accountingStorage.SetAccount(rifsBalance)
-	ub1, err := accountingStorage.GetAccount("other")
+	dataStorage.SetAccount(rifsBalance)
+	ub1, err := dataStorage.GetAccount("other")
 	if err != nil || !ub1.BalanceMap[utils.MONETARY].Equal(rifsBalance.BalanceMap[utils.MONETARY]) {
 		t.Log("UB: ", ub1)
 		t.Errorf("Expected %v was %v", rifsBalance, ub1)
@@ -155,8 +155,8 @@ func TestAccountStorageStore(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
-	accountingStorage.SetAccount(rifsBalance)
-	result, err := accountingStorage.GetAccount(rifsBalance.ID)
+	dataStorage.SetAccount(rifsBalance)
+	result, err := dataStorage.GetAccount(rifsBalance.ID)
 	if err != nil || rifsBalance.ID != result.ID ||
 		len(rifsBalance.BalanceMap[utils.VOICE]) < 2 || len(result.BalanceMap[utils.VOICE]) < 2 ||
 		!(rifsBalance.BalanceMap[utils.VOICE][0].Equal(result.BalanceMap[utils.VOICE][0])) ||
@@ -1247,8 +1247,8 @@ func TestDebitShared(t *testing.T) {
 
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
-	accountingStorage.SetAccount(groupie)
-	ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
+	dataStorage.SetAccount(groupie)
+	dataStorage.SetSharedGroup(sg, utils.NonTransactional)
 	cc, err := rif.debitCreditBalance(cd, false, false, true)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
@@ -1256,7 +1256,7 @@ func TestDebitShared(t *testing.T) {
 	if rif.BalanceMap[utils.MONETARY][0].GetValue() != 0 {
 		t.Errorf("Error debiting from shared group: %+v", rif.BalanceMap[utils.MONETARY][0])
 	}
-	groupie, _ = accountingStorage.GetAccount("groupie")
+	groupie, _ = dataStorage.GetAccount("groupie")
 	if groupie.BalanceMap[utils.MONETARY][0].GetValue() != 10 {
 		t.Errorf("Error debiting from shared group: %+v", groupie.BalanceMap[utils.MONETARY][0])
 	}
@@ -1316,8 +1316,8 @@ func TestMaxDurationShared(t *testing.T) {
 
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
-	accountingStorage.SetAccount(groupie)
-	ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
+	dataStorage.SetAccount(groupie)
+	dataStorage.SetSharedGroup(sg, utils.NonTransactional)
 	duration, err := cd.getMaxSessionDuration(rif)
 	if err != nil {
 		t.Error("Error getting max session duration from shared group: ", err)
@@ -1943,8 +1943,8 @@ func BenchmarkAccountStorageStoreRestore(b *testing.B) {
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
 	for i := 0; i < b.N; i++ {
-		accountingStorage.SetAccount(rifsBalance)
-		accountingStorage.GetAccount(rifsBalance.ID)
+		dataStorage.SetAccount(rifsBalance)
+		dataStorage.GetAccount(rifsBalance.ID)
 	}
 }
 

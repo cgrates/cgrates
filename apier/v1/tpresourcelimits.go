@@ -21,49 +21,49 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new CdrStats profile within a tariff plan
-func (self *ApierV1) SetTPCdrStats(attrs utils.TPCdrStats, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "CdrStats"}); len(missing) != 0 {
+// Creates a new resource limit within a tariff plan
+func (self *ApierV1) SetTPResourceLimit(attr utils.TPResourceLimit, reply *string) error {
+	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID", "Limit"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPCdrStats([]*utils.TPCdrStats{&attrs}); err != nil {
-		return utils.NewErrServerError(err)
+	if err := self.StorDb.SetTPResourceLimits([]*utils.TPResourceLimit{&attr}); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-type AttrGetTPCdrStats struct {
+type AttrGetTPResourceLimit struct {
 	TPid string // Tariff plan id
-	ID   string // CdrStat id
+	ID   string
 }
 
-// Queries specific CdrStat on tariff plan
-func (self *ApierV1) GetTPCdrStats(attrs AttrGetTPCdrStats, reply *utils.TPCdrStats) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+// Queries specific ResourceLimit on Tariff plan
+func (self *ApierV1) GetTPResourceLimit(attr AttrGetTPResourceLimit, reply *utils.TPResourceLimit) error {
+	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if css, err := self.StorDb.GetTPCdrStats(attrs.TPid, attrs.ID); err != nil {
+	if rls, err := self.StorDb.GetTPResourceLimits(attr.TPid, attr.ID); err != nil {
 		return utils.NewErrServerError(err)
-	} else if len(css) == 0 {
+	} else if len(rls) == 0 {
 		return utils.ErrNotFound
 	} else {
-		*reply = *css[0]
+		*reply = *rls[0]
 	}
 	return nil
 }
 
-type AttrGetTPCdrStatIds struct {
+type AttrGetTPResourceLimitIds struct {
 	TPid string // Tariff plan id
 	utils.Paginator
 }
 
-// Queries CdrStats identities on specific tariff plan.
-func (self *ApierV1) GetTPCdrStatsIds(attrs AttrGetTPCdrStatIds, reply *[]string) error {
+// Queries ResourceLimit identities on specific tariff plan.
+func (self *ApierV1) GetTPResourceLimitIDs(attrs AttrGetTPResourceLimitIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPCdrStats, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPResourceLimits, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -73,15 +73,16 @@ func (self *ApierV1) GetTPCdrStatsIds(attrs AttrGetTPCdrStatIds, reply *[]string
 	return nil
 }
 
-// Removes specific CdrStats on Tariff plan
-func (self *ApierV1) RemTPCdrStats(attrs AttrGetTPCdrStats, reply *string) error {
+// Removes specific ResourceLimit on Tariff plan
+func (self *ApierV1) RemTPResourceLimit(attrs AttrGetTPResourceLimit, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPSharedGroups, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPResourceLimits, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK
 	}
 	return nil
+
 }

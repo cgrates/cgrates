@@ -514,9 +514,9 @@ func TestCDRAsExportRecord(t *testing.T) {
 	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != cdr.Destination {
-		t.Errorf("Expecting: %s, received: %s", cdr.Destination, expRecord[0])
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.Destination, expRecord[0])
 	}
-	if err := ratingStorage.SetReverseDestination(&Destination{Id: "MASKED_DESTINATIONS", Prefixes: []string{"+4986517174963"}},
+	if err := dataStorage.SetReverseDestination(&Destination{Id: "MASKED_DESTINATIONS", Prefixes: []string{"+4986517174963"}},
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -525,13 +525,13 @@ func TestCDRAsExportRecord(t *testing.T) {
 	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != eDst {
-		t.Errorf("Expecting: %s, received: %s", eDst, expRecord[0])
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", eDst, expRecord[0])
 	}
 	cfgCdrFld = &config.CfgCdrField{Tag: "MaskedDest", Type: utils.MetaMaskedDestination, Value: val, MaskDestID: "MASKED_DESTINATIONS"}
 	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != "1" {
-		t.Errorf("Expecting: %s, received: %s", "1", expRecord[0])
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
 	fltr, _ := utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
 	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val, FieldFilter: fltr, Timezone: "UTC"}

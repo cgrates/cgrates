@@ -27,20 +27,10 @@ func (self *ApierV1) SetTPDerivedChargers(attrs utils.TPDerivedChargers, reply *
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Direction", "Tenant", "Category", "Account", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	/*for _, action := range attrs.DerivedCharges {
-		requiredFields := []string{"Identifier", "Weight"}
-		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
-			requiredFields = append(requiredFields, "Direction", "Units")
-		}
-		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:DerivedCharge:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
-		}
-	}*/
-	dc := engine.APItoModelDerivedCharger(&attrs)
-	if err := self.StorDb.SetTpDerivedChargers(dc); err != nil {
+	if err := self.StorDb.SetTPDerivedChargers([]*utils.TPDerivedChargers{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }
 
@@ -54,21 +44,14 @@ func (self *ApierV1) GetTPDerivedChargers(attrs AttrGetTPDerivedChargers, reply 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DerivedChargersId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tmpDc := &utils.TPDerivedChargers{TPid: attrs.TPid}
-	if err := tmpDc.SetDerivedChargersId(attrs.DerivedChargersId); err != nil {
-		return err
-	}
-	dcs := engine.APItoModelDerivedCharger(tmpDc)
-	if sgs, err := self.StorDb.GetTpDerivedChargers(&dcs[0]); err != nil {
+	filter := &utils.TPDerivedChargers{TPid: attrs.TPid}
+	filter.SetDerivedChargersId(attrs.DerivedChargersId)
+	if dcs, err := self.StorDb.GetTPDerivedChargers(filter); err != nil {
 		return utils.NewErrServerError(err)
-	} else if len(sgs) == 0 {
+	} else if len(dcs) == 0 {
 		return utils.ErrNotFound
 	} else {
-		dcsMap, err := engine.TpDerivedChargers(dcs).GetDerivedChargers()
-		if err != nil {
-			return err
-		}
-		*reply = *dcsMap[attrs.DerivedChargersId]
+		*reply = *dcs[0]
 	}
 	return nil
 }
@@ -83,7 +66,7 @@ func (self *ApierV1) GetTPDerivedChargerIds(attrs AttrGetTPDerivedChargeIds, rep
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_DERIVED_CHARGERS, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "account", "subject"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDerivedChargers, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "account", "subject"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -102,10 +85,10 @@ func (self *ApierV1) RemTPDerivedChargers(attrs AttrGetTPDerivedChargers, reply 
 	if err := tmpDc.SetDerivedChargersId(attrs.DerivedChargersId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_DERIVED_CHARGERS, attrs.TPid, map[string]string{"loadid": tmpDc.Loadid, "direction": tmpDc.Direction, "tenant": tmpDc.Tenant, "category": tmpDc.Category, "account": tmpDc.Account, "subject": tmpDc.Subject}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPDerivedChargers, attrs.TPid, map[string]string{"loadid": tmpDc.Loadid, "direction": tmpDc.Direction, "tenant": tmpDc.Tenant, "category": tmpDc.Category, "account": tmpDc.Account, "subject": tmpDc.Subject}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
-		*reply = "OK"
+		*reply = utils.OK
 	}
 	return nil
 }

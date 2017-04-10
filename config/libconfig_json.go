@@ -69,15 +69,9 @@ type DbJsonCfg struct {
 	Cdrs_indexes      *[]string
 }
 
-// Balancer config section
-type BalancerJsonCfg struct {
-	Enabled *bool
-}
-
 // Rater config section
 type RalsJsonCfg struct {
 	Enabled                     *bool
-	Balancer                    *string
 	Cdrstats_conns              *[]*HaPoolJsonCfg
 	Historys_conns              *[]*HaPoolJsonCfg
 	Pubsubs_conns               *[]*HaPoolJsonCfg

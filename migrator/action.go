@@ -43,7 +43,7 @@ func (m *Migrator) migrateActions() (err error) {
 	case utils.REDIS:
 		var acts engine.Actions
 		var actv1keys []string
-		actv1keys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_PREFIX)
+		actv1keys, err = m.dataDB.GetKeysForPrefix(utils.ACTION_PREFIX)
 		if err != nil {
 			return
 		}
@@ -55,13 +55,13 @@ func (m *Migrator) migrateActions() (err error) {
 			act := v1act.AsAction()
 			acts = append(acts, act)
 		}
-		if err := m.tpDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+		if err := m.dataDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 			return err
 		}
 
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ACTION_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_PREFIX]}
-		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -70,7 +70,7 @@ func (m *Migrator) migrateActions() (err error) {
 
 		return
 	case utils.MONGO:
-		dataDB := m.tpDB.(*engine.MongoStorage)
+		dataDB := m.dataDB.(*engine.MongoStorage)
 		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
 		var acts engine.Actions
@@ -80,12 +80,12 @@ func (m *Migrator) migrateActions() (err error) {
 			act := v1act.AsAction()
 			acts = append(acts, act)
 		}
-		if err := m.tpDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+		if err := m.dataDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 			return err
 		}
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ACTION_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_PREFIX]}
-		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -104,8 +104,8 @@ func (m *Migrator) migrateActions() (err error) {
 func (m *Migrator) getV1ActionFromDB(key string) (v1act *v1Action, err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
-		tpDB := m.tpDB.(*engine.RedisStorage)
-		if strVal, err := tpDB.Cmd("GET", key).Bytes(); err != nil {
+		dataDB := m.dataDB.(*engine.RedisStorage)
+		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
 			return nil, err
 		} else {
 			v1act := &v1Action{Id: key}
@@ -115,8 +115,8 @@ func (m *Migrator) getV1ActionFromDB(key string) (v1act *v1Action, err error) {
 			return v1act, nil
 		}
 	case utils.MONGO:
-		tpDB := m.tpDB.(*engine.MongoStorage)
-		mgoDB := tpDB.DB()
+		dataDB := m.dataDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
 		v1act := new(v1Action)
 		if err := mgoDB.C(utils.ACTION_PREFIX).Find(bson.M{"id": key}).One(v1act); err != nil {

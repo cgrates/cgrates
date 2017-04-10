@@ -57,10 +57,10 @@ func (self *ApierV2) RemTPDestination(attrs AttrGetTPDestination, reply *string)
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tag"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_DESTINATIONS, attrs.TPid, map[string]string{"tag": attrs.Tag}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPDestinations, attrs.TPid, map[string]string{"tag": attrs.Tag}); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
-		*reply = "OK"
+		*reply = utils.OK
 	}
 	return nil
 }

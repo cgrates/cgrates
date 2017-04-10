@@ -76,6 +76,6 @@ func TestNewSureTaxRequest(t *testing.T) {
 	if stReq, err := NewSureTaxRequest(cdr, stCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSureTaxRequest, stReq) {
-		t.Errorf("Expecting: %s, received: %s", string(eSureTaxRequest.Request), string(stReq.Request))
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", string(eSureTaxRequest.Request), string(stReq.Request))
 	}
 }

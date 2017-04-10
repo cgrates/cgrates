@@ -29,11 +29,10 @@ func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *stri
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Category", "Direction", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	rpf := engine.APItoModelRatingProfile(&attrs)
-	if err := self.StorDb.SetTpRatingProfiles(rpf); err != nil {
+	if err := self.StorDb.SetTPRatingProfiles([]*utils.TPRatingProfile{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }
 
@@ -51,25 +50,12 @@ func (self *ApierV1) GetTPRatingProfilesByLoadId(attrs utils.TPRatingProfile, re
 	if missing := utils.MissingStructFields(&attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	rpf := engine.APItoModelRatingProfile(&attrs)
-	if dr, err := self.StorDb.GetTpRatingProfiles(&rpf[0]); err != nil {
+	if rps, err := self.StorDb.GetTPRatingProfiles(&attrs); err != nil {
 		return utils.NewErrServerError(err)
-	} else if dr == nil {
+	} else if rps == nil {
 		return utils.ErrNotFound
 	} else {
-		rpfMap, err := engine.TpRatingProfiles(dr).GetRatingProfiles()
-		if err != nil {
-			return err
-		}
-		var rpfs []*utils.TPRatingProfile
-		if len(attrs.Subject) != 0 {
-			rpfs = []*utils.TPRatingProfile{rpfMap[attrs.KeyId()]}
-		} else {
-			for _, rpfLst := range rpfMap {
-				rpfs = append(rpfs, rpfLst)
-			}
-		}
-		*reply = rpfs
+		reply = &rps
 	}
 	return nil
 }
@@ -79,7 +65,7 @@ func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileId
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, utils.TPDistinctIds{"loadid"}, map[string]string{
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles, utils.TPDistinctIds{"loadid"}, map[string]string{
 		"tenant":    attrs.Tenant,
 		"tor":       attrs.Category,
 		"direction": attrs.Direction,
@@ -108,25 +94,12 @@ func (self *ApierV1) GetTPRatingProfile(attrs AttrGetTPRatingProfile, reply *uti
 	if err := tmpRpf.SetRatingProfilesId(attrs.RatingProfileId); err != nil {
 		return err
 	}
-	rpf := engine.APItoModelRatingProfile(tmpRpf)
-	if rpfs, err := self.StorDb.GetTpRatingProfiles(&rpf[0]); err != nil {
+	if rpfs, err := self.StorDb.GetTPRatingProfiles(tmpRpf); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(rpfs) == 0 {
 		return utils.ErrNotFound
 	} else {
-		rpfMap, err := engine.TpRatingProfiles(rpfs).GetRatingProfiles()
-		if err != nil {
-			return err
-		}
-		rpf := rpfMap[tmpRpf.KeyId()]
-		tpdc := utils.TPRatingProfile{
-			TPid: attrs.TPid,
-			RatingPlanActivations: rpf.RatingPlanActivations,
-		}
-		if err := tpdc.SetRatingProfilesId(attrs.RatingProfileId); err != nil {
-			return err
-		}
-		*reply = tpdc
+		*reply = *rpfs[0]
 	}
 	return nil
 }
@@ -141,7 +114,7 @@ func (self *ApierV1) GetTPRatingProfileIds(attrs AttrGetTPRatingProfileIds, repl
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -160,10 +133,10 @@ func (self *ApierV1) RemTPRatingProfile(attrs AttrGetTPRatingProfile, reply *str
 	if err := tmpRpf.SetRatingProfileId(attrs.RatingProfileId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, map[string]string{"loadid": tmpRpf.Loadid, "direction": tmpRpf.Direction, "tenant": tmpRpf.Tenant, "category": tmpRpf.Category, "subject": tmpRpf.Subject}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPRateProfiles, attrs.TPid, map[string]string{"loadid": tmpRpf.Loadid, "direction": tmpRpf.Direction, "tenant": tmpRpf.Tenant, "category": tmpRpf.Category, "subject": tmpRpf.Subject}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
-		*reply = "OK"
+		*reply = utils.OK
 	}
 	return nil
 }

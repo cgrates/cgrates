@@ -176,12 +176,6 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
 	InstanceID               string // Identifier for this engine instance
-	TpDbType                 string
-	TpDbHost                 string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	TpDbPort                 string // The port to bind to.
-	TpDbName                 string // The name of the database to connect to.
-	TpDbUser                 string // The user to sign in as.
-	TpDbPass                 string // The user's password.
 	DataDbType               string
 	DataDbHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	DataDbPort               string // The port to bind to.
@@ -226,7 +220,6 @@ type CGRConfig struct {
 	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
 	LogLevel                 int             // system wide log level, nothing higher than this will be logged
 	RALsEnabled              bool            // start standalone server (no balancer)
-	RALsBalancer             string          // balancer address host:port
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
 	RALsHistorySConns        []*HaPoolConfig
 	RALsPubSubSConns         []*HaPoolConfig
@@ -234,7 +227,6 @@ type CGRConfig struct {
 	RALsAliasSConns          []*HaPoolConfig
 	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
 	LcrSubjectPrefixMatching bool // enables prefix matching for the lcr subject
-	BalancerEnabled          bool
 	SchedulerEnabled         bool
 	CDRSEnabled              bool              // Enable CDR Server service
 	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
@@ -280,9 +272,6 @@ type CGRConfig struct {
 func (self *CGRConfig) checkConfigSanity() error {
 	// Rater checks
 	if self.RALsEnabled {
-		if self.RALsBalancer == utils.MetaInternal && !self.BalancerEnabled {
-			return errors.New("Balancer not enabled but requested by Rater component.")
-		}
 		for _, connCfg := range self.RALsCDRStatSConns {
 			if connCfg.Address == utils.MetaInternal && !self.CDRStatsEnabled {
 				return errors.New("CDRStats not enabled but requested by Rater component.")
@@ -516,22 +505,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
-	jsnTpDbCfg, err := jsnCfg.DbJsonCfg(TPDB_JSN)
-	if err != nil {
-		return err
-	}
-
 	jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN)
 	if err != nil {
 		return err
 	}
 
 	jsnStorDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN)
-	if err != nil {
-		return err
-	}
-
-	jsnBalancerCfg, err := jsnCfg.BalancerJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -629,28 +608,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	jsnSureTaxCfg, err := jsnCfg.SureTaxJsonCfg()
 	if err != nil {
 		return err
-	}
-
-	// All good, start populating config variables
-	if jsnTpDbCfg != nil {
-		if jsnTpDbCfg.Db_type != nil {
-			self.TpDbType = *jsnTpDbCfg.Db_type
-		}
-		if jsnTpDbCfg.Db_host != nil {
-			self.TpDbHost = *jsnTpDbCfg.Db_host
-		}
-		if jsnTpDbCfg.Db_port != nil {
-			self.TpDbPort = strconv.Itoa(*jsnTpDbCfg.Db_port)
-		}
-		if jsnTpDbCfg.Db_name != nil {
-			self.TpDbName = *jsnTpDbCfg.Db_name
-		}
-		if jsnTpDbCfg.Db_user != nil {
-			self.TpDbUser = *jsnTpDbCfg.Db_user
-		}
-		if jsnTpDbCfg.Db_password != nil {
-			self.TpDbPass = *jsnTpDbCfg.Db_password
-		}
 	}
 
 	if jsnDataDbCfg != nil {
@@ -814,9 +771,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnRALsCfg.Enabled != nil {
 			self.RALsEnabled = *jsnRALsCfg.Enabled
 		}
-		if jsnRALsCfg.Balancer != nil {
-			self.RALsBalancer = *jsnRALsCfg.Balancer
-		}
 		if jsnRALsCfg.Cdrstats_conns != nil {
 			self.RALsCDRStatSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Cdrstats_conns))
 			for idx, jsnHaCfg := range *jsnRALsCfg.Cdrstats_conns {
@@ -859,15 +813,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.LcrSubjectPrefixMatching = *jsnRALsCfg.Lcr_subject_prefix_matching
 		}
 	}
-
-	if jsnBalancerCfg != nil && jsnBalancerCfg.Enabled != nil {
-		self.BalancerEnabled = *jsnBalancerCfg.Enabled
-	}
-
 	if jsnSchedCfg != nil && jsnSchedCfg.Enabled != nil {
 		self.SchedulerEnabled = *jsnSchedCfg.Enabled
 	}
-
 	if jsnCdrsCfg != nil {
 		if jsnCdrsCfg.Enabled != nil {
 			self.CDRSEnabled = *jsnCdrsCfg.Enabled

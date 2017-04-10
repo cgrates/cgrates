@@ -41,7 +41,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 	case utils.REDIS:
 		var atrrs engine.ActionTriggers
 		var v1atrskeys []string
-		v1atrskeys, err = m.tpDB.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
+		v1atrskeys, err = m.dataDB.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {
 			return
 		}
@@ -56,12 +56,12 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 				atrrs = append(atrrs, atr)
 			}
 		}
-		if err := m.tpDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
+		if err := m.dataDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
 			return err
 		}
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
-		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -69,7 +69,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 		}
 		return
 	case utils.MONGO:
-		dataDB := m.tpDB.(*engine.MongoStorage)
+		dataDB := m.dataDB.(*engine.MongoStorage)
 		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
 		var atrrs engine.ActionTriggers
@@ -79,12 +79,12 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 			atr := v1atr.AsActionTrigger()
 			atrrs = append(atrrs, atr)
 		}
-		if err := m.tpDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
+		if err := m.dataDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
 			return err
 		}
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
-		if err = m.tpDB.SetVersions(vrs, false); err != nil {
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -101,8 +101,8 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger, err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
-		tpDB := m.tpDB.(*engine.RedisStorage)
-		if strVal, err := tpDB.Cmd("GET", key).Bytes(); err != nil {
+		dataDB := m.dataDB.(*engine.RedisStorage)
+		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
 			return nil, err
 		} else {
 			v1Atr := &v1ActionTrigger{Id: key}
@@ -112,8 +112,8 @@ func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger,
 			return v1Atr, nil
 		}
 	case utils.MONGO:
-		tpDB := m.tpDB.(*engine.MongoStorage)
-		mgoDB := tpDB.DB()
+		dataDB := m.dataDB.(*engine.MongoStorage)
+		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
 		v1Atr := new(v1ActionTrigger)
 		if err := mgoDB.C(utils.ACTION_TRIGGER_PREFIX).Find(bson.M{"id": key}).One(v1Atr); err != nil {

@@ -25,7 +25,6 @@ import (
 	"runtime"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -118,23 +117,23 @@ func TestStorDBitMongo(t *testing.T) {
 
 func testStorDBitCRUDTpTimings(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpTimings("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPTimings("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpTiming{
-		TpTiming{
-			Tpid:      "testTPid",
-			Tag:       "testTag1",
+	var snd = []*utils.ApierTPTiming{
+		&utils.ApierTPTiming{
+			TPid:      "testTPid",
+			ID:        "testTag1",
 			Years:     "*any",
 			Months:    "*any",
 			MonthDays: "*any",
 			WeekDays:  "1;2;3;4;5",
 			Time:      "01:00:00",
 		},
-		TpTiming{
-			Tpid:      "testTPid",
-			Tag:       "testTag2",
+		&utils.ApierTPTiming{
+			TPid:      "testTPid",
+			ID:        "testTag2",
 			Years:     "*any",
 			Months:    "*any",
 			MonthDays: "*any",
@@ -142,37 +141,29 @@ func testStorDBitCRUDTpTimings(t *testing.T) {
 			Time:      "01:00:00",
 		},
 	}
-	if err := storDB.SetTpTimings(snd); err != nil {
+	if err := storDB.SetTPTimings(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpTimings("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPTimings("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
 	snd[0].Time = "02:00:00"
 	snd[1].Time = "02:00:00"
-	if err := storDB.SetTpTimings(snd); err != nil {
+	if err := storDB.SetTPTimings(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpTimings("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPTimings("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -180,7 +171,7 @@ func testStorDBitCRUDTpTimings(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpTimings("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPTimings("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -194,12 +185,12 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 	snd := []*utils.TPDestination{
 		&utils.TPDestination{
 			TPid:     "testTPid",
-			Tag:      "testTag1",
+			ID:       "testTag1",
 			Prefixes: []string{`0256`, `0257`, `0723`, `+49`},
 		},
 		&utils.TPDestination{
 			TPid:     "testTPid",
-			Tag:      "testTag2",
+			ID:       "testTag2",
 			Prefixes: []string{`0256`, `0257`, `0723`, `+49`},
 		},
 	}
@@ -227,7 +218,7 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 			rcv[1].Prefixes = snd[0].Prefixes
 		}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -257,7 +248,7 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 			rcv[1].Prefixes = snd[0].Prefixes
 		}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -272,61 +263,73 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 
 func testStorDBitCRUDTpRates(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpRates("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPRates("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpRate{
-		TpRate{
-			Tpid:               "testTPid",
-			Tag:                "testTag1",
-			ConnectFee:         0.0,
-			Rate:               0.0,
-			RateUnit:           "60s",
-			RateIncrement:      "60s",
-			GroupIntervalStart: "0s",
+	var snd = []*utils.TPRate{
+		&utils.TPRate{
+			TPid: "testTPid",
+			ID:   "1",
+			RateSlots: []*utils.RateSlot{
+				&utils.RateSlot{
+					ConnectFee:         0.0,
+					Rate:               0.0,
+					RateUnit:           "60s",
+					RateIncrement:      "60s",
+					GroupIntervalStart: "0s",
+				},
+				&utils.RateSlot{
+					ConnectFee:         0.0,
+					Rate:               0.0,
+					RateUnit:           "60s",
+					RateIncrement:      "60s",
+					GroupIntervalStart: "1s",
+				},
+			},
 		},
-		TpRate{
-			Tpid:               "testTPid",
-			Tag:                "testTag2",
-			ConnectFee:         1.0,
-			Rate:               1.0,
-			RateUnit:           "70s",
-			RateIncrement:      "70s",
-			GroupIntervalStart: "0s",
+		&utils.TPRate{
+			TPid: "testTPid",
+			ID:   "2",
+			RateSlots: []*utils.RateSlot{
+				&utils.RateSlot{
+					ConnectFee:         0.0,
+					Rate:               0.0,
+					RateUnit:           "60s",
+					RateIncrement:      "60s",
+					GroupIntervalStart: "0s",
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpRates(snd); err != nil {
+	snd[0].RateSlots[0].SetDurations()
+	snd[0].RateSlots[1].SetDurations()
+	snd[1].RateSlots[0].SetDurations()
+	if err := storDB.SetTPRates(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpRates("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPRates("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].GroupIntervalStart = "1s"
-	snd[1].GroupIntervalStart = "1s"
-	if err := storDB.SetTpRates(snd); err != nil {
+	snd[0].RateSlots[0].GroupIntervalStart = "3s"
+	snd[1].RateSlots[0].GroupIntervalStart = "3s"
+	snd[0].RateSlots[0].SetDurations()
+	snd[1].RateSlots[0].SetDurations()
+	if err := storDB.SetTPRates(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpRates("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPRates("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -334,70 +337,71 @@ func testStorDBitCRUDTpRates(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpRates("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPRates("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpDestinationRates(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpDestinationRates("testTPid", "", nil); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPDestinationRates("testTPid", "", nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpDestinationRate{
-		TpDestinationRate{
-			Tpid:             "testTPid",
-			Tag:              "testTag1",
-			DestinationsTag:  "GERMANY",
-			RatesTag:         "RT_1CENT",
-			RoundingMethod:   "*up",
-			RoundingDecimals: 0,
-			MaxCost:          0.0,
-			MaxCostStrategy:  "",
+	var snd = []*utils.TPDestinationRate{
+		&utils.TPDestinationRate{
+			TPid: "testTPid",
+			ID:   "1",
+			DestinationRates: []*utils.DestinationRate{
+				&utils.DestinationRate{
+					DestinationId:    "GERMANY",
+					RateId:           "RT_1CENT",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 0,
+					MaxCost:          0.0,
+					MaxCostStrategy:  "",
+				},
+			},
 		},
-		TpDestinationRate{
-			Tpid:             "testTPid",
-			Tag:              "testTag1",
-			DestinationsTag:  "FRANCE",
-			RatesTag:         "RT_2CENT",
-			RoundingMethod:   "*down",
-			RoundingDecimals: 0,
-			MaxCost:          0.0,
-			MaxCostStrategy:  "",
+		&utils.TPDestinationRate{
+			TPid: "testTPid",
+			ID:   "2",
+			DestinationRates: []*utils.DestinationRate{
+				&utils.DestinationRate{
+					DestinationId:    "GERMANY",
+					RateId:           "RT_1CENT",
+					RoundingMethod:   "*up",
+					RoundingDecimals: 0,
+					MaxCost:          0.0,
+					MaxCostStrategy:  "",
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpDestinationRates(snd); err != nil {
+
+	if err := storDB.SetTPDestinationRates(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpDestinationRates("testTPid", "", nil); err != nil {
+	if rcv, err := storDB.GetTPDestinationRates("testTPid", "", nil); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].MaxCostStrategy = "test"
-	snd[1].MaxCostStrategy = "test"
-	if err := storDB.SetTpDestinationRates(snd); err != nil {
+	snd[0].DestinationRates[0].MaxCostStrategy = "test"
+	snd[1].DestinationRates[0].MaxCostStrategy = "test"
+	if err := storDB.SetTPDestinationRates(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpDestinationRates("testTPid", "", nil); err != nil {
+	if rcv, err := storDB.GetTPDestinationRates("testTPid", "", nil); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -405,64 +409,64 @@ func testStorDBitCRUDTpDestinationRates(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpDestinationRates("testTPid", "", nil); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPDestinationRates("testTPid", "", nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpRatingPlans(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpRatingPlans("testTPid", "", nil); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPRatingPlans("testTPid", "", nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpRatingPlan{
-		TpRatingPlan{
-			Tpid:         "testTPid",
-			Tag:          "testTag1",
-			DestratesTag: "1",
-			TimingTag:    "ALWAYS",
-			Weight:       0.0,
+	var snd = []*utils.TPRatingPlan{
+		&utils.TPRatingPlan{
+			TPid: "testTPid",
+			ID:   "1",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				&utils.TPRatingPlanBinding{
+					DestinationRatesId: "1",
+					TimingId:           "ALWAYS",
+					Weight:             0.0,
+				},
+			},
 		},
-		TpRatingPlan{
-			Tpid:         "testTPid",
-			Tag:          "testTag1",
-			DestratesTag: "2",
-			TimingTag:    "ALWAYS",
-			Weight:       1.0,
+		&utils.TPRatingPlan{
+			TPid: "testTPid",
+			ID:   "2",
+			RatingPlanBindings: []*utils.TPRatingPlanBinding{
+				&utils.TPRatingPlanBinding{
+					DestinationRatesId: "2",
+					TimingId:           "ALWAYS",
+					Weight:             2,
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpRatingPlans(snd); err != nil {
+	if err := storDB.SetTPRatingPlans(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpRatingPlans("testTPid", "", nil); err != nil {
+	if rcv, err := storDB.GetTPRatingPlans("testTPid", "", nil); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].TimingTag = "test"
-	snd[1].TimingTag = "test"
-	if err := storDB.SetTpRatingPlans(snd); err != nil {
+	snd[0].RatingPlanBindings[0].TimingId = "test"
+	snd[1].RatingPlanBindings[0].TimingId = "test"
+	if err := storDB.SetTPRatingPlans(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpRatingPlans("testTPid", "", nil); err != nil {
+	if rcv, err := storDB.GetTPRatingPlans("testTPid", "", nil); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -470,77 +474,77 @@ func testStorDBitCRUDTpRatingPlans(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpRatingPlans("testTPid", "", nil); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPRatingPlans("testTPid", "", nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpRatingProfiles(t *testing.T) {
 	// READ
-	var filter = TpRatingProfile{
-		Tpid: "testTPid",
+	var filter = utils.TPRatingProfile{
+		TPid: "testTPid",
 	}
-	if _, err := storDB.GetTpRatingProfiles(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPRatingProfiles(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpRatingProfile{
-		TpRatingProfile{
-			Tpid:             "testTPid",
-			Loadid:           "TEST_LOADID",
-			Direction:        "*out",
-			Tenant:           "cgrates.org",
-			Category:         "call",
-			Subject:          "test",
-			ActivationTime:   "2014-07-29T15:00:00Z",
-			RatingPlanTag:    "test",
-			FallbackSubjects: "",
-			CdrStatQueueIds:  "",
+	var snd = []*utils.TPRatingProfile{
+		&utils.TPRatingProfile{
+			TPid:      "testTPid",
+			LoadId:    "TEST_LOADID",
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Subject:   "test",
+			RatingPlanActivations: []*utils.TPRatingActivation{
+				&utils.TPRatingActivation{
+					ActivationTime:   "2014-07-29T15:00:00Z",
+					RatingPlanId:     "test",
+					FallbackSubjects: "",
+					CdrStatQueueIds:  "",
+				},
+			},
 		},
-		TpRatingProfile{
-			Tpid:             "testTPid",
-			Loadid:           "TEST_LOADID2",
-			Direction:        "*out",
-			Tenant:           "cgrates.org",
-			Category:         "call",
-			Subject:          "test",
-			ActivationTime:   "2014-07-29T15:00:00Z",
-			RatingPlanTag:    "test",
-			FallbackSubjects: "",
-			CdrStatQueueIds:  "",
+		&utils.TPRatingProfile{
+			TPid:      "testTPid",
+			LoadId:    "TEST_LOADID2",
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Subject:   "test",
+			RatingPlanActivations: []*utils.TPRatingActivation{
+				&utils.TPRatingActivation{
+					ActivationTime:   "2014-07-29T15:00:00Z",
+					RatingPlanId:     "test",
+					FallbackSubjects: "",
+					CdrStatQueueIds:  "",
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpRatingProfiles(snd); err != nil {
+	if err := storDB.SetTPRatingProfiles(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpRatingProfiles(&filter); err != nil {
+	if rcv, err := storDB.GetTPRatingProfiles(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].CdrStatQueueIds = "test"
-	snd[1].CdrStatQueueIds = "test"
-	if err := storDB.SetTpRatingProfiles(snd); err != nil {
+	snd[0].RatingPlanActivations[0].CdrStatQueueIds = "test"
+	snd[1].RatingPlanActivations[0].CdrStatQueueIds = "test"
+	if err := storDB.SetTPRatingProfiles(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpRatingProfiles(&filter); err != nil {
+	if rcv, err := storDB.GetTPRatingProfiles(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -548,64 +552,64 @@ func testStorDBitCRUDTpRatingProfiles(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpRatingProfiles(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPRatingProfiles(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpSharedGroups(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpSharedGroups("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPSharedGroups("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpSharedGroup{
-		TpSharedGroup{
-			Tpid:          "testTPid",
-			Tag:           "testTag1",
-			Account:       "test1",
-			Strategy:      "*lowest_cost",
-			RatingSubject: "test",
+	var snd = []*utils.TPSharedGroups{
+		&utils.TPSharedGroups{
+			TPid: "testTPid",
+			ID:   "1",
+			SharedGroups: []*utils.TPSharedGroup{
+				&utils.TPSharedGroup{
+					Account:       "test",
+					Strategy:      "*lowest_cost",
+					RatingSubject: "test",
+				},
+			},
 		},
-		TpSharedGroup{
-			Tpid:          "testTPid",
-			Tag:           "testTag1",
-			Account:       "test2",
-			Strategy:      "*lowest_cost",
-			RatingSubject: "test",
+		&utils.TPSharedGroups{
+			TPid: "testTPid",
+			ID:   "2",
+			SharedGroups: []*utils.TPSharedGroup{
+				&utils.TPSharedGroup{
+					Account:       "test",
+					Strategy:      "*lowest_cost",
+					RatingSubject: "test",
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpSharedGroups(snd); err != nil {
+	if err := storDB.SetTPSharedGroups(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpSharedGroups("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPSharedGroups("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].Strategy = "test"
-	snd[1].Strategy = "test"
-	if err := storDB.SetTpSharedGroups(snd); err != nil {
+	snd[0].SharedGroups[0].Strategy = "test"
+	snd[1].SharedGroups[0].Strategy = "test"
+	if err := storDB.SetTPSharedGroups(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpSharedGroups("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPSharedGroups("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -613,92 +617,94 @@ func testStorDBitCRUDTpSharedGroups(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpSharedGroups("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPSharedGroups("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpActions(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpActions("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPActions("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpAction{
-		TpAction{
-			Tpid:            "testTPid",
-			Tag:             "testTag1",
-			Action:          "*topup_reset",
-			ExtraParameters: "",
-			Filter:          "",
-			BalanceTag:      "",
-			BalanceType:     "*monetary",
-			Directions:      "*out",
-			Categories:      "",
-			DestinationTags: "DST_ON_NET",
-			RatingSubject:   "",
-			SharedGroups:    "",
-			ExpiryTime:      "*unlimited",
-			TimingTags:      "",
-			Units:           "10",
-			BalanceWeight:   "10",
-			BalanceBlocker:  "false",
-			BalanceDisabled: "false",
-			Weight:          11.0,
+	var snd = []*utils.TPActions{
+		&utils.TPActions{
+			TPid: "testTPid",
+			ID:   "1",
+			Actions: []*utils.TPAction{
+				&utils.TPAction{
+					Identifier:      "",
+					BalanceId:       "",
+					BalanceUuid:     "",
+					BalanceType:     "*monetary",
+					Directions:      "*out",
+					Units:           "10",
+					ExpiryTime:      "*unlimited",
+					Filter:          "",
+					TimingTags:      "",
+					DestinationIds:  "DST_ON_NET",
+					RatingSubject:   "",
+					Categories:      "",
+					SharedGroups:    "",
+					BalanceWeight:   "",
+					ExtraParameters: "",
+					BalanceBlocker:  "false",
+					BalanceDisabled: "false",
+					Weight:          11.0,
+				},
+			},
 		},
-		TpAction{
-			Tpid:            "testTPid",
-			Tag:             "testTag1",
-			Action:          "*topup_reset2",
-			ExtraParameters: "",
-			Filter:          "",
-			BalanceTag:      "",
-			BalanceType:     "*monetary",
-			Directions:      "*out",
-			Categories:      "",
-			DestinationTags: "DST_ON_NET",
-			RatingSubject:   "",
-			SharedGroups:    "",
-			ExpiryTime:      "*unlimited",
-			TimingTags:      "",
-			Units:           "10",
-			BalanceWeight:   "10",
-			BalanceBlocker:  "false",
-			BalanceDisabled: "false",
-			Weight:          11.0,
+		&utils.TPActions{
+			TPid: "testTPid",
+			ID:   "2",
+			Actions: []*utils.TPAction{
+				&utils.TPAction{
+					Identifier:      "",
+					BalanceId:       "",
+					BalanceUuid:     "",
+					BalanceType:     "*monetary",
+					Directions:      "*out",
+					Units:           "10",
+					ExpiryTime:      "*unlimited",
+					Filter:          "",
+					TimingTags:      "",
+					DestinationIds:  "DST_ON_NET",
+					RatingSubject:   "",
+					Categories:      "",
+					SharedGroups:    "",
+					BalanceWeight:   "",
+					ExtraParameters: "",
+					BalanceBlocker:  "false",
+					BalanceDisabled: "false",
+					Weight:          11.0,
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpActions(snd); err != nil {
+	if err := storDB.SetTPActions(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpActions("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPActions("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].Weight = 12.1
-	snd[1].Weight = 12.1
-	if err := storDB.SetTpActions(snd); err != nil {
+	snd[0].Actions[0].Weight = 12.1
+	snd[1].Actions[0].Weight = 12.1
+	if err := storDB.SetTPActions(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpActions("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPActions("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -706,64 +712,64 @@ func testStorDBitCRUDTpActions(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpActions("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPActions("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpActionPlans(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpActionPlans("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPActionPlans("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpActionPlan{
-		TpActionPlan{
-			Tpid:       "testTPid",
-			Tag:        "testTag1",
-			ActionsTag: "test",
-			TimingTag:  "",
-			Weight:     0.0,
+	var snd = []*utils.TPActionPlan{
+		&utils.TPActionPlan{
+			TPid: "testTPid",
+			ID:   "1",
+			ActionPlan: []*utils.TPActionTiming{
+				&utils.TPActionTiming{
+					ActionsId: "1",
+					TimingId:  "1",
+					Weight:    1,
+				},
+			},
 		},
-		TpActionPlan{
-			Tpid:       "testTPid",
-			Tag:        "testTag2",
-			ActionsTag: "test2",
-			TimingTag:  "",
-			Weight:     0.0,
+		&utils.TPActionPlan{
+			TPid: "testTPid",
+			ID:   "2",
+			ActionPlan: []*utils.TPActionTiming{
+				&utils.TPActionTiming{
+					ActionsId: "1",
+					TimingId:  "1",
+					Weight:    1,
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpActionPlans(snd); err != nil {
+	if err := storDB.SetTPActionPlans(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpActionPlans("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPActionPlans("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].TimingTag = "test"
-	snd[1].TimingTag = "test"
-	if err := storDB.SetTpActionPlans(snd); err != nil {
+	snd[0].ActionPlan[0].TimingId = "test"
+	snd[1].ActionPlan[0].TimingId = "test"
+	if err := storDB.SetTPActionPlans(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpActionPlans("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPActionPlans("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -771,102 +777,104 @@ func testStorDBitCRUDTpActionPlans(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpActionPlans("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPActionPlans("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpActionTriggers("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPActionTriggers("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpActionTrigger{
-		TpActionTrigger{
-			Tpid:                   "testTPid",
-			Tag:                    "testTag1",
-			UniqueId:               "",
-			ThresholdType:          "",
-			ThresholdValue:         0.0,
-			Recurrent:              true,
-			MinSleep:               "0",
-			ExpiryTime:             "2014-07-29T15:00:00Z",
-			ActivationTime:         "2014-07-29T15:00:00Z",
-			BalanceTag:             "test",
-			BalanceType:            "*monetary",
-			BalanceDirections:      "*out",
-			BalanceCategories:      "call",
-			BalanceDestinationTags: "",
-			BalanceRatingSubject:   "test",
-			BalanceSharedGroups:    "SHARED_1",
-			BalanceExpiryTime:      "2014-07-29T15:00:00Z",
-			BalanceTimingTags:      "T1",
-			BalanceWeight:          "0.0",
-			BalanceBlocker:         "false",
-			BalanceDisabled:        "false",
-			MinQueuedItems:         0,
-			ActionsTag:             "test",
-			Weight:                 0.0,
+	var snd = []*utils.TPActionTriggers{
+		&utils.TPActionTriggers{
+			TPid: "testTPid",
+			ID:   "1",
+			ActionTriggers: []*utils.TPActionTrigger{
+				&utils.TPActionTrigger{
+					Id:                    "1",
+					UniqueID:              "",
+					ThresholdType:         "1",
+					ThresholdValue:        0,
+					Recurrent:             true,
+					MinSleep:              "",
+					ExpirationDate:        "2014-07-29T15:00:00Z",
+					ActivationDate:        "2014-07-29T15:00:00Z",
+					BalanceId:             "test",
+					BalanceType:           "*monetary",
+					BalanceDirections:     "*out",
+					BalanceDestinationIds: "call",
+					BalanceWeight:         "0.0",
+					BalanceExpirationDate: "2014-07-29T15:00:00Z",
+					BalanceTimingTags:     "T1",
+					BalanceRatingSubject:  "test",
+					BalanceCategories:     "",
+					BalanceSharedGroups:   "SHARED_1",
+					BalanceBlocker:        "false",
+					BalanceDisabled:       "false",
+					MinQueuedItems:        0,
+					ActionsId:             "test",
+					Weight:                1.0,
+				},
+			},
 		},
-		TpActionTrigger{
-			Tpid:                   "testTPid",
-			Tag:                    "testTag1",
-			UniqueId:               "",
-			ThresholdType:          "",
-			ThresholdValue:         0.0,
-			Recurrent:              true,
-			MinSleep:               "0",
-			ExpiryTime:             "2014-07-29T15:00:00Z",
-			ActivationTime:         "2014-07-29T15:00:00Z",
-			BalanceTag:             "test2",
-			BalanceType:            "*monetary",
-			BalanceDirections:      "*out",
-			BalanceCategories:      "call",
-			BalanceDestinationTags: "",
-			BalanceRatingSubject:   "test",
-			BalanceSharedGroups:    "SHARED_1",
-			BalanceExpiryTime:      "2014-07-29T15:00:00Z",
-			BalanceTimingTags:      "T1",
-			BalanceWeight:          "0.0",
-			BalanceBlocker:         "false",
-			BalanceDisabled:        "false",
-			MinQueuedItems:         0,
-			ActionsTag:             "test",
-			Weight:                 0.0,
+		&utils.TPActionTriggers{
+			TPid: "testTPid",
+			ID:   "2",
+			ActionTriggers: []*utils.TPActionTrigger{
+				&utils.TPActionTrigger{
+					Id:                    "2",
+					UniqueID:              "",
+					ThresholdType:         "1",
+					ThresholdValue:        0,
+					Recurrent:             true,
+					MinSleep:              "",
+					ExpirationDate:        "2014-07-29T15:00:00Z",
+					ActivationDate:        "2014-07-29T15:00:00Z",
+					BalanceId:             "test",
+					BalanceType:           "*monetary",
+					BalanceDirections:     "*out",
+					BalanceDestinationIds: "call",
+					BalanceWeight:         "0.0",
+					BalanceExpirationDate: "2014-07-29T15:00:00Z",
+					BalanceTimingTags:     "T1",
+					BalanceRatingSubject:  "test",
+					BalanceCategories:     "",
+					BalanceSharedGroups:   "SHARED_1",
+					BalanceBlocker:        "false",
+					BalanceDisabled:       "false",
+					MinQueuedItems:        0,
+					ActionsId:             "test",
+					Weight:                1.0,
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpActionTriggers(snd); err != nil {
+	if err := storDB.SetTPActionTriggers(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpActionTriggers("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPActionTriggers("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].MinQueuedItems = 2
-	snd[1].MinQueuedItems = 2
-	if err := storDB.SetTpActionTriggers(snd); err != nil {
+	snd[0].ActionTriggers[0].MinQueuedItems = 2
+	snd[1].ActionTriggers[0].MinQueuedItems = 2
+	if err := storDB.SetTPActionTriggers(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpActionTriggers("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPActionTriggers("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -874,80 +882,65 @@ func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpActionTriggers("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPActionTriggers("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpAccountActions(t *testing.T) {
 	// READ
-	var filter = TpAccountAction{
-		Tpid:              "testTPid",
-		Loadid:            "",
-		Tenant:            "",
-		Account:           "",
-		ActionPlanTag:     "",
-		ActionTriggersTag: "",
-		AllowNegative:     true,
-		Disabled:          true,
+	var filter = utils.TPAccountActions{
+		TPid: "testTPid",
 	}
-	if _, err := storDB.GetTpAccountActions(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPAccountActions(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpAccountAction{
-		TpAccountAction{
-			Tpid:              "testTPid",
-			Loadid:            "TEST_LOADID",
-			Tenant:            "cgrates.org",
-			Account:           "1001",
-			ActionPlanTag:     "PACKAGE_10_SHARED_A_5",
-			ActionTriggersTag: "STANDARD_TRIGGERS",
-			AllowNegative:     true,
-			Disabled:          true,
+	var snd = []*utils.TPAccountActions{
+		&utils.TPAccountActions{
+			TPid:             "testTPid",
+			LoadId:           "TEST_LOADID",
+			Tenant:           "cgrates.org",
+			Account:          "1001",
+			ActionPlanId:     "PACKAGE_10_SHARED_A_5",
+			ActionTriggersId: "STANDARD_TRIGGERS",
+			AllowNegative:    true,
+			Disabled:         true,
 		},
-		TpAccountAction{
-			Tpid:              "testTPid",
-			Loadid:            "TEST_LOADID",
-			Tenant:            "cgrates.org",
-			Account:           "1002",
-			ActionPlanTag:     "PACKAGE_10_SHARED_A_5",
-			ActionTriggersTag: "STANDARD_TRIGGERS",
-			AllowNegative:     true,
-			Disabled:          true,
+		&utils.TPAccountActions{
+			TPid:             "testTPid",
+			LoadId:           "TEST_LOADID",
+			Tenant:           "cgrates.org",
+			Account:          "1002",
+			ActionPlanId:     "PACKAGE_10_SHARED_A_5",
+			ActionTriggersId: "STANDARD_TRIGGERS",
+			AllowNegative:    true,
+			Disabled:         true,
 		},
 	}
-	if err := storDB.SetTpAccountActions(snd); err != nil {
+	if err := storDB.SetTPAccountActions(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpAccountActions(&filter); err != nil {
+	if rcv, err := storDB.GetTPAccountActions(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
 	snd[0].Disabled = false
 	snd[1].Disabled = false
-	if err := storDB.SetTpAccountActions(snd); err != nil {
+	if err := storDB.SetTPAccountActions(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpAccountActions(&filter); err != nil {
+	if rcv, err := storDB.GetTPAccountActions(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -955,92 +948,96 @@ func testStorDBitCRUDTpAccountActions(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpAccountActions(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPAccountActions(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpLCRs(t *testing.T) {
 	// READ
-	var filter = TpLcrRule{
-		Tpid:           "testTPid",
-		Direction:      "",
-		Tenant:         "",
-		Category:       "",
-		Account:        "",
-		Subject:        "",
-		DestinationTag: "",
-		RpCategory:     "",
-		Strategy:       "",
-		StrategyParams: "",
-		ActivationTime: "",
-		Weight:         0.0,
+	var filter = utils.TPLcrRules{
+		TPid:      "testTPid",
+		Direction: "",
+		Tenant:    "",
+		Category:  "",
+		Account:   "",
+		Subject:   "",
+		Rules: []*utils.TPLcrRule{
+			&utils.TPLcrRule{
+				DestinationId:  "",
+				RpCategory:     "",
+				Strategy:       "",
+				StrategyParams: "",
+				ActivationTime: "",
+				Weight:         0,
+			},
+		},
 	}
-	if _, err := storDB.GetTpLCRs(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPLCRs(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpLcrRule{
-		TpLcrRule{
-			Tpid:           "testTPid",
-			Direction:      "*in",
-			Tenant:         "cgrates.org",
-			Category:       "LCR_STANDARD",
-			Account:        "1000",
-			Subject:        "test",
-			DestinationTag: "",
-			RpCategory:     "LCR_STANDARD",
-			Strategy:       "*lowest_cost",
-			StrategyParams: "",
-			ActivationTime: "2012-01-01T00:00:00Z",
-			Weight:         0.0,
+	var snd = []*utils.TPLcrRules{
+		&utils.TPLcrRules{
+			TPid:      "testTPid",
+			Direction: "*in",
+			Tenant:    "cgrates.org",
+			Category:  "LCR_STANDARD",
+			Account:   "1000",
+			Subject:   "test",
+			Rules: []*utils.TPLcrRule{
+				&utils.TPLcrRule{
+					DestinationId:  "",
+					RpCategory:     "LCR_STANDARD",
+					Strategy:       "*lowest_cost",
+					StrategyParams: "",
+					ActivationTime: "2012-01-01T00:00:00Z",
+					Weight:         1.0,
+				},
+			},
 		},
-		TpLcrRule{
-			Tpid:           "testTPid",
-			Direction:      "*out",
-			Tenant:         "cgrates.org",
-			Category:       "LCR_STANDARD",
-			Account:        "1000",
-			Subject:        "test2",
-			DestinationTag: "",
-			RpCategory:     "LCR_STANDARD",
-			Strategy:       "*lowest_cost",
-			StrategyParams: "",
-			ActivationTime: "2012-01-01T00:00:00Z",
-			Weight:         0.0,
+		&utils.TPLcrRules{
+			TPid:      "testTPid",
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "LCR_STANDARD",
+			Account:   "1000",
+			Subject:   "test",
+			Rules: []*utils.TPLcrRule{
+				&utils.TPLcrRule{
+					DestinationId:  "",
+					RpCategory:     "LCR_STANDARD",
+					Strategy:       "*lowest_cost",
+					StrategyParams: "",
+					ActivationTime: "2012-01-01T00:00:00Z",
+					Weight:         1.0,
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpLCRs(snd); err != nil {
+	if err := storDB.SetTPLCRs(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpLCRs(&filter); err != nil {
+	if rcv, err := storDB.GetTPLCRs(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].StrategyParams = "test"
-	snd[1].StrategyParams = "test"
-	if err := storDB.SetTpLCRs(snd); err != nil {
+	snd[0].Rules[0].StrategyParams = "test"
+	snd[1].Rules[0].StrategyParams = "test"
+	if err := storDB.SetTPLCRs(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpLCRs(&filter); err != nil {
+	if rcv, err := storDB.GetTPLCRs(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -1048,107 +1045,107 @@ func testStorDBitCRUDTpLCRs(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpLCRs(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPLCRs(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpDerivedChargers(t *testing.T) {
 	// READ
-	var filter = TpDerivedCharger{
-		Tpid: "testTPid",
+	var filter = utils.TPDerivedChargers{
+		TPid: "testTPid",
 	}
-	if _, err := storDB.GetTpDerivedChargers(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPDerivedChargers(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpDerivedCharger{
-		TpDerivedCharger{
-			Tpid:                 "testTPid",
-			Loadid:               "TEST_LOADID",
-			Direction:            "*out",
-			Tenant:               "cgrates.org",
-			Category:             "call",
-			Account:              "1000",
-			Subject:              "test",
-			DestinationIds:       "",
-			Runid:                "default",
-			RunFilters:           "",
-			ReqTypeField:         "test",
-			DirectionField:       "test",
-			TenantField:          "test",
-			CategoryField:        "test",
-			AccountField:         "test",
-			SubjectField:         "test",
-			DestinationField:     "^+49151708707",
-			SetupTimeField:       "test",
-			PddField:             "~pdd:s/sip:(.+)/$1/",
-			AnswerTimeField:      "~answertime2:s/sip:(.+)/$1/",
-			UsageField:           "test",
-			SupplierField:        "~supplier2:s/(.+)/$1/",
-			DisconnectCauseField: "test",
-			RatedField:           "test",
-			CostField:            "0",
+	var snd = []*utils.TPDerivedChargers{
+		&utils.TPDerivedChargers{
+			TPid:           "testTPid",
+			LoadId:         "TEST_LOADID",
+			Direction:      "*out",
+			Tenant:         "cgrates.org",
+			Category:       "call",
+			Account:        "1000",
+			Subject:        "test",
+			DestinationIds: "",
+			DerivedChargers: []*utils.TPDerivedCharger{
+				&utils.TPDerivedCharger{
+					RunId:                "default",
+					RunFilters:           "test",
+					ReqTypeField:         "test",
+					DirectionField:       "test",
+					TenantField:          "test",
+					CategoryField:        "test",
+					AccountField:         "test",
+					SubjectField:         "test",
+					DestinationField:     "^+49151708707",
+					SetupTimeField:       "test",
+					PddField:             "~pdd:s/sip:(.+)/$1/",
+					AnswerTimeField:      "~answertime2:s/sip:(.+)/$1/",
+					UsageField:           "test",
+					SupplierField:        "~supplier2:s/(.+)/$1/",
+					DisconnectCauseField: "test",
+					CostField:            "1",
+					RatedField:           "0",
+				},
+			},
 		},
-		TpDerivedCharger{
-			Tpid:                 "testTPid",
-			Loadid:               "TEST_LOADID",
-			Direction:            "*out",
-			Tenant:               "cgrates.org",
-			Category:             "call",
-			Account:              "1001",
-			Subject:              "test",
-			DestinationIds:       "",
-			Runid:                "default",
-			RunFilters:           "",
-			ReqTypeField:         "test",
-			DirectionField:       "test",
-			TenantField:          "test",
-			CategoryField:        "test",
-			AccountField:         "test",
-			SubjectField:         "test",
-			DestinationField:     "^+49151708707",
-			SetupTimeField:       "test",
-			PddField:             "~pdd:s/sip:(.+)/$1/",
-			AnswerTimeField:      "~answertime2:s/sip:(.+)/$1/",
-			UsageField:           "test",
-			SupplierField:        "~supplier2:s/(.+)/$1/",
-			DisconnectCauseField: "test",
-			RatedField:           "test",
-			CostField:            "0",
+		&utils.TPDerivedChargers{
+			TPid:           "testTPid",
+			LoadId:         "TEST_LOADID2",
+			Direction:      "*out",
+			Tenant:         "cgrates.org",
+			Category:       "call",
+			Account:        "1000",
+			Subject:        "test",
+			DestinationIds: "",
+			DerivedChargers: []*utils.TPDerivedCharger{
+				&utils.TPDerivedCharger{
+					RunId:                "default",
+					RunFilters:           "test",
+					ReqTypeField:         "test",
+					DirectionField:       "test",
+					TenantField:          "test",
+					CategoryField:        "test",
+					AccountField:         "test",
+					SubjectField:         "test",
+					DestinationField:     "^+49151708707",
+					SetupTimeField:       "test",
+					PddField:             "~pdd:s/sip:(.+)/$1/",
+					AnswerTimeField:      "~answertime2:s/sip:(.+)/$1/",
+					UsageField:           "test",
+					SupplierField:        "~supplier2:s/(.+)/$1/",
+					DisconnectCauseField: "test",
+					CostField:            "1",
+					RatedField:           "0",
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpDerivedChargers(snd); err != nil {
+	if err := storDB.SetTPDerivedChargers(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpDerivedChargers(&filter); err != nil {
+	if rcv, err := storDB.GetTPDerivedChargers(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].CostField = "test"
-	snd[1].CostField = "test"
-	if err := storDB.SetTpDerivedChargers(snd); err != nil {
+	snd[0].DerivedChargers[0].CostField = "test"
+	snd[1].DerivedChargers[0].CostField = "test"
+	if err := storDB.SetTPDerivedChargers(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpDerivedChargers(&filter); err != nil {
+	if rcv, err := storDB.GetTPDerivedChargers(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -1156,106 +1153,106 @@ func testStorDBitCRUDTpDerivedChargers(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpDerivedChargers(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPDerivedChargers(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpCdrStats(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpCdrStats("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPCdrStats("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpCdrstat{
-		TpCdrstat{
-			Tpid:             "testTPid",
-			Tag:              "testTag",
-			QueueLength:      0,
-			TimeWindow:       "10m",
-			SaveInterval:     "10s",
-			Metrics:          "ACD",
-			SetupInterval:    "",
-			Tors:             "",
-			CdrHosts:         "",
-			CdrSources:       "",
-			ReqTypes:         "",
-			Directions:       "",
-			Tenants:          "test",
-			Categories:       "",
-			Accounts:         "",
-			Subjects:         "1001",
-			DestinationIds:   "1003",
-			PddInterval:      "",
-			UsageInterval:    "",
-			Suppliers:        "suppl2",
-			DisconnectCauses: "",
-			MediationRunids:  "*default",
-			RatedAccounts:    "",
-			RatedSubjects:    "",
-			CostInterval:     "",
-			ActionTriggers:   "CDRST1001_WARN",
+	var snd = []*utils.TPCdrStats{
+		&utils.TPCdrStats{
+			TPid: "testTPid",
+			ID:   "1",
+			CdrStats: []*utils.TPCdrStat{
+				&utils.TPCdrStat{
+					QueueLength:      "0",
+					TimeWindow:       "10m",
+					SaveInterval:     "3s",
+					Metrics:          "ACD",
+					SetupInterval:    "",
+					TORs:             "",
+					CdrHosts:         "",
+					CdrSources:       "",
+					ReqTypes:         "",
+					Directions:       "",
+					Tenants:          "tests",
+					Categories:       "",
+					Accounts:         "",
+					Subjects:         "1001",
+					DestinationIds:   "1003",
+					PddInterval:      "",
+					UsageInterval:    "",
+					Suppliers:        "suppl2",
+					DisconnectCauses: "",
+					MediationRunIds:  "*default",
+					RatedAccounts:    "",
+					RatedSubjects:    "",
+					CostInterval:     "",
+					ActionTriggers:   "CDRST1001_WARN",
+				},
+			},
 		},
-		TpCdrstat{
-			Tpid:             "testTPid",
-			Tag:              "testTag",
-			QueueLength:      0,
-			TimeWindow:       "10m",
-			SaveInterval:     "10s",
-			Metrics:          "ACD",
-			SetupInterval:    "",
-			Tors:             "",
-			CdrHosts:         "",
-			CdrSources:       "",
-			ReqTypes:         "",
-			Directions:       "",
-			Tenants:          "test",
-			Categories:       "",
-			Accounts:         "",
-			Subjects:         "1001",
-			DestinationIds:   "1003",
-			PddInterval:      "",
-			UsageInterval:    "",
-			Suppliers:        "suppl2",
-			DisconnectCauses: "",
-			MediationRunids:  "*default",
-			RatedAccounts:    "",
-			RatedSubjects:    "",
-			CostInterval:     "",
-			ActionTriggers:   "CDRST1001_WARN",
+		&utils.TPCdrStats{
+			TPid: "testTPid",
+			ID:   "2",
+			CdrStats: []*utils.TPCdrStat{
+				&utils.TPCdrStat{
+					QueueLength:      "0",
+					TimeWindow:       "10m",
+					SaveInterval:     "3s",
+					Metrics:          "ACD",
+					SetupInterval:    "",
+					TORs:             "",
+					CdrHosts:         "",
+					CdrSources:       "",
+					ReqTypes:         "",
+					Directions:       "",
+					Tenants:          "tests",
+					Categories:       "",
+					Accounts:         "",
+					Subjects:         "1001",
+					DestinationIds:   "1003",
+					PddInterval:      "",
+					UsageInterval:    "",
+					Suppliers:        "suppl2",
+					DisconnectCauses: "",
+					MediationRunIds:  "*default",
+					RatedAccounts:    "",
+					RatedSubjects:    "",
+					CostInterval:     "",
+					ActionTriggers:   "CDRST1001_WARN",
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpCdrStats(snd); err != nil {
+	if err := storDB.SetTPCdrStats(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpCdrStats("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPCdrStats("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].Categories = "test"
-	snd[1].Categories = "test"
-	if err := storDB.SetTpCdrStats(snd); err != nil {
+	snd[0].CdrStats[0].Categories = "test"
+	snd[1].CdrStats[0].Categories = "test"
+	if err := storDB.SetTPCdrStats(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpCdrStats("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPCdrStats("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -1263,77 +1260,71 @@ func testStorDBitCRUDTpCdrStats(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpCdrStats("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPCdrStats("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpUsers(t *testing.T) {
 	// READ
-	var filter = TpUser{
-		Tpid:           "testTPid",
-		Tenant:         "",
-		UserName:       "",
-		Masked:         true,
-		AttributeName:  "",
-		AttributeValue: "",
-		Weight:         0.0,
+	var filter = utils.TPUsers{
+		TPid: "testTPid",
 	}
-	if _, err := storDB.GetTpUsers(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPUsers(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpUser{
-		TpUser{
-			Tpid:           "testTPid",
-			Tenant:         "cgrates.org",
-			UserName:       "1001",
-			Masked:         true,
-			AttributeName:  "Account",
-			AttributeValue: "1001",
-			Weight:         0.0,
+	var snd = []*utils.TPUsers{
+		&utils.TPUsers{
+			TPid:     "testTPid",
+			Tenant:   "cgrates.org",
+			Masked:   true,
+			UserName: "1001",
+			Weight:   0.1,
+			Profile: []*utils.TPUserProfile{
+				&utils.TPUserProfile{
+					AttrName:  "Account",
+					AttrValue: "1001",
+				},
+			},
 		},
-		TpUser{
-			Tpid:           "testTPid",
-			Tenant:         "cgrates.org",
-			UserName:       "1001",
-			Masked:         true,
-			AttributeName:  "Account",
-			AttributeValue: "1002",
-			Weight:         0.0,
+		&utils.TPUsers{
+			TPid:     "testTPid",
+			Tenant:   "cgrates.org",
+			Masked:   true,
+			UserName: "1002",
+			Weight:   0.1,
+			Profile: []*utils.TPUserProfile{
+				&utils.TPUserProfile{
+					AttrName:  "Account",
+					AttrValue: "1001",
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpUsers(snd); err != nil {
+	if err := storDB.SetTPUsers(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpUsers(&filter); err != nil {
+	if rcv, err := storDB.GetTPUsers(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
 	snd[0].Masked = false
 	snd[1].Masked = false
-	if err := storDB.SetTpUsers(snd); err != nil {
+	if err := storDB.SetTPUsers(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpUsers(&filter); err != nil {
+	if rcv, err := storDB.GetTPUsers(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -1341,88 +1332,81 @@ func testStorDBitCRUDTpUsers(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpUsers(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPUsers(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpAliases(t *testing.T) {
 	// READ
-	var filter = TpAlias{
-		Tpid:          "testTPid",
-		Direction:     "",
-		Tenant:        "",
-		Category:      "",
-		Account:       "",
-		Subject:       "",
-		DestinationId: "",
-		Context:       "",
-		Target:        "",
-		Original:      "",
-		Alias:         "",
-		Weight:        0.0,
+	var filter = utils.TPAliases{
+		TPid: "testTPid",
 	}
-	if _, err := storDB.GetTpAliases(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPAliases(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	// WRITE
-	var snd = []TpAlias{
-		TpAlias{
-			Tpid:          "testTPid",
-			Direction:     "*out",
-			Tenant:        "cgrates.org",
-			Category:      "call",
-			Account:       "1006",
-			Subject:       "1006",
-			DestinationId: "*any",
-			Context:       "*rating",
-			Target:        "Subject",
-			Original:      "1006",
-			Alias:         "1001",
-			Weight:        10.0,
+	var snd = []*utils.TPAliases{
+		&utils.TPAliases{
+			TPid:      "testTPid",
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Account:   "1006",
+			Subject:   "1006",
+			Context:   "*rating",
+			Values: []*utils.TPAliasValue{
+				&utils.TPAliasValue{
+					DestinationId: "*any",
+					Target:        "Subject",
+					Original:      "1006",
+					Alias:         "1001",
+					Weight:        2,
+				},
+			},
 		},
-		TpAlias{
-			Tpid:          "testTPid",
-			Direction:     "*out",
-			Tenant:        "cgrates.org",
-			Category:      "call",
-			Account:       "1006",
-			Subject:       "1006",
-			DestinationId: "*any",
-			Context:       "*rating",
-			Target:        "Subject",
-			Original:      "1006",
-			Alias:         "1001",
-			Weight:        10.0,
+		&utils.TPAliases{
+			TPid:      "testTPid",
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Account:   "1006",
+			Subject:   "1006",
+			Context:   "*rating",
+			Values: []*utils.TPAliasValue{
+				&utils.TPAliasValue{
+					DestinationId: "*any",
+					Target:        "Subject",
+					Original:      "1006",
+					Alias:         "1001",
+					Weight:        2,
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpAliases(snd); err != nil {
+	if err := storDB.SetTPAliases(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpAliases(&filter); err != nil {
+	if rcv, err := storDB.GetTPAliases(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].Target = "test"
-	snd[1].Target = "test"
-	if err := storDB.SetTpAliases(snd); err != nil {
+	snd[0].Values[0].Target = "test"
+	snd[1].Values[0].Target = "test"
+	if err := storDB.SetTPAliases(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpAliases(&filter); err != nil {
+	if rcv, err := storDB.GetTPAliases(&filter); err != nil {
 		t.Error(err)
 	} else {
-		rcv[0].Id = 0
-		rcv[1].Id = 0
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -1430,72 +1414,106 @@ func testStorDBitCRUDTpAliases(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpAliases(&filter); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPAliases(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTpResourceLimits("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPResourceLimits("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//WRITE
-	var snd = TpResourceLimits{
-		&TpResourceLimit{
-			Tpid:              "testTPid",
-			Tag:               "testTag1",
-			FilterType:        "test",
-			FilterFieldName:   "test",
-			FilterFieldValues: "test",
-			ActivationTime:    "test",
-			Weight:            0.0,
-			Limit:             "test",
-			ActionTriggerIds:  "test",
+	var snd = []*utils.TPResourceLimit{
+		&utils.TPResourceLimit{
+			TPid:             "testTPid",
+			ID:               "testTag1",
+			Weight:           0.0,
+			Limit:            "test",
+			ActionTriggerIDs: []string{"1x", "2x"},
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					Type:      "filtertype",
+					FieldName: "filtername",
+					Values:    []string{"test1", "test2"},
+				},
+			},
 		},
-		&TpResourceLimit{
-			Tpid:              "testTPid",
-			Tag:               "testTag2",
-			FilterType:        "test",
-			FilterFieldName:   "test",
-			FilterFieldValues: "test",
-			ActivationTime:    "test",
-			Weight:            0.0,
-			Limit:             "test",
-			ActionTriggerIds:  "test",
+		&utils.TPResourceLimit{
+			TPid:             "testTPid",
+			ID:               "testTag2",
+			ActivationTime:   "test",
+			Weight:           0.0,
+			Limit:            "test",
+			ActionTriggerIDs: []string{"1x", "2x"},
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					Type:      "filtertype",
+					FieldName: "filtername",
+					Values:    []string{"test1", "test2"},
+				},
+			},
 		},
 	}
-	if err := storDB.SetTpResourceLimits(snd); err != nil {
+	if err := storDB.SetTPResourceLimits(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpResourceLimits("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPResourceLimits("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		snd[0].CreatedAt = time.Time{}
-		snd[1].CreatedAt = time.Time{}
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+		if !(reflect.DeepEqual(snd[0].TPid, rcv[0].TPid) || reflect.DeepEqual(snd[0].TPid, rcv[1].TPid)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].TPid, rcv[0].TPid, rcv[1].TPid)
+		}
+		if !(reflect.DeepEqual(snd[0].ID, rcv[0].ID) || reflect.DeepEqual(snd[0].ID, rcv[1].ID)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ID, rcv[0].ID, rcv[1].ID)
+		}
+		if !(reflect.DeepEqual(snd[0].ActivationTime, rcv[0].ActivationTime) || reflect.DeepEqual(snd[0].ActivationTime, rcv[1].ActivationTime)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].TPid, rcv[0].TPid, rcv[1].TPid)
+		}
+		if !(reflect.DeepEqual(snd[0].Weight, rcv[0].Weight) || reflect.DeepEqual(snd[0].Weight, rcv[1].Weight)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Weight, rcv[0].Weight, rcv[1].Weight)
+		}
+		if !(reflect.DeepEqual(snd[0].Limit, rcv[0].Limit) || reflect.DeepEqual(snd[0].Limit, rcv[1].Limit)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Limit, rcv[0].Limit, rcv[1].Limit)
+		}
+		if !(reflect.DeepEqual(snd[0].ActionTriggerIDs, rcv[0].ActionTriggerIDs) || reflect.DeepEqual(snd[0].ActionTriggerIDs, rcv[1].ActionTriggerIDs)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ActionTriggerIDs, rcv[0].ActionTriggerIDs, rcv[1].ActionTriggerIDs)
+		}
+		for i, _ := range snd[0].Filters {
+			if !(reflect.DeepEqual(snd[0].Filters[i], rcv[0].Filters[i]) || reflect.DeepEqual(snd[0].Filters[i], rcv[1].Filters[i])) {
+				t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Filters[i], rcv[0].Filters[i], rcv[1].Filters[i])
+			}
 		}
 	}
 	// UPDATE
 	snd[0].Weight = 2.1
 	snd[1].Weight = 2.1
-	if err := storDB.SetTpResourceLimits(snd); err != nil {
+	if err := storDB.SetTPResourceLimits(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTpResourceLimits("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPResourceLimits("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
-		snd[0].CreatedAt = time.Time{}
-		snd[1].CreatedAt = time.Time{}
-		rcv[0].CreatedAt = time.Time{}
-		rcv[1].CreatedAt = time.Time{}
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0], rcv[0], rcv[1])
+		if !(reflect.DeepEqual(snd[0].TPid, rcv[0].TPid) || reflect.DeepEqual(snd[0].TPid, rcv[1].TPid)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].TPid, rcv[0].TPid, rcv[1].TPid)
+		}
+		if !(reflect.DeepEqual(snd[0].ID, rcv[0].ID) || reflect.DeepEqual(snd[0].ID, rcv[1].ID)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ID, rcv[0].ID, rcv[1].ID)
+		}
+		if !(reflect.DeepEqual(snd[0].ActivationTime, rcv[0].ActivationTime) || reflect.DeepEqual(snd[0].ActivationTime, rcv[1].ActivationTime)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].TPid, rcv[0].TPid, rcv[1].TPid)
+		}
+		if !(reflect.DeepEqual(snd[0].Weight, rcv[0].Weight) || reflect.DeepEqual(snd[0].Weight, rcv[1].Weight)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Weight, rcv[0].Weight, rcv[1].Weight)
+		}
+		if !(reflect.DeepEqual(snd[0].Limit, rcv[0].Limit) || reflect.DeepEqual(snd[0].Limit, rcv[1].Limit)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Limit, rcv[0].Limit, rcv[1].Limit)
+		}
+		if !(reflect.DeepEqual(snd[0].ActionTriggerIDs, rcv[0].ActionTriggerIDs) || reflect.DeepEqual(snd[0].ActionTriggerIDs, rcv[1].ActionTriggerIDs)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ActionTriggerIDs, rcv[0].ActionTriggerIDs, rcv[1].ActionTriggerIDs)
 		}
 	}
 	// REMOVE
@@ -1503,7 +1521,7 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTpResourceLimits("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPResourceLimits("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1522,6 +1540,7 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 			OrderID:     0,
 			OriginHost:  "host1",
 			OriginID:    "1",
+			Usage:       1,
 			CostDetails: &CallCost{Timespans: TimeSpans{}},
 			ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 		},
@@ -1531,6 +1550,7 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 			OrderID:     0,
 			OriginHost:  "host2",
 			OriginID:    "2",
+			Usage:       1,
 			CostDetails: &CallCost{Timespans: TimeSpans{}},
 			ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 		},
@@ -1551,9 +1571,9 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].RunID, rcv[0].RunID) || reflect.DeepEqual(snd[0].RunID, rcv[1].RunID)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].RunID, rcv[0].RunID, rcv[1].RunID)
 		}
-		if !(reflect.DeepEqual(snd[0].OrderID, rcv[0].OrderID) || reflect.DeepEqual(snd[0].OrderID, rcv[1].OrderID)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].OrderID, rcv[0].OrderID, rcv[1].OrderID)
-		}
+		// if !(reflect.DeepEqual(snd[0].OrderID, rcv[0].OrderID) || reflect.DeepEqual(snd[0].OrderID, rcv[1].OrderID)) {
+		// 	t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].OrderID, rcv[0].OrderID, rcv[1].OrderID)
+		// }
 		if !(reflect.DeepEqual(snd[0].OriginHost, rcv[0].OriginHost) || reflect.DeepEqual(snd[0].OriginHost, rcv[1].OriginHost)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].OriginHost, rcv[0].OriginHost, rcv[1].OriginHost)
 		}

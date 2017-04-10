@@ -290,7 +290,7 @@ func TestLCRCostSuppliersString(t *testing.T) {
 	if supplStr, err := lcrCost.SuppliersString(); err != nil {
 		t.Error(err)
 	} else if supplStr != eSupplStr {
-		t.Errorf("Expecting: %s, received: %s", eSupplStr, supplStr)
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", eSupplStr, supplStr)
 	}
 }
 

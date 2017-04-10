@@ -35,7 +35,7 @@ func (self *ApierV2) RemTP(attrs AttrRemTp, reply *string) error {
 	if err := self.StorDb.RemTpData("", attrs.TPid, nil); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
-		*reply = "OK"
+		*reply = utils.OK
 	}
 	return nil
 }

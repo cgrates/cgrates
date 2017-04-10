@@ -330,7 +330,7 @@ type TpCdrstat struct {
 }
 
 func (t TpCdrstat) TableName() string {
-	return utils.TBL_TP_CDR_STATS
+	return utils.TBLTPCdrStats
 }
 
 type TpUser struct {
@@ -376,7 +376,7 @@ type TpAlias struct {
 }
 
 func (ta *TpAlias) TableName() string {
-	return utils.TBL_TP_ALIASES
+	return utils.TBLTPAliases
 }
 
 func (ta *TpAlias) SetId(id string) error {
@@ -430,7 +430,7 @@ type TBLCDRs struct {
 }
 
 func (t TBLCDRs) TableName() string {
-	return utils.TBL_CDRS
+	return utils.TBLCDRs
 }
 
 type TBLSMCosts struct {

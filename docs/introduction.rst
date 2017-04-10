@@ -3,11 +3,11 @@
 
 `CGRateS`_ is a *very fast* and *easily scalable* **(charging, rating, accounting, lcr, mediation, billing, authorization)** *ENGINE* targeted especially for ISPs and Telecom Operators.
 
-It is written in `Go`_ programming language and is accessible from any programming language via JSON RPC. 
+It is written in `Go`_ programming language and is accessible from any programming language via JSON RPC.
 The code is well documented (**go doc** compliant `API docs`_) and heavily tested. (also **1300+** tests are part of the build system).
 
-After testing various databases like `Kyoto Cabinet`_, `Apache Cassandra`_, `Redis`_ and `MongoDB`_, 
-the project focused on **Redis** as it delivers the best trade-off between speed, configuration and scalability. 
+After testing various databases like `Kyoto Cabinet`_, `Apache Cassandra`_, `Redis`_ and `MongoDB`_,
+the project focused on **Redis** as it delivers the best trade-off between speed, configuration and scalability.
 
 .. important:: `MongoDB`_ **full** support is now added.
 
@@ -26,17 +26,17 @@ To better understand the CGRateS architecture, below are some logical configurat
 .. note::  **RALs** - is a CGRateS component and stands for RatingAccountingLCR service.
 
 .. image::  images/Simple.png
-This scenario fits most of the simple installations. The **Balancer** can be left out and the **RALs** can be queried directly.
+This scenario fits most of the simple installations.
 
 .. image::  images/Normal.png
-While the network grows more **RALs** can be thrown into the stack to offer more requests per seconds workload. 
+While the network grows more **RALs** can be thrown into the stack to offer more requests per seconds workload.
 This implies the usage of the **Balancer** to distribute the requests to the **RALs** running on the *different machines*.
 
 .. image::  images/Normal_ha.png
-Without Balancer using HA (broadcast) .... 
+Without Balancer using HA (broadcast) ....
 
 .. image::  images/Complicated.png
-Of course more **SessionManagers** can serve *multiple Telecom Switches* and all of them are connected to the same **Balancer**. 
+Of course more **SessionManagers** can serve *multiple Telecom Switches* and all of them are connected to the same **Balancer**.
 
 .. image::  images/Complicated_ha.png
 Without Balancer using HA (broadcast) ....
@@ -51,10 +51,9 @@ Without Balancer using HA (broadcast) ....
    - Using most modern programming concepts like multiprocessor support, asynchronous code execution within microthreads.
    - Built-in data caching system per call duration.
    - In-Memory database with persistence over restarts.
-   - Use of Balancer assures High-Availability of RALs as well as increase of processing performance where that is required.
    - Use of Linux enterprise ready tools to assure High-Availability of the Balancer where that is required (*Supervise* for Application level availability and *LinuxHA* for Host level availability).
-   - High-Availability of main components is now part of CGRateS core. 
-   
+   - High-Availability of main components is now part of CGRateS core.
+
 - Modular architecture
     - Easy to enhance functionality by writing custom session managers or mediators.
     - Flexible API accessible via both **Gob** (Golang specific, increased performance) or **JSON** (platform independent, universally accessible).

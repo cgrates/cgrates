@@ -120,7 +120,7 @@ func TestApierRpcConn(t *testing.T) {
 func TestApierTPTiming(t *testing.T) {
 	// ALWAYS,*any,*any,*any,*any,00:00:00
 	tmAlways := &utils.ApierTPTiming{TPid: utils.TEST_SQL,
-		TimingId:  "ALWAYS",
+		ID:        "ALWAYS",
 		Years:     "*any",
 		Months:    "*any",
 		MonthDays: "*any",
@@ -129,9 +129,9 @@ func TestApierTPTiming(t *testing.T) {
 	}
 	tmAlways2 := new(utils.ApierTPTiming)
 	*tmAlways2 = *tmAlways
-	tmAlways2.TimingId = "ALWAYS2"
+	tmAlways2.ID = "ALWAYS2"
 	tmAsap := &utils.ApierTPTiming{TPid: utils.TEST_SQL,
-		TimingId:  "ASAP",
+		ID:        "ASAP",
 		Years:     "*any",
 		Months:    "*any",
 		MonthDays: "*any",
@@ -155,18 +155,18 @@ func TestApierTPTiming(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPTiming", new(utils.ApierTPTiming), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPTiming, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid TimingId Years Months MonthDays WeekDays Time]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID Years Months MonthDays WeekDays Time]" {
 		t.Error("Calling ApierV1.SetTPTiming got unexpected error: ", err.Error())
 	}
 	// Test get
 	var rplyTmAlways2 *utils.ApierTPTiming
-	if err := rater.Call("ApierV1.GetTPTiming", AttrGetTPTiming{tmAlways2.TPid, tmAlways2.TimingId}, &rplyTmAlways2); err != nil {
+	if err := rater.Call("ApierV1.GetTPTiming", AttrGetTPTiming{tmAlways2.TPid, tmAlways2.ID}, &rplyTmAlways2); err != nil {
 		t.Error("Calling ApierV1.GetTPTiming, got error: ", err.Error())
 	} else if !reflect.DeepEqual(tmAlways2, rplyTmAlways2) {
 		t.Errorf("Calling ApierV1.GetTPTiming expected: %v, received: %v", tmAlways, rplyTmAlways2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPTiming", AttrGetTPTiming{tmAlways2.TPid, tmAlways2.TimingId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPTiming", AttrGetTPTiming{tmAlways2.TPid, tmAlways2.ID}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPTiming, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPTiming received: ", reply)
@@ -184,13 +184,13 @@ func TestApierTPTiming(t *testing.T) {
 // Test here TPTiming APIs
 func TestApierTPDestination(t *testing.T) {
 	reply := ""
-	dstDe := &utils.V1TPDestination{TPid: utils.TEST_SQL, DestinationId: "GERMANY", Prefixes: []string{"+49"}}
-	dstDeMobile := &utils.V1TPDestination{TPid: utils.TEST_SQL, DestinationId: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
-	dstFs := &utils.V1TPDestination{TPid: utils.TEST_SQL, DestinationId: "FS_USERS", Prefixes: []string{"10"}}
-	dstDe2 := new(utils.V1TPDestination)
+	dstDe := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY", Prefixes: []string{"+49"}}
+	dstDeMobile := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
+	dstFs := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "FS_USERS", Prefixes: []string{"10"}}
+	dstDe2 := new(utils.TPDestination)
 	*dstDe2 = *dstDe // Data which we use for remove, still keeping the sample data to check proper loading
-	dstDe2.DestinationId = "GERMANY2"
-	for _, dst := range []*utils.V1TPDestination{dstDe, dstDeMobile, dstFs, dstDe2} {
+	dstDe2.ID = "GERMANY2"
+	for _, dst := range []*utils.TPDestination{dstDe, dstDeMobile, dstFs, dstDe2} {
 		if err := rater.Call("ApierV1.SetTPDestination", dst, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPDestination: ", err.Error())
 		} else if reply != "OK" {
@@ -204,20 +204,20 @@ func TestApierTPDestination(t *testing.T) {
 		t.Error("Calling ApierV1.SetTPDestination got reply: ", reply)
 	}
 	// Check missing params
-	if err := rater.Call("ApierV1.SetTPDestination", new(utils.V1TPDestination), &reply); err == nil {
+	if err := rater.Call("ApierV1.SetTPDestination", new(utils.TPDestination), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid DestinationId Prefixes]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID Prefixes]" {
 		t.Error("Calling ApierV1.SetTPDestination got unexpected error: ", err.Error())
 	}
 	// Test get
-	var rplyDstDe2 *utils.V1TPDestination
-	if err := rater.Call("ApierV1.GetTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.DestinationId}, &rplyDstDe2); err != nil {
+	var rplyDstDe2 *utils.TPDestination
+	if err := rater.Call("ApierV1.GetTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &rplyDstDe2); err != nil {
 		t.Error("Calling ApierV1.GetTPDestination, got error: ", err.Error())
 	} else if !reflect.DeepEqual(dstDe2, rplyDstDe2) {
 		t.Errorf("Calling ApierV1.GetTPDestination expected: %v, received: %v", dstDe2, rplyDstDe2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.DestinationId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPTiming, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPTiming received: ", reply)
@@ -235,12 +235,12 @@ func TestApierTPDestination(t *testing.T) {
 // Test here TPRate APIs
 func TestApierTPRate(t *testing.T) {
 	reply := ""
-	rt := &utils.TPRate{TPid: utils.TEST_SQL, RateId: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
+	rt := &utils.TPRate{TPid: utils.TEST_SQL, ID: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
 		&utils.RateSlot{ConnectFee: 0, Rate: 0, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s"},
 	}}
 	rt2 := new(utils.TPRate)
 	*rt2 = *rt
-	rt2.RateId = "RT_FS_USERS2"
+	rt2.ID = "RT_FS_USERS2"
 	for _, r := range []*utils.TPRate{rt, rt2} {
 		if err := rater.Call("ApierV1.SetTPRate", r, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPRate: ", err.Error())
@@ -257,18 +257,18 @@ func TestApierTPRate(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPRate", new(utils.TPRate), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid RateId RateSlots]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID RateSlots]" {
 		t.Error("Calling ApierV1.SetTPRate got unexpected error: ", err.Error())
 	}
 	// Test get
 	var rplyRt2 *utils.TPRate
-	if err := rater.Call("ApierV1.GetTPRate", AttrGetTPRate{rt2.TPid, rt2.RateId}, &rplyRt2); err != nil {
+	if err := rater.Call("ApierV1.GetTPRate", AttrGetTPRate{rt2.TPid, rt2.ID}, &rplyRt2); err != nil {
 		t.Error("Calling ApierV1.GetTPRate, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rt2, rplyRt2) {
 		t.Errorf("Calling ApierV1.GetTPRate expected: %+v, received: %+v", rt2, rplyRt2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPRate", AttrGetTPRate{rt2.TPid, rt2.RateId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPRate", AttrGetTPRate{rt2.TPid, rt2.ID}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPRate, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPRate received: ", reply)
@@ -286,15 +286,15 @@ func TestApierTPRate(t *testing.T) {
 // Test here TPDestinationRate APIs
 func TestApierTPDestinationRate(t *testing.T) {
 	reply := ""
-	dr := &utils.TPDestinationRate{TPid: utils.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
+	dr := &utils.TPDestinationRate{TPid: utils.TEST_SQL, ID: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
 		&utils.DestinationRate{DestinationId: "FS_USERS", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
-	drDe := &utils.TPDestinationRate{TPid: utils.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
+	drDe := &utils.TPDestinationRate{TPid: utils.TEST_SQL, ID: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
 		&utils.DestinationRate{DestinationId: "GERMANY_MOBILE", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
 	dr2 := new(utils.TPDestinationRate)
 	*dr2 = *dr
-	dr2.DestinationRateId = utils.TEST_SQL
+	dr2.ID = utils.TEST_SQL
 	for _, d := range []*utils.TPDestinationRate{dr, dr2, drDe} {
 		if err := rater.Call("ApierV1.SetTPDestinationRate", d, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPDestinationRate: ", err.Error())
@@ -311,18 +311,18 @@ func TestApierTPDestinationRate(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPDestinationRate", new(utils.TPDestinationRate), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid DestinationRateId DestinationRates]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID DestinationRates]" {
 		t.Error("Calling ApierV1.SetTPDestinationRate got unexpected error: ", err.Error())
 	}
 	// Test get
 	var rplyDr2 *utils.TPDestinationRate
-	if err := rater.Call("ApierV1.GetTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId, utils.Paginator{}}, &rplyDr2); err != nil {
+	if err := rater.Call("ApierV1.GetTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.ID, utils.Paginator{}}, &rplyDr2); err != nil {
 		t.Error("Calling ApierV1.GetTPDestinationRate, got error: ", err.Error())
 	} else if !reflect.DeepEqual(dr2, rplyDr2) {
 		t.Errorf("Calling ApierV1.GetTPDestinationRate expected: %v, received: %v", dr2, rplyDr2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId, utils.Paginator{}}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.ID, utils.Paginator{}}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPRate, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPRate received: ", reply)
@@ -340,12 +340,12 @@ func TestApierTPDestinationRate(t *testing.T) {
 // Test here TPRatingPlan APIs
 func TestApierTPRatingPlan(t *testing.T) {
 	reply := ""
-	rp := &utils.TPRatingPlan{TPid: utils.TEST_SQL, RatingPlanId: "RETAIL1", RatingPlanBindings: []*utils.TPRatingPlanBinding{
+	rp := &utils.TPRatingPlan{TPid: utils.TEST_SQL, ID: "RETAIL1", RatingPlanBindings: []*utils.TPRatingPlanBinding{
 		&utils.TPRatingPlanBinding{DestinationRatesId: "DR_FREESWITCH_USERS", TimingId: "ALWAYS", Weight: 10},
 	}}
 	rpTst := new(utils.TPRatingPlan)
 	*rpTst = *rp
-	rpTst.RatingPlanId = utils.TEST_SQL
+	rpTst.ID = utils.TEST_SQL
 	for _, rpl := range []*utils.TPRatingPlan{rp, rpTst} {
 		if err := rater.Call("ApierV1.SetTPRatingPlan", rpl, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPRatingPlan: ", err.Error())
@@ -362,18 +362,18 @@ func TestApierTPRatingPlan(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPRatingPlan", new(utils.TPRatingPlan), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPRatingPlan, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid RatingPlanId RatingPlanBindings]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID RatingPlanBindings]" {
 		t.Error("Calling ApierV1.SetTPRatingPlan got unexpected error: ", err.Error())
 	}
 	// Test get
 	var rplyRpTst *utils.TPRatingPlan
-	if err := rater.Call("ApierV1.GetTPRatingPlan", AttrGetTPRatingPlan{TPid: rpTst.TPid, RatingPlanId: rpTst.RatingPlanId}, &rplyRpTst); err != nil {
+	if err := rater.Call("ApierV1.GetTPRatingPlan", AttrGetTPRatingPlan{TPid: rpTst.TPid, ID: rpTst.ID}, &rplyRpTst); err != nil {
 		t.Error("Calling ApierV1.GetTPRatingPlan, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rpTst, rplyRpTst) {
 		t.Errorf("Calling ApierV1.GetTPRatingPlan expected: %v, received: %v", rpTst, rplyRpTst)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPRatingPlan", AttrGetTPRatingPlan{TPid: rpTst.TPid, RatingPlanId: rpTst.RatingPlanId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPRatingPlan", AttrGetTPRatingPlan{TPid: rpTst.TPid, ID: rpTst.ID}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPRatingPlan, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPRatingPlan received: ", reply)
@@ -442,19 +442,19 @@ func TestApierTPRatingProfile(t *testing.T) {
 
 func TestApierTPActions(t *testing.T) {
 	reply := ""
-	act := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
+	act := &utils.TPActions{TPid: utils.TEST_SQL, ID: "PREPAID_10", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Directions: "*out", Units: "10", ExpiryTime: "*unlimited",
 			DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
 	}}
-	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
+	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ID: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
 	}}
-	actLog := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "LOG_BALANCE", Actions: []*utils.TPAction{
+	actLog := &utils.TPActions{TPid: utils.TEST_SQL, ID: "LOG_BALANCE", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*log", Weight: 10},
 	}}
 	actTst := new(utils.TPActions)
 	*actTst = *act
-	actTst.ActionsId = utils.TEST_SQL
+	actTst.ID = utils.TEST_SQL
 	for _, ac := range []*utils.TPActions{act, actWarn, actTst, actLog} {
 		if err := rater.Call("ApierV1.SetTPActions", ac, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActions: ", err.Error())
@@ -471,18 +471,18 @@ func TestApierTPActions(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPActions", new(utils.TPActions), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPActions, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionsId Actions]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID Actions]" {
 		t.Error("Calling ApierV1.SetTPActions got unexpected error: ", err.Error())
 	}
 	// Test get
 	var rplyActs *utils.TPActions
-	if err := rater.Call("ApierV1.GetTPActions", AttrGetTPActions{TPid: actTst.TPid, ActionsId: actTst.ActionsId}, &rplyActs); err != nil {
+	if err := rater.Call("ApierV1.GetTPActions", AttrGetTPActions{TPid: actTst.TPid, ID: actTst.ID}, &rplyActs); err != nil {
 		t.Error("Calling ApierV1.GetTPActions, got error: ", err.Error())
 	} else if !reflect.DeepEqual(actTst, rplyActs) {
 		t.Errorf("Calling ApierV1.GetTPActions expected: %v, received: %v", actTst, rplyActs)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPActions", AttrGetTPActions{TPid: actTst.TPid, ActionsId: actTst.ActionsId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPActions", AttrGetTPActions{TPid: actTst.TPid, ID: actTst.ID}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPActions, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPActions received: ", reply)
@@ -499,12 +499,12 @@ func TestApierTPActions(t *testing.T) {
 
 func TestApierTPActionPlan(t *testing.T) {
 	reply := ""
-	at := &utils.TPActionPlan{TPid: utils.TEST_SQL, ActionPlanId: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
+	at := &utils.TPActionPlan{TPid: utils.TEST_SQL, ID: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
 		&utils.TPActionTiming{ActionsId: "PREPAID_10", TimingId: "ASAP", Weight: 10},
 	}}
 	atTst := new(utils.TPActionPlan)
 	*atTst = *at
-	atTst.ActionPlanId = utils.TEST_SQL
+	atTst.ID = utils.TEST_SQL
 	for _, act := range []*utils.TPActionPlan{at, atTst} {
 		if err := rater.Call("ApierV1.SetTPActionPlan", act, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActionPlan: ", err.Error())
@@ -521,18 +521,18 @@ func TestApierTPActionPlan(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPActionPlan", new(utils.TPActionPlan), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPActionPlan, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionPlanId ActionPlan]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID ActionPlan]" {
 		t.Error("Calling ApierV1.SetTPActionPlan got unexpected error: ", err.Error())
 	}
 	// Test get
 	var rplyActs *utils.TPActionPlan
-	if err := rater.Call("ApierV1.GetTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, Id: atTst.ActionPlanId}, &rplyActs); err != nil {
+	if err := rater.Call("ApierV1.GetTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, ID: atTst.ID}, &rplyActs); err != nil {
 		t.Error("Calling ApierV1.GetTPActionPlan, got error: ", err.Error())
 	} else if !reflect.DeepEqual(atTst, rplyActs) {
 		t.Errorf("Calling ApierV1.GetTPActionPlan expected: %v, received: %v", atTst, rplyActs)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, Id: atTst.ActionPlanId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPActionPlan, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPActionPlan received: ", reply)
@@ -549,12 +549,12 @@ func TestApierTPActionPlan(t *testing.T) {
 
 func TestApierTPActionTriggers(t *testing.T) {
 	reply := ""
-	at := &utils.TPActionTriggers{TPid: utils.TEST_SQL, ActionTriggersId: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
+	at := &utils.TPActionTriggers{TPid: utils.TEST_SQL, ID: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
 		&utils.TPActionTrigger{Id: "STANDARD_TRIGGERS", UniqueID: "MYFIRSTTRIGGER", BalanceType: "*monetary", BalanceDirections: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
 	}}
 	atTst := new(utils.TPActionTriggers)
 	*atTst = *at
-	atTst.ActionTriggersId = utils.TEST_SQL
+	atTst.ID = utils.TEST_SQL
 	for _, act := range []*utils.TPActionTriggers{at, atTst} {
 		if err := rater.Call("ApierV1.SetTPActionTriggers", act, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActionTriggers: ", err.Error())
@@ -571,19 +571,19 @@ func TestApierTPActionTriggers(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPActionTriggers", new(utils.TPActionTriggers), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPActionTriggers, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionTriggersId]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID]" {
 		t.Error("Calling ApierV1.SetTPActionTriggers got unexpected error: ", err.Error())
 	}
 	atTst.ActionTriggers[0].Id = utils.TEST_SQL
 	// Test get
 	var rplyActs *utils.TPActionTriggers
-	if err := rater.Call("ApierV1.GetTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ActionTriggersId: atTst.ActionTriggersId}, &rplyActs); err != nil {
-		t.Errorf("Calling ApierV1.GetTPActionTriggers %s, got error: %s", atTst.ActionTriggersId, err.Error())
+	if err := rater.Call("ApierV1.GetTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ID: atTst.ID}, &rplyActs); err != nil {
+		t.Errorf("Calling ApierV1.GetTPActionTriggers %s, got error: %s", atTst.ID, err.Error())
 	} else if !reflect.DeepEqual(atTst, rplyActs) {
 		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %+v, received: %+v", atTst.ActionTriggers[0], rplyActs.ActionTriggers[0])
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ActionTriggersId: atTst.ActionTriggersId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPActionTriggers, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPActionTriggers received: ", reply)
@@ -635,13 +635,13 @@ func TestApierTPAccountActions(t *testing.T) {
 	}
 	// Test get
 	var rplyaa *utils.TPAccountActions
-	if err := rater.Call("ApierV1.GetTPAccountActions", AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetAccountActionsId()}, &rplyaa); err != nil {
+	if err := rater.Call("ApierV1.GetTPAccountActions", AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetId()}, &rplyaa); err != nil {
 		t.Error("Calling ApierV1.GetTPAccountActions, got error: ", err.Error())
 	} else if !reflect.DeepEqual(aaTst, rplyaa) {
 		t.Errorf("Calling ApierV1.GetTPAccountActions expected: %v, received: %v", aaTst, rplyaa)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPAccountActions", AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetAccountActionsId()}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPAccountActions", AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetId()}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPAccountActions, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPAccountActions received: ", reply)

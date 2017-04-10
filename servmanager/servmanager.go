@@ -30,15 +30,15 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewServiceManager(cfg *config.CGRConfig, ratingDB engine.RatingStorage, engineShutdown chan bool, cacheDoneChan chan struct{}) *ServiceManager {
-	return &ServiceManager{cfg: cfg, ratingDB: ratingDB, engineShutdown: engineShutdown, cacheDoneChan: cacheDoneChan}
+func NewServiceManager(cfg *config.CGRConfig, dataDB engine.DataDB, engineShutdown chan bool, cacheDoneChan chan struct{}) *ServiceManager {
+	return &ServiceManager{cfg: cfg, dataDB: dataDB, engineShutdown: engineShutdown, cacheDoneChan: cacheDoneChan}
 }
 
 // ServiceManager handles starting/stopping of the services ran by the engine
 type ServiceManager struct {
 	sync.RWMutex   // lock access to any shared data
 	cfg            *config.CGRConfig
-	ratingDB       engine.RatingStorage
+	dataDB         engine.DataDB
 	engineShutdown chan bool
 	cacheDoneChan  chan struct{} // Wait for cache to load
 	sched          *scheduler.Scheduler
@@ -59,7 +59,7 @@ func (srvMngr *ServiceManager) StartScheduler(waitCache bool) error {
 		srvMngr.cacheDoneChan <- cacheDone
 	}
 	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
-	sched := scheduler.NewScheduler(srvMngr.ratingDB)
+	sched := scheduler.NewScheduler(srvMngr.dataDB)
 	srvMngr.Lock()
 	srvMngr.sched = sched
 	srvMngr.Unlock()

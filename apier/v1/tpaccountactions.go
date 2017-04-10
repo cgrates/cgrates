@@ -28,11 +28,10 @@ func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *st
 		[]string{"TPid", "LoadId", "Tenant", "Account", "ActionPlanId", "ActionTriggersId"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	aas := engine.APItoModelAccountAction(&attrs)
-	if err := self.StorDb.SetTpAccountActions([]engine.TpAccountAction{*aas}); err != nil {
+	if err := self.StorDb.SetTPAccountActions([]*utils.TPAccountActions{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }
 
@@ -50,26 +49,12 @@ func (self *ApierV1) GetTPAccountActionsByLoadId(attrs utils.TPAccountActions, r
 	if missing := utils.MissingStructFields(&attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	aas := engine.APItoModelAccountAction(&attrs)
-	if aa, err := self.StorDb.GetTpAccountActions(aas); err != nil {
+	if aas, err := self.StorDb.GetTPAccountActions(&attrs); err != nil {
 		return utils.NewErrServerError(err)
-	} else if len(aa) == 0 {
+	} else if len(aas) == 0 {
 		return utils.ErrNotFound
 	} else {
-
-		tpAa, err := engine.TpAccountActions(aa).GetAccountActions()
-		if err != nil {
-			return err
-		}
-		var acts []*utils.TPAccountActions
-		if len(attrs.Account) != 0 {
-			acts = []*utils.TPAccountActions{tpAa[attrs.KeyId()]}
-		} else {
-			for _, actLst := range tpAa {
-				acts = append(acts, actLst)
-			}
-		}
-		*reply = acts
+		reply = &aas
 	}
 	return nil
 }
@@ -84,30 +69,16 @@ func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *u
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tmpAa := &utils.TPAccountActions{TPid: attrs.TPid}
-	if err := tmpAa.SetAccountActionsId(attrs.AccountActionsId); err != nil {
+	filter := &utils.TPAccountActions{TPid: attrs.TPid}
+	if err := filter.SetAccountActionsId(attrs.AccountActionsId); err != nil {
 		return err
 	}
-	tmpAaa := engine.APItoModelAccountAction(tmpAa)
-	if aas, err := self.StorDb.GetTpAccountActions(tmpAaa); err != nil {
+	if aas, err := self.StorDb.GetTPAccountActions(filter); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(aas) == 0 {
 		return utils.ErrNotFound
 	} else {
-		tpAaa, err := engine.TpAccountActions(aas).GetAccountActions()
-		if err != nil {
-			return err
-		}
-		aa := tpAaa[tmpAa.KeyId()]
-		tpdc := utils.TPAccountActions{
-			TPid:             attrs.TPid,
-			ActionPlanId:     aa.ActionPlanId,
-			ActionTriggersId: aa.ActionTriggersId,
-		}
-		if err := tpdc.SetAccountActionsId(attrs.AccountActionsId); err != nil {
-			return err
-		}
-		*reply = tpdc
+		*reply = *aas[0]
 	}
 	return nil
 }
@@ -122,7 +93,7 @@ func (self *ApierV1) GetTPAccountActionLoadIds(attrs AttrGetTPAccountActionIds, 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TPDistinctIds{"loadid"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountActions, utils.TPDistinctIds{"loadid"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -137,7 +108,7 @@ func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, repl
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TPDistinctIds{"loadid", "direction", "tenant", "account"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountActions, utils.TPDistinctIds{"loadid", "direction", "tenant", "account"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -156,10 +127,10 @@ func (self *ApierV1) RemTPAccountActions(attrs AttrGetTPAccountActions, reply *s
 	if err := aa.SetAccountActionId(attrs.AccountActionsId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.Tpid, map[string]string{"loadid": aa.Loadid, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPAccountActions, aa.Tpid, map[string]string{"loadid": aa.Loadid, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
-		*reply = "OK"
+		*reply = utils.OK
 	}
 	return nil
 }

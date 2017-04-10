@@ -53,7 +53,7 @@ func TestModelHelperCsvDump(t *testing.T) {
 func TestTPDestinationAsExportSlice(t *testing.T) {
 	tpDst := &utils.TPDestination{
 		TPid:     "TEST_TPID",
-		Tag:      "TEST_DEST",
+		ID:       "TEST_DEST",
 		Prefixes: []string{"49", "49176", "49151"},
 	}
 	expectedSlc := [][]string{
@@ -79,7 +79,7 @@ func TestTpDestinationsAsTPDestinations(t *testing.T) {
 	tpd1 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+491"}
 	tpd2 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+492"}
 	tpd3 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+493"}
-	eTPDestinations := []*utils.TPDestination{&utils.TPDestination{TPid: "TEST_TPID", Tag: "TEST_DEST",
+	eTPDestinations := []*utils.TPDestination{&utils.TPDestination{TPid: "TEST_TPID", ID: "TEST_DEST",
 		Prefixes: []string{"+491", "+492", "+493"}}}
 	if tpDst := TpDestinations([]TpDestination{tpd1, tpd2, tpd3}).AsTPDestinations(); !reflect.DeepEqual(eTPDestinations, tpDst) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPDestinations, tpDst)
@@ -89,8 +89,8 @@ func TestTpDestinationsAsTPDestinations(t *testing.T) {
 
 func TestTPRateAsExportSlice(t *testing.T) {
 	tpRate := &utils.TPRate{
-		TPid:   "TEST_TPID",
-		RateId: "TEST_RATEID",
+		TPid: "TEST_TPID",
+		ID:   "TEST_RATEID",
 		RateSlots: []*utils.RateSlot{
 			&utils.RateSlot{
 				ConnectFee:         0.100,
@@ -127,8 +127,8 @@ func TestTPRateAsExportSlice(t *testing.T) {
 
 func TestTPDestinationRateAsExportSlice(t *testing.T) {
 	tpDstRate := &utils.TPDestinationRate{
-		TPid:              "TEST_TPID",
-		DestinationRateId: "TEST_DSTRATE",
+		TPid: "TEST_TPID",
+		ID:   "TEST_DSTRATE",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "TEST_DEST1",
@@ -165,7 +165,7 @@ func TestTPDestinationRateAsExportSlice(t *testing.T) {
 func TestApierTPTimingAsExportSlice(t *testing.T) {
 	tpTiming := &utils.ApierTPTiming{
 		TPid:      "TEST_TPID",
-		TimingId:  "TEST_TIMING",
+		ID:        "TEST_TIMING",
 		Years:     "*any",
 		Months:    "*any",
 		MonthDays: "*any",
@@ -174,10 +174,10 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 	expectedSlc := [][]string{
 		[]string{"TEST_TIMING", "*any", "*any", "*any", "1;2;4", "00:00:01"},
 	}
-	ms := APItoModelApierTiming(tpTiming)
+	ms := APItoModelTiming(tpTiming)
 	var slc [][]string
 
-	lc, err := csvDump(*ms)
+	lc, err := csvDump(ms)
 	if err != nil {
 		t.Error("Error dumping to csv: ", err)
 	}
@@ -190,8 +190,8 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 
 func TestTPRatingPlanAsExportSlice(t *testing.T) {
 	tpRpln := &utils.TPRatingPlan{
-		TPid:         "TEST_TPID",
-		RatingPlanId: "TEST_RPLAN",
+		TPid: "TEST_TPID",
+		ID:   "TEST_RPLAN",
 		RatingPlanBindings: []*utils.TPRatingPlanBinding{
 			&utils.TPRatingPlanBinding{
 				DestinationRatesId: "TEST_DSTRATE1",
@@ -262,8 +262,8 @@ func TestTPRatingProfileAsExportSlice(t *testing.T) {
 
 func TestTPActionsAsExportSlice(t *testing.T) {
 	tpActs := &utils.TPActions{
-		TPid:      "TEST_TPID",
-		ActionsId: "TEST_ACTIONS",
+		TPid: "TEST_TPID",
+		ID:   "TEST_ACTIONS",
 		Actions: []*utils.TPAction{
 			&utils.TPAction{
 				Identifier:      "*topup_reset",
@@ -316,8 +316,8 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 // SHARED_A,*any,*highest,
 func TestTPSharedGroupsAsExportSlice(t *testing.T) {
 	tpSGs := &utils.TPSharedGroups{
-		TPid:           "TEST_TPID",
-		SharedGroupsId: "SHARED_GROUP_TEST",
+		TPid: "TEST_TPID",
+		ID:   "SHARED_GROUP_TEST",
 		SharedGroups: []*utils.TPSharedGroup{
 			&utils.TPSharedGroup{
 				Account:       "*any",
@@ -394,8 +394,8 @@ func TestTPLcrRulesAsExportSlice(t *testing.T) {
 //CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,rated,*out,cgrates.org,call,dan,dan,49,5m;10m,default,rif,rif,0;2,STANDARD_TRIGGERS
 func TestTPCdrStatsAsExportSlice(t *testing.T) {
 	cdrStats := &utils.TPCdrStats{
-		TPid:       "TEST_TPID",
-		CdrStatsId: "CDRST1",
+		TPid: "TEST_TPID",
+		ID:   "CDRST1",
 		CdrStats: []*utils.TPCdrStat{
 			&utils.TPCdrStat{
 				QueueLength:      "5",
@@ -474,7 +474,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 	dcs := &utils.TPDerivedChargers{
 		TPid:      "TEST_TPID",
-		Loadid:    "TEST_LOADID",
+		LoadId:    "TEST_LOADID",
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -543,8 +543,8 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 
 func TestTPActionTriggersAsExportSlice(t *testing.T) {
 	ap := &utils.TPActionPlan{
-		TPid:         "TEST_TPID",
-		ActionPlanId: "PACKAGE_10",
+		TPid: "TEST_TPID",
+		ID:   "PACKAGE_10",
 		ActionPlan: []*utils.TPActionTiming{
 			&utils.TPActionTiming{
 				ActionsId: "TOPUP_RST_10",
@@ -576,8 +576,8 @@ func TestTPActionTriggersAsExportSlice(t *testing.T) {
 
 func TestTPActionPlanAsExportSlice(t *testing.T) {
 	at := &utils.TPActionTriggers{
-		TPid:             "TEST_TPID",
-		ActionTriggersId: "STANDARD_TRIGGERS",
+		TPid: "TEST_TPID",
+		ID:   "STANDARD_TRIGGERS",
 		ActionTriggers: []*utils.TPActionTrigger{
 			&utils.TPActionTrigger{
 				Id:                    "STANDARD_TRIGGERS",
@@ -696,9 +696,9 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Weight:            10.0,
 			Limit:             "20"},
 	}
-	eTPs := map[string]*utils.TPResourceLimit{
-		tps[0].Tag: &utils.TPResourceLimit{
-			TPID: tps[0].Tpid,
+	eTPs := []*utils.TPResourceLimit{
+		&utils.TPResourceLimit{
+			TPid: tps[0].Tpid,
 			ID:   tps[0].Tag,
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
@@ -717,8 +717,8 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Limit:            tps[0].Limit,
 			ActionTriggerIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
-		tps[2].Tag: &utils.TPResourceLimit{
-			TPID: tps[2].Tpid,
+		&utils.TPResourceLimit{
+			TPid: tps[2].Tpid,
 			ID:   tps[2].Tag,
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
@@ -732,7 +732,42 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Limit:          tps[2].Limit,
 		},
 	}
-	if rcvTPs := TpResourceLimits(tps).AsTPResourceLimits(); !reflect.DeepEqual(eTPs, rcvTPs) {
-		t.Errorf("Expecting: %+v, received: %+v", eTPs, rcvTPs)
+	rcvTPs := TpResourceLimits(tps).AsTPResourceLimits()
+	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[1])) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	}
+}
+
+func TestAPItoResourceLimit(t *testing.T) {
+	tpRL := &utils.TPResourceLimit{
+		TPid: testTPID,
+		ID:   "ResGroup1",
+		Filters: []*utils.TPRequestFilter{
+			&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+			&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"10", "20"}},
+			&utils.TPRequestFilter{Type: MetaCDRStats, Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"}},
+			&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"}},
+		},
+		ActivationTime: "2014-07-29T15:00:00Z",
+		Weight:         10,
+		Limit:          "2",
+	}
+	eRL := &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight, Filters: make([]*RequestFilter, len(tpRL.Filters)), Usage: make(map[string]*ResourceUsage)}
+	eRL.Filters[0] = &RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}}
+	eRL.Filters[1] = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"10", "20"}}
+	eRL.Filters[2] = &RequestFilter{Type: MetaCDRStats, Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"},
+		cdrStatSThresholds: []*RFStatSThreshold{
+			&RFStatSThreshold{QueueID: "CDRST1", ThresholdType: "*MIN_ASR", ThresholdValue: 34},
+			&RFStatSThreshold{QueueID: "CDRST_1001", ThresholdType: "*MIN_ASR", ThresholdValue: 20},
+		}}
+	eRL.Filters[3] = &RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+		rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+	}
+	eRL.ActivationTime, _ = utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
+	eRL.Limit = 2
+	if rl, err := APItoResourceLimit(tpRL, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRL, rl) {
+		t.Errorf("Expecting: %+v, received: %+v", eRL, rl)
 	}
 }

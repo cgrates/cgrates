@@ -70,7 +70,7 @@ func (apier *ApierV1) RemCdrs(attrs utils.AttrRemCdrs, reply *string) error {
 	if _, _, err := apier.CdrDb.GetCDRs(&utils.CDRsFilter{CGRIDs: attrs.CgrIds}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }
 
@@ -83,7 +83,7 @@ func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error
 	if _, _, err := apier.CdrDb.GetCDRs(cdrsFilter, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }
 
