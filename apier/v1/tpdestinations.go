@@ -22,8 +22,8 @@ import (
 )
 
 // Creates a new destination within a tariff plan
-func (self *ApierV1) SetTPDestination(attrs utils.V1TPDestination, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) SetTPDestination(attrs utils.TPDestination, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "Prefixes"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.SetTPDestinations([]*utils.TPDestination{attrs.AsTPDestination()}); err != nil {
@@ -34,23 +34,23 @@ func (self *ApierV1) SetTPDestination(attrs utils.V1TPDestination, reply *string
 }
 
 type AttrGetTPDestination struct {
-	TPid          string // Tariff plan id
-	DestinationId string // Destination id
+	TPid string // Tariff plan id
+	ID   string // Destination id
 }
 
 // Queries a specific destination
-func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.V1TPDestination) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.TPDestination) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if tpDsts, err := self.StorDb.GetTPDestinations(attrs.TPid, attrs.DestinationId); err != nil {
+	if tpDsts, err := self.StorDb.GetTPDestinations(attrs.TPid, attrs.ID); err != nil {
 		return utils.APIErrorHandler(err)
 	} else if len(tpDsts) == 0 {
 		return utils.ErrNotFound
 	} else {
 		tpDst := tpDsts[0]
-		*reply = utils.V1TPDestination{TPid: tpDst.TPid,
-			DestinationId: tpDst.Tag, Prefixes: tpDst.Prefixes}
+		*reply = utils.TPDestination{TPid: tpDst.TPid,
+			ID: tpDst.ID, Prefixes: tpDst.Prefixes}
 	}
 	return nil
 }
@@ -65,7 +65,7 @@ func (self *ApierV1) GetTPDestinationIDs(attrs AttrGetTPDestinationIds, reply *[
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_DESTINATIONS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDestinations, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return utils.APIErrorHandler(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -75,14 +75,15 @@ func (self *ApierV1) GetTPDestinationIDs(attrs AttrGetTPDestinationIds, reply *[
 	return nil
 }
 
+// Removes specific Destination on Tariff plan
 func (self *ApierV1) RemTPDestination(attrs AttrGetTPDestination, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_DESTINATIONS, attrs.TPid, map[string]string{"tag": attrs.DestinationId}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPDestinations, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
-		*reply = "OK"
+		*reply = utils.OK
 	}
 	return nil
 }

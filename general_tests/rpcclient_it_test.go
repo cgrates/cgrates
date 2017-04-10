@@ -104,7 +104,7 @@ func TestRPCITLclStatusSecondEngine(t *testing.T) {
 	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.InstanceID].(string) != ral2ID {
-		t.Errorf("Expecting: %s, received: %s", ral2ID, status[utils.InstanceID].(string))
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", ral2ID, status[utils.InstanceID].(string))
 	}
 }
 
@@ -130,7 +130,7 @@ func TestRPCITLclStatusFirstInitial(t *testing.T) {
 	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.InstanceID].(string) != ral1ID {
-		t.Errorf("Expecting: %s, received: %s", ral1ID, status[utils.InstanceID].(string))
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", ral1ID, status[utils.InstanceID].(string))
 	}
 }
 
@@ -153,7 +153,7 @@ func TestRPCITLclStatusFirstFailover(t *testing.T) {
 	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.InstanceID].(string) != ral2ID {
-		t.Errorf("Expecting: %s, received: %s", ral2ID, status[utils.InstanceID].(string))
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", ral2ID, status[utils.InstanceID].(string))
 	}
 }
 
@@ -172,7 +172,7 @@ func TestRPCITLclStatusFirstFailback(t *testing.T) {
 	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.InstanceID].(string) != ral1ID {
-		t.Errorf("Expecting: %s, received: %s", ral1ID, status[utils.InstanceID].(string))
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", ral1ID, status[utils.InstanceID].(string))
 	}
 }
 
@@ -348,7 +348,7 @@ func TestRPCITRmtStatusFirstInitial(t *testing.T) {
 	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.InstanceID].(string) != ralRmtID {
-		t.Errorf("Expecting: %s, received: %s", ralRmtID, status[utils.InstanceID].(string))
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", ralRmtID, status[utils.InstanceID].(string))
 	}
 }
 

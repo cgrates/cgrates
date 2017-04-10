@@ -13,12 +13,6 @@
 	"http": ":2080",
 },
 
- "tariffplan_db": {
- 	"db_type": "mongo",
-	"db_port": 27017,
-},
-
-
 "data_db": {
 	"db_type": "mongo",
 	"db_port": 27017,

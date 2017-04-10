@@ -33,15 +33,15 @@ func TestSharedSetGet(t *testing.T) {
 		},
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
-	err := ratingStorage.SetSharedGroup(sg, utils.NonTransactional)
+	err := dataStorage.SetSharedGroup(sg, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error storing Shared groudp: ", err)
 	}
-	received, err := ratingStorage.GetSharedGroup(id, true, utils.NonTransactional)
+	received, err := dataStorage.GetSharedGroup(id, true, utils.NonTransactional)
 	if err != nil || received == nil || !reflect.DeepEqual(sg, received) {
 		t.Error("Error getting shared group: ", err, received)
 	}
-	received, err = ratingStorage.GetSharedGroup(id, false, utils.NonTransactional)
+	received, err = dataStorage.GetSharedGroup(id, false, utils.NonTransactional)
 	if err != nil || received == nil || !reflect.DeepEqual(sg, received) {
 		t.Error("Error getting cached shared group: ", err, received)
 	}

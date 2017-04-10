@@ -6,7 +6,7 @@ The CGRateS suite consists of **four** software applications described below.
    :columns: 4
 
    - cgr-engine
-   - cgr-loader  
+   - cgr-loader
    - cgr-console
    - cgr-tester
 
@@ -16,11 +16,10 @@ CGRateS has an internal cache.
 
    "internal_cache" - cache
 
-Operates with different external databases mentioned below. 
+Operates with different external databases mentioned below.
 
 ::
 
-   "tariffplan_db" - MongoDB, Redis
    "data_db"       - MongoDB, Redis
    "stor_db"       - MongoDB, MySQL, PostgreSQL
 
@@ -28,7 +27,6 @@ Operates with different external databases mentioned below.
 .. hlist::
    :columns: 1
 
-   - **tariffplan_db** - used to store active tariff plan(s) configuration(s)
    - **data_db**       - used to store runtime data ( eg: accounts )
    - **stor_db**       - used to store offline tariff plan(s) and CDRs
 
@@ -37,14 +35,14 @@ Operates with different external databases mentioned below.
    :alt: CGRateS Architecture
    :align: Center
    :scale: 75 %
-   
-   
+
+
    CGRateS high level design
 
 2.1. cgr-engine
 ---------------
-Is the most important and complex component. 
-Customisable through the use of *json* configuration file(s), 
+Is the most important and complex component.
+Customisable through the use of *json* configuration file(s),
 it will start on demand **one or more** service(s), outlined below.
 
 ::
@@ -74,24 +72,7 @@ it will start on demand **one or more** service(s), outlined below.
 .. hint::  # cgr-engine -config_dir=/etc/cgrates
 
 
-2.1.1. Balancer service
-~~~~~~~~~~~~~~~~~~~~~~~
-*Optional* component, used as proxy/balancer to a pool of RAL workers. 
-The RALs will register their availability to the Balancer thus implementing **dynamic HA functionality**.
-**HA functionality** can be archived also *without* the **Balancer**.
-
-- Communicates via:
-   - RPC
-   - internal/in-process *within the same running* **cgr-engine** process.
-
-- Operates with the following CGRateS database(s): ::
-
-   - none
-
-- Config section in the CGRateS configuration file:
-   - ``"balancer": {...}``
-
-2.1.2. RALs service
+2.1.1. RALs service
 ~~~~~~~~~~~~~~~~~~~~
 Responsible with the following tasks:
 
@@ -106,14 +87,13 @@ Responsible with the following tasks:
 
 - Operates with the following CGRateS database(s): ::
 
-   "tariffplan_db" - (ratingDb)
-   "data_db"       - (accountDb)
+   "data_db"       - (dataDb)
    "stor_db"       - (cdrDb, loadDb)
 
 - Config section in the CGRateS configuration file:
    - ``"rals": {...}``
 
-2.1.3. Scheduler service
+2.1.2. Scheduler service
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Used to execute periodic/scheduled tasks.
 
@@ -122,12 +102,12 @@ Used to execute periodic/scheduled tasks.
 
 - Operates with the following CGRateS database(s): ::
 
-   "tariffplan_db" - (ratingDb)
+   "data_db" - (dataDb)
 
 - Config section in the CGRateS configuration file:
    - ``"scheduler": {...}``
 
-2.1.4. SessionManager service
+2.1.3. SessionManager service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Responsible with call control on the Telecommunication Switch side. Operates in two different modes (per call or globally):
 
@@ -161,13 +141,13 @@ Right now there are **five** session manager types.
    "stor_db" - (cdrDb)
 
 - Config section in the CGRateS configuration file:
-   - ``"sm_freeswitch": {...}`` 
+   - ``"sm_freeswitch": {...}``
    - ``"sm_kamailio": {...}``
    - ``"sm_opensips": {...}``
    - ``"sm_asterisk": {...}``
    - ``"sm_generic": {...}``
 
-2.1.5. DiameterAgent service
+2.1.4. DiameterAgent service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Responsible for the communication with Diameter server via diameter protocol.
 Despite the name it is a flexible **Diameter Server**.
@@ -183,7 +163,7 @@ Despite the name it is a flexible **Diameter Server**.
 - Config section in the CGRateS configuration file:
    - ``"diameter_agent": {...}``
 
-2.1.6. CDRS service
+2.1.5. CDRS service
 ~~~~~~~~~~~~~~~~~~~
 Centralized CDR server and CDR (raw or rated) **replicator**.
 
@@ -199,7 +179,7 @@ Centralized CDR server and CDR (raw or rated) **replicator**.
 - Config section in the CGRateS configuration file:
    - ``"cdrs": {...}``
 
-2.1.7. CDRStats service
+2.1.6. CDRStats service
 ~~~~~~~~~~~~~~~~~~~~~~~
 Computes real-time CDR stats. Capable with real-time fraud detection and mitigation with actions triggered.
 
@@ -209,13 +189,12 @@ Computes real-time CDR stats. Capable with real-time fraud detection and mitigat
 
 - Operates with the following CGRateS database(s): ::
 
-   "tariffplan_db" - (ratingDb)
-   "data_db"       - (accountDb)
+   "data_db"       - (dataDb)
 
 - Config section in the CGRateS configuration file:
    - ``"cdrstats": {...}``
 
-2.1.8. CDRC service
+2.1.7. CDRC service
 ~~~~~~~~~~~~~~~~~~~
 Gathers offline CDRs and post them to CDR Server - (CDRS component)
 
@@ -230,9 +209,9 @@ Gathers offline CDRs and post them to CDR Server - (CDRS component)
 - Config section in the CGRateS configuration file:
    - ``"cdrc": {...}``
 
-2.1.9. History service
+2.1.8. History service
 ~~~~~~~~~~~~~~~~~~~~~~
-Archives rate changes in human readable JSON format using **GIT**. 
+Archives rate changes in human readable JSON format using **GIT**.
 
 - Communicates via:
    - RPC
@@ -245,7 +224,7 @@ Archives rate changes in human readable JSON format using **GIT**.
 - Config section in the CGRateS configuration file:
    - ``"historys": {...}``
 
-2.1.10. Aliases service
+2.1.9. Aliases service
 ~~~~~~~~~~~~~~~~~~~~~~~
 Generic purpose **aliasing** system.
 
@@ -265,7 +244,7 @@ Possible applications:
 - Config section in the CGRateS configuration file:
    - ``"aliases": {...}``
 
-2.1.11. User service
+2.1.10. User service
 ~~~~~~~~~~~~~~~~~~~~
 Generic purpose **user** system to maintain user profiles (LDAP similarity).
 
@@ -274,13 +253,13 @@ Generic purpose **user** system to maintain user profiles (LDAP similarity).
    - internal/in-process *within the same running* **cgr-engine** process.
 
 - Operates with the following CGRateS database(s): ::
-  
+
    "data_db" - (accountDb)
 
 - Config section in the CGRateS configuration file:
    - ``"users": {...}``
 
-2.1.12. PubSub service
+2.1.11. PubSub service
 ~~~~~~~~~~~~~~~~~~~~~~
 PubSub service used to expose internal events to interested external components (eg: balance ops)
 
@@ -296,7 +275,7 @@ PubSub service used to expose internal events to interested external components 
    - ``"pubsubs": {...}``
 
 
-2.1.13. Resource Limiter service
+2.1.12. Resource Limiter service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Resource Limiter service used to limit resources during authorization (eg: maximum calls per destination for an account)
 
@@ -311,7 +290,7 @@ Resource Limiter service used to limit resources during authorization (eg: maxim
 - Config section in the CGRateS configuration file:
    - ``"rls": {...}``
 
-2.1.14. APIER RPC service
+2.1.13. APIER RPC service
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 RPC service used to expose external access towards internal components.
 
@@ -320,7 +299,7 @@ RPC service used to expose external access towards internal components.
    - JSON over HTTP
    - JSON over WebSocket
 
-2.1.15. Cdre
+2.1.14. Cdre
 ~~~~~~~~~~~~
 Component to retrieve rated CDRs from internal CDRs database.
 
@@ -333,7 +312,7 @@ Component to retrieve rated CDRs from internal CDRs database.
 - Config section in the CGRateS configuration file:
    - ``"cdre": {...}``
 
-2.1.16. Mailer
+2.1.15. Mailer
 ~~~~~~~~~~~~~~
 TBD
 
@@ -344,7 +323,7 @@ TBD
 - Config section in the CGRateS configuration file:
    - ``"mailer": {...}``
 
-2.1.17. Suretax
+2.1.16. Suretax
 ~~~~~~~~~~~~~~~
 TBD
 
@@ -361,7 +340,7 @@ TBD
 
 .. important:: This service is not valid anymore. Its functionality is replaced by CDRC and CDRS services.
 
-Responsible to mediate the CDRs generated by Telecommunication Switch. 
+Responsible to mediate the CDRs generated by Telecommunication Switch.
 
 Has the ability to combine CDR fields into rating subject and run multiple mediation processes on the same record.
 
@@ -370,12 +349,12 @@ On Linux machines, able to work with inotify kernel subsystem in order to proces
 
 2.2. cgr-loader
 ---------------
-Used for importing the rating information into the CGRateS database system. 
+Used for importing the rating information into the CGRateS database system.
 
 Can be used to:
-   - Import information from **csv files** to **tariffplan_db**, **data_db**.
+   - Import information from **csv files** to **data_db**.
    - Import information from **csv files** to **stor_db**. ``-to_stordb -tpid``
-   - Import information from **stor_db** to **tariffplan_db**, **data_db**. ``-from_stordb -tpid``
+   - Import information from **stor_db** to **data_db**. ``-from_stordb -tpid``
 
 ::
 
@@ -435,20 +414,6 @@ Can be used to:
          Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB> (default "Local")
    -to_stordb
          Import the tariff plan from files to storDb
-   -tpdb_host string
-         The TariffPlan host to connect to. (default "127.0.0.1")
-   -tpdb_name string
-         The name/number of the TariffPlan to connect to. (default "10")
-   -tpdb_passwd string
-         The TariffPlan user's password.
-   -tpdb_port string
-         The TariffPlan port to bind to. (default "6379")
-   -tpdb_type string
-         The type of the TariffPlan database <redis> (default "redis")
-   -tpdb_user string
-         The TariffPlan user to sign in as.
-   -tpid string
-         The tariff plan id from the database
    -users_address string
          Users service to contact for data reloads, empty to disable automatic data reloads (default "127.0.0.1:2013")
    -validate
@@ -460,11 +425,11 @@ Can be used to:
 
 
 .. hint:: # cgr-loader -flushdb
-.. hint:: # cgr-loader -verbose -tpdb_port="27017" -tpdb_type="mongo" -datadb_port="27017" -datadb_type="mongo"
+.. hint:: # cgr-loader -verbose -datadb_port="27017" -datadb_type="mongo"
 
 2.3. cgr-console
 ----------------
-Command line tool used to interface with the RALs (and/or Balancer) service. Able to execute **sub-commands**. 
+Command line tool used to interface with the RALs service. Able to execute **sub-commands**.
 
 ::
 
@@ -480,7 +445,7 @@ Command line tool used to interface with the RALs (and/or Balancer) service. Abl
          Prints the application version.
 
  rif@grace:~$ cgr-console help_more
- 2013/04/13 17:23:51 
+ 2013/04/13 17:23:51
  Usage: cgr-console [cfg_opts...{-h}] <status|get_balance>
 
 .. hint:: # cgr-console status
@@ -493,18 +458,18 @@ Command line stress testing tool.
 
  cgrates@OCS:~$ cgr-tester --help
  Usage of cgr-tester:
-  -accountdb_host string
-        The AccountingDb host to connect to. (default "127.0.0.1")
-  -accountdb_name string
-        The name/number of the AccountingDb to connect to. (default "11")
-  -accountdb_passwd string
-        The AccountingDb user's password.
-  -accountdb_port string
-        The AccountingDb port to bind to. (default "6379")
-  -accountdb_type string
-        The type of the AccountingDb database <redis> (default "redis")
-  -accountdb_user string
-        The AccountingDb user to sign in as.
+  -datadb_host string
+        The DataDb host to connect to. (default "127.0.0.1")
+  -datadb_name string
+        The name/number of the DataDb to connect to. (default "11")
+  -datatdb_passwd string
+        The DataDb user's password.
+  -datadb_port string
+        The DataDb port to bind to. (default "6379")
+  -datadb_type string
+        The type of the DataDb database <redis> (default "redis")
+  -datadb_user string
+        The DataDb user to sign in as.
   -category string
         The Record category to test. (default "call")
   -cpuprofile string
@@ -523,18 +488,6 @@ Command line stress testing tool.
         run n requests in parallel
   -rater_address string
         Rater address for remote tests. Empty for internal rater.
-  -ratingdb_host string
-        The RatingDb host to connect to. (default "127.0.0.1")
-  -ratingdb_name string
-        The name/number of the RatingDb to connect to. (default "10")
-  -ratingdb_passwd string
-        The RatingDb user's password.
-  -ratingdb_port string
-        The RatingDb port to bind to. (default "6379")
-  -ratingdb_type string
-        The type of the RatingDb database <redis> (default "redis")
-  -ratingdb_user string
-        The RatingDb user to sign in as.
   -runs int
         stress cycle number (default 10000)
   -subject string

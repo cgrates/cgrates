@@ -56,7 +56,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
-	aac, err = ratingStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
+	aac, err = dataStorage.GetActions(at.ActionsID, false, utils.NonTransactional)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
 		return
@@ -112,7 +112,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 			"Id":        at.ID,
 			"ActionIds": at.ActionsID,
 		})
-		accountingStorage.SetAccount(ub)
+		dataStorage.SetAccount(ub)
 	}
 	return
 }

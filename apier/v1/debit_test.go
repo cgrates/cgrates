@@ -37,11 +37,9 @@ func init() {
 	cfg, _ := config.NewDefaultCGRConfig()
 	responder := new(engine.Responder)
 
-	engine.SetAccountingStorage(apierDebitStorage)
-	engine.SetRatingStorage(apierDebitStorage)
+	engine.SetDataStorage(apierDebitStorage)
 	apierDebit = &ApierV1{
-		AccountDb: engine.AccountingStorage(apierDebitStorage),
-		RatingDb:  engine.RatingStorage(apierDebitStorage),
+		DataDB:    engine.DataDB(apierDebitStorage),
 		Config:    cfg,
 		Responder: responder,
 	}

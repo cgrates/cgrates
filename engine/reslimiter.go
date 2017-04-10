@@ -87,7 +87,7 @@ func (rl *ResourceLimit) RemoveUsage(ruID string) error {
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceLimiterService(cfg *config.CGRConfig, dataDB AccountingStorage, cdrStatS rpcclient.RpcClientConnection) (*ResourceLimiterService, error) {
+func NewResourceLimiterService(cfg *config.CGRConfig, dataDB DataDB, cdrStatS rpcclient.RpcClientConnection) (*ResourceLimiterService, error) {
 	if cdrStatS != nil && reflect.ValueOf(cdrStatS).IsNil() {
 		cdrStatS = nil
 	}
@@ -98,7 +98,7 @@ func NewResourceLimiterService(cfg *config.CGRConfig, dataDB AccountingStorage, 
 // ResourcesLimiter is the service handling channel limits
 type ResourceLimiterService struct {
 	sync.RWMutex
-	dataDB   AccountingStorage // So we can load the data in cache and index it
+	dataDB   DataDB // So we can load the data in cache and index it
 	cdrStatS rpcclient.RpcClientConnection
 }
 

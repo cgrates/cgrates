@@ -31,7 +31,7 @@ var apierDcT *ApierV1
 func init() {
 	dataStorage, _ := engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	apierDcT = &ApierV1{RatingDb: engine.RatingStorage(dataStorage), Config: cfg}
+	apierDcT = &ApierV1{DataDB: engine.DataDB(dataStorage), Config: cfg}
 }
 
 /*

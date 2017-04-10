@@ -39,83 +39,6 @@ type Storage interface {
 	SelectDatabase(dbName string) (err error)
 }
 
-// Interface for storage providers.
-type RatingStorage interface {
-	Storage
-	Marshaler() Marshaler
-	HasData(string, string) (bool, error)
-	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
-	GetRatingPlan(string, bool, string) (*RatingPlan, error)
-	SetRatingPlan(*RatingPlan, string) error
-	GetRatingProfile(string, bool, string) (*RatingProfile, error)
-	SetRatingProfile(*RatingProfile, string) error
-	RemoveRatingProfile(string, string) error
-	GetDestination(string, bool, string) (*Destination, error)
-	SetDestination(*Destination, string) error
-	RemoveDestination(string, string) error
-	SetReverseDestination(*Destination, string) error
-	GetReverseDestination(string, bool, string) ([]string, error)
-	UpdateReverseDestination(*Destination, *Destination, string) error
-	GetLCR(string, bool, string) (*LCR, error)
-	SetLCR(*LCR, string) error
-	SetCdrStats(*CdrStats) error
-	GetCdrStats(string) (*CdrStats, error)
-	GetAllCdrStats() ([]*CdrStats, error)
-	GetDerivedChargers(string, bool, string) (*utils.DerivedChargers, error)
-	SetDerivedChargers(string, *utils.DerivedChargers, string) error
-	GetActions(string, bool, string) (Actions, error)
-	SetActions(string, Actions, string) error
-	RemoveActions(string, string) error
-	GetSharedGroup(string, bool, string) (*SharedGroup, error)
-	SetSharedGroup(*SharedGroup, string) error
-	GetActionTriggers(string, bool, string) (ActionTriggers, error)
-	SetActionTriggers(string, ActionTriggers, string) error
-	RemoveActionTriggers(string, string) error
-	GetActionPlan(string, bool, string) (*ActionPlan, error)
-	SetActionPlan(string, *ActionPlan, bool, string) error
-	GetAllActionPlans() (map[string]*ActionPlan, error)
-	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
-	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
-	RemAccountActionPlans(acntID string, aPlIDs []string) (err error)
-	PushTask(*Task) error
-	PopTask() (*Task, error)
-	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error
-}
-
-type AccountingStorage interface {
-	Storage
-	Marshaler() Marshaler
-	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error
-	GetAccount(string) (*Account, error)
-	SetAccount(*Account) error
-	RemoveAccount(string) error
-	GetCdrStatsQueue(string) (*StatsQueue, error)
-	SetCdrStatsQueue(*StatsQueue) error
-	GetSubscribers() (map[string]*SubscriberData, error)
-	SetSubscriber(string, *SubscriberData) error
-	RemoveSubscriber(string) error
-	SetUser(*UserProfile) error
-	GetUser(string) (*UserProfile, error)
-	GetUsers() ([]*UserProfile, error)
-	RemoveUser(string) error
-	SetAlias(*Alias, string) error
-	GetAlias(string, bool, string) (*Alias, error)
-	RemoveAlias(string, string) error
-	SetReverseAlias(*Alias, string) error
-	GetReverseAlias(string, bool, string) ([]string, error)
-	GetResourceLimit(string, bool, string) (*ResourceLimit, error)
-	SetResourceLimit(*ResourceLimit, string) error
-	RemoveResourceLimit(string, string) error
-	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
-	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetStructVersion() (*StructVersion, error)
-	SetStructVersion(*StructVersion) error
-	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
-	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
-	MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
-	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error
-}
-
 // OnlineStorage contains methods to use for administering online data
 type DataDB interface {
 	Storage
@@ -213,44 +136,44 @@ type LoadStorage interface {
 type LoadReader interface {
 	GetTpIds() ([]string, error)
 	GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
-	GetTpTimings(string, string) ([]TpTiming, error)
+	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
 	GetTPDestinations(string, string) ([]*utils.TPDestination, error)
-	GetTpRates(string, string) ([]TpRate, error)
-	GetTpDestinationRates(string, string, *utils.Paginator) ([]TpDestinationRate, error)
-	GetTpRatingPlans(string, string, *utils.Paginator) ([]TpRatingPlan, error)
-	GetTpRatingProfiles(*TpRatingProfile) ([]TpRatingProfile, error)
-	GetTpSharedGroups(string, string) ([]TpSharedGroup, error)
-	GetTpCdrStats(string, string) ([]TpCdrstat, error)
-	GetTpLCRs(*TpLcrRule) ([]TpLcrRule, error)
-	GetTpUsers(*TpUser) ([]TpUser, error)
-	GetTpAliases(*TpAlias) ([]TpAlias, error)
-	GetTpDerivedChargers(*TpDerivedCharger) ([]TpDerivedCharger, error)
-	GetTpActions(string, string) ([]TpAction, error)
-	GetTpActionPlans(string, string) ([]TpActionPlan, error)
-	GetTpActionTriggers(string, string) ([]TpActionTrigger, error)
-	GetTpAccountActions(*TpAccountAction) ([]TpAccountAction, error)
-	GetTpResourceLimits(string, string) (TpResourceLimits, error)
+	GetTPRates(string, string) ([]*utils.TPRate, error)
+	GetTPDestinationRates(string, string, *utils.Paginator) ([]*utils.TPDestinationRate, error)
+	GetTPRatingPlans(string, string, *utils.Paginator) ([]*utils.TPRatingPlan, error)
+	GetTPRatingProfiles(*utils.TPRatingProfile) ([]*utils.TPRatingProfile, error)
+	GetTPSharedGroups(string, string) ([]*utils.TPSharedGroups, error)
+	GetTPCdrStats(string, string) ([]*utils.TPCdrStats, error)
+	GetTPLCRs(*utils.TPLcrRules) ([]*utils.TPLcrRules, error)
+	GetTPUsers(*utils.TPUsers) ([]*utils.TPUsers, error)
+	GetTPAliases(*utils.TPAliases) ([]*utils.TPAliases, error)
+	GetTPDerivedChargers(*utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error)
+	GetTPActions(string, string) ([]*utils.TPActions, error)
+	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
+	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
+	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
+	GetTPResourceLimits(string, string) ([]*utils.TPResourceLimit, error)
 }
 
 type LoadWriter interface {
 	RemTpData(string, string, map[string]string) error
-	SetTpTimings([]TpTiming) error
+	SetTPTimings([]*utils.ApierTPTiming) error
 	SetTPDestinations([]*utils.TPDestination) error
-	SetTpRates([]TpRate) error
-	SetTpDestinationRates([]TpDestinationRate) error
-	SetTpRatingPlans([]TpRatingPlan) error
-	SetTpRatingProfiles([]TpRatingProfile) error
-	SetTpSharedGroups([]TpSharedGroup) error
-	SetTpCdrStats([]TpCdrstat) error
-	SetTpUsers([]TpUser) error
-	SetTpAliases([]TpAlias) error
-	SetTpDerivedChargers([]TpDerivedCharger) error
-	SetTpLCRs([]TpLcrRule) error
-	SetTpActions([]TpAction) error
-	SetTpActionPlans([]TpActionPlan) error
-	SetTpActionTriggers([]TpActionTrigger) error
-	SetTpAccountActions([]TpAccountAction) error
-	SetTpResourceLimits(TpResourceLimits) error
+	SetTPRates([]*utils.TPRate) error
+	SetTPDestinationRates([]*utils.TPDestinationRate) error
+	SetTPRatingPlans([]*utils.TPRatingPlan) error
+	SetTPRatingProfiles([]*utils.TPRatingProfile) error
+	SetTPSharedGroups([]*utils.TPSharedGroups) error
+	SetTPCdrStats([]*utils.TPCdrStats) error
+	SetTPUsers([]*utils.TPUsers) error
+	SetTPAliases([]*utils.TPAliases) error
+	SetTPDerivedChargers([]*utils.TPDerivedChargers) error
+	SetTPLCRs([]*utils.TPLcrRules) error
+	SetTPActions([]*utils.TPActions) error
+	SetTPActionPlans([]*utils.TPActionPlan) error
+	SetTPActionTriggers([]*utils.TPActionTriggers) error
+	SetTPAccountActions([]*utils.TPAccountActions) error
+	SetTPResourceLimits([]*utils.TPResourceLimit) error
 }
 
 type Marshaler interface {

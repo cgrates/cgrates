@@ -34,8 +34,7 @@ var (
 
 func init() {
 	historyScribe, _ = history.NewMockScribe()
-	ratingStorage.Flush("")
-	accountingStorage.Flush("")
+	dataStorage.Flush("")
 	populateDB()
 }
 
@@ -101,15 +100,15 @@ func populateDB() {
 				&Balance{Value: 10000, Weight: 10},
 			}},
 	}
-	if accountingStorage != nil && ratingStorage != nil {
-		ratingStorage.SetActions("TEST_ACTIONS", ats, utils.NonTransactional)
-		ratingStorage.SetActions("TEST_ACTIONS_ORDER", ats1, utils.NonTransactional)
-		accountingStorage.SetAccount(broker)
-		accountingStorage.SetAccount(minu)
-		accountingStorage.SetAccount(minitsboy)
-		accountingStorage.SetAccount(luna)
-		accountingStorage.SetAccount(max)
-		accountingStorage.SetAccount(money)
+	if dataStorage != nil {
+		dataStorage.SetActions("TEST_ACTIONS", ats, utils.NonTransactional)
+		dataStorage.SetActions("TEST_ACTIONS_ORDER", ats1, utils.NonTransactional)
+		dataStorage.SetAccount(broker)
+		dataStorage.SetAccount(minu)
+		dataStorage.SetAccount(minitsboy)
+		dataStorage.SetAccount(luna)
+		dataStorage.SetAccount(max)
+		dataStorage.SetAccount(money)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}
@@ -135,7 +134,7 @@ func TestSerialDebit(t *testing.T) {
 				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
-	if err := accountingStorage.SetAccount(moneyConcurent); err != nil {
+	if err := dataStorage.SetAccount(moneyConcurent); err != nil {
 		t.Error(err)
 	}
 	debitsToDo := 50
@@ -175,7 +174,7 @@ func TestParallelDebit(t *testing.T) {
 				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
-	if err := accountingStorage.SetAccount(moneyConcurent); err != nil {
+	if err := dataStorage.SetAccount(moneyConcurent); err != nil {
 		t.Error(err)
 	}
 	debitsToDo := 50
@@ -646,7 +645,7 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxRate(t *testing.T) {
-	ap, err := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, err := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	if err != nil {
 		t.FailNow()
 	}
@@ -655,7 +654,7 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	//acc, _ := accountingStorage.GetAccount("cgrates.org:12345")
+	//acc, _ := dataStorage.GetAccount("cgrates.org:12345")
 	//log.Print("ACC: ", utils.ToIJSON(acc))
 	cd := &CallDescriptor{
 		Direction:   "*out",
@@ -677,7 +676,7 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxCost(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -701,12 +700,12 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 }
 
 func TestGetMaxSessiontWithBlocker(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("BLOCK_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("BLOCK_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	acc, err := accountingStorage.GetAccount("cgrates.org:block")
+	acc, err := dataStorage.GetAccount("cgrates.org:block")
 	if err != nil {
 		t.Error("error getting account: ", err)
 	}
@@ -752,12 +751,12 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 }
 
 func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("BLOCK_EMPTY_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("BLOCK_EMPTY_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	acc, err := accountingStorage.GetAccount("cgrates.org:block_empty")
+	acc, err := dataStorage.GetAccount("cgrates.org:block_empty")
 	if err != nil {
 		t.Error("error getting account: ", err)
 	}
@@ -803,7 +802,7 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 }
 
 func TestGetCostWithMaxCost(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -827,7 +826,7 @@ func TestGetCostWithMaxCost(t *testing.T) {
 }
 
 func TestGetCostRoundingIssue(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -852,7 +851,7 @@ func TestGetCostRoundingIssue(t *testing.T) {
 }
 
 func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -880,7 +879,7 @@ func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
 }
 
 func TestDebitRatingInfoOnZeroTime(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -909,7 +908,7 @@ func TestDebitRatingInfoOnZeroTime(t *testing.T) {
 }
 
 func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -937,7 +936,7 @@ func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
 }
 
 func TestMaxDebitUnknowDest(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -960,7 +959,7 @@ func TestMaxDebitUnknowDest(t *testing.T) {
 }
 
 func TestMaxDebitRoundingIssue(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -977,7 +976,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 		MaxCostSoFar:    0,
 		PerformRounding: true,
 	}
-	acc, err := accountingStorage.GetAccount("cgrates.org:dy")
+	acc, err := dataStorage.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
@@ -988,14 +987,14 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 		t.Log(utils.ToIJSON(cc))
 		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
 	}
-	acc, err = accountingStorage.GetAccount("cgrates.org:dy")
+	acc, err = dataStorage.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 }
 
 func TestDebitRoundingRefund(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1012,7 +1011,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 		MaxCostSoFar:    0,
 		PerformRounding: true,
 	}
-	acc, err := accountingStorage.GetAccount("cgrates.org:dy")
+	acc, err := dataStorage.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
@@ -1023,14 +1022,14 @@ func TestDebitRoundingRefund(t *testing.T) {
 		t.Log(utils.ToIJSON(cc))
 		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
 	}
-	acc, err = accountingStorage.GetAccount("cgrates.org:dy")
+	acc, err = dataStorage.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 }
 
 func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1054,7 +1053,7 @@ func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 }
 
 func TestMaxDebitWithMaxCostFree(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1078,7 +1077,7 @@ func TestMaxDebitWithMaxCostFree(t *testing.T) {
 }
 
 func TestGetCostWithMaxCostFree(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1103,7 +1102,7 @@ func TestGetCostWithMaxCostFree(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
-	aliasService = NewAliasHandler(accountingStorage)
+	aliasService = NewAliasHandler(dataStorage)
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
@@ -1133,12 +1132,12 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithAccountShared(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	ap, _ = ratingStorage.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
+	ap, _ = dataStorage.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1174,12 +1173,12 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 }
 
 func TestMaxDebitWithAccountShared(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	ap, _ = ratingStorage.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
+	ap, _ = dataStorage.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1205,7 +1204,7 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 	if len(balanceMap) != 1 || balanceMap[0].GetValue() != 0 {
 		t.Errorf("Wrong shared balance debited: %+v", balanceMap[0])
 	}
-	other, err := accountingStorage.GetAccount("vdf:empty10")
+	other, err := dataStorage.GetAccount("vdf:empty10")
 	if err != nil || other.BalanceMap[utils.MONETARY][0].GetValue() != 7.5 {
 		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MONETARY][0])
 	}
@@ -1335,7 +1334,7 @@ func TestMaxSesionTimeEmptyBalance(t *testing.T) {
 		Account:     "luna",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("vdf:luna")
+	acc, _ := dataStorage.GetAccount("vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != 0 {
 		t.Error("Error get max session for 0 acount", err)
@@ -1353,7 +1352,7 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 		Account:     "luna",
 		Destination: "112",
 	}
-	acc, _ := accountingStorage.GetAccount("vdf:luna")
+	acc, _ := dataStorage.GetAccount("vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime == 0 {
 		t.Error("Error get max session for 0 acount", err)
@@ -1370,7 +1369,7 @@ func TestMaxSesionTimeLong(t *testing.T) {
 		Subject:     "money",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("cgrates.org:money")
+	acc, _ := dataStorage.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != cd.TimeEnd.Sub(cd.TimeStart) {
 		t.Error("Error get max session for acount:", allowedTime, err)
@@ -1387,7 +1386,7 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 		Subject:     "money",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("cgrates.org:money")
+	acc, _ := dataStorage.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	expected, err := time.ParseDuration("9999s") // 1 is the connect fee
 	if err != nil || allowedTime != expected {
@@ -1397,7 +1396,7 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 }
 
 func TestDebitFromShareAndNormal(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1426,7 +1425,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 }
 
 func TestDebitFromEmptyShare(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP_EMPTY_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP_EMPTY_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1455,7 +1454,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 }
 
 func TestDebitNegatve(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("POST_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("POST_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1495,7 +1494,7 @@ func TestDebitNegatve(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRate(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1525,7 +1524,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 }
 
 func TestMaxDebitForceDuration(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1550,7 +1549,7 @@ func TestMaxDebitForceDuration(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1579,7 +1578,7 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 }
 
 func TestMaxDebitConsumesMinutes(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dataStorage.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1668,7 +1667,7 @@ func TestCDRefundIncrements(t *testing.T) {
 			},
 		},
 	}
-	accountingStorage.SetAccount(ub)
+	dataStorage.SetAccount(ub)
 	increments := Increments{
 		&Increment{Cost: 2, BalanceInfo: &DebitInfo{Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
 		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{Unit: &UnitInfo{UUID: "minutea"}, Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
@@ -1676,7 +1675,7 @@ func TestCDRefundIncrements(t *testing.T) {
 	}
 	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()
-	ub, _ = accountingStorage.GetAccount(ub.ID)
+	ub, _ = dataStorage.GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 13 ||
 		ub.BalanceMap[utils.VOICE][1].GetValue() != 14 {
@@ -1697,7 +1696,7 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 			},
 		},
 	}
-	accountingStorage.SetAccount(ub)
+	dataStorage.SetAccount(ub)
 	increments := Increments{
 		&Increment{Cost: 0, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
 		&Increment{Cost: 0, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
@@ -1705,7 +1704,7 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 	}
 	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()
-	ub, _ = accountingStorage.GetAccount(ub.ID)
+	ub, _ = dataStorage.GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
 		ub.BalanceMap[utils.VOICE][1].GetValue() != 10 {
@@ -1721,7 +1720,7 @@ func BenchmarkStorageGetting(b *testing.B) {
 	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		ratingStorage.GetRatingProfile(cd.GetKey(cd.Subject), false, utils.NonTransactional)
+		dataStorage.GetRatingProfile(cd.GetKey(cd.Subject), false, utils.NonTransactional)
 	}
 }
 

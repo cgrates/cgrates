@@ -56,7 +56,7 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 			return err
 		}
 	}
-	if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 FROM %s", utils.TBL_CDRS)); err != nil {
+	if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 FROM %s", utils.TBLCDRs)); err != nil {
 		return err
 	}
 	return nil
@@ -100,12 +100,12 @@ func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 func (self *SQLStorage) GetTpIds() ([]string, error) {
 	rows, err := self.Db.Query(
 		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
-			utils.TBL_TP_TIMINGS,
-			utils.TBL_TP_DESTINATIONS,
-			utils.TBL_TP_RATES,
-			utils.TBL_TP_DESTINATION_RATES,
-			utils.TBL_TP_RATING_PLANS,
-			utils.TBL_TP_RATE_PROFILES))
+			utils.TBLTPTimings,
+			utils.TBLTPDestinations,
+			utils.TBLTPRates,
+			utils.TBLTPDestinationRates,
+			utils.TBLTPRatingPlans,
+			utils.TBLTPRateProfiles))
 	if err != nil {
 		return nil, err
 	}
@@ -188,9 +188,9 @@ func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) error {
 	tx := self.db.Begin()
 	if len(table) == 0 { // Remove tpid out of all tables
-		for _, tblName := range []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES,
-			utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_LCRS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS, utils.TBL_TP_ACCOUNT_ACTIONS,
-			utils.TBL_TP_DERIVED_CHARGERS, utils.TBL_TP_ALIASES, utils.TBL_TP_USERS, utils.TBLTPResourceLimits} {
+		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
+			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
+			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResourceLimits} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -213,20 +213,19 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	return nil
 }
 
-func (self *SQLStorage) SetTpTimings(timings []TpTiming) error {
+func (self *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 	if len(timings) == 0 {
 		return nil
 	}
 	tx := self.db.Begin()
 	for _, timing := range timings {
-		if err := tx.Where(&TpTiming{Tpid: timing.Tpid, Tag: timing.Tag}).Delete(TpTiming{}).Error; err != nil {
+		if err := tx.Where(&TpTiming{Tpid: timing.TPid, Tag: timing.ID}).Delete(TpTiming{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		save := tx.Save(&timing)
-		if save.Error != nil {
-			tx.Rollback()
-			return save.Error
+		t := APItoModelTiming(timing)
+		if err := tx.Save(&t).Error; err != nil {
+			return err
 		}
 	}
 	tx.Commit()
@@ -240,186 +239,177 @@ func (self *SQLStorage) SetTPDestinations(dests []*utils.TPDestination) error {
 	tx := self.db.Begin()
 	for _, dst := range dests {
 		// Remove previous
-		if err := tx.Where(&TpDestination{Tpid: dst.TPid, Tag: dst.Tag}).Delete(TpDestination{}).Error; err != nil {
+		if err := tx.Where(&TpDestination{Tpid: dst.TPid, Tag: dst.ID}).Delete(TpDestination{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, dstPrfx := range dst.Prefixes {
-			if err := tx.Save(&TpDestination{Tpid: dst.TPid, Tag: dst.Tag, Prefix: dstPrfx}).Error; err != nil {
-				tx.Rollback()
+		for _, d := range APItoModelDestination(dst) {
+			if err := tx.Save(&d).Error; err != nil {
 				return err
 			}
 		}
+		// for _, dstPrfx := range dst.Prefixes {
+		// 	if err := tx.Save(&TpDestination{Tpid: dst.TPid, Tag: dst.Tag, Prefix: dstPrfx}).Error; err != nil {
+		// 		tx.Rollback()
+		// 		return err
+		// 	}
+		// }
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpRates(rs []TpRate) error {
+func (self *SQLStorage) SetTPRates(rs []*utils.TPRate) error {
 	if len(rs) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, rate := range rs {
-		if found, _ := m[rate.Tag]; !found {
-			m[rate.Tag] = true
-			if err := tx.Where(&TpRate{Tpid: rate.Tpid, Tag: rate.Tag}).Delete(TpRate{}).Error; err != nil {
+		if found, _ := m[rate.ID]; !found {
+			m[rate.ID] = true
+			if err := tx.Where(&TpRate{Tpid: rate.TPid, Tag: rate.ID}).Delete(TpRate{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		save := tx.Save(&rate)
-		if save.Error != nil {
-			tx.Rollback()
-			return save.Error
+		for _, r := range APItoModelRate(rate) {
+			if err := tx.Save(&r).Error; err != nil {
+				return err
+			}
 		}
-
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpDestinationRates(drs []TpDestinationRate) error {
+func (self *SQLStorage) SetTPDestinationRates(drs []*utils.TPDestinationRate) error {
 	if len(drs) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, dRate := range drs {
-		if found, _ := m[dRate.Tag]; !found {
-			m[dRate.Tag] = true
-			if err := tx.Where(&TpDestinationRate{Tpid: dRate.Tpid, Tag: dRate.Tag}).Delete(TpDestinationRate{}).Error; err != nil {
+		if found, _ := m[dRate.ID]; !found {
+			m[dRate.ID] = true
+			if err := tx.Where(&TpDestinationRate{Tpid: dRate.TPid, Tag: dRate.ID}).Delete(TpDestinationRate{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		saved := tx.Save(&dRate)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		for _, d := range APItoModelDestinationRate(dRate) {
+			if err := tx.Save(&d).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpRatingPlans(drts []TpRatingPlan) error {
-	if len(drts) == 0 {
+func (self *SQLStorage) SetTPRatingPlans(rps []*utils.TPRatingPlan) error {
+	if len(rps) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
-	for _, rPlan := range drts {
-		if found, _ := m[rPlan.Tag]; !found {
-			m[rPlan.Tag] = true
-			if err := tx.Where(&TpRatingPlan{Tpid: rPlan.Tpid, Tag: rPlan.Tag}).Delete(TpRatingPlan{}).Error; err != nil {
+	for _, rPlan := range rps {
+		if found, _ := m[rPlan.ID]; !found {
+			m[rPlan.ID] = true
+			if err := tx.Where(&TpRatingPlan{Tpid: rPlan.TPid, Tag: rPlan.ID}).Delete(TpRatingPlan{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		saved := tx.Save(&rPlan)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		for _, r := range APItoModelRatingPlan(rPlan) {
+			if err := tx.Save(&r).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpRatingProfiles(rpfs []TpRatingProfile) error {
+func (self *SQLStorage) SetTPRatingProfiles(rpfs []*utils.TPRatingProfile) error {
 	if len(rpfs) == 0 {
 		return nil //Nothing to set
 	}
-
 	tx := self.db.Begin()
 	for _, rpf := range rpfs {
-		if err := tx.Where(&TpRatingProfile{Tpid: rpf.Tpid, Loadid: rpf.Loadid, Direction: rpf.Direction, Tenant: rpf.Tenant, Category: rpf.Category, Subject: rpf.Subject}).Delete(TpRatingProfile{}).Error; err != nil {
+		if err := tx.Where(&TpRatingProfile{Tpid: rpf.TPid, Loadid: rpf.LoadId, Direction: rpf.Direction, Tenant: rpf.Tenant, Category: rpf.Category, Subject: rpf.Subject}).Delete(TpRatingProfile{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		saved := tx.Save(&rpf)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		for _, r := range APItoModelRatingProfile(rpf) {
+			if err := tx.Save(&r).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpSharedGroups(sgs []TpSharedGroup) error {
+func (self *SQLStorage) SetTPSharedGroups(sgs []*utils.TPSharedGroups) error {
 	if len(sgs) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, sGroup := range sgs {
-		if found, _ := m[sGroup.Tag]; !found {
-			m[sGroup.Tag] = true
-			if err := tx.Where(&TpSharedGroup{Tpid: sGroup.Tpid, Tag: sGroup.Tag}).Delete(TpSharedGroup{}).Error; err != nil {
+		if found, _ := m[sGroup.ID]; !found {
+			m[sGroup.ID] = true
+			if err := tx.Where(&TpSharedGroup{Tpid: sGroup.TPid, Tag: sGroup.ID}).Delete(TpSharedGroup{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		saved := tx.Save(&sGroup)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		for _, s := range APItoModelSharedGroup(sGroup) {
+			if err := tx.Save(&s).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpCdrStats(css []TpCdrstat) error {
+func (self *SQLStorage) SetTPCdrStats(css []*utils.TPCdrStats) error {
 	if len(css) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, cStat := range css {
-		if found, _ := m[cStat.Tag]; !found {
-			m[cStat.Tag] = true
-			if err := tx.Where(&TpCdrstat{Tpid: cStat.Tpid, Tag: cStat.Tag}).Delete(TpCdrstat{}).Error; err != nil {
+		if found, _ := m[cStat.ID]; !found {
+			m[cStat.ID] = true
+			if err := tx.Where(&TpCdrstat{Tpid: cStat.TPid, Tag: cStat.ID}).Delete(TpCdrstat{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		saved := tx.Save(&cStat)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		for _, c := range APItoModelCdrStat(cStat) {
+			if err := tx.Save(&c).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpDerivedChargers(sgs []TpDerivedCharger) error {
+func (self *SQLStorage) SetTPDerivedChargers(sgs []*utils.TPDerivedChargers) error {
 	if len(sgs) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, dCharger := range sgs {
-		if found, _ := m[dCharger.GetDerivedChargersId()]; !found {
-			m[dCharger.GetDerivedChargersId()] = true
-			tmpDc := &TpDerivedCharger{}
-			if err := tmpDc.SetDerivedChargersId(dCharger.GetDerivedChargersId()); err != nil {
-				tx.Rollback()
-				return err
-			}
-
-			if err := tx.Where(tmpDc).Delete(TpDerivedCharger{
-				Tpid:      dCharger.Tpid,
+		if found, _ := m[dCharger.Direction]; !found {
+			m[dCharger.Direction] = true
+			if err := tx.Delete(TpDerivedCharger{
+				Tpid:      dCharger.TPid,
 				Direction: dCharger.Direction,
 				Tenant:    dCharger.Tenant,
 				Category:  dCharger.Category,
@@ -430,25 +420,24 @@ func (self *SQLStorage) SetTpDerivedChargers(sgs []TpDerivedCharger) error {
 				return err
 			}
 		}
-		if err := tx.Save(&dCharger).Error; err != nil {
-			tx.Rollback()
-			return err
+		for _, d := range APItoModelDerivedCharger(dCharger) {
+			if err := tx.Save(&d).Error; err != nil {
+				return err
+			}
 		}
-
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpLCRs(lcrs []TpLcrRule) error {
+func (self *SQLStorage) SetTPLCRs(lcrs []*utils.TPLcrRules) error {
 	if len(lcrs) == 0 {
 		return nil //Nothing to set
 	}
-
 	tx := self.db.Begin()
 	for _, lcr := range lcrs {
 		if err := tx.Where(&TpLcrRule{
-			Tpid:      lcr.Tpid,
+			Tpid:      lcr.TPid,
 			Direction: lcr.Direction,
 			Tenant:    lcr.Tenant,
 			Category:  lcr.Category,
@@ -458,42 +447,41 @@ func (self *SQLStorage) SetTpLCRs(lcrs []TpLcrRule) error {
 			tx.Rollback()
 			return err
 		}
-		if err := tx.Save(&lcr).Error; err != nil {
-			tx.Rollback()
-			return err
+		for _, l := range APItoModelLcrRule(lcr) {
+			if err := tx.Save(&l).Error; err != nil {
+				return err
+			}
 		}
-
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpActions(acts []TpAction) error {
+func (self *SQLStorage) SetTPActions(acts []*utils.TPActions) error {
 	if len(acts) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, a := range acts {
-		if found, _ := m[a.Tag]; !found {
-			m[a.Tag] = true
-			if err := tx.Where(&TpAction{Tpid: a.Tpid, Tag: a.Tag}).Delete(TpAction{}).Error; err != nil {
+		if found, _ := m[a.ID]; !found {
+			m[a.ID] = true
+			if err := tx.Where(&TpAction{Tpid: a.TPid, Tag: a.ID}).Delete(TpAction{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		saved := tx.Save(&a)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		for _, sa := range APItoModelAction(a) {
+			if err := tx.Save(&sa).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) SetTpActionPlans(ats []TpActionPlan) error {
+func (self *SQLStorage) SetTPActionPlans(ats []*utils.TPActionPlan) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
@@ -501,42 +489,41 @@ func (self *SQLStorage) SetTpActionPlans(ats []TpActionPlan) error {
 
 	tx := self.db.Begin()
 	for _, aPlan := range ats {
-		if found, _ := m[aPlan.Tag]; !found {
-			m[aPlan.Tag] = true
-			if err := tx.Where(&TpActionPlan{Tpid: aPlan.Tpid, Tag: aPlan.Tag}).Delete(TpActionPlan{}).Error; err != nil {
+		if found, _ := m[aPlan.ID]; !found {
+			m[aPlan.ID] = true
+			if err := tx.Where(&TpActionPlan{Tpid: aPlan.TPid, Tag: aPlan.ID}).Delete(TpActionPlan{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		saved := tx.Save(&aPlan)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		for _, a := range APItoModelActionPlan(aPlan) {
+			if err := tx.Save(&a).Error; err != nil {
+				return err
+			}
 		}
 	}
 	r := tx.Commit()
 	return r.Error
 }
 
-func (self *SQLStorage) SetTpActionTriggers(ats []TpActionTrigger) error {
+func (self *SQLStorage) SetTPActionTriggers(ats []*utils.TPActionTriggers) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, aTrigger := range ats {
-		if found, _ := m[aTrigger.Tag]; !found {
-			m[aTrigger.Tag] = true
-			if err := tx.Where(&TpActionTrigger{Tpid: aTrigger.Tpid, Tag: aTrigger.Tag}).Delete(TpActionTrigger{}).Error; err != nil {
+		if found, _ := m[aTrigger.ID]; !found {
+			m[aTrigger.ID] = true
+			if err := tx.Where(&TpActionTrigger{Tpid: aTrigger.TPid, Tag: aTrigger.ID}).Delete(TpActionTrigger{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		saved := tx.Save(&aTrigger)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		for _, a := range APItoModelActionTrigger(aTrigger) {
+			if err := tx.Save(&a).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
@@ -544,7 +531,7 @@ func (self *SQLStorage) SetTpActionTriggers(ats []TpActionTrigger) error {
 }
 
 // Sets a group of account actions. Map key has the role of grouping within a tpid
-func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
+func (self *SQLStorage) SetTPAccountActions(aas []*utils.TPAccountActions) error {
 	if len(aas) == 0 {
 		return nil //Nothing to set
 	}
@@ -552,44 +539,38 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 
 	tx := self.db.Begin()
 	for _, aa := range aas {
-		if found, _ := m[aa.GetAccountActionId()]; !found {
-			m[aa.GetAccountActionId()] = true
-			if err := tx.Where(&TpAccountAction{Tpid: aa.Tpid, Loadid: aa.Loadid, Tenant: aa.Tenant, Account: aa.Account}).Delete(TpAccountAction{}).Error; err != nil {
+		if found, _ := m[aa.GetId()]; !found {
+			m[aa.GetId()] = true
+			if err := tx.Where(&TpAccountAction{Tpid: aa.TPid, Loadid: aa.LoadId, Tenant: aa.Tenant, Account: aa.Account}).Delete(&TpAccountAction{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		saved := tx.Save(&aa)
-		if saved.Error != nil {
-			tx.Rollback()
-			return saved.Error
+		sa := APItoModelAccountAction(aa)
+		if err := tx.Save(&sa).Error; err != nil {
+			return err
 		}
 	}
 	tx.Commit()
 	return nil
-
 }
 
-func (self *SQLStorage) SetTpResourceLimits(rls TpResourceLimits) error {
+func (self *SQLStorage) SetTPResourceLimits(rls []*utils.TPResourceLimit) error {
 	if len(rls) == 0 {
 		return nil
 	}
-	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, rl := range rls {
-		if found, _ := m[rl.Tag]; !found {
-			m[rl.Tag] = true
-			if err := tx.Where(&TpResourceLimit{Tpid: rl.Tpid, Tag: rl.Tag}).Delete(TpResourceLimit{}).Error; err != nil {
+		// Remove previous
+		if err := tx.Where(&TpResourceLimit{Tpid: rl.TPid, Tag: rl.ID}).Delete(TpResourceLimit{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mrl := range APItoModelResourceLimit(rl) {
+			if err := tx.Save(&mrl).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
-		}
-		save := tx.Save(&rl)
-		if save.Error != nil {
-			fmt.Println(save.Error)
-			tx.Rollback()
-			return save.Error
 		}
 	}
 	tx.Commit()
@@ -768,7 +749,7 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 // qryFltr.Unscoped will ignore soft deletes or delete records permanently
 func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var cdrs []*CDR
-	q := self.db.Table(utils.TBL_CDRS).Select("*")
+	q := self.db.Table(utils.TBLCDRs).Select("*")
 	if qryFltr.Unscoped {
 		q = q.Unscoped()
 	}
@@ -874,10 +855,10 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		q = q.Where("disconnect_cause not in (?)", qryFltr.NotDisconnectCauses)
 	}
 	if len(qryFltr.Costs) != 0 {
-		q = q.Where(utils.TBL_CDRS+".cost in (?)", qryFltr.Costs)
+		q = q.Where(utils.TBLCDRs+".cost in (?)", qryFltr.Costs)
 	}
 	if len(qryFltr.NotCosts) != 0 {
-		q = q.Where(utils.TBL_CDRS+".cost not in (?)", qryFltr.NotCosts)
+		q = q.Where(utils.TBLCDRs+".cost not in (?)", qryFltr.NotCosts)
 	}
 	if len(qryFltr.ExtraFields) != 0 { // Extra fields searches, implemented as contains in extra field
 		qIds := bytes.NewBufferString("(")
@@ -914,10 +895,10 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		q = q.Where(qIds.String())
 	}
 	if qryFltr.OrderIDStart != nil { // Keep backwards compatible by testing 0 value
-		q = q.Where(utils.TBL_CDRS+".id >= ?", *qryFltr.OrderIDStart)
+		q = q.Where(utils.TBLCDRs+".id >= ?", *qryFltr.OrderIDStart)
 	}
 	if qryFltr.OrderIDEnd != nil {
-		q = q.Where(utils.TBL_CDRS+".id < ?", *qryFltr.OrderIDEnd)
+		q = q.Where(utils.TBLCDRs+".id < ?", *qryFltr.OrderIDEnd)
 	}
 	if qryFltr.SetupTimeStart != nil {
 		q = q.Where("setup_time >= ?", qryFltr.SetupTimeStart)
@@ -1078,11 +1059,11 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	return cdrs, 0, nil
 }
 
-func (self *SQLStorage) GetTPDestinations(tpid, tag string) (uTPDsts []*utils.TPDestination, err error) {
+func (self *SQLStorage) GetTPDestinations(tpid, id string) (uTPDsts []*utils.TPDestination, err error) {
 	var tpDests TpDestinations
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpDests).Error; err != nil {
 		return nil, err
@@ -1093,26 +1074,30 @@ func (self *SQLStorage) GetTPDestinations(tpid, tag string) (uTPDsts []*utils.TP
 	return tpDests.AsTPDestinations(), nil
 }
 
-func (self *SQLStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
-	var tpRates []TpRate
+func (self *SQLStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
+	var tpRates TpRates
 	q := self.db.Where("tpid = ?", tpid).Order("id")
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpRates).Error; err != nil {
 		return nil, err
 	}
-	if len(tpRates) == 0 {
-		return tpRates, utils.ErrNotFound
+	if rs, err := tpRates.AsTPRates(); err != nil {
+		return nil, err
+	} else {
+		if len(rs) == 0 {
+			return rs, utils.ErrNotFound
+		}
+		return rs, nil
 	}
-	return tpRates, nil
 }
 
-func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *utils.Paginator) ([]TpDestinationRate, error) {
-	var tpDestinationRates []TpDestinationRate
+func (self *SQLStorage) GetTPDestinationRates(tpid, id string, pagination *utils.Paginator) ([]*utils.TPDestinationRate, error) {
+	var tpDestinationRates TpDestinationRates
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if pagination != nil {
 		if pagination.Limit != nil {
@@ -1125,32 +1110,37 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *util
 	if err := q.Find(&tpDestinationRates).Error; err != nil {
 		return nil, err
 	}
-	if len(tpDestinationRates) == 0 {
-		return tpDestinationRates, utils.ErrNotFound
+	if drs, err := tpDestinationRates.AsTPDestinationRates(); err != nil {
+		return nil, err
+	} else {
+		if len(drs) == 0 {
+			return drs, utils.ErrNotFound
+		}
+		return drs, nil
 	}
-	return tpDestinationRates, nil
 }
 
-func (self *SQLStorage) GetTpTimings(tpid, tag string) ([]TpTiming, error) {
-	var tpTimings []TpTiming
+func (self *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
+	var tpTimings TpTimings
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpTimings).Error; err != nil {
 		return nil, err
 	}
-	if len(tpTimings) == 0 {
-		return tpTimings, utils.ErrNotFound
+	ts := tpTimings.AsTPTimings()
+	if len(ts) == 0 {
+		return ts, utils.ErrNotFound
 	}
-	return tpTimings, nil
+	return ts, nil
 }
 
-func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Paginator) ([]TpRatingPlan, error) {
-	var tpRatingPlans []TpRatingPlan
+func (self *SQLStorage) GetTPRatingPlans(tpid, id string, pagination *utils.Paginator) ([]*utils.TPRatingPlan, error) {
+	var tpRatingPlans TpRatingPlans
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpRatingPlans).Error; err != nil {
 		return nil, err
@@ -1163,15 +1153,22 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Pag
 			q = q.Offset(*pagination.Offset)
 		}
 	}
-	if len(tpRatingPlans) == 0 {
-		return tpRatingPlans, utils.ErrNotFound
+	if rps, err := tpRatingPlans.AsTPRatingPlans(); err != nil {
+		return nil, err
+	} else {
+		if len(rps) == 0 {
+			return rps, utils.ErrNotFound
+		}
+		return rps, nil
 	}
-	return tpRatingPlans, nil
 }
 
-func (self *SQLStorage) GetTpRatingProfiles(filter *TpRatingProfile) ([]TpRatingProfile, error) {
-	var tpRpfs []TpRatingProfile
-	q := self.db.Where("tpid = ?", filter.Tpid)
+func (self *SQLStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
+	var tpRpfs TpRatingProfiles
+	q := self.db.Where("tpid = ?", filter.TPid)
+	if len(filter.LoadId) != 0 {
+		q = q.Where("loadid = ?", filter.LoadId)
+	}
 	if len(filter.Direction) != 0 {
 		q = q.Where("direction = ?", filter.Direction)
 	}
@@ -1183,37 +1180,42 @@ func (self *SQLStorage) GetTpRatingProfiles(filter *TpRatingProfile) ([]TpRating
 	}
 	if len(filter.Subject) != 0 {
 		q = q.Where("subject = ?", filter.Subject)
-	}
-	if len(filter.Loadid) != 0 {
-		q = q.Where("loadid = ?", filter.Loadid)
 	}
 	if err := q.Find(&tpRpfs).Error; err != nil {
 		return nil, err
 	}
-	if len(tpRpfs) == 0 {
-		return tpRpfs, utils.ErrNotFound
+	if rps, err := tpRpfs.AsTPRatingProfiles(); err != nil {
+		return nil, err
+	} else {
+		if len(rps) == 0 {
+			return rps, utils.ErrNotFound
+		}
+		return rps, nil
 	}
-	return tpRpfs, nil
 }
 
-func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, error) {
-	var tpShareGroups []TpSharedGroup
+func (self *SQLStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
+	var tpShareGroups TpSharedGroups
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpShareGroups).Error; err != nil {
 		return nil, err
 	}
-	if len(tpShareGroups) == 0 {
-		return tpShareGroups, utils.ErrNotFound
+	if sgs, err := tpShareGroups.AsTPSharedGroups(); err != nil {
+		return nil, err
+	} else {
+		if len(sgs) == 0 {
+			return sgs, utils.ErrNotFound
+		}
+		return sgs, nil
 	}
-	return tpShareGroups, nil
 }
 
-func (self *SQLStorage) GetTpLCRs(filter *TpLcrRule) ([]TpLcrRule, error) {
-	var tpLcrRule []TpLcrRule
-	q := self.db.Where("tpid = ?", filter.Tpid)
+func (self *SQLStorage) GetTPLCRs(filter *utils.TPLcrRules) ([]*utils.TPLcrRules, error) {
+	var tpLcrRules TpLcrRules
+	q := self.db.Where("tpid = ?", filter.TPid)
 	if len(filter.Direction) != 0 {
 		q = q.Where("direction = ?", filter.Direction)
 	}
@@ -1229,86 +1231,104 @@ func (self *SQLStorage) GetTpLCRs(filter *TpLcrRule) ([]TpLcrRule, error) {
 	if len(filter.Subject) != 0 {
 		q = q.Where("subject = ?", filter.Subject)
 	}
-
-	if err := q.Find(&tpLcrRule).Error; err != nil {
+	if err := q.Find(&tpLcrRules).Error; err != nil {
 		return nil, err
 	}
-	if len(tpLcrRule) == 0 {
-		return tpLcrRule, utils.ErrNotFound
+	if lrs, err := tpLcrRules.AsTPLcrRules(); err != nil {
+		return nil, err
+	} else {
+		if len(lrs) == 0 {
+			return lrs, utils.ErrNotFound
+		}
+		return lrs, nil
 	}
-	return tpLcrRule, nil
 }
 
-func (self *SQLStorage) GetTpActions(tpid, tag string) ([]TpAction, error) {
-	var tpActions []TpAction
+func (self *SQLStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
+	var tpActions TpActions
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpActions).Error; err != nil {
 		return nil, err
 	}
-	if len(tpActions) == 0 {
-		return tpActions, utils.ErrNotFound
+	if as, err := tpActions.AsTPActions(); err != nil {
+		return nil, err
+	} else {
+		if len(as) == 0 {
+			return as, utils.ErrNotFound
+		}
+		return as, nil
 	}
-	return tpActions, nil
 }
 
-func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger, error) {
-	var tpActionTriggers []TpActionTrigger
+func (self *SQLStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
+	var tpActionTriggers TpActionTriggers
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpActionTriggers).Error; err != nil {
 		return nil, err
 	}
-	if len(tpActionTriggers) == 0 {
-		return tpActionTriggers, utils.ErrNotFound
+	if ats, err := tpActionTriggers.AsTPActionTriggers(); err != nil {
+		return nil, err
+	} else {
+		if len(ats) == 0 {
+			return ats, utils.ErrNotFound
+		}
+		return ats, nil
 	}
-	return tpActionTriggers, nil
 }
 
-func (self *SQLStorage) GetTpActionPlans(tpid, tag string) ([]TpActionPlan, error) {
-	var tpActionPlans []TpActionPlan
+func (self *SQLStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
+	var tpActionPlans TpActionPlans
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpActionPlans).Error; err != nil {
 		return nil, err
 	}
-	if len(tpActionPlans) == 0 {
-		return tpActionPlans, utils.ErrNotFound
+	if aps, err := tpActionPlans.AsTPActionPlans(); err != nil {
+		return nil, err
+	} else {
+		if len(aps) == 0 {
+			return aps, utils.ErrNotFound
+		}
+		return aps, nil
 	}
-	return tpActionPlans, nil
 }
 
-func (self *SQLStorage) GetTpAccountActions(filter *TpAccountAction) ([]TpAccountAction, error) {
-
-	var tpAccActs []TpAccountAction
-	q := self.db.Where("tpid = ?", filter.Tpid)
+func (self *SQLStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
+	var tpAccActs TpAccountActions
+	q := self.db.Where("tpid = ?", filter.TPid)
+	if len(filter.LoadId) != 0 {
+		q = q.Where("loadid = ?", filter.LoadId)
+	}
 	if len(filter.Tenant) != 0 {
 		q = q.Where("tenant = ?", filter.Tenant)
 	}
 	if len(filter.Account) != 0 {
 		q = q.Where("account = ?", filter.Account)
 	}
-	if len(filter.Loadid) != 0 {
-		q = q.Where("loadid = ?", filter.Loadid)
-	}
 	if err := q.Find(&tpAccActs).Error; err != nil {
 		return nil, err
 	}
-	if len(tpAccActs) == 0 {
-		return tpAccActs, utils.ErrNotFound
+	if aas, err := tpAccActs.AsTPAccountActions(); err != nil {
+		return nil, err
+	} else {
+		if len(aas) == 0 {
+			return aas, utils.ErrNotFound
+		}
+		return aas, nil
 	}
-	return tpAccActs, nil
 }
 
-func (self *SQLStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDerivedCharger, error) {
-	var tpDerivedChargers []TpDerivedCharger
-	q := self.db.Where("tpid = ?", filter.Tpid)
+func (self *SQLStorage) GetTPDerivedChargers(filter *utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error) {
+	var tpDerivedChargers TpDerivedChargers
+	q := self.db.Where("tpid = ?", filter.TPid)
 	if len(filter.Direction) != 0 {
 		q = q.Where("direction = ?", filter.Direction)
 	}
@@ -1324,61 +1344,68 @@ func (self *SQLStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 	if len(filter.Subject) != 0 {
 		q = q.Where("subject = ?", filter.Subject)
 	}
-	if len(filter.Loadid) != 0 {
-		q = q.Where("loadid = ?", filter.Loadid)
+	if len(filter.LoadId) != 0 {
+		q = q.Where("loadid = ?", filter.LoadId)
 	}
 	if err := q.Find(&tpDerivedChargers).Error; err != nil {
 		return nil, err
 	}
-	if len(tpDerivedChargers) == 0 {
-		return tpDerivedChargers, utils.ErrNotFound
+	if dcs, err := tpDerivedChargers.AsTPDerivedChargers(); err != nil {
+		return nil, err
+	} else {
+		if len(dcs) == 0 {
+			return dcs, utils.ErrNotFound
+		}
+		return dcs, nil
 	}
-	return tpDerivedChargers, nil
 }
 
-func (self *SQLStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrstat, error) {
-	var tpCdrStats []TpCdrstat
+func (self *SQLStorage) GetTPCdrStats(tpid, id string) ([]*utils.TPCdrStats, error) {
+	var tpCdrStats TpCdrStats
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
 	if err := q.Find(&tpCdrStats).Error; err != nil {
 		return nil, err
 	}
-	if len(tpCdrStats) == 0 {
-		return tpCdrStats, utils.ErrNotFound
+	if css, err := tpCdrStats.AsTPCdrStats(); err != nil {
+		return nil, err
+	} else {
+		if len(css) == 0 {
+			return css, utils.ErrNotFound
+		}
+		return css, nil
 	}
-	return tpCdrStats, nil
 }
 
-func (self *SQLStorage) SetTpUsers(users []TpUser) error {
+func (self *SQLStorage) SetTPUsers(users []*utils.TPUsers) error {
 	if len(users) == 0 {
 		return nil
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, user := range users {
-		if found, _ := m[user.GetId()]; !found {
-			m[user.GetId()] = true
-			if err := tx.Where(&TpUser{Tpid: user.Tpid, Tenant: user.Tenant, UserName: user.UserName}).Delete(TpUser{}).Error; err != nil {
+		if found, _ := m[user.Tenant]; !found {
+			m[user.Tenant] = true
+			if err := tx.Where(&TpUser{Tpid: user.TPid, Tenant: user.Tenant, UserName: user.UserName}).Delete(&TpUser{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		save := tx.Save(&user)
-		if save.Error != nil {
-			tx.Rollback()
-			return save.Error
+		for _, u := range APItoModelUsers(user) {
+			if err := tx.Save(&u).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) GetTpUsers(filter *TpUser) ([]TpUser, error) {
-	var tpUsers []TpUser
-	q := self.db.Where("tpid = ?", filter.Tpid)
+func (self *SQLStorage) GetTPUsers(filter *utils.TPUsers) ([]*utils.TPUsers, error) {
+	var tpUsers TpUsers
+	q := self.db.Where("tpid = ?", filter.TPid)
 	if len(filter.Tenant) != 0 {
 		q = q.Where("tenant = ?", filter.Tenant)
 	}
@@ -1388,24 +1415,27 @@ func (self *SQLStorage) GetTpUsers(filter *TpUser) ([]TpUser, error) {
 	if err := q.Find(&tpUsers).Error; err != nil {
 		return nil, err
 	}
-	if len(tpUsers) == 0 {
-		return tpUsers, utils.ErrNotFound
+	if us, err := tpUsers.AsTPUsers(); err != nil {
+		return nil, err
+	} else {
+		if len(us) == 0 {
+			return us, utils.ErrNotFound
+		}
+		return us, nil
 	}
-	return tpUsers, nil
 }
 
-func (self *SQLStorage) SetTpAliases(aliases []TpAlias) error {
+func (self *SQLStorage) SetTPAliases(aliases []*utils.TPAliases) error {
 	if len(aliases) == 0 {
 		return nil
 	}
 	m := make(map[string]bool)
-
 	tx := self.db.Begin()
 	for _, alias := range aliases {
 		if found, _ := m[alias.GetId()]; !found {
 			m[alias.GetId()] = true
 			if err := tx.Where(&TpAlias{
-				Tpid:      alias.Tpid,
+				Tpid:      alias.TPid,
 				Direction: alias.Direction,
 				Tenant:    alias.Tenant,
 				Category:  alias.Category,
@@ -1417,19 +1447,19 @@ func (self *SQLStorage) SetTpAliases(aliases []TpAlias) error {
 				return err
 			}
 		}
-		save := tx.Save(&alias)
-		if save.Error != nil {
-			tx.Rollback()
-			return save.Error
+		for _, a := range APItoModelAliases(alias) {
+			if err := tx.Save(&a).Error; err != nil {
+				return err
+			}
 		}
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
-	var tpAliases []TpAlias
-	q := self.db.Where("tpid = ?", filter.Tpid)
+func (self *SQLStorage) GetTPAliases(filter *utils.TPAliases) ([]*utils.TPAliases, error) {
+	var tpAliases TpAliases
+	q := self.db.Where("tpid = ?", filter.TPid)
 	if len(filter.Direction) != 0 {
 		q = q.Where("direction = ?", filter.Direction)
 	}
@@ -1448,26 +1478,33 @@ func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 	if len(filter.Context) != 0 {
 		q = q.Where("context = ?", filter.Context)
 	}
-
 	if err := q.Find(&tpAliases).Error; err != nil {
 		return nil, err
 	}
-	return tpAliases, nil
+	if as, err := tpAliases.AsTPAliases(); err != nil {
+		return nil, err
+	} else {
+		if len(as) == 0 {
+			return as, utils.ErrNotFound
+		}
+		return as, nil
+	}
 }
 
-func (self *SQLStorage) GetTpResourceLimits(tpid, tag string) (TpResourceLimits, error) {
-	var tpResourceLimits TpResourceLimits
+func (self *SQLStorage) GetTPResourceLimits(tpid, id string) ([]*utils.TPResourceLimit, error) {
+	var rls TpResourceLimits
 	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
 	}
-	if err := q.Find(&tpResourceLimits).Error; err != nil {
+	if err := q.Find(&rls).Error; err != nil {
 		return nil, err
 	}
-	if len(tpResourceLimits) == 0 {
-		return tpResourceLimits, utils.ErrNotFound
+	arls := rls.AsTPResourceLimits()
+	if len(arls) == 0 {
+		return arls, utils.ErrNotFound
 	}
-	return tpResourceLimits, nil
+	return arls, nil
 }
 
 // GetVersions returns slice of all versions or a specific version if tag is specified

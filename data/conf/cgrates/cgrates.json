@@ -34,7 +34,7 @@
 // 	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": false},	// control reverse destinations index caching
 // 	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},				// control rating plans caching
 // 	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": false},			// control rating profiles caching
-// 	"lcr": {"limit": 10000, "ttl":"0s", "precache": false},						// control lcr rules caching					
+// 	"lcr": {"limit": 10000, "ttl":"0s", "precache": false},						// control lcr rules caching
 // 	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": false},				// control cdr stats queues caching
 // 	"actions": {"limit": 10000, "ttl":"0s", "precache": false},					// control actions caching
 // 	"action_plans": {"limit": 10000, "ttl":"0s", "precache": false},			// control action plans caching
@@ -63,16 +63,6 @@
 // },
 
 
-// "tariffplan_db": {							// database used to store active tariff plan configuration
-// 	"db_type": "redis",						// tariffplan_db type: <redis|mongo>
-// 	"db_host": "127.0.0.1",					// tariffplan_db host address
-// 	"db_port": 6379, 						// port to reach the tariffplan_db
-// 	"db_name": "10", 						// tariffplan_db name to connect to
-// 	"db_user": "", 							// sername to use when connecting to tariffplan_db
-// 	"db_password": "", 						// password to use when connecting to tariffplan_db
-// },
-
-
 // "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 // 	"db_type": "redis",						// data_db type: <redis|mongo>
 // 	"db_host": "127.0.0.1",					// data_db host address
@@ -97,14 +87,8 @@
 // },
 
 
-// "balancer": {
-// 	"enabled": false,						// start Balancer service: <true|false>
-// },
-
-
 // "rals": {
 // 	"enabled": false,						// enable Rater service: <true|false>
-// 	"balancer": "",							// register to balancer as worker: <""|*internal|x.y.z.y:1234>
 // 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 // 	"historys_conns": [],					// address where to reach the history service, empty to disable history functionality: <""|*internal|x.y.z.y:1234>
 // 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>

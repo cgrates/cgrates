@@ -28,35 +28,8 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg *config.CacheConfig, loadHistorySize int) (db RatingStorage, err error) {
-	var d Storage
-	switch db_type {
-	case utils.REDIS:
-		var db_nb int
-		db_nb, err = strconv.Atoi(name)
-		if err != nil {
-			utils.Logger.Crit("Redis db name must be an integer!")
-			return nil, err
-		}
-		if port != "" {
-			host += ":" + port
-		}
-		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheCfg, loadHistorySize)
-	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.TariffPlanDB, nil, cacheCfg, loadHistorySize)
-		db = d.(RatingStorage)
-	default:
-		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
-			db_type, utils.REDIS, utils.MONGO))
-	}
-	if err != nil {
-		return nil, err
-	}
-	return d.(RatingStorage), nil
-}
-
-func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg *config.CacheConfig, loadHistorySize int) (db AccountingStorage, err error) {
-	var d AccountingStorage
+func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg *config.CacheConfig, loadHistorySize int) (db DataDB, err error) {
+	var d DataDB
 	switch db_type {
 	case utils.REDIS:
 		var db_nb int
@@ -71,7 +44,7 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheCfg, loadHistorySize)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, cacheCfg, loadHistorySize)
-		db = d.(AccountingStorage)
+		db = d.(DataDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
 			db_type, utils.REDIS, utils.MONGO))

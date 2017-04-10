@@ -40,26 +40,32 @@ import (
 	"time"
 )
 
-func NewCounterGen(start, limit int64) *CounterGen {
-	return &CounterGen{
-		cnt:   start,
+func NewCounter(start, limit int64) *Counter {
+	return &Counter{
+		value: start,
 		limit: limit,
 	}
 }
 
-type CounterGen struct {
-	cnt, limit int64
+type Counter struct {
+	value, limit int64
 	sync.Mutex
 }
 
-func (cg *CounterGen) Gen() int64 {
-	cg.Lock()
-	defer cg.Unlock()
-	cg.cnt += 1
-	if cg.limit > 0 && cg.cnt > cg.limit {
-		cg.cnt = 0
+func (c *Counter) Next() int64 {
+	c.Lock()
+	defer c.Unlock()
+	c.value += 1
+	if c.limit > 0 && c.value > c.limit {
+		c.value = 0
 	}
-	return cg.cnt
+	return c.value
+}
+
+func (c *Counter) Value() int64 {
+	c.Lock()
+	defer c.Unlock()
+	return c.value
 }
 
 // Returns first non empty string out of vals. Useful to extract defaults

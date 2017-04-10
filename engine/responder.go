@@ -19,14 +19,11 @@ package engine
 
 import (
 	"errors"
-	"fmt"
-	"net/rpc"
 	"reflect"
 	"runtime"
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -48,7 +45,6 @@ type AttrGetLcr struct {
 }
 
 type Responder struct {
-	Bal           *balancer2go.Balancer
 	ExitChan      chan bool
 	Stats         rpcclient.RpcClientConnection
 	Timeout       time.Duration
@@ -94,19 +90,14 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if rs.Bal != nil {
-		r, e := rs.getCallCost(arg, "Responder.GetCost")
-		*reply, err = *r, e
-	} else {
-		r, e := guardian.Guardian.Guard(func() (interface{}, error) {
-			return arg.GetCost()
-		}, 0, arg.GetAccountKey())
-		if r != nil {
-			*reply = *r.(*CallCost)
-		}
-		if e != nil {
-			return e
-		}
+	r, e := guardian.Guardian.Guard(func() (interface{}, error) {
+		return arg.GetCost()
+	}, 0, arg.GetAccountKey())
+	if r != nil {
+		*reply = *r.(*CallCost)
+	}
+	if e != nil {
+		return e
 	}
 	return
 }
@@ -132,17 +123,11 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-
-	if rs.Bal != nil {
-		r, e := rs.getCallCost(arg, "Responder.Debit")
-		*reply, err = *r, e
-	} else {
-		r, e := arg.Debit()
-		if e != nil {
-			return e
-		} else if r != nil {
-			*reply = *r
-		}
+	r, e := arg.Debit()
+	if e != nil {
+		return e
+	} else if r != nil {
+		*reply = *r
 	}
 	return
 }
@@ -175,20 +160,14 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-
-	if rs.Bal != nil {
-		r, e := rs.getCallCost(arg, "Responder.MaxDebit")
-		*reply, err = *r, e
-	} else {
-		r, e := arg.MaxDebit()
-		if e != nil {
-			rs.getCache().Cache(cacheKey, &cache.CacheItem{
-				Err: e,
-			})
-			return e
-		} else if r != nil {
-			*reply = *r
-		}
+	r, e := arg.MaxDebit()
+	if e != nil {
+		rs.getCache().Cache(cacheKey, &cache.CacheItem{
+			Err: e,
+		})
+		return e
+	} else if r != nil {
+		*reply = *r
 	}
 	rs.getCache().Cache(cacheKey, &cache.CacheItem{
 		Value: reply,
@@ -228,12 +207,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 		})
 		return err
 	}
-
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
-	} else {
-		err = arg.RefundIncrements()
-	}
+	err = arg.RefundIncrements()
 	rs.getCache().Cache(cacheKey, &cache.CacheItem{
 		Value: reply,
 		Err:   err,
@@ -272,12 +246,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 		})
 		return err
 	}
-
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(arg, "Responder.RefundRounding")
-	} else {
-		err = arg.RefundRounding()
-	}
+	err = arg.RefundRounding()
 	rs.getCache().Cache(cacheKey, &cache.CacheItem{
 		Value: reply,
 		Err:   err,
@@ -306,21 +275,13 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(arg, "Responder.GetMaxSessionTime")
-	} else {
-		r, e := arg.GetMaxSessionDuration()
-		*reply, err = float64(r), e
-	}
+	r, e := arg.GetMaxSessionDuration()
+	*reply, err = float64(r), e
 	return
 }
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
 func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
-	if rs.Bal != nil {
-		return errors.New("unsupported method on the balancer")
-	}
 	cacheKey := utils.GET_DERIV_MAX_SESS_TIME + ev.CGRID + ev.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
@@ -426,9 +387,6 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
 func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
-	if rs.Bal != nil {
-		return errors.New("Unsupported method on the balancer")
-	}
 	cacheKey := utils.GET_SESS_RUNS_CACHE_PREFIX + ev.CGRID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
@@ -518,10 +476,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 }
 
 func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
-	if rs.Bal != nil {
-		return errors.New("BALANCER_UNSUPPORTED_METHOD")
-	}
-	if dcsH, err := HandleGetDerivedChargers(ratingStorage, attrs); err != nil {
+	if dcsH, err := HandleGetDerivedChargers(dataStorage, attrs); err != nil {
 		return err
 	} else if dcsH != nil {
 		*dcs = *dcsH
@@ -584,9 +539,6 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
 	response[utils.InstanceID] = config.CgrConfig().InstanceID
-	if rs.Bal != nil {
-		response["Raters"] = rs.Bal.GetClientAddresses()
-	}
 	response["MemoryUsage"] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
 	response["Footprint"] = utils.SizeFmt(float64(memstats.Sys), "")
@@ -595,92 +547,11 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 }
 
 func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
-	if rs.Bal != nil {
-		rs.Bal.Shutdown("Responder.Shutdown")
-	}
-	ratingStorage.Close()
-	accountingStorage.Close()
+	dataStorage.Close()
 	cdrStorage.Close()
 	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"
 	return
-}
-
-/*
-The function that gets the information from the raters using balancer.
-*/
-func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *CallCost, err error) {
-	err = errors.New("") //not nil value
-	for err != nil {
-		client := rs.Bal.Balance()
-		if client == nil {
-			utils.Logger.Info("<Balancer> Waiting for raters to register...")
-			time.Sleep(1 * time.Second) // wait one second and retry
-		} else {
-			_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-				err = client.Call(method, *key, reply)
-				return reply, err
-			}, 0, key.GetAccountKey())
-			if err != nil {
-				utils.Logger.Err(fmt.Sprintf("<Balancer> Got en error from rater: %v", err))
-			}
-		}
-	}
-	return
-}
-
-/*
-The function that gets the information from the raters using balancer.
-*/
-func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float64, err error) {
-	err = errors.New("") //not nil value
-	for err != nil {
-		client := rs.Bal.Balance()
-		if client == nil {
-			utils.Logger.Info("Waiting for raters to register...")
-			time.Sleep(1 * time.Second) // wait one second and retry
-		} else {
-			_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-				err = client.Call(method, *key, &reply)
-				return reply, err
-			}, 0, key.GetAccountKey())
-			if err != nil {
-				utils.Logger.Info(fmt.Sprintf("Got en error from rater: %v", err))
-			}
-		}
-	}
-	return
-}
-
-/*
-RPC method that receives a rater address, connects to it and ads the pair to the rater list for balancing
-*/
-func (rs *Responder) RegisterRater(clientAddress string, replay *int) error {
-	utils.Logger.Info(fmt.Sprintf("Started rater %v registration...", clientAddress))
-	time.Sleep(2 * time.Second) // wait a second for Rater to start serving
-	client, err := rpc.Dial("tcp", clientAddress)
-	if err != nil {
-		utils.Logger.Err("Could not connect to client!")
-		return err
-	}
-	rs.Bal.AddClient(clientAddress, client)
-	utils.Logger.Info(fmt.Sprintf("Rater %v registered succesfully.", clientAddress))
-	return nil
-}
-
-/*
-RPC method that recives a rater addres gets the connections and closes it and removes the pair from rater list.
-*/
-func (rs *Responder) UnRegisterRater(clientAddress string, replay *int) error {
-	client, ok := rs.Bal.GetClient(clientAddress)
-	if ok {
-		client.Close()
-		rs.Bal.RemoveClient(clientAddress)
-		utils.Logger.Info(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))
-	} else {
-		utils.Logger.Info(fmt.Sprintf("Server %v was not on my watch!", clientAddress))
-	}
-	return nil
 }
 
 func (rs *Responder) GetTimeout(i int, d *time.Duration) error {

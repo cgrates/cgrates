@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,11 +26,10 @@ func (self *ApierV1) SetTPLcrRule(attrs utils.TPLcrRules, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Direction", "Tenant", "Category", "Account", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tm := engine.APItoModelLcrRule(&attrs)
-	if err := self.StorDb.SetTpLCRs(tm); err != nil {
+	if err := self.StorDb.SetTPLCRs([]*utils.TPLcrRules{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }
 
@@ -45,20 +43,14 @@ func (self *ApierV1) GetTPLcrRule(attr AttrGetTPLcrRules, reply *utils.TPLcrRule
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "LcrRuleId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	lcr := &engine.TpLcrRule{
-		Tpid: attr.TPid,
-	}
-	lcr.SetLcrRuleId(attr.LcrRuleId)
-	if lcrs, err := self.StorDb.GetTpLCRs(lcr); err != nil {
+	filter := &utils.TPLcrRules{TPid: attr.TPid}
+	filter.SetId(attr.LcrRuleId)
+	if lcrs, err := self.StorDb.GetTPLCRs(filter); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(lcrs) == 0 {
 		return utils.ErrNotFound
 	} else {
-		tmMap, err := engine.TpLcrRules(lcrs).GetLcrRules()
-		if err != nil {
-			return err
-		}
-		*reply = *tmMap[attr.LcrRuleId]
+		*reply = *lcrs[0]
 	}
 	return nil
 }
@@ -73,7 +65,7 @@ func (self *ApierV1) GetTPLcrRuleIds(attrs AttrGetTPLcrIds, reply *[]string) err
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_LCRS, utils.TPDistinctIds{"direction", "tenant", "category", "account", "subject"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPLcrs, utils.TPDistinctIds{"direction", "tenant", "category", "account", "subject"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -88,10 +80,10 @@ func (self *ApierV1) RemTPLcrRule(attrs AttrGetTPLcrRules, reply *string) error 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrRulesId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_LCRS, attrs.TPid, map[string]string{"tag": attrs.LcrRuleId}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPLcrs, attrs.TPid, map[string]string{"tag": attrs.LcrRuleId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
-		*reply = "OK"
+		*reply = utils.OK
 	}
 	return nil
 }
