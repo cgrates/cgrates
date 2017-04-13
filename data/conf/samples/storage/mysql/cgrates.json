@@ -7,7 +7,7 @@
 	"db_port": 3306,						// the port to reach the stordb
 	"db_name": "cgrates",					// stor database name
 	"db_user": "cgrates",					// username to use when connecting to stordb
-	"db_passwd": "CGRateS.org",				// password to use when connecting to stordb
+	"db_password": "CGRateS.org",				// password to use when connecting to stordb
 },
 
 }

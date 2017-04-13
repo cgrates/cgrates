@@ -9,6 +9,10 @@
 	"http": "127.0.0.1:22080",					// HTTP listening address
 },
 
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
 "rals": {
 	"enabled": true,					// enable Rater service: <true|false>
 },

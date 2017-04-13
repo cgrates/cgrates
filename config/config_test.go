@@ -220,7 +220,7 @@ func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	if cgrCfg.DataDbName != "10" {
 		t.Error(cgrCfg.DataDbName)
 	}
-	if cgrCfg.DataDbUser != "" {
+	if cgrCfg.DataDbUser != "cgrates" {
 		t.Error(cgrCfg.DataDbUser)
 	}
 	if cgrCfg.DataDbPass != "" {
@@ -247,7 +247,7 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDBUser != "cgrates" {
 		t.Error(cgrCfg.StorDBUser)
 	}
-	if cgrCfg.StorDBPass != "CGRateS.org" {
+	if cgrCfg.StorDBPass != "" {
 		t.Error(cgrCfg.StorDBPass)
 	}
 	if cgrCfg.StorDBMaxOpenConns != 100 {

@@ -4,6 +4,10 @@
 // Used in mediator_local_test
 // Starts rater, cdrs and mediator connecting over internal channel
 
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 },

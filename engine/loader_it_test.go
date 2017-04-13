@@ -39,6 +39,7 @@ var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario fold
 // Will use 3 different datadbs in order to be able to see differences in data loaded
 func TestLoaderITConnDataDbs(t *testing.T) {
 	lCfg, _ = config.NewDefaultCGRConfig()
+	lCfg.StorDBPass = "CGRateS.org"
 	var err error
 	if dataDbCsv, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "7",
 		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {

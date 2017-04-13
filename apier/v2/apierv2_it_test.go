@@ -47,7 +47,7 @@ var dataDB engine.DataDB // share db connection here so we can check data we set
 
 func TestApierV2itLoadConfig(t *testing.T) {
 	apierCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	if apierCfg, err = config.NewCGRConfigFromFolder(tpCfgPath); err != nil {
+	if apierCfg, err = config.NewCGRConfigFromFolder(apierCfgPath); err != nil {
 		t.Error(err)
 	}
 }

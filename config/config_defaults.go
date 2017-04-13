@@ -88,7 +88,7 @@ const CGRATES_CFG_JSON = `
 	"db_host": "127.0.0.1",					// data_db host address
 	"db_port": 6379, 						// data_db port to reach the database
 	"db_name": "10", 						// data_db database name to connect to
-	"db_user": "", 							// username to use when connecting to data_db
+	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
 	"load_history_size": 10,				// Number of records in the load history
 },
@@ -100,7 +100,7 @@ const CGRATES_CFG_JSON = `
 	"db_port": 3306,						// the port to reach the stordb
 	"db_name": "cgrates",					// stor database name
 	"db_user": "cgrates",					// username to use when connecting to stordb
-	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+	"db_password": "",						// password to use when connecting to stordb
 	"max_open_conns": 100,					// maximum database connections opened
 	"max_idle_conns": 10,					// maximum database connections idle
 	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo

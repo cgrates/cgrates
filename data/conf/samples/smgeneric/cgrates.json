@@ -12,6 +12,13 @@
  	"http": "0.0.0.0:3080",				// HTTP listening address
  },
 
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
+
+
 "cache":{
 	"destinations": {"limit": 10000, "ttl":"0s", "precache": true},
 	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},

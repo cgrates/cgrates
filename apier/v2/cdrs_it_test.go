@@ -56,7 +56,6 @@ var sTestsCDRsIT = []func(t *testing.T){
 }
 
 // Tests starting here
-
 func TestCDRsITMySQL(t *testing.T) {
 	cdrsConfDIR = "cdrsv2mysql"
 	for _, stest := range sTestsCDRsIT {

@@ -123,7 +123,7 @@ func TestDfDbJsonCfg(t *testing.T) {
 		Db_host:           utils.StringPointer("127.0.0.1"),
 		Db_port:           utils.IntPointer(6379),
 		Db_name:           utils.StringPointer("10"),
-		Db_user:           utils.StringPointer(""),
+		Db_user:           utils.StringPointer("cgrates"),
 		Db_password:       utils.StringPointer(""),
 		Load_history_size: utils.IntPointer(10),
 	}
@@ -138,7 +138,7 @@ func TestDfDbJsonCfg(t *testing.T) {
 		Db_port:        utils.IntPointer(3306),
 		Db_name:        utils.StringPointer("cgrates"),
 		Db_user:        utils.StringPointer("cgrates"),
-		Db_password:    utils.StringPointer("CGRateS.org"),
+		Db_password:    utils.StringPointer(""),
 		Max_open_conns: utils.IntPointer(100),
 		Max_idle_conns: utils.IntPointer(10),
 		Cdrs_indexes:   utils.StringSlicePointer([]string{}),
