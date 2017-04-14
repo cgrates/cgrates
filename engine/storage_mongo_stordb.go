@@ -55,10 +55,6 @@ func (ms *MongoStorage) GetTpIds() ([]string, error) {
 }
 
 func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filter map[string]string, pag *utils.Paginator) ([]string, error) {
-	selectors := bson.M{}
-	for _, d := range distinct {
-		selectors[d] = 1
-	}
 	findMap := make(map[string]interface{})
 	if tpid != "" {
 		findMap["tpid"] = tpid
@@ -76,8 +72,10 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		}
 		findMap["$and"] = []bson.M{bson.M{"$or": searchItems}}
 	}
+
 	session, col := ms.conn(table)
 	defer session.Close()
+
 	q := col.Find(findMap)
 	if pag != nil {
 		if pag.Limit != nil {
@@ -88,11 +86,18 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		}
 	}
 
+	selectors := bson.M{"_id": 0}
+	for i, d := range distinct {
+		if d == "tag" { // convert the tag used in SQL into id used here
+			distinct[i] = "id"
+		}
+		selectors[distinct[i]] = 1
+	}
 	iter := q.Select(selectors).Iter()
-	distinctIds := make(map[string]bool)
+	distinctIds := make(utils.StringMap)
 	item := make(map[string]string)
 	for iter.Next(item) {
-		id := ""
+		var id string
 		last := len(distinct) - 1
 		for i, d := range distinct {
 			if distinctValue, ok := item[d]; ok {
@@ -104,14 +109,13 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		}
 		distinctIds[id] = true
 	}
+	if err := iter.Err(); err != nil {
+		return nil, err
+	}
 	if err := iter.Close(); err != nil {
 		return nil, err
 	}
-	var results []string
-	for id := range distinctIds {
-		results = append(results, id)
-	}
-	return results, nil
+	return distinctIds.Slice(), nil
 }
 
 func (ms *MongoStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
@@ -499,7 +503,13 @@ func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) er
 	if args == nil {
 		args = make(map[string]string)
 	}
-	args["tpid"] = tpid
+	if _, has := args["tag"]; has { // API uses tag to be compatible with SQL models, fix it here
+		args["id"] = args["tag"]
+		delete(args, "tag")
+	}
+	if tpid != "" {
+		args["tpid"] = tpid
+	}
 	return db.C(table).Remove(args)
 }
 

@@ -44,6 +44,7 @@ var (
 )
 
 // subtests to be executed for each confDIR
+// FixMe#alin104n: add tests for rest of TP methods in loader interface
 var sTestsTutIT = []func(t *testing.T){
 	testTPitLoadConfig,
 	testTPitResetDataDb,
@@ -188,6 +189,13 @@ func testTPitTimings(t *testing.T) {
 	} else if !reflect.DeepEqual(tmDummyRemove, rplyTmDummy) {
 		t.Errorf("Calling ApierV2.GetTPTiming expected: %v, received: %v", tmDummyRemove, rplyTmDummy)
 	}
+	var rplyTmIDs []string
+	expectedTmIDs := []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK", tmDummyRemove.ID}
+	if err := tpRPC.Call("ApierV1.GetTPTimingIds", v1.AttrGetTPTimingIds{testTPid, utils.Paginator{}}, &rplyTmIDs); err != nil {
+		t.Error("Calling ApierV1.GetTPTimingIds, got error: ", err.Error())
+	} else if len(expectedTmIDs) != len(rplyTmIDs) {
+		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
+	}
 	// Test remove
 	if err := tpRPC.Call("ApierV2.RemTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &reply); err != nil {
 		t.Error("Calling ApierV2.RemTPTiming, got error: ", err.Error())
@@ -195,8 +203,8 @@ func testTPitTimings(t *testing.T) {
 		t.Error("Calling ApierV2.RemTPTiming received: ", reply)
 	}
 	// Test getIds
-	var rplyTmIDs []string
-	expectedTmIDs := []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK"}
+	rplyTmIDs = []string{}
+	expectedTmIDs = []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK"}
 	if err := tpRPC.Call("ApierV1.GetTPTimingIds", v1.AttrGetTPTimingIds{testTPid, utils.Paginator{}}, &rplyTmIDs); err != nil {
 		t.Error("Calling ApierV1.GetTPTimingIds, got error: ", err.Error())
 	} else if len(expectedTmIDs) != len(rplyTmIDs) {
