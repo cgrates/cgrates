@@ -1,5 +1,5 @@
-hash: da953ea34fabe4e21f4dde6344f3b7ab5a75e02122a1c17af5ea434058fc77fb
-updated: 2016-09-06T20:33:01.649869367+02:00
+hash: 2daed4c5ed5052824ae5df18b0690a85226f9e3c61c336f83db7fccc6f4ecd51
+updated: 2017-04-21T14:51:07.386488974+02:00
 imports:
 - name: github.com/bit4bit/gami
   version: 3a7f98e7efce7ed7f22c2169b666910b8abb15dc
@@ -7,6 +7,8 @@ imports:
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
 - name: github.com/cenk/rpc2
   version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
+  subpackages:
+  - jsonrpc
 - name: github.com/cgrates/aringo
   version: 47cdb110c5ff42bddf2b801dc5ae8ceb15d2d602
 - name: github.com/cgrates/fsock
@@ -15,6 +17,8 @@ imports:
   version: a376b1f937ba959857929fa3e111c0f3243278c0
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
+- name: github.com/cgrates/radigo
+  version: 8ee4c8409a0f8b8084d427dfb81010fd2add788c
 - name: github.com/cgrates/rpcclient
   version: dddae42e9344e877627cd4b7aba075d63b452c0b
 - name: github.com/ChrisTrenkamp/goxpath
@@ -26,13 +30,17 @@ imports:
   - internal/parser/findutil
   - internal/parser/intfns
   - internal/parser/pathexpr
-  - internal/xconst
-  - internal/xsort
+  - literals/boollit
+  - literals/numlit
+  - literals/strlit
   - tree
   - tree/xmltree
   - tree/xmltree/xmlbuilder
   - tree/xmltree/xmlele
   - tree/xmltree/xmlnode
+  - xconst
+  - xfn
+  - xsort
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
@@ -70,10 +78,10 @@ imports:
   - redis
 - name: github.com/mitchellh/mapstructure
   version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
-- name: github.com/streadway/amqp
-  version: d75c3a341ff43309ad0cb69ac8bdbd1d8772775f
 - name: github.com/peterh/liner
   version: 8975875355a81d612fafb9f5a6037bdcc2d9b073
+- name: github.com/streadway/amqp
+  version: d75c3a341ff43309ad0cb69ac8bdbd1d8772775f
 - name: github.com/ugorji/go
   version: 5cd0f2b3b6cca8e3a0a4101821e41a73cb59bed6
   subpackages:

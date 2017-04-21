@@ -40,3 +40,4 @@ import:
 - package: github.com/cgrates/aringo
 - package: github.com/bit4bit/gami
 - package: github.com/streadway/amqp
+- package: github.com/cgrates/radigo
