@@ -49,6 +49,7 @@ const (
 	KAMAILIO_JSN         = "kamailio"
 	OSIPS_JSN            = "opensips"
 	DA_JSN               = "diameter_agent"
+	RA_JSN               = "radius_agent"
 	HISTSERV_JSN         = "historys"
 	PUBSUBSERV_JSN       = "pubsubs"
 	ALIASESSERV_JSN      = "aliases"
@@ -279,6 +280,18 @@ func (self CgrJsonCfg) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(DiameterAgentJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
+	rawCfg, hasKey := self[RA_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(RadiusAgentJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

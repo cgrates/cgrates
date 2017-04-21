@@ -69,6 +69,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.smAsteriskCfg = new(SMAsteriskCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
+	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -249,6 +250,7 @@ type CGRConfig struct {
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
 	smAsteriskCfg            *SMAsteriskCfg           // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
+	radiusAgentCfg           *RadiusAgentCfg          // RadiusAgent configuration
 	HistoryServerEnabled     bool                     // Starts History as server: <true|false>.
 	HistoryDir               string                   // Location on disk where to store history files.
 	HistorySaveInterval      time.Duration            // The timout duration between pubsub writes
@@ -469,6 +471,13 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	if self.radiusAgentCfg.Enabled {
+		for _, raSMGConn := range self.radiusAgentCfg.SMGenericConns {
+			if raSMGConn.Address == utils.MetaInternal && !self.SmGenericConfig.Enabled {
+				return errors.New("SMGeneric not enabled but referenced by RadiusAgent component")
+			}
+		}
+	}
 	// ResourceLimiter checks
 	if self.resourceLimiterCfg != nil && self.resourceLimiterCfg.Enabled {
 		for _, connCfg := range self.resourceLimiterCfg.CDRStatConns {
@@ -571,6 +580,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnDACfg, err := jsnCfg.DiameterAgentJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnRACfg, err := jsnCfg.RadiusAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -983,6 +997,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
+	if jsnRACfg != nil {
+		if err := self.radiusAgentCfg.loadFromJsonCfg(jsnRACfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnHistServCfg != nil {
 		if jsnHistServCfg.Enabled != nil {
 			self.HistoryServerEnabled = *jsnHistServCfg.Enabled
@@ -1065,6 +1085,10 @@ func (self *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
 	cfgChan := <-self.ConfigReloads[utils.DIAMETER_AGENT] // Lock config for read or reloads
 	defer func() { self.ConfigReloads[utils.DIAMETER_AGENT] <- cfgChan }()
 	return self.diameterAgentCfg
+}
+
+func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
+	return self.radiusAgentCfg
 }
 
 // ToDo: fix locking here

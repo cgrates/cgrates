@@ -339,6 +339,30 @@ type DARequestProcessorJsnCfg struct {
 	CCA_fields          *[]*CdrFieldJsonCfg
 }
 
+// Radius Agent configuration section
+type RadiusAgentJsonCfg struct {
+	Enabled              *bool
+	Listen_auth          *string
+	Listen_acct          *string
+	Dictionaries_dir     *string
+	Sm_generic_conns     *[]*HaPoolJsonCfg
+	Create_cdr           *bool
+	Cdr_requires_session *bool
+	Timezone             *string
+	Request_processors   *[]*RAReqProcessorJsnCfg
+}
+
+type RAReqProcessorJsnCfg struct {
+	Id                  *string
+	Dry_run             *bool
+	Request_filter      *string
+	Flags               *[]string
+	Continue_on_success *bool
+	Append_reply        *bool
+	Request_fields      *[]*CdrFieldJsonCfg
+	Reply_fields        *[]*CdrFieldJsonCfg
+}
+
 // History server config section
 type HistServJsonCfg struct {
 	Enabled       *bool

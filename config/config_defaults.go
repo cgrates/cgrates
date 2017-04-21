@@ -358,8 +358,8 @@ const CGRATES_CFG_JSON = `
 			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",	// filter requests processed by this processor
 			"flags": [],													// flags to influence processing behavior
 			"continue_on_success": false,				// continue to the next template if executed
-			"append_cca": true,						// when continuing will append cca fields to the previous ones
-			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"append_cca": true,						// when continuing will append cca fields of the the previous one
+			"ccr_fields":[							// import content_fields template, tag will match internally CDR field
 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "^*users", "mandatory": true},
@@ -376,6 +376,34 @@ const CGRATES_CFG_JSON = `
 			],
 			"cca_fields":[								// fields returned in CCA
 				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit>CC-Time", "type": "*handler", "handler_id": "*cca_usage", "mandatory": true},
+			],
+		},
+	],
+},
+
+
+"radius_agent": {
+	"enabled": false,											// enables the radius agent: <true|false>
+	"listen_auth": "127.0.0.1:1812",							// address where to listen for radius authentication requests <x.y.z.y:1234>
+	"listen_acct": "127.0.0.1:1813",							// address where to listen for radius accounting requests <x.y.z.y:1234>
+	"dictionaries_dir": "/usr/share/cgrates/radius/dict/",		// path towards directory holding additional dictionaries to load (extra to RFC)
+	"sm_generic_conns": [
+		{"address": "*internal"}								// connection towards SMG component for session management
+	],
+	"create_cdr": true,											// create CDR out of Accounting-Stop and send it to SMG component
+	"cdr_requires_session": false,								// only create CDR if there is an active session at terminate
+	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
+	"request_processors": [
+		{
+			"id": "*default",									// formal identifier of this processor
+			"dry_run": false,									// do not send the events to SMG, just log them
+			"request_filter": "",								// filter requests processed by this processor
+			"flags": [],										// flags to influence processing behavior
+			"continue_on_success": false,						// continue to the next template if executed
+			"append_reply": true,								// when continuing will append reply fields to the next template
+			"request_fields":[									// import content_fields template, tag will match internally CDR field
+			],
+			"reply_fields":[								// fields returned in radius reply
 			],
 		},
 	],

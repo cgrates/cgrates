@@ -605,6 +605,40 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 	}
 }
 
+func TestRadiusAgentJsonCfg(t *testing.T) {
+	eCfg := &RadiusAgentJsonCfg{
+		Enabled:          utils.BoolPointer(false),
+		Listen_auth:      utils.StringPointer("127.0.0.1:1812"),
+		Listen_acct:      utils.StringPointer("127.0.0.1:1813"),
+		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/radius/dict/"),
+		Sm_generic_conns: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Address: utils.StringPointer(utils.MetaInternal),
+			}},
+		Create_cdr:           utils.BoolPointer(true),
+		Cdr_requires_session: utils.BoolPointer(false),
+		Timezone:             utils.StringPointer(""),
+		Request_processors: &[]*RAReqProcessorJsnCfg{
+			&RAReqProcessorJsnCfg{
+				Id:                  utils.StringPointer("*default"),
+				Dry_run:             utils.BoolPointer(false),
+				Request_filter:      utils.StringPointer(""),
+				Flags:               utils.StringSlicePointer([]string{}),
+				Continue_on_success: utils.BoolPointer(false),
+				Append_reply:        utils.BoolPointer(true),
+				Request_fields:      &[]*CdrFieldJsonCfg{},
+				Reply_fields:        &[]*CdrFieldJsonCfg{},
+			},
+		},
+	}
+	if cfg, err := dfCgrJsonCfg.RadiusAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		rcv := *cfg.Request_processors
+		t.Errorf("Received: %+v", rcv[0].Reply_fields)
+	}
+}
+
 func TestDfHistServJsonCfg(t *testing.T) {
 	eCfg := &HistServJsonCfg{
 		Enabled:       utils.BoolPointer(false),
