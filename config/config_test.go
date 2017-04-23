@@ -527,34 +527,6 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
-	reqProc := []*DARequestProcessor{&DARequestProcessor{
-		Id:                "*default",
-		DryRun:            false,
-		PublishEvent:      false,
-		RequestFilter:     utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type(0)", utils.INFIELD_SEP),
-		Flags:             utils.StringMap{},
-		ContinueOnSuccess: false,
-		AppendCCA:         true,
-		CCRFields: []*CfgCdrField{
-			&CfgCdrField{Tag: "TOR", FieldId: "ToR", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "OriginID", FieldId: "OriginID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Session-Id", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "RequestType", FieldId: "RequestType", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "Direction", FieldId: "Direction", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "Tenant", FieldId: "Tenant", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "Category", FieldId: "Category", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "Account", FieldId: "Account", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "Subject", FieldId: "Subject", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "Destination", FieldId: "Destination", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Service-Information>IN-Information>Real-Called-Number", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "SetupTime", FieldId: "SetupTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "AnswerTime", FieldId: "AnswerTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp", utils.INFIELD_SEP), Mandatory: true},
-			&CfgCdrField{Tag: "Usage", FieldId: "Usage", Type: "*handler", HandlerId: "*ccr_usage", Mandatory: true},
-			&CfgCdrField{Tag: "SubscriberID", FieldId: "SubscriberId", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true},
-		},
-		CCAFields: []*CfgCdrField{
-			&CfgCdrField{Tag: "GrantedUnits", FieldId: "Granted-Service-Unit>CC-Time", Type: "*handler", HandlerId: "*cca_usage", Mandatory: true}},
-	},
-	}
-
 	testDA := &DiameterAgentCfg{
 		Enabled:           false,
 		Listen:            "127.0.0.1:3868",
@@ -568,7 +540,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 		OriginRealm:       "cgrates.org",
 		VendorId:          0,
 		ProductName:       "CGRateS",
-		RequestProcessors: reqProc,
+		RequestProcessors: nil,
 	}
 
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Enabled, testDA.Enabled) {

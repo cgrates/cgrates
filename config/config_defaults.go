@@ -350,35 +350,7 @@ const CGRATES_CFG_JSON = `
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
-	"request_processors": [
-		{
-			"id": "*default",												// formal identifier of this processor
-			"dry_run": false,												// do not send the events to SMG, just log them
-			"publish_event": false,											// if enabled, it will publish internal event to pubsub
-			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",	// filter requests processed by this processor
-			"flags": [],													// flags to influence processing behavior
-			"continue_on_success": false,				// continue to the next template if executed
-			"append_cca": true,						// when continuing will append cca fields of the the previous one
-			"ccr_fields":[							// import content_fields template, tag will match internally CDR field
-				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
-				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
-				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
-				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
-				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},
-				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
-				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
-				{"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*ccr_usage", "mandatory": true},
-				{"tag": "SubscriberID", "field_id": "SubscriberId", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
-			],
-			"cca_fields":[								// fields returned in CCA
-				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit>CC-Time", "type": "*handler", "handler_id": "*cca_usage", "mandatory": true},
-			],
-		},
-	],
+	"request_processors": [],
 },
 
 

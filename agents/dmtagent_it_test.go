@@ -136,7 +136,33 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 		"Account": "*users", "AnswerTime": "2015-11-23 12:22:24 +0000 UTC", "Category": "call",
 		"Destination": "4986517174964", "Direction": "*out", "RequestType": "*users", "SetupTime": "2015-11-23 12:22:24 +0000 UTC",
 		"Subject": "*users", "SubscriberId": "4986517174963", "ToR": "*voice", "Tenant": "*users", "Usage": "300"}
-	if smge, err := ccr.AsSMGenericEvent(cfgDefaults.DiameterAgentCfg().RequestProcessors[0].CCRFields); err != nil {
+	ccrFields := []*config.CfgCdrField{
+		&config.CfgCdrField{Tag: "TOR", FieldId: "ToR", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "OriginID", FieldId: "OriginID", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Session-Id", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "RequestType", FieldId: "RequestType", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Direction", FieldId: "Direction", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Tenant", FieldId: "Tenant", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Category", FieldId: "Category", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Account", FieldId: "Account", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Subject", FieldId: "Subject", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("^*users", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Destination", FieldId: "Destination", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Service-Information>IN-Information>Real-Called-Number", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "SetupTime", FieldId: "SetupTime", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "AnswerTime", FieldId: "AnswerTime", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Usage", FieldId: "Usage", Type: "*handler", HandlerId: "*ccr_usage", Mandatory: true},
+		&config.CfgCdrField{Tag: "SubscriberID", FieldId: "SubscriberId", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}}
+	if smge, err := ccr.AsSMGenericEvent(ccrFields); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSMGE, smge) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGE, smge)

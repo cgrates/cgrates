@@ -317,7 +317,6 @@ func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, pro
 				}
 				continue
 			}
-
 			if len(matchingAvps) <= avpIdx {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot retrieve AVP with index %d for field template with id: %s", avpIdx, rsrTpl.Id))
 				continue // Not convertible, ignore
