@@ -69,7 +69,7 @@ func TestA1itStartEngine(t *testing.T) {
 }
 
 func TestA1itRPCConn(t *testing.T) {
-	time.Sleep(1500 * time.Millisecond) // flushdb takes time in mongo
+	time.Sleep(10400 * time.Millisecond) // flushdb takes time in mongo
 	var err error
 	a1rpc, err = jsonrpc.Dial("tcp", a1Cfg.RPCJSONListen)
 	if err != nil {

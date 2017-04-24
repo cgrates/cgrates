@@ -86,7 +86,7 @@ func testTPitLoadConfig(t *testing.T) {
 	}
 	switch configDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		delay = 4000
+		delay = 10400
 	default:
 		delay = *waitRater
 	}

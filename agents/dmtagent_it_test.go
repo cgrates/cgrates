@@ -200,6 +200,7 @@ func TestDmtAgentPopulateCCTotalOctets(t *testing.T) {
 
 // Connect rpc client to rater
 func TestDmtAgentApierRpcConn(t *testing.T) {
+	time.Sleep(10400 * time.Millisecond) // flushdb takes time in mongo
 	var err error
 	apierRpc, err = jsonrpc.Dial("tcp", daCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
