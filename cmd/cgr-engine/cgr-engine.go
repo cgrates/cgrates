@@ -210,7 +210,7 @@ func startSMAsterisk(internalSMGChan chan *sessionmanager.SMGeneric, exitChan ch
 }
 
 func startDiameterAgent(internalSMGChan chan *sessionmanager.SMGeneric, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
-	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
+	utils.Logger.Info("Starting CGRateS DiameterAgent service")
 	smgChan := make(chan rpcclient.RpcClientConnection, 1) // Use it to pass smg
 	go func(internalSMGChan chan *sessionmanager.SMGeneric, smgChan chan rpcclient.RpcClientConnection) {
 		// Need this to pass from *sessionmanager.SMGeneric to rpcclient.RpcClientConnection
@@ -250,8 +250,39 @@ func startDiameterAgent(internalSMGChan chan *sessionmanager.SMGeneric, internal
 	exitChan <- true
 }
 
+func startRadiusAgent(internalSMGChan chan *sessionmanager.SMGeneric, exitChan chan bool) {
+	utils.Logger.Info("Starting CGRateS RadiusAgent service")
+	smgChan := make(chan rpcclient.RpcClientConnection, 1) // Use it to pass smg
+	go func(internalSMGChan chan *sessionmanager.SMGeneric, smgChan chan rpcclient.RpcClientConnection) {
+		// Need this to pass from *sessionmanager.SMGeneric to rpcclient.RpcClientConnection
+		smg := <-internalSMGChan
+		internalSMGChan <- smg
+		smgChan <- smg
+	}(internalSMGChan, smgChan)
+	var smgConn *rpcclient.RpcClientPool
+	if len(cfg.RadiusAgentCfg().SMGenericConns) != 0 {
+		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.RadiusAgentCfg().SMGenericConns, smgChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<RadiusAgent> Could not connect to SMG: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	ra, err := agents.NewRadiusAgent(cfg, smgConn)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> error: <%s>", err.Error()))
+		exitChan <- true
+		return
+	}
+	if err = ra.ListenAndServe(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> error: <%s>", err.Error()))
+	}
+	exitChan <- true
+}
+
 func startSmFreeSWITCH(internalRaterChan, internalCDRSChan, rlsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
-	utils.Logger.Info("Starting CGRateS SMFreeSWITCH service.")
+	utils.Logger.Info("Starting CGRateS SMFreeSWITCH service")
 	var ralsConn, cdrsConn, rlsConn *rpcclient.RpcClientPool
 	if len(cfg.SmFsConfig.RALsConns) != 0 {
 		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
@@ -728,6 +759,10 @@ func main() {
 
 	if cfg.DiameterAgentCfg().Enabled {
 		go startDiameterAgent(internalSMGChan, internalPubSubSChan, exitChan)
+	}
+
+	if cfg.RadiusAgentCfg().Enabled {
+		go startRadiusAgent(internalSMGChan, exitChan)
 	}
 
 	// Start HistoryS service
