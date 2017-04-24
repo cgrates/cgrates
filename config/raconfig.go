@@ -23,9 +23,11 @@ import (
 
 type RadiusAgentCfg struct {
 	Enabled            bool
+	ListenNet          string // udp or tcp
 	ListenAuth         string
 	ListenAcct         string
-	DictionariesDir    string
+	ClientSecrets      map[string]string
+	ClientDictionaries map[string]string
 	SMGenericConns     []*HaPoolConfig
 	CreateCDR          bool
 	CDRRequiresSession bool
@@ -40,14 +42,30 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
+	if jsnCfg.Listen_net != nil {
+		self.ListenNet = *jsnCfg.Listen_net
+	}
 	if jsnCfg.Listen_auth != nil {
 		self.ListenAuth = *jsnCfg.Listen_auth
 	}
 	if jsnCfg.Listen_acct != nil {
 		self.ListenAcct = *jsnCfg.Listen_acct
 	}
-	if jsnCfg.Dictionaries_dir != nil {
-		self.DictionariesDir = *jsnCfg.Dictionaries_dir
+	if jsnCfg.Client_secrets != nil {
+		if self.ClientSecrets == nil {
+			self.ClientSecrets = make(map[string]string)
+		}
+		for k, v := range *jsnCfg.Client_secrets {
+			self.ClientSecrets[k] = v
+		}
+	}
+	if jsnCfg.Client_dictionaries != nil {
+		if self.ClientDictionaries == nil {
+			self.ClientDictionaries = make(map[string]string)
+		}
+		for k, v := range *jsnCfg.Client_dictionaries {
+			self.ClientDictionaries[k] = v
+		}
 	}
 	if jsnCfg.Sm_generic_conns != nil {
 		self.SMGenericConns = make([]*HaPoolConfig, len(*jsnCfg.Sm_generic_conns))

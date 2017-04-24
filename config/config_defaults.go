@@ -356,9 +356,13 @@ const CGRATES_CFG_JSON = `
 
 "radius_agent": {
 	"enabled": false,											// enables the radius agent: <true|false>
+	"listen_net": "udp",										// network to listen on <udp|tcp>
 	"listen_auth": "127.0.0.1:1812",							// address where to listen for radius authentication requests <x.y.z.y:1234>
 	"listen_acct": "127.0.0.1:1813",							// address where to listen for radius accounting requests <x.y.z.y:1234>
-	"dictionaries_dir": "/usr/share/cgrates/radius/dict/",		// path towards directory holding additional dictionaries to load (extra to RFC)
+	"client_secrets": {"*default": "CGRateS.org"},				// hash containing secrets for clients connecting here <*default|$client_ip>
+	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
+		"*default": "/usr/share/cgrates/radius/dict/",			// key represents the client IP or catch-all <*default|$client_ip>
+	},
 	"sm_generic_conns": [
 		{"address": "*internal"}								// connection towards SMG component for session management
 	],

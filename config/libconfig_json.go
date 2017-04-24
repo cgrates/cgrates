@@ -342,9 +342,11 @@ type DARequestProcessorJsnCfg struct {
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
 	Enabled              *bool
+	Listen_net           *string
 	Listen_auth          *string
 	Listen_acct          *string
-	Dictionaries_dir     *string
+	Client_secrets       *map[string]string
+	Client_dictionaries  *map[string]string
 	Sm_generic_conns     *[]*HaPoolJsonCfg
 	Create_cdr           *bool
 	Cdr_requires_session *bool

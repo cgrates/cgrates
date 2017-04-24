@@ -407,6 +407,10 @@ func StringMapPointer(sm StringMap) *StringMap {
 	return &sm
 }
 
+func MapStringStringPointer(mp map[string]string) *map[string]string {
+	return &mp
+}
+
 func TimePointer(t time.Time) *time.Time {
 	return &t
 }

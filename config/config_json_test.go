@@ -565,10 +565,16 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 
 func TestRadiusAgentJsonCfg(t *testing.T) {
 	eCfg := &RadiusAgentJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Listen_auth:      utils.StringPointer("127.0.0.1:1812"),
-		Listen_acct:      utils.StringPointer("127.0.0.1:1813"),
-		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/radius/dict/"),
+		Enabled:     utils.BoolPointer(false),
+		Listen_net:  utils.StringPointer("udp"),
+		Listen_auth: utils.StringPointer("127.0.0.1:1812"),
+		Listen_acct: utils.StringPointer("127.0.0.1:1813"),
+		Client_secrets: utils.MapStringStringPointer(map[string]string{
+			utils.META_DEFAULT: "CGRateS.org",
+		}),
+		Client_dictionaries: utils.MapStringStringPointer(map[string]string{
+			utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/",
+		}),
 		Sm_generic_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
