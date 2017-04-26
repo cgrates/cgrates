@@ -4,7 +4,7 @@
 // Copyright (C) ITsysCOM GmbH
 
 "general": {
-	"default_request_type": "*prepaid",
+//	"default_request_type": "*prepaid",
 },
 
 "stor_db": {
@@ -137,6 +137,7 @@
 
 "sm_generic": {
 	"enabled": true,
+	"debit_interval": "10s",
 },
 
 

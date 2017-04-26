@@ -1042,13 +1042,16 @@ func (smg *SMGeneric) BiRPCV1GetLCRSuppliers(clnt rpcclient.RpcClientConnection,
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
-func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) error {
-	if minMaxUsage, err := smg.InitiateSession(ev, clnt); err != nil {
-		return utils.NewErrServerError(err)
+func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) (err error) {
+	var minMaxUsage time.Duration
+	if minMaxUsage, err = smg.InitiateSession(ev, clnt); err != nil {
+		if err != rpcclient.ErrSessionNotFound {
+			err = utils.NewErrServerError(err)
+		}
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
 	}
-	return nil
+	return
 }
 
 // Interim updates, returns remaining duration from the RALs
