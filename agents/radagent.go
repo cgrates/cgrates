@@ -50,10 +50,22 @@ type RadiusAgent struct {
 }
 
 func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err error) {
+	utils.Logger.Debug(fmt.Sprintf("RadiusAgent handleAuth, received request: %+v", req))
+	rpl = req.Reply()
+	rpl.Code = radigo.AccessAccept
+	for _, avp := range req.AVPs {
+		rpl.AVPs = append(rpl.AVPs, avp)
+	}
 	return
 }
 
 func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
+	utils.Logger.Debug(fmt.Sprintf("RadiusAgent handleAcct, received req: %+v", req))
+	rpl = req.Reply()
+	rpl.Code = radigo.AccountingResponse
+	for _, avp := range req.AVPs {
+		rpl.AVPs = append(rpl.AVPs, avp)
+	}
 	return
 }
 
@@ -66,7 +78,7 @@ func (ra *RadiusAgent) ListenAndServe() (err error) {
 		}
 	}()
 	go func() {
-		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> Start listening for acct requests on <%s>", ra.cgrCfg.RadiusAgentCfg().ListenAcct))
+		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> Start listening for acct req on <%s>", ra.cgrCfg.RadiusAgentCfg().ListenAcct))
 		if err := ra.rsAcct.ListenAndServe(); err != nil {
 			errListen <- err
 		}
