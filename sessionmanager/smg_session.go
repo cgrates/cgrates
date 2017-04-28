@@ -122,7 +122,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.CD.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	// update call duration with real debited duration
 	ccDuration := cc.GetDuration()
-	if ccDuration != dur {
+	if ccDuration > dur {
 		self.ExtraDuration = ccDuration - dur
 	}
 	if ccDuration >= dur {
@@ -138,10 +138,10 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.CallCosts = append(self.CallCosts, cc)
 	self.LastDebit = initialExtraDuration + ccDuration
 	self.TotalUsage += self.LastUsage
-	if ccDuration >= dur { // we got what we asked to be debited
-		return requestedDuration, nil
+	if ccDuration < dur {
+		return initialExtraDuration + ccDuration, nil
 	}
-	return initialExtraDuration + ccDuration, nil
+	return requestedDuration, nil
 }
 
 // Attempts to refund a duration, error on failure
