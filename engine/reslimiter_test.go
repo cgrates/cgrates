@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -259,8 +260,8 @@ func TestRLsLoadRLs(t *testing.T) {
 
 func TestRLsMatchingResourceLimitsForEvent(t *testing.T) {
 	rLS = &ResourceLimiterService{dataDB: dataStorage, cdrStatS: nil}
-	eResLimits := map[string]*ResourceLimit{
-		"RL1": &ResourceLimit{
+	eResLimits := ResourceLimits{
+		&ResourceLimit{
 			ID:     "RL1",
 			Weight: 20,
 			Filters: []*RequestFilter{
@@ -272,7 +273,7 @@ func TestRLsMatchingResourceLimitsForEvent(t *testing.T) {
 			Limit:          2,
 			Usage:          make(map[string]*ResourceUsage),
 		},
-		"RL2": &ResourceLimit{
+		&ResourceLimit{
 			ID:     "RL2",
 			Weight: 10,
 			Filters: []*RequestFilter{
@@ -287,23 +288,17 @@ func TestRLsMatchingResourceLimitsForEvent(t *testing.T) {
 	}
 	if resLimits, err := rLS.matchingResourceLimitsForEvent(map[string]interface{}{"Account": "1002", "Subject": "dan", "Destination": "1002"}); err != nil {
 		t.Error(err)
-	} else if len(eResLimits) != len(resLimits) {
+	} else if !reflect.DeepEqual(eResLimits[0].Filters[0], resLimits[0].Filters[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", eResLimits, resLimits)
 	} else {
-		for rlID := range eResLimits {
-			if _, hasID := resLimits[rlID]; !hasID {
-				t.Errorf("Expecting: %+v, received: %+v", eResLimits, resLimits)
-			}
-		}
 		// Make sure the filters are what we expect to be after retrieving from cache:
-		fltr := resLimits["RL1"].Filters[1]
+		fltr := resLimits[0].Filters[1]
 		if pass, _ := fltr.Pass(map[string]interface{}{"Subject": "10000001"}, "", nil); !pass {
-			t.Errorf("Expecting RL: %+v, received: %+v", eResLimits["RL1"], resLimits["RL1"])
+			t.Errorf("Expecting RL: %+v, received: %+v", eResLimits[0], resLimits[0])
 		}
 		if pass, _ := fltr.Pass(map[string]interface{}{"Account": "1002"}, "", nil); pass {
-			t.Errorf("Expecting RL: %+v, received: %+v", eResLimits["RL1"], resLimits["RL1"])
+			t.Errorf("Expecting RL: %+v, received: %+v", eResLimits[0], resLimits[0])
 		}
-
 	}
 }
 
@@ -344,12 +339,12 @@ func TestRLsV1ResourceLimitsForEvent(t *testing.T) {
 
 func TestRLsV1InitiateResourceUsage(t *testing.T) {
 	attrRU := utils.AttrRLsResourceUsage{
-		ResourceUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e50",
-		Event:           map[string]interface{}{"Account": "1002", "Subject": "dan", "Destination": "1002"},
-		RequestedUnits:  1,
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e50",
+		Event:   map[string]interface{}{"Account": "1002", "Subject": "dan", "Destination": "1002"},
+		Units:   1,
 	}
 	var reply string
-	if err := rLS.V1InitiateResourceUsage(attrRU, &reply); err != nil {
+	if err := rLS.V1AllocateResource(attrRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received reply: ", reply)
@@ -359,21 +354,21 @@ func TestRLsV1InitiateResourceUsage(t *testing.T) {
 		t.Error(err)
 	} else if len(resLimits) != 2 {
 		t.Errorf("Received: %+v", resLimits)
-	} else if resLimits["RL1"].UsedUnits() != 1 {
-		t.Errorf("RL1: %+v", resLimits["RL1"])
-	} else if _, hasKey := resLimits["RL1"].Usage[attrRU.ResourceUsageID]; !hasKey {
-		t.Errorf("RL1: %+v", resLimits["RL1"])
+	} else if resLimits[0].UsedUnits() != 1 {
+		t.Errorf("RL1: %+v", resLimits[0])
+	} else if _, hasKey := resLimits[0].Usage[attrRU.UsageID]; !hasKey {
+		t.Errorf("RL1: %+v", resLimits[0])
 	}
 }
 
 func TestRLsV1TerminateResourceUsage(t *testing.T) {
 	attrRU := utils.AttrRLsResourceUsage{
-		ResourceUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e50",
-		Event:           map[string]interface{}{"Account": "1002", "Subject": "dan", "Destination": "1002"},
-		RequestedUnits:  1,
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e50",
+		Event:   map[string]interface{}{"Account": "1002", "Subject": "dan", "Destination": "1002"},
+		Units:   1,
 	}
 	var reply string
-	if err := rLS.V1TerminateResourceUsage(attrRU, &reply); err != nil {
+	if err := rLS.V1ReleaseResource(attrRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received reply: ", reply)
@@ -383,9 +378,9 @@ func TestRLsV1TerminateResourceUsage(t *testing.T) {
 		t.Error(err)
 	} else if len(resLimits) != 2 {
 		t.Errorf("Received: %+v", resLimits)
-	} else if resLimits["RL1"].UsedUnits() != 0 {
-		t.Errorf("RL1: %+v", resLimits["RL1"])
-	} else if _, hasKey := resLimits["RL1"].Usage[attrRU.ResourceUsageID]; hasKey {
-		t.Errorf("RL1: %+v", resLimits["RL1"])
+	} else if resLimits[0].UsedUnits() != 0 {
+		t.Errorf("RL1: %+v", resLimits[0])
+	} else if _, hasKey := resLimits[0].Usage[attrRU.UsageID]; hasKey {
+		t.Errorf("RL1: %+v", resLimits[0])
 	}
 }

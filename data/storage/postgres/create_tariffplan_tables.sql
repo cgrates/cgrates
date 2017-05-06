@@ -401,7 +401,7 @@ CREATE TABLE tp_resource_limits (
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_resource_limits_idx ON tp_resource_limits (tpid);
-CREATE INDEX tp_resource_limits_unique ON tp_resource_limits  ("tpid", "tag");
+CREATE INDEX tp_resource_limits_unique ON tp_resource_limits  ("tpid", "tag", "filter_type", "filter_field_name");
 
 DROP TABLE IF EXISTS versions;
 CREATE TABLE versions (

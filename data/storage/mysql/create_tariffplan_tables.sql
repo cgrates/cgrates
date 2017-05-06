@@ -406,7 +406,7 @@ CREATE TABLE tp_resource_limits (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_resource_limits` (`tpid`, `tag`)
+  UNIQUE KEY `unique_tp_resource_limits` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
 );
 
 DROP TABLE IF EXISTS versions;

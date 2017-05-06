@@ -20,11 +20,10 @@ package engine
 import (
 	"fmt"
 	"reflect"
-	"strings"
+	"sort"
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -38,6 +37,7 @@ type ResourceUsage struct {
 
 // ResourceLimit represents a limit imposed for accessing a resource (eg: new calls)
 type ResourceLimit struct {
+	sync.Mutex
 	ID             string           // Identifier of this limit
 	Filters        []*RequestFilter // Filters for the request
 	ActivationTime time.Time        // Time when this limit becomes active
@@ -61,22 +61,28 @@ func (rl *ResourceLimit) removeExpiredUnits() {
 }
 
 func (rl *ResourceLimit) UsedUnits() float64 {
+	rl.Lock()
+	defer rl.Unlock()
 	if rl.UsageTTL != 0 {
 		rl.removeExpiredUnits()
 	}
 	return rl.usageCounter
 }
 
-func (rl *ResourceLimit) RecordUsage(ru *ResourceUsage) error {
+func (rl *ResourceLimit) RecordUsage(ru *ResourceUsage) (err error) {
+	rl.Lock()
+	defer rl.Unlock()
 	if _, hasID := rl.Usage[ru.ID]; hasID {
 		return fmt.Errorf("Duplicate resource usage with id: %s", ru.ID)
 	}
 	rl.Usage[ru.ID] = ru
 	rl.usageCounter += ru.UsageUnits
-	return nil
+	return
 }
 
-func (rl *ResourceLimit) RemoveUsage(ruID string) error {
+func (rl *ResourceLimit) ClearUsage(ruID string) error {
+	rl.Lock()
+	defer rl.Unlock()
 	ru, hasIt := rl.Usage[ruID]
 	if !hasIt {
 		return fmt.Errorf("Cannot find usage record with id: %s", ruID)
@@ -86,23 +92,79 @@ func (rl *ResourceLimit) RemoveUsage(ruID string) error {
 	return nil
 }
 
+// ResourceLimits is an ordered list of ResourceLimits based on Weight
+type ResourceLimits []*ResourceLimit
+
+// sort based on Weight
+func (rls ResourceLimits) Sort() {
+	sort.Slice(rls, func(i, j int) bool { return rls[i].Weight > rls[j].Weight })
+}
+
+// AllowUsage checks limits and decides whether the usage is allowed
+func (rls ResourceLimits) AllowUsage(usage float64) bool {
+	if len(rls) != 0 { // if rules defined, they need to allow usage
+		for _, rl := range rls {
+			if rl.Limit < rl.UsedUnits()+usage {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// RecordUsage will record the usage in all the resource limits
+func (rls ResourceLimits) RecordUsage(ru *ResourceUsage) (err error) {
+	var failedAtIdx int
+	for i, rl := range rls {
+		if err = rl.RecordUsage(ru); err != nil {
+			failedAtIdx = i
+			break
+		}
+	}
+	if err != nil {
+		for _, rl := range rls[:failedAtIdx] {
+			rl.ClearUsage(ru.ID) // best effort
+		}
+	}
+	return
+}
+
+// ClearUsage gives back the units to the pool
+func (rls ResourceLimits) ClearUsage(ruID string) {
+	for _, rl := range rls {
+		if err := rl.ClearUsage(ruID); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, err: %s", err.Error()))
+		}
+	}
+	return
+}
+
 // Pas the config as a whole so we can ask access concurrently
 func NewResourceLimiterService(cfg *config.CGRConfig, dataDB DataDB, cdrStatS rpcclient.RpcClientConnection) (*ResourceLimiterService, error) {
 	if cdrStatS != nil && reflect.ValueOf(cdrStatS).IsNil() {
 		cdrStatS = nil
 	}
-	rls := &ResourceLimiterService{dataDB: dataDB, cdrStatS: cdrStatS}
-	return rls, nil
+	return &ResourceLimiterService{dataDB: dataDB, cdrStatS: cdrStatS}, nil
 }
 
 // ResourcesLimiter is the service handling channel limits
 type ResourceLimiterService struct {
-	sync.RWMutex
 	dataDB   DataDB // So we can load the data in cache and index it
 	cdrStatS rpcclient.RpcClientConnection
 }
 
-func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]interface{}) (map[string]*ResourceLimit, error) {
+// Called to start the service
+func (rls *ResourceLimiterService) ListenAndServe() error {
+	return nil
+}
+
+// Called to shutdown the service
+func (rls *ResourceLimiterService) ServiceShutdown() error {
+	return nil
+}
+
+// matchingResourceLimitsForEvent returns ordered list of matching resources which are active by the time of the call
+func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]interface{}) (resLimits ResourceLimits, err error) {
 	matchingResources := make(map[string]*ResourceLimit)
 	for fldName, fieldValIf := range ev {
 		fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
@@ -174,117 +236,58 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 			matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
 		}
 	}
-	return matchingResources, nil
+	resLimits = make(ResourceLimits, len(matchingResources))
+	i := 0
+	for _, rl := range matchingResources {
+		resLimits[i] = rl
+		i++
+	}
+	resLimits.Sort()
+	return resLimits, nil
 }
 
-// Called to start the service
-func (rls *ResourceLimiterService) ListenAndServe() error {
-	return nil
-}
-
-// Called to shutdown the service
-func (rls *ResourceLimiterService) ServiceShutdown() error {
-	return nil
-}
-
-// RPC Methods
-
+// V1ResourceLimitsForEvent returns active resource limits matching the event
 func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interface{}, reply *[]*ResourceLimit) error {
-	rls.Lock() // Unknown number of RLs updated
-	defer rls.Unlock()
 	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	retRLs := make([]*ResourceLimit, len(matchingRLForEv))
-	i := 0
-	for _, rl := range matchingRLForEv {
-		retRLs[i] = rl
-		i++
-	}
-	*reply = retRLs
+	*reply = matchingRLForEv
 	return nil
 }
 
-// Alias API for external use
-func (rls *ResourceLimiterService) ResourceLimitsForEvent(ev map[string]interface{}, reply *[]*ResourceLimit) error {
-	return rls.V1ResourceLimitsForEvent(ev, reply)
-}
-
-// Called when a session or another event needs to
-func (rls *ResourceLimiterService) V1InitiateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
-	rls.Lock() // Unknown number of RLs updated
-	defer rls.Unlock()
+func (rls *ResourceLimiterService) V1AllowUsage(attrs utils.AttrRLsResourceUsage, allow *bool) (err error) {
 	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(attrs.Event)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	for rlID, rl := range matchingRLForEv {
-		if rl.Limit < rl.UsedUnits()+attrs.RequestedUnits {
-			delete(matchingRLForEv, rlID)
-		}
-		if err := rl.RecordUsage(&ResourceUsage{ID: attrs.ResourceUsageID, UsageTime: time.Now(), UsageUnits: attrs.RequestedUnits}); err != nil {
-			return err // Should not happen
-		}
+	*allow = matchingRLForEv.AllowUsage(attrs.Units)
+	return
+}
+
+// V1InitiateResourceUsage is called when a session or another event needs to consume
+func (rls *ResourceLimiterService) V1AllocateResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
+	mtcRLs, err := rls.matchingResourceLimitsForEvent(args.Event)
+	if err != nil {
+		return utils.NewErrServerError(err)
 	}
-	if len(matchingRLForEv) == 0 {
+	if !mtcRLs.AllowUsage(args.Units) {
 		return utils.ErrResourceUnavailable
 	}
-	for _, rl := range matchingRLForEv {
-		cache.Set(utils.ResourceLimitsPrefix+rl.ID, rl, true, "") // no real reason for a transaction
+	if err = mtcRLs.RecordUsage(&ResourceUsage{ID: args.UsageID,
+		UsageTime: time.Now(), UsageUnits: args.Units}); err != nil {
+		return
 	}
 	*reply = utils.OK
-	return nil
+	return
 }
 
-// Alias for externam methods
-func (rls *ResourceLimiterService) InitiateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
-	return rls.V1InitiateResourceUsage(attrs, reply)
-}
-
-func (rls *ResourceLimiterService) V1TerminateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
-	rls.Lock() // Unknown number of RLs updated
-	defer rls.Unlock()
-	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(attrs.Event)
+func (rls *ResourceLimiterService) V1ReleaseResource(attrs utils.AttrRLsResourceUsage, reply *string) (err error) {
+	mtcRLs, err := rls.matchingResourceLimitsForEvent(attrs.Event)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	for _, rl := range matchingRLForEv {
-		rl.RemoveUsage(attrs.ResourceUsageID)
-	}
+	mtcRLs.ClearUsage(attrs.UsageID)
 	*reply = utils.OK
 	return nil
-}
-
-// Alias for external methods
-func (rls *ResourceLimiterService) TerminateResourceUsage(attrs utils.AttrRLsResourceUsage, reply *string) error {
-	return rls.V1TerminateResourceUsage(attrs, reply)
-}
-
-// Make the service available as RPC internally
-func (rls *ResourceLimiterService) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return utils.ErrNotImplemented
-	}
-	// get method
-	method := reflect.ValueOf(rls).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
-	if !method.IsValid() {
-		return utils.ErrNotImplemented
-	}
-
-	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
 }

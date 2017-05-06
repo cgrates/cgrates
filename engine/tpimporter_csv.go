@@ -56,6 +56,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.LCRS_CSV:              (*TPCSVImporter).importLcrs,
 	utils.USERS_CSV:             (*TPCSVImporter).importUsers,
 	utils.ALIASES_CSV:           (*TPCSVImporter).importAliases,
+	utils.ResourceLimitsCsv:     (*TPCSVImporter).importResourceLimits,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -344,4 +345,15 @@ func (self *TPCSVImporter) importAliases(fn string) error {
 		tps[i].TPid = self.TPid
 	}
 	return self.StorDb.SetTPAliases(tps)
+}
+
+func (self *TPCSVImporter) importResourceLimits(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	rls, err := self.csvr.GetTPResourceLimits(self.TPid, "")
+	if err != nil {
+		return err
+	}
+	return self.StorDb.SetTPResourceLimits(rls)
 }

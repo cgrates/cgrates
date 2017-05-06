@@ -188,11 +188,11 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	if sm.rls != nil {
 		var reply string
 		attrRU := utils.AttrRLsResourceUsage{
-			ResourceUsageID: ev.GetUUID(),
-			Event:           ev.(FSEvent).AsMapStringInterface(sm.timezone),
-			RequestedUnits:  1,
+			UsageID: ev.GetUUID(),
+			Event:   ev.(FSEvent).AsMapStringInterface(sm.timezone),
+			Units:   1,
 		}
-		if err := sm.rls.Call("RLsV1.InitiateResourceUsage", attrRU, &reply); err != nil {
+		if err := sm.rls.Call("RLsV1.AllocateResource", attrRU, &reply); err != nil {
 			if err.Error() == utils.ErrResourceUnavailable.Error() {
 				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), "-"+utils.ErrResourceUnavailable.Error())
 			} else {
@@ -251,12 +251,12 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 	}
 	var reply string
 	attrRU := utils.AttrRLsResourceUsage{
-		ResourceUsageID: ev.GetUUID(),
-		Event:           ev.(FSEvent).AsMapStringInterface(sm.timezone),
-		RequestedUnits:  1,
+		UsageID: ev.GetUUID(),
+		Event:   ev.(FSEvent).AsMapStringInterface(sm.timezone),
+		Units:   1,
 	}
 	if sm.rls != nil {
-		if err := sm.rls.Call("RLsV1.TerminateResourceUsage", attrRU, &reply); err != nil {
+		if err := sm.rls.Call("RLsV1.ReleaseResource", attrRU, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> RLs API error: %s", err.Error()))
 		}
 	}

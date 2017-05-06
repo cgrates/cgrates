@@ -75,7 +75,7 @@ type RequestFilter struct {
 func (rf *RequestFilter) CompileValues() (err error) {
 	if rf.Type == MetaRSRFields {
 		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(rf.Values); err != nil {
-			return err
+			return
 		}
 	} else if rf.Type == MetaCDRStats {
 		rf.cdrStatSThresholds = make([]*RFStatSThreshold, len(rf.Values))
@@ -98,7 +98,7 @@ func (rf *RequestFilter) CompileValues() (err error) {
 			rf.cdrStatSThresholds[i] = st
 		}
 	}
-	return nil
+	return
 }
 
 // Pass is the method which should be used from outside.

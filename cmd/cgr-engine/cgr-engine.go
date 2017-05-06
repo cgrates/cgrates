@@ -531,8 +531,9 @@ func startResourceLimiterService(internalRLSChan, internalCdrStatSChan chan rpcc
 		exitChan <- true
 		return
 	}
-	server.RpcRegisterName("RLsV1", rls)
-	internalRLSChan <- rls
+	rlsV1 := v1.NewRLsV1(rls)
+	server.RpcRegister(rlsV1)
+	internalRLSChan <- rlsV1
 }
 
 func startRpc(server *utils.Server, internalRaterChan,

@@ -1283,9 +1283,9 @@ type AttrRLsCache struct {
 }
 
 type AttrRLsResourceUsage struct {
-	ResourceUsageID string
-	Event           map[string]interface{}
-	RequestedUnits  float64
+	Event   map[string]interface{}
+	UsageID string // ResourceUsage Identifier
+	Units   float64
 }
 
 // Attributes to send on SessionDisconnect by SMG
