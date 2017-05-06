@@ -17,20 +17,3 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package agents
-
-import (
-	"bytes"
-	"encoding/binary"
-	"fmt"
-	"reflect"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessionmanager"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/fiorix/go-diameter/diam"
-	"github.com/fiorix/go-diameter/diam/avp"
-	"github.com/fiorix/go-diameter/diam/datatype"
-	"github.com/fiorix/go-diameter/diam/dict"
-)

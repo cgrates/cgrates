@@ -73,7 +73,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.RARequestProcessor) (processed bool, err error) {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
-		if passes, _ := radPassesFieldFilter(req, fldFilter, nil); !passes {
+		if passes := radPassesFieldFilter(req, fldFilter, nil); !passes {
 			passesAllFilters = false
 		}
 	}

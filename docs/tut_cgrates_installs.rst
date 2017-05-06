@@ -26,15 +26,12 @@ Installation
 
 Installation steps are provided within **CGRateS** `install documentation <https://cgrates.readthedocs.org/en/latest/installation.html>`_.
 
-To get **CGRateS** installed execute the following commands over ssh console:
+Since this tutorial is for master version of **CGRateS** we will install CGRateS out of temporary .deb packages built out of master code:
 
 ::
 
- cd /etc/apt/sources.list.d/
- wget -O - http://apt.itsyscom.com/conf/cgrates.gpg.key | apt-key add -
- wget http://apt.itsyscom.com/conf/cgrates.apt.list
- apt-get update
- apt-get install cgrates
+ wget http://www.cgrates.org/tmp_pkg/cgrates_0.9.1~rc8_amd64.deb
+ dpkg -i cgrates_0.9.1~rc8_amd64.deb
 
 As described in post-install section, we will need to set up the MySQL_ database (using *CGRateS.org* as our root password):
 

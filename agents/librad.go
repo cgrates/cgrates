@@ -33,7 +33,7 @@ func radPassesFieldFilter(pkt *radigo.Packet, fieldFilter *utils.RSRField, proce
 	}
 	if val, hasIt := processorVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
 		if fieldFilter.FilterPasses(val) {
-			return true, 0
+			return true
 		}
 		return false
 	}
