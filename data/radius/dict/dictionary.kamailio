@@ -1,0 +1,86 @@
+#
+# $Id$
+#
+# SIP RADIUS attributes
+#
+# Proprietary indicates an attribute that hasn't
+# been standardized
+#
+#
+# NOTE: All standard (IANA registered) attributes are 
+#       defined in the default dictionary of the 
+#       radiusclient-ng library.
+#
+
+
+#### Attributes ###
+ATTRIBUTE       Sip-Response-Code       102     integer
+ATTRIBUTE	Sip-Method		101	integer
+ATTRIBUTE	Sip-Response-Code	102	integer
+ATTRIBUTE	Sip-CSeq		103	string
+ATTRIBUTE	Sip-To-Tag		104	string
+ATTRIBUTE	Sip-From-Tag		105	string
+ATTRIBUTE	Sip-Branch-ID		106	string
+ATTRIBUTE	Sip-Translated-Request-URI	107	string
+ATTRIBUTE	Sip-Source-IP-Address	108	ipaddr
+ATTRIBUTE	Sip-Source-Port		109	integer
+ATTRIBUTE	Sip-User-ID		110	string
+ATTRIBUTE	Sip-User-Realm		111	string
+ATTRIBUTE	Sip-User-Nonce		112	string
+ATTRIBUTE	Sip-User-Method		113	string
+ATTRIBUTE	Sip-User-Digest-URI	114	string
+ATTRIBUTE	Sip-User-Nonce-Count	115	string
+ATTRIBUTE	Sip-User-QOP		116	string
+ATTRIBUTE	Sip-User-Opaque		117	string
+ATTRIBUTE	Sip-User-Response	118	string
+ATTRIBUTE	Sip-User-CNonce		119	string
+ATTRIBUTE	Sip-URI-User		208	string
+ATTRIBUTE	Sip-Req-URI		210	string
+ATTRIBUTE	Sip-CC			212	string
+ATTRIBUTE	Sip-RPId		213	string
+ATTRIBUTE	Digest-Response		206	string
+ATTRIBUTE	Digest-Attributes	207	string
+ATTRIBUTE	Digest-Realm		1063	string
+ATTRIBUTE	Digest-Nonce		1064	string
+ATTRIBUTE	Digest-Method		1065	string
+ATTRIBUTE	Digest-URI		1066	string
+ATTRIBUTE	Digest-QOP		1067	string
+ATTRIBUTE	Digest-Algorithm	1068	string
+ATTRIBUTE	Digest-Body-Digest	1069	string
+ATTRIBUTE	Digest-CNonce		1070	string
+ATTRIBUTE	Digest-Nonce-Count	1071	string
+ATTRIBUTE	Digest-User-Name	1072	string
+
+ATTRIBUTE Sip-Uri-User         208  string     # Proprietary, auth_radius
+ATTRIBUTE Sip-Group            211  string     # Proprietary, group_radius
+ATTRIBUTE Sip-Rpid             213  string     # Proprietary, auth_radius
+ATTRIBUTE SIP-AVP              225  string     # Proprietary, avp_radius
+
+### Acct-Status-Type Values ###
+VALUE Acct-Status-Type   Failed           15   # RFC2866, acc
+
+### Service-Type Values ###
+#VALUE Service-Type       Call-Check       10   # RFC2865, uri_radius
+VALUE Service-Type       Group-Check      12   # Proprietary, group_radius
+VALUE Service-Type       Sip-Session      15   # Schulzrinne, acc, auth_radius
+VALUE Service-Type       SIP-Caller-AVPs  30   # Proprietary, avp_radius
+VALUE Service-Type       SIP-Callee-AVPs  31   # Proprietary, avp_radius
+
+### Sip-Method Values ###
+VALUE Sip-Method         Undefined      0
+VALUE Sip-Method         Invite         1
+VALUE Sip-Method         Cancel         2
+VALUE Sip-Method         Ack            4
+VALUE Sip-Method         Bye            8
+VALUE Sip-Method         Info           16
+VALUE Sip-Method         Options        32
+VALUE Sip-Method         Update         64
+VALUE Sip-Method         Register       128
+VALUE Sip-Method         Message        256
+VALUE Sip-Method         Subscribe      512
+VALUE Sip-Method         Notify         1024
+VALUE Sip-Method         Prack          2048
+VALUE Sip-Method         Refer          4096
+VALUE Sip-Method         Other          8192
+
+

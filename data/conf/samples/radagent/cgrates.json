@@ -1,8 +1,11 @@
 {
 // CGRateS Configuration file
 //
-// Used for cgradmin
-// Starts rater, scheduler
+
+"general": {
+    "log_level": 7,
+},
+
 
 "listen": {
 	"rpc_json": ":2012",				// RPC JSON listening address
@@ -74,6 +77,36 @@
 
 "radius_agent": {
 	"enabled": true,
+	"request_processors": [
+		{
+			"id": "KamailioAccountingStart",
+			"dry_run": false,
+			"request_filter": "Service-Type(Sip-Session);Sip-Method(Invite)",
+			"flags": [],
+			"continue_on_success": false,
+			"append_reply": true,
+			"request_fields":[	
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "User-Name", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Called-Station-Id", "mandatory": true},
+			],
+			"reply_fields":[],
+		},
+		{
+			"id": "KamailioAccountingStop",
+			"dry_run": false,
+			"request_filter": "Service-Type(Sip-Session);Sip-Method(Bye)",
+			"flags": [],
+			"continue_on_success": false,
+			"append_reply": true,
+			"request_fields":[	
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "User-Name", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Called-Station-Id", "mandatory": true},
+			],
+			"reply_fields":[],
+		},
+		
+	],
+
 },
 
 }

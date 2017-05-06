@@ -32,7 +32,6 @@ import (
 )
 
 func TestITCDRsMySQL(t *testing.T) {
-
 	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mysql"))
 	if err != nil {
 		t.Error(err)
@@ -49,7 +48,6 @@ func TestITCDRsMySQL(t *testing.T) {
 }
 
 func TestITCDRsPSQL(t *testing.T) {
-
 	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "postgres"))
 	if err != nil {
 		t.Error(err)

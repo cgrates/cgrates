@@ -35,9 +35,9 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection)
 	}
 	ra = &RadiusAgent{cgrCfg: cgrCfg, smg: smg}
 	ra.rsAuth = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet, cgrCfg.RadiusAgentCfg().ListenAuth, cgrCfg.RadiusAgentCfg().ClientSecrets, dicts,
-		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){radigo.AccessRequest: ra.handleAuth})
+		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){radigo.AccessRequest: ra.handleAuth}, nil)
 	ra.rsAcct = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet, cgrCfg.RadiusAgentCfg().ListenAcct, cgrCfg.RadiusAgentCfg().ClientSecrets, dicts,
-		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){radigo.AccountingRequest: ra.handleAcct})
+		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){radigo.AccountingRequest: ra.handleAcct}, nil)
 	return
 
 }
@@ -59,12 +59,26 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	return
 }
 
+// RadiusAgent handleAcct, received req: &{RWMutex:{w:{state:0 sema:0} writerSem:0 readerSem:0 readerCount:0 readerWait:0} dict:0xc4202e5840 secret:CGRateS.org Code:AccountingRequest Identifier:143 Authenticator:[67 77 204 122 189 209 219 22 9 176 15 228 24 246 183 7] AVPs:[0xc42023c230 0xc42023c2a0 0xc42023c310 0xc42023c460 0xc42023c4d0 0xc42023c540 0xc42023c850 0xc42023ce00 0xc42023d180 0xc42023d1f0 0xc42023d260]}
+// Identifier:144 Authenticator:[192 197 33 53 203 181 16 117 204 143 172 174 231 245 81 116] AVPs:[0xc42023d5e0 0xc42023d650 0xc42023d880 0xc42023d8f0 0xc42023da40 0xc42023db20 0xc42023dc70 0xc42023dd50 0xc42023ddc0 0xc42023de30 0xc42023dea0]}
 func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	utils.Logger.Debug(fmt.Sprintf("RadiusAgent handleAcct, received req: %+v", req))
+	req.SetAVPValues()
+	utils.Logger.Debug(fmt.Sprintf("Received request: %s", utils.ToJSON(req)))
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
-	for _, avp := range req.AVPs {
-		rpl.AVPs = append(rpl.AVPs, avp)
+	rpl.SetAVPValues()
+	return
+}
+
+func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.RARequestProcessor) (processed bool, err error) {
+	passesAllFilters := true
+	for _, fldFilter := range reqProcessor.RequestFilter {
+		if passes, _ := radPassesFieldFilter(req, fldFilter, nil); !passes {
+			passesAllFilters = false
+		}
+	}
+	if !passesAllFilters { // Not going with this processor further
+		return false, nil
 	}
 	return
 }
