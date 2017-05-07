@@ -317,7 +317,7 @@ type SmKamConfig struct {
 	Enabled         bool
 	RALsConns       []*HaPoolConfig
 	CDRsConns       []*HaPoolConfig
-	CDRStatsConns   []*HaPoolConfig
+	RLsConns        []*HaPoolConfig
 	CreateCdr       bool
 	DebitInterval   time.Duration
 	MinCallDuration time.Duration
@@ -347,11 +347,11 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Cdrstats_conns != nil {
-		self.CDRStatsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrstats_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Cdrstats_conns {
-			self.CDRStatsConns[idx] = NewDfltHaPoolConfig()
-			self.CDRStatsConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Rls_conns != nil {
+		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Rls_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rls_conns {
+			self.RLsConns[idx] = NewDfltHaPoolConfig()
+			self.RLsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {

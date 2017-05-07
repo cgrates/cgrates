@@ -58,6 +58,7 @@ type KamAuthReply struct {
 	TransactionLabel int    // Original transaction label
 	MaxSessionTime   int    // Maximum session time in case of success, -1 for unlimited
 	Suppliers        string // List of suppliers, comma separated
+	ResourceAllowed  bool
 	Error            string // Reply in case of error
 }
 
@@ -346,11 +347,10 @@ func (kev KamEvent) String() string {
 	return string(mrsh)
 }
 
-func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string, resErr error) (*KamAuthReply, error) {
-	var err error
-	kar := &KamAuthReply{Event: CGR_AUTH_REPLY, Suppliers: suppliers}
-	if resErr != nil {
-		kar.Error = resErr.Error()
+func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string, resAllowed bool, rplyErr error) (kar *KamAuthReply, err error) {
+	kar = &KamAuthReply{Event: CGR_AUTH_REPLY, Suppliers: suppliers}
+	if rplyErr != nil {
+		kar.Error = rplyErr.Error()
 	}
 	if _, hasIt := kev[KAM_TR_INDEX]; !hasIt {
 		return nil, utils.NewErrMandatoryIeMissing(KAM_TR_INDEX, "")
@@ -369,6 +369,7 @@ func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string, res
 		maxSessionTime = maxSessionDur.Seconds()
 	}
 	kar.MaxSessionTime = int(utils.Round(maxSessionTime, 0, utils.ROUNDING_MIDDLE))
+	kar.ResourceAllowed = resAllowed
 	return kar, nil
 }
 
@@ -395,6 +396,10 @@ func (kev KamEvent) ComputeLcr() bool {
 	}
 }
 
-func (kev KamEvent) AsMapStringIface() (map[string]interface{}, error) {
-	return nil, utils.ErrNotImplemented
+func (kev KamEvent) AsMapStringIface() (mp map[string]interface{}, err error) {
+	mp = make(map[string]interface{}, len(kev))
+	for k, v := range kev {
+		mp[k] = v
+	}
+	return
 }

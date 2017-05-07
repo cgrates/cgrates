@@ -66,8 +66,8 @@ func (rlsv1 *RLsV1) GetLimitsForEvent(ev map[string]interface{}, reply *[]*engin
 }
 
 // AllowUsage checks if there are limits imposed for event
-func (rlsv1 *RLsV1) AllowUsage(args utils.AttrRLsResourceUsage, has *bool) error {
-	return rlsv1.rls.V1AllowUsage(args, has)
+func (rlsv1 *RLsV1) AllowUsage(args utils.AttrRLsResourceUsage, allowed *bool) error {
+	return rlsv1.rls.V1AllowUsage(args, allowed)
 }
 
 // V1InitiateResourceUsage records usage for an event

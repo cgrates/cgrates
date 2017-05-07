@@ -31,8 +31,8 @@ import (
 )
 
 func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv,
-	cdrStatS rpcclient.RpcClientConnection, timezone string) (ksm *KamailioSessionManager, err error) {
-	ksm = &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, cdrStatS: cdrStatS,
+	rlS rpcclient.RpcClientConnection, timezone string) (ksm *KamailioSessionManager, err error) {
+	ksm = &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, rlS: rlS,
 		timezone: timezone, conns: make(map[string]*kamevapi.KamEvapi), sessions: NewSessions()}
 	return
 }
@@ -41,65 +41,10 @@ type KamailioSessionManager struct {
 	cfg      *config.SmKamConfig
 	rater    rpcclient.RpcClientConnection
 	cdrsrv   rpcclient.RpcClientConnection
-	cdrStatS rpcclient.RpcClientConnection
+	rlS      rpcclient.RpcClientConnection
 	timezone string
 	conns    map[string]*kamevapi.KamEvapi
 	sessions *Sessions
-}
-
-func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
-	kev, err := NewKamEvent(evData)
-	if err != nil {
-		utils.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
-		return
-	}
-	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
-		return
-	}
-	if kev.MissingParameter(self.timezone) {
-		if kar, err := kev.AsKamAuthReply(0.0, "", utils.ErrMandatoryIeMissing); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
-		} else if err = self.conns[connId].Send(kar.String()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
-		}
-		return
-	}
-	var remainingDuration float64
-	var errMaxSession error
-	if errMaxSession = self.rater.Call("Responder.GetDerivedMaxSessionTime", kev.AsStoredCdr(self.Timezone()), &remainingDuration); errMaxSession != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time, error: %s", errMaxSession.Error()))
-	}
-	var supplStr string
-	var errSuppl error
-	if kev.ComputeLcr() {
-		if supplStr, errSuppl = self.getSuppliers(kev); errSuppl != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get suppliers, error: %s", errSuppl.Error()))
-		}
-	}
-	if errMaxSession == nil { // Overwrite the error from maxSessionTime with the one from suppliers if nil
-		errMaxSession = errSuppl
-	}
-	if kar, err := kev.AsKamAuthReply(remainingDuration, supplStr, errMaxSession); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
-	} else if err = self.conns[connId].Send(kar.String()); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
-	}
-}
-
-func (self *KamailioSessionManager) onCgrLcrReq(evData []byte, connId string) {
-	kev, err := NewKamEvent(evData)
-	if err != nil {
-		utils.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", string(evData), err.Error()))
-		return
-	}
-	supplStr, err := self.getSuppliers(kev)
-	kamLcrReply, errReply := kev.AsKamAuthReply(-1.0, supplStr, err)
-	kamLcrReply.Event = CGR_LCR_REPLY // Hit the CGR_LCR_REPLY event route on Kamailio side
-	if errReply != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", errReply.Error()))
-	} else if err = self.conns[connId].Send(kamLcrReply.String()); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending lcr reply %s", err.Error()))
-	}
 }
 
 func (self *KamailioSessionManager) getSuppliers(kev KamEvent) (string, error) {
@@ -119,6 +64,80 @@ func (self *KamailioSessionManager) getSuppliers(kev KamEvent) (string, error) {
 		return "", errors.New("LCR_COMPUTE_ERROR")
 	}
 	return lcr.SuppliersString()
+}
+
+func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
+	kev, err := NewKamEvent(evData)
+	if err != nil {
+		utils.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+		return
+	}
+	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
+	}
+	if kev.MissingParameter(self.timezone) {
+		if kar, err := kev.AsKamAuthReply(0.0, "", false, utils.ErrMandatoryIeMissing); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
+		} else if err = self.conns[connId].Send(kar.String()); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
+		}
+		return
+	}
+	var remainingDuration float64
+	var errReply error
+	if errReply = self.rater.Call("Responder.GetDerivedMaxSessionTime",
+		kev.AsStoredCdr(self.timezone), &remainingDuration); errReply != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time, error: %s", errReply.Error()))
+	}
+	var supplStr string
+	var errSuppl error
+	if kev.ComputeLcr() {
+		if supplStr, errSuppl = self.getSuppliers(kev); errSuppl != nil {
+			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get suppliers, error: %s", errSuppl.Error()))
+		}
+	}
+	if errReply == nil { // Overwrite the error from maxSessionTime with the one from suppliers if nil
+		errReply = errSuppl
+	}
+	resourceAllowed := true
+	if self.rlS != nil {
+		var reply string
+		ev, err := kev.AsMapStringIface()
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs error: %s", err.Error()))
+			resourceAllowed = false
+		}
+		attrRU := utils.AttrRLsResourceUsage{
+			UsageID: kev.GetUUID(),
+			Event:   ev,
+			Units:   1, // One channel reserved
+		}
+		if err := self.rlS.Call("RLsV1.AllocateResource", attrRU, &reply); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs API error: %s", err.Error()))
+			resourceAllowed = false
+		}
+	}
+	if kar, err := kev.AsKamAuthReply(remainingDuration, supplStr, resourceAllowed, errReply); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
+	} else if err = self.conns[connId].Send(kar.String()); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
+	}
+}
+
+func (self *KamailioSessionManager) onCgrLcrReq(evData []byte, connId string) {
+	kev, err := NewKamEvent(evData)
+	if err != nil {
+		utils.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", string(evData), err.Error()))
+		return
+	}
+	supplStr, err := self.getSuppliers(kev)
+	kamLcrReply, errReply := kev.AsKamAuthReply(0, supplStr, false, err)
+	kamLcrReply.Event = CGR_LCR_REPLY // Hit the CGR_LCR_REPLY event route on Kamailio side
+	if errReply != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", errReply.Error()))
+	} else if err = self.conns[connId].Send(kamLcrReply.String()); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending lcr reply %s", err.Error()))
+	}
 }
 
 func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
@@ -153,13 +172,30 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Mandatory IE missing out of event: %+v", kev))
 	}
 	go self.ProcessCdr(kev.AsStoredCdr(self.Timezone()))
-	s := self.sessions.getSession(kev.GetUUID())
-	if s == nil { // Not handled by us
-		return
+	if self.rlS != nil { // Release RLs resource
+		go func() {
+			ev, err := kev.AsMapStringIface()
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs error: %s", err.Error()))
+				return
+			}
+			var reply string
+			attrRU := utils.AttrRLsResourceUsage{
+				UsageID: kev.GetUUID(),
+				Event:   ev,
+				Units:   1,
+			}
+			if err := self.rlS.Call("RLsV1.ReleaseResource", attrRU, &reply); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs API error: %s", err.Error()))
+			}
+		}()
 	}
-	if err := self.sessions.removeSession(s, kev); err != nil {
-		utils.Logger.Err(err.Error())
+	if s := self.sessions.getSession(kev.GetUUID()); s != nil {
+		if err := self.sessions.removeSession(s, kev); err != nil {
+			utils.Logger.Err(err.Error())
+		}
 	}
+
 }
 
 func (self *KamailioSessionManager) Connect() error {

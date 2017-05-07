@@ -434,7 +434,7 @@ func TestCgrCfgJSONDefaultsSMKamConfig(t *testing.T) {
 		Enabled:         false,
 		RALsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
 		CDRsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CDRStatsConns:   []*HaPoolConfig{},
+		RLsConns:        []*HaPoolConfig{},
 		CreateCdr:       false,
 		DebitInterval:   10 * time.Second,
 		MinCallDuration: 0 * time.Second,

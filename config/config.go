@@ -422,9 +422,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
 			}
 		}
-		for _, smKamCDRStatSConn := range self.SmKamConfig.CDRStatsConns {
-			if smKamCDRStatSConn.Address == utils.MetaInternal && !self.CDRStatsEnabled {
-				return errors.New("CDRStatS not enabled but requested by SM-Kamailio component")
+		for _, smKamRLsConn := range self.SmKamConfig.RLsConns {
+			if smKamRLsConn.Address == utils.MetaInternal && !self.resourceLimiterCfg.Enabled {
+				return errors.New("RLs not enabled but requested by SM-Kamailio component")
 			}
 		}
 	}

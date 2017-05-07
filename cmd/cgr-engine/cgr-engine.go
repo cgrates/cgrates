@@ -319,9 +319,9 @@ func startSmFreeSWITCH(internalRaterChan, internalCDRSChan, rlsChan chan rpcclie
 	exitChan <- true
 }
 
-func startSmKamailio(internalRaterChan, internalCDRSChan, internalCDRStatSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+func startSmKamailio(internalRaterChan, internalCDRSChan, internalRLsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMKamailio service.")
-	var ralsConn, cdrsConn, cdrStatsConn *rpcclient.RpcClientPool
+	var ralsConn, cdrsConn, rlSConn *rpcclient.RpcClientPool
 	if len(cfg.SmKamConfig.RALsConns) != 0 {
 		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmKamConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
@@ -340,16 +340,16 @@ func startSmKamailio(internalRaterChan, internalCDRSChan, internalCDRStatSChan c
 			return
 		}
 	}
-	if len(cfg.SmKamConfig.CDRStatsConns) != 0 {
-		cdrStatsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmKamConfig.CDRStatsConns, internalCDRStatSChan, cfg.InternalTtl)
+	if len(cfg.SmKamConfig.RLsConns) != 0 {
+		rlSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.SmKamConfig.RLsConns, internalRLsChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to CDRStatS: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RLsConns: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, ralsConn, cdrsConn, cdrStatsConn, cfg.DefaultTimezone)
+	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, ralsConn, cdrsConn, rlSConn, cfg.DefaultTimezone)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMKamailio> error: %s!", err))
@@ -547,7 +547,7 @@ func startResourceLimiterService(internalRLSChan, internalCdrStatSChan chan rpcc
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
-	internalAliaseSChan, internalRLSChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
+	internalAliaseSChan, internalRLsChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -565,8 +565,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalAliaseSChan <- aliases
 	case smg := <-internalSMGChan:
 		internalSMGChan <- smg
-	case rls := <-internalRLSChan:
-		internalRLSChan <- rls
+	case rls := <-internalRLsChan:
+		internalRLsChan <- rls
 	}
 	go server.ServeJSON(cfg.RPCJSONListen)
 	go server.ServeGOB(cfg.RPCGOBListen)
@@ -751,7 +751,7 @@ func main() {
 
 	// Start SM-Kamailio
 	if cfg.SmKamConfig.Enabled {
-		go startSmKamailio(internalRaterChan, internalCdrSChan, internalCdrStatSChan, cdrDb, exitChan)
+		go startSmKamailio(internalRaterChan, internalCdrSChan, internalRLSChan, cdrDb, exitChan)
 	}
 
 	// Start SM-OpenSIPS
