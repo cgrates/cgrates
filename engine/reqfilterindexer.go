@@ -29,7 +29,8 @@ func NewReqFilterIndexer(dataDB DataDB, dbKey string) (*ReqFilterIndexer, error)
 	if indexes == nil {
 		indexes = make(map[string]map[string]utils.StringMap)
 	}
-	return &ReqFilterIndexer{dataDB: dataDB, dbKey: dbKey, indexes: indexes, chngdIndxKeys: make(utils.StringMap)}, nil
+	return &ReqFilterIndexer{dataDB: dataDB, dbKey: dbKey,
+		indexes: indexes, chngdIndxKeys: make(utils.StringMap)}, nil
 }
 
 // ReqFilterIndexer is a centralized indexer for all data sources using RequestFilter

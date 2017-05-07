@@ -1663,8 +1663,8 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if tpr.dataStorage == nil {
 		return errors.New("no database connection")
 	}
-	if flush {
-		tpr.dataStorage.Flush("")
+	if flush { // ToDo
+		//tpr.dataStorage.Flush("")
 	}
 	if verbose {
 		log.Print("Destinations:")
@@ -1887,7 +1887,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if !disable_reverse {
 		if len(tpr.destinations) > 0 {
 			if verbose {
-				log.Print("Rebuilding Reverse Destinations")
+				log.Print("Rebuilding reverse destinations")
 			}
 			if err = tpr.dataStorage.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 				return err
@@ -1895,7 +1895,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if len(tpr.acntActionPlans) > 0 {
 			if verbose {
-				log.Print("Rebuilding Account Action Plans")
+				log.Print("Rebuilding account action plans")
 			}
 			if err = tpr.dataStorage.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 				return err
@@ -1903,9 +1903,31 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if len(tpr.aliases) > 0 {
 			if verbose {
-				log.Print("Rebuilding Reverse Aliases")
+				log.Print("Rebuilding reverse aliases")
 			}
 			if err = tpr.dataStorage.RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
+				return err
+			}
+		}
+		if len(tpr.resLimits) > 0 {
+			if verbose {
+				log.Print("Indexing resource limits")
+			}
+			rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourceLimitsIndex)
+			if err != nil {
+				return err
+			}
+			for _, tpRL := range tpr.resLimits {
+				if rl, err := APItoResourceLimit(tpRL, tpr.timezone); err != nil {
+					return err
+				} else {
+					rlIdxr.IndexFilters(rl.ID, rl.Filters)
+				}
+			}
+			if verbose {
+				log.Printf("Indexed ResourceLimit keys: %+v", rlIdxr.ChangedKeys().Slice())
+			}
+			if err := rlIdxr.StoreIndexes(); err != nil {
 				return err
 			}
 		}
