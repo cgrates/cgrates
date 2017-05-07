@@ -286,7 +286,8 @@ func TestRLsMatchingResourceLimitsForEvent(t *testing.T) {
 			Usage:          make(map[string]*ResourceUsage),
 		},
 	}
-	if resLimits, err := rLS.matchingResourceLimitsForEvent(map[string]interface{}{"Account": "1002", "Subject": "dan", "Destination": "1002"}); err != nil {
+	if resLimits, err := rLS.matchingResourceLimitsForEvent(
+		map[string]interface{}{"Account": "1002", "Subject": "dan", "Destination": "1002"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eResLimits[0].Filters[0], resLimits[0].Filters[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", eResLimits, resLimits)

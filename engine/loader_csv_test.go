@@ -268,11 +268,10 @@ cgrates.org,mas,true,another,value,10
 
 	resLimits = `
 #Id,FilterType,FilterFieldName,FilterFieldValues,ActivationTime,Weight,Limit,ActionTriggers
-ResGroup1,*string,Account,1001;1002,2014-07-29T15:00:00Z,10,2,
-ResGroup1,*string_prefix,Destination,10;20,2014-07-29T15:00:00Z,10,,
-ResGroup1,*cdr_stats,,CDRST1:*min_ASR:34;CDRST_1001:*min_ASR:20,,,,
-ResGroup1,*rsr_fields,,Subject(~^1.*1$);Destination(1002),,,,
-ResGroup2,*destinations,Destination,DST_FS,2014-07-29T15:00:00Z,10,2,
+ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,10,2,
+ResGroup21,*string_prefix,HdrDestination,10;20,2014-07-29T15:00:00Z,10,,
+ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,
+ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,10,2,
 `
 )
 
@@ -1377,24 +1376,23 @@ func TestLoadReverseAliases(t *testing.T) {
 
 func TestLoadResourceLimits(t *testing.T) {
 	eResLimits := map[string]*utils.TPResourceLimit{
-		"ResGroup1": &utils.TPResourceLimit{
+		"ResGroup21": &utils.TPResourceLimit{
 			TPid: testTPID,
-			ID:   "ResGroup1",
+			ID:   "ResGroup21",
 			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
-				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"10", "20"}},
-				&utils.TPRequestFilter{Type: MetaCDRStats, Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"}},
-				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"}},
+				&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
+				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
+				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"HdrSubject(~^1.*1$)", "HdrDestination(1002)"}},
 			},
 			ActivationTime: "2014-07-29T15:00:00Z",
 			Weight:         10,
 			Limit:          "2",
 		},
-		"ResGroup2": &utils.TPResourceLimit{
+		"ResGroup22": &utils.TPResourceLimit{
 			TPid: testTPID,
-			ID:   "ResGroup2",
+			ID:   "ResGroup22",
 			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "Destination", Values: []string{"DST_FS"}},
+				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
 			},
 			ActivationTime: "2014-07-29T15:00:00Z",
 			Weight:         10,
