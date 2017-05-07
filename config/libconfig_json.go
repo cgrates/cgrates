@@ -275,6 +275,7 @@ type SmKamJsonCfg struct {
 	Enabled           *bool
 	Rals_conns        *[]*HaPoolJsonCfg
 	Cdrs_conns        *[]*HaPoolJsonCfg
+	Cdrstats_conns    *[]*HaPoolJsonCfg
 	Create_cdr        *bool
 	Debit_interval    *string
 	Min_call_duration *string

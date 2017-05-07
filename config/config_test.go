@@ -434,15 +434,15 @@ func TestCgrCfgJSONDefaultsSMKamConfig(t *testing.T) {
 		Enabled:         false,
 		RALsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
 		CDRsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		CDRStatsConns:   []*HaPoolConfig{},
 		CreateCdr:       false,
 		DebitInterval:   10 * time.Second,
 		MinCallDuration: 0 * time.Second,
 		MaxCallDuration: 3 * time.Hour,
 		EvapiConns:      []*KamConnConfig{&KamConnConfig{Address: "127.0.0.1:8448", Reconnects: 5}},
 	}
-
 	if !reflect.DeepEqual(cgrCfg.SmKamConfig, eSmKaCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.CdreProfiles, eSmKaCfg)
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmKamConfig, eSmKaCfg)
 	}
 }
 

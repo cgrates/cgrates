@@ -135,7 +135,7 @@ const CGRATES_CFG_JSON = `
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
-	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality<""|*internal|x.y.z.y:1234>
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
 },
 
@@ -306,6 +306,7 @@ const CGRATES_CFG_JSON = `
 	"cdrs_conns": [
 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",				// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this

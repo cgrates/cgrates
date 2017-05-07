@@ -470,6 +470,7 @@ func TestSmKamJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
+		Cdrstats_conns:    &[]*HaPoolJsonCfg{},
 		Create_cdr:        utils.BoolPointer(false),
 		Debit_interval:    utils.StringPointer("10s"),
 		Min_call_duration: utils.StringPointer("0s"),
