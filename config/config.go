@@ -411,7 +411,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 		for _, smKamRaterConn := range self.SmKamConfig.RALsConns {
 			if smKamRaterConn.Address == utils.MetaInternal && !self.RALsEnabled {
-				return errors.New("Rater not enabled but requested by SM-Kamailio component.")
+				return errors.New("Rater not enabled but requested by SM-Kamailio component")
 			}
 		}
 		if len(self.SmKamConfig.CDRsConns) == 0 {
@@ -420,6 +420,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 		for _, smKamCDRSConn := range self.SmKamConfig.CDRsConns {
 			if smKamCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
 				return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
+			}
+		}
+		for _, smKamCDRStatSConn := range self.SmKamConfig.CDRStatsConns {
+			if smKamCDRStatSConn.Address == utils.MetaInternal && !self.CDRStatsEnabled {
+				return errors.New("CDRStatS not enabled but requested by SM-Kamailio component")
 			}
 		}
 	}

@@ -319,9 +319,9 @@ func startSmFreeSWITCH(internalRaterChan, internalCDRSChan, rlsChan chan rpcclie
 	exitChan <- true
 }
 
-func startSmKamailio(internalRaterChan, internalCDRSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+func startSmKamailio(internalRaterChan, internalCDRSChan, internalCDRStatSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMKamailio service.")
-	var ralsConn, cdrsConn *rpcclient.RpcClientPool
+	var ralsConn, cdrsConn, cdrStatsConn *rpcclient.RpcClientPool
 	if len(cfg.SmKamConfig.RALsConns) != 0 {
 		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmKamConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
@@ -335,12 +335,21 @@ func startSmKamailio(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SmKamConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RAL: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to CDRs: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, ralsConn, cdrsConn, cfg.DefaultTimezone)
+	if len(cfg.SmKamConfig.CDRStatsConns) != 0 {
+		cdrStatsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.SmKamConfig.CDRStatsConns, internalCDRStatSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to CDRStatS: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, ralsConn, cdrsConn, cdrStatsConn, cfg.DefaultTimezone)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMKamailio> error: %s!", err))
@@ -742,7 +751,7 @@ func main() {
 
 	// Start SM-Kamailio
 	if cfg.SmKamConfig.Enabled {
-		go startSmKamailio(internalRaterChan, internalCdrSChan, cdrDb, exitChan)
+		go startSmKamailio(internalRaterChan, internalCdrSChan, internalCdrStatSChan, cdrDb, exitChan)
 	}
 
 	// Start SM-OpenSIPS

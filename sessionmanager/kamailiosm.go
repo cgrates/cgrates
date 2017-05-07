@@ -30,15 +30,18 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv rpcclient.RpcClientConnection, timezone string) (*KamailioSessionManager, error) {
-	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, conns: make(map[string]*kamevapi.KamEvapi), sessions: NewSessions()}
-	return ksm, nil
+func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv,
+	cdrStatS rpcclient.RpcClientConnection, timezone string) (ksm *KamailioSessionManager, err error) {
+	ksm = &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, cdrStatS: cdrStatS,
+		timezone: timezone, conns: make(map[string]*kamevapi.KamEvapi), sessions: NewSessions()}
+	return
 }
 
 type KamailioSessionManager struct {
 	cfg      *config.SmKamConfig
 	rater    rpcclient.RpcClientConnection
 	cdrsrv   rpcclient.RpcClientConnection
+	cdrStatS rpcclient.RpcClientConnection
 	timezone string
 	conns    map[string]*kamevapi.KamEvapi
 	sessions *Sessions
