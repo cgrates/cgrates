@@ -37,17 +37,17 @@ type ResourceUsage struct {
 
 // ResourceLimit represents a limit imposed for accessing a resource (eg: new calls)
 type ResourceLimit struct {
-	sync.Mutex
-	ID             string           // Identifier of this limit
-	Filters        []*RequestFilter // Filters for the request
-	ActivationTime time.Time        // Time when this limit becomes active
-	ExpiryTime     time.Time
-	Weight         float64                   // Weight to sort the ResourceLimits
-	Limit          float64                   // Limit value
-	ActionTriggers ActionTriggers            // Thresholds to check after changing Limit
-	UsageTTL       time.Duration             // Expire usage after this duration
-	Usage          map[string]*ResourceUsage // Keep a record of usage, bounded with timestamps so we can expire too long records
-	usageCounter   float64                   // internal counter aggregating real usage of ResourceLimit
+	sync.RWMutex
+	ID                 string                    // Identifier of this limit
+	Filters            []*RequestFilter          // Filters for the request
+	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
+	ExpiryTime         time.Time
+	Weight             float64                   // Weight to sort the ResourceLimits
+	Limit              float64                   // Limit value
+	ActionTriggers     ActionTriggers            // Thresholds to check after changing Limit
+	UsageTTL           time.Duration             // Expire usage after this duration
+	Usage              map[string]*ResourceUsage // Keep a record of usage, bounded with timestamps so we can expire too long records
+	TotalUsage         float64                   // internal counter aggregating real usage of ResourceLimit
 }
 
 func (rl *ResourceLimit) removeExpiredUnits() {
@@ -56,7 +56,7 @@ func (rl *ResourceLimit) removeExpiredUnits() {
 			continue // not expired
 		}
 		delete(rl.Usage, ruID)
-		rl.usageCounter -= rv.UsageUnits
+		rl.TotalUsage -= rv.UsageUnits
 	}
 }
 
@@ -66,7 +66,7 @@ func (rl *ResourceLimit) UsedUnits() float64 {
 	if rl.UsageTTL != 0 {
 		rl.removeExpiredUnits()
 	}
-	return rl.usageCounter
+	return rl.TotalUsage
 }
 
 func (rl *ResourceLimit) RecordUsage(ru *ResourceUsage) (err error) {
@@ -76,7 +76,7 @@ func (rl *ResourceLimit) RecordUsage(ru *ResourceUsage) (err error) {
 		return fmt.Errorf("Duplicate resource usage with id: %s", ru.ID)
 	}
 	rl.Usage[ru.ID] = ru
-	rl.usageCounter += ru.UsageUnits
+	rl.TotalUsage += ru.UsageUnits
 	return
 }
 
@@ -88,7 +88,7 @@ func (rl *ResourceLimit) ClearUsage(ruID string) error {
 		return fmt.Errorf("Cannot find usage record with id: %s", ruID)
 	}
 	delete(rl.Usage, ru.ID)
-	rl.usageCounter -= ru.UsageUnits
+	rl.TotalUsage -= ru.UsageUnits
 	return nil
 }
 
@@ -189,8 +189,7 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 				}
 				return nil, err
 			}
-			now := time.Now()
-			if rl.ActivationTime.After(now) || (!rl.ExpiryTime.IsZero() && rl.ExpiryTime.Before(now)) { // not active
+			if rl.ActivationInterval != nil && !rl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 				continue
 			}
 			passAllFilters := true
@@ -223,8 +222,7 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 			}
 			return nil, err
 		}
-		now := time.Now()
-		if rl.ActivationTime.After(now) || (!rl.ExpiryTime.IsZero() && rl.ExpiryTime.Before(now)) { // not active
+		if rl.ActivationInterval != nil && !rl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
 		for _, fltr := range rl.Filters {

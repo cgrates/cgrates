@@ -1832,11 +1832,21 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 		rl, found := mrl[tp.Tag]
 		if !found {
 			rl = &utils.TPResourceLimit{
-				TPid:           tp.Tpid,
-				ID:             tp.Tag,
-				ActivationTime: tp.ActivationTime,
-				Weight:         tp.Weight,
-				Limit:          tp.Limit,
+				TPid:     tp.Tpid,
+				ID:       tp.Tag,
+				UsageTTL: tp.UsageTTL,
+				Weight:   tp.Weight,
+				Limit:    tp.Limit,
+			}
+			if len(tp.ActivationInterval) != 0 {
+				tpAI := new(utils.TPActivationInterval)
+				aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+				if len(aiSplt) == 2 {
+					tpAI.ActivationTime = aiSplt[0]
+					tpAI.ExpiryTime = aiSplt[1]
+				} else if len(aiSplt) == 1 {
+					tpAI.ActivationTime = aiSplt[0]
+				}
 			}
 		}
 		if tp.ActionTriggerIds != "" {
@@ -1859,56 +1869,52 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 	return
 }
 
-func APItoModelResourceLimit(rl *utils.TPResourceLimit) TpResourceLimits {
-	result := TpResourceLimits{}
-	for _, f := range rl.Filters {
-		tp := &TpResourceLimit{
-			Tpid:           rl.TPid,
-			Tag:            rl.ID,
-			ActivationTime: rl.ActivationTime,
-			Weight:         rl.Weight,
-			Limit:          rl.Limit,
-		}
-		for i, atid := range rl.ActionTriggerIDs {
-			if i != 0 {
-				tp.ActionTriggerIds = tp.ActionTriggerIds + utils.INFIELD_SEP + atid
-			} else {
-				tp.ActionTriggerIds = atid
-			}
-		}
-		tp.FilterType = f.Type
-		tp.FilterFieldName = f.FieldName
-		for i, val := range f.Values {
-			if i != 0 {
-				tp.FilterFieldValues = tp.FilterFieldValues + utils.INFIELD_SEP + val
-			} else {
-				tp.FilterFieldValues = val
-			}
-		}
-		result = append(result, tp)
-	}
+func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) {
 	if len(rl.Filters) == 0 {
-		tp := &TpResourceLimit{
-			Tpid:           rl.TPid,
-			Tag:            rl.ID,
-			ActivationTime: rl.ActivationTime,
-			Weight:         rl.Weight,
-			Limit:          rl.Limit,
+		return
+	}
+	for i, fltr := range rl.Filters {
+		mdl := &TpResourceLimit{
+			Tpid: rl.TPid,
+			Tag:  rl.ID,
 		}
-		for i, atid := range rl.ActionTriggerIDs {
-			if i != 0 {
-				tp.ActionTriggerIds = tp.ActionTriggerIds + utils.INFIELD_SEP + atid
-			} else {
-				tp.ActionTriggerIds = atid
+		if i == 0 {
+			mdl.UsageTTL = rl.UsageTTL
+			mdl.Weight = rl.Weight
+			mdl.Limit = rl.Limit
+			if rl.ActivationInterval != nil {
+				if rl.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
+				}
+				if rl.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
+				}
+			}
+			for i, atid := range rl.ActionTriggerIDs {
+				if i != 0 {
+					mdl.ActionTriggerIds = mdl.ActionTriggerIds + utils.INFIELD_SEP + atid
+				} else {
+					mdl.ActionTriggerIds = atid
+				}
 			}
 		}
-		result = append(result, tp)
+		mdl.FilterType = fltr.Type
+		mdl.FilterFieldName = fltr.FieldName
+		for i, val := range fltr.Values {
+			if i != 0 {
+				mdl.FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
+			} else {
+				mdl.FilterFieldValues = val
+			}
+		}
+		mdls = append(mdls, mdl)
 	}
-	return result
+	return
 }
 
 func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceLimit, err error) {
-	rl = &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight, Filters: make([]*RequestFilter, len(tpRL.Filters)), Usage: make(map[string]*ResourceUsage)}
+	rl = &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight,
+		Filters: make([]*RequestFilter, len(tpRL.Filters)), Usage: make(map[string]*ResourceUsage)}
 	for i, f := range tpRL.Filters {
 		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
@@ -1916,8 +1922,10 @@ func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *Resou
 		}
 		rl.Filters[i] = rf
 	}
-	if rl.ActivationTime, err = utils.ParseTimeDetectLayout(tpRL.ActivationTime, timezone); err != nil {
-		return nil, err
+	if tpRL.ActivationInterval != nil {
+		if rl.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
 	}
 	if rl.Limit, err = strconv.ParseFloat(tpRL.Limit, 64); err != nil {
 		return nil, err

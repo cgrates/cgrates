@@ -267,11 +267,11 @@ cgrates.org,mas,true,another,value,10
 `
 
 	resLimits = `
-#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationTime,Weight,Limit,ActionTriggers
-ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,10,2,
-ResGroup21,*string_prefix,HdrDestination,10;20,2014-07-29T15:00:00Z,10,,
-ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,
-ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,10,2,
+#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,TTL,Limit,Weight,ActionTriggers
+ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,10,
+ResGroup21,*string_prefix,HdrDestination,10;20,,,,,
+ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,
+ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,10,
 `
 )
 

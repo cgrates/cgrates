@@ -1262,19 +1262,26 @@ type AttrSetBalance struct {
 }
 
 type TPResourceLimit struct {
-	TPid             string
-	ID               string             // Identifier of this limit
-	Filters          []*TPRequestFilter // Filters for the request
-	ActivationTime   string             // Time when this limit becomes active
-	Weight           float64            // Weight to sort the ResourceLimits
-	Limit            string             // Limit value
-	ActionTriggerIDs []string           // Thresholds to check after changing Limit
+	TPid               string
+	ID                 string                // Identifier of this limit
+	Filters            []*TPRequestFilter    // Filters for the request
+	ActivationInterval *TPActivationInterval // Time when this limit becomes active/expires
+	UsageTTL           string
+	Limit              string   // Limit value
+	Weight             float64  // Weight to sort the ResourceLimits
+	ActionTriggerIDs   []string // Thresholds to check after changing Limit
 }
 
 type TPRequestFilter struct {
 	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
 	FieldName string   // Name of the field providing us the Values to check (used in case of some )
 	Values    []string // Filter definition
+}
+
+// TPActivationInterval represents an activation interval for an item
+type TPActivationInterval struct {
+	ActivationTime,
+	ExpiryTime string
 }
 
 type AttrRLsCache struct {
@@ -1286,6 +1293,18 @@ type AttrRLsResourceUsage struct {
 	Event   map[string]interface{}
 	UsageID string // ResourceUsage Identifier
 	Units   float64
+}
+
+// AsActivationTime converts TPActivationInterval into ActivationInterval
+func (tpAI *TPActivationInterval) AsActivationInterval(timezone string) (ai *ActivationInterval, err error) {
+	var at, et time.Time
+	if at, err = ParseTimeDetectLayout(tpAI.ActivationTime, timezone); err != nil {
+		return
+	}
+	if et, err = ParseTimeDetectLayout(tpAI.ExpiryTime, timezone); err != nil {
+		return
+	}
+	return &ActivationInterval{ActivationTime: at, ExpiryTime: et}, nil
 }
 
 // Attributes to send on SessionDisconnect by SMG
