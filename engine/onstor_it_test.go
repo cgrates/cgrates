@@ -736,12 +736,12 @@ func testOnStorITCacheResourceLimit(t *testing.T) {
 			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 			}},
-		ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-		ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-		Limit:          1,
-		ActionTriggers: make(ActionTriggers, 0),
-		UsageTTL:       time.Duration(1 * time.Millisecond),
-		Usage:          make(map[string]*ResourceUsage),
+		ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
+		ExpiryTime:         time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+		Limit:              1,
+		ActionTriggers:     make(ActionTriggers, 0),
+		UsageTTL:           time.Duration(1 * time.Millisecond),
+		Usage:              make(map[string]*ResourceUsage),
 	}
 	if err := onStor.SetResourceLimit(rL, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -755,7 +755,7 @@ func testOnStorITCacheResourceLimit(t *testing.T) {
 	if itm, hasIt := cache.Get(utils.ResourceLimitsPrefix + rL.ID); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ResourceLimit); !reflect.DeepEqual(rL, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", rL.ActivationTime, rcv.ActivationTime)
+		t.Errorf("Expecting: %+v, received: %+v", rL, rcv)
 	}
 }
 
@@ -1649,12 +1649,12 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 			}},
-		ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-		ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-		Limit:          1,
-		ActionTriggers: make(ActionTriggers, 0),
-		UsageTTL:       time.Duration(1 * time.Millisecond),
-		Usage:          make(map[string]*ResourceUsage),
+		ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
+		ExpiryTime:         time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+		Limit:              1,
+		ActionTriggers:     make(ActionTriggers, 0),
+		UsageTTL:           time.Duration(1 * time.Millisecond),
+		Usage:              make(map[string]*ResourceUsage),
 	}
 	if _, rcvErr := onStor.GetResourceLimit(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

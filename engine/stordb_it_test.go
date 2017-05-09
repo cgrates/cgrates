@@ -1441,12 +1441,12 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 			},
 		},
 		&utils.TPResourceLimit{
-			TPid:             "testTPid",
-			ID:               "testTag2",
-			ActivationTime:   "test",
-			Weight:           0.0,
-			Limit:            "test",
-			ActionTriggerIDs: []string{"1x", "2x"},
+			TPid:               "testTPid",
+			ID:                 "testTag2",
+			ActivationInterval: &utils.TPActivationInterval{ActivationTime: "test"},
+			Weight:             0.0,
+			Limit:              "test",
+			ActionTriggerIDs:   []string{"1x", "2x"},
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
 					Type:      "filtertype",
@@ -1469,7 +1469,7 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].ID, rcv[0].ID) || reflect.DeepEqual(snd[0].ID, rcv[1].ID)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ID, rcv[0].ID, rcv[1].ID)
 		}
-		if !(reflect.DeepEqual(snd[0].ActivationTime, rcv[0].ActivationTime) || reflect.DeepEqual(snd[0].ActivationTime, rcv[1].ActivationTime)) {
+		if !(reflect.DeepEqual(snd[0].ActivationInterval, rcv[0].ActivationInterval) || reflect.DeepEqual(snd[0].ActivationInterval, rcv[1].ActivationInterval)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].TPid, rcv[0].TPid, rcv[1].TPid)
 		}
 		if !(reflect.DeepEqual(snd[0].Weight, rcv[0].Weight) || reflect.DeepEqual(snd[0].Weight, rcv[1].Weight)) {
@@ -1503,7 +1503,8 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].ID, rcv[0].ID) || reflect.DeepEqual(snd[0].ID, rcv[1].ID)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ID, rcv[0].ID, rcv[1].ID)
 		}
-		if !(reflect.DeepEqual(snd[0].ActivationTime, rcv[0].ActivationTime) || reflect.DeepEqual(snd[0].ActivationTime, rcv[1].ActivationTime)) {
+		if !(reflect.DeepEqual(snd[0].ActivationInterval, rcv[0].ActivationInterval) ||
+			reflect.DeepEqual(snd[0].ActivationInterval, rcv[1].ActivationInterval)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].TPid, rcv[0].TPid, rcv[1].TPid)
 		}
 		if !(reflect.DeepEqual(snd[0].Weight, rcv[0].Weight) || reflect.DeepEqual(snd[0].Weight, rcv[1].Weight)) {
