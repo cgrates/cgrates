@@ -656,7 +656,6 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Enabled:             utils.BoolPointer(false),
 		Cdrstats_conns:      &[]*HaPoolJsonCfg{},
 		Cache_dump_interval: utils.StringPointer("0s"),
-		Usage_ttl:           utils.StringPointer("3h"),
 	}
 	if cfg, err := dfCgrJsonCfg.ResourceLimiterJsonCfg(); err != nil {
 		t.Error(err)

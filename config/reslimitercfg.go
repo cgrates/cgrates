@@ -27,7 +27,6 @@ type ResourceLimiterConfig struct {
 	Enabled           bool
 	CDRStatConns      []*HaPoolConfig // Connections towards CDRStatS
 	CacheDumpInterval time.Duration   // Dump regularly from cache into dataDB
-	UsageTTL          time.Duration   // Auto-Expire usage units older than this duration
 }
 
 func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJsonCfg) (err error) {
@@ -46,11 +45,6 @@ func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJ
 	}
 	if jsnCfg.Cache_dump_interval != nil {
 		if rlcfg.CacheDumpInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Cache_dump_interval); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Usage_ttl != nil {
-		if rlcfg.UsageTTL, err = utils.ParseDurationWithSecs(*jsnCfg.Usage_ttl); err != nil {
 			return err
 		}
 	}

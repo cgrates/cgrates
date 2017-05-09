@@ -517,7 +517,6 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		Enabled:           false,
 		CDRStatConns:      []*HaPoolConfig{},
 		CacheDumpInterval: 0 * time.Second,
-		UsageTTL:          3 * time.Hour,
 	}
 
 	if !reflect.DeepEqual(cgrCfg.resourceLimiterCfg, eResLiCfg) {
