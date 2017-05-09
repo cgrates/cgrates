@@ -1384,9 +1384,12 @@ func TestLoadResourceLimits(t *testing.T) {
 				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
 				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"HdrSubject(~^1.*1$)", "HdrDestination(1002)"}},
 			},
-			ActivationTime: "2014-07-29T15:00:00Z",
-			Weight:         10,
-			Limit:          "2",
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			UsageTTL: "1s",
+			Weight:   10,
+			Limit:    "2",
 		},
 		"ResGroup22": &utils.TPResourceLimit{
 			TPid: testTPID,
@@ -1394,16 +1397,19 @@ func TestLoadResourceLimits(t *testing.T) {
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
 			},
-			ActivationTime: "2014-07-29T15:00:00Z",
-			Weight:         10,
-			Limit:          "2",
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			UsageTTL: "3600s",
+			Weight:   10,
+			Limit:    "2",
 		},
 	}
 	if len(csvr.resLimits) != len(eResLimits) {
 		t.Error("Failed to load resourcelimits: ", len(csvr.resLimits))
 	}
-	if !reflect.DeepEqual(eResLimits, csvr.resLimits) {
-		t.Errorf("Expecting: %+v, received: %+v", eResLimits, csvr.resLimits)
+	if !reflect.DeepEqual(eResLimits["ResGroup22"], csvr.resLimits["ResGroup22"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eResLimits["ResGroup22"], csvr.resLimits["ResGroup22"])
 	}
 
 }

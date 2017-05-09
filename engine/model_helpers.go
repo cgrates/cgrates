@@ -1832,21 +1832,27 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 		rl, found := mrl[tp.Tag]
 		if !found {
 			rl = &utils.TPResourceLimit{
-				TPid:     tp.Tpid,
-				ID:       tp.Tag,
-				UsageTTL: tp.UsageTTL,
-				Weight:   tp.Weight,
-				Limit:    tp.Limit,
+				TPid: tp.Tpid,
+				ID:   tp.Tag,
 			}
-			if len(tp.ActivationInterval) != 0 {
-				tpAI := new(utils.TPActivationInterval)
-				aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
-				if len(aiSplt) == 2 {
-					tpAI.ActivationTime = aiSplt[0]
-					tpAI.ExpiryTime = aiSplt[1]
-				} else if len(aiSplt) == 1 {
-					tpAI.ActivationTime = aiSplt[0]
-				}
+		}
+		if tp.UsageTTL != "" {
+			rl.UsageTTL = tp.UsageTTL
+		}
+		if tp.Weight != 0 {
+			rl.Weight = tp.Weight
+		}
+		if tp.Limit != "" {
+			rl.Limit = tp.Limit
+		}
+		if len(tp.ActivationInterval) != 0 {
+			rl.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				rl.ActivationInterval.ActivationTime = aiSplt[0]
+				rl.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				rl.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
 		if tp.ActionTriggerIds != "" {

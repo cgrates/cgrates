@@ -1307,6 +1307,15 @@ func (tpAI *TPActivationInterval) AsActivationInterval(timezone string) (ai *Act
 	return &ActivationInterval{ActivationTime: at, ExpiryTime: et}, nil
 }
 
+type ActivationInterval struct {
+	ActivationTime, ExpiryTime time.Time
+}
+
+func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
+	return ai.ActivationTime.Before(atTime) &&
+		(ai.ExpiryTime.IsZero() || ai.ExpiryTime.After(atTime))
+}
+
 // Attributes to send on SessionDisconnect by SMG
 type AttrDisconnectSession struct {
 	EventStart map[string]interface{}

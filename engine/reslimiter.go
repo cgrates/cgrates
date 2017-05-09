@@ -101,7 +101,7 @@ func (rls ResourceLimits) Sort() {
 }
 
 // AllowUsage checks limits and decides whether the usage is allowed
-func (rls ResourceLimits) AllowUsage(usage float64) bool {
+func (rls ResourceLimits) AllowUsage(usage float64) (allowed bool) {
 	if len(rls) != 0 { // if rules defined, they need to allow usage
 		for _, rl := range rls {
 			if rl.Limit < rl.UsedUnits()+usage {

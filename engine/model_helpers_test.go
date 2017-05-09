@@ -670,15 +670,15 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 	tps := []*TpResourceLimit{
 		&TpResourceLimit{
-			Tpid:              "TEST_TPID",
-			Tag:               "ResGroup1",
-			FilterType:        MetaStringPrefix,
-			FilterFieldName:   "Destination",
-			FilterFieldValues: "+49151;+49161",
-			ActivationTime:    "2014-07-29T15:00:00Z",
-			Weight:            10.0,
-			Limit:             "45",
-			ActionTriggerIds:  "WARN_RES1;WARN_RES2"},
+			Tpid:               "TEST_TPID",
+			Tag:                "ResGroup1",
+			FilterType:         MetaStringPrefix,
+			FilterFieldName:    "Destination",
+			FilterFieldValues:  "+49151;+49161",
+			ActivationInterval: "2014-07-29T15:00:00Z",
+			Weight:             10.0,
+			Limit:              "45",
+			ActionTriggerIds:   "WARN_RES1;WARN_RES2"},
 		&TpResourceLimit{
 			Tpid:              "TEST_TPID",
 			Tag:               "ResGroup1",
@@ -687,14 +687,14 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			FilterFieldValues: "call;inbound_call",
 			ActionTriggerIds:  "WARN3"},
 		&TpResourceLimit{
-			Tpid:              "TEST_TPID",
-			Tag:               "ResGroup2",
-			FilterType:        MetaStringPrefix,
-			FilterFieldName:   "Destination",
-			FilterFieldValues: "+40",
-			ActivationTime:    "2014-07-29T15:00:00Z",
-			Weight:            10.0,
-			Limit:             "20"},
+			Tpid:               "TEST_TPID",
+			Tag:                "ResGroup2",
+			FilterType:         MetaStringPrefix,
+			FilterFieldName:    "Destination",
+			FilterFieldValues:  "+40",
+			ActivationInterval: "2014-07-29T15:00:00Z",
+			Weight:             10.0,
+			Limit:              "20"},
 	}
 	eTPs := []*utils.TPResourceLimit{
 		&utils.TPResourceLimit{
@@ -712,7 +712,9 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 					Values:    []string{"call", "inbound_call"},
 				},
 			},
-			ActivationTime:   tps[0].ActivationTime,
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: tps[0].ActivationInterval,
+			},
 			Weight:           tps[0].Weight,
 			Limit:            tps[0].Limit,
 			ActionTriggerIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
@@ -727,9 +729,11 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 					Values:    []string{"+40"},
 				},
 			},
-			ActivationTime: tps[2].ActivationTime,
-			Weight:         tps[2].Weight,
-			Limit:          tps[2].Limit,
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: tps[2].ActivationInterval,
+			},
+			Weight: tps[2].Weight,
+			Limit:  tps[2].Limit,
 		},
 	}
 	rcvTPs := TpResourceLimits(tps).AsTPResourceLimits()
@@ -748,14 +752,20 @@ func TestAPItoResourceLimit(t *testing.T) {
 			&utils.TPRequestFilter{Type: MetaCDRStats, Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"}},
 			&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"}},
 		},
-		ActivationTime: "2014-07-29T15:00:00Z",
-		Weight:         10,
-		Limit:          "2",
+		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
+		Weight:             10,
+		Limit:              "2",
 	}
-	eRL := &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight, Filters: make([]*RequestFilter, len(tpRL.Filters)), Usage: make(map[string]*ResourceUsage)}
-	eRL.Filters[0] = &RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}}
-	eRL.Filters[1] = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"10", "20"}}
-	eRL.Filters[2] = &RequestFilter{Type: MetaCDRStats, Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"},
+	eRL := &ResourceLimit{ID: tpRL.ID,
+		Weight:  tpRL.Weight,
+		Filters: make([]*RequestFilter, len(tpRL.Filters)),
+		Usage:   make(map[string]*ResourceUsage)}
+	eRL.Filters[0] = &RequestFilter{Type: MetaString,
+		FieldName: "Account", Values: []string{"1001", "1002"}}
+	eRL.Filters[1] = &RequestFilter{Type: MetaStringPrefix,
+		FieldName: "Destination", Values: []string{"10", "20"}}
+	eRL.Filters[2] = &RequestFilter{Type: MetaCDRStats,
+		Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"},
 		cdrStatSThresholds: []*RFStatSThreshold{
 			&RFStatSThreshold{QueueID: "CDRST1", ThresholdType: "*MIN_ASR", ThresholdValue: 34},
 			&RFStatSThreshold{QueueID: "CDRST_1001", ThresholdType: "*MIN_ASR", ThresholdValue: 20},
@@ -763,7 +773,8 @@ func TestAPItoResourceLimit(t *testing.T) {
 	eRL.Filters[3] = &RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 		rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 	}
-	eRL.ActivationTime, _ = utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
+	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
+	eRL.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 	eRL.Limit = 2
 	if rl, err := APItoResourceLimit(tpRL, "UTC"); err != nil {
 		t.Error(err)
