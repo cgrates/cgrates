@@ -66,6 +66,23 @@ func (self *KamailioSessionManager) getSuppliers(kev KamEvent) (string, error) {
 	return lcr.SuppliersString()
 }
 
+func (self *KamailioSessionManager) allocateResources(kev KamEvent) (err error) {
+	if self.rlS == nil {
+		return errors.New("no RLs connection")
+	}
+	var ev map[string]interface{}
+	if ev, err = kev.AsMapStringIface(); err != nil {
+		return
+	}
+	attrRU := utils.AttrRLsResourceUsage{
+		UsageID: kev.GetUUID(),
+		Event:   ev,
+		Units:   1, // One channel reserved
+	}
+	var reply string
+	return self.rlS.Call("RLsV1.AllocateResource", attrRU, &reply)
+}
+
 func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
@@ -101,19 +118,8 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	}
 	resourceAllowed := true
 	if self.rlS != nil {
-		var reply string
-		ev, err := kev.AsMapStringIface()
-		if err != nil {
+		if err := self.allocateResources(kev); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs error: %s", err.Error()))
-			resourceAllowed = false
-		}
-		attrRU := utils.AttrRLsResourceUsage{
-			UsageID: kev.GetUUID(),
-			Event:   ev,
-			Units:   1, // One channel reserved
-		}
-		if err := self.rlS.Call("RLsV1.AllocateResource", attrRU, &reply); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs API error: %s", err.Error()))
 			resourceAllowed = false
 		}
 	}
@@ -134,9 +140,30 @@ func (self *KamailioSessionManager) onCgrLcrReq(evData []byte, connId string) {
 	kamLcrReply, errReply := kev.AsKamAuthReply(0, supplStr, false, err)
 	kamLcrReply.Event = CGR_LCR_REPLY // Hit the CGR_LCR_REPLY event route on Kamailio side
 	if errReply != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", errReply.Error()))
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building LCR reply %s", errReply.Error()))
 	} else if err = self.conns[connId].Send(kamLcrReply.String()); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending lcr reply %s", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending LCR reply %s", err.Error()))
+	}
+}
+
+// onCgrRLReq is the handler for CGR_RL_REQUEST events coming from Kamailio
+func (self *KamailioSessionManager) onCgrRLReq(evData []byte, connId string) {
+	kev, err := NewKamEvent(evData)
+	if err != nil {
+		utils.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", string(evData), err.Error()))
+		return
+	}
+	resourceAllowed := true
+	if err := self.allocateResources(kev); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs error: %s", err.Error()))
+		resourceAllowed = false
+	}
+	kamRLReply, errReply := kev.AsKamAuthReply(0, "", resourceAllowed, err)
+	kamRLReply.Event = CGR_RL_REPLY // Hit the CGR_LCR_REPLY event route on Kamailio side
+	if errReply != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building RL reply %s", errReply.Error()))
+	} else if err = self.conns[connId].Send(kamRLReply.String()); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending RL reply %s", err.Error()))
 	}
 }
 
@@ -201,10 +228,11 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 func (self *KamailioSessionManager) Connect() error {
 	var err error
 	eventHandlers := map[*regexp.Regexp][]func([]byte, string){
-		regexp.MustCompile("CGR_AUTH_REQUEST"): []func([]byte, string){self.onCgrAuth},
-		regexp.MustCompile("CGR_LCR_REQUEST"):  []func([]byte, string){self.onCgrLcrReq},
-		regexp.MustCompile("CGR_CALL_START"):   []func([]byte, string){self.onCallStart},
-		regexp.MustCompile("CGR_CALL_END"):     []func([]byte, string){self.onCallEnd},
+		regexp.MustCompile(CGR_AUTH_REQUEST): []func([]byte, string){self.onCgrAuth},
+		regexp.MustCompile(CGR_LCR_REQUEST):  []func([]byte, string){self.onCgrLcrReq},
+		regexp.MustCompile(CGR_RL_REQUEST):   []func([]byte, string){self.onCgrRLReq},
+		regexp.MustCompile(CGR_CALL_START):   []func([]byte, string){self.onCallStart},
+		regexp.MustCompile(CGR_CALL_END):     []func([]byte, string){self.onCallEnd},
 	}
 	errChan := make(chan error)
 	for _, connCfg := range self.cfg.EvapiConns {

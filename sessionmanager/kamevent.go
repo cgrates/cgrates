@@ -37,6 +37,8 @@ const (
 	CGR_SESSION_DISCONNECT = "CGR_SESSION_DISCONNECT"
 	CGR_CALL_START         = "CGR_CALL_START"
 	CGR_CALL_END           = "CGR_CALL_END"
+	CGR_RL_REQUEST         = "CGR_RL_REQUEST"
+	CGR_RL_REPLY           = "CGR_RL_REPLY"
 	CGR_SETUPTIME          = "cgr_setuptime"
 	CGR_ANSWERTIME         = "cgr_answertime"
 	CGR_STOPTIME           = "cgr_stoptime"
