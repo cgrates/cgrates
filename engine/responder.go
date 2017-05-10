@@ -380,8 +380,8 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 			maxCallDuration = remainingDuration
 		}
 	}
-	rs.getCache().Cache(cacheKey, &cache.CacheItem{Value: maxCallDuration})
 	*reply = maxCallDuration
+	rs.getCache().Cache(cacheKey, &cache.CacheItem{Value: reply})
 	return nil
 }
 
