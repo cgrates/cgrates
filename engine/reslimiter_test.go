@@ -172,6 +172,45 @@ func TestRLsIndexStringFilters(t *testing.T) {
 	}
 }
 */
+/*
+func TestResourceLimitsAllowUsage(t *testing.T) {
+	rls := make(ResourceLimits, 0)
+	if !rls.AllowUsage(1.0) {
+		t.Error("Not allowed for empty limits")
+	}
+	rls = ResourceLimits{
+		&ResourceLimit{
+			ID:     "RLAU1",
+			Weight: 20,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+				&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+				}},
+			ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)},
+			Limit:              1,
+			Usage: map[string]*ResourceUsage{"call1": &ResourceUsage{
+				ID: "call1", UsageTime: time.Now(), UsageUnits: 1}},
+			TotalUsage: 1,
+		},
+		&ResourceLimit{
+			ID:     "RLAU2",
+			Weight: 10,
+			Filters: []*RequestFilter{
+				&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
+				&RequestFilter{Type: MetaString, FieldName: "Subject", Values: []string{"dan"}},
+			},
+			ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)},
+			Limit:              2,
+			UsageTTL:           time.Duration(1 * time.Millisecond),
+			Usage:              make(map[string]*ResourceUsage),
+		},
+	}
+	if !rls.AllowUsage(2.0) {
+		t.Error("Not allowed")
+	}
+}
+*/
 
 func TestRLsLoadRLs(t *testing.T) {
 	rls := []*ResourceLimit{
@@ -347,7 +386,7 @@ func TestRLsV1InitiateResourceUsage(t *testing.T) {
 	var reply string
 	if err := rLS.V1AllocateResource(attrRU, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
+	} else if reply != "RL1" {
 		t.Error("Received reply: ", reply)
 	}
 	resLimits, err := rLS.matchingResourceLimitsForEvent(attrRU.Event)

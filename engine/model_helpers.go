@@ -1845,6 +1845,9 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 		if tp.Limit != "" {
 			rl.Limit = tp.Limit
 		}
+		if tp.AllocationMessage != "" {
+			rl.AllocationMessage = tp.AllocationMessage
+		}
 		if len(tp.ActivationInterval) != 0 {
 			rl.ActivationInterval = new(utils.TPActivationInterval)
 			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
@@ -1888,6 +1891,7 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) 
 			mdl.UsageTTL = rl.UsageTTL
 			mdl.Weight = rl.Weight
 			mdl.Limit = rl.Limit
+			mdl.AllocationMessage = rl.AllocationMessage
 			if rl.ActivationInterval != nil {
 				if rl.ActivationInterval.ActivationTime != "" {
 					mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
@@ -1921,6 +1925,11 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) 
 func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceLimit, err error) {
 	rl = &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight,
 		Filters: make([]*RequestFilter, len(tpRL.Filters)), Usage: make(map[string]*ResourceUsage)}
+	if tpRL.UsageTTL != "" {
+		if rl.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {
+			return nil, err
+		}
+	}
 	for i, f := range tpRL.Filters {
 		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {

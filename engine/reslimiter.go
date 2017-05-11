@@ -30,9 +30,9 @@ import (
 )
 
 type ResourceUsage struct {
-	ID         string    // Unique identifier of this resourceUsage, Eg: FreeSWITCH UUID
-	UsageTime  time.Time // So we can expire it later
-	UsageUnits float64   // Number of units used
+	ID    string    // Unique identifier of this ResourceUsage, Eg: FreeSWITCH UUID
+	Time  time.Time // So we can expire it later
+	Units float64   // Number of units used
 }
 
 // ResourceLimit represents a limit imposed for accessing a resource (eg: new calls)
@@ -46,23 +46,22 @@ type ResourceLimit struct {
 	Limit              float64                   // Limit value
 	ActionTriggers     ActionTriggers            // Thresholds to check after changing Limit
 	UsageTTL           time.Duration             // Expire usage after this duration
+	AllocationMessage  string                    // message returned by the winning resourceLimit on allocation
 	Usage              map[string]*ResourceUsage // Keep a record of usage, bounded with timestamps so we can expire too long records
 	TotalUsage         float64                   // internal counter aggregating real usage of ResourceLimit
 }
 
 func (rl *ResourceLimit) removeExpiredUnits() {
 	for ruID, rv := range rl.Usage {
-		if time.Now().Sub(rv.UsageTime) <= rl.UsageTTL {
+		if time.Now().Sub(rv.Time) <= rl.UsageTTL {
 			continue // not expired
 		}
 		delete(rl.Usage, ruID)
-		rl.TotalUsage -= rv.UsageUnits
+		rl.TotalUsage -= rv.Units
 	}
 }
 
 func (rl *ResourceLimit) UsedUnits() float64 {
-	rl.Lock()
-	defer rl.Unlock()
 	if rl.UsageTTL != 0 {
 		rl.removeExpiredUnits()
 	}
@@ -70,25 +69,21 @@ func (rl *ResourceLimit) UsedUnits() float64 {
 }
 
 func (rl *ResourceLimit) RecordUsage(ru *ResourceUsage) (err error) {
-	rl.Lock()
-	defer rl.Unlock()
 	if _, hasID := rl.Usage[ru.ID]; hasID {
 		return fmt.Errorf("Duplicate resource usage with id: %s", ru.ID)
 	}
 	rl.Usage[ru.ID] = ru
-	rl.TotalUsage += ru.UsageUnits
+	rl.TotalUsage += ru.Units
 	return
 }
 
 func (rl *ResourceLimit) ClearUsage(ruID string) error {
-	rl.Lock()
-	defer rl.Unlock()
 	ru, hasIt := rl.Usage[ruID]
 	if !hasIt {
 		return fmt.Errorf("Cannot find usage record with id: %s", ruID)
 	}
 	delete(rl.Usage, ru.ID)
-	rl.TotalUsage -= ru.UsageUnits
+	rl.TotalUsage -= ru.Units
 	return nil
 }
 
@@ -100,19 +95,7 @@ func (rls ResourceLimits) Sort() {
 	sort.Slice(rls, func(i, j int) bool { return rls[i].Weight > rls[j].Weight })
 }
 
-// AllowUsage checks limits and decides whether the usage is allowed
-func (rls ResourceLimits) AllowUsage(usage float64) (allowed bool) {
-	if len(rls) != 0 { // if rules defined, they need to allow usage
-		for _, rl := range rls {
-			if rl.Limit < rl.UsedUnits()+usage {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// RecordUsage will record the usage in all the resource limits
+// RecordUsage will record the usage in all the resource limits, failing back on errors
 func (rls ResourceLimits) RecordUsage(ru *ResourceUsage) (err error) {
 	var failedAtIdx int
 	for i, rl := range rls {
@@ -124,6 +107,7 @@ func (rls ResourceLimits) RecordUsage(ru *ResourceUsage) (err error) {
 	if err != nil {
 		for _, rl := range rls[:failedAtIdx] {
 			rl.ClearUsage(ru.ID) // best effort
+			rl.TotalUsage -= ru.Units
 		}
 	}
 	return
@@ -132,10 +116,52 @@ func (rls ResourceLimits) RecordUsage(ru *ResourceUsage) (err error) {
 // ClearUsage gives back the units to the pool
 func (rls ResourceLimits) ClearUsage(ruID string) {
 	for _, rl := range rls {
+		rl.Lock()
+		defer rl.Unlock()
+	}
+	for _, rl := range rls {
 		if err := rl.ClearUsage(ruID); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, err: %s", err.Error()))
 		}
 	}
+	return
+}
+
+// AllocateResource attempts allocating resources for a *ResourceUsage
+// simulates on dryRun
+// returns utils.ErrResourceUnavailable if allocation is not possible
+func (rls ResourceLimits) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage string, err error) {
+	if len(rls) == 0 {
+		return utils.META_NONE, nil
+	}
+	// lock resources so we can safely take decisions, need all to be locked before proceeding
+	for _, rl := range rls {
+		if dryRun {
+			rl.RLock()
+			defer rl.RUnlock()
+		} else {
+			rl.Lock()
+			defer rl.Unlock()
+		}
+	}
+	// Simulate resource usage
+	for _, rl := range rls {
+		if rl.Limit >= rl.UsedUnits()+ru.Units {
+			if alcMessage == "" {
+				alcMessage = rl.AllocationMessage
+			}
+			if alcMessage == "" { // rl.AllocationMessage is not populated
+				alcMessage = rl.ID
+			}
+		}
+	}
+	if alcMessage == "" {
+		return "", utils.ErrResourceUnavailable
+	}
+	if dryRun {
+		return
+	}
+	err = rls.RecordUsage(ru)
 	return
 }
 
@@ -254,12 +280,19 @@ func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interf
 	return nil
 }
 
-func (rls *ResourceLimiterService) V1AllowUsage(attrs utils.AttrRLsResourceUsage, allow *bool) (err error) {
-	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(attrs.Event)
+func (rls *ResourceLimiterService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *bool) (err error) {
+	mtcRLs, err := rls.matchingResourceLimitsForEvent(args.Event)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*allow = matchingRLForEv.AllowUsage(attrs.Units)
+	if _, err = mtcRLs.AllocateResource(&ResourceUsage{ID: args.UsageID,
+		Time: time.Now(), Units: args.Units}, false); err != nil {
+		if err == utils.ErrResourceUnavailable {
+			return // not error but still not allowed
+		}
+		return utils.NewErrServerError(err)
+	}
+	*allow = true
 	return
 }
 
@@ -269,14 +302,12 @@ func (rls *ResourceLimiterService) V1AllocateResource(args utils.AttrRLsResource
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if !mtcRLs.AllowUsage(args.Units) {
-		return utils.ErrResourceUnavailable
+	if alcMsg, err := mtcRLs.AllocateResource(&ResourceUsage{ID: args.UsageID,
+		Time: time.Now(), Units: args.Units}, false); err != nil {
+		return err
+	} else {
+		*reply = alcMsg
 	}
-	if err = mtcRLs.RecordUsage(&ResourceUsage{ID: args.UsageID,
-		UsageTime: time.Now(), UsageUnits: args.Units}); err != nil {
-		return
-	}
-	*reply = utils.OK
 	return
 }
 

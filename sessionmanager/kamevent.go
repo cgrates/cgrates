@@ -55,13 +55,14 @@ var primaryFields = []string{EVENT, CALLID, FROM_TAG, HASH_ENTRY, HASH_ID, CGR_A
 	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION, CGR_PDD, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE}
 
 type KamAuthReply struct {
-	Event            string // Kamailio will use this to differentiate between requests and replies
-	TransactionIndex int    // Original transaction index
-	TransactionLabel int    // Original transaction label
-	MaxSessionTime   int    // Maximum session time in case of success, -1 for unlimited
-	Suppliers        string // List of suppliers, comma separated
-	ResourceAllowed  bool
-	Error            string // Reply in case of error
+	Event             string // Kamailio will use this to differentiate between requests and replies
+	TransactionIndex  int    // Original transaction index
+	TransactionLabel  int    // Original transaction label
+	MaxSessionTime    int    // Maximum session time in case of success, -1 for unlimited
+	Suppliers         string // List of suppliers, comma separated
+	ResourceAllocated bool
+	AllocationMessage string
+	Error             string // Reply in case of error
 }
 
 func (self *KamAuthReply) String() string {
@@ -349,8 +350,10 @@ func (kev KamEvent) String() string {
 	return string(mrsh)
 }
 
-func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string, resAllowed bool, rplyErr error) (kar *KamAuthReply, err error) {
-	kar = &KamAuthReply{Event: CGR_AUTH_REPLY, Suppliers: suppliers}
+func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string,
+	resAllocated bool, allocationMessage string, rplyErr error) (kar *KamAuthReply, err error) {
+	kar = &KamAuthReply{Event: CGR_AUTH_REPLY, Suppliers: suppliers,
+		ResourceAllocated: resAllocated, AllocationMessage: allocationMessage}
 	if rplyErr != nil {
 		kar.Error = rplyErr.Error()
 	}
@@ -371,7 +374,7 @@ func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string, res
 		maxSessionTime = maxSessionDur.Seconds()
 	}
 	kar.MaxSessionTime = int(utils.Round(maxSessionTime, 0, utils.ROUNDING_MIDDLE))
-	kar.ResourceAllowed = resAllowed
+
 	return kar, nil
 }
 

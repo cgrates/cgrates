@@ -267,11 +267,11 @@ cgrates.org,mas,true,another,value,10
 `
 
 	resLimits = `
-#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,TTL,Limit,Weight,ActionTriggers
-ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,10,
-ResGroup21,*string_prefix,HdrDestination,10;20,,,,,
-ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,
-ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,10,
+#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,TTL,Limit,AllocationMessage,Weight,ActionTriggers
+ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,10,
+ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,
+ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,
+ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,10,
 `
 )
 
@@ -329,7 +329,6 @@ func init() {
 		log.Print("error in LoadAliases:", err)
 	}
 	if err := csvr.LoadResourceLimits(); err != nil {
-		log.Print("error in LoadResourceLimits:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
@@ -1387,9 +1386,10 @@ func TestLoadResourceLimits(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			UsageTTL: "1s",
-			Weight:   10,
-			Limit:    "2",
+			UsageTTL:          "1s",
+			AllocationMessage: "call",
+			Weight:            10,
+			Limit:             "2",
 		},
 		"ResGroup22": &utils.TPResourceLimit{
 			TPid: testTPID,
@@ -1400,15 +1400,15 @@ func TestLoadResourceLimits(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			UsageTTL: "3600s",
-			Weight:   10,
-			Limit:    "2",
+			UsageTTL:          "3600s",
+			AllocationMessage: "premium_call",
+			Weight:            10,
+			Limit:             "2",
 		},
 	}
 	if len(csvr.resLimits) != len(eResLimits) {
 		t.Error("Failed to load resourcelimits: ", len(csvr.resLimits))
-	}
-	if !reflect.DeepEqual(eResLimits["ResGroup22"], csvr.resLimits["ResGroup22"]) {
+	} else if !reflect.DeepEqual(eResLimits["ResGroup22"], csvr.resLimits["ResGroup22"]) {
 		t.Errorf("Expecting: %+v, received: %+v", eResLimits["ResGroup22"], csvr.resLimits["ResGroup22"])
 	}
 

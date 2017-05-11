@@ -93,7 +93,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 		return
 	}
 	if kev.MissingParameter(self.timezone) {
-		if kar, err := kev.AsKamAuthReply(0.0, "", false, utils.ErrMandatoryIeMissing); err != nil {
+		if kar, err := kev.AsKamAuthReply(0.0, "", false, "", utils.ErrMandatoryIeMissing); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
 		} else if err = self.conns[connId].Send(kar.String()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
@@ -123,7 +123,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 			resourceAllowed = false
 		}
 	}
-	if kar, err := kev.AsKamAuthReply(remainingDuration, supplStr, resourceAllowed, errReply); err != nil {
+	if kar, err := kev.AsKamAuthReply(remainingDuration, supplStr, resourceAllowed, "", errReply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
 	} else if err = self.conns[connId].Send(kar.String()); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
@@ -137,7 +137,7 @@ func (self *KamailioSessionManager) onCgrLcrReq(evData []byte, connId string) {
 		return
 	}
 	supplStr, err := self.getSuppliers(kev)
-	kamLcrReply, errReply := kev.AsKamAuthReply(0, supplStr, false, err)
+	kamLcrReply, errReply := kev.AsKamAuthReply(0, supplStr, false, "", err)
 	kamLcrReply.Event = CGR_LCR_REPLY // Hit the CGR_LCR_REPLY event route on Kamailio side
 	if errReply != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building LCR reply %s", errReply.Error()))
@@ -158,7 +158,7 @@ func (self *KamailioSessionManager) onCgrRLReq(evData []byte, connId string) {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs error: %s", err.Error()))
 		resourceAllowed = false
 	}
-	kamRLReply, errReply := kev.AsKamAuthReply(0, "", resourceAllowed, err)
+	kamRLReply, errReply := kev.AsKamAuthReply(0, "", resourceAllowed, "", err)
 	kamRLReply.Event = CGR_RL_REPLY // Hit the CGR_LCR_REPLY event route on Kamailio side
 	if errReply != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building RL reply %s", errReply.Error()))

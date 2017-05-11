@@ -1267,7 +1267,8 @@ type TPResourceLimit struct {
 	Filters            []*TPRequestFilter    // Filters for the request
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active/expires
 	UsageTTL           string
-	Limit              string   // Limit value
+	Limit              string // Limit value
+	AllocationMessage  string
 	Weight             float64  // Weight to sort the ResourceLimits
 	ActionTriggerIDs   []string // Thresholds to check after changing Limit
 }

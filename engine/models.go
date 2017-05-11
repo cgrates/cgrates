@@ -460,8 +460,9 @@ type TpResourceLimit struct {
 	ActivationInterval string  `index:"4" re:""`
 	UsageTTL           string  `index:"5" re:""`
 	Limit              string  `index:"6" re:""`
-	Weight             float64 `index:"7" re:"\d+\.?\d*"`
-	ActionTriggerIds   string  `index:"8" re:""`
+	AllocationMessage  string  `index:"7" re:""`
+	Weight             float64 `index:"8" re:"\d+\.?\d*"`
+	ActionTriggerIds   string  `index:"9" re:""`
 	CreatedAt          time.Time
 }
 
