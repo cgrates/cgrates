@@ -3,6 +3,5 @@ API Calls
 
 API calls are documented in the following GoDoc_
 
-.. _GoDoc : http://www.asterisk.org/
-
+.. _GoDoc : https://godoc.org/github.com/cgrates/cgrates/apier
 
