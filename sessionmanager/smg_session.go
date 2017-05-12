@@ -32,14 +32,13 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
-	mux           sync.RWMutex   // protects the SMGSession in places where is concurrently accessed
-	CGRID         string         // Unique identifier for this session
-	EventStart    SMGenericEvent // Event which started
-	stopDebit     chan struct{}  // Channel to communicate with debit loops when closing the session
-	RunID         string         // Keep a reference for the derived run
+	mux           sync.RWMutex  // protects the SMGSession in places where is concurrently accessed
+	stopDebit     chan struct{} // Channel to communicate with debit loops when closing the session
+	CGRID         string        // Unique identifier for this session
+	RunID         string        // Keep a reference for the derived run
 	Timezone      string
-	CD            *engine.CallDescriptor
-	SessionCDs    []*engine.CallDescriptor
+	EventStart    SMGenericEvent         // Event which started the session
+	CD            *engine.CallDescriptor // initial CD used for debits, updated on each debit
 	CallCosts     []*engine.CallCost
 	ExtraDuration time.Duration                 // keeps the current duration debited on top of what heas been asked
 	LastUsage     time.Duration                 // last requested Duration
@@ -134,7 +133,6 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.CD.DurationIndex += ccDuration
 	self.CD.MaxCostSoFar += cc.Cost
 	self.CD.LoopIndex += 1
-	self.SessionCDs = append(self.SessionCDs, self.CD.Clone())
 	self.CallCosts = append(self.CallCosts, cc)
 	self.LastDebit = initialExtraDuration + ccDuration
 	self.TotalUsage += self.LastUsage

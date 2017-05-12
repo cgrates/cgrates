@@ -137,7 +137,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
 	} else if pSessions[0].Usage != time.Duration(90*time.Second) {
-		t.Errorf("PassiveSession: %+v", aSessions[0])
+		t.Errorf("PassiveSession: %+v", pSessions[0])
 	}
 }
 
