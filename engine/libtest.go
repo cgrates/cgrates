@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"net/rpc/jsonrpc"
 	"os"
 	"os/exec"
 	"path"
@@ -67,7 +68,18 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}
-	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // Give time to rater to fire up
+	if cfg, err := config.NewCGRConfigFromFolder(cfgPath); err == nil {
+		for {
+			time.Sleep(100 * time.Millisecond)
+			_, err2 := jsonrpc.Dial("tcp", cfg.RPCJSONListen)
+			if err2 == nil {
+				break
+			}
+		}
+	} else {
+		return nil, err
+	}
+	//time.Sleep(time.Duration(waitEngine) * time.Millisecond) // Give time to rater to fire up
 	return engine, nil
 }
 
