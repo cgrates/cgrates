@@ -150,7 +150,7 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 		urlVals = content.(url.Values)
 		body = []byte(urlVals.Encode())
 	}
-	delay := Fib()
+	fib := Fib()
 	bodyType := "application/x-www-form-urlencoded"
 	if contentType == CONTENT_JSON {
 		bodyType = "application/json"
@@ -164,19 +164,19 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 		}
 		if err != nil {
 			Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
-			time.Sleep(delay())
+			time.Sleep(time.Duration(fib()) * time.Second)
 			continue
 		}
 		defer resp.Body.Close()
 		respBody, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
-			time.Sleep(delay())
+			time.Sleep(time.Duration(fib()) * time.Second)
 			continue
 		}
 		if resp.StatusCode > 299 {
 			Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", addr, resp.StatusCode))
-			time.Sleep(delay())
+			time.Sleep(time.Duration(fib()) * time.Second)
 			continue
 		}
 		return respBody, nil
@@ -249,13 +249,13 @@ type AMQPPoster struct {
 // the optional chn will permits channel caching
 func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []byte, fallbackFileName string) (*amqp.Channel, error) {
 	var err error
-	delay := Fib()
+	fib := Fib()
 	if chn == nil {
 		for i := 0; i < pstr.attempts; i++ {
 			if chn, err = pstr.NewPostChannel(); err == nil {
 				break
 			}
-			time.Sleep(delay())
+			time.Sleep(time.Duration(fib()) * time.Second)
 		}
 		if err != nil && fallbackFileName != META_NONE {
 			err = pstr.writeToFile(fallbackFileName, content)
@@ -275,7 +275,7 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 			}); err == nil {
 			break
 		}
-		time.Sleep(delay())
+		time.Sleep(time.Duration(fib()) * time.Second)
 	}
 	if err != nil && fallbackFileName != META_NONE {
 		err = pstr.writeToFile(fallbackFileName, content)

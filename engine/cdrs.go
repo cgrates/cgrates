@@ -372,7 +372,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) && (cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
-		delay := utils.Fib()
+		fib := utils.Fib()
 		var smCosts []*SMCost
 		cgrID := cdr.CGRID
 		if _, hasIT := cdr.ExtraFields[utils.OriginIDPrefix]; hasIT {
@@ -384,7 +384,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 				break
 			}
 			if i != 3 {
-				time.Sleep(delay())
+				time.Sleep(time.Duration(fib()) * time.Second)
 			}
 		}
 		if len(smCosts) != 0 { // Cost retrieved from SMCost table

@@ -165,7 +165,7 @@ func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 		switch transport {
 		case utils.META_HTTP_POST:
 			go func() {
-				delay := utils.Fib()
+				fib := utils.Fib()
 				for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
 					if _, err := ps.pubFunc(address, ttlVerify, jsn); err == nil {
 						break // Success, no need to reinterate
@@ -173,7 +173,7 @@ func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 						utils.Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), evt["EventName"]))
 						break
 					}
-					time.Sleep(delay())
+					time.Sleep(time.Duration(fib()) * time.Second)
 				}
 			}()
 		}

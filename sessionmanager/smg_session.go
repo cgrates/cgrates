@@ -32,21 +32,24 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
-	mux           sync.RWMutex  // protects the SMGSession in places where is concurrently accessed
-	stopDebit     chan struct{} // Channel to communicate with debit loops when closing the session
-	CGRID         string        // Unique identifier for this session
-	RunID         string        // Keep a reference for the derived run
-	Timezone      string
-	EventStart    SMGenericEvent         // Event which started the session
-	CD            *engine.CallDescriptor // initial CD used for debits, updated on each debit
+	mux       sync.RWMutex                  // protects the SMGSession in places where is concurrently accessed
+	stopDebit chan struct{}                 // Channel to communicate with debit loops when closing the session
+	clntConn  rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
+	rals      rpcclient.RpcClientConnection // Connector to rals service
+	cdrsrv    rpcclient.RpcClientConnection // Connector to CDRS service
+
+	CGRID      string // Unique identifier for this session
+	RunID      string // Keep a reference for the derived run
+	Timezone   string
+	EventStart SMGenericEvent         // Event which started the session
+	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
+
 	CallCosts     []*engine.CallCost
-	ExtraDuration time.Duration                 // keeps the current duration debited on top of what heas been asked
-	LastUsage     time.Duration                 // last requested Duration
-	LastDebit     time.Duration                 // last real debited duration
-	TotalUsage    time.Duration                 // sum of lastUsage
-	clntConn      rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
-	rals          rpcclient.RpcClientConnection // Connector to rals service
-	cdrsrv        rpcclient.RpcClientConnection // Connector to CDRS service
+	ExtraDuration time.Duration // keeps the current duration debited on top of what heas been asked
+	LastUsage     time.Duration // last requested Duration
+	LastDebit     time.Duration // last real debited duration
+	TotalUsage    time.Duration // sum of lastUsage
+
 }
 
 // Called in case of automatic debits

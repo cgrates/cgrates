@@ -362,11 +362,11 @@ func Unzip(src, dest string) error {
 }
 
 // successive Fibonacci numbers.
-func Fib() func() time.Duration {
+func Fib() func() int {
 	a, b := 0, 1
-	return func() time.Duration {
+	return func() int {
 		a, b = b, a+b
-		return time.Duration(a) * time.Second
+		return a
 	}
 }
 

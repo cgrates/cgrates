@@ -68,18 +68,22 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}
-	if cfg, err := config.NewCGRConfigFromFolder(cfgPath); err == nil {
-		for {
-			time.Sleep(100 * time.Millisecond)
-			_, err2 := jsonrpc.Dial("tcp", cfg.RPCJSONListen)
-			if err2 == nil {
-				break
-			}
-		}
-	} else {
+	cfg, err := config.NewCGRConfigFromFolder(cfgPath)
+	if err != nil {
 		return nil, err
 	}
-	//time.Sleep(time.Duration(waitEngine) * time.Millisecond) // Give time to rater to fire up
+	fib := utils.Fib()
+	var connected bool
+	for i := 0; i < 200; i++ {
+		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		if _, err := jsonrpc.Dial("tcp", cfg.RPCJSONListen); err == nil {
+			connected = true
+			break
+		}
+	}
+	if !connected {
+		return nil, fmt.Errorf("engine did not open port <%d>", cfg.RPCJSONListen)
+	}
 	return engine, nil
 }
 
