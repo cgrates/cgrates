@@ -103,6 +103,6 @@ func (self *SMGenericBiRpcV1) ReplicateActiveSessions(clnt *rpc2.Client, args se
 	return self.sm.BiRPCV1ReplicateActiveSessions(clnt, args, reply)
 }
 
-func (self *SMGenericBiRpcV1) BiRPCV1ReplicatePassiveSessions(clnt *rpc2.Client, args sessionmanager.ArgsReplicateSessions, reply *string) error {
+func (self *SMGenericBiRpcV1) ReplicatePassiveSessions(clnt *rpc2.Client, args sessionmanager.ArgsReplicateSessions, reply *string) error {
 	return self.sm.BiRPCV1ReplicateActiveSessions(clnt, args, reply)
 }

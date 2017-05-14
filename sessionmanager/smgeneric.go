@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -1175,6 +1176,18 @@ func (smg *SMGeneric) BiRPCV1SetPassiveSessions(clnt rpcclient.RpcClientConnecti
 		*reply = utils.OK
 	}
 	return
+}
+
+// BiRPCV1SetGZIPpedPassiveSessions is used to handle GZIP compressed arguments to BiRPCV1SetPassiveSessions
+// eg: if CallCosts are too big, sending them over network could introduce latency
+func (smg *SMGeneric) BiRPCV1SetGZIPpedPassiveSessions(clnt rpcclient.RpcClientConnection, args []byte, reply *string) (err error) {
+	var argsSetPSS ArgsSetPassiveSessions
+	if dst, err := utils.GUnZIPContent(args); err != nil {
+		return err
+	} else if err := json.Unmarshal(dst, &argsSetPSS); err != nil {
+		return err
+	}
+	return smg.BiRPCV1SetPassiveSessions(clnt, argsSetPSS, reply)
 }
 
 type ArgsReplicateSessions struct {

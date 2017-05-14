@@ -90,6 +90,10 @@ func (self *SMGenericV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSe
 	return self.sm.BiRPCV1SetPassiveSessions(nil, args, reply)
 }
 
+func (self *SMGenericV1) SetGZIPpedPassiveSessions(args []byte, reply *string) error {
+	return self.sm.BiRPCV1SetGZIPpedPassiveSessions(nil, args, reply)
+}
+
 func (self *SMGenericV1) ReplicateActiveSessions(args sessionmanager.ArgsReplicateSessions, reply *string) error {
 	return self.sm.BiRPCV1ReplicateActiveSessions(nil, args, reply)
 }

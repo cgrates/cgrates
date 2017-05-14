@@ -802,3 +802,16 @@ func TestCounterConcurrent(t *testing.T) {
 		t.Error("Counter was not reseted to 0")
 	}
 }
+
+func TestGZIPGUnZIP(t *testing.T) {
+	src := []byte("CGRateS.org")
+	gzipped, err := GZIPContent(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if dst, err := GUnZIPContent(gzipped); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(src, dst) {
+		t.Error("not matching initial source")
+	}
+}
