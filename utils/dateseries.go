@@ -87,6 +87,19 @@ func (ys Years) Serialize(sep string) string {
 	return yStr
 }
 
+// Equals implies that Years are already sorted
+func (ys Years) Equals(oYS Years) bool {
+	if len(ys) != len(oYS) {
+		return false
+	}
+	for i := range ys {
+		if ys[i] != oYS[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Defines months series
 type Months []time.Month
 
@@ -154,6 +167,19 @@ func (m Months) IsComplete() bool {
 	return reflect.DeepEqual(m, allMonths)
 }
 
+// Equals implies that Months are already sorted
+func (m Months) Equals(oM Months) bool {
+	if len(m) != len(oM) {
+		return false
+	}
+	for i := range m {
+		if m[i] != oM[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Defines month days series
 type MonthDays []int
 
@@ -216,6 +242,19 @@ func (md MonthDays) Serialize(sep string) string {
 	return mdsStr
 }
 
+// Equals implies that MonthDays are already sorted
+func (md MonthDays) Equals(oMD MonthDays) bool {
+	if len(md) != len(oMD) {
+		return false
+	}
+	for i := range md {
+		if md[i] != oMD[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Defines week days series
 type WeekDays []time.Weekday
 
@@ -275,6 +314,19 @@ func (wd WeekDays) Serialize(sep string) string {
 		}
 	}
 	return wdStr
+}
+
+// Equals implies that WeekDays are already sorted
+func (wd WeekDays) Equals(oWD WeekDays) bool {
+	if len(wd) != len(oWD) {
+		return false
+	}
+	for i := range wd {
+		if wd[i] != oWD[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func DaysInMonth(year int, month time.Month) float64 {
