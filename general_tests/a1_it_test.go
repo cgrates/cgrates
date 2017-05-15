@@ -201,6 +201,7 @@ func TestA1itDataSession1(t *testing.T) {
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)
 	}
+	time.Sleep(time.Duration(20) * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
 	if err := a1rpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {

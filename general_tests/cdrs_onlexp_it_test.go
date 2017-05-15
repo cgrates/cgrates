@@ -110,6 +110,7 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
+	time.Sleep(time.Duration(20) * time.Millisecond)
 	var rcvedCdrs []*engine.ExternalCDR
 	if err := cdrsSlaveRpc.Call("ApierV2.GetCdrs",
 		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
