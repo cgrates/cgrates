@@ -219,7 +219,7 @@ func TestTpExecuteActionCgrRpc(t *testing.T) {
 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 	}
 	var acnt engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "rpc"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1013"}
 	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	}
@@ -237,7 +237,7 @@ func TestTpExecuteActionCgrRpcAcc(t *testing.T) {
 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 	}
 	var dests []*engine.Destination
-	attrs := &v2.AttrGetDestinations{DestinationIDs: []string{"1016"}}
+	attrs := &v2.AttrGetDestinations{DestinationIDs: []string{}}
 	if err := tpRPC.Call("ApierV2.GetDestinations", attrs, &dests); err != nil {
 		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
 	}
@@ -253,6 +253,7 @@ func TestTpExecuteActionCgrRpcCdrStats(t *testing.T) {
 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 	}
 	var queue engine.StatsQueue
+	time.Sleep(20 * time.Millisecond)
 	if err := tpRPC.Call("CDRStatsV1.GetQueue", "qtest", &queue); err != nil {
 		t.Error("Got error on CDRStatsV1.GetQueue: ", err.Error())
 	}
