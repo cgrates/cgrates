@@ -23,6 +23,54 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// EventCost
+type EventCost struct {
+	CGRID           string
+	RunID           string
+	Cost            float64
+	Usage           time.Duration
+	Charges         []*ChargingInterval
+	IntervalDetails map[string]*ChrgIntervDetail
+	RatingUnits     map[string]*RatingUnit
+	Rates           map[string][]*Rate
+	Timings         map[string]*ChargedTiming
+}
+
+// ChargingInterval represents one interval out of Usage providing charging info
+// eg: PEAK vs OFFPEAK
+type ChargingInterval struct {
+	StartTime           *time.Time
+	IntervalDetailsUUID string               // reference to CIntervDetails
+	RatingUUID          string               // reference to RatingUnit
+	Increments          []*ChargingIncrement // specific increments applied to this interval
+	CompressFactor      int
+}
+
+// ChargingIncrement represents one unit charged inside an interval
+type ChargingIncrement struct {
+	Usage             time.Duration
+	Cost              float64
+	BalanceChargeUUID string
+	CompressFactor    int
+}
+
+// BalanceCharge represents one unit charged to a balance
+type BalanceCharge struct {
+	AccountID       string  // keep reference for shared balances
+	BalanceUUID     string  // balance charged
+	RatingUUID      string  // special price applied on this balance
+	Units           float64 // number of units charged
+	ExtraChargeUUID string  // used in cases when paying *voice with *monetary
+}
+
+type ChrgIntervDetail struct {
+	Subject           string // matched subject
+	DestinationPrefix string // matched destination prefix
+	DestinationID     string // matched destinationID
+	RatingPlanID      string // matched ratingPlanID
+
+}
+
 // ChargedTiming represents one timing attached to a charge
 type ChargedTiming struct {
 	Years     *utils.Years
@@ -32,55 +80,13 @@ type ChargedTiming struct {
 	StartTime string
 }
 
-// RatingUnit represents one unit out of RatingPlan bounded to event
+// RatingUnit represents one unit out of RatingPlan matching for an event
 type RatingUnit struct {
 	ConnectFee       float64
 	RoudingMethod    string
 	RoundingDecimals int
 	MaxCost          float64
 	MaxCostStrategy  string
-	Timing           *ChargedTiming // This RatingUnit is bounded to specific timing profile
-	Rates            []*Rate
-}
-
-// BalanceCharge represents one unit charged to a balance
-type BalanceCharge struct {
-	UUID        string // balance charged
-	AccountID   string
-	Rating      *RatingUnit    // special price applied on this balance
-	Units       float64        // number of units charged
-	ExtraCharge *BalanceCharge // used in cases when paying *voice with *monetary
-}
-
-// ChargingIncrement represents one unit charged inside an interval
-type ChargingIncrement struct {
-	Usage   time.Duration
-	Cost    float64
-	Rating  *RatingUnit
-	Balance *BalanceCharge
-}
-
-// ChargingInterval represents one interval out of Usage providing charging info
-// eg: PEAK vs OFFPEAK
-type ChargingInterval struct {
-	StartTime  *time.Time
-	Increments []*ChargingIncrement
-}
-
-// EventCost holds cost for an event
-type EventCost struct {
-	CGRID   string
-	RunID   string
-	Cost    float64
-	Usage   time.Duration
-	Charges []*ChargingInterval
-}
-
-// EventCostDigest is an optimized EventCost with smaller footprint to be sent over network or stored
-// not that human friendly as EventCost
-type EventCostDigest struct {
-	CGRID string
-	RunID string
-	Cost  float64
-	Usage time.Duration
+	TimingUUID       string // This RatingUnit is bounded to specific timing profile
+	RatesUUID        string
 }
