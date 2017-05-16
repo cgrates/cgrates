@@ -26,13 +26,143 @@ import (
 
 type ChargedIntervalDetails map[string]*ChrgIntervDetail // so we can define search methods
 
+// GetWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (cids ChargedIntervalDetails) GetUUIDWithSet(cid *ChrgIntervDetail) string {
+	for k, v := range cids {
+		if v.Equals(cid) {
+			return k
+		}
+	}
+	// not found, set it here
+	uuid := utils.GenUUID()
+	cids[uuid] = cid
+	return uuid
+}
+
 type ChargedRatingUnits map[string]*RatingUnit
+
+// GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (crus ChargedRatingUnits) GetUUIDWithSet(cru *RatingUnit) string {
+	for k, v := range crus {
+		if v.Equals(cru) {
+			return k
+		}
+	}
+	// not found, set it here
+	uuid := utils.GenUUID()
+	crus[uuid] = cru
+	return uuid
+}
 
 type ChargedRates map[string]RateGroups
 
+// GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (crs ChargedRates) GetUUIDWithSet(rg RateGroups) string {
+	for k, v := range crs {
+		if v.Equals(rg) {
+			return k
+		}
+	}
+	// not found, set it here
+	uuid := utils.GenUUID()
+	crs[uuid] = rg
+	return uuid
+}
+
 type ChargedTimings map[string]*ChargedTiming
 
+// GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (cts ChargedTimings) GetUUIDWithSet(ct *ChargedTiming) string {
+	for k, v := range cts {
+		if v.Equals(ct) {
+			return k
+		}
+	}
+	// not found, set it here
+	uuid := utils.GenUUID()
+	cts[uuid] = ct
+	return uuid
+}
+
 type ChargedBalances map[string]*BalanceCharge
+
+// GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (cbs ChargedBalances) GetUUIDWithSet(cb *BalanceCharge) string {
+	for k, v := range cbs {
+		if v.Equals(cb) {
+			return k
+		}
+	}
+	// not found, set it here
+	uuid := utils.GenUUID()
+	cbs[uuid] = cb
+	return uuid
+}
+
+func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost) {
+	ec = &EventCost{CGRID: cgrID, RunID: runID,
+		IntervalDetails: make(ChargedIntervalDetails),
+		RatingUnits:     make(ChargedRatingUnits),
+		Rates:           make(ChargedRates),
+		Timings:         make(ChargedTimings),
+		Balances:        make(ChargedBalances),
+	}
+	if len(cc.Timespans) != 0 {
+		ec.Charges = make([]*ChargingInterval, len(cc.Timespans))
+	}
+	for i, ts := range cc.Timespans {
+		cIl := &ChargingInterval{StartTime: ts.TimeStart, CompressFactor: ts.CompressFactor}
+		cIl.IntervalDetailsUUID = ec.IntervalDetails.GetUUIDWithSet(
+			&ChrgIntervDetail{Subject: ts.MatchedSubject, DestinationPrefix: ts.MatchedPrefix,
+				DestinationID: ts.MatchedDestId, RatingPlanID: ts.RatingPlanId})
+		cIl.RatingUUID = ec.ratingUUIDForRateInterval(ts.RateInterval)
+		if len(ts.Increments) != 0 {
+			cIl.Increments = make([]*ChargingIncrement, len(ts.Increments))
+		}
+		for j, incr := range ts.Increments {
+			cIt := &ChargingIncrement{
+				Usage:          incr.Duration,
+				Cost:           incr.Cost,
+				CompressFactor: incr.CompressFactor}
+			if incr.BalanceInfo == nil {
+				continue
+			}
+			//BalanceChargeUUID
+			if incr.BalanceInfo.Unit != nil {
+				// 2 balances work-around
+				ecUUID := utils.META_NONE // populate no matter what due to Unit not nil
+				if incr.BalanceInfo.Monetary != nil {
+					if uuid := ec.Balances.GetUUIDWithSet(
+						&BalanceCharge{
+							AccountID:   incr.BalanceInfo.AccountID,
+							BalanceUUID: incr.BalanceInfo.Monetary.UUID,
+							Units:       incr.Cost,
+							RatingUUID:  ec.ratingUUIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval),
+						}); uuid != "" {
+						ecUUID = uuid
+					}
+				}
+				cIt.BalanceChargeUUID = ec.Balances.GetUUIDWithSet(
+					&BalanceCharge{
+						AccountID:       incr.BalanceInfo.AccountID,
+						BalanceUUID:     incr.BalanceInfo.Unit.UUID,
+						Units:           incr.BalanceInfo.Unit.Consumed,
+						RatingUUID:      ec.ratingUUIDForRateInterval(incr.BalanceInfo.Unit.RateInterval),
+						ExtraChargeUUID: ecUUID})
+			} else { // Only monetary
+				cIt.BalanceChargeUUID = ec.Balances.GetUUIDWithSet(
+					&BalanceCharge{
+						AccountID:   incr.BalanceInfo.AccountID,
+						BalanceUUID: incr.BalanceInfo.Monetary.UUID,
+						Units:       incr.Cost,
+						RatingUUID:  ec.ratingUUIDForRateInterval(incr.BalanceInfo.Unit.RateInterval)})
+			}
+			cIl.Increments[j] = cIt
+		}
+		ec.Charges[i] = cIl
+	}
+	return
+}
 
 // EventCost stores cost for an Event
 type EventCost struct {
@@ -49,6 +179,54 @@ type EventCost struct {
 	dirty           bool // mark need of recomputation of the Cost and Usage
 }
 
+func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval) string {
+	if ri == nil || ri.Rating == nil {
+		return ""
+	}
+	var tmID string
+	if ri.Timing != nil {
+		tmID = ec.Timings.GetUUIDWithSet(
+			&ChargedTiming{Years: ri.Timing.Years,
+				Months:    ri.Timing.Months,
+				MonthDays: ri.Timing.MonthDays,
+				WeekDays:  ri.Timing.WeekDays,
+				StartTime: ri.Timing.StartTime})
+	}
+	var rtUUID string
+	if len(ri.Rating.Rates) != 0 {
+		rtUUID = ec.Rates.GetUUIDWithSet(ri.Rating.Rates)
+	}
+	return ec.RatingUnits.GetUUIDWithSet(
+		&RatingUnit{
+			ConnectFee:       ri.Rating.ConnectFee,
+			RoundingMethod:   ri.Rating.RoundingMethod,
+			RoundingDecimals: ri.Rating.RoundingDecimals,
+			MaxCost:          ri.Rating.MaxCost,
+			MaxCostStrategy:  ri.Rating.MaxCostStrategy,
+			TimingUUID:       tmID, RatesUUID: rtUUID})
+}
+
+func (ec *EventCost) rateIntervalForRatingUUID(ratingUUID string) (ri *RateInterval) {
+	if ratingUUID == "" {
+		return
+	}
+	cIlRU := ec.RatingUnits[ratingUUID]
+	ri = new(RateInterval)
+	ri.Rating = &RIRate{ConnectFee: cIlRU.ConnectFee,
+		RoundingMethod:   cIlRU.RoundingMethod,
+		RoundingDecimals: cIlRU.RoundingDecimals,
+		MaxCost:          cIlRU.MaxCost, MaxCostStrategy: cIlRU.MaxCostStrategy}
+	if cIlRU.RatesUUID != "" {
+		ri.Rating.Rates = ec.Rates[cIlRU.RatesUUID]
+	}
+	if cIlRU.TimingUUID != "" {
+		cIlTm := ec.Timings[cIlRU.TimingUUID]
+		ri.Timing = &RITiming{Years: cIlTm.Years, Months: cIlTm.Months, MonthDays: cIlTm.MonthDays,
+			WeekDays: cIlTm.WeekDays, StartTime: cIlTm.StartTime}
+	}
+	return
+}
+
 func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subject, Destination string) *CallCost {
 	cc := &CallCost{Direction: Direction, Category: Category, Tenant: Tenant,
 		Subject: Subject, Account: Account, Destination: Destination, TOR: ToR}
@@ -63,22 +241,7 @@ func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subje
 			ts.MatchedDestId = iDtls.DestinationID
 			ts.RatingPlanId = iDtls.RatingPlanID
 		}
-		if cIl.RatingUUID != "" {
-			cIlRU := ec.RatingUnits[cIl.RatingUUID]
-			ri := new(RateInterval)
-			ri.Rating = &RIRate{ConnectFee: cIlRU.ConnectFee,
-				RoundingMethod: cIlRU.RoundingMethod, RoundingDecimals: cIlRU.RoundingDecimals,
-				MaxCost: cIlRU.MaxCost, MaxCostStrategy: cIlRU.MaxCostStrategy}
-			if cIlRU.RatesUUID != "" {
-				ri.Rating.Rates = ec.Rates[cIlRU.RatesUUID]
-			}
-			if cIlRU.TimingUUID != "" {
-				cIlTm := ec.Timings[cIlRU.TimingUUID]
-				ri.Timing = &RITiming{Years: cIlTm.Years, Months: cIlTm.Months, MonthDays: cIlTm.MonthDays,
-					WeekDays: cIlTm.WeekDays, StartTime: cIlTm.StartTime}
-			}
-			ts.RateInterval = ri
-		}
+		ts.RateInterval = ec.rateIntervalForRatingUUID(cIl.RatingUUID)
 		if len(cIl.Increments) != 0 {
 			ts.Increments = make(Increments, len(cIl.Increments))
 		}
@@ -91,31 +254,11 @@ func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subje
 					// Work around, enforce logic with 2 balances for *voice/*monetary combination
 					// so we can stay compatible with CallCost
 					incr.BalanceInfo.Unit = &UnitInfo{UUID: cBC.BalanceUUID, Consumed: cBC.Units}
-					if cBC.RatingUUID != "" {
-						cBCRU := ec.RatingUnits[cBC.RatingUUID]
-						ri := new(RateInterval)
-						ri.Rating = &RIRate{ConnectFee: cBCRU.ConnectFee,
-							RoundingMethod: cBCRU.RoundingMethod, RoundingDecimals: cBCRU.RoundingDecimals,
-							MaxCost: cBCRU.MaxCost, MaxCostStrategy: cBCRU.MaxCostStrategy}
-						if cBCRU.RatesUUID != "" {
-							ri.Rating.Rates = ec.Rates[cBCRU.RatesUUID]
-						}
-						incr.BalanceInfo.Unit.RateInterval = ri
-					}
+					incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingUUID(cBC.RatingUUID)
 					cBC = ec.Balances[cBC.ExtraChargeUUID] // overwrite original balance so we can process it in one place
 				}
 				incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
-				if cBC.RatingUUID != "" {
-					cBCRU := ec.RatingUnits[cBC.RatingUUID]
-					ri := new(RateInterval)
-					ri.Rating = &RIRate{ConnectFee: cBCRU.ConnectFee,
-						RoundingMethod: cBCRU.RoundingMethod, RoundingDecimals: cBCRU.RoundingDecimals,
-						MaxCost: cBCRU.MaxCost, MaxCostStrategy: cBCRU.MaxCostStrategy}
-					if cBCRU.RatesUUID != "" {
-						ri.Rating.Rates = ec.Rates[cBCRU.RatesUUID]
-					}
-					incr.BalanceInfo.Monetary.RateInterval = ri
-				}
+				incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingUUID(cBC.RatingUUID)
 			}
 			ts.Increments[j] = incr
 		}

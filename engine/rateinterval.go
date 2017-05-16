@@ -283,6 +283,18 @@ func (pg *RateGroups) AddRate(ps ...*Rate) {
 	}
 }
 
+func (pg RateGroups) Equals(oRG RateGroups) bool {
+	if len(pg) != len(oRG) {
+		return false
+	}
+	for i := range pg {
+		if !pg[0].Equal(oRG[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 /*
 Returns true if the received time result inside the interval
 */

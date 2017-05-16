@@ -92,19 +92,6 @@ func NewTPid() string {
 	return Sha1(GenUUID())
 }
 
-/*func GenUUID() string {
-	uuid := make([]byte, 16)
-	n, err := rand.Read(uuid)
-	if n != len(uuid) || err != nil {
-		return strconv.FormatInt(time.Now().UnixNano(), 10)
-	}
-	// TODO: verify the two lines implement RFC 4122 correctly
-	uuid[8] = 0x80 // variant bits see page 5
-	uuid[4] = 0x40 // version 4 Pseudo Random, see page 7
-
-	return hex.EncodeToString(uuid)
-}*/
-
 // helper function for uuid generation
 func GenUUID() string {
 	b := make([]byte, 16)
