@@ -41,7 +41,6 @@ type EventCost struct {
 	Cost            float64
 	Usage           time.Duration
 	Charges         []*ChargingInterval
-	AccountSummary  *AccountSummary
 	IntervalDetails ChargedIntervalDetails
 	RatingUnits     ChargedRatingUnits
 	Rates           ChargedRates
