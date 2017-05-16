@@ -20,35 +20,125 @@ package engine
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// EventCost
+type ChargedIntervalDetails map[string]*ChrgIntervDetail // so we can define search methods
+
+type ChargedRatingUnits map[string]*RatingUnit
+
+type ChargedRates map[string]RateGroups
+
+type ChargedTimings map[string]*ChargedTiming
+
+type ChargedBalances map[string]*BalanceCharge
+
+// EventCost stores cost for an Event
 type EventCost struct {
 	CGRID           string
 	RunID           string
 	Cost            float64
 	Usage           time.Duration
 	Charges         []*ChargingInterval
-	IntervalDetails map[string]*ChrgIntervDetail
-	RatingUnits     map[string]*RatingUnit
-	Rates           map[string][]*Rate
-	Timings         map[string]*ChargedTiming
+	AccountSummary  *AccountSummary
+	IntervalDetails ChargedIntervalDetails
+	RatingUnits     ChargedRatingUnits
+	Rates           ChargedRates
+	Timings         ChargedTimings
+	Balances        ChargedBalances
+	dirty           bool // mark need of recomputation of the Cost and Usage
+}
+
+func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subject, Destination string) *CallCost {
+	cc := &CallCost{Direction: Direction, Category: Category, Tenant: Tenant,
+		Subject: Subject, Account: Account, Destination: Destination, TOR: ToR}
+	cc.Timespans = make(TimeSpans, len(ec.Charges))
+	for i, cIl := range ec.Charges {
+		ts := &TimeSpan{TimeStart: cIl.StartTime, TimeEnd: cIl.StartTime.Add(cIl.Usage()),
+			Cost: cIl.Cost(), DurationIndex: cIl.Usage(), CompressFactor: cIl.CompressFactor}
+		if cIl.IntervalDetailsUUID != "" {
+			iDtls := ec.IntervalDetails[cIl.IntervalDetailsUUID]
+			ts.MatchedSubject = iDtls.Subject
+			ts.MatchedPrefix = iDtls.DestinationPrefix
+			ts.MatchedDestId = iDtls.DestinationID
+			ts.RatingPlanId = iDtls.RatingPlanID
+		}
+		if cIl.RatingUUID != "" {
+			cIlRU := ec.RatingUnits[cIl.RatingUUID]
+			ri := new(RateInterval)
+			ri.Rating = &RIRate{ConnectFee: cIlRU.ConnectFee,
+				RoundingMethod: cIlRU.RoundingMethod, RoundingDecimals: cIlRU.RoundingDecimals,
+				MaxCost: cIlRU.MaxCost, MaxCostStrategy: cIlRU.MaxCostStrategy}
+			if cIlRU.RatesUUID != "" {
+				ri.Rating.Rates = ec.Rates[cIlRU.RatesUUID]
+			}
+			if cIlRU.TimingUUID != "" {
+				cIlTm := ec.Timings[cIlRU.TimingUUID]
+				ri.Timing = &RITiming{Years: cIlTm.Years, Months: cIlTm.Months, MonthDays: cIlTm.MonthDays,
+					WeekDays: cIlTm.WeekDays, StartTime: cIlTm.StartTime}
+			}
+			ts.RateInterval = ri
+		}
+		if len(cIl.Increments) != 0 {
+			ts.Increments = make(Increments, len(cIl.Increments))
+		}
+		for j, cInc := range cIl.Increments {
+			incr := &Increment{Duration: cInc.Usage, Cost: cInc.Cost, CompressFactor: cInc.CompressFactor}
+			if cInc.BalanceChargeUUID != "" {
+				cBC := ec.Balances[cInc.BalanceChargeUUID]
+				incr.BalanceInfo = &DebitInfo{AccountID: cBC.AccountID}
+				if cBC.ExtraChargeUUID != "" { // have both monetary and data
+					// Work around, enforce logic with 2 balances for *voice/*monetary combination
+					// so we can stay compatible with CallCost
+					incr.BalanceInfo.Unit = &UnitInfo{UUID: cBC.BalanceUUID, Consumed: cBC.Units}
+					if cBC.RatingUUID != "" {
+						cBCRU := ec.RatingUnits[cBC.RatingUUID]
+						ri := new(RateInterval)
+						ri.Rating = &RIRate{ConnectFee: cBCRU.ConnectFee,
+							RoundingMethod: cBCRU.RoundingMethod, RoundingDecimals: cBCRU.RoundingDecimals,
+							MaxCost: cBCRU.MaxCost, MaxCostStrategy: cBCRU.MaxCostStrategy}
+						if cBCRU.RatesUUID != "" {
+							ri.Rating.Rates = ec.Rates[cBCRU.RatesUUID]
+						}
+						incr.BalanceInfo.Unit.RateInterval = ri
+					}
+					cBC = ec.Balances[cBC.ExtraChargeUUID] // overwrite original balance so we can process it in one place
+				}
+				incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
+				if cBC.RatingUUID != "" {
+					cBCRU := ec.RatingUnits[cBC.RatingUUID]
+					ri := new(RateInterval)
+					ri.Rating = &RIRate{ConnectFee: cBCRU.ConnectFee,
+						RoundingMethod: cBCRU.RoundingMethod, RoundingDecimals: cBCRU.RoundingDecimals,
+						MaxCost: cBCRU.MaxCost, MaxCostStrategy: cBCRU.MaxCostStrategy}
+					if cBCRU.RatesUUID != "" {
+						ri.Rating.Rates = ec.Rates[cBCRU.RatesUUID]
+					}
+					incr.BalanceInfo.Monetary.RateInterval = ri
+				}
+			}
+			ts.Increments[j] = incr
+		}
+		cc.Timespans[i] = ts
+	}
+	return cc
 }
 
 // ChargingInterval represents one interval out of Usage providing charging info
 // eg: PEAK vs OFFPEAK
 type ChargingInterval struct {
-	StartTime           *time.Time
+	StartTime           time.Time
 	IntervalDetailsUUID string               // reference to CIntervDetails
 	RatingUUID          string               // reference to RatingUnit
 	Increments          []*ChargingIncrement // specific increments applied to this interval
 	CompressFactor      int
+	usage               *time.Duration // cache usage computation for this interval
+	cost                *float64       // cache cost calculation on this interval
 }
 
 func (cIl *ChargingInterval) Equals(oCIl *ChargingInterval) (equals bool) {
-	if equals = ((cIl.StartTime == nil && oCIl.StartTime == nil) ||
-		(cIl.StartTime != nil && oCIl.StartTime != nil && cIl.StartTime.Equal(*oCIl.StartTime))) &&
+	if equals = cIl.StartTime.Equal(oCIl.StartTime) &&
 		cIl.IntervalDetailsUUID == oCIl.IntervalDetailsUUID &&
 		cIl.RatingUUID == oCIl.RatingUUID &&
 		len(cIl.Increments) == len(oCIl.Increments); !equals {
@@ -61,6 +151,31 @@ func (cIl *ChargingInterval) Equals(oCIl *ChargingInterval) (equals bool) {
 		}
 	}
 	return
+}
+
+// Usage computes the total usage of this ChargingInterval, ignoring CompressFactor
+func (cIl *ChargingInterval) Usage() time.Duration {
+	if cIl.usage == nil {
+		var usage time.Duration
+		for _, incr := range cIl.Increments {
+			usage += time.Duration(incr.Usage.Nanoseconds() * int64(incr.CompressFactor))
+		}
+		cIl.usage = &usage
+	}
+	return *cIl.usage
+}
+
+// Cost computes the total cost on this ChargingInterval
+func (cIl *ChargingInterval) Cost() float64 {
+	if cIl.cost == nil {
+		var cost float64
+		for _, incr := range cIl.Increments {
+			cost += incr.Cost * float64(incr.CompressFactor)
+		}
+		cost = utils.Round(cost, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		cIl.cost = &cost
+	}
+	return *cIl.cost
 }
 
 // ChargingIncrement represents one unit charged inside an interval
@@ -128,7 +243,7 @@ func (ct *ChargedTiming) Equals(oCT *ChargedTiming) bool {
 // RatingUnit represents one unit out of RatingPlan matching for an event
 type RatingUnit struct {
 	ConnectFee       float64
-	RoudingMethod    string
+	RoundingMethod   string
 	RoundingDecimals int
 	MaxCost          float64
 	MaxCostStrategy  string
@@ -138,7 +253,7 @@ type RatingUnit struct {
 
 func (ru *RatingUnit) Equals(oRU *RatingUnit) bool {
 	return ru.ConnectFee == oRU.ConnectFee &&
-		ru.RoudingMethod == oRU.RoudingMethod &&
+		ru.RoundingMethod == oRU.RoundingMethod &&
 		ru.RoundingDecimals == oRU.RoundingDecimals &&
 		ru.MaxCost == oRU.MaxCost &&
 		ru.MaxCostStrategy == oRU.MaxCostStrategy &&
