@@ -429,6 +429,10 @@ func TimePointer(t time.Time) *time.Time {
 	return &t
 }
 
+func DurationPointer(d time.Duration) *time.Duration {
+	return &d
+}
+
 func ReflectFuncLocation(handler interface{}) (file string, line int) {
 	f := runtime.FuncForPC(reflect.ValueOf(handler).Pointer())
 	entry := f.Entry()
