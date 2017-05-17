@@ -24,18 +24,18 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ChargedIntervalDetails map[string]*ChrgIntervDetail // so we can define search methods
+type RatingFilters map[string]*RatingMatchedFilters // so we can define search methods
 
 // GetWithSet attempts to retrieve the UUID of a matching data or create a new one
-func (cids ChargedIntervalDetails) GetUUIDWithSet(cid *ChrgIntervDetail) string {
-	for k, v := range cids {
-		if v.Equals(cid) {
+func (rfs RatingFilters) GetUUIDWithSet(rmf *RatingMatchedFilters) string {
+	for k, v := range rfs {
+		if v.Equals(rmf) {
 			return k
 		}
 	}
 	// not found, set it here
 	uuid := utils.GenUUID()
-	cids[uuid] = cid
+	rfs[uuid] = rmf
 	return uuid
 }
 
@@ -101,21 +101,20 @@ func (cbs ChargedBalances) GetUUIDWithSet(cb *BalanceCharge) string {
 
 func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost) {
 	ec = &EventCost{CGRID: cgrID, RunID: runID,
-		IntervalDetails: make(ChargedIntervalDetails),
-		RatingUnits:     make(ChargedRatingUnits),
-		Rates:           make(ChargedRates),
-		Timings:         make(ChargedTimings),
-		Balances:        make(ChargedBalances),
+		RatingFilters: make(RatingFilters),
+		RatingUnits:   make(ChargedRatingUnits),
+		Rates:         make(ChargedRates),
+		Timings:       make(ChargedTimings),
+		Balances:      make(ChargedBalances),
 	}
 	if len(cc.Timespans) != 0 {
 		ec.Charges = make([]*ChargingInterval, len(cc.Timespans))
 	}
 	for i, ts := range cc.Timespans {
 		cIl := &ChargingInterval{StartTime: ts.TimeStart, CompressFactor: ts.CompressFactor}
-		cIl.IntervalDetailsUUID = ec.IntervalDetails.GetUUIDWithSet(
-			&ChrgIntervDetail{Subject: ts.MatchedSubject, DestinationPrefix: ts.MatchedPrefix,
-				DestinationID: ts.MatchedDestId, RatingPlanID: ts.RatingPlanId})
-		cIl.RatingUUID = ec.ratingUUIDForRateInterval(ts.RateInterval)
+		rf := &RatingMatchedFilters{Subject: ts.MatchedSubject, DestinationPrefix: ts.MatchedPrefix,
+			DestinationID: ts.MatchedDestId, RatingPlanID: ts.RatingPlanId}
+		cIl.RatingUUID = ec.ratingUUIDForRateInterval(ts.RateInterval, rf)
 		if len(ts.Increments) != 0 {
 			cIl.Increments = make([]*ChargingIncrement, len(ts.Increments))
 		}
@@ -137,7 +136,7 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 							AccountID:   incr.BalanceInfo.AccountID,
 							BalanceUUID: incr.BalanceInfo.Monetary.UUID,
 							Units:       incr.Cost,
-							RatingUUID:  ec.ratingUUIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval),
+							RatingUUID:  ec.ratingUUIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf),
 						}); uuid != "" {
 						ecUUID = uuid
 					}
@@ -147,7 +146,7 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 						AccountID:       incr.BalanceInfo.AccountID,
 						BalanceUUID:     incr.BalanceInfo.Unit.UUID,
 						Units:           incr.BalanceInfo.Unit.Consumed,
-						RatingUUID:      ec.ratingUUIDForRateInterval(incr.BalanceInfo.Unit.RateInterval),
+						RatingUUID:      ec.ratingUUIDForRateInterval(incr.BalanceInfo.Unit.RateInterval, rf),
 						ExtraChargeUUID: ecUUID})
 			} else { // Only monetary
 				cIt.BalanceChargeUUID = ec.Balances.GetUUIDWithSet(
@@ -155,7 +154,7 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 						AccountID:   incr.BalanceInfo.AccountID,
 						BalanceUUID: incr.BalanceInfo.Monetary.UUID,
 						Units:       incr.Cost,
-						RatingUUID:  ec.ratingUUIDForRateInterval(incr.BalanceInfo.Unit.RateInterval)})
+						RatingUUID:  ec.ratingUUIDForRateInterval(incr.BalanceInfo.Unit.RateInterval, rf)})
 			}
 			cIl.Increments[j] = cIt
 		}
@@ -166,22 +165,26 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 
 // EventCost stores cost for an Event
 type EventCost struct {
-	CGRID           string
-	RunID           string
-	Cost            float64
-	Usage           time.Duration
-	Charges         []*ChargingInterval
-	IntervalDetails ChargedIntervalDetails
-	RatingUnits     ChargedRatingUnits
-	Rates           ChargedRates
-	Timings         ChargedTimings
-	Balances        ChargedBalances
-	dirty           bool // mark need of recomputation of the Cost and Usage
+	CGRID         string
+	RunID         string
+	Cost          float64
+	Usage         time.Duration
+	Charges       []*ChargingInterval
+	RatingFilters RatingFilters
+	RatingUnits   ChargedRatingUnits
+	Rates         ChargedRates
+	Timings       ChargedTimings
+	Balances      ChargedBalances
+	dirty         bool // mark need of recomputation of the Cost and Usage
 }
 
-func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval) string {
+func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval, rf *RatingMatchedFilters) string {
 	if ri == nil || ri.Rating == nil {
 		return ""
+	}
+	var rfUUID string
+	if rf != nil {
+		rfUUID = ec.RatingFilters.GetUUIDWithSet(rf)
 	}
 	var tmID string
 	if ri.Timing != nil {
@@ -198,12 +201,14 @@ func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval) string {
 	}
 	return ec.RatingUnits.GetUUIDWithSet(
 		&RatingUnit{
-			ConnectFee:       ri.Rating.ConnectFee,
-			RoundingMethod:   ri.Rating.RoundingMethod,
-			RoundingDecimals: ri.Rating.RoundingDecimals,
-			MaxCost:          ri.Rating.MaxCost,
-			MaxCostStrategy:  ri.Rating.MaxCostStrategy,
-			TimingUUID:       tmID, RatesUUID: rtUUID})
+			ConnectFee:        ri.Rating.ConnectFee,
+			RoundingMethod:    ri.Rating.RoundingMethod,
+			RoundingDecimals:  ri.Rating.RoundingDecimals,
+			MaxCost:           ri.Rating.MaxCost,
+			MaxCostStrategy:   ri.Rating.MaxCostStrategy,
+			TimingUUID:        tmID,
+			RatesUUID:         rtUUID,
+			RatingFiltersUUID: rfUUID})
 }
 
 func (ec *EventCost) rateIntervalForRatingUUID(ratingUUID string) (ri *RateInterval) {
@@ -234,12 +239,14 @@ func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subje
 	for i, cIl := range ec.Charges {
 		ts := &TimeSpan{TimeStart: cIl.StartTime, TimeEnd: cIl.StartTime.Add(cIl.Usage()),
 			Cost: cIl.Cost(), DurationIndex: cIl.Usage(), CompressFactor: cIl.CompressFactor}
-		if cIl.IntervalDetailsUUID != "" {
-			iDtls := ec.IntervalDetails[cIl.IntervalDetailsUUID]
-			ts.MatchedSubject = iDtls.Subject
-			ts.MatchedPrefix = iDtls.DestinationPrefix
-			ts.MatchedDestId = iDtls.DestinationID
-			ts.RatingPlanId = iDtls.RatingPlanID
+		if cIl.RatingUUID != "" {
+			if ec.RatingUnits[cIl.RatingUUID].RatingFiltersUUID != "" {
+				rfs := ec.RatingFilters[ec.RatingUnits[cIl.RatingUUID].RatingFiltersUUID]
+				ts.MatchedSubject = rfs.Subject
+				ts.MatchedPrefix = rfs.DestinationPrefix
+				ts.MatchedDestId = rfs.DestinationID
+				ts.RatingPlanId = rfs.RatingPlanID
+			}
 		}
 		ts.RateInterval = ec.rateIntervalForRatingUUID(cIl.RatingUUID)
 		if len(cIl.Increments) != 0 {
@@ -351,18 +358,18 @@ func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 		bc.ExtraChargeUUID == oBC.ExtraChargeUUID
 }
 
-type ChrgIntervDetail struct {
+type RatingMatchedFilters struct {
 	Subject           string // matched subject
 	DestinationPrefix string // matched destination prefix
 	DestinationID     string // matched destinationID
 	RatingPlanID      string // matched ratingPlanID
 }
 
-func (cid *ChrgIntervDetail) Equals(oCID *ChrgIntervDetail) bool {
-	return cid.Subject == oCID.Subject &&
-		cid.DestinationPrefix == oCID.DestinationPrefix &&
-		cid.DestinationID == oCID.DestinationID &&
-		cid.RatingPlanID == oCID.RatingPlanID
+func (rf *RatingMatchedFilters) Equals(oRF *RatingMatchedFilters) bool {
+	return rf.Subject == oRF.Subject &&
+		rf.DestinationPrefix == oRF.DestinationPrefix &&
+		rf.DestinationID == oRF.DestinationID &&
+		rf.RatingPlanID == oRF.RatingPlanID
 }
 
 // ChargedTiming represents one timing attached to a charge
@@ -384,13 +391,14 @@ func (ct *ChargedTiming) Equals(oCT *ChargedTiming) bool {
 
 // RatingUnit represents one unit out of RatingPlan matching for an event
 type RatingUnit struct {
-	ConnectFee       float64
-	RoundingMethod   string
-	RoundingDecimals int
-	MaxCost          float64
-	MaxCostStrategy  string
-	TimingUUID       string // This RatingUnit is bounded to specific timing profile
-	RatesUUID        string
+	ConnectFee        float64
+	RoundingMethod    string
+	RoundingDecimals  int
+	MaxCost           float64
+	MaxCostStrategy   string
+	TimingUUID        string // This RatingUnit is bounded to specific timing profile
+	RatesUUID         string
+	RatingFiltersUUID string
 }
 
 func (ru *RatingUnit) Equals(oRU *RatingUnit) bool {
