@@ -259,7 +259,8 @@ func (ec *EventCost) ComputeUsage() time.Duration {
 
 func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subject, Destination string) *CallCost {
 	cc := &CallCost{Direction: Direction, Category: Category, Tenant: Tenant,
-		Subject: Subject, Account: Account, Destination: Destination, TOR: ToR}
+		Subject: Subject, Account: Account, Destination: Destination, TOR: ToR,
+		Cost: ec.ComputeCost(), RatedUsage: ec.ComputeUsage().Seconds()}
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {
 		ts := &TimeSpan{TimeStart: cIl.StartTime, TimeEnd: cIl.StartTime.Add(cIl.Usage()),
@@ -287,7 +288,9 @@ func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subje
 					// so we can stay compatible with CallCost
 					incr.BalanceInfo.Unit = &UnitInfo{UUID: cBC.BalanceUUID, Consumed: cBC.Units}
 					incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingUUID(cBC.RatingUUID)
-					cBC = ec.Accounting[cBC.ExtraChargeUUID] // overwrite original balance so we can process it in one place
+					if cBC.ExtraChargeUUID != utils.META_NONE {
+						cBC = ec.Accounting[cBC.ExtraChargeUUID] // overwrite original balance so we can process it in one place
+					}
 				}
 				incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
 				incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingUUID(cBC.RatingUUID)
