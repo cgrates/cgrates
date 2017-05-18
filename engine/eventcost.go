@@ -24,10 +24,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type RatingFilters map[string]*RatingMatchedFilters // so we can define search methods
+type RatingFilters map[string]RatingMatchedFilters // so we can define search methods
 
 // GetWithSet attempts to retrieve the UUID of a matching data or create a new one
-func (rfs RatingFilters) GetUUIDWithSet(rmf *RatingMatchedFilters) string {
+func (rfs RatingFilters) GetUUIDWithSet(rmf RatingMatchedFilters) string {
 	for k, v := range rfs {
 		if v.Equals(rmf) {
 			return k
@@ -112,8 +112,8 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 	}
 	for i, ts := range cc.Timespans {
 		cIl := &ChargingInterval{StartTime: ts.TimeStart, CompressFactor: ts.CompressFactor}
-		rf := &RatingMatchedFilters{Subject: ts.MatchedSubject, DestinationPrefix: ts.MatchedPrefix,
-			DestinationID: ts.MatchedDestId, RatingPlanID: ts.RatingPlanId}
+		rf := RatingMatchedFilters{"Subject": ts.MatchedSubject, "DestinationPrefix": ts.MatchedPrefix,
+			"DestinationID": ts.MatchedDestId, "RatingPlanID": ts.RatingPlanId}
 		cIl.RatingUUID = ec.ratingUUIDForRateInterval(ts.RateInterval, rf)
 		if len(ts.Increments) != 0 {
 			cIl.Increments = make([]*ChargingIncrement, len(ts.Increments))
@@ -177,7 +177,7 @@ type EventCost struct {
 	Timings       ChargedTimings
 }
 
-func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval, rf *RatingMatchedFilters) string {
+func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval, rf RatingMatchedFilters) string {
 	if ri == nil || ri.Rating == nil {
 		return ""
 	}
@@ -267,10 +267,10 @@ func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subje
 		if cIl.RatingUUID != "" {
 			if ec.Rating[cIl.RatingUUID].RatingFiltersUUID != "" {
 				rfs := ec.RatingFilters[ec.Rating[cIl.RatingUUID].RatingFiltersUUID]
-				ts.MatchedSubject = rfs.Subject
-				ts.MatchedPrefix = rfs.DestinationPrefix
-				ts.MatchedDestId = rfs.DestinationID
-				ts.RatingPlanId = rfs.RatingPlanID
+				ts.MatchedSubject = rfs["Subject"].(string)
+				ts.MatchedPrefix = rfs["DestinationPrefix"].(string)
+				ts.MatchedDestId = rfs["DestinationID"].(string)
+				ts.RatingPlanId = rfs["RatingPlanID"].(string)
 			}
 		}
 		ts.RateInterval = ec.rateIntervalForRatingUUID(cIl.RatingUUID)
@@ -302,18 +302,16 @@ func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subje
 // ChargingInterval represents one interval out of Usage providing charging info
 // eg: PEAK vs OFFPEAK
 type ChargingInterval struct {
-	StartTime           time.Time
-	IntervalDetailsUUID string               // reference to CIntervDetails
-	RatingUUID          string               // reference to RatingUnit
-	Increments          []*ChargingIncrement // specific increments applied to this interval
-	CompressFactor      int
-	usage               *time.Duration // cache usage computation for this interval
-	cost                *float64       // cache cost calculation on this interval
+	StartTime      time.Time
+	RatingUUID     string               // reference to RatingUnit
+	Increments     []*ChargingIncrement // specific increments applied to this interval
+	CompressFactor int
+	usage          *time.Duration // cache usage computation for this interval
+	cost           *float64       // cache cost calculation on this interval
 }
 
 func (cIl *ChargingInterval) Equals(oCIl *ChargingInterval) (equals bool) {
 	if equals = cIl.StartTime.Equal(oCIl.StartTime) &&
-		cIl.IntervalDetailsUUID == oCIl.IntervalDetailsUUID &&
 		cIl.RatingUUID == oCIl.RatingUUID &&
 		len(cIl.Increments) == len(oCIl.Increments); !equals {
 		return
@@ -383,18 +381,17 @@ func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 		bc.ExtraChargeUUID == oBC.ExtraChargeUUID
 }
 
-type RatingMatchedFilters struct {
-	Subject           string // matched subject
-	DestinationPrefix string // matched destination prefix
-	DestinationID     string // matched destinationID
-	RatingPlanID      string // matched ratingPlanID
-}
+type RatingMatchedFilters map[string]interface{}
 
-func (rf *RatingMatchedFilters) Equals(oRF *RatingMatchedFilters) bool {
-	return rf.Subject == oRF.Subject &&
-		rf.DestinationPrefix == oRF.DestinationPrefix &&
-		rf.DestinationID == oRF.DestinationID &&
-		rf.RatingPlanID == oRF.RatingPlanID
+func (rf RatingMatchedFilters) Equals(oRF RatingMatchedFilters) (equals bool) {
+	equals = true
+	for k := range rf {
+		if rf[k] != oRF[k] {
+			equals = false
+			break
+		}
+	}
+	return
 }
 
 // ChargedTiming represents one timing attached to a charge
@@ -433,5 +430,6 @@ func (ru *RatingUnit) Equals(oRU *RatingUnit) bool {
 		ru.MaxCost == oRU.MaxCost &&
 		ru.MaxCostStrategy == oRU.MaxCostStrategy &&
 		ru.TimingUUID == oRU.TimingUUID &&
-		ru.RatesUUID == oRU.RatesUUID
+		ru.RatesUUID == oRU.RatesUUID &&
+		ru.RatingFiltersUUID == oRU.RatingFiltersUUID
 }
