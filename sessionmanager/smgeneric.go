@@ -361,17 +361,17 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 }
 
 // sessionStart will handle a new session, pass the connectionId so we can communicate on disconnect request
-func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.RpcClientConnection) error {
+func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.RpcClientConnection) (err error) {
 	cgrID := evStart.GetCGRID(utils.META_DEFAULT)
-	processed, err := guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
 		if pSS := smg.passiveToActive(cgrID); len(pSS) != 0 {
-			return true, nil // ToDo: handle here also debits
+			return nil, nil // ToDo: handle here also debits
 		}
 		var sessionRuns []*engine.SessionRun
 		if err := smg.rals.Call("Responder.GetSessionRuns", evStart.AsStoredCdr(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
-			return true, err
+			return nil, err
 		} else if len(sessionRuns) == 0 {
-			return true, nil
+			return nil, nil
 		}
 		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
@@ -384,13 +384,9 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.Rp
 				go s.debitLoop(smg.cgrCfg.SmGenericConfig.DebitInterval)
 			}
 		}
-		return true, nil
+		return nil, nil
 	}, smg.cgrCfg.LockingTimeout, cgrID)
-	if processed == nil || processed == false {
-		utils.Logger.Err("<SMGeneric> Cannot start session, empty reply")
-		return utils.ErrServerError
-	}
-	return err
+	return
 }
 
 // sessionEnd will end a session from outside

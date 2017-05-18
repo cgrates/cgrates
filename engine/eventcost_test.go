@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -639,5 +638,5 @@ func TestEventCostAsCallCost(t *testing.T) {
 	if len(eCC.Timespans) != len(cc.Timespans) {
 		t.Errorf("Expecting: %+v, received: %+v", eCC, cc)
 	}
-	fmt.Printf("Expecting: %s, \nreceived : %s\n", utils.ToJSON(eCC), utils.ToJSON(cc))
+	//fmt.Printf("Expecting: %s, \nreceived : %s\n", utils.ToJSON(eCC), utils.ToJSON(cc))
 }
