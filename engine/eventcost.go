@@ -232,6 +232,31 @@ func (ec *EventCost) rateIntervalForRatingUUID(ratingUUID string) (ri *RateInter
 	return
 }
 
+// ComputeCost iterates through Charges, calculating cached Cost
+func (ec *EventCost) ComputeCost() float64 {
+	if ec.Cost == nil {
+		var cost float64
+		for _, ci := range ec.Charges {
+			cost += ci.Cost() * float64(ci.CompressFactor)
+		}
+		cost = utils.Round(cost, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		ec.Cost = &cost
+	}
+	return *ec.Cost
+}
+
+// ComputeUsage iterates through Charges, calculating cached Usage
+func (ec *EventCost) ComputeUsage() time.Duration {
+	if ec.Usage == nil {
+		var usage time.Duration
+		for _, ci := range ec.Charges {
+			usage += time.Duration(ci.Usage().Nanoseconds() * int64(ci.CompressFactor))
+		}
+		ec.Usage = &usage
+	}
+	return *ec.Usage
+}
+
 func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subject, Destination string) *CallCost {
 	cc := &CallCost{Direction: Direction, Category: Category, Tenant: Tenant,
 		Subject: Subject, Account: Account, Destination: Destination, TOR: ToR}
