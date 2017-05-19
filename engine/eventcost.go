@@ -292,8 +292,10 @@ func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subje
 						cBC = ec.Accounting[cBC.ExtraChargeUUID] // overwrite original balance so we can process it in one place
 					}
 				}
-				incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
-				incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingUUID(cBC.RatingUUID)
+				if cBC.ExtraChargeUUID != utils.META_NONE {
+					incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
+					incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingUUID(cBC.RatingUUID)
+				}
 			}
 			ts.Increments[j] = incr
 		}

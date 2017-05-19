@@ -140,7 +140,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 			&TimeSpan{
 				TimeStart: time.Date(2017, 1, 9, 16, 19, 21, 0, time.UTC),
 				TimeEnd:   time.Date(2017, 1, 9, 16, 20, 21, 0, time.UTC),
-				Cost:      0.01,
+				Cost:      0.6,
 				RateInterval: &RateInterval{ // standard rating
 					Timing: &RITiming{
 						StartTime: "00:00:00",
@@ -190,24 +190,24 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
 				StartTime:  time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
-				RatingUUID: "bebf80cf-cba5-4e36-89dc-86673cff8cc4",
+				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
 						Usage:             time.Duration(0),
 						Cost:              0.1,
-						BalanceChargeUUID: "716a278d-9ca5-451a-aa59-b6a43f4fb4ef",
+						BalanceChargeUUID: "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
 						CompressFactor:    1,
 					},
 					&ChargingIncrement{
 						Usage:             time.Duration(1 * time.Second),
 						Cost:              0,
-						BalanceChargeUUID: "8ee1f8ee-5783-487b-87e3-cb1bb6fd8f9f",
+						BalanceChargeUUID: "a555cde8-4bd0-408a-afbc-c3ba64888927",
 						CompressFactor:    30,
 					},
 					&ChargingIncrement{
 						Usage:             time.Duration(1 * time.Second),
 						Cost:              0.005,
-						BalanceChargeUUID: "77c904d4-c579-4687-8c28-a1561e39dae2",
+						BalanceChargeUUID: "906bfd0f-035c-40a3-93a8-46f71627983e",
 						CompressFactor:    30,
 					},
 				},
@@ -215,12 +215,12 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 			},
 			&ChargingInterval{
 				StartTime:  time.Date(2017, 1, 9, 16, 19, 21, 0, time.UTC),
-				RatingUUID: "bebf80cf-cba5-4e36-89dc-86673cff8cc4",
+				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
-						Usage:             time.Duration(0),
+						Usage:             time.Duration(1 * time.Second),
 						Cost:              0.01,
-						BalanceChargeUUID: "79463f6e-d70f-41ac-9345-76bd21714759",
+						BalanceChargeUUID: "c890a899-df43-497a-9979-38492713f57b",
 						CompressFactor:    60,
 					},
 				},
@@ -228,46 +228,46 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 			},
 		},
 		Rating: Rating{
-			"bebf80cf-cba5-4e36-89dc-86673cff8cc4": &RatingUnit{
+			"4607d907-02c3-4f2b-bc08-95a0dcc7222c": &RatingUnit{
+				RoundingMethod:    "*up",
+				RoundingDecimals:  5,
+				TimingUUID:        "27f1e5f8-05bb-4f1c-a596-bf1010ad296c",
+				RatesUUID:         "e5eb0f1c-3612-4e8c-b749-7f8f41dd90d4",
+				RatingFiltersUUID: "7e73a00d-be53-4083-a1ee-8ee0b546c62a",
+			},
+			"f2518464-68b8-42f4-acec-aef23d714314": &RatingUnit{
 				ConnectFee:        0.1,
 				RoundingMethod:    "*up",
 				RoundingDecimals:  5,
-				TimingUUID:        "3e4c7dd1-10f9-4fdc-b7df-8833724933dd",
-				RatesUUID:         "5f04c792-5c79-4873-ba39-413342671595",
-				RatingFiltersUUID: "8fa45f23-5bb1-44ee-867c-ad09b2bae981",
-			},
-			"2b7333c0-479c-4e5d-8d72-d089e93b2b6a": &RatingUnit{
-				RoundingMethod:    "*up",
-				RoundingDecimals:  5,
-				TimingUUID:        "3e4c7dd1-10f9-4fdc-b7df-8833724933dd",
-				RatesUUID:         "3246cb23-ef2e-4080-ba5b-45300cbede3f",
-				RatingFiltersUUID: "8fa45f23-5bb1-44ee-867c-ad09b2bae981",
+				TimingUUID:        "27f1e5f8-05bb-4f1c-a596-bf1010ad296c",
+				RatesUUID:         "6504fb84-6b27-47a8-a1c6-c0d843959f89",
+				RatingFiltersUUID: "7e73a00d-be53-4083-a1ee-8ee0b546c62a",
 			},
 		},
 		Accounting: Accounting{
-			"2afef931-eb94-46df-8fb4-3509954e771c": &BalanceCharge{
-				AccountID:   "cgrates.org:dan",
-				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-				Units:       0.005,
-			},
-			"716a278d-9ca5-451a-aa59-b6a43f4fb4ef": &BalanceCharge{
-				AccountID:   "cgrates.org:dan",
-				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-				Units:       0.1,
-			},
-			"77c904d4-c579-4687-8c28-a1561e39dae2": &BalanceCharge{
-				AccountID:       "cgrates.org:dan",
-				BalanceUUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
-				RatingUUID:      "2b7333c0-479c-4e5d-8d72-d089e93b2b6a",
-				Units:           1,
-				ExtraChargeUUID: "2afef931-eb94-46df-8fb4-3509954e771c",
-			},
-			"79463f6e-d70f-41ac-9345-76bd21714759": &BalanceCharge{
+			"c890a899-df43-497a-9979-38492713f57b": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.01,
 			},
-			"8ee1f8ee-5783-487b-87e3-cb1bb6fd8f9f": &BalanceCharge{
+			"a894f8f1-206a-4457-99ce-df21a0c7fedc": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.005,
+			},
+			"44e97dec-8a7e-43d0-8b0a-736d46b5613e": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.1,
+			},
+			"906bfd0f-035c-40a3-93a8-46f71627983e": &BalanceCharge{
+				AccountID:       "cgrates.org:dan",
+				BalanceUUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				RatingUUID:      "4607d907-02c3-4f2b-bc08-95a0dcc7222c",
+				Units:           1,
+				ExtraChargeUUID: "a894f8f1-206a-4457-99ce-df21a0c7fedc",
+			},
+			"a555cde8-4bd0-408a-afbc-c3ba64888927": &BalanceCharge{
 				AccountID:       "cgrates.org:dan",
 				BalanceUUID:     "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
 				Units:           1,
@@ -275,7 +275,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 			},
 		},
 		RatingFilters: RatingFilters{
-			"8fa45f23-5bb1-44ee-867c-ad09b2bae981": RatingMatchedFilters{
+			"7e73a00d-be53-4083-a1ee-8ee0b546c62a": RatingMatchedFilters{
 				"DestinationID":     "GERMANY",
 				"DestinationPrefix": "+49",
 				"RatingPlanID":      "RPL_RETAIL1",
@@ -283,14 +283,14 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 			},
 		},
 		Rates: ChargedRates{
-			"3246cb23-ef2e-4080-ba5b-45300cbede3f": RateGroups{
+			"6504fb84-6b27-47a8-a1c6-c0d843959f89": RateGroups{
 				&Rate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.01,
 					RateIncrement:      time.Duration(1 * time.Minute),
 					RateUnit:           time.Duration(1 * time.Second)},
 			},
-			"5f04c792-5c79-4873-ba39-413342671595": RateGroups{
+			"e5eb0f1c-3612-4e8c-b749-7f8f41dd90d4": RateGroups{
 				&Rate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.005,
@@ -304,7 +304,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 			},
 		},
 		Timings: ChargedTimings{
-			"3e4c7dd1-10f9-4fdc-b7df-8833724933dd": &ChargedTiming{
+			"27f1e5f8-05bb-4f1c-a596-bf1010ad296c": &ChargedTiming{
 				StartTime: "00:00:00",
 			},
 		},
@@ -320,24 +320,41 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 	if len(ec.Charges) != len(eEC.Charges) {
 		t.Errorf("Expecting: %+v, received: %+v", eEC, ec)
 	}
-	for i := range eEC.Charges {
+	for i := range ec.Charges {
 		// Make sure main rating is correct
 		if cc.Timespans[i].RateInterval.Rating != nil &&
-			!reflect.DeepEqual(cc.Timespans[i].RateInterval.Rating.Rates, ec.Rates[ec.Rating[ec.Charges[i].RatingUUID].RatesUUID]) {
-			t.Errorf("For index: %d, expecting: %s, received: %s",
-				i, utils.ToJSON(cc.Timespans[i].RateInterval.Rating.Rates), ec.Rates[ec.Rating[ec.Charges[i].RatingUUID].RatesUUID])
+			!reflect.DeepEqual(cc.Timespans[i].RateInterval.Rating.Rates,
+				ec.Rates[ec.Rating[ec.Charges[i].RatingUUID].RatesUUID]) {
+			t.Errorf("Index: %d, expecting: %s, received: %s",
+				i, utils.ToJSON(cc.Timespans[i].RateInterval.Rating.Rates),
+				ec.Rates[ec.Rating[ec.Charges[i].RatingUUID].RatesUUID])
+		}
+		// Make sure it matches also the expected rates
+		if !reflect.DeepEqual(eEC.Rates[eEC.Rating[eEC.Charges[i].RatingUUID].RatesUUID],
+			ec.Rates[ec.Rating[ec.Charges[i].RatingUUID].RatesUUID]) {
+			t.Errorf("Index: %d, expecting: %s, received: %s", i,
+				utils.ToJSON(eEC.Rates[eEC.Rating[eEC.Charges[i].RatingUUID].RatesUUID]),
+				utils.ToJSON(ec.Rates[ec.Rating[ec.Charges[i].RatingUUID].RatesUUID]))
 		}
 		if len(eEC.Charges[i].Increments) != len(ec.Charges[i].Increments) {
-			t.Errorf("At index %d, expecting: %+v, received: %+v", eEC.Charges[i].Increments, ec.Charges[i].Increments)
+			t.Errorf("Index %d, expecting: %+v, received: %+v", i, eEC.Charges[i].Increments, ec.Charges[i].Increments)
 		}
 	}
 	if len(ec.Rating) != len(eEC.Rating) {
 		t.Errorf("Expecting: %+v, received: %+v", eEC, ec)
 	}
+	// Compare to original timestamp
 	if !reflect.DeepEqual(cc.Timespans[0].Increments[2].BalanceInfo.Unit.RateInterval.Rating.Rates,
 		ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(cc.Timespans[0].Increments[2].BalanceInfo.Unit.RateInterval.Rating.Rates),
+			utils.ToJSON(ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]))
+	}
+	// Compare to expected EC
+	if !reflect.DeepEqual(eEC.Rates[eEC.Rating[eEC.Accounting[eEC.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID],
+		ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eEC.Rates[eEC.Rating[eEC.Accounting[eEC.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]),
 			utils.ToJSON(ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]))
 	}
 	if len(ec.Accounting) != len(eEC.Accounting) {
@@ -360,24 +377,24 @@ func TestEventCostAsCallCost(t *testing.T) {
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
 				StartTime:  time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
-				RatingUUID: "bebf80cf-cba5-4e36-89dc-86673cff8cc4",
+				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
 						Usage:             time.Duration(0),
 						Cost:              0.1,
-						BalanceChargeUUID: "716a278d-9ca5-451a-aa59-b6a43f4fb4ef",
+						BalanceChargeUUID: "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
 						CompressFactor:    1,
 					},
 					&ChargingIncrement{
 						Usage:             time.Duration(1 * time.Second),
 						Cost:              0,
-						BalanceChargeUUID: "8ee1f8ee-5783-487b-87e3-cb1bb6fd8f9f",
+						BalanceChargeUUID: "a555cde8-4bd0-408a-afbc-c3ba64888927",
 						CompressFactor:    30,
 					},
 					&ChargingIncrement{
 						Usage:             time.Duration(1 * time.Second),
 						Cost:              0.005,
-						BalanceChargeUUID: "77c904d4-c579-4687-8c28-a1561e39dae2",
+						BalanceChargeUUID: "906bfd0f-035c-40a3-93a8-46f71627983e",
 						CompressFactor:    30,
 					},
 				},
@@ -385,12 +402,12 @@ func TestEventCostAsCallCost(t *testing.T) {
 			},
 			&ChargingInterval{
 				StartTime:  time.Date(2017, 1, 9, 16, 19, 21, 0, time.UTC),
-				RatingUUID: "bebf80cf-cba5-4e36-89dc-86673cff8cc4",
+				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
-						Usage:             time.Duration(0),
+						Usage:             time.Duration(1 * time.Second),
 						Cost:              0.01,
-						BalanceChargeUUID: "79463f6e-d70f-41ac-9345-76bd21714759",
+						BalanceChargeUUID: "c890a899-df43-497a-9979-38492713f57b",
 						CompressFactor:    60,
 					},
 				},
@@ -398,46 +415,46 @@ func TestEventCostAsCallCost(t *testing.T) {
 			},
 		},
 		Rating: Rating{
-			"bebf80cf-cba5-4e36-89dc-86673cff8cc4": &RatingUnit{
+			"4607d907-02c3-4f2b-bc08-95a0dcc7222c": &RatingUnit{
+				RoundingMethod:    "*up",
+				RoundingDecimals:  5,
+				TimingUUID:        "27f1e5f8-05bb-4f1c-a596-bf1010ad296c",
+				RatesUUID:         "e5eb0f1c-3612-4e8c-b749-7f8f41dd90d4",
+				RatingFiltersUUID: "7e73a00d-be53-4083-a1ee-8ee0b546c62a",
+			},
+			"f2518464-68b8-42f4-acec-aef23d714314": &RatingUnit{
 				ConnectFee:        0.1,
 				RoundingMethod:    "*up",
 				RoundingDecimals:  5,
-				TimingUUID:        "3e4c7dd1-10f9-4fdc-b7df-8833724933dd",
-				RatesUUID:         "5f04c792-5c79-4873-ba39-413342671595",
-				RatingFiltersUUID: "8fa45f23-5bb1-44ee-867c-ad09b2bae981",
-			},
-			"2b7333c0-479c-4e5d-8d72-d089e93b2b6a": &RatingUnit{
-				RoundingMethod:    "*up",
-				RoundingDecimals:  5,
-				TimingUUID:        "3e4c7dd1-10f9-4fdc-b7df-8833724933dd",
-				RatesUUID:         "3246cb23-ef2e-4080-ba5b-45300cbede3f",
-				RatingFiltersUUID: "8fa45f23-5bb1-44ee-867c-ad09b2bae981",
+				TimingUUID:        "27f1e5f8-05bb-4f1c-a596-bf1010ad296c",
+				RatesUUID:         "6504fb84-6b27-47a8-a1c6-c0d843959f89",
+				RatingFiltersUUID: "7e73a00d-be53-4083-a1ee-8ee0b546c62a",
 			},
 		},
 		Accounting: Accounting{
-			"2afef931-eb94-46df-8fb4-3509954e771c": &BalanceCharge{
-				AccountID:   "cgrates.org:dan",
-				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-				Units:       0.005,
-			},
-			"716a278d-9ca5-451a-aa59-b6a43f4fb4ef": &BalanceCharge{
-				AccountID:   "cgrates.org:dan",
-				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-				Units:       0.1,
-			},
-			"77c904d4-c579-4687-8c28-a1561e39dae2": &BalanceCharge{
-				AccountID:       "cgrates.org:dan",
-				BalanceUUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
-				RatingUUID:      "2b7333c0-479c-4e5d-8d72-d089e93b2b6a",
-				Units:           1,
-				ExtraChargeUUID: "2afef931-eb94-46df-8fb4-3509954e771c",
-			},
-			"79463f6e-d70f-41ac-9345-76bd21714759": &BalanceCharge{
+			"c890a899-df43-497a-9979-38492713f57b": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.01,
 			},
-			"8ee1f8ee-5783-487b-87e3-cb1bb6fd8f9f": &BalanceCharge{
+			"a894f8f1-206a-4457-99ce-df21a0c7fedc": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.005,
+			},
+			"44e97dec-8a7e-43d0-8b0a-736d46b5613e": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.1,
+			},
+			"906bfd0f-035c-40a3-93a8-46f71627983e": &BalanceCharge{
+				AccountID:       "cgrates.org:dan",
+				BalanceUUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				RatingUUID:      "4607d907-02c3-4f2b-bc08-95a0dcc7222c",
+				Units:           1,
+				ExtraChargeUUID: "a894f8f1-206a-4457-99ce-df21a0c7fedc",
+			},
+			"a555cde8-4bd0-408a-afbc-c3ba64888927": &BalanceCharge{
 				AccountID:       "cgrates.org:dan",
 				BalanceUUID:     "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
 				Units:           1,
@@ -445,7 +462,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 			},
 		},
 		RatingFilters: RatingFilters{
-			"8fa45f23-5bb1-44ee-867c-ad09b2bae981": RatingMatchedFilters{
+			"7e73a00d-be53-4083-a1ee-8ee0b546c62a": RatingMatchedFilters{
 				"DestinationID":     "GERMANY",
 				"DestinationPrefix": "+49",
 				"RatingPlanID":      "RPL_RETAIL1",
@@ -453,14 +470,14 @@ func TestEventCostAsCallCost(t *testing.T) {
 			},
 		},
 		Rates: ChargedRates{
-			"3246cb23-ef2e-4080-ba5b-45300cbede3f": RateGroups{
+			"6504fb84-6b27-47a8-a1c6-c0d843959f89": RateGroups{
 				&Rate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.01,
 					RateIncrement:      time.Duration(1 * time.Minute),
 					RateUnit:           time.Duration(1 * time.Second)},
 			},
-			"5f04c792-5c79-4873-ba39-413342671595": RateGroups{
+			"e5eb0f1c-3612-4e8c-b749-7f8f41dd90d4": RateGroups{
 				&Rate{
 					GroupIntervalStart: time.Duration(0),
 					Value:              0.005,
@@ -474,7 +491,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 			},
 		},
 		Timings: ChargedTimings{
-			"3e4c7dd1-10f9-4fdc-b7df-8833724933dd": &ChargedTiming{
+			"27f1e5f8-05bb-4f1c-a596-bf1010ad296c": &ChargedTiming{
 				StartTime: "00:00:00",
 			},
 		},
@@ -522,9 +539,8 @@ func TestEventCostAsCallCost(t *testing.T) {
 					&Increment{ // ConnectFee
 						Cost: 0.1,
 						BalanceInfo: &DebitInfo{
-							Monetary: &MonetaryInfo{UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-								ID:    utils.META_DEFAULT,
-								Value: 9.9},
+							Monetary: &MonetaryInfo{
+								UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"},
 							AccountID: "cgrates.org:dan",
 						},
 						CompressFactor: 1,
@@ -535,10 +551,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 						BalanceInfo: &DebitInfo{
 							Unit: &UnitInfo{
 								UUID:     "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
-								ID:       "free_mins",
-								Value:    0,
 								Consumed: 1.0,
-								TOR:      utils.VOICE,
 							},
 							AccountID: "cgrates.org:dan",
 						},
@@ -550,10 +563,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 						BalanceInfo: &DebitInfo{
 							Unit: &UnitInfo{ // Minutes with special price
 								UUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
-								ID:       "discounted_mins",
-								Value:    0,
 								Consumed: 1.0,
-								TOR:      utils.VOICE,
 								RateInterval: &RateInterval{
 									Timing: &RITiming{
 										StartTime: "00:00:00",
@@ -580,9 +590,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 								},
 							},
 							Monetary: &MonetaryInfo{
-								UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-								ID:    utils.META_DEFAULT,
-								Value: 9.75},
+								UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"},
 							AccountID: "cgrates.org:dan",
 						},
 						CompressFactor: 30,
@@ -593,7 +601,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 			&TimeSpan{
 				TimeStart: time.Date(2017, 1, 9, 16, 19, 21, 0, time.UTC),
 				TimeEnd:   time.Date(2017, 1, 9, 16, 20, 21, 0, time.UTC),
-				Cost:      0.01,
+				Cost:      0.6,
 				RateInterval: &RateInterval{ // standard rating
 					Timing: &RITiming{
 						StartTime: "00:00:00",
@@ -623,9 +631,8 @@ func TestEventCostAsCallCost(t *testing.T) {
 						Cost:     0.01,
 						Duration: time.Duration(1 * time.Second),
 						BalanceInfo: &DebitInfo{
-							Monetary: &MonetaryInfo{UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-								ID:    utils.META_DEFAULT,
-								Value: 9.15},
+							Monetary: &MonetaryInfo{
+								UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"},
 							AccountID: "cgrates.org:dan",
 						},
 						CompressFactor: 60,
@@ -635,8 +642,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 		},
 	}
 	cc := ec.AsCallCost("*voice", "cgrates.org", "*out", "call", "dan", "dan", "+4986517174963")
-	if len(eCC.Timespans) != len(cc.Timespans) {
-		t.Errorf("Expecting: %+v, received: %+v", eCC, cc)
+	if !reflect.DeepEqual(eCC, cc) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCC), utils.ToJSON(cc))
 	}
-	//fmt.Printf("Expecting: %s, \nreceived : %s\n", utils.ToJSON(eCC), utils.ToJSON(cc))
 }
