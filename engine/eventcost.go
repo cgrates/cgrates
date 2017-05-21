@@ -20,6 +20,7 @@ package engine
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,7 +34,7 @@ func (rfs RatingFilters) GetUUIDWithSet(rmf RatingMatchedFilters) string {
 		}
 	}
 	// not found, set it here
-	uuid := utils.UUIDSha1Prefix()
+	uuid := utils.GenUUID()
 	rfs[uuid] = rmf
 	return uuid
 }
@@ -48,7 +49,7 @@ func (crus Rating) GetUUIDWithSet(cru *RatingUnit) string {
 		}
 	}
 	// not found, set it here
-	uuid := utils.UUIDSha1Prefix()
+	uuid := utils.GenUUID()
 	crus[uuid] = cru
 	return uuid
 }
@@ -63,7 +64,7 @@ func (crs ChargedRates) GetUUIDWithSet(rg RateGroups) string {
 		}
 	}
 	// not found, set it here
-	uuid := utils.UUIDSha1Prefix()
+	uuid := utils.GenUUID()
 	crs[uuid] = rg
 	return uuid
 }
@@ -78,7 +79,7 @@ func (cts ChargedTimings) GetUUIDWithSet(ct *ChargedTiming) string {
 		}
 	}
 	// not found, set it here
-	uuid := utils.UUIDSha1Prefix()
+	uuid := utils.GenUUID()
 	cts[uuid] = ct
 	return uuid
 }
@@ -93,19 +94,18 @@ func (cbs Accounting) GetUUIDWithSet(cb *BalanceCharge) string {
 		}
 	}
 	// not found, set it here
-	uuid := utils.UUIDSha1Prefix()
+	uuid := utils.GenUUID()
 	cbs[uuid] = cb
 	return uuid
 }
 
 func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost) {
 	ec = &EventCost{CGRID: cgrID, RunID: runID,
-		AccountSummary: cc.AccountSummary,
-		RatingFilters:  make(RatingFilters),
-		Rating:         make(Rating),
-		Rates:          make(ChargedRates),
-		Timings:        make(ChargedTimings),
-		Accounting:     make(Accounting),
+		RatingFilters: make(RatingFilters),
+		Rating:        make(Rating),
+		Rates:         make(ChargedRates),
+		Timings:       make(ChargedTimings),
+		Accounting:    make(Accounting),
 	}
 	if len(cc.Timespans) != 0 {
 		ec.Charges = make([]*ChargingInterval, len(cc.Timespans))
@@ -165,17 +165,16 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 
 // EventCost stores cost for an Event
 type EventCost struct {
-	CGRID          string
-	RunID          string
-	Cost           *float64 // pointer so we can nil it when dirty
-	Usage          *time.Duration
-	Charges        []*ChargingInterval
-	AccountSummary *AccountSummary // Account summary at the end of the event calculation
-	Rating         Rating
-	Accounting     Accounting
-	RatingFilters  RatingFilters
-	Rates          ChargedRates
-	Timings        ChargedTimings
+	CGRID         string
+	RunID         string
+	Cost          *float64 // pointer so we can nil it when dirty
+	Usage         *time.Duration
+	Charges       []*ChargingInterval
+	Rating        Rating
+	Accounting    Accounting
+	RatingFilters RatingFilters
+	Rates         ChargedRates
+	Timings       ChargedTimings
 }
 
 func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval, rf RatingMatchedFilters) string {
@@ -238,9 +237,9 @@ func (ec *EventCost) ComputeCost() float64 {
 	if ec.Cost == nil {
 		var cost float64
 		for _, ci := range ec.Charges {
-			cost += ci.GetCost() * float64(ci.CompressFactor)
+			cost += ci.Cost() * float64(ci.CompressFactor)
 		}
-		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+		cost = utils.Round(cost, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
 		ec.Cost = &cost
 	}
 	return *ec.Cost
@@ -251,26 +250,21 @@ func (ec *EventCost) ComputeUsage() time.Duration {
 	if ec.Usage == nil {
 		var usage time.Duration
 		for _, ci := range ec.Charges {
-			usage += time.Duration(ci.GetUsage().Nanoseconds() * int64(ci.CompressFactor))
+			usage += time.Duration(ci.Usage().Nanoseconds() * int64(ci.CompressFactor))
 		}
 		ec.Usage = &usage
 	}
 	return *ec.Usage
 }
 
-func (ec *EventCost) ComputeRounding() []*ChargingIncrement {
-	return nil
-}
-
 func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subject, Destination string) *CallCost {
 	cc := &CallCost{Direction: Direction, Category: Category, Tenant: Tenant,
 		Subject: Subject, Account: Account, Destination: Destination, TOR: ToR,
-		Cost: ec.ComputeCost(), RatedUsage: ec.ComputeUsage().Seconds(),
-		AccountSummary: ec.AccountSummary}
+		Cost: ec.ComputeCost(), RatedUsage: ec.ComputeUsage().Seconds()}
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {
-		ts := &TimeSpan{TimeStart: cIl.StartTime, TimeEnd: cIl.StartTime.Add(cIl.GetUsage()),
-			Cost: cIl.GetCost(), DurationIndex: cIl.GetUsage(), CompressFactor: cIl.CompressFactor}
+		ts := &TimeSpan{TimeStart: cIl.StartTime, TimeEnd: cIl.StartTime.Add(cIl.Usage()),
+			Cost: cIl.Cost(), DurationIndex: cIl.Usage(), CompressFactor: cIl.CompressFactor}
 		if cIl.RatingUUID != "" {
 			if ec.Rating[cIl.RatingUUID].RatingFiltersUUID != "" {
 				rfs := ec.RatingFilters[ec.Rating[cIl.RatingUUID].RatingFiltersUUID]
@@ -317,8 +311,8 @@ type ChargingInterval struct {
 	RatingUUID     string               // reference to RatingUnit
 	Increments     []*ChargingIncrement // specific increments applied to this interval
 	CompressFactor int
-	Usage          *time.Duration // cache usage computation for this interval
-	Cost           *float64       // cache cost calculation on this interval
+	usage          *time.Duration // cache usage computation for this interval
+	cost           *float64       // cache cost calculation on this interval
 }
 
 func (cIl *ChargingInterval) Equals(oCIl *ChargingInterval) (equals bool) {
@@ -337,31 +331,28 @@ func (cIl *ChargingInterval) Equals(oCIl *ChargingInterval) (equals bool) {
 }
 
 // Usage computes the total usage of this ChargingInterval, ignoring CompressFactor
-func (cIl *ChargingInterval) GetUsage() time.Duration {
-	if cIl.Usage == nil {
+func (cIl *ChargingInterval) Usage() time.Duration {
+	if cIl.usage == nil {
 		var usage time.Duration
 		for _, incr := range cIl.Increments {
 			usage += time.Duration(incr.Usage.Nanoseconds() * int64(incr.CompressFactor))
 		}
-		cIl.Usage = &usage
+		cIl.usage = &usage
 	}
-	return *cIl.Usage
+	return *cIl.usage
 }
 
 // Cost computes the total cost on this ChargingInterval
-func (cIl *ChargingInterval) GetCost() float64 {
-	if cIl.Cost == nil {
+func (cIl *ChargingInterval) Cost() float64 {
+	if cIl.cost == nil {
 		var cost float64
 		for _, incr := range cIl.Increments {
 			cost += incr.Cost * float64(incr.CompressFactor)
 		}
-		if cIl.RoundingIncrement != nil {
-
-		}
-		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
-		cIl.Cost = &cost
+		cost = utils.Round(cost, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		cIl.cost = &cost
 	}
-	return *cIl.Cost
+	return *cIl.cost
 }
 
 // ChargingIncrement represents one unit charged inside an interval

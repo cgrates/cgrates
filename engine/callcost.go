@@ -30,7 +30,6 @@ type CallCost struct {
 	Cost                                                            float64
 	Timespans                                                       TimeSpans
 	RatedUsage                                                      float64
-	AccountSummary                                                  *AccountSummary
 	deductConnectFee                                                bool
 	negativeConnectFee                                              bool // the connect fee went negative on default balance
 	maxCostDisconect                                                bool
@@ -181,7 +180,6 @@ func (cc *CallCost) updateCost() {
 	cc.Cost = cost
 }
 
-// Round creates the RoundIncrements in timespans
 func (cc *CallCost) Round() {
 	if len(cc.Timespans) == 0 || cc.Timespans[0] == nil {
 		return
@@ -193,12 +191,11 @@ func (cc *CallCost) Round() {
 		}
 		inc := ts.Increments[0]
 		if inc.BalanceInfo.Monetary == nil || inc.Cost == 0 {
-			// this is a unit paid timespan, nothing to round
+			// this is a unit payied timespan, nothing to round
 			continue
 		}
 		cost := ts.CalculateCost()
-		roundedCost := utils.Round(cost,
-			ts.RateInterval.Rating.RoundingDecimals,
+		roundedCost := utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals,
 			ts.RateInterval.Rating.RoundingMethod)
 		correctionCost := roundedCost - cost
 		//log.Print(cost, roundedCost, correctionCost)

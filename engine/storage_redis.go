@@ -384,7 +384,6 @@ func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 		return nil, err
 	}
 	cache.Set(key, rp, cacheCommit(transactionID), transactionID)
-	fmt.Printf("RatingPlan: %s\n", utils.ToJSON(rp))
 	return
 }
 

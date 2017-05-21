@@ -754,7 +754,6 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			//log.Print("AFTER MAX SESSION: ", cd)
 			if err != nil || remainingDuration == 0 {
 				cc = cd.CreateCallCost()
-				cc.AccountSummary = cd.AccountSummary()
 				if cd.GetDuration() == 0 {
 					// add RatingInfo
 					err = cd.LoadRatingPlans()
@@ -778,7 +777,6 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			}
 			//log.Print("Remaining duration: ", remainingDuration)
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
-			cc.AccountSummary = cd.AccountSummary()
 			//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 			return
 		}, 0, lkIDs...)
@@ -1309,12 +1307,4 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 		}
 	}
 	return lcrCost, nil
-}
-
-// AccountSummary returns the AccountSummary for cached account
-func (cd *CallDescriptor) AccountSummary() *AccountSummary {
-	if cd.account == nil {
-		return nil
-	}
-	return cd.account.AsAccountSummary()
 }
