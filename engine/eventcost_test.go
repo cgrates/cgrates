@@ -26,6 +26,28 @@ import (
 )
 
 func TestNewEventCostFromCallCost(t *testing.T) {
+	acntSummary := &AccountSummary{
+		Tenant: "cgrates.org",
+		ID:     "dan",
+		BalanceSummaries: []*BalanceSummary{
+			&BalanceSummary{
+				Type:     "*monetary",
+				Value:    50,
+				Disabled: false},
+			&BalanceSummary{
+				ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+				Type:     "*monetary",
+				Value:    25,
+				Disabled: false},
+			&BalanceSummary{
+				Type:     "*voice",
+				Value:    200,
+				Disabled: false,
+			},
+		},
+		AllowNegative: false,
+		Disabled:      false,
+	}
 	cc := &CallCost{
 		Direction:   utils.META_OUT,
 		Category:    "call",
@@ -180,6 +202,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				},
 			},
 		},
+		AccountSummary: acntSummary,
 	}
 
 	eEC := &EventCost{
@@ -308,6 +331,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				StartTime: "00:00:00",
 			},
 		},
+		AccountSummary: acntSummary,
 	}
 	ec := NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT)
 	if cost := ec.ComputeCost(); cost != cc.Cost {
@@ -366,9 +390,34 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 	if len(ec.Timings) != len(eEC.Timings) {
 		t.Errorf("Expecting: %+v, received: %+v", eEC, ec)
 	}
+	if !reflect.DeepEqual(eEC.AccountSummary, ec.AccountSummary) {
+		t.Errorf("Expecting: %+v, received: %+v", eEC, ec)
+	}
 }
 
 func TestEventCostAsCallCost(t *testing.T) {
+	acntSummary := &AccountSummary{
+		Tenant: "cgrates.org",
+		ID:     "dan",
+		BalanceSummaries: []*BalanceSummary{
+			&BalanceSummary{
+				Type:     "*monetary",
+				Value:    50,
+				Disabled: false},
+			&BalanceSummary{
+				ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+				Type:     "*monetary",
+				Value:    25,
+				Disabled: false},
+			&BalanceSummary{
+				Type:     "*voice",
+				Value:    200,
+				Disabled: false,
+			},
+		},
+		AllowNegative: false,
+		Disabled:      false,
+	}
 	ec := &EventCost{
 		CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
 		RunID: utils.META_DEFAULT,
@@ -414,6 +463,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 				CompressFactor: 1,
 			},
 		},
+		AccountSummary: acntSummary,
 		Rating: Rating{
 			"4607d907-02c3-4f2b-bc08-95a0dcc7222c": &RatingUnit{
 				RoundingMethod:    "*up",
@@ -497,15 +547,16 @@ func TestEventCostAsCallCost(t *testing.T) {
 		},
 	}
 	eCC := &CallCost{
-		Direction:   utils.META_OUT,
-		Category:    "call",
-		Tenant:      "cgrates.org",
-		Subject:     "dan",
-		Account:     "dan",
-		Destination: "+4986517174963",
-		TOR:         utils.VOICE,
-		Cost:        0.85,
-		RatedUsage:  120.0,
+		Direction:      utils.META_OUT,
+		Category:       "call",
+		Tenant:         "cgrates.org",
+		Subject:        "dan",
+		Account:        "dan",
+		Destination:    "+4986517174963",
+		TOR:            utils.VOICE,
+		Cost:           0.85,
+		RatedUsage:     120.0,
+		AccountSummary: acntSummary,
 		Timespans: TimeSpans{
 			&TimeSpan{
 				TimeStart: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
