@@ -105,6 +105,12 @@ func GenUUID() string {
 		b[10:])
 }
 
+// UUIDSha1Prefix generates a prefix of the sha1 applied to an UUID
+// prefix 8 is chosen since the probability of colision starts being minimal after 7 characters (see git commits)
+func UUIDSha1Prefix() string {
+	return Sha1(GenUUID())[:8]
+}
+
 // Round return rounded version of x with prec precision.
 //
 // Special cases are:
