@@ -713,6 +713,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		}
 		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
+			cc.AccountSummary = cd.AccountSummary()
 			return
 		}, 0, lkIDs...)
 		return

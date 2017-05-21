@@ -355,9 +355,6 @@ func (cIl *ChargingInterval) GetCost() float64 {
 		for _, incr := range cIl.Increments {
 			cost += incr.Cost * float64(incr.CompressFactor)
 		}
-		if cIl.RoundingIncrement != nil {
-
-		}
 		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 		cIl.Cost = &cost
 	}
