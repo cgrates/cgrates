@@ -1076,7 +1076,7 @@ func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err err
 	return
 }
 
-// AccountDigest contains compressed information about an Account
+// AccountSummary contains compressed information about an Account
 type AccountSummary struct {
 	Tenant           string
 	ID               string
