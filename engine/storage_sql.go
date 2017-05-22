@@ -406,8 +406,9 @@ func (self *SQLStorage) SetTPDerivedChargers(sgs []*utils.TPDerivedChargers) err
 	m := make(map[string]bool)
 	tx := self.db.Begin()
 	for _, dCharger := range sgs {
-		if found, _ := m[dCharger.Direction]; !found {
-			m[dCharger.Direction] = true
+		dcKey := dCharger.GetDerivedChargersKey()
+		if found, _ := m[dcKey]; !found {
+			m[dcKey] = true
 			if err := tx.Delete(TpDerivedCharger{
 				Tpid:      dCharger.TPid,
 				Direction: dCharger.Direction,

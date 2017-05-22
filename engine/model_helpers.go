@@ -1194,46 +1194,33 @@ func MapTPDerivedChargers(s []*utils.TPDerivedChargers) (map[string]*utils.TPDer
 }
 
 func APItoModelDerivedCharger(dcs *utils.TPDerivedChargers) (result TpDerivedChargers) {
-	if dcs != nil {
-		for _, dc := range dcs.DerivedChargers {
-			result = append(result, TpDerivedCharger{
-				Tpid:                 dcs.TPid,
-				Loadid:               dcs.LoadId,
-				Direction:            dcs.Direction,
-				Tenant:               dcs.Tenant,
-				Category:             dcs.Category,
-				Account:              dcs.Account,
-				Subject:              dcs.Subject,
-				Runid:                dc.RunId,
-				RunFilters:           dc.RunFilters,
-				ReqTypeField:         dc.ReqTypeField,
-				DirectionField:       dc.DirectionField,
-				TenantField:          dc.TenantField,
-				CategoryField:        dc.CategoryField,
-				AccountField:         dc.AccountField,
-				SubjectField:         dc.SubjectField,
-				PddField:             dc.PddField,
-				DestinationField:     dc.DestinationField,
-				SetupTimeField:       dc.SetupTimeField,
-				AnswerTimeField:      dc.AnswerTimeField,
-				UsageField:           dc.UsageField,
-				SupplierField:        dc.SupplierField,
-				DisconnectCauseField: dc.DisconnectCauseField,
-				CostField:            dc.CostField,
-				RatedField:           dc.RatedField,
-			})
-		}
-		if len(dcs.DerivedChargers) == 0 {
-			result = append(result, TpDerivedCharger{
-				Tpid:      dcs.TPid,
-				Loadid:    dcs.LoadId,
-				Direction: dcs.Direction,
-				Tenant:    dcs.Tenant,
-				Category:  dcs.Category,
-				Account:   dcs.Account,
-				Subject:   dcs.Subject,
-			})
-		}
+	for _, dc := range dcs.DerivedChargers {
+		result = append(result, TpDerivedCharger{
+			Tpid:                 dcs.TPid,
+			Loadid:               dcs.LoadId,
+			Direction:            dcs.Direction,
+			Tenant:               dcs.Tenant,
+			Category:             dcs.Category,
+			Account:              dcs.Account,
+			Subject:              dcs.Subject,
+			Runid:                dc.RunId,
+			RunFilters:           dc.RunFilters,
+			ReqTypeField:         dc.ReqTypeField,
+			DirectionField:       dc.DirectionField,
+			TenantField:          dc.TenantField,
+			CategoryField:        dc.CategoryField,
+			AccountField:         dc.AccountField,
+			SubjectField:         dc.SubjectField,
+			PddField:             dc.PddField,
+			DestinationField:     dc.DestinationField,
+			SetupTimeField:       dc.SetupTimeField,
+			AnswerTimeField:      dc.AnswerTimeField,
+			UsageField:           dc.UsageField,
+			SupplierField:        dc.SupplierField,
+			DisconnectCauseField: dc.DisconnectCauseField,
+			CostField:            dc.CostField,
+			RatedField:           dc.RatedField,
+		})
 	}
 	return
 }

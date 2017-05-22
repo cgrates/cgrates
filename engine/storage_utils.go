@@ -140,3 +140,18 @@ type AttrCDRSStoreSMCost struct {
 	Cost           *SMCost
 	CheckDuplicate bool
 }
+
+type ArgsCDRSStoreSMCost struct {
+	Cost           *V2SMCost
+	CheckDuplicate bool
+}
+
+type V2SMCost struct {
+	CGRID       string
+	RunID       string
+	OriginHost  string
+	OriginID    string
+	CostSource  string
+	Usage       float64
+	CostDetails *EventCost
+}
