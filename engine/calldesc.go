@@ -713,7 +713,9 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		}
 		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
-			cc.AccountSummary = cd.AccountSummary()
+			if err == nil {
+				cc.AccountSummary = cd.AccountSummary()
+			}
 			return
 		}, 0, lkIDs...)
 		return
@@ -779,7 +781,9 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			}
 			//log.Print("Remaining duration: ", remainingDuration)
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
-			cc.AccountSummary = cd.AccountSummary()
+			if err == nil {
+				cc.AccountSummary = cd.AccountSummary()
+			}
 			//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 			return
 		}, 0, lkIDs...)
