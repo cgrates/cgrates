@@ -27,6 +27,9 @@ type RatingFilters map[string]RatingMatchedFilters // so we can define search me
 
 // GetWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (rfs RatingFilters) GetUUIDWithSet(rmf RatingMatchedFilters) string {
+	if rmf == nil || len(rmf) == 0 {
+		return ""
+	}
 	for k, v := range rfs {
 		if v.Equals(rmf) {
 			return k
@@ -42,6 +45,9 @@ type Rating map[string]*RatingUnit
 
 // GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (crus Rating) GetUUIDWithSet(cru *RatingUnit) string {
+	if cru == nil {
+		return ""
+	}
 	for k, v := range crus {
 		if v.Equals(cru) {
 			return k
@@ -57,6 +63,9 @@ type ChargedRates map[string]RateGroups
 
 // GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (crs ChargedRates) GetUUIDWithSet(rg RateGroups) string {
+	if rg == nil || len(rg) == 0 {
+		return ""
+	}
 	for k, v := range crs {
 		if v.Equals(rg) {
 			return k
@@ -72,6 +81,9 @@ type ChargedTimings map[string]*ChargedTiming
 
 // GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (cts ChargedTimings) GetUUIDWithSet(ct *ChargedTiming) string {
+	if ct == nil {
+		return ""
+	}
 	for k, v := range cts {
 		if v.Equals(ct) {
 			return k
@@ -87,6 +99,9 @@ type Accounting map[string]*BalanceCharge
 
 // GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
 func (cbs Accounting) GetUUIDWithSet(cb *BalanceCharge) string {
+	if cb == nil {
+		return ""
+	}
 	for k, v := range cbs {
 		if v.Equals(cb) {
 			return k
@@ -109,9 +124,10 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 	}
 	if len(cc.Timespans) != 0 {
 		ec.Charges = make([]*ChargingInterval, len(cc.Timespans))
+		ec.StartTime = cc.Timespans[0].TimeStart
 	}
 	for i, ts := range cc.Timespans {
-		cIl := &ChargingInterval{StartTime: ts.TimeStart, CompressFactor: ts.CompressFactor}
+		cIl := &ChargingInterval{CompressFactor: ts.CompressFactor}
 		rf := RatingMatchedFilters{"Subject": ts.MatchedSubject, "DestinationPrefix": ts.MatchedPrefix,
 			"DestinationID": ts.MatchedDestId, "RatingPlanID": ts.RatingPlanId}
 		cIl.RatingUUID = ec.ratingUUIDForRateInterval(ts.RateInterval, rf)
@@ -168,6 +184,7 @@ type EventCost struct {
 	CGRID          string
 	RunID          string
 	Cost           *float64 // pointer so we can nil it when dirty
+	StartTime      time.Time
 	Usage          *time.Duration
 	Charges        []*ChargingInterval
 	AccountSummary *AccountSummary // Account summary at the end of the event calculation
@@ -233,12 +250,30 @@ func (ec *EventCost) rateIntervalForRatingUUID(ratingUUID string) (ri *RateInter
 	return
 }
 
-// ComputeCost iterates through Charges, calculating cached Cost
+// Compute aggregates all the compute methods on EventCost
+func (ec *EventCost) Compute() {
+	ec.ComputeUsage()
+	ec.ComputeUsageIndexes()
+	ec.ComputeCost()
+}
+
+// ResetCounters will reset all the computed cached values
+func (ec *EventCost) ResetCounters() {
+	ec.Cost = nil
+	ec.Usage = nil
+	for _, cIl := range ec.Charges {
+		cIl.cost = nil
+		cIl.usage = nil
+		cIl.totalUsageIndex = nil
+	}
+}
+
+// ComputeCost iterates through Charges, computing EventCost.Cost
 func (ec *EventCost) ComputeCost() float64 {
 	if ec.Cost == nil {
 		var cost float64
 		for _, ci := range ec.Charges {
-			cost += ci.GetCost() * float64(ci.CompressFactor)
+			cost += ci.Cost() * float64(ci.CompressFactor)
 		}
 		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 		ec.Cost = &cost
@@ -246,31 +281,43 @@ func (ec *EventCost) ComputeCost() float64 {
 	return *ec.Cost
 }
 
-// ComputeUsage iterates through Charges, calculating cached Usage
+// ComputeUsage iterates through Charges, computing EventCost.Usage
 func (ec *EventCost) ComputeUsage() time.Duration {
 	if ec.Usage == nil {
 		var usage time.Duration
 		for _, ci := range ec.Charges {
-			usage += time.Duration(ci.GetUsage().Nanoseconds() * int64(ci.CompressFactor))
+			usage += time.Duration(ci.Usage().Nanoseconds() * int64(ci.CompressFactor))
 		}
 		ec.Usage = &usage
 	}
 	return *ec.Usage
 }
 
-func (ec *EventCost) ComputeRounding() []*ChargingIncrement {
-	return nil
+// ComputeUsageIndexes will iterate through Chargers and populate their totalUsageIndex
+func (ec *EventCost) ComputeUsageIndexes() {
+	var totalUsage time.Duration
+	for _, cIl := range ec.Charges {
+		if cIl.totalUsageIndex == nil {
+			cIl.totalUsageIndex = utils.DurationPointer(totalUsage)
+		}
+		totalUsage += time.Duration(cIl.Usage().Nanoseconds() * int64(cIl.CompressFactor))
+	}
 }
 
-func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subject, Destination string) *CallCost {
-	cc := &CallCost{Direction: Direction, Category: Category, Tenant: Tenant,
-		Subject: Subject, Account: Account, Destination: Destination, TOR: ToR,
+func (ec *EventCost) AsCallCost() *CallCost {
+	cc := &CallCost{
 		Cost: ec.ComputeCost(), RatedUsage: ec.ComputeUsage().Seconds(),
 		AccountSummary: ec.AccountSummary}
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {
-		ts := &TimeSpan{TimeStart: cIl.StartTime, TimeEnd: cIl.StartTime.Add(cIl.GetUsage()),
-			Cost: cIl.GetCost(), DurationIndex: cIl.GetUsage(), CompressFactor: cIl.CompressFactor}
+		ts := &TimeSpan{Cost: cIl.Cost(),
+			DurationIndex: *cIl.Usage(), CompressFactor: cIl.CompressFactor}
+		if cIl.totalUsageIndex == nil { // index was not populated yet
+			ec.ComputeUsageIndexes()
+		}
+		ts.TimeStart = ec.StartTime.Add(*cIl.totalUsageIndex)
+		ts.TimeEnd = ts.TimeStart.Add(
+			time.Duration(cIl.Usage().Nanoseconds() * int64(cIl.CompressFactor)))
 		if cIl.RatingUUID != "" {
 			if ec.Rating[cIl.RatingUUID].RatingFiltersUUID != "" {
 				rfs := ec.RatingFilters[ec.Rating[cIl.RatingUUID].RatingFiltersUUID]
@@ -310,20 +357,82 @@ func (ec *EventCost) AsCallCost(ToR, Tenant, Direction, Category, Account, Subje
 	return cc
 }
 
+// ratingGetUUIDFomEventCost retrieves UUID based on data from another EventCost
+func (ec *EventCost) ratingGetUUIDFomEventCost(oEC *EventCost, oRatingUUID string) string {
+	oCIlRating := oEC.Rating[oRatingUUID].Clone() // clone so we don't influence the original data
+	oCIlRating.TimingUUID = ec.Timings.GetUUIDWithSet(oEC.Timings[oCIlRating.TimingUUID])
+	oCIlRating.RatingFiltersUUID = ec.RatingFilters.GetUUIDWithSet(oEC.RatingFilters[oCIlRating.RatingFiltersUUID])
+	oCIlRating.RatesUUID = ec.Rates.GetUUIDWithSet(oEC.Rates[oCIlRating.RatesUUID])
+	return ec.Rating.GetUUIDWithSet(oCIlRating)
+}
+
+// accountingGetUUIDFromEventCost retrieves UUID based on data from another EventCost
+func (ec *EventCost) accountingGetUUIDFromEventCost(oEC *EventCost, oBalanceChargeUUID string) string {
+	oBC := oEC.Accounting[oBalanceChargeUUID].Clone()
+	oBC.RatingUUID = ec.ratingGetUUIDFomEventCost(oEC, oBC.RatingUUID)
+	if oBC.ExtraChargeUUID != "" {
+		oBC.ExtraChargeUUID = ec.accountingGetUUIDFromEventCost(oEC, oBC.ExtraChargeUUID)
+	}
+	return ec.Accounting.GetUUIDWithSet(oBC)
+}
+
+// appendCIl appends a ChargingInterval to existing chargers, no compression done
+func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
+	cIl := oEC.Charges[cIlIdx]
+	cIl.RatingUUID = ec.ratingGetUUIDFomEventCost(oEC, cIl.RatingUUID)
+	for _, cIt := range cIl.Increments {
+		cIt.BalanceChargeUUID = ec.accountingGetUUIDFromEventCost(oEC, cIt.BalanceChargeUUID)
+	}
+	ec.Charges = append(ec.Charges, cIl)
+}
+
+// AppendChargingInterval appends or compresses a &ChargingInterval to existing ec.Chargers
+func (ec *EventCost) AppendChargingIntervalFromEventCost(oEC *EventCost, cIlIdx int) {
+	lenChargers := len(ec.Charges)
+	if lenChargers != 0 && ec.Charges[lenChargers-1].PartiallyEquals(oEC.Charges[cIlIdx]) {
+		ec.Charges[lenChargers-1].CompressFactor += 1
+	} else {
+		ec.appendCIlFromEC(oEC, cIlIdx)
+	}
+}
+
+// Merge will merge a list of EventCosts into this one
+func (ec *EventCost) Merge(ecs ...*EventCost) {
+	for _, newEC := range ecs {
+		ec.AccountSummary = newEC.AccountSummary // updated AccountSummary information
+		for cIlIdx := range newEC.Charges {
+			ec.AppendChargingIntervalFromEventCost(newEC, cIlIdx)
+		}
+	}
+	ec.Usage = nil // Reset them
+	ec.Cost = nil
+}
+
+/*
+// Cut will cut the EventCost on specifiedTime at ChargingIncrement level, returning the surplus
+func (ec *EventCost) Trim(atTime time.Time) (surplus *EventCost) {
+	var limitIndex int
+	for i, cIl := range ec.Charges {
+		if cIl.StartTime >
+	}
+}
+*/
+
 // ChargingInterval represents one interval out of Usage providing charging info
 // eg: PEAK vs OFFPEAK
 type ChargingInterval struct {
-	StartTime      time.Time
-	RatingUUID     string               // reference to RatingUnit
-	Increments     []*ChargingIncrement // specific increments applied to this interval
-	CompressFactor int
-	Usage          *time.Duration // cache usage computation for this interval
-	Cost           *float64       // cache cost calculation on this interval
+	RatingUUID      string               // reference to RatingUnit
+	Increments      []*ChargingIncrement // specific increments applied to this interval
+	CompressFactor  int
+	usage           *time.Duration // cache usage computation for this interval
+	totalUsageIndex *time.Duration // computed value of totalUsage at the starting of the interval
+	cost            *float64       // cache cost calculation on this interval
+
 }
 
-func (cIl *ChargingInterval) Equals(oCIl *ChargingInterval) (equals bool) {
-	if equals = cIl.StartTime.Equal(oCIl.StartTime) &&
-		cIl.RatingUUID == oCIl.RatingUUID &&
+// PartiallyEquals does not compare CompressFactor, usefull for Merge
+func (cIl *ChargingInterval) PartiallyEquals(oCIl *ChargingInterval) (equals bool) {
+	if equals = cIl.RatingUUID == oCIl.RatingUUID &&
 		len(cIl.Increments) == len(oCIl.Increments); !equals {
 		return
 	}
@@ -337,28 +446,46 @@ func (cIl *ChargingInterval) Equals(oCIl *ChargingInterval) (equals bool) {
 }
 
 // Usage computes the total usage of this ChargingInterval, ignoring CompressFactor
-func (cIl *ChargingInterval) GetUsage() time.Duration {
-	if cIl.Usage == nil {
+func (cIl *ChargingInterval) Usage() *time.Duration {
+	if cIl.usage == nil {
 		var usage time.Duration
 		for _, incr := range cIl.Increments {
 			usage += time.Duration(incr.Usage.Nanoseconds() * int64(incr.CompressFactor))
 		}
-		cIl.Usage = &usage
+		cIl.usage = &usage
 	}
-	return *cIl.Usage
+	return cIl.usage
+}
+
+// TotalUsageIndex publishes the value of totalUsageIndex
+func (cIl *ChargingInterval) TotalUsageIndex() *time.Duration {
+	return cIl.totalUsageIndex
+}
+
+// StartTime computes a StartTime based on EventCost.Start time and totalUsageIndex
+func (cIl *ChargingInterval) StartTime(ecST time.Time) (st time.Time) {
+	if cIl.totalUsageIndex != nil {
+		st = ecST.Add(*cIl.totalUsageIndex)
+	}
+	return
+}
+
+// EndTime computes an EndTime based on ChargingInterval StartTime value and usage
+func (cIl *ChargingInterval) EndTime(cIlST time.Time) (et time.Time) {
+	return cIlST.Add(time.Duration(cIl.Usage().Nanoseconds() * int64(cIl.CompressFactor)))
 }
 
 // Cost computes the total cost on this ChargingInterval
-func (cIl *ChargingInterval) GetCost() float64 {
-	if cIl.Cost == nil {
+func (cIl *ChargingInterval) Cost() float64 {
+	if cIl.cost == nil {
 		var cost float64
 		for _, incr := range cIl.Increments {
 			cost += incr.Cost * float64(incr.CompressFactor)
 		}
 		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
-		cIl.Cost = &cost
+		cIl.cost = &cost
 	}
-	return *cIl.Cost
+	return *cIl.cost
 }
 
 // ChargingIncrement represents one unit charged inside an interval
@@ -372,7 +499,8 @@ type ChargingIncrement struct {
 func (cIt *ChargingIncrement) Equals(oCIt *ChargingIncrement) bool {
 	return cIt.Usage == oCIt.Usage &&
 		cIt.Cost == oCIt.Cost &&
-		cIt.BalanceChargeUUID == oCIt.BalanceChargeUUID
+		cIt.BalanceChargeUUID == oCIt.BalanceChargeUUID &&
+		cIt.CompressFactor == oCIt.CompressFactor
 }
 
 // BalanceCharge represents one unit charged to a balance
@@ -390,6 +518,12 @@ func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 		bc.RatingUUID == oBC.RatingUUID &&
 		bc.Units == oBC.Units &&
 		bc.ExtraChargeUUID == oBC.ExtraChargeUUID
+}
+
+func (bc *BalanceCharge) Clone() *BalanceCharge {
+	clnBC := new(BalanceCharge)
+	*clnBC = *bc
+	return clnBC
 }
 
 type RatingMatchedFilters map[string]interface{}
@@ -443,4 +577,10 @@ func (ru *RatingUnit) Equals(oRU *RatingUnit) bool {
 		ru.TimingUUID == oRU.TimingUUID &&
 		ru.RatesUUID == oRU.RatesUUID &&
 		ru.RatingFiltersUUID == oRU.RatingFiltersUUID
+}
+
+func (ru *RatingUnit) Clone() *RatingUnit {
+	clnRU := new(RatingUnit)
+	*clnRU = *ru
+	return clnRU
 }

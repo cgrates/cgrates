@@ -206,13 +206,13 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 	}
 
 	eEC := &EventCost{
-		CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID: utils.META_DEFAULT,
-		Cost:  utils.Float64Pointer(0.85),
-		Usage: utils.DurationPointer(time.Duration(2 * time.Minute)),
+		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
+		RunID:     utils.META_DEFAULT,
+		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+		Cost:      utils.Float64Pointer(0.85),
+		Usage:     utils.DurationPointer(time.Duration(2 * time.Minute)),
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
-				StartTime:  time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
@@ -234,10 +234,12 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 						CompressFactor:    30,
 					},
 				},
-				CompressFactor: 1,
+				CompressFactor:  1,
+				usage:           utils.DurationPointer(time.Duration(60 * time.Second)),
+				cost:            utils.Float64Pointer(0.25),
+				totalUsageIndex: utils.DurationPointer(time.Duration(0)),
 			},
 			&ChargingInterval{
-				StartTime:  time.Date(2017, 1, 9, 16, 19, 21, 0, time.UTC),
 				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
@@ -247,7 +249,10 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 						CompressFactor:    60,
 					},
 				},
-				CompressFactor: 1,
+				CompressFactor:  1,
+				usage:           utils.DurationPointer(time.Duration(60 * time.Second)),
+				cost:            utils.Float64Pointer(0.6),
+				totalUsageIndex: utils.DurationPointer(time.Duration(60 * time.Second)),
 			},
 		},
 		Rating: Rating{
@@ -344,6 +349,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 	if len(ec.Charges) != len(eEC.Charges) {
 		t.Errorf("Expecting: %+v, received: %+v", eEC, ec)
 	}
+	ec.ComputeUsageIndexes()
 	for i := range ec.Charges {
 		// Make sure main rating is correct
 		if cc.Timespans[i].RateInterval.Rating != nil &&
@@ -361,7 +367,29 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				utils.ToJSON(ec.Rates[ec.Rating[ec.Charges[i].RatingUUID].RatesUUID]))
 		}
 		if len(eEC.Charges[i].Increments) != len(ec.Charges[i].Increments) {
-			t.Errorf("Index %d, expecting: %+v, received: %+v", i, eEC.Charges[i].Increments, ec.Charges[i].Increments)
+			t.Errorf("Index %d, expecting: %+v, received: %+v",
+				i, eEC.Charges[i].Increments, ec.Charges[i].Increments)
+		}
+		if !reflect.DeepEqual(eEC.Charges[i].Usage(), ec.Charges[i].Usage()) {
+			t.Errorf("Expecting: %v, received: %v",
+				eEC.Charges[i].Usage(), ec.Charges[i].Usage())
+		}
+		if !reflect.DeepEqual(eEC.Charges[i].Cost(), ec.Charges[i].Cost()) {
+			t.Errorf("Expecting: %f, received: %f",
+				eEC.Charges[i].Cost(), ec.Charges[i].Cost())
+		}
+		if !reflect.DeepEqual(eEC.Charges[i].totalUsageIndex, ec.Charges[i].totalUsageIndex) {
+			t.Errorf("Expecting: %v, received: %v",
+				eEC.Charges[i].totalUsageIndex, ec.Charges[i].totalUsageIndex)
+		}
+		cIlStartTime := ec.Charges[i].StartTime(ec.StartTime)
+		if !cc.Timespans[i].TimeStart.Equal(cIlStartTime) {
+			t.Errorf("Expecting: %v, received: %v",
+				cc.Timespans[i].TimeStart, cIlStartTime)
+		}
+		if !cc.Timespans[i].TimeEnd.Equal(ec.Charges[i].EndTime(cIlStartTime)) {
+			t.Errorf("Expecting: %v, received: %v",
+				cc.Timespans[i].TimeStart, ec.Charges[i].EndTime(cIlStartTime))
 		}
 	}
 	if len(ec.Rating) != len(eEC.Rating) {
@@ -419,13 +447,13 @@ func TestEventCostAsCallCost(t *testing.T) {
 		Disabled:      false,
 	}
 	ec := &EventCost{
-		CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID: utils.META_DEFAULT,
-		Cost:  utils.Float64Pointer(0.85),
-		Usage: utils.DurationPointer(time.Duration(2 * time.Minute)),
+		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
+		RunID:     utils.META_DEFAULT,
+		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+		Cost:      utils.Float64Pointer(0.85),
+		Usage:     utils.DurationPointer(time.Duration(2 * time.Minute)),
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
-				StartTime:  time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
@@ -450,7 +478,6 @@ func TestEventCostAsCallCost(t *testing.T) {
 				CompressFactor: 1,
 			},
 			&ChargingInterval{
-				StartTime:  time.Date(2017, 1, 9, 16, 19, 21, 0, time.UTC),
 				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
@@ -547,13 +574,6 @@ func TestEventCostAsCallCost(t *testing.T) {
 		},
 	}
 	eCC := &CallCost{
-		Direction:      utils.META_OUT,
-		Category:       "call",
-		Tenant:         "cgrates.org",
-		Subject:        "dan",
-		Account:        "dan",
-		Destination:    "+4986517174963",
-		TOR:            utils.VOICE,
 		Cost:           0.85,
 		RatedUsage:     120.0,
 		AccountSummary: acntSummary,
@@ -692,7 +712,7 @@ func TestEventCostAsCallCost(t *testing.T) {
 			},
 		},
 	}
-	cc := ec.AsCallCost("*voice", "cgrates.org", "*out", "call", "dan", "dan", "+4986517174963")
+	cc := ec.AsCallCost()
 	if !reflect.DeepEqual(eCC, cc) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCC), utils.ToJSON(cc))
 	}
