@@ -66,3 +66,7 @@ func (apier *ApierV2) CountCdrs(attrs utils.RPCCDRsFilter, reply *int64) error {
 type CdrsV2 struct {
 	v1.CdrsV1
 }
+
+func (self *CdrsV2) StoreSMCost(args engine.ArgsV2CDRSStoreSMCost, reply *string) error {
+	return self.CdrSrv.V2StoreSMCost(args, reply)
+}

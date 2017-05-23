@@ -295,6 +295,15 @@ func (pg RateGroups) Equals(oRG RateGroups) bool {
 	return true
 }
 
+func (pg RateGroups) Clone() (cln RateGroups) {
+	cln = make(RateGroups, len(pg))
+	for i, rt := range pg {
+		cln[i] = new(Rate)
+		*cln[i] = *rt
+	}
+	return
+}
+
 /*
 Returns true if the received time result inside the interval
 */

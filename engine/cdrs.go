@@ -526,6 +526,50 @@ func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) er
 	return nil
 }
 
+func (cdrs *CdrServer) V2StoreSMCost(args ArgsV2CDRSStoreSMCost, reply *string) error {
+	if args.Cost.CGRID == "" {
+		return utils.NewCGRError(utils.CDRSCtx,
+			utils.MandatoryIEMissingCaps, fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing),
+			"SMCost: %+v with empty CGRID")
+	}
+	cacheKey := "V2StoreSMCost" + args.Cost.CGRID + args.Cost.RunID + args.Cost.OriginID
+	if item, err := cdrs.getCache().Get(cacheKey); err == nil && item != nil {
+		if item.Value != nil {
+			*reply = item.Value.(string)
+		}
+		return item.Err
+	}
+	cc := args.Cost.CostDetails.AsCallCost()
+	cc.Round()
+	roundIncrements := cc.GetRoundIncrements()
+	if len(roundIncrements) != 0 {
+		cd := cc.CreateCallDescriptor()
+		cd.CgrID = args.Cost.CGRID
+		cd.RunID = args.Cost.RunID
+		cd.Increments = roundIncrements
+		var response float64
+		if err := cdrs.rals.Call("Responder.RefundRounding", cd, &response); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CDRS> RefundRounding for cc: %+v, got error: %s", cc, err.Error()))
+		}
+	}
+	if err := cdrs.storeSMCost(&SMCost{
+		CGRID:       args.Cost.CGRID,
+		RunID:       args.Cost.RunID,
+		OriginHost:  args.Cost.OriginHost,
+		OriginID:    args.Cost.OriginID,
+		CostSource:  args.Cost.CostSource,
+		Usage:       args.Cost.Usage,
+		CostDetails: cc,
+	}, args.CheckDuplicate); err != nil {
+		cdrs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	cdrs.getCache().Cache(cacheKey, &cache.CacheItem{Value: *reply})
+	return nil
+
+}
+
 // Called by rate/re-rate API, RPC method
 func (self *CdrServer) V1RateCDRs(attrs utils.AttrRateCDRs, reply *string) error {
 	cdrFltr, err := attrs.RPCCDRsFilter.AsCDRsFilter(self.cgrCfg.DefaultTimezone)

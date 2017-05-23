@@ -44,7 +44,7 @@ type SMGSession struct {
 	EventStart SMGenericEvent         // Event which started the session
 	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
 
-	CallCosts     []*engine.CallCost
+	EventCost     *engine.EventCost
 	ExtraDuration time.Duration // keeps the current duration debited on top of what heas been asked
 	LastUsage     time.Duration // last requested Duration
 	LastDebit     time.Duration // last real debited duration
@@ -136,13 +136,86 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.CD.DurationIndex += ccDuration
 	self.CD.MaxCostSoFar += cc.Cost
 	self.CD.LoopIndex += 1
-	self.CallCosts = append(self.CallCosts, cc)
 	self.LastDebit = initialExtraDuration + ccDuration
 	self.TotalUsage += self.LastUsage
+	ec := engine.NewEventCostFromCallCost(self.CGRID, self.RunID)
+	if self.EventCost == nil {
+		self.EventCost = ec
+	} else {
+		self.EventCost.Merge(ec)
+	}
 	if ccDuration < dur {
 		return initialExtraDuration + ccDuration, nil
 	}
 	return requestedDuration, nil
+}
+
+// Send disconnect order to remote connection
+func (self *SMGSession) disconnectSession(reason string) error {
+	self.EventStart[utils.USAGE] = strconv.FormatFloat(self.TotalUsage.Seconds(), 'f', -1, 64) // Set the usage to total one debitted
+	if self.clntConn == nil || reflect.ValueOf(self.clntConn).IsNil() {
+		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
+	}
+	var reply string
+	if err := self.clntConn.Call("SMGClientV1.DisconnectSession", utils.AttrDisconnectSession{EventStart: self.EventStart, Reason: reason}, &reply); err != nil {
+		return err
+	} else if reply != utils.OK {
+		return errors.New(fmt.Sprintf("Unexpected disconnect reply: %s", reply))
+	}
+	return nil
+}
+
+// Session has ended, check debits and refund the extra charged duration
+func (self *SMGSession) close(endTime time.Time) (err error) {
+	self.mux.Lock()
+	defer self.mux.Unlock()
+	if self.EventCost != nil { // We have had at least one cost calculation
+		chargedEndTime := self.EventCost.Charges[len(self.EventCost.Charges)-1].GetEndTime()
+		if endTime.After(chargedEndTime) { // we did not charge enough, make a manual debit here
+			extraDur := endTime.Sub(chargedEndTime)
+			if self.CD.LoopIndex > 0 {
+				self.CD.TimeStart = self.CD.TimeEnd
+			}
+			self.CD.TimeEnd = self.CD.TimeStart.Add(extraDur)
+			self.CD.DurationIndex += extraDur
+			cc := &engine.CallCost{}
+			if err = self.rals.Call("Responder.Debit", self.CD, cc); err == nil {
+				self.EventCost.Merge(
+					engine.NewEventCostFromCallCost(self.CGRID, self.RunID))
+			}
+		} else {
+			err = self.refund(chargedEndTime.Sub(endTime))
+		}
+	}
+	return
+}
+
+// storeSMCost will send the SMCost to CDRs for storing
+func (self *SMGSession) storeSMCost() error {
+	if self.EventCost == nil {
+		return nil // There are no costs to save, ignore the operation
+	}
+	self.mux.Lock()
+	self.mux.Unlock()
+	smCost := &engine.V2SMCost{
+		CGRID:       self.CGRID,
+		CostSource:  utils.SESSION_MANAGER_SOURCE,
+		RunID:       self.RunID,
+		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
+		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
+		Usage:       self.TotalUsage.Seconds(),
+		CostDetails: self.EventCost,
+	}
+	var reply string
+	if err := self.cdrsrv.Call("CdrsV2.StoreSMCost", engine.ArgsV2CDRSStoreSMCost{Cost: smCost,
+		CheckDuplicate: true}, &reply); err != nil {
+		if err == utils.ErrExists {
+			self.refund(self.CD.GetDuration()) // Refund entire duration
+		} else {
+			return err
+		}
+	}
+	return nil
 }
 
 // Attempts to refund a duration, error on failure
@@ -207,120 +280,6 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	//firstCC.Cost -= refundIncrements.GetTotalCost() // use updateCost instead
 	firstCC.UpdateCost()
 	firstCC.UpdateRatedUsage()
-	return nil
-}
-
-// mergeCCs will merge the CallCosts recorded for this session
-func (self *SMGSession) mergeCCs() {
-	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
-		firstCC := self.CallCosts[0]
-		for _, cc := range self.CallCosts[1:] {
-			firstCC.Merge(cc)
-		}
-	}
-}
-
-// Session has ended, check debits and refund the extra charged duration
-func (self *SMGSession) close(endTime time.Time) (err error) {
-	self.mux.Lock()
-	defer self.mux.Unlock()
-	if len(self.CallCosts) != 0 { // We have had at least one cost calculation
-		chargedEndTime := self.CallCosts[len(self.CallCosts)-1].GetEndTime()
-		if endTime.After(chargedEndTime) { // we did not charge enough, make a manual debit here
-			extraDur := endTime.Sub(chargedEndTime)
-			if self.CD.LoopIndex > 0 {
-				self.CD.TimeStart = self.CD.TimeEnd
-			}
-			self.CD.TimeEnd = self.CD.TimeStart.Add(extraDur)
-			self.CD.DurationIndex += extraDur
-			cc := &engine.CallCost{}
-			if err = self.rals.Call("Responder.Debit", self.CD, cc); err == nil {
-				self.CallCosts = append(self.CallCosts, cc)
-				self.mergeCCs() // merge again so we can store the right value in db
-			}
-		} else {
-			self.mergeCCs()
-			err = self.refund(chargedEndTime.Sub(endTime))
-		}
-	}
-	return
-}
-
-// Send disconnect order to remote connection
-func (self *SMGSession) disconnectSession(reason string) error {
-	self.EventStart[utils.USAGE] = strconv.FormatFloat(self.TotalUsage.Seconds(), 'f', -1, 64) // Set the usage to total one debitted
-	if self.clntConn == nil || reflect.ValueOf(self.clntConn).IsNil() {
-		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
-	}
-	var reply string
-	if err := self.clntConn.Call("SMGClientV1.DisconnectSession", utils.AttrDisconnectSession{EventStart: self.EventStart, Reason: reason}, &reply); err != nil {
-		return err
-	} else if reply != utils.OK {
-		return errors.New(fmt.Sprintf("Unexpected disconnect reply: %s", reply))
-	}
-	return nil
-}
-
-// Merge the sum of costs and sends it to CDRS for storage
-// originID could have been changed from original event, hence passing as argument here
-// pass cc as the clone of original to avoid concurrency issues
-func (self *SMGSession) saveOperations(cgrID string) error {
-	if len(self.CallCosts) == 0 {
-		return nil // There are no costs to save, ignore the operation
-	}
-	self.mux.Lock()
-	self.mux.Unlock()
-	cc := self.CallCosts[0] // was merged in close method
-	cc.Round()
-	roundIncrements := cc.GetRoundIncrements()
-	if len(roundIncrements) != 0 {
-		cd := cc.CreateCallDescriptor()
-		cd.CgrID = self.CD.CgrID
-		cd.RunID = self.CD.RunID
-		cd.Increments = roundIncrements
-		var response float64
-		if err := self.rals.Call("Responder.RefundRounding", cd, &response); err != nil {
-			return err
-		}
-	}
-	smCost := &engine.SMCost{
-		CGRID:       self.CGRID,
-		CostSource:  utils.SESSION_MANAGER_SOURCE,
-		RunID:       self.RunID,
-		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
-		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
-		Usage:       self.TotalUsage.Seconds(),
-		CostDetails: cc,
-	}
-	if len(smCost.CostDetails.Timespans) > MaxTimespansInCost { // Merge since we will get a callCost too big
-		if err := utils.Clone(cc, &smCost.CostDetails); err != nil { // Avoid concurrency on CC
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not clone callcost for sessionID: %s, RunID: %s, error: %s", cgrID, self.RunID, err.Error()))
-		}
-		go func(smCost *engine.SMCost) { // could take longer than the locked stage
-			if err := self.storeSMCost(smCost); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not store callcost for sessionID: %s, RunID: %s, error: %s", cgrID, self.RunID, err.Error()))
-			}
-		}(smCost)
-	} else {
-		return self.storeSMCost(smCost)
-	}
-	return nil
-}
-
-func (self *SMGSession) storeSMCost(smCost *engine.SMCost) error {
-	if len(smCost.CostDetails.Timespans) > MaxTimespansInCost { // Merge so we can compress the CostDetails
-		smCost.CostDetails.Timespans.Decompress()
-		smCost.CostDetails.Timespans.Merge()
-		smCost.CostDetails.Timespans.Compress()
-	}
-	var reply string
-	if err := self.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
-		if err == utils.ErrExists {
-			self.refund(self.CD.GetDuration()) // Refund entire duration
-		} else {
-			return err
-		}
-	}
 	return nil
 }
 

@@ -141,7 +141,7 @@ type AttrCDRSStoreSMCost struct {
 	CheckDuplicate bool
 }
 
-type ArgsCDRSStoreSMCost struct {
+type ArgsV2CDRSStoreSMCost struct {
 	Cost           *V2SMCost
 	CheckDuplicate bool
 }

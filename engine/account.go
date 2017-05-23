@@ -1084,3 +1084,19 @@ type AccountSummary struct {
 	AllowNegative    bool
 	Disabled         bool
 }
+
+func (as *AccountSummary) Clone() (cln *AccountSummary) {
+	cln = new(AccountSummary)
+	cln.Tenant = as.Tenant
+	cln.ID = as.ID
+	cln.AllowNegative = as.AllowNegative
+	cln.Disabled = as.Disabled
+	if as.BalanceSummaries != nil {
+		cln.BalanceSummaries = make([]*BalanceSummary, len(as.BalanceSummaries))
+		for i, bs := range as.BalanceSummaries {
+			cln.BalanceSummaries[i] = new(BalanceSummary)
+			*cln.BalanceSummaries[i] = *bs
+		}
+	}
+	return
+}
