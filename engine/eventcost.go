@@ -357,6 +357,82 @@ func (ec *EventCost) Merge(ecs ...*EventCost) {
 	ec.Cost = nil
 }
 
+// RemoveStaleReferences iterates through cached data and makes sure it is still referenced from Charging
+func (ec *EventCost) RemoveStaleReferences() {
+	// RatingUUIDs
+	for key := range ec.Rating {
+		var keyUsed bool
+		for _, cIl := range ec.Charges {
+			if cIl.RatingUUID == key {
+				keyUsed = true
+				break
+			}
+		}
+		if !keyUsed { // look also in accounting for references
+			for _, bc := range ec.Accounting {
+				if bc.RatingUUID == key {
+					keyUsed = true
+					break
+				}
+			}
+		}
+		if !keyUsed { // not used, remove it
+			delete(ec.Rating, key)
+		}
+	}
+	for key := range ec.Accounting {
+		var keyUsed bool
+		for _, cIl := range ec.Charges {
+			for _, cIt := range cIl.Increments {
+				if cIt.BalanceChargeUUID == key {
+					keyUsed = true
+					break
+				}
+			}
+		}
+		if !keyUsed {
+			delete(ec.Accounting, key)
+		}
+	}
+	for key := range ec.RatingFilters {
+		var keyUsed bool
+		for _, ru := range ec.Rating {
+			if ru.RatingFiltersUUID == key {
+				keyUsed = true
+				break
+			}
+		}
+		if !keyUsed {
+			delete(ec.RatingFilters, key)
+		}
+	}
+	for key := range ec.Rates {
+		var keyUsed bool
+		for _, ru := range ec.Rating {
+			if ru.RatesUUID == key {
+				keyUsed = true
+				break
+			}
+		}
+		if !keyUsed {
+			delete(ec.Rates, key)
+		}
+	}
+	for key := range ec.Timings {
+		var keyUsed bool
+		for _, ru := range ec.Rating {
+			if ru.TimingUUID == key {
+				keyUsed = true
+				break
+			}
+
+		}
+		if !keyUsed {
+			delete(ec.Rates, key)
+		}
+	}
+}
+
 // Trim will cut the EventCost at specific duration
 // returns the srplusEC as separate EventCost
 func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error) {
@@ -483,6 +559,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			ec.Charges = append(ec.Charges, lastActiveCIl.Clone())
 			lastActiveCIl = ec.Charges[len(ec.Charges)-1]
 			lastActiveCIl.CompressFactor = 1
+
 		}
 		srplsCIl := lastActiveCIl.Clone()
 		srplsCIl.Increments = srplsIncrements
@@ -496,6 +573,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			lastActiveCIl.Increments[len(lastActiveCIl.Increments)-1].CompressFactor = laItCF // correct the compressFactor for the last increment
 		}
 	}
+	ec.RemoveStaleReferences()
 	ec.ResetCounters()
 	if usage := ec.ComputeUsage(); usage < atUsage {
 		return nil, errors.New("usage of EventCost smaller than requested")
