@@ -96,7 +96,7 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string, maxDur time.
         }
         return nil
     }  else if len(sm.cfg.EmptyBalanceAnnFile) != 0 {
-            if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("sched_api +%d uuid_broadcast %s playback!manager_request::%s aleg\n\n", int(maxDur.Seconds()), uuid, sm.cfg.EmptyBalanceAnnFile)); err != nil {
+            if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("sched_broadcast +%d %s playback!manager_request::%s aleg\n\n", int(maxDur.Seconds()), uuid, sm.cfg.EmptyBalanceAnnFile)); err != nil {
             utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send uuid_broadcast to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
             return err
         }
