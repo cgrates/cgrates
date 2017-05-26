@@ -920,7 +920,7 @@ func TestECTrimZeroAndFull(t *testing.T) {
 	}
 }
 
-func TestECTrimMiddle(t *testing.T) {
+func TestECTrimMiddle1(t *testing.T) {
 	// trim in the middle of increments
 	ec := testEC.Clone()
 	eEC := testEC.Clone()
@@ -1025,5 +1025,64 @@ func TestECTrimMiddle(t *testing.T) {
 		//t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eEC), utils.ToJSON(ec))
 	} else if !reflect.DeepEqual(eSrplsEC, srplsEC) {
 		//t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eSrplsEC), utils.ToJSON(srplsEC))
+	}
+}
+
+// TestECTrimMUsage is targeting simpler testing of the durations trimmed/remainders
+func TestECTrimMUsage(t *testing.T) {
+	ec := testEC.Clone()
+	t.Logf("ec: %s", utils.ToJSON(ec))
+	atUsage := time.Duration(5 * time.Second)
+	srplsEC, _ := ec.Trim(atUsage)
+	if ec.ComputeUsage() != atUsage {
+		t.Errorf("Wrongly trimmed EC: %s", utils.ToJSON(ec))
+	}
+	if srplsEC.ComputeUsage() != time.Duration(295*time.Second) {
+		t.Errorf("Wrong surplusEC: %s", utils.ToJSON(ec))
+	}
+	ec = testEC.Clone()
+	atUsage = time.Duration(10 * time.Second)
+	srplsEC, _ = ec.Trim(atUsage)
+	if ec.ComputeUsage() != atUsage {
+		t.Errorf("Wrongly trimmed EC: %s", utils.ToJSON(ec))
+	}
+	if srplsEC.ComputeUsage() != time.Duration(290*time.Second) {
+		t.Errorf("Wrong surplusEC: %s", utils.ToJSON(srplsEC))
+	}
+	ec = testEC.Clone()
+	atUsage = time.Duration(15 * time.Second)
+	srplsEC, _ = ec.Trim(atUsage)
+	if ec.ComputeUsage() != time.Duration(20*time.Second) {
+		t.Errorf("Wrongly trimmed EC: %s", utils.ToJSON(ec))
+	}
+	if srplsEC.ComputeUsage() != time.Duration(280*time.Second) {
+		t.Errorf("Wrong surplusEC: %s", utils.ToJSON(srplsEC))
+	}
+	ec = testEC.Clone()
+	atUsage = time.Duration(25 * time.Second)
+	srplsEC, _ = ec.Trim(atUsage)
+	if ec.ComputeUsage() != time.Duration(30*time.Second) {
+		t.Errorf("Wrongly trimmed EC: %s", utils.ToJSON(ec))
+	}
+	if srplsEC.ComputeUsage() != time.Duration(270*time.Second) {
+		t.Errorf("Wrong surplusEC: %s", utils.ToJSON(srplsEC))
+	}
+	ec = testEC.Clone()
+	atUsage = time.Duration(38 * time.Second)
+	srplsEC, _ = ec.Trim(atUsage)
+	if ec.ComputeUsage() != atUsage {
+		t.Errorf("Wrongly trimmed EC: %s", utils.ToJSON(ec))
+	}
+	if srplsEC.ComputeUsage() != time.Duration(262*time.Second) {
+		t.Errorf("Wrong surplusEC: %s", utils.ToJSON(srplsEC))
+	}
+	ec = testEC.Clone()
+	atUsage = time.Duration(61 * time.Second)
+	srplsEC, _ = ec.Trim(atUsage)
+	if ec.ComputeUsage() != atUsage {
+		t.Errorf("Wrongly trimmed EC: %s", utils.ToJSON(ec))
+	}
+	if srplsEC.ComputeUsage() != time.Duration(239*time.Second) {
+		t.Errorf("Wrong surplusEC: %s", utils.ToJSON(srplsEC))
 	}
 }

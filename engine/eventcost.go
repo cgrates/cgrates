@@ -316,7 +316,7 @@ func (ec *EventCost) ratingGetUUIDFomEventCost(oEC *EventCost, oRatingUUID strin
 
 // accountingGetUUIDFromEventCost retrieves UUID based on data from another EventCost
 func (ec *EventCost) accountingGetUUIDFromEventCost(oEC *EventCost, oBalanceChargeUUID string) string {
-	if oBalanceChargeUUID == "" {
+	if oBalanceChargeUUID == "" || oBalanceChargeUUID == utils.META_NONE {
 		return ""
 	}
 	oBC := oEC.Accounting[oBalanceChargeUUID].Clone()
@@ -511,7 +511,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	var incrementsUsage time.Duration
 	for i, cIt := range lastActiveCIl.Increments {
 		incrementsUsage += cIt.TotalUsage()
-		if incrementsUsage > atUsage {
+		if incrementsUsage >= atUsage {
 			lastActiveCItIdx = utils.IntPointer(i)
 			break
 		}
@@ -559,12 +559,10 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			ec.Charges = append(ec.Charges, lastActiveCIl.Clone())
 			lastActiveCIl = ec.Charges[len(ec.Charges)-1]
 			lastActiveCIl.CompressFactor = 1
-
 		}
 		srplsCIl := lastActiveCIl.Clone()
 		srplsCIl.Increments = srplsIncrements
 		srplusEC.Charges = append([]*ChargingInterval{srplsCIl}, srplusEC.Charges...)
-
 		lastActiveCIl.Increments = make([]*ChargingIncrement, len(lastActiveCIts))
 		for i, incr := range lastActiveCIts {
 			lastActiveCIl.Increments[i] = incr.Clone() // avoid pointer references to the other interval
@@ -573,7 +571,6 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			lastActiveCIl.Increments[len(lastActiveCIl.Increments)-1].CompressFactor = laItCF // correct the compressFactor for the last increment
 		}
 	}
-	ec.RemoveStaleReferences()
 	ec.ResetCounters()
 	if usage := ec.ComputeUsage(); usage < atUsage {
 		return nil, errors.New("usage of EventCost smaller than requested")
@@ -590,5 +587,6 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			incr.BalanceChargeUUID = srplusEC.accountingGetUUIDFromEventCost(ec, incr.BalanceChargeUUID)
 		}
 	}
+	ec.RemoveStaleReferences() // data should be transfered by now, can clean the old one
 	return
 }
