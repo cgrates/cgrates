@@ -23,7 +23,7 @@ to_pass      = ''
 # Overwrite target collections flag.
 # Works only if from/to is on same host.
 # If from/to hosts are different we use mongorestore which overwrites by default.
-to_drop_target = False
+drop_target = False
 
 dump_folder = 'dump'
 
