@@ -1086,3 +1086,53 @@ func TestECTrimMUsage(t *testing.T) {
 		t.Errorf("Wrong surplusEC: %s", utils.ToJSON(srplsEC))
 	}
 }
+
+func TestECMerge(t *testing.T) {
+	ec := NewBareEventCost()
+	ec.CGRID = testEC.CGRID
+	ec.RunID = testEC.RunID
+	ec.StartTime = testEC.StartTime
+	newEC := &EventCost{
+		Charges:        []*ChargingInterval{testEC.Charges[0]},
+		AccountSummary: testEC.AccountSummary,
+		Rating:         testEC.Rating,
+		Accounting:     testEC.Accounting,
+		RatingFilters:  testEC.RatingFilters,
+		Rates:          testEC.Rates,
+		Timings:        testEC.Timings,
+	}
+	ec.Merge(newEC)
+	if len(ec.Charges) != len(newEC.Charges) ||
+		!reflect.DeepEqual(ec.Charges[0].TotalUsage(), newEC.Charges[0].TotalUsage()) ||
+		!reflect.DeepEqual(ec.Charges[0].TotalCost(), newEC.Charges[0].TotalCost()) {
+		t.Errorf("Unexpected EC after merge: %s", utils.ToJSON(ec))
+	}
+	// Add second charging interval with compress factor 1
+	newEC = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingUUID:     testEC.Charges[1].RatingUUID,
+				Increments:     testEC.Charges[1].Increments,
+				CompressFactor: 1}},
+		AccountSummary: testEC.AccountSummary,
+		Rating:         testEC.Rating,
+		Accounting:     testEC.Accounting,
+		RatingFilters:  testEC.RatingFilters,
+		Rates:          testEC.Rates,
+		Timings:        testEC.Timings,
+	}
+	ec.Merge(newEC)
+	if len(ec.Charges) != 2 ||
+		!reflect.DeepEqual(ec.Charges[1].TotalUsage(), newEC.Charges[0].TotalUsage()) ||
+		!reflect.DeepEqual(ec.Charges[1].TotalCost(), newEC.Charges[0].TotalCost()) {
+		t.Errorf("Unexpected EC after merge: %s", utils.ToJSON(ec))
+	}
+	newEC.Charges[0].CompressFactor = 1
+	ec.Merge(newEC)
+	if len(ec.Charges) != 2 ||
+		ec.Charges[1].CompressFactor != 2 ||
+		*ec.Charges[1].Usage() != time.Duration(1*time.Minute) || // only equal at charging interval level
+		*ec.Charges[1].TotalUsage() != time.Duration(2*time.Minute) {
+		t.Errorf("Unexpected EC after merge: %s", utils.ToJSON(ec))
+	}
+}

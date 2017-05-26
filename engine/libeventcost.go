@@ -104,6 +104,11 @@ func (cIl *ChargingInterval) Cost() float64 {
 	return *cIl.cost
 }
 
+func (cIl *ChargingInterval) TotalCost() float64 {
+	return utils.Round((cIl.Cost() * float64(cIl.CompressFactor)),
+		globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+}
+
 // Clone returns a new instance of ChargingInterval with independent data
 func (cIl *ChargingInterval) Clone() (cln *ChargingInterval) {
 	cln = new(ChargingInterval)

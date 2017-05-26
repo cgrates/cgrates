@@ -353,8 +353,7 @@ func (ec *EventCost) Merge(ecs ...*EventCost) {
 			ec.AppendChargingIntervalFromEventCost(newEC, cIlIdx)
 		}
 	}
-	ec.Usage = nil // Reset them
-	ec.Cost = nil
+	ec.ResetCounters()
 }
 
 // RemoveStaleReferences iterates through cached data and makes sure it is still referenced from Charging
