@@ -47,7 +47,7 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 		cIl := &ChargingInterval{CompressFactor: ts.CompressFactor}
 		rf := RatingMatchedFilters{"Subject": ts.MatchedSubject, "DestinationPrefix": ts.MatchedPrefix,
 			"DestinationID": ts.MatchedDestId, "RatingPlanID": ts.RatingPlanId}
-		cIl.RatingUUID = ec.ratingUUIDForRateInterval(ts.RateInterval, rf)
+		cIl.RatingID = ec.ratingIDForRateInterval(ts.RateInterval, rf)
 		if len(ts.Increments) != 0 {
 			cIl.Increments = make([]*ChargingIncrement, len(ts.Increments))
 		}
@@ -59,35 +59,35 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 			if incr.BalanceInfo == nil {
 				continue
 			}
-			//AccountingUUID
+			//AccountingID
 			if incr.BalanceInfo.Unit != nil {
 				// 2 balances work-around
 				ecUUID := utils.META_NONE // populate no matter what due to Unit not nil
 				if incr.BalanceInfo.Monetary != nil {
-					if uuid := ec.Accounting.GetUUIDWithSet(
+					if uuid := ec.Accounting.GetIDWithSet(
 						&BalanceCharge{
 							AccountID:   incr.BalanceInfo.AccountID,
 							BalanceUUID: incr.BalanceInfo.Monetary.UUID,
 							Units:       incr.Cost,
-							RatingUUID:  ec.ratingUUIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf),
+							RatingID:    ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf),
 						}); uuid != "" {
 						ecUUID = uuid
 					}
 				}
-				cIt.AccountingUUID = ec.Accounting.GetUUIDWithSet(
+				cIt.AccountingID = ec.Accounting.GetIDWithSet(
 					&BalanceCharge{
-						AccountID:       incr.BalanceInfo.AccountID,
-						BalanceUUID:     incr.BalanceInfo.Unit.UUID,
-						Units:           incr.BalanceInfo.Unit.Consumed,
-						RatingUUID:      ec.ratingUUIDForRateInterval(incr.BalanceInfo.Unit.RateInterval, rf),
-						ExtraChargeUUID: ecUUID})
+						AccountID:     incr.BalanceInfo.AccountID,
+						BalanceUUID:   incr.BalanceInfo.Unit.UUID,
+						Units:         incr.BalanceInfo.Unit.Consumed,
+						RatingID:      ec.ratingIDForRateInterval(incr.BalanceInfo.Unit.RateInterval, rf),
+						ExtraChargeID: ecUUID})
 			} else if incr.BalanceInfo.Monetary != nil { // Only monetary
-				cIt.AccountingUUID = ec.Accounting.GetUUIDWithSet(
+				cIt.AccountingID = ec.Accounting.GetIDWithSet(
 					&BalanceCharge{
 						AccountID:   incr.BalanceInfo.AccountID,
 						BalanceUUID: incr.BalanceInfo.Monetary.UUID,
 						Units:       incr.Cost,
-						RatingUUID:  ec.ratingUUIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf)})
+						RatingID:    ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf)})
 			}
 			cIl.Increments[j] = cIt
 		}
@@ -112,17 +112,17 @@ type EventCost struct {
 	Timings        ChargedTimings
 }
 
-func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval, rf RatingMatchedFilters) string {
+func (ec *EventCost) ratingIDForRateInterval(ri *RateInterval, rf RatingMatchedFilters) string {
 	if ri == nil || ri.Rating == nil {
 		return ""
 	}
 	var rfUUID string
 	if rf != nil {
-		rfUUID = ec.RatingFilters.GetUUIDWithSet(rf)
+		rfUUID = ec.RatingFilters.GetIDWithSet(rf)
 	}
 	var tmID string
 	if ri.Timing != nil {
-		tmID = ec.Timings.GetUUIDWithSet(
+		tmID = ec.Timings.GetIDWithSet(
 			&ChargedTiming{
 				Years:     ri.Timing.Years,
 				Months:    ri.Timing.Months,
@@ -132,35 +132,35 @@ func (ec *EventCost) ratingUUIDForRateInterval(ri *RateInterval, rf RatingMatche
 	}
 	var rtUUID string
 	if len(ri.Rating.Rates) != 0 {
-		rtUUID = ec.Rates.GetUUIDWithSet(ri.Rating.Rates)
+		rtUUID = ec.Rates.GetIDWithSet(ri.Rating.Rates)
 	}
-	return ec.Rating.GetUUIDWithSet(
+	return ec.Rating.GetIDWithSet(
 		&RatingUnit{
-			ConnectFee:        ri.Rating.ConnectFee,
-			RoundingMethod:    ri.Rating.RoundingMethod,
-			RoundingDecimals:  ri.Rating.RoundingDecimals,
-			MaxCost:           ri.Rating.MaxCost,
-			MaxCostStrategy:   ri.Rating.MaxCostStrategy,
-			TimingUUID:        tmID,
-			RatesUUID:         rtUUID,
-			RatingFiltersUUID: rfUUID})
+			ConnectFee:       ri.Rating.ConnectFee,
+			RoundingMethod:   ri.Rating.RoundingMethod,
+			RoundingDecimals: ri.Rating.RoundingDecimals,
+			MaxCost:          ri.Rating.MaxCost,
+			MaxCostStrategy:  ri.Rating.MaxCostStrategy,
+			TimingID:         tmID,
+			RatesID:          rtUUID,
+			RatingFiltersID:  rfUUID})
 }
 
-func (ec *EventCost) rateIntervalForRatingUUID(ratingUUID string) (ri *RateInterval) {
-	if ratingUUID == "" {
+func (ec *EventCost) rateIntervalForRatingID(ratingID string) (ri *RateInterval) {
+	if ratingID == "" {
 		return
 	}
-	cIlRU := ec.Rating[ratingUUID]
+	cIlRU := ec.Rating[ratingID]
 	ri = new(RateInterval)
 	ri.Rating = &RIRate{ConnectFee: cIlRU.ConnectFee,
 		RoundingMethod:   cIlRU.RoundingMethod,
 		RoundingDecimals: cIlRU.RoundingDecimals,
 		MaxCost:          cIlRU.MaxCost, MaxCostStrategy: cIlRU.MaxCostStrategy}
-	if cIlRU.RatesUUID != "" {
-		ri.Rating.Rates = ec.Rates[cIlRU.RatesUUID]
+	if cIlRU.RatesID != "" {
+		ri.Rating.Rates = ec.Rates[cIlRU.RatesID]
 	}
-	if cIlRU.TimingUUID != "" {
-		cIlTm := ec.Timings[cIlRU.TimingUUID]
+	if cIlRU.TimingID != "" {
+		cIlTm := ec.Timings[cIlRU.TimingID]
 		ri.Timing = &RITiming{Years: cIlTm.Years, Months: cIlTm.Months, MonthDays: cIlTm.MonthDays,
 			WeekDays: cIlTm.WeekDays, StartTime: cIlTm.StartTime}
 	}
@@ -263,36 +263,36 @@ func (ec *EventCost) AsCallCost() *CallCost {
 		ts.TimeStart = ec.StartTime.Add(*cIl.ecUsageIdx)
 		ts.TimeEnd = ts.TimeStart.Add(
 			time.Duration(cIl.Usage().Nanoseconds() * int64(cIl.CompressFactor)))
-		if cIl.RatingUUID != "" {
-			if ec.Rating[cIl.RatingUUID].RatingFiltersUUID != "" {
-				rfs := ec.RatingFilters[ec.Rating[cIl.RatingUUID].RatingFiltersUUID]
+		if cIl.RatingID != "" {
+			if ec.Rating[cIl.RatingID].RatingFiltersID != "" {
+				rfs := ec.RatingFilters[ec.Rating[cIl.RatingID].RatingFiltersID]
 				ts.MatchedSubject = rfs["Subject"].(string)
 				ts.MatchedPrefix = rfs["DestinationPrefix"].(string)
 				ts.MatchedDestId = rfs["DestinationID"].(string)
 				ts.RatingPlanId = rfs["RatingPlanID"].(string)
 			}
 		}
-		ts.RateInterval = ec.rateIntervalForRatingUUID(cIl.RatingUUID)
+		ts.RateInterval = ec.rateIntervalForRatingID(cIl.RatingID)
 		if len(cIl.Increments) != 0 {
 			ts.Increments = make(Increments, len(cIl.Increments))
 		}
 		for j, cInc := range cIl.Increments {
 			incr := &Increment{Duration: cInc.Usage, Cost: cInc.Cost, CompressFactor: cInc.CompressFactor}
-			if cInc.AccountingUUID != "" {
-				cBC := ec.Accounting[cInc.AccountingUUID]
+			if cInc.AccountingID != "" {
+				cBC := ec.Accounting[cInc.AccountingID]
 				incr.BalanceInfo = &DebitInfo{AccountID: cBC.AccountID}
-				if cBC.ExtraChargeUUID != "" { // have both monetary and data
+				if cBC.ExtraChargeID != "" { // have both monetary and data
 					// Work around, enforce logic with 2 balances for *voice/*monetary combination
 					// so we can stay compatible with CallCost
 					incr.BalanceInfo.Unit = &UnitInfo{UUID: cBC.BalanceUUID, Consumed: cBC.Units}
-					incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingUUID(cBC.RatingUUID)
-					if cBC.ExtraChargeUUID != utils.META_NONE {
-						cBC = ec.Accounting[cBC.ExtraChargeUUID] // overwrite original balance so we can process it in one place
+					incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
+					if cBC.ExtraChargeID != utils.META_NONE {
+						cBC = ec.Accounting[cBC.ExtraChargeID] // overwrite original balance so we can process it in one place
 					}
 				}
-				if cBC.ExtraChargeUUID != utils.META_NONE {
+				if cBC.ExtraChargeID != utils.META_NONE {
 					incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
-					incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingUUID(cBC.RatingUUID)
+					incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
 				}
 			}
 			ts.Increments[j] = incr
@@ -302,35 +302,35 @@ func (ec *EventCost) AsCallCost() *CallCost {
 	return cc
 }
 
-// ratingGetUUIDFomEventCost retrieves UUID based on data from another EventCost
-func (ec *EventCost) ratingGetUUIDFomEventCost(oEC *EventCost, oRatingUUID string) string {
-	if oRatingUUID == "" {
+// ratingGetIDFomEventCost retrieves UUID based on data from another EventCost
+func (ec *EventCost) ratingGetIDFomEventCost(oEC *EventCost, oRatingID string) string {
+	if oRatingID == "" {
 		return ""
 	}
-	oCIlRating := oEC.Rating[oRatingUUID].Clone() // clone so we don't influence the original data
-	oCIlRating.TimingUUID = ec.Timings.GetUUIDWithSet(oEC.Timings[oCIlRating.TimingUUID])
-	oCIlRating.RatingFiltersUUID = ec.RatingFilters.GetUUIDWithSet(oEC.RatingFilters[oCIlRating.RatingFiltersUUID])
-	oCIlRating.RatesUUID = ec.Rates.GetUUIDWithSet(oEC.Rates[oCIlRating.RatesUUID])
-	return ec.Rating.GetUUIDWithSet(oCIlRating)
+	oCIlRating := oEC.Rating[oRatingID].Clone() // clone so we don't influence the original data
+	oCIlRating.TimingID = ec.Timings.GetIDWithSet(oEC.Timings[oCIlRating.TimingID])
+	oCIlRating.RatingFiltersID = ec.RatingFilters.GetIDWithSet(oEC.RatingFilters[oCIlRating.RatingFiltersID])
+	oCIlRating.RatesID = ec.Rates.GetIDWithSet(oEC.Rates[oCIlRating.RatesID])
+	return ec.Rating.GetIDWithSet(oCIlRating)
 }
 
-// accountingGetUUIDFromEventCost retrieves UUID based on data from another EventCost
-func (ec *EventCost) accountingGetUUIDFromEventCost(oEC *EventCost, oAccountingUUID string) string {
-	if oAccountingUUID == "" || oAccountingUUID == utils.META_NONE {
+// accountingGetIDFromEventCost retrieves UUID based on data from another EventCost
+func (ec *EventCost) accountingGetIDFromEventCost(oEC *EventCost, oAccountingID string) string {
+	if oAccountingID == "" || oAccountingID == utils.META_NONE {
 		return ""
 	}
-	oBC := oEC.Accounting[oAccountingUUID].Clone()
-	oBC.RatingUUID = ec.ratingGetUUIDFomEventCost(oEC, oBC.RatingUUID)
-	oBC.ExtraChargeUUID = ec.accountingGetUUIDFromEventCost(oEC, oBC.ExtraChargeUUID)
-	return ec.Accounting.GetUUIDWithSet(oBC)
+	oBC := oEC.Accounting[oAccountingID].Clone()
+	oBC.RatingID = ec.ratingGetIDFomEventCost(oEC, oBC.RatingID)
+	oBC.ExtraChargeID = ec.accountingGetIDFromEventCost(oEC, oBC.ExtraChargeID)
+	return ec.Accounting.GetIDWithSet(oBC)
 }
 
 // appendCIl appends a ChargingInterval to existing chargers, no compression done
 func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 	cIl := oEC.Charges[cIlIdx]
-	cIl.RatingUUID = ec.ratingGetUUIDFomEventCost(oEC, cIl.RatingUUID)
+	cIl.RatingID = ec.ratingGetIDFomEventCost(oEC, cIl.RatingID)
 	for _, cIt := range cIl.Increments {
-		cIt.AccountingUUID = ec.accountingGetUUIDFromEventCost(oEC, cIt.AccountingUUID)
+		cIt.AccountingID = ec.accountingGetIDFromEventCost(oEC, cIt.AccountingID)
 	}
 	ec.Charges = append(ec.Charges, cIl)
 }
@@ -358,18 +358,18 @@ func (ec *EventCost) Merge(ecs ...*EventCost) {
 
 // RemoveStaleReferences iterates through cached data and makes sure it is still referenced from Charging
 func (ec *EventCost) RemoveStaleReferences() {
-	// RatingUUIDs
+	// RatingIDs
 	for key := range ec.Rating {
 		var keyUsed bool
 		for _, cIl := range ec.Charges {
-			if cIl.RatingUUID == key {
+			if cIl.RatingID == key {
 				keyUsed = true
 				break
 			}
 		}
 		if !keyUsed { // look also in accounting for references
 			for _, bc := range ec.Accounting {
-				if bc.RatingUUID == key {
+				if bc.RatingID == key {
 					keyUsed = true
 					break
 				}
@@ -383,7 +383,7 @@ func (ec *EventCost) RemoveStaleReferences() {
 		var keyUsed bool
 		for _, cIl := range ec.Charges {
 			for _, cIt := range cIl.Increments {
-				if cIt.AccountingUUID == key {
+				if cIt.AccountingID == key {
 					keyUsed = true
 					break
 				}
@@ -396,7 +396,7 @@ func (ec *EventCost) RemoveStaleReferences() {
 	for key := range ec.RatingFilters {
 		var keyUsed bool
 		for _, ru := range ec.Rating {
-			if ru.RatingFiltersUUID == key {
+			if ru.RatingFiltersID == key {
 				keyUsed = true
 				break
 			}
@@ -408,7 +408,7 @@ func (ec *EventCost) RemoveStaleReferences() {
 	for key := range ec.Rates {
 		var keyUsed bool
 		for _, ru := range ec.Rating {
-			if ru.RatesUUID == key {
+			if ru.RatesID == key {
 				keyUsed = true
 				break
 			}
@@ -420,7 +420,7 @@ func (ec *EventCost) RemoveStaleReferences() {
 	for key := range ec.Timings {
 		var keyUsed bool
 		for _, ru := range ec.Rating {
-			if ru.TimingUUID == key {
+			if ru.TimingID == key {
 				keyUsed = true
 				break
 			}
@@ -581,9 +581,9 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	}
 	// close surplus with missing cache
 	for _, cIl := range srplusEC.Charges {
-		cIl.RatingUUID = srplusEC.ratingGetUUIDFomEventCost(ec, cIl.RatingUUID)
+		cIl.RatingID = srplusEC.ratingGetIDFomEventCost(ec, cIl.RatingID)
 		for _, incr := range cIl.Increments {
-			incr.AccountingUUID = srplusEC.accountingGetUUIDFromEventCost(ec, incr.AccountingUUID)
+			incr.AccountingID = srplusEC.accountingGetIDFromEventCost(ec, incr.AccountingID)
 		}
 	}
 	ec.RemoveStaleReferences() // data should be transfered by now, can clean the old one

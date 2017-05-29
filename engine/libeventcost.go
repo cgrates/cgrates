@@ -26,7 +26,7 @@ import (
 // ChargingInterval represents one interval out of Usage providing charging info
 // eg: PEAK vs OFFPEAK
 type ChargingInterval struct {
-	RatingUUID     string               // reference to RatingUnit
+	RatingID       string               // reference to RatingUnit
 	Increments     []*ChargingIncrement // specific increments applied to this interval
 	CompressFactor int
 	usage          *time.Duration // cache usage computation for this interval
@@ -37,7 +37,7 @@ type ChargingInterval struct {
 
 // PartiallyEquals does not compare CompressFactor, usefull for Merge
 func (cIl *ChargingInterval) PartiallyEquals(oCIl *ChargingInterval) (equals bool) {
-	if equals = cIl.RatingUUID == oCIl.RatingUUID &&
+	if equals = cIl.RatingID == oCIl.RatingID &&
 		len(cIl.Increments) == len(oCIl.Increments); !equals {
 		return
 	}
@@ -112,7 +112,7 @@ func (cIl *ChargingInterval) TotalCost() float64 {
 // Clone returns a new instance of ChargingInterval with independent data
 func (cIl *ChargingInterval) Clone() (cln *ChargingInterval) {
 	cln = new(ChargingInterval)
-	cln.RatingUUID = cIl.RatingUUID
+	cln.RatingID = cIl.RatingID
 	cln.CompressFactor = cIl.CompressFactor
 	cln.Increments = make([]*ChargingIncrement, len(cIl.Increments))
 	for i, cIt := range cIl.Increments {
@@ -125,14 +125,14 @@ func (cIl *ChargingInterval) Clone() (cln *ChargingInterval) {
 type ChargingIncrement struct {
 	Usage          time.Duration
 	Cost           float64
-	AccountingUUID string
+	AccountingID   string
 	CompressFactor int
 }
 
 func (cIt *ChargingIncrement) Equals(oCIt *ChargingIncrement) bool {
 	return cIt.Usage == oCIt.Usage &&
 		cIt.Cost == oCIt.Cost &&
-		cIt.AccountingUUID == oCIt.AccountingUUID &&
+		cIt.AccountingID == oCIt.AccountingID &&
 		cIt.CompressFactor == oCIt.CompressFactor
 }
 
@@ -149,19 +149,19 @@ func (cIt *ChargingIncrement) TotalUsage() time.Duration {
 
 // BalanceCharge represents one unit charged to a balance
 type BalanceCharge struct {
-	AccountID       string  // keep reference for shared balances
-	BalanceUUID     string  // balance charged
-	RatingUUID      string  // special price applied on this balance
-	Units           float64 // number of units charged
-	ExtraChargeUUID string  // used in cases when paying *voice with *monetary
+	AccountID     string  // keep reference for shared balances
+	BalanceUUID   string  // balance charged
+	RatingID      string  // special price applied on this balance
+	Units         float64 // number of units charged
+	ExtraChargeID string  // used in cases when paying *voice with *monetary
 }
 
 func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 	return bc.AccountID == oBC.AccountID &&
 		bc.BalanceUUID == oBC.BalanceUUID &&
-		bc.RatingUUID == oBC.RatingUUID &&
+		bc.RatingID == oBC.RatingID &&
 		bc.Units == oBC.Units &&
-		bc.ExtraChargeUUID == oBC.ExtraChargeUUID
+		bc.ExtraChargeID == oBC.ExtraChargeID
 }
 
 func (bc *BalanceCharge) Clone() *BalanceCharge {
@@ -214,14 +214,14 @@ func (ct *ChargedTiming) Clone() (cln *ChargedTiming) {
 
 // RatingUnit represents one unit out of RatingPlan matching for an event
 type RatingUnit struct {
-	ConnectFee        float64
-	RoundingMethod    string
-	RoundingDecimals  int
-	MaxCost           float64
-	MaxCostStrategy   string
-	TimingUUID        string // This RatingUnit is bounded to specific timing profile
-	RatesUUID         string
-	RatingFiltersUUID string
+	ConnectFee       float64
+	RoundingMethod   string
+	RoundingDecimals int
+	MaxCost          float64
+	MaxCostStrategy  string
+	TimingID         string // This RatingUnit is bounded to specific timing profile
+	RatesID          string
+	RatingFiltersID  string
 }
 
 func (ru *RatingUnit) Equals(oRU *RatingUnit) bool {
@@ -230,9 +230,9 @@ func (ru *RatingUnit) Equals(oRU *RatingUnit) bool {
 		ru.RoundingDecimals == oRU.RoundingDecimals &&
 		ru.MaxCost == oRU.MaxCost &&
 		ru.MaxCostStrategy == oRU.MaxCostStrategy &&
-		ru.TimingUUID == oRU.TimingUUID &&
-		ru.RatesUUID == oRU.RatesUUID &&
-		ru.RatingFiltersUUID == oRU.RatingFiltersUUID
+		ru.TimingID == oRU.TimingID &&
+		ru.RatesID == oRU.RatesID &&
+		ru.RatingFiltersID == oRU.RatingFiltersID
 }
 
 func (ru *RatingUnit) Clone() (cln *RatingUnit) {
@@ -244,7 +244,7 @@ func (ru *RatingUnit) Clone() (cln *RatingUnit) {
 type RatingFilters map[string]RatingMatchedFilters // so we can define search methods
 
 // GetWithSet attempts to retrieve the UUID of a matching data or create a new one
-func (rfs RatingFilters) GetUUIDWithSet(rmf RatingMatchedFilters) string {
+func (rfs RatingFilters) GetIDWithSet(rmf RatingMatchedFilters) string {
 	if rmf == nil || len(rmf) == 0 {
 		return ""
 	}
@@ -269,8 +269,8 @@ func (rfs RatingFilters) Clone() (cln RatingFilters) {
 
 type Rating map[string]*RatingUnit
 
-// GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
-func (crus Rating) GetUUIDWithSet(cru *RatingUnit) string {
+// GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (crus Rating) GetIDWithSet(cru *RatingUnit) string {
 	if cru == nil {
 		return ""
 	}
@@ -295,8 +295,8 @@ func (crus Rating) Clone() (cln Rating) {
 
 type ChargedRates map[string]RateGroups
 
-// GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
-func (crs ChargedRates) GetUUIDWithSet(rg RateGroups) string {
+// GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (crs ChargedRates) GetIDWithSet(rg RateGroups) string {
 	if rg == nil || len(rg) == 0 {
 		return ""
 	}
@@ -321,8 +321,8 @@ func (crs ChargedRates) Clone() (cln ChargedRates) {
 
 type ChargedTimings map[string]*ChargedTiming
 
-// GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
-func (cts ChargedTimings) GetUUIDWithSet(ct *ChargedTiming) string {
+// GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (cts ChargedTimings) GetIDWithSet(ct *ChargedTiming) string {
 	if ct == nil {
 		return ""
 	}
@@ -347,8 +347,8 @@ func (cts ChargedTimings) Clone() (cln ChargedTimings) {
 
 type Accounting map[string]*BalanceCharge
 
-// GetUUIDWithSet attempts to retrieve the UUID of a matching data or create a new one
-func (cbs Accounting) GetUUIDWithSet(cb *BalanceCharge) string {
+// GetIDWithSet attempts to retrieve the UUID of a matching data or create a new one
+func (cbs Accounting) GetIDWithSet(cb *BalanceCharge) string {
 	if cb == nil {
 		return ""
 	}
