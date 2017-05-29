@@ -197,9 +197,9 @@ func (ec *EventCost) Clone() (cln *EventCost) {
 
 // Compute aggregates all the compute methods on EventCost
 func (ec *EventCost) Compute() {
-	ec.ComputeUsage()
+	ec.GetUsage()
 	ec.ComputeEventCostUsageIndexes()
-	ec.ComputeCost()
+	ec.GetCost()
 }
 
 // ResetCounters will reset all the computed cached values
@@ -214,7 +214,7 @@ func (ec *EventCost) ResetCounters() {
 }
 
 // ComputeCost iterates through Charges, computing EventCost.Cost
-func (ec *EventCost) ComputeCost() float64 {
+func (ec *EventCost) GetCost() float64 {
 	if ec.Cost == nil {
 		var cost float64
 		for _, ci := range ec.Charges {
@@ -227,7 +227,7 @@ func (ec *EventCost) ComputeCost() float64 {
 }
 
 // ComputeUsage iterates through Charges, computing EventCost.Usage
-func (ec *EventCost) ComputeUsage() time.Duration {
+func (ec *EventCost) GetUsage() time.Duration {
 	if ec.Usage == nil {
 		var usage time.Duration
 		for _, ci := range ec.Charges {
@@ -251,7 +251,7 @@ func (ec *EventCost) ComputeEventCostUsageIndexes() {
 
 func (ec *EventCost) AsCallCost() *CallCost {
 	cc := &CallCost{
-		Cost: ec.ComputeCost(), RatedUsage: ec.ComputeUsage().Seconds(),
+		Cost: ec.GetCost(), RatedUsage: ec.GetUsage().Seconds(),
 		AccountSummary: ec.AccountSummary}
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {
@@ -436,9 +436,9 @@ func (ec *EventCost) RemoveStaleReferences() {
 // returns the srplusEC as separate EventCost
 func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error) {
 	if ec.Usage == nil {
-		ec.ComputeUsage()
+		ec.GetUsage()
 	}
-	origECUsage := ec.ComputeUsage()
+	origECUsage := ec.GetUsage()
 	if atUsage >= *ec.Usage {
 		return // no trim
 	}
@@ -464,7 +464,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			ec.ComputeEventCostUsageIndexes()
 		}
 		if cIl.usage == nil {
-			ec.ComputeUsage()
+			ec.GetUsage()
 		}
 		if *cIl.ecUsageIdx+*cIl.TotalUsage() >= atUsage {
 			lastActiveCIlIdx = utils.IntPointer(i)
@@ -571,12 +571,12 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 		}
 	}
 	ec.ResetCounters()
-	if usage := ec.ComputeUsage(); usage < atUsage {
+	if usage := ec.GetUsage(); usage < atUsage {
 		return nil, errors.New("usage of EventCost smaller than requested")
 	}
 	srplusEC.ResetCounters()
-	srplusEC.StartTime = ec.StartTime.Add(ec.ComputeUsage())
-	if srplsUsage := srplusEC.ComputeUsage(); srplsUsage > origECUsage-atUsage {
+	srplusEC.StartTime = ec.StartTime.Add(ec.GetUsage())
+	if srplsUsage := srplusEC.GetUsage(); srplsUsage > origECUsage-atUsage {
 		return nil, errors.New("surplus EventCost too big")
 	}
 	// close surplus with missing cache
