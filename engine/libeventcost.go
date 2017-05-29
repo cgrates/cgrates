@@ -123,16 +123,16 @@ func (cIl *ChargingInterval) Clone() (cln *ChargingInterval) {
 
 // ChargingIncrement represents one unit charged inside an interval
 type ChargingIncrement struct {
-	Usage             time.Duration
-	Cost              float64
-	BalanceChargeUUID string
-	CompressFactor    int
+	Usage          time.Duration
+	Cost           float64
+	AccountingUUID string
+	CompressFactor int
 }
 
 func (cIt *ChargingIncrement) Equals(oCIt *ChargingIncrement) bool {
 	return cIt.Usage == oCIt.Usage &&
 		cIt.Cost == oCIt.Cost &&
-		cIt.BalanceChargeUUID == oCIt.BalanceChargeUUID &&
+		cIt.AccountingUUID == oCIt.AccountingUUID &&
 		cIt.CompressFactor == oCIt.CompressFactor
 }
 

@@ -35,28 +35,28 @@ var testEC = &EventCost{
 			RatingUUID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
 				&ChargingIncrement{
-					Usage:             time.Duration(0),
-					Cost:              0.1,
-					BalanceChargeUUID: "9bdad10",
-					CompressFactor:    1,
+					Usage:          time.Duration(0),
+					Cost:           0.1,
+					AccountingUUID: "9bdad10",
+					CompressFactor: 1,
 				},
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0,
-					BalanceChargeUUID: "3455b83",
-					CompressFactor:    10,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0,
+					AccountingUUID: "3455b83",
+					CompressFactor: 10,
 				},
 				&ChargingIncrement{
-					Usage:             time.Duration(10 * time.Second),
-					Cost:              0.01,
-					BalanceChargeUUID: "a012888",
-					CompressFactor:    2,
+					Usage:          time.Duration(10 * time.Second),
+					Cost:           0.01,
+					AccountingUUID: "a012888",
+					CompressFactor: 2,
 				},
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0.005,
-					BalanceChargeUUID: "44d6c02",
-					CompressFactor:    30,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0.005,
+					AccountingUUID: "44d6c02",
+					CompressFactor: 30,
 				},
 			},
 			CompressFactor: 1,
@@ -65,10 +65,10 @@ var testEC = &EventCost{
 			RatingUUID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0.01,
-					BalanceChargeUUID: "a012888",
-					CompressFactor:    60,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0.01,
+					AccountingUUID: "a012888",
+					CompressFactor: 60,
 				},
 			},
 			CompressFactor: 4,
@@ -399,22 +399,22 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
-						Usage:             time.Duration(0),
-						Cost:              0.1,
-						BalanceChargeUUID: "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
-						CompressFactor:    1,
+						Usage:          time.Duration(0),
+						Cost:           0.1,
+						AccountingUUID: "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
+						CompressFactor: 1,
 					},
 					&ChargingIncrement{
-						Usage:             time.Duration(1 * time.Second),
-						Cost:              0,
-						BalanceChargeUUID: "a555cde8-4bd0-408a-afbc-c3ba64888927",
-						CompressFactor:    30,
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0,
+						AccountingUUID: "a555cde8-4bd0-408a-afbc-c3ba64888927",
+						CompressFactor: 30,
 					},
 					&ChargingIncrement{
-						Usage:             time.Duration(1 * time.Second),
-						Cost:              0.005,
-						BalanceChargeUUID: "906bfd0f-035c-40a3-93a8-46f71627983e",
-						CompressFactor:    30,
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.005,
+						AccountingUUID: "906bfd0f-035c-40a3-93a8-46f71627983e",
+						CompressFactor: 30,
 					},
 				},
 				CompressFactor: 1,
@@ -426,10 +426,10 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
-						Usage:             time.Duration(1 * time.Second),
-						Cost:              0.01,
-						BalanceChargeUUID: "c890a899-df43-497a-9979-38492713f57b",
-						CompressFactor:    60,
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.01,
+						AccountingUUID: "c890a899-df43-497a-9979-38492713f57b",
+						CompressFactor: 60,
 					},
 				},
 				CompressFactor: 1,
@@ -580,17 +580,17 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 	}
 	// Compare to original timestamp
 	if !reflect.DeepEqual(cc.Timespans[0].Increments[2].BalanceInfo.Unit.RateInterval.Rating.Rates,
-		ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]) {
+		ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].AccountingUUID].RatingUUID].RatesUUID]) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(cc.Timespans[0].Increments[2].BalanceInfo.Unit.RateInterval.Rating.Rates),
-			utils.ToJSON(ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]))
+			utils.ToJSON(ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].AccountingUUID].RatingUUID].RatesUUID]))
 	}
 	// Compare to expected EC
-	if !reflect.DeepEqual(eEC.Rates[eEC.Rating[eEC.Accounting[eEC.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID],
-		ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]) {
+	if !reflect.DeepEqual(eEC.Rates[eEC.Rating[eEC.Accounting[eEC.Charges[0].Increments[2].AccountingUUID].RatingUUID].RatesUUID],
+		ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].AccountingUUID].RatingUUID].RatesUUID]) {
 		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eEC.Rates[eEC.Rating[eEC.Accounting[eEC.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]),
-			utils.ToJSON(ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].BalanceChargeUUID].RatingUUID].RatesUUID]))
+			utils.ToJSON(eEC.Rates[eEC.Rating[eEC.Accounting[eEC.Charges[0].Increments[2].AccountingUUID].RatingUUID].RatesUUID]),
+			utils.ToJSON(ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].AccountingUUID].RatingUUID].RatesUUID]))
 	}
 	if len(ec.Accounting) != len(eEC.Accounting) {
 		t.Errorf("Expecting: %+v, received: %+v", eEC, ec)
@@ -640,22 +640,22 @@ func TestECAsCallCost(t *testing.T) {
 				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
-						Usage:             time.Duration(0),
-						Cost:              0.1,
-						BalanceChargeUUID: "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
-						CompressFactor:    1,
+						Usage:          time.Duration(0),
+						Cost:           0.1,
+						AccountingUUID: "44e97dec-8a7e-43d0-8b0a-736d46b5613e",
+						CompressFactor: 1,
 					},
 					&ChargingIncrement{
-						Usage:             time.Duration(1 * time.Second),
-						Cost:              0,
-						BalanceChargeUUID: "a555cde8-4bd0-408a-afbc-c3ba64888927",
-						CompressFactor:    30,
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0,
+						AccountingUUID: "a555cde8-4bd0-408a-afbc-c3ba64888927",
+						CompressFactor: 30,
 					},
 					&ChargingIncrement{
-						Usage:             time.Duration(1 * time.Second),
-						Cost:              0.005,
-						BalanceChargeUUID: "906bfd0f-035c-40a3-93a8-46f71627983e",
-						CompressFactor:    30,
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.005,
+						AccountingUUID: "906bfd0f-035c-40a3-93a8-46f71627983e",
+						CompressFactor: 30,
 					},
 				},
 				CompressFactor: 1,
@@ -664,10 +664,10 @@ func TestECAsCallCost(t *testing.T) {
 				RatingUUID: "f2518464-68b8-42f4-acec-aef23d714314",
 				Increments: []*ChargingIncrement{
 					&ChargingIncrement{
-						Usage:             time.Duration(1 * time.Second),
-						Cost:              0.01,
-						BalanceChargeUUID: "c890a899-df43-497a-9979-38492713f57b",
-						CompressFactor:    60,
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.01,
+						AccountingUUID: "c890a899-df43-497a-9979-38492713f57b",
+						CompressFactor: 60,
 					},
 				},
 				CompressFactor: 1,
@@ -929,28 +929,28 @@ func TestECTrimMiddle1(t *testing.T) {
 			RatingUUID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
 				&ChargingIncrement{
-					Usage:             time.Duration(0),
-					Cost:              0.1,
-					BalanceChargeUUID: "9bdad10",
-					CompressFactor:    1,
+					Usage:          time.Duration(0),
+					Cost:           0.1,
+					AccountingUUID: "9bdad10",
+					CompressFactor: 1,
 				},
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0,
-					BalanceChargeUUID: "3455b83",
-					CompressFactor:    10,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0,
+					AccountingUUID: "3455b83",
+					CompressFactor: 10,
 				},
 				&ChargingIncrement{
-					Usage:             time.Duration(10 * time.Second),
-					Cost:              0.01,
-					BalanceChargeUUID: "a012888",
-					CompressFactor:    2,
+					Usage:          time.Duration(10 * time.Second),
+					Cost:           0.01,
+					AccountingUUID: "a012888",
+					CompressFactor: 2,
 				},
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0.005,
-					BalanceChargeUUID: "44d6c02",
-					CompressFactor:    30,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0.005,
+					AccountingUUID: "44d6c02",
+					CompressFactor: 30,
 				},
 			},
 			CompressFactor: 1,
@@ -959,10 +959,10 @@ func TestECTrimMiddle1(t *testing.T) {
 			RatingUUID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0.01,
-					BalanceChargeUUID: "a012888",
-					CompressFactor:    60,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0.01,
+					AccountingUUID: "a012888",
+					CompressFactor: 60,
 				},
 			},
 			CompressFactor: 2,
@@ -971,10 +971,10 @@ func TestECTrimMiddle1(t *testing.T) {
 			RatingUUID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0.01,
-					BalanceChargeUUID: "a012888",
-					CompressFactor:    10,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0.01,
+					AccountingUUID: "a012888",
+					CompressFactor: 10,
 				},
 			},
 			CompressFactor: 1,
@@ -986,10 +986,10 @@ func TestECTrimMiddle1(t *testing.T) {
 			RatingUUID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0.01,
-					BalanceChargeUUID: "a012888",
-					CompressFactor:    50,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0.01,
+					AccountingUUID: "a012888",
+					CompressFactor: 50,
 				},
 			},
 			CompressFactor: 1,
@@ -998,10 +998,10 @@ func TestECTrimMiddle1(t *testing.T) {
 			RatingUUID: "c1a5ab9",
 			Increments: []*ChargingIncrement{
 				&ChargingIncrement{
-					Usage:             time.Duration(1 * time.Second),
-					Cost:              0.01,
-					BalanceChargeUUID: "a012888",
-					CompressFactor:    60,
+					Usage:          time.Duration(1 * time.Second),
+					Cost:           0.01,
+					AccountingUUID: "a012888",
+					CompressFactor: 60,
 				},
 			},
 			CompressFactor: 1,

@@ -59,7 +59,7 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 			if incr.BalanceInfo == nil {
 				continue
 			}
-			//BalanceChargeUUID
+			//AccountingUUID
 			if incr.BalanceInfo.Unit != nil {
 				// 2 balances work-around
 				ecUUID := utils.META_NONE // populate no matter what due to Unit not nil
@@ -74,7 +74,7 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 						ecUUID = uuid
 					}
 				}
-				cIt.BalanceChargeUUID = ec.Accounting.GetUUIDWithSet(
+				cIt.AccountingUUID = ec.Accounting.GetUUIDWithSet(
 					&BalanceCharge{
 						AccountID:       incr.BalanceInfo.AccountID,
 						BalanceUUID:     incr.BalanceInfo.Unit.UUID,
@@ -82,7 +82,7 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 						RatingUUID:      ec.ratingUUIDForRateInterval(incr.BalanceInfo.Unit.RateInterval, rf),
 						ExtraChargeUUID: ecUUID})
 			} else if incr.BalanceInfo.Monetary != nil { // Only monetary
-				cIt.BalanceChargeUUID = ec.Accounting.GetUUIDWithSet(
+				cIt.AccountingUUID = ec.Accounting.GetUUIDWithSet(
 					&BalanceCharge{
 						AccountID:   incr.BalanceInfo.AccountID,
 						BalanceUUID: incr.BalanceInfo.Monetary.UUID,
@@ -278,8 +278,8 @@ func (ec *EventCost) AsCallCost() *CallCost {
 		}
 		for j, cInc := range cIl.Increments {
 			incr := &Increment{Duration: cInc.Usage, Cost: cInc.Cost, CompressFactor: cInc.CompressFactor}
-			if cInc.BalanceChargeUUID != "" {
-				cBC := ec.Accounting[cInc.BalanceChargeUUID]
+			if cInc.AccountingUUID != "" {
+				cBC := ec.Accounting[cInc.AccountingUUID]
 				incr.BalanceInfo = &DebitInfo{AccountID: cBC.AccountID}
 				if cBC.ExtraChargeUUID != "" { // have both monetary and data
 					// Work around, enforce logic with 2 balances for *voice/*monetary combination
@@ -315,11 +315,11 @@ func (ec *EventCost) ratingGetUUIDFomEventCost(oEC *EventCost, oRatingUUID strin
 }
 
 // accountingGetUUIDFromEventCost retrieves UUID based on data from another EventCost
-func (ec *EventCost) accountingGetUUIDFromEventCost(oEC *EventCost, oBalanceChargeUUID string) string {
-	if oBalanceChargeUUID == "" || oBalanceChargeUUID == utils.META_NONE {
+func (ec *EventCost) accountingGetUUIDFromEventCost(oEC *EventCost, oAccountingUUID string) string {
+	if oAccountingUUID == "" || oAccountingUUID == utils.META_NONE {
 		return ""
 	}
-	oBC := oEC.Accounting[oBalanceChargeUUID].Clone()
+	oBC := oEC.Accounting[oAccountingUUID].Clone()
 	oBC.RatingUUID = ec.ratingGetUUIDFomEventCost(oEC, oBC.RatingUUID)
 	oBC.ExtraChargeUUID = ec.accountingGetUUIDFromEventCost(oEC, oBC.ExtraChargeUUID)
 	return ec.Accounting.GetUUIDWithSet(oBC)
@@ -330,7 +330,7 @@ func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 	cIl := oEC.Charges[cIlIdx]
 	cIl.RatingUUID = ec.ratingGetUUIDFomEventCost(oEC, cIl.RatingUUID)
 	for _, cIt := range cIl.Increments {
-		cIt.BalanceChargeUUID = ec.accountingGetUUIDFromEventCost(oEC, cIt.BalanceChargeUUID)
+		cIt.AccountingUUID = ec.accountingGetUUIDFromEventCost(oEC, cIt.AccountingUUID)
 	}
 	ec.Charges = append(ec.Charges, cIl)
 }
@@ -383,7 +383,7 @@ func (ec *EventCost) RemoveStaleReferences() {
 		var keyUsed bool
 		for _, cIl := range ec.Charges {
 			for _, cIt := range cIl.Increments {
-				if cIt.BalanceChargeUUID == key {
+				if cIt.AccountingUUID == key {
 					keyUsed = true
 					break
 				}
@@ -583,7 +583,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	for _, cIl := range srplusEC.Charges {
 		cIl.RatingUUID = srplusEC.ratingGetUUIDFomEventCost(ec, cIl.RatingUUID)
 		for _, incr := range cIl.Increments {
-			incr.BalanceChargeUUID = srplusEC.accountingGetUUIDFromEventCost(ec, incr.BalanceChargeUUID)
+			incr.AccountingUUID = srplusEC.accountingGetUUIDFromEventCost(ec, incr.AccountingUUID)
 		}
 	}
 	ec.RemoveStaleReferences() // data should be transfered by now, can clean the old one

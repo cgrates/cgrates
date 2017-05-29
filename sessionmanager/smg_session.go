@@ -193,7 +193,6 @@ func (self *SMGSession) close(usage time.Duration) (err error) {
 // Attempts to refund a duration, error on failure
 // usage represents the real usage
 func (self *SMGSession) refund(usage time.Duration) (err error) {
-	utils.Logger.Debug(fmt.Sprintf("### refund, usage: %v", usage))
 	if self.EventCost == nil {
 		return
 	}
@@ -207,6 +206,7 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 	}
 
 	cc := srplsEC.AsCallCost()
+	utils.Logger.Debug(fmt.Sprintf("### cc: %s", utils.ToJSON(cc)))
 	var incrmts engine.Increments
 	for _, tmspn := range cc.Timespans {
 		for _, incr := range tmspn.Increments {
