@@ -412,10 +412,10 @@ func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
 					cgrID, s.RunID, aTime, err))
 				continue // Unanswered session
 			}
-			if err := s.close(aTime.Add(usage)); err != nil {
+			if err := s.close(usage); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", cgrID, s.RunID, err.Error()))
 			}
-			if err := s.saveOperations(cgrID); err != nil {
+			if err := s.storeSMCost(); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", cgrID, s.RunID, err.Error()))
 			}
 		}

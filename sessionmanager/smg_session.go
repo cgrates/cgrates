@@ -138,7 +138,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.CD.LoopIndex += 1
 	self.LastDebit = initialExtraDuration + ccDuration
 	self.TotalUsage += self.LastUsage
-	ec := engine.NewEventCostFromCallCost(self.CGRID, self.RunID)
+	ec := engine.NewEventCostFromCallCost(cc, self.CGRID, self.RunID)
 	if self.EventCost == nil {
 		self.EventCost = ec
 	} else {
@@ -166,28 +166,65 @@ func (self *SMGSession) disconnectSession(reason string) error {
 }
 
 // Session has ended, check debits and refund the extra charged duration
-func (self *SMGSession) close(endTime time.Time) (err error) {
+func (self *SMGSession) close(usage time.Duration) (err error) {
 	self.mux.Lock()
 	defer self.mux.Unlock()
-	if self.EventCost != nil { // We have had at least one cost calculation
-		chargedEndTime := self.EventCost.Charges[len(self.EventCost.Charges)-1].GetEndTime()
-		if endTime.After(chargedEndTime) { // we did not charge enough, make a manual debit here
-			extraDur := endTime.Sub(chargedEndTime)
-			if self.CD.LoopIndex > 0 {
-				self.CD.TimeStart = self.CD.TimeEnd
-			}
-			self.CD.TimeEnd = self.CD.TimeStart.Add(extraDur)
-			self.CD.DurationIndex += extraDur
-			cc := &engine.CallCost{}
-			if err = self.rals.Call("Responder.Debit", self.CD, cc); err == nil {
-				self.EventCost.Merge(
-					engine.NewEventCostFromCallCost(self.CGRID, self.RunID))
-			}
-		} else {
-			err = self.refund(chargedEndTime.Sub(endTime))
+	if self.EventCost == nil {
+		return
+	}
+	if notCharged := usage - self.EventCost.ComputeUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
+		if self.CD.LoopIndex > 0 {
+			self.CD.TimeStart = self.CD.TimeEnd
+		}
+		self.CD.TimeEnd = self.CD.TimeStart.Add(notCharged)
+		self.CD.DurationIndex += notCharged
+		cc := &engine.CallCost{}
+		if err = self.rals.Call("Responder.Debit", self.CD, cc); err == nil {
+			self.EventCost.Merge(
+				engine.NewEventCostFromCallCost(cc, self.CGRID, self.RunID))
+		}
+	} else if notCharged < 0 { // charged too much, try refund
+		err = self.refund(usage)
+	}
+
+	return
+}
+
+// Attempts to refund a duration, error on failure
+// usage represents the real usage
+func (self *SMGSession) refund(usage time.Duration) (err error) {
+	utils.Logger.Debug(fmt.Sprintf("### refund, usage: %v", usage))
+	if self.EventCost == nil {
+		return
+	}
+	srplsEC, err := self.EventCost.Trim(usage)
+	utils.Logger.Debug(fmt.Sprintf("### refund, usage: %v, srplsEc: %s, err: %v", usage, utils.ToJSON(srplsEC), err))
+	if err != nil {
+		return err
+	}
+	if srplsEC == nil {
+		return
+	}
+
+	cc := srplsEC.AsCallCost()
+	var incrmts engine.Increments
+	for _, tmspn := range cc.Timespans {
+		for _, incr := range tmspn.Increments {
+			incrmts = append(incrmts, incr)
 		}
 	}
-	return
+	cd := &engine.CallDescriptor{
+		Direction:   self.CD.Direction,
+		Category:    self.CD.Category,
+		Tenant:      self.CD.Tenant,
+		Subject:     self.CD.Subject,
+		Account:     self.CD.Account,
+		Destination: self.CD.Destination,
+		TOR:         self.CD.TOR,
+		Increments:  incrmts,
+	}
+	var reply string
+	return self.rals.Call("Responder.RefundIncrements", cd, &reply)
 }
 
 // storeSMCost will send the SMCost to CDRs for storing
@@ -215,71 +252,6 @@ func (self *SMGSession) storeSMCost() error {
 			return err
 		}
 	}
-	return nil
-}
-
-// Attempts to refund a duration, error on failure
-func (self *SMGSession) refund(refundDuration time.Duration) error {
-	if refundDuration == 0 { // Nothing to refund
-		return nil
-	}
-	firstCC := self.CallCosts[0] // use merged cc (from close function)
-	firstCC.Timespans.Decompress()
-	defer firstCC.Timespans.Compress()
-	var refundIncrements engine.Increments
-	for i := len(firstCC.Timespans) - 1; i >= 0; i-- {
-		ts := firstCC.Timespans[i]
-		tsDuration := ts.GetDuration()
-		if refundDuration <= tsDuration {
-
-			lastRefundedIncrementIndex := -1
-
-			for j := len(ts.Increments) - 1; j >= 0; j-- {
-				increment := ts.Increments[j]
-
-				if increment.Duration <= refundDuration {
-
-					refundIncrements = append(refundIncrements, increment)
-					refundDuration -= increment.Duration
-					lastRefundedIncrementIndex = j
-
-				} else {
-					break //increment duration is larger, cannot refund increment
-				}
-			}
-			if lastRefundedIncrementIndex == 0 {
-				firstCC.Timespans[i] = nil
-				firstCC.Timespans = firstCC.Timespans[:i]
-			} else {
-				ts.SplitByIncrement(lastRefundedIncrementIndex)
-				ts.Cost = ts.CalculateCost()
-			}
-			break // do not go to other timespans
-		} else {
-			refundIncrements = append(refundIncrements, ts.Increments...)
-			// remove the timespan entirely
-			firstCC.Timespans[i] = nil
-			firstCC.Timespans = firstCC.Timespans[:i]
-			// continue to the next timespan with what is left to refund
-			refundDuration -= tsDuration
-		}
-	}
-	// show only what was actualy refunded (stopped in timespan)
-	if len(refundIncrements) > 0 {
-		cd := firstCC.CreateCallDescriptor()
-		cd.Increments = refundIncrements
-		cd.CgrID = self.CD.CgrID
-		cd.RunID = self.CD.RunID
-		cd.Increments.Compress()
-		var response float64
-		err := self.rals.Call("Responder.RefundIncrements", cd, &response)
-		if err != nil {
-			return err
-		}
-	}
-	//firstCC.Cost -= refundIncrements.GetTotalCost() // use updateCost instead
-	firstCC.UpdateCost()
-	firstCC.UpdateRatedUsage()
 	return nil
 }
 
