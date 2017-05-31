@@ -8,17 +8,21 @@
 
 from_host    = '127.0.0.1'
 from_port    = '27017'
-from_db      = '10'
+from_db      = '11'
 from_auth_db = 'cgrates' # Auth db on source server
 from_user    = 'cgrates'
 from_pass    = ''
 
 to_host      = '127.0.0.1'
 to_port      = '27017'
-to_db        = '11'
+to_db        = '10'
 to_auth_db   = "cgrates" # Auth db on target server
 to_user      = 'cgrates'
 to_pass      = ''
+
+ignore_empty_cols = True
+# Do not migrate collections with 0 document count.
+# Works only if from/to is on same host.
 
 # Overwrite target collections flag.
 # Works only if from/to is on same host.
@@ -49,12 +53,15 @@ if from_host == to_host and from_port == to_port:
             i = 0
             for col in cols:
                 i += 1
-                print('Moving colection %s (%d of %d)...' % (col, i, len(cols)))
-                try:
-                    client.admin.command(OrderedDict([('renameCollection', from_db + '.' + col), ('to', to_db + '.' + col), ('dropTarget', drop_target)]))
-                except:
-                    e = sys.exc_info()[0]
-                    print(e)
+                if not ignore_empty_cols or (ignore_empty_cols and db[col].count() > 0):
+                    print('Moving collection %s (%d of %d)...' % (col, i, len(cols)))
+                    try:
+                        client.admin.command(OrderedDict([('renameCollection', from_db + '.' + col), ('to', to_db + '.' + col), ('dropTarget', drop_target)]))
+                    except:
+                        e = sys.exc_info()[0]
+                        print(e)
+                else:
+                    print('Skipping empty collection %s (%d of %d)...' % (col, i, len(cols)))
         # no collections found
         else:
             print('No collections in source database.')
