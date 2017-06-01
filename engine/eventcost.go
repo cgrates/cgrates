@@ -281,6 +281,20 @@ func (ec *EventCost) AsCallCost() *CallCost {
 			if cInc.AccountingID != "" {
 				cBC := ec.Accounting[cInc.AccountingID]
 				incr.BalanceInfo = &DebitInfo{AccountID: cBC.AccountID}
+				var balanceType string
+				if cBC.BalanceUUID != "" {
+					if ec.AccountSummary != nil {
+						for _, b := range ec.AccountSummary.BalanceSummaries {
+							if b.UUID == cBC.BalanceUUID {
+								balanceType = b.Type
+								break
+							}
+						}
+					}
+				}
+				if utils.IsSliceMember([]string{utils.VOICE, utils.DATA}, balanceType) && cBC.ExtraChargeID == "" {
+					cBC.ExtraChargeID = utils.META_NONE // mark the balance to be exported as Unit type
+				}
 				if cBC.ExtraChargeID != "" { // have both monetary and data
 					// Work around, enforce logic with 2 balances for *voice/*monetary combination
 					// so we can stay compatible with CallCost
@@ -386,6 +400,14 @@ func (ec *EventCost) RemoveStaleReferences() {
 				if cIt.AccountingID == key {
 					keyUsed = true
 					break
+				}
+			}
+			if !keyUsed {
+				for _, bCharge := range ec.Accounting {
+					if bCharge.ExtraChargeID == key {
+						keyUsed = true
+						break
+					}
 				}
 			}
 		}

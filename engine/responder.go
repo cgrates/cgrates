@@ -571,7 +571,6 @@ func (rs *Responder) Call(serviceMethod string, args interface{}, reply interfac
 	}
 	// construct the params
 	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return utils.ErrServerError

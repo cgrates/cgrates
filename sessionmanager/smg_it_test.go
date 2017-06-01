@@ -207,16 +207,14 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 	}
 }
 
-/*
-
 func TestSMGVoiceMixedRefund(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	}
-	t.Logf("Initial monetary: %f", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
-	t.Logf("Initial voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	//t.Logf("Initial monetary: %f", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	//t.Logf("Initial voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
@@ -276,8 +274,8 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eMoneyVal {
 		t.Errorf("Expected voice: %f, received voice : %f, expected money: %f, received money: %f", eVoiceVal, acnt.BalanceMap[utils.VOICE].GetTotalValue(), eMoneyVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	t.Logf("After monetary: %f", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
-	t.Logf("After voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	//t.Logf("After monetary: %f", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	//t.Logf("After voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 }
 
 func TestSMGVoiceLastUsed(t *testing.T) {
@@ -888,7 +886,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		utils.OriginIDPrefix: "12372",
 		utils.DIRECTION:      smgEv[utils.DIRECTION],
 		utils.ACCOUNT:        smgEv[utils.ACCOUNT],
-   		utils.SUBJECT:        smgEv[utils.SUBJECT],
+		utils.SUBJECT:        smgEv[utils.SUBJECT],
 		utils.DESTINATION:    smgEv[utils.DESTINATION],
 		utils.CATEGORY:       smgEv[utils.CATEGORY],
 		utils.TENANT:         smgEv[utils.TENANT],
@@ -937,4 +935,3 @@ func TestSMGVoiceSessionStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/

@@ -679,7 +679,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 
 // Converts the balance towards compressed information to be displayed
 func (b *Balance) AsBalanceSummary(typ string) *BalanceSummary {
-	bd := &BalanceSummary{ID: b.ID, Type: typ, Value: b.Value, Disabled: b.Disabled}
+	bd := &BalanceSummary{UUID: b.Uuid, ID: b.ID, Type: typ, Value: b.Value, Disabled: b.Disabled}
 	if bd.ID == "" {
 		bd.ID = b.Uuid
 	}
@@ -810,7 +810,8 @@ func (f ValueFactor) GetValue(tor string) float64 {
 
 // BalanceDigest represents compressed information about a balance
 type BalanceSummary struct {
-	ID       string // ID or UUID if not defined
+	UUID     string // Balance UUID
+	ID       string // Balance ID  if not defined
 	Type     string // *voice, *data, etc
 	Value    float64
 	Disabled bool

@@ -172,7 +172,7 @@ func (self *SMGSession) close(usage time.Duration) (err error) {
 	if self.EventCost == nil {
 		return
 	}
-	if notCharged := usage - self.EventCost.ComputeUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
+	if notCharged := usage - self.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
 		if self.CD.LoopIndex > 0 {
 			self.CD.TimeStart = self.CD.TimeEnd
 		}
@@ -197,7 +197,6 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 		return
 	}
 	srplsEC, err := self.EventCost.Trim(usage)
-	utils.Logger.Debug(fmt.Sprintf("### refund, usage: %v, srplsEc: %s, err: %v", usage, utils.ToJSON(srplsEC), err))
 	if err != nil {
 		return err
 	}
@@ -206,7 +205,6 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 	}
 
 	cc := srplsEC.AsCallCost()
-	utils.Logger.Debug(fmt.Sprintf("### cc: %s", utils.ToJSON(cc)))
 	var incrmts engine.Increments
 	for _, tmspn := range cc.Timespans {
 		for _, incr := range tmspn.Increments {
@@ -223,7 +221,7 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 		TOR:         self.CD.TOR,
 		Increments:  incrmts,
 	}
-	var reply string
+	var reply float64
 	return self.rals.Call("Responder.RefundIncrements", cd, &reply)
 }
 
