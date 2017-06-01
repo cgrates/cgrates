@@ -20,6 +20,7 @@ package sessionmanager
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"regexp"
 	"time"
 
@@ -32,6 +33,9 @@ import (
 
 func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv,
 	rlS rpcclient.RpcClientConnection, timezone string) (ksm *KamailioSessionManager, err error) {
+	if rlS != nil && reflect.ValueOf(rlS).IsNil() {
+		rlS = nil
+	}
 	ksm = &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, rlS: rlS,
 		timezone: timezone, conns: make(map[string]*kamevapi.KamEvapi), sessions: NewSessions()}
 	return
@@ -70,6 +74,7 @@ func (self *KamailioSessionManager) allocateResources(kev KamEvent) (err error) 
 	if self.rlS == nil {
 		return errors.New("no RLs connection")
 	}
+	fmt.Printf("In allocateResources, rls: %+v", self.rlS)
 	var ev map[string]interface{}
 	if ev, err = kev.AsMapStringIface(); err != nil {
 		return

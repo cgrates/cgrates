@@ -569,7 +569,6 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			srplsIncrement := lastIncrement.Clone()
 			srplsIncrement.CompressFactor = srplsIncrement.CompressFactor - laItCF
 			srplsIncrements = append([]*ChargingIncrement{srplsIncrement}, srplsIncrements...) // prepend the surplus out of compress
-			//lastIncrement.CompressFactor = laItCF
 		}
 	}
 
