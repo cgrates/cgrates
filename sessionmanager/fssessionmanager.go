@@ -86,12 +86,28 @@ func (sm *FSSessionManager) createHandlers() map[string][]func(string, string) {
 }
 
 // Sets the call timeout valid of starting of the call
-func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string, maxDur time.Duration) error {
+func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string, maxDur time.Duration, DestNr string) error {
 	// _, err := fsock.FS.SendApiCmd(fmt.Sprintf("sched_hangup +%d %s\n\n", int(maxDur.Seconds()), uuid))
-	_, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s execute_on_answer sched_hangup +%d alloted_timeout\n\n", uuid, int(maxDur.Seconds())))
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send sched_hangup command to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
-		return err
+    if len(sm.cfg.EmptyBalanceContext) != 0 {
+        _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s execute_on_answer sched_transfer +%d %s XML %s\n\n", uuid, int(maxDur.Seconds()), DestNr, sm.cfg.EmptyBalanceContext))
+        if err != nil {
+            utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not transfer the call to empty balance context, error: <%s>, connId: %s", err.Error(), connId))
+            return err
+        }
+        return nil
+    }  else if len(sm.cfg.EmptyBalanceAnnFile) != 0 {
+            if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("sched_broadcast +%d %s playback!manager_request::%s aleg\n\n", int(maxDur.Seconds()), uuid, sm.cfg.EmptyBalanceAnnFile)); err != nil {
+            utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send uuid_broadcast to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
+            return err
+        }
+        return nil
+    } else {
+        _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s execute_on_answer sched_hangup +%d alloted_timeout\n\n", uuid, int(maxDur.Seconds())))
+        if err != nil {
+            utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send sched_hangup command to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
+            return err
+        }
+	    return nil
 	}
 	return nil
 }
@@ -149,7 +165,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
 				return
 			}
-			sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
+			sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur, ev.GetCallDestNr(utils.META_DEFAULT))
 		}
 	}
 	// ComputeLcr
