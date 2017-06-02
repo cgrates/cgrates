@@ -192,7 +192,7 @@ func (cc *CallCost) Round() {
 			continue // safe check
 		}
 		inc := ts.Increments[0]
-		if inc.BalanceInfo.Monetary == nil || inc.Cost == 0 {
+		if inc.BalanceInfo == nil || inc.BalanceInfo.Monetary == nil || inc.Cost == 0 {
 			// this is a unit paid timespan, nothing to round
 			continue
 		}
