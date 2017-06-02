@@ -839,6 +839,9 @@ func (cd *CallDescriptor) RefundIncrements() (err error) {
 	cd.Increments.Decompress()
 	accMap := make(utils.StringMap)
 	for _, increment := range cd.Increments {
+		if increment.BalanceInfo == nil {
+			continue
+		}
 		if increment.BalanceInfo.Monetary != nil || increment.BalanceInfo.Unit != nil {
 			accMap[utils.ACCOUNT_PREFIX+increment.BalanceInfo.AccountID] = true
 		}
