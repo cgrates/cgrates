@@ -85,6 +85,24 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
 		StartTime: utils.ASAP,
 		EndTime:   "",
 	}
+	tpr.timings[utils.MetaEveryMinute] = &utils.TPTiming{
+		ID:        utils.MetaEveryMinute,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: utils.MetaEveryMinute,
+		EndTime:   "",
+	}
+	tpr.timings[utils.MetaHourly] = &utils.TPTiming{
+		ID:        utils.MetaHourly,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: utils.MetaHourly,
+		EndTime:   "",
+	}
 	return tpr
 }
 

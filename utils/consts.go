@@ -370,4 +370,6 @@ const (
 	MetaFileCSV                  = "*file_csv"
 	MetaFileFWV                  = "*file_fwv"
 	Accounts                     = "Accounts"
+	MetaEveryMinute              = "*every_minute"
+	MetaHourly                   = "*hourly"
 )

@@ -348,6 +348,23 @@ func TestRateIntervalCronEmpty(t *testing.T) {
 	}
 }
 
+func TestRITimingCronEveryX(t *testing.T) {
+	rit := &RITiming{
+		StartTime: utils.MetaEveryMinute,
+	}
+	eCronStr := "0 * * * * * *"
+	if cronStr := rit.CronString(); cronStr != eCronStr {
+		t.Errorf("Expecting: <%s>, received: <%s>", eCronStr, cronStr)
+	}
+	rit = &RITiming{
+		StartTime: utils.MetaHourly,
+	}
+	eCronStr = "0 0 * * * * *"
+	if cronStr := rit.CronString(); cronStr != eCronStr {
+		t.Errorf("Expecting: <%s>, received: <%s>", eCronStr, cronStr)
+	}
+}
+
 func TestRateIntervalCost(t *testing.T) {
 	ri := &RateInterval{
 		Rating: &RIRate{
