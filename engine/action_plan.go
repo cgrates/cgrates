@@ -95,15 +95,7 @@ func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 	if len(i.Timing.Months) > 0 && len(i.Timing.MonthDays) == 0 {
 		i.Timing.MonthDays = append(i.Timing.MonthDays, 1)
 	}
-
-	if i.Timing.StartTime == utils.MINUTE {
-		at.stCache = cronexpr.MustParse("0 * * * * * *").Next(now)
-	} else if i.Timing.StartTime == utils.HOUR {
-		at.stCache = cronexpr.MustParse("0 0 * * * * *").Next(now)
-	} else {
-		at.stCache = cronexpr.MustParse(i.Timing.CronString()).Next(now)
-	}
-
+	at.stCache = cronexpr.MustParse(i.Timing.CronString()).Next(now)
 	return at.stCache
 }
 

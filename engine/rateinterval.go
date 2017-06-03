@@ -53,9 +53,14 @@ func (rit *RITiming) CronString() string {
 		return rit.cronString
 	}
 	var sec, min, hour, monthday, month, weekday, year string
-	if len(rit.StartTime) == 0 {
+	switch rit.StartTime {
+	case "":
 		hour, min, sec = "*", "*", "*"
-	} else {
+	case utils.MetaEveryMinute:
+		hour, min, sec = "*", "*", "0"
+	case utils.MetaHourly:
+		hour, min, sec = "*", "0", "0"
+	default:
 		hms := strings.Split(rit.StartTime, ":")
 		if len(hms) == 3 {
 			hour, min, sec = hms[0], hms[1], hms[2]
