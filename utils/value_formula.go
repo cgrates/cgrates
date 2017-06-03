@@ -102,5 +102,21 @@ func incrementalFormula(params map[string]interface{}) float64 {
 			return units / DaysInYear(now.Year())
 		}
 	}
+	if increment == "hour" {
+		if interval == "day" {
+			return units / 24
+		}
+		if interval == "month" {
+			return units / ( DaysInMonth(now.Year(), now.Month()) * 24 )
+		}
+		if interval == "year" {
+			return units / ( DaysInYear(now.Year()) * 24 )
+		}
+	}
+	if increment == "minute" {
+		if interval == "hour" {
+			return units / 60
+		}
+	}
 	return 0.0
 }

@@ -108,6 +108,8 @@ const (
 	UNLIMITED                     = "*unlimited"
 	ZERO                          = "*zero"
 	ASAP                          = "*asap"
+	MINUTE                        = "*minute"
+	HOUR                          = "*hour"
 	USERS                         = "*users"
 	COMMENT_CHAR                  = '#'
 	CSV_SEP                       = ','
