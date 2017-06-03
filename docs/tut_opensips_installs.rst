@@ -6,7 +6,7 @@ As operating system we have choosen Debian Jessie, since all the software compon
 OpenSIPS_
 ---------
 
-We got OpenSIPS_ installed via following commands:
+We got OpenSIPS_ (2.2.x) installed via following commands:
 ::
 
  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 049AD65B
