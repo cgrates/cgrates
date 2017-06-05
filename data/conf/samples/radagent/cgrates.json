@@ -81,8 +81,8 @@
 		{
 			"id": "KamailioAccountingStart",
 			"dry_run": false,
-			"request_filter": "Service-Type(Sip-Session);Sip-Method(Invite)",
-			"flags": [],
+			"request_filter": "*radcode(4);Service-Type(Sip-Session);Sip-Method(Invite)",
+			"flags": ["*radacct_start"], // flag accounting start since we have no Acct-Status-Type in request
 			"continue_on_success": false,
 			"append_reply": true,
 			"request_fields":[	
@@ -94,8 +94,8 @@
 		{
 			"id": "KamailioAccountingStop",
 			"dry_run": false,
-			"request_filter": "Service-Type(Sip-Session);Sip-Method(Bye)",
-			"flags": [],
+			"request_filter": "*radcode(4)Service-Type(Sip-Session);Sip-Method(Bye)",
+			"flags": ["*radacct_stop"],
 			"continue_on_success": false,
 			"append_reply": true,
 			"request_fields":[	

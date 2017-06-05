@@ -19,13 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
-
-/*
-Various RADIUS helpers here
-*/
 
 func radPassesFieldFilter(pkt *radigo.Packet, fieldFilter *utils.RSRField, processorVars map[string]string) (pass bool) {
 	if fieldFilter == nil {
@@ -33,9 +31,25 @@ func radPassesFieldFilter(pkt *radigo.Packet, fieldFilter *utils.RSRField, proce
 	}
 	if val, hasIt := processorVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
 		if fieldFilter.FilterPasses(val) {
-			return true
+			pass = true
 		}
-		return false
+		return
 	}
-	return
+	splt := strings.Split(fieldFilter.Id, "/")
+	var attrName, vendorName string
+	if len(splt) > 1 {
+		vendorName, attrName = splt[0], splt[1]
+	} else {
+		attrName = splt[0]
+	}
+	avps := pkt.AttributesWithName(attrName, vendorName)
+	if len(avps) == 0 { // no attribute found, filter not passing
+		return
+	}
+	for _, avp := range avps { // they all need to match the filter
+		if !fieldFilter.FilterPasses(avp.StringValue()) {
+			return
+		}
+	}
+	return true
 }

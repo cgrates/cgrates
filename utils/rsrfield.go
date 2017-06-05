@@ -88,6 +88,14 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 	return rsrField, nil
 }
 
+func NewRSRFieldMustCompile(fldStr string) (rsrFld *RSRField) {
+	var err error
+	if rsrFld, err = NewRSRField(fldStr); err != nil {
+		return nil
+	}
+	return
+}
+
 type RSRField struct {
 	Id          string             // Identifier
 	Rules       string             // Rules container holding the string rules to be able to restore it after DB
