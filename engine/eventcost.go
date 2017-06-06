@@ -277,10 +277,10 @@ func (ec *EventCost) AsCallCost() *CallCost {
 			ts.Increments = make(Increments, len(cIl.Increments))
 		}
 		for j, cInc := range cIl.Increments {
-			incr := &Increment{Duration: cInc.Usage, Cost: cInc.Cost, CompressFactor: cInc.CompressFactor}
+			incr := &Increment{Duration: cInc.Usage, Cost: cInc.Cost, CompressFactor: cInc.CompressFactor, BalanceInfo: new(DebitInfo)}
 			if cInc.AccountingID != "" {
 				cBC := ec.Accounting[cInc.AccountingID]
-				incr.BalanceInfo = &DebitInfo{AccountID: cBC.AccountID}
+				incr.BalanceInfo.AccountID = cBC.AccountID
 				var balanceType string
 				if cBC.BalanceUUID != "" {
 					if ec.AccountSummary != nil {
