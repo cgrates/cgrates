@@ -56,7 +56,6 @@ END-VENDOR      Cisco
 
 func init() {
 	dictRad = radigo.RFC2865Dictionary()
-	// Load some VSA for our tests
 	dictRad.ParseFromReader(strings.NewReader(freeRADIUSDocDictSample))
 	coder = radigo.NewCoder()
 }
@@ -69,38 +68,35 @@ func TestRadPassesFieldFilter(t *testing.T) {
 	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
 		t.Error(err)
 	}
-	//ftr :=
 	if !radPassesFieldFilter(pkt, nil, nil) {
 		t.Error("not passing empty filter")
 	}
-	if !radPassesFieldFilter(pkt,
-		utils.NewRSRFieldMustCompile("User-Name(flopsy)"), nil) {
+	if !radPassesFieldFilter(pkt, nil,
+		utils.NewRSRFieldMustCompile("User-Name(flopsy)")) {
 		t.Error("not passing valid filter")
 	}
-	if radPassesFieldFilter(pkt,
-		utils.NewRSRFieldMustCompile("User-Name(notmatching)"), nil) {
+	if radPassesFieldFilter(pkt, nil,
+		utils.NewRSRFieldMustCompile("User-Name(notmatching)")) {
 		t.Error("passing invalid filter value")
 	}
-	if !radPassesFieldFilter(pkt,
-		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(CGR1)"), nil) {
+	if !radPassesFieldFilter(pkt, nil,
+		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(CGR1)")) {
 		t.Error("not passing valid filter")
 	}
-	if radPassesFieldFilter(pkt,
-		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(notmatching)"), nil) {
+	if radPassesFieldFilter(pkt, nil,
+		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(notmatching)")) {
 		t.Error("passing invalid filter value")
 	}
-	if !radPassesFieldFilter(pkt,
-		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(4)", MetaRadReqCode)),
-		map[string]string{MetaRadReqCode: "4"}) {
+	if !radPassesFieldFilter(pkt, map[string]string{MetaRadReqCode: "4"},
+		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(4)", MetaRadReqCode))) {
 		t.Error("not passing valid filter")
 	}
-	if radPassesFieldFilter(pkt,
-		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(4)", MetaRadReqCode)),
-		map[string]string{MetaRadReqCode: "5"}) {
+	if radPassesFieldFilter(pkt, map[string]string{MetaRadReqCode: "5"},
+		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(4)", MetaRadReqCode))) {
 		t.Error("passing invalid filter")
 	}
-	if radPassesFieldFilter(pkt,
-		utils.NewRSRFieldMustCompile("UnknownField(notmatching)"), nil) {
+	if radPassesFieldFilter(pkt, nil,
+		utils.NewRSRFieldMustCompile("UnknownField(notmatching)")) {
 		t.Error("passing invalid filter value")
 	}
 }

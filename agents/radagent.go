@@ -37,6 +37,7 @@ const (
 	MetaRadAcctStop   = "*radAcctStop"
 	MetaRadAcctEvent  = "*radAcctEvent"
 	MetaCGRMaxUsage   = "*cgrMaxUsage"
+	EvRadiusReq       = "RADIUS_REQ"
 )
 
 func NewRadiusAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection) (ra *RadiusAgent, err error) {
@@ -138,7 +139,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	req *radigo.Packet, processorVars map[string]string, reply *radigo.Packet) (processed bool, err error) {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
-		if passes := radPassesFieldFilter(req, fldFilter, processorVars); !passes {
+		if !radPassesFieldFilter(req, processorVars, fldFilter) {
 			passesAllFilters = false
 		}
 	}
