@@ -19,6 +19,8 @@ package agents
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -27,8 +29,14 @@ import (
 )
 
 const (
-	MetaRadReqCode   = "*req_code"
-	MetaRadReplyCode = "*reply_code"
+	MetaRadReqCode    = "*radReqCode"
+	MetaRadReplyCode  = "*radReplyCode"
+	MetaRadAuth       = "*radAuth"
+	MetaRadAcctStart  = "*radAcctStart"
+	MetaRadAcctUpdate = "*radAcctUpdate"
+	MetaRadAcctStop   = "*radAcctStop"
+	MetaRadAcctEvent  = "*radAcctEvent"
+	MetaCGRMaxUsage   = "*cgrMaxUsage"
 )
 
 func NewRadiusAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection) (ra *RadiusAgent, err error) {
@@ -39,10 +47,14 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection)
 		}
 	}
 	ra = &RadiusAgent{cgrCfg: cgrCfg, smg: smg}
-	ra.rsAuth = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet, cgrCfg.RadiusAgentCfg().ListenAuth, cgrCfg.RadiusAgentCfg().ClientSecrets, dicts,
-		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){radigo.AccessRequest: ra.handleAuth}, nil)
-	ra.rsAcct = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet, cgrCfg.RadiusAgentCfg().ListenAcct, cgrCfg.RadiusAgentCfg().ClientSecrets, dicts,
-		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){radigo.AccountingRequest: ra.handleAcct}, nil)
+	ra.rsAuth = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
+		cgrCfg.RadiusAgentCfg().ListenAuth, cgrCfg.RadiusAgentCfg().ClientSecrets, dicts,
+		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
+			radigo.AccessRequest: ra.handleAuth}, nil)
+	ra.rsAcct = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
+		cgrCfg.RadiusAgentCfg().ListenAcct, cgrCfg.RadiusAgentCfg().ClientSecrets, dicts,
+		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
+			radigo.AccountingRequest: ra.handleAcct}, nil)
 	return
 
 }
@@ -59,7 +71,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	req.SetAVPValues() // populate string values in AVPs
 	utils.Logger.Debug(fmt.Sprintf("RadiusAgent handleAuth, received request: %+v", req))
 	procVars := map[string]string{
-		MetaRadReqCode: "4",
+		MetaRadAuth: "true",
 	}
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
@@ -88,8 +100,16 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
 	req.SetAVPValues() // populate string values in AVPs
 	utils.Logger.Debug(fmt.Sprintf("Received request: %s", utils.ToJSON(req)))
-	procVars := map[string]string{
-		MetaRadReqCode: "4",
+	procVars := make(map[string]string)
+	if avps := req.AttributesWithName("Acct-Status-Type", ""); len(avps) != 0 { // populate accounting type
+		switch avps[0].StringValue() { // first AVP found will give out the type of accounting
+		case "Start":
+			procVars[MetaRadAcctStart] = "true"
+		case "Interim-Update":
+			procVars[MetaRadAcctUpdate] = "true"
+		case "Stop":
+			procVars[MetaRadAcctStop] = "true"
+		}
 	}
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
@@ -125,7 +145,43 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	if !passesAllFilters { // Not going with this processor further
 		return false, nil
 	}
-	return
+	for k, v := range reqProcessor.Flags { // update processorVars with flags from processor
+		processorVars[k] = strconv.FormatBool(v)
+	}
+	smgEv, err := radReqAsSMGEvent(req, processorVars, reqProcessor.RequestFields, reqProcessor.Flags)
+	if err != nil {
+		return false, err
+	}
+
+	var maxUsage time.Duration
+	if processorVars[MetaRadReqCode] == "3" { // auth attempt, make sure that MaxUsage is enough
+		if err = ra.smg.Call("SMGenericV2.GetMaxUsage", smgEv, &maxUsage); err != nil {
+			return
+		}
+		if reqUsage, has := smgEv[utils.USAGE]; !has { // usage was not requested, decide based on 0
+			if maxUsage == 0 {
+				reply.Code = radigo.AccessReject
+			}
+		} else if reqUsage.(time.Duration) < maxUsage {
+			reply.Code = radigo.AccessReject
+		}
+	} else if _, has := processorVars[MetaRadAcctStart]; has {
+		err = ra.smg.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage)
+	} else if _, has := processorVars[MetaRadAcctUpdate]; has {
+		err = ra.smg.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage)
+	} else if _, has := processorVars[MetaRadAcctStop]; has {
+		var rpl string
+		err = ra.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
+	}
+	if err != nil {
+		return false, err
+	}
+
+	processorVars[MetaCGRMaxUsage] = strconv.Itoa(int(maxUsage))
+	if err := radReplyAppendAttributes(reply, processorVars, reqProcessor.ReplyFields, reqProcessor.Flags); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (ra *RadiusAgent) ListenAndServe() (err error) {

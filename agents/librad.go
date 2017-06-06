@@ -21,6 +21,8 @@ package agents
 import (
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -52,4 +54,16 @@ func radPassesFieldFilter(pkt *radigo.Packet, fieldFilter *utils.RSRField, proce
 		}
 	}
 	return true
+}
+
+// radPktAsSMGEvent converts a RADIUS packet into SMGEvent
+func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string,
+	tplFlds []*config.CfgCdrField, procFlags utils.StringMap) (smgEv sessionmanager.SMGenericEvent, err error) {
+	return
+}
+
+// radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
+func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]string,
+	tplFlds []*config.CfgCdrField, procFlags utils.StringMap) (err error) {
+	return
 }

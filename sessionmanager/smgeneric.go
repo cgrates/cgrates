@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -1016,7 +1015,6 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMetho
 }
 
 func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) error {
-	*maxUsage = 0 // Bug in OpenSIPS, remove in the future
 	maxUsageDur, err := smg.GetMaxUsage(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -1026,6 +1024,16 @@ func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection, ev 
 	} else {
 		*maxUsage = maxUsageDur.Seconds()
 	}
+	return nil
+}
+
+// BiRPCV2GetMaxUsage returns the maximum usage as duration/int64
+func (smg *SMGeneric) BiRPCV2GetMaxUsage(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *time.Duration) error {
+	maxUsageDur, err := smg.GetMaxUsage(ev)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*maxUsage = maxUsageDur
 	return nil
 }
 
@@ -1052,6 +1060,19 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 	return
 }
 
+// BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
+func (smg *SMGeneric) BiRPCV2InitiateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *time.Duration) (err error) {
+	var minMaxUsage time.Duration
+	if minMaxUsage, err = smg.InitiateSession(ev, clnt); err != nil {
+		if err != rpcclient.ErrSessionNotFound {
+			err = utils.NewErrServerError(err)
+		}
+	} else {
+		*maxUsage = minMaxUsage
+	}
+	return
+}
+
 // Interim updates, returns remaining duration from the RALs
 func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) (err error) {
 	var minMaxUsage time.Duration
@@ -1061,6 +1082,19 @@ func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection, e
 		}
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
+	}
+	return
+}
+
+// BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
+func (smg *SMGeneric) BiRPCV2UpdateSession(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *time.Duration) (err error) {
+	var minMaxUsage time.Duration
+	if minMaxUsage, err = smg.UpdateSession(ev, clnt); err != nil {
+		if err != rpcclient.ErrSessionNotFound {
+			err = utils.NewErrServerError(err)
+		}
+	} else {
+		*maxUsage = minMaxUsage
 	}
 	return
 }
@@ -1172,18 +1206,6 @@ func (smg *SMGeneric) BiRPCV1SetPassiveSessions(clnt rpcclient.RpcClientConnecti
 		*reply = utils.OK
 	}
 	return
-}
-
-// BiRPCV1SetGZIPpedPassiveSessions is used to handle GZIP compressed arguments to BiRPCV1SetPassiveSessions
-// eg: if CallCosts are too big, sending them over network could introduce latency
-func (smg *SMGeneric) BiRPCV1SetGZIPpedPassiveSessions(clnt rpcclient.RpcClientConnection, args []byte, reply *string) (err error) {
-	var argsSetPSS ArgsSetPassiveSessions
-	if dst, err := utils.GUnZIPContent(args); err != nil {
-		return err
-	} else if err := json.Unmarshal(dst, &argsSetPSS); err != nil {
-		return err
-	}
-	return smg.BiRPCV1SetPassiveSessions(clnt, argsSetPSS, reply)
 }
 
 type ArgsReplicateSessions struct {

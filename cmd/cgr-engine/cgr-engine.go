@@ -167,6 +167,7 @@ func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRate
 	// Register RPC handler
 	smgRpc := v1.NewSMGenericV1(sm)
 	server.RpcRegister(smgRpc)
+	server.RpcRegister(&v2.SMGenericV2{*smgRpc})
 	// Register BiRpc handlers
 	if cfg.SmGenericConfig.ListenBijson != "" {
 		smgBiRpc := v1.NewSMGenericBiRpcV1(sm)

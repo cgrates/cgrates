@@ -27,79 +27,75 @@ import (
 )
 
 func NewSMGenericV1(sm *sessionmanager.SMGeneric) *SMGenericV1 {
-	return &SMGenericV1{sm: sm}
+	return &SMGenericV1{SMG: sm}
 }
 
 // Exports RPC from SMGeneric
 type SMGenericV1 struct {
-	sm *sessionmanager.SMGeneric
+	SMG *sessionmanager.SMGeneric
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	return self.sm.BiRPCV1GetMaxUsage(nil, ev, maxUsage)
+	return self.SMG.BiRPCV1GetMaxUsage(nil, ev, maxUsage)
 }
 
 // Returns list of suppliers which can be used for the request
 func (self *SMGenericV1) GetLCRSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	return self.sm.BiRPCV1GetLCRSuppliers(nil, ev, suppliers)
+	return self.SMG.BiRPCV1GetLCRSuppliers(nil, ev, suppliers)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
 func (self *SMGenericV1) InitiateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	return self.sm.BiRPCV1InitiateSession(nil, ev, maxUsage)
+	return self.SMG.BiRPCV1InitiateSession(nil, ev, maxUsage)
 }
 
 // Interim updates, returns remaining duration from the rater
 func (self *SMGenericV1) UpdateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	return self.sm.BiRPCV1UpdateSession(nil, ev, maxUsage)
+	return self.SMG.BiRPCV1UpdateSession(nil, ev, maxUsage)
 }
 
 // Called on session end, should stop debit loop
 func (self *SMGenericV1) TerminateSession(ev sessionmanager.SMGenericEvent, reply *string) error {
-	return self.sm.BiRPCV1TerminateSession(nil, ev, reply)
+	return self.SMG.BiRPCV1TerminateSession(nil, ev, reply)
 }
 
 // Called on individual Events (eg SMS)
 func (self *SMGenericV1) ChargeEvent(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	return self.sm.BiRPCV1ChargeEvent(nil, ev, maxUsage)
+	return self.SMG.BiRPCV1ChargeEvent(nil, ev, maxUsage)
 }
 
 // Called on session end, should send the CDR to CDRS
 func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *string) error {
-	return self.sm.BiRPCV1ProcessCDR(nil, ev, reply)
+	return self.SMG.BiRPCV1ProcessCDR(nil, ev, reply)
 }
 
 func (self *SMGenericV1) GetActiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
-	return self.sm.BiRPCV1GetActiveSessions(nil, attrs, reply)
+	return self.SMG.BiRPCV1GetActiveSessions(nil, attrs, reply)
 }
 
 func (self *SMGenericV1) GetActiveSessionsCount(attrs map[string]string, reply *int) error {
-	return self.sm.BiRPCV1GetActiveSessionsCount(nil, attrs, reply)
+	return self.SMG.BiRPCV1GetActiveSessionsCount(nil, attrs, reply)
 }
 
 func (self *SMGenericV1) GetPassiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
-	return self.sm.BiRPCV1GetPassiveSessions(nil, attrs, reply)
+	return self.SMG.BiRPCV1GetPassiveSessions(nil, attrs, reply)
 }
 
 func (self *SMGenericV1) GetPassiveSessionsCount(attrs map[string]string, reply *int) error {
-	return self.sm.BiRPCV1GetPassiveSessionsCount(nil, attrs, reply)
+	return self.SMG.BiRPCV1GetPassiveSessionsCount(nil, attrs, reply)
 }
 
 func (self *SMGenericV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSessions, reply *string) error {
-	return self.sm.BiRPCV1SetPassiveSessions(nil, args, reply)
-}
-
-func (self *SMGenericV1) SetGZIPpedPassiveSessions(args []byte, reply *string) error {
-	return self.sm.BiRPCV1SetGZIPpedPassiveSessions(nil, args, reply)
+	return self.SMG.BiRPCV1SetPassiveSessions(nil, args, reply)
 }
 
 func (self *SMGenericV1) ReplicateActiveSessions(args sessionmanager.ArgsReplicateSessions, reply *string) error {
-	return self.sm.BiRPCV1ReplicateActiveSessions(nil, args, reply)
+	return self.SMG.BiRPCV1ReplicateActiveSessions(nil, args, reply)
 }
 
 func (self *SMGenericV1) ReplicatePassiveSessions(args sessionmanager.ArgsReplicateSessions, reply *string) error {
-	return self.sm.BiRPCV1ReplicatePassiveSessions(nil, args, reply)
+	return self.SMG.BiRPCV1ReplicatePassiveSessions(nil, args, reply)
 }
 
 // rpcclient.RpcClientConnection interface
