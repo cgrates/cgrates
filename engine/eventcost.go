@@ -218,7 +218,7 @@ func (ec *EventCost) GetCost() float64 {
 	if ec.Cost == nil {
 		var cost float64
 		for _, ci := range ec.Charges {
-			cost += ci.Cost() * float64(ci.CompressFactor)
+			cost += ci.TotalCost()
 		}
 		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 		ec.Cost = &cost

@@ -147,6 +147,10 @@ func (cIt *ChargingIncrement) TotalUsage() time.Duration {
 	return time.Duration(cIt.Usage.Nanoseconds() * int64(cIt.CompressFactor))
 }
 
+func (cIt *ChargingIncrement) TotalCost() float64 {
+	return cIt.Cost * float64(cIt.CompressFactor)
+}
+
 // BalanceCharge represents one unit charged to a balance
 type BalanceCharge struct {
 	AccountID     string  // keep reference for shared balances

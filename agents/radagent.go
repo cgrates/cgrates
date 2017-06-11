@@ -29,15 +29,17 @@ import (
 )
 
 const (
-	MetaRadReqCode    = "*radReqCode"
-	MetaRadReplyCode  = "*radReplyCode"
-	MetaRadAuth       = "*radAuth"
-	MetaRadAcctStart  = "*radAcctStart"
-	MetaRadAcctUpdate = "*radAcctUpdate"
-	MetaRadAcctStop   = "*radAcctStop"
-	MetaRadAcctEvent  = "*radAcctEvent"
-	MetaCGRMaxUsage   = "*cgrMaxUsage"
-	EvRadiusReq       = "RADIUS_REQ"
+	MetaRadReqCode      = "*radReqCode"
+	MetaRadReplyCode    = "*radReplyCode"
+	MetaRadAuth         = "*radAuth"
+	MetaRadAcctStart    = "*radAcctStart"
+	MetaRadAcctUpdate   = "*radAcctUpdate"
+	MetaRadAcctStop     = "*radAcctStop"
+	MetaRadAcctEvent    = "*radAcctEvent"
+	MetaCGRMaxUsage     = "*cgrMaxUsage"
+	MetaRadReqType      = "*radReqType"
+	EvRadiusReq         = "RADIUS_REQUEST"
+	MetaUsageDifference = "*usage_difference"
 )
 
 func NewRadiusAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection) (ra *RadiusAgent, err error) {
@@ -103,7 +105,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	utils.Logger.Debug(fmt.Sprintf("Received request: %s", utils.ToJSON(req)))
 	procVars := make(map[string]string)
 	if avps := req.AttributesWithName("Acct-Status-Type", ""); len(avps) != 0 { // populate accounting type
-		switch avps[0].StringValue() { // first AVP found will give out the type of accounting
+		switch avps[0].GetStringValue() { // first AVP found will give out the type of accounting
 		case "Start":
 			procVars[MetaRadAcctStart] = "true"
 		case "Interim-Update":
@@ -149,13 +151,14 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	for k, v := range reqProcessor.Flags { // update processorVars with flags from processor
 		processorVars[k] = strconv.FormatBool(v)
 	}
-	smgEv, err := radReqAsSMGEvent(req, processorVars, reqProcessor.RequestFields, reqProcessor.Flags)
+	smgEv, err := radReqAsSMGEvent(req, processorVars, reqProcessor.Flags, reqProcessor.RequestFields)
 	if err != nil {
 		return false, err
 	}
 
 	var maxUsage time.Duration
-	if processorVars[MetaRadReqCode] == "3" { // auth attempt, make sure that MaxUsage is enough
+	switch processorVars[MetaRadReqType] {
+	case MetaRadAuth: // auth attempt, make sure that MaxUsage is enough
 		if err = ra.smg.Call("SMGenericV2.GetMaxUsage", smgEv, &maxUsage); err != nil {
 			return
 		}
@@ -166,13 +169,15 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 		} else if reqUsage.(time.Duration) < maxUsage {
 			reply.Code = radigo.AccessReject
 		}
-	} else if _, has := processorVars[MetaRadAcctStart]; has {
-		err = ra.smg.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage)
-	} else if _, has := processorVars[MetaRadAcctUpdate]; has {
-		err = ra.smg.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage)
-	} else if _, has := processorVars[MetaRadAcctStop]; has {
+	case MetaRadAcctStart:
+		err = ra.smg.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage)
+	case MetaRadAcctUpdate:
+		err = ra.smg.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage)
+	case MetaRadAcctStop:
 		var rpl string
 		err = ra.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
+	default:
+		err = fmt.Errorf("unsupported radius request type: <%s>", processorVars[MetaRadReqType])
 	}
 	if err != nil {
 		return false, err
