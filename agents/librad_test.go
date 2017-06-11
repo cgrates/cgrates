@@ -250,3 +250,24 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v\n, received: %+v", eSMGEv, smgEv)
 	}
 }
+
+func TestRadReplyAppendAttributes(t *testing.T) {
+	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
+	rplyFlds := []*config.CfgCdrField{
+		&config.CfgCdrField{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_CONSTANT,
+			Value: utils.ParseRSRFieldsMustCompile("AccessAccept", utils.INFIELD_SEP)},
+		&config.CfgCdrField{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
+			Value: utils.ParseRSRFieldsMustCompile("~*cgrMaxUsage:s/(\\d*)\\d{9}$/$1/", utils.INFIELD_SEP)},
+	}
+	if err := radReplyAppendAttributes(rply, map[string]string{MetaCGRMaxUsage: "30000000000"}, rplyFlds); err != nil {
+		t.Error(err)
+	}
+	if rply.Code != radigo.AccessAccept {
+		t.Errorf("Wrong reply code: %d", rply.Code)
+	}
+	if avps := rply.AttributesWithName("Acct-Session-Time", ""); len(avps) == 0 {
+		t.Error("Cannot find Acct-Session-Time in reply")
+	} else if avps[0].GetStringValue() != "30" {
+		t.Errorf("Expecting: 30, received: %s", avps[0].GetStringValue())
+	}
+}

@@ -111,17 +111,6 @@ func radMetaHandler(pkt *radigo.Packet, processorVars map[string]string,
 // radFieldOutVal formats the field value retrieved from RADIUS packet
 func radFieldOutVal(pkt *radigo.Packet, processorVars map[string]string,
 	cfgFld *config.CfgCdrField) (outVal string, err error) {
-	// make sure filters are passing
-	passedAllFilters := true
-	for _, fldFilter := range cfgFld.FieldFilter {
-		if !radPassesFieldFilter(pkt, processorVars, fldFilter) {
-			passedAllFilters = false
-			break
-		}
-	}
-	if !passedAllFilters {
-		return "", ErrFilterNotPassing // Not matching field filters, will have it empty
-	}
 	// different output based on cgrFld.Type
 	switch cfgFld.Type {
 	case utils.META_FILLER:
@@ -150,11 +139,18 @@ func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string, procFla
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = EvRadiusReq
 	for _, cfgFld := range cfgFlds {
+		passedAllFilters := true
+		for _, fldFilter := range cfgFld.FieldFilter {
+			if !radPassesFieldFilter(radPkt, procVars, fldFilter) {
+				passedAllFilters = false
+				break
+			}
+		}
+		if !passedAllFilters {
+			continue
+		}
 		fmtOut, err := radFieldOutVal(radPkt, procVars, cfgFld)
 		if err != nil {
-			if err == ErrFilterNotPassing {
-				continue // Do nothing in case of Filter not passing
-			}
 			return nil, err
 		}
 		if _, hasKey := outMap[cfgFld.FieldId]; hasKey && cfgFld.Append {
@@ -171,6 +167,32 @@ func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string, procFla
 
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
 func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]string,
-	tplFlds []*config.CfgCdrField, procFlags utils.StringMap) (err error) {
+	cfgFlds []*config.CfgCdrField) (err error) {
+	for _, cfgFld := range cfgFlds {
+		passedAllFilters := true
+		for _, fldFilter := range cfgFld.FieldFilter {
+			if !radPassesFieldFilter(reply, procVars, fldFilter) {
+				passedAllFilters = false
+				break
+			}
+		}
+		if !passedAllFilters {
+			continue
+		}
+		fmtOut, err := radFieldOutVal(reply, procVars, cfgFld)
+		if err != nil {
+			return err
+		}
+		if cfgFld.FieldId == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+			if err = reply.SetCodeWithName(fmtOut); err != nil {
+				return err
+			}
+			continue
+		}
+		attrName, vendorName := attrVendorFromPath(cfgFld.FieldId)
+		if err = reply.AddAVPWithName(attrName, fmtOut, vendorName); err != nil {
+			return err
+		}
+	}
 	return
 }

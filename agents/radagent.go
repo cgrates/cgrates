@@ -36,7 +36,9 @@ const (
 	MetaRadAcctUpdate   = "*radAcctUpdate"
 	MetaRadAcctStop     = "*radAcctStop"
 	MetaRadAcctEvent    = "*radAcctEvent"
+	MetaCGRReply        = "*cgrReply"
 	MetaCGRMaxUsage     = "*cgrMaxUsage"
+	MetaCGRError        = "*cgrError"
 	MetaRadReqType      = "*radReqType"
 	EvRadiusReq         = "RADIUS_REQUEST"
 	MetaUsageDifference = "*usage_difference"
@@ -157,6 +159,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	}
 
 	var maxUsage time.Duration
+	var cgrReply interface{} // so we can store it in processorsVars
 	switch processorVars[MetaRadReqType] {
 	case MetaRadAuth: // auth attempt, make sure that MaxUsage is enough
 		if err = ra.smg.Call("SMGenericV2.GetMaxUsage", smgEv, &maxUsage); err != nil {
@@ -171,20 +174,24 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 		}
 	case MetaRadAcctStart:
 		err = ra.smg.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage)
+		cgrReply = maxUsage
 	case MetaRadAcctUpdate:
 		err = ra.smg.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage)
+		cgrReply = maxUsage
 	case MetaRadAcctStop:
 		var rpl string
 		err = ra.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
+		cgrReply = rpl
 	default:
 		err = fmt.Errorf("unsupported radius request type: <%s>", processorVars[MetaRadReqType])
 	}
 	if err != nil {
+		processorVars[MetaCGRError] = err.Error()
 		return false, err
 	}
-
+	processorVars[MetaCGRReply] = utils.ToJSON(cgrReply)
 	processorVars[MetaCGRMaxUsage] = strconv.Itoa(int(maxUsage))
-	if err := radReplyAppendAttributes(reply, processorVars, reqProcessor.ReplyFields, reqProcessor.Flags); err != nil {
+	if err := radReplyAppendAttributes(reply, processorVars, reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
 	return true, nil
