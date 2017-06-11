@@ -102,7 +102,6 @@ func radMetaHandler(pkt *radigo.Packet, processorVars map[string]string,
 		if err != nil {
 			return "", err
 		}
-		fmt.Printf("tEnd: %v, tStart: %v\n", tEnd, tStart)
 		return tEnd.Sub(tStart).String(), nil
 	}
 	return

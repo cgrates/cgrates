@@ -182,6 +182,13 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 		var rpl string
 		err = ra.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
 		cgrReply = rpl
+		if ra.cgrCfg.RadiusAgentCfg().CreateCDR {
+			if errCdr := ra.smg.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); errCdr != nil {
+				err = errCdr
+			} else {
+				cgrReply = rpl
+			}
+		}
 	default:
 		err = fmt.Errorf("unsupported radius request type: <%s>", processorVars[MetaRadReqType])
 	}
