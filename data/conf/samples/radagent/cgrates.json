@@ -73,18 +73,30 @@
 
 "sm_generic": {
 	"enabled": true,
+	"debit_interval": "10s",
 },
 
 "radius_agent": {
 	"enabled": true,
 	"request_processors": [
 		{
+			"id": "KamailioAuth",
+			"request_filter": "*radReqType(*radAuth)",
+			"request_fields":[
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid", "mandatory": true},	
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Acct-Session-Id;^-;Sip-From-Tag", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "User-Name", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Called-Station-Id", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+			],
+			"reply_fields":[
+				{"tag": "MaxUsage", "field_id": "Acct-Session-Time", "type": "*composed", "value": "~*cgrMaxUsage:s/(\\d*)\\d{9}$/$1/", "mandatory": true},
+			],
+		},
+		{
 			"id": "KamailioAccountingStart",
-			"dry_run": false,
-			"request_filter": "*radcode(4);Service-Type(Sip-Session);Sip-Method(Invite)",
-			"flags": ["*radacct_start"], // flag accounting start since we have no Acct-Status-Type in request
-			"continue_on_success": false,
-			"append_reply": true,
+			"request_filter": "*radReqType(*radAcctStart)",
 			"request_fields":[	
 				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Called-Station-Id", "mandatory": true},
@@ -93,11 +105,7 @@
 		},
 		{
 			"id": "KamailioAccountingStop",
-			"dry_run": false,
-			"request_filter": "*radcode(4)Service-Type(Sip-Session);Sip-Method(Bye)",
-			"flags": ["*radacct_stop"],
-			"continue_on_success": false,
-			"append_reply": true,
+			"request_filter": "*radReqType(*radAcctStop)",
 			"request_fields":[	
 				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Called-Station-Id", "mandatory": true},

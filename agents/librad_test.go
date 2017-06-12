@@ -108,12 +108,12 @@ func TestRadPassesFieldFilter(t *testing.T) {
 		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(notmatching)")) {
 		t.Error("passing invalid filter value")
 	}
-	if !radPassesFieldFilter(pkt, map[string]string{MetaRadReqCode: "4"},
-		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(4)", MetaRadReqCode))) {
+	if !radPassesFieldFilter(pkt, map[string]string{MetaRadReqType: MetaRadAuth},
+		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(%s)", MetaRadReqType, MetaRadAuth))) {
 		t.Error("not passing valid filter")
 	}
-	if radPassesFieldFilter(pkt, map[string]string{MetaRadReqCode: "5"},
-		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(4)", MetaRadReqCode))) {
+	if radPassesFieldFilter(pkt, map[string]string{MetaRadReqType: MetaRadAcctStart},
+		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(%s)", MetaRadReqType, MetaRadAuth))) {
 		t.Error("passing invalid filter")
 	}
 	if radPassesFieldFilter(pkt, nil,

@@ -157,6 +157,9 @@ func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string, procFla
 		} else {
 			outMap[cfgFld.FieldId] = fmtOut
 		}
+		if cfgFld.BreakOnSuccess {
+			break
+		}
 	}
 	if len(procFlags) != 0 {
 		outMap[utils.CGRFlags] = procFlags.String()
@@ -191,6 +194,9 @@ func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]string,
 		attrName, vendorName := attrVendorFromPath(cfgFld.FieldId)
 		if err = reply.AddAVPWithName(attrName, fmtOut, vendorName); err != nil {
 			return err
+		}
+		if cfgFld.BreakOnSuccess {
+			break
 		}
 	}
 	return

@@ -79,6 +79,9 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 	if jsnCfgFld.Mask_length != nil {
 		cfgFld.MaskLen = *jsnCfgFld.Mask_length
 	}
+	if jsnCfgFld.Break_on_success != nil {
+		cfgFld.BreakOnSuccess = *jsnCfgFld.Break_on_success
+	}
 	return cfgFld, nil
 }
 
@@ -100,6 +103,7 @@ type CfgCdrField struct {
 	Timezone         string
 	MaskDestID       string
 	MaskLen          int
+	BreakOnSuccess   bool
 }
 
 func CfgCdrFieldsFromCdrFieldsJsonCfg(jsnCfgFldss []*CdrFieldJsonCfg) ([]*CfgCdrField, error) {

@@ -29,9 +29,8 @@ import (
 )
 
 const (
-	MetaRadReqCode      = "*radReqCode"
 	MetaRadReplyCode    = "*radReplyCode"
-	MetaRadAuth         = "*radAuth"
+	MetaRadAuth         = "*radAuthReq"
 	MetaRadAcctStart    = "*radAcctStart"
 	MetaRadAcctUpdate   = "*radAcctUpdate"
 	MetaRadAcctStop     = "*radAcctStop"
@@ -163,6 +162,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	switch processorVars[MetaRadReqType] {
 	case MetaRadAuth: // auth attempt, make sure that MaxUsage is enough
 		if err = ra.smg.Call("SMGenericV2.GetMaxUsage", smgEv, &maxUsage); err != nil {
+			processorVars[MetaCGRError] = err.Error()
 			return
 		}
 		if reqUsage, has := smgEv[utils.USAGE]; !has { // usage was not requested, decide based on 0

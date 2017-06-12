@@ -633,6 +633,9 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 			outMap[cfgFld.FieldId] = fmtOut
 
 		}
+		if cfgFld.BreakOnSuccess {
+			break
+		}
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
@@ -699,6 +702,9 @@ func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, proce
 		}
 		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), fmtOut, cfgFld.Append, self.timezone); err != nil {
 			return err
+		}
+		if cfgFld.BreakOnSuccess { // don't look for another field
+			break
 		}
 	}
 	return nil
