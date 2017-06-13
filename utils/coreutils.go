@@ -513,9 +513,9 @@ type Cloner interface {
 //  width - the field width
 //  strip - if present it will specify the strip strategy, when missing strip will not be allowed
 //  padding - if present it will specify the padding strategy to use, left, right, zeroleft, zeroright
-func FmtFieldWidth(source string, width int, strip, padding string, mandatory bool) (string, error) {
+func FmtFieldWidth(fieldID, source string, width int, strip, padding string, mandatory bool) (string, error) {
 	if mandatory && len(source) == 0 {
-		return "", errors.New("Empty source value")
+		return "", fmt.Errorf("Empty source value for fieldID: <%s>", fieldID)
 	}
 	if width == 0 { // Disable width processing if not defined
 		return source, nil
@@ -525,7 +525,7 @@ func FmtFieldWidth(source string, width int, strip, padding string, mandatory bo
 	}
 	if len(source) > width { //the source is bigger than allowed
 		if len(strip) == 0 {
-			return "", fmt.Errorf("Source %s is bigger than the width %d, no strip defied", source, width)
+			return "", fmt.Errorf("Source %s is bigger than the width %d, no strip defied, fieldID: <%s>", source, width, fieldID)
 		}
 		if strip == "right" {
 			return source[:width], nil
@@ -540,7 +540,7 @@ func FmtFieldWidth(source string, width int, strip, padding string, mandatory bo
 		}
 	} else { //the source is smaller as the maximum allowed
 		if len(padding) == 0 {
-			return "", fmt.Errorf("Source %s is smaller than the width %d, no padding defined", source, width)
+			return "", fmt.Errorf("Source %s is smaller than the width %d, no padding defined, fieldID: <%s>", source, width, fieldID)
 		}
 		var paddingFmt string
 		switch padding {

@@ -126,7 +126,7 @@ func radFieldOutVal(pkt *radigo.Packet, processorVars map[string]string,
 	default:
 		return "", fmt.Errorf("unsupported configuration field type: <%s>", cfgFld.Type)
 	}
-	if outVal, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+	if outVal, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		return "", err
 	}
 	return

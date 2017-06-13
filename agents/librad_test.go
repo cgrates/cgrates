@@ -45,6 +45,7 @@ ATTRIBUTE    Password     2    string
 
 # Alias values
 VALUE    Framed-Protocol    PPP    1
+VALUE Service-Type       SIP-Caller-AVPs  30   # Proprietary, avp_radius
 
 # Vendors
 VENDOR    Cisco    9

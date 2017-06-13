@@ -73,9 +73,8 @@ type RadiusAgent struct {
 // handleAuth handles RADIUS Authorization request
 func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err error) {
 	req.SetAVPValues() // populate string values in AVPs
-	utils.Logger.Debug(fmt.Sprintf("RadiusAgent handleAuth, received request: %+v", req))
 	procVars := map[string]string{
-		MetaRadAuth: "true",
+		MetaRadReqType: MetaRadAuth,
 	}
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
@@ -103,16 +102,15 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 // supports: Acct-Status-Type = Start, Interim-Update, Stop
 func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
 	req.SetAVPValues() // populate string values in AVPs
-	utils.Logger.Debug(fmt.Sprintf("Received request: %s", utils.ToJSON(req)))
 	procVars := make(map[string]string)
 	if avps := req.AttributesWithName("Acct-Status-Type", ""); len(avps) != 0 { // populate accounting type
 		switch avps[0].GetStringValue() { // first AVP found will give out the type of accounting
 		case "Start":
-			procVars[MetaRadAcctStart] = "true"
+			procVars[MetaRadReqType] = MetaRadAcctStart
 		case "Interim-Update":
-			procVars[MetaRadAcctUpdate] = "true"
+			procVars[MetaRadReqType] = MetaRadAcctUpdate
 		case "Stop":
-			procVars[MetaRadAcctStop] = "true"
+			procVars[MetaRadReqType] = MetaRadAcctStop
 		}
 	}
 	rpl = req.Reply()
@@ -144,6 +142,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	for _, fldFilter := range reqProcessor.RequestFilter {
 		if !radPassesFieldFilter(req, processorVars, fldFilter) {
 			passesAllFilters = false
+			break
 		}
 	}
 	if !passesAllFilters { // Not going with this processor further

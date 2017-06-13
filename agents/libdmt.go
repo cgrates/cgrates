@@ -417,7 +417,7 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.MetaGrouped: // GroupedAVP
 		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex, processorVars)
 	}
-	if fmtValOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+	if fmtValOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
 		return "", err
 	}

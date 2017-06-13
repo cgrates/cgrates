@@ -372,20 +372,7 @@ const CGRATES_CFG_JSON = `
 	"create_cdr": true,											// create CDR out of Accounting-Stop and send it to SMG component
 	"cdr_requires_session": false,								// only create CDR if there is an active session at terminate
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
-	"request_processors": [
-		{
-			"id": "*default",									// formal identifier of this processor
-			"dry_run": false,									// do not send the events to SMG, just log them
-			"request_filter": "",								// filter requests processed by this processor
-			"flags": [],										// flags to influence processing behavior
-			"continue_on_success": false,						// continue to the next template if executed
-			"append_reply": true,								// when continuing will append reply fields to the next template
-			"request_fields":[									// import content_fields template, tag will match internally CDR field
-			],
-			"reply_fields":[								// fields returned in radius reply
-			],
-		},
-	],
+	"request_processors": [],
 },
 
 
