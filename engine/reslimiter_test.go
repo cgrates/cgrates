@@ -290,8 +290,4 @@ func TestRLsAllocateResource(t *testing.T) {
 	if _, err := rls.AllocateResource(ru2, false); err == nil {
 		t.Error("Duplicate ResourceUsage id should not be allowed")
 	}
-
-	t.Error(rls[0].Usage, rls[0].Limit, rls[0].TotalUsage)
-	t.Error(rls[1].Usage, rls[1].Limit, rls[1].TotalUsage)
-
 }
