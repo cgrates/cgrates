@@ -583,24 +583,13 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Create_cdr:           utils.BoolPointer(true),
 		Cdr_requires_session: utils.BoolPointer(false),
 		Timezone:             utils.StringPointer(""),
-		Request_processors: &[]*RAReqProcessorJsnCfg{
-			&RAReqProcessorJsnCfg{
-				Id:                  utils.StringPointer("*default"),
-				Dry_run:             utils.BoolPointer(false),
-				Request_filter:      utils.StringPointer(""),
-				Flags:               utils.StringSlicePointer([]string{}),
-				Continue_on_success: utils.BoolPointer(false),
-				Append_reply:        utils.BoolPointer(true),
-				Request_fields:      &[]*CdrFieldJsonCfg{},
-				Reply_fields:        &[]*CdrFieldJsonCfg{},
-			},
-		},
+		Request_processors:   &[]*RAReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		rcv := *cfg.Request_processors
-		t.Errorf("Received: %+v", rcv[0].Reply_fields)
+		t.Errorf("Received: %+v", rcv)
 	}
 }
 

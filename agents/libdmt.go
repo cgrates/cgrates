@@ -417,7 +417,7 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.MetaGrouped: // GroupedAVP
 		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex, processorVars)
 	}
-	if fmtValOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+	if fmtValOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
 		return "", err
 	}
@@ -633,6 +633,9 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 			outMap[cfgFld.FieldId] = fmtOut
 
 		}
+		if cfgFld.BreakOnSuccess {
+			break
+		}
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
@@ -699,6 +702,9 @@ func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, proce
 		}
 		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), fmtOut, cfgFld.Append, self.timezone); err != nil {
 			return err
+		}
+		if cfgFld.BreakOnSuccess { // don't look for another field
+			break
 		}
 	}
 	return nil

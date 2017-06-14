@@ -251,8 +251,6 @@ func (partCDR *PartialCDRRecord) MergeCDRs() *engine.CDR {
 						retCdr.ExtraFields[fldName] = fldVal
 					}
 				}
-				//default:
-				//	fmt.Printf("Unhandled FieldName: %s, Kind: %+v\n", cdrRVal.Type().Field(i).Name, fld.Kind())
 			}
 			if updated {
 				retCdrRVal.Field(i).Set(fld)

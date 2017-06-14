@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -56,7 +57,7 @@ func radPassesFieldFilter(pkt *radigo.Packet, processorVars map[string]string, f
 		return
 	}
 	for _, avp := range avps { // they all need to match the filter
-		if !fieldFilter.FilterPasses(avp.StringValue()) {
+		if !fieldFilter.FilterPasses(avp.GetStringValue()) {
 			return
 		}
 	}
@@ -77,7 +78,7 @@ func radComposedFieldValue(pkt *radigo.Packet,
 		}
 		for _, avp := range pkt.AttributesWithName(
 			attrVendorFromPath(rsrTpl.Id)) {
-			outVal += rsrTpl.ParseValue(avp.StringValue())
+			outVal += rsrTpl.ParseValue(avp.GetStringValue())
 		}
 	}
 	return outVal
@@ -85,24 +86,30 @@ func radComposedFieldValue(pkt *radigo.Packet,
 
 // radMetaHandler handles *handler type in configuration fields
 func radMetaHandler(pkt *radigo.Packet, processorVars map[string]string,
-	handlerTag, arg string) (outVal string, err error) {
+	cfgFld *config.CfgCdrField) (outVal string, err error) {
+	handlerArgs := strings.Split(
+		radComposedFieldValue(pkt, processorVars, cfgFld.Value), utils.HandlerArgSep)
+	switch cfgFld.HandlerId {
+	case MetaUsageDifference: // expects tEnd|tStart in the composed val
+		if len(handlerArgs) != 2 {
+			return "", errors.New("unexpected number of arguments")
+		}
+		tEnd, err := utils.ParseTimeDetectLayout(handlerArgs[0], cfgFld.Timezone)
+		if err != nil {
+			return "", err
+		}
+		tStart, err := utils.ParseTimeDetectLayout(handlerArgs[1], cfgFld.Timezone)
+		if err != nil {
+			return "", err
+		}
+		return tEnd.Sub(tStart).String(), nil
+	}
 	return
 }
 
 // radFieldOutVal formats the field value retrieved from RADIUS packet
 func radFieldOutVal(pkt *radigo.Packet, processorVars map[string]string,
-	cfgFld *config.CfgCdrField, extraParam interface{}) (outVal string, err error) {
-	// make sure filters are passing
-	passedAllFilters := true
-	for _, fldFilter := range cfgFld.FieldFilter {
-		if !radPassesFieldFilter(pkt, processorVars, fldFilter) {
-			passedAllFilters = false
-			break
-		}
-	}
-	if !passedAllFilters {
-		return "", ErrFilterNotPassing // Not matching field filters, will have it empty
-	}
+	cfgFld *config.CfgCdrField) (outVal string, err error) {
 	// different output based on cgrFld.Type
 	switch cfgFld.Type {
 	case utils.META_FILLER:
@@ -113,30 +120,36 @@ func radFieldOutVal(pkt *radigo.Packet, processorVars map[string]string,
 	case utils.META_COMPOSED:
 		outVal = radComposedFieldValue(pkt, processorVars, cfgFld.Value)
 	case utils.META_HANDLER:
-		if outVal, err = radMetaHandler(pkt, processorVars, cfgFld.HandlerId, cfgFld.Layout); err != nil {
+		if outVal, err = radMetaHandler(pkt, processorVars, cfgFld); err != nil {
 			return "", err
 		}
 	default:
 		return "", fmt.Errorf("unsupported configuration field type: <%s>", cfgFld.Type)
 	}
-	if outVal, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+	if outVal, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		return "", err
 	}
 	return
 }
 
 // radPktAsSMGEvent converts a RADIUS packet into SMGEvent
-func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string,
-	cfgFlds []*config.CfgCdrField,
-	procFlags utils.StringMap) (smgEv sessionmanager.SMGenericEvent, err error) {
+func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string, procFlags utils.StringMap,
+	cfgFlds []*config.CfgCdrField) (smgEv sessionmanager.SMGenericEvent, err error) {
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = EvRadiusReq
 	for _, cfgFld := range cfgFlds {
-		fmtOut, err := radFieldOutVal(radPkt, procVars, cfgFld, nil)
-		if err != nil {
-			if err == ErrFilterNotPassing {
-				continue // Do nothing in case of Filter not passing
+		passedAllFilters := true
+		for _, fldFilter := range cfgFld.FieldFilter {
+			if !radPassesFieldFilter(radPkt, procVars, fldFilter) {
+				passedAllFilters = false
+				break
 			}
+		}
+		if !passedAllFilters {
+			continue
+		}
+		fmtOut, err := radFieldOutVal(radPkt, procVars, cfgFld)
+		if err != nil {
 			return nil, err
 		}
 		if _, hasKey := outMap[cfgFld.FieldId]; hasKey && cfgFld.Append {
@@ -144,12 +157,47 @@ func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string,
 		} else {
 			outMap[cfgFld.FieldId] = fmtOut
 		}
+		if cfgFld.BreakOnSuccess {
+			break
+		}
+	}
+	if len(procFlags) != 0 {
+		outMap[utils.CGRFlags] = procFlags.String()
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
 
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
 func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]string,
-	tplFlds []*config.CfgCdrField, procFlags utils.StringMap) (err error) {
+	cfgFlds []*config.CfgCdrField) (err error) {
+	for _, cfgFld := range cfgFlds {
+		passedAllFilters := true
+		for _, fldFilter := range cfgFld.FieldFilter {
+			if !radPassesFieldFilter(reply, procVars, fldFilter) {
+				passedAllFilters = false
+				break
+			}
+		}
+		if !passedAllFilters {
+			continue
+		}
+		fmtOut, err := radFieldOutVal(reply, procVars, cfgFld)
+		if err != nil {
+			return err
+		}
+		if cfgFld.FieldId == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+			if err = reply.SetCodeWithName(fmtOut); err != nil {
+				return err
+			}
+			continue
+		}
+		attrName, vendorName := attrVendorFromPath(cfgFld.FieldId)
+		if err = reply.AddAVPWithName(attrName, fmtOut, vendorName); err != nil {
+			return err
+		}
+		if cfgFld.BreakOnSuccess {
+			break
+		}
+	}
 	return
 }

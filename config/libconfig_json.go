@@ -135,6 +135,7 @@ type CdrFieldJsonCfg struct {
 	Timezone             *string
 	Mask_destinationd_id *string
 	Mask_length          *int
+	Break_on_success     *bool
 }
 
 // Cdre config section
