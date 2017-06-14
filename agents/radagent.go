@@ -155,54 +155,64 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	for k, v := range reqProcessor.Flags { // update processorVars with flags from processor
 		processorVars[k] = strconv.FormatBool(v)
 	}
+	if reqProcessor.DryRun {
+		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> DRY_RUN, RADIUS request: %s", utils.ToJSON(req)))
+		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> DRY_RUN, process variabiles: %+v", processorVars))
+	}
 	smgEv, err := radReqAsSMGEvent(req, processorVars, reqProcessor.Flags, reqProcessor.RequestFields)
 	if err != nil {
 		return false, err
 	}
-
-	var maxUsage time.Duration
-	var cgrReply interface{} // so we can store it in processorsVars
-	switch processorVars[MetaRadReqType] {
-	case MetaRadAuth: // auth attempt, make sure that MaxUsage is enough
-		if err = ra.smg.Call("SMGenericV2.GetMaxUsage", smgEv, &maxUsage); err != nil {
-			processorVars[MetaCGRError] = err.Error()
-			return
-		}
-		if reqUsage, has := smgEv[utils.USAGE]; !has { // usage was not requested, decide based on 0
-			if maxUsage == 0 {
+	if reqProcessor.DryRun {
+		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> DRY_RUN, SMGEvent: %+v", smgEv))
+	} else { // process with RPC
+		var maxUsage time.Duration
+		var cgrReply interface{} // so we can store it in processorsVars
+		switch processorVars[MetaRadReqType] {
+		case MetaRadAuth: // auth attempt, make sure that MaxUsage is enough
+			if err = ra.smg.Call("SMGenericV2.GetMaxUsage", smgEv, &maxUsage); err != nil {
+				processorVars[MetaCGRError] = err.Error()
+				return
+			}
+			if reqUsage, has := smgEv[utils.USAGE]; !has { // usage was not requested, decide based on 0
+				if maxUsage == 0 {
+					reply.Code = radigo.AccessReject
+				}
+			} else if reqUsage.(time.Duration) < maxUsage {
 				reply.Code = radigo.AccessReject
 			}
-		} else if reqUsage.(time.Duration) < maxUsage {
-			reply.Code = radigo.AccessReject
-		}
-	case MetaRadAcctStart:
-		err = ra.smg.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage)
-		cgrReply = maxUsage
-	case MetaRadAcctUpdate:
-		err = ra.smg.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage)
-		cgrReply = maxUsage
-	case MetaRadAcctStop:
-		var rpl string
-		err = ra.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
-		cgrReply = rpl
-		if ra.cgrCfg.RadiusAgentCfg().CreateCDR {
-			if errCdr := ra.smg.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); errCdr != nil {
-				err = errCdr
-			} else {
-				cgrReply = rpl
+		case MetaRadAcctStart:
+			err = ra.smg.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage)
+			cgrReply = maxUsage
+		case MetaRadAcctUpdate:
+			err = ra.smg.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage)
+			cgrReply = maxUsage
+		case MetaRadAcctStop:
+			var rpl string
+			err = ra.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
+			cgrReply = rpl
+			if ra.cgrCfg.RadiusAgentCfg().CreateCDR {
+				if errCdr := ra.smg.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); errCdr != nil {
+					err = errCdr
+				} else {
+					cgrReply = rpl
+				}
 			}
+		default:
+			err = fmt.Errorf("unsupported radius request type: <%s>", processorVars[MetaRadReqType])
 		}
-	default:
-		err = fmt.Errorf("unsupported radius request type: <%s>", processorVars[MetaRadReqType])
+		if err != nil {
+			processorVars[MetaCGRError] = err.Error()
+			return false, err
+		}
+		processorVars[MetaCGRReply] = utils.ToJSON(cgrReply)
+		processorVars[MetaCGRMaxUsage] = strconv.Itoa(int(maxUsage))
 	}
-	if err != nil {
-		processorVars[MetaCGRError] = err.Error()
-		return false, err
-	}
-	processorVars[MetaCGRReply] = utils.ToJSON(cgrReply)
-	processorVars[MetaCGRMaxUsage] = strconv.Itoa(int(maxUsage))
 	if err := radReplyAppendAttributes(reply, processorVars, reqProcessor.ReplyFields); err != nil {
 		return false, err
+	}
+	if reqProcessor.DryRun {
+		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> DRY_RUN, radius reply: %s", reply))
 	}
 	return true, nil
 }
