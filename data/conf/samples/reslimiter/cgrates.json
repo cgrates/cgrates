@@ -1,0 +1,127 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"general": {
+	"log_level": 7,
+},
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",						// password to use when connecting to stordb
+},
+
+
+"cache":{
+	"destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
+	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"lcr": {"limit": 10000, "ttl":"0s", "precache": true},
+	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": true},
+	"actions": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
+	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_limits": {"limit": 10000, "ttl":"0s", "precache": true},
+},
+
+
+"rals": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"cdre": {
+	"TestTutITExportCDR": {
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "RunID"},
+			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
+			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
+			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "Category"},
+			{"tag":"Account", "type": "*composed", "value": "Account"},
+			{"tag":"Destination", "type": "*composed", "value": "Destination"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "type": "*composed", "value": "Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
+			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+		],
+	},
+},
+
+
+"cdrstats": {
+	"enabled": true,					// starts the cdrstats service: <true|false>
+},
+
+
+"pubsubs": {
+	"enabled": true,				// starts PubSub service: <true|false>.
+},
+
+
+"users": {
+	"enabled": true,				// starts User service: <true|false>.
+	"indexes": ["Uuid"],			// user profile field indexes
+},
+
+"rls": {
+	"enabled": true,						// starts ResourceLimiter service: <true|false>.
+	"cdrstats_conns": [						// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+		{"address": "*internal"}
+	],
+	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|dur>
+	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|dur>
+},
+
+"historys": {
+	"enabled": true,
+},
+
+"aliases": {
+	"enabled": true,							// starts Aliases service: <true|false>.
+},
+
+"sm_generic": {
+	"enabled": true,
+},
+
+}
