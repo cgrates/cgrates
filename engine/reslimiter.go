@@ -286,7 +286,7 @@ func (rls *ResourceLimiterService) V1AllowUsage(args utils.AttrRLsResourceUsage,
 		return utils.NewErrServerError(err)
 	}
 	if _, err = mtcRLs.AllocateResource(&ResourceUsage{ID: args.UsageID,
-		Time: time.Now(), Units: args.Units}, false); err != nil {
+		Time: time.Now(), Units: args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			return // not error but still not allowed
 		}
