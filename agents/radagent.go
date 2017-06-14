@@ -89,10 +89,12 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 		}
 	}
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> request: %s, error: %s", utils.ToJSON(req), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> error: <%s> ignoring request: %s, process vars: %+v",
+			err.Error(), utils.ToJSON(req), procVars))
 		return nil, nil
 	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> No request processor enabled for request: %s, ignoring request", utils.ToJSON(req)))
+		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> No request processor enabled, ignoring request %s, process vars: %+v",
+			utils.ToJSON(req), procVars))
 		return nil, nil
 	}
 	return
@@ -126,10 +128,12 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 		}
 	}
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> request: %s, error: %s", utils.ToJSON(req), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> error: <%s> ignoring request: %s, process vars: %+v",
+			err.Error(), utils.ToJSON(req), procVars))
 		return nil, nil
 	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> No request processor enabled for request: %s, ignoring request", utils.ToJSON(req)))
+		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> No request processor enabled, ignoring request %s, process vars: %+v",
+			utils.ToJSON(req), procVars))
 		return nil, nil
 	}
 	return

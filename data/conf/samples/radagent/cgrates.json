@@ -49,6 +49,9 @@
 
 "cdrs": {
 	"enabled": true,
+	"rals_conns": [
+		{"address": "*internal"}
+	],
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
@@ -112,14 +115,16 @@
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
 					"value": "Acct-Session-Id;^-;Sip-From-Tag;^-;Sip-To-Tag", "mandatory": true},
+				{"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", 
+					"value": "NAS-IP-Address", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", 
 					"value": "User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
 					"value": "Called-Station-Id", "mandatory": true},
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
-					"value": "Event-Timestamp", "mandatory": true},
+					"value": "Ascend-User-Acct-Time", "mandatory": true},
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
-					"value": "Event-Timestamp", "mandatory": true},
+					"value": "Ascend-User-Acct-Time", "mandatory": true},
 			],
 			"reply_fields":[],
 		},
@@ -138,10 +143,10 @@
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
 					"value": "Called-Station-Id", "mandatory": true},
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
-					"value": "Event-Timestamp", "mandatory": true},
+					"value": "Ascend-User-Acct-Time", "mandatory": true},
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
-					"value": "Event-Timestamp", "mandatory": true},
-				{"tag": "Usage", "field_id": "AnswerTime", "type": "*handler", "handler_id": "*usage_difference", 
+					"value": "Ascend-User-Acct-Time", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*usage_difference", 
 					"value": "Event-Timestamp;^|;Ascend-User-Acct-Time", "mandatory": true},
 			],
 			"reply_fields":[],
