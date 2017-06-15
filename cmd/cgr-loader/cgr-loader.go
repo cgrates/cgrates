@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/rpc"
 	"path"
 	"strconv"
 	"strings"
@@ -66,10 +65,11 @@ var (
 	stats           = flag.Bool("stats", false, "Generates statsistics about given data.")
 	fromStorDb      = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb        = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	historyServer   = flag.String("history_server", cgrConfig.RPCGOBListen, "The history server address:port, empty to disable automatic history archiving")
-	raterAddress    = flag.String("rater_address", cgrConfig.RPCGOBListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
-	cdrstatsAddress = flag.String("cdrstats_address", cgrConfig.RPCGOBListen, "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
-	usersAddress    = flag.String("users_address", cgrConfig.RPCGOBListen, "Users service to contact for data reloads, empty to disable automatic data reloads")
+	rpcEncoding     = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
+	historyServer   = flag.String("historys", cgrConfig.RPCJSONListen, "The history server address:port, empty to disable automatic history archiving")
+	ralsAddress     = flag.String("rals", cgrConfig.RPCJSONListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
+	cdrstatsAddress = flag.String("cdrstats", cgrConfig.RPCJSONListen, "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
+	usersAddress    = flag.String("users", cgrConfig.RPCJSONListen, "Users service to contact for data reloads, empty to disable automatic data reloads")
 	runId           = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
 	timezone        = flag.String("timezone", cgrConfig.DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
@@ -85,7 +85,7 @@ func main() {
 	var errDataDB, errStorDb, err error
 	var dataDB engine.DataDB
 	var storDb engine.LoadStorage
-	var rater, cdrstats, users *rpc.Client
+	var rater, cdrstats, users rpcclient.RpcClientConnection
 	var loader engine.LoadReader
 	if *migrateRC8 != "" {
 		if *datadb_type == "redis" {
@@ -287,7 +287,7 @@ func main() {
 	}
 	if *historyServer != "" { // Init scribeAgent so we can store the differences
 		if scribeAgent, err := rpcclient.NewRpcClient("tcp", *historyServer, 3, 3,
-			time.Duration(1*time.Second), time.Duration(5*time.Minute), utils.GOB, nil, false); err != nil {
+			time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
 			log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
 			return
 		} else {
@@ -297,22 +297,22 @@ func main() {
 	} else {
 		log.Print("WARNING: Rates history archiving is disabled!")
 	}
-	if *raterAddress != "" { // Init connection to rater so we can reload it's data
-		rater, err = rpc.Dial("tcp", *raterAddress)
-		if err != nil {
-			log.Fatalf("Could not connect to rater: %s", err.Error())
+	if *ralsAddress != "" { // Init connection to rater so we can reload it's data
+		if rater, err = rpcclient.NewRpcClient("tcp", *ralsAddress, 3, 3,
+			time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
+			log.Fatalf("Could not connect to RALs: %s", err.Error())
 			return
 		}
 	} else {
 		log.Print("WARNING: Rates automatic cache reloading is disabled!")
 	}
 	if *cdrstatsAddress != "" { // Init connection to rater so we can reload it's data
-		if *cdrstatsAddress == *raterAddress {
+		if *cdrstatsAddress == *ralsAddress {
 			cdrstats = rater
 		} else {
-			cdrstats, err = rpc.Dial("tcp", *cdrstatsAddress)
-			if err != nil {
-				log.Fatalf("Could not connect to CDRStats API: %s", err.Error())
+			if cdrstats, err = rpcclient.NewRpcClient("tcp", *cdrstatsAddress, 3, 3,
+				time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
+				log.Fatalf("Could not connect to CDRStatS API: %s", err.Error())
 				return
 			}
 		}
@@ -320,12 +320,12 @@ func main() {
 		log.Print("WARNING: CDRStats automatic data reload is disabled!")
 	}
 	if *usersAddress != "" { // Init connection to rater so we can reload it's data
-		if *usersAddress == *raterAddress {
+		if *usersAddress == *ralsAddress {
 			users = rater
 		} else {
-			users, err = rpc.Dial("tcp", *usersAddress)
-			if err != nil {
-				log.Fatalf("Could not connect to Users API: %s", err.Error())
+			if users, err = rpcclient.NewRpcClient("tcp", *usersAddress, 3, 3,
+				time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
+				log.Fatalf("Could not connect to UserS API: %s", err.Error())
 				return
 			}
 		}
@@ -340,17 +340,21 @@ func main() {
 	if len(*historyServer) != 0 && *verbose {
 		log.Print("Wrote history.")
 	}
-	var dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds, rlIDs []string
+	var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rlIDs, aatIDs, ralsIDs []string
 	if rater != nil {
 		dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
+		revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
 		rplIds, _ = tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
 		rpfIds, _ = tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
 		actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
+		aapIDs, _ = tpReader.GetLoadedIds(utils.AccountActionPlansPrefix)
 		shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
 		alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
 		lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
 		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
 		rlIDs, _ = tpReader.GetLoadedIds(utils.ResourceLimitsPrefix)
+		aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
+		ralsIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_ALIASES_PREFIX)
 	}
 	aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	var statsQueueIds []string
@@ -372,21 +376,23 @@ func main() {
 		if *verbose {
 			log.Print("Reloading cache")
 		}
-		if *flush {
-			dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds, rlIDs, aps = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil // Should reload all these on flush
-		}
 		if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{ArgsCache: utils.ArgsCache{
-			DestinationIDs:    &dstIds,
-			RatingPlanIDs:     &rplIds,
-			RatingProfileIDs:  &rpfIds,
-			ActionIDs:         &actIds,
-			ActionPlanIDs:     &aps,
-			SharedGroupIDs:    &shgIds,
-			AliasIDs:          &alsIds,
-			LCRids:            &lcrIds,
-			DerivedChargerIDs: &dcsIds,
-			ResourceLimitIDs:  &rlIDs,
-		}}, &reply); err != nil {
+			DestinationIDs:        &dstIds,
+			ReverseDestinationIDs: &revDstIDs,
+			RatingPlanIDs:         &rplIds,
+			RatingProfileIDs:      &rpfIds,
+			ActionIDs:             &actIds,
+			ActionPlanIDs:         &aps,
+			AccountActionPlanIDs:  &aapIDs,
+			ActionTriggerIDs:      &aatIDs,
+			SharedGroupIDs:        &shgIds,
+			LCRids:                &lcrIds,
+			DerivedChargerIDs:     &dcsIds,
+			AliasIDs:              &alsIds,
+			ReverseAliasIDs:       &ralsIDs,
+			ResourceLimitIDs:      &rlIDs},
+			FlushAll: *flush,
+		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
 
