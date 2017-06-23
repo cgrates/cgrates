@@ -2140,6 +2140,22 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
+	case utils.ACTION_TRIGGER_PREFIX:
+		keys := make([]string, len(tpr.actionsTriggers))
+		i := 0
+		for k := range tpr.actionsTriggers {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.LCR_PREFIX:
+		keys := make([]string, len(tpr.lcrs))
+		i := 0
+		for k := range tpr.lcrs {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
 	}
 	return nil, errors.New("Unsupported load category")
 }

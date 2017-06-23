@@ -80,7 +80,10 @@ func TestSMGBiRPCStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestSMGBiRPCApierRpcConn(t *testing.T) {
 	clntHandlers := map[string]interface{}{"SMGClientV1.DisconnectSession": handleDisconnectSession}
-	if smgBiRPC, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson, clntHandlers); err != nil { // Connect also simple RPC so we can check accounts and such
+	if _, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson, clntHandlers); err != nil { // First attempt is to make sure multiple clients are supported
+		t.Fatal(err)
+	}
+	if smgBiRPC, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson, clntHandlers); err != nil {
 		t.Fatal(err)
 	}
 	if smgRPC, err = jsonrpc.Dial("tcp", smgBiRPCCfg.RPCJSONListen); err != nil { // Connect also simple RPC so we can check accounts and such

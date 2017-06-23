@@ -193,11 +193,13 @@ func (s *Server) ServeBiJSON(addr string) {
 		log.Fatal("ServeBiJSON listen error:", e)
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
-	conn, err := lBiJSON.Accept()
-	if err != nil {
-		log.Fatal(err)
+	for {
+		conn, err := lBiJSON.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		go s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
 	}
-	s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
 }
 
 // rpcRequest represents a RPC request.

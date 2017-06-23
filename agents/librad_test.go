@@ -45,7 +45,13 @@ ATTRIBUTE    Password     2    string
 
 # Alias values
 VALUE    Framed-Protocol    PPP    1
+VALUE Service-Type       Sip-Session      15   # Schulzrinne, acc, auth_radius
 VALUE Service-Type       SIP-Caller-AVPs  30   # Proprietary, avp_radius
+
+VALUE Sip-Method         Invite         1
+VALUE Sip-Method         Bye            8
+VALUE Acct-Status-Type	Start			1
+VALUE Acct-Status-Type	Stop			2
 
 # Vendors
 VENDOR    Cisco    9

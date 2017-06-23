@@ -755,9 +755,10 @@ func (self *ApierV1) ReloadScheduler(ignore string, reply *string) error {
 func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (err error) {
 	if attrs.FlushAll {
 		cache.Flush()
+		return
 	}
-	var dataIDs []string
 	// Reload Destinations
+	dataIDs := make([]string, 0)
 	if attrs.DestinationIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.DestinationIDs) > 0 {
@@ -770,6 +771,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// Reload ReverseDestinations
+	dataIDs = make([]string, 0)
 	if attrs.ReverseDestinationIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.ReverseDestinationIDs) > 0 {
@@ -782,6 +784,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// RatingPlans
+	dataIDs = make([]string, 0)
 	if attrs.RatingPlanIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.RatingPlanIDs) > 0 {
@@ -794,6 +797,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// RatingProfiles
+	dataIDs = make([]string, 0)
 	if attrs.RatingProfileIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.RatingProfileIDs) > 0 {
@@ -806,6 +810,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// Actions
+	dataIDs = make([]string, 0)
 	if attrs.ActionIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.ActionIDs) > 0 {
@@ -818,6 +823,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// ActionPlans
+	dataIDs = make([]string, 0)
 	if attrs.ActionPlanIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.ActionPlanIDs) > 0 {
@@ -830,6 +836,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// AccountActionPlans
+	dataIDs = make([]string, 0)
 	if attrs.AccountActionPlanIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.AccountActionPlanIDs) > 0 {
@@ -842,6 +849,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// ActionTriggers
+	dataIDs = make([]string, 0)
 	if attrs.ActionTriggerIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.ActionTriggerIDs) > 0 {
@@ -850,10 +858,11 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataDB.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataDB.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// SharedGroups
+	dataIDs = make([]string, 0)
 	if attrs.SharedGroupIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.SharedGroupIDs) > 0 {
@@ -866,6 +875,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// LCR Profiles
+	dataIDs = make([]string, 0)
 	if attrs.LCRids == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.LCRids) > 0 {
@@ -878,6 +888,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// DerivedChargers
+	dataIDs = make([]string, 0)
 	if attrs.DerivedChargerIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.DerivedChargerIDs) > 0 {
@@ -890,6 +901,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// Aliases
+	dataIDs = make([]string, 0)
 	if attrs.AliasIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.AliasIDs) > 0 {
@@ -902,6 +914,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// ReverseAliases
+	dataIDs = make([]string, 0)
 	if attrs.ReverseAliasIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.ReverseAliasIDs) > 0 {
@@ -914,6 +927,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 	// ResourceLimits
+	dataIDs = make([]string, 0)
 	if attrs.ResourceLimitIDs == nil {
 		dataIDs = nil // Reload all
 	} else if len(*attrs.ResourceLimitIDs) > 0 {

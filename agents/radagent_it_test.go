@@ -29,14 +29,15 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
 
 var raCfgPath string
 var raCfg *config.CGRConfig
-var raSMGrpc *rpc.Client
 var raAuthClnt, raAcctClnt *radigo.Client
+var raRPC *rpc.Client
 
 func TestRAitInitCfg(t *testing.T) {
 	raCfgPath = path.Join(*dataDir, "conf", "samples", "radagent")
@@ -74,7 +75,7 @@ func TestRAitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestRAitApierRpcConn(t *testing.T) {
 	var err error
-	raSMGrpc, err = jsonrpc.Dial("tcp", raCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	raRPC, err = jsonrpc.Dial("tcp", raCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +85,7 @@ func TestRAitApierRpcConn(t *testing.T) {
 func TestRAitTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
-	if err := raSMGrpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+	if err := raRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -104,10 +105,10 @@ func TestRAitAuth(t *testing.T) {
 	if err := authReq.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
 		t.Error(err)
 	}
-	if err := authReq.AddAVPWithName("Acct-Session-Id", "2ca13afce9b2d76e15de7e1ec6568fc8@0:0:0:0:0:0:0:0", ""); err != nil {
+	if err := authReq.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
 		t.Error(err)
 	}
-	if err := authReq.AddAVPWithName("Sip-From-Tag", "7f30055f", ""); err != nil {
+	if err := authReq.AddAVPWithName("Sip-From-Tag", "51585361", ""); err != nil {
 		t.Error(err)
 	}
 	if err := authReq.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
@@ -128,6 +129,157 @@ func TestRAitAuth(t *testing.T) {
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
+	}
+}
+
+func TestRAitAcctStart(t *testing.T) {
+	if raAcctClnt, err = radigo.NewClient("udp", "127.0.0.1:1813", "CGRateS.org", dictRad, 1, nil); err != nil {
+		t.Fatal(err)
+	}
+	req := raAcctClnt.NewRequest(radigo.AccountingRequest, 2) // emulates Kamailio packet for accounting start
+	if err := req.AddAVPWithName("Acct-Status-Type", "Start", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Service-Type", "Sip-Session", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Sip-Response-Code", "200", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Sip-Method", "Invite", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Event-Timestamp", "1497106115", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Sip-From-Tag", "51585361", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Sip-To-Tag", "75c2f57b", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("User-Name", "1001", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Ascend-User-Acct-Time", "1497106115", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("NAS-Port-Id", "5060", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Acct-Delay-Time", "0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
+		t.Error(err)
+	}
+	reply, err := raAcctClnt.SendRequest(req)
+	if err != nil {
+		t.Error(err)
+	}
+	if reply.Code != radigo.AccountingResponse {
+		t.Errorf("Received reply: %+v", reply)
+	}
+	if len(reply.AVPs) != 0 { // we don't expect AVPs to be populated
+		t.Errorf("Received AVPs: %+v", reply.AVPs)
+	}
+	// Make sure the sessin is managed by SMG
+	var aSessions []*sessionmanager.ActiveSession
+	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
+		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.ACCID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
+		&aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	} else if aSessions[0].Usage != time.Duration(10)*time.Second {
+		t.Errorf("Expecting 10s, received usage: %v", aSessions[0].Usage)
+	}
+}
+
+func TestRAitAcctStop(t *testing.T) {
+	req := raAcctClnt.NewRequest(radigo.AccountingRequest, 3) // emulates Kamailio packet for accounting start
+	if err := req.AddAVPWithName("Acct-Status-Type", "Stop", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Service-Type", "Sip-Session", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Sip-Response-Code", "200", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Sip-Method", "Bye", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Event-Timestamp", "1497106119", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Sip-From-Tag", "51585361", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Sip-To-Tag", "75c2f57b", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("User-Name", "1001", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Ascend-User-Acct-Time", "1497106115", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("NAS-Port-Id", "5060", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("Acct-Delay-Time", "0", ""); err != nil {
+		t.Error(err)
+	}
+	if err := req.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
+		t.Error(err)
+	}
+	reply, err := raAcctClnt.SendRequest(req)
+	if err != nil {
+		t.Error(err)
+	}
+	if reply.Code != radigo.AccountingResponse {
+		t.Errorf("Received reply: %+v", reply)
+	}
+	if len(reply.AVPs) != 0 { // we don't expect AVPs to be populated
+		t.Errorf("Received AVPs: %+v", reply.AVPs)
+	}
+	// Make sure the sessin was disconnected from SMG
+	var aSessions []*sessionmanager.ActiveSession
+	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
+		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.ACCID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
+		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(10 * time.Millisecond))
+	var cdrs []*engine.ExternalCDR
+	args := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1002"}}
+	if err := raRPC.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "4" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
+		if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {
+			t.Errorf("Unexpected CDR CostSource received for CDR: %v", cdrs[0])
+		}
+		if cdrs[0].Cost != 0.01 {
+			t.Errorf("Unexpected CDR Cost received for CDR: %v", cdrs[0])
+		}
 	}
 }
 
