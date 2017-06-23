@@ -61,6 +61,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheAlias,
 	testOnStorITCacheReverseAlias,
 	testOnStorITCacheResourceLimit,
+	testOnStorITCacheTiming,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
@@ -83,6 +84,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDAlias,
 	testOnStorITCRUDReverseAlias,
 	testOnStorITCRUDResourceLimit,
+	testOnStorITCRUDTiming,
 	testOnStorITCRUDHistory,
 	testOnStorITCRUDStructVersion,
 }
@@ -756,6 +758,33 @@ func testOnStorITCacheResourceLimit(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ResourceLimit); !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", rL, rcv)
+	}
+}
+
+func testOnStorITCacheTiming(t *testing.T) {
+	tmg := &utils.TPTiming{
+		ID:        "TEST_TMG",
+		Years:     utils.Years{2016, 2017},
+		Months:    utils.Months{time.January, time.February, time.March},
+		MonthDays: utils.MonthDays{1, 2, 3, 4},
+		WeekDays:  utils.WeekDays{},
+		StartTime: "00:00:00",
+		EndTime:   "",
+	}
+
+	if err := onStor.SetTiming(tmg, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, hasIt := cache.Get(utils.TimingsPrefix + tmg.ID); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.TimingsPrefix, []string{tmg.ID}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.TimingsPrefix + tmg.ID); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*utils.TPTiming); !reflect.DeepEqual(tmg, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", tmg, rcv)
 	}
 }
 
@@ -1691,6 +1720,51 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 	}
 }
 
+func testOnStorITCRUDTiming(t *testing.T) {
+	tmg := &utils.TPTiming{
+		ID:        "TEST",
+		Years:     utils.Years{2016, 2017},
+		Months:    utils.Months{time.January, time.February, time.March},
+		MonthDays: utils.MonthDays{1, 2, 3, 4},
+		WeekDays:  utils.WeekDays{},
+		StartTime: "00:00:00",
+		EndTime:   "",
+	}
+	if _, rcvErr := onStor.GetTiming(tmg.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetTiming(tmg, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetTiming(tmg.ID, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tmg, rcv) {
+		t.Errorf("Expecting: %v, received: %v", tmg, rcv)
+	}
+	// FixMe
+	// if err = onStor.SelectDatabase("13"); err != nil {
+	// 	t.Error(err)
+	// }
+	// if _, rcvErr := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// 	t.Error(rcvErr)
+	// }
+	//
+	if rcv, err := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tmg, rcv) {
+		t.Errorf("Expecting: %v, received: %v", tmg, rcv)
+	}
+	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
+	// 	t.Error(err)
+	// }
+	if err := onStor.RemoveTiming(tmg.ID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetTiming(tmg.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
 func testOnStorITCRUDHistory(t *testing.T) {
 	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()
 	ist := &utils.LoadInstance{"Load", "RatingLoad", "Account", time}
@@ -1724,6 +1798,7 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 		Cdrs:            "1",
 		SMCosts:         "1",
 		ResourceLimits:  "1",
+		Timings:         "1",
 	}
 	if _, rcvErr := onStor.GetStructVersion(); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

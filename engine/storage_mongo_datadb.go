@@ -58,6 +58,7 @@ const (
 	colVer = "versions"
 	colRL  = "resource_limits"
 	colRFI = "request_filter_indexes"
+	colTmg = "timings"
 )
 
 var (
@@ -322,6 +323,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
 		utils.ResourceLimitsPrefix:       colRL,
+		utils.TimingsPrefix:              colTmg,
 	}
 	name, ok = colMap[prefix]
 	return
@@ -462,7 +464,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix}, prfx) {
+		utils.ResourceLimitsPrefix,
+		utils.TimingsPrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -514,6 +517,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			nrItems = ms.cacheCfg.ReverseAliases.Limit
 		case utils.ResourceLimitsPrefix:
 			nrItems = ms.cacheCfg.ResourceLimits.Limit
+		case utils.TimingsPrefix:
+			nrItems = ms.cacheCfg.Timings.Limit
 		}
 		if nrItems != 0 && nrItems < len(ids) { // More ids than cache config allows it, limit here
 			ids = ids[:nrItems]
@@ -554,6 +559,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
 			_, err = ms.GetResourceLimit(dataID, true, utils.NonTransactional)
+		case utils.TimingsPrefix:
+			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -653,6 +660,11 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		iter := db.C(colRL).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.AccountActionPlansPrefix+keyResult.Key)
+		}
+	case utils.TimingsPrefix:
+		iter := db.C(colRL).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.TimingsPrefix+idResult.Id)
 		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -1894,6 +1906,48 @@ func (ms *MongoStorage) RemoveResourceLimit(id string, transactionID string) (er
 		return
 	}
 	cache.RemKey(utils.ResourceLimitsPrefix+id, cacheCommit(transactionID), transactionID)
+	return nil
+}
+
+func (ms *MongoStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
+	key := utils.TimingsPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*utils.TPTiming), nil
+		}
+	}
+	session, col := ms.conn(colTmg)
+	defer session.Close()
+	t = new(utils.TPTiming)
+	if err = col.Find(bson.M{"id": id}).One(t); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, t, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (ms *MongoStorage) SetTiming(t *utils.TPTiming, transactionID string) (err error) {
+	fmt.Println("Mongo")
+	session, col := ms.conn(colTmg)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"id": t.ID}, t)
+	return
+}
+
+func (ms *MongoStorage) RemoveTiming(id string, transactionID string) (err error) {
+	session, col := ms.conn(colTmg)
+	defer session.Close()
+	if err = col.Remove(bson.M{"id": id}); err != nil {
+		return
+	}
+	cache.RemKey(utils.TimingsPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil
 }
 

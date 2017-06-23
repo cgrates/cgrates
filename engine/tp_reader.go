@@ -1902,6 +1902,17 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", rl.ID)
 		}
 	}
+	if verbose {
+		log.Print("Timings:")
+	}
+	for _, t := range tpr.timings {
+		if err = tpr.dataStorage.SetTiming(t, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", t.ID)
+		}
+	}
 	if !disable_reverse {
 		if len(tpr.destinations) > 0 {
 			if verbose {
