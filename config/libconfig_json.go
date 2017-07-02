@@ -65,6 +65,7 @@ type DbJsonCfg struct {
 	Db_password       *string
 	Max_open_conns    *int // Used only in case of storDb
 	Max_idle_conns    *int
+	Conn_max_lifetime *int // Used only in case of storDb
 	Load_history_size *int // Used in case of dataDb to limit the length of the loads history
 	Cdrs_indexes      *[]string
 }

@@ -192,6 +192,7 @@ type CGRConfig struct {
 	StorDBPass               string // The user's password.
 	StorDBMaxOpenConns       int    // Maximum database connections opened
 	StorDBMaxIdleConns       int    // Maximum idle connections to keep opened
+	StorDBConnMaxLifetime    int
 	StorDBCDRSIndexes        []string
 	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
 	CacheConfig              *CacheConfig
@@ -677,6 +678,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnStorDbCfg.Max_idle_conns != nil {
 			self.StorDBMaxIdleConns = *jsnStorDbCfg.Max_idle_conns
+		}
+		if jsnStorDbCfg.Conn_max_lifetime != nil {
+			self.StorDBConnMaxLifetime = *jsnStorDbCfg.Conn_max_lifetime
 		}
 		if jsnStorDbCfg.Cdrs_indexes != nil {
 			self.StorDBCDRSIndexes = *jsnStorDbCfg.Cdrs_indexes

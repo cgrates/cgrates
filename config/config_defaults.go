@@ -102,10 +102,12 @@ const CGRATES_CFG_JSON = `
 	"db_name": "cgrates",					// stor database name
 	"db_user": "cgrates",					// username to use when connecting to stordb
 	"db_password": "",						// password to use when connecting to stordb
-	"max_open_conns": 100,					// maximum database connections opened
-	"max_idle_conns": 10,					// maximum database connections idle
+	"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
+	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
+	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
 },
+
 
 "rals": {
 	"enabled": false,						// enable Rater service: <true|false>

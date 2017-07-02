@@ -1461,7 +1461,6 @@ func (ms *MapStorage) GetTiming(id string, skipCache bool, transactionID string)
 }
 
 func (ms *MapStorage) SetTiming(t *utils.TPTiming, transactionID string) error {
-	fmt.Println("Map")
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(t)

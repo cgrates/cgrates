@@ -1471,7 +1471,6 @@ func (rs *RedisStorage) GetTiming(id string, skipCache bool, transactionID strin
 }
 
 func (rs *RedisStorage) SetTiming(t *utils.TPTiming, transactionID string) error {
-	fmt.Println("Redis")
 	result, err := rs.ms.Marshal(t)
 	if err != nil {
 		return err

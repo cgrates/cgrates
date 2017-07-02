@@ -1934,7 +1934,6 @@ func (ms *MongoStorage) GetTiming(id string, skipCache bool, transactionID strin
 }
 
 func (ms *MongoStorage) SetTiming(t *utils.TPTiming, transactionID string) (err error) {
-	fmt.Println("Mongo")
 	session, col := ms.conn(colTmg)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"id": t.ID}, t)

@@ -19,14 +19,14 @@ package engine
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
-
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 )
 
-func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (*SQLStorage, error) {
+func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdleConn, connMaxLifetime int) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password)
 	db, err := gorm.Open("postgres", connectString)
 	if err != nil {
@@ -38,6 +38,7 @@ func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdl
 	}
 	db.DB().SetMaxIdleConns(maxIdleConn)
 	db.DB().SetMaxOpenConns(maxConn)
+	db.DB().SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
 	//db.LogMode(true)
 	postgressStorage := new(PostgresStorage)
 	postgressStorage.db = db

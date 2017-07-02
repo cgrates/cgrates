@@ -62,7 +62,8 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
 func TestLoaderITCreateStorTpTables(t *testing.T) {
-	db, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns)
+	db, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName,
+		lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns, lCfg.StorDBConnMaxLifetime)
 	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return

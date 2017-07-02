@@ -19,18 +19,18 @@ package engine
 
 import (
 	"fmt"
-
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 )
 
 type MySQLStorage struct {
 	SQLStorage
 }
 
-func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (*SQLStorage, error) {
+func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn, connMaxLifetime int) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true", user, password, host, port, name)
 	db, err := gorm.Open("mysql", connectString)
 	if err != nil {
@@ -41,6 +41,7 @@ func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleCo
 	}
 	db.DB().SetMaxIdleConns(maxIdleConn)
 	db.DB().SetMaxOpenConns(maxConn)
+	db.DB().SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
 	//db.LogMode(true)
 	mySQLStorage := new(MySQLStorage)
 	mySQLStorage.db = db

@@ -55,7 +55,7 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 	return d, nil
 }
 
-func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int, cdrsIndexes []string) (db Storage, err error) {
+func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db Storage, err error) {
 	var d Storage
 	switch db_type {
 	/*
@@ -74,9 +74,9 @@ func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler strin
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
 	case utils.POSTGRES:
-		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
+		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
+		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
 			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
@@ -87,13 +87,13 @@ func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler strin
 	return d, nil
 }
 
-func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int, cdrsIndexes []string) (db LoadStorage, err error) {
+func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db LoadStorage, err error) {
 	var d LoadStorage
 	switch db_type {
 	case utils.POSTGRES:
-		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
+		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
+		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
 	default:
@@ -106,13 +106,13 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	return d, nil
 }
 
-func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn int, cdrsIndexes []string) (db CdrStorage, err error) {
+func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db CdrStorage, err error) {
 	var d CdrStorage
 	switch db_type {
 	case utils.POSTGRES:
-		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
+		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
+		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
 	default:

@@ -65,7 +65,7 @@ func TestStorDBitMySQL(t *testing.T) {
 		t.Fatal(err)
 	}
 	if storDB, err = NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName,
-		cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns); err != nil {
+		cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime); err != nil {
 		t.Fatal(err)
 	}
 	storDB2ndDBname = "mysql"
@@ -82,7 +82,7 @@ func TestStorDBitPostgresSQL(t *testing.T) {
 		t.Fatal(err)
 	}
 	if storDB, err = NewPostgresStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName,
-		cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns); err != nil {
+		cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime); err != nil {
 		t.Fatal(err)
 	}
 	storDB2ndDBname = "postgres"

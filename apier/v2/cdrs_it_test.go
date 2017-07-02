@@ -103,10 +103,10 @@ func testV2CDRsInjectUnratedCdr(t *testing.T) {
 	switch cdrsConfDIR {
 	case "cdrsv2mysql":
 		db, err = engine.NewMySQLStorage(cdrsCfg.StorDBHost, cdrsCfg.StorDBPort, cdrsCfg.StorDBName, cdrsCfg.StorDBUser, cdrsCfg.StorDBPass,
-			cdrsCfg.StorDBMaxOpenConns, cdrsCfg.StorDBMaxIdleConns)
+			cdrsCfg.StorDBMaxOpenConns, cdrsCfg.StorDBMaxIdleConns, cdrsCfg.StorDBConnMaxLifetime)
 	case "cdrsv2psql":
 		db, err = engine.NewPostgresStorage(cdrsCfg.StorDBHost, cdrsCfg.StorDBPort, cdrsCfg.StorDBName, cdrsCfg.StorDBUser, cdrsCfg.StorDBPass,
-			cdrsCfg.StorDBMaxOpenConns, cdrsCfg.StorDBMaxIdleConns)
+			cdrsCfg.StorDBMaxOpenConns, cdrsCfg.StorDBMaxIdleConns, cdrsCfg.StorDBConnMaxLifetime)
 	case "cdrsv2mongo":
 		db, err = engine.NewMongoStorage(cdrsCfg.StorDBHost, cdrsCfg.StorDBPort, cdrsCfg.StorDBName,
 			cdrsCfg.StorDBUser, cdrsCfg.StorDBPass, utils.StorDB, cdrsCfg.StorDBCDRSIndexes, nil, 10)
