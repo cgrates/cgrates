@@ -100,6 +100,9 @@ type DataDB interface {
 	GetResourceLimit(string, bool, string) (*ResourceLimit, error)
 	SetResourceLimit(*ResourceLimit, string) error
 	RemoveResourceLimit(string, string) error
+	GetTiming(string, bool, string) (*utils.TPTiming, error)
+	SetTiming(*utils.TPTiming, string) error
+	RemoveTiming(string, string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetStructVersion() (*StructVersion, error)

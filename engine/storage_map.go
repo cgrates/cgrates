@@ -265,7 +265,8 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix}, prefix) {
+		utils.ResourceLimitsPrefix,
+		utils.TimingsPrefix}, prefix) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -317,6 +318,8 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 			nrItems = ms.cacheCfg.ReverseAliases.Limit
 		case utils.ResourceLimitsPrefix:
 			nrItems = ms.cacheCfg.ResourceLimits.Limit
+		case utils.TimingsPrefix:
+			nrItems = ms.cacheCfg.Timings.Limit
 		}
 		if nrItems != 0 && nrItems < len(IDs) {
 			IDs = IDs[:nrItems]
@@ -357,6 +360,8 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
 			_, err = ms.GetResourceLimit(dataID, true, utils.NonTransactional)
+		case utils.TimingsPrefix:
+			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -1406,6 +1411,7 @@ func (ms *MapStorage) GetResourceLimit(id string, skipCache bool, transactionID 
 	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
 	return
 }
+
 func (ms *MapStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -1422,6 +1428,55 @@ func (ms *MapStorage) RemoveResourceLimit(id string, transactionID string) error
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.ResourceLimitsPrefix + id
+	delete(ms.dict, key)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return nil
+}
+
+func (ms *MapStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	key := utils.TimingsPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x != nil {
+				return x.(*utils.TPTiming), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	cCommit := cacheCommit(transactionID)
+	if values, ok := ms.dict[key]; ok {
+		t = new(utils.TPTiming)
+		if err = ms.ms.Unmarshal(values, &t); err != nil {
+			return nil, err
+		}
+	} else {
+		cache.Set(key, nil, cCommit, transactionID)
+		return nil, utils.ErrNotFound
+	}
+	cache.Set(key, t, cCommit, transactionID)
+	return
+
+}
+
+func (ms *MapStorage) SetTiming(t *utils.TPTiming, transactionID string) error {
+	fmt.Println("Map")
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(t)
+	if err != nil {
+		return err
+	}
+	key := utils.TimingsPrefix + t.ID
+	ms.dict[key] = result
+	return nil
+}
+
+func (ms *MapStorage) RemoveTiming(id string, transactionID string) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.TimingsPrefix + id
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil

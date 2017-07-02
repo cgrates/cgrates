@@ -64,6 +64,7 @@ type CacheConfig struct {
 	ReverseAliases      *CacheParamConfig
 	DerivedChargers     *CacheParamConfig
 	ResourceLimits      *CacheParamConfig
+	Timings             *CacheParamConfig
 }
 
 func (self *CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) error {

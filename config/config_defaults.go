@@ -65,6 +65,7 @@ const CGRATES_CFG_JSON = `
 	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": false},			// control reverse aliases index caching
 	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": false},		// control derived charging rule caching
 	"resource_limits": {"limit": 10000, "ttl":"0s", "precache": false},			// control resource limits caching
+	"timings": {"limit": 10000, "ttl":"0s", "precache": false},					// control timings caching
 },
 
 
@@ -362,7 +363,7 @@ const CGRATES_CFG_JSON = `
 	"listen_acct": "127.0.0.1:1813",							// address where to listen for radius accounting requests <x.y.z.y:1234>
 	"client_secrets": {											// hash containing secrets for clients connecting here <*default|$client_ip>
 		"*default": "CGRateS.org"
-	},				
+	},
 	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
 		"*default": "/usr/share/cgrates/radius/dict/",			// key represents the client IP or catch-all <*default|$client_ip>
 	},

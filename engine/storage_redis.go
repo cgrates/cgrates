@@ -229,7 +229,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix}, prfx) {
+		utils.ResourceLimitsPrefix,
+		utils.TimingsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -281,6 +282,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			nrItems = rs.cacheCfg.ReverseAliases.Limit
 		case utils.ResourceLimitsPrefix:
 			nrItems = rs.cacheCfg.ResourceLimits.Limit
+		case utils.TimingsPrefix:
+			nrItems = rs.cacheCfg.Timings.Limit
 		}
 		if nrItems != 0 && nrItems < len(ids) {
 			ids = ids[:nrItems]
@@ -321,6 +324,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
 			_, err = rs.GetResourceLimit(dataID, true, utils.NonTransactional)
+		case utils.TimingsPrefix:
+			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -1432,6 +1437,49 @@ func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 }
 func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) (err error) {
 	key := utils.ResourceLimitsPrefix + id
+	if err = rs.Cmd("DEL", key).Err; err != nil {
+		return
+	}
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (rs *RedisStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
+	key := utils.TimingsPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*utils.TPTiming), nil
+		}
+	}
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err.Error() == "wrong type" { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &t); err != nil {
+		return
+	}
+	cache.Set(key, t, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (rs *RedisStorage) SetTiming(t *utils.TPTiming, transactionID string) error {
+	fmt.Println("Redis")
+	result, err := rs.ms.Marshal(t)
+	if err != nil {
+		return err
+	}
+	return rs.Cmd("SET", utils.TimingsPrefix+t.ID, result).Err
+}
+
+func (rs *RedisStorage) RemoveTiming(id string, transactionID string) (err error) {
+	key := utils.TimingsPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

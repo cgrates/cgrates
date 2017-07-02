@@ -74,6 +74,7 @@ var (
 		Cdrs:            "1",
 		SMCosts:         "1",
 		ResourceLimits:  "1",
+		Timings:         "1",
 	}
 )
 
@@ -99,6 +100,7 @@ type StructVersion struct {
 	Cdrs           string
 	SMCosts        string
 	ResourceLimits string
+	Timings        string
 }
 
 type MigrationInfo struct {
