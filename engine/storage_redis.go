@@ -73,7 +73,8 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns i
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
-	return &RedisStorage{dbPool: p, maxConns: maxConns, ms: mrshler, cacheCfg: cacheCfg, loadHistorySize: loadHistorySize}, nil
+	return &RedisStorage{dbPool: p, maxConns: maxConns, ms: mrshler,
+		cacheCfg: cacheCfg, loadHistorySize: loadHistorySize}, nil
 }
 
 // This CMD function get a connection from the pool.
@@ -367,7 +368,7 @@ func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -418,7 +419,7 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool, transaction
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -478,7 +479,7 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool, transactionID string)
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -516,7 +517,7 @@ func (rs *RedisStorage) GetDestination(key string, skipCache bool, transactionID
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -684,7 +685,7 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool, transactionID str
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -721,7 +722,7 @@ func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool, transactionID
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -787,7 +788,7 @@ func (rs *RedisStorage) RemoveAccount(key string) (err error) {
 func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
 	var values []byte
 	if values, err = rs.Cmd("GET", utils.CDR_STATS_QUEUE_PREFIX+key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -816,7 +817,7 @@ func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err
 	for _, key := range keys {
 		var values []byte
 		if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-			if err.Error() == "wrong type" { // did not find the destination
+			if err == redis.ErrRespNil { // did not find the destination
 				err = utils.ErrNotFound
 			}
 			return
@@ -854,7 +855,7 @@ func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
 func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
 	var values []byte
 	if values, err = rs.Cmd("GET", utils.USERS_PREFIX+key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -901,7 +902,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool, transactionID strin
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", cacheKey).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
@@ -1082,7 +1083,7 @@ func (rs *RedisStorage) GetActionTriggers(key string, skipCache bool, transactio
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -1133,7 +1134,7 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool, transactionID 
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -1218,7 +1219,7 @@ func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool, tra
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -1305,7 +1306,7 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool, transacti
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -1349,7 +1350,7 @@ func (rs *RedisStorage) SetCdrStats(cs *CdrStats) error {
 func (rs *RedisStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 	var values []byte
 	if values, err = rs.Cmd("GET", utils.CDR_STATS_PREFIX+key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1389,7 +1390,7 @@ func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
 func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	var values []byte
 	if values, err = rs.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			err = utils.ErrNotFound
 		}
 		return
@@ -1410,7 +1411,7 @@ func (rs *RedisStorage) GetResourceLimit(id string, skipCache bool, transactionI
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -1456,7 +1457,7 @@ func (rs *RedisStorage) GetTiming(id string, skipCache bool, transactionID strin
 	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
@@ -1543,7 +1544,7 @@ func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 	// Not found in cache, check in DB
 	fldValBytes, err := rs.Cmd("HGET", dbKey, fieldValKey).Bytes()
 	if err != nil {
-		if err.Error() == "wrong type" { // did not find the destination
+		if err == redis.ErrRespNil { // did not find the destination
 			cache.Set(cacheKey, nil, true, utils.NonTransactional)
 			err = utils.ErrNotFound
 		}
