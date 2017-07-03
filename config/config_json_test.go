@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+
 )
 
 var dfCgrJsonCfg *CgrJsonCfg
@@ -97,7 +98,10 @@ func TestCacheJsonCfg(t *testing.T) {
 			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
 		Resource_limits: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),
 			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
+		Timings: &CacheParamJsonCfg{Limit: utils.IntPointer(10000),
+			Ttl: utils.StringPointer("0s"), Precache: utils.BoolPointer(false)},
 	}
+
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
