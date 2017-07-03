@@ -399,8 +399,6 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			}
 		}
 		cc.Timespans.Decompress()
-		fmt.Printf("Balance.debitUnits, cd: \n%s\n, account: \n%s\n, moneyBalances: \n%s\n, count: %v, dryRun: %v, debitConnectFee: %v, cc: \n%s\n",
-			utils.ToJSON(cd), utils.ToJSON(ub), utils.ToJSON(moneyBalances), count, dryRun, debitConnectFee, utils.ToJSON(cc))
 		//log.Printf("CC: %+v", cc)
 
 		for tsIndex, ts := range cc.Timespans {
