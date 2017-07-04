@@ -402,6 +402,45 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	}
 
 }
+func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
+	eCacheCfg := &CacheConfig{
+		Destinations: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ReverseDestinations: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		RatingPlans: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: true},
+		RatingProfiles: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		Lcr: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		CdrStats: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		Actions: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ActionPlans: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		AccountActionPlans: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ActionTriggers: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		SharedGroups: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		Aliases: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ReverseAliases: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		DerivedChargers: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ResourceLimits: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		Timings: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+	}
+ if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheConfig) {
+		 t.Errorf("received: %+v, expecting: %+v", eCacheCfg, cgrCfg.CacheConfig)
+	}
+}
 
 func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
 	eSmFsCfg := &SmFsConfig{

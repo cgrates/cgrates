@@ -187,3 +187,47 @@ func TestDateseriesDaysInYear(t *testing.T) {
 		t.Error("error calculating days: ", n)
 	}
 }
+
+func TestDateseriesWeekDaysEquals(t *testing.T) {
+	wds1 := WeekDays{time.Monday, time.Saturday, time.Sunday}
+	wds2 := WeekDays{time.Monday, time.Saturday, time.Sunday}
+	wds3 := WeekDays{time.Monday}
+	if wds1.Equals(wds2) != true {
+		t.Errorf("Expected: true, got: %v",!true)
+	}else if wds1.Equals(wds3) !=false {
+		t.Errorf("Expected: false, got: %v",!false)
+	}
+}
+
+	func TestDateseriesMonthsEquals(t *testing.T) {
+	m1 := Months{5, 6, 7, 8}
+	m2 := Months{5, 6, 7, 8}
+	m3 := Months{}
+	 if m1.Equals(m2) !=true {
+		 t.Errorf("Expected: true, got: %v",!true)
+	}else if m1.Equals(m3) !=false {
+		t.Errorf("Expected: false, got: %v",!false)
+	}
+}
+
+	func TestDateseriesMonthDayssEquals(t *testing.T) {
+	md1 := MonthDays{24, 25, 26}
+	md2 := MonthDays{24, 25, 26}
+	md3 := MonthDays{}
+	if md1.Equals(md2) !=true {
+t.Errorf("Expected: true, got: %v",!true)
+	}else if md1.Equals(md3) !=false {
+t.Errorf("Expected: false, got: %v",!false)
+	}
+}
+
+func TestDateseriesYearsEquals(t *testing.T) {
+	ys1 := Years{2013, 2014, 2015}
+	ys2 := Years{2013, 2014, 2015}
+	ys3 := Years{}
+	if ys1.Equals(ys2) !=true {
+		t.Errorf("Expected: true, got: %v",!true)
+	}else if ys1.Equals(ys3) !=false {
+		t.Errorf("Expected: false, got: %v",!false)
+	}
+}
