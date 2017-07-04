@@ -283,3 +283,39 @@ func TestDateseriesYearsParse(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", ys2, ys1)
 	}
 }
+
+func TestDateseriesWeekDaysContains(t *testing.T) {
+	wds := WeekDays{time.Monday, time.Tuesday}
+	if wds.Contains(time.Monday) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if wds.Contains(time.Wednesday) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesMonthsContains(t *testing.T) {
+	m := Months{5, 6, 7, 8}
+	if m.Contains(5) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if m.Contains(4) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesMonthDaysContains(t *testing.T) {
+	md := MonthDays{24, 25, 26}
+	if md.Contains(24) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if md.Contains(23) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesYearsContains(t *testing.T) {
+	ys := Years{2013, 2014, 2015}
+	if ys.Contains(2013) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if ys.Contains(2012) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
