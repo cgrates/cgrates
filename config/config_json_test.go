@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
-
 )
 
 var dfCgrJsonCfg *CgrJsonCfg
