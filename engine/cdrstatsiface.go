@@ -30,7 +30,7 @@ import (
 type StatsInterface interface {
 	GetValues(string, *map[string]float64) error
 	GetQueueIds(int, *[]string) error
-	GetQueue(string, *StatsQueue) error
+	GetQueue(string, *CDRStatsQueue) error
 	GetQueueTriggers(string, *ActionTriggers) error
 	AppendCDR(*CDR, *int) error
 	AddQueue(*CdrStats, *int) error
@@ -41,7 +41,7 @@ type StatsInterface interface {
 }
 
 type Stats struct {
-	queues              map[string]*StatsQueue
+	queues              map[string]*CDRStatsQueue
 	queueSavers         map[string]*queueSaver
 	mux                 sync.RWMutex
 	dataDB              DataDB
@@ -52,18 +52,18 @@ type queueSaver struct {
 	ticker  *time.Ticker
 	stopper chan bool
 	save    func(*queueSaver)
-	sq      *StatsQueue
+	sq      *CDRStatsQueue
 	dataDB  DataDB
 }
 
-func newQueueSaver(saveInterval time.Duration, sq *StatsQueue, db DataDB) *queueSaver {
+func newQueueSaver(saveInterval time.Duration, sq *CDRStatsQueue, db DataDB) *queueSaver {
 	svr := &queueSaver{
 		ticker:  time.NewTicker(saveInterval),
 		stopper: make(chan bool),
 		sq:      sq,
 		dataDB:  db,
 	}
-	go func(saveInterval time.Duration, sq *StatsQueue, db DataDB) {
+	go func(saveInterval time.Duration, sq *CDRStatsQueue, db DataDB) {
 		for {
 			select {
 			case <-svr.ticker.C:
@@ -103,7 +103,7 @@ func (s *Stats) GetQueueIds(in int, ids *[]string) error {
 	return nil
 }
 
-func (s *Stats) GetQueue(id string, sq *StatsQueue) error {
+func (s *Stats) GetQueue(id string, sq *CDRStatsQueue) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	q, found := s.queues[id]
@@ -143,17 +143,17 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	if s.queues == nil {
-		s.queues = make(map[string]*StatsQueue)
+		s.queues = make(map[string]*CDRStatsQueue)
 	}
 	if s.queueSavers == nil {
 		s.queueSavers = make(map[string]*queueSaver)
 	}
-	var sq *StatsQueue
+	var sq *CDRStatsQueue
 	var exists bool
 	if sq, exists = s.queues[cs.Id]; exists {
 		sq.UpdateConf(cs)
 	} else {
-		sq = NewStatsQueue(cs)
+		sq = NewCDRStatsQueue(cs)
 		s.queues[cs.Id] = sq
 	}
 	// save the conf
@@ -170,7 +170,7 @@ func (s *Stats) RemoveQueue(qID string, out *int) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	if s.queues == nil {
-		s.queues = make(map[string]*StatsQueue)
+		s.queues = make(map[string]*CDRStatsQueue)
 	}
 	if s.queueSavers == nil {
 		s.queueSavers = make(map[string]*queueSaver)
@@ -238,10 +238,10 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	defer s.mux.Unlock()
 	oldQueues := s.queues
 	oldSavers := s.queueSavers
-	s.queues = make(map[string]*StatsQueue, len(css))
+	s.queues = make(map[string]*CDRStatsQueue, len(css))
 	s.queueSavers = make(map[string]*queueSaver, len(css))
 	for _, cs := range css {
-		var sq *StatsQueue
+		var sq *CDRStatsQueue
 		var existing bool
 		if oldQueues != nil {
 			if sq, existing = oldQueues[cs.Id]; existing {
@@ -251,7 +251,7 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 			}
 		}
 		if sq == nil {
-			sq = NewStatsQueue(cs)
+			sq = NewCDRStatsQueue(cs)
 			// load queue from storage if exists
 			if saved, err := s.dataDB.GetCdrStatsQueue(sq.GetId()); err == nil {
 				sq.Load(saved)
@@ -267,7 +267,7 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	return nil
 }
 
-func (s *Stats) setupQueueSaver(sq *StatsQueue) {
+func (s *Stats) setupQueueSaver(sq *CDRStatsQueue) {
 	if sq == nil {
 		return
 	}

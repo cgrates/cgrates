@@ -24,15 +24,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestStatsQueueInit(t *testing.T) {
-	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACC}})
+func TestCDRStatsQueueInit(t *testing.T) {
+	sq := NewCDRStatsQueue(&CdrStats{Metrics: []string{ASR, ACC}})
 	if len(sq.metrics) != 2 {
 		t.Error("Expected 2 metrics got ", len(sq.metrics))
 	}
 }
 
 func TestStatsValue(t *testing.T) {
-	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}})
+	sq := NewCDRStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}})
 	cdr := &CDR{
 		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -72,7 +72,7 @@ func TestStatsSimplifyCDR(t *testing.T) {
 		RunID:       "mri",
 		Cost:        10,
 	}
-	sq := &StatsQueue{}
+	sq := &CDRStatsQueue{}
 	qcdr := sq.simplifyCdr(cdr)
 	if cdr.SetupTime != qcdr.SetupTime ||
 		cdr.AnswerTime != qcdr.AnswerTime ||
@@ -83,7 +83,7 @@ func TestStatsSimplifyCDR(t *testing.T) {
 }
 
 func TestAcceptCdr(t *testing.T) {
-	sq := NewStatsQueue(nil)
+	sq := NewCDRStatsQueue(nil)
 	cdr := &CDR{
 		ToR:             "tor",
 		OriginID:        "accid",
@@ -194,7 +194,7 @@ func TestAcceptCdr(t *testing.T) {
 	}
 }
 
-func TestStatsQueueIds(t *testing.T) {
+func TestCDRStatsQueueIds(t *testing.T) {
 	cdrStats := NewStats(dataStorage, 0)
 	ids := []string{}
 	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
@@ -443,7 +443,7 @@ func TestStatsResetQueuesWithIds(t *testing.T) {
 }
 
 func TestStatsSaveRestoreQeue(t *testing.T) {
-	sq := &StatsQueue{
+	sq := &CDRStatsQueue{
 		conf: &CdrStats{Id: "TTT"},
 		Cdrs: []*QCdr{&QCdr{Cost: 9.0}},
 	}
@@ -460,7 +460,7 @@ func TestStatsSaveRestoreQeue(t *testing.T) {
 }
 
 func TestStatsPurgeTimeOne(t *testing.T) {
-	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	sq := NewCDRStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
 	cdr := &CDR{
 		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -480,7 +480,7 @@ func TestStatsPurgeTimeOne(t *testing.T) {
 }
 
 func TestStatsPurgeTime(t *testing.T) {
-	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	sq := NewCDRStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
 	cdr := &CDR{
 		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -506,7 +506,7 @@ func TestStatsPurgeTime(t *testing.T) {
 }
 
 func TestStatsPurgeTimeFirst(t *testing.T) {
-	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	sq := NewCDRStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
 	cdr := &CDR{
 		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -532,7 +532,7 @@ func TestStatsPurgeTimeFirst(t *testing.T) {
 }
 
 func TestStatsPurgeLength(t *testing.T) {
-	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, QueueLength: 1})
+	sq := NewCDRStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, QueueLength: 1})
 	cdr := &CDR{
 		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),

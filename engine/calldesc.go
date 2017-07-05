@@ -1090,21 +1090,21 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 				} else if rpf != nil {
 					rpf.RatingPlanActivations.Sort()
 					activeRas := rpf.RatingPlanActivations.GetActiveForCall(cd)
-					var cdrStatsQueueIds []string
+					var cdrCDRStatsQueueIds []string
 					for _, ra := range activeRas {
 						for _, qId := range ra.CdrStatQueueIds {
 							if qId != "" {
-								cdrStatsQueueIds = append(cdrStatsQueueIds, qId)
+								cdrCDRStatsQueueIds = append(cdrCDRStatsQueueIds, qId)
 							}
 						}
 					}
 
 					statsErr := false
-					var supplierQueues []*StatsQueue
-					for _, qId := range cdrStatsQueueIds {
+					var supplierQueues []*CDRStatsQueue
+					for _, qId := range cdrCDRStatsQueueIds {
 						if lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
-							for _, qId := range cdrStatsQueueIds {
-								sq := &StatsQueue{}
+							for _, qId := range cdrCDRStatsQueueIds {
+								sq := &CDRStatsQueue{}
 								if err := stats.Call("CDRStatsV1.GetQueue", qId, sq); err == nil {
 									if sq.conf.QueueLength == 0 { //only add qeues that don't have fixed length
 										supplierQueues = append(supplierQueues, sq)

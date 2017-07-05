@@ -252,7 +252,7 @@ func TestTpExecuteActionCgrRpcCdrStats(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
 	}
-	var queue engine.StatsQueue
+	var queue engine.CDRStatsQueue
 	time.Sleep(20 * time.Millisecond)
 	if err := tpRPC.Call("CDRStatsV1.GetQueue", "qtest", &queue); err != nil {
 		t.Error("Got error on CDRStatsV1.GetQueue: ", err.Error())

@@ -45,7 +45,7 @@ func (sts *CDRStatsV1) GetQueueIds(empty string, reply *[]string) error {
 	return sts.CdrStats.Call("CDRStatsV1.GetQueueIds", 0, reply)
 }
 
-func (sts *CDRStatsV1) GetQueue(id string, sq *engine.StatsQueue) error {
+func (sts *CDRStatsV1) GetQueue(id string, sq *engine.CDRStatsQueue) error {
 	return sts.CdrStats.Call("CDRStatsV1.GetQueue", id, sq)
 }
 

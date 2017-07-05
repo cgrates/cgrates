@@ -785,7 +785,7 @@ func (rs *RedisStorage) RemoveAccount(key string) (err error) {
 
 }
 
-func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
+func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err error) {
 	var values []byte
 	if values, err = rs.Cmd("GET", utils.CDR_STATS_QUEUE_PREFIX+key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
@@ -793,14 +793,14 @@ func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error)
 		}
 		return
 	}
-	sq = new(StatsQueue)
+	sq = new(CDRStatsQueue)
 	if err = rs.ms.Unmarshal(values, &sq); err != nil {
 		return nil, err
 	}
 	return
 }
 
-func (rs *RedisStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
+func (rs *RedisStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sq); err != nil {
 		return

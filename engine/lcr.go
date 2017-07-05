@@ -162,7 +162,7 @@ type LCRSupplierCost struct {
 	Error          string // Not error due to JSON automatic serialization into struct
 	QOS            map[string]float64
 	qosSortParams  []string
-	supplierQueues []*StatsQueue // used for load distribution
+	supplierQueues []*CDRStatsQueue // used for load distribution
 }
 
 func (lcr *LCR) GetId() string {
@@ -336,7 +336,7 @@ func (lc *LCRCost) SortLoadDistribution() {
 			}
 		}
 	}
-	supplierQueues := make(map[*LCRSupplierCost]*StatsQueue)
+	supplierQueues := make(map[*LCRSupplierCost]*CDRStatsQueue)
 	for _, supCost := range lc.SupplierCosts {
 		for _, sq := range supCost.supplierQueues {
 			if sq.conf.TimeWindow == winnerTimeWindow {

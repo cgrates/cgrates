@@ -1461,7 +1461,7 @@ func testOnStorITCRUDAccount(t *testing.T) {
 }
 
 func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
-	sq := &StatsQueue{
+	sq := &CDRStatsQueue{
 		conf: &CdrStats{Id: "TTT"},
 		Cdrs: []*QCdr{
 			&QCdr{Cost: 9.0,
