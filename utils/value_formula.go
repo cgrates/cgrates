@@ -107,10 +107,10 @@ func incrementalFormula(params map[string]interface{}) float64 {
 			return units / 24
 		}
 		if interval == "month" {
-			return units / ( DaysInMonth(now.Year(), now.Month()) * 24 )
+			return units / (DaysInMonth(now.Year(), now.Month()) * 24)
 		}
 		if interval == "year" {
-			return units / ( DaysInYear(now.Year()) * 24 )
+			return units / (DaysInYear(now.Year()) * 24)
 		}
 	}
 	if increment == "minute" {

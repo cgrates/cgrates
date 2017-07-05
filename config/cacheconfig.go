@@ -158,5 +158,11 @@ func (self *CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) error {
 			return err
 		}
 	}
+	if jsnCfg.Timings != nil {
+		self.Timings = &CacheParamConfig{}
+		if err := self.Timings.loadFromJsonCfg(jsnCfg.Timings); err != nil {
+			return err
+		}
+	}
 	return nil
 }

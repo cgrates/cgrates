@@ -263,6 +263,7 @@ type CacheJsonCfg struct {
 	Reverse_aliases      *CacheParamJsonCfg
 	Derived_chargers     *CacheParamJsonCfg
 	Resource_limits      *CacheParamJsonCfg
+	Timings              *CacheParamJsonCfg
 }
 
 // Represents one connection instance towards FreeSWITCH

@@ -187,3 +187,135 @@ func TestDateseriesDaysInYear(t *testing.T) {
 		t.Error("error calculating days: ", n)
 	}
 }
+
+func TestDateseriesWeekDaysEquals(t *testing.T) {
+	wds1 := WeekDays{time.Monday, time.Saturday, time.Sunday}
+	wds2 := WeekDays{time.Monday, time.Saturday, time.Sunday}
+	wds3 := WeekDays{time.Monday}
+	if wds1.Equals(wds2) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if wds1.Equals(wds3) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesMonthsEquals(t *testing.T) {
+	m1 := Months{5, 6, 7, 8}
+	m2 := Months{5, 6, 7, 8}
+	m3 := Months{}
+	if m1.Equals(m2) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if m1.Equals(m3) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesMonthDaysEquals(t *testing.T) {
+	md1 := MonthDays{24, 25, 26}
+	md2 := MonthDays{24, 25, 26}
+	md3 := MonthDays{}
+	if md1.Equals(md2) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if md1.Equals(md3) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesYearsEquals(t *testing.T) {
+	ys1 := Years{2013, 2014, 2015}
+	ys2 := Years{2013, 2014, 2015}
+	ys3 := Years{}
+	if ys1.Equals(ys2) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if ys1.Equals(ys3) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesWeekDaysParse(t *testing.T) {
+	wds1 := WeekDays{}
+	in := "1,2,3"
+	wds2 := WeekDays{time.Monday, time.Tuesday, time.Wednesday}
+	if reflect.DeepEqual(wds2, wds1) != false {
+		t.Errorf("Expected: %+v, received: %+v", WeekDays{}, wds1)
+	}
+	wds1.Parse(in, ",")
+	if !reflect.DeepEqual(wds2, wds1) {
+		t.Errorf("Expected: %+v, received: %+v", wds2, wds1)
+	}
+}
+
+func TestDateseriesMonthsParse(t *testing.T) {
+	m1 := Months{}
+	m2 := Months{5, 6, 7, 8}
+	in := "5,6,7,8"
+	if reflect.DeepEqual(m2, m1) != false {
+		t.Errorf("Expected: %+v, received: %+v", Months{}, m1)
+	}
+	m1.Parse(in, ",")
+	if !reflect.DeepEqual(m2, m1) {
+		t.Errorf("Expected: %+v, received: %+v", m2, m1)
+	}
+}
+
+func TestDateseriesMonthDaysParse(t *testing.T) {
+	md1 := MonthDays{}
+	md2 := MonthDays{24, 25, 26}
+	in := "24,25,26"
+	if reflect.DeepEqual(md2, md1) != false {
+		t.Errorf("Expected: %+v, received: %+v", MonthDays{}, md1)
+	}
+	md1.Parse(in, ",")
+	if !reflect.DeepEqual(md2, md1) {
+		t.Errorf("Expected: %+v, received: %+v", md2, md1)
+	}
+}
+
+func TestDateseriesYearsParse(t *testing.T) {
+	ys1 := Years{}
+	ys2 := Years{2013, 2014, 2015}
+	in := "2013,2014,2015"
+	if reflect.DeepEqual(ys2, ys1) != false {
+		t.Errorf("Expected: %+v, received: %+v", Years{}, ys1)
+	}
+	ys1.Parse(in, ",")
+	if !reflect.DeepEqual(ys2, ys1) {
+		t.Errorf("Expected: %+v, received: %+v", ys2, ys1)
+	}
+}
+
+func TestDateseriesWeekDaysContains(t *testing.T) {
+	wds := WeekDays{time.Monday, time.Tuesday}
+	if wds.Contains(time.Monday) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if wds.Contains(time.Wednesday) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesMonthsContains(t *testing.T) {
+	m := Months{5, 6, 7, 8}
+	if m.Contains(5) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if m.Contains(4) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesMonthDaysContains(t *testing.T) {
+	md := MonthDays{24, 25, 26}
+	if md.Contains(24) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if md.Contains(23) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
+
+func TestDateseriesYearsContains(t *testing.T) {
+	ys := Years{2013, 2014, 2015}
+	if ys.Contains(2013) != true {
+		t.Errorf("Expected: true, got: %v", !true)
+	} else if ys.Contains(2012) != false {
+		t.Errorf("Expected: false, got: %v", !false)
+	}
+}
