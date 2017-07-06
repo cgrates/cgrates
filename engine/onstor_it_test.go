@@ -1123,13 +1123,13 @@ func testOnStorITCRUDLCR(t *testing.T) {
 func testOnStorITCRUDCdrStats(t *testing.T) {
 	cdrs := &CdrStats{Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}
 
-	if _, rcvErr := onStor.GetCdrStats(utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetCdrStats(""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetCdrStats(cdrs); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetCdrStats(utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetCdrStats(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cdrs.Metrics, rcv.Metrics) {
 		t.Errorf("Expecting: %v, received: %v", cdrs.Metrics, rcv.Metrics)
