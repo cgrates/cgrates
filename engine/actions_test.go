@@ -1376,7 +1376,7 @@ func TestActionSetDDestination(t *testing.T) {
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "666": 1}}, nil, nil)
+	setddestinations(acc, &CDRStatsQueueTriggered{Metrics: map[string]float64{"333": 1, "666": 1}}, nil, nil)
 	d, err := dataStorage.GetDestination("*ddc_test", false, utils.NonTransactional)
 	if err != nil ||
 		d.Id != origD.Id ||

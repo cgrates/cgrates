@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type StatsQueue struct {
+type CDRStatsQueue struct {
 	Cdrs    []*QCdr
 	conf    *CdrStats
 	metrics map[string]Metric
@@ -62,16 +62,16 @@ type QCdr struct {
 	Dest       string
 }
 
-func NewStatsQueue(conf *CdrStats) *StatsQueue {
+func NewCDRStatsQueue(conf *CdrStats) *CDRStatsQueue {
 	if conf == nil {
-		return &StatsQueue{metrics: make(map[string]Metric)}
+		return &CDRStatsQueue{metrics: make(map[string]Metric)}
 	}
-	sq := &StatsQueue{}
+	sq := &CDRStatsQueue{}
 	sq.UpdateConf(conf)
 	return sq
 }
 
-func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
+func (sq *CDRStatsQueue) UpdateConf(conf *CdrStats) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	// check if new conf asks for action trigger reset only
@@ -93,7 +93,7 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	}
 }
 
-func (sq *StatsQueue) Save(db DataDB) {
+func (sq *CDRStatsQueue) Save(db DataDB) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	if sq.dirty {
@@ -111,7 +111,7 @@ func (sq *StatsQueue) Save(db DataDB) {
 	}
 }
 
-func (sq *StatsQueue) Load(saved *StatsQueue) {
+func (sq *CDRStatsQueue) Load(saved *CDRStatsQueue) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	sq.Cdrs = saved.Cdrs
@@ -120,7 +120,7 @@ func (sq *StatsQueue) Load(saved *StatsQueue) {
 	}
 }
 
-func (sq *StatsQueue) AppendCDR(cdr *CDR) *QCdr {
+func (sq *CDRStatsQueue) AppendCDR(cdr *CDR) *QCdr {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	var qcdr *QCdr
@@ -131,7 +131,7 @@ func (sq *StatsQueue) AppendCDR(cdr *CDR) *QCdr {
 	return qcdr
 }
 
-func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
+func (sq *CDRStatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 	qcdr.EventTime = time.Now() //used for TimeWindow
 	sq.Cdrs = append(sq.Cdrs, qcdr)
 	sq.addToMetrics(qcdr)
@@ -174,7 +174,7 @@ func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 	}
 }
 
-func (sq *StatsQueue) GetTriggerLastExecution(trigger_id *string) time.Time {
+func (sq *CDRStatsQueue) GetTriggerLastExecution(trigger_id *string) time.Time {
 	for _, trigger := range sq.conf.Triggers {
 		if trigger.ID == *trigger_id {
 			return trigger.LastExecutionTime
@@ -183,20 +183,20 @@ func (sq *StatsQueue) GetTriggerLastExecution(trigger_id *string) time.Time {
 	return time.Time{}
 }
 
-func (sq *StatsQueue) addToMetrics(cdr *QCdr) {
+func (sq *CDRStatsQueue) addToMetrics(cdr *QCdr) {
 	//log.Print("AddToMetrics: " + utils.ToIJSON(cdr))
 	for _, metric := range sq.metrics {
 		metric.AddCdr(cdr)
 	}
 }
 
-func (sq *StatsQueue) removeFromMetrics(cdr *QCdr) {
+func (sq *CDRStatsQueue) removeFromMetrics(cdr *QCdr) {
 	for _, metric := range sq.metrics {
 		metric.RemoveCdr(cdr)
 	}
 }
 
-func (sq *StatsQueue) simplifyCdr(cdr *CDR) *QCdr {
+func (sq *CDRStatsQueue) simplifyCdr(cdr *CDR) *QCdr {
 	return &QCdr{
 		SetupTime:  cdr.SetupTime,
 		AnswerTime: cdr.AnswerTime,
@@ -207,7 +207,7 @@ func (sq *StatsQueue) simplifyCdr(cdr *CDR) *QCdr {
 	}
 }
 
-func (sq *StatsQueue) purgeObsoleteCdrs() {
+func (sq *CDRStatsQueue) purgeObsoleteCdrs() {
 	if sq.conf.QueueLength > 0 {
 		currentLength := len(sq.Cdrs)
 		if currentLength > sq.conf.QueueLength {
@@ -237,14 +237,14 @@ func (sq *StatsQueue) purgeObsoleteCdrs() {
 	}
 }
 
-func (sq *StatsQueue) GetStats() map[string]float64 {
+func (sq *CDRStatsQueue) GetStats() map[string]float64 {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	sq.purgeObsoleteCdrs()
 	return sq.getStats()
 }
 
-func (sq *StatsQueue) getStats() map[string]float64 {
+func (sq *CDRStatsQueue) getStats() map[string]float64 {
 	stat := make(map[string]float64, len(sq.metrics))
 	for key, metric := range sq.metrics {
 		stat[key] = metric.GetValue()
@@ -252,18 +252,18 @@ func (sq *StatsQueue) getStats() map[string]float64 {
 	return stat
 }
 
-func (sq *StatsQueue) GetId() string {
+func (sq *CDRStatsQueue) GetId() string {
 	return sq.conf.Id
 }
 
 // Convert data into a struct which can be used in actions based on triggers hit
-func (sq *StatsQueue) Triggered(at *ActionTrigger) *StatsQueueTriggered {
-	return &StatsQueueTriggered{Id: sq.conf.Id, Metrics: sq.getStats(), Trigger: at}
+func (sq *CDRStatsQueue) Triggered(at *ActionTrigger) *CDRStatsQueueTriggered {
+	return &CDRStatsQueueTriggered{Id: sq.conf.Id, Metrics: sq.getStats(), Trigger: at}
 }
 
 // Struct to be passed to triggered actions
-type StatsQueueTriggered struct {
-	Id      string // StatsQueueId
+type CDRStatsQueueTriggered struct {
+	Id      string // CDRStatsQueueId
 	Metrics map[string]float64
 	Trigger *ActionTrigger
 }

@@ -828,11 +828,11 @@ func (ms *MapStorage) RemoveAccount(key string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
+func (ms *MapStorage) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	if values, ok := ms.dict[utils.CDR_STATS_QUEUE_PREFIX+key]; ok {
-		sq = &StatsQueue{}
+		sq = &CDRStatsQueue{}
 		err = ms.ms.Unmarshal(values, sq)
 	} else {
 		return nil, utils.ErrNotFound
@@ -840,7 +840,7 @@ func (ms *MapStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
 	return
 }
 
-func (ms *MapStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
+func (ms *MapStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sq)

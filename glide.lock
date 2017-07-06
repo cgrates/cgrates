@@ -12,13 +12,13 @@ imports:
 - name: github.com/cgrates/aringo
   version: 47cdb110c5ff42bddf2b801dc5ae8ceb15d2d602
 - name: github.com/cgrates/fsock
-  version: a8ffdbdfc8440016df008ba91e6f05f806d7a69f
+  version: 5b60f0d72ff4f8885289bffab55435e5b8adfb55
 - name: github.com/cgrates/kamevapi
   version: a376b1f937ba959857929fa3e111c0f3243278c0
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/radigo
-  version: b3ea6cb087f3ecdc1b4e611df206521d96af1472
+  version: 4351b1d135e822472a2759ae1c95f103cf51df60
 - name: github.com/cgrates/rpcclient
   version: dddae42e9344e877627cd4b7aba075d63b452c0b
 - name: github.com/ChrisTrenkamp/goxpath

@@ -292,7 +292,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
 func (sm *FSSessionManager) Connect() error {
-	eventFilters := map[string]string{"Call-Direction": "inbound"}
+	eventFilters := map[string][]string{"Call-Direction": []string{"inbound"}}
 	errChan := make(chan error)
 	for _, connCfg := range sm.cfg.EventSocketConns {
 		connId := utils.GenUUID()
@@ -311,7 +311,7 @@ func (sm *FSSessionManager) Connect() error {
 			}
 		}()
 		if fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
-			make(map[string][]func(string, string)), make(map[string]string), utils.Logger.GetSyslog(), connId); err != nil {
+			make(map[string][]func(string, string)), make(map[string][]string), utils.Logger.GetSyslog(), connId); err != nil {
 			return fmt.Errorf("Cannot connect FreeSWITCH senders pool, error: %s", err.Error())
 		} else if fsSenderPool == nil {
 			return errors.New("Cannot connect FreeSWITCH senders pool.")

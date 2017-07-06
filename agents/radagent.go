@@ -44,19 +44,21 @@ const (
 )
 
 func NewRadiusAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection) (ra *RadiusAgent, err error) {
-	dicts := make(map[string]*radigo.Dictionary, len(cgrCfg.RadiusAgentCfg().ClientDictionaries))
+	dts := make(map[string]*radigo.Dictionary, len(cgrCfg.RadiusAgentCfg().ClientDictionaries))
 	for clntID, dictPath := range cgrCfg.RadiusAgentCfg().ClientDictionaries {
-		if dicts[clntID], err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
+		if dts[clntID], err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
 			return
 		}
 	}
+	dicts := radigo.NewDictionaries(dts)
 	ra = &RadiusAgent{cgrCfg: cgrCfg, smg: smg}
+	secrets := radigo.NewSecrets(cgrCfg.RadiusAgentCfg().ClientSecrets)
 	ra.rsAuth = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
-		cgrCfg.RadiusAgentCfg().ListenAuth, cgrCfg.RadiusAgentCfg().ClientSecrets, dicts,
+		cgrCfg.RadiusAgentCfg().ListenAuth, secrets, dicts,
 		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
 			radigo.AccessRequest: ra.handleAuth}, nil)
 	ra.rsAcct = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
-		cgrCfg.RadiusAgentCfg().ListenAcct, cgrCfg.RadiusAgentCfg().ClientSecrets, dicts,
+		cgrCfg.RadiusAgentCfg().ListenAcct, secrets, dicts,
 		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
 			radigo.AccountingRequest: ra.handleAcct}, nil)
 	return

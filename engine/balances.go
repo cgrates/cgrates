@@ -371,7 +371,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				inc.paid = false
 				// delete the rest of the unpiad increments/timespans
 				if incIndex == 0 {
-					// cat the entire current timespan
+					// cut the entire current timespan
 					cc.Timespans = nil
 				} else {
 					ts.SplitByIncrement(incIndex)
@@ -446,11 +446,11 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				cost := inc.Cost
 				inc.paid = false
 				if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
-					// cat the entire current timespan
+					// cut the entire current timespan
 					cc.maxCostDisconect = true
 					if dryRun {
 						if incIndex == 0 {
-							// cat the entire current timespan
+							// cut the entire current timespan
 							cc.Timespans = cc.Timespans[:tsIndex]
 						} else {
 							ts.SplitByIncrement(incIndex)
@@ -481,6 +481,10 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						moneyBal = mb
 						break
 					}
+				}
+				if cost != 0 && moneyBal == nil && (!dryRun || ub.AllowNegative) { // Fix for issue #685
+					utils.Logger.Err(fmt.Sprintf("<RALs> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
+					moneyBal = ub.GetDefaultMoneyBalance()
 				}
 				if (cost == 0 || moneyBal != nil) && b.GetValue() >= amount {
 					b.SubstractValue(amount)
@@ -514,7 +518,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					inc.paid = false
 					// delete the rest of the unpiad increments/timespans
 					if incIndex == 0 {
-						// cat the entire current timespan
+						// cut the entire current timespan
 						cc.Timespans = cc.Timespans[:tsIndex]
 					} else {
 						ts.SplitByIncrement(incIndex)
@@ -603,11 +607,11 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			amount := inc.Cost
 			inc.paid = false
 			if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
-				// cat the entire current timespan
+				// cut the entire current timespan
 				cc.maxCostDisconect = true
 				if dryRun {
 					if incIndex == 0 {
-						// cat the entire current timespan
+						// cut the entire current timespan
 						cc.Timespans = cc.Timespans[:tsIndex]
 					} else {
 						ts.SplitByIncrement(incIndex)
@@ -657,7 +661,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				inc.paid = false
 				// delete the rest of the unpiad increments/timespans
 				if incIndex == 0 {
-					// cat the entire current timespan
+					// cut the entire current timespan
 					cc.Timespans = cc.Timespans[:tsIndex]
 				} else {
 					ts.SplitByIncrement(incIndex)

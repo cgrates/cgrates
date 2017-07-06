@@ -55,5 +55,5 @@ func (self *CmdCdrStatsQueue) PostprocessRpcParams() error {
 }
 
 func (self *CmdCdrStatsQueue) RpcResult() interface{} {
-	return &engine.StatsQueue{}
+	return &engine.CDRStatsQueue{}
 }
