@@ -47,7 +47,6 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 		{"address": "1.2.3.5:8021", "password": "ClueCon", "reconnects": 5}
 	],
 },
-
 }`
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.SmFsConfig.Enabled = true
@@ -59,6 +58,314 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrCfg.SmFsConfig, cgrCfg.SmFsConfig) {
 		t.Errorf("Expected: %+v, received: %+v", eCgrCfg.SmFsConfig, cgrCfg.SmFsConfig)
+	}
+}
+
+func TestCgrCfgLoadJSONDefaults(t *testing.T) {
+	cgrCfg, err = NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
+	if cgrCfg.LogLevel != utils.LOGLEVEL_INFO {
+		t.Error(cgrCfg.LogLevel)
+	}
+	if cgrCfg.HttpSkipTlsVerify != false {
+		t.Error(cgrCfg.HttpSkipTlsVerify)
+	}
+	if cgrCfg.RoundingDecimals != 5 {
+		t.Error(cgrCfg.RoundingDecimals)
+	}
+	if cgrCfg.DBDataEncoding != "msgpack" {
+		t.Error(cgrCfg.DBDataEncoding)
+	}
+	if cgrCfg.TpExportPath != "/var/spool/cgrates/tpe" {
+		t.Error(cgrCfg.TpExportPath)
+	}
+	if cgrCfg.PosterAttempts != 3 {
+		t.Error(cgrCfg.PosterAttempts)
+	}
+	if cgrCfg.FailedPostsDir != "/var/spool/cgrates/failed_posts" {
+		t.Error(cgrCfg.FailedPostsDir)
+	}
+	if cgrCfg.DefaultReqType != "*rated" {
+		t.Error(cgrCfg.DefaultReqType)
+	}
+	if cgrCfg.DefaultCategory != "call" {
+		t.Error(cgrCfg.DefaultCategory)
+	}
+	if cgrCfg.DefaultTenant != "cgrates.org" {
+		t.Error(cgrCfg.DefaultTenant)
+	}
+	if cgrCfg.DefaultTimezone != "Local" {
+		t.Error(cgrCfg.DefaultTimezone)
+	}
+	if cgrCfg.ConnectAttempts != 3 {
+		t.Error(cgrCfg.ConnectAttempts)
+	}
+	if cgrCfg.Reconnects != -1 {
+		t.Error(cgrCfg.Reconnects)
+	}
+	if cgrCfg.ConnectTimeout != 1*time.Second {
+		t.Error(cgrCfg.ConnectTimeout)
+	}
+	if cgrCfg.ReplyTimeout != 2*time.Second {
+		t.Error(cgrCfg.ReplyTimeout)
+	}
+	if cgrCfg.ResponseCacheTTL != 0*time.Second {
+		t.Error(cgrCfg.ResponseCacheTTL)
+	}
+	if cgrCfg.InternalTtl != 2*time.Minute {
+		t.Error(cgrCfg.InternalTtl)
+	}
+	if cgrCfg.LockingTimeout != 5*time.Second {
+		t.Error(cgrCfg.LockingTimeout)
+	}
+	if cgrCfg.LogLevel != 6 {
+		t.Error(cgrCfg.LogLevel)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
+	eCacheCfg := &CacheConfig{
+		Destinations: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ReverseDestinations: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		RatingPlans: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: true},
+		RatingProfiles: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		Lcr: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		CdrStats: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		Actions: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ActionPlans: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		AccountActionPlans: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ActionTriggers: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		SharedGroups: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		Aliases: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ReverseAliases: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		DerivedChargers: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		ResourceLimits: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+		Timings: &CacheParamConfig{Limit: 10000,
+			TTL: time.Duration(0 * time.Second), Precache: false},
+	}
+	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheConfig) {
+		t.Errorf("received: %+v, expecting: %+v", eCacheCfg, cgrCfg.CacheConfig)
+	}
+}
+
+func TestCgrCfgJSONDefaultsListen(t *testing.T) {
+	if cgrCfg.RPCJSONListen != "127.0.0.1:2012" {
+		t.Error(cgrCfg.RPCJSONListen)
+	}
+	if cgrCfg.RPCGOBListen != "127.0.0.1:2013" {
+		t.Error(cgrCfg.RPCGOBListen)
+	}
+	if cgrCfg.HTTPListen != "127.0.0.1:2080" {
+		t.Error(cgrCfg.HTTPListen)
+	}
+}
+
+func TestCgrCfgJSONDefaultsHTTP(t *testing.T) {
+	if cgrCfg.HTTPJsonRPCURL != "/jsonrpc" {
+		t.Error(cgrCfg.HTTPJsonRPCURL)
+	}
+	if cgrCfg.HTTPWSURL != "/ws" {
+		t.Error(cgrCfg.HTTPWSURL)
+	}
+	if cgrCfg.HTTPUseBasicAuth != false {
+		t.Error(cgrCfg.HTTPUseBasicAuth)
+	}
+	if !reflect.DeepEqual(cgrCfg.HTTPAuthUsers, map[string]string{}) {
+		t.Error(cgrCfg.HTTPAuthUsers)
+	}
+}
+
+func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
+	if cgrCfg.DataDbType != "redis" {
+		t.Error(cgrCfg.DataDbType)
+	}
+	if cgrCfg.DataDbHost != "127.0.0.1" {
+		t.Error(cgrCfg.DataDbHost)
+	}
+	if cgrCfg.DataDbPort != "6379" {
+		t.Error(cgrCfg.DataDbPort)
+	}
+	if cgrCfg.DataDbName != "10" {
+		t.Error(cgrCfg.DataDbName)
+	}
+	if cgrCfg.DataDbUser != "cgrates" {
+		t.Error(cgrCfg.DataDbUser)
+	}
+	if cgrCfg.DataDbPass != "" {
+		t.Error(cgrCfg.DataDbPass)
+	}
+	if cgrCfg.LoadHistorySize != 10 {
+		t.Error(cgrCfg.LoadHistorySize)
+	}
+}
+
+func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
+	if cgrCfg.StorDBType != "mysql" {
+		t.Error(cgrCfg.StorDBType)
+	}
+	if cgrCfg.StorDBHost != "127.0.0.1" {
+		t.Error(cgrCfg.StorDBHost)
+	}
+	if cgrCfg.StorDBPort != "3306" {
+		t.Error(cgrCfg.StorDBPort)
+	}
+	if cgrCfg.StorDBName != "cgrates" {
+		t.Error(cgrCfg.StorDBName)
+	}
+	if cgrCfg.StorDBUser != "cgrates" {
+		t.Error(cgrCfg.StorDBUser)
+	}
+	if cgrCfg.StorDBPass != "" {
+		t.Error(cgrCfg.StorDBPass)
+	}
+	if cgrCfg.StorDBMaxOpenConns != 100 {
+		t.Error(cgrCfg.StorDBMaxOpenConns)
+	}
+	if cgrCfg.StorDBMaxIdleConns != 10 {
+		t.Error(cgrCfg.StorDBMaxIdleConns)
+	}
+	Eslice := []string{}
+	if !reflect.DeepEqual(cgrCfg.StorDBCDRSIndexes, Eslice) {
+		t.Error(cgrCfg.StorDBCDRSIndexes)
+	}
+}
+
+func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
+	eHaPoolcfg := []*HaPoolConfig{}
+	if cgrCfg.RALsEnabled != false {
+		t.Error(cgrCfg.RALsEnabled)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns, eHaPoolcfg) {
+		t.Error(cgrCfg.RALsCDRStatSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsHistorySConns, eHaPoolcfg) {
+		t.Error(cgrCfg.RALsHistorySConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsPubSubSConns, eHaPoolcfg) {
+		t.Error(cgrCfg.RALsPubSubSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsUserSConns, eHaPoolcfg) {
+		t.Error(cgrCfg.RALsUserSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.RALsAliasSConns, eHaPoolcfg) {
+		t.Error(cgrCfg.RALsAliasSConns)
+	}
+	if cgrCfg.RpSubjectPrefixMatching != false {
+		t.Error(cgrCfg.RpSubjectPrefixMatching)
+	}
+	if cgrCfg.LcrSubjectPrefixMatching != false {
+		t.Error(cgrCfg.LcrSubjectPrefixMatching)
+	}
+}
+
+func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
+	if cgrCfg.SchedulerEnabled != false {
+		t.Error(cgrCfg.SchedulerEnabled)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
+	eHaPoolCfg := []*HaPoolConfig{}
+	var eCdrExtr []*utils.RSRField
+	if cgrCfg.CDRSEnabled != false {
+		t.Error(cgrCfg.CDRSEnabled)
+	}
+	if !reflect.DeepEqual(eCdrExtr, cgrCfg.CDRSExtraFields) {
+		t.Errorf(" expecting: %+v, received: %+v", eCdrExtr, cgrCfg.CDRSExtraFields)
+	}
+	if cgrCfg.CDRSStoreCdrs != true {
+		t.Error(cgrCfg.CDRSStoreCdrs)
+	}
+	if cgrCfg.CDRScdrAccountSummary != false {
+		t.Error(cgrCfg.CDRScdrAccountSummary)
+	}
+	if cgrCfg.CDRSSMCostRetries != 5 {
+		t.Error(cgrCfg.CDRSSMCostRetries)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}) {
+		t.Error(cgrCfg.CDRSRaterConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSPubSubSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSPubSubSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSUserSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSUserSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSAliaseSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSAliaseSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSStatSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSStatSConns)
+	}
+	if cgrCfg.CDRSOnlineCDRExports != nil {
+		t.Error(cgrCfg.CDRSOnlineCDRExports)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
+	eFields := []*CfgCdrField{}
+	eContentFlds := []*CfgCdrField{
+		&CfgCdrField{Tag: "CGRID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("CGRID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "RunID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("RunID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "TOR", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("ToR", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "OriginID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("OriginID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "RequestType", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("RequestType", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Direction", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Direction", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Tenant", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Tenant", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Category", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Category", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Account", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Account", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Subject", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Destination", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Destination", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "SetupTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("SetupTime", utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{Tag: "AnswerTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("AnswerTime", utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{Tag: "Usage", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Usage", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Cost", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Cost", utils.INFIELD_SEP), RoundingDecimals: 4},
+	}
+	eCdreCfg := map[string]*CdreConfig{
+		"*default": {
+			ExportFormat:        utils.MetaFileCSV,
+			ExportPath:          "/var/spool/cgrates/cdre",
+			Synchronous:         false,
+			Attempts:            1,
+			FieldSeparator:      ',',
+			UsageMultiplyFactor: map[string]float64{utils.ANY: 1.0},
+			CostMultiplyFactor:  1.0,
+			HeaderFields:        eFields,
+			ContentFields:       eContentFlds,
+			TrailerFields:       eFields,
+		},
+	}
+	if !reflect.DeepEqual(cgrCfg.CdreProfiles, eCdreCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.CdreProfiles, eCdreCfg)
+	}
+}
+
+func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
+	if cgrCfg.CDRStatsEnabled != false {
+		t.Error(cgrCfg.CDRStatsEnabled)
+	}
+	if cgrCfg.CDRStatsSaveInterval != 1*time.Minute {
+		t.Error(cgrCfg.CDRStatsSaveInterval)
 	}
 }
 
@@ -131,258 +438,6 @@ func TestCgrCfgCDRC(t *testing.T) {
 	}
 }
 
-func TestCgrCfgLoadJSONDefaults(t *testing.T) {
-	cgrCfg, err = NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
-	if cgrCfg.HttpSkipTlsVerify != false {
-		t.Error(cgrCfg.HttpSkipTlsVerify)
-	}
-	if cgrCfg.RoundingDecimals != 5 {
-		t.Error(cgrCfg.RoundingDecimals)
-	}
-	if cgrCfg.DBDataEncoding != "msgpack" {
-		t.Error(cgrCfg.DBDataEncoding)
-	}
-	if cgrCfg.TpExportPath != "/var/spool/cgrates/tpe" {
-		t.Error(cgrCfg.TpExportPath)
-	}
-	if cgrCfg.PosterAttempts != 3 {
-		t.Error(cgrCfg.PosterAttempts)
-	}
-	if cgrCfg.FailedPostsDir != "/var/spool/cgrates/failed_posts" {
-		t.Error(cgrCfg.FailedPostsDir)
-	}
-	if cgrCfg.DefaultReqType != "*rated" {
-		t.Error(cgrCfg.DefaultReqType)
-	}
-	if cgrCfg.DefaultCategory != "call" {
-		t.Error(cgrCfg.DefaultCategory)
-	}
-	if cgrCfg.DefaultTenant != "cgrates.org" {
-		t.Error(cgrCfg.DefaultTenant)
-	}
-	if cgrCfg.DefaultTimezone != "Local" {
-		t.Error(cgrCfg.DefaultTimezone)
-	}
-	if cgrCfg.ConnectAttempts != 3 {
-		t.Error(cgrCfg.ConnectAttempts)
-	}
-	if cgrCfg.Reconnects != -1 {
-		t.Error(cgrCfg.Reconnects)
-	}
-	if cgrCfg.ConnectTimeout != 1*time.Second {
-		t.Error(cgrCfg.ConnectTimeout)
-	}
-	if cgrCfg.ReplyTimeout != 2*time.Second {
-		t.Error(cgrCfg.ReplyTimeout)
-	}
-	if cgrCfg.ResponseCacheTTL != 0*time.Second {
-		t.Error(cgrCfg.ResponseCacheTTL)
-	}
-	if cgrCfg.InternalTtl != 2*time.Minute {
-		t.Error(cgrCfg.InternalTtl)
-	}
-	if cgrCfg.LockingTimeout != 5*time.Second {
-		t.Error(cgrCfg.LockingTimeout)
-	}
-	if cgrCfg.LogLevel != 6 {
-		t.Error(cgrCfg.LogLevel)
-	}
-}
-
-func TestCgrCfgJSONDefaultsListen(t *testing.T) {
-	if cgrCfg.RPCJSONListen != "127.0.0.1:2012" {
-		t.Error(cgrCfg.RPCJSONListen)
-	}
-	if cgrCfg.RPCGOBListen != "127.0.0.1:2013" {
-		t.Error(cgrCfg.RPCGOBListen)
-	}
-	if cgrCfg.HTTPListen != "127.0.0.1:2080" {
-		t.Error(cgrCfg.HTTPListen)
-	}
-}
-
-func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
-	if cgrCfg.DataDbType != "redis" {
-		t.Error(cgrCfg.DataDbType)
-	}
-	if cgrCfg.DataDbHost != "127.0.0.1" {
-		t.Error(cgrCfg.DataDbHost)
-	}
-	if cgrCfg.DataDbPort != "6379" {
-		t.Error(cgrCfg.DataDbPort)
-	}
-	if cgrCfg.DataDbName != "10" {
-		t.Error(cgrCfg.DataDbName)
-	}
-	if cgrCfg.DataDbUser != "cgrates" {
-		t.Error(cgrCfg.DataDbUser)
-	}
-	if cgrCfg.DataDbPass != "" {
-		t.Error(cgrCfg.DataDbPass)
-	}
-	if cgrCfg.LoadHistorySize != 10 {
-		t.Error(cgrCfg.LoadHistorySize)
-	}
-}
-
-func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
-	if cgrCfg.StorDBType != "mysql" {
-		t.Error(cgrCfg.StorDBType)
-	}
-	if cgrCfg.StorDBHost != "127.0.0.1" {
-		t.Error(cgrCfg.StorDBHost)
-	}
-	if cgrCfg.StorDBPort != "3306" {
-		t.Error(cgrCfg.StorDBPort)
-	}
-	if cgrCfg.StorDBName != "cgrates" {
-		t.Error(cgrCfg.StorDBName)
-	}
-	if cgrCfg.StorDBUser != "cgrates" {
-		t.Error(cgrCfg.StorDBUser)
-	}
-	if cgrCfg.StorDBPass != "" {
-		t.Error(cgrCfg.StorDBPass)
-	}
-	if cgrCfg.StorDBMaxOpenConns != 100 {
-		t.Error(cgrCfg.StorDBMaxOpenConns)
-	}
-	if cgrCfg.StorDBMaxIdleConns != 10 {
-		t.Error(cgrCfg.StorDBMaxIdleConns)
-	}
-	Eslice := []string{}
-	if !reflect.DeepEqual(cgrCfg.StorDBCDRSIndexes, Eslice) {
-		t.Error(cgrCfg.StorDBCDRSIndexes)
-	}
-}
-
-func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
-
-	eHaPoolcfg := []*HaPoolConfig{}
-
-	if cgrCfg.RALsEnabled != false {
-		t.Error(cgrCfg.RALsEnabled)
-	}
-	if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsCDRStatSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.RALsHistorySConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsHistorySConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.RALsPubSubSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsPubSubSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.RALsUserSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsUserSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.RALsAliasSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsAliasSConns)
-	}
-	if cgrCfg.RpSubjectPrefixMatching != false {
-		t.Error(cgrCfg.RpSubjectPrefixMatching)
-	}
-	if cgrCfg.LcrSubjectPrefixMatching != false {
-		t.Error(cgrCfg.LcrSubjectPrefixMatching)
-	}
-}
-
-func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
-	if cgrCfg.SchedulerEnabled != false {
-		t.Error(cgrCfg.SchedulerEnabled)
-	}
-}
-
-func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
-	eHaPoolCfg := []*HaPoolConfig{}
-	var eCdrExtr []*utils.RSRField
-	if cgrCfg.CDRSEnabled != false {
-		t.Error(cgrCfg.CDRSEnabled)
-	}
-	if !reflect.DeepEqual(eCdrExtr, cgrCfg.CDRSExtraFields) {
-		t.Errorf(" expecting: %+v, received: %+v", eCdrExtr, cgrCfg.CDRSExtraFields)
-	}
-	if cgrCfg.CDRSStoreCdrs != true {
-		t.Error(cgrCfg.CDRSStoreCdrs)
-	}
-	if cgrCfg.CDRScdrAccountSummary != false {
-		t.Error(cgrCfg.CDRScdrAccountSummary)
-	}
-	if cgrCfg.CDRSSMCostRetries != 5 {
-		t.Error(cgrCfg.CDRSSMCostRetries)
-	}
-	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}) {
-		t.Error(cgrCfg.CDRSRaterConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CDRSPubSubSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSPubSubSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CDRSUserSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSUserSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CDRSAliaseSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSAliaseSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CDRSStatSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSStatSConns)
-	}
-	if cgrCfg.CDRSOnlineCDRExports != nil {
-		t.Error(cgrCfg.CDRSOnlineCDRExports)
-	}
-}
-
-func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
-	if cgrCfg.CDRStatsEnabled != false {
-		t.Error(cgrCfg.CDRStatsEnabled)
-	}
-	if cgrCfg.CDRStatsSaveInterval != 1*time.Minute {
-		t.Error(cgrCfg.CDRStatsSaveInterval)
-	}
-}
-
-func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
-	eFields := []*CfgCdrField{}
-	eContentFlds := []*CfgCdrField{
-		&CfgCdrField{Tag: "CGRID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("CGRID", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "RunID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("RunID", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "TOR", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("ToR", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "OriginID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("OriginID", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "RequestType", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("RequestType", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Direction", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Direction", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Tenant", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Tenant", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Category", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Category", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Account", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Account", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Subject", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Destination", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Destination", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "SetupTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("SetupTime", utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
-		&CfgCdrField{Tag: "AnswerTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("AnswerTime", utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
-		&CfgCdrField{Tag: "Usage", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Usage", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Cost", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Cost", utils.INFIELD_SEP), RoundingDecimals: 4},
-	}
-	eCdreCfg := map[string]*CdreConfig{
-		"*default": {
-			ExportFormat:        utils.MetaFileCSV,
-			ExportPath:          "/var/spool/cgrates/cdre",
-			Synchronous:         false,
-			Attempts:            1,
-			FieldSeparator:      ',',
-			UsageMultiplyFactor: map[string]float64{utils.ANY: 1.0},
-			CostMultiplyFactor:  1.0,
-			HeaderFields:        eFields,
-			ContentFields:       eContentFlds,
-			TrailerFields:       eFields,
-		},
-	}
-	if !reflect.DeepEqual(cgrCfg.CdreProfiles, eCdreCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.CdreProfiles, eCdreCfg)
-	}
-}
-
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSmGeCfg := &SmGenericConfig{
 		Enabled:             false,
@@ -399,46 +454,6 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 
 	if !reflect.DeepEqual(cgrCfg.SmGenericConfig, eSmGeCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmGenericConfig, eSmGeCfg)
-	}
-
-}
-func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
-	eCacheCfg := &CacheConfig{
-		Destinations: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		ReverseDestinations: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		RatingPlans: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: true},
-		RatingProfiles: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		Lcr: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		CdrStats: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		Actions: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		ActionPlans: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		AccountActionPlans: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		ActionTriggers: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		SharedGroups: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		Aliases: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		ReverseAliases: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		DerivedChargers: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		ResourceLimits: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-		Timings: &CacheParamConfig{Limit: 10000,
-			TTL: time.Duration(0 * time.Second), Precache: false},
-	}
-	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheConfig) {
-		t.Errorf("received: %+v, expecting: %+v", eCacheCfg, cgrCfg.CacheConfig)
 	}
 }
 
@@ -462,7 +477,6 @@ func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
 		MaxWaitConnection:   2 * time.Second,
 		EventSocketConns:    []*FsConnConfig{&FsConnConfig{Address: "127.0.0.1:8021", Password: "ClueCon", Reconnects: 5}},
 	}
-
 	if !reflect.DeepEqual(cgrCfg.SmFsConfig, eSmFsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmFsConfig, eSmFsCfg)
 	}
@@ -498,7 +512,6 @@ func TestCgrCfgJSONDefaultsSMOsipsConfig(t *testing.T) {
 		EventsSubscribeInterval: 60 * time.Second,
 		MiAddr:                  "127.0.0.1:8020",
 	}
-
 	if !reflect.DeepEqual(cgrCfg.SmOsipsConfig, eSmOpCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmOsipsConfig, eSmOpCfg)
 	}
@@ -510,7 +523,6 @@ func TestCgrCfgJSONDefaultsSMAsteriskCfg(t *testing.T) {
 		CreateCDR:     false,
 		AsteriskConns: []*AsteriskConnCfg{&AsteriskConnCfg{Address: "127.0.0.1:8088", User: "cgrates", Password: "CGRateS.org", ConnectAttempts: 3, Reconnects: 5}},
 	}
-
 	if !reflect.DeepEqual(cgrCfg.smAsteriskCfg, eSmAsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.smAsteriskCfg, eSmAsCfg)
 	}
@@ -545,7 +557,6 @@ func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 	if cgrCfg.UserServerEnabled != false {
 		t.Error(cgrCfg.UserServerEnabled)
 	}
-
 	if !reflect.DeepEqual(cgrCfg.UserServerIndexes, eStrSlc) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.UserServerIndexes, eStrSlc)
 	}
@@ -557,11 +568,9 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		CDRStatConns:      []*HaPoolConfig{},
 		CacheDumpInterval: 0 * time.Second,
 	}
-
 	if !reflect.DeepEqual(cgrCfg.resourceLimiterCfg, eResLiCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.resourceLimiterCfg, eResLiCfg)
 	}
-
 }
 
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
@@ -580,7 +589,6 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 		ProductName:       "CGRateS",
 		RequestProcessors: nil,
 	}
-
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Enabled, testDA.Enabled) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.Enabled, testDA.Enabled)
 	}
@@ -619,6 +627,55 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.RequestProcessors, testDA.RequestProcessors) {
 		t.Errorf("expecting: %+v, received: %+v", testDA.RequestProcessors, cgrCfg.diameterAgentCfg.RequestProcessors)
+	}
+}
+
+func TestRadiusAgentCfg(t *testing.T) {
+	testRA := &RadiusAgentCfg{
+		Enabled:            false,
+		ListenNet:          "udp",
+		ListenAuth:         "127.0.0.1:1812",
+		ListenAcct:         "127.0.0.1:1813",
+		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
+		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
+		SMGenericConns:     []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
+		CreateCDR:          true,
+		CDRRequiresSession: false,
+		Timezone:           "",
+		RequestProcessors:  nil,
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.Enabled, testRA.Enabled) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.Enabled, testRA.Enabled)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenNet, testRA.ListenNet) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenNet, testRA.ListenNet)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenAuth, testRA.ListenAuth) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenAuth, testRA.ListenAuth)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenAcct, testRA.ListenAcct) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenAcct, testRA.ListenAcct)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ClientSecrets, testRA.ClientSecrets) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ClientSecrets, testRA.ClientSecrets)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.SMGenericConns, testRA.SMGenericConns) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.SMGenericConns, testRA.SMGenericConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.CDRRequiresSession, testRA.CDRRequiresSession) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.CDRRequiresSession, testRA.CDRRequiresSession)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.Timezone, testRA.Timezone) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.Timezone, testRA.Timezone)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors)
 	}
 }
 
