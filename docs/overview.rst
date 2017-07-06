@@ -23,7 +23,7 @@ dedicated benchmark tool,
 asynchronous request processing,
 own transactional cache with majority of handled data loaded on start or reloaded during runtime,
 )
-however not loosing focus of **quality** (over 1300 tests part of the build environment).
+however not losing focus of **quality** (over 1300 tests part of the build environment).
 
 Modular and flexible, CGRateS provides APIs over a variety of simultaneously accessible communication interfaces:
  - **In-process**           : optimal when there is no need to split services over different processes.
