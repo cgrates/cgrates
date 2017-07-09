@@ -120,7 +120,7 @@ func TestDfListenJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfDbJsonCfg(t *testing.T) {
+func TestDfDataDbJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
 		Db_type:           utils.StringPointer("redis"),
 		Db_host:           utils.StringPointer("127.0.0.1"),
@@ -135,7 +135,10 @@ func TestDfDbJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
-	eCfg = &DbJsonCfg{
+}
+
+func TestDfStorDBJsonCfg(t *testing.T) {
+	eCfg := &DbJsonCfg{
 		Db_type:           utils.StringPointer("mysql"),
 		Db_host:           utils.StringPointer("127.0.0.1"),
 		Db_port:           utils.IntPointer(3306),
@@ -766,5 +769,18 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfgSmFs, smFsCfg) {
 		t.Error("Received: ", smFsCfg)
+	}
+}
+
+func TestDfHttpJsonCfg(t *testing.T) {
+	eCfg := &HTTPJsonCfg{
+		Json_rpc_url:   utils.StringPointer("/jsonrpc"),
+		Ws_url:         utils.StringPointer("/ws"),
+		Use_basic_auth: utils.BoolPointer(false),
+		Auth_users:     utils.MapStringStringPointer(map[string]string{})}
+	if cfg, err := dfCgrJsonCfg.HttpJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
 	}
 }

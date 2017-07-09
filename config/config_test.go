@@ -674,3 +674,67 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.sureTaxCfg, eSureTaxCfg)
 	}
 }
+
+func TestCgrCfgJSONDefaultsHTTP(t *testing.T) {
+	if cgrCfg.HTTPJsonRPCURL != "/jsonrpc" {
+		t.Error(cgrCfg.HTTPJsonRPCURL)
+	}
+	if cgrCfg.HTTPWSURL != "/ws" {
+		t.Error(cgrCfg.HTTPWSURL)
+	}
+	if cgrCfg.HTTPUseBasicAuth != false {
+		t.Error(cgrCfg.HTTPUseBasicAuth)
+	}
+	if !reflect.DeepEqual(cgrCfg.HTTPAuthUsers, map[string]string{}) {
+		t.Error(cgrCfg.HTTPAuthUsers)
+	}
+}
+
+func TestRadiusAgentCfg(t *testing.T) {
+	testRA := &RadiusAgentCfg{
+		Enabled:            false,
+		ListenNet:          "udp",
+		ListenAuth:         "127.0.0.1:1812",
+		ListenAcct:         "127.0.0.1:1813",
+		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
+		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
+		SMGenericConns:     []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
+		CreateCDR:          true,
+		CDRRequiresSession: false,
+		Timezone:           "",
+		RequestProcessors:  nil,
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.Enabled, testRA.Enabled) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.Enabled, testRA.Enabled)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenNet, testRA.ListenNet) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenNet, testRA.ListenNet)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenAuth, testRA.ListenAuth) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenAuth, testRA.ListenAuth)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenAcct, testRA.ListenAcct) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenAcct, testRA.ListenAcct)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ClientSecrets, testRA.ClientSecrets) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ClientSecrets, testRA.ClientSecrets)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.SMGenericConns, testRA.SMGenericConns) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.SMGenericConns, testRA.SMGenericConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.CDRRequiresSession, testRA.CDRRequiresSession) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.CDRRequiresSession, testRA.CDRRequiresSession)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.Timezone, testRA.Timezone) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.Timezone, testRA.Timezone)
+	}
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors)
+	}
+}
