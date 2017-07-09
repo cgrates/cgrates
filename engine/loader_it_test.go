@@ -35,6 +35,7 @@ var storDb LoadStorage
 var lCfg *config.CGRConfig
 
 var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario folder to import tp csv data from")
+var tpTutFilesDir = "tutorial"
 
 // Create connection to dataDb
 // Will use 3 different datadbs in order to be able to see differences in data loaded
@@ -158,23 +159,23 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 
 func TestLoaderITWriteToDatabase(t *testing.T) {
 	loader := NewTpReader(dataDbCsv, NewFileCSVStorage(utils.CSV_SEP,
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATION_RATES_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SHARED_GROUPS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.LCRS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_PLANS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourceLimitsCsv),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.DESTINATIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.TIMINGS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.RATES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.DESTINATION_RATES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.RATING_PLANS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.RATING_PROFILES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.SHARED_GROUPS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.LCRS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.ACTIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.ACTION_PLANS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.ACTION_TRIGGERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.DERIVED_CHARGERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.CDR_STATS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.USERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.ALIASES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpTutFilesDir, utils.ResourceLimitsCsv),
 	), "", "")
 
 	if err := loader.LoadAll(); err != nil {
