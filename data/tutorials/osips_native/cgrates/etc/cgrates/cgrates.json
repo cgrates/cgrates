@@ -108,7 +108,7 @@
 			{"tag":"Usage", "type": "*composed", "value": "Usage"},
 			{"tag":"Cost", "type": "*composed", "value": "Cost"},
 		],
-		"trailer_fields": [],	
+		"trailer_fields": [],
 	},
 },
 

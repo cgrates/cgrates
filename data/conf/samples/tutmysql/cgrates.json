@@ -14,9 +14,8 @@
 	"http": ":2080",
 },
 
-
 "stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_password": "CGRateS.org",						// password to use when connecting to stordb
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
 },
 
 
@@ -105,7 +104,7 @@
 
 "rls": {
 	"enabled": true,						// starts ResourceLimiter service: <true|false>.
-	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>					
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|dur>
 	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|dur>
 },

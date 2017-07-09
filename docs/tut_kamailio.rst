@@ -1,7 +1,7 @@
 Kamailio_ Integration Tutorials
 ===============================
 
-In these tutorials we exemplify few cases of integration between Kamailio_ and CGRateS_. We start with common steps, installation and postinstall processes then we dive into particular configurations, depending on the case we run.
+In these tutorials we exemplify a few cases of integration between Kamailio_ and CGRateS_. We start with common steps, installation and postinstall processes, then we dive into particular configurations, depending on the case we run.
 
 
 .. toctree::

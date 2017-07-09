@@ -7,11 +7,11 @@ As operating system we have chosen Debian Jessie, since all the software compone
 FreeSWITCH_
 -----------
 
-More information regarding installing FreeSWITCH_ on Debian can be found on it's official `installation wiki <https://freeswitch.org/confluence/display/FREESWITCH/FreeSWITCH+1.6+Video>`_.
+More information regarding the installation of FreeSWITCH_ on Debian can be found on it's official `installation wiki <https://freeswitch.org/confluence/display/FREESWITCH/FreeSWITCH+1.6+Video>`_.
 
-To get FreeSWITCH_ installed and configured, we have choosen the simplest method, out of *vanilla* packages plus one individual module we need: *mod-json-cdr*.
+To get FreeSWITCH_ installed and configured, we have choosen the simplest method, out of *vanilla* packages, plus one individual module we need: *mod-json-cdr*.
 
-We got FreeSWITCH_ installed via following commands:
+We will install FreeSWITCH_ via following commands:
 
 ::
 
@@ -20,6 +20,6 @@ We got FreeSWITCH_ installed via following commands:
  apt-get update
  apt-get install freeswitch-meta-vanilla freeswitch-mod-json-cdr libyuv-dev
 
-Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
+Once installed, we will proceed with loading the configuration out of specific tutorial cases bellow.
 
 .. _FreeSWITCH: http://www.freeswitch.org/

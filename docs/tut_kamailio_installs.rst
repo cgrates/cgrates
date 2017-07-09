@@ -1,7 +1,7 @@
 Software installation
 =====================
 
-As operating system we have choosen Debian Jessie, since all the software components we use provide packaging for it.
+We have chosen Debian Jessie as operating system, since all the software components we use provide packaging for it.
 
 Kamailio_
 ---------
