@@ -1031,7 +1031,6 @@ func TestECTrimMiddle1(t *testing.T) {
 // TestECTrimMUsage is targeting simpler testing of the durations trimmed/remainders
 func TestECTrimMUsage(t *testing.T) {
 	ec := testEC.Clone()
-	t.Logf("ec: %s", utils.ToJSON(ec))
 	atUsage := time.Duration(5 * time.Second)
 	srplsEC, _ := ec.Trim(atUsage)
 	if ec.GetUsage() != atUsage {
