@@ -1,7 +1,7 @@
 Software installation
 =====================
 
-As operating system we have choosen Debian stable.
+We have chosen Debian Jessie as operating system.
 
 Asterisk_
 ---------

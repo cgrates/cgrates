@@ -1,7 +1,7 @@
 FreeSWITCH Integration Tutorials
 ================================
 
-In these tutorials we exemplify few cases of integration between FreeSWITCH_ and **CGRateS**. We start with common steps, installation and postinstall processes then we dive into particular configurations.
+In these tutorials we exemplify a few cases of integration between FreeSWITCH_ and **CGRateS**. We start with common steps, installation and postinstall processes, then we dive into particular configurations.
 
 
 .. toctree::

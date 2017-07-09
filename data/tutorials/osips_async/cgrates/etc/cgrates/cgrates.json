@@ -24,6 +24,9 @@
 	],
 },
 
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
 
 "scheduler": {
 	"enabled": true,
@@ -101,7 +104,7 @@
 			{"tag":"Usage", "type": "*composed", "value": "Usage"},
 			{"tag":"Cost", "type": "*composed", "value": "Cost"},
 		],
-		"trailer_fields": [],	
+		"trailer_fields": [],
 	},
 },
 
