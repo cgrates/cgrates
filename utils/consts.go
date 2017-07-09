@@ -373,4 +373,7 @@ const (
 	Accounts                     = "Accounts"
 	MetaEveryMinute              = "*every_minute"
 	MetaHourly                   = "*hourly"
+	ID                           = "ID"
+	MetaASR                      = "*asr"
+	MetaACD                      = "*acd"
 )

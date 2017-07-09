@@ -17,11 +17,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
-type EventStatsQueue struct{}
+import (
+	"errors"
+	"fmt"
+	"sync"
 
+	"github.com/cgrates/cgrates/utils"
+)
+
+// StatService builds stats for events
 type StatService struct {
+	sync.RWMutex
 	dataDB   DataDB
-	stQueues []*EventStatsQueue
+	stQueues []*StatsQueue    // ordered list of StatsQueues
+	evCache  *StatsEventCache // so we can pass it to queues
 }
 
 // Called to start the service
@@ -32,4 +41,24 @@ func (ss *StatService) ListenAndServe() error {
 // Called to shutdown the service
 func (ss *StatService) ServiceShutdown() error {
 	return nil
+}
+
+// processEvent processes a StatsEvent through the queues and caches it when needed
+func (ss *StatService) processEvent(ev StatsEvent) (err error) {
+	evStatsID := ev.ID()
+	if evStatsID == "" { // ID is mandatory
+		return errors.New("missing ID field")
+	}
+	for _, stQ := range ss.stQueues {
+		if err := stQ.ProcessEvent(ev); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
+				stQ.ID, evStatsID, err.Error()))
+		}
+	}
+	return
+}
+
+// store stores the necessary data to DB
+func (ss *StatService) store() (err error) {
+	return
 }
