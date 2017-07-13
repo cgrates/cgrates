@@ -42,7 +42,7 @@ type StatsMetric interface {
 	addEvent(ev StatsEvent) error
 	remEvent(ev StatsEvent) error
 	getStoredValues() ([]byte, error) // used to generate the values which are stored into DB
-	loadStoredValues([]byte) error    // load the values from DB
+	loadStoredValues([]byte) error    // load the values from DB data
 }
 
 func NewStatsASR() (StatsMetric, error) {

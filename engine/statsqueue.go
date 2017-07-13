@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -34,7 +33,8 @@ type SQItem struct {
 
 // SQStored contains values saved in DB on store
 type StoredSQ struct {
-	SQItems   []*SQItem
+	SEvents   map[string]StatsEvent // Events used by SQItems
+	SQItems   []*SQItem             // SQItems
 	SQMetrics map[string][]byte
 }
 
@@ -63,6 +63,9 @@ func (sq *StatsQueue) Init(sec *StatsEventCache, storedSQ *StoredSQ) (err error)
 	if storedSQ == nil {
 		return
 	}
+	for evID, ev := range storedSQ.SEvents {
+		sq.sec.Cache(evID, ev, sq.ID)
+	}
 	sq.sqItems = storedSQ.SQItems
 	for metricID := range sq.sqMetrics {
 		if sq.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
@@ -78,20 +81,43 @@ func (sq *StatsQueue) Init(sec *StatsEventCache, storedSQ *StoredSQ) (err error)
 }
 
 // GetStoredSQ retrieves the data used for store to DB
-func (sq *StatsQueue) GetStoredSQ() (sSQ *StoredSQ, err error) {
+func (sq *StatsQueue) GetStoredSQ() (sSQ *StoredSQ) {
 	sq.RLock()
 	defer sq.RUnlock()
-	if !sq.Store {
-		return nil, errors.New("not storable")
+	sEvents := make(map[string]StatsEvent)
+	var sItems []*SQItem
+	for _, sqItem := range sq.sqItems { // make sure event is properly retrieved from cache
+		ev := sq.sec.GetEvent(sqItem.EventID)
+		if ev == nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatsQueue> querying for storage eventID: %s, error: event not cached",
+				sqItem.EventID))
+			continue
+		}
+		sEvents[sqItem.EventID] = ev
+		sItems = append(sItems, sqItem)
 	}
 	sSQ = &StoredSQ{
-		SQItems:   sq.sqItems,
+		SEvents:   sEvents,
+		SQItems:   sItems,
 		SQMetrics: make(map[string][]byte, len(sq.sqMetrics))}
 	for metricID, metric := range sq.sqMetrics {
+		var err error
 		if sSQ.SQMetrics[metricID], err = metric.getStoredValues(); err != nil {
-			return nil, err
+			utils.Logger.Warning(fmt.Sprintf("<StatsQueue> querying for storage metricID: %s, error: %s",
+				metricID, err.Error()))
+			continue
 		}
 	}
+	return
+}
+
+// ProcessEvent processes a StatsEvent, returns true if processed
+func (sq *StatsQueue) ProcessEvent(ev StatsEvent) (err error) {
+	sq.Lock()
+	sq.remExpired()
+	sq.remOnQueueLength()
+	sq.addStatsEvent(ev)
+	sq.Unlock()
 	return
 }
 
@@ -152,14 +178,4 @@ func (sq *StatsQueue) remEventWithID(evID string) {
 			utils.Logger.Warning(fmt.Sprintf("<StatsQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
 		}
 	}
-}
-
-// ProcessEvent processes a StatsEvent, returns true if processed
-func (sq *StatsQueue) ProcessEvent(ev StatsEvent) (err error) {
-	sq.Lock()
-	sq.remExpired()
-	sq.remOnQueueLength()
-	sq.addStatsEvent(ev)
-	sq.Unlock()
-	return
 }
