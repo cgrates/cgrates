@@ -1566,3 +1566,13 @@ func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
+
+// SetStoredSQ stores the variable part of a StatsQueue
+func (rs *RedisStorage) SetStoredSQ(ssq *StoredSQ) (err error) {
+	return
+}
+
+// GetStoredSQ retrieves the variable part of a StatsQueue
+func (rs *RedisStorage) GetStoredSQ(sqID string) (ssq *StoredSQ, err error) {
+	return
+}

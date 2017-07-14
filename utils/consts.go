@@ -223,6 +223,7 @@ const (
 	LOG_ERR                       = "ler_"
 	LOG_CDR                       = "cdr_"
 	LOG_MEDIATED_CDR              = "mcd_"
+	StoredSQPrefix                = "ssq_"
 	LOADINST_KEY                  = "load_history"
 	SESSION_MANAGER_SOURCE        = "SMR"
 	MEDIATOR_SOURCE               = "MED"

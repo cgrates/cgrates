@@ -2008,3 +2008,13 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 	cache.Set(cacheKey, itemIDs, true, utils.NonTransactional)
 	return
 }
+
+// SetStoredSQ stores the variable part of a StatsQueue
+func (ms *MongoStorage) SetStoredSQ(ssq *StoredSQ) (err error) {
+	return
+}
+
+// GetStoredSQ retrieves the variable part of a StatsQueue
+func (ms *MongoStorage) GetStoredSQ(sqID string) (ssq *StoredSQ, err error) {
+	return
+}

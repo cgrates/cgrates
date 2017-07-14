@@ -33,6 +33,7 @@ type SQItem struct {
 
 // SQStored contains values saved in DB on store
 type StoredSQ struct {
+	SqID      string                // StatsQueueID
 	SEvents   map[string]StatsEvent // Events used by SQItems
 	SQItems   []*SQItem             // SQItems
 	SQMetrics map[string][]byte

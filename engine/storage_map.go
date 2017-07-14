@@ -1548,3 +1548,25 @@ func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
+
+// SetStoredSQ stores the variable part of a StatsQueue
+func (ms *MapStorage) SetStoredSQ(ssq *StoredSQ) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	var result []byte
+	result, err = ms.ms.Marshal(ssq)
+	ms.dict[utils.StoredSQPrefix+ssq.SqID] = result
+	return
+}
+
+// GetStoredSQ retrieves the variable part of a StatsQueue
+func (ms *MapStorage) GetStoredSQ(sqID string) (ssq *StoredSQ, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	values, ok := ms.dict[utils.StoredSQPrefix+ssq.SqID]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &ssq)
+	return
+}

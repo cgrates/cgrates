@@ -110,6 +110,8 @@ type DataDB interface {
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
+	SetStoredSQ(ssq *StoredSQ) (err error) // stores StatsQueue
+	GetStoredSQ(sqID string) (ssq *StoredSQ, err error)
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }
