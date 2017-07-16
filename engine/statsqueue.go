@@ -46,6 +46,7 @@ type StatsQueue struct {
 	sec       *StatsEventCache
 	sqItems   []*SQItem
 	sqMetrics map[string]StatsMetric
+	ms        Marshaler // used to get/set Metrics
 
 	ID                 string                    // QueueID
 	ActivationInterval *utils.ActivationInterval // Activation interval
@@ -59,7 +60,7 @@ type StatsQueue struct {
 
 // Init prepares a StatsQueue for operations
 // Should be executed at server start
-func (sq *StatsQueue) Init(sec *StatsEventCache, sqSM *SQStoredMetrics) (err error) {
+func (sq *StatsQueue) Init(sec *StatsEventCache, ms Marshaler, sqSM *SQStoredMetrics) (err error) {
 	sq.sec = sec
 	if sqSM == nil {
 		return
@@ -74,7 +75,7 @@ func (sq *StatsQueue) Init(sec *StatsEventCache, sqSM *SQStoredMetrics) (err err
 		}
 		if stored, has := sqSM.SQMetrics[metricID]; !has {
 			continue
-		} else if err = sq.sqMetrics[metricID].loadStoredValues(stored); err != nil {
+		} else if err = sq.sqMetrics[metricID].SetFromMarshaled(stored, ms); err != nil {
 			return
 		}
 	}
@@ -103,7 +104,7 @@ func (sq *StatsQueue) GetStoredMetrics() (sqSM *SQStoredMetrics) {
 		SQMetrics: make(map[string][]byte, len(sq.sqMetrics))}
 	for metricID, metric := range sq.sqMetrics {
 		var err error
-		if sqSM.SQMetrics[metricID], err = metric.getStoredValues(); err != nil {
+		if sqSM.SQMetrics[metricID], err = metric.GetMarshaled(sq.ms); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatsQueue> querying for storage metricID: %s, error: %s",
 				metricID, err.Error()))
 			continue
@@ -160,7 +161,7 @@ func (sq *StatsQueue) remOnQueueLength() {
 func (sq *StatsQueue) addStatsEvent(ev StatsEvent) {
 	evID := ev.ID()
 	for metricID, metric := range sq.sqMetrics {
-		if err := metric.addEvent(ev); err != nil {
+		if err := metric.AddEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatsQueue> metricID: %s, add eventID: %s, error: %s",
 				metricID, evID, err.Error()))
 		}
@@ -175,7 +176,7 @@ func (sq *StatsQueue) remEventWithID(evID string) {
 		return
 	}
 	for metricID, metric := range sq.sqMetrics {
-		if err := metric.remEvent(ev); err != nil {
+		if err := metric.RemEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatsQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
 		}
 	}

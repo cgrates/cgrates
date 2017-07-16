@@ -38,11 +38,11 @@ func NewStatsMetric(metricID string) (sm StatsMetric, err error) {
 
 // StatsMetric is the interface which a metric should implement
 type StatsMetric interface {
-	getStringValue() string
-	addEvent(ev StatsEvent) error
-	remEvent(ev StatsEvent) error
-	getStoredValues() ([]byte, error) // used to generate the values which are stored into DB
-	loadStoredValues([]byte) error    // load the values from DB data
+	GetStringValue(fmtOpts string) (val string)
+	AddEvent(ev StatsEvent) error
+	RemEvent(ev StatsEvent) error
+	GetMarshaled(ms Marshaler) (vals []byte, err error)
+	SetFromMarshaled(vals []byte, ms Marshaler) (err error) // mostly used to load from DB
 }
 
 func NewStatsASR() (StatsMetric, error) {
@@ -55,23 +55,23 @@ type StatsASR struct {
 	count    int
 }
 
-func (asr *StatsASR) getStringValue() (val string) {
+func (asr *StatsASR) GetStringValue(fmtOpts string) (val string) {
 	return
 }
 
-func (asr *StatsASR) addEvent(ev StatsEvent) (err error) {
+func (asr *StatsASR) AddEvent(ev StatsEvent) (err error) {
 	return
 }
 
-func (asr *StatsASR) remEvent(ev StatsEvent) (err error) {
+func (asr *StatsASR) RemEvent(ev StatsEvent) (err error) {
 	return
 }
 
-func (asr *StatsASR) getStoredValues() (vals []byte, err error) {
+func (asr *StatsASR) GetMarshaled(ms Marshaler) (vals []byte, err error) {
 	return
 }
 
-func (asr *StatsASR) loadStoredValues(vals []byte) (err error) {
+func (asr *StatsASR) SetFromMarshaled(vals []byte, ms Marshaler) (err error) {
 	return
 }
 
@@ -82,22 +82,22 @@ func NewStatsACD() (StatsMetric, error) {
 // StatsACD implements AverageCallDuration metric
 type StatsACD struct{}
 
-func (acd *StatsACD) getStringValue() (val string) {
+func (acd *StatsACD) GetStringValue(fmtOpts string) (val string) {
 	return
 }
 
-func (acd *StatsACD) addEvent(ev StatsEvent) (err error) {
+func (acd *StatsACD) AddEvent(ev StatsEvent) (err error) {
 	return
 }
 
-func (acd *StatsACD) remEvent(ev StatsEvent) (err error) {
+func (acd *StatsACD) RemEvent(ev StatsEvent) (err error) {
 	return
 }
 
-func (asr *StatsACD) getStoredValues() (vals []byte, err error) {
+func (acd *StatsACD) GetMarshaled(ms Marshaler) (vals []byte, err error) {
 	return
 }
 
-func (asr *StatsACD) loadStoredValues(vals []byte) (err error) {
+func (acd *StatsACD) SetFromMarshaled(vals []byte, ms Marshaler) (err error) {
 	return
 }
