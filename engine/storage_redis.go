@@ -1567,6 +1567,21 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
+// GetStatsQueue retrieves a StatsQueue from dataDB/cache
+func (rs *RedisStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
+	return
+}
+
+// SetStatsQueue stores a StatsQueue into DataDB
+func (rs *RedisStorage) SetStatsQueue(sq *StatsQueue) (err error) {
+	return
+}
+
+// RemStatsQueue removes a StatsQueue from dataDB/cache
+func (rs *RedisStorage) RemStatsQueue(sqID string, transactionID string) (err error) {
+	return
+}
+
 // GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
 func (rs *RedisStorage) GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error) {
 	return

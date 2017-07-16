@@ -1549,6 +1549,54 @@ func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
+// GetStatsQueue retrieves a StatsQueue from dataDB/cache
+func (ms *MapStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	key := utils.StatsQueuePrefix + sqID
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*StatsQueue), nil
+		}
+	}
+	values, ok := ms.dict[key]
+	if !ok {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &sq)
+	if err != nil {
+		return nil, err
+	}
+	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
+	return
+}
+
+// SetStatsQueue stores a StatsQueue into DataDB
+func (ms *MapStorage) SetStatsQueue(sq *StatsQueue) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(sq)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.StatsQueuePrefix+sq.ID] = result
+	return
+}
+
+// RemStatsQueue removes a StatsQueue from dataDB/cache
+func (ms *MapStorage) RemStatsQueue(sqID string, transactionID string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.StatsQueuePrefix + sqID
+	delete(ms.dict, key)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
+}
+
 // GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
 func (ms *MapStorage) GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error) {
 	ms.mu.RLock()

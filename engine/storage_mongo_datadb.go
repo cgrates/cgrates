@@ -2009,6 +2009,21 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 	return
 }
 
+// GetStatsQueue retrieves a StatsQueue from dataDB/cache
+func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
+	return
+}
+
+// SetStatsQueue stores a StatsQueue into DataDB
+func (ms *MongoStorage) SetStatsQueue(sq *StatsQueue) (err error) {
+	return
+}
+
+// RemStatsQueue removes a StatsQueue from dataDB/cache
+func (ms *MongoStorage) RemStatsQueue(sqID string, transactionID string) (err error) {
+	return
+}
+
 // GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
 func (ms *MongoStorage) GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error) {
 	return
