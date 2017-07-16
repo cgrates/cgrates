@@ -31,8 +31,8 @@ type SQItem struct {
 	ExpiryTime *time.Time // Used to auto-expire events
 }
 
-// SQStored contains values saved in DB on store
-type StoredSQ struct {
+// SQStoredMetrics contains metrics saved in DB
+type SQStoredMetrics struct {
 	SqID      string                // StatsQueueID
 	SEvents   map[string]StatsEvent // Events used by SQItems
 	SQItems   []*SQItem             // SQItems
@@ -51,7 +51,7 @@ type StatsQueue struct {
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Filters            []*RequestFilter
 	QueueLength        int
-	TTL                time.Duration
+	TTL                *time.Duration
 	Metrics            []string // list of metrics to build
 	Store              bool     // store to DB
 	Thresholds         []string // list of thresholds to be checked after changes
@@ -59,20 +59,20 @@ type StatsQueue struct {
 
 // Init prepares a StatsQueue for operations
 // Should be executed at server start
-func (sq *StatsQueue) Init(sec *StatsEventCache, storedSQ *StoredSQ) (err error) {
+func (sq *StatsQueue) Init(sec *StatsEventCache, sqSM *SQStoredMetrics) (err error) {
 	sq.sec = sec
-	if storedSQ == nil {
+	if sqSM == nil {
 		return
 	}
-	for evID, ev := range storedSQ.SEvents {
+	for evID, ev := range sqSM.SEvents {
 		sq.sec.Cache(evID, ev, sq.ID)
 	}
-	sq.sqItems = storedSQ.SQItems
+	sq.sqItems = sqSM.SQItems
 	for metricID := range sq.sqMetrics {
 		if sq.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
 			return
 		}
-		if stored, has := storedSQ.SQMetrics[metricID]; !has {
+		if stored, has := sqSM.SQMetrics[metricID]; !has {
 			continue
 		} else if err = sq.sqMetrics[metricID].loadStoredValues(stored); err != nil {
 			return
@@ -81,8 +81,8 @@ func (sq *StatsQueue) Init(sec *StatsEventCache, storedSQ *StoredSQ) (err error)
 	return
 }
 
-// GetStoredSQ retrieves the data used for store to DB
-func (sq *StatsQueue) GetStoredSQ() (sSQ *StoredSQ) {
+// GetSQStoredMetrics retrieves the data used for store to DB
+func (sq *StatsQueue) GetStoredMetrics() (sqSM *SQStoredMetrics) {
 	sq.RLock()
 	defer sq.RUnlock()
 	sEvents := make(map[string]StatsEvent)
@@ -97,13 +97,13 @@ func (sq *StatsQueue) GetStoredSQ() (sSQ *StoredSQ) {
 		sEvents[sqItem.EventID] = ev
 		sItems = append(sItems, sqItem)
 	}
-	sSQ = &StoredSQ{
+	sqSM = &SQStoredMetrics{
 		SEvents:   sEvents,
 		SQItems:   sItems,
 		SQMetrics: make(map[string][]byte, len(sq.sqMetrics))}
 	for metricID, metric := range sq.sqMetrics {
 		var err error
-		if sSQ.SQMetrics[metricID], err = metric.getStoredValues(); err != nil {
+		if sqSM.SQMetrics[metricID], err = metric.getStoredValues(); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatsQueue> querying for storage metricID: %s, error: %s",
 				metricID, err.Error()))
 			continue

@@ -2009,12 +2009,17 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 	return
 }
 
-// SetStoredSQ stores the variable part of a StatsQueue
-func (ms *MongoStorage) SetStoredSQ(ssq *StoredSQ) (err error) {
+// GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
+func (ms *MongoStorage) GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error) {
 	return
 }
 
-// GetStoredSQ retrieves the variable part of a StatsQueue
-func (ms *MongoStorage) GetStoredSQ(sqID string) (ssq *StoredSQ, err error) {
+// SetStoredSQ stores the metrics for a StatsQueue
+func (ms *MongoStorage) SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error) {
+	return
+}
+
+// RemSQStoredMetrics removes stored metrics for a StatsQueue
+func (ms *MongoStorage) RemSQStoredMetrics(sqID string) (err error) {
 	return
 }

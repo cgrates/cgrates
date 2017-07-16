@@ -1567,12 +1567,17 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-// SetStoredSQ stores the variable part of a StatsQueue
-func (rs *RedisStorage) SetStoredSQ(ssq *StoredSQ) (err error) {
+// GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
+func (rs *RedisStorage) GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error) {
 	return
 }
 
-// GetStoredSQ retrieves the variable part of a StatsQueue
-func (rs *RedisStorage) GetStoredSQ(sqID string) (ssq *StoredSQ, err error) {
+// SetStoredSQ stores the metrics for a StatsQueue
+func (rs *RedisStorage) SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error) {
+	return
+}
+
+// RemSQStoredMetrics removes stored metrics for a StatsQueue
+func (rs *RedisStorage) RemSQStoredMetrics(sqID string) (err error) {
 	return
 }
