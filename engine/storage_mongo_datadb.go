@@ -2011,6 +2011,7 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 
 // GetStatsQueue retrieves a StatsQueue from dataDB/cache
 func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
+	var rez *StatsQueue
 	cacheKey := utils.StatsQueuePrefix + sqID
 	if !skipCache {
 		if x, ok := cache.Get(cacheKey); ok {
@@ -2023,13 +2024,14 @@ func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID
 	session, col := ms.conn(utils.StatsQueuePrefix)
 	defer session.Close()
 	cCommit := cacheCommit(transactionID)
-	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
+	if err = col.Find(bson.M{"id": sqID}).One(&rez); err != nil {
 		if err == mgo.ErrNotFound {
 			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
+	sq = rez
 	cache.Set(cacheKey, sq, cCommit, transactionID)
 	return
 }
@@ -2044,15 +2046,8 @@ func (ms *MongoStorage) SetStatsQueue(sq *StatsQueue) (err error) {
 
 // RemStatsQueue removes a StatsQueue from dataDB/cache
 func (ms *MongoStorage) RemStatsQueue(sqID string, transactionID string) (err error) {
-	session, col := ms.conn(utils.SQStoredMetricsPrefix)
+	session, col := ms.conn(utils.StatsQueuePrefix)
 	key := utils.StatsQueuePrefix + sqID
-	_, err = ms.GetStatsQueue(sqID, false, transactionID)
-	if err != nil {
-		if err == mgo.ErrNotFound {
-			err = nil
-		}
-		return
-	}
 	err = col.Remove(bson.M{"id": sqID})
 	if err != nil {
 		return err

@@ -88,6 +88,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDHistory,
 	testOnStorITCRUDStructVersion,
 	testOnStorITCRUDSQStoredMetrics,
+	testOnStorITCRUDStatsQueue,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -1844,7 +1845,7 @@ func testOnStorITCRUDStatsQueue(t *testing.T) {
 	timeTTL := time.Duration(0 * time.Second)
 	sq := &StatsQueue{
 		ID:                 "test",
-		ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)},
+		ActivationInterval: &utils.ActivationInterval{},
 		Filters:            []*RequestFilter{},
 		QueueLength:        2,
 		TTL:                &timeTTL,
@@ -1852,11 +1853,16 @@ func testOnStorITCRUDStatsQueue(t *testing.T) {
 		Store:              true,
 		Thresholds:         []string{},
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetStatsQueue(sq); err != nil {
 		t.Error(err)
+	}
+	if rcv, err := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(sq, rcv) {
+		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
 	if rcv, err := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1865,6 +1871,9 @@ func testOnStorITCRUDStatsQueue(t *testing.T) {
 	}
 	if err := onStor.RemStatsQueue(sq.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
 	}
 	if _, rcvErr := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

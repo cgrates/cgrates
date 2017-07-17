@@ -1589,7 +1589,7 @@ func (rs *RedisStorage) GetStatsQueue(sqID string, skipCache bool, transactionID
 	if err = rs.ms.Unmarshal(values, &sq); err != nil {
 		return
 	}
-	cache.Set(key, &sq, cacheCommit(transactionID), transactionID)
+	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
 
