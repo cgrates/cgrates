@@ -2011,30 +2011,82 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 
 // GetStatsQueue retrieves a StatsQueue from dataDB/cache
 func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
+	cacheKey := utils.StatsQueuePrefix + sqID
+	if !skipCache {
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*StatsQueue), nil
+		}
+	}
+	session, col := ms.conn(utils.StatsQueuePrefix)
+	defer session.Close()
+	cCommit := cacheCommit(transactionID)
+	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cCommit, transactionID)
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
+	cache.Set(cacheKey, sq, cCommit, transactionID)
 	return
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
 func (ms *MongoStorage) SetStatsQueue(sq *StatsQueue) (err error) {
+	session, col := ms.conn(utils.StatsQueuePrefix)
+	defer session.Close()
+	_, err = col.UpsertId(bson.M{"id": sq.ID}, sq)
 	return
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB/cache
 func (ms *MongoStorage) RemStatsQueue(sqID string, transactionID string) (err error) {
+	session, col := ms.conn(utils.SQStoredMetricsPrefix)
+	key := utils.StatsQueuePrefix + sqID
+	_, err = ms.GetStatsQueue(sqID, false, transactionID)
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			err = nil
+		}
+		return
+	}
+	err = col.Remove(bson.M{"id": sqID})
+	if err != nil {
+		return err
+	}
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	session.Close()
 	return
 }
 
 // GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
-func (ms *MongoStorage) GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error) {
+func (ms *MongoStorage) GetSQStoredMetrics(sqmID string) (sqSM *SQStoredMetrics, err error) {
+	session, col := ms.conn(utils.SQStoredMetricsPrefix)
+	defer session.Close()
+	if err = col.Find(bson.M{"sqid": sqmID}).One(&sqSM); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
 	return
 }
 
 // SetStoredSQ stores the metrics for a StatsQueue
 func (ms *MongoStorage) SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error) {
+	session, col := ms.conn(utils.SQStoredMetricsPrefix)
+	defer session.Close()
+	_, err = col.UpsertId(bson.M{"sqid": sqSM.SqID}, sqSM)
 	return
 }
 
 // RemSQStoredMetrics removes stored metrics for a StatsQueue
-func (ms *MongoStorage) RemSQStoredMetrics(sqID string) (err error) {
-	return
+func (ms *MongoStorage) RemSQStoredMetrics(sqmID string) (err error) {
+	session, col := ms.conn(utils.SQStoredMetricsPrefix)
+	defer session.Close()
+	err = col.Remove(bson.M{"sqid": sqmID})
+	return err
 }

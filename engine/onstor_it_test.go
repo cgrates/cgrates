@@ -87,6 +87,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDTiming,
 	testOnStorITCRUDHistory,
 	testOnStorITCRUDStructVersion,
+	testOnStorITCRUDSQStoredMetrics,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -1810,5 +1811,62 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cv, rcv) {
 		t.Errorf("Expecting: %v, received: %v", cv, rcv)
+	}
+}
+
+func testOnStorITCRUDSQStoredMetrics(t *testing.T) {
+	sqm := &SQStoredMetrics{
+		SqID:      "test",
+		SEvents:   map[string]StatsEvent{},
+		SQItems:   []*SQItem{},
+		SQMetrics: map[string][]byte{},
+	}
+	if _, rcvErr := onStor.GetSQStoredMetrics(sqm.SqID); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetSQStoredMetrics(sqm); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetSQStoredMetrics(sqm.SqID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(sqm, rcv) {
+		t.Errorf("Expecting: %v, received: %v", sqm, rcv)
+	}
+	if err := onStor.RemSQStoredMetrics(sqm.SqID); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetSQStoredMetrics(sqm.SqID); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDStatsQueue(t *testing.T) {
+	timeTTL := time.Duration(0 * time.Second)
+	sq := &StatsQueue{
+		ID:                 "test",
+		ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)},
+		Filters:            []*RequestFilter{},
+		QueueLength:        2,
+		TTL:                &timeTTL,
+		Metrics:            []string{},
+		Store:              true,
+		Thresholds:         []string{},
+	}
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetStatsQueue(sq); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(sq, rcv) {
+		t.Errorf("Expecting: %v, received: %v", sq, rcv)
+	}
+	if err := onStor.RemStatsQueue(sq.ID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
 	}
 }
