@@ -1929,8 +1929,10 @@ func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *Resou
 			return nil, err
 		}
 	}
-	if rl.Limit, err = strconv.ParseFloat(tpRL.Limit, 64); err != nil {
-		return nil, err
+	if tpRL.Limit != "" {
+		if rl.Limit, err = strconv.ParseFloat(tpRL.Limit, 64); err != nil {
+			return nil, err
+		}
 	}
 	return rl, nil
 }

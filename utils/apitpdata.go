@@ -1313,7 +1313,7 @@ type ActivationInterval struct {
 }
 
 func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
-	return ai.ActivationTime.Before(atTime) &&
+	return (ai.ActivationTime.IsZero() || ai.ActivationTime.Before(atTime)) &&
 		(ai.ExpiryTime.IsZero() || ai.ExpiryTime.After(atTime))
 }
 

@@ -1976,11 +1976,8 @@ func (ms *MongoStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map
 	return
 }
 
-func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
-	fldValSplt := strings.Split(fieldValKey, utils.CONCATENATED_KEY_SEP)
-	if len(fldValSplt) != 2 {
-		return nil, fmt.Errorf("malformed key in query: %s", fldValSplt)
-	}
+func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+	fieldValKey := utils.ConcatenatedKey(fldName, fldVal)
 	cacheKey := dbKey + fieldValKey
 	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
 		if x == nil {
@@ -1994,7 +1991,7 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 		Key   string
 		Value map[string]map[string]utils.StringMap
 	}
-	fldKey := fmt.Sprintf("value.%s.%s", fldValSplt[0], fldValSplt[1])
+	fldKey := fmt.Sprintf("value.%s.%s", fldName, fldVal)
 	if err = col.Find(
 		bson.M{"key": dbKey, fldKey: bson.M{"$exists": true}}).Select(
 		bson.M{fldKey: true}).One(&result); err != nil {
@@ -2004,7 +2001,7 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs 
 		}
 		return nil, err
 	}
-	itemIDs = result.Value[fldValSplt[0]][fldValSplt[1]]
+	itemIDs = result.Value[fldName][fldVal]
 	cache.Set(cacheKey, itemIDs, true, utils.NonTransactional)
 	return
 }

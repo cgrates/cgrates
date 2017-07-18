@@ -100,7 +100,7 @@ func TestTutSMGCacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 9,
 		Actions: 8, ActionPlans: 4, AccountActionPlans: 5, SharedGroups: 1, DerivedChargers: 1, LcrProfiles: 5,
-		CdrStats: 6, Users: 3, Aliases: 1, ReverseAliases: 2, ResourceLimits: 2}
+		CdrStats: 6, Users: 3, Aliases: 1, ReverseAliases: 2, ResourceLimits: 3}
 	var args utils.AttrCacheStats
 	if err := tutSMGRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())

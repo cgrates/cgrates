@@ -192,55 +192,12 @@ func (rls *ResourceLimiterService) ServiceShutdown() error {
 // matchingResourceLimitsForEvent returns ordered list of matching resources which are active by the time of the call
 func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]interface{}) (resLimits ResourceLimits, err error) {
 	matchingResources := make(map[string]*ResourceLimit)
-	for fldName, fieldValIf := range ev {
-		fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
-		if !canCast {
-			return nil, fmt.Errorf("Cannot cast field: %s into string", fldName)
-		}
-		rlIDs, err := rls.dataDB.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey(fldName, fldVal))
-		if err != nil {
-			if err == utils.ErrNotFound {
-				continue
-			}
-			return nil, err
-		}
-		for resName := range rlIDs {
-			if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
-				continue
-			}
-			rl, err := rls.dataDB.GetResourceLimit(resName, false, utils.NonTransactional)
-			if err != nil {
-				if err == utils.ErrNotFound {
-					continue
-				}
-				return nil, err
-			}
-			if rl.ActivationInterval != nil && !rl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
-				continue
-			}
-			passAllFilters := true
-			for _, fltr := range rl.Filters {
-				if pass, err := fltr.Pass(ev, "", rls.cdrStatS); err != nil {
-					return nil, utils.NewErrServerError(err)
-				} else if !pass {
-					passAllFilters = false
-					continue
-				}
-			}
-			if passAllFilters {
-				matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
-			}
-		}
-	}
-	// Check un-indexed resources
-	uIdxRLIDs, err := rls.dataDB.MatchReqFilterIndex(utils.ResourceLimitsIndex, utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE))
-	if err != nil && err != utils.ErrNotFound {
+	rlIDs, err := matchingItemIDsForEvent(ev, rls.dataDB, utils.ResourceLimitsIndex)
+	if err != nil {
 		return nil, err
 	}
-	for resName := range uIdxRLIDs {
-		if _, hasIt := matchingResources[resName]; hasIt { // Already checked this RL
-			continue
-		}
+	utils.Logger.Debug(fmt.Sprintf("### #0 rlIDs: %+v\n", rlIDs))
+	for resName := range rlIDs {
 		rl, err := rls.dataDB.GetResourceLimit(resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -248,18 +205,32 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 			}
 			return nil, err
 		}
-		if rl.ActivationInterval != nil && !rl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+		utils.Logger.Debug(fmt.Sprintf("### #1 RL, rl: %+v\n", rl))
+		if rl.ActivationInterval != nil &&
+			!rl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+			utils.Logger.Debug(fmt.Sprintf("### #2 RL, rl: %+v, not active: %+v\n", rl, rl.ActivationInterval))
 			continue
 		}
+		passAllFilters := true
 		for _, fltr := range rl.Filters {
+			utils.Logger.Debug(fmt.Sprintf("### #3 RL, rl: %+v, fltr: %+v\n", rl, fltr))
 			if pass, err := fltr.Pass(ev, "", rls.cdrStatS); err != nil {
+				utils.Logger.Debug(fmt.Sprintf("### RL, rl: %+v, fltr: %+v, not passing, err: %v\n", rl, fltr, err))
 				return nil, utils.NewErrServerError(err)
 			} else if !pass {
+				passAllFilters = false
 				continue
 			}
-			matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
+			utils.Logger.Debug(fmt.Sprintf("### #4 RL, rl: %+v, fltr: %+v, passing\n", rl, fltr))
 		}
+		if !passAllFilters {
+			continue
+		}
+		utils.Logger.Debug(fmt.Sprintf("### #4.1 RL, passing all filters, adding rlID: %s, rl: %+v, matchingResources: %+v\n", rl.ID, rl, matchingResources))
+		matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
 	}
+	utils.Logger.Debug(fmt.Sprintf("### #5 RL, matchingResources: %+v\n", matchingResources))
+	// All good, convert from Map to Slice so we can sort
 	resLimits = make(ResourceLimits, len(matchingResources))
 	i := 0
 	for _, rl := range matchingResources {
@@ -271,7 +242,8 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 }
 
 // V1ResourceLimitsForEvent returns active resource limits matching the event
-func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interface{}, reply *[]*ResourceLimit) error {
+func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interface{},
+	reply *[]*ResourceLimit) error {
 	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -280,7 +252,8 @@ func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interf
 	return nil
 }
 
-func (rls *ResourceLimiterService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *bool) (err error) {
+func (rls *ResourceLimiterService) V1AllowUsage(args utils.AttrRLsResourceUsage,
+	allow *bool) (err error) {
 	mtcRLs, err := rls.matchingResourceLimitsForEvent(args.Event)
 	if err != nil {
 		return utils.NewErrServerError(err)

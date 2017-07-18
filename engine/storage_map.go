@@ -1504,8 +1504,8 @@ func (ms *MapStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[s
 	ms.dict[dbKey] = result
 	return
 }
-func (ms *MapStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
-	cacheKey := dbKey + fieldValKey
+func (ms *MapStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+	cacheKey := dbKey + utils.ConcatenatedKey(fldName, fldVal)
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
@@ -1524,9 +1524,8 @@ func (ms *MapStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs ut
 	if err = ms.ms.Unmarshal(values, &indexes); err != nil {
 		return nil, err
 	}
-	keySplt := strings.Split(fieldValKey, ":")
-	if _, hasIt := indexes[keySplt[0]]; hasIt {
-		itemIDs = indexes[keySplt[0]][keySplt[1]]
+	if _, hasIt := indexes[fldName]; hasIt {
+		itemIDs = indexes[fldName][fldVal]
 	}
 	//Verify items
 	if len(itemIDs) == 0 {

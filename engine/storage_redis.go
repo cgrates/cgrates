@@ -1532,7 +1532,8 @@ func (rs *RedisStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map
 	return rs.Cmd("HMSET", dbKey, mp).Err
 }
 
-func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error) {
+func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+	fieldValKey := utils.ConcatenatedKey(fldName, fldVal)
 	cacheKey := dbKey + fieldValKey
 	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
 		if x == nil {

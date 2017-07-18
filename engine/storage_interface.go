@@ -109,7 +109,7 @@ type DataDB interface {
 	SetStructVersion(*StructVersion) error
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
-	MatchReqFilterIndex(dbKey, fieldValKey string) (itemIDs utils.StringMap, err error)
+	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error)
 	SetStatsQueue(sq *StatsQueue) (err error)
 	RemStatsQueue(sqID string, transactionID string) (err error)
