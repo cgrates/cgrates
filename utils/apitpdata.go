@@ -1322,3 +1322,17 @@ type AttrDisconnectSession struct {
 	EventStart map[string]interface{}
 	Reason     string
 }
+
+// TPStats is used in APIs to manage remotely offline Stats config
+type TPStats struct {
+	TPid               string
+	ID                 string
+	Filters            []*TPRequestFilter
+	ActivationInterval *TPActivationInterval
+	QueueLength        int
+	TTL                string
+	Metrics            string
+	Store              bool
+	Thresholds         string
+	Weight             float64
+}
