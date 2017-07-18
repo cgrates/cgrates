@@ -1,2 +1,2 @@
-#Id,ActivationInterval,FilterType,FilterFieldName,FilterFieldValues,QueueLength,TTL,Metrics,Store,Thresholds,Weight
-Stats1,2014-07-29T15:00:00Z,*string,Account,1001;1002,100,1s,*asr;*acd;*acc,true,THRESH1;THRESH2,20
+#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,QueueLength,TTL,Metrics,Store,Thresholds,Weight
+Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,THRESH1;THRESH2,20

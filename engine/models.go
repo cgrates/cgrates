@@ -475,3 +475,20 @@ type TBLVersion struct {
 func (t TBLVersion) TableName() string {
 	return utils.TBLVersions
 }
+
+type TpStats struct {
+	ID                 int64
+	Tpid               string
+	Tag                string  `index:"0" re:""`
+	FilterType         string  `index:"1" re:"^\*[A-Za-z].*"`
+	FilterFieldName    string  `index:"2" re:""`
+	FilterFieldValues  string  `index:"3" re:""`
+	ActivationInterval string  `index:"4" re:""`
+	QueueLength        int     `index:"5" re:""`
+	TTL                string  `index:"6" re:""`
+	Metrics            string  `index:"7" re:""`
+	Store              bool    `index:"8" re:""`
+	Thresholds         string  `index:"9" re:""`
+	Weight             float64 `index:"10" re:"\d+\.?\d*"`
+	CreatedAt          time.Time
+}
