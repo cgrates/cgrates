@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"log"
 	"log/syslog"
-	//	_ "net/http/pprof"
 	"os"
 	"runtime"
 	"runtime/pprof"
@@ -621,9 +620,9 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer f.Close()
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
-
 	}
 	if *scheduledShutdown != "" {
 		shutdownDur, err := utils.ParseDurationWithSecs(*scheduledShutdown)

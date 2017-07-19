@@ -505,7 +505,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		// get the default money balanance
 		// and go negative on it with the amount still unpaid
 		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !ub.AllowNegative && !dryRun {
-			utils.Logger.Err(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
+			utils.Logger.Warning(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
 		}
 		leftCC.Timespans.Decompress()
 		for tsIndex, ts := range leftCC.Timespans {

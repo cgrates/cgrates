@@ -483,7 +483,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 				}
 				if cost != 0 && moneyBal == nil && (!dryRun || ub.AllowNegative) { // Fix for issue #685
-					utils.Logger.Err(fmt.Sprintf("<RALs> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
+					utils.Logger.Warning(fmt.Sprintf("<RALs> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
 					moneyBal = ub.GetDefaultMoneyBalance()
 				}
 				if (cost == 0 || moneyBal != nil) && b.GetValue() >= amount {
