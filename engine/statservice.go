@@ -28,6 +28,7 @@ import (
 // NewStatService initializes a StatService
 func NewStatService(dataDB DataDB) (ss *StatService, err error) {
 	ss = &StatService{dataDB: dataDB}
+	return
 }
 
 // StatService builds stats for events

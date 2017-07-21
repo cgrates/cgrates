@@ -15,6 +15,8 @@ imports:
   version: 5b60f0d72ff4f8885289bffab55435e5b8adfb55
 - name: github.com/cgrates/kamevapi
   version: a376b1f937ba959857929fa3e111c0f3243278c0
+- name: github.com/cgrates/ltcache
+  version: c4fd16ee97ba74e5a0623ff4717fc964478acf65
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/radigo

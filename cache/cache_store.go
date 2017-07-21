@@ -19,10 +19,10 @@ package cache
 
 import (
 	"strings"
-	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -33,78 +33,6 @@ type cacheStore interface {
 	DeletePrefix(string)
 	CountEntriesForPrefix(string) int
 	GetKeysForPrefix(string) []string
-}
-
-// easy to be counted exported by prefix
-type cacheDoubleStore struct {
-	cache map[string]map[string]interface{}
-	sync.RWMutex
-}
-
-func newDoubleStore() *cacheDoubleStore {
-	return &cacheDoubleStore{cache: make(map[string]map[string]interface{})}
-}
-
-func (cs cacheDoubleStore) Put(key string, value interface{}) {
-	cs.Lock()
-	defer cs.Unlock()
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	mp, ok := cs.cache[prefix]
-	if !ok {
-		mp = make(map[string]interface{})
-		cs.cache[prefix] = mp
-	}
-	mp[key] = value
-}
-
-func (cs cacheDoubleStore) Get(key string) (interface{}, bool) {
-	cs.RLock()
-	defer cs.RUnlock()
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs.cache[prefix]; ok {
-		if ti, exists := keyMap[key]; exists {
-			return ti, true
-		}
-	}
-	return nil, false
-}
-
-func (cs cacheDoubleStore) Delete(key string) {
-	cs.Lock()
-	cs.Unlock()
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs.cache[prefix]; ok {
-		delete(keyMap, key)
-	}
-}
-
-func (cs cacheDoubleStore) DeletePrefix(prefix string) {
-	cs.Lock()
-	defer cs.Unlock()
-	delete(cs.cache, prefix)
-}
-
-func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
-	cs.RLock()
-	defer cs.RUnlock()
-	if m, ok := cs.cache[prefix]; ok {
-		return len(m)
-	}
-	return 0
-}
-
-func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
-	cs.RLock()
-	defer cs.RUnlock()
-	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
-	if keyMap, ok := cs.cache[prefix]; ok {
-		for iterKey := range keyMap {
-			if len(key) == 0 || strings.HasPrefix(iterKey, key) {
-				keys = append(keys, prefix+iterKey)
-			}
-		}
-	}
-	return
 }
 
 // easy to be counted exported by prefix
@@ -236,204 +164,95 @@ func (cs lrustore) GetKeysForPrefix(prefix string) (keys []string) {
 	return
 }
 
-type cacheLRUTTL map[string]*Cache
+type cacheLRUTTL map[string]*ltcache.Cache
 
-func newLRUTTL(cfg *config.CacheConfig) cacheLRUTTL {
-	c := make(cacheLRUTTL)
-	if cfg != nil && cfg.Destinations != nil {
-		c[utils.DESTINATION_PREFIX] = NewLRUTTL(cfg.Destinations.Limit, cfg.Destinations.TTL)
-	} else {
-		c[utils.DESTINATION_PREFIX] = NewLRUTTL(10000, 0)
+func newLRUTTL(cfg *config.CacheConfig) (c cacheLRUTTL) {
+	c = map[string]*ltcache.Cache{
+		utils.ANY: ltcache.New(0, 0, false, nil), // no limits for default cache instance
 	}
-	if cfg != nil && cfg.ReverseDestinations != nil {
-		c[utils.REVERSE_DESTINATION_PREFIX] = NewLRUTTL(cfg.ReverseDestinations.Limit, cfg.ReverseDestinations.TTL)
-	} else {
-		c[utils.REVERSE_DESTINATION_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg == nil {
+		return
 	}
-	if cfg != nil && cfg.RatingPlans != nil {
-		c[utils.RATING_PLAN_PREFIX] = NewLRUTTL(cfg.RatingPlans.Limit, cfg.RatingPlans.TTL)
-	} else {
-		c[utils.RATING_PLAN_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.Destinations != nil {
+		c[utils.DESTINATION_PREFIX] = ltcache.New(cfg.Destinations.Limit, cfg.Destinations.TTL, false, nil)
 	}
-	if cfg != nil && cfg.RatingProfiles != nil {
-		c[utils.RATING_PROFILE_PREFIX] = NewLRUTTL(cfg.RatingProfiles.Limit, cfg.RatingProfiles.TTL)
-	} else {
-		c[utils.RATING_PROFILE_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.ReverseDestinations != nil {
+		c[utils.REVERSE_DESTINATION_PREFIX] = ltcache.New(cfg.ReverseDestinations.Limit, cfg.ReverseDestinations.TTL, false, nil)
 	}
-	if cfg != nil && cfg.Lcr != nil {
-		c[utils.LCR_PREFIX] = NewLRUTTL(cfg.Lcr.Limit, cfg.Lcr.TTL)
-	} else {
-		c[utils.LCR_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.RatingPlans != nil {
+		c[utils.RATING_PLAN_PREFIX] = ltcache.New(cfg.RatingPlans.Limit, cfg.RatingPlans.TTL, false, nil)
 	}
-	if cfg != nil && cfg.CdrStats != nil {
-		c[utils.CDR_STATS_PREFIX] = NewLRUTTL(cfg.CdrStats.Limit, cfg.CdrStats.TTL)
-	} else {
-		c[utils.CDR_STATS_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.RatingProfiles != nil {
+		c[utils.RATING_PROFILE_PREFIX] = ltcache.New(cfg.RatingProfiles.Limit, cfg.RatingProfiles.TTL, false, nil)
 	}
-	if cfg != nil && cfg.Actions != nil {
-		c[utils.ACTION_PREFIX] = NewLRUTTL(cfg.Actions.Limit, cfg.Actions.TTL)
-	} else {
-		c[utils.ACTION_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.Lcr != nil {
+		c[utils.LCR_PREFIX] = ltcache.New(cfg.Lcr.Limit, cfg.Lcr.TTL, false, nil)
 	}
-	if cfg != nil && cfg.ActionPlans != nil {
-		c[utils.ACTION_PLAN_PREFIX] = NewLRUTTL(cfg.ActionPlans.Limit, cfg.ActionPlans.TTL)
-	} else {
-		c[utils.ACTION_PLAN_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.CdrStats != nil {
+		c[utils.CDR_STATS_PREFIX] = ltcache.New(cfg.CdrStats.Limit, cfg.CdrStats.TTL, false, nil)
 	}
-	if cfg != nil && cfg.ActionTriggers != nil {
-		c[utils.ACTION_TRIGGER_PREFIX] = NewLRUTTL(cfg.ActionTriggers.Limit, cfg.ActionTriggers.TTL)
-	} else {
-		c[utils.ACTION_TRIGGER_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.Actions != nil {
+		c[utils.ACTION_PREFIX] = ltcache.New(cfg.Actions.Limit, cfg.Actions.TTL, false, nil)
 	}
-	if cfg != nil && cfg.SharedGroups != nil {
-		c[utils.SHARED_GROUP_PREFIX] = NewLRUTTL(cfg.SharedGroups.Limit, cfg.SharedGroups.TTL)
-	} else {
-		c[utils.SHARED_GROUP_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.ActionPlans != nil {
+		c[utils.ACTION_PLAN_PREFIX] = ltcache.New(cfg.ActionPlans.Limit, cfg.ActionPlans.TTL, false, nil)
 	}
-	if cfg != nil && cfg.Aliases != nil {
-		c[utils.ALIASES_PREFIX] = NewLRUTTL(cfg.Aliases.Limit, cfg.Aliases.TTL)
-	} else {
-		c[utils.ALIASES_PREFIX] = NewLRUTTL(10000, 0)
+	if cfg.ActionTriggers != nil {
+		c[utils.ACTION_TRIGGER_PREFIX] = ltcache.New(cfg.ActionTriggers.Limit, cfg.ActionTriggers.TTL, false, nil)
+	}
+	if cfg.SharedGroups != nil {
+		c[utils.SHARED_GROUP_PREFIX] = ltcache.New(cfg.SharedGroups.Limit, cfg.SharedGroups.TTL, false, nil)
+	}
+	if cfg.Aliases != nil {
+		c[utils.ALIASES_PREFIX] = ltcache.New(cfg.Aliases.Limit, cfg.Aliases.TTL, false, nil)
 	}
 	if cfg != nil && cfg.ReverseAliases != nil {
-		c[utils.REVERSE_ALIASES_PREFIX] = NewLRUTTL(cfg.ReverseAliases.Limit, cfg.ReverseAliases.TTL)
-	} else {
-		c[utils.REVERSE_ALIASES_PREFIX] = NewLRUTTL(10000, 0)
-	}
-
-	return c
-}
-
-func (cs cacheLRUTTL) Put(key string, value interface{}) {
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	mp, ok := cs[prefix]
-	if !ok {
-		mp = NewLRUTTL(10000, 0)
-		cs[prefix] = mp
-	}
-	mp.Set(key, value)
-}
-
-func (cs cacheLRUTTL) Get(key string) (interface{}, bool) {
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
-		if ti, exists := keyMap.Get(key); exists {
-			return ti, true
-		}
-	}
-	return nil, false
-}
-
-func (cs cacheLRUTTL) Delete(key string) {
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
-		keyMap.Remove(key)
-	}
-}
-
-func (cs cacheLRUTTL) DeletePrefix(prefix string) {
-	delete(cs, prefix)
-}
-
-func (cs cacheLRUTTL) CountEntriesForPrefix(prefix string) int {
-	if m, ok := cs[prefix]; ok {
-		return m.Len()
-	}
-	return 0
-}
-
-func (cs cacheLRUTTL) GetKeysForPrefix(prefix string) (keys []string) {
-	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
-		for iterKey := range keyMap.cache {
-			if len(key) == 0 || strings.HasPrefix(iterKey, key) {
-				keys = append(keys, prefix+iterKey)
-			}
-		}
+		c[utils.REVERSE_ALIASES_PREFIX] = ltcache.New(cfg.ReverseAliases.Limit, cfg.ReverseAliases.TTL, false, nil)
 	}
 	return
 }
 
-// faster to access
-type cacheSimpleStore struct {
-	cache    map[string]interface{}
-	counters map[string]int
-}
-
-func newSimpleStore() cacheSimpleStore {
-	return cacheSimpleStore{
-		cache:    make(map[string]interface{}),
-		counters: make(map[string]int),
+func (cs cacheLRUTTL) cacheInstance(instID string) (c *ltcache.Cache) {
+	var ok bool
+	if c, ok = cs[instID]; !ok {
+		c = cs[utils.ANY]
 	}
+	return
 }
 
-func (cs cacheSimpleStore) Put(key string, value interface{}) {
-	if _, ok := cs.cache[key]; !ok {
-		// only count if the key is not already there
-		cs.count(key)
-	}
-	cs.cache[key] = value
+func (cs cacheLRUTTL) Put(key string, value interface{}) {
+	cs.cacheInstance(key[:PREFIX_LEN]).Set(key[PREFIX_LEN:], value)
 }
 
-func (cs cacheSimpleStore) Get(key string) (interface{}, bool) {
-	if value, exists := cs.cache[key]; exists {
-		return value, true
-	}
-	return nil, false
+func (cs cacheLRUTTL) Get(key string) (interface{}, bool) {
+	return cs.cacheInstance(key[:PREFIX_LEN]).Get(key[PREFIX_LEN:])
 }
 
-func (cs cacheSimpleStore) Delete(key string) {
-	if _, ok := cs.cache[key]; ok {
-		delete(cs.cache, key)
-		cs.descount(key)
+func (cs cacheLRUTTL) Delete(key string) {
+	cs.cacheInstance(key[:PREFIX_LEN]).Remove(key[PREFIX_LEN:])
+}
+
+func (cs cacheLRUTTL) DeletePrefix(prefix string) {
+	if c, hasInst := cs[prefix]; hasInst {
+		c.Clear()
 	}
 }
 
-func (cs cacheSimpleStore) DeletePrefix(prefix string) {
-	for key, _ := range cs.cache {
-		if strings.HasPrefix(key, prefix) {
-			delete(cs.cache, key)
-			cs.descount(key)
-		}
+func (cs cacheLRUTTL) CountEntriesForPrefix(prefix string) (cnt int) {
+	if c, ok := cs[prefix]; ok {
+		cnt = c.Len()
 	}
+	return
 }
 
-// increments the counter for the specified key prefix
-func (cs cacheSimpleStore) count(key string) {
-	if len(key) < PREFIX_LEN {
-		return
-	}
-	prefix := key[:PREFIX_LEN]
-	if _, ok := cs.counters[prefix]; ok {
-		// increase the value
-		cs.counters[prefix] += 1
-	} else {
-		cs.counters[prefix] = 1
-	}
-}
-
-// decrements the counter for the specified key prefix
-func (cs cacheSimpleStore) descount(key string) {
-	if len(key) < PREFIX_LEN {
-		return
-	}
-	prefix := key[:PREFIX_LEN]
-	if value, ok := cs.counters[prefix]; ok && value > 0 {
-		cs.counters[prefix] -= 1
-	}
-}
-
-func (cs cacheSimpleStore) CountEntriesForPrefix(prefix string) int {
-	if _, ok := cs.counters[prefix]; ok {
-		return cs.counters[prefix]
-	}
-	return 0
-}
-
-func (cs cacheSimpleStore) GetKeysForPrefix(prefix string) (keys []string) {
-	for key, _ := range cs.cache {
-		if strings.HasPrefix(key, prefix) {
-			keys = append(keys, key)
+func (cs cacheLRUTTL) GetKeysForPrefix(prefix string) (keys []string) {
+	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
+	if c, ok := cs[prefix]; ok {
+		for _, ifKey := range c.Keys() {
+			iterKey := ifKey.(string)
+			if len(key) == 0 || strings.HasPrefix(iterKey, key) {
+				keys = append(keys, prefix+iterKey)
+			}
 		}
 	}
 	return

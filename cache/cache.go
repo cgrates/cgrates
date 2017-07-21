@@ -58,7 +58,7 @@ func init() {
 
 func NewCache(cacheCfg *config.CacheConfig) {
 	cfg = cacheCfg
-	cache = newLruStore()
+	cache = newLRUTTL(cacheCfg)
 	transactionBuffer = make(map[string][]*transactionItem) // map[transactionID][]*transactionItem
 }
 
