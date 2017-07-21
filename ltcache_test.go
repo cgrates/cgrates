@@ -275,8 +275,83 @@ func TestSetGetRemLRUttl(t *testing.T) {
 	}
 }
 
-// BenchmarkSet 	 5000000	       383 ns/op
-func BenchmarkSet(b *testing.B) {
+// BenchmarkSetSimpleCache 	10000000	       180 ns/op
+func BenchmarkSetSimpleCache(b *testing.B) {
+	cache := NewLTCache(0, 0, false, nil)
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(testCIs)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := testCIs[rand.Intn(max-min)+min]
+		cache.Set(ci.key, ci.value)
+	}
+}
+
+// BenchmarkGetSimpleCache 	10000000	       120 ns/op
+func BenchmarkGetSimpleCache(b *testing.B) {
+	cache := NewLTCache(0, 0, false, nil)
+	for _, ci := range testCIs {
+		cache.Set(ci.key, ci.value)
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(testCIs)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := testCIs[rand.Intn(max-min)+min]
+		cache.Get(ci.key)
+	}
+}
+
+// BenchmarkSetLRU         	 5000000	       303 ns/op
+func BenchmarkSetLRU(b *testing.B) {
+	cache := NewLTCache(3, 0, false, nil)
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(testCIs)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := testCIs[rand.Intn(max-min)+min]
+		cache.Set(ci.key, ci.value)
+	}
+}
+
+// BenchmarkGetLRU         	10000000	       140 ns/op
+func BenchmarkGetLRU(b *testing.B) {
+	cache := NewLTCache(3, 0, false, nil)
+	for _, ci := range testCIs {
+		cache.Set(ci.key, ci.value)
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(testCIs)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := testCIs[rand.Intn(max-min)+min]
+		cache.Get(ci.key)
+	}
+}
+
+// BenchmarkSetTTL         	10000000	       225 ns/op
+func BenchmarkSetTTL(b *testing.B) {
+	cache := NewLTCache(0, time.Duration(time.Millisecond), false, nil)
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(testCIs)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := testCIs[rand.Intn(max-min)+min]
+		cache.Set(ci.key, ci.value)
+	}
+}
+
+// BenchmarkGetTTL         	10000000	       221 ns/op
+func BenchmarkGetTTL(b *testing.B) {
+	cache := NewLTCache(0, time.Duration(5*time.Millisecond), false, nil)
+	for _, ci := range testCIs {
+		cache.Set(ci.key, ci.value)
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(testCIs)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := testCIs[rand.Intn(max-min)+min]
+		cache.Get(ci.key)
+	}
+}
+
+// BenchmarkSetLRUttl      	 5000000	       381 ns/op
+func BenchmarkSetLRUttl(b *testing.B) {
 	cache := NewLTCache(3, time.Duration(time.Millisecond), false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
@@ -286,8 +361,8 @@ func BenchmarkSet(b *testing.B) {
 	}
 }
 
-// BenchmarkGet 	10000000	       186 ns/op
-func BenchmarkGet(b *testing.B) {
+// BenchmarkGetLRUttl      	10000000	       182 ns/op
+func BenchmarkGetLRUttl(b *testing.B) {
 	cache := NewLTCache(3, time.Duration(5*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
