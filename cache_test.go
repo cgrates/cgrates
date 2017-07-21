@@ -49,6 +49,9 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	} else if val.(string) != "two" {
 		t.Errorf("wrong item value: %v", val)
 	}
+	if ks := cache.Keys(); len(ks) != 5 {
+		t.Errorf("wrong keys: %+v", ks)
+	}
 	cache.Set("2", "twice")
 	if val, has := cache.Get("2"); !has {
 		t.Error("item not in cache")

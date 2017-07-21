@@ -127,6 +127,19 @@ func (c *Cache) Remove(k key) {
 	c.removeKey(k)
 }
 
+// Keys returns a slice with all keys in the cache
+func (c *Cache) Keys() (ks []key) {
+	c.RLock()
+	ks = make([]key, len(c.cache))
+	i := 0
+	for k := range c.cache {
+		ks[i] = k
+		i++
+	}
+	c.RUnlock()
+	return
+}
+
 // removeElement completely removes an Element from the cache
 func (c *Cache) removeKey(k key) {
 	ci, has := c.cache[k]
