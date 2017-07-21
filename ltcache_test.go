@@ -10,9 +10,9 @@ package ltcache
 
 import (
 	"testing"
+	"time"
 )
 
-var cache *LTCache
 var testCIs = []*cachedItem{
 	&cachedItem{key: "1", value: "one"},
 	&cachedItem{key: "2", value: "two"},
@@ -23,7 +23,7 @@ var testCIs = []*cachedItem{
 var lastEvicted string
 
 func TestSetGetRemNoIndexes(t *testing.T) {
-	cache = NewLTCache(0, 0, false,
+	cache := NewLTCache(0, 0, false,
 		func(k key, v interface{}) { lastEvicted = k.(string) })
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
@@ -77,7 +77,7 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 }
 
 func TestSetGetRemLRU(t *testing.T) {
-	cache = NewLTCache(3, 0, false, nil)
+	cache := NewLTCache(3, 0, false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -158,5 +158,118 @@ func TestSetGetRemLRU(t *testing.T) {
 	cache.Clear()
 	if cache.Len() != 0 {
 		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+}
+
+func TestSetGetRemTTLDynamic(t *testing.T) {
+	cache := NewLTCache(0, time.Duration(10*time.Millisecond), false, nil)
+	for _, ci := range testCIs {
+		cache.Set(ci.key, ci.value)
+	}
+	if len(cache.cache) != 5 {
+		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+	if cache.lruIdx.Len() != 0 {
+		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
+	}
+	if len(cache.lruRefs) != 0 {
+		t.Errorf("Wrong items in lru references: %+v", cache.lruRefs)
+	}
+	if cache.ttlIdx.Len() != 5 {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlIdx)
+	}
+	if len(cache.ttlRefs) != 5 {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
+	}
+	time.Sleep(time.Duration(6 * time.Millisecond))
+	if _, has := cache.Get("2"); !has {
+		t.Error("item not in cache")
+	}
+	time.Sleep(time.Duration(6 * time.Millisecond))
+	if cache.Len() != 1 {
+		t.Errorf("Wrong items in cache: %+v", cache.cache)
+	}
+	if cache.ttlIdx.Len() != 1 {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlIdx)
+	}
+	if len(cache.ttlRefs) != 1 {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
+	}
+}
+
+func TestSetGetRemTTLStatic(t *testing.T) {
+	cache := NewLTCache(0, time.Duration(10*time.Millisecond), true, nil)
+	for _, ci := range testCIs {
+		cache.Set(ci.key, ci.value)
+	}
+	if cache.Len() != 5 {
+		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+	time.Sleep(time.Duration(6 * time.Millisecond))
+	if _, has := cache.Get("2"); !has {
+		t.Error("item not in cache")
+	}
+	time.Sleep(time.Duration(6 * time.Millisecond))
+	if cache.Len() != 0 {
+		t.Errorf("Wrong items in cache: %+v", cache.cache)
+	}
+}
+
+func TestSetGetRemLRUttl(t *testing.T) {
+	nrItems := 3
+	cache := NewLTCache(nrItems, time.Duration(10*time.Millisecond), false, nil)
+	for _, ci := range testCIs {
+		cache.Set(ci.key, ci.value)
+	}
+	if cache.Len() != nrItems {
+		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+	if cache.lruIdx.Len() != nrItems {
+		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
+	}
+	if len(cache.lruRefs) != nrItems {
+		t.Errorf("Wrong items in lru references: %+v", cache.lruRefs)
+	}
+	if cache.ttlIdx.Len() != nrItems {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlIdx)
+	}
+	if len(cache.ttlRefs) != nrItems {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
+	}
+	time.Sleep(time.Duration(6 * time.Millisecond))
+	cache.Remove("4")
+	cache.Set("3", "third")
+	nrItems = 2
+	if cache.Len() != nrItems {
+		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+	if cache.lruIdx.Len() != nrItems {
+		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
+	}
+	if len(cache.lruRefs) != nrItems {
+		t.Errorf("Wrong items in lru references: %+v", cache.lruRefs)
+	}
+	if cache.ttlIdx.Len() != nrItems {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlIdx)
+	}
+	if len(cache.ttlRefs) != nrItems {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
+	}
+	time.Sleep(time.Duration(6 * time.Millisecond)) // timeout items which were not modified
+	nrItems = 1
+	if cache.Len() != nrItems {
+		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+	if cache.lruIdx.Len() != nrItems {
+		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
+	}
+	if len(cache.lruRefs) != nrItems {
+		t.Errorf("Wrong items in lru references: %+v", cache.lruRefs)
+	}
+	if cache.ttlIdx.Len() != nrItems {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlIdx)
+	}
+	if len(cache.ttlRefs) != nrItems {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
 	}
 }

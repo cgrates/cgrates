@@ -47,8 +47,8 @@ type LTCache struct {
 
 // NewLTCache initializes a new cache.
 func NewLTCache(maxEntries int, ttl time.Duration, staticTTL bool,
-	onEvicted func(k key, value interface{})) *LTCache {
-	return &LTCache{
+	onEvicted func(k key, value interface{})) (ltCache *LTCache) {
+	ltCache = &LTCache{
 		cache:      make(map[key]*cachedItem),
 		onEvicted:  onEvicted,
 		maxEntries: maxEntries,
@@ -59,6 +59,10 @@ func NewLTCache(maxEntries int, ttl time.Duration, staticTTL bool,
 		ttlIdx:     list.New(),
 		ttlRefs:    make(map[key]*list.Element),
 	}
+	if ltCache.ttl != 0 {
+		go ltCache.cleanExpired()
+	}
+	return
 }
 
 // Get looks up a key's value from the cache.
@@ -74,7 +78,7 @@ func (c *LTCache) Get(k key) (value interface{}, ok bool) {
 		c.lruIdx.MoveToFront(c.lruRefs[k])
 	}
 	if c.ttl > 0 && !c.staticTTL { // update ttl indexes
-		ci.expiryTime.Add(c.ttl)
+		ci.expiryTime = time.Now().Add(c.ttl)
 		c.ttlIdx.MoveToFront(c.ttlRefs[k])
 	}
 	return
@@ -134,7 +138,7 @@ func (c *LTCache) removeKey(k key) {
 		delete(c.lruRefs, k)
 	}
 	if c.ttl != 0 {
-		c.ttlIdx.Remove(c.lruRefs[k])
+		c.ttlIdx.Remove(c.ttlRefs[k])
 		delete(c.ttlRefs, k)
 	}
 	delete(c.cache, ci.key)
