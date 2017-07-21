@@ -22,7 +22,7 @@ Copyright (C) ITsysCOM GmbH. All Rights Reserved.
 package main
 
 func main() {
-	cache := NewLTCache(3, time.Duration(10*time.Millisecond), false, 
+	cache := New(3, time.Duration(10*time.Millisecond), false, 
 		func(k key, v interface{}) { fmt.Printf("Evicted key: %v, value: %v", k, v)})
 	cache.Set("key1": "val1")
 	cache.Get("key1")
