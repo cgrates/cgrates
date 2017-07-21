@@ -1,5 +1,5 @@
 /*
-ltcache.go is released under the MIT License <http://www.opensource.org/licenses/mit-license.php
+Cache.go is released under the MIT License <http://www.opensource.org/licenses/mit-license.php
 Copyright (C) ITsysCOM GmbH. All Rights Reserved.
 
 A LRU cache with TTL capabilities.
@@ -24,8 +24,8 @@ type cachedItem struct {
 	expiryTime time.Time
 }
 
-// LTCache is an LRU/TTL cache. It is safe for concurrent access.
-type LTCache struct {
+// Cache is an LRU/TTL cache. It is safe for concurrent access.
+type Cache struct {
 	// simple locking for now, ToDo: try locking per key
 	sync.RWMutex
 	// cache holds the items
@@ -45,10 +45,10 @@ type LTCache struct {
 	ttlRefs map[key]*list.Element // index the list element based on it' key in cache
 }
 
-// NewLTCache initializes a new cache.
-func NewLTCache(maxEntries int, ttl time.Duration, staticTTL bool,
-	onEvicted func(k key, value interface{})) (ltCache *LTCache) {
-	ltCache = &LTCache{
+// New initializes a new cache.
+func New(maxEntries int, ttl time.Duration, staticTTL bool,
+	onEvicted func(k key, value interface{})) (c *Cache) {
+	c = &Cache{
 		cache:      make(map[key]*cachedItem),
 		onEvicted:  onEvicted,
 		maxEntries: maxEntries,
@@ -59,14 +59,14 @@ func NewLTCache(maxEntries int, ttl time.Duration, staticTTL bool,
 		ttlIdx:     list.New(),
 		ttlRefs:    make(map[key]*list.Element),
 	}
-	if ltCache.ttl != 0 {
-		go ltCache.cleanExpired()
+	if c.ttl != 0 {
+		go c.cleanExpired()
 	}
 	return
 }
 
 // Get looks up a key's value from the cache.
-func (c *LTCache) Get(k key) (value interface{}, ok bool) {
+func (c *Cache) Get(k key) (value interface{}, ok bool) {
 	c.Lock()
 	defer c.Unlock()
 	ci, has := c.cache[k]
@@ -85,7 +85,7 @@ func (c *LTCache) Get(k key) (value interface{}, ok bool) {
 }
 
 // Set sets/adds a value to the cache.
-func (c *LTCache) Set(k key, value interface{}) {
+func (c *Cache) Set(k key, value interface{}) {
 	c.Lock()
 	defer c.Unlock()
 	now := time.Now()
@@ -121,14 +121,14 @@ func (c *LTCache) Set(k key, value interface{}) {
 }
 
 // Remove removes the provided key from the cache.
-func (c *LTCache) Remove(k key) {
+func (c *Cache) Remove(k key) {
 	c.Lock()
 	defer c.Unlock()
 	c.removeKey(k)
 }
 
 // removeElement completely removes an Element from the cache
-func (c *LTCache) removeKey(k key) {
+func (c *Cache) removeKey(k key) {
 	ci, has := c.cache[k]
 	if !has {
 		return
@@ -148,7 +148,7 @@ func (c *LTCache) removeKey(k key) {
 }
 
 // cleanExpired checks items indexed for TTL and expires them when necessary
-func (c *LTCache) cleanExpired() {
+func (c *Cache) cleanExpired() {
 	for {
 		c.Lock()
 		if c.ttlIdx.Len() == 0 {
@@ -169,14 +169,14 @@ func (c *LTCache) cleanExpired() {
 }
 
 // Len returns the number of items in the cache.
-func (c *LTCache) Len() int {
+func (c *Cache) Len() int {
 	c.RLock()
 	defer c.RUnlock()
 	return len(c.cache)
 }
 
 // Clear purges all stored items from the cache.
-func (c *LTCache) Clear() {
+func (c *Cache) Clear() {
 	c.Lock()
 	defer c.Unlock()
 	if c.onEvicted != nil {

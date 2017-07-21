@@ -24,7 +24,7 @@ var testCIs = []*cachedItem{
 var lastEvicted string
 
 func TestSetGetRemNoIndexes(t *testing.T) {
-	cache := NewLTCache(0, 0, false,
+	cache := New(0, 0, false,
 		func(k key, v interface{}) { lastEvicted = k.(string) })
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
@@ -78,7 +78,7 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 }
 
 func TestSetGetRemLRU(t *testing.T) {
-	cache := NewLTCache(3, 0, false, nil)
+	cache := New(3, 0, false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -163,7 +163,7 @@ func TestSetGetRemLRU(t *testing.T) {
 }
 
 func TestSetGetRemTTLDynamic(t *testing.T) {
-	cache := NewLTCache(0, time.Duration(10*time.Millisecond), false, nil)
+	cache := New(0, time.Duration(10*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -199,7 +199,7 @@ func TestSetGetRemTTLDynamic(t *testing.T) {
 }
 
 func TestSetGetRemTTLStatic(t *testing.T) {
-	cache := NewLTCache(0, time.Duration(10*time.Millisecond), true, nil)
+	cache := New(0, time.Duration(10*time.Millisecond), true, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -218,7 +218,7 @@ func TestSetGetRemTTLStatic(t *testing.T) {
 
 func TestSetGetRemLRUttl(t *testing.T) {
 	nrItems := 3
-	cache := NewLTCache(nrItems, time.Duration(10*time.Millisecond), false, nil)
+	cache := New(nrItems, time.Duration(10*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -277,7 +277,7 @@ func TestSetGetRemLRUttl(t *testing.T) {
 
 // BenchmarkSetSimpleCache 	10000000	       180 ns/op
 func BenchmarkSetSimpleCache(b *testing.B) {
-	cache := NewLTCache(0, 0, false, nil)
+	cache := New(0, 0, false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -288,7 +288,7 @@ func BenchmarkSetSimpleCache(b *testing.B) {
 
 // BenchmarkGetSimpleCache 	10000000	       120 ns/op
 func BenchmarkGetSimpleCache(b *testing.B) {
-	cache := NewLTCache(0, 0, false, nil)
+	cache := New(0, 0, false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -302,7 +302,7 @@ func BenchmarkGetSimpleCache(b *testing.B) {
 
 // BenchmarkSetLRU         	 5000000	       303 ns/op
 func BenchmarkSetLRU(b *testing.B) {
-	cache := NewLTCache(3, 0, false, nil)
+	cache := New(3, 0, false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -313,7 +313,7 @@ func BenchmarkSetLRU(b *testing.B) {
 
 // BenchmarkGetLRU         	10000000	       140 ns/op
 func BenchmarkGetLRU(b *testing.B) {
-	cache := NewLTCache(3, 0, false, nil)
+	cache := New(3, 0, false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -327,7 +327,7 @@ func BenchmarkGetLRU(b *testing.B) {
 
 // BenchmarkSetTTL         	10000000	       225 ns/op
 func BenchmarkSetTTL(b *testing.B) {
-	cache := NewLTCache(0, time.Duration(time.Millisecond), false, nil)
+	cache := New(0, time.Duration(time.Millisecond), false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -338,7 +338,7 @@ func BenchmarkSetTTL(b *testing.B) {
 
 // BenchmarkGetTTL         	10000000	       221 ns/op
 func BenchmarkGetTTL(b *testing.B) {
-	cache := NewLTCache(0, time.Duration(5*time.Millisecond), false, nil)
+	cache := New(0, time.Duration(5*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -352,7 +352,7 @@ func BenchmarkGetTTL(b *testing.B) {
 
 // BenchmarkSetLRUttl      	 5000000	       381 ns/op
 func BenchmarkSetLRUttl(b *testing.B) {
-	cache := NewLTCache(3, time.Duration(time.Millisecond), false, nil)
+	cache := New(3, time.Duration(time.Millisecond), false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -363,7 +363,7 @@ func BenchmarkSetLRUttl(b *testing.B) {
 
 // BenchmarkGetLRUttl      	10000000	       182 ns/op
 func BenchmarkGetLRUttl(b *testing.B) {
-	cache := NewLTCache(3, time.Duration(5*time.Millisecond), false, nil)
+	cache := New(3, time.Duration(5*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
