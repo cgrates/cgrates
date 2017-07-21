@@ -9,6 +9,7 @@ A LRU cache with TTL capabilities.
 package ltcache
 
 import (
+	"math/rand"
 	"testing"
 	"time"
 )
@@ -271,5 +272,30 @@ func TestSetGetRemLRUttl(t *testing.T) {
 	}
 	if len(cache.ttlRefs) != nrItems {
 		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
+	}
+}
+
+// BenchmarkSet 	 5000000	       383 ns/op
+func BenchmarkSet(b *testing.B) {
+	cache := NewLTCache(3, time.Duration(time.Millisecond), false, nil)
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(testCIs)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := testCIs[rand.Intn(max-min)+min]
+		cache.Set(ci.key, ci.value)
+	}
+}
+
+// BenchmarkGet 	10000000	       186 ns/op
+func BenchmarkGet(b *testing.B) {
+	cache := NewLTCache(3, time.Duration(5*time.Millisecond), false, nil)
+	for _, ci := range testCIs {
+		cache.Set(ci.key, ci.value)
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(testCIs)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := testCIs[rand.Intn(max-min)+min]
+		cache.Get(ci.key)
 	}
 }
