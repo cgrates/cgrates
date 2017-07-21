@@ -25,6 +25,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// NewStatService initializes a StatService
+func NewStatService(dataDB DataDB) (ss *StatService, err error) {
+	ss = &StatService{dataDB: dataDB}
+}
+
 // StatService builds stats for events
 type StatService struct {
 	sync.RWMutex
