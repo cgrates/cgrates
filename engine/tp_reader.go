@@ -53,6 +53,7 @@ type TpReader struct {
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
 	resLimits        map[string]*utils.TPResourceLimit
+	stats            map[string]*utils.TPStats
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
@@ -124,6 +125,7 @@ func (tpr *TpReader) Init() {
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resLimits = make(map[string]*utils.TPResourceLimit)
+	tpr.stats = make(map[string]*utils.TPStats)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1603,6 +1605,23 @@ func (tpr *TpReader) LoadResourceLimits() error {
 	return tpr.LoadResourceLimitsFiltered("")
 }
 
+func (tpr *TpReader) LoadStatsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPStats(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	mapSTs := make(map[string]*utils.TPStats)
+	for _, st := range tps {
+		mapSTs[st.ID] = st
+	}
+	tpr.stats = mapSTs
+	return nil
+}
+
+func (tpr *TpReader) LoadStats() error {
+	return tpr.LoadStatsFiltered("")
+}
+
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -1653,6 +1672,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadResourceLimits(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil

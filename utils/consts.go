@@ -101,6 +101,7 @@ const (
 	USERS_CSV                     = "Users.csv"
 	ALIASES_CSV                   = "Aliases.csv"
 	ResourceLimitsCsv             = "ResourceLimits.csv"
+	StatsCsv             					= "Stats.csv"
 	ROUNDING_UP                   = "*up"
 	ROUNDING_MIDDLE               = "*middle"
 	ROUNDING_DOWN                 = "*down"

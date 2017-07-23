@@ -273,13 +273,17 @@ ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,
 ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,
 ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,10,
 `
+	stats = `
+#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,QueueLength,TTL,Metrics,Store,Thresholds,Weight
+Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,THRESH1;THRESH2,20
+`
 )
 
 var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(dataStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits), testTPID, "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits, stats), testTPID, "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -329,6 +333,8 @@ func init() {
 		log.Print("error in LoadAliases:", err)
 	}
 	if err := csvr.LoadResourceLimits(); err != nil {
+	}
+	if err := csvr.LoadStats(); err != nil {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
@@ -1412,4 +1418,32 @@ func TestLoadResourceLimits(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eResLimits["ResGroup22"], csvr.resLimits["ResGroup22"])
 	}
 
+}
+
+func TestLoadStats(t *testing.T) {
+	eStats := map[string]*utils.TPStats{
+		"Stats1": &utils.TPStats{
+			TPid: testTPID,
+			ID:   "Stats1",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			QueueLength: 100,
+			TTL:         "1s",
+			Metrics:     "*asr;*acd;*acc",
+			Store:       true,
+			Thresholds:  "THRESH1;THRESH2",
+			Weight:      20,
+		},
+	}
+
+	// if len(csvr.stats) != len(eStats) {
+	// 	t.Error("Failed to load stats: ", len(csvr.stats))
+	// } else
+	if !reflect.DeepEqual(eStats["Stats1"], csvr.stats["Stats1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.stats["Stats1"])
+	}
 }

@@ -162,6 +162,7 @@ type LoadReader interface {
 	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
 	GetTPResourceLimits(string, string) ([]*utils.TPResourceLimit, error)
+	GetTPStats(string, string) ([]*utils.TPStats, error)
 }
 
 type LoadWriter interface {

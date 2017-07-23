@@ -1936,3 +1936,135 @@ func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *Resou
 	}
 	return rl, nil
 }
+
+type TpStatsS []*TpStats
+
+func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
+	mrl := make(map[string]*utils.TPStats)
+	for _, tp := range tps {
+		rl, found := mrl[tp.Tag]
+		if !found {
+			rl = &utils.TPStats{
+				TPid: tp.Tpid,
+				ID:   tp.Tag,
+			}
+		}
+		if tp.QueueLength != 0 {
+			rl.QueueLength = tp.QueueLength
+		}
+		if tp.TTL != "" {
+			rl.TTL = tp.TTL
+		}
+		if tp.Metrics != "" {
+			rl.Metrics = tp.Metrics
+		}
+		if tp.Store != false {
+			rl.Store = tp.Store
+		}
+		if tp.Thresholds != "" {
+			rl.Thresholds = tp.Thresholds
+		}
+		if tp.Weight != 0 {
+			rl.Weight = tp.Weight
+		}
+		if len(tp.ActivationInterval) != 0 {
+			rl.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				rl.ActivationInterval.ActivationTime = aiSplt[0]
+				rl.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				rl.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.FilterType != "" {
+			rl.Filters = append(rl.Filters, &utils.TPRequestFilter{
+				Type:      tp.FilterType,
+				FieldName: tp.FilterFieldName,
+				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
+		}
+		mrl[tp.Tag] = rl
+	}
+	result = make([]*utils.TPStats, len(mrl))
+	i := 0
+	for _, rl := range mrl {
+		result[i] = rl
+		i++
+	}
+	return
+}
+
+// func APItoModelTPStats(tps *utils.TPStats) (mdls TpStatsS) {
+// 	if len(rl.Filters) == 0 {
+// 		return
+// 	}
+// 	for i, fltr := range rl.Filters {
+// 		mdl := &TpStats{
+// 			Tpid: tps.TPid,
+// 			Tag:  tps.ID,
+// 		}
+// 		if i == 0 {
+// 			mdl.QueueLength = tps.QueueLength
+// 			mdl.TTL = tps.TTL
+// 			mdl.Metrics = tps.Metrics
+// 			mdl.Store = tps.Store
+// 			mdl.Thresholds = tps.Thresholds
+// 			mdl.Weight = tps.Weight
+// 			if tps.ActivationInterval != nil {
+// 				if tps.ActivationInterval.ActivationTime != "" {
+// 					mdl.ActivationInterval = tps.ActivationInterval.ActivationTime
+// 				}
+// 				if tps.ActivationInterval.ExpiryTime != "" {
+// 					mdl.ActivationInterval += utils.INFIELD_SEP + tps.ActivationInterval.ExpiryTime
+// 				}
+// 			}
+// 		}
+// 		mdl.FilterType = fltr.Type
+// 		mdl.FilterFieldName = fltr.FieldName
+// 		for i, val := range fltr.Values {
+// 			if i != 0 {
+// 				mdl.FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
+// 			} else {
+// 				mdl.FilterFieldValues = val
+// 			}
+// 		}
+// 		mdls = append(mdls, mdl)
+// 	}
+// 	return
+// }FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
+// 			} else {
+// 				mdl.FilterFieldValues = val
+// 			}
+// 		}
+// 		mdls = append(mdls, mdl)
+// 	}
+// 	return
+// }
+
+// func APItoTPStats(tpST *utils.TPStats, timezone string) (st *TpStats, err error) {
+// 	st = &ResourceLimit{ID: tpST.ID, Weight: tpST.Weight,
+// 		Filters: make([]*RequestFilter, len(tpST.Filters)), Usage: make(map[string]*ResourceUsage)}
+// 	if tpST.TTL != "" {
+// 		if rl.TTL, err = utils.ParseDurationWithSecs(tpST.TTL); err != nil {
+// 			return nil, err
+// 		}
+// 	}
+// 	for i, f := range tpST.Filters {
+// 		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+// 		if err := rf.CompileValues(); err != nil {
+// 			return nil, err
+// 		}
+// 		st.Filters[i] = rf
+// 	}
+// 	if tpST.ActivationInterval != nil {
+// 		if st.ActivationInterval, err = tpST.ActivationInterval.AsActivationInterval(timezone); err != nil {
+// 			return nil, err
+// 		}
+// 	}
+// 	if tpST.Thresholds != "" {
+// 		if st.Thresholds, err = strconv.ParseFloat(tpST.Thresholds, 64); err != nil {
+// 			return nil, err
+// 		}
+// 	}
+// 	return st, nil
+// }

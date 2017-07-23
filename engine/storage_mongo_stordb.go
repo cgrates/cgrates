@@ -1105,6 +1105,10 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	return cdrs, 0, nil
 }
 
+func (ms *MongoStorage) GetTPStats(string, string) ([]*utils.TPStats, error) {
+	return nil, nil
+}
+
 func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
 	return
 }

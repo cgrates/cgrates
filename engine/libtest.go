@@ -127,6 +127,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dataDB DataDB, disable_re
 		path.Join(tpPath, utils.USERS_CSV),
 		path.Join(tpPath, utils.ALIASES_CSV),
 		path.Join(tpPath, utils.ResourceLimitsCsv),
+		path.Join(tpPath, utils.StatsCsv),
 	), "", timezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
