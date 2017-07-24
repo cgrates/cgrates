@@ -31,10 +31,9 @@ var dbAuth engine.DataDB
 var rsponder *engine.Responder
 
 func TestAuthSetStorage(t *testing.T) {
+	config.CgrConfig().CacheConfig[utils.CacheRatingPlans].Precache = true // precache rating plan
 	dbAuth, _ = engine.NewMapStorageJson()
 	engine.SetDataStorage(dbAuth)
-	cfg, _ := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
 	rsponder = new(engine.Responder)
 
 }

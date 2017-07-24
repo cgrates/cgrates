@@ -89,7 +89,7 @@ var (
 	CostLow            = strings.ToLower(utils.COST)
 )
 
-func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string, cacheCfg *config.CacheConfig, loadHistorySize int) (ms *MongoStorage, err error) {
+func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string, cacheCfg config.CacheConfig, loadHistorySize int) (ms *MongoStorage, err error) {
 	url := host
 	if port != "" {
 		url += ":" + port
@@ -123,7 +123,7 @@ type MongoStorage struct {
 	db              string
 	storageType     string // datadb, stordb
 	ms              Marshaler
-	cacheCfg        *config.CacheConfig
+	cacheCfg        config.CacheConfig
 	loadHistorySize int
 	cdrsIndexes     []string
 	cnter           *utils.Counter
@@ -488,37 +488,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			ids = append(ids, keyID[len(prfx):])
 		}
 		var nrItems int
-		switch prfx {
-		case utils.DESTINATION_PREFIX:
-			nrItems = ms.cacheCfg.Destinations.Limit
-		case utils.REVERSE_DESTINATION_PREFIX:
-			nrItems = ms.cacheCfg.ReverseDestinations.Limit
-		case utils.RATING_PLAN_PREFIX:
-			nrItems = ms.cacheCfg.RatingPlans.Limit
-		case utils.RATING_PROFILE_PREFIX:
-			nrItems = ms.cacheCfg.RatingProfiles.Limit
-		case utils.ACTION_PREFIX:
-			nrItems = ms.cacheCfg.Actions.Limit
-		case utils.ACTION_PLAN_PREFIX:
-			nrItems = ms.cacheCfg.ActionPlans.Limit
-		case utils.AccountActionPlansPrefix:
-			nrItems = ms.cacheCfg.AccountActionPlans.Limit
-		case utils.ACTION_TRIGGER_PREFIX:
-			nrItems = ms.cacheCfg.ActionTriggers.Limit
-		case utils.SHARED_GROUP_PREFIX:
-			nrItems = ms.cacheCfg.SharedGroups.Limit
-		case utils.DERIVEDCHARGERS_PREFIX:
-			nrItems = ms.cacheCfg.DerivedChargers.Limit
-		case utils.LCR_PREFIX:
-			nrItems = ms.cacheCfg.Lcr.Limit
-		case utils.ALIASES_PREFIX:
-			nrItems = ms.cacheCfg.Aliases.Limit
-		case utils.REVERSE_ALIASES_PREFIX:
-			nrItems = ms.cacheCfg.ReverseAliases.Limit
-		case utils.ResourceLimitsPrefix:
-			nrItems = ms.cacheCfg.ResourceLimits.Limit
-		case utils.TimingsPrefix:
-			nrItems = ms.cacheCfg.Timings.Limit
+		if cCfg, has := ms.cacheCfg[utils.CachePrefixToInstance[prfx]]; has {
+			nrItems = cCfg.Limit
 		}
 		if nrItems != 0 && nrItems < len(ids) { // More ids than cache config allows it, limit here
 			ids = ids[:nrItems]

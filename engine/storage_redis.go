@@ -37,11 +37,11 @@ type RedisStorage struct {
 	dbPool          *pool.Pool
 	maxConns        int
 	ms              Marshaler
-	cacheCfg        *config.CacheConfig
+	cacheCfg        config.CacheConfig
 	loadHistorySize int
 }
 
-func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int, cacheCfg *config.CacheConfig, loadHistorySize int) (*RedisStorage, error) {
+func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int, cacheCfg config.CacheConfig, loadHistorySize int) (*RedisStorage, error) {
 	df := func(network, addr string) (*redis.Client, error) {
 		client, err := redis.Dial(network, addr)
 		if err != nil {
@@ -254,37 +254,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			ids = append(ids, keyID[len(prfx):])
 		}
 		var nrItems int
-		switch prfx {
-		case utils.DESTINATION_PREFIX:
-			nrItems = rs.cacheCfg.Destinations.Limit
-		case utils.REVERSE_DESTINATION_PREFIX:
-			nrItems = rs.cacheCfg.ReverseDestinations.Limit
-		case utils.RATING_PLAN_PREFIX:
-			nrItems = rs.cacheCfg.RatingPlans.Limit
-		case utils.RATING_PROFILE_PREFIX:
-			nrItems = rs.cacheCfg.RatingProfiles.Limit
-		case utils.ACTION_PREFIX:
-			nrItems = rs.cacheCfg.Actions.Limit
-		case utils.ACTION_PLAN_PREFIX:
-			nrItems = rs.cacheCfg.ActionPlans.Limit
-		case utils.AccountActionPlansPrefix:
-			nrItems = rs.cacheCfg.AccountActionPlans.Limit
-		case utils.ACTION_TRIGGER_PREFIX:
-			nrItems = rs.cacheCfg.ActionTriggers.Limit
-		case utils.SHARED_GROUP_PREFIX:
-			nrItems = rs.cacheCfg.SharedGroups.Limit
-		case utils.DERIVEDCHARGERS_PREFIX:
-			nrItems = rs.cacheCfg.DerivedChargers.Limit
-		case utils.LCR_PREFIX:
-			nrItems = rs.cacheCfg.Lcr.Limit
-		case utils.ALIASES_PREFIX:
-			nrItems = rs.cacheCfg.Aliases.Limit
-		case utils.REVERSE_ALIASES_PREFIX:
-			nrItems = rs.cacheCfg.ReverseAliases.Limit
-		case utils.ResourceLimitsPrefix:
-			nrItems = rs.cacheCfg.ResourceLimits.Limit
-		case utils.TimingsPrefix:
-			nrItems = rs.cacheCfg.Timings.Limit
+		if cCfg, has := rs.cacheCfg[utils.CachePrefixToInstance[prfx]]; has {
+			nrItems = cCfg.Limit
 		}
 		if nrItems != 0 && nrItems < len(ids) {
 			ids = ids[:nrItems]

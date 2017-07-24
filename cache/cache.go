@@ -38,7 +38,7 @@ const (
 var (
 	cache    cacheStore
 	cacheMux sync.RWMutex
-	cfg      *config.CacheConfig
+	cfg      config.CacheConfig
 
 	// transaction stuff
 	transactionBuffer map[string][]*transactionItem // Queue tasks based on transactionID
@@ -56,7 +56,7 @@ func init() {
 	NewCache(nil)
 }
 
-func NewCache(cacheCfg *config.CacheConfig) {
+func NewCache(cacheCfg config.CacheConfig) {
 	cfg = cacheCfg
 	cache = newLRUTTL(cacheCfg)
 	transactionBuffer = make(map[string][]*transactionItem) // map[transactionID][]*transactionItem

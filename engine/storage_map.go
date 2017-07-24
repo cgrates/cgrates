@@ -36,7 +36,7 @@ type MapStorage struct {
 	tasks    [][]byte
 	ms       Marshaler
 	mu       sync.RWMutex
-	cacheCfg *config.CacheConfig
+	cacheCfg config.CacheConfig
 }
 
 type storage map[string][]byte
@@ -145,80 +145,35 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
-func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error {
+func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
 	if ms.cacheCfg == nil {
-		return nil
+		return
 	}
-	if ms.cacheCfg.Destinations != nil && ms.cacheCfg.Destinations.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.DESTINATION_PREFIX); err != nil {
-			return err
-		}
-	}
-
-	if ms.cacheCfg.ReverseDestinations != nil && ms.cacheCfg.ReverseDestinations.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
-			return err
-		}
-	}
-
-	if ms.cacheCfg.RatingPlans != nil && ms.cacheCfg.RatingPlans.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
-			return err
-		}
-	}
-
-	if ms.cacheCfg.RatingProfiles != nil && ms.cacheCfg.RatingProfiles.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
-			return err
-		}
-	}
-	if ms.cacheCfg.Lcr != nil && ms.cacheCfg.Lcr.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.LCR_PREFIX); err != nil {
-			return err
-		}
-	}
-	if ms.cacheCfg.CdrStats != nil && ms.cacheCfg.CdrStats.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.CDR_STATS_PREFIX); err != nil {
-			return err
-		}
-	}
-	if ms.cacheCfg.Actions != nil && ms.cacheCfg.Actions.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.ACTION_PREFIX); err != nil {
-			return err
-		}
-	}
-	if ms.cacheCfg.ActionPlans != nil && ms.cacheCfg.ActionPlans.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-			return err
-		}
-	}
-	if ms.cacheCfg.ActionTriggers != nil && ms.cacheCfg.ActionTriggers.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.ACTION_TRIGGER_PREFIX); err != nil {
-			return err
-		}
-	}
-	if ms.cacheCfg.SharedGroups != nil && ms.cacheCfg.SharedGroups.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.SHARED_GROUP_PREFIX); err != nil {
-			return err
+	for k, cacheCfg := range ms.cacheCfg {
+		k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
+		if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
+			utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
+			utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
+			utils.SHARED_GROUP_PREFIX}, k) && cacheCfg.Precache {
+			if err := ms.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
+				return err
+			}
 		}
 	}
 	// add more prefixes if needed
-	return nil
+	return
 }
 
 func (ms *MapStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error {
 	if ms.cacheCfg == nil {
 		return nil
 	}
-	if ms.cacheCfg.Aliases != nil && ms.cacheCfg.Aliases.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.ALIASES_PREFIX); err != nil {
-			return err
-		}
-	}
-
-	if ms.cacheCfg.ReverseAliases != nil && ms.cacheCfg.ReverseAliases.Precache {
-		if err := ms.PreloadCacheForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
-			return err
+	for k, cacheCfg := range ms.cacheCfg {
+		k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
+		if utils.IsSliceMember([]string{utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX}, k) && cacheCfg.Precache {
+			if err := ms.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
+				return err
+			}
 		}
 	}
 	return nil
@@ -289,37 +244,8 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 			IDs = append(IDs, keyID[len(prefix):])
 		}
 		var nrItems int
-		switch prefix {
-		case utils.DESTINATION_PREFIX:
-			nrItems = ms.cacheCfg.Destinations.Limit
-		case utils.REVERSE_DESTINATION_PREFIX:
-			nrItems = ms.cacheCfg.ReverseDestinations.Limit
-		case utils.RATING_PLAN_PREFIX:
-			nrItems = ms.cacheCfg.RatingPlans.Limit
-		case utils.RATING_PROFILE_PREFIX:
-			nrItems = ms.cacheCfg.RatingProfiles.Limit
-		case utils.ACTION_PREFIX:
-			nrItems = ms.cacheCfg.Actions.Limit
-		case utils.ACTION_PLAN_PREFIX:
-			nrItems = ms.cacheCfg.ActionPlans.Limit
-		case utils.AccountActionPlansPrefix:
-			nrItems = ms.cacheCfg.AccountActionPlans.Limit
-		case utils.ACTION_TRIGGER_PREFIX:
-			nrItems = ms.cacheCfg.ActionTriggers.Limit
-		case utils.SHARED_GROUP_PREFIX:
-			nrItems = ms.cacheCfg.SharedGroups.Limit
-		case utils.DERIVEDCHARGERS_PREFIX:
-			nrItems = ms.cacheCfg.DerivedChargers.Limit
-		case utils.LCR_PREFIX:
-			nrItems = ms.cacheCfg.Lcr.Limit
-		case utils.ALIASES_PREFIX:
-			nrItems = ms.cacheCfg.Aliases.Limit
-		case utils.REVERSE_ALIASES_PREFIX:
-			nrItems = ms.cacheCfg.ReverseAliases.Limit
-		case utils.ResourceLimitsPrefix:
-			nrItems = ms.cacheCfg.ResourceLimits.Limit
-		case utils.TimingsPrefix:
-			nrItems = ms.cacheCfg.Timings.Limit
+		if cCfg, has := ms.cacheCfg[utils.CachePrefixToInstance[prefix]]; has {
+			nrItems = cCfg.Limit
 		}
 		if nrItems != 0 && nrItems < len(IDs) {
 			IDs = IDs[:nrItems]

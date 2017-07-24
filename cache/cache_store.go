@@ -38,75 +38,21 @@ type cacheStore interface {
 // easy to be counted exported by prefix
 type lrustore map[string]*lru.Cache
 
-func newLruStore() lrustore {
-	c := make(map[string]*lru.Cache)
-	if cfg != nil && cfg.Destinations != nil {
-		c[utils.DESTINATION_PREFIX], _ = lru.New(cfg.Destinations.Limit)
-	} else {
-		c[utils.DESTINATION_PREFIX], _ = lru.New(10000)
+func newLruStore() (c lrustore) {
+	c = make(map[string]*lru.Cache)
+	c[utils.ANY], _ = lru.New(0)
+	if cfg == nil {
+		return
 	}
-	if cfg != nil && cfg.ReverseDestinations != nil {
-		c[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(cfg.ReverseDestinations.Limit)
-	} else {
-		c[utils.REVERSE_DESTINATION_PREFIX], _ = lru.New(10000)
+	// dynamically configure cache instances based on CacheConfig
+	for cfgKey := range cfg {
+		cacheInstanceID := cfgKey
+		if prefixKey, has := utils.CacheInstanceToPrefix[cfgKey]; has {
+			cacheInstanceID = prefixKey // old aliases, backwards compatibility purpose
+		}
+		c[cacheInstanceID], _ = lru.New(cfg[cfgKey].Limit)
 	}
-	if cfg != nil && cfg.RatingPlans != nil {
-		c[utils.RATING_PLAN_PREFIX], _ = lru.New(cfg.RatingPlans.Limit)
-	} else {
-		c[utils.RATING_PLAN_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.RatingProfiles != nil {
-		c[utils.RATING_PROFILE_PREFIX], _ = lru.New(cfg.RatingProfiles.Limit)
-	} else {
-		c[utils.RATING_PROFILE_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.Lcr != nil {
-		c[utils.LCR_PREFIX], _ = lru.New(cfg.Lcr.Limit)
-	} else {
-		c[utils.LCR_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.CdrStats != nil {
-		c[utils.CDR_STATS_PREFIX], _ = lru.New(cfg.CdrStats.Limit)
-	} else {
-		c[utils.CDR_STATS_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.Actions != nil {
-		c[utils.ACTION_PREFIX], _ = lru.New(cfg.Actions.Limit)
-	} else {
-		c[utils.ACTION_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.ActionPlans != nil {
-		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(cfg.ActionPlans.Limit)
-	} else {
-		c[utils.ACTION_PLAN_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.AccountActionPlans != nil {
-		c[utils.AccountActionPlansPrefix], _ = lru.New(cfg.AccountActionPlans.Limit)
-	} else {
-		c[utils.AccountActionPlansPrefix], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.ActionTriggers != nil {
-		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(cfg.ActionTriggers.Limit)
-	} else {
-		c[utils.ACTION_TRIGGER_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.SharedGroups != nil {
-		c[utils.SHARED_GROUP_PREFIX], _ = lru.New(cfg.SharedGroups.Limit)
-	} else {
-		c[utils.SHARED_GROUP_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.Aliases != nil {
-		c[utils.ALIASES_PREFIX], _ = lru.New(cfg.Aliases.Limit)
-	} else {
-		c[utils.ALIASES_PREFIX], _ = lru.New(10000)
-	}
-	if cfg != nil && cfg.ReverseAliases != nil {
-		c[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(cfg.ReverseAliases.Limit)
-	} else {
-		c[utils.REVERSE_ALIASES_PREFIX], _ = lru.New(10000)
-	}
-
-	return c
+	return
 }
 
 func (cs lrustore) Put(key string, value interface{}) {
@@ -166,48 +112,20 @@ func (cs lrustore) GetKeysForPrefix(prefix string) (keys []string) {
 
 type cacheLRUTTL map[string]*ltcache.Cache
 
-func newLRUTTL(cfg *config.CacheConfig) (c cacheLRUTTL) {
+func newLRUTTL(cfg config.CacheConfig) (c cacheLRUTTL) {
 	c = map[string]*ltcache.Cache{
 		utils.ANY: ltcache.New(0, 0, false, nil), // no limits for default cache instance
 	}
 	if cfg == nil {
 		return
 	}
-	if cfg.Destinations != nil {
-		c[utils.DESTINATION_PREFIX] = ltcache.New(cfg.Destinations.Limit, cfg.Destinations.TTL, false, nil)
-	}
-	if cfg.ReverseDestinations != nil {
-		c[utils.REVERSE_DESTINATION_PREFIX] = ltcache.New(cfg.ReverseDestinations.Limit, cfg.ReverseDestinations.TTL, false, nil)
-	}
-	if cfg.RatingPlans != nil {
-		c[utils.RATING_PLAN_PREFIX] = ltcache.New(cfg.RatingPlans.Limit, cfg.RatingPlans.TTL, false, nil)
-	}
-	if cfg.RatingProfiles != nil {
-		c[utils.RATING_PROFILE_PREFIX] = ltcache.New(cfg.RatingProfiles.Limit, cfg.RatingProfiles.TTL, false, nil)
-	}
-	if cfg.Lcr != nil {
-		c[utils.LCR_PREFIX] = ltcache.New(cfg.Lcr.Limit, cfg.Lcr.TTL, false, nil)
-	}
-	if cfg.CdrStats != nil {
-		c[utils.CDR_STATS_PREFIX] = ltcache.New(cfg.CdrStats.Limit, cfg.CdrStats.TTL, false, nil)
-	}
-	if cfg.Actions != nil {
-		c[utils.ACTION_PREFIX] = ltcache.New(cfg.Actions.Limit, cfg.Actions.TTL, false, nil)
-	}
-	if cfg.ActionPlans != nil {
-		c[utils.ACTION_PLAN_PREFIX] = ltcache.New(cfg.ActionPlans.Limit, cfg.ActionPlans.TTL, false, nil)
-	}
-	if cfg.ActionTriggers != nil {
-		c[utils.ACTION_TRIGGER_PREFIX] = ltcache.New(cfg.ActionTriggers.Limit, cfg.ActionTriggers.TTL, false, nil)
-	}
-	if cfg.SharedGroups != nil {
-		c[utils.SHARED_GROUP_PREFIX] = ltcache.New(cfg.SharedGroups.Limit, cfg.SharedGroups.TTL, false, nil)
-	}
-	if cfg.Aliases != nil {
-		c[utils.ALIASES_PREFIX] = ltcache.New(cfg.Aliases.Limit, cfg.Aliases.TTL, false, nil)
-	}
-	if cfg != nil && cfg.ReverseAliases != nil {
-		c[utils.REVERSE_ALIASES_PREFIX] = ltcache.New(cfg.ReverseAliases.Limit, cfg.ReverseAliases.TTL, false, nil)
+	// dynamically configure cache instances based on CacheConfig
+	for cfgKey := range cfg {
+		cacheInstanceID := cfgKey
+		if prefixKey, has := utils.CacheInstanceToPrefix[cfgKey]; has {
+			cacheInstanceID = prefixKey // old aliases, backwards compatibility purpose
+		}
+		c[cacheInstanceID] = ltcache.New(cfg[cfgKey].Limit, cfg[cfgKey].TTL, cfg[cfgKey].StaticTTL, nil)
 	}
 	return
 }

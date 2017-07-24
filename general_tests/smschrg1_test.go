@@ -22,11 +22,13 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestSMSSetStorageSmsChrg1(t *testing.T) {
+	config.CgrConfig().CacheConfig[utils.CacheRatingPlans].Precache = true // precache rating plan
 	dataDB, _ = engine.NewMapStorageJson()
 	engine.SetDataStorage(dataDB)
 }
