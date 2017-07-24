@@ -23,7 +23,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
-	lru "github.com/hashicorp/golang-lru"
 )
 
 type cacheStore interface {
@@ -33,81 +32,7 @@ type cacheStore interface {
 	DeletePrefix(string)
 	CountEntriesForPrefix(string) int
 	GetKeysForPrefix(string) []string
-}
-
-// easy to be counted exported by prefix
-type lrustore map[string]*lru.Cache
-
-func newLruStore() (c lrustore) {
-	c = make(map[string]*lru.Cache)
-	c[utils.ANY], _ = lru.New(0)
-	if cfg == nil {
-		return
-	}
-	// dynamically configure cache instances based on CacheConfig
-	for cfgKey := range cfg {
-		cacheInstanceID := cfgKey
-		if prefixKey, has := utils.CacheInstanceToPrefix[cfgKey]; has {
-			cacheInstanceID = prefixKey // old aliases, backwards compatibility purpose
-		}
-		c[cacheInstanceID], _ = lru.New(cfg[cfgKey].Limit)
-	}
-	return
-}
-
-func (cs lrustore) Put(key string, value interface{}) {
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	mp, ok := cs[prefix]
-	if !ok {
-		var err error
-		mp, err = lru.New(10000)
-		if err != nil {
-			return
-		}
-		cs[prefix] = mp
-	}
-	mp.Add(key, value)
-}
-
-func (cs lrustore) Get(key string) (interface{}, bool) {
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
-		if ti, exists := keyMap.Get(key); exists {
-			return ti, true
-		}
-	}
-	return nil, false
-}
-
-func (cs lrustore) Delete(key string) {
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
-		keyMap.Remove(key)
-	}
-}
-
-func (cs lrustore) DeletePrefix(prefix string) {
-	delete(cs, prefix)
-}
-
-func (cs lrustore) CountEntriesForPrefix(prefix string) int {
-	if m, ok := cs[prefix]; ok {
-		return m.Len()
-	}
-	return 0
-}
-
-func (cs lrustore) GetKeysForPrefix(prefix string) (keys []string) {
-	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
-		for _, iterKey := range keyMap.Keys() {
-			iterKeyString := iterKey.(string)
-			if len(key) == 0 || strings.HasPrefix(iterKeyString, key) {
-				keys = append(keys, prefix+iterKeyString)
-			}
-		}
-	}
-	return
+	Clear()
 }
 
 type cacheLRUTTL map[string]*ltcache.Cache
@@ -174,4 +99,10 @@ func (cs cacheLRUTTL) GetKeysForPrefix(prefix string) (keys []string) {
 		}
 	}
 	return
+}
+
+func (cs cacheLRUTTL) Clear() {
+	for _, cInst := range cs {
+		cInst.Clear()
+	}
 }

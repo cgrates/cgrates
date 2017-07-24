@@ -53,7 +53,8 @@ type transactionItem struct {
 }
 
 func init() {
-	NewCache(nil)
+	dfCfg, _ := config.NewDefaultCGRConfig()
+	NewCache(dfCfg.CacheConfig)
 }
 
 func NewCache(cacheCfg config.CacheConfig) {
@@ -146,7 +147,7 @@ func RemPrefixKey(prefix string, commit bool, transID string) {
 // Delete all keys from cache
 func Flush() {
 	cacheMux.Lock()
-	cache = newLruStore()
+	cache.Clear()
 	cacheMux.Unlock()
 }
 

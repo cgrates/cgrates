@@ -136,7 +136,7 @@ func TestCacheCount(t *testing.T) {
 	Set("rpf_A3", "3", true, "")
 	Set("dst_A4", "4", true, "")
 	Set("dst_A5", "5", true, "")
-	if cnt := CountEntries(utils.ANY); cnt != 5 {
+	if cnt := CountEntries(utils.DESTINATION_PREFIX); cnt != 4 {
 		t.Error("Error counting entries: ", cnt)
 	}
 }
