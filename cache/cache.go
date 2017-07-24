@@ -53,6 +53,7 @@ type transactionItem struct {
 }
 
 func init() {
+	// ToDo: revert to nil config as soon as we handle cacheInstances properly
 	dfCfg, _ := config.NewDefaultCGRConfig()
 	NewCache(dfCfg.CacheConfig)
 }
