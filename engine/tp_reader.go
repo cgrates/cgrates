@@ -1982,6 +1982,28 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
+		if len(tpr.stats) > 0 {
+			if verbose {
+				log.Print("Indexing stats")
+			}
+			stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.StatsIndex)
+			if err != nil {
+				return err
+			}
+			for _, tpST := range tpr.stats {
+				if st, err := APItoTPStats(tpST, tpr.timezone); err != nil {
+					return err
+				} else {
+					stIdxr.IndexFilters(st.ID, st.Filters)
+				}
+			}
+			if verbose {
+				log.Printf("Indexed Stats keys: %+v", stIdxr.ChangedKeys().Slice())
+			}
+			if err := stIdxr.StoreIndexes(); err != nil {
+				return err
+			}
+		}
 	}
 	return
 }
@@ -2045,6 +2067,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("CDR stats: ", len(tpr.cdrStats))
 	// resource limits
 	log.Print("ResourceLimits: ", len(tpr.resLimits))
+	// stats
+	log.Print("Stats: ", len(tpr.stats))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2174,6 +2198,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.lcrs))
 		i := 0
 		for k := range tpr.lcrs {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.StatsPrefix:
+		keys := make([]string, len(tpr.stats))
+		i := 0
+		for k := range tpr.stats {
 			keys[i] = k
 			i++
 		}

@@ -1433,17 +1433,16 @@ func TestLoadStats(t *testing.T) {
 			},
 			QueueLength: 100,
 			TTL:         "1s",
-			Metrics:     "*asr;*acd;*acc",
+			Metrics:     []string{"*asr", "*acd", "*acc"},
 			Store:       true,
-			Thresholds:  "THRESH1;THRESH2",
+			Thresholds:  []string{"THRESH1", "THRESH2"},
 			Weight:      20,
 		},
 	}
 
-	// if len(csvr.stats) != len(eStats) {
-	// 	t.Error("Failed to load stats: ", len(csvr.stats))
-	// } else
-	if !reflect.DeepEqual(eStats["Stats1"], csvr.stats["Stats1"]) {
+	if len(csvr.stats) != len(eStats) {
+		t.Error("Failed to load stats: ", len(csvr.stats))
+	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.stats["Stats1"]) {
 		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.stats["Stats1"])
 	}
 }

@@ -1331,8 +1331,8 @@ type TPStats struct {
 	ActivationInterval *TPActivationInterval
 	QueueLength        int
 	TTL                string
-	Metrics            string
+	Metrics            []string
 	Store              bool
-	Thresholds         string
+	Thresholds         []string
 	Weight             float64
 }

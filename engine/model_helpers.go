@@ -1956,13 +1956,19 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			rl.TTL = tp.TTL
 		}
 		if tp.Metrics != "" {
-			rl.Metrics = tp.Metrics
+			metrSplt := strings.Split(tp.Metrics, utils.INFIELD_SEP)
+			for _, metr := range metrSplt {
+				rl.Metrics = append(rl.Metrics, metr)
+			}
 		}
 		if tp.Store != false {
 			rl.Store = tp.Store
 		}
 		if tp.Thresholds != "" {
-			rl.Thresholds = tp.Thresholds
+			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
+			for _, trsh := range trshSplt {
+				rl.Thresholds = append(rl.Thresholds, trsh)
+			}
 		}
 		if tp.Weight != 0 {
 			rl.Weight = tp.Weight
@@ -1994,77 +2000,36 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 	return
 }
 
-// func APItoModelTPStats(tps *utils.TPStats) (mdls TpStatsS) {
-// 	if len(rl.Filters) == 0 {
-// 		return
-// 	}
-// 	for i, fltr := range rl.Filters {
-// 		mdl := &TpStats{
-// 			Tpid: tps.TPid,
-// 			Tag:  tps.ID,
-// 		}
-// 		if i == 0 {
-// 			mdl.QueueLength = tps.QueueLength
-// 			mdl.TTL = tps.TTL
-// 			mdl.Metrics = tps.Metrics
-// 			mdl.Store = tps.Store
-// 			mdl.Thresholds = tps.Thresholds
-// 			mdl.Weight = tps.Weight
-// 			if tps.ActivationInterval != nil {
-// 				if tps.ActivationInterval.ActivationTime != "" {
-// 					mdl.ActivationInterval = tps.ActivationInterval.ActivationTime
-// 				}
-// 				if tps.ActivationInterval.ExpiryTime != "" {
-// 					mdl.ActivationInterval += utils.INFIELD_SEP + tps.ActivationInterval.ExpiryTime
-// 				}
-// 			}
-// 		}
-// 		mdl.FilterType = fltr.Type
-// 		mdl.FilterFieldName = fltr.FieldName
-// 		for i, val := range fltr.Values {
-// 			if i != 0 {
-// 				mdl.FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
-// 			} else {
-// 				mdl.FilterFieldValues = val
-// 			}
-// 		}
-// 		mdls = append(mdls, mdl)
-// 	}
-// 	return
-// }FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
-// 			} else {
-// 				mdl.FilterFieldValues = val
-// 			}
-// 		}
-// 		mdls = append(mdls, mdl)
-// 	}
-// 	return
-// }
+func APItoTPStats(tpST *utils.TPStats, timezone string) (st *StatsQueue, err error) {
+	st = &StatsQueue{
+		ID:          tpST.ID,
+		QueueLength: tpST.QueueLength,
+		Store:       tpST.Store,
+		Filters:     make([]*RequestFilter, len(tpST.Filters)),
+	}
+	if tpST.TTL != "" {
+		if st.TTL, err = utils.ParseDurationWithSecs(tpST.TTL); err != nil {
+			return nil, err
+		}
+	}
+	for _, metr := range tpST.Metrics {
+		st.Metrics = append(st.Metrics, metr)
+	}
+	for _, trh := range tpST.Thresholds {
+		st.Thresholds = append(st.Thresholds, trh)
 
-// func APItoTPStats(tpST *utils.TPStats, timezone string) (st *TpStats, err error) {
-// 	st = &ResourceLimit{ID: tpST.ID, Weight: tpST.Weight,
-// 		Filters: make([]*RequestFilter, len(tpST.Filters)), Usage: make(map[string]*ResourceUsage)}
-// 	if tpST.TTL != "" {
-// 		if rl.TTL, err = utils.ParseDurationWithSecs(tpST.TTL); err != nil {
-// 			return nil, err
-// 		}
-// 	}
-// 	for i, f := range tpST.Filters {
-// 		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
-// 		if err := rf.CompileValues(); err != nil {
-// 			return nil, err
-// 		}
-// 		st.Filters[i] = rf
-// 	}
-// 	if tpST.ActivationInterval != nil {
-// 		if st.ActivationInterval, err = tpST.ActivationInterval.AsActivationInterval(timezone); err != nil {
-// 			return nil, err
-// 		}
-// 	}
-// 	if tpST.Thresholds != "" {
-// 		if st.Thresholds, err = strconv.ParseFloat(tpST.Thresholds, 64); err != nil {
-// 			return nil, err
-// 		}
-// 	}
-// 	return st, nil
-// }
+	}
+	for i, f := range tpST.Filters {
+		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		if err := rf.CompileValues(); err != nil {
+			return nil, err
+		}
+		st.Filters[i] = rf
+	}
+	if tpST.ActivationInterval != nil {
+		if st.ActivationInterval, err = tpST.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
+	}
+	return st, nil
+}
