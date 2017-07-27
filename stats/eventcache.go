@@ -15,11 +15,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package stats
 
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,18 +28,18 @@ import (
 func NewStatsEventCache() *StatsEventCache {
 	return &StatsEventCache{
 		evCacheIdx: make(map[string]utils.StringMap),
-		evCache:    make(map[string]StatsEvent)}
+		evCache:    make(map[string]engine.StatsEvent)}
 }
 
 // StatsEventCache keeps a cache of StatsEvents which are referenced by StatsQueues
 type StatsEventCache struct {
 	sync.RWMutex
-	evCacheIdx map[string]utils.StringMap // index events used in queues, map[eventID]map[queueID]bool
-	evCache    map[string]StatsEvent      // cache for the processed events
+	evCacheIdx map[string]utils.StringMap   // index events used in queues, map[eventID]map[queueID]bool
+	evCache    map[string]engine.StatsEvent // cache for the processed events
 }
 
 // Cache will cache an event and reference it in the index
-func (sec *StatsEventCache) Cache(evID string, ev StatsEvent, queueID string) {
+func (sec *StatsEventCache) Cache(evID string, ev engine.StatsEvent, queueID string) {
 	if utils.IsSliceMember([]string{evID, queueID}, "") {
 		return
 	}
@@ -50,7 +51,7 @@ func (sec *StatsEventCache) Cache(evID string, ev StatsEvent, queueID string) {
 	sec.Unlock()
 }
 
-func (sec *StatsEventCache) UnCache(evID string, ev StatsEvent, queueID string) {
+func (sec *StatsEventCache) UnCache(evID string, ev engine.StatsEvent, queueID string) {
 	sec.Lock()
 	if _, hasIt := sec.evCache[evID]; !hasIt {
 		return
@@ -64,7 +65,7 @@ func (sec *StatsEventCache) UnCache(evID string, ev StatsEvent, queueID string) 
 }
 
 // GetEvent returns the event based on ID
-func (sec *StatsEventCache) GetEvent(evID string) StatsEvent {
+func (sec *StatsEventCache) GetEvent(evID string) engine.StatsEvent {
 	sec.RLock()
 	defer sec.RUnlock()
 	return sec.evCache[evID]

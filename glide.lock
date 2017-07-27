@@ -15,6 +15,8 @@ imports:
   version: 5b60f0d72ff4f8885289bffab55435e5b8adfb55
 - name: github.com/cgrates/kamevapi
   version: a376b1f937ba959857929fa3e111c0f3243278c0
+- name: github.com/cgrates/ltcache
+  version: c4fd16ee97ba74e5a0623ff4717fc964478acf65
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/radigo
@@ -57,10 +59,6 @@ imports:
   version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
-- name: github.com/hashicorp/golang-lru
-  version: 0a025b7e63adc15a622f29b0b2c4c3848243bbf6
-  subpackages:
-  - simplelru
 - name: github.com/jinzhu/gorm
   version: 0f2ceb5a775714a46bc344976324e3e439f8cdcc
 - name: github.com/jinzhu/inflection

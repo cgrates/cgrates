@@ -28,7 +28,7 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg *config.CacheConfig, loadHistorySize int) (db DataDB, err error) {
+func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg config.CacheConfig, loadHistorySize int) (db DataDB, err error) {
 	var d DataDB
 	switch db_type {
 	case utils.REDIS:

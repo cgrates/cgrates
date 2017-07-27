@@ -18,8 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cache
 
 import (
+	"fmt"
+	"math/rand"
 	"sync"
 	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestRemKey(t *testing.T) {
@@ -35,32 +40,34 @@ func TestRemKey(t *testing.T) {
 
 func TestTransaction(t *testing.T) {
 	transID := BeginTransaction()
-	Set("t11_mm", "test", false, transID)
-	if t1, ok := Get("t11_mm"); ok || t1 == "test" {
+	Set("mmm_t11", "test", false, transID)
+	if t1, ok := Get("mmm_t11"); ok || t1 == "test" {
 		t.Error("Error in transaction cache")
 	}
-	Set("t12_mm", "test", false, transID)
-	RemKey("t11_mm", false, transID)
+	Set("mmm_t12", "test", false, transID)
+	RemKey("mmm_t11", false, transID)
 	if _, hasTransID := transactionBuffer[transID]; !hasTransID {
 		t.Error("Does not have transactionID")
 	}
 	CommitTransaction(transID)
-	if t1, ok := Get("t12_mm"); !ok || t1 != "test" {
+	if t1, ok := Get("mmm_t12"); !ok || t1 != "test" {
+		fmt.Println(t1, ok)
 		t.Error("Error commiting transaction")
 	}
-	if t1, ok := Get("t11_mm"); ok || t1 == "test" {
+	if t1, ok := Get("mmm_t11"); ok || t1 == "test" {
 		t.Error("Error in transaction cache")
 	}
 	if _, hasTransID := transactionBuffer[transID]; hasTransID {
 		t.Error("Should not longer have transactionID")
 	}
+
 }
 
 func TestTransactionRem(t *testing.T) {
 	transID := BeginTransaction()
 	Set("t21_mm", "test", false, transID)
 	Set("t21_nn", "test", false, transID)
-	RemPrefixKey("t21_", false, transID)
+	RemPrefixKey(utils.ANY, false, transID)
 	if _, hasTransID := transactionBuffer[transID]; !hasTransID {
 		t.Error("Does not have transactionID")
 	}
@@ -78,19 +85,19 @@ func TestTransactionRem(t *testing.T) {
 
 func TestTransactionRollback(t *testing.T) {
 	transID := BeginTransaction()
-	Set("t31_mm", "test", false, transID)
-	if t1, ok := Get("t31_mm"); ok || t1 == "test" {
+	Set("aaa_t31", "test", false, transID)
+	if t1, ok := Get("aaa_t31"); ok || t1 == "test" {
 		t.Error("Error in transaction cache")
 	}
-	Set("t32_mm", "test", false, transID)
+	Set("aaa_t32", "test", false, transID)
 	if _, hasTransID := transactionBuffer[transID]; !hasTransID {
 		t.Error("Does not have transactionID")
 	}
 	RollbackTransaction(transID)
-	if t1, ok := Get("t32_mm"); ok || t1 == "test" {
+	if t1, ok := Get("aaa_t32"); ok || t1 == "test" {
 		t.Error("Error commiting transaction")
 	}
-	if t1, ok := Get("t31_mm"); ok || t1 == "test" {
+	if t1, ok := Get("aaa_t31"); ok || t1 == "test" {
 		t.Error("Error in transaction cache")
 	}
 	if _, hasTransID := transactionBuffer[transID]; hasTransID {
@@ -115,10 +122,10 @@ func TestTransactionRemBefore(t *testing.T) {
 func TestRemPrefixKey(t *testing.T) {
 	Set("xxx_t1", "test", true, "")
 	Set("yyy_t1", "test", true, "")
-	RemPrefixKey("xxx_", true, "")
+	RemPrefixKey(utils.ANY, true, "")
 	_, okX := Get("xxx_t1")
 	_, okY := Get("yyy_t1")
-	if okX || !okY {
+	if okX || okY {
 		t.Error("Error removing prefix: ", okX, okY)
 	}
 }
@@ -129,8 +136,8 @@ func TestCacheCount(t *testing.T) {
 	Set("rpf_A3", "3", true, "")
 	Set("dst_A4", "4", true, "")
 	Set("dst_A5", "5", true, "")
-	if CountEntries("dst_") != 4 {
-		t.Error("Error countiong entries: ", CountEntries("dst_"))
+	if cnt := CountEntries(utils.DESTINATION_PREFIX); cnt != 4 {
+		t.Error("Error counting entries: ", cnt)
 	}
 }
 
@@ -148,4 +155,40 @@ func TestCacheConcurrent(t *testing.T) {
 	}
 	s.Prefix = "+491"
 	wg.Wait()
+}
+
+// BenchmarkSet 	 5000000	       313 ns/op
+func BenchmarkSet(b *testing.B) {
+	cacheItems := [][]string{
+		[]string{"aaa_1", "1"},
+		[]string{"aaa_2", "1"},
+		[]string{"aaa_3", "1"},
+		[]string{"aaa_4", "1"},
+		[]string{"aaa_5", "1"},
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(cacheItems)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		ci := cacheItems[rand.Intn(max-min)+min]
+		Set(ci[0], ci[1], false, "")
+	}
+}
+
+// BenchmarkGet 	10000000	       131 ns/op
+func BenchmarkGet(b *testing.B) {
+	cacheItems := [][]string{
+		[]string{"aaa_1", "1"},
+		[]string{"aaa_2", "1"},
+		[]string{"aaa_3", "1"},
+		[]string{"aaa_4", "1"},
+		[]string{"aaa_5", "1"},
+	}
+	for _, ci := range cacheItems {
+		Set(ci[0], ci[1], false, "")
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	min, max := 0, len(cacheItems)-1 // so we can have random index
+	for n := 0; n < b.N; n++ {
+		cache.Get(cacheItems[rand.Intn(max-min)+min][0])
+	}
 }

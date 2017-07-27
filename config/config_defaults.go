@@ -50,22 +50,22 @@ const CGRATES_CFG_JSON = `
 
 
 "cache":{
-	"destinations": {"limit": 10000, "ttl":"0s", "precache": false},			// control destination caching
-	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": false},	// control reverse destinations index caching
-	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},				// control rating plans caching
-	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": false},			// control rating profiles caching
-	"lcr": {"limit": 10000, "ttl":"0s", "precache": false},						// control lcr rules caching
-	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": false},				// control cdr stats queues caching
-	"actions": {"limit": 10000, "ttl":"0s", "precache": false},					// control actions caching
-	"action_plans": {"limit": 10000, "ttl":"0s", "precache": false},			// control action plans caching
-	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": false},	// control account action plans index caching
-	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": false},			// control action triggers caching
-	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": false},			// control shared groups caching
-	"aliases": {"limit": 10000, "ttl":"0s", "precache": false},					// control aliases caching
-	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": false},			// control reverse aliases index caching
-	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": false},		// control derived charging rule caching
-	"resource_limits": {"limit": 10000, "ttl":"0s", "precache": false},			// control resource limits caching
-	"timings": {"limit": 10000, "ttl":"0s", "precache": false},					// control timings caching
+	"destinations": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},			// control destination caching
+	"reverse_destinations": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},	// control reverse destinations index caching
+	"rating_plans": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},			// control rating plans caching
+	"rating_profiles": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control rating profiles caching
+	"lcr_rules": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control lcr rules caching
+	"cdr_stats": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control cdr stats queues caching
+	"actions": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control actions caching
+	"action_plans": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},			// control action plans caching
+	"account_action_plans": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},	// control account action plans index caching
+	"action_triggers": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control action triggers caching
+	"shared_groups": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},			// control shared groups caching
+	"aliases": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control aliases caching
+	"reverse_aliases": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control reverse aliases index caching
+	"derived_chargers": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control derived charging rule caching
+	"resource_limits": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control resource limits caching
+	"timings": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control timings caching
 },
 
 

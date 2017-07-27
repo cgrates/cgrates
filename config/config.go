@@ -48,6 +48,10 @@ var (
 	dfltAstConnCfg    *AsteriskConnCfg
 )
 
+func init() {
+	cgrCfg, _ = NewDefaultCGRConfig()
+}
+
 // Used to retrieve system configuration from other packages
 func CgrConfig() *CGRConfig {
 	return cgrCfg
@@ -63,7 +67,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.InstanceID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SmGenericConfig = new(SmGenericConfig)
-	cfg.CacheConfig = new(CacheConfig)
+	cfg.CacheConfig = make(CacheConfig)
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
@@ -195,7 +199,7 @@ type CGRConfig struct {
 	StorDBConnMaxLifetime    int
 	StorDBCDRSIndexes        []string
 	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
-	CacheConfig              *CacheConfig
+	CacheConfig              CacheConfig
 	RPCJSONListen            string            // RPC JSON listening address
 	RPCGOBListen             string            // RPC GOB listening address
 	HTTPListen               string            // HTTP listening address

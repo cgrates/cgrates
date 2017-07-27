@@ -38,7 +38,7 @@ const (
 var (
 	cache    cacheStore
 	cacheMux sync.RWMutex
-	cfg      *config.CacheConfig
+	cfg      config.CacheConfig
 
 	// transaction stuff
 	transactionBuffer map[string][]*transactionItem // Queue tasks based on transactionID
@@ -53,12 +53,14 @@ type transactionItem struct {
 }
 
 func init() {
-	NewCache(nil)
+	// ToDo: revert to nil config as soon as we handle cacheInstances properly
+	dfCfg, _ := config.NewDefaultCGRConfig()
+	NewCache(dfCfg.CacheConfig)
 }
 
-func NewCache(cacheCfg *config.CacheConfig) {
+func NewCache(cacheCfg config.CacheConfig) {
 	cfg = cacheCfg
-	cache = newLruStore()
+	cache = newLRUTTL(cacheCfg)
 	transactionBuffer = make(map[string][]*transactionItem) // map[transactionID][]*transactionItem
 }
 
@@ -146,7 +148,7 @@ func RemPrefixKey(prefix string, commit bool, transID string) {
 // Delete all keys from cache
 func Flush() {
 	cacheMux.Lock()
-	cache = newLruStore()
+	cache.Clear()
 	cacheMux.Unlock()
 }
 

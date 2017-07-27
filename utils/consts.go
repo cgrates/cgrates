@@ -39,6 +39,25 @@ var (
 		MetaFileCSV:     CSVSuffix,
 		MetaFileFWV:     FWVSuffix,
 	}
+	CacheInstanceToPrefix = map[string]string{
+		CacheDestinations:        DESTINATION_PREFIX,
+		CacheReverseDestinations: REVERSE_DESTINATION_PREFIX,
+		CacheRatingPlans:         RATING_PLAN_PREFIX,
+		CacheRatingProfiles:      RATING_PROFILE_PREFIX,
+		CacheLCRRules:            LCR_PREFIX,
+		CacheCDRStatS:            CDR_STATS_PREFIX,
+		CacheActions:             ACTION_PREFIX,
+		CacheActionPlans:         ACTION_PLAN_PREFIX,
+		CacheAccountActionPlans:  AccountActionPlansPrefix,
+		CacheActionTriggers:      ACTION_TRIGGER_PREFIX,
+		CacheSharedGroups:        SHARED_GROUP_PREFIX,
+		CacheAliases:             ALIASES_PREFIX,
+		CacheReverseAliases:      REVERSE_ALIASES_PREFIX,
+		CacheDerivedChargers:     DERIVEDCHARGERS_PREFIX,
+		CacheResourceLimits:      ResourceLimitsPrefix,
+		CacheTimings:             TimingsPrefix,
+	}
+	CachePrefixToInstance map[string]string // will be built on init
 )
 
 const (
@@ -382,4 +401,31 @@ const (
 	ID                           = "ID"
 	MetaASR                      = "*asr"
 	MetaACD                      = "*acd"
+	CacheDestinations            = "destinations"
+	CacheReverseDestinations     = "reverse_destinations"
+	CacheRatingPlans             = "rating_plans"
+	CacheRatingProfiles          = "rating_profiles"
+	CacheLCRRules                = "lcr_rules"
+	CacheCDRStatS                = "cdr_stats"
+	CacheActions                 = "actions"
+	CacheActionPlans             = "action_plans"
+	CacheAccountActionPlans      = "account_action_plans"
+	CacheActionTriggers          = "action_triggers"
+	CacheSharedGroups            = "shared_groups"
+	CacheAliases                 = "aliases"
+	CacheReverseAliases          = "reverse_aliases"
+	CacheDerivedChargers         = "derived_chargers"
+	CacheResourceLimits          = "resource_limits"
+	CacheTimings                 = "timings"
 )
+
+func buildCacheInstRevPrefixes() {
+	CachePrefixToInstance = make(map[string]string)
+	for k, v := range CacheInstanceToPrefix {
+		CachePrefixToInstance[v] = k
+	}
+}
+
+func init() {
+	buildCacheInstRevPrefixes()
+}

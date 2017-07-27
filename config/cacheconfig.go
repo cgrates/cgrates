@@ -24,9 +24,10 @@ import (
 )
 
 type CacheParamConfig struct {
-	Limit    int
-	TTL      time.Duration
-	Precache bool
+	Limit     int
+	TTL       time.Duration
+	StaticTTL bool
+	Precache  bool
 }
 
 func (self *CacheParamConfig) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
@@ -42,127 +43,27 @@ func (self *CacheParamConfig) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 			return err
 		}
 	}
+	if jsnCfg.Static_ttl != nil {
+		self.StaticTTL = *jsnCfg.Static_ttl
+	}
 	if jsnCfg.Precache != nil {
 		self.Precache = *jsnCfg.Precache
 	}
 	return nil
 }
 
-type CacheConfig struct {
-	Destinations        *CacheParamConfig
-	ReverseDestinations *CacheParamConfig
-	RatingPlans         *CacheParamConfig
-	RatingProfiles      *CacheParamConfig
-	Lcr                 *CacheParamConfig
-	CdrStats            *CacheParamConfig
-	Actions             *CacheParamConfig
-	ActionPlans         *CacheParamConfig
-	AccountActionPlans  *CacheParamConfig
-	ActionTriggers      *CacheParamConfig
-	SharedGroups        *CacheParamConfig
-	Aliases             *CacheParamConfig
-	ReverseAliases      *CacheParamConfig
-	DerivedChargers     *CacheParamConfig
-	ResourceLimits      *CacheParamConfig
-	Timings             *CacheParamConfig
-}
+type CacheConfig map[string]*CacheParamConfig
 
-func (self *CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) error {
-	if jsnCfg.Destinations != nil {
-		self.Destinations = &CacheParamConfig{}
-		if err := self.Destinations.loadFromJsonCfg(jsnCfg.Destinations); err != nil {
-			return err
-		}
+func (self CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return
 	}
-	if jsnCfg.Reverse_destinations != nil {
-		self.ReverseDestinations = &CacheParamConfig{}
-		if err := self.ReverseDestinations.loadFromJsonCfg(jsnCfg.Reverse_destinations); err != nil {
+	for kJsn, vJsn := range *jsnCfg {
+		val := new(CacheParamConfig)
+		if err := val.loadFromJsonCfg(vJsn); err != nil {
 			return err
 		}
-	}
-	if jsnCfg.Rating_plans != nil {
-		self.RatingPlans = &CacheParamConfig{}
-		if err := self.RatingPlans.loadFromJsonCfg(jsnCfg.Rating_plans); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Rating_profiles != nil {
-		self.RatingProfiles = &CacheParamConfig{}
-		if err := self.RatingProfiles.loadFromJsonCfg(jsnCfg.Rating_profiles); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Lcr != nil {
-		self.Lcr = &CacheParamConfig{}
-		if err := self.Lcr.loadFromJsonCfg(jsnCfg.Lcr); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Cdr_stats != nil {
-		self.CdrStats = &CacheParamConfig{}
-		if err := self.CdrStats.loadFromJsonCfg(jsnCfg.Cdr_stats); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Actions != nil {
-		self.Actions = &CacheParamConfig{}
-		if err := self.Actions.loadFromJsonCfg(jsnCfg.Actions); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Action_plans != nil {
-		self.ActionPlans = &CacheParamConfig{}
-		if err := self.ActionPlans.loadFromJsonCfg(jsnCfg.Action_plans); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Account_action_plans != nil {
-		self.AccountActionPlans = &CacheParamConfig{}
-		if err := self.AccountActionPlans.loadFromJsonCfg(jsnCfg.Account_action_plans); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Action_triggers != nil {
-		self.ActionTriggers = &CacheParamConfig{}
-		if err := self.ActionTriggers.loadFromJsonCfg(jsnCfg.Action_triggers); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Shared_groups != nil {
-		self.SharedGroups = &CacheParamConfig{}
-		if err := self.SharedGroups.loadFromJsonCfg(jsnCfg.Shared_groups); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Aliases != nil {
-		self.Aliases = &CacheParamConfig{}
-		if err := self.Aliases.loadFromJsonCfg(jsnCfg.Aliases); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Reverse_aliases != nil {
-		self.ReverseAliases = &CacheParamConfig{}
-		if err := self.ReverseAliases.loadFromJsonCfg(jsnCfg.Reverse_aliases); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Derived_chargers != nil {
-		self.DerivedChargers = &CacheParamConfig{}
-		if err := self.DerivedChargers.loadFromJsonCfg(jsnCfg.Derived_chargers); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Resource_limits != nil {
-		self.ResourceLimits = &CacheParamConfig{}
-		if err := self.ResourceLimits.loadFromJsonCfg(jsnCfg.Resource_limits); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Timings != nil {
-		self.Timings = &CacheParamConfig{}
-		if err := self.Timings.loadFromJsonCfg(jsnCfg.Timings); err != nil {
-			return err
-		}
+		self[kJsn] = val
 	}
 	return nil
 }

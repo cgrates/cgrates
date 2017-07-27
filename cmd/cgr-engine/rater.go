@@ -62,48 +62,49 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		}
 		*/
 		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
-		if !cfg.CacheConfig.Destinations.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheDestinations]; !has || !cCfg.Precache {
 			dstIDs = make([]string, 0) // Don't cache any
 		}
-		if !cfg.CacheConfig.ReverseDestinations.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheReverseDestinations]; !has || !cCfg.Precache {
 			rvDstIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.RatingPlans.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheRatingPlans]; !has || !cCfg.Precache {
 			rplIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.RatingProfiles.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheRatingProfiles]; !has || !cCfg.Precache {
 			rpfIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.Actions.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheActions]; !has || !cCfg.Precache {
 			actIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.ActionPlans.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheActionPlans]; !has || !cCfg.Precache {
 			aplIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.AccountActionPlans.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheAccountActionPlans]; !has || !cCfg.Precache {
 			aapIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.ActionTriggers.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheActionTriggers]; !has || !cCfg.Precache {
 			atrgIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.SharedGroups.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheSharedGroups]; !has || !cCfg.Precache {
 			sgIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.Lcr.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheLCRRules]; !has || !cCfg.Precache {
 			lcrIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.DerivedChargers.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheDerivedChargers]; !has || !cCfg.Precache {
 			dcIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.Aliases.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheAliases]; !has || !cCfg.Precache {
 			alsIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.ReverseAliases.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheReverseAliases]; !has || !cCfg.Precache {
 			rvAlsIDs = make([]string, 0)
 		}
-		if !cfg.CacheConfig.ResourceLimits.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheResourceLimits]; !has || !cCfg.Precache {
 			rlIDs = make([]string, 0)
 		}
+		// ToDo: Add here timings
 		if err := dataDB.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
 			exitChan <- true
