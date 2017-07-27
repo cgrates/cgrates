@@ -15,41 +15,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package stats
 
 import (
+	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
 )
 
-func NewACD() (StatsMetric, error) {
-	return new(ACD), nil
-}
-
-// ACD implements AverageCallDuration metric
-type ACD struct {
-	Sum   time.Duration
-	Count int
-}
-
-func (acd *ACD) GetStringValue(fmtOpts string) (val string) {
-	return
-}
-
-func (acd *ACD) AddEvent(ev engine.StatsEvent) (err error) {
-	return
-}
-
-func (acd *ACD) RemEvent(ev engine.StatsEvent) (err error) {
-	return
-}
-
-func (acd *ACD) GetMarshaled(ms engine.Marshaler) (vals []byte, err error) {
-	return
-}
-
-func (acd *ACD) SetFromMarshaled(vals []byte, ms engine.Marshaler) (err error) {
-	return
+func TestASRAddRemEvent(t *testing.T) {
+	asr, _ := NewASR()
+	ev := engine.StatsEvent{
+		"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	}
+	asr.AddEvent(ev)
+	if strVal := asr.GetStringValue(""); strVal != "100%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
 }

@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package stats
 
 import (
+	"fmt"
+
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func NewASR() (StatsMetric, error) {
@@ -28,26 +32,43 @@ func NewASR() (StatsMetric, error) {
 
 // ASR implements AverageSuccessRatio metric
 type ASR struct {
-	answered int
-	count    int
+	Answered float64
+	Count    float64
 }
 
-func (asr *ASR) GetStringValue(fmtOpts string) (val string) {
-	return
+func (asr *ASR) GetStringValue(fmtOpts string) (valStr string) {
+	if asr.Count == 0 {
+		return utils.NOT_AVAILABLE
+	}
+	val := utils.Round((asr.Answered / asr.Count * 100),
+		config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+	return fmt.Sprintf("%v%%", val)
 }
 
 func (asr *ASR) AddEvent(ev engine.StatsEvent) (err error) {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
+		return err
+	} else if !at.IsZero() {
+		asr.Answered += 1
+	}
+	asr.Count += 1
 	return
 }
 
 func (asr *ASR) RemEvent(ev engine.StatsEvent) (err error) {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
+		return err
+	} else if !at.IsZero() {
+		asr.Answered -= 1
+	}
+	asr.Count -= 1
 	return
 }
 
 func (asr *ASR) GetMarshaled(ms engine.Marshaler) (vals []byte, err error) {
-	return
+	return ms.Marshal(asr)
 }
 
 func (asr *ASR) SetFromMarshaled(vals []byte, ms engine.Marshaler) (err error) {
-	return
+	return ms.Unmarshal(vals, asr)
 }

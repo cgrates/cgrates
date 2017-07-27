@@ -26,6 +26,7 @@ import (
 )
 
 // NewStatsMetrics instantiates the StatsMetrics
+// cfg serves as general purpose container to pass config options to metric
 func NewStatsMetric(metricID string) (sm StatsMetric, err error) {
 	metrics := map[string]func() (StatsMetric, error){
 		utils.MetaASR: NewASR,
