@@ -16,11 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package stats
 
 import (
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,10 +40,10 @@ func NewStatsMetric(metricID string) (sm StatsMetric, err error) {
 // StatsMetric is the interface which a metric should implement
 type StatsMetric interface {
 	GetStringValue(fmtOpts string) (val string)
-	AddEvent(ev StatsEvent) error
-	RemEvent(ev StatsEvent) error
-	GetMarshaled(ms Marshaler) (vals []byte, err error)
-	SetFromMarshaled(vals []byte, ms Marshaler) (err error) // mostly used to load from DB
+	AddEvent(ev engine.StatsEvent) error
+	RemEvent(ev engine.StatsEvent) error
+	GetMarshaled(ms engine.Marshaler) (vals []byte, err error)
+	SetFromMarshaled(vals []byte, ms engine.Marshaler) (err error) // mostly used to load from DB
 }
 
 func NewStatsASR() (StatsMetric, error) {
@@ -59,19 +60,19 @@ func (asr *StatsASR) GetStringValue(fmtOpts string) (val string) {
 	return
 }
 
-func (asr *StatsASR) AddEvent(ev StatsEvent) (err error) {
+func (asr *StatsASR) AddEvent(ev engine.StatsEvent) (err error) {
 	return
 }
 
-func (asr *StatsASR) RemEvent(ev StatsEvent) (err error) {
+func (asr *StatsASR) RemEvent(ev engine.StatsEvent) (err error) {
 	return
 }
 
-func (asr *StatsASR) GetMarshaled(ms Marshaler) (vals []byte, err error) {
+func (asr *StatsASR) GetMarshaled(ms engine.Marshaler) (vals []byte, err error) {
 	return
 }
 
-func (asr *StatsASR) SetFromMarshaled(vals []byte, ms Marshaler) (err error) {
+func (asr *StatsASR) SetFromMarshaled(vals []byte, ms engine.Marshaler) (err error) {
 	return
 }
 
@@ -86,18 +87,18 @@ func (acd *StatsACD) GetStringValue(fmtOpts string) (val string) {
 	return
 }
 
-func (acd *StatsACD) AddEvent(ev StatsEvent) (err error) {
+func (acd *StatsACD) AddEvent(ev engine.StatsEvent) (err error) {
 	return
 }
 
-func (acd *StatsACD) RemEvent(ev StatsEvent) (err error) {
+func (acd *StatsACD) RemEvent(ev engine.StatsEvent) (err error) {
 	return
 }
 
-func (acd *StatsACD) GetMarshaled(ms Marshaler) (vals []byte, err error) {
+func (acd *StatsACD) GetMarshaled(ms engine.Marshaler) (vals []byte, err error) {
 	return
 }
 
-func (acd *StatsACD) SetFromMarshaled(vals []byte, ms Marshaler) (err error) {
+func (acd *StatsACD) SetFromMarshaled(vals []byte, ms engine.Marshaler) (err error) {
 	return
 }

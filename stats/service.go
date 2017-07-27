@@ -15,18 +15,19 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package stats
 
 import (
 	"errors"
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewStatService initializes a StatService
-func NewStatService(dataDB DataDB) (ss *StatService, err error) {
+func NewStatService(dataDB engine.DataDB) (ss *StatService, err error) {
 	ss = &StatService{dataDB: dataDB}
 	return
 }
@@ -34,8 +35,8 @@ func NewStatService(dataDB DataDB) (ss *StatService, err error) {
 // StatService builds stats for events
 type StatService struct {
 	sync.RWMutex
-	dataDB   DataDB
-	stQueues []*StatsQueue    // ordered list of StatsQueues
+	dataDB   engine.DataDB
+	stQueues StatsInstances   // ordered list of StatsQueues
 	evCache  *StatsEventCache // so we can pass it to queues
 }
 
@@ -50,7 +51,7 @@ func (ss *StatService) ServiceShutdown() error {
 }
 
 // processEvent processes a StatsEvent through the queues and caches it when needed
-func (ss *StatService) processEvent(ev StatsEvent) (err error) {
+func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
 	evStatsID := ev.ID()
 	if evStatsID == "" { // ID is mandatory
 		return errors.New("missing ID field")
@@ -58,7 +59,7 @@ func (ss *StatService) processEvent(ev StatsEvent) (err error) {
 	for _, stQ := range ss.stQueues {
 		if err := stQ.ProcessEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
-				stQ.ID, evStatsID, err.Error()))
+				stQ.cfg.ID, evStatsID, err.Error()))
 		}
 	}
 	return
