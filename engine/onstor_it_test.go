@@ -1846,7 +1846,7 @@ func testOnStorITCRUDStatsQueue(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{},
 		Filters:            []*RequestFilter{},
 		QueueLength:        2,
-		TTL:                &timeTTL,
+		TTL:                timeTTL,
 		Metrics:            []string{},
 		Store:              true,
 		Thresholds:         []string{},

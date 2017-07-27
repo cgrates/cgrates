@@ -81,6 +81,7 @@ const (
 	TBLTPUsers                    = "tp_users"
 	TBLTPAliases                  = "tp_aliases"
 	TBLTPResourceLimits           = "tp_resource_limits"
+	TBLTPStats                    = "tp_stats"
 	TBLSMCosts                    = "sm_costs"
 	TBLCDRs                       = "cdrs"
 	TBLVersions                   = "versions"

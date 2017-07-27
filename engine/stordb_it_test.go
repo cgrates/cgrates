@@ -56,6 +56,7 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTpCdrStats,
 	testStorDBitCRUDTpUsers,
 	testStorDBitCRUDTpResourceLimits,
+	testStorDBitCRUDTpStats,
 	testStorDBitCRUDCDRs,
 	testStorDBitCRUDSMCosts,
 }
@@ -1523,6 +1524,94 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 	}
 	// READ
 	if _, err := storDB.GetTPResourceLimits("testTPid", ""); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testStorDBitCRUDTpStats(t *testing.T) {
+	// READ
+	if _, err := storDB.GetTPStats("testTPid", ""); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	//WRITE
+	eTPs := []*utils.TPStats{
+		&utils.TPStats{
+			TPid: "TEST_TPID",
+			ID:   "Stats1",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					Type:      "filtertype",
+					FieldName: "Account",
+					Values:    []string{"1001", "1002"},
+				},
+			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			QueueLength: 100,
+			TTL:         "1s",
+			Metrics:     []string{"*asr", "*acd", "*acc"},
+			Store:       true,
+			Thresholds:  []string{"THRESH1", "THRESH2"},
+			Weight:      20.0,
+		},
+	}
+
+	if err := storDB.SetTPStats(eTPs); err != nil {
+		t.Error(err)
+	}
+	// READ
+	if rcv, err := storDB.GetTPStats("testTPid", ""); err != nil {
+		t.Error(err)
+	} else {
+		if !(reflect.DeepEqual(eTPs[0].TPid, rcv[0].TPid) || reflect.DeepEqual(eTPs[0].TPid, rcv[1].TPid)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].TPid, rcv[0].TPid, rcv[1].TPid)
+		}
+		if !(reflect.DeepEqual(eTPs[0].ID, rcv[0].ID) || reflect.DeepEqual(eTPs[0].ID, rcv[1].ID)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].ID, rcv[0].ID, rcv[1].ID)
+		}
+		if !(reflect.DeepEqual(eTPs[0].ActivationInterval, rcv[0].ActivationInterval) || reflect.DeepEqual(eTPs[0].ActivationInterval, rcv[1].ActivationInterval)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].TPid, rcv[0].TPid, rcv[1].TPid)
+		}
+		if !(reflect.DeepEqual(eTPs[0].Weight, rcv[0].Weight) || reflect.DeepEqual(eTPs[0].Weight, rcv[1].Weight)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].Weight, rcv[0].Weight, rcv[1].Weight)
+		}
+		for i, _ := range eTPs[0].Filters {
+			if !(reflect.DeepEqual(eTPs[0].Filters[i], rcv[0].Filters[i]) || reflect.DeepEqual(eTPs[0].Filters[i], rcv[1].Filters[i])) {
+				t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].Filters[i], rcv[0].Filters[i], rcv[1].Filters[i])
+			}
+		}
+	}
+	// UPDATE
+	eTPs[0].Weight = 2.1
+	if err := storDB.SetTPStats(eTPs); err != nil {
+		t.Error(err)
+	}
+	// READ
+	if rcv, err := storDB.GetTPStats("testTPid", ""); err != nil {
+		t.Error(err)
+	} else {
+		if !(reflect.DeepEqual(eTPs[0].TPid, rcv[0].TPid) || reflect.DeepEqual(eTPs[0].TPid, rcv[1].TPid)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].TPid, rcv[0].TPid, rcv[1].TPid)
+		}
+		if !(reflect.DeepEqual(eTPs[0].ID, rcv[0].ID) || reflect.DeepEqual(eTPs[0].ID, rcv[1].ID)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].ID, rcv[0].ID, rcv[1].ID)
+		}
+		if !(reflect.DeepEqual(eTPs[0].ActivationInterval, rcv[0].ActivationInterval) ||
+			reflect.DeepEqual(eTPs[0].ActivationInterval, rcv[1].ActivationInterval)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].TPid, rcv[0].TPid, rcv[1].TPid)
+		}
+		if !(reflect.DeepEqual(eTPs[0].Weight, rcv[0].Weight) || reflect.DeepEqual(eTPs[0].Weight, rcv[1].Weight)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].Weight, rcv[0].Weight, rcv[1].Weight)
+		}
+
+	}
+	// REMOVE
+	if err := storDB.RemTpData("", "testTPid", nil); err != nil {
+		t.Error(err)
+	}
+	// READ
+	if _, err := storDB.GetTPStats("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

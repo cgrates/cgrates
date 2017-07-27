@@ -1940,62 +1940,105 @@ func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *Resou
 type TpStatsS []*TpStats
 
 func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
-	mrl := make(map[string]*utils.TPStats)
+	mst := make(map[string]*utils.TPStats)
 	for _, tp := range tps {
-		rl, found := mrl[tp.Tag]
+		st, found := mst[tp.Tag]
 		if !found {
-			rl = &utils.TPStats{
+			st = &utils.TPStats{
 				TPid: tp.Tpid,
 				ID:   tp.Tag,
 			}
 		}
 		if tp.QueueLength != 0 {
-			rl.QueueLength = tp.QueueLength
+			st.QueueLength = tp.QueueLength
 		}
 		if tp.TTL != "" {
-			rl.TTL = tp.TTL
+			st.TTL = tp.TTL
 		}
 		if tp.Metrics != "" {
 			metrSplt := strings.Split(tp.Metrics, utils.INFIELD_SEP)
 			for _, metr := range metrSplt {
-				rl.Metrics = append(rl.Metrics, metr)
+				st.Metrics = append(st.Metrics, metr)
 			}
 		}
 		if tp.Store != false {
-			rl.Store = tp.Store
+			st.Store = tp.Store
 		}
 		if tp.Thresholds != "" {
 			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
 			for _, trsh := range trshSplt {
-				rl.Thresholds = append(rl.Thresholds, trsh)
+				st.Thresholds = append(st.Thresholds, trsh)
 			}
 		}
 		if tp.Weight != 0 {
-			rl.Weight = tp.Weight
+			st.Weight = tp.Weight
 		}
 		if len(tp.ActivationInterval) != 0 {
-			rl.ActivationInterval = new(utils.TPActivationInterval)
+			st.ActivationInterval = new(utils.TPActivationInterval)
 			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
 			if len(aiSplt) == 2 {
-				rl.ActivationInterval.ActivationTime = aiSplt[0]
-				rl.ActivationInterval.ExpiryTime = aiSplt[1]
+				st.ActivationInterval.ActivationTime = aiSplt[0]
+				st.ActivationInterval.ExpiryTime = aiSplt[1]
 			} else if len(aiSplt) == 1 {
-				rl.ActivationInterval.ActivationTime = aiSplt[0]
+				st.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
 		if tp.FilterType != "" {
-			rl.Filters = append(rl.Filters, &utils.TPRequestFilter{
+			st.Filters = append(st.Filters, &utils.TPRequestFilter{
 				Type:      tp.FilterType,
 				FieldName: tp.FilterFieldName,
 				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
-		mrl[tp.Tag] = rl
+		mst[tp.Tag] = st
 	}
-	result = make([]*utils.TPStats, len(mrl))
+	result = make([]*utils.TPStats, len(mst))
 	i := 0
-	for _, rl := range mrl {
-		result[i] = rl
+	for _, st := range mst {
+		result[i] = st
 		i++
+	}
+	return
+}
+
+func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
+	if len(st.Filters) == 0 {
+		return
+	}
+	for i, fltr := range st.Filters {
+		mdl := &TpStats{
+			Tpid: st.TPid,
+			Tag:  st.ID,
+		}
+		if i == 0 {
+			mdl.TTL = st.TTL
+			mdl.Weight = st.Weight
+			mdl.QueueLength = st.QueueLength
+			mdl.Store = st.Store
+			for _, val := range st.Metrics {
+				mdl.Metrics = mdl.Metrics + utils.INFIELD_SEP + val
+			}
+			for _, val := range st.Thresholds {
+				mdl.Thresholds = mdl.Thresholds + utils.INFIELD_SEP + val
+			}
+			if st.ActivationInterval != nil {
+				if st.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = st.ActivationInterval.ActivationTime
+				}
+				if st.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + st.ActivationInterval.ExpiryTime
+				}
+			}
+		}
+		mdl.FilterType = fltr.Type
+		mdl.FilterFieldName = fltr.FieldName
+		for i, val := range fltr.Values {
+			if i != 0 {
+				mdl.FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
+			} else {
+				mdl.FilterFieldValues = val
+			}
+		}
+		mdls = append(mdls, mdl)
 	}
 	return
 }

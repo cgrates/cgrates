@@ -361,5 +361,12 @@ func (self *TPCSVImporter) importResourceLimits(fn string) error {
 }
 
 func (self *TPCSVImporter) importStats(fn string) error {
-	return nil
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	sts, err := self.csvr.GetTPStats(self.TPid, "")
+	if err != nil {
+		return err
+	}
+	return self.StorDb.SetTPStats(sts)
 }

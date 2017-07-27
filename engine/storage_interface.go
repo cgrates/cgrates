@@ -184,6 +184,7 @@ type LoadWriter interface {
 	SetTPActionTriggers([]*utils.TPActionTriggers) error
 	SetTPAccountActions([]*utils.TPAccountActions) error
 	SetTPResourceLimits([]*utils.TPResourceLimit) error
+	SetTPStats([]*utils.TPStats) error
 }
 
 type Marshaler interface {

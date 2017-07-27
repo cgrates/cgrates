@@ -1436,6 +1436,7 @@ func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 	}
 	return rs.Cmd("SET", utils.ResourceLimitsPrefix+rl.ID, result).Err
 }
+
 func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) (err error) {
 	key := utils.ResourceLimitsPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {

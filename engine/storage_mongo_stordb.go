@@ -1105,8 +1105,35 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	return cdrs, 0, nil
 }
 
-func (ms *MongoStorage) GetTPStats(string, string) ([]*utils.TPStats, error) {
-	return nil, nil
+func (ms *MongoStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
+	filter := bson.M{
+		"tpid": tpid,
+	}
+	if id != "" {
+		filter["id"] = id
+	}
+	var results []*utils.TPStats
+	session, col := ms.conn(utils.TBLTPStats)
+	defer session.Close()
+	err := col.Find(filter).All(&results)
+	if len(results) == 0 {
+		return results, utils.ErrNotFound
+	}
+	return results, err
+}
+
+func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStats) (err error) {
+	if len(tpSTs) == 0 {
+		return
+	}
+	session, col := ms.conn(utils.TBLTPStats)
+	defer session.Close()
+	tx := col.Bulk()
+	for _, tp := range tpSTs {
+		tx.Upsert(bson.M{"tpid": tp.TPid, "id": tp.ID}, tp)
+	}
+	_, err = tx.Run()
+	return
 }
 
 func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
