@@ -41,6 +41,7 @@ func NewStatsMetric(metricID string) (sm StatsMetric, err error) {
 // StatsMetric is the interface which a metric should implement
 type StatsMetric interface {
 	GetStringValue(fmtOpts string) (val string)
+	GetValue() interface{}
 	AddEvent(ev engine.StatsEvent) error
 	RemEvent(ev engine.StatsEvent) error
 	GetMarshaled(ms engine.Marshaler) (vals []byte, err error)

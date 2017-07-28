@@ -38,6 +38,10 @@ func (acd *ACD) GetStringValue(fmtOpts string) (val string) {
 	return
 }
 
+func (acd *ACD) GetValue() (v interface{}) {
+	return
+}
+
 func (acd *ACD) AddEvent(ev engine.StatsEvent) (err error) {
 	return
 }

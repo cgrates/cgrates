@@ -22,15 +22,47 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
-func TestASRAddRemEvent(t *testing.T) {
+func TestASRGetStringValue(t *testing.T) {
+	asr, _ := NewASR()
+	if strVal := asr.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.AddEvent(
+		engine.StatsEvent{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)})
+	if strVal := asr.GetStringValue(""); strVal != "100%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.AddEvent(engine.StatsEvent{})
+	asr.AddEvent(engine.StatsEvent{})
+	if strVal := asr.GetStringValue(""); strVal != "33.33333%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.RemEvent(engine.StatsEvent{})
+	if strVal := asr.GetStringValue(""); strVal != "50%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+}
+
+func TestASRGetValue(t *testing.T) {
 	asr, _ := NewASR()
 	ev := engine.StatsEvent{
 		"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 	}
 	asr.AddEvent(ev)
-	if strVal := asr.GetStringValue(""); strVal != "100%" {
-		t.Errorf("wrong asr value: %s", strVal)
+	if v := asr.GetValue(); v != 100.0 {
+		t.Errorf("wrong asr value: %f", v)
+	}
+	asr.AddEvent(engine.StatsEvent{})
+	asr.AddEvent(engine.StatsEvent{})
+	if v := asr.GetValue(); v != 33.33333 {
+		t.Errorf("wrong asr value: %f", v)
+	}
+	asr.RemEvent(engine.StatsEvent{})
+	if v := asr.GetValue(); v != 50.0 {
+		t.Errorf("wrong asr value: %f", v)
 	}
 }

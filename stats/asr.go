@@ -40,13 +40,21 @@ func (asr *ASR) GetStringValue(fmtOpts string) (valStr string) {
 	if asr.Count == 0 {
 		return utils.NOT_AVAILABLE
 	}
-	val := utils.Round((asr.Answered / asr.Count * 100),
+	val := asr.GetValue().(float64)
+	return fmt.Sprintf("%v%%", val) // %v will automatically limit the number of decimals printed
+}
+
+func (asr *ASR) GetValue() (v interface{}) {
+	if asr.Count == 0 {
+		return engine.STATS_NA
+	}
+	return utils.Round((asr.Answered / asr.Count * 100),
 		config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
-	return fmt.Sprintf("%v%%", val)
 }
 
 func (asr *ASR) AddEvent(ev engine.StatsEvent) (err error) {
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
 		asr.Answered += 1
@@ -56,7 +64,8 @@ func (asr *ASR) AddEvent(ev engine.StatsEvent) (err error) {
 }
 
 func (asr *ASR) RemEvent(ev engine.StatsEvent) (err error) {
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
 		asr.Answered -= 1
