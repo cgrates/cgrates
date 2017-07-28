@@ -30,9 +30,9 @@ func TestASRGetStringValue(t *testing.T) {
 	if strVal := asr.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
-	asr.AddEvent(
-		engine.StatsEvent{
-			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)})
+	ev := engine.StatsEvent{
+		"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
+	asr.AddEvent(ev)
 	if strVal := asr.GetStringValue(""); strVal != "100%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
@@ -45,6 +45,15 @@ func TestASRGetStringValue(t *testing.T) {
 	if strVal := asr.GetStringValue(""); strVal != "50%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
+	asr.RemEvent(ev)
+	if strVal := asr.GetStringValue(""); strVal != "0%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.RemEvent(engine.StatsEvent{})
+	if strVal := asr.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+
 }
 
 func TestASRGetValue(t *testing.T) {
@@ -63,6 +72,14 @@ func TestASRGetValue(t *testing.T) {
 	}
 	asr.RemEvent(engine.StatsEvent{})
 	if v := asr.GetValue(); v != 50.0 {
+		t.Errorf("wrong asr value: %f", v)
+	}
+	asr.RemEvent(ev)
+	if v := asr.GetValue(); v != 0.0 {
+		t.Errorf("wrong asr value: %f", v)
+	}
+	asr.RemEvent(engine.StatsEvent{})
+	if v := asr.GetValue(); v != -1.0 {
 		t.Errorf("wrong asr value: %f", v)
 	}
 }

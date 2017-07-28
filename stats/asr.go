@@ -46,7 +46,7 @@ func (asr *ASR) GetStringValue(fmtOpts string) (valStr string) {
 
 func (asr *ASR) GetValue() (v interface{}) {
 	if asr.Count == 0 {
-		return engine.STATS_NA
+		return float64(engine.STATS_NA)
 	}
 	return utils.Round((asr.Answered / asr.Count * 100),
 		config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
