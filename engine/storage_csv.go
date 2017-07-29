@@ -623,9 +623,9 @@ func (csvs *CSVStorage) GetTPResourceLimits(tpid, id string) ([]*utils.TPResourc
 func (csvs *CSVStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.statsFn, csvs.sep, getColumnCount(TpStats{}))
 	if err != nil {
-		//log.Print("Could not load resource limits file: ", err)
+		//log.Print("Could not load stats file: ", err)
 		// allow writing of the other values
-		return nil, err
+		return nil, nil
 	}
 	if fp != nil {
 		defer fp.Close()

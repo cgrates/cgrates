@@ -391,6 +391,10 @@ CREATE TABLE tp_aliases (
   UNIQUE KEY `unique_tp_aliases` (`tpid`,`direction`,`tenant`,`category`,`account`,`subject`,`context`, `target`)
 );
 
+--
+-- Table structure for table `tp_resource_limits`
+--
+
 DROP TABLE IF EXISTS tp_resource_limits;
 CREATE TABLE tp_resource_limits (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -410,6 +414,35 @@ CREATE TABLE tp_resource_limits (
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_resource_limits` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
 );
+
+--
+-- Table structure for table `tp_stats`
+--
+
+DROP TABLE IF EXISTS tp_stats;
+CREATE TABLE tp_stats (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
+  `filter_type` varchar(16) NOT NULL,
+  `filter_field_name` varchar(64) NOT NULL,
+  `filter_field_values` varchar(256) NOT NULL,
+  `activation_interval` varchar(64) NOT NULL,
+  `queue_length` int(11) NOT NULL,
+  `ttl` varchar(32) NOT NULL,
+  `metrics` varchar(64) NOT NULL,
+  `store` BOOLEAN NOT NULL,
+  `thresholds` varchar(64) NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_stats` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
+);
+
+--
+-- Table structure for table `versions`
+--
 
 DROP TABLE IF EXISTS versions;
 CREATE TABLE versions (

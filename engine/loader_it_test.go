@@ -153,6 +153,9 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadResourceLimits(); err != nil {
 		t.Error("Failed loading resource limits: ", err.Error())
 	}
+	if err = loader.LoadStats(); err != nil {
+		t.Error("Failed loading stats: ", err.Error())
+	}
 	if err := loader.WriteToDatabase(false, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
 	}
@@ -309,6 +312,16 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 		if !reflect.DeepEqual(rl, rcv) {
 			t.Errorf("Expecting: %v, received: %v", rl, rcv)
+		}
+	}
+
+	for k, st := range loader.stats {
+		rcv, err := loader.dataStorage.GetStatsQueue(k, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Failed GetStatsQueue: ", err.Error())
+		}
+		if !reflect.DeepEqual(st, rcv) {
+			t.Errorf("Expecting: %v, received: %v", st, rcv)
 		}
 	}
 

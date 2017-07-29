@@ -1986,7 +1986,6 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 
 // GetStatsQueue retrieves a StatsQueue from dataDB/cache
 func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
-	var rez *StatsQueue
 	cacheKey := utils.StatsQueuePrefix + sqID
 	if !skipCache {
 		if x, ok := cache.Get(cacheKey); ok {
@@ -1998,15 +1997,20 @@ func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID
 	}
 	session, col := ms.conn(utils.StatsQueuePrefix)
 	defer session.Close()
+	sq = new(StatsQueue)
 	cCommit := cacheCommit(transactionID)
-	if err = col.Find(bson.M{"id": sqID}).One(&rez); err != nil {
+	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
 			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	sq = rez
+	for _, fltr := range sq.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
+	}
 	cache.Set(cacheKey, sq, cCommit, transactionID)
 	return
 }

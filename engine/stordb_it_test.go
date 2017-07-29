@@ -1561,7 +1561,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTPStats("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPStats("TEST_TPID", ""); err != nil {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(eTPs[0].TPid, rcv[0].TPid) || reflect.DeepEqual(eTPs[0].TPid, rcv[1].TPid)) {
@@ -1588,7 +1588,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTPStats("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPStats("TEST_TPID", ""); err != nil {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(eTPs[0].TPid, rcv[0].TPid) || reflect.DeepEqual(eTPs[0].TPid, rcv[1].TPid)) {

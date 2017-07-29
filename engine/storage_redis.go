@@ -1562,6 +1562,11 @@ func (rs *RedisStorage) GetStatsQueue(sqID string, skipCache bool, transactionID
 	if err = rs.ms.Unmarshal(values, &sq); err != nil {
 		return
 	}
+	for _, fltr := range sq.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
+	}
 	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }

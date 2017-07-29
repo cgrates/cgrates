@@ -850,6 +850,7 @@ func TestAPItoTPStats(t *testing.T) {
 		Store:       tps.Store,
 		Thresholds:  []string{"THRESH1", "THRESH2"},
 		Filters:     make([]*RequestFilter, len(tps.Filters)),
+		Weight:      20.0,
 	}
 	if eTPs.TTL, err = utils.ParseDurationWithSecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)

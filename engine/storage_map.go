@@ -1496,6 +1496,11 @@ func (ms *MapStorage) GetStatsQueue(sqID string, skipCache bool, transactionID s
 	if err != nil {
 		return nil, err
 	}
+	for _, fltr := range sq.Filters {
+		if err := fltr.CompileValues(); err != nil {
+			return nil, err
+		}
+	}
 	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
@@ -1540,6 +1545,9 @@ func (ms *MapStorage) SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error) {
 	defer ms.mu.Unlock()
 	var result []byte
 	result, err = ms.ms.Marshal(sqSM)
+	if err != nil {
+		return err
+	}
 	ms.dict[utils.SQStoredMetricsPrefix+sqSM.SqID] = result
 	return
 }
