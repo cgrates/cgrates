@@ -1610,7 +1610,6 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("\nstats :")
 	mapSTs := make(map[string]*utils.TPStats)
 	for _, st := range tps {
 		mapSTs[st.ID] = st
@@ -1933,7 +1932,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		fmt.Printf("stats: %+v", st.Filters[0])
 		if err = tpr.dataStorage.SetStatsQueue(st); err != nil {
 			return err
 		}

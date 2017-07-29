@@ -156,7 +156,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadStats(); err != nil {
 		t.Error("Failed loading stats: ", err.Error())
 	}
-	if err := loader.WriteToDatabase(false, false, false); err != nil {
+	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
 	}
 }
@@ -310,8 +310,12 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Error("Failed GetResourceLimit: ", err.Error())
 		}
-		if !reflect.DeepEqual(rl, rcv) {
-			t.Errorf("Expecting: %v, received: %v", rl, rcv)
+		rlT, err := APItoResourceLimit(rl, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(rlT, rcv) {
+			t.Errorf("Expecting: %v, received: %v", rlT, rcv)
 		}
 	}
 
@@ -320,8 +324,12 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Error("Failed GetStatsQueue: ", err.Error())
 		}
-		if !reflect.DeepEqual(st, rcv) {
-			t.Errorf("Expecting: %v, received: %v", st, rcv)
+		sts, err := APItoTPStats(st, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(sts, rcv) {
+			t.Errorf("Expecting: %v, received: %v", sts, rcv)
 		}
 	}
 
