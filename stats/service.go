@@ -20,24 +20,56 @@ package stats
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 // NewStatService initializes a StatService
-func NewStatService(dataDB engine.DataDB) (ss *StatService, err error) {
-	ss = &StatService{dataDB: dataDB}
+func NewStatService(dataDB engine.DataDB, ms engine.Marshaler, storeInterval time.Duration) (ss *StatService, err error) {
+	ss = &StatService{dataDB: dataDB, ms: ms, storeInterval: storeInterval,
+		stopStoring: make(chan struct{}), evCache: NewStatsEventCache()}
+	sqPrfxs, err := dataDB.GetKeysForPrefix(utils.StatsQueuePrefix)
+	if err != nil {
+		return nil, err
+	}
+	ss.stInsts = make(StatsInstances, len(sqPrfxs))
+	for i, prfx := range sqPrfxs {
+		sq, err := dataDB.GetStatsQueue(prfx[len(utils.StatsQueuePrefix):], false, utils.NonTransactional)
+		if err != nil {
+			return nil, err
+		}
+		var sqSM *engine.SQStoredMetrics
+		if sq.Store {
+			if sqSM, err = dataDB.GetSQStoredMetrics(sq.ID); err != nil && err != utils.ErrNotFound {
+				return nil, err
+			}
+		}
+		if ss.stInsts[i], err = NewStatsInstance(ss.evCache, ss.ms, sq, sqSM); err != nil {
+			return nil, err
+		}
+	}
+	ss.stInsts.Sort()
+	go ss.dumpStoredMetrics()
 	return
 }
 
 // StatService builds stats for events
 type StatService struct {
 	sync.RWMutex
-	dataDB   engine.DataDB
-	stQueues StatsInstances   // ordered list of StatsQueues
-	evCache  *StatsEventCache // so we can pass it to queues
+	dataDB        engine.DataDB
+	ms            engine.Marshaler
+	storeInterval time.Duration
+	stopStoring   chan struct{}
+	evCache       *StatsEventCache // so we can pass it to queues
+	stInsts       StatsInstances   // ordered list of StatsQueues
 }
 
 // Called to start the service
@@ -47,6 +79,8 @@ func (ss *StatService) ListenAndServe() error {
 
 // Called to shutdown the service
 func (ss *StatService) ServiceShutdown() error {
+	close(ss.stopStoring)
+	ss.storeMetrics()
 	return nil
 }
 
@@ -56,16 +90,43 @@ func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
 	if evStatsID == "" { // ID is mandatory
 		return errors.New("missing ID field")
 	}
-	for _, stQ := range ss.stQueues {
-		if err := stQ.ProcessEvent(ev); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
-				stQ.cfg.ID, evStatsID, err.Error()))
+	for _, stInst := range ss.stInsts {
+		if err := stInst.ProcessEvent(ev); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
+					stInst.cfg.ID, evStatsID, err.Error()))
 		}
 	}
 	return
 }
 
-// store stores the necessary data to DB
-func (ss *StatService) store() (err error) {
+// store stores the necessary storedMetrics to dataDB
+func (ss *StatService) storeMetrics() {
+	for _, si := range ss.stInsts {
+		if !si.cfg.Store || !si.dirty { // no need to save
+			continue
+		}
+		if siSM := si.GetStoredMetrics(); siSM != nil {
+			if err := ss.dataDB.SetSQStoredMetrics(siSM); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<StatService> failed saving StoredMetrics for QueueID: %s, error: %s",
+						si.cfg.ID, err.Error()))
+			}
+		}
+		// randomize the CPU load and give up thread control
+		time.Sleep(time.Duration(rand.Intn(1000)) * time.Nanosecond)
+	}
 	return
+}
+
+// dumpStoredMetrics regularly dumps metrics to dataDB
+func (ss *StatService) dumpStoredMetrics() {
+	for {
+		select {
+		case <-ss.stopStoring:
+			return
+		}
+		ss.storeMetrics()
+		time.Sleep(ss.storeInterval)
+	}
 }

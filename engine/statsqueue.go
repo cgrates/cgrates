@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -37,16 +38,6 @@ type SQStoredMetrics struct {
 	SQMetrics map[string][]byte
 }
 
-// StatsEvent is an event received by StatService
-type StatsEvent map[string]interface{}
-
-func (se StatsEvent) ID() (id string) {
-	if sID, has := se[utils.ID]; has {
-		id = sID.(string)
-	}
-	return
-}
-
 // StatsQueue represents the configuration of a  StatsInstance in StatS
 type StatsQueue struct {
 	ID                 string // QueueID
@@ -58,4 +49,30 @@ type StatsQueue struct {
 	Store              bool     // store to DB
 	Thresholds         []string // list of thresholds to be checked after changes
 	Weight             float64
+}
+
+// StatsEvent is an event received by StatService
+type StatsEvent map[string]interface{}
+
+func (se StatsEvent) ID() (id string) {
+	if sID, has := se[utils.ID]; has {
+		id = sID.(string)
+	}
+	return
+}
+
+// AnswerTime returns the AnswerTime of StatsEvent
+func (se StatsEvent) AnswerTime(timezone string) (at time.Time, err error) {
+	atIf, has := se[utils.ANSWER_TIME]
+	if !has {
+		return at, utils.ErrNotFound
+	}
+	if at, canCast := atIf.(time.Time); canCast {
+		return at, nil
+	}
+	atStr, canCast := atIf.(string)
+	if !canCast {
+		return at, errors.New("cannot cast to string")
+	}
+	return utils.ParseTimeDetectLayout(atStr, timezone)
 }

@@ -26,10 +26,11 @@ import (
 )
 
 // NewStatsMetrics instantiates the StatsMetrics
+// cfg serves as general purpose container to pass config options to metric
 func NewStatsMetric(metricID string) (sm StatsMetric, err error) {
 	metrics := map[string]func() (StatsMetric, error){
-		utils.MetaASR: NewStatsASR,
-		utils.MetaACD: NewStatsACD,
+		utils.MetaASR: NewASR,
+		utils.MetaACD: NewACD,
 	}
 	if _, has := metrics[metricID]; !has {
 		return nil, fmt.Errorf("unsupported metric: %s", metricID)
@@ -40,65 +41,9 @@ func NewStatsMetric(metricID string) (sm StatsMetric, err error) {
 // StatsMetric is the interface which a metric should implement
 type StatsMetric interface {
 	GetStringValue(fmtOpts string) (val string)
+	GetValue() interface{}
 	AddEvent(ev engine.StatsEvent) error
 	RemEvent(ev engine.StatsEvent) error
 	GetMarshaled(ms engine.Marshaler) (vals []byte, err error)
 	SetFromMarshaled(vals []byte, ms engine.Marshaler) (err error) // mostly used to load from DB
-}
-
-func NewStatsASR() (StatsMetric, error) {
-	return new(StatsASR), nil
-}
-
-// StatsASR implements AverageSuccessRatio metric
-type StatsASR struct {
-	answered int
-	count    int
-}
-
-func (asr *StatsASR) GetStringValue(fmtOpts string) (val string) {
-	return
-}
-
-func (asr *StatsASR) AddEvent(ev engine.StatsEvent) (err error) {
-	return
-}
-
-func (asr *StatsASR) RemEvent(ev engine.StatsEvent) (err error) {
-	return
-}
-
-func (asr *StatsASR) GetMarshaled(ms engine.Marshaler) (vals []byte, err error) {
-	return
-}
-
-func (asr *StatsASR) SetFromMarshaled(vals []byte, ms engine.Marshaler) (err error) {
-	return
-}
-
-func NewStatsACD() (StatsMetric, error) {
-	return new(StatsACD), nil
-}
-
-// StatsACD implements AverageCallDuration metric
-type StatsACD struct{}
-
-func (acd *StatsACD) GetStringValue(fmtOpts string) (val string) {
-	return
-}
-
-func (acd *StatsACD) AddEvent(ev engine.StatsEvent) (err error) {
-	return
-}
-
-func (acd *StatsACD) RemEvent(ev engine.StatsEvent) (err error) {
-	return
-}
-
-func (acd *StatsACD) GetMarshaled(ms engine.Marshaler) (vals []byte, err error) {
-	return
-}
-
-func (acd *StatsACD) SetFromMarshaled(vals []byte, ms engine.Marshaler) (err error) {
-	return
 }

@@ -19,6 +19,7 @@ package stats
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -26,7 +27,36 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// StatsInstances is a sortable list of StatsInstance
 type StatsInstances []*StatsInstance
+
+// Sort is part of sort interface, sort based on Weight
+func (sis StatsInstances) Sort() {
+	sort.Slice(sis, func(i, j int) bool { return sis[i].cfg.Weight > sis[j].cfg.Weight })
+}
+
+// NewStatsInstance instantiates a StatsInstance
+func NewStatsInstance(sec *StatsEventCache, ms engine.Marshaler,
+	sqCfg *engine.StatsQueue, sqSM *engine.SQStoredMetrics) (si *StatsInstance, err error) {
+	si = &StatsInstance{sec: sec, ms: ms, cfg: sqCfg}
+	if sqSM != nil {
+		for evID, ev := range sqSM.SEvents {
+			si.sec.Cache(evID, ev, si.cfg.ID)
+		}
+		si.sqItems = sqSM.SQItems
+		for metricID := range si.sqMetrics {
+			if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
+				return
+			}
+			if stored, has := sqSM.SQMetrics[metricID]; !has {
+				continue
+			} else if err = si.sqMetrics[metricID].SetFromMarshaled(stored, ms); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
 
 // StatsInstance represents an individual stats instance
 type StatsInstance struct {
@@ -37,30 +67,6 @@ type StatsInstance struct {
 	sqMetrics map[string]StatsMetric
 	ms        engine.Marshaler // used to get/set Metrics
 	cfg       *engine.StatsQueue
-}
-
-// Init prepares a StatsInstance for operations
-// Should be executed at server start
-func (sq *StatsInstance) Init(sec *StatsEventCache, ms engine.Marshaler, sqSM *engine.SQStoredMetrics) (err error) {
-	sq.sec = sec
-	if sqSM == nil {
-		return
-	}
-	for evID, ev := range sqSM.SEvents {
-		sq.sec.Cache(evID, ev, sq.cfg.ID)
-	}
-	sq.sqItems = sqSM.SQItems
-	for metricID := range sq.sqMetrics {
-		if sq.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
-			return
-		}
-		if stored, has := sqSM.SQMetrics[metricID]; !has {
-			continue
-		} else if err = sq.sqMetrics[metricID].SetFromMarshaled(stored, ms); err != nil {
-			return
-		}
-	}
-	return
 }
 
 // GetSQStoredMetrics retrieves the data used for store to DB
