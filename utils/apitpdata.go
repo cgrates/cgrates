@@ -703,6 +703,8 @@ type CacheStats struct {
 	Aliases             int
 	ReverseAliases      int
 	ResourceLimits      int
+	//Stats               int
+	//thresholds		  int
 }
 
 type AttrExpFileCdrs struct {
@@ -1269,6 +1271,8 @@ type TPResourceLimit struct {
 	UsageTTL           string
 	Limit              string // Limit value
 	AllocationMessage  string
+	Blocker            bool // blocker flag to stop processing on filters matched
+	Stored             bool
 	Weight             float64  // Weight to sort the ResourceLimits
 	ActionTriggerIDs   []string // Thresholds to check after changing Limit
 }
@@ -1334,5 +1338,7 @@ type TPStats struct {
 	Metrics            []string
 	Store              bool
 	Thresholds         []string
+	Blocker            bool // blocker flag to stop processing on filters matched
+	Stored             bool
 	Weight             float64
 }

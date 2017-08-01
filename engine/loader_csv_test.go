@@ -268,14 +268,14 @@ cgrates.org,mas,true,another,value,10
 
 	resLimits = `
 #Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,TTL,Limit,AllocationMessage,Weight,ActionTriggers
-ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,10,
-ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,
-ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,
-ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,10,
+ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
+ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
+ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
+ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
 #Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,QueueLength,TTL,Metrics,Store,Thresholds,Weight
-Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,THRESH1;THRESH2,20
+Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,THRESH1;THRESH2,true,true,20
 `
 )
 
@@ -1408,6 +1408,8 @@ func TestLoadResourceLimits(t *testing.T) {
 			},
 			UsageTTL:          "3600s",
 			AllocationMessage: "premium_call",
+			Blocker:           true,
+			Stored:            true,
 			Weight:            10,
 			Limit:             "2",
 		},
@@ -1436,6 +1438,8 @@ func TestLoadStats(t *testing.T) {
 			Metrics:     []string{"*asr", "*acd", "*acc"},
 			Store:       true,
 			Thresholds:  []string{"THRESH1", "THRESH2"},
+			Blocker:     true,
+			Stored:      true,
 			Weight:      20,
 		},
 	}

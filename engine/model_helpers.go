@@ -1819,8 +1819,10 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 		rl, found := mrl[tp.Tag]
 		if !found {
 			rl = &utils.TPResourceLimit{
-				TPid: tp.Tpid,
-				ID:   tp.Tag,
+				TPid:    tp.Tpid,
+				ID:      tp.Tag,
+				Blocker: tp.Blocker,
+				Stored:  tp.Stored,
 			}
 		}
 		if tp.UsageTTL != "" {
@@ -1913,6 +1915,8 @@ func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *Resou
 	rl = &ResourceLimit{
 		ID:      tpRL.ID,
 		Weight:  tpRL.Weight,
+		Blocker: tpRL.Blocker,
+		Stored:  tpRL.Stored,
 		Filters: make([]*RequestFilter, len(tpRL.Filters)),
 		Usage:   make(map[string]*ResourceUsage),
 	}
@@ -1949,8 +1953,10 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 		st, found := mst[tp.Tag]
 		if !found {
 			st = &utils.TPStats{
-				TPid: tp.Tpid,
-				ID:   tp.Tag,
+				TPid:    tp.Tpid,
+				ID:      tp.Tag,
+				Blocker: tp.Blocker,
+				Stored:  tp.Stored,
 			}
 		}
 		if tp.QueueLength != 0 {
@@ -2015,6 +2021,8 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 		}
 		if i == 0 {
 			mdl.TTL = st.TTL
+			mdl.Blocker = st.Blocker
+			mdl.Stored = st.Stored
 			mdl.Weight = st.Weight
 			mdl.QueueLength = st.QueueLength
 			mdl.Store = st.Store
@@ -2053,6 +2061,8 @@ func APItoTPStats(tpST *utils.TPStats, timezone string) (st *StatsQueue, err err
 		QueueLength: tpST.QueueLength,
 		Store:       tpST.Store,
 		Weight:      tpST.Weight,
+		Blocker:     tpST.Blocker,
+		Stored:      tpST.Stored,
 		Filters:     make([]*RequestFilter, len(tpST.Filters)),
 	}
 	if tpST.TTL != "" {

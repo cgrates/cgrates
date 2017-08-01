@@ -48,6 +48,8 @@ type StatsQueue struct {
 	Metrics            []string // list of metrics to build
 	Store              bool     // store to DB
 	Thresholds         []string // list of thresholds to be checked after changes
+	Blocker            bool     // blocker flag to stop processing on filters matched
+	Stored             bool
 	Weight             float64
 }
 

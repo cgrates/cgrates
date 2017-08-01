@@ -403,6 +403,8 @@ CREATE TABLE tp_resource_limits (
   "usage_ttl" varchar(32) NOT NULL,
   "limit" varchar(64) NOT NULL,
   "allocation_message" varchar(64) NOT NULL,
+  "blocker" BOOLEAN NOT NULL,
+  "stored" BOOLEAN NOT NULL,
   "weight" NUMERIC(8,2) NOT NULL,
   "action_trigger_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
@@ -429,6 +431,8 @@ CREATE TABLE tp_stats (
   "metrics" varchar(64) NOT NULL,
   "store" BOOLEAN NOT NULL,
   "thresholds" varchar(64) NOT NULL,
+  "blocker" BOOLEAN NOT NULL,
+  "stored" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );

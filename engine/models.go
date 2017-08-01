@@ -461,8 +461,10 @@ type TpResourceLimit struct {
 	UsageTTL           string  `index:"5" re:""`
 	Limit              string  `index:"6" re:""`
 	AllocationMessage  string  `index:"7" re:""`
-	Weight             float64 `index:"8" re:"\d+\.?\d*"`
-	ActionTriggerIds   string  `index:"9" re:""`
+	Blocker            bool    `index:"8" re:""`
+	Stored             bool    `index:"9" re:""`
+	Weight             float64 `index:"10" re:"\d+\.?\d*"`
+	ActionTriggerIds   string  `index:"11" re:""`
 	CreatedAt          time.Time
 }
 
@@ -489,6 +491,8 @@ type TpStats struct {
 	Metrics            string  `index:"7" re:""`
 	Store              bool    `index:"8" re:""`
 	Thresholds         string  `index:"9" re:""`
-	Weight             float64 `index:"10" re:"\d+\.?\d*"`
+	Blocker            bool    `index:"10" re:""`
+	Stored             bool    `index:"11" re:""`
+	Weight             float64 `index:"12" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
 }

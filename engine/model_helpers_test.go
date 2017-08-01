@@ -676,6 +676,8 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			FilterFieldName:    "Destination",
 			FilterFieldValues:  "+49151;+49161",
 			ActivationInterval: "2014-07-29T15:00:00Z",
+			Stored:             false,
+			Blocker:            false,
 			Weight:             10.0,
 			Limit:              "45",
 			ActionTriggerIds:   "WARN_RES1;WARN_RES2"},
@@ -693,6 +695,8 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			FilterFieldName:    "Destination",
 			FilterFieldValues:  "+40",
 			ActivationInterval: "2014-07-29T15:00:00Z",
+			Stored:             false,
+			Blocker:            false,
 			Weight:             10.0,
 			Limit:              "20"},
 	}
@@ -715,6 +719,8 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
+			Stored:           tps[0].Stored,
+			Blocker:          tps[0].Blocker,
 			Weight:           tps[0].Weight,
 			Limit:            tps[0].Limit,
 			ActionTriggerIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
@@ -732,8 +738,10 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[2].ActivationInterval,
 			},
-			Weight: tps[2].Weight,
-			Limit:  tps[2].Limit,
+			Stored:  tps[2].Stored,
+			Blocker: tps[2].Blocker,
+			Weight:  tps[2].Weight,
+			Limit:   tps[2].Limit,
 		},
 	}
 	rcvTPs := TpResourceLimits(tps).AsTPResourceLimits()
@@ -753,10 +761,15 @@ func TestAPItoResourceLimit(t *testing.T) {
 			&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"}},
 		},
 		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
+		Stored:             false,
+		Blocker:            false,
 		Weight:             10,
 		Limit:              "2",
 	}
-	eRL := &ResourceLimit{ID: tpRL.ID,
+	eRL := &ResourceLimit{
+		ID:      tpRL.ID,
+		Stored:  tpRL.Stored,
+		Blocker: tpRL.Blocker,
 		Weight:  tpRL.Weight,
 		Filters: make([]*RequestFilter, len(tpRL.Filters)),
 		Usage:   make(map[string]*ResourceUsage)}
@@ -797,6 +810,8 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			Metrics:            "*asr;*acd;*acc",
 			Store:              true,
 			Thresholds:         "THRESH1;THRESH2",
+			Stored:             false,
+			Blocker:            false,
 			Weight:             20.0,
 		},
 	}
@@ -819,6 +834,8 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			Metrics:     []string{"*asr", "*acd", "*acc"},
 			Store:       tps[0].Store,
 			Thresholds:  []string{"THRESH1", "THRESH2"},
+			Stored:      tps[0].Stored,
+			Blocker:     tps[0].Blocker,
 			Weight:      tps[0].Weight,
 		},
 	}
@@ -841,6 +858,8 @@ func TestAPItoTPStats(t *testing.T) {
 		Metrics:            []string{"*asr", "*acd", "*acc"},
 		Store:              true,
 		Thresholds:         []string{"THRESH1", "THRESH2"},
+		Stored:             false,
+		Blocker:            false,
 		Weight:             20.0,
 	}
 
@@ -850,6 +869,8 @@ func TestAPItoTPStats(t *testing.T) {
 		Store:       tps.Store,
 		Thresholds:  []string{"THRESH1", "THRESH2"},
 		Filters:     make([]*RequestFilter, len(tps.Filters)),
+		Stored:      tps.Stored,
+		Blocker:     tps.Blocker,
 		Weight:      20.0,
 	}
 	if eTPs.TTL, err = utils.ParseDurationWithSecs(tps.TTL); err != nil {
