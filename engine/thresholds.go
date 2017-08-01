@@ -18,15 +18,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
+import (
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
 type ThresholdCfg struct {
 	ID                 string
 	Filters            []*RequestFilter          // Filters for the request
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
 	ThresholdType      string
 	ThresholdValue     float64 // threshold value
+	MinItems           int     // number of items agregated for the threshold to match
 	Recurrent          bool
 	MinSleep           time.Duration
-	MinItems           int  // number of items agregated for the threshold to match
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64 // Weight to sort the thresholds
