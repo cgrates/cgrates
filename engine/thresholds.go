@@ -24,9 +24,9 @@ type ThresholdCfg struct {
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
 	ThresholdType      string
 	ThresholdValue     float64 // threshold value
+	MinItems           int     // number of items agregated for the threshold to match
 	Recurrent          bool
 	MinSleep           time.Duration
-	MinItems           int  // number of items agregated for the threshold to match
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64 // Weight to sort the thresholds
