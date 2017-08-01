@@ -53,7 +53,6 @@ var sTestsTutIT = []func(t *testing.T){
 	testTPitRpcConn,
 	testTPitTimings,
 	testTPitDestinations,
-	engine.KillEngineTest,
 }
 
 // Tests starting here

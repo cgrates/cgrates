@@ -52,7 +52,6 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV2CDRsRateWithoutTP,
 	testV2CDRsLoadTariffPlanFromFolder,
 	testV2CDRsRateWithTP,
-	engine.KillEngineTest,
 }
 
 // Tests starting here
