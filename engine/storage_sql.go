@@ -190,7 +190,9 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResourceLimits} {
+			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResourceLimits,
+			//	utils.TBLTPStats
+		} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -569,6 +571,28 @@ func (self *SQLStorage) SetTPResourceLimits(rls []*utils.TPResourceLimit) error 
 		}
 		for _, mrl := range APItoModelResourceLimit(rl) {
 			if err := tx.Save(&mrl).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func (self *SQLStorage) SetTPStats(sts []*utils.TPStats) error {
+	if len(sts) == 0 {
+		return nil
+	}
+	tx := self.db.Begin()
+	for _, stq := range sts {
+		// Remove previous
+		if err := tx.Where(&TpStats{Tpid: stq.TPid, Tag: stq.ID}).Delete(TpStats{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mst := range APItoModelStats(stq) {
+			if err := tx.Save(&mst).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -1506,6 +1530,22 @@ func (self *SQLStorage) GetTPResourceLimits(tpid, id string) ([]*utils.TPResourc
 		return arls, utils.ErrNotFound
 	}
 	return arls, nil
+}
+
+func (self *SQLStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
+	var sts TpStatsS
+	q := self.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
+	}
+	if err := q.Find(&sts).Error; err != nil {
+		return nil, err
+	}
+	asts := sts.AsTPStats()
+	if len(asts) == 0 {
+		return asts, utils.ErrNotFound
+	}
+	return asts, nil
 }
 
 // GetVersions returns slice of all versions or a specific version if tag is specified

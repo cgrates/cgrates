@@ -1819,8 +1819,10 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 		rl, found := mrl[tp.Tag]
 		if !found {
 			rl = &utils.TPResourceLimit{
-				TPid: tp.Tpid,
-				ID:   tp.Tag,
+				TPid:    tp.Tpid,
+				ID:      tp.Tag,
+				Blocker: tp.Blocker,
+				Stored:  tp.Stored,
 			}
 		}
 		if tp.UsageTTL != "" {
@@ -1910,8 +1912,14 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) 
 }
 
 func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceLimit, err error) {
-	rl = &ResourceLimit{ID: tpRL.ID, Weight: tpRL.Weight,
-		Filters: make([]*RequestFilter, len(tpRL.Filters)), Usage: make(map[string]*ResourceUsage)}
+	rl = &ResourceLimit{
+		ID:      tpRL.ID,
+		Weight:  tpRL.Weight,
+		Blocker: tpRL.Blocker,
+		Stored:  tpRL.Stored,
+		Filters: make([]*RequestFilter, len(tpRL.Filters)),
+		Usage:   make(map[string]*ResourceUsage),
+	}
 	if tpRL.UsageTTL != "" {
 		if rl.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {
 			return nil, err
@@ -1935,4 +1943,151 @@ func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *Resou
 		}
 	}
 	return rl, nil
+}
+
+type TpStatsS []*TpStats
+
+func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
+	mst := make(map[string]*utils.TPStats)
+	for _, tp := range tps {
+		st, found := mst[tp.Tag]
+		if !found {
+			st = &utils.TPStats{
+				TPid:    tp.Tpid,
+				ID:      tp.Tag,
+				Blocker: tp.Blocker,
+				Stored:  tp.Stored,
+			}
+		}
+		if tp.QueueLength != 0 {
+			st.QueueLength = tp.QueueLength
+		}
+		if tp.TTL != "" {
+			st.TTL = tp.TTL
+		}
+		if tp.Metrics != "" {
+			metrSplt := strings.Split(tp.Metrics, utils.INFIELD_SEP)
+			for _, metr := range metrSplt {
+				st.Metrics = append(st.Metrics, metr)
+			}
+		}
+		if tp.Store != false {
+			st.Store = tp.Store
+		}
+		if tp.Thresholds != "" {
+			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
+			for _, trsh := range trshSplt {
+				st.Thresholds = append(st.Thresholds, trsh)
+			}
+		}
+		if tp.Weight != 0 {
+			st.Weight = tp.Weight
+		}
+		if len(tp.ActivationInterval) != 0 {
+			st.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				st.ActivationInterval.ActivationTime = aiSplt[0]
+				st.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				st.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.FilterType != "" {
+			st.Filters = append(st.Filters, &utils.TPRequestFilter{
+				Type:      tp.FilterType,
+				FieldName: tp.FilterFieldName,
+				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
+		}
+		mst[tp.Tag] = st
+	}
+	result = make([]*utils.TPStats, len(mst))
+	i := 0
+	for _, st := range mst {
+		result[i] = st
+		i++
+	}
+	return
+}
+
+func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
+	if len(st.Filters) == 0 {
+		return
+	}
+	for i, fltr := range st.Filters {
+		mdl := &TpStats{
+			Tpid: st.TPid,
+			Tag:  st.ID,
+		}
+		if i == 0 {
+			mdl.TTL = st.TTL
+			mdl.Blocker = st.Blocker
+			mdl.Stored = st.Stored
+			mdl.Weight = st.Weight
+			mdl.QueueLength = st.QueueLength
+			mdl.Store = st.Store
+			for _, val := range st.Metrics {
+				mdl.Metrics = mdl.Metrics + utils.INFIELD_SEP + val
+			}
+			for _, val := range st.Thresholds {
+				mdl.Thresholds = mdl.Thresholds + utils.INFIELD_SEP + val
+			}
+			if st.ActivationInterval != nil {
+				if st.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = st.ActivationInterval.ActivationTime
+				}
+				if st.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + st.ActivationInterval.ExpiryTime
+				}
+			}
+		}
+		mdl.FilterType = fltr.Type
+		mdl.FilterFieldName = fltr.FieldName
+		for i, val := range fltr.Values {
+			if i != 0 {
+				mdl.FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
+			} else {
+				mdl.FilterFieldValues = val
+			}
+		}
+		mdls = append(mdls, mdl)
+	}
+	return
+}
+
+func APItoTPStats(tpST *utils.TPStats, timezone string) (st *StatsQueue, err error) {
+	st = &StatsQueue{
+		ID:          tpST.ID,
+		QueueLength: tpST.QueueLength,
+		Store:       tpST.Store,
+		Weight:      tpST.Weight,
+		Blocker:     tpST.Blocker,
+		Stored:      tpST.Stored,
+		Filters:     make([]*RequestFilter, len(tpST.Filters)),
+	}
+	if tpST.TTL != "" {
+		if st.TTL, err = utils.ParseDurationWithSecs(tpST.TTL); err != nil {
+			return nil, err
+		}
+	}
+	for _, metr := range tpST.Metrics {
+		st.Metrics = append(st.Metrics, metr)
+	}
+	for _, trh := range tpST.Thresholds {
+		st.Thresholds = append(st.Thresholds, trh)
+
+	}
+	for i, f := range tpST.Filters {
+		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		if err := rf.CompileValues(); err != nil {
+			return nil, err
+		}
+		st.Filters[i] = rf
+	}
+	if tpST.ActivationInterval != nil {
+		if st.ActivationInterval, err = tpST.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
+	}
+	return st, nil
 }

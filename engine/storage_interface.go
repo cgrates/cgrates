@@ -162,6 +162,7 @@ type LoadReader interface {
 	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
 	GetTPResourceLimits(string, string) ([]*utils.TPResourceLimit, error)
+	GetTPStats(string, string) ([]*utils.TPStats, error)
 }
 
 type LoadWriter interface {
@@ -183,6 +184,7 @@ type LoadWriter interface {
 	SetTPActionTriggers([]*utils.TPActionTriggers) error
 	SetTPAccountActions([]*utils.TPAccountActions) error
 	SetTPResourceLimits([]*utils.TPResourceLimit) error
+	SetTPStats([]*utils.TPStats) error
 }
 
 type Marshaler interface {

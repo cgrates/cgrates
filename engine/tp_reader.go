@@ -53,6 +53,7 @@ type TpReader struct {
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
 	resLimits        map[string]*utils.TPResourceLimit
+	stats            map[string]*utils.TPStats
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
@@ -124,6 +125,7 @@ func (tpr *TpReader) Init() {
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resLimits = make(map[string]*utils.TPResourceLimit)
+	tpr.stats = make(map[string]*utils.TPStats)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1603,6 +1605,23 @@ func (tpr *TpReader) LoadResourceLimits() error {
 	return tpr.LoadResourceLimitsFiltered("")
 }
 
+func (tpr *TpReader) LoadStatsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPStats(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	mapSTs := make(map[string]*utils.TPStats)
+	for _, st := range tps {
+		mapSTs[st.ID] = st
+	}
+	tpr.stats = mapSTs
+	return nil
+}
+
+func (tpr *TpReader) LoadStats() error {
+	return tpr.LoadStatsFiltered("")
+}
+
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -1653,6 +1672,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadResourceLimits(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -1903,6 +1925,21 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
+		log.Print("Stats:")
+	}
+	for _, tpST := range tpr.stats {
+		st, err := APItoTPStats(tpST, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dataStorage.SetStatsQueue(st); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", st.ID)
+		}
+	}
+	if verbose {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
@@ -1957,6 +1994,28 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Printf("Indexed ResourceLimit keys: %+v", rlIdxr.ChangedKeys().Slice())
 			}
 			if err := rlIdxr.StoreIndexes(); err != nil {
+				return err
+			}
+		}
+		if len(tpr.stats) > 0 {
+			if verbose {
+				log.Print("Indexing stats")
+			}
+			stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.StatsIndex)
+			if err != nil {
+				return err
+			}
+			for _, tpST := range tpr.stats {
+				if st, err := APItoTPStats(tpST, tpr.timezone); err != nil {
+					return err
+				} else {
+					stIdxr.IndexFilters(st.ID, st.Filters)
+				}
+			}
+			if verbose {
+				log.Printf("Indexed Stats keys: %+v", stIdxr.ChangedKeys().Slice())
+			}
+			if err := stIdxr.StoreIndexes(); err != nil {
 				return err
 			}
 		}
@@ -2023,6 +2082,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("CDR stats: ", len(tpr.cdrStats))
 	// resource limits
 	log.Print("ResourceLimits: ", len(tpr.resLimits))
+	// stats
+	log.Print("Stats: ", len(tpr.stats))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2152,6 +2213,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.lcrs))
 		i := 0
 		for k := range tpr.lcrs {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.StatsPrefix:
+		keys := make([]string, len(tpr.stats))
+		i := 0
+		for k := range tpr.stats {
 			keys[i] = k
 			i++
 		}

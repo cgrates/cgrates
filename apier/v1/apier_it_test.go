@@ -1272,7 +1272,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 			rcvStats.LcrProfiles != 0 ||
 			rcvStats.Aliases != 1 ||
 			rcvStats.ReverseAliases != 2 ||
-			rcvStats.ResourceLimits != 0 {
+			rcvStats.ResourceLimits != 3 {
 			t.Errorf("Expecting: %+v, received: %+v", expStats, rcvStats)
 		}
 	}

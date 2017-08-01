@@ -386,6 +386,11 @@ CREATE TABLE tp_aliases (
 CREATE INDEX tpaliases_tpid_idx ON tp_aliases (tpid);
 CREATE INDEX tpaliases_idx ON tp_aliases ("tpid","direction","tenant","category","account","subject","context","target");
 
+
+--
+-- Table structure for table `tp_resource_limits`
+--
+
 DROP TABLE IF EXISTS tp_resource_limits;
 CREATE TABLE tp_resource_limits (
   "id" SERIAL PRIMARY KEY,
@@ -398,12 +403,46 @@ CREATE TABLE tp_resource_limits (
   "usage_ttl" varchar(32) NOT NULL,
   "limit" varchar(64) NOT NULL,
   "allocation_message" varchar(64) NOT NULL,
-  "weight" decimal(8,2) NOT NULL,
+  "blocker" BOOLEAN NOT NULL,
+  "stored" BOOLEAN NOT NULL,
+  "weight" NUMERIC(8,2) NOT NULL,
   "action_trigger_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_resource_limits_idx ON tp_resource_limits (tpid);
 CREATE INDEX tp_resource_limits_unique ON tp_resource_limits  ("tpid", "tag", "filter_type", "filter_field_name");
+
+
+--
+-- Table structure for table `tp_stats`
+--
+
+DROP TABLE IF EXISTS tp_stats;
+CREATE TABLE tp_stats (
+  "id" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tag" varchar(64) NOT NULL,
+  "filter_type" varchar(16) NOT NULL,
+  "filter_field_name" varchar(64) NOT NULL,
+  "filter_field_values" varchar(256) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
+  "queue_length" INTEGER NOT NULL,
+  "ttl" varchar(32) NOT NULL,
+  "metrics" varchar(64) NOT NULL,
+  "store" BOOLEAN NOT NULL,
+  "thresholds" varchar(64) NOT NULL,
+  "blocker" BOOLEAN NOT NULL,
+  "stored" BOOLEAN NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX tp_stats_idx ON tp_stats (tpid);
+CREATE INDEX tp_stats_unique ON tp_stats  ("tpid", "tag", "filter_type", "filter_field_name");
+
+
+--
+-- Table structure for table `versions`
+--
 
 DROP TABLE IF EXISTS versions;
 CREATE TABLE versions (

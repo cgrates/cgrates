@@ -44,10 +44,12 @@ type StatsQueue struct {
 	Filters            []*RequestFilter
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	QueueLength        int
-	TTL                *time.Duration
+	TTL                time.Duration
 	Metrics            []string // list of metrics to build
 	Store              bool     // store to DB
 	Thresholds         []string // list of thresholds to be checked after changes
+	Blocker            bool     // blocker flag to stop processing on filters matched
+	Stored             bool
 	Weight             float64
 }
 

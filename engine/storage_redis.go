@@ -1407,6 +1407,7 @@ func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string
 	}
 	return rs.Cmd("SET", utils.ResourceLimitsPrefix+rl.ID, result).Err
 }
+
 func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) (err error) {
 	key := utils.ResourceLimitsPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {
@@ -1560,6 +1561,11 @@ func (rs *RedisStorage) GetStatsQueue(sqID string, skipCache bool, transactionID
 	}
 	if err = rs.ms.Unmarshal(values, &sq); err != nil {
 		return
+	}
+	for _, fltr := range sq.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
 	}
 	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return

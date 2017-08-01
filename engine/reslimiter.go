@@ -42,6 +42,8 @@ type ResourceLimit struct {
 	Filters            []*RequestFilter          // Filters for the request
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
 	ExpiryTime         time.Time
+	Blocker            bool // blocker flag to stop processing on filters matched
+	Stored             bool
 	Weight             float64                   // Weight to sort the ResourceLimits
 	Limit              float64                   // Limit value
 	ActionTriggers     ActionTriggers            // Thresholds to check after changing Limit

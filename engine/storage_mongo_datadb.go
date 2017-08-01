@@ -57,6 +57,7 @@ const (
 	colLht = "load_history"
 	colVer = "versions"
 	colRL  = "resource_limits"
+	colSts = "stats"
 	colRFI = "request_filter_indexes"
 	colTmg = "timings"
 )
@@ -323,6 +324,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
 		utils.ResourceLimitsPrefix:       colRL,
+		utils.StatsPrefix:                colSts,
 		utils.TimingsPrefix:              colTmg,
 	}
 	name, ok = colMap[prefix]
@@ -626,6 +628,11 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		iter := db.C(colRL).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.ResourceLimitsPrefix+idResult.Id)
+		}
+	case utils.StatsPrefix:
+		iter := db.C(colSts).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.StatsPrefix+idResult.Id)
 		}
 	case utils.AccountActionPlansPrefix:
 		iter := db.C(colRL).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
@@ -1979,7 +1986,6 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 
 // GetStatsQueue retrieves a StatsQueue from dataDB/cache
 func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
-	var rez *StatsQueue
 	cacheKey := utils.StatsQueuePrefix + sqID
 	if !skipCache {
 		if x, ok := cache.Get(cacheKey); ok {
@@ -1991,15 +1997,20 @@ func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID
 	}
 	session, col := ms.conn(utils.StatsQueuePrefix)
 	defer session.Close()
+	sq = new(StatsQueue)
 	cCommit := cacheCommit(transactionID)
-	if err = col.Find(bson.M{"id": sqID}).One(&rez); err != nil {
+	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
 			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	sq = rez
+	for _, fltr := range sq.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
+	}
 	cache.Set(cacheKey, sq, cCommit, transactionID)
 	return
 }
