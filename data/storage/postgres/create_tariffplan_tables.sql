@@ -406,7 +406,7 @@ CREATE TABLE tp_resource_limits (
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "weight" NUMERIC(8,2) NOT NULL,
-  "action_trigger_ids" varchar(64) NOT NULL,
+  "thresholds" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_resource_limits_idx ON tp_resource_limits (tpid);
@@ -429,11 +429,10 @@ CREATE TABLE tp_stats (
   "queue_length" INTEGER NOT NULL,
   "ttl" varchar(32) NOT NULL,
   "metrics" varchar(64) NOT NULL,
-  "store" BOOLEAN NOT NULL,
-  "thresholds" varchar(64) NOT NULL,
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
+  "thresholds" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);

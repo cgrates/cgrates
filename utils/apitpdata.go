@@ -1274,7 +1274,7 @@ type TPResourceLimit struct {
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64  // Weight to sort the ResourceLimits
-	ActionTriggerIDs   []string // Thresholds to check after changing Limit
+	Thresholds         []string // Thresholds to check after changing Limit
 }
 
 type TPRequestFilter struct {
@@ -1336,9 +1336,8 @@ type TPStats struct {
 	QueueLength        int
 	TTL                string
 	Metrics            []string
-	Store              bool
-	Thresholds         []string
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64
+	Thresholds         []string
 }

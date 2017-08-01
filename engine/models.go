@@ -464,7 +464,7 @@ type TpResourceLimit struct {
 	Blocker            bool    `index:"8" re:""`
 	Stored             bool    `index:"9" re:""`
 	Weight             float64 `index:"10" re:"\d+\.?\d*"`
-	ActionTriggerIds   string  `index:"11" re:""`
+	Thresholds         string  `index:"11" re:""`
 	CreatedAt          time.Time
 }
 
@@ -489,10 +489,9 @@ type TpStats struct {
 	QueueLength        int     `index:"5" re:""`
 	TTL                string  `index:"6" re:""`
 	Metrics            string  `index:"7" re:""`
-	Store              bool    `index:"8" re:""`
-	Thresholds         string  `index:"9" re:""`
-	Blocker            bool    `index:"10" re:""`
-	Stored             bool    `index:"11" re:""`
-	Weight             float64 `index:"12" re:"\d+\.?\d*"`
+	Blocker            bool    `index:"8" re:""`
+	Stored             bool    `index:"9" re:""`
+	Weight             float64 `index:"10" re:"\d+\.?\d*"`
+	Thresholds         string  `index:"11" re:""`
 	CreatedAt          time.Time
 }

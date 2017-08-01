@@ -64,28 +64,8 @@ func TestResourceLimitRecordUsage(t *testing.T) {
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Weight:     100,
 		Limit:      2,
-		ActionTriggers: ActionTriggers{
-			&ActionTrigger{
-				// ID            string // original csv tag
-				// UniqueID      string // individual id
-				ThresholdType:  utils.TRIGGER_MAX_EVENT_COUNTER,
-				ThresholdValue: 2,
-				// Recurrent      bool          // reset excuted flag each run
-				// MinSleep       time.Duration // Minimum duration between two executions in case of recurrent triggers
-				// ExpirationDate time.Time
-				// ActivationDate time.Time
-				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				},
-				ActionsID: "TEST_ACTIONS",
-				// Weight            float64
-				// ActionsID         string
-				// MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
-				// Executed          bool
-				// LastExecutionTime time.Time
-			},
-		},
+		Thresholds: []string{"TEST_ACTIONS"},
+
 		UsageTTL:          time.Duration(1 * time.Millisecond),
 		AllocationMessage: "ALLOC",
 		Usage: map[string]*ResourceUsage{
@@ -179,29 +159,8 @@ func TestRLSort(t *testing.T) {
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Weight:     50,
 		Limit:      2,
-		ActionTriggers: ActionTriggers{
-			&ActionTrigger{
-				// ID            string // original csv tag
-				// UniqueID      string // individual id
-				ThresholdType:  utils.TRIGGER_MAX_EVENT_COUNTER,
-				ThresholdValue: 2,
-				// Recurrent      bool          // reset excuted flag each run
-				// MinSleep       time.Duration // Minimum duration between two executions in case of recurrent triggers
-				// ExpirationDate time.Time
-				// ActivationDate time.Time
-				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				},
-				ActionsID: "TEST_ACTIONS",
-				// Weight            float64
-				// ActionsID         string
-				// MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
-				// Executed          bool
-				// LastExecutionTime time.Time
-			},
-		},
-		UsageTTL: time.Duration(1 * time.Millisecond),
+		Thresholds: []string{"TEST_ACTIONS"},
+		UsageTTL:   time.Duration(1 * time.Millisecond),
 		// AllocationMessage: "ALLOC2",
 		Usage: map[string]*ResourceUsage{
 			ru2.ID: ru2,
