@@ -1428,11 +1428,11 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 	//WRITE
 	var snd = []*utils.TPResourceLimit{
 		&utils.TPResourceLimit{
-			TPid:             "testTPid",
-			ID:               "testTag1",
-			Weight:           0.0,
-			Limit:            "test",
-			ActionTriggerIDs: []string{"1x", "2x"},
+			TPid:       "testTPid",
+			ID:         "testTag1",
+			Weight:     0.0,
+			Limit:      "test",
+			Thresholds: []string{"1x", "2x"},
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
 					Type:      "filtertype",
@@ -1447,7 +1447,7 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{ActivationTime: "test"},
 			Weight:             0.0,
 			Limit:              "test",
-			ActionTriggerIDs:   []string{"1x", "2x"},
+			Thresholds:         []string{"1x", "2x"},
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
 					Type:      "filtertype",
@@ -1479,8 +1479,8 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].Limit, rcv[0].Limit) || reflect.DeepEqual(snd[0].Limit, rcv[1].Limit)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Limit, rcv[0].Limit, rcv[1].Limit)
 		}
-		if !(reflect.DeepEqual(snd[0].ActionTriggerIDs, rcv[0].ActionTriggerIDs) || reflect.DeepEqual(snd[0].ActionTriggerIDs, rcv[1].ActionTriggerIDs)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ActionTriggerIDs, rcv[0].ActionTriggerIDs, rcv[1].ActionTriggerIDs)
+		if !(reflect.DeepEqual(snd[0].Thresholds, rcv[0].Thresholds) || reflect.DeepEqual(snd[0].Thresholds, rcv[1].Thresholds)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Thresholds, rcv[0].Thresholds, rcv[1].Thresholds)
 		}
 		for i, _ := range snd[0].Filters {
 			if !(reflect.DeepEqual(snd[0].Filters[i], rcv[0].Filters[i]) || reflect.DeepEqual(snd[0].Filters[i], rcv[1].Filters[i])) {
@@ -1514,8 +1514,8 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].Limit, rcv[0].Limit) || reflect.DeepEqual(snd[0].Limit, rcv[1].Limit)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Limit, rcv[0].Limit, rcv[1].Limit)
 		}
-		if !(reflect.DeepEqual(snd[0].ActionTriggerIDs, rcv[0].ActionTriggerIDs) || reflect.DeepEqual(snd[0].ActionTriggerIDs, rcv[1].ActionTriggerIDs)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ActionTriggerIDs, rcv[0].ActionTriggerIDs, rcv[1].ActionTriggerIDs)
+		if !(reflect.DeepEqual(snd[0].Thresholds, rcv[0].Thresholds) || reflect.DeepEqual(snd[0].Thresholds, rcv[1].Thresholds)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Thresholds, rcv[0].Thresholds, rcv[1].Thresholds)
 		}
 	}
 	// REMOVE
@@ -1551,7 +1551,6 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics:     []string{"*asr", "*acd", "*acc"},
-			Store:       true,
 			Thresholds:  []string{"THRESH1", "THRESH2"},
 			Weight:      20.0,
 		},

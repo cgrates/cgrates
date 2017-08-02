@@ -1847,8 +1847,11 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 				rl.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.ActionTriggerIds != "" {
-			rl.ActionTriggerIDs = append(rl.ActionTriggerIDs, strings.Split(tp.ActionTriggerIds, utils.INFIELD_SEP)...)
+		if tp.Thresholds != "" {
+			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
+			for _, trsh := range trshSplt {
+				rl.Thresholds = append(rl.Thresholds, trsh)
+			}
 		}
 		if tp.FilterType != "" {
 			rl.Filters = append(rl.Filters, &utils.TPRequestFilter{
@@ -1889,11 +1892,11 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) 
 					mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
 				}
 			}
-			for i, atid := range rl.ActionTriggerIDs {
+			for i, val := range rl.Thresholds {
 				if i != 0 {
-					mdl.ActionTriggerIds = mdl.ActionTriggerIds + utils.INFIELD_SEP + atid
+					mdl.Thresholds = mdl.Thresholds + utils.INFIELD_SEP + val
 				} else {
-					mdl.ActionTriggerIds = atid
+					mdl.Thresholds = val
 				}
 			}
 		}
@@ -1971,9 +1974,6 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 				st.Metrics = append(st.Metrics, metr)
 			}
 		}
-		if tp.Store != false {
-			st.Store = tp.Store
-		}
 		if tp.Thresholds != "" {
 			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
 			for _, trsh := range trshSplt {
@@ -2025,7 +2025,6 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 			mdl.Stored = st.Stored
 			mdl.Weight = st.Weight
 			mdl.QueueLength = st.QueueLength
-			mdl.Store = st.Store
 			for _, val := range st.Metrics {
 				mdl.Metrics = mdl.Metrics + utils.INFIELD_SEP + val
 			}
@@ -2059,7 +2058,6 @@ func APItoTPStats(tpST *utils.TPStats, timezone string) (st *StatsQueue, err err
 	st = &StatsQueue{
 		ID:          tpST.ID,
 		QueueLength: tpST.QueueLength,
-		Store:       tpST.Store,
 		Weight:      tpST.Weight,
 		Blocker:     tpST.Blocker,
 		Stored:      tpST.Stored,
