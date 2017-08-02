@@ -264,6 +264,7 @@ type CGRConfig struct {
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
 	UserServerIndexes        []string                 // List of user profile field indexes
 	resourceLimiterCfg       *ResourceLimiterConfig   // Configuration for resource limiter
+	statsCfg                 *StatSCfg                // Configuration for StatS
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -1107,6 +1108,10 @@ func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
 // ToDo: fix locking here
 func (self *CGRConfig) ResourceLimiterCfg() *ResourceLimiterConfig {
 	return self.resourceLimiterCfg
+}
+
+func (cfg *CGRConfig) StatSCfg() *StatSCfg {
+	return cfg.statsCfg
 }
 
 // ToDo: fix locking here

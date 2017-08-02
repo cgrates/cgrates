@@ -676,6 +676,18 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDfStatServiceJsonCfg(t *testing.T) {
+	eCfg := &StatServJsonCfg{
+		Enabled:             utils.BoolPointer(false),
+		Cache_dump_interval: utils.StringPointer("0s"),
+	}
+	if cfg, err := dfCgrJsonCfg.StatSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
 func TestDfMailerJsonCfg(t *testing.T) {
 	eCfg := &MailerJsonCfg{
 		Server:        utils.StringPointer("localhost"),

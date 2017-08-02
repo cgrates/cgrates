@@ -383,6 +383,12 @@ type ResourceLimiterServJsonCfg struct {
 	Cache_dump_interval *string
 }
 
+// Stat service config section
+type StatServJsonCfg struct {
+	Enabled             *bool
+	Cache_dump_interval *string
+}
+
 // Mailer config section
 type MailerJsonCfg struct {
 	Server        *string

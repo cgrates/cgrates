@@ -417,6 +417,7 @@ const (
 	CacheDerivedChargers         = "derived_chargers"
 	CacheResourceLimits          = "resource_limits"
 	CacheTimings                 = "timings"
+	StatS                        = "stats"
 )
 
 func buildCacheInstRevPrefixes() {

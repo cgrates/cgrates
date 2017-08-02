@@ -409,6 +409,12 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"stats": {
+	"enabled": false,						// starts ResourceLimiter service: <true|false>.
+	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+},
+
+
 "mailer": {
 	"server": "localhost",								// the server to use when sending emails out
 	"auth_user": "cgrates",								// authenticate to email server using this user
