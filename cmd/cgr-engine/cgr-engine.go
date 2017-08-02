@@ -559,15 +559,19 @@ func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cfg 
 	go func() {
 		if err := sts.ListenAndServe(exitChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<StatS> Error: %s listening for packets", err.Error()))
-			exitChan <- true
-			return
 		}
+		sts.Shutdown()
+		exitChan <- true
+		return
 	}()
+	stsV1 := v1.NewStatSV1(sts)
+	server.RpcRegister(stsV1)
+	internalStatSChan <- stsV1
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
-	internalAliaseSChan, internalRLsChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
+	internalAliaseSChan, internalRLsChan, internalStatSChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -587,6 +591,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalSMGChan <- smg
 	case rls := <-internalRLsChan:
 		internalRLsChan <- rls
+	case statS := <-internalStatSChan:
+		internalStatSChan <- statS
 	}
 	go server.ServeJSON(cfg.RPCJSONListen)
 	go server.ServeGOB(cfg.RPCGOBListen)
@@ -840,7 +846,7 @@ func main() {
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan, internalHistorySChan,
-		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRLSChan, internalSMGChan)
+		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRLSChan, internalStatSChan, internalSMGChan)
 	<-exitChan
 
 	if *pidFile != "" {
