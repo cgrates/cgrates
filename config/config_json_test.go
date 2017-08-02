@@ -665,11 +665,23 @@ func TestDfUserServJsonCfg(t *testing.T) {
 
 func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 	eCfg := &ResourceLimiterServJsonCfg{
-		Enabled:             utils.BoolPointer(false),
-		Cdrstats_conns:      &[]*HaPoolJsonCfg{},
-		Cache_dump_interval: utils.StringPointer("0s"),
+		Enabled:        utils.BoolPointer(false),
+		Cdrstats_conns: &[]*HaPoolJsonCfg{},
+		Store_interval: utils.StringPointer("0s"),
 	}
 	if cfg, err := dfCgrJsonCfg.ResourceLimiterJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestDfStatServiceJsonCfg(t *testing.T) {
+	eCfg := &StatServJsonCfg{
+		Enabled:        utils.BoolPointer(false),
+		Store_interval: utils.StringPointer("0s"),
+	}
+	if cfg, err := dfCgrJsonCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

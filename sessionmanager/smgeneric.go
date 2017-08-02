@@ -443,8 +443,10 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 			}
 		}
 		for i, s := range ss[initialID] {
+			s.mux.Lock()
 			s.CGRID = cgrID                         // Overwrite initial CGRID with new one
 			s.EventStart[utils.ACCID] = newOriginID // Overwrite OriginID for session indexing
+			s.mux.Unlock()
 			smg.recordASession(s)
 			if i == 0 {
 				smg.unrecordASession(initialID)

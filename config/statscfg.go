@@ -23,28 +23,20 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ResourceLimiterConfig struct {
+type StatSCfg struct {
 	Enabled       bool
-	CDRStatConns  []*HaPoolConfig // Connections towards CDRStatS
-	StoreInterval time.Duration   // Dump regularly from cache into dataDB
+	StoreInterval time.Duration // Dump regularly from cache into dataDB
 }
 
-func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJsonCfg) (err error) {
+func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Enabled != nil {
-		rlcfg.Enabled = *jsnCfg.Enabled
-	}
-	if jsnCfg.Cdrstats_conns != nil {
-		rlcfg.CDRStatConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrstats_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Cdrstats_conns {
-			rlcfg.CDRStatConns[idx] = NewDfltHaPoolConfig()
-			rlcfg.CDRStatConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
+		st.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Store_interval != nil {
-		if rlcfg.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
+		if st.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
 			return err
 		}
 	}

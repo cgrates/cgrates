@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/DisposaBoy/JsonConfigReader"
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -352,6 +353,18 @@ func (self CgrJsonCfg) ResourceLimiterJsonCfg() (*ResourceLimiterServJsonCfg, er
 		return nil, nil
 	}
 	cfg := new(ResourceLimiterServJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
+	rawCfg, hasKey := self[utils.StatS]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(StatServJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

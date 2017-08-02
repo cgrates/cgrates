@@ -405,7 +405,13 @@ const CGRATES_CFG_JSON = `
 "rls": {
 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+	"store_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+},
+
+
+"stats": {
+	"enabled": false,						// starts Stat service: <true|false>.
+	"store_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
 },
 
 

@@ -378,9 +378,15 @@ type UserServJsonCfg struct {
 
 // ResourceLimiter service config section
 type ResourceLimiterServJsonCfg struct {
-	Enabled             *bool
-	Cdrstats_conns      *[]*HaPoolJsonCfg
-	Cache_dump_interval *string
+	Enabled        *bool
+	Cdrstats_conns *[]*HaPoolJsonCfg
+	Store_interval *string
+}
+
+// Stat service config section
+type StatServJsonCfg struct {
+	Enabled        *bool
+	Store_interval *string
 }
 
 // Mailer config section

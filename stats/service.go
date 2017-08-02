@@ -72,32 +72,21 @@ type StatService struct {
 	stInsts       StatsInstances   // ordered list of StatsQueues
 }
 
-// Called to start the service
-func (ss *StatService) ListenAndServe() error {
+// ListenAndServe loops keeps the service alive
+func (ss *StatService) ListenAndServe(exitChan chan bool) error {
+	e := <-exitChan
+	exitChan <- e // put back for the others listening for shutdown request
 	return nil
 }
 
 // Called to shutdown the service
-func (ss *StatService) ServiceShutdown() error {
+// ToDo: improve with context, ie, following http implementation
+func (ss *StatService) Shutdown() error {
+	utils.Logger.Info("<StatS> service shutdown initialized")
 	close(ss.stopStoring)
 	ss.storeMetrics()
+	utils.Logger.Info("<StatS> service shutdown complete")
 	return nil
-}
-
-// processEvent processes a StatsEvent through the queues and caches it when needed
-func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
-	evStatsID := ev.ID()
-	if evStatsID == "" { // ID is mandatory
-		return errors.New("missing ID field")
-	}
-	for _, stInst := range ss.stInsts {
-		if err := stInst.ProcessEvent(ev); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
-					stInst.cfg.ID, evStatsID, err.Error()))
-		}
-	}
-	return
 }
 
 // store stores the necessary storedMetrics to dataDB
@@ -129,4 +118,28 @@ func (ss *StatService) dumpStoredMetrics() {
 		ss.storeMetrics()
 		time.Sleep(ss.storeInterval)
 	}
+}
+
+// processEvent processes a StatsEvent through the queues and caches it when needed
+func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
+	evStatsID := ev.ID()
+	if evStatsID == "" { // ID is mandatory
+		return errors.New("missing ID field")
+	}
+	for _, stInst := range ss.stInsts {
+		if err := stInst.ProcessEvent(ev); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
+					stInst.cfg.ID, evStatsID, err.Error()))
+		}
+	}
+	return
+}
+
+// V1ProcessEvent implements StatV1 method for processing an Event
+func (ss *StatService) V1ProcessEvent(ev engine.StatsEvent, reply *string) (err error) {
+	if err = ss.processEvent(ev); err == nil {
+		*reply = utils.OK
+	}
+	return
 }

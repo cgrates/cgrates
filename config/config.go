@@ -264,6 +264,7 @@ type CGRConfig struct {
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
 	UserServerIndexes        []string                 // List of user profile field indexes
 	resourceLimiterCfg       *ResourceLimiterConfig   // Configuration for resource limiter
+	statsCfg                 *StatSCfg                // Configuration for StatS
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -620,6 +621,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnRLSCfg, err := jsnCfg.ResourceLimiterJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnStatSCfg, err := jsnCfg.StatSJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1051,6 +1057,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
+	if jsnStatSCfg != nil {
+		if self.statsCfg == nil {
+			self.statsCfg = new(StatSCfg)
+		}
+		if self.statsCfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnUserServCfg != nil {
 		if jsnUserServCfg.Enabled != nil {
 			self.UserServerEnabled = *jsnUserServCfg.Enabled
@@ -1107,6 +1122,11 @@ func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
 // ToDo: fix locking here
 func (self *CGRConfig) ResourceLimiterCfg() *ResourceLimiterConfig {
 	return self.resourceLimiterCfg
+}
+
+// ToDo: fix locking
+func (cfg *CGRConfig) StatSCfg() *StatSCfg {
+	return cfg.statsCfg
 }
 
 // ToDo: fix locking here
