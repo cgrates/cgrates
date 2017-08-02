@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"github.com/cgrates/cgrates/utils"
@@ -185,6 +186,19 @@ type LoadWriter interface {
 	SetTPAccountActions([]*utils.TPAccountActions) error
 	SetTPResourceLimits([]*utils.TPResourceLimit) error
 	SetTPStats([]*utils.TPStats) error
+}
+
+// NewMarshaler returns the marshaler type selected by mrshlerStr
+func NewMarshaler(mrshlerStr string) (ms Marshaler, err error) {
+	switch mrshlerStr {
+	case utils.MSGPACK:
+		ms = NewCodecMsgpackMarshaler()
+	case utils.JSON:
+		ms = new(JSONMarshaler)
+	default:
+		err = fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
+	}
+	return
 }
 
 type Marshaler interface {

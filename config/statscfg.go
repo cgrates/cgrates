@@ -24,8 +24,8 @@ import (
 )
 
 type StatSCfg struct {
-	Enabled           bool
-	CacheDumpInterval time.Duration // Dump regularly from cache into dataDB
+	Enabled       bool
+	StoreInterval time.Duration // Dump regularly from cache into dataDB
 }
 
 func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -35,8 +35,8 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		st.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Cache_dump_interval != nil {
-		if st.CacheDumpInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Cache_dump_interval); err != nil {
+	if jsnCfg.Store_interval != nil {
+		if st.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
 			return err
 		}
 	}

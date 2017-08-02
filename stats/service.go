@@ -72,13 +72,16 @@ type StatService struct {
 	stInsts       StatsInstances   // ordered list of StatsQueues
 }
 
-// Called to start the service
-func (ss *StatService) ListenAndServe() error {
+// ListenAndServe loops keeps the service alive
+func (ss *StatService) ListenAndServe(exitChan chan bool) error {
+	e := <-exitChan
+	exitChan <- e // put back for the others listening for shutdown request
 	return nil
 }
 
 // Called to shutdown the service
-func (ss *StatService) ServiceShutdown() error {
+// ToDo: improve with context, ie, following http implementation
+func (ss *StatService) Shutdown() error {
 	close(ss.stopStoring)
 	ss.storeMetrics()
 	return nil

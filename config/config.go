@@ -625,6 +625,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
+	jsnStatSCfg, err := jsnCfg.StatSJsonCfg()
+	if err != nil {
+		return err
+	}
+
 	jsnMailerCfg, err := jsnCfg.MailerJsonCfg()
 	if err != nil {
 		return err
@@ -1052,6 +1057,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
+	if jsnStatSCfg != nil {
+		if self.statsCfg == nil {
+			self.statsCfg = new(StatSCfg)
+		}
+		if self.statsCfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnUserServCfg != nil {
 		if jsnUserServCfg.Enabled != nil {
 			self.UserServerEnabled = *jsnUserServCfg.Enabled
@@ -1110,6 +1124,7 @@ func (self *CGRConfig) ResourceLimiterCfg() *ResourceLimiterConfig {
 	return self.resourceLimiterCfg
 }
 
+// ToDo: fix locking
 func (cfg *CGRConfig) StatSCfg() *StatSCfg {
 	return cfg.statsCfg
 }

@@ -24,9 +24,9 @@ import (
 )
 
 type ResourceLimiterConfig struct {
-	Enabled           bool
-	CDRStatConns      []*HaPoolConfig // Connections towards CDRStatS
-	CacheDumpInterval time.Duration   // Dump regularly from cache into dataDB
+	Enabled       bool
+	CDRStatConns  []*HaPoolConfig // Connections towards CDRStatS
+	StoreInterval time.Duration   // Dump regularly from cache into dataDB
 }
 
 func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJsonCfg) (err error) {
@@ -43,8 +43,8 @@ func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJ
 			rlcfg.CDRStatConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Cache_dump_interval != nil {
-		if rlcfg.CacheDumpInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Cache_dump_interval); err != nil {
+	if jsnCfg.Store_interval != nil {
+		if rlcfg.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
 			return err
 		}
 	}
