@@ -444,6 +444,34 @@ CREATE TABLE tp_stats (
 );
 
 --
+-- Table structure for table `tp_threshold_cfgs`
+--
+
+DROP TABLE IF EXISTS tp_threshold_cfgs;
+CREATE TABLE tp_threshold_cfgs (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
+  `filter_type` varchar(16) NOT NULL,
+  `filter_field_name` varchar(64) NOT NULL,
+  `filter_field_values` varchar(256) NOT NULL,
+  `activation_interval` varchar(64) NOT NULL,
+  `threshold_type` char(64) NOT NULL,
+  `threshold_value` DECIMAL(20,4) NOT NULL,
+  `min_items` int(11) NOT NULL,
+  `recurrent` BOOLEAN NOT NULL,
+  `min_sleep` varchar(16) NOT NULL,
+  `blocker` BOOLEAN NOT NULL,
+  `stored` BOOLEAN NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
+  `action_ids` varchar(64) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_threshold_cfgs` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
+);
+
+--
 -- Table structure for table `versions`
 --
 

@@ -438,6 +438,33 @@ CREATE TABLE tp_stats (
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);
 CREATE INDEX tp_stats_unique ON tp_stats  ("tpid", "tag", "filter_type", "filter_field_name");
 
+--
+-- Table structure for table `tp_threshold_cfgs`
+--
+
+DROP TABLE IF EXISTS tp_threshold_cfgs;
+CREATE TABLE tp_threshold_cfgs (
+  "id" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tag" varchar(64) NOT NULL,
+  "filter_type" varchar(16) NOT NULL,
+  "filter_field_name" varchar(64) NOT NULL,
+  "filter_field_values" varchar(256) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
+  "threshold_type" VARCHAR(64) NOT NULL,
+  "threshold_value" NUMERIC(20,4) NOT NULL,
+  "min_items" INTEGER NOT NULL,
+  "recurrent" BOOLEAN NOT NULL,
+  "min_sleep" varchar(16) NOT NULL,
+  "blocker" BOOLEAN NOT NULL,
+  "stored" BOOLEAN NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "action_ids" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX tp_threshold_cfgs_idx ON tp_threshold_cfgs (tpid);
+CREATE INDEX tp_threshold_cfgs_unique ON tp_threshold_cfgs  ("tpid", "tag", "filter_type", "filter_field_name");
+
 
 --
 -- Table structure for table `versions`

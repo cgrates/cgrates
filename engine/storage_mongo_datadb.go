@@ -2064,3 +2064,55 @@ func (ms *MongoStorage) RemSQStoredMetrics(sqmID string) (err error) {
 	err = col.Remove(bson.M{"sqid": sqmID})
 	return err
 }
+
+// GetStatsQueue retrieves a ThresholdCfg from dataDB/cache
+func (ms *MongoStorage) GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error) {
+	cacheKey := utils.ThresholdCfgPrefix + ID
+	if !skipCache {
+		if x, ok := cache.Get(cacheKey); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*ThresholdCfg), nil
+		}
+	}
+	session, col := ms.conn(utils.ThresholdCfgPrefix)
+	defer session.Close()
+	th = new(ThresholdCfg)
+	cCommit := cacheCommit(transactionID)
+	if err = col.Find(bson.M{"id": ID}).One(&th); err != nil {
+		if err == mgo.ErrNotFound {
+			cache.Set(cacheKey, nil, cCommit, transactionID)
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
+	for _, fltr := range th.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
+	}
+	cache.Set(cacheKey, th, cCommit, transactionID)
+	return
+}
+
+// SetStatsQueue stores a ThresholdCfg into DataDB
+func (ms *MongoStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
+	session, col := ms.conn(utils.ThresholdCfgPrefix)
+	defer session.Close()
+	_, err = col.UpsertId(bson.M{"id": th.ID}, th)
+	return
+}
+
+// RemStatsQueue removes a ThresholdCfg from dataDB/cache
+func (ms *MongoStorage) RemThresholdCfg(ID string, transactionID string) (err error) {
+	session, col := ms.conn(utils.ThresholdCfgPrefix)
+	key := utils.ThresholdCfgPrefix + ID
+	err = col.Remove(bson.M{"id": ID})
+	if err != nil {
+		return err
+	}
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	session.Close()
+	return
+}

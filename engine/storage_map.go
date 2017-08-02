@@ -1560,8 +1560,55 @@ func (ms *MapStorage) RemSQStoredMetrics(sqID string) (err error) {
 	return
 }
 
-/*
-GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error)
-SetStatsQueue(sq *StatsQueue) (err error)
-RemStatsQueue(sqID, transactionID string) (err error)
-*/
+// GetStatsQueue retrieves a ThresholdCfg from dataDB/cache
+func (ms *MapStorage) GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	key := utils.ThresholdCfgPrefix + ID
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*ThresholdCfg), nil
+		}
+	}
+	values, ok := ms.dict[key]
+	if !ok {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &th)
+	if err != nil {
+		return nil, err
+	}
+	for _, fltr := range th.Filters {
+		if err := fltr.CompileValues(); err != nil {
+			return nil, err
+		}
+	}
+	cache.Set(key, th, cacheCommit(transactionID), transactionID)
+	return
+}
+
+// SetStatsQueue stores a ThresholdCfg into DataDB
+func (ms *MapStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(th)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.ThresholdCfgPrefix+th.ID] = result
+	return
+}
+
+// RemStatsQueue removes a ThresholdCfg from dataDB/cache
+func (ms *MapStorage) RemThresholdCfg(sqID string, transactionID string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.ThresholdCfgPrefix + sqID
+	delete(ms.dict, key)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
+}

@@ -1145,6 +1145,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.Aliases = cache.CountEntries(utils.ALIASES_PREFIX)
 	cs.ReverseAliases = cache.CountEntries(utils.REVERSE_ALIASES_PREFIX)
 	cs.ResourceLimits = cache.CountEntries(utils.ResourceLimitsPrefix)
+
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
 		if err := self.CdrStatsSrv.Call("CDRStatsV1.GetQueueIds", 0, &queueIds); err != nil {
@@ -1453,6 +1454,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.ALIASES_CSV),
 		path.Join(attrs.FolderPath, utils.ResourceLimitsCsv),
 		path.Join(attrs.FolderPath, utils.StatsCsv),
+		path.Join(attrs.FolderPath, utils.ThresholdsCsv),
 	), "", self.Config.DefaultTimezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)

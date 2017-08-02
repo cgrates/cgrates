@@ -1623,3 +1623,52 @@ func (rs *RedisStorage) RemSQStoredMetrics(sqmID string) (err error) {
 	}
 	return
 }
+
+// GetStatsQueue retrieves a ThresholdCfg from dataDB/cache
+func (rs *RedisStorage) GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error) {
+	key := utils.ThresholdCfgPrefix + ID
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*ThresholdCfg), nil
+		}
+	}
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err == redis.ErrRespNil {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &th); err != nil {
+		return
+	}
+	for _, fltr := range th.Filters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
+	}
+	cache.Set(key, th, cacheCommit(transactionID), transactionID)
+	return
+}
+
+// SetStatsQueue stores a ThresholdCfg into DataDB
+func (rs *RedisStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
+	var result []byte
+	result, err = rs.ms.Marshal(th)
+	if err != nil {
+		return
+	}
+	return rs.Cmd("SET", utils.ThresholdCfgPrefix+th.ID, result).Err
+}
+
+// RemStatsQueue removes a ThresholdCfg from dataDB/cache
+func (rs *RedisStorage) RemThresholdCfg(ID string, transactionID string) (err error) {
+	key := utils.ThresholdCfgPrefix + ID
+	err = rs.Cmd("DEL", key).Err
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
+}
