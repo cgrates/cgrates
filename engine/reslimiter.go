@@ -46,7 +46,7 @@ type ResourceLimit struct {
 	Stored             bool
 	Weight             float64                   // Weight to sort the ResourceLimits
 	Limit              float64                   // Limit value
-	ActionTriggers     ActionTriggers            // Thresholds to check after changing Limit
+	Thresholds         []string                  // Thresholds to check after changing Limit
 	UsageTTL           time.Duration             // Expire usage after this duration
 	AllocationMessage  string                    // message returned by the winning resourceLimit on allocation
 	Usage              map[string]*ResourceUsage // Keep a record of usage, bounded with timestamps so we can expire too long records

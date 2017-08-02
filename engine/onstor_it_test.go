@@ -741,7 +741,7 @@ func testOnStorITCacheResourceLimit(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
 		ExpiryTime:         time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
 		Limit:              1,
-		ActionTriggers:     make(ActionTriggers, 0),
+		Thresholds:         []string{"TEST_ACTIONS"},
 		UsageTTL:           time.Duration(1 * time.Millisecond),
 		Usage:              make(map[string]*ResourceUsage),
 	}
@@ -1681,7 +1681,7 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
 		ExpiryTime:         time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
 		Limit:              1,
-		ActionTriggers:     make(ActionTriggers, 0),
+		Thresholds:         []string{"TEST_ACTIONS"},
 		UsageTTL:           time.Duration(1 * time.Millisecond),
 		Usage:              make(map[string]*ResourceUsage),
 	}
