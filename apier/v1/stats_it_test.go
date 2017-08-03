@@ -52,13 +52,11 @@ func TestStatSV1InitDataDb(t *testing.T) {
 	}
 }
 
-/*
 func TestStatSV1StartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(stsV1CfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
 }
-*/
 
 func TestStatSV1RpcConn(t *testing.T) {
 	var err error
