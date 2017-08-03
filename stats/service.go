@@ -173,6 +173,7 @@ func (ss *StatService) V1ProcessEvent(ev engine.StatsEvent, reply *string) (err 
 	return
 }
 
+// V1GetQueueIDs returns list of queue IDs configured in the service
 func (ss *StatService) V1GetQueueIDs(ignored struct{}, reply *[]string) (err error) {
 	if len(ss.queuesCache) == 0 {
 		return utils.ErrNotFound
@@ -183,6 +184,7 @@ func (ss *StatService) V1GetQueueIDs(ignored struct{}, reply *[]string) (err err
 	return
 }
 
+// V1GetStatMetrics returns the metrics as string values
 func (ss *StatService) V1GetStatMetrics(queueID string, reply *map[string]string) (err error) {
 	sq, has := ss.queuesCache[queueID]
 	if !has {
@@ -196,12 +198,13 @@ func (ss *StatService) V1GetStatMetrics(queueID string, reply *map[string]string
 	return
 }
 
+// ArgsLoadQueues are the arguments passed to V1LoadQueues
 type ArgsLoadQueues struct {
 	QueueIDs *[]string
 }
 
 // V1LoadQueues loads the queues specified by qIDs into the service
-// loads all if qIDs is nil
+// loads all if args.QueueIDs is nil
 func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err error) {
 	qIDs := args.QueueIDs
 	if qIDs == nil {
