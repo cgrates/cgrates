@@ -42,7 +42,7 @@ func NewStatService(dataDB engine.DataDB, ms engine.Marshaler, storeInterval tim
 	}
 	ss.stInsts = make(StatsInstances, len(sqPrfxs))
 	for i, prfx := range sqPrfxs {
-		sq, err := dataDB.GetStatsQueue(prfx[len(utils.StatsQueuePrefix):], false, utils.NonTransactional)
+		sq, err := dataDB.GetStatsQueue(prfx[len(utils.StatsQueuePrefix):])
 		if err != nil {
 			return nil, err
 		}

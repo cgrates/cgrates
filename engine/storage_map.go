@@ -1474,22 +1474,13 @@ func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-// GetStatsQueue retrieves a StatsQueue from dataDB/cache
-func (ms *MapStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
+// GetStatsQueue retrieves a StatsQueue from dataDB
+func (ms *MapStorage) GetStatsQueue(sqID string) (sq *StatsQueue, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key := utils.StatsQueuePrefix + sqID
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*StatsQueue), nil
-		}
-	}
 	values, ok := ms.dict[key]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
 	err = ms.ms.Unmarshal(values, &sq)
@@ -1501,7 +1492,6 @@ func (ms *MapStorage) GetStatsQueue(sqID string, skipCache bool, transactionID s
 			return nil, err
 		}
 	}
-	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1517,13 +1507,12 @@ func (ms *MapStorage) SetStatsQueue(sq *StatsQueue) (err error) {
 	return
 }
 
-// RemStatsQueue removes a StatsQueue from dataDB/cache
-func (ms *MapStorage) RemStatsQueue(sqID string, transactionID string) (err error) {
+// RemStatsQueue removes a StatsQueue from dataDB
+func (ms *MapStorage) RemStatsQueue(sqID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.StatsQueuePrefix + sqID
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1560,7 +1549,7 @@ func (ms *MapStorage) RemSQStoredMetrics(sqID string) (err error) {
 	return
 }
 
-// GetStatsQueue retrieves a ThresholdCfg from dataDB/cache
+// GetThresholdCfg retrieves a ThresholdCfg from dataDB/cache
 func (ms *MapStorage) GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -1591,7 +1580,7 @@ func (ms *MapStorage) GetThresholdCfg(ID string, skipCache bool, transactionID s
 	return
 }
 
-// SetStatsQueue stores a ThresholdCfg into DataDB
+// SetThresholdCfg stores a ThresholdCfg into DataDB
 func (ms *MapStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -1603,7 +1592,7 @@ func (ms *MapStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
 	return
 }
 
-// RemStatsQueue removes a ThresholdCfg from dataDB/cache
+// RemThresholdCfg removes a ThresholdCfg from dataDB/cache
 func (ms *MapStorage) RemThresholdCfg(sqID string, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

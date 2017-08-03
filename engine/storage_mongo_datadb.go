@@ -1984,24 +1984,13 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 	return
 }
 
-// GetStatsQueue retrieves a StatsQueue from dataDB/cache
-func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error) {
-	cacheKey := utils.StatsQueuePrefix + sqID
-	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*StatsQueue), nil
-		}
-	}
+// GetStatsQueue retrieves a StatsQueue from dataDB
+func (ms *MongoStorage) GetStatsQueue(sqID string) (sq *StatsQueue, err error) {
 	session, col := ms.conn(utils.StatsQueuePrefix)
 	defer session.Close()
 	sq = new(StatsQueue)
-	cCommit := cacheCommit(transactionID)
 	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
@@ -2011,7 +2000,6 @@ func (ms *MongoStorage) GetStatsQueue(sqID string, skipCache bool, transactionID
 			return
 		}
 	}
-	cache.Set(cacheKey, sq, cCommit, transactionID)
 	return
 }
 
@@ -2023,15 +2011,13 @@ func (ms *MongoStorage) SetStatsQueue(sq *StatsQueue) (err error) {
 	return
 }
 
-// RemStatsQueue removes a StatsQueue from dataDB/cache
-func (ms *MongoStorage) RemStatsQueue(sqID string, transactionID string) (err error) {
+// RemStatsQueue removes a StatsQueue from dataDB
+func (ms *MongoStorage) RemStatsQueue(sqID string) (err error) {
 	session, col := ms.conn(utils.StatsQueuePrefix)
-	key := utils.StatsQueuePrefix + sqID
 	err = col.Remove(bson.M{"id": sqID})
 	if err != nil {
 		return err
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	session.Close()
 	return
 }
@@ -2065,7 +2051,7 @@ func (ms *MongoStorage) RemSQStoredMetrics(sqmID string) (err error) {
 	return err
 }
 
-// GetStatsQueue retrieves a ThresholdCfg from dataDB/cache
+// GetThresholdCfg retrieves a ThresholdCfg from dataDB/cache
 func (ms *MongoStorage) GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error) {
 	cacheKey := utils.ThresholdCfgPrefix + ID
 	if !skipCache {
@@ -2096,7 +2082,7 @@ func (ms *MongoStorage) GetThresholdCfg(ID string, skipCache bool, transactionID
 	return
 }
 
-// SetStatsQueue stores a ThresholdCfg into DataDB
+// SetThresholdCfg stores a ThresholdCfg into DataDB
 func (ms *MongoStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
 	session, col := ms.conn(utils.ThresholdCfgPrefix)
 	defer session.Close()
@@ -2104,7 +2090,7 @@ func (ms *MongoStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
 	return
 }
 
-// RemStatsQueue removes a ThresholdCfg from dataDB/cache
+// RemThresholdCfg removes a ThresholdCfg from dataDB/cache
 func (ms *MongoStorage) RemThresholdCfg(ID string, transactionID string) (err error) {
 	session, col := ms.conn(utils.ThresholdCfgPrefix)
 	key := utils.ThresholdCfgPrefix + ID

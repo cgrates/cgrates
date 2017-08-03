@@ -1851,29 +1851,29 @@ func testOnStorITCRUDStatsQueue(t *testing.T) {
 		Store:              true,
 		Thresholds:         []string{},
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetStatsQueue(sq); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetStatsQueue(sq.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
-	if rcv, err := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetStatsQueue(sq.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
-	if err := onStor.RemStatsQueue(sq.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemStatsQueue(sq.ID); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
