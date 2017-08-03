@@ -54,7 +54,7 @@ func TestTutITInitCfg(t *testing.T) {
 	config.SetCgrConfig(tutFsLocalCfg)
 }
 
-// Remove data in both rating and accounting db
+// Remove data in dataDB
 func TestTutITResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(tutFsLocalCfg); err != nil {
 		t.Fatal(err)

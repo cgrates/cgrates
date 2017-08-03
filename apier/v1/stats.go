@@ -62,7 +62,23 @@ func (stsv1 *StatSV1) Call(serviceMethod string, args interface{}, reply interfa
 	return err
 }
 
-// GetLimitsForEvent returns ResourceLimits matching a specific event
+// ProcessEvent returns processes a new Event
 func (stsv1 *StatSV1) ProcessEvent(ev engine.StatsEvent, reply *string) error {
 	return stsv1.sts.V1ProcessEvent(ev, reply)
+}
+
+// GetQueueIDs returns the list of queues IDs in the system
+func (stsv1 *StatSV1) GetQueueIDs(ignored struct{}, reply *[]string) (err error) {
+	return stsv1.sts.V1GetQueueIDs(ignored, reply)
+}
+
+// GetStatMetrics returns the metrics for a queueID
+func (stsv1 *StatSV1) GetStatMetrics(queueID string, reply *map[string]string) (err error) {
+	return stsv1.sts.V1GetStatMetrics(queueID, reply)
+}
+
+// LoadQueues loads from dataDB into statsService the queueIDs specified
+// loads all when qIDs is nil
+func (stsv1 *StatSV1) LoadQueues(args stats.ArgsLoadQueues, reply *string) (err error) {
+	return stsv1.sts.V1LoadQueues(args, reply)
 }

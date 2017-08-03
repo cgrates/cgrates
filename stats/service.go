@@ -40,24 +40,17 @@ func NewStatService(dataDB engine.DataDB, ms engine.Marshaler, storeInterval tim
 	if err != nil {
 		return nil, err
 	}
-	ss.stInsts = make(StatsInstances, len(sqPrfxs))
-	for i, prfx := range sqPrfxs {
-		sq, err := dataDB.GetStatsQueue(prfx[len(utils.StatsQueuePrefix):])
-		if err != nil {
+	ss.queuesCache = make(map[string]*StatsInstance)
+	ss.queues = make(StatsInstances, 0)
+	for _, prfx := range sqPrfxs {
+		if q, err := ss.loadQueue(prfx[len(utils.StatsQueuePrefix):]); err != nil {
 			return nil, err
-		}
-		var sqSM *engine.SQStoredMetrics
-		if sq.Store {
-			if sqSM, err = dataDB.GetSQStoredMetrics(sq.ID); err != nil && err != utils.ErrNotFound {
-				return nil, err
-			}
-		}
-		if ss.stInsts[i], err = NewStatsInstance(ss.evCache, ss.ms, sq, sqSM); err != nil {
-			return nil, err
+		} else {
+			ss.setQueue(q)
 		}
 	}
-	ss.stInsts.Sort()
-	go ss.dumpStoredMetrics()
+	ss.queues.Sort()
+	go ss.dumpStoredMetrics() // start dumpStoredMetrics loop
 	return
 }
 
@@ -68,8 +61,10 @@ type StatService struct {
 	ms            engine.Marshaler
 	storeInterval time.Duration
 	stopStoring   chan struct{}
-	evCache       *StatsEventCache // so we can pass it to queues
-	stInsts       StatsInstances   // ordered list of StatsQueues
+	evCache       *StatsEventCache          // so we can pass it to queues
+	queuesCache   map[string]*StatsInstance // unordered db of StatsQueues, used for fast queries
+	queues        StatsInstances            // ordered list of StatsQueues
+
 }
 
 // ListenAndServe loops keeps the service alive
@@ -80,7 +75,7 @@ func (ss *StatService) ListenAndServe(exitChan chan bool) error {
 }
 
 // Called to shutdown the service
-// ToDo: improve with context, ie, following http implementation
+// ToDo: improve with context, ie following http implementation
 func (ss *StatService) Shutdown() error {
 	utils.Logger.Info("<StatS> service shutdown initialized")
 	close(ss.stopStoring)
@@ -89,9 +84,38 @@ func (ss *StatService) Shutdown() error {
 	return nil
 }
 
+// setQueue adds or modifies a queue into cache
+// sort will reorder the ss.queues
+func (ss *StatService) loadQueue(qID string) (q *StatsInstance, err error) {
+	sq, err := ss.dataDB.GetStatsQueue(qID, false, utils.NonTransactional)
+	if err != nil {
+		return nil, err
+	}
+	var sqSM *engine.SQStoredMetrics
+	if sq.Store {
+		if sqSM, err = ss.dataDB.GetSQStoredMetrics(sq.ID); err != nil && err != utils.ErrNotFound {
+			return nil, err
+		}
+	}
+	return NewStatsInstance(ss.evCache, ss.ms, sq, sqSM)
+}
+
+func (ss *StatService) setQueue(q *StatsInstance) {
+	ss.queuesCache[q.cfg.ID] = q
+	ss.queues = append(ss.queues, q)
+}
+
+// remQueue will remove a queue based on it's ID
+func (ss *StatService) remQueue(qID string) (si *StatsInstance) {
+	si = ss.queuesCache[qID]
+	ss.queues.remWithID(qID)
+	delete(ss.queuesCache, qID)
+	return
+}
+
 // store stores the necessary storedMetrics to dataDB
 func (ss *StatService) storeMetrics() {
-	for _, si := range ss.stInsts {
+	for _, si := range ss.queues {
 		if !si.cfg.Store || !si.dirty { // no need to save
 			continue
 		}
@@ -126,7 +150,7 @@ func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
 	if evStatsID == "" { // ID is mandatory
 		return errors.New("missing ID field")
 	}
-	for _, stInst := range ss.stInsts {
+	for _, stInst := range ss.queues {
 		if err := stInst.ProcessEvent(ev); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
@@ -141,5 +165,73 @@ func (ss *StatService) V1ProcessEvent(ev engine.StatsEvent, reply *string) (err 
 	if err = ss.processEvent(ev); err == nil {
 		*reply = utils.OK
 	}
+	return
+}
+
+func (ss *StatService) V1GetQueueIDs(ignored struct{}, reply *[]string) (err error) {
+	if len(ss.queuesCache) == 0 {
+		return utils.ErrNotFound
+	}
+	for k := range ss.queuesCache {
+		*reply = append(*reply, k)
+	}
+	return
+}
+
+func (ss *StatService) V1GetStatMetrics(queueID string, reply *map[string]string) (err error) {
+	sq, has := ss.queuesCache[queueID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	metrics := make(map[string]string, len(sq.sqMetrics))
+	for metricID, metric := range sq.sqMetrics {
+		metrics[metricID] = metric.GetStringValue("")
+	}
+	*reply = metrics
+	return
+}
+
+type ArgsLoadQueues struct {
+	QueueIDs *[]string
+}
+
+// V1LoadQueues loads the queues specified by qIDs into the service
+// loads all if qIDs is nil
+func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err error) {
+	qIDs := args.QueueIDs
+	if qIDs == nil {
+		sqPrfxs, err := ss.dataDB.GetKeysForPrefix(utils.StatsQueuePrefix)
+		if err != nil {
+			return err
+		}
+		queueIDs := make([]string, len(sqPrfxs))
+		for i, prfx := range sqPrfxs {
+			queueIDs[i] = prfx[len(utils.StatsQueuePrefix):]
+		}
+		if len(queueIDs) != 0 {
+			qIDs = &queueIDs
+		}
+	}
+	if qIDs == nil || len(*qIDs) == 0 {
+		return utils.ErrNotFound
+	}
+	var sQs []*StatsInstance // cache here so we lock only later when data available
+	for _, qID := range *qIDs {
+		if _, hasPrev := ss.queuesCache[qID]; hasPrev {
+			continue // don't overwrite previous, could be extended in the future by carefully checking cached events
+		}
+		if q, err := ss.loadQueue(qID); err != nil {
+			return err
+		} else {
+			sQs = append(sQs, q)
+		}
+	}
+	ss.Lock()
+	for _, q := range sQs {
+		ss.setQueue(q)
+	}
+	ss.queues.Sort()
+	ss.Unlock()
+	*reply = utils.OK
 	return
 }

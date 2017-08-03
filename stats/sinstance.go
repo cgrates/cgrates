@@ -35,18 +35,37 @@ func (sis StatsInstances) Sort() {
 	sort.Slice(sis, func(i, j int) bool { return sis[i].cfg.Weight > sis[j].cfg.Weight })
 }
 
+// remWithID removes the queue with ID from slice
+func (sis StatsInstances) remWithID(qID string) {
+	for i, q := range sis {
+		if q.cfg.ID == qID {
+			copy(sis[i:], sis[i+1:])
+			sis[len(sis)-1] = nil
+			sis = sis[:len(sis)-1]
+			break // there can be only one item with ID
+		}
+	}
+}
+
 // NewStatsInstance instantiates a StatsInstance
 func NewStatsInstance(sec *StatsEventCache, ms engine.Marshaler,
 	sqCfg *engine.StatsQueue, sqSM *engine.SQStoredMetrics) (si *StatsInstance, err error) {
-	si = &StatsInstance{sec: sec, ms: ms, cfg: sqCfg}
+	si = &StatsInstance{sec: sec, ms: ms, cfg: sqCfg, sqMetrics: make(map[string]StatsMetric)}
+	for _, metricID := range sqCfg.Metrics {
+		if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
+			return
+		}
+	}
 	if sqSM != nil {
 		for evID, ev := range sqSM.SEvents {
 			si.sec.Cache(evID, ev, si.cfg.ID)
 		}
 		si.sqItems = sqSM.SQItems
 		for metricID := range si.sqMetrics {
-			if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
-				return
+			if _, has := si.sqMetrics[metricID]; !has {
+				if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
+					return
+				}
 			}
 			if stored, has := sqSM.SQMetrics[metricID]; !has {
 				continue
