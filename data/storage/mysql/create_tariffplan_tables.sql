@@ -447,8 +447,8 @@ CREATE TABLE tp_stats (
 -- Table structure for table `tp_threshold_cfgs`
 --
 
-DROP TABLE IF EXISTS tp_threshold_cfgs;
-CREATE TABLE tp_threshold_cfgs (
+DROP TABLE IF EXISTS tp_thresholds;
+CREATE TABLE tp_thresholds (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
@@ -468,7 +468,7 @@ CREATE TABLE tp_threshold_cfgs (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_threshold_cfgs` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
+  UNIQUE KEY `unique_tp_thresholds` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
 );
 
 --

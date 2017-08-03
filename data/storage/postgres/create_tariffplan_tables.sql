@@ -442,8 +442,8 @@ CREATE INDEX tp_stats_unique ON tp_stats  ("tpid", "tag", "filter_type", "filter
 -- Table structure for table `tp_threshold_cfgs`
 --
 
-DROP TABLE IF EXISTS tp_threshold_cfgs;
-CREATE TABLE tp_threshold_cfgs (
+DROP TABLE IF EXISTS tp_thresholds;
+CREATE TABLE tp_thresholds (
   "id" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
   "tag" varchar(64) NOT NULL,
@@ -462,8 +462,8 @@ CREATE TABLE tp_threshold_cfgs (
   "action_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
-CREATE INDEX tp_threshold_cfgs_idx ON tp_threshold_cfgs (tpid);
-CREATE INDEX tp_threshold_cfgs_unique ON tp_threshold_cfgs  ("tpid", "tag", "filter_type", "filter_field_name");
+CREATE INDEX tp_thresholds_idx ON tp_thresholds (tpid);
+CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid", "tag", "filter_type", "filter_field_name");
 
 
 --
