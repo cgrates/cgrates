@@ -44,7 +44,9 @@ func NewStatService(dataDB engine.DataDB, ms engine.Marshaler, storeInterval tim
 	ss.queues = make(StatsInstances, 0)
 	for _, prfx := range sqPrfxs {
 		if q, err := ss.loadQueue(prfx[len(utils.StatsQueuePrefix):]); err != nil {
-			return nil, err
+			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
+				q.cfg.ID, err.Error()))
+			continue
 		} else {
 			ss.setQueue(q)
 		}
@@ -156,6 +158,9 @@ func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
 				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
 					stInst.cfg.ID, evStatsID, err.Error()))
 		}
+		if stInst.cfg.Block {
+			break
+		}
 	}
 	return
 }
@@ -221,7 +226,9 @@ func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err err
 			continue // don't overwrite previous, could be extended in the future by carefully checking cached events
 		}
 		if q, err := ss.loadQueue(qID); err != nil {
-			return err
+			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
+				q.cfg.ID, err.Error()))
+			continue
 		} else {
 			sQs = append(sQs, q)
 		}
