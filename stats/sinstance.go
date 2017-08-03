@@ -50,15 +50,22 @@ func (sis StatsInstances) remWithID(qID string) {
 // NewStatsInstance instantiates a StatsInstance
 func NewStatsInstance(sec *StatsEventCache, ms engine.Marshaler,
 	sqCfg *engine.StatsQueue, sqSM *engine.SQStoredMetrics) (si *StatsInstance, err error) {
-	si = &StatsInstance{sec: sec, ms: ms, cfg: sqCfg}
+	si = &StatsInstance{sec: sec, ms: ms, cfg: sqCfg, sqMetrics: make(map[string]StatsMetric)}
+	for _, metricID := range sqCfg.Metrics {
+		if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
+			return
+		}
+	}
 	if sqSM != nil {
 		for evID, ev := range sqSM.SEvents {
 			si.sec.Cache(evID, ev, si.cfg.ID)
 		}
 		si.sqItems = sqSM.SQItems
 		for metricID := range si.sqMetrics {
-			if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
-				return
+			if _, has := si.sqMetrics[metricID]; !has {
+				if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
+					return
+				}
 			}
 			if stored, has := sqSM.SQMetrics[metricID]; !has {
 				continue

@@ -98,7 +98,10 @@ func TestStatSV1GetStats(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
 	}
-	expectedMetrics := map[string]string{}
+	expectedMetrics := map[string]string{
+		utils.MetaASR: utils.NOT_AVAILABLE,
+		utils.MetaACD: "",
+	}
 	if err := stsV1Rpc.Call("StatSV1.GetStatMetrics", "Stats1", &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -135,7 +138,10 @@ func TestStatSV1ProcessEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
-	expectedMetrics := map[string]string{}
+	expectedMetrics := map[string]string{
+		utils.MetaASR: "66.66667%",
+		utils.MetaACD: "",
+	}
 	var metrics map[string]string
 	if err := stsV1Rpc.Call("StatSV1.GetStatMetrics", "Stats1", &metrics); err != nil {
 		t.Error(err)
