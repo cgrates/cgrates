@@ -68,7 +68,8 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB DataDB, rater, pubsub, users, aliases, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB DataDB, rater, pubsub, users,
+	aliases, cdrstats, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
 	if rater == nil || reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -81,11 +82,15 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB DataDB, rat
 	if aliases == nil || reflect.ValueOf(aliases).IsNil() {
 		aliases = nil
 	}
+	if cdrstats == nil || reflect.ValueOf(cdrstats).IsNil() {
+		cdrstats = nil
+	}
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		stats = nil
 	}
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dataDB: dataDB,
-		rals: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: guardian.Guardian,
+		rals: rater, pubsub: pubsub, users: users, aliases: aliases,
+		cdrstats: cdrstats, stats: stats, guard: guardian.Guardian,
 		httpPoster: utils.NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
 }
 
@@ -97,6 +102,7 @@ type CdrServer struct {
 	pubsub        rpcclient.RpcClientConnection
 	users         rpcclient.RpcClientConnection
 	aliases       rpcclient.RpcClientConnection
+	cdrstats      rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
 	guard         *guardian.GuardianLock
 	responseCache *cache.ResponseCache
@@ -187,21 +193,21 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		}
 	}
 	// Attach raw CDR to stats
-	if self.stats != nil { // Send raw CDR to stats
+	if self.cdrstats != nil { // Send raw CDR to stats
 		var out int
-		go self.stats.Call("CDRStatsV1.AppendCDR", cdr, &out)
+		go self.cdrstats.Call("CDRStatsV1.AppendCDR", cdr, &out)
 	}
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
 		self.replicateCDRs([]*CDR{cdr})
 	}
 	if self.rals != nil && !cdr.Rated { // CDRs not rated will be processed by Rating
-		go self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs, self.stats != nil, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
+		go self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs, self.cdrstats != nil, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
 	}
 	return nil
 }
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
-func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, replicate bool) error {
+func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, replicate bool) error {
 	cdrRuns, err := self.deriveCdrs(cdr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Deriving CDR %+v, got error: %s", cdr, err.Error()))
@@ -270,11 +276,11 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, rep
 		}
 	}
 	// Attach CDR to stats
-	if stats { // Send CDR to stats
+	if cdrstats { // Send CDR to stats
 		for _, ratedCDR := range ratedCDRs {
 			var out int
-			if err := self.stats.Call("CDRStatsV1.AppendCDR", ratedCDR, &out); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<CDRS> Could not send CDR to stats: %s", err.Error()))
+			if err := self.cdrstats.Call("CDRStatsV1.AppendCDR", ratedCDR, &out); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<CDRS> Could not send CDR to cdrstats: %s", err.Error()))
 			}
 		}
 	}
@@ -584,7 +590,7 @@ func (self *CdrServer) V1RateCDRs(attrs utils.AttrRateCDRs, reply *string) error
 	if attrs.StoreCDRs != nil {
 		storeCDRs = *attrs.StoreCDRs
 	}
-	sendToStats := self.stats != nil
+	sendToStats := self.cdrstats != nil
 	if attrs.SendToStatS != nil {
 		sendToStats = *attrs.SendToStatS
 	}

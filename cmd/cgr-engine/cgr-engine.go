@@ -387,12 +387,13 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 	exitChan <- true
 }
 
-func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, dataDB engine.DataDB,
-	internalRaterChan chan rpcclient.RpcClientConnection, internalPubSubSChan chan rpcclient.RpcClientConnection,
-	internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
-	internalCdrStatSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
+func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
+	cdrDb engine.CdrStorage, dataDB engine.DataDB,
+	internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
+	internalCdrStatSChan, internalStatSChan chan rpcclient.RpcClientConnection,
+	server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS CDRS service.")
-	var ralConn, pubSubConn, usersConn, aliasesConn, statsConn *rpcclient.RpcClientPool
+	var ralConn, pubSubConn, usersConn, aliasesConn, cdrstatsConn, statsConn *rpcclient.RpcClientPool
 	if len(cfg.CDRSRaterConns) != 0 { // Conn pool towards RAL
 		ralConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSRaterConns, internalRaterChan, cfg.InternalTtl)
@@ -429,17 +430,26 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, cdrDb engine
 			return
 		}
 	}
-
 	if len(cfg.CDRSCDRStatSConns) != 0 { // Stats connection init
-		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+		cdrstatsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSCDRStatSConns, internalCdrStatSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to CDRStatS: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.CDRSStatSConns) != 0 { // Stats connection init
+		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.CDRSStatSConns, internalStatSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to StatS: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dataDB, ralConn, pubSubConn, usersConn, aliasesConn, statsConn)
+	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dataDB, ralConn, pubSubConn,
+		usersConn, aliasesConn, cdrstatsConn, statsConn)
 	cdrServer.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHandlersToServer(server)
@@ -765,7 +775,8 @@ func main() {
 	// Start CDR Server
 	if cfg.CDRSEnabled {
 		go startCDRS(internalCdrSChan, cdrDb, dataDB,
-			internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalCdrStatSChan, server, exitChan)
+			internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
+			internalCdrStatSChan, internalStatSChan, server, exitChan)
 	}
 
 	// Start CDR Stats server
