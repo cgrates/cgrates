@@ -158,7 +158,7 @@ func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
 				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
 					stInst.cfg.ID, evStatsID, err.Error()))
 		}
-		if stInst.cfg.Block {
+		if stInst.cfg.Blocker {
 			break
 		}
 	}
