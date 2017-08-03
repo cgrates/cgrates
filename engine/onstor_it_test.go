@@ -1855,28 +1855,28 @@ func testOnStorITCRUDStatsQueue(t *testing.T) {
 	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, rcvErr := cache.Get(utils.StatsQueuePrefix + sq.ID); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
+	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+		t.Error("Should not be in cache")
 	}
 	if err := onStor.SetStatsQueue(sq); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := cache.Get(utils.StatsQueuePrefix + sq.ID); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
+	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+		t.Error("Should not be in cache")
 	}
 	if rcv, err := onStor.GetStatsQueue(sq.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
-	if _, rcvErr := cache.Get(utils.StatsQueuePrefix + sq.ID); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
+	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+		t.Error("Should not be in cache")
 	}
 	if err := onStor.RemStatsQueue(sq.ID); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := cache.Get(utils.StatsQueuePrefix + sq.ID); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
+	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+		t.Error("Should not be in cache")
 	}
 	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
@@ -1907,8 +1907,8 @@ func testOnStorITCRUDThresholdCfg(t *testing.T) {
 	}
 	if rcv, err := onStor.GetThresholdCfg(th.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(sq, rcv) {
-		t.Errorf("Expecting: %v, received: %v", sq, rcv)
+	} else if !reflect.DeepEqual(th, rcv) {
+		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
 	if rcv, err := onStor.GetThresholdCfg(th.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
