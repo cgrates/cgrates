@@ -430,9 +430,9 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, cdrDb engine
 		}
 	}
 
-	if len(cfg.CDRSStatSConns) != 0 { // Stats connection init
+	if len(cfg.CDRSCDRStatSConns) != 0 { // Stats connection init
 		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.CDRSStatSConns, internalCdrStatSChan, cfg.InternalTtl)
+			cfg.CDRSCDRStatSConns, internalCdrStatSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to StatS: %s", err.Error()))
 			exitChan <- true

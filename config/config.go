@@ -243,10 +243,11 @@ type CGRConfig struct {
 	CDRSPubSubSConns         []*HaPoolConfig // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
 	CDRSUserSConns           []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSAliaseSConns         []*HaPoolConfig // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
-	CDRSStatSConns           []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
-	CDRSOnlineCDRExports     []string        // list of CDRE templates to use for real-time CDR exports
-	CDRStatsEnabled          bool            // Enable CDR Stats service
-	CDRStatsSaveInterval     time.Duration   // Save interval duration
+	CDRSCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable cdrstats gathering  <""|internal|x.y.z.y:1234>
+	CDRSStatSConns           []*HaPoolConfig
+	CDRSOnlineCDRExports     []string      // list of CDRE templates to use for real-time CDR exports
+	CDRStatsEnabled          bool          // Enable CDR Stats service
+	CDRStatsSaveInterval     time.Duration // Save interval duration
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	SmGenericConfig          *SmGenericConfig
@@ -328,9 +329,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("AliaseS not enabled but requested by CDRS component.")
 			}
 		}
-		for _, connCfg := range self.CDRSStatSConns {
+		for _, connCfg := range self.CDRSCDRStatSConns {
 			if connCfg.Address == utils.MetaInternal && !self.CDRStatsEnabled {
 				return errors.New("CDRStatS not enabled but requested by CDRS component.")
+			}
+		}
+		for _, connCfg := range self.CDRSStatSConns {
+			if connCfg.Address == utils.MetaInternal && !self.statsCfg.Enabled {
+				return errors.New("StatS not enabled but requested by CDRS component.")
 			}
 		}
 		for _, cdrePrfl := range self.CDRSOnlineCDRExports {
@@ -896,8 +902,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			}
 		}
 		if jsnCdrsCfg.Cdrstats_conns != nil {
-			self.CDRSStatSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Cdrstats_conns))
+			self.CDRSCDRStatSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Cdrstats_conns))
 			for idx, jsnHaCfg := range *jsnCdrsCfg.Cdrstats_conns {
+				self.CDRSCDRStatSConns[idx] = NewDfltHaPoolConfig()
+				self.CDRSCDRStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
+		}
+		if jsnCdrsCfg.Stats_conns != nil {
+			self.CDRSStatSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Stats_conns))
+			for idx, jsnHaCfg := range *jsnCdrsCfg.Stats_conns {
 				self.CDRSStatSConns[idx] = NewDfltHaPoolConfig()
 				self.CDRSStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
