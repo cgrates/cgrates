@@ -35,6 +35,18 @@ func (sis StatsInstances) Sort() {
 	sort.Slice(sis, func(i, j int) bool { return sis[i].cfg.Weight > sis[j].cfg.Weight })
 }
 
+// remWithID removes the queue with ID from slice
+func (sis StatsInstances) remWithID(qID string) {
+	for i, q := range sis {
+		if q.cfg.ID == qID {
+			copy(sis[i:], sis[i+1:])
+			sis[len(sis)-1] = nil
+			sis = sis[:len(sis)-1]
+			break // there can be only one item with ID
+		}
+	}
+}
+
 // NewStatsInstance instantiates a StatsInstance
 func NewStatsInstance(sec *StatsEventCache, ms engine.Marshaler,
 	sqCfg *engine.StatsQueue, sqSM *engine.SQStoredMetrics) (si *StatsInstance, err error) {
