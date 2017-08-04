@@ -527,12 +527,12 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, data
 	internalUserSChan <- userServer
 }
 
-func startResourceLimiterService(internalRLSChan, internalCdrStatSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+func startResourceLimiterService(internalRLSChan, internalStatSConn chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dataDB engine.DataDB, server *utils.Server, exitChan chan bool) {
 	var statsConn *rpcclient.RpcClientPool
-	if len(cfg.ResourceLimiterCfg().CDRStatConns) != 0 { // Stats connection init
+	if len(cfg.ResourceLimiterCfg().StatSConns) != 0 { // Stats connection init
 		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.ResourceLimiterCfg().CDRStatConns, internalCdrStatSChan, cfg.InternalTtl)
+			cfg.ResourceLimiterCfg().StatSConns, internalStatSConn, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RLs> Could not connect to StatS: %s", err.Error()))
 			exitChan <- true
@@ -848,7 +848,8 @@ func main() {
 
 	// Start RL service
 	if cfg.ResourceLimiterCfg().Enabled {
-		go startResourceLimiterService(internalRLSChan, internalCdrStatSChan, cfg, dataDB, server, exitChan)
+		go startResourceLimiterService(internalRLSChan,
+			internalStatSChan, cfg, dataDB, server, exitChan)
 	}
 
 	if cfg.StatSCfg().Enabled {

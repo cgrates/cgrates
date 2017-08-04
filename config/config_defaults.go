@@ -112,6 +112,7 @@ const CGRATES_CFG_JSON = `
 "rals": {
 	"enabled": false,						// enable Rater service: <true|false>
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"historys_conns": [],					// address where to reach the history service, empty to disable history functionality: <""|*internal|x.y.z.y:1234>
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
@@ -404,14 +405,14 @@ const CGRATES_CFG_JSON = `
 
 
 "rls": {
-	"enabled": false,						// starts ResourceLimiter service: <true|false>.
-	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"enabled": false,				// starts ResourceLimiter service: <true|false>.
+	"stats_conns": [],				// address where to reach the stats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"store_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
 },
 
 
 "stats": {
-	"enabled": false,						// starts Stat service: <true|false>.
+	"enabled": false,				// starts Stat service: <true|false>.
 	"store_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
 },
 

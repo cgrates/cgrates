@@ -74,6 +74,7 @@ type DbJsonCfg struct {
 type RalsJsonCfg struct {
 	Enabled                     *bool
 	Cdrstats_conns              *[]*HaPoolJsonCfg
+	Stats_conns                 *[]*HaPoolJsonCfg
 	Historys_conns              *[]*HaPoolJsonCfg
 	Pubsubs_conns               *[]*HaPoolJsonCfg
 	Aliases_conns               *[]*HaPoolJsonCfg
@@ -380,7 +381,7 @@ type UserServJsonCfg struct {
 // ResourceLimiter service config section
 type ResourceLimiterServJsonCfg struct {
 	Enabled        *bool
-	Cdrstats_conns *[]*HaPoolJsonCfg
+	Stats_conns    *[]*HaPoolJsonCfg
 	Store_interval *string
 }
 

@@ -554,7 +554,7 @@ func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceLimiterConfig{
 		Enabled:       false,
-		CDRStatConns:  []*HaPoolConfig{},
+		StatSConns:    []*HaPoolConfig{},
 		StoreInterval: 0,
 	}
 

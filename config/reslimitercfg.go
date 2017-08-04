@@ -25,7 +25,7 @@ import (
 
 type ResourceLimiterConfig struct {
 	Enabled       bool
-	CDRStatConns  []*HaPoolConfig // Connections towards CDRStatS
+	StatSConns    []*HaPoolConfig // Connections towards StatS
 	StoreInterval time.Duration   // Dump regularly from cache into dataDB
 }
 
@@ -36,11 +36,11 @@ func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJ
 	if jsnCfg.Enabled != nil {
 		rlcfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Cdrstats_conns != nil {
-		rlcfg.CDRStatConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrstats_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Cdrstats_conns {
-			rlcfg.CDRStatConns[idx] = NewDfltHaPoolConfig()
-			rlcfg.CDRStatConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Stats_conns != nil {
+		rlcfg.StatSConns = make([]*HaPoolConfig, len(*jsnCfg.Stats_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
+			rlcfg.StatSConns[idx] = NewDfltHaPoolConfig()
+			rlcfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Store_interval != nil {

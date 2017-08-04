@@ -227,6 +227,7 @@ type CGRConfig struct {
 	LogLevel                 int             // system wide log level, nothing higher than this will be logged
 	RALsEnabled              bool            // start standalone server (no balancer)
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	RALsStatSConns           []*HaPoolConfig
 	RALsHistorySConns        []*HaPoolConfig
 	RALsPubSubSConns         []*HaPoolConfig
 	RALsUserSConns           []*HaPoolConfig
@@ -283,27 +284,32 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.RALsEnabled {
 		for _, connCfg := range self.RALsCDRStatSConns {
 			if connCfg.Address == utils.MetaInternal && !self.CDRStatsEnabled {
-				return errors.New("CDRStats not enabled but requested by Rater component.")
+				return errors.New("CDRStats not enabled but requested by RALs component.")
+			}
+		}
+		for _, connCfg := range self.RALsStatSConns {
+			if connCfg.Address == utils.MetaInternal && !self.statsCfg.Enabled {
+				return errors.New("StatS not enabled but requested by RALs component.")
 			}
 		}
 		for _, connCfg := range self.RALsHistorySConns {
 			if connCfg.Address == utils.MetaInternal && !self.HistoryServerEnabled {
-				return errors.New("History server not enabled but requested by Rater component.")
+				return errors.New("History server not enabled but requested by RALs component.")
 			}
 		}
 		for _, connCfg := range self.RALsPubSubSConns {
 			if connCfg.Address == utils.MetaInternal && !self.PubSubServerEnabled {
-				return errors.New("PubSub server not enabled but requested by Rater component.")
+				return errors.New("PubSub server not enabled but requested by RALs component.")
 			}
 		}
 		for _, connCfg := range self.RALsAliasSConns {
 			if connCfg.Address == utils.MetaInternal && !self.AliasesServerEnabled {
-				return errors.New("Alias server not enabled but requested by Rater component.")
+				return errors.New("Alias server not enabled but requested by RALs component.")
 			}
 		}
 		for _, connCfg := range self.RALsUserSConns {
 			if connCfg.Address == utils.MetaInternal && !self.UserServerEnabled {
-				return errors.New("User service not enabled but requested by Rater component.")
+				return errors.New("User service not enabled but requested by RALs component.")
 			}
 		}
 	}
@@ -497,9 +503,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// ResourceLimiter checks
 	if self.resourceLimiterCfg != nil && self.resourceLimiterCfg.Enabled {
-		for _, connCfg := range self.resourceLimiterCfg.CDRStatConns {
-			if connCfg.Address == utils.MetaInternal && !self.CDRStatsEnabled {
-				return errors.New("CDRStats not enabled but requested by ResourceLimiter component.")
+		for _, connCfg := range self.resourceLimiterCfg.StatSConns {
+			if connCfg.Address == utils.MetaInternal && !self.statsCfg.Enabled {
+				return errors.New("StatS not enabled but requested by ResourceLimiter component.")
 			}
 		}
 	}
@@ -815,6 +821,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			for idx, jsnHaCfg := range *jsnRALsCfg.Cdrstats_conns {
 				self.RALsCDRStatSConns[idx] = NewDfltHaPoolConfig()
 				self.RALsCDRStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
+		}
+		if jsnRALsCfg.Stats_conns != nil {
+			self.RALsStatSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Stats_conns))
+			for idx, jsnHaCfg := range *jsnRALsCfg.Stats_conns {
+				self.RALsStatSConns[idx] = NewDfltHaPoolConfig()
+				self.RALsStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
 		}
 		if jsnRALsCfg.Historys_conns != nil {
