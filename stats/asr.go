@@ -36,6 +36,14 @@ type ASR struct {
 	Count    float64
 }
 
+func (asr *ASR) GetValue() (v interface{}) {
+	if asr.Count == 0 {
+		return float64(engine.STATS_NA)
+	}
+	return utils.Round((asr.Answered / asr.Count * 100),
+		config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+}
+
 func (asr *ASR) GetStringValue(fmtOpts string) (valStr string) {
 	if asr.Count == 0 {
 		return utils.NOT_AVAILABLE
@@ -44,12 +52,8 @@ func (asr *ASR) GetStringValue(fmtOpts string) (valStr string) {
 	return fmt.Sprintf("%v%%", val) // %v will automatically limit the number of decimals printed
 }
 
-func (asr *ASR) GetValue() (v interface{}) {
-	if asr.Count == 0 {
-		return float64(engine.STATS_NA)
-	}
-	return utils.Round((asr.Answered / asr.Count * 100),
-		config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+func (asr *ASR) GetFloat64Value() (val float64) {
+	return asr.GetValue().(float64)
 }
 
 func (asr *ASR) AddEvent(ev engine.StatsEvent) (err error) {

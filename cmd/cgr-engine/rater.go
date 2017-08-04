@@ -29,21 +29,10 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-/*func init() {
-	gob.Register(map[interface{}]struct{}{})
-	gob.Register(engine.Actions{})
-	gob.RegisterName("github.com/cgrates/cgrates/engine.ActionPlan", &engine.ActionPlan{})
-	gob.Register([]*utils.LoadInstance{})
-	gob.RegisterName("github.com/cgrates/cgrates/engine.RatingPlan", &engine.RatingPlan{})
-	gob.RegisterName("github.com/cgrates/cgrates/engine.RatingProfile", &engine.RatingProfile{})
-	gob.RegisterName("github.com/cgrates/cgrates/utils.DerivedChargers", &utils.DerivedChargers{})
-	gob.Register(engine.AliasValues{})
-}*/
-
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneChan chan struct{},
-	internalCdrStatSChan chan rpcclient.RpcClientConnection, internalHistorySChan chan rpcclient.RpcClientConnection,
-	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
+	internalCdrStatSChan, internalStatSChan, internalHistorySChan,
+	internalPubSubSChan, internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dataDB engine.DataDB, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
 	var waitTasks []chan struct{}
@@ -53,14 +42,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	waitTasks = append(waitTasks, cacheTaskChan)
 	go func() {
 		defer close(cacheTaskChan)
-
-		/*loadHist, err := dataDB.GetLoadHistory(1, true, utils.NonTransactional)
-		if err != nil || len(loadHist) == 0 {
-			utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
-			cacheDoneChan <- struct{}{}
-			return
-		}
-		*/
 		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
 		if cCfg, has := cfg.CacheConfig[utils.CacheDestinations]; !has || !cCfg.Precache {
 			dstIDs = make([]string, 0) // Don't cache any
@@ -115,7 +96,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 			exitChan <- true
 			return
 		}
-
 		cacheDoneChan <- struct{}{}
 	}()
 
@@ -129,6 +109,21 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 				cfg.RALsCDRStatSConns, internalCdrStatSChan, cfg.InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to CDRStatS, error: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+		}()
+	}
+	var stats *rpcclient.RpcClientPool
+	if len(cfg.RALsStatSConns) != 0 { // Connections to CDRStats
+		statsTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, statsTaskChan)
+		go func() {
+			defer close(statsTaskChan)
+			stats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+				cfg.RALsStatSConns, internalStatSChan, cfg.InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
 				exitChan <- true
 				return
 			}

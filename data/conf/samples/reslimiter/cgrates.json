@@ -18,20 +18,20 @@
 
 "rals": {
 	"enabled": true,
-	"cdrstats_conns": [
+	"stats_conns": [
 		{"address": "*internal"}
 	],
 },
 
-"cdrstats": {
+"stats": {
 	"enabled": true,
 },
 
 
 "rls": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
+	"stats_conns": [
+		//{"address": "*internal"}
 	],
 	"cache_dump_interval": "0s",
 	"usage_ttl": "3h",

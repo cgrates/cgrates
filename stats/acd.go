@@ -42,6 +42,10 @@ func (acd *ACD) GetValue() (v interface{}) {
 	return
 }
 
+func (acd *ACD) GetFloat64Value() (v float64) {
+	return float64(engine.STATS_NA)
+}
+
 func (acd *ACD) AddEvent(ev engine.StatsEvent) (err error) {
 	return
 }
