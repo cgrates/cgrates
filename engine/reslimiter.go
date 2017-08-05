@@ -168,17 +168,17 @@ func (rls ResourceLimits) AllocateResource(ru *ResourceUsage, dryRun bool) (alcM
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceLimiterService(cfg *config.CGRConfig, dataDB DataDB, cdrStatS rpcclient.RpcClientConnection) (*ResourceLimiterService, error) {
-	if cdrStatS != nil && reflect.ValueOf(cdrStatS).IsNil() {
-		cdrStatS = nil
+func NewResourceLimiterService(cfg *config.CGRConfig, dataDB DataDB, statS rpcclient.RpcClientConnection) (*ResourceLimiterService, error) {
+	if statS != nil && reflect.ValueOf(statS).IsNil() {
+		statS = nil
 	}
-	return &ResourceLimiterService{dataDB: dataDB, cdrStatS: cdrStatS}, nil
+	return &ResourceLimiterService{dataDB: dataDB, statS: statS}, nil
 }
 
 // ResourcesLimiter is the service handling channel limits
 type ResourceLimiterService struct {
-	dataDB   DataDB // So we can load the data in cache and index it
-	cdrStatS rpcclient.RpcClientConnection
+	dataDB DataDB // So we can load the data in cache and index it
+	statS  rpcclient.RpcClientConnection
 }
 
 // Called to start the service
@@ -198,7 +198,6 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 	if err != nil {
 		return nil, err
 	}
-	utils.Logger.Debug(fmt.Sprintf("### #0 rlIDs: %+v\n", rlIDs))
 	for resName := range rlIDs {
 		rl, err := rls.dataDB.GetResourceLimit(resName, false, utils.NonTransactional)
 		if err != nil {
@@ -207,31 +206,24 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 			}
 			return nil, err
 		}
-		utils.Logger.Debug(fmt.Sprintf("### #1 RL, rl: %+v\n", rl))
 		if rl.ActivationInterval != nil &&
 			!rl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
-			utils.Logger.Debug(fmt.Sprintf("### #2 RL, rl: %+v, not active: %+v\n", rl, rl.ActivationInterval))
 			continue
 		}
 		passAllFilters := true
 		for _, fltr := range rl.Filters {
-			utils.Logger.Debug(fmt.Sprintf("### #3 RL, rl: %+v, fltr: %+v\n", rl, fltr))
-			if pass, err := fltr.Pass(ev, "", rls.cdrStatS); err != nil {
-				utils.Logger.Debug(fmt.Sprintf("### RL, rl: %+v, fltr: %+v, not passing, err: %v\n", rl, fltr, err))
+			if pass, err := fltr.Pass(ev, "", rls.statS); err != nil {
 				return nil, utils.NewErrServerError(err)
 			} else if !pass {
 				passAllFilters = false
 				continue
 			}
-			utils.Logger.Debug(fmt.Sprintf("### #4 RL, rl: %+v, fltr: %+v, passing\n", rl, fltr))
 		}
 		if !passAllFilters {
 			continue
 		}
-		utils.Logger.Debug(fmt.Sprintf("### #4.1 RL, passing all filters, adding rlID: %s, rl: %+v, matchingResources: %+v\n", rl.ID, rl, matchingResources))
 		matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
 	}
-	utils.Logger.Debug(fmt.Sprintf("### #5 RL, matchingResources: %+v\n", matchingResources))
 	// All good, convert from Map to Slice so we can sort
 	resLimits = make(ResourceLimits, len(matchingResources))
 	i := 0
@@ -240,6 +232,11 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 		i++
 	}
 	resLimits.Sort()
+	for i, rl := range resLimits {
+		if rl.Blocker {
+			resLimits = resLimits[:i+1]
+		}
+	}
 	return resLimits, nil
 }
 

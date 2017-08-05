@@ -184,8 +184,8 @@ func (ss *StatService) V1GetQueueIDs(ignored struct{}, reply *[]string) (err err
 	return
 }
 
-// V1GetStatMetrics returns the metrics as string values
-func (ss *StatService) V1GetStatMetrics(queueID string, reply *map[string]string) (err error) {
+// V1GetStringMetrics returns the metrics as string values
+func (ss *StatService) V1GetStringMetrics(queueID string, reply *map[string]string) (err error) {
 	sq, has := ss.queuesCache[queueID]
 	if !has {
 		return utils.ErrNotFound
@@ -193,6 +193,20 @@ func (ss *StatService) V1GetStatMetrics(queueID string, reply *map[string]string
 	metrics := make(map[string]string, len(sq.sqMetrics))
 	for metricID, metric := range sq.sqMetrics {
 		metrics[metricID] = metric.GetStringValue("")
+	}
+	*reply = metrics
+	return
+}
+
+// V1GetFloatMetrics returns the metrics as float64 values
+func (ss *StatService) V1GetFloatMetrics(queueID string, reply *map[string]float64) (err error) {
+	sq, has := ss.queuesCache[queueID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	metrics := make(map[string]float64, len(sq.sqMetrics))
+	for metricID, metric := range sq.sqMetrics {
+		metrics[metricID] = metric.GetFloat64Value()
 	}
 	*reply = metrics
 	return

@@ -73,8 +73,13 @@ func (stsv1 *StatSV1) GetQueueIDs(ignored struct{}, reply *[]string) (err error)
 }
 
 // GetStatMetrics returns the metrics for a queueID
-func (stsv1 *StatSV1) GetStatMetrics(queueID string, reply *map[string]string) (err error) {
-	return stsv1.sts.V1GetStatMetrics(queueID, reply)
+func (stsv1 *StatSV1) GetStringMetrics(queueID string, reply *map[string]string) (err error) {
+	return stsv1.sts.V1GetStringMetrics(queueID, reply)
+}
+
+// GetStatMetrics returns the metrics for a queueID
+func (stsv1 *StatSV1) GetFloatMetrics(queueID string, reply *map[string]float64) (err error) {
+	return stsv1.sts.V1GetFloatMetrics(queueID, reply)
 }
 
 // LoadQueues loads from dataDB into statsService the queueIDs specified

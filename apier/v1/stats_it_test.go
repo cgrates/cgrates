@@ -83,7 +83,7 @@ func TestStatSV1GetStats(t *testing.T) {
 		t.Error(err)
 	}
 	var metrics map[string]string
-	if err := stsV1Rpc.Call("StatSV1.GetStatMetrics", "Stats1", &metrics); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := stsV1Rpc.Call("StatSV1.GetStringMetrics", "Stats1", &metrics); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	var replyStr string
@@ -102,7 +102,7 @@ func TestStatSV1GetStats(t *testing.T) {
 		utils.MetaASR: utils.NOT_AVAILABLE,
 		utils.MetaACD: "",
 	}
-	if err := stsV1Rpc.Call("StatSV1.GetStatMetrics", "Stats1", &metrics); err != nil {
+	if err := stsV1Rpc.Call("StatSV1.GetStringMetrics", "Stats1", &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -143,7 +143,7 @@ func TestStatSV1ProcessEvent(t *testing.T) {
 		utils.MetaACD: "",
 	}
 	var metrics map[string]string
-	if err := stsV1Rpc.Call("StatSV1.GetStatMetrics", "Stats1", &metrics); err != nil {
+	if err := stsV1Rpc.Call("StatSV1.GetStringMetrics", "Stats1", &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)

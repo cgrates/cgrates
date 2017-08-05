@@ -32,14 +32,14 @@ const (
 	MetaStringPrefix = "*string_prefix"
 	MetaTimings      = "*timings"
 	MetaRSRFields    = "*rsr_fields"
-	MetaCDRStats     = "*cdr_stats"
+	MetaStatS        = "*stats"
 	MetaDestinations = "*destinations"
 	MetaMinCapPrefix = "*MIN_"
 	MetaMaxCapPrefix = "*MAX_"
 )
 
 func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
-	if !utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaCDRStats, MetaDestinations}, rfType) {
+	if !utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaStatS, MetaDestinations}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaDestinations}, rfType) {
@@ -64,11 +64,11 @@ type RFStatSThreshold struct {
 // RequestFilter filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
 type RequestFilter struct {
-	Type               string              // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FieldName          string              // Name of the field providing us the Values to check (used in case of some )
-	Values             []string            // Filter definition
-	rsrFields          utils.RSRFields     // Cache here the RSRFilter Values
-	cdrStatSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
+	Type            string              // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName       string              // Name of the field providing us the Values to check (used in case of some )
+	Values          []string            // Filter definition
+	rsrFields       utils.RSRFields     // Cache here the RSRFilter Values
+	statSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
 }
 
 // Separate method to compile RSR fields
@@ -77,8 +77,8 @@ func (rf *RequestFilter) CompileValues() (err error) {
 		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(rf.Values); err != nil {
 			return
 		}
-	} else if rf.Type == MetaCDRStats {
-		rf.cdrStatSThresholds = make([]*RFStatSThreshold, len(rf.Values))
+	} else if rf.Type == MetaStatS {
+		rf.statSThresholds = make([]*RFStatSThreshold, len(rf.Values))
 		for i, val := range rf.Values {
 			valSplt := strings.Split(val, utils.InInFieldSep)
 			if len(valSplt) != 3 {
@@ -95,7 +95,7 @@ func (rf *RequestFilter) CompileValues() (err error) {
 			} else {
 				st.ThresholdValue = tv
 			}
-			rf.cdrStatSThresholds[i] = st
+			rf.statSThresholds[i] = st
 		}
 	}
 	return
@@ -114,8 +114,8 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, cdrSta
 		return fltr.passDestinations(req, extraFieldsLabel)
 	case MetaRSRFields:
 		return fltr.passRSRFields(req, extraFieldsLabel)
-	case MetaCDRStats:
-		return fltr.passCDRStats(req, extraFieldsLabel, cdrStats)
+	case MetaStatS:
+		return fltr.passStatS(req, extraFieldsLabel, cdrStats)
 	default:
 		return false, utils.ErrNotImplemented
 	}
@@ -194,11 +194,11 @@ func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel strin
 	return false, nil
 }
 
-func (fltr *RequestFilter) passCDRStats(req interface{}, extraFieldsLabel string, cdrStats rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *RequestFilter) passStatS(req interface{}, extraFieldsLabel string, cdrStats rpcclient.RpcClientConnection) (bool, error) {
 	if cdrStats == nil {
 		return false, errors.New("Missing CDRStatS information")
 	}
-	for _, threshold := range fltr.cdrStatSThresholds {
+	for _, threshold := range fltr.statSThresholds {
 		statValues := make(map[string]float64)
 		if err := cdrStats.Call("CDRStatsV1.GetValues", threshold.QueueID, &statValues); err != nil {
 			return false, err
