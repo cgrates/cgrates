@@ -418,6 +418,9 @@ const (
 	CacheResourceLimits          = "resource_limits"
 	CacheTimings                 = "timings"
 	StatS                        = "stats"
+	CostSource                   = "CostSource"
+	ExtraInfo                    = "ExtraInfo"
+	MetaPrefix                   = "*"
 )
 
 func buildCacheInstRevPrefixes() {

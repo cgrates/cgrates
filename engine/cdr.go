@@ -793,8 +793,38 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool, g
 }
 
 // Part of event interface
-func (cdr *CDR) AsMapStringIface() (map[string]interface{}, error) {
-	return nil, utils.ErrNotImplemented
+func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
+	mp = make(map[string]interface{})
+	for k, v := range cdr.ExtraFields {
+		mp[k] = v
+	}
+	mp[utils.CGRID] = cdr.CGRID
+	mp[utils.MEDI_RUNID] = cdr.RunID
+	mp[utils.ORDERID] = cdr.OrderID
+	mp[utils.CDRHOST] = cdr.OriginHost
+	mp[utils.CDRSOURCE] = cdr.Source
+	mp[utils.ACCID] = cdr.OriginID
+	mp[utils.TOR] = cdr.ToR
+	mp[utils.REQTYPE] = cdr.RequestType
+	mp[utils.DIRECTION] = cdr.Direction
+	mp[utils.TENANT] = cdr.Tenant
+	mp[utils.CATEGORY] = cdr.Category
+	mp[utils.ACCOUNT] = cdr.Account
+	mp[utils.SUBJECT] = cdr.Subject
+	mp[utils.DESTINATION] = cdr.Destination
+	mp[utils.SETUP_TIME] = cdr.SetupTime
+	mp[utils.PDD] = cdr.PDD
+	mp[utils.ANSWER_TIME] = cdr.AnswerTime
+	mp[utils.USAGE] = cdr.Usage
+	mp[utils.SUPPLIER] = cdr.Supplier
+	mp[utils.DISCONNECT_CAUSE] = cdr.DisconnectCause
+	mp[utils.CostSource] = cdr.CostSource
+	mp[utils.COST] = cdr.Cost
+	mp[utils.COST_DETAILS] = cdr.CostDetails
+	mp[utils.ExtraInfo] = cdr.ExtraInfo
+	mp[utils.RATED] = cdr.Rated
+	mp[utils.PartialField] = cdr.Partial
+	return
 }
 
 // Used in place where we need to export the CDR based on an export template

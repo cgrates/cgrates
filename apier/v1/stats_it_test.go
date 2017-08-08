@@ -167,16 +167,17 @@ func TestStatSV1ProcessEvent(t *testing.T) {
 	}
 }
 
-/*
 func TestStatSV1StopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }
-*/
 
 // BenchmarkStatSV1SetEvent         	    5000	    263437 ns/op
 func BenchmarkStatSV1SetEvent(b *testing.B) {
+	if _, err := engine.StopStartEngine(stsV1CfgPath, 1000); err != nil {
+		b.Fatal(err)
+	}
 	b.StopTimer()
 	var err error
 	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed

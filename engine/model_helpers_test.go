@@ -757,7 +757,7 @@ func TestAPItoResourceLimit(t *testing.T) {
 		Filters: []*utils.TPRequestFilter{
 			&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
 			&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"10", "20"}},
-			&utils.TPRequestFilter{Type: MetaStatS, Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"}},
+			&utils.TPRequestFilter{Type: MetaStatS, Values: []string{"CDRST1:*min_asr:34", "CDRST_1001:*min_asr:20"}},
 			&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"}},
 		},
 		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
@@ -778,10 +778,10 @@ func TestAPItoResourceLimit(t *testing.T) {
 	eRL.Filters[1] = &RequestFilter{Type: MetaStringPrefix,
 		FieldName: "Destination", Values: []string{"10", "20"}}
 	eRL.Filters[2] = &RequestFilter{Type: MetaStatS,
-		Values: []string{"CDRST1:*min_ASR:34", "CDRST_1001:*min_ASR:20"},
+		Values: []string{"CDRST1:*min_asr:34", "CDRST_1001:*min_asr:20"},
 		statSThresholds: []*RFStatSThreshold{
-			&RFStatSThreshold{QueueID: "CDRST1", ThresholdType: "*MIN_ASR", ThresholdValue: 34},
-			&RFStatSThreshold{QueueID: "CDRST_1001", ThresholdType: "*MIN_ASR", ThresholdValue: 20},
+			&RFStatSThreshold{QueueID: "CDRST1", ThresholdType: "*min_asr", ThresholdValue: 34},
+			&RFStatSThreshold{QueueID: "CDRST_1001", ThresholdType: "*min_asr", ThresholdValue: 20},
 		}}
 	eRL.Filters[3] = &RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 		rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),

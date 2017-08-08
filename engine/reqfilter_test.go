@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestPassString(t *testing.T) {
+func TestReqFilterPassString(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
@@ -43,7 +43,7 @@ func TestPassString(t *testing.T) {
 	}
 }
 
-func TestPassStringPrefix(t *testing.T) {
+func TestReqFilterPassStringPrefix(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
@@ -85,7 +85,7 @@ func TestPassStringPrefix(t *testing.T) {
 	}
 }
 
-func TestPassRSRFields(t *testing.T) {
+func TestReqFilterPassRSRFields(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
@@ -118,7 +118,7 @@ func TestPassRSRFields(t *testing.T) {
 	}
 }
 
-func TestPassDestinations(t *testing.T) {
+func TestReqFilterPassDestinations(t *testing.T) {
 	cache.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", []string{"DE", "EU_LANDLINE"}, true, "")
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
@@ -141,36 +141,4 @@ func TestPassDestinations(t *testing.T) {
 	} else if passes {
 		t.Error("Passing")
 	}
-}
-
-func TestPassStatS(t *testing.T) {
-	/* #FixMe
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
-		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	statS := NewStats(dataStorage, 0)
-	cdr := &CDR{
-		Tenant:          "cgrates.org",
-		Category:        "call",
-		AnswerTime:      time.Now(),
-		SetupTime:       time.Now(),
-		Usage:           10 * time.Second,
-		Cost:            10,
-		Supplier:        "suppl1",
-		DisconnectCause: "NORMAL_CLEARNING",
-	}
-	err := statS.AppendCDR(cdr, nil)
-	if err != nil {
-		t.Error("Error appending cdr to stats: ", err)
-	}
-	rf, err := NewRequestFilter(MetastatS, "", []string{"CDRST1:*min_asr:20", "CDRST2:*min_acd:10"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if passes, err := rf.passStatS(cd, "ExtraFields", statS); err != nil {
-		t.Error(err)
-	} else if !passes {
-		t.Error("Not passing")
-	}
-	*/
 }

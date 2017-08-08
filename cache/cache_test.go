@@ -51,7 +51,6 @@ func TestTransaction(t *testing.T) {
 	}
 	CommitTransaction(transID)
 	if t1, ok := Get("mmm_t12"); !ok || t1 != "test" {
-		fmt.Println(t1, ok)
 		t.Error("Error commiting transaction")
 	}
 	if t1, ok := Get("mmm_t11"); ok || t1 == "test" {

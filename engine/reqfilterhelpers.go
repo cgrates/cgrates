@@ -26,7 +26,6 @@ import (
 // matchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // helper on top of dataDB.MatchReqFilterIndex, adding utils.NOT_AVAILABLE to list of fields queried
 func matchingItemIDsForEvent(ev map[string]interface{}, dataDB DataDB, dbIdxKey string) (itemIDs utils.StringMap, err error) {
-	fmt.Printf("Event: %+v, dbIdxKey: %s\n", ev, dbIdxKey)
 	itemIDs = make(utils.StringMap)
 	for fldName, fieldValIf := range ev {
 		fldVal, canCast := utils.CastFieldIfToString(fieldValIf)

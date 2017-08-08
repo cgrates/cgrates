@@ -20,6 +20,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -34,8 +35,8 @@ const (
 	MetaRSRFields    = "*rsr_fields"
 	MetaStatS        = "*stats"
 	MetaDestinations = "*destinations"
-	MetaMinCapPrefix = "*MIN_"
-	MetaMaxCapPrefix = "*MAX_"
+	MetaMinCapPrefix = "*min_"
+	MetaMaxCapPrefix = "*max_"
 )
 
 func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
@@ -84,7 +85,7 @@ func (rf *RequestFilter) CompileValues() (err error) {
 			if len(valSplt) != 3 {
 				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
 			}
-			st := &RFStatSThreshold{QueueID: valSplt[0], ThresholdType: strings.ToUpper(valSplt[1])}
+			st := &RFStatSThreshold{QueueID: valSplt[0], ThresholdType: valSplt[1]}
 			if len(st.ThresholdType) < len(MetaMinCapPrefix)+1 {
 				return fmt.Errorf("Value %s contains a unsupported ThresholdType format", val)
 			} else if !strings.HasPrefix(st.ThresholdType, MetaMinCapPrefix) && !strings.HasPrefix(st.ThresholdType, MetaMaxCapPrefix) {
@@ -102,7 +103,7 @@ func (rf *RequestFilter) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, cdrStats rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
 	switch fltr.Type {
 	case MetaString:
 		return fltr.passString(req, extraFieldsLabel)
@@ -115,7 +116,7 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, cdrSta
 	case MetaRSRFields:
 		return fltr.passRSRFields(req, extraFieldsLabel)
 	case MetaStatS:
-		return fltr.passStatS(req, extraFieldsLabel, cdrStats)
+		return fltr.passStatS(req, extraFieldsLabel, rpcClnt)
 	default:
 		return false, utils.ErrNotImplemented
 	}
@@ -194,20 +195,24 @@ func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel strin
 	return false, nil
 }
 
-func (fltr *RequestFilter) passStatS(req interface{}, extraFieldsLabel string, cdrStats rpcclient.RpcClientConnection) (bool, error) {
-	if cdrStats == nil {
-		return false, errors.New("Missing CDRStatS information")
+func (fltr *RequestFilter) passStatS(req interface{}, extraFieldsLabel string, stats rpcclient.RpcClientConnection) (bool, error) {
+	if stats == nil || reflect.ValueOf(stats).IsNil() {
+		return false, errors.New("Missing StatS information")
 	}
 	for _, threshold := range fltr.statSThresholds {
 		statValues := make(map[string]float64)
-		if err := cdrStats.Call("CDRStatsV1.GetValues", threshold.QueueID, &statValues); err != nil {
+		if err := stats.Call("StatSV1.GetFloatMetrics", threshold.QueueID, &statValues); err != nil {
 			return false, err
 		}
-		if val, hasIt := statValues[threshold.ThresholdType[len(MetaMinCapPrefix):]]; !hasIt {
+		val, hasIt := statValues[utils.MetaPrefix+threshold.ThresholdType[len(MetaMinCapPrefix):]]
+		if !hasIt {
 			continue
-		} else if strings.HasPrefix(threshold.ThresholdType, MetaMinCapPrefix) && val >= threshold.ThresholdValue {
+		}
+		if strings.HasPrefix(threshold.ThresholdType, MetaMinCapPrefix) &&
+			val >= threshold.ThresholdValue {
 			return true, nil
-		} else if strings.HasPrefix(threshold.ThresholdType, MetaMaxCapPrefix) && val < threshold.ThresholdValue {
+		} else if strings.HasPrefix(threshold.ThresholdType, MetaMaxCapPrefix) &&
+			val < threshold.ThresholdValue {
 			return true, nil
 		}
 	}

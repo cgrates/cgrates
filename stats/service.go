@@ -21,11 +21,14 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"reflect"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func init() {
@@ -258,4 +261,30 @@ func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err err
 	ss.Unlock()
 	*reply = utils.OK
 	return
+}
+
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// here for testing purposes
+func (ss *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	methodSplit := strings.Split(serviceMethod, ".")
+	if len(methodSplit) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	method := reflect.ValueOf(ss).MethodByName(methodSplit[0][len(methodSplit[0])-2:] + methodSplit[1])
+	if !method.IsValid() {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }
