@@ -34,7 +34,7 @@ func NewServiceManager(cfg *config.CGRConfig, dataDB engine.DataDB, engineShutdo
 	return &ServiceManager{cfg: cfg, dataDB: dataDB, engineShutdown: engineShutdown, cacheDoneChan: cacheDoneChan}
 }
 
-// ServiceManager handles starting/stopping of the services ran by the engine
+// ServiceManager handles service management ran by the engine
 type ServiceManager struct {
 	sync.RWMutex   // lock access to any shared data
 	cfg            *config.CGRConfig
@@ -42,6 +42,8 @@ type ServiceManager struct {
 	engineShutdown chan bool
 	cacheDoneChan  chan struct{} // Wait for cache to load
 	sched          *scheduler.Scheduler
+	rpcChans       map[string]chan rpcclient.RpcClientConnection // services expected to start
+	rpcServices    map[string]rpcclient.RpcClientConnection      // services started
 }
 
 func (srvMngr *ServiceManager) StartScheduler(waitCache bool) error {
