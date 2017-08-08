@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"math/rand"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -37,6 +38,22 @@ var (
 	stsV1Cfg     *config.CGRConfig
 	stsV1Rpc     *rpc.Client
 )
+
+var evs = []engine.StatsEvent{
+	engine.StatsEvent{
+		utils.ID:          "event1",
+		utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)},
+	engine.StatsEvent{
+		utils.ID:          "event2",
+		utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)},
+	engine.StatsEvent{
+		utils.ID:         "event3",
+		utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)},
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano()) // used in benchmarks
+}
 
 func TestStatSV1LoadConfig(t *testing.T) {
 	var err error
@@ -130,7 +147,7 @@ func TestStatSV1ProcessEvent(t *testing.T) {
 		t.Errorf("received reply: %s", reply)
 	}
 	if err := stsV1Rpc.Call("StatSV1.ProcessEvent",
-		map[string]interface{}{
+		engine.StatsEvent{
 			utils.ID:         "event3",
 			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)},
 		&reply); err != nil {
@@ -150,8 +167,41 @@ func TestStatSV1ProcessEvent(t *testing.T) {
 	}
 }
 
+/*
 func TestStatSV1StopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+*/
+
+// BenchmarkStatSV1SetEvent         	    5000	    263437 ns/op
+func BenchmarkStatSV1SetEvent(b *testing.B) {
+	b.StopTimer()
+	var err error
+	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		b.Fatal("Could not connect to rater: ", err.Error())
+	}
+	var reply string
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		if err := stsV1Rpc.Call("StatSV1.ProcessEvent", evs[rand.Intn(len(evs))],
+			&reply); err != nil {
+			b.Error(err)
+		} else if reply != utils.OK {
+			b.Errorf("received reply: %s", reply)
+		}
+	}
+}
+
+// BenchmarkStatSV1GetStringMetrics 	   20000	     94607 ns/op
+func BenchmarkStatSV1GetStringMetrics(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		var metrics map[string]string
+		if err := stsV1Rpc.Call("StatSV1.GetStringMetrics", "Stats1",
+			&metrics); err != nil {
+			b.Error(err)
+		}
 	}
 }
