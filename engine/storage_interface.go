@@ -111,12 +111,15 @@ type DataDB interface {
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
-	GetStatsQueue(sqID string, skipCache bool, transactionID string) (sq *StatsQueue, err error)
+	GetStatsQueue(sqID string) (sq *StatsQueue, err error)
 	SetStatsQueue(sq *StatsQueue) (err error)
-	RemStatsQueue(sqID string, transactionID string) (err error)
+	RemStatsQueue(sqID string) (err error)
 	GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error)
 	SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error)
 	RemSQStoredMetrics(sqID string) (err error)
+	GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error)
+	SetThresholdCfg(th *ThresholdCfg) (err error)
+	RemThresholdCfg(ID string, transactionID string) (err error)
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }
@@ -164,6 +167,7 @@ type LoadReader interface {
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
 	GetTPResourceLimits(string, string) ([]*utils.TPResourceLimit, error)
 	GetTPStats(string, string) ([]*utils.TPStats, error)
+	GetTPThresholdCfg(string, string) ([]*utils.TPThresholdCfg, error)
 }
 
 type LoadWriter interface {
@@ -186,6 +190,7 @@ type LoadWriter interface {
 	SetTPAccountActions([]*utils.TPAccountActions) error
 	SetTPResourceLimits([]*utils.TPResourceLimit) error
 	SetTPStats([]*utils.TPStats) error
+	SetTPThresholdCfg([]*utils.TPThresholdCfg) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr

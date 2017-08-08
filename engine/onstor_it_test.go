@@ -89,6 +89,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDStructVersion,
 	testOnStorITCRUDSQStoredMetrics,
 	testOnStorITCRUDStatsQueue,
+	testOnStorITCRUDThresholdCfg,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -1851,29 +1852,76 @@ func testOnStorITCRUDStatsQueue(t *testing.T) {
 		Store:              true,
 		Thresholds:         []string{},
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
+	}
+	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+		t.Error("Should not be in cache")
 	}
 	if err := onStor.SetStatsQueue(sq); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); err != nil {
+	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+		t.Error("Should not be in cache")
+	}
+	if rcv, err := onStor.GetStatsQueue(sq.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
-	if rcv, err := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sq, rcv) {
-		t.Errorf("Expecting: %v, received: %v", sq, rcv)
+	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+		t.Error("Should not be in cache")
 	}
-	if err := onStor.RemStatsQueue(sq.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemStatsQueue(sq.ID); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+		t.Error("Should not be in cache")
+	}
+	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+}
+
+func testOnStorITCRUDThresholdCfg(t *testing.T) {
+	timeMinSleep := time.Duration(0 * time.Second)
+	th := &ThresholdCfg{
+		ID:                 "test",
+		ActivationInterval: &utils.ActivationInterval{},
+		Filters:            []*RequestFilter{},
+		ThresholdType:      "",
+		ThresholdValue:     1.2,
+		MinItems:           10,
+		Recurrent:          true,
+		MinSleep:           timeMinSleep,
+		Blocker:            true,
+		Stored:             true,
+		Weight:             1.4,
+		ActionIDs:          []string{},
+	}
+	if _, rcvErr := onStor.GetThresholdCfg(th.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetThresholdCfg(th); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetThresholdCfg(th.ID, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(th, rcv) {
+		t.Errorf("Expecting: %v, received: %v", th, rcv)
+	}
+	if rcv, err := onStor.GetThresholdCfg(th.ID, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(th, rcv) {
+		t.Errorf("Expecting: %v, received: %v", th, rcv)
+	}
+	if err := onStor.RemThresholdCfg(th.ID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetThresholdCfg(th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if _, rcvErr := onStor.GetThresholdCfg(th.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

@@ -495,3 +495,23 @@ type TpStats struct {
 	Thresholds         string  `index:"11" re:""`
 	CreatedAt          time.Time
 }
+
+type TpThresholdCfg struct {
+	ID                 int64
+	Tpid               string
+	Tag                string  `index:"0" re:""`
+	FilterType         string  `index:"1" re:"^\*[A-Za-z].*"`
+	FilterFieldName    string  `index:"2" re:""`
+	FilterFieldValues  string  `index:"3" re:""`
+	ActivationInterval string  `index:"4" re:""`
+	ThresholdType      string  `index:"5" re:""`
+	ThresholdValue     float64 `index:"6" re:"\d+\.?\d*"`
+	MinItems           int     `index:"7" re:""`
+	Recurrent          bool    `index:"8" re:""`
+	MinSleep           string  `index:"9" re:""`
+	Blocker            bool    `index:"10" re:""`
+	Stored             bool    `index:"11" re:""`
+	Weight             float64 `index:"12" re:"\d+\.?\d*"`
+	ActionIDs          string  `index:"13" re:""`
+	CreatedAt          time.Time
+}

@@ -878,7 +878,102 @@ func TestAPItoTPStats(t *testing.T) {
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 
-	if st, err := APItoTPStats(tps, "UTC"); err != nil {
+	if st, err := APItoStats(tps, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTPs, st) {
+		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)
+	}
+}
+
+func TestAsTPThresholdCfgAsAsTPThresholdCfg(t *testing.T) {
+	tps := []*TpThresholdCfg{
+		&TpThresholdCfg{
+			Tpid:               "TEST_TPID",
+			Tag:                "Stats1",
+			FilterType:         MetaStringPrefix,
+			FilterFieldName:    "Account",
+			FilterFieldValues:  "1001;1002",
+			ActivationInterval: "2014-07-29T15:00:00Z",
+			MinItems:           100,
+			Recurrent:          false,
+			MinSleep:           "1s",
+			ThresholdType:      "",
+			ThresholdValue:     1.2,
+			Stored:             false,
+			Blocker:            false,
+			Weight:             20.0,
+			ActionIDs:          "WARN3",
+		},
+	}
+	eTPs := []*utils.TPThresholdCfg{
+		&utils.TPThresholdCfg{
+			TPid: tps[0].Tpid,
+			ID:   tps[0].Tag,
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					Type:      tps[0].FilterType,
+					FieldName: tps[0].FilterFieldName,
+					Values:    []string{"1001", "1002"},
+				},
+			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: tps[0].ActivationInterval,
+			},
+			MinItems:       tps[0].MinItems,
+			MinSleep:       tps[0].MinSleep,
+			ThresholdType:  tps[0].ThresholdType,
+			ThresholdValue: tps[0].ThresholdValue,
+			Recurrent:      tps[0].Recurrent,
+			Stored:         tps[0].Stored,
+			Blocker:        tps[0].Blocker,
+			Weight:         tps[0].Weight,
+			ActionIDs:      []string{"WARN3"},
+		},
+	}
+	rcvTPs := TpThresholdCfgS(tps).AsTPThresholdCfg()
+	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	}
+}
+
+func TestAPItoTPThresholdCfg(t *testing.T) {
+	tps := &utils.TPThresholdCfg{
+		TPid: testTPID,
+		ID:   "Stats1",
+		Filters: []*utils.TPRequestFilter{
+			&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+		},
+		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
+		MinItems:           100,
+		Recurrent:          false,
+		MinSleep:           "1s",
+		ThresholdType:      "",
+		ThresholdValue:     1.2,
+		Stored:             false,
+		Blocker:            false,
+		Weight:             20.0,
+		ActionIDs:          []string{"WARN3"},
+	}
+
+	eTPs := &ThresholdCfg{ID: tps.ID,
+		Filters:        make([]*RequestFilter, len(tps.Filters)),
+		MinItems:       tps.MinItems,
+		Recurrent:      tps.Recurrent,
+		ThresholdType:  tps.ThresholdType,
+		ThresholdValue: tps.ThresholdValue,
+		Stored:         tps.Stored,
+		Blocker:        tps.Blocker,
+		Weight:         tps.Weight,
+		ActionIDs:      []string{"WARN3"},
+	}
+	if eTPs.MinSleep, err = utils.ParseDurationWithSecs(tps.MinSleep); err != nil {
+		t.Errorf("Got error: %+v", err)
+	}
+	eTPs.Filters[0] = &RequestFilter{Type: MetaString,
+		FieldName: "Account", Values: []string{"1001", "1002"}}
+	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
+	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
+	if st, err := APItoThresholdCfg(tps, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)

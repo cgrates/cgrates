@@ -668,6 +668,8 @@ type ArgsCache struct {
 	AliasIDs              *[]string
 	ReverseAliasIDs       *[]string
 	ResourceLimitIDs      *[]string
+	StatsIDs              *[]string
+	ThresholdsIDs         *[]string
 }
 
 // Data used to do remote cache reloads via api
@@ -1340,4 +1342,20 @@ type TPStats struct {
 	Stored             bool
 	Weight             float64
 	Thresholds         []string
+}
+
+type TPThresholdCfg struct {
+	TPid               string
+	ID                 string
+	Filters            []*TPRequestFilter    // Filters for the request
+	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+	ThresholdType      string
+	ThresholdValue     float64 // threshold value
+	MinItems           int     // number of items agregated for the threshold to match
+	Recurrent          bool
+	MinSleep           string
+	Blocker            bool // blocker flag to stop processing on filters matched
+	Stored             bool
+	Weight             float64 // Weight to sort the thresholds
+	ActionIDs          []string
 }

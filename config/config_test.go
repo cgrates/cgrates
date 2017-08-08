@@ -564,6 +564,16 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 
 }
 
+func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
+	eStatsCfg := &StatSCfg{
+		Enabled: false,
+		StoreInterval: 0,
+	}
+	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
+		 t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
+	}
+}
+
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	testDA := &DiameterAgentCfg{
 		Enabled:           false,

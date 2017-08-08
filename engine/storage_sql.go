@@ -602,6 +602,28 @@ func (self *SQLStorage) SetTPStats(sts []*utils.TPStats) error {
 	return nil
 }
 
+func (self *SQLStorage) SetTPThresholdCfg(ths []*utils.TPThresholdCfg) error {
+	if len(ths) == 0 {
+		return nil
+	}
+	tx := self.db.Begin()
+	for _, th := range ths {
+		// Remove previous
+		if err := tx.Where(&TpThresholdCfg{Tpid: th.TPid, Tag: th.ID}).Delete(TpThresholdCfg{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mst := range APItoModelTPThresholdCfg(th) {
+			if err := tx.Save(&mst).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
@@ -1546,6 +1568,22 @@ func (self *SQLStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
 		return asts, utils.ErrNotFound
 	}
 	return asts, nil
+}
+
+func (self *SQLStorage) GetTPThresholdCfg(tpid, id string) ([]*utils.TPThresholdCfg, error) {
+	var ths TpThresholdCfgS
+	q := self.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("tag = ?", id)
+	}
+	if err := q.Find(&ths).Error; err != nil {
+		return nil, err
+	}
+	aths := ths.AsTPThresholdCfg()
+	if len(aths) == 0 {
+		return aths, utils.ErrNotFound
+	}
+	return aths, nil
 }
 
 // GetVersions returns slice of all versions or a specific version if tag is specified
