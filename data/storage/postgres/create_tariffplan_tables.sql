@@ -368,23 +368,23 @@ CREATE INDEX tpusers_idx ON tp_users (tpid,tenant,user_name);
 
 DROP TABLE IF EXISTS tp_aliases;
 CREATE TABLE tp_aliases (
-  "id" SERIAL PRIMARY KEY,
-  "tpid" varchar(64) NOT NULL,
-  "direction" varchar(8) NOT NULL,
-  "tenant" varchar(64) NOT NULL,
-  "category" varchar(64) NOT NULL,
-  "account" varchar(64) NOT NULL,
-  "subject" varchar(64) NOT NULL,
-  "destination_id" varchar(64) NOT NULL,
-  "context" varchar(64) NOT NULL,
-  "target" varchar(64) NOT NULL,
-  "original" varchar(64) NOT NULL,
-  "alias" varchar(64) NOT NULL,
-  "weight" NUMERIC(8,2) NOT NULL,
-  "created_at" TIMESTAMP WITH TIME ZONE
+  id SERIAL PRIMARY KEY,
+  tpid varchar(64) NOT NULL,
+  direction varchar(8) NOT NULL,
+  tenant varchar(64) NOT NULL,
+  category varchar(64) NOT NULL,
+  account varchar(64) NOT NULL,
+  subject varchar(64) NOT NULL,
+  destination_id varchar(64) NOT NULL,
+  context varchar(64) NOT NULL,
+  target varchar(64) NOT NULL,
+  original varchar(64) NOT NULL,
+  alias varchar(64) NOT NULL,
+  weight NUMERIC(8,2) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tpaliases_tpid_idx ON tp_aliases (tpid);
-CREATE INDEX tpaliases_idx ON tp_aliases ("tpid","direction","tenant","category","account","subject","context","target");
+CREATE INDEX tpaliases_idx ON tp_aliases (tpid,direction,tenant,category,account,subject,context,target);
 
 
 --
@@ -437,6 +437,33 @@ CREATE TABLE tp_stats (
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);
 CREATE INDEX tp_stats_unique ON tp_stats  ("tpid", "tag", "filter_type", "filter_field_name");
+
+--
+-- Table structure for table `tp_threshold_cfgs`
+--
+
+DROP TABLE IF EXISTS tp_thresholds;
+CREATE TABLE tp_thresholds (
+  "id" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tag" varchar(64) NOT NULL,
+  "filter_type" varchar(16) NOT NULL,
+  "filter_field_name" varchar(64) NOT NULL,
+  "filter_field_values" varchar(256) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
+  "threshold_type" VARCHAR(64) NOT NULL,
+  "threshold_value" NUMERIC(20,4) NOT NULL,
+  "min_items" INTEGER NOT NULL,
+  "recurrent" BOOLEAN NOT NULL,
+  "min_sleep" varchar(16) NOT NULL,
+  "blocker" BOOLEAN NOT NULL,
+  "stored" BOOLEAN NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "action_ids" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX tp_thresholds_idx ON tp_thresholds (tpid);
+CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid", "tag", "filter_type", "filter_field_name");
 
 
 --

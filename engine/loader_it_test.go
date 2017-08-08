@@ -106,6 +106,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourceLimitsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
 	), "", "")
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -155,6 +156,9 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadStats(); err != nil {
 		t.Error("Failed loading stats: ", err.Error())
+	}
+	if err = loader.LoadThresholds(); err != nil {
+		t.Error("Failed loading thresholds: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
@@ -320,11 +324,11 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, st := range loader.stats {
-		rcv, err := loader.dataStorage.GetStatsQueue(k, true, utils.NonTransactional)
+		rcv, err := loader.dataStorage.GetStatsQueue(k)
 		if err != nil {
 			t.Error("Failed GetStatsQueue: ", err.Error())
 		}
-		sts, err := APItoTPStats(st, "UTC")
+		sts, err := APItoStats(st, "UTC")
 		if err != nil {
 			t.Error(err)
 		}
@@ -333,6 +337,19 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
+	for k, th := range loader.thresholds {
+		rcv, err := loader.dataStorage.GetThresholdCfg(k, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Failed GetThresholdCfg: ", err.Error())
+		}
+		sts, err := APItoThresholdCfg(th, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(sts, rcv) {
+			t.Errorf("Expecting: %v, received: %v", sts, rcv)
+		}
+	}
 }
 
 // Imports data from csv files in tpScenario to storDb

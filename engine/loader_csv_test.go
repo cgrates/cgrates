@@ -265,17 +265,20 @@ cgrates.org,mas,true,another,value,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Subject,remo,minu,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
-
 	resLimits = `
-#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,TTL,Limit,AllocationMessage,Weight,Thresholds
+#Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],TTL[5],Limit[6],AllocationMessage[7],Weight[8],Thresholds[9]
 ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
 ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
 ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
 ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
-#Id,FilterType,FilterFieldName,FilterFieldValues,ActivationInterval,QueueLength,TTL,Metrics,Blocker,Stored,Weight,Thresholds
+#Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],QueueLength[5],TTL[6],Metrics[7],Blocker[8],Stored[9],Weight[10],Thresholds[11]
 Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,true,20,THRESH1;THRESH2
+`
+	thresholds = `
+#Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],ThresholdType[5],ThresholdValue[6],MinItems[7],Recurrent[8],MinSleep[9],Blocker[10],Stored[11],Weight[12],ActionIDs[13]
+Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,,1.2,10,true,1s,true,true,10,
 `
 )
 
@@ -283,7 +286,7 @@ var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(dataStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits, stats), testTPID, "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds), testTPID, "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -333,8 +336,14 @@ func init() {
 		log.Print("error in LoadAliases:", err)
 	}
 	if err := csvr.LoadResourceLimits(); err != nil {
+		log.Print("error in LoadResourceLimits:", err)
+
 	}
 	if err := csvr.LoadStats(); err != nil {
+		log.Print("error in LoadStats:", err)
+	}
+	if err := csvr.LoadThresholds(); err != nil {
+		log.Print("error in LoadThresholds:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
@@ -1447,5 +1456,33 @@ func TestLoadStats(t *testing.T) {
 		t.Error("Failed to load stats: ", len(csvr.stats))
 	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.stats["Stats1"]) {
 		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.stats["Stats1"])
+	}
+}
+
+func TestLoadThresholds(t *testing.T) {
+	eThresholds := map[string]*utils.TPThresholdCfg{
+		"Threshold1": &utils.TPThresholdCfg{
+			TPid: testTPID,
+			ID:   "Threshold1",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			ThresholdType:  "",
+			ThresholdValue: 1.2,
+			MinItems:       10,
+			Recurrent:      true,
+			MinSleep:       "1s",
+			Blocker:        true,
+			Stored:         true,
+			Weight:         10,
+		},
+	}
+	if len(csvr.thresholds) != len(eThresholds) {
+		t.Error("Failed to load thresholds: ", len(csvr.thresholds))
+	} else if !reflect.DeepEqual(eThresholds["Threshold1"], csvr.thresholds["Threshold1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eThresholds["Threshold1"], csvr.thresholds["Threshold1"])
 	}
 }

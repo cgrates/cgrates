@@ -89,7 +89,7 @@ func (ss *StatService) Shutdown() error {
 // setQueue adds or modifies a queue into cache
 // sort will reorder the ss.queues
 func (ss *StatService) loadQueue(qID string) (q *StatsInstance, err error) {
-	sq, err := ss.dataDB.GetStatsQueue(qID, false, utils.NonTransactional)
+	sq, err := ss.dataDB.GetStatsQueue(qID)
 	if err != nil {
 		return nil, err
 	}

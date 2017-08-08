@@ -54,6 +54,8 @@ type TpReader struct {
 	aliases          map[string]*Alias
 	resLimits        map[string]*utils.TPResourceLimit
 	stats            map[string]*utils.TPStats
+	thresholds       map[string]*utils.TPThresholdCfg
+
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
@@ -126,6 +128,7 @@ func (tpr *TpReader) Init() {
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resLimits = make(map[string]*utils.TPResourceLimit)
 	tpr.stats = make(map[string]*utils.TPStats)
+	tpr.thresholds = make(map[string]*utils.TPThresholdCfg)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1622,6 +1625,23 @@ func (tpr *TpReader) LoadStats() error {
 	return tpr.LoadStatsFiltered("")
 }
 
+func (tpr *TpReader) LoadThresholdsFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPThresholdCfg(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	mapTHs := make(map[string]*utils.TPThresholdCfg)
+	for _, th := range tps {
+		mapTHs[th.ID] = th
+	}
+	tpr.thresholds = mapTHs
+	return nil
+}
+
+func (tpr *TpReader) LoadThresholds() error {
+	return tpr.LoadThresholdsFiltered("")
+}
+
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -1675,6 +1695,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -1928,7 +1951,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Stats:")
 	}
 	for _, tpST := range tpr.stats {
-		st, err := APItoTPStats(tpST, tpr.timezone)
+		st, err := APItoStats(tpST, tpr.timezone)
 		if err != nil {
 			return err
 		}
@@ -1937,6 +1960,21 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if verbose {
 			log.Print("\t", st.ID)
+		}
+	}
+	if verbose {
+		log.Print("Thresholds:")
+	}
+	for _, tpTH := range tpr.thresholds {
+		th, err := APItoThresholdCfg(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dataStorage.SetThresholdCfg(th); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.ID)
 		}
 	}
 	if verbose {
@@ -2006,10 +2044,32 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 			for _, tpST := range tpr.stats {
-				if st, err := APItoTPStats(tpST, tpr.timezone); err != nil {
+				if st, err := APItoStats(tpST, tpr.timezone); err != nil {
 					return err
 				} else {
 					stIdxr.IndexFilters(st.ID, st.Filters)
+				}
+			}
+			if verbose {
+				log.Printf("Indexed Stats keys: %+v", stIdxr.ChangedKeys().Slice())
+			}
+			if err := stIdxr.StoreIndexes(); err != nil {
+				return err
+			}
+		}
+		if len(tpr.thresholds) > 0 {
+			if verbose {
+				log.Print("Indexing thresholds")
+			}
+			stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ThresholdsIndex)
+			if err != nil {
+				return err
+			}
+			for _, tpTH := range tpr.thresholds {
+				if th, err := APItoThresholdCfg(tpTH, tpr.timezone); err != nil {
+					return err
+				} else {
+					stIdxr.IndexFilters(th.ID, th.Filters)
 				}
 			}
 			if verbose {
@@ -2221,6 +2281,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.stats))
 		i := 0
 		for k := range tpr.stats {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.ThresholdsPrefix:
+		keys := make([]string, len(tpr.thresholds))
+		i := 0
+		for k := range tpr.thresholds {
 			keys[i] = k
 			i++
 		}
