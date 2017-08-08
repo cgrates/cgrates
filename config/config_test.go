@@ -570,7 +570,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		StoreInterval: 0,
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
+		 t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
 	}
 }
 
