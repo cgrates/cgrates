@@ -496,7 +496,7 @@ type TpStats struct {
 	CreatedAt          time.Time
 }
 
-type TpThresholdCfg struct {
+type TpThreshold struct {
 	ID                 int64
 	Tpid               string
 	Tag                string  `index:"0" re:""`

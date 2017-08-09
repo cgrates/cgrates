@@ -885,9 +885,9 @@ func TestAPItoTPStats(t *testing.T) {
 	}
 }
 
-func TestAsTPThresholdCfgAsAsTPThresholdCfg(t *testing.T) {
-	tps := []*TpThresholdCfg{
-		&TpThresholdCfg{
+func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
+	tps := []*TpThreshold{
+		&TpThreshold{
 			Tpid:               "TEST_TPID",
 			Tag:                "Stats1",
 			FilterType:         MetaStringPrefix,
@@ -905,8 +905,8 @@ func TestAsTPThresholdCfgAsAsTPThresholdCfg(t *testing.T) {
 			ActionIDs:          "WARN3",
 		},
 	}
-	eTPs := []*utils.TPThresholdCfg{
-		&utils.TPThresholdCfg{
+	eTPs := []*utils.TPThreshold{
+		&utils.TPThreshold{
 			TPid: tps[0].Tpid,
 			ID:   tps[0].Tag,
 			Filters: []*utils.TPRequestFilter{
@@ -930,14 +930,14 @@ func TestAsTPThresholdCfgAsAsTPThresholdCfg(t *testing.T) {
 			ActionIDs:      []string{"WARN3"},
 		},
 	}
-	rcvTPs := TpThresholdCfgS(tps).AsTPThresholdCfg()
+	rcvTPs := TpThresholdS(tps).AsTPThreshold()
 	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
 
-func TestAPItoTPThresholdCfg(t *testing.T) {
-	tps := &utils.TPThresholdCfg{
+func TestAPItoTPThreshold(t *testing.T) {
+	tps := &utils.TPThreshold{
 		TPid: testTPID,
 		ID:   "Stats1",
 		Filters: []*utils.TPRequestFilter{

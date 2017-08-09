@@ -648,8 +648,8 @@ func (csvs *CSVStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
 	return tpStats.AsTPStats(), nil
 }
 
-func (csvs *CSVStorage) GetTPThresholdCfg(tpid, id string) ([]*utils.TPThresholdCfg, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.thresholdsFn, csvs.sep, getColumnCount(TpThresholdCfg{}))
+func (csvs *CSVStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, error) {
+	csvReader, fp, err := csvs.readerFunc(csvs.thresholdsFn, csvs.sep, getColumnCount(TpThreshold{}))
 	if err != nil {
 		//log.Print("Could not load stats file: ", err)
 		// allow writing of the other values
@@ -658,22 +658,22 @@ func (csvs *CSVStorage) GetTPThresholdCfg(tpid, id string) ([]*utils.TPThreshold
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpThresholdCfg TpThresholdCfgS
+	var tpThreshold TpThresholdS
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
-			log.Print("bad line in TPThresholdCfg csv: ", err)
+			log.Print("bad line in TPThreshold csv: ", err)
 			return nil, err
 		}
-		if thresholdCfg, err := csvLoad(TpThresholdCfg{}, record); err != nil {
-			log.Print("error loading TPThresholdCfg: ", err)
+		if thresholdCfg, err := csvLoad(TpThreshold{}, record); err != nil {
+			log.Print("error loading TPThreshold: ", err)
 			return nil, err
 		} else {
-			tHresholdCfg := thresholdCfg.(TpThresholdCfg)
+			tHresholdCfg := thresholdCfg.(TpThreshold)
 			tHresholdCfg.Tpid = tpid
-			tpThresholdCfg = append(tpThresholdCfg, &tHresholdCfg)
+			tpThreshold = append(tpThreshold, &tHresholdCfg)
 		}
 	}
-	return tpThresholdCfg.AsTPThresholdCfg(), nil
+	return tpThreshold.AsTPThreshold(), nil
 }
 
 func (csvs *CSVStorage) GetTpIds() ([]string, error) {
