@@ -1,4 +1,3 @@
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -567,21 +566,21 @@ func TestCDRAsMapStringIface(t *testing.T) {
 
 func TestCDRAsExportRecord(t *testing.T) {
 	cdr := &CDR{
-		CGRID: utils.Sha1("dsafdsaf",
-	 time.Unix(1383813745, 0).UTC().String()),
-	 ToR: utils.VOICE, OriginID: "dsafdsaf",
-	  OriginHost: "192.168.1.1",
-		RequestType: utils.META_RATED,
-		 Direction: "*out", Tenant: "cgrates.org",
-		Category: "call",
-		 Account: "1001",
-		  Subject: "1001",
-		   Destination: "+4986517174963",
-		    SetupTime: time.Unix(1383813745, 0).UTC(),
-		     AnswerTime: time.Unix(1383813746, 0).UTC(),
-		Usage: time.Duration(10) * time.Second,
-		 RunID: utils.DEFAULT_RUNID, Cost: 1.01,
-		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
+	CGRID: utils.Sha1("dsafdsaf",
+	time.Unix(1383813745, 0).UTC().String()),
+	ToR: utils.VOICE, OriginID: "dsafdsaf",
+	OriginHost: "192.168.1.1",
+	RequestType: utils.META_RATED,
+	Direction: "*out", Tenant: "cgrates.org",
+	Category: "call",
+	Account: "1001",
+	Subject: "1001",
+	Destination: "+4986517174963",
+	SetupTime: time.Unix(1383813745, 0).UTC(),
+	AnswerTime: time.Unix(1383813746, 0).UTC(),
+	Usage: time.Duration(10) * time.Second,
+	RunID: utils.DEFAULT_RUNID, Cost: 1.01,
+	ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
 
 	val, _ := utils.ParseRSRFields(utils.DESTINATION, utils.INFIELD_SEP)
 	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val, Timezone: "UTC"}
