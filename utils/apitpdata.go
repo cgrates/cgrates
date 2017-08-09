@@ -1344,7 +1344,7 @@ type TPStats struct {
 	Thresholds         []string
 }
 
-type TPThresholdCfg struct {
+type TPThreshold struct {
 	TPid               string
 	ID                 string
 	Filters            []*TPRequestFilter    // Filters for the request

@@ -54,7 +54,7 @@ type TpReader struct {
 	aliases          map[string]*Alias
 	resLimits        map[string]*utils.TPResourceLimit
 	stats            map[string]*utils.TPStats
-	thresholds       map[string]*utils.TPThresholdCfg
+	thresholds       map[string]*utils.TPThreshold
 
 	revDests,
 	revAliases,
@@ -128,7 +128,7 @@ func (tpr *TpReader) Init() {
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resLimits = make(map[string]*utils.TPResourceLimit)
 	tpr.stats = make(map[string]*utils.TPStats)
-	tpr.thresholds = make(map[string]*utils.TPThresholdCfg)
+	tpr.thresholds = make(map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1626,11 +1626,11 @@ func (tpr *TpReader) LoadStats() error {
 }
 
 func (tpr *TpReader) LoadThresholdsFiltered(tag string) error {
-	tps, err := tpr.lr.GetTPThresholdCfg(tpr.tpid, tag)
+	tps, err := tpr.lr.GetTPThreshold(tpr.tpid, tag)
 	if err != nil {
 		return err
 	}
-	mapTHs := make(map[string]*utils.TPThresholdCfg)
+	mapTHs := make(map[string]*utils.TPThreshold)
 	for _, th := range tps {
 		mapTHs[th.ID] = th
 	}
