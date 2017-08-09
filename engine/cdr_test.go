@@ -1,3 +1,4 @@
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -502,11 +503,84 @@ func TestCDRParseFieldValue(t *testing.T) {
 	}
 }
 
+func TestCDRAsMapStringIface(t *testing.T) {
+	cdr := &CDR{
+		CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), 
+		OrderID: 123,
+		ToR: utils.VOICE, 
+		OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1",
+		Source: utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Direction: "*out",
+		Tenant: "cgrates.org",
+		Category: "call",
+		Account: "1002",
+		Subject: "1001",
+		Destination: "+4986517174963",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10) * time.Second,
+		Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+
+	var mp = make(map[string]interface{})
+	for k, v := range cdr.ExtraFields {
+		mp[k] = v
+	}
+	mp[utils.CGRID] = cdr.CGRID
+	mp[utils.MEDI_RUNID] = cdr.RunID
+	mp[utils.ORDERID] = cdr.OrderID
+	mp[utils.CDRHOST] = cdr.OriginHost
+	mp[utils.CDRSOURCE] = cdr.Source
+	mp[utils.ACCID] = cdr.OriginID
+	mp[utils.TOR] = cdr.ToR
+	mp[utils.REQTYPE] = cdr.RequestType
+	mp[utils.DIRECTION] = cdr.Direction
+	mp[utils.TENANT] = cdr.Tenant
+	mp[utils.CATEGORY] = cdr.Category
+	mp[utils.ACCOUNT] = cdr.Account
+	mp[utils.SUBJECT] = cdr.Subject
+	mp[utils.DESTINATION] = cdr.Destination
+	mp[utils.SETUP_TIME] = cdr.SetupTime
+	mp[utils.PDD] = cdr.PDD
+	mp[utils.ANSWER_TIME] = cdr.AnswerTime
+	mp[utils.USAGE] = cdr.Usage
+	mp[utils.SUPPLIER] = cdr.Supplier
+	mp[utils.DISCONNECT_CAUSE] = cdr.DisconnectCause
+	mp[utils.CostSource] = cdr.CostSource
+	mp[utils.COST] = cdr.Cost
+	mp[utils.COST_DETAILS] = cdr.CostDetails
+	mp[utils.ExtraInfo] = cdr.ExtraInfo
+	mp[utils.RATED] = cdr.Rated
+	mp[utils.PartialField] = cdr.Partial
+
+	if cdrMp,err := cdr.AsMapStringIface(); err !=nil {
+		t.Error(err)
+	}else if !reflect.DeepEqual(mp,cdrMp){
+		t.Errorf("Expecting: %+v, received: %+v", mp, cdrMp)
+	}
+	
+}
+
 func TestCDRAsExportRecord(t *testing.T) {
-	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
-		Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
-		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 1.01,
+	cdr := &CDR{
+		CGRID: utils.Sha1("dsafdsaf",
+	 time.Unix(1383813745, 0).UTC().String()),
+	 ToR: utils.VOICE, OriginID: "dsafdsaf",
+	  OriginHost: "192.168.1.1",
+		RequestType: utils.META_RATED,
+		 Direction: "*out", Tenant: "cgrates.org",
+		Category: "call",
+		 Account: "1001",
+		  Subject: "1001",
+		   Destination: "+4986517174963",
+		    SetupTime: time.Unix(1383813745, 0).UTC(),
+		     AnswerTime: time.Unix(1383813746, 0).UTC(),
+		Usage: time.Duration(10) * time.Second,
+		 RunID: utils.DEFAULT_RUNID, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
 
 	val, _ := utils.ParseRSRFields(utils.DESTINATION, utils.INFIELD_SEP)
