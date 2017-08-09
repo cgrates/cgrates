@@ -197,11 +197,21 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		var out int
 		go self.cdrstats.Call("CDRStatsV1.AppendCDR", cdr, &out)
 	}
+	if self.stats != nil {
+		cdrIf, _ := cdr.AsMapStringIface()
+		cdrIf[utils.ID] = cdr.CGRID
+		if cdrIf[utils.ID] == "" {
+			cdrIf[utils.ID] = cdr.OriginID
+		}
+		var reply string
+		go self.stats.Call("StatSV1.ProcessEvent", cdrIf, &reply)
+	}
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
 		self.replicateCDRs([]*CDR{cdr})
 	}
 	if self.rals != nil && !cdr.Rated { // CDRs not rated will be processed by Rating
-		go self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs, self.cdrstats != nil, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
+		go self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs,
+			self.cdrstats != nil, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
 	}
 	return nil
 }
@@ -278,9 +288,20 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 	// Attach CDR to stats
 	if cdrstats { // Send CDR to stats
 		for _, ratedCDR := range ratedCDRs {
-			var out int
-			if err := self.cdrstats.Call("CDRStatsV1.AppendCDR", ratedCDR, &out); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<CDRS> Could not send CDR to cdrstats: %s", err.Error()))
+			if self.cdrstats != nil {
+				var out int
+				if err := self.cdrstats.Call("CDRStatsV1.AppendCDR", ratedCDR, &out); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<CDRS> Could not send CDR to cdrstats: %s", err.Error()))
+				}
+			}
+			if self.stats != nil {
+				cdrIf, _ := ratedCDR.AsMapStringIface()
+				cdrIf[utils.ID] = ratedCDR.CGRID
+				if cdrIf[utils.ID] == "" {
+					cdrIf[utils.ID] = ratedCDR.OriginID
+				}
+				var reply string
+				go self.stats.Call("StatSV1.ProcessEvent", cdrIf, &reply)
 			}
 		}
 	}
