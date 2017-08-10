@@ -504,9 +504,9 @@ func TestCDRParseFieldValue(t *testing.T) {
 
 func TestCDRAsMapStringIface(t *testing.T) {
 	cdr := &CDR{
-		CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), 
+		CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 		OrderID: 123,
-		ToR: utils.VOICE, 
+		ToR: utils.VOICE,
 		OriginID: "dsafdsaf",
 		OriginHost: "192.168.1.1",
 		Source: utils.UNIT_TEST,
@@ -522,46 +522,46 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second,
 		Supplier: "SUPPL1",
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost: 1.01,
 	}
 
-	var mp = make(map[string]interface{})
-	for k, v := range cdr.ExtraFields {
-		mp[k] = v
-	}
-	mp[utils.CGRID] = cdr.CGRID
-	mp[utils.MEDI_RUNID] = cdr.RunID
-	mp[utils.ORDERID] = cdr.OrderID
-	mp[utils.CDRHOST] = cdr.OriginHost
-	mp[utils.CDRSOURCE] = cdr.Source
-	mp[utils.ACCID] = cdr.OriginID
-	mp[utils.TOR] = cdr.ToR
-	mp[utils.REQTYPE] = cdr.RequestType
-	mp[utils.DIRECTION] = cdr.Direction
-	mp[utils.TENANT] = cdr.Tenant
-	mp[utils.CATEGORY] = cdr.Category
-	mp[utils.ACCOUNT] = cdr.Account
-	mp[utils.SUBJECT] = cdr.Subject
-	mp[utils.DESTINATION] = cdr.Destination
-	mp[utils.SETUP_TIME] = cdr.SetupTime
-	mp[utils.PDD] = cdr.PDD
-	mp[utils.ANSWER_TIME] = cdr.AnswerTime
-	mp[utils.USAGE] = cdr.Usage
-	mp[utils.SUPPLIER] = cdr.Supplier
-	mp[utils.DISCONNECT_CAUSE] = cdr.DisconnectCause
-	mp[utils.CostSource] = cdr.CostSource
-	mp[utils.COST] = cdr.Cost
-	mp[utils.COST_DETAILS] = cdr.CostDetails
-	mp[utils.ExtraInfo] = cdr.ExtraInfo
-	mp[utils.RATED] = cdr.Rated
-	mp[utils.PartialField] = cdr.Partial
-
+	mp := map[string]interface{} {
+	"field_extr1": "val_extr1",
+	"fieldextr2": "valextr2",
+	utils.CGRID: cdr.CGRID,
+	utils.MEDI_RUNID: utils.DEFAULT_RUNID,
+	utils.ORDERID:	cdr.OrderID,
+	utils.CDRHOST: "192.168.1.1",
+	utils.CDRSOURCE: utils.UNIT_TEST,
+	utils.ACCID: "dsafdsaf",
+	utils.TOR: utils.VOICE,
+	utils.REQTYPE: utils.META_RATED,
+	utils.DIRECTION:	"*out",
+	utils.TENANT: "cgrates.org",
+	utils.CATEGORY:	"call",
+	utils.ACCOUNT:  "1002",
+	utils.SUBJECT:	"1001",
+	utils.DESTINATION: "+4986517174963",
+	utils.SETUP_TIME: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+	utils.PDD:	time.Duration(0) * time.Second,
+	utils.ANSWER_TIME: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+	utils.USAGE: time.Duration(10) * time.Second,
+	utils.SUPPLIER: "SUPPL1",
+	utils.DISCONNECT_CAUSE:cdr.DisconnectCause,
+	utils.CostSource: cdr.CostSource,
+	utils.COST: 1.01,
+	utils.COST_DETAILS: cdr.CostDetails,
+	utils.RATED: false,
+	utils.PartialField:	false,
+	utils.ExtraInfo:cdr.ExtraInfo,
+}
 	if cdrMp,err := cdr.AsMapStringIface(); err !=nil {
 		t.Error(err)
 	}else if !reflect.DeepEqual(mp,cdrMp){
 		t.Errorf("Expecting: %+v, received: %+v", mp, cdrMp)
 	}
-	
+
 }
 
 func TestCDRAsExportRecord(t *testing.T) {
