@@ -377,9 +377,9 @@ func (self *TPCSVImporter) importThresholds(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	sts, err := self.csvr.GetTPThresholdCfg(self.TPid, "")
+	sts, err := self.csvr.GetTPThreshold(self.TPid, "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPThresholdCfg(sts)
+	return self.StorDb.SetTPThreshold(sts)
 }

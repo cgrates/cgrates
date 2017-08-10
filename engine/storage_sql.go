@@ -602,18 +602,18 @@ func (self *SQLStorage) SetTPStats(sts []*utils.TPStats) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPThresholdCfg(ths []*utils.TPThresholdCfg) error {
+func (self *SQLStorage) SetTPThreshold(ths []*utils.TPThreshold) error {
 	if len(ths) == 0 {
 		return nil
 	}
 	tx := self.db.Begin()
 	for _, th := range ths {
 		// Remove previous
-		if err := tx.Where(&TpThresholdCfg{Tpid: th.TPid, Tag: th.ID}).Delete(TpThresholdCfg{}).Error; err != nil {
+		if err := tx.Where(&TpThreshold{Tpid: th.TPid, Tag: th.ID}).Delete(TpThreshold{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, mst := range APItoModelTPThresholdCfg(th) {
+		for _, mst := range APItoModelTPThreshold(th) {
 			if err := tx.Save(&mst).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1570,8 +1570,8 @@ func (self *SQLStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
 	return asts, nil
 }
 
-func (self *SQLStorage) GetTPThresholdCfg(tpid, id string) ([]*utils.TPThresholdCfg, error) {
-	var ths TpThresholdCfgS
+func (self *SQLStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, error) {
+	var ths TpThresholdS
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1579,7 +1579,7 @@ func (self *SQLStorage) GetTPThresholdCfg(tpid, id string) ([]*utils.TPThreshold
 	if err := q.Find(&ths).Error; err != nil {
 		return nil, err
 	}
-	aths := ths.AsTPThresholdCfg()
+	aths := ths.AsTPThreshold()
 	if len(aths) == 0 {
 		return aths, utils.ErrNotFound
 	}

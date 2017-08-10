@@ -2089,14 +2089,14 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatsQueue, err error
 	return st, nil
 }
 
-type TpThresholdCfgS []*TpThresholdCfg
+type TpThresholdS []*TpThreshold
 
-func (tps TpThresholdCfgS) AsTPThresholdCfg() (result []*utils.TPThresholdCfg) {
-	mst := make(map[string]*utils.TPThresholdCfg)
+func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
+	mst := make(map[string]*utils.TPThreshold)
 	for _, tp := range tps {
 		th, found := mst[tp.Tag]
 		if !found {
-			th = &utils.TPThresholdCfg{
+			th = &utils.TPThreshold{
 				TPid:      tp.Tpid,
 				ID:        tp.Tag,
 				Blocker:   tp.Blocker,
@@ -2138,7 +2138,7 @@ func (tps TpThresholdCfgS) AsTPThresholdCfg() (result []*utils.TPThresholdCfg) {
 		}
 		mst[tp.Tag] = th
 	}
-	result = make([]*utils.TPThresholdCfg, len(mst))
+	result = make([]*utils.TPThreshold, len(mst))
 	i := 0
 	for _, th := range mst {
 		result[i] = th
@@ -2147,12 +2147,12 @@ func (tps TpThresholdCfgS) AsTPThresholdCfg() (result []*utils.TPThresholdCfg) {
 	return
 }
 
-func APItoModelTPThresholdCfg(th *utils.TPThresholdCfg) (mdls TpThresholdCfgS) {
+func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 	if len(th.Filters) == 0 {
 		return
 	}
 	for i, fltr := range th.Filters {
-		mdl := &TpThresholdCfg{
+		mdl := &TpThreshold{
 			Tpid: th.TPid,
 			Tag:  th.ID,
 		}
@@ -2196,7 +2196,7 @@ func APItoModelTPThresholdCfg(th *utils.TPThresholdCfg) (mdls TpThresholdCfgS) {
 	return
 }
 
-func APItoThresholdCfg(tpTH *utils.TPThresholdCfg, timezone string) (th *ThresholdCfg, err error) {
+func APItoThresholdCfg(tpTH *utils.TPThreshold, timezone string) (th *ThresholdCfg, err error) {
 	th = &ThresholdCfg{
 		ID:             tpTH.ID,
 		ThresholdType:  tpTH.ThresholdType,

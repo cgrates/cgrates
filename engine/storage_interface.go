@@ -167,7 +167,7 @@ type LoadReader interface {
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
 	GetTPResourceLimits(string, string) ([]*utils.TPResourceLimit, error)
 	GetTPStats(string, string) ([]*utils.TPStats, error)
-	GetTPThresholdCfg(string, string) ([]*utils.TPThresholdCfg, error)
+	GetTPThreshold(string, string) ([]*utils.TPThreshold, error)
 }
 
 type LoadWriter interface {
@@ -190,7 +190,7 @@ type LoadWriter interface {
 	SetTPAccountActions([]*utils.TPAccountActions) error
 	SetTPResourceLimits([]*utils.TPResourceLimit) error
 	SetTPStats([]*utils.TPStats) error
-	SetTPThresholdCfg([]*utils.TPThresholdCfg) error
+	SetTPThreshold([]*utils.TPThreshold) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr
