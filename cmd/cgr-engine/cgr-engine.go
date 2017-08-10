@@ -551,9 +551,9 @@ func startResourceLimiterService(internalRLSChan, internalStatSConn chan rpcclie
 		exitChan <- true
 		return
 	}
-	rlsV1 := v1.NewRLsV1(rls)
-	server.RpcRegister(rlsV1)
-	internalRLSChan <- rlsV1
+	rsV1 := v1.NewResourceSV1(rls)
+	server.RpcRegister(rsV1)
+	internalRLSChan <- rsV1
 }
 
 // startStatService fires up the StatS

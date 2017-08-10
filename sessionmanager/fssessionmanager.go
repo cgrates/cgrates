@@ -217,7 +217,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 			Event:   ev.(FSEvent).AsMapStringInterface(sm.timezone),
 			Units:   1,
 		}
-		if err := sm.rls.Call("RLsV1.AllocateResource", attrRU, &reply); err != nil {
+		if err := sm.rls.Call("ResourceSV1.AllocateResource", attrRU, &reply); err != nil {
 			if err.Error() == utils.ErrResourceUnavailable.Error() {
 				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), "-"+utils.ErrResourceUnavailable.Error())
 			} else {

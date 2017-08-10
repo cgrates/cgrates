@@ -26,22 +26,22 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewRLsV1(rls *engine.ResourceService) *RLsV1 {
-	return &RLsV1{rls: rls}
+func NewResourceSV1(rls *engine.ResourceService) *ResourceSV1 {
+	return &ResourceSV1{rls: rls}
 }
 
 // Exports RPC from RLs
-type RLsV1 struct {
+type ResourceSV1 struct {
 	rls *engine.ResourceService
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (rlsv1 *RLsV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (rsv1 *ResourceSV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	method := reflect.ValueOf(rlsv1).MethodByName(methodSplit[1])
+	method := reflect.ValueOf(rsv1).MethodByName(methodSplit[1])
 	if !method.IsValid() {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
@@ -61,21 +61,21 @@ func (rlsv1 *RLsV1) Call(serviceMethod string, args interface{}, reply interface
 }
 
 // GetLimitsForEvent returns ResourceLimits matching a specific event
-func (rlsv1 *RLsV1) GetLimitsForEvent(ev map[string]interface{}, reply *[]*engine.ResourceCfg) error {
-	return rlsv1.rls.V1ResourcesForEvent(ev, reply)
+func (rsv1 *ResourceSV1) GetResourcesForEvent(ev map[string]interface{}, reply *[]*engine.ResourceCfg) error {
+	return rsv1.rls.V1ResourcesForEvent(ev, reply)
 }
 
 // AllowUsage checks if there are limits imposed for event
-func (rlsv1 *RLsV1) AllowUsage(args utils.AttrRLsResourceUsage, allowed *bool) error {
-	return rlsv1.rls.V1AllowUsage(args, allowed)
+func (rsv1 *ResourceSV1) AllowUsage(args utils.AttrRLsResourceUsage, allowed *bool) error {
+	return rsv1.rls.V1AllowUsage(args, allowed)
 }
 
 // V1InitiateResourceUsage records usage for an event
-func (rlsv1 *RLsV1) AllocateResource(args utils.AttrRLsResourceUsage, reply *string) error {
-	return rlsv1.rls.V1AllocateResource(args, reply)
+func (rsv1 *ResourceSV1) AllocateResource(args utils.AttrRLsResourceUsage, reply *string) error {
+	return rsv1.rls.V1AllocateResource(args, reply)
 }
 
 // V1TerminateResourceUsage releases usage for an event
-func (rlsv1 *RLsV1) ReleaseResource(args utils.AttrRLsResourceUsage, reply *string) error {
-	return rlsv1.rls.V1ReleaseResource(args, reply)
+func (rsv1 *ResourceSV1) ReleaseResource(args utils.AttrRLsResourceUsage, reply *string) error {
+	return rsv1.rls.V1ReleaseResource(args, reply)
 }
