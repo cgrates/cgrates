@@ -60,7 +60,7 @@ func (rsv1 *ResourceSV1) Call(serviceMethod string, args interface{}, reply inte
 	return err
 }
 
-// GetLimitsForEvent returns ResourceLimits matching a specific event
+// GetResourcesForEvent returns Resources matching a specific event
 func (rsv1 *ResourceSV1) GetResourcesForEvent(ev map[string]interface{}, reply *[]*engine.ResourceCfg) error {
 	return rsv1.rls.V1ResourcesForEvent(ev, reply)
 }

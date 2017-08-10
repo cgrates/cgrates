@@ -54,7 +54,7 @@ var (
 		CacheAliases:             ALIASES_PREFIX,
 		CacheReverseAliases:      REVERSE_ALIASES_PREFIX,
 		CacheDerivedChargers:     DERIVEDCHARGERS_PREFIX,
-		CacheResourceLimits:      ResourceLimitsPrefix,
+		CacheResources:           ResourceLimitsPrefix,
 		CacheTimings:             TimingsPrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
@@ -420,7 +420,7 @@ const (
 	CacheAliases                 = "aliases"
 	CacheReverseAliases          = "reverse_aliases"
 	CacheDerivedChargers         = "derived_chargers"
-	CacheResourceLimits          = "resource_limits"
+	CacheResources               = "resources"
 	CacheTimings                 = "timings"
 	StatS                        = "stats"
 	CostSource                   = "CostSource"

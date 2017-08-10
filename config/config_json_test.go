@@ -109,7 +109,7 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheDerivedChargers: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
 			Ttl: utils.StringPointer("0s"), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheResourceLimits: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
+		utils.CacheResources: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
 			Ttl: utils.StringPointer("0s"), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
 		utils.CacheTimings: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
@@ -457,7 +457,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Rls_conns:              &[]*HaPoolJsonCfg{},
+		Resources_conns:        &[]*HaPoolJsonCfg{},
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           utils.StringSlicePointer([]string{}),
 		Debit_interval:         utils.StringPointer("10s"),
@@ -495,7 +495,7 @@ func TestSmKamJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Rls_conns:         &[]*HaPoolJsonCfg{},
+		Resources_conns:   &[]*HaPoolJsonCfg{},
 		Create_cdr:        utils.BoolPointer(false),
 		Debit_interval:    utils.StringPointer("10s"),
 		Min_call_duration: utils.StringPointer("0s"),
