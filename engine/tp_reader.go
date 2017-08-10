@@ -1940,7 +1940,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dataStorage.SetResourceLimit(rl, utils.NonTransactional); err != nil {
+		if err = tpr.dataStorage.SetResourceCfg(rl, utils.NonTransactional); err != nil {
 			return err
 		}
 		if verbose {

@@ -76,16 +76,11 @@ func TestRLsV1TPFromFolder(t *testing.T) {
 }
 
 func TestRLsV1GetLimitsForEvent(t *testing.T) {
-	var reply *[]*engine.ResourceLimit
-
+	var reply *[]*engine.ResourceCfg
 	ev := map[string]interface{}{"Unknown": "unknown"}
-	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err != nil {
+	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if len(*reply) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(*reply))
-	}
-
 	ev = map[string]interface{}{"Destination": "10"}
 	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err != nil {
 		t.Error(err)
@@ -98,11 +93,8 @@ func TestRLsV1GetLimitsForEvent(t *testing.T) {
 	}
 
 	ev = map[string]interface{}{"Destination": "20"}
-	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err != nil {
+	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	}
-	if len(*reply) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(*reply))
 	}
 
 	ev = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1002"}
@@ -179,10 +171,8 @@ func TestRLsV1AllowUsage(t *testing.T) {
 	}
 	if err := rlsV1Rpc.Call("RLsV1.AllowUsage", attrRU, &reply); err != nil {
 		t.Error(err)
-	} else {
-		if reply != true {
-			t.Errorf("Expecting: %+v, received: %+v", true, reply)
-		}
+	} else if reply != true {
+		t.Errorf("Expecting: %+v, received: %+v", true, reply)
 	}
 
 	attrRU = utils.AttrRLsResourceUsage{
@@ -206,7 +196,6 @@ func TestRLsV1ReleaseResource(t *testing.T) {
 	if err := rlsV1Rpc.Call("RLsV1.ReleaseResource", attrRU, &reply); err != nil {
 		t.Error(err)
 	}
-
 	if err := rlsV1Rpc.Call("RLsV1.AllowUsage", attrRU, &reply); err != nil {
 		t.Error(err)
 	} else {
@@ -215,7 +204,7 @@ func TestRLsV1ReleaseResource(t *testing.T) {
 		}
 	}
 
-	attrRU.Units += 1
+	attrRU.Units += 7
 	if err := rlsV1Rpc.Call("RLsV1.AllowUsage", attrRU, &reply); err == nil {
 		t.Errorf("Expecting: %+v, received: %+v", false, reply)
 	}

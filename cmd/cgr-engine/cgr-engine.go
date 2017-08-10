@@ -539,7 +539,7 @@ func startResourceLimiterService(internalRLSChan, internalStatSConn chan rpcclie
 			return
 		}
 	}
-	rls, err := engine.NewResourceLimiterService(cfg, dataDB, statsConn)
+	rls, err := engine.NewResourceService(cfg, dataDB, statsConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<RLs> Could not init, error: %s", err.Error()))
 		exitChan <- true

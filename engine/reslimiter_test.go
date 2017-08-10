@@ -21,200 +21,187 @@ import (
 	"testing"
 	"time"
 
-	// "reflect"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	rl, rl2      *ResourceLimit
+	r, r2        *Resource
 	ru, ru2, ru3 *ResourceUsage
-	rls          ResourceLimits
+	rs           Resources
 )
 
 func TestResourceLimitRecordUsage(t *testing.T) {
 	ru = &ResourceUsage{
-		ID:    "RU1",
-		Time:  time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units: 2,
+		ID:         "RU1",
+		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+		Units:      2,
 	}
 
 	ru2 = &ResourceUsage{
-		ID:    "RU2",
-		Time:  time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units: 2,
+		ID:         "RU2",
+		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+		Units:      2,
 	}
 
-	rl = &ResourceLimit{
-		ID: "RL1",
-		Filters: []*RequestFilter{
-			&RequestFilter{
-				Type:      MetaString,
-				FieldName: "Account",
-				Values:    []string{"1001", "1002"},
+	r = &Resource{
+		rCfg: &ResourceCfg{
+			ID: "RL1",
+			Filters: []*RequestFilter{
+				&RequestFilter{
+					Type:      MetaString,
+					FieldName: "Account",
+					Values:    []string{"1001", "1002"},
+				},
+				&RequestFilter{
+					Type:      MetaRSRFields,
+					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+				},
 			},
-			&RequestFilter{
-				Type:      MetaRSRFields,
-				Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
-				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Duration(1 * time.Millisecond)),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		},
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Weight:     100,
-		Limit:      2,
-		Thresholds: []string{"TEST_ACTIONS"},
+			Weight:     100,
+			Limit:      2,
+			Thresholds: []string{"TEST_ACTIONS"},
 
-		UsageTTL:          time.Duration(1 * time.Millisecond),
-		AllocationMessage: "ALLOC",
-		Usage: map[string]*ResourceUsage{
+			UsageTTL:          time.Duration(1 * time.Millisecond),
+			AllocationMessage: "ALLOC",
+		},
+		usages: map[string]*ResourceUsage{
 			ru.ID: ru,
 		},
-		TotalUsage: 2,
+		ttlUsages: []*ResourceUsage{ru},
+		tUsage:    utils.Float64Pointer(2),
 	}
 
-	if err := rl.RecordUsage(ru2); err != nil {
+	if err := r.recordUsage(ru2); err != nil {
 		t.Error(err.Error())
 	} else {
-		if err := rl.RecordUsage(ru); err == nil {
+		if err := r.recordUsage(ru); err == nil {
 			t.Error("Duplicate ResourceUsage id should not be allowed")
 		}
-		if _, found := rl.Usage[ru2.ID]; !found {
+		if _, found := r.usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
-		if rl.TotalUsage != 4 {
-			t.Errorf("Expecting: %+v, received: %+v", 4, rl.TotalUsage)
+		if *r.tUsage != 4 {
+			t.Errorf("Expecting: %+v, received: %+v", 4, r.tUsage)
 		}
 	}
 
 }
 
 func TestRLClearUsage(t *testing.T) {
-	rl.Usage = map[string]*ResourceUsage{
+	r.usages = map[string]*ResourceUsage{
 		ru.ID: ru,
 	}
-	rl.TotalUsage = 3
-
-	rl.ClearUsage(ru.ID)
-
-	if len(rl.Usage) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(rl.Usage))
+	*r.tUsage = 3
+	r.clearUsage(ru.ID)
+	if len(r.usages) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.usages))
 	}
-	if rl.TotalUsage != 1 {
-		t.Errorf("Expecting: %+v, received: %+v", 1, rl.TotalUsage)
+	if *r.tUsage != 1 {
+		t.Errorf("Expecting: %+v, received: %+v", 1, r.tUsage)
 	}
 }
 
 func TestRLRemoveExpiredUnits(t *testing.T) {
-	rl.Usage = map[string]*ResourceUsage{
+	r.usages = map[string]*ResourceUsage{
 		ru.ID: ru,
 	}
-	rl.TotalUsage = 2
+	*r.tUsage = 2
 
-	rl.removeExpiredUnits()
+	r.removeExpiredUnits()
 
-	if len(rl.Usage) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(rl.Usage))
+	if len(r.usages) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.usages))
 	}
-	if rl.TotalUsage != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, rl.TotalUsage)
+	if len(r.ttlUsages) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.ttlUsages))
+	}
+	if *r.tUsage != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, r.tUsage)
 	}
 }
 
 func TestRLUsedUnits(t *testing.T) {
-	rl.Usage = map[string]*ResourceUsage{
+	r.usages = map[string]*ResourceUsage{
 		ru.ID: ru,
 	}
-	rl.TotalUsage = 2
-
-	usedUnits := rl.UsedUnits()
-
-	if len(rl.Usage) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(rl.Usage))
-	}
-	if usedUnits != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, usedUnits)
+	*r.tUsage = 2
+	if usedUnits := r.totalUsage(); usedUnits != 2 {
+		t.Errorf("Expecting: %+v, received: %+v", 2, usedUnits)
 	}
 }
 
-func TestRLSort(t *testing.T) {
-	rl2 = &ResourceLimit{
-		ID: "RL2",
-		Filters: []*RequestFilter{
-			&RequestFilter{
-				Type:      MetaString,
-				FieldName: "Account",
-				Values:    []string{"1001", "1002"},
+func TestRsort(t *testing.T) {
+	r2 = &Resource{
+		rCfg: &ResourceCfg{
+			ID: "RL2",
+			Filters: []*RequestFilter{
+				&RequestFilter{
+					Type:      MetaString,
+					FieldName: "Account",
+					Values:    []string{"1001", "1002"},
+				},
+				&RequestFilter{
+					Type:      MetaRSRFields,
+					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+				},
 			},
-			&RequestFilter{
-				Type:      MetaRSRFields,
-				Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
-				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 			},
+
+			Weight:     50,
+			Limit:      2,
+			Thresholds: []string{"TEST_ACTIONS"},
+			UsageTTL:   time.Duration(1 * time.Millisecond),
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		},
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Weight:     50,
-		Limit:      2,
-		Thresholds: []string{"TEST_ACTIONS"},
-		UsageTTL:   time.Duration(1 * time.Millisecond),
 		// AllocationMessage: "ALLOC2",
-		Usage: map[string]*ResourceUsage{
+		usages: map[string]*ResourceUsage{
 			ru2.ID: ru2,
 		},
-		TotalUsage: 2,
+		tUsage: utils.Float64Pointer(2),
 	}
 
-	rls = ResourceLimits{rl2, rl}
-	rls.Sort()
+	rs = Resources{r2, r}
+	rs.Sort()
 
-	if rls[0].ID != "RL1" {
+	if rs[0].rCfg.ID != "RL1" {
 		t.Error("Sort failed")
 	}
 }
 
-func TestRLsClearUsage(t *testing.T) {
-	rls.ClearUsage(ru2.ID)
-	for _, rl := range rls {
-		if len(rl.Usage) > 0 {
-			t.Errorf("Expecting: %+v, received: %+v", 0, len(rl.Usage))
-		}
+func TestRsClearUsage(t *testing.T) {
+	if err := r2.clearUsage(ru2.ID); err != nil {
+		t.Error(err)
+	} else if len(r2.usages) != 0 {
+		t.Errorf("Unexpected usages %+v", r2.usages)
+	} else if *r2.tUsage != 0 {
+		t.Errorf("Unexpected tUsage %+v", r2.tUsage)
 	}
 }
 
-func TestRLsRecordUsages(t *testing.T) {
-	if err := rls.RecordUsage(ru); err != nil {
-		for _, rl := range rls {
-			if _, found := rl.Usage[ru.ID]; found {
-				t.Error("Fallback on error failed")
-			}
-		}
-		t.Error(err.Error())
-	} else {
-		for _, rl := range rls {
-			if _, found := rl.Usage[ru.ID]; !found {
-				t.Error("ResourceUsage not found ")
-			}
-			if rl.TotalUsage != 2 {
-				t.Errorf("Expecting: %+v, received: %+v", 2, rl.TotalUsage)
-			}
-		}
+func TestRsRecordUsages(t *testing.T) {
+	if err := rs.recordUsage(ru); err == nil {
+		t.Error("should get duplicated error")
 	}
 }
 
-func TestRLsAllocateResource(t *testing.T) {
-	rls.ClearUsage(ru.ID)
-	rls.ClearUsage(ru2.ID)
+func TestRsAllocateResource(t *testing.T) {
+	rs.clearUsage(ru.ID)
+	rs.clearUsage(ru2.ID)
 
-	rls[0].UsageTTL = time.Duration(20 * time.Second)
-	rls[1].UsageTTL = time.Duration(20 * time.Second)
-	ru.Time = time.Now()
-	ru2.Time = time.Now()
+	rs[0].rCfg.UsageTTL = time.Duration(20 * time.Second)
+	rs[1].rCfg.UsageTTL = time.Duration(20 * time.Second)
+	//ru.ExpiryTime = time.Now()
+	//ru2.Time = time.Now()
 
-	if alcMessage, err := rls.AllocateResource(ru, false); err != nil {
+	if alcMessage, err := rs.AllocateResource(ru, false); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "ALLOC" {
@@ -222,14 +209,14 @@ func TestRLsAllocateResource(t *testing.T) {
 		}
 	}
 
-	if _, err := rls.AllocateResource(ru2, false); err != utils.ErrResourceUnavailable {
+	if _, err := rs.AllocateResource(ru2, false); err != utils.ErrResourceUnavailable {
 		t.Error("Did not receive " + utils.ErrResourceUnavailable.Error() + " error")
 	}
 
-	rls[0].Limit = 2
-	rls[1].Limit = 4
+	rs[0].rCfg.Limit = 2
+	rs[1].rCfg.Limit = 4
 
-	if alcMessage, err := rls.AllocateResource(ru, true); err != nil {
+	if alcMessage, err := rs.AllocateResource(ru, true); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "RL2" {
@@ -237,7 +224,7 @@ func TestRLsAllocateResource(t *testing.T) {
 		}
 	}
 
-	if alcMessage, err := rls.AllocateResource(ru2, false); err != nil {
+	if alcMessage, err := rs.AllocateResource(ru2, false); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "RL2" {
@@ -246,7 +233,7 @@ func TestRLsAllocateResource(t *testing.T) {
 	}
 
 	ru2.Units = 0
-	if _, err := rls.AllocateResource(ru2, false); err == nil {
+	if _, err := rs.AllocateResource(ru2, false); err == nil {
 		t.Error("Duplicate ResourceUsage id should not be allowed")
 	}
 }

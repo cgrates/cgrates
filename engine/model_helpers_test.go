@@ -766,13 +766,12 @@ func TestAPItoResourceLimit(t *testing.T) {
 		Weight:             10,
 		Limit:              "2",
 	}
-	eRL := &ResourceLimit{
+	eRL := &ResourceCfg{
 		ID:      tpRL.ID,
 		Stored:  tpRL.Stored,
 		Blocker: tpRL.Blocker,
 		Weight:  tpRL.Weight,
-		Filters: make([]*RequestFilter, len(tpRL.Filters)),
-		Usage:   make(map[string]*ResourceUsage)}
+		Filters: make([]*RequestFilter, len(tpRL.Filters))}
 	eRL.Filters[0] = &RequestFilter{Type: MetaString,
 		FieldName: "Account", Values: []string{"1001", "1002"}}
 	eRL.Filters[1] = &RequestFilter{Type: MetaStringPrefix,

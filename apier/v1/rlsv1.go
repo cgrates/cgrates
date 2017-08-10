@@ -26,13 +26,13 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewRLsV1(rls *engine.ResourceLimiterService) *RLsV1 {
+func NewRLsV1(rls *engine.ResourceService) *RLsV1 {
 	return &RLsV1{rls: rls}
 }
 
 // Exports RPC from RLs
 type RLsV1 struct {
-	rls *engine.ResourceLimiterService
+	rls *engine.ResourceService
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
@@ -61,8 +61,8 @@ func (rlsv1 *RLsV1) Call(serviceMethod string, args interface{}, reply interface
 }
 
 // GetLimitsForEvent returns ResourceLimits matching a specific event
-func (rlsv1 *RLsV1) GetLimitsForEvent(ev map[string]interface{}, reply *[]*engine.ResourceLimit) error {
-	return rlsv1.rls.V1ResourceLimitsForEvent(ev, reply)
+func (rlsv1 *RLsV1) GetLimitsForEvent(ev map[string]interface{}, reply *[]*engine.ResourceCfg) error {
+	return rlsv1.rls.V1ResourcesForEvent(ev, reply)
 }
 
 // AllowUsage checks if there are limits imposed for event

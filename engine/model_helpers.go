@@ -1914,14 +1914,13 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) 
 	return
 }
 
-func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceLimit, err error) {
-	rl = &ResourceLimit{
+func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceCfg, err error) {
+	rl = &ResourceCfg{
 		ID:      tpRL.ID,
 		Weight:  tpRL.Weight,
 		Blocker: tpRL.Blocker,
 		Stored:  tpRL.Stored,
 		Filters: make([]*RequestFilter, len(tpRL.Filters)),
-		Usage:   make(map[string]*ResourceUsage),
 	}
 	if tpRL.UsageTTL != "" {
 		if rl.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {

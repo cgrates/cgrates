@@ -285,7 +285,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
-			_, err = ms.GetResourceLimit(dataID, true, utils.NonTransactional)
+			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
@@ -1308,14 +1308,14 @@ func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	return
 }
 
-func (ms *MapStorage) GetResourceLimit(id string, skipCache bool, transactionID string) (rl *ResourceLimit, err error) {
+func (ms *MapStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key := utils.ResourceLimitsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x != nil {
-				return x.(*ResourceLimit), nil
+				return x.(*ResourceCfg), nil
 			}
 			return nil, utils.ErrNotFound
 		}
@@ -1338,19 +1338,19 @@ func (ms *MapStorage) GetResourceLimit(id string, skipCache bool, transactionID 
 	return
 }
 
-func (ms *MapStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) error {
+func (ms *MapStorage) SetResourceCfg(r *ResourceCfg, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(rl)
+	result, err := ms.ms.Marshal(r)
 	if err != nil {
 		return err
 	}
-	key := utils.ResourceLimitsPrefix + rl.ID
+	key := utils.ResourceLimitsPrefix + r.ID
 	ms.dict[key] = result
 	return nil
 }
 
-func (ms *MapStorage) RemoveResourceLimit(id string, transactionID string) error {
+func (ms *MapStorage) RemoveResourceCfg(id string, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.ResourceLimitsPrefix + id

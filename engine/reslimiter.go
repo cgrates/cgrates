@@ -29,101 +29,139 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// ResourceUsage represents an usage counted
 type ResourceUsage struct {
-	ID    string    // Unique identifier of this ResourceUsage, Eg: FreeSWITCH UUID
-	Time  time.Time // So we can expire it later
-	Units float64   // Number of units used
+	ID         string // Unique identifier of this ResourceUsage, Eg: FreeSWITCH UUID
+	ExpiryTime time.Time
+	Units      float64 // Number of units used
 }
 
-// ResourceLimit represents a limit imposed for accessing a resource (eg: new calls)
-type ResourceLimit struct {
-	sync.RWMutex
-	ID                 string                    // Identifier of this limit
-	Filters            []*RequestFilter          // Filters for the request
-	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
-	ExpiryTime         time.Time
-	Blocker            bool // blocker flag to stop processing on filters matched
+// isActive checks ExpiryTime at some time
+func (ru *ResourceUsage) isActive(atTime time.Time) bool {
+	return ru.ExpiryTime.IsZero() || ru.ExpiryTime.Sub(atTime) > 0
+}
+
+// ResourceCfg represents the user configuration for the resource
+type ResourceCfg struct {
+	ID                 string                    // identifier of this resource
+	Filters            []*RequestFilter          // filters for the request
+	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
+	UsageTTL           time.Duration             // expire the usage after this duration
+	Limit              float64                   // limit value
+	AllocationMessage  string                    // message returned by the winning resource on allocation
+	Blocker            bool                      // blocker flag to stop processing on filters matched
 	Stored             bool
-	Weight             float64                   // Weight to sort the ResourceLimits
-	Limit              float64                   // Limit value
-	Thresholds         []string                  // Thresholds to check after changing Limit
-	UsageTTL           time.Duration             // Expire usage after this duration
-	AllocationMessage  string                    // message returned by the winning resourceLimit on allocation
-	Usage              map[string]*ResourceUsage // Keep a record of usage, bounded with timestamps so we can expire too long records
-	TotalUsage         float64                   // internal counter aggregating real usage of ResourceLimit
+	Weight             float64  // Weight to sort the resources
+	Thresholds         []string // Thresholds to check after changing Limit
 }
 
-func (rl *ResourceLimit) removeExpiredUnits() {
-	for ruID, rv := range rl.Usage {
-		if time.Now().Sub(rv.Time) <= rl.UsageTTL {
-			continue // not expired
+// StoredResourceUsages is stored on demand into dataDB
+type StoredResourceUsages map[string]*ResourceUsage
+
+func NewResource(rCfg *ResourceCfg) *Resource {
+	return &Resource{rCfg: rCfg,
+		usages: make(map[string]*ResourceUsage)}
+}
+
+// Resource represents a resource in the system
+type Resource struct {
+	sync.RWMutex
+	rCfg      *ResourceCfg
+	usages    map[string]*ResourceUsage
+	ttlUsages []*ResourceUsage // used to speed up expirying of the usages
+	tUsage    *float64         // sum of all usages
+	dirty     bool             // the usages were modified, needs save
+}
+
+// removeExpiredUnits removes units which are expired
+func (r *Resource) removeExpiredUnits() {
+	var firstActive int
+	r.RLock()
+	for _, rv := range r.ttlUsages {
+		if rv.isActive(time.Now()) {
+			break
 		}
-		delete(rl.Usage, ruID)
-		rl.TotalUsage -= rv.Units
+		firstActive += 1
 	}
+	r.RUnlock()
+	if firstActive == 0 {
+		return
+	}
+	r.Lock()
+	for _, ru := range r.ttlUsages[:firstActive] {
+		delete(r.usages, ru.ID)
+		*r.tUsage -= ru.Units
+		ru = nil // empty it so we avoid memleak
+	}
+	r.ttlUsages = r.ttlUsages[firstActive:]
+	r.Unlock()
 }
 
-func (rl *ResourceLimit) UsedUnits() float64 {
-	if rl.UsageTTL != 0 {
-		rl.removeExpiredUnits()
+// totalUsage returns the sum of all usage units
+func (r *Resource) totalUsage() float64 {
+	if r.tUsage == nil {
+		var tu float64
+		for _, ru := range r.usages {
+			tu += ru.Units
+		}
+		r.tUsage = &tu
 	}
-	return rl.TotalUsage
+	return *r.tUsage
 }
 
-func (rl *ResourceLimit) RecordUsage(ru *ResourceUsage) (err error) {
-	if _, hasID := rl.Usage[ru.ID]; hasID {
+// recordUsage records a new usage
+func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
+	if _, hasID := r.usages[ru.ID]; hasID {
 		return fmt.Errorf("Duplicate resource usage with id: %s", ru.ID)
 	}
-	rl.Usage[ru.ID] = ru
-	rl.TotalUsage += ru.Units
+	r.usages[ru.ID] = ru
+	*r.tUsage += ru.Units
 	return
 }
 
-func (rl *ResourceLimit) ClearUsage(ruID string) error {
-	ru, hasIt := rl.Usage[ruID]
+// clearUsage clears the usage for an ID
+func (r *Resource) clearUsage(ruID string) error {
+	ru, hasIt := r.usages[ruID]
 	if !hasIt {
 		return fmt.Errorf("Cannot find usage record with id: %s", ruID)
 	}
-	delete(rl.Usage, ru.ID)
-	rl.TotalUsage -= ru.Units
+	delete(r.usages, ru.ID)
+	*r.tUsage -= ru.Units
 	return nil
 }
 
-// ResourceLimits is an ordered list of ResourceLimits based on Weight
-type ResourceLimits []*ResourceLimit
+// Resources is an ordered list of Resources based on Weight
+type Resources []*Resource
 
 // sort based on Weight
-func (rls ResourceLimits) Sort() {
-	sort.Slice(rls, func(i, j int) bool { return rls[i].Weight > rls[j].Weight })
+func (rs Resources) Sort() {
+	sort.Slice(rs, func(i, j int) bool { return rs[i].rCfg.Weight > rs[j].rCfg.Weight })
 }
 
-// RecordUsage will record the usage in all the resource limits, failing back on errors
-func (rls ResourceLimits) RecordUsage(ru *ResourceUsage) (err error) {
-	var failedAtIdx int
-	for i, rl := range rls {
-		if err = rl.RecordUsage(ru); err != nil {
-			failedAtIdx = i
+// recordUsage will record the usage in all the resource limits, failing back on errors
+func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
+	var nonReservedIdx int // index of first resource not reserved
+	for _, r := range rs {
+		if err = r.recordUsage(ru); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, err: %s", err.Error()))
 			break
 		}
+		nonReservedIdx += 1
 	}
 	if err != nil {
-		for _, rl := range rls[:failedAtIdx] {
-			rl.ClearUsage(ru.ID) // best effort
-			rl.TotalUsage -= ru.Units
+		for _, r := range rs[:nonReservedIdx] {
+			r.clearUsage(ru.ID) // best effort
 		}
 	}
 	return
 }
 
-// ClearUsage gives back the units to the pool
-func (rls ResourceLimits) ClearUsage(ruID string) {
-	for _, rl := range rls {
-		rl.Lock()
-		defer rl.Unlock()
-	}
-	for _, rl := range rls {
-		if err := rl.ClearUsage(ruID); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, err: %s", err.Error()))
+// clearUsage gives back the units to the pool
+func (rs Resources) clearUsage(ruID string) (err error) {
+	for _, r := range rs {
+		if errClear := r.clearUsage(ruID); errClear != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, err: %s", errClear.Error()))
+			err = errClear
 		}
 	}
 	return
@@ -132,28 +170,28 @@ func (rls ResourceLimits) ClearUsage(ruID string) {
 // AllocateResource attempts allocating resources for a *ResourceUsage
 // simulates on dryRun
 // returns utils.ErrResourceUnavailable if allocation is not possible
-func (rls ResourceLimits) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage string, err error) {
-	if len(rls) == 0 {
+func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage string, err error) {
+	if len(rs) == 0 {
 		return utils.META_NONE, nil
 	}
 	// lock resources so we can safely take decisions, need all to be locked before proceeding
-	for _, rl := range rls {
-		if dryRun {
-			rl.RLock()
-			defer rl.RUnlock()
+	for _, r := range rs {
+		if dryRun { // dryRun only needs read
+			r.RLock()
+			defer r.RUnlock()
 		} else {
-			rl.Lock()
-			defer rl.Unlock()
+			r.Lock()
+			defer r.Unlock()
 		}
 	}
 	// Simulate resource usage
-	for _, rl := range rls {
-		if rl.Limit >= rl.UsedUnits()+ru.Units {
+	for _, r := range rs {
+		if r.rCfg.Limit >= r.totalUsage()+ru.Units {
 			if alcMessage == "" {
-				alcMessage = rl.AllocationMessage
+				alcMessage = r.rCfg.AllocationMessage
 			}
 			if alcMessage == "" { // rl.AllocationMessage is not populated
-				alcMessage = rl.ID
+				alcMessage = r.rCfg.ID
 			}
 		}
 	}
@@ -163,56 +201,58 @@ func (rls ResourceLimits) AllocateResource(ru *ResourceUsage, dryRun bool) (alcM
 	if dryRun {
 		return
 	}
-	err = rls.RecordUsage(ru)
+	err = rs.recordUsage(ru)
 	return
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceLimiterService(cfg *config.CGRConfig, dataDB DataDB, statS rpcclient.RpcClientConnection) (*ResourceLimiterService, error) {
+func NewResourceService(cfg *config.CGRConfig, dataDB DataDB,
+	statS rpcclient.RpcClientConnection) (*ResourceService, error) {
 	if statS != nil && reflect.ValueOf(statS).IsNil() {
 		statS = nil
 	}
-	return &ResourceLimiterService{dataDB: dataDB, statS: statS}, nil
+	return &ResourceService{dataDB: dataDB, statS: statS}, nil
 }
 
-// ResourcesLimiter is the service handling channel limits
-type ResourceLimiterService struct {
+// ResourceService is the service handling channel limits
+type ResourceService struct {
 	dataDB DataDB // So we can load the data in cache and index it
 	statS  rpcclient.RpcClientConnection
 }
 
 // Called to start the service
-func (rls *ResourceLimiterService) ListenAndServe() error {
+func (rS *ResourceService) ListenAndServe() error {
 	return nil
 }
 
 // Called to shutdown the service
-func (rls *ResourceLimiterService) ServiceShutdown() error {
+func (rS *ResourceService) ServiceShutdown() error {
 	return nil
 }
 
-// matchingResourceLimitsForEvent returns ordered list of matching resources which are active by the time of the call
-func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]interface{}) (resLimits ResourceLimits, err error) {
-	matchingResources := make(map[string]*ResourceLimit)
-	rlIDs, err := matchingItemIDsForEvent(ev, rls.dataDB, utils.ResourceLimitsIndex)
+// matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
+func (rS *ResourceService) matchingResourcesForEvent(
+	ev map[string]interface{}) (rs Resources, err error) {
+	matchingResources := make(map[string]*Resource)
+	rlIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourceLimitsIndex)
 	if err != nil {
 		return nil, err
 	}
 	for resName := range rlIDs {
-		rl, err := rls.dataDB.GetResourceLimit(resName, false, utils.NonTransactional)
+		rCfg, err := rS.dataDB.GetResourceCfg(resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if rl.ActivationInterval != nil &&
-			!rl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+		if rCfg.ActivationInterval != nil &&
+			!rCfg.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
 		passAllFilters := true
-		for _, fltr := range rl.Filters {
-			if pass, err := fltr.Pass(ev, "", rls.statS); err != nil {
+		for _, fltr := range rCfg.Filters {
+			if pass, err := fltr.Pass(ev, "", rS.statS); err != nil {
 				return nil, utils.NewErrServerError(err)
 			} else if !pass {
 				passAllFilters = false
@@ -222,43 +262,50 @@ func (rls *ResourceLimiterService) matchingResourceLimitsForEvent(ev map[string]
 		if !passAllFilters {
 			continue
 		}
-		matchingResources[rl.ID] = rl // Cannot save it here since we could have errors after and resource will remain unused
+		matchingResources[rCfg.ID] = NewResource(rCfg) // Cannot save it here since we could have errors after and resource will remain unused
 	}
 	// All good, convert from Map to Slice so we can sort
-	resLimits = make(ResourceLimits, len(matchingResources))
+	rs = make(Resources, len(matchingResources))
 	i := 0
-	for _, rl := range matchingResources {
-		resLimits[i] = rl
+	for _, r := range matchingResources {
+		rs[i] = r
 		i++
 	}
-	resLimits.Sort()
-	for i, rl := range resLimits {
-		if rl.Blocker {
-			resLimits = resLimits[:i+1]
+	rs.Sort()
+	for i, r := range rs {
+		if r.rCfg.Blocker {
+			rs = rs[:i+1]
 		}
 	}
-	return resLimits, nil
+	return
 }
 
-// V1ResourceLimitsForEvent returns active resource limits matching the event
-func (rls *ResourceLimiterService) V1ResourceLimitsForEvent(ev map[string]interface{},
-	reply *[]*ResourceLimit) error {
-	matchingRLForEv, err := rls.matchingResourceLimitsForEvent(ev)
+// V1ResourcesForEvent returns active resource limits matching the event
+func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{},
+	reply *[]*ResourceCfg) error {
+	matchingRLForEv, err := rS.matchingResourcesForEvent(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = matchingRLForEv
+	if len(matchingRLForEv) == 0 {
+		return utils.ErrNotFound
+	}
+	for _, r := range matchingRLForEv {
+		*reply = append(*reply, r.rCfg)
+	}
 	return nil
 }
 
-func (rls *ResourceLimiterService) V1AllowUsage(args utils.AttrRLsResourceUsage,
+// V1AllowUsage queries service to find if an Usage is allowed
+func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage,
 	allow *bool) (err error) {
-	mtcRLs, err := rls.matchingResourceLimitsForEvent(args.Event)
+	mtcRLs, err := rS.matchingResourcesForEvent(args.Event)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if _, err = mtcRLs.AllocateResource(&ResourceUsage{ID: args.UsageID,
-		Time: time.Now(), Units: args.Units}, true); err != nil {
+	if _, err = mtcRLs.AllocateResource(
+		&ResourceUsage{ID: args.UsageID,
+			Units: args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			return // not error but still not allowed
 		}
@@ -268,14 +315,15 @@ func (rls *ResourceLimiterService) V1AllowUsage(args utils.AttrRLsResourceUsage,
 	return
 }
 
-// V1InitiateResourceUsage is called when a session or another event needs to consume
-func (rls *ResourceLimiterService) V1AllocateResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
-	mtcRLs, err := rls.matchingResourceLimitsForEvent(args.Event)
+// V1AllocateResource is called when a resource needs allocation
+func (rS *ResourceService) V1AllocateResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
+	mtcRLs, err := rS.matchingResourcesForEvent(args.Event)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if alcMsg, err := mtcRLs.AllocateResource(&ResourceUsage{ID: args.UsageID,
-		Time: time.Now(), Units: args.Units}, false); err != nil {
+	if alcMsg, err := mtcRLs.AllocateResource(
+		&ResourceUsage{ID: args.UsageID,
+			Units: args.Units}, false); err != nil {
 		return err
 	} else {
 		*reply = alcMsg
@@ -283,12 +331,13 @@ func (rls *ResourceLimiterService) V1AllocateResource(args utils.AttrRLsResource
 	return
 }
 
-func (rls *ResourceLimiterService) V1ReleaseResource(attrs utils.AttrRLsResourceUsage, reply *string) (err error) {
-	mtcRLs, err := rls.matchingResourceLimitsForEvent(attrs.Event)
+// V1ReleaseResource is called when we need to clear an allocation
+func (rS *ResourceService) V1ReleaseResource(attrs utils.AttrRLsResourceUsage, reply *string) (err error) {
+	mtcRLs, err := rS.matchingResourcesForEvent(attrs.Event)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	mtcRLs.ClearUsage(attrs.UsageID)
+	mtcRLs.clearUsage(attrs.UsageID)
 	*reply = utils.OK
 	return nil
 }

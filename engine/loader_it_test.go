@@ -310,7 +310,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, rl := range loader.resLimits {
-		rcv, err := loader.dataStorage.GetResourceLimit(k, true, utils.NonTransactional)
+		rcv, err := loader.dataStorage.GetResourceCfg(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetResourceLimit: ", err.Error())
 		}

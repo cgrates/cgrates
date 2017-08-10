@@ -98,9 +98,9 @@ type DataDB interface {
 	RemoveAlias(string, string) error
 	SetReverseAlias(*Alias, string) error
 	GetReverseAlias(string, bool, string) ([]string, error)
-	GetResourceLimit(string, bool, string) (*ResourceLimit, error)
-	SetResourceLimit(*ResourceLimit, string) error
-	RemoveResourceLimit(string, string) error
+	GetResourceCfg(string, bool, string) (*ResourceCfg, error)
+	SetResourceCfg(*ResourceCfg, string) error
+	RemoveResourceCfg(string, string) error
 	GetTiming(string, bool, string) (*utils.TPTiming, error)
 	SetTiming(*utils.TPTiming, string) error
 	RemoveTiming(string, string) error
