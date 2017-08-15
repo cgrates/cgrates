@@ -34,7 +34,7 @@
 	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
 	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
 	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
-	"resource_limits": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
 },
 
 

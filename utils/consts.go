@@ -121,7 +121,7 @@ const (
 	CDR_STATS_CSV                 = "CdrStats.csv"
 	USERS_CSV                     = "Users.csv"
 	ALIASES_CSV                   = "Aliases.csv"
-	ResourceLimitsCsv             = "ResourceLimits.csv"
+	ResourcesCsv                  = "Resources.csv"
 	StatsCsv                      = "Stats.csv"
 	ThresholdsCsv                 = "Thresholds.csv"
 	ROUNDING_UP                   = "*up"

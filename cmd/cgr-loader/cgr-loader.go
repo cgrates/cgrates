@@ -266,7 +266,7 @@ func main() {
 			path.Join(*dataPath, utils.CDR_STATS_CSV),
 			path.Join(*dataPath, utils.USERS_CSV),
 			path.Join(*dataPath, utils.ALIASES_CSV),
-			path.Join(*dataPath, utils.ResourceLimitsCsv),
+			path.Join(*dataPath, utils.ResourcesCsv),
 			path.Join(*dataPath, utils.StatsCsv),
 			path.Join(*dataPath, utils.ThresholdsCsv),
 		)

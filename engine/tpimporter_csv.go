@@ -56,7 +56,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.LCRS_CSV:              (*TPCSVImporter).importLcrs,
 	utils.USERS_CSV:             (*TPCSVImporter).importUsers,
 	utils.ALIASES_CSV:           (*TPCSVImporter).importAliases,
-	utils.ResourceLimitsCsv:     (*TPCSVImporter).importResourceLimits,
+	utils.ResourcesCsv:          (*TPCSVImporter).importResourceLimits,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
 }
@@ -79,7 +79,7 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.CDR_STATS_CSV),
 		path.Join(self.DirPath, utils.USERS_CSV),
 		path.Join(self.DirPath, utils.ALIASES_CSV),
-		path.Join(self.DirPath, utils.ResourceLimitsCsv),
+		path.Join(self.DirPath, utils.ResourcesCsv),
 		path.Join(self.DirPath, utils.StatsCsv),
 		path.Join(self.DirPath, utils.ThresholdsCsv),
 	)

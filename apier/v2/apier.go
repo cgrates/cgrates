@@ -139,7 +139,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.CDR_STATS_CSV),
 		path.Join(attrs.FolderPath, utils.USERS_CSV),
 		path.Join(attrs.FolderPath, utils.ALIASES_CSV),
-		path.Join(attrs.FolderPath, utils.ResourceLimitsCsv),
+		path.Join(attrs.FolderPath, utils.ResourcesCsv),
 		path.Join(attrs.FolderPath, utils.StatsCsv),
 		path.Join(attrs.FolderPath, utils.ThresholdsCsv),
 	), "", self.Config.DefaultTimezone)
