@@ -667,9 +667,9 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 	}
 }
 
-func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
-	tps := []*TpResourceLimit{
-		&TpResourceLimit{
+func TestTpResourcesAsTpResources(t *testing.T) {
+	tps := []*TpResource{
+		&TpResource{
 			Tpid:               "TEST_TPID",
 			Tag:                "ResGroup1",
 			FilterType:         MetaStringPrefix,
@@ -681,14 +681,14 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Weight:             10.0,
 			Limit:              "45",
 			Thresholds:         "WARN_RES1;WARN_RES2"},
-		&TpResourceLimit{
+		&TpResource{
 			Tpid:              "TEST_TPID",
 			Tag:               "ResGroup1",
 			FilterType:        MetaStringPrefix,
 			FilterFieldName:   "Category",
 			FilterFieldValues: "call;inbound_call",
 			Thresholds:        "WARN3"},
-		&TpResourceLimit{
+		&TpResource{
 			Tpid:               "TEST_TPID",
 			Tag:                "ResGroup2",
 			FilterType:         MetaStringPrefix,

@@ -1811,7 +1811,7 @@ func APItoModelLcrRules(ts []*utils.TPLcrRules) (result TpLcrRules) {
 	return result
 }
 
-type TpResourceLimits []*TpResourceLimit
+type TpResourceLimits []*TpResource
 
 func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimit) {
 	mrl := make(map[string]*utils.TPResourceLimit)
@@ -1875,7 +1875,7 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) 
 		return
 	}
 	for i, fltr := range rl.Filters {
-		mdl := &TpResourceLimit{
+		mdl := &TpResource{
 			Tpid: rl.TPid,
 			Tag:  rl.ID,
 		}

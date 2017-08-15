@@ -565,7 +565,7 @@ func (self *SQLStorage) SetTPResourceLimits(rls []*utils.TPResourceLimit) error 
 	tx := self.db.Begin()
 	for _, rl := range rls {
 		// Remove previous
-		if err := tx.Where(&TpResourceLimit{Tpid: rl.TPid, Tag: rl.ID}).Delete(TpResourceLimit{}).Error; err != nil {
+		if err := tx.Where(&TpResource{Tpid: rl.TPid, Tag: rl.ID}).Delete(TpResource{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
