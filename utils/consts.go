@@ -54,7 +54,7 @@ var (
 		CacheAliases:             ALIASES_PREFIX,
 		CacheReverseAliases:      REVERSE_ALIASES_PREFIX,
 		CacheDerivedChargers:     DERIVEDCHARGERS_PREFIX,
-		CacheResourceLimits:      ResourceLimitsPrefix,
+		CacheResources:           ResourceLimitsPrefix,
 		CacheTimings:             TimingsPrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
@@ -99,7 +99,7 @@ const (
 	TBLTPDerivedChargers          = "tp_derived_chargers"
 	TBLTPUsers                    = "tp_users"
 	TBLTPAliases                  = "tp_aliases"
-	TBLTPResourceLimits           = "tp_resource_limits"
+	TBLTPResourceLimits           = "tp_resources"
 	TBLTPStats                    = "tp_stats"
 	TBLTPThresholds               = "tp_thresholds"
 	TBLSMCosts                    = "sm_costs"
@@ -121,7 +121,7 @@ const (
 	CDR_STATS_CSV                 = "CdrStats.csv"
 	USERS_CSV                     = "Users.csv"
 	ALIASES_CSV                   = "Aliases.csv"
-	ResourceLimitsCsv             = "ResourceLimits.csv"
+	ResourcesCsv                  = "Resources.csv"
 	StatsCsv                      = "Stats.csv"
 	ThresholdsCsv                 = "Thresholds.csv"
 	ROUNDING_UP                   = "*up"
@@ -234,8 +234,8 @@ const (
 	USERS_PREFIX                  = "usr_"
 	ALIASES_PREFIX                = "als_"
 	REVERSE_ALIASES_PREFIX        = "rls_"
-	ResourceLimitsPrefix          = "rlm_"
-	ResourceLimitsIndex           = "rli_"
+	ResourceLimitsPrefix          = "res_"
+	ResourceLimitsIndex           = "rsi_"
 	StatsPrefix                   = "sts_"
 	StatsIndex                    = "sti_"
 	ThresholdsPrefix              = "ths_"
@@ -420,7 +420,7 @@ const (
 	CacheAliases                 = "aliases"
 	CacheReverseAliases          = "reverse_aliases"
 	CacheDerivedChargers         = "derived_chargers"
-	CacheResourceLimits          = "resource_limits"
+	CacheResources               = "resources"
 	CacheTimings                 = "timings"
 	StatS                        = "stats"
 	CostSource                   = "CostSource"

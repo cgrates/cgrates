@@ -667,9 +667,9 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 	}
 }
 
-func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
-	tps := []*TpResourceLimit{
-		&TpResourceLimit{
+func TestTpResourcesAsTpResources(t *testing.T) {
+	tps := []*TpResource{
+		&TpResource{
 			Tpid:               "TEST_TPID",
 			Tag:                "ResGroup1",
 			FilterType:         MetaStringPrefix,
@@ -681,14 +681,14 @@ func TestTpResourceLimitsAsTPResourceLimits(t *testing.T) {
 			Weight:             10.0,
 			Limit:              "45",
 			Thresholds:         "WARN_RES1;WARN_RES2"},
-		&TpResourceLimit{
+		&TpResource{
 			Tpid:              "TEST_TPID",
 			Tag:               "ResGroup1",
 			FilterType:        MetaStringPrefix,
 			FilterFieldName:   "Category",
 			FilterFieldValues: "call;inbound_call",
 			Thresholds:        "WARN3"},
-		&TpResourceLimit{
+		&TpResource{
 			Tpid:               "TEST_TPID",
 			Tag:                "ResGroup2",
 			FilterType:         MetaStringPrefix,
@@ -766,13 +766,12 @@ func TestAPItoResourceLimit(t *testing.T) {
 		Weight:             10,
 		Limit:              "2",
 	}
-	eRL := &ResourceLimit{
+	eRL := &ResourceCfg{
 		ID:      tpRL.ID,
 		Stored:  tpRL.Stored,
 		Blocker: tpRL.Blocker,
 		Weight:  tpRL.Weight,
-		Filters: make([]*RequestFilter, len(tpRL.Filters)),
-		Usage:   make(map[string]*ResourceUsage)}
+		Filters: make([]*RequestFilter, len(tpRL.Filters))}
 	eRL.Filters[0] = &RequestFilter{Type: MetaString,
 		FieldName: "Account", Values: []string{"1001", "1002"}}
 	eRL.Filters[1] = &RequestFilter{Type: MetaStringPrefix,
@@ -885,9 +884,9 @@ func TestAPItoTPStats(t *testing.T) {
 	}
 }
 
-func TestAsTPThresholdCfgAsAsTPThresholdCfg(t *testing.T) {
-	tps := []*TpThresholdCfg{
-		&TpThresholdCfg{
+func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
+	tps := []*TpThreshold{
+		&TpThreshold{
 			Tpid:               "TEST_TPID",
 			Tag:                "Stats1",
 			FilterType:         MetaStringPrefix,
@@ -905,8 +904,8 @@ func TestAsTPThresholdCfgAsAsTPThresholdCfg(t *testing.T) {
 			ActionIDs:          "WARN3",
 		},
 	}
-	eTPs := []*utils.TPThresholdCfg{
-		&utils.TPThresholdCfg{
+	eTPs := []*utils.TPThreshold{
+		&utils.TPThreshold{
 			TPid: tps[0].Tpid,
 			ID:   tps[0].Tag,
 			Filters: []*utils.TPRequestFilter{
@@ -930,14 +929,14 @@ func TestAsTPThresholdCfgAsAsTPThresholdCfg(t *testing.T) {
 			ActionIDs:      []string{"WARN3"},
 		},
 	}
-	rcvTPs := TpThresholdCfgS(tps).AsTPThresholdCfg()
+	rcvTPs := TpThresholdS(tps).AsTPThreshold()
 	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
 
-func TestAPItoTPThresholdCfg(t *testing.T) {
-	tps := &utils.TPThresholdCfg{
+func TestAPItoTPThreshold(t *testing.T) {
+	tps := &utils.TPThreshold{
 		TPid: testTPID,
 		ID:   "Stats1",
 		Filters: []*utils.TPRequestFilter{

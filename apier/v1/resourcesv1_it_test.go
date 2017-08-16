@@ -75,19 +75,14 @@ func TestRLsV1TPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(1000) * time.Millisecond)
 }
 
-func TestRLsV1GetLimitsForEvent(t *testing.T) {
-	var reply *[]*engine.ResourceLimit
-
+func TestRLsV1GetResourcesForEvent(t *testing.T) {
+	var reply *[]*engine.ResourceCfg
 	ev := map[string]interface{}{"Unknown": "unknown"}
-	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if len(*reply) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(*reply))
-	}
-
 	ev = map[string]interface{}{"Destination": "10"}
-	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", ev, &reply); err != nil {
 		t.Error(err)
 	}
 	if len(*reply) != 1 {
@@ -98,15 +93,12 @@ func TestRLsV1GetLimitsForEvent(t *testing.T) {
 	}
 
 	ev = map[string]interface{}{"Destination": "20"}
-	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	}
-	if len(*reply) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(*reply))
 	}
 
 	ev = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1002"}
-	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", ev, &reply); err != nil {
 		t.Error(err)
 	}
 	if len(*reply) != 2 {
@@ -114,7 +106,7 @@ func TestRLsV1GetLimitsForEvent(t *testing.T) {
 	}
 
 	ev = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1001"}
-	if err := rlsV1Rpc.Call("RLsV1.GetLimitsForEvent", ev, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", ev, &reply); err != nil {
 		t.Error(err)
 	}
 	if len(*reply) != 1 {
@@ -133,7 +125,7 @@ func TestRLsV1AllocateResource(t *testing.T) {
 		Event:   map[string]interface{}{"Account": "1002", "Subject": "1001", "Destination": "1002"},
 		Units:   3,
 	}
-	if err := rlsV1Rpc.Call("RLsV1.AllocateResource", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", attrRU, &reply); err != nil {
 		t.Error(err)
 	}
 	if reply != "ResGroup1" {
@@ -147,7 +139,7 @@ func TestRLsV1AllocateResource(t *testing.T) {
 		Event:   map[string]interface{}{"Destination": "100"},
 		Units:   5,
 	}
-	if err := rlsV1Rpc.Call("RLsV1.AllocateResource", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", attrRU, &reply); err != nil {
 		t.Error(err)
 	}
 	if reply != "ResGroup2" {
@@ -161,7 +153,7 @@ func TestRLsV1AllocateResource(t *testing.T) {
 		Event:   map[string]interface{}{"Account": "1002", "Subject": "1001", "Destination": "1002"},
 		Units:   3,
 	}
-	if err := rlsV1Rpc.Call("RLsV1.AllocateResource", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", attrRU, &reply); err != nil {
 		t.Error(err)
 	}
 	if reply != "ResGroup1" {
@@ -177,12 +169,10 @@ func TestRLsV1AllowUsage(t *testing.T) {
 		Event:   map[string]interface{}{"Account": "1002", "Subject": "1001", "Destination": "1002"},
 		Units:   1,
 	}
-	if err := rlsV1Rpc.Call("RLsV1.AllowUsage", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
 		t.Error(err)
-	} else {
-		if reply != true {
-			t.Errorf("Expecting: %+v, received: %+v", true, reply)
-		}
+	} else if reply != true {
+		t.Errorf("Expecting: %+v, received: %+v", true, reply)
 	}
 
 	attrRU = utils.AttrRLsResourceUsage{
@@ -190,7 +180,7 @@ func TestRLsV1AllowUsage(t *testing.T) {
 		Event:   map[string]interface{}{"Account": "1002", "Subject": "1001", "Destination": "1002"},
 		Units:   2,
 	}
-	if err := rlsV1Rpc.Call("RLsV1.AllowUsage", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
 		t.Error(err)
 	}
 }
@@ -203,11 +193,10 @@ func TestRLsV1ReleaseResource(t *testing.T) {
 		Event:   map[string]interface{}{"Destination": "100"},
 		Units:   2,
 	}
-	if err := rlsV1Rpc.Call("RLsV1.ReleaseResource", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.ReleaseResource", attrRU, &reply); err != nil {
 		t.Error(err)
 	}
-
-	if err := rlsV1Rpc.Call("RLsV1.AllowUsage", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
 		t.Error(err)
 	} else {
 		if reply != true {
@@ -215,8 +204,8 @@ func TestRLsV1ReleaseResource(t *testing.T) {
 		}
 	}
 
-	attrRU.Units += 1
-	if err := rlsV1Rpc.Call("RLsV1.AllowUsage", attrRU, &reply); err == nil {
+	attrRU.Units += 7
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err == nil {
 		t.Errorf("Expecting: %+v, received: %+v", false, reply)
 	}
 

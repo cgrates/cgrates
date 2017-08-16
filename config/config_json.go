@@ -55,7 +55,7 @@ const (
 	PUBSUBSERV_JSN       = "pubsubs"
 	ALIASESSERV_JSN      = "aliases"
 	USERSERV_JSN         = "users"
-	RESOURCELIMITER_JSON = "rls"
+	RESOURCELIMITER_JSON = "resources"
 	MAILER_JSN           = "mailer"
 	SURETAX_JSON         = "suretax"
 )

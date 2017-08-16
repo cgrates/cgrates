@@ -217,9 +217,9 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Rls_conns != nil {
-		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Rls_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Rls_conns {
+	if jsnCfg.Resources_conns != nil {
+		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
 			self.RLsConns[idx] = NewDfltHaPoolConfig()
 			self.RLsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
@@ -347,9 +347,9 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Rls_conns != nil {
-		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Rls_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Rls_conns {
+	if jsnCfg.Resources_conns != nil {
+		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
 			self.RLsConns[idx] = NewDfltHaPoolConfig()
 			self.RLsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}

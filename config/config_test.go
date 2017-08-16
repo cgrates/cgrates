@@ -432,7 +432,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
 		utils.CacheDerivedChargers: &CacheParamConfig{Limit: 0,
 			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheResourceLimits: &CacheParamConfig{Limit: 0,
+		utils.CacheResources: &CacheParamConfig{Limit: 0,
 			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
 		utils.CacheTimings: &CacheParamConfig{Limit: 0,
 			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
@@ -566,11 +566,11 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 	eStatsCfg := &StatSCfg{
-		Enabled: false,
+		Enabled:       false,
 		StoreInterval: 0,
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
-		 t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
 	}
 }
 

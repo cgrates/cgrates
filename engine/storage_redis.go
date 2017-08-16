@@ -295,7 +295,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = rs.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
-			_, err = rs.GetResourceLimit(dataID, true, utils.NonTransactional)
+			_, err = rs.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
 		}
@@ -1370,14 +1370,15 @@ func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetResourceLimit(id string, skipCache bool, transactionID string) (rl *ResourceLimit, err error) {
+func (rs *RedisStorage) GetResourceCfg(id string,
+	skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
 	key := utils.ResourceLimitsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ResourceLimit), nil
+			return x.(*ResourceCfg), nil
 		}
 	}
 	var values []byte
@@ -1400,15 +1401,15 @@ func (rs *RedisStorage) GetResourceLimit(id string, skipCache bool, transactionI
 	return
 }
 
-func (rs *RedisStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) error {
-	result, err := rs.ms.Marshal(rl)
+func (rs *RedisStorage) SetResourceCfg(r *ResourceCfg, transactionID string) error {
+	result, err := rs.ms.Marshal(r)
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.ResourceLimitsPrefix+rl.ID, result).Err
+	return rs.Cmd("SET", utils.ResourceLimitsPrefix+r.ID, result).Err
 }
 
-func (rs *RedisStorage) RemoveResourceLimit(id string, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveResourceCfg(id string, transactionID string) (err error) {
 	key := utils.ResourceLimitsPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return

@@ -1460,8 +1460,8 @@ func TestLoadStats(t *testing.T) {
 }
 
 func TestLoadThresholds(t *testing.T) {
-	eThresholds := map[string]*utils.TPThresholdCfg{
-		"Threshold1": &utils.TPThresholdCfg{
+	eThresholds := map[string]*utils.TPThreshold{
+		"Threshold1": &utils.TPThreshold{
 			TPid: testTPID,
 			ID:   "Threshold1",
 			Filters: []*utils.TPRequestFilter{

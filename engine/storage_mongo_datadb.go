@@ -531,7 +531,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceLimitsPrefix:
-			_, err = ms.GetResourceLimit(dataID, true, utils.NonTransactional)
+			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
@@ -1841,19 +1841,19 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool, transactionID string) (rl *ResourceLimit, err error) {
+func (ms *MongoStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
 	key := utils.ResourceLimitsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ResourceLimit), nil
+			return x.(*ResourceCfg), nil
 		}
 	}
 	session, col := ms.conn(colRL)
 	defer session.Close()
-	rl = new(ResourceLimit)
+	rl = new(ResourceCfg)
 	if err = col.Find(bson.M{"id": id}).One(rl); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
@@ -1870,14 +1870,14 @@ func (ms *MongoStorage) GetResourceLimit(id string, skipCache bool, transactionI
 	return
 }
 
-func (ms *MongoStorage) SetResourceLimit(rl *ResourceLimit, transactionID string) (err error) {
+func (ms *MongoStorage) SetResourceCfg(rl *ResourceCfg, transactionID string) (err error) {
 	session, col := ms.conn(colRL)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"id": rl.ID}, rl)
 	return
 }
 
-func (ms *MongoStorage) RemoveResourceLimit(id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveResourceCfg(id string, transactionID string) (err error) {
 	session, col := ms.conn(colRL)
 	defer session.Close()
 	if err = col.Remove(bson.M{"id": id}); err != nil {

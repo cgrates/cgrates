@@ -450,7 +450,7 @@ func (t TBLSMCosts) TableName() string {
 	return utils.TBLSMCosts
 }
 
-type TpResourceLimit struct {
+type TpResource struct {
 	ID                 int64
 	Tpid               string
 	Tag                string  `index:"0" re:""`
@@ -496,7 +496,7 @@ type TpStats struct {
 	CreatedAt          time.Time
 }
 
-type TpThresholdCfg struct {
+type TpThreshold struct {
 	ID                 int64
 	Tpid               string
 	Tag                string  `index:"0" re:""`

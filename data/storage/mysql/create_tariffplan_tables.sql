@@ -392,11 +392,11 @@ CREATE TABLE tp_aliases (
 );
 
 --
--- Table structure for table `tp_resource_limits`
+-- Table structure for table `tp_resources`
 --
 
-DROP TABLE IF EXISTS tp_resource_limits;
-CREATE TABLE tp_resource_limits (
+DROP TABLE IF EXISTS tp_resources;
+CREATE TABLE tp_resources (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
@@ -414,7 +414,7 @@ CREATE TABLE tp_resource_limits (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_resource_limits` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
+  UNIQUE KEY `unique_tp_resource` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
 );
 
 --

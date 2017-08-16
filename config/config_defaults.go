@@ -64,7 +64,7 @@ const CGRATES_CFG_JSON = `
 	"aliases": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control aliases caching
 	"reverse_aliases": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control reverse aliases index caching
 	"derived_chargers": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control derived charging rule caching
-	"resource_limits": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control resource limits caching
+	"resources": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control resource caching
 	"timings": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control timings caching
 },
 
@@ -284,7 +284,7 @@ const CGRATES_CFG_JSON = `
 	"cdrs_conns": [
 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
-	"rls_conns": [],						// address where to reach the ResourceLimiter service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+	"resources_conns": [],					// address where to reach the ResourceLimiter service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
 	"debit_interval": "10s",				// interval to perform debits on.
@@ -311,7 +311,7 @@ const CGRATES_CFG_JSON = `
 	"cdrs_conns": [
 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
-	"rls_conns": [],						// address where to reach the ResourceLimiter service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+	"resources_conns": [],					// address where to reach the ResourceLimiter service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",				// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
@@ -404,7 +404,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"rls": {
+"resources": {
 	"enabled": false,				// starts ResourceLimiter service: <true|false>.
 	"stats_conns": [],				// address where to reach the stats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"store_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>

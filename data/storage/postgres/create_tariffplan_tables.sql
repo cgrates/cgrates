@@ -388,11 +388,11 @@ CREATE INDEX tpaliases_idx ON tp_aliases (tpid,direction,tenant,category,account
 
 
 --
--- Table structure for table `tp_resource_limits`
+-- Table structure for table `tp_resources`
 --
 
-DROP TABLE IF EXISTS tp_resource_limits;
-CREATE TABLE tp_resource_limits (
+DROP TABLE IF EXISTS tp_resources;
+CREATE TABLE tp_resources (
   "id" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
   "tag" varchar(64) NOT NULL,
@@ -409,8 +409,8 @@ CREATE TABLE tp_resource_limits (
   "thresholds" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
-CREATE INDEX tp_resource_limits_idx ON tp_resource_limits (tpid);
-CREATE INDEX tp_resource_limits_unique ON tp_resource_limits  ("tpid", "tag", "filter_type", "filter_field_name");
+CREATE INDEX tp_resources_idx ON tp_resources (tpid);
+CREATE INDEX tp_resources_unique ON tp_resources  ("tpid", "tag", "filter_type", "filter_field_name");
 
 
 --

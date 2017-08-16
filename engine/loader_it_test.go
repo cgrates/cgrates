@@ -104,7 +104,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourceLimitsCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
 	), "", "")
@@ -310,7 +310,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, rl := range loader.resLimits {
-		rcv, err := loader.dataStorage.GetResourceLimit(k, true, utils.NonTransactional)
+		rcv, err := loader.dataStorage.GetResourceCfg(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetResourceLimit: ", err.Error())
 		}

@@ -82,7 +82,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		if cCfg, has := cfg.CacheConfig[utils.CacheReverseAliases]; !has || !cCfg.Precache {
 			rvAlsIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheResourceLimits]; !has || !cCfg.Precache {
+		if cCfg, has := cfg.CacheConfig[utils.CacheResources]; !has || !cCfg.Precache {
 			rlIDs = make([]string, 0)
 		}
 		// ToDo: Add here timings

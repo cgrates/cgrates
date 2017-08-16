@@ -731,7 +731,7 @@ func testOnStorITCacheReverseAlias(t *testing.T) {
 }
 
 func testOnStorITCacheResourceLimit(t *testing.T) {
-	rL := &ResourceLimit{
+	rCfg := &ResourceCfg{
 		ID:     "RL_TEST",
 		Weight: 10,
 		Filters: []*RequestFilter{
@@ -739,26 +739,26 @@ func testOnStorITCacheResourceLimit(t *testing.T) {
 			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 			}},
-		ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
-		ExpiryTime:         time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-		Limit:              1,
-		Thresholds:         []string{"TEST_ACTIONS"},
-		UsageTTL:           time.Duration(1 * time.Millisecond),
-		Usage:              make(map[string]*ResourceUsage),
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
+		Limit:      1,
+		Thresholds: []string{"TEST_ACTIONS"},
+		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if err := onStor.SetResourceLimit(rL, utils.NonTransactional); err != nil {
+	if err := onStor.SetResourceCfg(rCfg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, hasIt := cache.Get(utils.ResourceLimitsPrefix + rL.ID); hasIt {
+	if _, hasIt := cache.Get(utils.ResourceLimitsPrefix + rCfg.ID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.ResourceLimitsPrefix, []string{rL.ID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ResourceLimitsPrefix, []string{rCfg.ID}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.ResourceLimitsPrefix + rL.ID); !hasIt {
+	if itm, hasIt := cache.Get(utils.ResourceLimitsPrefix + rCfg.ID); !hasIt {
 		t.Error("Did not cache")
-	} else if rcv := itm.(*ResourceLimit); !reflect.DeepEqual(rL, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", rL, rcv)
+	} else if rcv := itm.(*ResourceCfg); !reflect.DeepEqual(rCfg, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", rCfg, rcv)
 	}
 }
 
@@ -1671,7 +1671,7 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 }
 
 func testOnStorITCRUDResourceLimit(t *testing.T) {
-	rL := &ResourceLimit{
+	rL := &ResourceCfg{
 		ID:     "RL_TEST2",
 		Weight: 10,
 		Filters: []*RequestFilter{
@@ -1679,20 +1679,20 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 			}},
-		ActivationInterval: &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
-		ExpiryTime:         time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-		Limit:              1,
-		Thresholds:         []string{"TEST_ACTIONS"},
-		UsageTTL:           time.Duration(1 * time.Millisecond),
-		Usage:              make(map[string]*ResourceUsage),
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
+		Limit:      1,
+		Thresholds: []string{"TEST_ACTIONS"},
+		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if _, rcvErr := onStor.GetResourceLimit(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResourceCfg(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetResourceLimit(rL, utils.NonTransactional); err != nil {
+	if err := onStor.SetResourceCfg(rL, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetResourceLimit(rL.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResourceCfg(rL.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
@@ -1705,7 +1705,7 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.GetResourceLimit(rL.ID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResourceCfg(rL.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
@@ -1713,10 +1713,10 @@ func testOnStorITCRUDResourceLimit(t *testing.T) {
 	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err := onStor.RemoveResourceLimit(rL.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResourceCfg(rL.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetResourceLimit(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResourceCfg(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

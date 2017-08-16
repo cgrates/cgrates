@@ -1136,14 +1136,14 @@ func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStats) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPThresholdCfg(tpid, id string) ([]*utils.TPThresholdCfg, error) {
+func (ms *MongoStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPThresholdCfg
+	var results []*utils.TPThreshold
 	session, col := ms.conn(utils.TBLTPThresholds)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
@@ -1153,7 +1153,7 @@ func (ms *MongoStorage) GetTPThresholdCfg(tpid, id string) ([]*utils.TPThreshold
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPThresholdCfg(tpTHs []*utils.TPThresholdCfg) (err error) {
+func (ms *MongoStorage) SetTPThreshold(tpTHs []*utils.TPThreshold) (err error) {
 	if len(tpTHs) == 0 {
 		return
 	}
