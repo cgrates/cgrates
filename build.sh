@@ -3,8 +3,6 @@ echo "Building CGRateS ..."
 
 GIT_LAST_LOG=$(git log -1 | tr -d "'")
 
-echo $GIT_LAST_LOG
-
 go install -ldflags "-X 'github.com/cgrates/cgrates/utils.GitLastLog=$GIT_LAST_LOG'" github.com/cgrates/cgrates/cmd/cgr-engine
 cr=$?
 go install -ldflags "-X 'github.com/cgrates/cgrates/utils.GitLastLog=$GIT_LAST_LOG'" github.com/cgrates/cgrates/cmd/cgr-loader
