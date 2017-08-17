@@ -23,8 +23,9 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 )
-var(
-	version         = flag.Bool("version", false, "Prints the application version.")
+
+var (
+	version = flag.Bool("version", false, "Prints the application version.")
 )
 
 func main() {
