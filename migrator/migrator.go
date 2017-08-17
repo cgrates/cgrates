@@ -24,15 +24,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string) *Migrator {
+func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string,oldDataDB engine.DataDB,oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string) (m *Migrator,err error) {
 	var mrshlr engine.Marshaler
+	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
 		mrshlr = engine.NewCodecMsgpackMarshaler()
 	} else if dataDBEncoding == utils.JSON {
 		mrshlr = new(engine.JSONMarshaler)
+	}else if oldDataDBEncoding == utils.MSGPACK {
+		oldmrshlr = engine.NewCodecMsgpackMarshaler()
+	}else if oldDataDBEncoding == utils.JSON {
+		oldmrshlr = new(engine.JSONMarshaler)
 	}
-	return &Migrator{dataDB: dataDB, dataDBType: dataDBType,
-		storDB: storDB, storDBType: storDBType, mrshlr: mrshlr}
+	m = &Migrator{
+		dataDB: dataDB, dataDBType: dataDBType,
+		storDB: storDB, storDBType: storDBType, mrshlr: mrshlr,
+	   	oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
+    	oldStorDB: oldStorDB, oldStorDBType: oldStorDBType, oldmrshlr:oldmrshlr,
+	}
+	return m,err
 }
 
 type Migrator struct {
@@ -40,7 +50,12 @@ type Migrator struct {
 	dataDBType string
 	storDB     engine.Storage
 	storDBType string
-	mrshlr     engine.Marshaler
+	mrshlr      engine.Marshaler
+	oldDataDB     engine.DataDB
+	oldDataDBType string
+	oldStorDB     engine.Storage
+	oldStorDBType string
+	oldmrshlr	engine.Marshaler
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods

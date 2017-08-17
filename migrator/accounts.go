@@ -37,7 +37,7 @@ func (m *Migrator) migrateAccounts() (err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
 		var acntV1Keys []string
-		acntV1Keys, err = m.dataDB.GetKeysForPrefix(v1AccountDBPrefix)
+		acntV1Keys, err = m.oldDataDB.GetKeysForPrefix(v1AccountDBPrefix)
 		if err != nil {
 			return
 		}
@@ -100,7 +100,7 @@ func (m *Migrator) getV1AccountFromDB(key string) (*v1Account, error) {
 			return nil, err
 		} else {
 			v1Acnt := &v1Account{Id: key}
-			if err := m.mrshlr.Unmarshal(strVal, v1Acnt); err != nil {
+			if err := m.oldmrshlr.Unmarshal(strVal, v1Acnt); err != nil {
 				return nil, err
 			}
 			return v1Acnt, nil
@@ -183,7 +183,7 @@ func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 	for oldBalKey, oldBalChain := range v1Acc.BalanceMap {
 		keyElements := strings.Split(oldBalKey, "*")
 		newBalKey := "*" + keyElements[1]
-		newBalDirection := "*" + idElements[0]
+		newBalDirection :=  idElements[0]
 		ac.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
 			// check default to set new id
