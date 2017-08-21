@@ -19,6 +19,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -264,6 +265,7 @@ func (ec *EventCost) AsCallCost() *CallCost {
 		ts.TimeEnd = ts.TimeStart.Add(
 			time.Duration(cIl.Usage().Nanoseconds() * int64(cIl.CompressFactor)))
 		if cIl.RatingID != "" {
+			//fmt.Printf("Checking RatingID: <%s>\n", cIl.RatingID)
 			if ec.Rating[cIl.RatingID].RatingFiltersID != "" {
 				rfs := ec.RatingFilters[ec.Rating[cIl.RatingID].RatingFiltersID]
 				ts.MatchedSubject = rfs["Subject"].(string)
@@ -460,6 +462,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	if ec.Usage == nil {
 		ec.GetUsage()
 	}
+	fmt.Printf("Trim, atUsage: %v, eventCostUsage: %v\n", atUsage, ec.Usage)
 	origECUsage := ec.GetUsage()
 	if atUsage >= *ec.Usage {
 		return // no trim
@@ -480,7 +483,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	srplusEC.StartTime = ec.StartTime
 	srplusEC.AccountSummary = ec.AccountSummary.Clone()
 
-	var lastActiveCIlIdx *int // marks last index which should stay with ec
+	var lastActiveCIlIdx *int // mark last index which should stay with ec
 	for i, cIl := range ec.Charges {
 		if cIl.ecUsageIdx == nil {
 			ec.ComputeEventCostUsageIndexes()
@@ -504,12 +507,14 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	}
 	srplusEC.Charges = ec.Charges[*lastActiveCIlIdx+1:]
 	ec.Charges = ec.Charges[:*lastActiveCIlIdx+1]
-
-	if lastActiveCIl.CompressFactor != 1 { // Split based on compress factor if needed
+	ec.Usage = nil
+	ec.Cost = nil
+	if lastActiveCIl.CompressFactor != 1 &&
+		*lastActiveCIl.ecUsageIdx+*lastActiveCIl.TotalUsage() > atUsage { // Split based on compress factor if needed
 		var laCF int
 		for ciCnt := 1; ciCnt <= lastActiveCIl.CompressFactor; ciCnt++ {
 			if *lastActiveCIl.ecUsageIdx+
-				time.Duration(lastActiveCIl.usage.Nanoseconds()*int64(ciCnt)) > atUsage {
+				time.Duration(lastActiveCIl.usage.Nanoseconds()*int64(ciCnt)) >= atUsage {
 				laCF = ciCnt
 				break
 			}
@@ -523,72 +528,83 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			srplsCIl.CompressFactor = lastActiveCIl.CompressFactor - laCF
 			srplusEC.Charges = append([]*ChargingInterval{srplsCIl}, srplusEC.Charges...) // prepend surplus CIl
 			lastActiveCIl.CompressFactor = laCF                                           // correct compress factor
+			ec.Usage = nil
+			ec.Cost = nil
 		}
 	}
-	atUsage = atUsage - time.Duration(lastActiveCIl.ecUsageIdx.Nanoseconds()*int64(lastActiveCIl.CompressFactor)) // remaining duration to cover in increments
-
-	// find out last increment covering duration
-	var lastActiveCItIdx *int
-	var incrementsUsage time.Duration
-	for i, cIt := range lastActiveCIl.Increments {
-		incrementsUsage += cIt.TotalUsage()
-		if incrementsUsage >= atUsage {
-			lastActiveCItIdx = utils.IntPointer(i)
-			break
-		}
-	}
-	if lastActiveCItIdx == nil { // bug in increments
-		return nil, errors.New("no active increment found")
-	}
-	lastActiveCIts := lastActiveCIl.Increments // so we can modify the reference in case we have surplus
-	lastIncrement := lastActiveCIts[*lastActiveCItIdx]
-
-	if lastIncrement.CompressFactor == 0 {
-		return nil, errors.New("empty compress factor in increment")
-	}
-
-	var srplsIncrements []*ChargingIncrement
-	if *lastActiveCItIdx < len(lastActiveCIl.Increments)-1 { // less that complete increments, have surplus
-		srplsIncrements = lastActiveCIts[*lastActiveCItIdx+1:]
-		lastActiveCIts = lastActiveCIts[:*lastActiveCItIdx+1]
-	}
-	var laItCF int
-	if lastIncrement.CompressFactor != 1 { // detect the increment covering the last part of usage
-		incrementsUsage -= lastIncrement.TotalUsage()
-		for cnt := 1; cnt <= lastIncrement.CompressFactor; cnt++ {
-			incrementsUsage += lastIncrement.Usage
+	if atUsage != ec.GetUsage()+*lastActiveCIl.TotalUsage() { // lastInterval covering more than needed, need split
+		atUsage -= (ec.GetUsage() - *lastActiveCIl.TotalUsage()) // remaining duration to cover in increments of the last charging interval
+		// find out last increment covering duration
+		var lastActiveCItIdx *int
+		var incrementsUsage time.Duration
+		for i, cIt := range lastActiveCIl.Increments {
+			incrementsUsage += cIt.TotalUsage()
 			if incrementsUsage >= atUsage {
-				laItCF = cnt
+				lastActiveCItIdx = utils.IntPointer(i)
 				break
 			}
 		}
-		if laItCF == 0 {
-			return nil, errors.New("cannot detect last active CompressFactor in ChargingIncrement")
+		if lastActiveCItIdx == nil { // bug in increments
+			return nil, errors.New("no active increment found")
 		}
-		if laItCF != lastIncrement.CompressFactor {
-			srplsIncrement := lastIncrement.Clone()
-			srplsIncrement.CompressFactor = srplsIncrement.CompressFactor - laItCF
-			srplsIncrements = append([]*ChargingIncrement{srplsIncrement}, srplsIncrements...) // prepend the surplus out of compress
+		lastActiveCIts := lastActiveCIl.Increments // so we can modify the reference in case we have surplus
+		lastIncrement := lastActiveCIts[*lastActiveCItIdx]
+		if lastIncrement.CompressFactor == 0 {
+			return nil, errors.New("empty compress factor in increment")
 		}
-	}
+		var srplsIncrements []*ChargingIncrement
+		if *lastActiveCItIdx < len(lastActiveCIl.Increments)-1 { // less that complete increments, have surplus
+			srplsIncrements = lastActiveCIts[*lastActiveCItIdx+1:]
+			lastActiveCIts = lastActiveCIts[:*lastActiveCItIdx+1]
+			ec.Usage = nil
+			ec.Cost = nil
+		}
+		var laItCF int
+		if lastIncrement.CompressFactor != 1 && atUsage != incrementsUsage {
+			// last increment compress factor is higher that we need to cover
+			incrementsUsage -= lastIncrement.TotalUsage()
+			for cnt := 1; cnt <= lastIncrement.CompressFactor; cnt++ {
+				incrementsUsage += lastIncrement.Usage
+				if incrementsUsage >= atUsage {
+					laItCF = cnt
+					break
+				}
+			}
+			if laItCF == 0 {
+				return nil, errors.New("cannot detect last active CompressFactor in ChargingIncrement")
+			}
+			if laItCF != lastIncrement.CompressFactor {
+				srplsIncrement := lastIncrement.Clone()
+				srplsIncrement.CompressFactor = srplsIncrement.CompressFactor - laItCF
+				srplsIncrements = append([]*ChargingIncrement{srplsIncrement}, srplsIncrements...) // prepend the surplus out of compress
+				lastIncrement.CompressFactor = laItCF
+				ec.Usage = nil
+				ec.Cost = nil
 
-	if len(srplsIncrements) != 0 { // partially covering, need trim
+			}
+		}
 
-		if lastActiveCIl.CompressFactor > 1 { // ChargingInterval not covering in full, need to split it
-			lastActiveCIl.CompressFactor -= 1
-			ec.Charges = append(ec.Charges, lastActiveCIl.Clone())
-			lastActiveCIl = ec.Charges[len(ec.Charges)-1]
-			lastActiveCIl.CompressFactor = 1
-		}
-		srplsCIl := lastActiveCIl.Clone()
-		srplsCIl.Increments = srplsIncrements
-		srplusEC.Charges = append([]*ChargingInterval{srplsCIl}, srplusEC.Charges...)
-		lastActiveCIl.Increments = make([]*ChargingIncrement, len(lastActiveCIts))
-		for i, incr := range lastActiveCIts {
-			lastActiveCIl.Increments[i] = incr.Clone() // avoid pointer references to the other interval
-		}
-		if laItCF != 0 {
-			lastActiveCIl.Increments[len(lastActiveCIl.Increments)-1].CompressFactor = laItCF // correct the compressFactor for the last increment
+		if len(srplsIncrements) != 0 { // partially covering, need trim
+			if lastActiveCIl.CompressFactor > 1 { // ChargingInterval not covering in full, need to split it
+				lastActiveCIl.CompressFactor -= 1
+				ec.Charges = append(ec.Charges, lastActiveCIl.Clone())
+				lastActiveCIl = ec.Charges[len(ec.Charges)-1]
+				lastActiveCIl.CompressFactor = 1
+				ec.Usage = nil
+				ec.Cost = nil
+			}
+			srplsCIl := lastActiveCIl.Clone()
+			srplsCIl.Increments = srplsIncrements
+			srplusEC.Charges = append([]*ChargingInterval{srplsCIl}, srplusEC.Charges...)
+			lastActiveCIl.Increments = make([]*ChargingIncrement, len(lastActiveCIts))
+			for i, incr := range lastActiveCIts {
+				lastActiveCIl.Increments[i] = incr.Clone() // avoid pointer references to the other interval
+			}
+			if laItCF != 0 {
+				lastActiveCIl.Increments[len(lastActiveCIl.Increments)-1].CompressFactor = laItCF // correct the compressFactor for the last increment
+				ec.Usage = nil
+				ec.Cost = nil
+			}
 		}
 	}
 	ec.ResetCounters()
