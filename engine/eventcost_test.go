@@ -1169,13 +1169,49 @@ func TestECTrimMUsage(t *testing.T) {
 			time.Duration(538 * time.Second), 3.23},
 		{time.Duration(120 * time.Second), time.Duration(120 * time.Second), 0.87,
 			time.Duration(480 * time.Second), 2.65},
+		{time.Duration(121 * time.Second), time.Duration(121 * time.Second), 0.88,
+			time.Duration(479 * time.Second), 2.64},
+		{time.Duration(180 * time.Second), time.Duration(180 * time.Second), 1.47,
+			time.Duration(420 * time.Second), 2.05},
+		{time.Duration(250 * time.Second), time.Duration(250 * time.Second), 2.17,
+			time.Duration(350 * time.Second), 1.35},
+		{time.Duration(299 * time.Second), time.Duration(299 * time.Second), 2.66,
+			time.Duration(301 * time.Second), 0.86},
+		{time.Duration(300 * time.Second), time.Duration(300 * time.Second), 2.67,
+			time.Duration(300 * time.Second), 0.85},
+		{time.Duration(302 * time.Second), time.Duration(302 * time.Second), 2.67,
+			time.Duration(298 * time.Second), 0.85},
+		{time.Duration(310 * time.Second), time.Duration(310 * time.Second), 2.67,
+			time.Duration(290 * time.Second), 0.85},
+		{time.Duration(316 * time.Second), time.Duration(320 * time.Second), 2.68,
+			time.Duration(280 * time.Second), 0.84},
+		{time.Duration(320 * time.Second), time.Duration(320 * time.Second), 2.68,
+			time.Duration(280 * time.Second), 0.84},
+		{time.Duration(321 * time.Second), time.Duration(330 * time.Second), 2.69,
+			time.Duration(270 * time.Second), 0.83},
+		{time.Duration(330 * time.Second), time.Duration(330 * time.Second), 2.69,
+			time.Duration(270 * time.Second), 0.83},
+		{time.Duration(331 * time.Second), time.Duration(331 * time.Second), 2.695,
+			time.Duration(269 * time.Second), 0.825},
+		{time.Duration(359 * time.Second), time.Duration(359 * time.Second), 2.835,
+			time.Duration(241 * time.Second), 0.685},
+		{time.Duration(360 * time.Second), time.Duration(360 * time.Second), 2.84,
+			time.Duration(240 * time.Second), 0.68},
+		{time.Duration(376 * time.Second), time.Duration(380 * time.Second), 2.85,
+			time.Duration(220 * time.Second), 0.67},
+		{time.Duration(391 * time.Second), time.Duration(391 * time.Second), 2.865,
+			time.Duration(209 * time.Second), 0.655},
+		{time.Duration(479 * time.Second), time.Duration(479 * time.Second), 3.175,
+			time.Duration(121 * time.Second), 0.345},
+		{time.Duration(599 * time.Second), time.Duration(599 * time.Second), 3.515,
+			time.Duration(1 * time.Second), 0.005},
 	}
 	for _, tC := range testCases {
 		t.Run(fmt.Sprintf("AtUsage:%s", tC.atUsage), func(t *testing.T) {
 			var ec, srplsEC *EventCost
 			ec = testEC.Clone()
 			if srplsEC, err = ec.Trim(tC.atUsage); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 			if ec.GetUsage() != tC.ecUsage {
 				t.Errorf("Wrongly trimmed EC: %s", utils.ToIJSON(ec))

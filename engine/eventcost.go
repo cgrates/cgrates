@@ -19,7 +19,6 @@ package engine
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -462,7 +461,6 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	if ec.Usage == nil {
 		ec.GetUsage()
 	}
-	fmt.Printf("Trim, atUsage: %v, eventCostUsage: %v\n", atUsage, ec.Usage)
 	origECUsage := ec.GetUsage()
 	if atUsage >= *ec.Usage {
 		return // no trim
@@ -505,7 +503,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	} else if lastActiveCIl.CompressFactor == 0 {
 		return nil, errors.New("ChargingInterval with 0 compressFactor")
 	}
-	srplusEC.Charges = ec.Charges[*lastActiveCIlIdx+1:]
+	srplusEC.Charges = append(srplusEC.Charges, ec.Charges[*lastActiveCIlIdx+1:]...) // direct assignment will wrongly reference later
 	ec.Charges = ec.Charges[:*lastActiveCIlIdx+1]
 	ec.Usage = nil
 	ec.Cost = nil
@@ -522,7 +520,6 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 		if laCF == 0 {
 			return nil, errors.New("cannot detect last active CompressFactor in ChargingInterval")
 		}
-
 		if laCF != lastActiveCIl.CompressFactor {
 			srplsCIl := lastActiveCIl.Clone()
 			srplsCIl.CompressFactor = lastActiveCIl.CompressFactor - laCF
@@ -532,8 +529,8 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			ec.Cost = nil
 		}
 	}
-	if atUsage != ec.GetUsage()+*lastActiveCIl.TotalUsage() { // lastInterval covering more than needed, need split
-		atUsage -= (ec.GetUsage() - *lastActiveCIl.TotalUsage()) // remaining duration to cover in increments of the last charging interval
+	if atUsage != ec.GetUsage() { // lastInterval covering more than needed, need split
+		atUsage -= (ec.GetUsage() - *lastActiveCIl.Usage()) // remaining duration to cover in increments of the last charging interval
 		// find out last increment covering duration
 		var lastActiveCItIdx *int
 		var incrementsUsage time.Duration
@@ -577,13 +574,8 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 				srplsIncrement := lastIncrement.Clone()
 				srplsIncrement.CompressFactor = srplsIncrement.CompressFactor - laItCF
 				srplsIncrements = append([]*ChargingIncrement{srplsIncrement}, srplsIncrements...) // prepend the surplus out of compress
-				lastIncrement.CompressFactor = laItCF
-				ec.Usage = nil
-				ec.Cost = nil
-
 			}
 		}
-
 		if len(srplsIncrements) != 0 { // partially covering, need trim
 			if lastActiveCIl.CompressFactor > 1 { // ChargingInterval not covering in full, need to split it
 				lastActiveCIl.CompressFactor -= 1
