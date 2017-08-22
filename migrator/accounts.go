@@ -36,16 +36,21 @@ const (
 func (m *Migrator) migrateAccounts() (err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
+					log.Print("#9 Starts migrateAccounts")
 		var acntV1Keys []string
 		acntV1Keys, err = m.oldDataDB.GetKeysForPrefix(v1AccountDBPrefix)
 		if err != nil {
 			return
 		}
+		log.Print("#10 it doesn't get to here",acntV1Keys)
+		
 		for _, acntV1Key := range acntV1Keys {
+			log.Print("#11 acc key:",acntV1Key)
 			v1Acnt, err := m.getV1AccountFromDB(acntV1Key)
 			if err != nil {
 				return err
 			}
+								log.Print("#8 it doesn't get to here")
 			if v1Acnt != nil {
 				acnt := v1Acnt.AsAccount()
 				if err = m.dataDB.SetAccount(acnt); err != nil {
@@ -53,6 +58,7 @@ func (m *Migrator) migrateAccounts() (err error) {
 				}
 			}
 		}
+					log.Print("#8 it doesn't get to here")
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
 		if err = m.dataDB.SetVersions(vrs, false); err != nil {
@@ -61,6 +67,7 @@ func (m *Migrator) migrateAccounts() (err error) {
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 		}
+				log.Print("#8 it doesn't get to here")		
 		return
 	case utils.MONGO:
 		dataDB := m.dataDB.(*engine.MongoStorage)
@@ -93,20 +100,25 @@ func (m *Migrator) migrateAccounts() (err error) {
 }
 
 func (m *Migrator) getV1AccountFromDB(key string) (*v1Account, error) {
-	switch m.dataDBType {
+	switch m.oldDataDBType {
 	case utils.REDIS:
-		dataDB := m.dataDB.(*engine.RedisStorage)
+						log.Print("#12 start get ")		
+		dataDB := m.oldDataDB.(*engine.RedisStorage)
+			log.Print("#12 start get")		
 		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
 			return nil, err
 		} else {
+			log.Print("#12 start get")		
 			v1Acnt := &v1Account{Id: key}
-			if err := m.oldmrshlr.Unmarshal(strVal, v1Acnt); err != nil {
+			log.Print("#12 start get")		
+			if err := m.mrshlr.Unmarshal(strVal, v1Acnt); err != nil {
 				return nil, err
 			}
+			log.Print("#12 start get")		
 			return v1Acnt, nil
 		}
 	case utils.MONGO:
-		dataDB := m.dataDB.(*engine.MongoStorage)
+		dataDB := m.oldDataDB.(*engine.MongoStorage)
 		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
 		v1Acnt := new(v1Account)
@@ -118,7 +130,7 @@ func (m *Migrator) getV1AccountFromDB(key string) (*v1Account, error) {
 		return nil, utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			utils.UnsupportedDB,
-			fmt.Sprintf("error: unsupported: <%s> for getV1AccountFromDB method", m.dataDBType))
+			fmt.Sprintf("error: unsupported: <%s> for getV1AccountFromDB method", m.oldDataDBType))
 	}
 }
 

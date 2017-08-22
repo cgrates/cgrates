@@ -19,7 +19,7 @@ package migrator
 
 import (
 	"fmt"
-
+	"log"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -76,6 +76,7 @@ func (m *Migrator) Migrate(taskID string) (err error) {
 	case utils.MetaCostDetails:
 		err = m.migrateCostDetails()
 	case utils.MetaAccounts:
+		log.Print("#7 function is about to start")		
 		err = m.migrateAccounts()
 	case "migrateActionPlans":
 		err = m.migrateActionPlans()
