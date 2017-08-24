@@ -180,7 +180,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Sparse:     false,
 		}
 		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers} {
+			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPStats} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
 			}

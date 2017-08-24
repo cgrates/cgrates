@@ -379,6 +379,23 @@ func (ms *MongoStorage) GetTPResourceLimits(tpid, id string) ([]*utils.TPResourc
 	return results, err
 }
 
+func (ms *MongoStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
+	filter := bson.M{
+		"tpid": tpid,
+	}
+	if id != "" {
+		filter["id"] = id
+	}
+	var results []*utils.TPStats
+	session, col := ms.conn(utils.TBLTPStats)
+	defer session.Close()
+	err := col.Find(filter).All(&results)
+	if len(results) == 0 {
+		return results, utils.ErrNotFound
+	}
+	return results, err
+}
+
 func (ms *MongoStorage) GetTPDerivedChargers(tp *utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error) {
 	filter := bson.M{"tpid": tp.TPid}
 	if tp.Direction != "" {
@@ -841,6 +858,20 @@ func (ms *MongoStorage) SetTPResourceLimits(tpRLs []*utils.TPResourceLimit) (err
 	return
 }
 
+func (ms *MongoStorage) SetTPRStats(tpS []*utils.TPStats) (err error) {
+	if len(tpS) == 0 {
+		return
+	}
+	session, col := ms.conn(utils.TBLTPStats)
+	defer session.Close()
+	tx := col.Bulk()
+	for _, tp := range tpS {
+		tx.Upsert(bson.M{"tpid": tp.TPid, "id": tp.ID}, tp)
+	}
+	_, err = tx.Run()
+	return
+}
+
 func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
@@ -1105,7 +1136,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	return cdrs, 0, nil
 }
 
-func (ms *MongoStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
+func (ms *MongoStorage) GetTPStat(tpid, id string) ([]*utils.TPStats, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}

@@ -2024,8 +2024,11 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 			mdl.Stored = st.Stored
 			mdl.Weight = st.Weight
 			mdl.QueueLength = st.QueueLength
-			for _, val := range st.Metrics {
-				mdl.Metrics = mdl.Metrics + utils.INFIELD_SEP + val
+			for i, val := range st.Metrics {
+				if i != 0 {
+					mdl.Metrics += utils.INFIELD_SEP
+				}
+				mdl.Metrics += val
 			}
 			for _, val := range st.Thresholds {
 				mdl.Thresholds = mdl.Thresholds + utils.INFIELD_SEP + val

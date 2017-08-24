@@ -190,9 +190,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResourceLimits,
-			//	utils.TBLTPStats
-		} {
+			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResourceLimits, utils.TBLTPStats} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -201,6 +199,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 		tx.Commit()
 		return nil
 	}
+	utils.Logger.Debug(fmt.Sprintf("#Rem sterge %s", tpid))
 	// Remove from a single table
 	tx = tx.Table(table).Where("tpid = ?", tpid)
 	// Compose filters
@@ -219,8 +218,10 @@ func (self *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 	if len(timings) == 0 {
 		return nil
 	}
+
 	tx := self.db.Begin()
 	for _, timing := range timings {
+		utils.Logger.Debug(fmt.Sprintf("#1(set) Id care trimite  %s", timing.ID))
 		if err := tx.Where(&TpTiming{Tpid: timing.TPid, Tag: timing.ID}).Delete(TpTiming{}).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -1170,6 +1171,8 @@ func (self *SQLStorage) GetTPDestinationRates(tpid, id string, pagination *utils
 func (self *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
 	var tpTimings TpTimings
 	q := self.db.Where("tpid = ?", tpid)
+	utils.Logger.Debug(fmt.Sprintf("#1 Id care trimite  %s", id))
+	utils.Logger.Debug(fmt.Sprintf("#1 TPId care trimite  %s", tpid))
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
 	}
@@ -1177,6 +1180,7 @@ func (self *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, e
 		return nil, err
 	}
 	ts := tpTimings.AsTPTimings()
+	utils.Logger.Debug(fmt.Sprintf("#2 ce gaseste : %s", ts))
 	if len(ts) == 0 {
 		return ts, utils.ErrNotFound
 	}
