@@ -2056,8 +2056,8 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 	return
 }
 
-func APItoStats(tpST *utils.TPStats, timezone string) (st *StatsQueue, err error) {
-	st = &StatsQueue{
+func APItoStats(tpST *utils.TPStats, timezone string) (st *StatsConfig, err error) {
+	st = &StatsConfig{
 		ID:          tpST.ID,
 		QueueLength: tpST.QueueLength,
 		Weight:      tpST.Weight,

@@ -189,6 +189,7 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 	}
 }
 
+/* De completat functia de test pentru ModelStats
 func TestAPItoModelStats(t *testing.T) {
 	tpS := &utils.TPStats{
 		TPid: "TPS1",
@@ -211,11 +212,23 @@ func TestAPItoModelStats(t *testing.T) {
 		Weight:     20,
 		Thresholds: nil,
 	}
+	expectedSlc := [][]string{
+		[]string{,"TPS1", "*Stat1", "*string", "*Account", "1002", "2014-07-29T15:00:00Z","","1","MetricValue",},
+	}
 	expectedtpS := APItoModelStats(tpS)
+	var slc [][]string
+	lc, err := csvDump(expectedtpS)
+	if err != nil {
+		t.Error("Error dumping to csv: ", err)
+	}
+	slc = append(slc, lc)
+
 	if !reflect.DeepEqual(expectedtpS, tpS) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedtpS, tpS)
+		t.Errorf("Expecting: %+v, received: %+v", expectedtpS, slc)
 	}
 }
+
+*/
 
 func TestTPRatingPlanAsExportSlice(t *testing.T) {
 	tpRpln := &utils.TPRatingPlan{
@@ -888,7 +901,7 @@ func TestAPItoTPStats(t *testing.T) {
 		Weight:             20.0,
 	}
 
-	eTPs := &StatsQueue{ID: tps.ID,
+	eTPs := &StatsConfig{ID: tps.ID,
 		QueueLength: tps.QueueLength,
 		Metrics:     []string{"*asr", "*acd", "*acc"},
 		Thresholds:  []string{"THRESH1", "THRESH2"},

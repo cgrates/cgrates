@@ -31,15 +31,16 @@ import (
 var tpCfgPath string
 var tpCfg *config.CGRConfig
 var tpRPC *rpc.Client
+var tpDataDir = "/usr/share/cgrates"
 
 func TestTPStatInitCfg(t *testing.T) {
 	var err error
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpCfgPath = path.Join(tpDataDir, "conf", "samples", "tutmysql")
 	tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	tpCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	tpCfg.DataFolderPath = tpDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tpCfg)
 }
 

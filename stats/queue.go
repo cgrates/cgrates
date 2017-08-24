@@ -49,7 +49,7 @@ func (sis StatsInstances) remWithID(qID string) {
 
 // NewStatsInstance instantiates a StatsInstance
 func NewStatsInstance(sec *StatsEventCache, ms engine.Marshaler,
-	sqCfg *engine.StatsQueue, sqSM *engine.SQStoredMetrics) (si *StatsInstance, err error) {
+	sqCfg *engine.StatsConfig, sqSM *engine.SQStoredMetrics) (si *StatsInstance, err error) {
 	si = &StatsInstance{sec: sec, ms: ms, cfg: sqCfg, sqMetrics: make(map[string]StatsMetric)}
 	for _, metricID := range sqCfg.Metrics {
 		if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
@@ -85,7 +85,7 @@ type StatsInstance struct {
 	sqItems   []*engine.SQItem
 	sqMetrics map[string]StatsMetric
 	ms        engine.Marshaler // used to get/set Metrics
-	cfg       *engine.StatsQueue
+	cfg       *engine.StatsConfig
 }
 
 // GetSQStoredMetrics retrieves the data used for store to DB

@@ -87,3 +87,16 @@ func (stsv1 *StatSV1) GetFloatMetrics(queueID string, reply *map[string]float64)
 func (stsv1 *StatSV1) LoadQueues(args stats.ArgsLoadQueues, reply *string) (err error) {
 	return stsv1.sts.V1LoadQueues(args, reply)
 }
+
+//after implement test for it
+func (apierV1 *ApierV1) GetStatConfig() {
+
+}
+
+func (apierV1 *ApierV1) SetStatConfig() {
+
+}
+
+func (apierV1 *ApierV1) RemStatConfig() {
+
+}
