@@ -39,14 +39,14 @@ func init() {
 func NewStatService(dataDB engine.DataDB, ms engine.Marshaler, storeInterval time.Duration) (ss *StatService, err error) {
 	ss = &StatService{dataDB: dataDB, ms: ms, storeInterval: storeInterval,
 		stopStoring: make(chan struct{}), evCache: NewStatsEventCache()}
-	sqPrfxs, err := dataDB.GetKeysForPrefix(utils.StatsQueuePrefix)
+	sqPrfxs, err := dataDB.GetKeysForPrefix(utils.StatsConfigPrefix)
 	if err != nil {
 		return nil, err
 	}
 	ss.queuesCache = make(map[string]*StatsInstance)
 	ss.queues = make(StatsInstances, 0)
 	for _, prfx := range sqPrfxs {
-		if q, err := ss.loadQueue(prfx[len(utils.StatsQueuePrefix):]); err != nil {
+		if q, err := ss.loadQueue(prfx[len(utils.StatsConfigPrefix):]); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
 				q.cfg.ID, err.Error()))
 			continue
@@ -92,7 +92,7 @@ func (ss *StatService) Shutdown() error {
 // setQueue adds or modifies a queue into cache
 // sort will reorder the ss.queues
 func (ss *StatService) loadQueue(qID string) (q *StatsInstance, err error) {
-	sq, err := ss.dataDB.GetStatsQueue(qID)
+	sq, err := ss.dataDB.GetStatsConfig(qID)
 	if err != nil {
 		return nil, err
 	}
@@ -225,13 +225,13 @@ type ArgsLoadQueues struct {
 func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err error) {
 	qIDs := args.QueueIDs
 	if qIDs == nil {
-		sqPrfxs, err := ss.dataDB.GetKeysForPrefix(utils.StatsQueuePrefix)
+		sqPrfxs, err := ss.dataDB.GetKeysForPrefix(utils.StatsConfigPrefix)
 		if err != nil {
 			return err
 		}
 		queueIDs := make([]string, len(sqPrfxs))
 		for i, prfx := range sqPrfxs {
-			queueIDs[i] = prfx[len(utils.StatsQueuePrefix):]
+			queueIDs[i] = prfx[len(utils.StatsConfigPrefix):]
 		}
 		if len(queueIDs) != 0 {
 			qIDs = &queueIDs

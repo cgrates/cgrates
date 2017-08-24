@@ -39,7 +39,7 @@ type SQStoredMetrics struct {
 }
 
 // StatsQueue represents the configuration of a  StatsInstance in StatS
-type StatsQueue struct {
+type StatsConfig struct {
 	ID                 string // QueueID
 	Filters            []*RequestFilter
 	ActivationInterval *utils.ActivationInterval // Activation interval

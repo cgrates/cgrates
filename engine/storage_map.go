@@ -1475,19 +1475,19 @@ func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
 }
 
 // GetStatsQueue retrieves a StatsQueue from dataDB
-func (ms *MapStorage) GetStatsQueue(sqID string) (sq *StatsQueue, err error) {
+func (ms *MapStorage) GetStatsConfig(sqID string) (scf *StatsConfig, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.StatsQueuePrefix + sqID
+	key := utils.StatsConfigPrefix + sqID
 	values, ok := ms.dict[key]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, &sq)
+	err = ms.ms.Unmarshal(values, &scf)
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range sq.Filters {
+	for _, fltr := range scf.Filters {
 		if err := fltr.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -1496,22 +1496,22 @@ func (ms *MapStorage) GetStatsQueue(sqID string) (sq *StatsQueue, err error) {
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
-func (ms *MapStorage) SetStatsQueue(sq *StatsQueue) (err error) {
+func (ms *MapStorage) SetStatsConfig(scf *StatsConfig) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(sq)
+	result, err := ms.ms.Marshal(scf)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.StatsQueuePrefix+sq.ID] = result
+	ms.dict[utils.StatsConfigPrefix+scf.ID] = result
 	return
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MapStorage) RemStatsQueue(sqID string) (err error) {
+func (ms *MapStorage) RemStatsConfig(scfID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.StatsQueuePrefix + sqID
+	key := utils.StatsConfigPrefix + scfID
 	delete(ms.dict, key)
 	return
 }

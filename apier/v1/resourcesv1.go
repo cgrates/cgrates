@@ -79,3 +79,16 @@ func (rsv1 *ResourceSV1) AllocateResource(args utils.AttrRLsResourceUsage, reply
 func (rsv1 *ResourceSV1) ReleaseResource(args utils.AttrRLsResourceUsage, reply *string) error {
 	return rsv1.rls.V1ReleaseResource(args, reply)
 }
+
+//after implement test for it
+func (apierV1 *ApierV1) GetResourceConfig() {
+
+}
+
+func (apierV1 *ApierV1) SetResourceConfig() {
+
+}
+
+func (apierV1 *ApierV1) RemResourceConfig() {
+
+}

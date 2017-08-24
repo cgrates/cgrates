@@ -180,7 +180,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Sparse:     false,
 		}
 		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers} {
+			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPStats} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
 			}
@@ -1985,10 +1985,10 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 }
 
 // GetStatsQueue retrieves a StatsQueue from dataDB
-func (ms *MongoStorage) GetStatsQueue(sqID string) (sq *StatsQueue, err error) {
-	session, col := ms.conn(utils.StatsQueuePrefix)
+func (ms *MongoStorage) GetStatsConfig(sqID string) (sq *StatsConfig, err error) {
+	session, col := ms.conn(utils.StatsConfigPrefix)
 	defer session.Close()
-	sq = new(StatsQueue)
+	sq = new(StatsConfig)
 	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
@@ -2004,16 +2004,16 @@ func (ms *MongoStorage) GetStatsQueue(sqID string) (sq *StatsQueue, err error) {
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
-func (ms *MongoStorage) SetStatsQueue(sq *StatsQueue) (err error) {
-	session, col := ms.conn(utils.StatsQueuePrefix)
+func (ms *MongoStorage) SetStatsConfig(sq *StatsConfig) (err error) {
+	session, col := ms.conn(utils.StatsConfigPrefix)
 	defer session.Close()
 	_, err = col.UpsertId(bson.M{"id": sq.ID}, sq)
 	return
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MongoStorage) RemStatsQueue(sqID string) (err error) {
-	session, col := ms.conn(utils.StatsQueuePrefix)
+func (ms *MongoStorage) RemStatsConfig(sqID string) (err error) {
+	session, col := ms.conn(utils.StatsConfigPrefix)
 	err = col.Remove(bson.M{"id": sqID})
 	if err != nil {
 		return err

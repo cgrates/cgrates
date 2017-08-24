@@ -32,8 +32,8 @@ func TestReqFilterPassStatS(t *testing.T) {
 		config.SetCgrConfig(cgrCfg)
 	}
 	dataStorage, _ := engine.NewMapStorage()
-	dataStorage.SetStatsQueue(
-		&engine.StatsQueue{ID: "CDRST1",
+	dataStorage.SetStatsConfig(
+		&engine.StatsConfig{ID: "CDRST1",
 			Filters: []*engine.RequestFilter{
 				&engine.RequestFilter{Type: engine.MetaString, FieldName: "Tenant",
 					Values: []string{"cgrates.org"}}},

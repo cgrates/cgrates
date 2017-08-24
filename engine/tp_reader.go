@@ -1955,7 +1955,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dataStorage.SetStatsQueue(st); err != nil {
+		if err = tpr.dataStorage.SetStatsConfig(st); err != nil {
 			return err
 		}
 		if verbose {
