@@ -189,7 +189,7 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 	}
 }
 
-/* De completat functia de test pentru ModelStats
+/*
 func TestAPItoModelStats(t *testing.T) {
 	tpS := &utils.TPStats{
 		TPid: "TPS1",
