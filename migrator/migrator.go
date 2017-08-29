@@ -19,43 +19,42 @@ package migrator
 
 import (
 	"fmt"
-	"log"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string,oldDataDB engine.DataDB,oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string) (m *Migrator,err error) {
+func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB engine.DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
 		mrshlr = engine.NewCodecMsgpackMarshaler()
 	} else if dataDBEncoding == utils.JSON {
 		mrshlr = new(engine.JSONMarshaler)
-	}else if oldDataDBEncoding == utils.MSGPACK {
+	} else if oldDataDBEncoding == utils.MSGPACK {
 		oldmrshlr = engine.NewCodecMsgpackMarshaler()
-	}else if oldDataDBEncoding == utils.JSON {
+	} else if oldDataDBEncoding == utils.JSON {
 		oldmrshlr = new(engine.JSONMarshaler)
 	}
 	m = &Migrator{
 		dataDB: dataDB, dataDBType: dataDBType,
 		storDB: storDB, storDBType: storDBType, mrshlr: mrshlr,
-	   	oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
-    	oldStorDB: oldStorDB, oldStorDBType: oldStorDBType, oldmrshlr:oldmrshlr,
+		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
+		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType, oldmrshlr: oldmrshlr,
 	}
-	return m,err
+	return m, err
 }
 
 type Migrator struct {
-	dataDB     engine.DataDB
-	dataDBType string
-	storDB     engine.Storage
-	storDBType string
-	mrshlr      engine.Marshaler
+	dataDB        engine.DataDB
+	dataDBType    string
+	storDB        engine.Storage
+	storDBType    string
+	mrshlr        engine.Marshaler
 	oldDataDB     engine.DataDB
 	oldDataDBType string
 	oldStorDB     engine.Storage
 	oldStorDBType string
-	oldmrshlr	engine.Marshaler
+	oldmrshlr     engine.Marshaler
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods
@@ -76,17 +75,15 @@ func (m *Migrator) Migrate(taskID string) (err error) {
 	case utils.MetaCostDetails:
 		err = m.migrateCostDetails()
 	case utils.MetaAccounts:
-		log.Print("#7 function is about to start")		
 		err = m.migrateAccounts()
-	case "migrateActionPlans":
+	case utils.MetaActionPlans:
 		err = m.migrateActionPlans()
-	case "migrateActionTriggers":
+	case utils.MetaActionTriggers:
 		err = m.migrateActionTriggers()
-	case "migrateActions":
+	case utils.MetaActions:
 		err = m.migrateActions()
-	case "migrateSharedGroups":
+	case utils.MetaSharedGroups:
 		err = m.migrateSharedGroups()
 	}
-
 	return
 }

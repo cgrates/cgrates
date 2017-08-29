@@ -85,31 +85,24 @@ if migrate != nil && *migrate != "" { // Run migrator
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Print("#1 The redis db loaded")
 		oldDataDB, err := engine.ConfigureDataStorage(*oldDataDBType, *oldDataDBHost, *oldDataDBPort, *oldDataDBName, *oldDataDBUser, *oldDataDBPass, *oldDBDataEncoding, config.CgrConfig().CacheConfig, *oldLoadHistorySize)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Print("#2 Old redis db loaded")
 			storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort, *storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Print("#3 Old mysql db loaded")
-
 			oldstorDB, err := engine.ConfigureStorStorage(*oldStorDBType, *oldStorDBHost, *oldStorDBPort, *oldStorDBName, *oldStorDBUser, *oldStorDBPass, *oldDBDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Print("#4 Old mysql db loaded")
-
 		m,err := migrator.NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType,oldDataDB,*oldDataDBType,*oldDBDataEncoding,oldstorDB,*oldStorDBType)
 		 if err != nil {
 			log.Fatal(err)
 		}
- 		log.Print("#5 Migrator started")		
 		err = m.Migrate(*migrate); 
 		if err != nil {
 			log.Fatal(err)
