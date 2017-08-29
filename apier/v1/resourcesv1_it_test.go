@@ -259,6 +259,41 @@ func TestRLsV1GetResourceConfigAfterSet(t *testing.T) {
 	}
 }
 
+func TestRLsV1UpdateResourceConfig(t *testing.T) {
+	var result string
+	resConfig.Filters = []*engine.RequestFilter{
+		&engine.RequestFilter{
+			Type:      "type",
+			FieldName: "Name",
+			Values:    []string{"FilterValue1", "FilterValue2"},
+		},
+		&engine.RequestFilter{
+			Type:      "*string",
+			FieldName: "Accout",
+			Values:    []string{"1001", "1002"},
+		},
+		&engine.RequestFilter{
+			Type:      "*string_prefix",
+			FieldName: "Destination",
+			Values:    []string{"10", "20"},
+		},
+	}
+	if err := rlsV1Rpc.Call("ApierV1.SetResourceConfig", resConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func TestRLsV1GetResourceConfigAfterUpdate(t *testing.T) {
+	var reply *engine.ResourceCfg
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: "RCFG1"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, resConfig) {
+		t.Errorf("Expecting: %+v, received: %+v", resConfig, reply)
+	}
+}
+
 func TestRLsV1RemResourceCOnfig(t *testing.T) {
 	var resp string
 	if err := rlsV1Rpc.Call("ApierV1.RemResourceConfig", &AttrGetResCfg{ID: resConfig.ID}, &resp); err != nil {
