@@ -12,26 +12,26 @@ import (
 )
 
 type v1ActionTrigger struct {
-	Id                    string
-	ThresholdType         string
+	Id                    string // for visual identification
+	ThresholdType         string //*min_counter, *max_counter, *min_balance, *max_balance
 	ThresholdValue        float64
-	Recurrent             bool
-	MinSleep              time.Duration
+	Recurrent             bool          // reset eexcuted flag each run
+	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
 	BalanceId             string
 	BalanceType           string
 	BalanceDirection      string
-	BalanceDestinationIds string
-	BalanceWeight         float64
-	BalanceExpirationDate time.Time
-	BalanceTimingTags     string
-	BalanceRatingSubject  string
-	BalanceCategory       string
-	BalanceSharedGroup    string
-	BalanceDisabled       bool
+	BalanceDestinationIds string    // filter for balance
+	BalanceWeight         float64   // filter for balance
+	BalanceExpirationDate time.Time // filter for balance
+	BalanceTimingTags     string    // filter for balance
+	BalanceRatingSubject  string    // filter for balance
+	BalanceCategory       string    // filter for balance
+	BalanceSharedGroup    string    // filter for balance
 	Weight                float64
 	ActionsId             string
-	MinQueuedItems        int
+	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
 	Executed              bool
+	lastExecutionTime     time.Time
 }
 
 type v1ActionTriggers []*v1ActionTrigger
@@ -168,9 +168,6 @@ func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {
 	}
 	if v1Act.BalanceWeight != 0 {
 		bf.Weight = utils.Float64Pointer(v1Act.BalanceWeight)
-	}
-	if v1Act.BalanceDisabled != false {
-		bf.Disabled = utils.BoolPointer(v1Act.BalanceDisabled)
 	}
 	if !v1Act.BalanceExpirationDate.IsZero() {
 		bf.ExpirationDate = utils.TimePointer(v1Act.BalanceExpirationDate)

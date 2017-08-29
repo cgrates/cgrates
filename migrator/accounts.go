@@ -296,9 +296,6 @@ func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 		if oldAtr.BalanceWeight != 0 {
 			bf.Weight = utils.Float64Pointer(oldAtr.BalanceWeight)
 		}
-		if oldAtr.BalanceDisabled != false {
-			bf.Disabled = utils.BoolPointer(oldAtr.BalanceDisabled)
-		}
 		if !oldAtr.BalanceExpirationDate.IsZero() {
 			bf.ExpirationDate = utils.TimePointer(oldAtr.BalanceExpirationDate)
 		}
