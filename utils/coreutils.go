@@ -738,3 +738,17 @@ func GetCGRVersion() (vers string) {
 	//CGRateS 0.9.1~rc8 git+73014da (2016-12-30T19:48:09+01:00)
 	return fmt.Sprintf("%s %s git+%s (%s)", CGRateS, VERSION, commitHash[:7], commitDate.Format(time.RFC3339))
 }
+
+// AppendToFile is a convenience function to be used for appending to an already existing file
+func AppendToFile(fName, text string) error {
+	f, err := os.OpenFile(fName, os.O_APPEND|os.O_WRONLY, 0666)
+	if err != nil {
+		return err
+	}
+	if _, err := f.WriteString(text); err != nil {
+		return err
+	}
+	f.Sync()
+	f.Close()
+	return nil
+}

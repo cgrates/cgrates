@@ -1713,6 +1713,153 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 	}
 }
 
+/*
+func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
+	acnt := &Account{
+		ID: "TCDDBSWF:account1",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{
+				&Balance{ID: "voice1", Value: 60, RatingSubject: "SubjTCDDBSWF"},
+			}},
+	}
+	dataStorage.SetAccount(acnt)
+	dst := &Destination{Id: "DST_TCDDBSWF", Prefixes: []string{"1716"}}
+	dataStorage.SetDestination(dst, utils.NonTransactional)
+	dataStorage.SetReverseDestination(dst, utils.NonTransactional)
+	rpSubj := &RatingPlan{
+		Id: "RP_TCDDBSWF",
+		Timings: map[string]*RITiming{
+			"30eab300": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"b457f86d": &RIRate{
+
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0,
+						RateIncrement:      60 * time.Second,
+						RateUnit:           60 * time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			dst.Id: []*RPRate{
+				&RPRate{
+					Timing: "30eab300",
+					Rating: "b457f86d",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	rpDflt := &RatingPlan{
+		Id: "RP_DFLT",
+		Timings: map[string]*RITiming{
+			"30eab301": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"b457f861": &RIRate{
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.01,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			dst.Id: []*RPRate{
+				&RPRate{
+					Timing: "30eab301",
+					Rating: "b457f861",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	for _, rpl := range []*RatingPlan{rpSubj, rpDflt} {
+		dataStorage.SetRatingPlan(rpl, utils.NonTransactional)
+	}
+	rpfTCDDBSWF := &RatingProfile{Id: "*out:TCDDBSWF:call:SubjTCDDBSWF",
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:   rpSubj.Id,
+		}},
+	}
+	rpfAny := &RatingProfile{Id: "*out:TCDDBSWF:call:*any",
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:   rpDflt.Id,
+		}},
+	}
+	for _, rpf := range []*RatingProfile{rpfTCDDBSWF, rpfAny} {
+		dataStorage.SetRatingProfile(rpf, utils.NonTransactional)
+	}
+	cd1 := &CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "TCDDBSWF",
+		Account:     "account1",
+		Subject:     "SubjTCDDBSWF",
+		Destination: "1716",
+		TimeStart:   time.Date(2015, 01, 01, 9, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
+		TOR:         utils.VOICE,
+	}
+	if cc, err := cd1.GetCost(); err != nil || cc.Cost != 0 {
+		t.Errorf("Error getting *any dest: %+v %v", cc, err)
+	}
+	cd2 := &CallDescriptor{ // equivalent of the extra charge out of *monetary balance when *voice is finished
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "TCDDBSWF",
+		Subject:     "dan",
+		Destination: "1716",
+		TimeStart:   time.Date(2015, 01, 01, 9, 1, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
+		TOR:         utils.VOICE,
+	}
+	if cc, err := cd2.GetCost(); err != nil || cc.Cost != 0.6 {
+		t.Errorf("Error getting *any dest: %+v %v", cc, err)
+	}
+	if cc, err := cd1.Debit(); err != nil {
+		t.Error(err)
+	} else if cc.Cost != 0 {
+		t.Errorf("CallCost: %v", cc)
+	}
+	if resAcnt, err := dataStorage.GetAccount(acnt.ID); err != nil {
+		t.Error(err)
+	} else if resAcnt.BalanceMap[utils.VOICE][0].ID != "voice1" ||
+		resAcnt.BalanceMap[utils.VOICE][0].Value != 0 {
+		t.Errorf("Account: %v", resAcnt)
+	} else if len(resAcnt.BalanceMap[utils.MONETARY]) == 0 ||
+		resAcnt.BalanceMap[utils.VOICE][0].ID != utils.META_DEFAULT ||
+		resAcnt.BalanceMap[utils.VOICE][0].Value != -0.60 {
+		t.Errorf("Account: %s", utils.ToIJSON(resAcnt))
+	}
+}
+*/
+
 /*************** BENCHMARKS ********************/
 func BenchmarkStorageGetting(b *testing.B) {
 	b.StopTimer()
