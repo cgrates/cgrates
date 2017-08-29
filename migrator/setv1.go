@@ -19,6 +19,14 @@ package migrator
 
 import "github.com/cgrates/cgrates/engine"
 
+func (m *Migrator) SetV1onOldRedis(key string, bl []byte) (err error) {
+	dataDB := m.oldDataDB.(*engine.RedisStorage)
+	if err = dataDB.Cmd("SET", key, bl).Err; err != nil {
+		return err
+	}
+	return
+}
+
 func (m *Migrator) SetV1onRedis(key string, bl []byte) (err error) {
 	dataDB := m.dataDB.(*engine.RedisStorage)
 	if err = dataDB.Cmd("SET", key, bl).Err; err != nil {
