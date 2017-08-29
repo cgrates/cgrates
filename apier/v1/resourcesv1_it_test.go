@@ -23,6 +23,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -209,6 +210,104 @@ func TestRLsV1ReleaseResource(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", false, reply)
 	}
 
+}
+
+var resConfig = &engine.ResourceCfg{
+	ID: "RCFG1",
+	Filters: []*engine.RequestFilter{
+		&engine.RequestFilter{
+			Type:      "type",
+			FieldName: "Name",
+			Values:    []string{"FilterValue1", "FilterValue2"},
+		},
+	},
+	ActivationInterval: &utils.ActivationInterval{
+		ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	},
+	UsageTTL:          time.Duration(10) * time.Microsecond,
+	Limit:             10,
+	AllocationMessage: "MessageAllocation",
+	Blocker:           true,
+	Stored:            true,
+	Weight:            20,
+	Thresholds:        []string{"Val1", "Val2"},
+}
+
+func TestRLsV1GetResourceConfigBeforeSet(t *testing.T) {
+	var reply *string
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: "RCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func TestRLsV1SetResourceConfig(t *testing.T) {
+	var result string
+	if err := rlsV1Rpc.Call("ApierV1.SetResourceConfig", resConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func TestRLsV1GetResourceConfigAfterSet(t *testing.T) {
+	var reply *engine.ResourceCfg
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: "RCFG1"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, resConfig) {
+		t.Errorf("Expecting: %+v, received: %+v", resConfig, reply)
+	}
+}
+
+func TestRLsV1UpdateResourceConfig(t *testing.T) {
+	var result string
+	resConfig.Filters = []*engine.RequestFilter{
+		&engine.RequestFilter{
+			Type:      "type",
+			FieldName: "Name",
+			Values:    []string{"FilterValue1", "FilterValue2"},
+		},
+		&engine.RequestFilter{
+			Type:      "*string",
+			FieldName: "Accout",
+			Values:    []string{"1001", "1002"},
+		},
+		&engine.RequestFilter{
+			Type:      "*string_prefix",
+			FieldName: "Destination",
+			Values:    []string{"10", "20"},
+		},
+	}
+	if err := rlsV1Rpc.Call("ApierV1.SetResourceConfig", resConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func TestRLsV1GetResourceConfigAfterUpdate(t *testing.T) {
+	var reply *engine.ResourceCfg
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: "RCFG1"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, resConfig) {
+		t.Errorf("Expecting: %+v, received: %+v", resConfig, reply)
+	}
+}
+
+func TestRLsV1RemResourceCOnfig(t *testing.T) {
+	var resp string
+	if err := rlsV1Rpc.Call("ApierV1.RemResourceConfig", &AttrGetResCfg{ID: resConfig.ID}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+}
+
+func TestRLsV1GetResourceConfigAfterDelete(t *testing.T) {
+	var reply *string
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: resConfig.ID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
 }
 
 func TestRLsV1StopEngine(t *testing.T) {

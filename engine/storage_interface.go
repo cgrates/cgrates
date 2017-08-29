@@ -111,7 +111,6 @@ type DataDB interface {
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
-	//modicari
 	GetStatsConfig(sqID string) (sq *StatsConfig, err error)
 	SetStatsConfig(sq *StatsConfig) (err error)
 	RemStatsConfig(sqID string) (err error)
