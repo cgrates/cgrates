@@ -80,15 +80,46 @@ func (rsv1 *ResourceSV1) ReleaseResource(args utils.AttrRLsResourceUsage, reply 
 	return rsv1.rls.V1ReleaseResource(args, reply)
 }
 
-//after implement test for it
-func (apierV1 *ApierV1) GetResourceConfig() {
-
+type AttrGetResCfg struct {
+	ID string
 }
 
-func (apierV1 *ApierV1) SetResourceConfig() {
-
+func (apierV1 *ApierV1) GetResourceConfig(attr AttrGetResCfg, reply *engine.ResourceCfg) error {
+	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if rcfg, err := apierV1.DataDB.GetResourceCfg(attr.ID, true, utils.NonTransactional); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	} else {
+		*reply = *rcfg
+	}
+	return nil
 }
 
-func (apierV1 *ApierV1) RemResourceConfig() {
+func (apierV1 *ApierV1) SetResourceConfig(attr *engine.ResourceCfg, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataDB.SetResourceCfg(attr, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
 
+func (apierV1 *ApierV1) RemResourceConfig(attrs AttrGetResCfg, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataDB.RemoveResourceCfg(attrs.ID, utils.NonTransactional); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = utils.OK
+	return nil
 }
