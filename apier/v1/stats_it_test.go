@@ -93,7 +93,6 @@ func TestStatSV1TPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(1000) * time.Millisecond)
 }
 
-/*
 func TestStatSV1GetStats(t *testing.T) {
 	var reply []string
 	// first attempt should be empty since there is no queue in cache yet
@@ -167,7 +166,6 @@ func TestStatSV1ProcessEvent(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 }
-*/
 
 var statConfig = &engine.StatsConfig{
 	ID: "SCFG1",
