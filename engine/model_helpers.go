@@ -1811,14 +1811,14 @@ func APItoModelLcrRules(ts []*utils.TPLcrRules) (result TpLcrRules) {
 	return result
 }
 
-type TpResourceLimits []*TpResource
+type TpResources []*TpResource
 
-func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimit) {
-	mrl := make(map[string]*utils.TPResourceLimit)
+func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
+	mrl := make(map[string]*utils.TPResource)
 	for _, tp := range tps {
 		rl, found := mrl[tp.Tag]
 		if !found {
-			rl = &utils.TPResourceLimit{
+			rl = &utils.TPResource{
 				TPid:    tp.Tpid,
 				ID:      tp.Tag,
 				Blocker: tp.Blocker,
@@ -1861,7 +1861,7 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 		}
 		mrl[tp.Tag] = rl
 	}
-	result = make([]*utils.TPResourceLimit, len(mrl))
+	result = make([]*utils.TPResource, len(mrl))
 	i := 0
 	for _, rl := range mrl {
 		result[i] = rl
@@ -1870,7 +1870,7 @@ func (tps TpResourceLimits) AsTPResourceLimits() (result []*utils.TPResourceLimi
 	return
 }
 
-func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) {
+func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 	if len(rl.Filters) == 0 {
 		return
 	}
@@ -1914,7 +1914,7 @@ func APItoModelResourceLimit(rl *utils.TPResourceLimit) (mdls TpResourceLimits) 
 	return
 }
 
-func APItoResourceLimit(tpRL *utils.TPResourceLimit, timezone string) (rl *ResourceCfg, err error) {
+func APItoResource(tpRL *utils.TPResource, timezone string) (rl *ResourceCfg, err error) {
 	rl = &ResourceCfg{
 		ID:      tpRL.ID,
 		Weight:  tpRL.Weight,

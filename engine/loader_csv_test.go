@@ -335,8 +335,8 @@ func init() {
 	if err := csvr.LoadAliases(); err != nil {
 		log.Print("error in LoadAliases:", err)
 	}
-	if err := csvr.LoadResourceLimits(); err != nil {
-		log.Print("error in LoadResourceLimits:", err)
+	if err := csvr.LoadResources(); err != nil {
+		log.Print("error in LoadResources:", err)
 
 	}
 	if err := csvr.LoadStats(); err != nil {
@@ -1388,9 +1388,9 @@ func TestLoadReverseAliases(t *testing.T) {
 	}
 }
 
-func TestLoadResourceLimits(t *testing.T) {
-	eResLimits := map[string]*utils.TPResourceLimit{
-		"ResGroup21": &utils.TPResourceLimit{
+func TestLoadResources(t *testing.T) {
+	eResLimits := map[string]*utils.TPResource{
+		"ResGroup21": &utils.TPResource{
 			TPid: testTPID,
 			ID:   "ResGroup21",
 			Filters: []*utils.TPRequestFilter{
@@ -1406,7 +1406,7 @@ func TestLoadResourceLimits(t *testing.T) {
 			Weight:            10,
 			Limit:             "2",
 		},
-		"ResGroup22": &utils.TPResourceLimit{
+		"ResGroup22": &utils.TPResource{
 			TPid: testTPID,
 			ID:   "ResGroup22",
 			Filters: []*utils.TPRequestFilter{

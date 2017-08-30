@@ -30,7 +30,7 @@ var (
 	rs           Resources
 )
 
-func TestResourceLimitRecordUsage(t *testing.T) {
+func TestResourceRecordUsage(t *testing.T) {
 	ru = &ResourceUsage{
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),

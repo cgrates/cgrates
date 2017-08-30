@@ -56,7 +56,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.LCRS_CSV:              (*TPCSVImporter).importLcrs,
 	utils.USERS_CSV:             (*TPCSVImporter).importUsers,
 	utils.ALIASES_CSV:           (*TPCSVImporter).importAliases,
-	utils.ResourcesCsv:          (*TPCSVImporter).importResourceLimits,
+	utils.ResourcesCsv:          (*TPCSVImporter).importResources,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
 }
@@ -351,15 +351,15 @@ func (self *TPCSVImporter) importAliases(fn string) error {
 	return self.StorDb.SetTPAliases(tps)
 }
 
-func (self *TPCSVImporter) importResourceLimits(fn string) error {
+func (self *TPCSVImporter) importResources(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPResourceLimits(self.TPid, "")
+	rls, err := self.csvr.GetTPResources(self.TPid, "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPResourceLimits(rls)
+	return self.StorDb.SetTPResources(rls)
 }
 
 func (self *TPCSVImporter) importStats(fn string) error {

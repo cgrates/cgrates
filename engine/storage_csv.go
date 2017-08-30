@@ -592,7 +592,7 @@ func (csvs *CSVStorage) GetTPAliases(filter *utils.TPAliases) ([]*utils.TPAliase
 	}
 }
 
-func (csvs *CSVStorage) GetTPResourceLimits(tpid, id string) ([]*utils.TPResourceLimit, error) {
+func (csvs *CSVStorage) GetTPResources(tpid, id string) ([]*utils.TPResource, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.resLimitsFn, csvs.sep, getColumnCount(TpResource{}))
 	if err != nil {
 		//log.Print("Could not load resource limits file: ", err)
@@ -602,7 +602,7 @@ func (csvs *CSVStorage) GetTPResourceLimits(tpid, id string) ([]*utils.TPResourc
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpResLimits TpResourceLimits
+	var tpResLimits TpResources
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in resourcelimits csv: ", err)
@@ -617,7 +617,7 @@ func (csvs *CSVStorage) GetTPResourceLimits(tpid, id string) ([]*utils.TPResourc
 			tpResLimits = append(tpResLimits, &tpLimit)
 		}
 	}
-	return tpResLimits.AsTPResourceLimits(), nil
+	return tpResLimits.AsTPResources(), nil
 }
 
 func (csvs *CSVStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {

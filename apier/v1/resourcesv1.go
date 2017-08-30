@@ -84,6 +84,7 @@ type AttrGetResCfg struct {
 	ID string
 }
 
+// GetResourceConfig returns a resource configuration
 func (apierV1 *ApierV1) GetResourceConfig(attr AttrGetResCfg, reply *engine.ResourceCfg) error {
 	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -99,6 +100,7 @@ func (apierV1 *ApierV1) GetResourceConfig(attr AttrGetResCfg, reply *engine.Reso
 	return nil
 }
 
+//SetResourceConfig add a new resource configuration
 func (apierV1 *ApierV1) SetResourceConfig(attr *engine.ResourceCfg, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -110,6 +112,7 @@ func (apierV1 *ApierV1) SetResourceConfig(attr *engine.ResourceCfg, reply *strin
 	return nil
 }
 
+//RemResourceConfig remove a specific resource configuration
 func (apierV1 *ApierV1) RemResourceConfig(attrs AttrGetResCfg, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

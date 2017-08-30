@@ -92,6 +92,7 @@ type AttrGetStatsCfg struct {
 	ID string
 }
 
+//GetStatConfig returns a stat configuration
 func (apierV1 *ApierV1) GetStatConfig(attr AttrGetStatsCfg, reply *engine.StatsConfig) error {
 	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -107,6 +108,7 @@ func (apierV1 *ApierV1) GetStatConfig(attr AttrGetStatsCfg, reply *engine.StatsC
 	return nil
 }
 
+//SetStatConfig add a new stat configuration
 func (apierV1 *ApierV1) SetStatConfig(attr *engine.StatsConfig, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -119,6 +121,7 @@ func (apierV1 *ApierV1) SetStatConfig(attr *engine.StatsConfig, reply *string) e
 
 }
 
+//Remove a specific stat configuration
 func (apierV1 *ApierV1) RemStatConfig(attrs AttrGetStatsCfg, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
