@@ -19,6 +19,7 @@ package migrator
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -55,19 +56,26 @@ func (at *v1ActionPlan) IsASAP() bool {
 func (m *Migrator) migrateActionPlans() (err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
+		var v1aps *v1ActionPlans
 		var apsv1keys []string
 		apsv1keys, err = m.dataDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 		if err != nil {
 			return
 		}
 		for _, apsv1key := range apsv1keys {
-			v1aps, err := m.getV1ActionPlansFromDB(apsv1key)
+			v1aps, err = m.getV1ActionPlansFromDB(apsv1key)
 			if err != nil {
 				return err
 			}
-			aps := v1aps.AsActionPlan()
-			if err = m.dataDB.SetActionPlan(aps.Id, aps, true, utils.NonTransactional); err != nil {
-				return err
+			if v1aps == nil {
+				log.Print("No Action Plans found key:", v1aps)
+			} else {
+				for _, v1ap := range *v1aps {
+					ap := v1ap.AsActionPlan()
+					if err = m.dataDB.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+						return err
+					}
+				}
 			}
 		}
 		// All done, update version wtih current one
@@ -108,15 +116,14 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	}
 }
 
-func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlan, err error) {
+func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlans, err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
 		dataDB := m.dataDB.(*engine.RedisStorage)
 		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
 			return nil, err
 		} else {
-			v1aps := &v1ActionPlan{Id: key}
-			if err := m.mrshlr.Unmarshal(strVal, v1aps); err != nil {
+			if err := m.mrshlr.Unmarshal(strVal, &v1aps); err != nil {
 				return nil, err
 			}
 			return v1aps, nil
@@ -125,7 +132,7 @@ func (m *Migrator) getV1ActionPlansFromDB(key string) (v1aps *v1ActionPlan, err 
 		dataDB := m.dataDB.(*engine.MongoStorage)
 		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
-		v1aps := new(v1ActionPlan)
+		v1aps := new(v1ActionPlans)
 		if err := mgoDB.C(utils.ACTION_PLAN_PREFIX).Find(bson.M{"id": key}).One(v1aps); err != nil {
 			return nil, err
 		}

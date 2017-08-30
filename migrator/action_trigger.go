@@ -52,7 +52,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 				return err
 			}
 			if v1atrs == nil {
-				log.Print("No Actions found")
+				log.Print("No Action Triggers found key:", v1atrskey)
 			} else {
 				for _, v1atr := range *v1atrs {
 					atr := v1atr.AsActionTrigger()

@@ -19,6 +19,7 @@ package migrator
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -53,7 +54,7 @@ func (m *Migrator) migrateActions() (err error) {
 				return err
 			}
 			if v1acts == nil {
-				log.Print("No Actions found")
+				log.Print("No Actions found with key:", actv1key)
 			} else {
 				for _, v1act := range *v1acts {
 					act := v1act.AsAction()
@@ -114,7 +115,7 @@ func (m *Migrator) getV1ActionFromDB(key string) (v1act *v1Actions, err error) {
 		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
 			return nil, err
 		} else {
-			if err := m.mrshlr.Unmarshal(strVal, v1act); err != nil {
+			if err := m.mrshlr.Unmarshal(strVal, &v1act); err != nil {
 				return nil, err
 			}
 			return v1act, nil
