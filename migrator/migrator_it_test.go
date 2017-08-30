@@ -217,7 +217,8 @@ func testMigratorAccounts(t *testing.T) {
 //2
 
 func testMigratorActionPlans(t *testing.T) {
-	v1ap := &v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
+
+	v1ap := v1ActionPlans{&v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}
 	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
 	switch {
 	case dbtype == utils.REDIS:
@@ -225,7 +226,7 @@ func testMigratorActionPlans(t *testing.T) {
 		if err != nil {
 			t.Error("Error when marshaling ", err.Error())
 		}
-		setv1id := utils.ACTION_PLAN_PREFIX + v1ap.Id
+		setv1id := utils.ACTION_PLAN_PREFIX + v1ap[0].Id
 		err = mig.SetV1onRedis(setv1id, bit)
 		if err != nil {
 			t.Error("Error when setting v1 ActionPlan ", err.Error())
@@ -242,6 +243,7 @@ func testMigratorActionPlans(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting ActionPlan ", err.Error())
 		}
+
 		if ap.Id != result.Id || !reflect.DeepEqual(ap.AccountIDs, result.AccountIDs) {
 			t.Errorf("Expecting: %+v, received: %+v", *ap, result)
 		} else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
@@ -249,6 +251,7 @@ func testMigratorActionPlans(t *testing.T) {
 		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
 			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
+
 		/*
 			case dbtype == utils.MONGO:
 				err := mig.SetV1onMongoActionPlan(utils.ACTION_PLAN_PREFIX, v1ap)
@@ -426,7 +429,7 @@ func testMigratorActionTriggers(t *testing.T) {
 //4
 
 func testMigratorActions(t *testing.T) {
-	v1act := &v1Action{Id: "test", ActionType: "", BalanceType: "", Direction: "INBOUND", ExtraParameters: "", ExpirationString: "", Balance: &v1Balance{Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}
+	v1act := v1Actions{&v1Action{Id: "test", ActionType: "", BalanceType: "", Direction: "INBOUND", ExtraParameters: "", ExpirationString: "", Balance: &v1Balance{Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
 	act := engine.Actions{&engine.Action{Id: "test", ActionType: "", ExtraParameters: "", ExpirationString: "", Weight: 0.00, Balance: &engine.BalanceFilter{Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
 	switch {
 	case dbtype == utils.REDIS:
@@ -434,7 +437,7 @@ func testMigratorActions(t *testing.T) {
 		if err != nil {
 			t.Error("Error when marshaling ", err.Error())
 		}
-		setv1id := utils.ACTION_PREFIX + v1act.Id
+		setv1id := utils.ACTION_PREFIX + v1act[0].Id
 		err = mig.SetV1onRedis(setv1id, bit)
 		if err != nil {
 			t.Error("Error when setting v1 Actions ", err.Error())
@@ -447,7 +450,7 @@ func testMigratorActions(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Actions ", err.Error())
 		}
-		result, err := mig.dataDB.GetActions(v1act.Id, true, utils.NonTransactional)
+		result, err := mig.dataDB.GetActions(v1act[0].Id, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Actions ", err.Error())
 		}
