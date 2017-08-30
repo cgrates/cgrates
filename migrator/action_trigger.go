@@ -51,7 +51,9 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 			if err != nil {
 				return err
 			}
-			if v1atrs != nil {
+			if v1atrs == nil {
+				log.Print("No Actions found")
+			} else {
 				for _, v1atr := range *v1atrs {
 					atr := v1atr.AsActionTrigger()
 					atrrs = append(atrrs, atr)

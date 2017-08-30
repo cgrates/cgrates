@@ -48,12 +48,18 @@ func (m *Migrator) migrateActions() (err error) {
 			return
 		}
 		for _, actv1key := range actv1keys {
-			v1act, err := m.getV1ActionFromDB(actv1key)
+			v1acts, err := m.getV1ActionFromDB(actv1key)
 			if err != nil {
 				return err
 			}
-			act := v1act.AsAction()
-			acts = append(acts, act)
+			if v1acts == nil {
+				log.Print("No Actions found")
+			} else {
+				for _, v1act := range *v1acts {
+					act := v1act.AsAction()
+					acts = append(acts, act)
+				}
+			}
 		}
 		if err := m.dataDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 			return err
@@ -101,14 +107,13 @@ func (m *Migrator) migrateActions() (err error) {
 	}
 }
 
-func (m *Migrator) getV1ActionFromDB(key string) (v1act *v1Action, err error) {
+func (m *Migrator) getV1ActionFromDB(key string) (v1act *v1Actions, err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
 		dataDB := m.dataDB.(*engine.RedisStorage)
 		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
 			return nil, err
 		} else {
-			v1act := &v1Action{Id: key}
 			if err := m.mrshlr.Unmarshal(strVal, v1act); err != nil {
 				return nil, err
 			}
@@ -118,7 +123,7 @@ func (m *Migrator) getV1ActionFromDB(key string) (v1act *v1Action, err error) {
 		dataDB := m.dataDB.(*engine.MongoStorage)
 		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
-		v1act := new(v1Action)
+		v1act := new(v1Actions)
 		if err := mgoDB.C(utils.ACTION_PREFIX).Find(bson.M{"id": key}).One(v1act); err != nil {
 			return nil, err
 		}
