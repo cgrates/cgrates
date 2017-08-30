@@ -144,7 +144,7 @@ func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (e
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourceLimitsPrefix:   rlIDs,
+		utils.ResourcesPrefix:        rlIDs,
 	} {
 		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -230,7 +230,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix,
+		utils.ResourcesPrefix,
 		utils.TimingsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
@@ -294,7 +294,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = rs.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourceLimitsPrefix:
+		case utils.ResourcesPrefix:
 			_, err = rs.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
@@ -1372,7 +1372,7 @@ func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 
 func (rs *RedisStorage) GetResourceCfg(id string,
 	skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
-	key := utils.ResourceLimitsPrefix + id
+	key := utils.ResourcesPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1406,11 +1406,11 @@ func (rs *RedisStorage) SetResourceCfg(r *ResourceCfg, transactionID string) err
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.ResourceLimitsPrefix+r.ID, result).Err
+	return rs.Cmd("SET", utils.ResourcesPrefix+r.ID, result).Err
 }
 
 func (rs *RedisStorage) RemoveResourceCfg(id string, transactionID string) (err error) {
-	key := utils.ResourceLimitsPrefix + id
+	key := utils.ResourcesPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

@@ -234,7 +234,7 @@ func (rS *ResourceService) ServiceShutdown() error {
 func (rS *ResourceService) matchingResourcesForEvent(
 	ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rlIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourceLimitsIndex)
+	rlIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourcesIndex)
 	if err != nil {
 		return nil, err
 	}

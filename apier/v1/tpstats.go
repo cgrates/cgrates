@@ -21,6 +21,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// Creates a new stat within a tariff plan
 func (self *ApierV1) SetTPStat(attr utils.TPStats, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -37,6 +38,7 @@ type AttrGetTPStat struct {
 	ID   string
 }
 
+// Queries specific Stat on Tariff plan
 func (self *ApierV1) GetTPStat(attr AttrGetTPStat, reply *utils.TPStats) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -57,6 +59,7 @@ type AttrGetTPStatIds struct {
 	utils.Paginator
 }
 
+// Queries Stat identities on specific tariff plan.
 func (self *ApierV1) GetTPStatIDs(attrs AttrGetTPStatIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -71,6 +74,7 @@ func (self *ApierV1) GetTPStatIDs(attrs AttrGetTPStatIds, reply *[]string) error
 	return nil
 }
 
+// Removes specific Stat on Tariff plan
 func (self *ApierV1) RemTPStat(attrs AttrGetTPStat, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

@@ -323,7 +323,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.CDR_STATS_PREFIX:           colCrs,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
-		utils.ResourceLimitsPrefix:       colRL,
+		utils.ResourcesPrefix:            colRL,
 		utils.StatsPrefix:                colSts,
 		utils.TimingsPrefix:              colTmg,
 	}
@@ -440,7 +440,7 @@ func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (e
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourceLimitsPrefix:   rlIDs,
+		utils.ResourcesPrefix:        rlIDs,
 	} {
 		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -466,7 +466,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix,
+		utils.ResourcesPrefix,
 		utils.TimingsPrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
@@ -530,7 +530,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourceLimitsPrefix:
+		case utils.ResourcesPrefix:
 			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
@@ -624,10 +624,10 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&keyResult) {
 			result = append(result, utils.REVERSE_ALIASES_PREFIX+keyResult.Key)
 		}
-	case utils.ResourceLimitsPrefix:
+	case utils.ResourcesPrefix:
 		iter := db.C(colRL).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.ResourceLimitsPrefix+idResult.Id)
+			result = append(result, utils.ResourcesPrefix+idResult.Id)
 		}
 	case utils.StatsPrefix:
 		iter := db.C(colSts).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
@@ -1842,7 +1842,7 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 }
 
 func (ms *MongoStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
-	key := utils.ResourceLimitsPrefix + id
+	key := utils.ResourcesPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1883,7 +1883,7 @@ func (ms *MongoStorage) RemoveResourceCfg(id string, transactionID string) (err 
 	if err = col.Remove(bson.M{"id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ResourceLimitsPrefix+id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ResourcesPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil
 }
 
