@@ -378,7 +378,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 	//log.Printf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances)
 	var leftCC *CallCost
 	cc = cd.CreateCallCost()
-
+	var hadBalanceSubj bool
 	generalBalanceChecker := true
 	for generalBalanceChecker {
 		generalBalanceChecker = false
@@ -397,7 +397,9 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				if debitErr != nil {
 					return nil, debitErr
 				}
-
+				if balance.RatingSubject != "" && !strings.HasPrefix(balance.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
+					hadBalanceSubj = true
+				}
 				//utils.Logger.Info(fmt.Sprintf("CD AFTER UNIT: %+v", cd))
 				if partCC != nil {
 					//log.Printf("partCC: %+v", partCC.Timespans[0])
@@ -473,6 +475,9 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		//log.Print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 	}
 	//log.Printf("After balances CD: %+v", cd)
+	if hadBalanceSubj {
+		cd.RatingInfos = nil
+	}
 	leftCC, err = cd.getCost()
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))

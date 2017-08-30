@@ -1713,7 +1713,6 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 	}
 }
 
-/*
 func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	acnt := &Account{
 		ID: "TCDDBSWF:account1",
@@ -1815,11 +1814,10 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	for _, rpf := range []*RatingProfile{rpfTCDDBSWF, rpfAny} {
 		dataStorage.SetRatingProfile(rpf, utils.NonTransactional)
 	}
-	cd1 := &CallDescriptor{
+	cd1 := &CallDescriptor{ // test the cost for subject within balance setup
 		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "TCDDBSWF",
-		Account:     "account1",
 		Subject:     "SubjTCDDBSWF",
 		Destination: "1716",
 		TimeStart:   time.Date(2015, 01, 01, 9, 0, 0, 0, time.UTC),
@@ -1842,9 +1840,20 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	if cc, err := cd2.GetCost(); err != nil || cc.Cost != 0.6 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
 	}
-	if cc, err := cd1.Debit(); err != nil {
+	cd := &CallDescriptor{ // test the cost
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "TCDDBSWF",
+		Account:     "account1",
+		Subject:     "account1",
+		Destination: "1716",
+		TimeStart:   time.Date(2015, 01, 01, 9, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
+		TOR:         utils.VOICE,
+	}
+	if cc, err := cd.Debit(); err != nil {
 		t.Error(err)
-	} else if cc.Cost != 0 {
+	} else if cc.Cost != 0.6 {
 		t.Errorf("CallCost: %v", cc)
 	}
 	if resAcnt, err := dataStorage.GetAccount(acnt.ID); err != nil {
@@ -1853,12 +1862,11 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		resAcnt.BalanceMap[utils.VOICE][0].Value != 0 {
 		t.Errorf("Account: %v", resAcnt)
 	} else if len(resAcnt.BalanceMap[utils.MONETARY]) == 0 ||
-		resAcnt.BalanceMap[utils.VOICE][0].ID != utils.META_DEFAULT ||
-		resAcnt.BalanceMap[utils.VOICE][0].Value != -0.60 {
+		resAcnt.BalanceMap[utils.MONETARY][0].ID != utils.META_DEFAULT ||
+		resAcnt.BalanceMap[utils.MONETARY][0].Value != -0.600013 { // rounding issue
 		t.Errorf("Account: %s", utils.ToIJSON(resAcnt))
 	}
 }
-*/
 
 /*************** BENCHMARKS ********************/
 func BenchmarkStorageGetting(b *testing.B) {

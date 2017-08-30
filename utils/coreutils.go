@@ -284,6 +284,9 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 	return d2
 }
 
+// ParseZeroRatingSubject will parse the subject in the balance
+// returns duration if able to extract it from subject
+// returns error if not able to parse duration (ie: if ratingSubject is standard one)
 func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
 	rateSubj = strings.TrimSpace(rateSubj)
 	if rateSubj == "" || rateSubj == ANY {

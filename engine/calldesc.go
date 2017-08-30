@@ -494,7 +494,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 }
 
 func (cd *CallDescriptor) getCost() (*CallCost, error) {
-
 	// check for 0 duration
 	if cd.GetDuration() == 0 {
 		cc := cd.CreateCallCost()
