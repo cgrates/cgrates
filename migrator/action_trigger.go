@@ -2,18 +2,19 @@ package migrator
 
 import (
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
+	"log"
 	"strings"
 	"time"
-
-	"gopkg.in/mgo.v2/bson"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type v1ActionTrigger struct {
-	Id                    string // for visual identification
-	ThresholdType         string //*min_counter, *max_counter, *min_balance, *max_balance
+	Id            string // for visual identification
+	ThresholdType string //*min_counter, *max_counter, *min_balance, *max_balance
+	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc
 	ThresholdValue        float64
 	Recurrent             bool          // reset eexcuted flag each run
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
@@ -50,10 +51,11 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 			if err != nil {
 				return err
 			}
-			v1atr := v1atrs
 			if v1atrs != nil {
-				atr := v1atr.AsActionTrigger()
-				atrrs = append(atrrs, atr)
+				for _, v1atr := range *v1atrs {
+					atr := v1atr.AsActionTrigger()
+					atrrs = append(atrrs, atr)
+				}
 			}
 		}
 		if err := m.dataDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
@@ -98,14 +100,13 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 			fmt.Sprintf("error: unsupported: <%s> for migrateActionTriggers method", m.dataDBType))
 	}
 }
-func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger, err error) {
+func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTriggers, err error) {
 	switch m.dataDBType {
 	case utils.REDIS:
 		dataDB := m.dataDB.(*engine.RedisStorage)
 		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
 			return nil, err
 		} else {
-			v1Atr := &v1ActionTrigger{Id: key}
 			if err := m.mrshlr.Unmarshal(strVal, &v1Atr); err != nil {
 				return nil, err
 			}
@@ -115,7 +116,7 @@ func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTrigger,
 		dataDB := m.dataDB.(*engine.MongoStorage)
 		mgoDB := dataDB.DB()
 		defer mgoDB.Session.Close()
-		v1Atr := new(v1ActionTrigger)
+		v1Atr := new(v1ActionTriggers)
 		if err := mgoDB.C(utils.ACTION_TRIGGER_PREFIX).Find(bson.M{"id": key}).One(v1Atr); err != nil {
 			return nil, err
 		}
