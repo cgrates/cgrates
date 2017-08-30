@@ -742,8 +742,8 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Weight:             10.0,
 			Limit:              "20"},
 	}
-	eTPs := []*utils.TPResourceLimit{
-		&utils.TPResourceLimit{
+	eTPs := []*utils.TPResource{
+		&utils.TPResource{
 			TPid: tps[0].Tpid,
 			ID:   tps[0].Tag,
 			Filters: []*utils.TPRequestFilter{
@@ -767,7 +767,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Limit:      tps[0].Limit,
 			Thresholds: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
-		&utils.TPResourceLimit{
+		&utils.TPResource{
 			TPid: tps[2].Tpid,
 			ID:   tps[2].Tag,
 			Filters: []*utils.TPRequestFilter{
@@ -786,14 +786,14 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Limit:   tps[2].Limit,
 		},
 	}
-	rcvTPs := TpResourceLimits(tps).AsTPResourceLimits()
+	rcvTPs := TpResources(tps).AsTPResource()
 	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[1])) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
 
-func TestAPItoResourceLimit(t *testing.T) {
-	tpRL := &utils.TPResourceLimit{
+func TestAPItoResource(t *testing.T) {
+	tpRL := &utils.TPResource{
 		TPid: testTPID,
 		ID:   "ResGroup1",
 		Filters: []*utils.TPRequestFilter{
@@ -830,7 +830,7 @@ func TestAPItoResourceLimit(t *testing.T) {
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eRL.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 	eRL.Limit = 2
-	if rl, err := APItoResourceLimit(tpRL, "UTC"); err != nil {
+	if rl, err := APItoResource(tpRL, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRL, rl) {
 		t.Errorf("Expecting: %+v, received: %+v", eRL, rl)

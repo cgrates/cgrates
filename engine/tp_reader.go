@@ -52,7 +52,7 @@ type TpReader struct {
 	cdrStats         map[string]*CdrStats
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
-	resLimits        map[string]*utils.TPResourceLimit
+	resLimits        map[string]*utils.TPResource
 	stats            map[string]*utils.TPStats
 	thresholds       map[string]*utils.TPThreshold
 
@@ -126,7 +126,7 @@ func (tpr *TpReader) Init() {
 	tpr.users = make(map[string]*UserProfile)
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
-	tpr.resLimits = make(map[string]*utils.TPResourceLimit)
+	tpr.resLimits = make(map[string]*utils.TPResource)
 	tpr.stats = make(map[string]*utils.TPStats)
 	tpr.thresholds = make(map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
@@ -1591,12 +1591,12 @@ func (tpr *TpReader) LoadAliases() error {
 	return err
 }
 
-func (tpr *TpReader) LoadResourceLimitsFiltered(tag string) error {
-	rls, err := tpr.lr.GetTPResourceLimits(tpr.tpid, tag)
+func (tpr *TpReader) LoadResourceFiltered(tag string) error {
+	rls, err := tpr.lr.GetTPResource(tpr.tpid, tag)
 	if err != nil {
 		return err
 	}
-	mapRLs := make(map[string]*utils.TPResourceLimit)
+	mapRLs := make(map[string]*utils.TPResource)
 	for _, rl := range rls {
 		mapRLs[rl.ID] = rl
 	}
@@ -1605,7 +1605,7 @@ func (tpr *TpReader) LoadResourceLimitsFiltered(tag string) error {
 }
 
 func (tpr *TpReader) LoadResourceLimits() error {
-	return tpr.LoadResourceLimitsFiltered("")
+	return tpr.LoadResourceFiltered("")
 }
 
 func (tpr *TpReader) LoadStatsFiltered(tag string) error {
@@ -1936,7 +1936,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("ResourceLimits:")
 	}
 	for _, tpRL := range tpr.resLimits {
-		rl, err := APItoResourceLimit(tpRL, tpr.timezone)
+		rl, err := APItoResource(tpRL, tpr.timezone)
 		if err != nil {
 			return err
 		}
@@ -2022,7 +2022,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 			for _, tpRL := range tpr.resLimits {
-				if rl, err := APItoResourceLimit(tpRL, tpr.timezone); err != nil {
+				if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
 					return err
 				} else {
 					rlIdxr.IndexFilters(rl.ID, rl.Filters)

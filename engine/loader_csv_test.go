@@ -1388,9 +1388,9 @@ func TestLoadReverseAliases(t *testing.T) {
 	}
 }
 
-func TestLoadResourceLimits(t *testing.T) {
-	eResLimits := map[string]*utils.TPResourceLimit{
-		"ResGroup21": &utils.TPResourceLimit{
+func TestLoadResource(t *testing.T) {
+	eResLimits := map[string]*utils.TPResource{
+		"ResGroup21": &utils.TPResource{
 			TPid: testTPID,
 			ID:   "ResGroup21",
 			Filters: []*utils.TPRequestFilter{
@@ -1406,7 +1406,7 @@ func TestLoadResourceLimits(t *testing.T) {
 			Weight:            10,
 			Limit:             "2",
 		},
-		"ResGroup22": &utils.TPResourceLimit{
+		"ResGroup22": &utils.TPResource{
 			TPid: testTPID,
 			ID:   "ResGroup22",
 			Filters: []*utils.TPRequestFilter{

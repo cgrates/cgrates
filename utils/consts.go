@@ -99,7 +99,7 @@ const (
 	TBLTPDerivedChargers          = "tp_derived_chargers"
 	TBLTPUsers                    = "tp_users"
 	TBLTPAliases                  = "tp_aliases"
-	TBLTPResourceLimits           = "tp_resources"
+	TBLTPResource                 = "tp_resources"
 	TBLTPStats                    = "tp_stats"
 	TBLTPThresholds               = "tp_thresholds"
 	TBLSMCosts                    = "sm_costs"

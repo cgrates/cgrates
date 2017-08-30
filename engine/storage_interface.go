@@ -165,7 +165,7 @@ type LoadReader interface {
 	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
 	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
-	GetTPResourceLimits(string, string) ([]*utils.TPResourceLimit, error)
+	GetTPResource(string, string) ([]*utils.TPResource, error)
 	GetTPStats(string, string) ([]*utils.TPStats, error)
 	GetTPThreshold(string, string) ([]*utils.TPThreshold, error)
 }
@@ -188,7 +188,7 @@ type LoadWriter interface {
 	SetTPActionPlans([]*utils.TPActionPlan) error
 	SetTPActionTriggers([]*utils.TPActionTriggers) error
 	SetTPAccountActions([]*utils.TPAccountActions) error
-	SetTPResourceLimits([]*utils.TPResourceLimit) error
+	SetTPResource([]*utils.TPResource) error
 	SetTPStats([]*utils.TPStats) error
 	SetTPThreshold([]*utils.TPThreshold) error
 }

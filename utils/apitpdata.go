@@ -1265,7 +1265,7 @@ type AttrSetBalance struct {
 	Disabled       *bool
 }
 
-type TPResourceLimit struct {
+type TPResource struct {
 	TPid               string
 	ID                 string                // Identifier of this limit
 	Filters            []*TPRequestFilter    // Filters for the request
