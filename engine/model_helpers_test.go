@@ -786,7 +786,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Limit:   tps[2].Limit,
 		},
 	}
-	rcvTPs := TpResources(tps).AsTPResource()
+	rcvTPs := TpResources(tps).AsTPResources()
 	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[1])) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}

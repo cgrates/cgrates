@@ -1591,8 +1591,8 @@ func (tpr *TpReader) LoadAliases() error {
 	return err
 }
 
-func (tpr *TpReader) LoadResourceFiltered(tag string) error {
-	rls, err := tpr.lr.GetTPResource(tpr.tpid, tag)
+func (tpr *TpReader) LoadResourcesFiltered(tag string) error {
+	rls, err := tpr.lr.GetTPResources(tpr.tpid, tag)
 	if err != nil {
 		return err
 	}
@@ -1604,8 +1604,8 @@ func (tpr *TpReader) LoadResourceFiltered(tag string) error {
 	return nil
 }
 
-func (tpr *TpReader) LoadResourceLimits() error {
-	return tpr.LoadResourceFiltered("")
+func (tpr *TpReader) LoadResources() error {
+	return tpr.LoadResourcesFiltered("")
 }
 
 func (tpr *TpReader) LoadStatsFiltered(tag string) error {
@@ -1691,7 +1691,7 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadAliases(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadResourceLimits(); err != nil && err.Error() != utils.NotFoundCaps {
+	if err = tpr.LoadResources(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1933,7 +1933,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("ResourceLimits:")
+		log.Print("Resources:")
 	}
 	for _, tpRL := range tpr.resLimits {
 		rl, err := APItoResource(tpRL, tpr.timezone)
@@ -2017,7 +2017,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if verbose {
 				log.Print("Indexing resource limits")
 			}
-			rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourceLimitsIndex)
+			rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourcesIndex)
 			if err != nil {
 				return err
 			}
@@ -2253,7 +2253,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ResourceLimitsPrefix:
+	case utils.ResourcesPrefix:
 		keys := make([]string, len(tpr.resLimits))
 		i := 0
 		for k := range tpr.resLimits {

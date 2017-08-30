@@ -21,12 +21,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new resource limit within a tariff plan
-func (self *ApierV1) SetTPResourceLimit(attr utils.TPResource, reply *string) error {
+// Creates a new resource within a tariff plan
+func (self *ApierV1) SetTPResource(attr utils.TPResource, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID", "Limit"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPResource([]*utils.TPResource{&attr}); err != nil {
+	if err := self.StorDb.SetTPResources([]*utils.TPResource{&attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -38,12 +38,12 @@ type AttrGetTPResource struct {
 	ID   string
 }
 
-// Queries specific ResourceLimit on Tariff plan
-func (self *ApierV1) GetTPResourceLimit(attr AttrGetTPResource, reply *utils.TPResource) error {
+// Queries specific Resource on Tariff plan
+func (self *ApierV1) GetTPResource(attr AttrGetTPResource, reply *utils.TPResource) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rls, err := self.StorDb.GetTPResource(attr.TPid, attr.ID); err != nil {
+	if rls, err := self.StorDb.GetTPResources(attr.TPid, attr.ID); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(rls) == 0 {
 		return utils.ErrNotFound
@@ -58,12 +58,12 @@ type AttrGetTPResourceIds struct {
 	utils.Paginator
 }
 
-// Queries ResourceLimit identities on specific tariff plan.
-func (self *ApierV1) GetTPResourceLimitIDs(attrs AttrGetTPResourceIds, reply *[]string) error {
+// Queries Resource identities on specific tariff plan.
+func (self *ApierV1) GetTPResourceIDs(attrs AttrGetTPResourceIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPResource, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPResources, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -73,12 +73,12 @@ func (self *ApierV1) GetTPResourceLimitIDs(attrs AttrGetTPResourceIds, reply *[]
 	return nil
 }
 
-// Removes specific ResourceLimit on Tariff plan
-func (self *ApierV1) RemTPResourceLimit(attrs AttrGetTPResource, reply *string) error {
+// Removes specific Resource on Tariff plan
+func (self *ApierV1) RemTPResource(attrs AttrGetTPResource, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPResource, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPResources, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

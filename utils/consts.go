@@ -54,7 +54,7 @@ var (
 		CacheAliases:             ALIASES_PREFIX,
 		CacheReverseAliases:      REVERSE_ALIASES_PREFIX,
 		CacheDerivedChargers:     DERIVEDCHARGERS_PREFIX,
-		CacheResources:           ResourceLimitsPrefix,
+		CacheResources:           ResourcesPrefix,
 		CacheTimings:             TimingsPrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
@@ -99,7 +99,7 @@ const (
 	TBLTPDerivedChargers          = "tp_derived_chargers"
 	TBLTPUsers                    = "tp_users"
 	TBLTPAliases                  = "tp_aliases"
-	TBLTPResource                 = "tp_resources"
+	TBLTPResources                = "tp_resources"
 	TBLTPStats                    = "tp_stats"
 	TBLTPThresholds               = "tp_thresholds"
 	TBLSMCosts                    = "sm_costs"
@@ -234,8 +234,8 @@ const (
 	USERS_PREFIX                  = "usr_"
 	ALIASES_PREFIX                = "als_"
 	REVERSE_ALIASES_PREFIX        = "rls_"
-	ResourceLimitsPrefix          = "res_"
-	ResourceLimitsIndex           = "rsi_"
+	ResourcesPrefix               = "res_"
+	ResourcesIndex                = "rsi_"
 	StatsPrefix                   = "sts_"
 	StatsIndex                    = "sti_"
 	ThresholdsPrefix              = "ths_"

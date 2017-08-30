@@ -667,7 +667,7 @@ type ArgsCache struct {
 	DerivedChargerIDs     *[]string
 	AliasIDs              *[]string
 	ReverseAliasIDs       *[]string
-	ResourceLimitIDs      *[]string
+	ResourceIDs           *[]string
 	StatsIDs              *[]string
 	ThresholdsIDs         *[]string
 }
@@ -704,7 +704,7 @@ type CacheStats struct {
 	Users               int
 	Aliases             int
 	ReverseAliases      int
-	ResourceLimits      int
+	Resources           int
 	//Stats               int
 	//thresholds		  int
 }
@@ -1292,8 +1292,8 @@ type TPActivationInterval struct {
 }
 
 type AttrRLsCache struct {
-	LoadID           string
-	ResourceLimitIDs []string
+	LoadID      string
+	ResourceIDs []string
 }
 
 type AttrRLsResourceUsage struct {

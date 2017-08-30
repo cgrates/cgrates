@@ -190,7 +190,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResource, utils.TBLTPStats} {
+			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -559,7 +559,7 @@ func (self *SQLStorage) SetTPAccountActions(aas []*utils.TPAccountActions) error
 	return nil
 }
 
-func (self *SQLStorage) SetTPResource(rls []*utils.TPResource) error {
+func (self *SQLStorage) SetTPResources(rls []*utils.TPResource) error {
 	if len(rls) == 0 {
 		return nil
 	}
@@ -1542,7 +1542,7 @@ func (self *SQLStorage) GetTPAliases(filter *utils.TPAliases) ([]*utils.TPAliase
 	}
 }
 
-func (self *SQLStorage) GetTPResource(tpid, id string) ([]*utils.TPResource, error) {
+func (self *SQLStorage) GetTPResources(tpid, id string) ([]*utils.TPResource, error) {
 	var rls TpResources
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
@@ -1551,7 +1551,7 @@ func (self *SQLStorage) GetTPResource(tpid, id string) ([]*utils.TPResource, err
 	if err := q.Find(&rls).Error; err != nil {
 		return nil, err
 	}
-	arls := rls.AsTPResource()
+	arls := rls.AsTPResources()
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}

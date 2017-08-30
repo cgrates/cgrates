@@ -362,7 +362,7 @@ func (ms *MongoStorage) GetTPAliases(tp *utils.TPAliases) ([]*utils.TPAliases, e
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPResource(tpid, id string) ([]*utils.TPResource, error) {
+func (ms *MongoStorage) GetTPResources(tpid, id string) ([]*utils.TPResource, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -370,7 +370,7 @@ func (ms *MongoStorage) GetTPResource(tpid, id string) ([]*utils.TPResource, err
 		filter["id"] = id
 	}
 	var results []*utils.TPResource
-	session, col := ms.conn(utils.TBLTPResource)
+	session, col := ms.conn(utils.TBLTPResources)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
 	if len(results) == 0 {
@@ -844,11 +844,11 @@ func (ms *MongoStorage) SetTPAccountActions(tps []*utils.TPAccountActions) error
 	return err
 }
 
-func (ms *MongoStorage) SetTPResource(tpRLs []*utils.TPResource) (err error) {
+func (ms *MongoStorage) SetTPResources(tpRLs []*utils.TPResource) (err error) {
 	if len(tpRLs) == 0 {
 		return
 	}
-	session, col := ms.conn(utils.TBLTPResource)
+	session, col := ms.conn(utils.TBLTPResources)
 	defer session.Close()
 	tx := col.Bulk()
 	for _, tp := range tpRLs {

@@ -1813,7 +1813,7 @@ func APItoModelLcrRules(ts []*utils.TPLcrRules) (result TpLcrRules) {
 
 type TpResources []*TpResource
 
-func (tps TpResources) AsTPResource() (result []*utils.TPResource) {
+func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 	mrl := make(map[string]*utils.TPResource)
 	for _, tp := range tps {
 		rl, found := mrl[tp.Tag]
