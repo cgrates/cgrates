@@ -87,3 +87,52 @@ func (stsv1 *StatSV1) GetFloatMetrics(queueID string, reply *map[string]float64)
 func (stsv1 *StatSV1) LoadQueues(args stats.ArgsLoadQueues, reply *string) (err error) {
 	return stsv1.sts.V1LoadQueues(args, reply)
 }
+
+type AttrGetStatsCfg struct {
+	ID string
+}
+
+//GetStatConfig returns a stat configuration
+func (apierV1 *ApierV1) GetStatConfig(attr AttrGetStatsCfg, reply *engine.StatsConfig) error {
+	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if sCfg, err := apierV1.DataDB.GetStatsConfig(attr.ID); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	} else {
+		*reply = *sCfg
+	}
+	return nil
+}
+
+//SetStatConfig add a new stat configuration
+func (apierV1 *ApierV1) SetStatConfig(attr *engine.StatsConfig, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataDB.SetStatsConfig(attr); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+
+}
+
+//Remove a specific stat configuration
+func (apierV1 *ApierV1) RemStatConfig(attrs AttrGetStatsCfg, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataDB.RemStatsConfig(attrs.ID); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = utils.OK
+	return nil
+
+}

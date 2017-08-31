@@ -302,6 +302,8 @@ func (b *Balance) SetDirty() {
 	b.dirty = true
 }
 
+// debitUnits will debit units for call descriptor.
+// returns the amount debited within cc
 func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
@@ -405,7 +407,6 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
 			}
-
 			if ts.RateInterval == nil {
 				utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 				return nil, errors.New("timespan with no rate interval assigned")
@@ -432,7 +433,6 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 
 			maxCost, strategy := ts.RateInterval.GetMaxCost()
 			for incIndex, inc := range ts.Increments {
-
 				if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && cc.deductConnectFee && ok {
 					// go to nextincrement
 					continue
@@ -486,7 +486,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					utils.Logger.Warning(fmt.Sprintf("<RALs> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
 					moneyBal = ub.GetDefaultMoneyBalance()
 				}
-				if (cost == 0 || moneyBal != nil) && b.GetValue() >= amount {
+				if b.GetValue() >= amount && (moneyBal != nil || cost == 0) {
 					b.SubstractValue(amount)
 					inc.BalanceInfo.Unit = &UnitInfo{
 						UUID:          b.Uuid,

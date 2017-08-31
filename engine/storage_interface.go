@@ -111,9 +111,9 @@ type DataDB interface {
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
-	GetStatsQueue(sqID string) (sq *StatsQueue, err error)
-	SetStatsQueue(sq *StatsQueue) (err error)
-	RemStatsQueue(sqID string) (err error)
+	GetStatsConfig(sqID string) (sq *StatsConfig, err error)
+	SetStatsConfig(sq *StatsConfig) (err error)
+	RemStatsConfig(sqID string) (err error)
 	GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error)
 	SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error)
 	RemSQStoredMetrics(sqID string) (err error)
@@ -165,7 +165,7 @@ type LoadReader interface {
 	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
 	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
-	GetTPResourceLimits(string, string) ([]*utils.TPResourceLimit, error)
+	GetTPResources(string, string) ([]*utils.TPResource, error)
 	GetTPStats(string, string) ([]*utils.TPStats, error)
 	GetTPThreshold(string, string) ([]*utils.TPThreshold, error)
 }
@@ -188,7 +188,7 @@ type LoadWriter interface {
 	SetTPActionPlans([]*utils.TPActionPlan) error
 	SetTPActionTriggers([]*utils.TPActionTriggers) error
 	SetTPAccountActions([]*utils.TPAccountActions) error
-	SetTPResourceLimits([]*utils.TPResourceLimit) error
+	SetTPResources([]*utils.TPResource) error
 	SetTPStats([]*utils.TPStats) error
 	SetTPThreshold([]*utils.TPThreshold) error
 }

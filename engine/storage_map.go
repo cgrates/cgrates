@@ -220,7 +220,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceLimitsPrefix,
+		utils.ResourcesPrefix,
 		utils.TimingsPrefix}, prefix) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
@@ -284,7 +284,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourceLimitsPrefix:
+		case utils.ResourcesPrefix:
 			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
@@ -1311,7 +1311,7 @@ func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
 func (ms *MapStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.ResourceLimitsPrefix + id
+	key := utils.ResourcesPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x != nil {
@@ -1345,7 +1345,7 @@ func (ms *MapStorage) SetResourceCfg(r *ResourceCfg, transactionID string) error
 	if err != nil {
 		return err
 	}
-	key := utils.ResourceLimitsPrefix + r.ID
+	key := utils.ResourcesPrefix + r.ID
 	ms.dict[key] = result
 	return nil
 }
@@ -1353,7 +1353,7 @@ func (ms *MapStorage) SetResourceCfg(r *ResourceCfg, transactionID string) error
 func (ms *MapStorage) RemoveResourceCfg(id string, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.ResourceLimitsPrefix + id
+	key := utils.ResourcesPrefix + id
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
@@ -1475,19 +1475,19 @@ func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
 }
 
 // GetStatsQueue retrieves a StatsQueue from dataDB
-func (ms *MapStorage) GetStatsQueue(sqID string) (sq *StatsQueue, err error) {
+func (ms *MapStorage) GetStatsConfig(sqID string) (scf *StatsConfig, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.StatsQueuePrefix + sqID
+	key := utils.StatsConfigPrefix + sqID
 	values, ok := ms.dict[key]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, &sq)
+	err = ms.ms.Unmarshal(values, &scf)
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range sq.Filters {
+	for _, fltr := range scf.Filters {
 		if err := fltr.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -1496,22 +1496,22 @@ func (ms *MapStorage) GetStatsQueue(sqID string) (sq *StatsQueue, err error) {
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
-func (ms *MapStorage) SetStatsQueue(sq *StatsQueue) (err error) {
+func (ms *MapStorage) SetStatsConfig(scf *StatsConfig) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(sq)
+	result, err := ms.ms.Marshal(scf)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.StatsQueuePrefix+sq.ID] = result
+	ms.dict[utils.StatsConfigPrefix+scf.ID] = result
 	return
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MapStorage) RemStatsQueue(sqID string) (err error) {
+func (ms *MapStorage) RemStatsConfig(scfID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.StatsQueuePrefix + sqID
+	key := utils.StatsConfigPrefix + scfID
 	delete(ms.dict, key)
 	return
 }

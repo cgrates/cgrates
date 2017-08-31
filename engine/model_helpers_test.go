@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package engine
 
 import (
@@ -187,6 +188,47 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
 	}
 }
+
+/*
+func TestAPItoModelStats(t *testing.T) {
+	tpS := &utils.TPStats{
+		TPid: "TPS1",
+		ID:   "Stat1",
+		Filters: []*utils.TPRequestFilter{
+			&utils.TPRequestFilter{
+				Type:      "*string",
+				FieldName: "Account",
+				Values:    []string{"1002"},
+			},
+		},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "",
+		},
+		TTL:        "1",
+		Metrics:    []string{"MetricValue"},
+		Blocker:    true,
+		Stored:     true,
+		Weight:     20,
+		Thresholds: nil,
+	}
+	expectedSlc := [][]string{
+		[]string{,"TPS1", "*Stat1", "*string", "*Account", "1002", "2014-07-29T15:00:00Z","","1","MetricValue",},
+	}
+	expectedtpS := APItoModelStats(tpS)
+	var slc [][]string
+	lc, err := csvDump(expectedtpS)
+	if err != nil {
+		t.Error("Error dumping to csv: ", err)
+	}
+	slc = append(slc, lc)
+
+	if !reflect.DeepEqual(expectedtpS, tpS) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedtpS, slc)
+	}
+}
+
+*/
 
 func TestTPRatingPlanAsExportSlice(t *testing.T) {
 	tpRpln := &utils.TPRatingPlan{
@@ -700,8 +742,8 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Weight:             10.0,
 			Limit:              "20"},
 	}
-	eTPs := []*utils.TPResourceLimit{
-		&utils.TPResourceLimit{
+	eTPs := []*utils.TPResource{
+		&utils.TPResource{
 			TPid: tps[0].Tpid,
 			ID:   tps[0].Tag,
 			Filters: []*utils.TPRequestFilter{
@@ -725,7 +767,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Limit:      tps[0].Limit,
 			Thresholds: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
-		&utils.TPResourceLimit{
+		&utils.TPResource{
 			TPid: tps[2].Tpid,
 			ID:   tps[2].Tag,
 			Filters: []*utils.TPRequestFilter{
@@ -744,14 +786,14 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Limit:   tps[2].Limit,
 		},
 	}
-	rcvTPs := TpResourceLimits(tps).AsTPResourceLimits()
+	rcvTPs := TpResources(tps).AsTPResources()
 	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[1])) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
 
-func TestAPItoResourceLimit(t *testing.T) {
-	tpRL := &utils.TPResourceLimit{
+func TestAPItoResource(t *testing.T) {
+	tpRL := &utils.TPResource{
 		TPid: testTPID,
 		ID:   "ResGroup1",
 		Filters: []*utils.TPRequestFilter{
@@ -788,7 +830,7 @@ func TestAPItoResourceLimit(t *testing.T) {
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eRL.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 	eRL.Limit = 2
-	if rl, err := APItoResourceLimit(tpRL, "UTC"); err != nil {
+	if rl, err := APItoResource(tpRL, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRL, rl) {
 		t.Errorf("Expecting: %+v, received: %+v", eRL, rl)
@@ -859,7 +901,7 @@ func TestAPItoTPStats(t *testing.T) {
 		Weight:             20.0,
 	}
 
-	eTPs := &StatsQueue{ID: tps.ID,
+	eTPs := &StatsConfig{ID: tps.ID,
 		QueueLength: tps.QueueLength,
 		Metrics:     []string{"*asr", "*acd", "*acc"},
 		Thresholds:  []string{"THRESH1", "THRESH2"},
