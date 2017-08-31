@@ -74,41 +74,41 @@ var (
 )
 
 func main() {
-	flag.Parse()
-	if *version {
-		fmt.Println(utils.GetCGRVersion())
-		return
-	}
-if migrate != nil && *migrate != "" { // Run migrator
+// 	flag.Parse()
+// 	if *version {
+// 		fmt.Println(utils.GetCGRVersion())
+// 		return
+// 	}
+// if migrate != nil && *migrate != "" { // Run migrator
 
-		dataDB, err := engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
-		if err != nil {
-			log.Fatal(err)
-		}
-		oldDataDB, err := engine.ConfigureDataStorage(*oldDataDBType, *oldDataDBHost, *oldDataDBPort, *oldDataDBName, *oldDataDBUser, *oldDataDBPass, *oldDBDataEncoding, config.CgrConfig().CacheConfig, *oldLoadHistorySize)
-		if err != nil {
-			log.Fatal(err)
-		}
-			storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort, *storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
-			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
-		if err != nil {
-			log.Fatal(err)
-		}
-			oldstorDB, err := engine.ConfigureStorStorage(*oldStorDBType, *oldStorDBHost, *oldStorDBPort, *oldStorDBName, *oldStorDBUser, *oldStorDBPass, *oldDBDataEncoding,
-			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
-		if err != nil {
-			log.Fatal(err)
-		}
-		m,err := migrator.NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType,oldDataDB,*oldDataDBType,*oldDBDataEncoding,oldstorDB,*oldStorDBType)
-		 if err != nil {
-			log.Fatal(err)
-		}
-		err = m.Migrate(*migrate); 
-		if err != nil {
-			log.Fatal(err)
-		}
+// 		dataDB, err := engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 		oldDataDB, err := engine.ConfigureDataStorage(*oldDataDBType, *oldDataDBHost, *oldDataDBPort, *oldDataDBName, *oldDataDBUser, *oldDataDBPass, *oldDBDataEncoding, config.CgrConfig().CacheConfig, *oldLoadHistorySize)
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 			storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort, *storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
+// 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 			oldstorDB, err := engine.ConfigureStorStorage(*oldStorDBType, *oldStorDBHost, *oldStorDBPort, *oldStorDBName, *oldStorDBUser, *oldStorDBPass, *oldDBDataEncoding,
+// 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 		m,err := migrator.NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType,oldDataDB,*oldDataDBType,*oldDBDataEncoding,oldstorDB,*oldStorDBType)
+// 		 if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 		err = m.Migrate(*migrate); 
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
 		
-		log.Print("Done migrating!")
-		return
-	}
+// 		log.Print("Done migrating!")
+// 		return
+// 	}
 }
