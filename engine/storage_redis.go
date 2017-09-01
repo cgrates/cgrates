@@ -1372,7 +1372,7 @@ func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 
 func (rs *RedisStorage) GetResourceCfg(id string,
 	skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
-	key := utils.ResourcesPrefix + id
+	key := utils.ResourceConfigsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1406,15 +1406,27 @@ func (rs *RedisStorage) SetResourceCfg(r *ResourceCfg, transactionID string) err
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.ResourcesPrefix+r.ID, result).Err
+	return rs.Cmd("SET", utils.ResourceConfigsPrefix+r.ID, result).Err
 }
 
 func (rs *RedisStorage) RemoveResourceCfg(id string, transactionID string) (err error) {
-	key := utils.ResourcesPrefix + id
+	key := utils.ResourceConfigsPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (rs *RedisStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
+	return
+}
+
+func (rs *RedisStorage) SetResource(r *Resource) (err error) {
+	return
+}
+
+func (rs *RedisStorage) RemoveResource(id string, transactionID string) (err error) {
 	return
 }
 
@@ -1541,7 +1553,7 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-// GetStatsQueue retrieves a StatsQueue from dataDB
+// GetStatsConfig retrieves a StatsConfig from dataDB
 func (rs *RedisStorage) GetStatsConfig(sqID string) (sq *StatsConfig, err error) {
 	key := utils.StatsConfigPrefix + sqID
 	var values []byte

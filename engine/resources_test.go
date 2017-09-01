@@ -69,11 +69,11 @@ func TestResourceRecordUsage(t *testing.T) {
 			UsageTTL:          time.Duration(1 * time.Millisecond),
 			AllocationMessage: "ALLOC",
 		},
-		usages: map[string]*ResourceUsage{
+		Usages: map[string]*ResourceUsage{
 			ru.ID: ru,
 		},
-		ttlUsages: []*ResourceUsage{ru},
-		tUsage:    utils.Float64Pointer(2),
+		TTLIdx: []string{ru.ID},
+		tUsage: utils.Float64Pointer(2),
 	}
 
 	if err := r.recordUsage(ru2); err != nil {
@@ -82,7 +82,7 @@ func TestResourceRecordUsage(t *testing.T) {
 		if err := r.recordUsage(ru); err == nil {
 			t.Error("Duplicate ResourceUsage id should not be allowed")
 		}
-		if _, found := r.usages[ru2.ID]; !found {
+		if _, found := r.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
 		if *r.tUsage != 4 {
@@ -93,13 +93,13 @@ func TestResourceRecordUsage(t *testing.T) {
 }
 
 func TestRLClearUsage(t *testing.T) {
-	r.usages = map[string]*ResourceUsage{
+	r.Usages = map[string]*ResourceUsage{
 		ru.ID: ru,
 	}
 	*r.tUsage = 3
 	r.clearUsage(ru.ID)
-	if len(r.usages) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.usages))
+	if len(r.Usages) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.Usages))
 	}
 	if *r.tUsage != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, r.tUsage)
@@ -107,18 +107,18 @@ func TestRLClearUsage(t *testing.T) {
 }
 
 func TestRLRemoveExpiredUnits(t *testing.T) {
-	r.usages = map[string]*ResourceUsage{
+	r.Usages = map[string]*ResourceUsage{
 		ru.ID: ru,
 	}
 	*r.tUsage = 2
 
 	r.removeExpiredUnits()
 
-	if len(r.usages) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.usages))
+	if len(r.Usages) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.Usages))
 	}
-	if len(r.ttlUsages) != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.ttlUsages))
+	if len(r.TTLIdx) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(r.TTLIdx))
 	}
 	if *r.tUsage != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, r.tUsage)
@@ -126,7 +126,7 @@ func TestRLRemoveExpiredUnits(t *testing.T) {
 }
 
 func TestRLUsedUnits(t *testing.T) {
-	r.usages = map[string]*ResourceUsage{
+	r.Usages = map[string]*ResourceUsage{
 		ru.ID: ru,
 	}
 	*r.tUsage = 2
@@ -162,7 +162,7 @@ func TestRsort(t *testing.T) {
 			UsageTTL:   time.Duration(1 * time.Millisecond),
 		},
 		// AllocationMessage: "ALLOC2",
-		usages: map[string]*ResourceUsage{
+		Usages: map[string]*ResourceUsage{
 			ru2.ID: ru2,
 		},
 		tUsage: utils.Float64Pointer(2),
@@ -179,8 +179,8 @@ func TestRsort(t *testing.T) {
 func TestRsClearUsage(t *testing.T) {
 	if err := r2.clearUsage(ru2.ID); err != nil {
 		t.Error(err)
-	} else if len(r2.usages) != 0 {
-		t.Errorf("Unexpected usages %+v", r2.usages)
+	} else if len(r2.Usages) != 0 {
+		t.Errorf("Unexpected usages %+v", r2.Usages)
 	} else if *r2.tUsage != 0 {
 		t.Errorf("Unexpected tUsage %+v", r2.tUsage)
 	}

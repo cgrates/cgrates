@@ -29,6 +29,20 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// ResourceCfg represents the user configuration for the resource
+type ResourceCfg struct {
+	ID                 string                    // identifier of this resource
+	Filters            []*RequestFilter          // filters for the request
+	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
+	UsageTTL           time.Duration             // auto-expire the usage after this duration
+	Limit              float64                   // limit value
+	AllocationMessage  string                    // message returned by the winning resource on allocation
+	Blocker            bool                      // blocker flag to stop processing on filters matched
+	Stored             bool
+	Weight             float64  // Weight to sort the resources
+	Thresholds         []string // Thresholds to check after changing Limit
+}
+
 // ResourceUsage represents an usage counted
 type ResourceUsage struct {
 	ID         string // Unique identifier of this ResourceUsage, Eg: FreeSWITCH UUID
@@ -41,96 +55,86 @@ func (ru *ResourceUsage) isActive(atTime time.Time) bool {
 	return ru.ExpiryTime.IsZero() || ru.ExpiryTime.Sub(atTime) > 0
 }
 
-// ResourceCfg represents the user configuration for the resource
-type ResourceCfg struct {
-	ID                 string                    // identifier of this resource
-	Filters            []*RequestFilter          // filters for the request
-	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
-	UsageTTL           time.Duration             // expire the usage after this duration
-	Limit              float64                   // limit value
-	AllocationMessage  string                    // message returned by the winning resource on allocation
-	Blocker            bool                      // blocker flag to stop processing on filters matched
-	Stored             bool
-	Weight             float64  // Weight to sort the resources
-	Thresholds         []string // Thresholds to check after changing Limit
-}
-
-// StoredResourceUsages is stored on demand into dataDB
-type StoredResourceUsages map[string]*ResourceUsage
-
-func NewResource(rCfg *ResourceCfg) *Resource {
-	return &Resource{rCfg: rCfg,
-		usages: make(map[string]*ResourceUsage)}
-}
-
 // Resource represents a resource in the system
+// not thread safe, needs locking at process level
 type Resource struct {
-	sync.RWMutex
-	rCfg      *ResourceCfg
-	usages    map[string]*ResourceUsage
-	ttlUsages []*ResourceUsage // used to speed up expirying of the usages
-	tUsage    *float64         // sum of all usages
-	dirty     bool             // the usages were modified, needs save
+	ID     string
+	Usages map[string]*ResourceUsage
+	TTLIdx []string     // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+	rCfg   *ResourceCfg // optional configuration attached
+	tUsage *float64     // sum of all usages
+	dirty  *bool        // the usages were modified, needs save, *bool so we only save if enabled in config
 }
 
-// removeExpiredUnits removes units which are expired
+// removeExpiredUnits removes units which are expired from the resource
 func (r *Resource) removeExpiredUnits() {
 	var firstActive int
-	r.RLock()
-	for _, rv := range r.ttlUsages {
-		if rv.isActive(time.Now()) {
+	for _, rID := range r.TTLIdx {
+		if r, has := r.Usages[rID]; has && r.isActive(time.Now()) {
 			break
 		}
 		firstActive += 1
 	}
-	r.RUnlock()
 	if firstActive == 0 {
 		return
 	}
-	r.Lock()
-	for _, ru := range r.ttlUsages[:firstActive] {
-		delete(r.usages, ru.ID)
+	for _, rID := range r.TTLIdx[:firstActive] {
+		ru, has := r.Usages[rID]
+		if !has {
+			continue
+		}
+		delete(r.Usages, rID)
 		*r.tUsage -= ru.Units
-		ru = nil // empty it so we avoid memleak
+		if *r.tUsage < 0 { // something went wrong
+			utils.Logger.Warning(
+				fmt.Sprintf("resetting total usage for resourceID: %s, usage smaller than 0: %f", r.ID, *r.tUsage))
+			r.tUsage = nil
+		}
 	}
-	r.ttlUsages = r.ttlUsages[firstActive:]
-	r.Unlock()
+	r.TTLIdx = r.TTLIdx[firstActive:]
 }
 
 // totalUsage returns the sum of all usage units
-func (r *Resource) totalUsage() float64 {
+func (r *Resource) totalUsage() (tU float64) {
 	if r.tUsage == nil {
 		var tu float64
-		for _, ru := range r.usages {
+		for _, ru := range r.Usages {
 			tu += ru.Units
 		}
 		r.tUsage = &tu
 	}
-	return *r.tUsage
+	if r.tUsage != nil {
+		tU = *r.tUsage
+	}
+	return
 }
 
 // recordUsage records a new usage
 func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
-	if _, hasID := r.usages[ru.ID]; hasID {
-		return fmt.Errorf("Duplicate resource usage with id: %s", ru.ID)
+	if _, hasID := r.Usages[ru.ID]; hasID {
+		return fmt.Errorf("duplicate resource usage with id: %s", ru.ID)
 	}
-	r.usages[ru.ID] = ru
-	*r.tUsage += ru.Units
+	r.Usages[ru.ID] = ru
+	if r.tUsage != nil {
+		*r.tUsage += ru.Units
+	}
 	return
 }
 
 // clearUsage clears the usage for an ID
-func (r *Resource) clearUsage(ruID string) error {
-	ru, hasIt := r.usages[ruID]
+func (r *Resource) clearUsage(ruID string) (err error) {
+	ru, hasIt := r.Usages[ruID]
 	if !hasIt {
 		return fmt.Errorf("Cannot find usage record with id: %s", ruID)
 	}
-	delete(r.usages, ru.ID)
-	*r.tUsage -= ru.Units
-	return nil
+	delete(r.Usages, ruID)
+	if r.tUsage != nil {
+		*r.tUsage -= ru.Units
+	}
+	return
 }
 
-// Resources is an ordered list of Resources based on Weight
+// Resources is an orderable list of Resources based on Weight
 type Resources []*Resource
 
 // sort based on Weight
@@ -174,16 +178,6 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	if len(rs) == 0 {
 		return utils.META_NONE, nil
 	}
-	// lock resources so we can safely take decisions, need all to be locked before proceeding
-	for _, r := range rs {
-		if dryRun { // dryRun only needs read
-			r.RLock()
-			defer r.RUnlock()
-		} else {
-			r.Lock()
-			defer r.Unlock()
-		}
-	}
 	// Simulate resource usage
 	for _, r := range rs {
 		if r.rCfg.Limit >= r.totalUsage()+ru.Units {
@@ -214,10 +208,12 @@ func NewResourceService(cfg *config.CGRConfig, dataDB DataDB,
 	return &ResourceService{dataDB: dataDB, statS: statS}, nil
 }
 
-// ResourceService is the service handling channel limits
+// ResourceService is the service handling resources
 type ResourceService struct {
-	dataDB DataDB // So we can load the data in cache and index it
-	statS  rpcclient.RpcClientConnection
+	sync.RWMutex
+	dataDB         DataDB // So we can load the data in cache and index it
+	statS          rpcclient.RpcClientConnection
+	eventResources map[string][]string // map[ruID][]string{rID} for faster queries
 }
 
 // Called to start the service
@@ -253,7 +249,7 @@ func (rS *ResourceService) matchingResourcesForEvent(
 		passAllFilters := true
 		for _, fltr := range rCfg.Filters {
 			if pass, err := fltr.Pass(ev, "", rS.statS); err != nil {
-				return nil, utils.NewErrServerError(err)
+				return nil, err
 			} else if !pass {
 				passAllFilters = false
 				continue
@@ -262,7 +258,12 @@ func (rS *ResourceService) matchingResourcesForEvent(
 		if !passAllFilters {
 			continue
 		}
-		matchingResources[rCfg.ID] = NewResource(rCfg) // Cannot save it here since we could have errors after and resource will remain unused
+		r, err := rS.dataDB.GetResource(rCfg.ID, false, "")
+		if err != nil {
+			return nil, err
+		}
+		r.rCfg = rCfg
+		matchingResources[rCfg.ID] = r // Cannot save it here since we could have errors after and resource will remain unused
 	}
 	// All good, convert from Map to Slice so we can sort
 	rs = make(Resources, len(matchingResources))
@@ -273,8 +274,9 @@ func (rS *ResourceService) matchingResourcesForEvent(
 	}
 	rs.Sort()
 	for i, r := range rs {
-		if r.rCfg.Blocker {
+		if r.rCfg.Blocker { // blocker will stop processing
 			rs = rs[:i+1]
+			break
 		}
 	}
 	return
