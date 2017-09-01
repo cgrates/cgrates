@@ -23,6 +23,7 @@ import (
 )
 
 var (
+	ErrNoMoreData			   = errors.New("NO_MORE_DATA")
 	ErrNotImplemented          = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound                = errors.New("NOT_FOUND")
 	ErrTimedOut                = errors.New("TIMED_OUT")

@@ -23,7 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB engine.DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string) (m *Migrator, err error) {
+func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB v1DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -50,7 +50,7 @@ type Migrator struct {
 	storDB        engine.Storage
 	storDBType    string
 	mrshlr        engine.Marshaler
-	oldDataDB     engine.DataDB
+	oldDataDB     v1DataDB
 	oldDataDBType string
 	oldStorDB     engine.Storage
 	oldStorDBType string

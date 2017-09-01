@@ -19,7 +19,7 @@ package migrator
 import (
 	"flag"
 	//	"fmt"
-	//	"path"
+		"path"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,8 +37,7 @@ var (
 	onStorCfg string
 	dbtype    string
 	mig       *Migrator
-	migrate   = flag.String("migrate", "", "Fire up automatic migration <*cost_details|*set_versions>")
-	version   = flag.Bool("version", false, "Prints the application version.")
+	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 
 	dataDBType = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <redis>")
 	dataDBHost = flag.String("datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
@@ -73,17 +72,17 @@ var (
 
 	dbDataEncoding    = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
 	oldDBDataEncoding = flag.String("old_dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
-)
+ )
 
 // subtests to be executed for each migrator
 var sTestsITMigrator = []func(t *testing.T){
 	testOnStorITFlush,
 	testMigratorAccounts,
-	testMigratorActionPlans,
-	testMigratorActionTriggers,
-	testMigratorActions,
-	testMigratorSharedGroups,
-}
+// 	testMigratorActionPlans,
+// 	testMigratorActionTriggers,
+// 	testMigratorActions,
+// 	testMigratorSharedGroups,
+ }
 
 func TestOnStorITRedisConnect(t *testing.T) {
 	dataDB, err := engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
@@ -117,28 +116,43 @@ func TestOnStorITRedis(t *testing.T) {
 	}
 }
 
-// func TestOnStorITMongoConnect(t *testing.T) {
-// 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
-// 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if mgoITdb, err = engine.NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort, mgoITCfg.StorDBName, mgoITCfg.StorDBUser, db_passwd,
-// 		utils.StorDB, nil, mgoITCfg.CacheConfig, mgoITCfg.LoadHistorySize); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	mongo = mgoITCfg
-// 	onStorCfg = mgoITCfg.StorDBName
-// 	mig = NewMigrator(mgoITdb, mgoITdb, utils.MONGO, utils.JSON, mgoITdb, utils.MONGO)
-// }
+func TestOnStorITMongoConnect(t *testing.T) {
+	
+	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
+	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataDB, err := engine.ConfigureDataStorage(mgoITCfg.DataDbType, mgoITCfg.DataDbHost, mgoITCfg.DataDbPort, mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass, mgoITCfg.DBDataEncoding, mgoITCfg.CacheConfig, *loadHistorySize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	oldDataDB, err := engine.ConfigureDataStorage(mgoITCfg.DataDbType, mgoITCfg.DataDbHost, mgoITCfg.DataDbPort, mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass, mgoITCfg.DBDataEncoding, mgoITCfg.CacheConfig, *oldLoadHistorySize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	storDB, err := engine.ConfigureStorStorage(mgoITCfg.StorDBType, mgoITCfg.StorDBHost, mgoITCfg.StorDBPort, mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass, mgoITCfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	oldstorDB, err := engine.ConfigureStorStorage(mgoITCfg.StorDBType, mgoITCfg.StorDBHost, mgoITCfg.StorDBPort, mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass, mgoITCfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mig, err = NewMigrator(dataDB, mgoITCfg.DataDbType,mgoITCfg.DBDataEncoding, storDB, mgoITCfg.StorDBType, oldDataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, oldstorDB, mgoITCfg.StorDBType)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
-// func TestOnStorITMongo(t *testing.T) {
-// 	dbtype = utils.MONGO
-// 	onStor = mgoITdb
-// 	for _, stest := range sTestsITMigrator {
-// 		t.Run("TestITMigratorOnMongo", stest)
-// 	}
-// }
+func TestOnStorITMongo(t *testing.T) {
+	dbtype = utils.MONGO
+	for _, stest := range sTestsITMigrator {
+		t.Run("TestITMigratorOnMongo", stest)
+	}
+}
 
 func testOnStorITFlush(t *testing.T) {
 	switch {
@@ -149,7 +163,7 @@ func testOnStorITFlush(t *testing.T) {
 			t.Error("Error when flushing Redis ", err.Error())
 		}
 	case dbtype == utils.MONGO:
-		err := engine.InitDataDb(mongo)
+		err := mig.dataDB.Flush("")
 		if err != nil {
 			t.Error("Error when flushing Mongo ", err.Error())
 		}
@@ -193,9 +207,9 @@ func testMigratorAccounts(t *testing.T) {
 		} else if !reflect.DeepEqual(testAccount, result) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
-		/*
+		
 			case dbtype == utils.MONGO:
-				err := mig.SetV1onMongoAccount(v1AccountDBPrefix, v1Acc)
+				err := mig.SetV1onMongoAccount(v1Acc)
 				if err != nil {
 					t.Error("Error when marshaling ", err.Error())
 				}
@@ -210,14 +224,12 @@ func testMigratorAccounts(t *testing.T) {
 				if !reflect.DeepEqual(testAccount, result) {
 					t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 				}
-		*/
 	}
 }
 
 //2
-
+/*
 func testMigratorActionPlans(t *testing.T) {
-
 	v1ap := v1ActionPlans{&v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}
 	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
 	switch {
@@ -233,7 +245,7 @@ func testMigratorActionPlans(t *testing.T) {
 		}
 		_, err = mig.getV1ActionPlansFromDB(setv1id)
 		if err != nil {
-			t.Error("Error when setting v1 ActionPlan ", err.Error())
+			t.Error("Error when getting v1 ActionPlan ", err.Error())
 		}
 		err = mig.Migrate(utils.MetaActionPlans)
 		if err != nil {
@@ -252,12 +264,18 @@ func testMigratorActionPlans(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
 
-		/*
+		
 			case dbtype == utils.MONGO:
-				err := mig.SetV1onMongoActionPlan(utils.ACTION_PLAN_PREFIX, v1ap)
+				err := mig.SetV1onMongoActionPlan("actions", &v1ap)
 				if err != nil {
 					t.Error("Error when setting v1 ActionPlans ", err.Error())
 				}
+				log.Print("dadada!")
+				_, err = mig.getV1ActionPlansFromDB("")
+				if err != nil {
+				t.Error("Error when getting v1 ActionPlan ", err.Error())
+				}
+				log.Print("dadada!")
 				err = mig.Migrate("migrateActionPlans")
 				if err != nil {
 					t.Error("Error when migrating ActionPlans ", err.Error())
@@ -268,12 +286,12 @@ func testMigratorActionPlans(t *testing.T) {
 				}
 				if ap.Id != result.Id || !reflect.DeepEqual(ap.AccountIDs, result.AccountIDs) {
 					t.Errorf("Expecting: %+v, received: %+v", *ap, result)
-				} else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
-					t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
-				} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
-					t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
-				}
-		*/
+				} //else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, result.ActionTimings.Timing) {
+				//	t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
+				//} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
+				//	t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
+				//}
+		
 	}
 }
 
@@ -339,7 +357,7 @@ func testMigratorActionTriggers(t *testing.T) {
 		}
 		if !reflect.DeepEqual(atrs[0].ID, result[0].ID) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ID, result[0].ID)
-		} /*else if !reflect.DeepEqual(atrs[0].UniqueID, result[0].UniqueID) {
+		} else if !reflect.DeepEqual(atrs[0].UniqueID, result[0].UniqueID) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].UniqueID, result[0].UniqueID)
 		} else if !reflect.DeepEqual(atrs[0].ThresholdType, result[0].ThresholdType) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ThresholdType, result[0].ThresholdType)
@@ -400,10 +418,10 @@ func testMigratorActionTriggers(t *testing.T) {
 		} else if !reflect.DeepEqual(atrs[0].Balance.Blocker, result[0].Balance.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Blocker, result[0].Balance.Blocker)
 		}
-		*/
-		/*
+		
+		
 			case dbtype == utils.MONGO:
-				err := mig.SetV1onMongoActionTrigger(utils.ACTION_TRIGGER_PREFIX, v1atrs)
+				err := mig.SetV1onMongoActionTrigger(utils.ACTION_TRIGGER_PREFIX, &v1atrs)
 				if err != nil {
 					t.Error("Error when setting v1 ActionTriggers ", err.Error())
 				}
@@ -411,7 +429,7 @@ func testMigratorActionTriggers(t *testing.T) {
 				if err != nil {
 					t.Error("Error when migrating ActionTriggers ", err.Error())
 				}
-				result, err := mig.dataDB.GetActionTriggers(v1atrs.Id, true, utils.NonTransactional)
+				result, err := mig.dataDB.GetActionTriggers(v1atrs[0].Id, true, utils.NonTransactional)
 				if err != nil {
 					t.Error("Error when getting ActionTriggers ", err.Error())
 				}
@@ -422,7 +440,7 @@ func testMigratorActionTriggers(t *testing.T) {
 				if err != nil {
 					t.Error("Error when flushing v1 ActionTriggers ", err.Error())
 				}
-		*/
+		
 	}
 }
 
@@ -457,9 +475,9 @@ func testMigratorActions(t *testing.T) {
 		if !reflect.DeepEqual(act, result) {
 			t.Errorf("Expecting: %+v, received: %+v", act, result)
 		}
-		/*
+		
 			case dbtype == utils.MONGO:
-				err := mig.SetV1onMongoAction(utils.ACTION_PREFIX, v1act)
+				err := mig.SetV1onMongoAction(utils.ACTION_PREFIX, &v1act)
 				if err != nil {
 					t.Error("Error when setting v1 Actions ", err.Error())
 				}
@@ -467,7 +485,7 @@ func testMigratorActions(t *testing.T) {
 				if err != nil {
 					t.Error("Error when migrating Actions ", err.Error())
 				}
-				result, err := mig.dataDB.GetActions(v1act.Id, true, utils.NonTransactional)
+				result, err := mig.dataDB.GetActions(v1act[0].Id, true, utils.NonTransactional)
 				if err != nil {
 					t.Error("Error when getting Actions ", err.Error())
 				}
@@ -478,7 +496,7 @@ func testMigratorActions(t *testing.T) {
 				if err != nil {
 					t.Error("Error when flushing v1 Actions ", err.Error())
 				}
-		*/
+		
 	}
 }
 
@@ -521,7 +539,7 @@ func testMigratorSharedGroups(t *testing.T) {
 		if !reflect.DeepEqual(sg, result) {
 			t.Errorf("Expecting: %+v, received: %+v", sg, result)
 		}
-		/*
+		
 			case dbtype == utils.MONGO:
 				err := mig.SetV1onMongoSharedGroup(utils.SHARED_GROUP_PREFIX, v1sg)
 				if err != nil {
@@ -538,6 +556,7 @@ func testMigratorSharedGroups(t *testing.T) {
 				if !reflect.DeepEqual(sg, result) {
 					t.Errorf("Expecting: %+v, received: %+v", sg, result)
 				}
-		*/
+		
 	}
 }
+*/
