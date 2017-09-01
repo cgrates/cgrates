@@ -617,7 +617,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	case utils.ALIASES_PREFIX:
 		iter := db.C(colAls).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
-			result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
+			result = append(result, utils.ALIASES_PREFIX+keyResult.Key)
 		}
 	case utils.REVERSE_ALIASES_PREFIX:
 		iter := db.C(colRls).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
@@ -634,13 +634,18 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.StatsPrefix+idResult.Id)
 		}
+	case utils.StatsConfigPrefix:
+		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.StatsConfigPrefix+idResult.Id)
+		}
 	case utils.AccountActionPlansPrefix:
-		iter := db.C(colRL).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colAAp).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.AccountActionPlansPrefix+keyResult.Key)
 		}
 	case utils.TimingsPrefix:
-		iter := db.C(colRL).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colTmg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.TimingsPrefix+idResult.Id)
 		}

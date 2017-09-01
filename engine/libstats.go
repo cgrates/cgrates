@@ -38,7 +38,7 @@ type SQStoredMetrics struct {
 	SQMetrics map[string][]byte
 }
 
-// StatsQueue represents the configuration of a  StatsInstance in StatS
+// StatsConfig represents the configuration of a  StatsInstance in StatS
 type StatsConfig struct {
 	ID                 string // QueueID
 	Filters            []*RequestFilter

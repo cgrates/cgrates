@@ -55,7 +55,7 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTpDerivedChargers,
 	testStorDBitCRUDTpCdrStats,
 	testStorDBitCRUDTpUsers,
-	testStorDBitCRUDTpResourceLimits,
+	testStorDBitCRUDTpResources,
 	testStorDBitCRUDTpStats,
 	testStorDBitCRUDCDRs,
 	testStorDBitCRUDSMCosts,
@@ -1420,14 +1420,14 @@ func testStorDBitCRUDTpAliases(t *testing.T) {
 	}
 }
 
-func testStorDBitCRUDTpResourceLimits(t *testing.T) {
+func testStorDBitCRUDTpResources(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTPResourceLimits("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPResources("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//WRITE
-	var snd = []*utils.TPResourceLimit{
-		&utils.TPResourceLimit{
+	var snd = []*utils.TPResource{
+		&utils.TPResource{
 			TPid:       "testTPid",
 			ID:         "testTag1",
 			Weight:     0.0,
@@ -1441,7 +1441,7 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 				},
 			},
 		},
-		&utils.TPResourceLimit{
+		&utils.TPResource{
 			TPid:               "testTPid",
 			ID:                 "testTag2",
 			ActivationInterval: &utils.TPActivationInterval{ActivationTime: "test"},
@@ -1457,11 +1457,11 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 			},
 		},
 	}
-	if err := storDB.SetTPResourceLimits(snd); err != nil {
+	if err := storDB.SetTPResources(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTPResourceLimits("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPResources("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0].TPid, rcv[0].TPid) || reflect.DeepEqual(snd[0].TPid, rcv[1].TPid)) {
@@ -1491,11 +1491,11 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 	// UPDATE
 	snd[0].Weight = 2.1
 	snd[1].Weight = 2.1
-	if err := storDB.SetTPResourceLimits(snd); err != nil {
+	if err := storDB.SetTPResources(snd); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTPResourceLimits("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPResources("testTPid", ""); err != nil {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0].TPid, rcv[0].TPid) || reflect.DeepEqual(snd[0].TPid, rcv[1].TPid)) {
@@ -1523,7 +1523,7 @@ func testStorDBitCRUDTpResourceLimits(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTPResourceLimits("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPResources("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
