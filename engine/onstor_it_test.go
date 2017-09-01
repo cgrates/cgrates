@@ -60,7 +60,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheLCR,
 	testOnStorITCacheAlias,
 	testOnStorITCacheReverseAlias,
-	testOnStorITCacheResourceLimit,
+	testOnStorITCacheResource,
 	testOnStorITCacheTiming,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
@@ -83,12 +83,12 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDUser,
 	testOnStorITCRUDAlias,
 	testOnStorITCRUDReverseAlias,
-	testOnStorITCRUDResourceLimit,
+	testOnStorITCRUDResource,
 	testOnStorITCRUDTiming,
 	testOnStorITCRUDHistory,
 	testOnStorITCRUDStructVersion,
 	testOnStorITCRUDSQStoredMetrics,
-	testOnStorITCRUDStatsQueue,
+	testOnStorITCRUDStats,
 	testOnStorITCRUDThresholdCfg,
 }
 
@@ -194,7 +194,7 @@ func testOnStorITSetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.SetReqFilterIndexes(utils.ResourceLimitsIndex, idxes); err != nil {
+	if err := onStor.SetReqFilterIndexes(utils.ResourcesIndex, idxes); err != nil {
 		t.Error(err)
 	}
 }
@@ -225,7 +225,7 @@ func testOnStorITGetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if idxes, err := onStor.GetReqFilterIndexes(utils.ResourceLimitsIndex); err != nil {
+	if idxes, err := onStor.GetReqFilterIndexes(utils.ResourcesIndex); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, idxes) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
@@ -240,12 +240,12 @@ func testOnStorITMatchReqFilterIndex(t *testing.T) {
 		"RL1": true,
 		"RL2": true,
 	}
-	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourceLimitsIndex, "Account", "1002"); err != nil {
+	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourcesIndex, "Account", "1002"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
-	if _, err := onStor.MatchReqFilterIndex(utils.ResourceLimitsIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.MatchReqFilterIndex(utils.ResourcesIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -340,6 +340,12 @@ func testOnStorITCacheRatingPlan(t *testing.T) {
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	expectedCRPl := []string{"rpl_TEST_RP_CACHE"}
+	if itm, err := onStor.GetKeysForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCRPl, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedCRPl, itm)
+	}
 	if _, hasIt := cache.Get(utils.RATING_PLAN_PREFIX + rp.Id); hasIt {
 		t.Error("Already in cache")
 	}
@@ -366,6 +372,12 @@ func testOnStorITCacheRatingProfile(t *testing.T) {
 	}
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
+	}
+	expectedCRR := []string{"rpf_*out:test:0:trp"}
+	if itm, err := onStor.GetKeysForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCRR, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedCRR, itm)
 	}
 	if _, hasIt := cache.Get(utils.RATING_PROFILE_PREFIX + rpf.Id); hasIt {
 		t.Error("Already in cache")
@@ -422,6 +434,12 @@ func testOnStorITCacheActions(t *testing.T) {
 	if err := onStor.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	expectedCA := []string{"act_MINI"}
+	if itm, err := onStor.GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCA, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedCA, itm)
+	}
 	if _, hasIt := cache.Get(utils.ACTION_PREFIX + acts[0].Id); hasIt {
 		t.Error("Already in cache")
 	}
@@ -473,6 +491,12 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 	if err := onStor.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	expectedCAp := []string{"apl_MORE_MINUTES"}
+	if itm, err := onStor.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCAp, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedCAp, itm)
+	}
 	if _, hasIt := cache.Get(utils.ACTION_PLAN_PREFIX + ap.Id); hasIt {
 		t.Error("Already in cache")
 	}
@@ -521,6 +545,12 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	expectedCAt := []string{"atr_testOnStorITCacheActionTrigger"}
+	if itm, err := onStor.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCAt, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedCAt, itm)
+	}
 	if _, hasIt := cache.Get(utils.ACTION_TRIGGER_PREFIX + atsID); hasIt {
 		t.Error("Already in cache")
 	}
@@ -547,6 +577,12 @@ func testOnStorITCacheSharedGroup(t *testing.T) {
 	}
 	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
 		t.Error(err)
+	}
+	expectedCSh := []string{"shg_SG1"}
+	if itm, err := onStor.GetKeysForPrefix(utils.SHARED_GROUP_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCSh, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedCSh, itm)
 	}
 	if _, hasIt := cache.Get(utils.SHARED_GROUP_PREFIX + sg.Id); hasIt {
 		t.Error("Already in cache")
@@ -623,6 +659,12 @@ func testOnStorITCacheLCR(t *testing.T) {
 	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	expectedCLCR := []string{"lcr_*out:cgrates.org:call:*any:*any"}
+	if itm, err := onStor.GetKeysForPrefix(utils.LCR_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCLCR, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedCLCR, itm)
+	}
 	if _, hasIt := cache.Get(utils.LCR_PREFIX + lcr.GetId()); hasIt {
 		t.Error("Already in cache")
 	}
@@ -668,6 +710,12 @@ func testOnStorITCacheAlias(t *testing.T) {
 	}
 	if err := onStor.SetAlias(als, utils.NonTransactional); err != nil {
 		t.Error(err)
+	}
+	expectedCA := []string{"als_*out:cgrates.org:call:dan:dan:*rating"}
+	if itm, err := onStor.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCA, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedCA, itm)
 	}
 	if _, hasIt := cache.Get(utils.ALIASES_PREFIX + als.GetId()); hasIt {
 		t.Error("Already in cache")
@@ -730,7 +778,7 @@ func testOnStorITCacheReverseAlias(t *testing.T) {
 	}
 }
 
-func testOnStorITCacheResourceLimit(t *testing.T) {
+func testOnStorITCacheResource(t *testing.T) {
 	rCfg := &ResourceCfg{
 		ID:     "RL_TEST",
 		Weight: 10,
@@ -749,13 +797,19 @@ func testOnStorITCacheResourceLimit(t *testing.T) {
 	if err := onStor.SetResourceCfg(rCfg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, hasIt := cache.Get(utils.ResourceLimitsPrefix + rCfg.ID); hasIt {
+	expectedR := []string{"res_RL_TEST"}
+	if itm, err := onStor.GetKeysForPrefix(utils.ResourcesPrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedR, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
+	}
+	if _, hasIt := cache.Get(utils.ResourcesPrefix + rCfg.ID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.ResourceLimitsPrefix, []string{rCfg.ID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ResourcesPrefix, []string{rCfg.ID}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.ResourceLimitsPrefix + rCfg.ID); !hasIt {
+	if itm, hasIt := cache.Get(utils.ResourcesPrefix + rCfg.ID); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ResourceCfg); !reflect.DeepEqual(rCfg, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", rCfg, rcv)
@@ -775,6 +829,12 @@ func testOnStorITCacheTiming(t *testing.T) {
 
 	if err := onStor.SetTiming(tmg, utils.NonTransactional); err != nil {
 		t.Error(err)
+	}
+	expectedT := []string{"tmg_TEST_TMG"}
+	if itm, err := onStor.GetKeysForPrefix(utils.TimingsPrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedT, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	if _, hasIt := cache.Get(utils.TimingsPrefix + tmg.ID); hasIt {
 		t.Error("Already in cache")
@@ -828,6 +888,12 @@ func testOnStorITHasData(t *testing.T) {
 	}
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
+	}
+	expectedRP := []string{"rpl_HasData", "rpl_TEST_RP_CACHE"}
+	if itm, err := onStor.GetKeysForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
+		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
 	}
 	if rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id); err != nil {
 		t.Error(err)
@@ -909,6 +975,14 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	expectedRP := []string{"rpl_TEST_RP_CACHE", "rpl_HasData", "rpl_CRUDRatingPlan"}
+
+	if itm, err := onStor.GetKeysForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
+		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
+	}
+
 	if rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
@@ -1670,7 +1744,7 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 	// }
 }
 
-func testOnStorITCRUDResourceLimit(t *testing.T) {
+func testOnStorITCRUDResource(t *testing.T) {
 	rL := &ResourceCfg{
 		ID:     "RL_TEST2",
 		Weight: 10,
@@ -1798,7 +1872,7 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 		LoadHistory:     "1",
 		Cdrs:            "1",
 		SMCosts:         "1",
-		ResourceLimits:  "1",
+		Resources:       "1",
 		Timings:         "1",
 	}
 	if _, rcvErr := onStor.GetStructVersion(); rcvErr != utils.ErrNotFound {
@@ -1840,9 +1914,9 @@ func testOnStorITCRUDSQStoredMetrics(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDStatsQueue(t *testing.T) {
+func testOnStorITCRUDStats(t *testing.T) {
 	timeTTL := time.Duration(0 * time.Second)
-	sq := &StatsQueue{
+	sq := &StatsConfig{
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
 		Filters:            []*RequestFilter{},
@@ -1852,33 +1926,33 @@ func testOnStorITCRUDStatsQueue(t *testing.T) {
 		Store:              true,
 		Thresholds:         []string{},
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatsConfig(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+	if _, ok := cache.Get(utils.StatsConfigPrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.SetStatsQueue(sq); err != nil {
+	if err := onStor.SetStatsConfig(sq); err != nil {
 		t.Error(err)
 	}
-	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+	if _, ok := cache.Get(utils.StatsConfigPrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if rcv, err := onStor.GetStatsQueue(sq.ID); err != nil {
+	if rcv, err := onStor.GetStatsConfig(sq.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
-	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+	if _, ok := cache.Get(utils.StatsConfigPrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.RemStatsQueue(sq.ID); err != nil {
+	if err := onStor.RemStatsConfig(sq.ID); err != nil {
 		t.Error(err)
 	}
-	if _, ok := cache.Get(utils.StatsQueuePrefix + sq.ID); ok != false {
+	if _, ok := cache.Get(utils.StatsConfigPrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if _, rcvErr := onStor.GetStatsQueue(sq.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatsConfig(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

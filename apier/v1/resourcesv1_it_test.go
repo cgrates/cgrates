@@ -38,7 +38,7 @@ var (
 	rlsV1Rpc     *rpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
 	rlsConfig    *engine.ResourceCfg
-	delay        int
+	resDelay     int
 )
 
 var sTestsRLSV1 = []func(t *testing.T){
@@ -70,13 +70,6 @@ func TestRLSV1ITMySQL(t *testing.T) {
 	}
 }
 
-func TestRLSV1ITpg(t *testing.T) {
-	rlsV1ConfDIR = "tutpostgres"
-	for _, stest := range sTestsRLSV1 {
-		t.Run(rlsV1ConfDIR, stest)
-	}
-}
-
 func TestRLSV1ITMongo(t *testing.T) {
 	rlsV1ConfDIR = "tutmongo"
 	for _, stest := range sTestsRLSV1 {
@@ -92,9 +85,9 @@ func testV1RLSLoadConfig(t *testing.T) {
 	}
 	switch rlsV1ConfDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		delay = 4000
+		resDelay = 4000
 	default:
-		delay = 1000
+		resDelay = 1000
 	}
 }
 
@@ -112,7 +105,7 @@ func testV1RLSResetStorDb(t *testing.T) {
 }
 
 func testV1RLSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rlsV1CfgPath, delay); err != nil {
+	if _, err := engine.StopStartEngine(rlsV1CfgPath, resDelay); err != nil {
 		t.Fatal(err)
 	}
 }

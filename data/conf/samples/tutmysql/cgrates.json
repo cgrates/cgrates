@@ -118,6 +118,11 @@
 	"usage_ttl": "3h",
 },
 
+"stats": {
+	"enabled": true,
+	"store_interval": "0s",
+},
+
 "historys": {
 	"enabled": true,
 },

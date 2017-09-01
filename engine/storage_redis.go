@@ -314,7 +314,11 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}
-	return r.List()
+	if keys, _ := r.List(); len(keys) != 0 {
+		return keys, nil
+	}
+	return nil, nil
+
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
