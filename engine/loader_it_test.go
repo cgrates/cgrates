@@ -151,7 +151,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadAliases(); err != nil {
 		t.Error("Failed loading aliases: ", err.Error())
 	}
-	if err = loader.LoadResourceLimits(); err != nil {
+	if err = loader.LoadResources(); err != nil {
 		t.Error("Failed loading resource limits: ", err.Error())
 	}
 	if err = loader.LoadStats(); err != nil {
@@ -314,7 +314,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Error("Failed GetResourceLimit: ", err.Error())
 		}
-		rlT, err := APItoResourceLimit(rl, "UTC")
+		rlT, err := APItoResource(rl, "UTC")
 		if err != nil {
 			t.Error(err)
 		}
@@ -324,7 +324,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, st := range loader.stats {
-		rcv, err := loader.dataStorage.GetStatsQueue(k)
+		rcv, err := loader.dataStorage.GetStatsConfig(k)
 		if err != nil {
 			t.Error("Failed GetStatsQueue: ", err.Error())
 		}

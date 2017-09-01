@@ -59,7 +59,6 @@
 	"enabled": true,
 },
 
-
 "users": {
 	"enabled": true,
 	"indexes": ["Uuid"],
@@ -67,6 +66,20 @@
 
 "aliases": {
 	"enabled": true,
+},
+
+"resources": {
+	"enabled": true,
+	"stats_conns": [
+		//{"address": "*internal"}
+	],
+	"cache_dump_interval": "0s",
+	"usage_ttl": "3h",
+},
+
+"stats": {
+	"enabled": true,
+	"store_interval": "0s",
 },
 
 "sm_generic": {

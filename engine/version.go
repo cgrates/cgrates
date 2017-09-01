@@ -73,13 +73,12 @@ var (
 		LoadHistory:     "1",
 		Cdrs:            "1",
 		SMCosts:         "1",
-		Resources:       "1",
+		ResourceConfigs: "1",
 		Timings:         "1",
 	}
 )
 
 type StructVersion struct {
-	//  rating
 	Destinations    string
 	RatingPlans     string
 	RatingProfiles  string
@@ -89,18 +88,16 @@ type StructVersion struct {
 	ActionPlans     string
 	ActionTriggers  string
 	SharedGroups    string
-	// accounting
-	Accounts    string
-	CdrStats    string
-	Users       string
-	Alias       string
-	PubSubs     string
-	LoadHistory string
-	// cdr
-	Cdrs      string
-	SMCosts   string
-	Resources string
-	Timings   string
+	Accounts        string
+	CdrStats        string
+	Users           string
+	Alias           string
+	PubSubs         string
+	LoadHistory     string
+	Cdrs            string
+	SMCosts         string
+	ResourceConfigs string
+	Timings         string
 }
 
 type MigrationInfo struct {
@@ -231,11 +228,11 @@ func (sv *StructVersion) CompareAndMigrate(dbVer *StructVersion) []*MigrationInf
 			CurrentVersion: CurrentVersion.SMCosts,
 		})
 	}
-	if sv.Resources != dbVer.Resources {
+	if sv.ResourceConfigs != dbVer.ResourceConfigs {
 		migrationInfoList = append(migrationInfoList, &MigrationInfo{
-			Prefix:         utils.ResourcesPrefix,
-			DbVersion:      dbVer.Resources,
-			CurrentVersion: CurrentVersion.Resources,
+			Prefix:         utils.ResourceConfigsPrefix,
+			DbVersion:      dbVer.ResourceConfigs,
+			CurrentVersion: CurrentVersion.ResourceConfigs,
 		})
 	}
 	return migrationInfoList

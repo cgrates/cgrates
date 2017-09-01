@@ -109,7 +109,7 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheDerivedChargers: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
 			Ttl: utils.StringPointer("0s"), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheResources: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
+		utils.CacheResourceConfigs: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
 			Ttl: utils.StringPointer("0s"), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
 		utils.CacheTimings: &CacheParamJsonCfg{Limit: utils.IntPointer(0),

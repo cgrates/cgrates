@@ -220,7 +220,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourcesPrefix,
+		utils.ResourceConfigsPrefix,
 		utils.TimingsPrefix}, prefix) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
@@ -284,7 +284,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourcesPrefix:
+		case utils.ResourceConfigsPrefix:
 			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)

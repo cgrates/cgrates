@@ -144,7 +144,7 @@ func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (e
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourcesPrefix:        rlIDs,
+		utils.ResourceConfigsPrefix:  rlIDs,
 	} {
 		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -230,7 +230,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourcesPrefix,
+		utils.ResourceConfigsPrefix,
 		utils.TimingsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
@@ -294,7 +294,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = rs.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourcesPrefix:
+		case utils.ResourceConfigsPrefix:
 			_, err = rs.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
@@ -314,7 +314,11 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}
-	return r.List()
+	if keys, _ := r.List(); len(keys) != 0 {
+		return keys, nil
+	}
+	return nil, nil
+
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity

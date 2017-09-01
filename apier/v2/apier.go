@@ -182,7 +182,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for _, prfx := range []string{
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourcesPrefix} {
+		utils.ResourceConfigsPrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataDB.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)

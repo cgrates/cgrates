@@ -323,7 +323,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.CDR_STATS_PREFIX:           colCrs,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
-		utils.ResourcesPrefix:            colRCfg,
+		utils.ResourceConfigsPrefix:      colRCfg,
 		utils.StatsPrefix:                colSts,
 		utils.TimingsPrefix:              colTmg,
 	}
@@ -440,7 +440,7 @@ func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (e
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourcesPrefix:        rlIDs,
+		utils.ResourceConfigsPrefix:  rlIDs,
 	} {
 		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -466,7 +466,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourcesPrefix,
+		utils.ResourceConfigsPrefix,
 		utils.TimingsPrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
@@ -530,7 +530,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourcesPrefix:
+		case utils.ResourceConfigsPrefix:
 			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
@@ -617,14 +617,14 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	case utils.ALIASES_PREFIX:
 		iter := db.C(colAls).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
-			result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
+			result = append(result, utils.ALIASES_PREFIX+keyResult.Key)
 		}
 	case utils.REVERSE_ALIASES_PREFIX:
 		iter := db.C(colRCfgs).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
 			result = append(result, utils.REVERSE_ALIASES_PREFIX+keyResult.Key)
 		}
-	case utils.ResourcesPrefix:
+	case utils.ResourceConfigsPrefix:
 		iter := db.C(colRCfg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.ResourcesPrefix+idResult.Id)
@@ -634,13 +634,18 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.StatsPrefix+idResult.Id)
 		}
+	case utils.StatsConfigPrefix:
+		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.StatsConfigPrefix+idResult.Id)
+		}
 	case utils.AccountActionPlansPrefix:
-		iter := db.C(colRCfg).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colAAp).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.AccountActionPlansPrefix+keyResult.Key)
 		}
 	case utils.TimingsPrefix:
-		iter := db.C(colRCfg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colTmg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.TimingsPrefix+idResult.Id)
 		}

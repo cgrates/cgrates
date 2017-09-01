@@ -64,7 +64,7 @@ const CGRATES_CFG_JSON = `
 	"aliases": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control aliases caching
 	"reverse_aliases": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control reverse aliases index caching
 	"derived_chargers": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control derived charging rule caching
-	"resources": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control resource caching
+	"resource_configs": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},		// control resource caching
 	"timings": {"limit": 0, "ttl": "0s", "static_ttl": false, "precache": false},				// control timings caching
 },
 

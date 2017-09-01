@@ -1,8 +1,7 @@
 {
 // CGRateS Configuration file
 //
-// Used for cgradmin
-// Starts rater, scheduler
+
 
 "general": {
 	"log_level": 7,
@@ -34,7 +33,7 @@
 	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
 	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
 	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
-	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_configs": {"limit": 10000, "ttl":"0s", "precache": true},
 },
 
 
@@ -107,6 +106,20 @@
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"cache_dump_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|dur>
 	"usage_ttl": "3h",						// expire usage records if older than this duration <""|*never|dur>
+},
+
+"resources": {
+	"enabled": true,
+	"stats_conns": [
+		//{"address": "*internal"}
+	],
+	"cache_dump_interval": "0s",
+	"usage_ttl": "3h",
+},
+
+"stats": {
+	"enabled": true,
+	"store_interval": "0s",
 },
 
 "historys": {
