@@ -171,6 +171,15 @@ func (rs Resources) clearUsage(ruID string) (err error) {
 	return
 }
 
+// ids returns list of resource IDs in resources
+func (rs Resources) ids() (ids []string) {
+	ids = make([]string, len(rs))
+	for i, r := range rs {
+		ids[i] = r.ID
+	}
+	return
+}
+
 // AllocateResource attempts allocating resources for a *ResourceUsage
 // simulates on dryRun
 // returns utils.ErrResourceUnavailable if allocation is not possible
@@ -200,8 +209,7 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceService(cfg *config.CGRConfig, dataDB DataDB,
-	statS rpcclient.RpcClientConnection) (*ResourceService, error) {
+func NewResourceService(cfg *config.CGRConfig, dataDB DataDB, statS rpcclient.RpcClientConnection) (*ResourceService, error) {
 	if statS != nil && reflect.ValueOf(statS).IsNil() {
 		statS = nil
 	}
@@ -210,10 +218,10 @@ func NewResourceService(cfg *config.CGRConfig, dataDB DataDB,
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	sync.RWMutex
 	dataDB         DataDB // So we can load the data in cache and index it
 	statS          rpcclient.RpcClientConnection
 	eventResources map[string][]string // map[ruID][]string{rID} for faster queries
+	erMux          sync.RWMutex
 }
 
 // Called to start the service
@@ -226,9 +234,34 @@ func (rS *ResourceService) ServiceShutdown() error {
 	return nil
 }
 
+// cachedResourcesForEvent attempts to retrieve cached resources for an event
+// returns nil if event not cached or errors occur
+func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources) {
+	rS.erMux.RLock()
+	rIDs, has := rS.eventResources[evUUID]
+	rS.erMux.RUnlock()
+	if !has {
+		return nil
+	}
+	rs = make(Resources, len(rIDs))
+	for i, rID := range rIDs {
+		if r, err := rS.dataDB.GetResource(rID, false, ""); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<ResourceS> force-uncaching resources for evUUID: <%s>, error: <%s>",
+					evUUID, err.Error()))
+			rS.erMux.Lock()
+			delete(rS.eventResources, evUUID)
+			rS.erMux.Unlock()
+			return nil
+		} else {
+			rs[i] = r
+		}
+	}
+	return
+}
+
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceService) matchingResourcesForEvent(
-	ev map[string]interface{}) (rs Resources, err error) {
+func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
 	rlIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourcesIndex)
 	if err != nil {
@@ -283,8 +316,7 @@ func (rS *ResourceService) matchingResourcesForEvent(
 }
 
 // V1ResourcesForEvent returns active resource limits matching the event
-func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{},
-	reply *[]*ResourceCfg) error {
+func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{}, reply *[]*ResourceCfg) error {
 	matchingRLForEv, err := rS.matchingResourcesForEvent(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -299,11 +331,12 @@ func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{},
 }
 
 // V1AllowUsage queries service to find if an Usage is allowed
-func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage,
-	allow *bool) (err error) {
-	mtcRLs, err := rS.matchingResourcesForEvent(args.Event)
-	if err != nil {
-		return utils.NewErrServerError(err)
+func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *bool) (err error) {
+	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
+	if mtcRLs == nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+			return err
+		}
 	}
 	if _, err = mtcRLs.AllocateResource(
 		&ResourceUsage{ID: args.UsageID,
@@ -311,35 +344,43 @@ func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage,
 		if err == utils.ErrResourceUnavailable {
 			return // not error but still not allowed
 		}
-		return utils.NewErrServerError(err)
+		return err
 	}
 	*allow = true
 	return
 }
 
-// V1AllocateResource is called when a resource needs allocation
+// V1AllocateResource is called when a resource requires allocation
 func (rS *ResourceService) V1AllocateResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
-	mtcRLs, err := rS.matchingResourcesForEvent(args.Event)
+	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
+	if mtcRLs == nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+			return
+		}
+	}
+	alcMsg, err := mtcRLs.AllocateResource(&ResourceUsage{ID: args.UsageID, Units: args.Units}, false)
 	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if alcMsg, err := mtcRLs.AllocateResource(
-		&ResourceUsage{ID: args.UsageID,
-			Units: args.Units}, false); err != nil {
 		return err
-	} else {
-		*reply = alcMsg
 	}
+	rS.erMux.Lock()
+	rS.eventResources[args.UsageID] = mtcRLs.ids()
+	rS.erMux.Unlock()
+	*reply = alcMsg
 	return
 }
 
 // V1ReleaseResource is called when we need to clear an allocation
-func (rS *ResourceService) V1ReleaseResource(attrs utils.AttrRLsResourceUsage, reply *string) (err error) {
-	mtcRLs, err := rS.matchingResourcesForEvent(attrs.Event)
-	if err != nil {
-		return utils.NewErrServerError(err)
+func (rS *ResourceService) V1ReleaseResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
+	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
+	if mtcRLs == nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+			return
+		}
 	}
-	mtcRLs.clearUsage(attrs.UsageID)
+	mtcRLs.clearUsage(args.UsageID)
+	rS.erMux.Lock()
+	delete(rS.eventResources, args.UsageID)
+	rS.erMux.Unlock()
 	*reply = utils.OK
 	return nil
 }
