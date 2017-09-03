@@ -265,8 +265,11 @@ func CopyHour(src, dest time.Time) time.Time {
 }
 
 // Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
-func ParseDurationWithSecs(durStr string) (time.Duration, error) {
-	if _, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+func ParseDurationWithSecs(durStr string) (d time.Duration, err error) {
+	if durStr == "" {
+		return
+	}
+	if _, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
 		durStr += "s"
 	}
 	return time.ParseDuration(durStr)

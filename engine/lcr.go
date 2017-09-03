@@ -197,22 +197,22 @@ func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minPDD, maxPDD, minA
 		if maxASR, err = strconv.ParseFloat(params[1], 64); err != nil {
 			maxASR = -1
 		}
-		if minPDD, err = utils.ParseDurationWithSecs(params[2]); err != nil {
+		if minPDD, err = utils.ParseDurationWithSecs(params[2]); err != nil || params[2] == "" {
 			minPDD = -1
 		}
-		if maxPDD, err = utils.ParseDurationWithSecs(params[3]); err != nil {
+		if maxPDD, err = utils.ParseDurationWithSecs(params[3]); err != nil || params[3] == "" {
 			maxPDD = -1
 		}
-		if minACD, err = utils.ParseDurationWithSecs(params[4]); err != nil {
+		if minACD, err = utils.ParseDurationWithSecs(params[4]); err != nil || params[4] == "" {
 			minACD = -1
 		}
-		if maxACD, err = utils.ParseDurationWithSecs(params[5]); err != nil {
+		if maxACD, err = utils.ParseDurationWithSecs(params[5]); err != nil || params[5] == "" {
 			maxACD = -1
 		}
-		if minTCD, err = utils.ParseDurationWithSecs(params[6]); err != nil {
+		if minTCD, err = utils.ParseDurationWithSecs(params[6]); err != nil || params[6] == "" {
 			minTCD = -1
 		}
-		if maxTCD, err = utils.ParseDurationWithSecs(params[7]); err != nil {
+		if maxTCD, err = utils.ParseDurationWithSecs(params[7]); err != nil || params[7] == "" {
 			maxTCD = -1
 		}
 		if minACC, err = strconv.ParseFloat(params[8], 64); err != nil {

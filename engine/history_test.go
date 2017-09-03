@@ -35,8 +35,7 @@ func TestHistoryRatinPlans(t *testing.T) {
 func TestHistoryDestinations(t *testing.T) {
 	scribe := historyScribe.(*history.MockScribe)
 	buf := scribe.GetBuffer(history.DESTINATIONS_FN)
-	expected := `{"Id":"*ddc_test","Prefixes":["333","666"]},
-{"Id":"ALL","Prefixes":["49","41","43"]},
+	expected := `{"Id":"ALL","Prefixes":["49","41","43"]},
 {"Id":"DST_TCDDBSWF","Prefixes":["1716"]},
 {"Id":"DST_UK_Mobile_BIG5","Prefixes":["447956"]},
 {"Id":"EU_LANDLINE","Prefixes":["444"]},

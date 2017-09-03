@@ -71,7 +71,8 @@ func (s storage) smembers(key string, ms Marshaler) (idMap utils.StringMap, ok b
 }
 
 func NewMapStorage() (*MapStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(), cacheCfg: config.CgrConfig().CacheConfig}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(),
+		cacheCfg: config.CgrConfig().CacheConfig}, nil
 }
 
 func NewMapStorageJson() (mpStorage *MapStorage, err error) {
@@ -247,7 +248,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		if cCfg, has := ms.cacheCfg[utils.CachePrefixToInstance[prefix]]; has {
 			nrItems = cCfg.Limit
 		}
-		if nrItems != 0 && nrItems < len(IDs) {
+		if nrItems > 0 && nrItems < len(IDs) {
 			IDs = IDs[:nrItems]
 		}
 	}

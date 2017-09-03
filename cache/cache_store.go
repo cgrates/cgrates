@@ -39,7 +39,7 @@ type cacheLRUTTL map[string]*ltcache.Cache
 
 func newLRUTTL(cfg config.CacheConfig) (c cacheLRUTTL) {
 	c = map[string]*ltcache.Cache{
-		utils.ANY: ltcache.New(0, 0, false, nil), // no limits for default cache instance
+		utils.ANY: ltcache.New(ltcache.UnlimitedCaching, ltcache.UnlimitedCaching, false, nil), // no limits for default cache instance
 	}
 	if cfg == nil {
 		return

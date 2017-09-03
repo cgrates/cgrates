@@ -49,7 +49,10 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 },
 
 }`
-	eCgrCfg, _ := NewDefaultCGRConfig()
+	eCgrCfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
 	eCgrCfg.SmFsConfig.Enabled = true
 	eCgrCfg.SmFsConfig.EventSocketConns = []*FsConnConfig{
 		&FsConnConfig{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3},
@@ -404,41 +407,41 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 }
 func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 	eCacheCfg := CacheConfig{
-		utils.CacheDestinations: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheReverseDestinations: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheRatingPlans: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheRatingProfiles: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheLCRRules: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheCDRStatS: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheActions: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheActionPlans: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheAccountActionPlans: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheActionTriggers: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheSharedGroups: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheAliases: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheReverseAliases: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheDerivedChargers: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheResourceConfigs: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
-		utils.CacheTimings: &CacheParamConfig{Limit: 0,
-			TTL: time.Duration(0 * time.Second), StaticTTL: false, Precache: false},
+		utils.CacheDestinations: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheReverseDestinations: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheRatingPlans: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheRatingProfiles: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheLCRRules: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheCDRStatS: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheActions: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheActionPlans: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheAccountActionPlans: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheActionTriggers: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheSharedGroups: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheAliases: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheReverseAliases: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheDerivedChargers: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheResourceConfigs: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheTimings: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 	}
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheConfig) {
-		t.Errorf("received: %+v, expecting: %+v", eCacheCfg, cgrCfg.CacheConfig)
+		t.Errorf("received: %s, \nexpecting: %s", utils.ToIJSON(eCacheCfg), utils.ToIJSON(cgrCfg.CacheConfig))
 	}
 }
 

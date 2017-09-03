@@ -119,7 +119,8 @@ func TestLcrGetQosLimitsSome(t *testing.T) {
 		minAcc != 1 || maxAcc != -1 ||
 		minTcc != 3 || maxTcc != -1 ||
 		minDdc != -1 || maxDdc != 2 {
-		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd, minTcd, maxTcd, minTcc, maxTcc, minDdc, maxDdc)
+		t.Errorf("Wrong qos limits parsed: <%v>, <%v>, <%v>, <%v>, <%v>, <%v>, <%v>, <%v>, <%v>, <%v>",
+			minAsr, maxAsr, minAcd, maxAcd, minTcd, maxTcd, minTcc, maxTcc, minDdc, maxDdc)
 	}
 }
 
