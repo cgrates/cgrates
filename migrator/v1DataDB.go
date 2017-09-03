@@ -23,4 +23,6 @@ getv1Account() (v1Acnt *v1Account, err error)
 setV1Account( x *v1Account) (err error)
 getV1ActionPlans() (v1aps *v1ActionPlans, err error)
 setV1ActionPlans(x *v1ActionPlans) (err error)
+getV1Actions() (v1acs *v1Actions, err error)
+setV1Actions(x *v1Actions) (err error)
 }

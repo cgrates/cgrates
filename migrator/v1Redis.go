@@ -101,6 +101,8 @@ func (v1rs *v1Redis) getKeysForPrefix(prefix string) ([]string, error) {
 	return r.List()
 }
 
+//Account methods
+//get
 func (v1rs *v1Redis) getv1Account() (v1Acnt *v1Account, err error){
 if v1rs.qryIdx==nil{
 	v1rs.dataKeys, err = v1rs.getKeysForPrefix(v1AccountDBPrefix);
@@ -128,6 +130,7 @@ v1rs.qryIdx=nil
 	return v1Acnt,nil 
 }
 
+//set
 func (v1rs *v1Redis) setV1Account( x *v1Account) (err error) {
 key:=v1AccountDBPrefix + x.Id
 bit, err := v1rs.ms.Marshal(x)
@@ -140,6 +143,8 @@ if err = v1rs.cmd("SET", key, bit).Err; err != nil {
 	return
 }
 
+//ActionPlans methods
+//get
 func (v1rs *v1Redis) getV1ActionPlans() (v1aps *v1ActionPlans, err error){
 if v1rs.qryIdx==nil{
 	v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PLAN_PREFIX);
@@ -166,8 +171,50 @@ v1rs.qryIdx=nil
 	return v1aps,nil 
 }
 
-	func (v1rs *v1Redis) setV1ActionPlans( x *v1ActionPlans) (err error) {
+//set
+func (v1rs *v1Redis) setV1ActionPlans( x *v1ActionPlans) (err error) {
 key:=utils.ACTION_PLAN_PREFIX + (*x)[0].Id
+bit, err := v1rs.ms.Marshal(x)
+		if err != nil {
+			return err
+		}
+if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//Actions methods
+//get
+func (v1rs *v1Redis) getV1Actions() (v1acs *v1Actions, err error){
+if v1rs.qryIdx==nil{
+	v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PREFIX);
+		if err != nil {
+				return
+			}else if len(v1rs.dataKeys)==0{
+				return nil,utils.ErrNotFound
+			}
+			v1rs.qryIdx=utils.IntPointer(0)
+	}
+if *v1rs.qryIdx<=len(v1rs.dataKeys)-1{
+strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+	if err != nil {
+			return nil ,err
+		}
+	if err := v1rs.ms.Unmarshal(strVal, &v1acs); err != nil {
+			return nil,err
+			}
+*v1rs.qryIdx=*v1rs.qryIdx+1
+}else{
+v1rs.qryIdx=nil	
+	return nil,utils.ErrNoMoreData
+	}
+	return v1acs,nil 
+}
+
+//set
+func (v1rs *v1Redis) setV1Actions(x *v1Actions) (err error){
+key:=utils.ACTION_PREFIX + (*x)[0].Id
 bit, err := v1rs.ms.Marshal(x)
 		if err != nil {
 			return err

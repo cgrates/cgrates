@@ -19,13 +19,12 @@ package migrator
 
 import (
 	"fmt"
-	"log"
+//	"log"
 
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/engine"
 	"gopkg.in/mgo.v2"
-//	"gopkg.in/mgo.v2/bson"
 )
 
 type  v1Mongo struct{
@@ -101,22 +100,17 @@ var strct *AtKeyValue
  	v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actiontimings").Find(nil).Iter()
 	}
  	v1ms.qryIter.Next(&strct) 
-		log.Print("Done migrating!",strct)
-
 	if strct==nil{
 		v1ms.qryIter=nil
 			return nil,utils.ErrNoMoreData
 	}
-
 	v1aps=&strct.Value
 	return v1aps,nil
 }
 
 //set
-func (v1ms *v1Mongo) setV1Actions(x *v1ActionPlans) (err error) {
+func (v1ms *v1Mongo) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	key:=utils.ACTION_PLAN_PREFIX + (*x)[0].Id
-		log.Print("Done migrating!",(*x)[0])
-
 	if err := v1ms.session.DB(v1ms.db).C("actiontimings").Insert(&AtKeyValue{key, *x}); err != nil {
 		return err
 	}
@@ -125,24 +119,23 @@ func (v1ms *v1Mongo) setV1Actions(x *v1ActionPlans) (err error) {
 
 //Actions methods
 //get
-func (v1ms *v1Mongo) getV1ActionPlans() (v1aps *v1ActionPlans, err error){
-var strct *AtKeyValue
+func (v1ms *v1Mongo) getV1Actions() (v1acs *v1Actions, err error){
+var strct *AcKeyValue
 	if v1ms.qryIter==nil{
- 	v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actiontimings").Find(nil).Iter()
+ 	v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actions").Find(nil).Iter()
 	}
  	v1ms.qryIter.Next(&strct) 
-		log.Print("Done migrating!",strct)
-
 	if strct==nil{
 		v1ms.qryIter=nil
 			return nil,utils.ErrNoMoreData
 	}
 
-	v1aps=&strct.Value
-	return v1aps,nil
+	v1acs=&strct.Value
+	return v1acs,nil
 }
 
-func (v1ms *v1Mongo) setV1onMongoAction(key string, x *v1Actions) (err error) {
+func (v1ms *v1Mongo) setV1Actions(x *v1Actions) (err error) {
+		key:=utils.ACTION_PREFIX + (*x)[0].Id
 	if err := v1ms.session.DB(v1ms.db).C("actions").Insert(&AcKeyValue{key, *x}); err != nil {
 		return err
 	}

@@ -19,7 +19,7 @@ package migrator
 
 import (
 	"fmt"
-	"log"
+	//"log"
 	"strings"
 	"time"
 
@@ -54,20 +54,14 @@ func (at *v1ActionPlan) IsASAP() bool {
 func (m *Migrator) migrateActionPlans() (err error) {
 				var v1APs *v1ActionPlans
 			for {
-		log.Print("Done migrating!")
-
 			v1APs,err=m.oldDataDB.getV1ActionPlans()
 			if err!=nil&&err!=utils.ErrNoMoreData{
 				return err
 			}
-					log.Print("after get !",err, v1APs)
 	if err==utils.ErrNoMoreData{break}
-
-						log.Print("after err check !")
 		if *v1APs != nil {
 				for _, v1ap := range *v1APs{ 
 				ap := v1ap.AsActionPlan()
-									log.Print("ActionPlan !",ap)
 				if err = m.dataDB.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 					return err
 				}
