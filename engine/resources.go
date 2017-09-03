@@ -27,9 +27,14 @@ import (
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 // ResourceCfg represents the user configuration for the resource
 type ResourceCfg struct {
@@ -189,6 +194,9 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	if len(rs) == 0 {
 		return utils.META_NONE, nil
 	}
+	lockIDs := utils.PrefixSliceItems(rs.ids(), utils.ResourcesPrefix)
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	// Simulate resource usage
 	for _, r := range rs {
 		if r.rCfg.Limit >= r.totalUsage()+ru.Units {
@@ -220,6 +228,7 @@ func NewResourceService(cfg *config.CGRConfig, dataDB DataDB, statS rpcclient.Rp
 
 // ResourceService is the service handling resources
 type ResourceService struct {
+	cfg             *config.CGRConfig
 	dataDB          DataDB // So we can load the data in cache and index it
 	statS           rpcclient.RpcClientConnection
 	eventResources  map[string][]string // map[ruID][]string{rID} for faster queries
@@ -247,7 +256,7 @@ func (rS *ResourceService) ServiceShutdown() error {
 	return nil
 }
 
-// storeResource stores the necessary storedMetrics to dataDB
+// StoreResource stores the resource in DB and corrects dirty flag
 func (rS *ResourceService) StoreResource(r *Resource) (err error) {
 	if r.dirty == nil || !*r.dirty {
 		return
@@ -262,10 +271,10 @@ func (rS *ResourceService) StoreResource(r *Resource) (err error) {
 	return
 }
 
-// storeResources executes one task of complete backup
+// storeResources represents one task of complete backup
 func (rS *ResourceService) storeResources() {
 	var failedRIDs []string
-	for {
+	for { // don't stop untill we store all dirty resources
 		rS.srMux.Lock()
 		rID := rS.storedResources.GetOne()
 		if rID != "" {
@@ -316,6 +325,9 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	if !has {
 		return nil
 	}
+	lockIDs := utils.PrefixSliceItems(rIDs, utils.ResourcesPrefix)
+	guardian.Guardian.GuardIDs(rS.cfg.LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	rs = make(Resources, len(rIDs))
 	for i, rID := range rIDs {
 		if r, err := rS.dataDB.GetResource(rID, false, ""); err != nil {
@@ -336,11 +348,14 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rlIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourcesIndex)
+	rIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourcesIndex)
 	if err != nil {
 		return nil, err
 	}
-	for resName := range rlIDs {
+	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourcesPrefix)
+	guardian.Guardian.GuardIDs(rS.cfg.LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
+	for resName := range rIDs {
 		rCfg, err := rS.dataDB.GetResourceCfg(resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -391,7 +406,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) 
 	return
 }
 
-// V1ResourcesForEvent returns active resource limits matching the event
+// V1ResourcesForEvent returns active resource configs matching the event
 func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{}, reply *[]*ResourceCfg) error {
 	matchingRLForEv, err := rS.matchingResourcesForEvent(ev)
 	if err != nil {

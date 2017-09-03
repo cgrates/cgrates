@@ -66,3 +66,11 @@ func AvgNegative(values []float64) float64 {
 	}
 	return Avg(values)
 }
+
+func PrefixSliceItems(slc []string, prfx string) (out []string) {
+	out = make([]string, len(slc))
+	for i, itm := range slc {
+		out[i] = prfx + itm
+	}
+	return
+}
