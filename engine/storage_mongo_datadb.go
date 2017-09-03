@@ -627,7 +627,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	case utils.ResourceConfigsPrefix:
 		iter := db.C(colRCfg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.ResourcesPrefix+idResult.Id)
+			result = append(result, utils.ResourceConfigsPrefix+idResult.Id)
 		}
 	case utils.StatsPrefix:
 		iter := db.C(colSts).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
