@@ -24,7 +24,7 @@ var testCIs = []*cachedItem{
 var lastEvicted string
 
 func TestSetGetRemNoIndexes(t *testing.T) {
-	cache := New(0, 0, false,
+	cache := New(UnlimitedCaching, 0, false,
 		func(k key, v interface{}) { lastEvicted = k.(string) })
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
@@ -166,7 +166,7 @@ func TestSetGetRemLRU(t *testing.T) {
 }
 
 func TestSetGetRemTTLDynamic(t *testing.T) {
-	cache := New(0, time.Duration(10*time.Millisecond), false, nil)
+	cache := New(UnlimitedCaching, time.Duration(10*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -202,7 +202,7 @@ func TestSetGetRemTTLDynamic(t *testing.T) {
 }
 
 func TestSetGetRemTTLStatic(t *testing.T) {
-	cache := New(0, time.Duration(10*time.Millisecond), true, nil)
+	cache := New(UnlimitedCaching, time.Duration(10*time.Millisecond), true, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}
@@ -280,7 +280,7 @@ func TestSetGetRemLRUttl(t *testing.T) {
 
 // BenchmarkSetSimpleCache 	10000000	       180 ns/op
 func BenchmarkSetSimpleCache(b *testing.B) {
-	cache := New(0, 0, false, nil)
+	cache := New(UnlimitedCaching, 0, false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -291,7 +291,7 @@ func BenchmarkSetSimpleCache(b *testing.B) {
 
 // BenchmarkGetSimpleCache 	10000000	       120 ns/op
 func BenchmarkGetSimpleCache(b *testing.B) {
-	cache := New(0, 0, false, nil)
+	cache := New(UnlimitedCaching, 0, false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.key, ci.value)
 	}

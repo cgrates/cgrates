@@ -15,6 +15,11 @@ import (
 	"time"
 )
 
+const (
+	UnlimitedCaching = -1
+	DisabledCaching  = 0
+)
+
 // A key may be any value that is comparable. See http://golang.org/ref/spec#Comparison_operators
 type key interface{}
 
@@ -33,6 +38,7 @@ type Cache struct {
 	// onEvicted will execute specific function if defined when an item will be removed
 	onEvicted func(k key, value interface{})
 	// maxEntries represents maximum number of entries allowed by LRU cache mechanism
+	// -1 for unlimited caching, 0 for disabling caching
 	maxEntries int
 	// ttl represents the lifetime of an cachedItem
 	ttl time.Duration
@@ -74,7 +80,7 @@ func (c *Cache) Get(k key) (value interface{}, ok bool) {
 		return
 	}
 	value, ok = ci.value, true
-	if c.maxEntries != 0 { // update lru indexes
+	if c.maxEntries != UnlimitedCaching { // update lru indexes
 		c.lruIdx.MoveToFront(c.lruRefs[k])
 	}
 	if c.ttl > 0 && !c.staticTTL { // update ttl indexes
@@ -86,12 +92,15 @@ func (c *Cache) Get(k key) (value interface{}, ok bool) {
 
 // Set sets/adds a value to the cache.
 func (c *Cache) Set(k key, value interface{}) {
+	if c.maxEntries == DisabledCaching {
+		return
+	}
 	c.Lock()
 	defer c.Unlock()
 	now := time.Now()
 	if ci, ok := c.cache[k]; ok {
 		ci.value = value
-		if c.maxEntries != 0 { // update lru indexes
+		if c.maxEntries != UnlimitedCaching { // update lru indexes
 			c.lruIdx.MoveToFront(c.lruRefs[k])
 		}
 		if c.ttl > 0 && !c.staticTTL { // update ttl indexes
@@ -102,14 +111,14 @@ func (c *Cache) Set(k key, value interface{}) {
 	}
 	ci := &cachedItem{key: k, value: value}
 	c.cache[k] = ci
-	if c.maxEntries != 0 {
+	if c.maxEntries != UnlimitedCaching {
 		c.lruRefs[k] = c.lruIdx.PushFront(ci)
 	}
 	if c.ttl > 0 {
 		ci.expiryTime = now.Add(c.ttl)
 		c.ttlRefs[k] = c.ttlIdx.PushFront(ci)
 	}
-	if c.maxEntries != 0 {
+	if c.maxEntries != UnlimitedCaching {
 		var lElm *list.Element
 		if c.lruIdx.Len() > c.maxEntries {
 			lElm = c.lruIdx.Back()
@@ -146,7 +155,7 @@ func (c *Cache) removeKey(k key) {
 	if !has {
 		return
 	}
-	if c.maxEntries != 0 {
+	if c.maxEntries != UnlimitedCaching {
 		c.lruIdx.Remove(c.lruRefs[k])
 		delete(c.lruRefs, k)
 	}
