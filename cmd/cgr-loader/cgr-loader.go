@@ -237,7 +237,7 @@ func main() {
 		alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
 		lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
 		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
-		rlIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
+		rlIDs, _ = tpReader.GetLoadedIds(utils.ResourceConfigsPrefix)
 		aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
 		ralsIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_ALIASES_PREFIX)
 	}

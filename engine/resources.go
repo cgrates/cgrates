@@ -19,15 +19,37 @@ package engine
 
 import (
 	"fmt"
+	"math/rand"
 	"reflect"
 	"sort"
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/cgrates/rpcclient"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+// ResourceCfg represents the user configuration for the resource
+type ResourceCfg struct {
+	ID                 string                    // identifier of this resource
+	Filters            []*RequestFilter          // filters for the request
+	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
+	UsageTTL           time.Duration             // auto-expire the usage after this duration
+	Limit              float64                   // limit value
+	AllocationMessage  string                    // message returned by the winning resource on allocation
+	Blocker            bool                      // blocker flag to stop processing on filters matched
+	Stored             bool
+	Weight             float64  // Weight to sort the resources
+	Thresholds         []string // Thresholds to check after changing Limit
+}
 
 // ResourceUsage represents an usage counted
 type ResourceUsage struct {
@@ -41,96 +63,86 @@ func (ru *ResourceUsage) isActive(atTime time.Time) bool {
 	return ru.ExpiryTime.IsZero() || ru.ExpiryTime.Sub(atTime) > 0
 }
 
-// ResourceCfg represents the user configuration for the resource
-type ResourceCfg struct {
-	ID                 string                    // identifier of this resource
-	Filters            []*RequestFilter          // filters for the request
-	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
-	UsageTTL           time.Duration             // expire the usage after this duration
-	Limit              float64                   // limit value
-	AllocationMessage  string                    // message returned by the winning resource on allocation
-	Blocker            bool                      // blocker flag to stop processing on filters matched
-	Stored             bool
-	Weight             float64  // Weight to sort the resources
-	Thresholds         []string // Thresholds to check after changing Limit
-}
-
-// StoredResourceUsages is stored on demand into dataDB
-type StoredResourceUsages map[string]*ResourceUsage
-
-func NewResource(rCfg *ResourceCfg) *Resource {
-	return &Resource{rCfg: rCfg,
-		usages: make(map[string]*ResourceUsage)}
-}
-
 // Resource represents a resource in the system
+// not thread safe, needs locking at process level
 type Resource struct {
-	sync.RWMutex
-	rCfg      *ResourceCfg
-	usages    map[string]*ResourceUsage
-	ttlUsages []*ResourceUsage // used to speed up expirying of the usages
-	tUsage    *float64         // sum of all usages
-	dirty     bool             // the usages were modified, needs save
+	ID     string
+	Usages map[string]*ResourceUsage
+	TTLIdx []string     // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+	tUsage *float64     // sum of all usages
+	dirty  *bool        // the usages were modified, needs save, *bool so we only save if enabled in config
+	rCfg   *ResourceCfg // for ordering purposes
 }
 
-// removeExpiredUnits removes units which are expired
+// removeExpiredUnits removes units which are expired from the resource
 func (r *Resource) removeExpiredUnits() {
 	var firstActive int
-	r.RLock()
-	for _, rv := range r.ttlUsages {
-		if rv.isActive(time.Now()) {
+	for _, rID := range r.TTLIdx {
+		if r, has := r.Usages[rID]; has && r.isActive(time.Now()) {
 			break
 		}
 		firstActive += 1
 	}
-	r.RUnlock()
 	if firstActive == 0 {
 		return
 	}
-	r.Lock()
-	for _, ru := range r.ttlUsages[:firstActive] {
-		delete(r.usages, ru.ID)
+	for _, rID := range r.TTLIdx[:firstActive] {
+		ru, has := r.Usages[rID]
+		if !has {
+			continue
+		}
+		delete(r.Usages, rID)
 		*r.tUsage -= ru.Units
-		ru = nil // empty it so we avoid memleak
+		if *r.tUsage < 0 { // something went wrong
+			utils.Logger.Warning(
+				fmt.Sprintf("resetting total usage for resourceID: %s, usage smaller than 0: %f", r.ID, *r.tUsage))
+			r.tUsage = nil
+		}
 	}
-	r.ttlUsages = r.ttlUsages[firstActive:]
-	r.Unlock()
+	r.TTLIdx = r.TTLIdx[firstActive:]
 }
 
 // totalUsage returns the sum of all usage units
-func (r *Resource) totalUsage() float64 {
+func (r *Resource) totalUsage() (tU float64) {
 	if r.tUsage == nil {
 		var tu float64
-		for _, ru := range r.usages {
+		for _, ru := range r.Usages {
 			tu += ru.Units
 		}
 		r.tUsage = &tu
 	}
-	return *r.tUsage
+	if r.tUsage != nil {
+		tU = *r.tUsage
+	}
+	return
 }
 
 // recordUsage records a new usage
 func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
-	if _, hasID := r.usages[ru.ID]; hasID {
-		return fmt.Errorf("Duplicate resource usage with id: %s", ru.ID)
+	if _, hasID := r.Usages[ru.ID]; hasID {
+		return fmt.Errorf("duplicate resource usage with id: %s", ru.ID)
 	}
-	r.usages[ru.ID] = ru
-	*r.tUsage += ru.Units
+	r.Usages[ru.ID] = ru
+	if r.tUsage != nil {
+		*r.tUsage += ru.Units
+	}
 	return
 }
 
 // clearUsage clears the usage for an ID
-func (r *Resource) clearUsage(ruID string) error {
-	ru, hasIt := r.usages[ruID]
+func (r *Resource) clearUsage(ruID string) (err error) {
+	ru, hasIt := r.Usages[ruID]
 	if !hasIt {
 		return fmt.Errorf("Cannot find usage record with id: %s", ruID)
 	}
-	delete(r.usages, ru.ID)
-	*r.tUsage -= ru.Units
-	return nil
+	delete(r.Usages, ruID)
+	if r.tUsage != nil {
+		*r.tUsage -= ru.Units
+	}
+	return
 }
 
-// Resources is an ordered list of Resources based on Weight
+// Resources is an orderable list of Resources based on Weight
 type Resources []*Resource
 
 // sort based on Weight
@@ -167,6 +179,15 @@ func (rs Resources) clearUsage(ruID string) (err error) {
 	return
 }
 
+// ids returns list of resource IDs in resources
+func (rs Resources) ids() (ids []string) {
+	ids = make([]string, len(rs))
+	for i, r := range rs {
+		ids[i] = r.ID
+	}
+	return
+}
+
 // AllocateResource attempts allocating resources for a *ResourceUsage
 // simulates on dryRun
 // returns utils.ErrResourceUnavailable if allocation is not possible
@@ -174,16 +195,9 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	if len(rs) == 0 {
 		return utils.META_NONE, nil
 	}
-	// lock resources so we can safely take decisions, need all to be locked before proceeding
-	for _, r := range rs {
-		if dryRun { // dryRun only needs read
-			r.RLock()
-			defer r.RUnlock()
-		} else {
-			r.Lock()
-			defer r.Unlock()
-		}
-	}
+	lockIDs := utils.PrefixSliceItems(rs.ids(), utils.ResourcesPrefix)
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	// Simulate resource usage
 	for _, r := range rs {
 		if r.rCfg.Limit >= r.totalUsage()+ru.Units {
@@ -206,39 +220,159 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceService(cfg *config.CGRConfig, dataDB DataDB,
-	statS rpcclient.RpcClientConnection) (*ResourceService, error) {
+func NewResourceService(cfg *config.CGRConfig, dataDB DataDB, statS rpcclient.RpcClientConnection) (*ResourceService, error) {
 	if statS != nil && reflect.ValueOf(statS).IsNil() {
 		statS = nil
 	}
-	return &ResourceService{dataDB: dataDB, statS: statS}, nil
+	return &ResourceService{dataDB: dataDB, statS: statS,
+		scEventResources: ltcache.New(ltcache.UnlimitedCaching, time.Duration(1)*time.Minute, false, nil),
+		lcEventResources: ltcache.New(ltcache.UnlimitedCaching, ltcache.UnlimitedCaching, false, nil)}, nil
 }
 
-// ResourceService is the service handling channel limits
+// ResourceService is the service handling resources
 type ResourceService struct {
-	dataDB DataDB // So we can load the data in cache and index it
-	statS  rpcclient.RpcClientConnection
+	cfg              *config.CGRConfig
+	dataDB           DataDB                        // So we can load the data in cache and index it
+	statS            rpcclient.RpcClientConnection // allows applying filters based on stats
+	scEventResources *ltcache.Cache                // short cache map[ruID], used to keep references to matched resources for events in allow queries
+	lcEventResources *ltcache.Cache                // cache recording resources for events in alocation phase
+	storedResources  utils.StringMap               // keep a record of resources which need saving, map[resID]bool
+	srMux            sync.RWMutex
+	stopBackup       chan struct{} // control storing process
+	backupInterval   time.Duration
 }
 
 // Called to start the service
-func (rS *ResourceService) ListenAndServe() error {
+func (rS *ResourceService) ListenAndServe(exitChan chan bool) error {
+	go rS.runBackup() // start backup loop
+	e := <-exitChan
+	exitChan <- e // put back for the others listening for shutdown request
 	return nil
 }
 
 // Called to shutdown the service
 func (rS *ResourceService) ServiceShutdown() error {
+	utils.Logger.Info("<ResourceS> service shutdown initialized")
+	close(rS.stopBackup)
+	rS.storeResources()
+	utils.Logger.Info("<ResourceS> service shutdown complete")
 	return nil
 }
 
+// StoreResource stores the resource in DB and corrects dirty flag
+func (rS *ResourceService) StoreResource(r *Resource) (err error) {
+	if r.dirty == nil || !*r.dirty {
+		return
+	}
+	if err = rS.dataDB.SetResource(r); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
+				r.ID, err.Error()))
+	} else {
+		*r.dirty = false
+	}
+	return
+}
+
+// storeResources represents one task of complete backup
+func (rS *ResourceService) storeResources() {
+	var failedRIDs []string
+	for { // don't stop untill we store all dirty resources
+		rS.srMux.Lock()
+		rID := rS.storedResources.GetOne()
+		if rID != "" {
+			delete(rS.storedResources, rID)
+		}
+		rS.srMux.Unlock()
+		if rID == "" {
+			break // no more keys, backup completed
+		}
+		if rIf, ok := cache.Get(utils.ResourcesPrefix + rID); !ok || rIf == nil {
+			utils.Logger.Warning(fmt.Sprintf("<ResourceS> failed retrieving from cache resource with ID: %s"))
+		} else if err := rS.StoreResource(rIf.(*Resource)); err != nil {
+			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
+		}
+		// randomize the CPU load and give up thread control
+		time.Sleep(time.Duration(rand.Intn(1000)) * time.Nanosecond)
+	}
+	if len(failedRIDs) != 0 { // there were errors on save, schedule the keys for next backup
+		rS.srMux.Lock()
+		for _, rID := range failedRIDs {
+			rS.storedResources[rID] = true
+		}
+		rS.srMux.Unlock()
+	}
+}
+
+// backup will regularly store resources changed to dataDB
+func (rS *ResourceService) runBackup() {
+	if rS.backupInterval <= 0 {
+		return
+	}
+	for {
+		select {
+		case <-rS.stopBackup:
+			return
+		}
+		rS.storeResources()
+	}
+	time.Sleep(rS.backupInterval)
+}
+
+// cachedResourcesForEvent attempts to retrieve cached resources for an event
+// returns nil if event not cached or errors occur
+// returns []Resource if negative reply was cached
+func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources) {
+	var shortCached bool
+	rIDsIf, has := rS.lcEventResources.Get(evUUID)
+	if !has {
+		if rIDsIf, has = rS.scEventResources.Get(evUUID); !has {
+			return nil
+		}
+		shortCached = true
+	}
+	var rIDs []string
+	if rIDsIf != nil {
+		rIDs = rIDsIf.([]string)
+	}
+	rs = make(Resources, len(rIDs))
+	if len(rIDs) == 0 {
+		return
+	}
+
+	lockIDs := utils.PrefixSliceItems(rIDs, utils.ResourcesPrefix)
+	guardian.Guardian.GuardIDs(rS.cfg.LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
+	for i, rID := range rIDs {
+		if r, err := rS.dataDB.GetResource(rID, false, ""); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<ResourceS> force-uncaching resources for evUUID: <%s>, error: <%s>",
+					evUUID, err.Error()))
+			// on errors, cleanup cache so we recache
+			if shortCached {
+				rS.scEventResources.Remove(evUUID)
+			} else {
+				rS.lcEventResources.Remove(evUUID)
+			}
+			return nil
+		} else {
+			rs[i] = r
+		}
+	}
+	return
+}
+
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceService) matchingResourcesForEvent(
-	ev map[string]interface{}) (rs Resources, err error) {
+func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rlIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourcesIndex)
+	rIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourcesIndex)
 	if err != nil {
 		return nil, err
 	}
-	for resName := range rlIDs {
+	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourcesPrefix)
+	guardian.Guardian.GuardIDs(rS.cfg.LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
+	for resName := range rIDs {
 		rCfg, err := rS.dataDB.GetResourceCfg(resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -253,7 +387,7 @@ func (rS *ResourceService) matchingResourcesForEvent(
 		passAllFilters := true
 		for _, fltr := range rCfg.Filters {
 			if pass, err := fltr.Pass(ev, "", rS.statS); err != nil {
-				return nil, utils.NewErrServerError(err)
+				return nil, err
 			} else if !pass {
 				passAllFilters = false
 				continue
@@ -262,7 +396,15 @@ func (rS *ResourceService) matchingResourcesForEvent(
 		if !passAllFilters {
 			continue
 		}
-		matchingResources[rCfg.ID] = NewResource(rCfg) // Cannot save it here since we could have errors after and resource will remain unused
+		r, err := rS.dataDB.GetResource(rCfg.ID, false, "")
+		if err != nil {
+			return nil, err
+		}
+		if rCfg.Stored {
+			r.dirty = utils.BoolPointer(false)
+		}
+		r.rCfg = rCfg
+		matchingResources[rCfg.ID] = r // Cannot save it here since we could have errors after and resource will remain unused
 	}
 	// All good, convert from Map to Slice so we can sort
 	rs = make(Resources, len(matchingResources))
@@ -273,19 +415,19 @@ func (rS *ResourceService) matchingResourcesForEvent(
 	}
 	rs.Sort()
 	for i, r := range rs {
-		if r.rCfg.Blocker {
+		if r.rCfg.Blocker { // blocker will stop processing
 			rs = rs[:i+1]
+			break
 		}
 	}
 	return
 }
 
-// V1ResourcesForEvent returns active resource limits matching the event
-func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{},
-	reply *[]*ResourceCfg) error {
+// V1ResourcesForEvent returns active resource configs matching the event
+func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{}, reply *[]*ResourceCfg) error {
 	matchingRLForEv, err := rS.matchingResourcesForEvent(ev)
 	if err != nil {
-		return utils.NewErrServerError(err)
+		return err
 	}
 	if len(matchingRLForEv) == 0 {
 		return utils.ErrNotFound
@@ -297,47 +439,97 @@ func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{},
 }
 
 // V1AllowUsage queries service to find if an Usage is allowed
-func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage,
-	allow *bool) (err error) {
-	mtcRLs, err := rS.matchingResourcesForEvent(args.Event)
-	if err != nil {
-		return utils.NewErrServerError(err)
+func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *bool) (err error) {
+	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
+	if mtcRLs == nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+			return err
+		}
+		rS.scEventResources.Set(args.UsageID, mtcRLs.ids())
 	}
 	if _, err = mtcRLs.AllocateResource(
 		&ResourceUsage{ID: args.UsageID,
 			Units: args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
+			rS.scEventResources.Set(args.UsageID, nil)
 			return // not error but still not allowed
 		}
-		return utils.NewErrServerError(err)
+		return err
 	}
 	*allow = true
 	return
 }
 
-// V1AllocateResource is called when a resource needs allocation
+// V1AllocateResource is called when a resource requires allocation
 func (rS *ResourceService) V1AllocateResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
-	mtcRLs, err := rS.matchingResourcesForEvent(args.Event)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if alcMsg, err := mtcRLs.AllocateResource(
-		&ResourceUsage{ID: args.UsageID,
-			Units: args.Units}, false); err != nil {
-		return err
+	var wasCached bool
+	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
+	if mtcRLs == nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+			return
+		}
 	} else {
-		*reply = alcMsg
+		wasCached = true
 	}
+	alcMsg, err := mtcRLs.AllocateResource(&ResourceUsage{ID: args.UsageID, Units: args.Units}, false)
+	if err != nil {
+		return err
+	}
+
+	// index it for matching out of cache
+	var wasShortCached bool
+	if wasCached {
+		if _, has := rS.scEventResources.Get(args.UsageID); has {
+			// remove from short cache to populate event cache
+			wasShortCached = true
+			rS.scEventResources.Remove(args.UsageID)
+		}
+	}
+	if wasShortCached || !wasCached {
+		rS.lcEventResources.Set(args.UsageID, mtcRLs.ids())
+	}
+
+	// index it for storing
+	rS.srMux.Lock()
+	for _, r := range mtcRLs {
+		if rS.backupInterval == -1 {
+			rS.StoreResource(r)
+		} else if r.dirty != nil {
+			*r.dirty = true // mark it to be saved
+		}
+		rS.storedResources[r.ID] = true
+	}
+	rS.srMux.Unlock()
+	*reply = alcMsg
 	return
 }
 
 // V1ReleaseResource is called when we need to clear an allocation
-func (rS *ResourceService) V1ReleaseResource(attrs utils.AttrRLsResourceUsage, reply *string) (err error) {
-	mtcRLs, err := rS.matchingResourcesForEvent(attrs.Event)
-	if err != nil {
-		return utils.NewErrServerError(err)
+func (rS *ResourceService) V1ReleaseResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
+	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
+	if mtcRLs == nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+			return
+		}
 	}
-	mtcRLs.clearUsage(attrs.UsageID)
+	mtcRLs.clearUsage(args.UsageID)
+	rS.lcEventResources.Remove(args.UsageID)
+	if rS.backupInterval != -1 {
+		rS.srMux.Lock()
+	}
+	for _, r := range mtcRLs {
+		if r.dirty != nil {
+			if rS.backupInterval == -1 {
+				rS.StoreResource(r)
+			} else {
+				*r.dirty = true // mark it to be saved
+				rS.storedResources[r.ID] = true
+			}
+		}
+	}
+	if rS.backupInterval != -1 {
+		rS.srMux.Unlock()
+	}
 	*reply = utils.OK
 	return nil
 }

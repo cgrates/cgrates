@@ -358,7 +358,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	for _, prfx := range []string{
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourcesPrefix} {
+		utils.ResourceConfigsPrefix} {
 		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
 		if err := self.DataDB.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
@@ -936,7 +936,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataDB.CacheDataFromDB(utils.ResourcesPrefix, dataIDs, true); err != nil {
+	if err = self.DataDB.CacheDataFromDB(utils.ResourceConfigsPrefix, dataIDs, true); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1120,10 +1120,10 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 		}
 	}
 	if args.ResourceIDs == nil {
-		cache.RemPrefixKey(utils.ResourcesPrefix, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ResourceConfigsPrefix, true, utils.NonTransactional)
 	} else if len(*args.ResourceIDs) != 0 {
 		for _, key := range *args.ResourceIDs {
-			cache.RemKey(utils.ResourcesPrefix+key, true, utils.NonTransactional)
+			cache.RemKey(utils.ResourceConfigsPrefix+key, true, utils.NonTransactional)
 		}
 	}
 	*reply = utils.OK
@@ -1144,7 +1144,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.LcrProfiles = cache.CountEntries(utils.LCR_PREFIX)
 	cs.Aliases = cache.CountEntries(utils.ALIASES_PREFIX)
 	cs.ReverseAliases = cache.CountEntries(utils.REVERSE_ALIASES_PREFIX)
-	cs.Resources = cache.CountEntries(utils.ResourcesPrefix)
+	cs.Resources = cache.CountEntries(utils.ResourceConfigsPrefix)
 
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
@@ -1406,13 +1406,13 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		var ids []string
 		if len(*args.ResourceIDs) != 0 {
 			for _, id := range *args.ResourceIDs {
-				if _, hasIt := cache.Get(utils.ResourcesPrefix + id); hasIt {
+				if _, hasIt := cache.Get(utils.ResourceConfigsPrefix + id); hasIt {
 					ids = append(ids, id)
 				}
 			}
 		} else {
-			for _, id := range cache.GetEntryKeys(utils.ResourcesPrefix) {
-				ids = append(ids, id[len(utils.ResourcesPrefix):])
+			for _, id := range cache.GetEntryKeys(utils.ResourceConfigsPrefix) {
+				ids = append(ids, id[len(utils.ResourceConfigsPrefix):])
 			}
 		}
 		ids = args.Paginator.PaginateStringSlice(ids)
@@ -1494,7 +1494,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for _, prfx := range []string{
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourcesPrefix} {
+		utils.ResourceConfigsPrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataDB.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)

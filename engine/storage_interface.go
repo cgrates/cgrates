@@ -101,6 +101,9 @@ type DataDB interface {
 	GetResourceCfg(string, bool, string) (*ResourceCfg, error)
 	SetResourceCfg(*ResourceCfg, string) error
 	RemoveResourceCfg(string, string) error
+	GetResource(string, bool, string) (*Resource, error)
+	SetResource(*Resource) error
+	RemoveResource(string, string) error
 	GetTiming(string, bool, string) (*utils.TPTiming, error)
 	SetTiming(*utils.TPTiming, string) error
 	RemoveTiming(string, string) error

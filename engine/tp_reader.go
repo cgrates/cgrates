@@ -2253,7 +2253,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ResourcesPrefix:
+	case utils.ResourceConfigsPrefix:
 		keys := make([]string, len(tpr.resLimits))
 		i := 0
 		for k := range tpr.resLimits {

@@ -144,7 +144,7 @@ func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (e
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourcesPrefix:        rlIDs,
+		utils.ResourceConfigsPrefix:  rlIDs,
 	} {
 		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -230,7 +230,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourcesPrefix,
+		utils.ResourceConfigsPrefix,
 		utils.TimingsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
@@ -257,7 +257,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		if cCfg, has := rs.cacheCfg[utils.CachePrefixToInstance[prfx]]; has {
 			nrItems = cCfg.Limit
 		}
-		if nrItems != 0 && nrItems < len(ids) {
+		if nrItems > 0 && nrItems < len(ids) {
 			ids = ids[:nrItems]
 		}
 	}
@@ -294,7 +294,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = rs.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourcesPrefix:
+		case utils.ResourceConfigsPrefix:
 			_, err = rs.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
@@ -314,7 +314,11 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}
-	return r.List()
+	if keys, _ := r.List(); len(keys) != 0 {
+		return keys, nil
+	}
+	return nil, nil
+
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
@@ -1372,7 +1376,7 @@ func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 
 func (rs *RedisStorage) GetResourceCfg(id string,
 	skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
-	key := utils.ResourcesPrefix + id
+	key := utils.ResourceConfigsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1406,15 +1410,27 @@ func (rs *RedisStorage) SetResourceCfg(r *ResourceCfg, transactionID string) err
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.ResourcesPrefix+r.ID, result).Err
+	return rs.Cmd("SET", utils.ResourceConfigsPrefix+r.ID, result).Err
 }
 
 func (rs *RedisStorage) RemoveResourceCfg(id string, transactionID string) (err error) {
-	key := utils.ResourcesPrefix + id
+	key := utils.ResourceConfigsPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (rs *RedisStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
+	return
+}
+
+func (rs *RedisStorage) SetResource(r *Resource) (err error) {
+	return
+}
+
+func (rs *RedisStorage) RemoveResource(id string, transactionID string) (err error) {
 	return
 }
 
@@ -1541,7 +1557,7 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-// GetStatsQueue retrieves a StatsQueue from dataDB
+// GetStatsConfig retrieves a StatsConfig from dataDB
 func (rs *RedisStorage) GetStatsConfig(sqID string) (sq *StatsConfig, err error) {
 	key := utils.StatsConfigPrefix + sqID
 	var values []byte

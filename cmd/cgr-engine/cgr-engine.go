@@ -320,7 +320,7 @@ func startSmFreeSWITCH(internalRaterChan, internalCDRSChan, rlsChan chan rpcclie
 	exitChan <- true
 }
 
-func startSmKamailio(internalRaterChan, internalCDRSChan, internalRLsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+func startSmKamailio(internalRaterChan, internalCDRSChan, internalRsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMKamailio service.")
 	var ralsConn, cdrsConn, rlSConn *rpcclient.RpcClientPool
 	if len(cfg.SmKamConfig.RALsConns) != 0 {
@@ -343,7 +343,7 @@ func startSmKamailio(internalRaterChan, internalCDRSChan, internalRLsChan chan r
 	}
 	if len(cfg.SmKamConfig.RLsConns) != 0 {
 		rlSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmKamConfig.RLsConns, internalRLsChan, cfg.InternalTtl)
+			cfg.SmKamConfig.RLsConns, internalRsChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RLsConns: %s", err.Error()))
 			exitChan <- true
@@ -527,33 +527,33 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, data
 	internalUserSChan <- userServer
 }
 
-func startResourceLimiterService(internalRLSChan, internalStatSConn chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dataDB engine.DataDB, server *utils.Server, exitChan chan bool) {
 	var statsConn *rpcclient.RpcClientPool
 	if len(cfg.ResourceLimiterCfg().StatSConns) != 0 { // Stats connection init
 		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.ResourceLimiterCfg().StatSConns, internalStatSConn, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<RLs> Could not connect to StatS: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not connect to StatS: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	rls, err := engine.NewResourceService(cfg, dataDB, statsConn)
+	rS, err := engine.NewResourceService(cfg, dataDB, statsConn)
 	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<RLs> Could not init, error: %s", err.Error()))
+		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("Starting ResourceLimiter service"))
-	if err := rls.ListenAndServe(); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<RLs> Could not start, error: %s", err.Error()))
+	utils.Logger.Info(fmt.Sprintf("Starting Resource Service"))
+	if err := rS.ListenAndServe(exitChan); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not start, error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
-	rsV1 := v1.NewResourceSV1(rls)
+	rsV1 := v1.NewResourceSV1(rS)
 	server.RpcRegister(rsV1)
-	internalRLSChan <- rsV1
+	internalRsChan <- rsV1
 }
 
 // startStatService fires up the StatS
@@ -581,7 +581,7 @@ func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cfg 
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
-	internalAliaseSChan, internalRLsChan, internalStatSChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
+	internalAliaseSChan, internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -599,8 +599,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalAliaseSChan <- aliases
 	case smg := <-internalSMGChan:
 		internalSMGChan <- smg
-	case rls := <-internalRLsChan:
-		internalRLsChan <- rls
+	case rls := <-internalRsChan:
+		internalRsChan <- rls
 	case statS := <-internalStatSChan:
 		internalStatSChan <- statS
 	}
@@ -755,7 +755,7 @@ func main() {
 	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan *sessionmanager.SMGeneric, 1)
-	internalRLSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// Start ServiceManager
@@ -794,14 +794,14 @@ func main() {
 	}
 	// Start SM-FreeSWITCH
 	if cfg.SmFsConfig.Enabled {
-		go startSmFreeSWITCH(internalRaterChan, internalCdrSChan, internalRLSChan, cdrDb, exitChan)
+		go startSmFreeSWITCH(internalRaterChan, internalCdrSChan, internalRsChan, cdrDb, exitChan)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler(exitChan)
 	}
 
 	// Start SM-Kamailio
 	if cfg.SmKamConfig.Enabled {
-		go startSmKamailio(internalRaterChan, internalCdrSChan, internalRLSChan, cdrDb, exitChan)
+		go startSmKamailio(internalRaterChan, internalCdrSChan, internalRsChan, cdrDb, exitChan)
 	}
 
 	// Start SM-OpenSIPS
@@ -849,7 +849,7 @@ func main() {
 
 	// Start RL service
 	if cfg.ResourceLimiterCfg().Enabled {
-		go startResourceLimiterService(internalRLSChan,
+		go startResourceService(internalRsChan,
 			internalStatSChan, cfg, dataDB, server, exitChan)
 	}
 
@@ -859,7 +859,7 @@ func main() {
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan, internalHistorySChan,
-		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRLSChan, internalStatSChan, internalSMGChan)
+		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan)
 	<-exitChan
 
 	if *pidFile != "" {

@@ -71,7 +71,8 @@ func (s storage) smembers(key string, ms Marshaler) (idMap utils.StringMap, ok b
 }
 
 func NewMapStorage() (*MapStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(), cacheCfg: config.CgrConfig().CacheConfig}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler(),
+		cacheCfg: config.CgrConfig().CacheConfig}, nil
 }
 
 func NewMapStorageJson() (mpStorage *MapStorage, err error) {
@@ -220,7 +221,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourcesPrefix,
+		utils.ResourceConfigsPrefix,
 		utils.TimingsPrefix}, prefix) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
@@ -247,7 +248,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		if cCfg, has := ms.cacheCfg[utils.CachePrefixToInstance[prefix]]; has {
 			nrItems = cCfg.Limit
 		}
-		if nrItems != 0 && nrItems < len(IDs) {
+		if nrItems > 0 && nrItems < len(IDs) {
 			IDs = IDs[:nrItems]
 		}
 	}
@@ -284,7 +285,7 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourcesPrefix:
+		case utils.ResourceConfigsPrefix:
 			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
@@ -1311,7 +1312,7 @@ func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
 func (ms *MapStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.ResourcesPrefix + id
+	key := utils.ResourceConfigsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x != nil {
@@ -1345,18 +1346,62 @@ func (ms *MapStorage) SetResourceCfg(r *ResourceCfg, transactionID string) error
 	if err != nil {
 		return err
 	}
-	key := utils.ResourcesPrefix + r.ID
-	ms.dict[key] = result
+	ms.dict[utils.ResourceConfigsPrefix+r.ID] = result
 	return nil
 }
 
 func (ms *MapStorage) RemoveResourceCfg(id string, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.ResourcesPrefix + id
+	key := utils.ResourceConfigsPrefix + id
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
+}
+
+func (ms *MapStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	key := utils.ResourcesPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x != nil {
+				return x.(*Resource), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	values, ok := ms.dict[key]
+	if !ok {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, r)
+	if err != nil {
+		return nil, err
+	}
+	cache.Set(key, r, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (ms *MapStorage) SetResource(r *Resource) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.ResourcesPrefix+r.ID] = result
+	return
+}
+
+func (ms *MapStorage) RemoveResource(id string, transactionID string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.ResourcesPrefix + id
+	delete(ms.dict, key)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
 }
 
 func (ms *MapStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
