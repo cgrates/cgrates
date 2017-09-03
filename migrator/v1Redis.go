@@ -19,7 +19,7 @@ package migrator
 
 import (
 "fmt"
-"log"
+//"log"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/engine"
 
@@ -104,20 +104,14 @@ func (v1rs *v1Redis) getKeysForPrefix(prefix string) ([]string, error) {
 func (v1rs *v1Redis) getv1Account() (v1Acnt *v1Account, err error){
 if v1rs.qryIdx==nil{
 	v1rs.dataKeys, err = v1rs.getKeysForPrefix(v1AccountDBPrefix);
-			log.Print("#1 Done migrating!",v1rs.dataKeys)
-
 		if err != nil {
 				return
 			}else if len(v1rs.dataKeys)==0{
 				return nil,utils.ErrNotFound
 			}
 			v1rs.qryIdx=utils.IntPointer(0)
-						log.Print("#2 Done migrating!",*v1rs.qryIdx)
-
 	}
 if *v1rs.qryIdx<=len(v1rs.dataKeys)-1{
-				log.Print("#3 Done migrating!",v1rs.dataKeys[*v1rs.qryIdx])
-
 strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
 	if err != nil {
 			return nil ,err
@@ -126,11 +120,60 @@ strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
 	if err := v1rs.ms.Unmarshal(strVal, v1Acnt); err != nil {
 			return nil,err
 			}
-log.Print("#4 Done migrating!",*v1rs.qryIdx)
 *v1rs.qryIdx=*v1rs.qryIdx+1
 }else{
-v1rs.qryIdx=utils.IntPointer(-1)
+v1rs.qryIdx=nil
 	return nil,utils.ErrNoMoreData
 	}
 	return v1Acnt,nil 
+}
+
+func (v1rs *v1Redis) setV1Account( x *v1Account) (err error) {
+key:=v1AccountDBPrefix + x.Id
+bit, err := v1rs.ms.Marshal(x)
+		if err != nil {
+			return err
+		}
+if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+func (v1rs *v1Redis) getV1ActionPlans() (v1aps *v1ActionPlans, err error){
+if v1rs.qryIdx==nil{
+	v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PLAN_PREFIX);
+		if err != nil {
+				return
+			}else if len(v1rs.dataKeys)==0{
+				return nil,utils.ErrNotFound
+			}
+			v1rs.qryIdx=utils.IntPointer(0)
+	}
+if *v1rs.qryIdx<=len(v1rs.dataKeys)-1{
+strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+	if err != nil {
+			return nil ,err
+		}
+	if err := v1rs.ms.Unmarshal(strVal, &v1aps); err != nil {
+			return nil,err
+			}
+*v1rs.qryIdx=*v1rs.qryIdx+1
+}else{
+v1rs.qryIdx=nil	
+	return nil,utils.ErrNoMoreData
+	}
+	return v1aps,nil 
+}
+
+	func (v1rs *v1Redis) setV1ActionPlans( x *v1ActionPlans) (err error) {
+key:=utils.ACTION_PLAN_PREFIX + (*x)[0].Id
+bit, err := v1rs.ms.Marshal(x)
+		if err != nil {
+			return err
+		}
+if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
 }

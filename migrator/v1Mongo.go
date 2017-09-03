@@ -19,9 +19,13 @@ package migrator
 
 import (
 	"fmt"
+	"log"
+
+	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/engine"
 	"gopkg.in/mgo.v2"
+//	"gopkg.in/mgo.v2/bson"
 )
 
 type  v1Mongo struct{
@@ -31,6 +35,16 @@ type  v1Mongo struct{
 	qryIter 		*mgo.Iter 
 
 }
+
+type AcKeyValue struct {
+	Key   string
+	Value v1Actions
+}
+type AtKeyValue struct {
+	Key   string
+	Value v1ActionPlans
+}
+
 func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string) (v1ms *v1Mongo, err error) {
 	url := host
 	if port != "" {
@@ -51,6 +65,12 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	return
 }
 
+	func (v1ms *v1Mongo) getKeysForPrefix(prefix string) ([]string, error){
+return nil,nil
+}
+
+//Account methods
+//get
  func (v1ms *v1Mongo) getv1Account() (v1Acnt *v1Account, err error){
  	if v1ms.qryIter==nil{
  	v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v1AccountDBPrefix).Find(nil).Iter()
@@ -59,10 +79,92 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 
 	if v1Acnt==nil{
 		v1ms.qryIter=nil
+			return nil,utils.ErrNoMoreData
+
 	}
 	return v1Acnt,nil
  }
 
-func (v1ms *v1Mongo) getKeysForPrefix(prefix string) ([]string, error){
-return nil,nil
+//set
+func (v1ms *v1Mongo) setV1Account( x *v1Account) (err error) {
+	if err := v1ms.session.DB(v1ms.db).C(v1AccountDBPrefix).Insert(x); err != nil {
+		return err
+	}
+	return
 }
+
+//Action methods
+//get
+func (v1ms *v1Mongo) getV1ActionPlans() (v1aps *v1ActionPlans, err error){
+var strct *AtKeyValue
+	if v1ms.qryIter==nil{
+ 	v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actiontimings").Find(nil).Iter()
+	}
+ 	v1ms.qryIter.Next(&strct) 
+		log.Print("Done migrating!",strct)
+
+	if strct==nil{
+		v1ms.qryIter=nil
+			return nil,utils.ErrNoMoreData
+	}
+
+	v1aps=&strct.Value
+	return v1aps,nil
+}
+
+//set
+func (v1ms *v1Mongo) setV1Actions(x *v1ActionPlans) (err error) {
+	key:=utils.ACTION_PLAN_PREFIX + (*x)[0].Id
+		log.Print("Done migrating!",(*x)[0])
+
+	if err := v1ms.session.DB(v1ms.db).C("actiontimings").Insert(&AtKeyValue{key, *x}); err != nil {
+		return err
+	}
+	return
+}
+
+//Actions methods
+//get
+func (v1ms *v1Mongo) getV1ActionPlans() (v1aps *v1ActionPlans, err error){
+var strct *AtKeyValue
+	if v1ms.qryIter==nil{
+ 	v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actiontimings").Find(nil).Iter()
+	}
+ 	v1ms.qryIter.Next(&strct) 
+		log.Print("Done migrating!",strct)
+
+	if strct==nil{
+		v1ms.qryIter=nil
+			return nil,utils.ErrNoMoreData
+	}
+
+	v1aps=&strct.Value
+	return v1aps,nil
+}
+
+func (v1ms *v1Mongo) setV1onMongoAction(key string, x *v1Actions) (err error) {
+	if err := v1ms.session.DB(v1ms.db).C("actions").Insert(&AcKeyValue{key, *x}); err != nil {
+		return err
+	}
+	return
+}
+
+// func (v1ms *v1Mongo) setV1onMongoActionTrigger(pref string, x *v1ActionTriggers) (err error) {
+// 	if err := v1ms.session.DB(v1ms.db).C(pref).Insert(x); err != nil {
+// 		return err
+// 	}
+// 	return
+// }
+
+// func (v1ms *v1Mongo) setV1onMongoSharedGroup(pref string, x *v1SharedGroup) (err error) {
+// 	if err := v1ms.session.DB(v1ms.db).C(pref).Insert(x); err != nil {
+// 		return err
+// 	}
+// 	return
+// }
+// func (v1ms *v1Mongo) DropV1Colection(pref string) (err error) {
+// 	if err := v1ms.session.DB(v1ms.db).C(pref).DropCollection(); err != nil {
+// 		return err
+// 	}
+// 	return
+// }

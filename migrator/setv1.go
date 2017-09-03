@@ -51,59 +51,41 @@ package migrator
 // }
 
 // func (m *Migrator) SetV1onMongoAccount( x *v1Account) (err error) {
-// 	dataDB := m.dataDB.(*engine.MongoStorage)
-// 	mgoDB := dataDB.DB()
-// 	defer mgoDB.Session.Close()
-// 	if err := mgoDB.C("userbalances").Insert(x); err != nil {
+// 	if err := m.oldDataDB.session.DB().C("userbalances").Insert(x); err != nil {
 // 		return err
 // 	}
 // 	return
 // }
 
 // func (m *Migrator) SetV1onMongoAction(key string, x *v1Actions) (err error) {
-// 	dataDB := m.dataDB.(*engine.MongoStorage)
-// 	mgoDB := dataDB.DB()
-// 	defer mgoDB.Session.Close()
-// 	if err := mgoDB.C("actions").Insert(&AcKeyValue{key, *x}); err != nil {
+// 	if err := m.oldDataDB.session.DB().C("actions").Insert(&AcKeyValue{key, *x}); err != nil {
 // 		return err
 // 	}
 // 	return
 // }
 
 // func (m *Migrator) SetV1onMongoActionPlan(key string, x *v1ActionPlans) (err error) {
-// 	dataDB := m.dataDB.(*engine.MongoStorage)
-// 	mgoDB := dataDB.DB()
-// 	defer mgoDB.Session.Close()
-// 	if err := mgoDB.C("actiontimings").Insert(&AtKeyValue{key, *x}); err != nil {
+// 	if err := m.oldDataDB.session.DB().C("actiontimings").Insert(&AtKeyValue{key, *x}); err != nil {
 // 		return err
 // 	}
 // 	return
 // }
 
 // func (m *Migrator) SetV1onMongoActionTrigger(pref string, x *v1ActionTriggers) (err error) {
-// 	dataDB := m.dataDB.(*engine.MongoStorage)
-// 	mgoDB := dataDB.DB()
-// 	defer mgoDB.Session.Close()
-// 	if err := mgoDB.C(pref).Insert(x); err != nil {
+// 	if err := m.oldDataDB.session.DB().C(pref).Insert(x); err != nil {
 // 		return err
 // 	}
 // 	return
 // }
 
 // func (m *Migrator) SetV1onMongoSharedGroup(pref string, x *v1SharedGroup) (err error) {
-// 	dataDB := m.dataDB.(*engine.MongoStorage)
-// 	mgoDB := dataDB.DB()
-// 	defer mgoDB.Session.Close()
-// 	if err := mgoDB.C(pref).Insert(x); err != nil {
+// 	if err := m.oldDataDB.session.DB().C(pref).Insert(x); err != nil {
 // 		return err
 // 	}
 // 	return
 // }
 // func (m *Migrator) DropV1Colection(pref string) (err error) {
-// 	dataDB := m.dataDB.(*engine.MongoStorage)
-// 	mgoDB := dataDB.DB()
-// 	defer mgoDB.Session.Close()
-// 	if err := mgoDB.C(pref).DropCollection(); err != nil {
+// 	if err := m.oldDataDB.session.DB().C(pref).DropCollection(); err != nil {
 // 		return err
 // 	}
 // 	return

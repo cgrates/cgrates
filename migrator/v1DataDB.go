@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 type  v1DataDB interface{
-getv1Account() (v1Acnt *v1Account, err error)
 getKeysForPrefix(prefix string) ([]string, error)
+getv1Account() (v1Acnt *v1Account, err error)
+setV1Account( x *v1Account) (err error)
+getV1ActionPlans() (v1aps *v1ActionPlans, err error)
+setV1ActionPlans(x *v1ActionPlans) (err error)
 }
