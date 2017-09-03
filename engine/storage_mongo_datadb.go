@@ -493,7 +493,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		if cCfg, has := ms.cacheCfg[utils.CachePrefixToInstance[prfx]]; has {
 			nrItems = cCfg.Limit
 		}
-		if nrItems != 0 && nrItems < len(ids) { // More ids than cache config allows it, limit here
+		if nrItems > 0 && nrItems < len(ids) { // More ids than cache config allows it, limit here
 			ids = ids[:nrItems]
 		}
 	}

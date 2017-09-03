@@ -257,7 +257,7 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		if cCfg, has := rs.cacheCfg[utils.CachePrefixToInstance[prfx]]; has {
 			nrItems = cCfg.Limit
 		}
-		if nrItems != 0 && nrItems < len(ids) {
+		if nrItems > 0 && nrItems < len(ids) {
 			ids = ids[:nrItems]
 		}
 	}
