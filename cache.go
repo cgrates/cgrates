@@ -65,7 +65,7 @@ func New(maxEntries int, ttl time.Duration, staticTTL bool,
 		ttlIdx:     list.New(),
 		ttlRefs:    make(map[key]*list.Element),
 	}
-	if c.ttl != 0 {
+	if c.ttl > 0 {
 		go c.cleanExpired()
 	}
 	return
@@ -159,7 +159,7 @@ func (c *Cache) removeKey(k key) {
 		c.lruIdx.Remove(c.lruRefs[k])
 		delete(c.lruRefs, k)
 	}
-	if c.ttl != 0 {
+	if c.ttl > 0 {
 		c.ttlIdx.Remove(c.ttlRefs[k])
 		delete(c.ttlRefs, k)
 	}

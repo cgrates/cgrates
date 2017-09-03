@@ -278,6 +278,32 @@ func TestSetGetRemLRUttl(t *testing.T) {
 	}
 }
 
+func TestCacheDisabled(t *testing.T) {
+	cache := New(DisabledCaching, time.Duration(10*time.Millisecond), false, nil)
+	for _, ci := range testCIs {
+		cache.Set(ci.key, ci.value)
+		if _, has := cache.Get(ci.key); has {
+			t.Errorf("Wrong intems in cache: %+v", cache.cache)
+		}
+	}
+	if cache.Len() != 0 {
+		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+	if cache.lruIdx.Len() != 0 {
+		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
+	}
+	if len(cache.lruRefs) != 0 {
+		t.Errorf("Wrong items in lru references: %+v", cache.lruRefs)
+	}
+	if cache.ttlIdx.Len() != 0 {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlIdx)
+	}
+	if len(cache.ttlRefs) != 0 {
+		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
+	}
+	cache.Remove("4")
+}
+
 // BenchmarkSetSimpleCache 	10000000	       180 ns/op
 func BenchmarkSetSimpleCache(b *testing.B) {
 	cache := New(UnlimitedCaching, 0, false, nil)
