@@ -40,36 +40,37 @@ type v1Action struct {
 type v1Actions []*v1Action
 
 func (m *Migrator) migrateActions() (err error) {
-		var v1ACs *v1Actions
-		var acts engine.Actions
-			for {
-			v1ACs,err=m.oldDataDB.getV1Actions()
-			if err!=nil&&err!=utils.ErrNoMoreData{
-				return err
-			}
-	if err==utils.ErrNoMoreData{break}
+	var v1ACs *v1Actions
+	var acts engine.Actions
+	for {
+		v1ACs, err = m.oldDataDB.getV1Actions()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
 		if *v1ACs != nil {
-				for _, v1ac := range *v1ACs{ 
+			for _, v1ac := range *v1ACs {
 				act := v1ac.AsAction()
 				acts = append(acts, act)
 
 			}
 			if err := m.dataDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
-			return err
-		}
+				return err
+			}
 
 		}
 	}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
-		}
-		return
-
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.ACTION_PREFIX]}
+	if err = m.dataDB.SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+	}
+	return
 }
 
 func (v1Act v1Action) AsAction() (act *engine.Action) {

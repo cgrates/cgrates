@@ -19,11 +19,11 @@ package migrator
 import (
 	"flag"
 	//	"fmt"
-		"path"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"log"
+	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -72,24 +72,25 @@ var (
 
 	dbDataEncoding    = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
 	oldDBDataEncoding = flag.String("old_dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
- )
+)
 
 // subtests to be executed for each migrator
 var sTestsITMigrator = []func(t *testing.T){
 	testOnStorITFlush,
 	testMigratorAccounts,
- 	testMigratorActionPlans,
-// 	testMigratorActionTriggers,
- 	testMigratorActions,
-// 	testMigratorSharedGroups,
- }
+	testMigratorActionPlans,
+	testMigratorActionTriggers,
+	testMigratorActions,
+	testMigratorSharedGroups,
+	testOnStorITFlush,
+}
 
 func TestOnStorITRedisConnect(t *testing.T) {
 	dataDB, err := engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldDataDB, err := ConfigureV1DataStorage(*oldDataDBType, *oldDataDBHost, *oldDataDBPort, *oldDataDBName, *oldDataDBUser, *oldDataDBPass, *oldDBDataEncoding )
+	oldDataDB, err := ConfigureV1DataStorage(*oldDataDBType, *oldDataDBHost, *oldDataDBPort, *oldDataDBName, *oldDataDBUser, *oldDataDBPass, *oldDBDataEncoding)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -117,7 +118,6 @@ func TestOnStorITRedis(t *testing.T) {
 }
 
 func TestOnStorITMongoConnect(t *testing.T) {
-	
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
@@ -141,7 +141,7 @@ func TestOnStorITMongoConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	mig, err = NewMigrator(dataDB, mgoITCfg.DataDbType,mgoITCfg.DBDataEncoding, storDB, mgoITCfg.StorDBType, oldDataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, oldstorDB, mgoITCfg.StorDBType)
+	mig, err = NewMigrator(dataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, storDB, mgoITCfg.StorDBType, oldDataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, oldstorDB, mgoITCfg.StorDBType)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -170,8 +170,6 @@ func testOnStorITFlush(t *testing.T) {
 	}
 }
 
-//1
-
 func testMigratorAccounts(t *testing.T) {
 	v1b := &v1Balance{Value: 10, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
 	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
@@ -199,26 +197,24 @@ func testMigratorAccounts(t *testing.T) {
 		} else if !reflect.DeepEqual(testAccount, result) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
-			case dbtype == utils.MONGO:
-				err := mig.oldDataDB.setV1Account(v1Acc)
-				if err != nil {
-					t.Error("Error when marshaling ", err.Error())
-				}
-				err = mig.Migrate(utils.MetaAccounts)
-				if err != nil {
-					t.Error("Error when migrating accounts ", err.Error())
-				}
-				result, err := mig.dataDB.GetAccount(testAccount.ID)
-				if err != nil {
-					t.Error("Error when getting account ", err.Error())
-				}
-				if !reflect.DeepEqual(testAccount, result) {
-					t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
-				}
+	case dbtype == utils.MONGO:
+		err := mig.oldDataDB.setV1Account(v1Acc)
+		if err != nil {
+			t.Error("Error when marshaling ", err.Error())
+		}
+		err = mig.Migrate(utils.MetaAccounts)
+		if err != nil {
+			t.Error("Error when migrating accounts ", err.Error())
+		}
+		result, err := mig.dataDB.GetAccount(testAccount.ID)
+		if err != nil {
+			t.Error("Error when getting account ", err.Error())
+		}
+		if !reflect.DeepEqual(testAccount, result) {
+			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
+		}
 	}
 }
-
-//2
 
 func testMigratorActionPlans(t *testing.T) {
 	v1ap := &v1ActionPlans{&v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}
@@ -245,33 +241,31 @@ func testMigratorActionPlans(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
 	case dbtype == utils.MONGO:
-				err := mig.oldDataDB.setV1ActionPlans(v1ap)
-				if err != nil {
-					t.Error("Error when setting v1 ActionPlans ", err.Error())
-				}
-				err = mig.Migrate(utils.MetaActionPlans )
-				if err != nil {
-					t.Error("Error when migrating ActionPlans ", err.Error())
-				}
-				result, err := mig.dataDB.GetActionPlan(ap.Id, true, utils.NonTransactional)
-				if err != nil {
-					t.Error("Error when getting ActionPlan ", err.Error())
-				}
-			if ap.Id != result.Id || !reflect.DeepEqual(ap.AccountIDs, result.AccountIDs) {
-				t.Errorf("Expecting: %+v, received: %+v", *ap, result)
-			} else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
-				t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
-			} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
-				t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
-			}		
+		err := mig.oldDataDB.setV1ActionPlans(v1ap)
+		if err != nil {
+			t.Error("Error when setting v1 ActionPlans ", err.Error())
+		}
+		err = mig.Migrate(utils.MetaActionPlans)
+		if err != nil {
+			t.Error("Error when migrating ActionPlans ", err.Error())
+		}
+		result, err := mig.dataDB.GetActionPlan(ap.Id, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting ActionPlan ", err.Error())
+		}
+		if ap.Id != result.Id || !reflect.DeepEqual(ap.AccountIDs, result.AccountIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", *ap, result)
+		} else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
+			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
+		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
+			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
 	}
+}
 
-//3
-/*
 func testMigratorActionTriggers(t *testing.T) {
 	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()
-	v1atrs := v1ActionTriggers{
+	v1atrs := &v1ActionTriggers{
 		&v1ActionTrigger{
 			Id:                    "Test",
 			BalanceType:           "*monetary",
@@ -303,19 +297,7 @@ func testMigratorActionTriggers(t *testing.T) {
 	}
 	switch {
 	case dbtype == utils.REDIS:
-		bit, err := mig.mrshlr.Marshal(v1atrs)
-		if err != nil {
-			t.Error("Error when marshaling ", err.Error())
-		}
-		// if err := mig.mrshlr.Unmarshal(bit, &v1Atr); err != nil {
-		// 	t.Error("Error when setting v1 ActionTriggers ", err.Error())
-		// }
-		setv1id := utils.ACTION_TRIGGER_PREFIX + v1atrs[0].Id
-		err = mig.SetV1onRedis(setv1id, bit)
-		if err != nil {
-			t.Error("Error when setting v1 ActionTriggers ", err.Error())
-		}
-		_, err = mig.getV1ActionTriggerFromDB(setv1id)
+		err := mig.oldDataDB.setV1ActionTriggers(v1atrs)
 		if err != nil {
 			t.Error("Error when setting v1 ActionTriggers ", err.Error())
 		}
@@ -323,7 +305,7 @@ func testMigratorActionTriggers(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating ActionTriggers ", err.Error())
 		}
-		result, err := mig.dataDB.GetActionTriggers(v1atrs[0].Id, true, utils.NonTransactional)
+		result, err := mig.dataDB.GetActionTriggers((*v1atrs)[0].Id, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting ActionTriggers ", err.Error())
 		}
@@ -343,8 +325,8 @@ func testMigratorActionTriggers(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ExpirationDate, result[0].ExpirationDate)
 		} else if !reflect.DeepEqual(atrs[0].ActivationDate, result[0].ActivationDate) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].ActivationDate, result[0].ActivationDate)
-		} else if !reflect.DeepEqual(atrs[0].Balance, result[0].Balance) {
-			//	t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance, result[0].Balance)
+		} else if !reflect.DeepEqual(atrs[0].Balance.Type, result[0].Balance.Type) {
+			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Type, result[0].Balance.Type)
 		} else if !reflect.DeepEqual(atrs[0].Weight, result[0].Weight) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Weight, result[0].Weight)
 		} else if !reflect.DeepEqual(atrs[0].ActionsID, result[0].ActionsID) {
@@ -390,33 +372,14 @@ func testMigratorActionTriggers(t *testing.T) {
 		} else if !reflect.DeepEqual(atrs[0].Balance.Blocker, result[0].Balance.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Blocker, result[0].Balance.Blocker)
 		}
-		
-		
-			case dbtype == utils.MONGO:
-				err := mig.SetV1onMongoActionTrigger(utils.ACTION_TRIGGER_PREFIX, &v1atrs)
-				if err != nil {
-					t.Error("Error when setting v1 ActionTriggers ", err.Error())
-				}
-				err = mig.Migrate("migrateActionTriggers")
-				if err != nil {
-					t.Error("Error when migrating ActionTriggers ", err.Error())
-				}
-				result, err := mig.dataDB.GetActionTriggers(v1atrs[0].Id, true, utils.NonTransactional)
-				if err != nil {
-					t.Error("Error when getting ActionTriggers ", err.Error())
-				}
-				if !reflect.DeepEqual(atrs[0], result[0]) {
-					t.Errorf("Expecting: %+v, received: %+v", atrs[0], result[0])
-				}
-				err = mig.DropV1Colection(utils.ACTION_TRIGGER_PREFIX)
-				if err != nil {
-					t.Error("Error when flushing v1 ActionTriggers ", err.Error())
-				}
-		
+	case dbtype == utils.MONGO:
+		err := mig.Migrate(utils.MetaActionTriggers)
+		if err != nil && err != utils.ErrNotImplemented {
+			t.Error("Error when migrating ActionTriggers ", err.Error())
+		}
+
 	}
 }
-*/
-//4
 
 func testMigratorActions(t *testing.T) {
 	v1act := &v1Actions{&v1Action{Id: "test", ActionType: "", BalanceType: "", Direction: "INBOUND", ExtraParameters: "", ExpirationString: "", Balance: &v1Balance{Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
@@ -438,28 +401,26 @@ func testMigratorActions(t *testing.T) {
 		if !reflect.DeepEqual(*act, result) {
 			t.Errorf("Expecting: %+v, received: %+v", *act, result)
 		}
-		
-			case dbtype == utils.MONGO:
-				err := mig.oldDataDB.setV1Actions(v1act)
-				if err != nil {
-					t.Error("Error when setting v1 Actions ", err.Error())
-				}
-				err = mig.Migrate(utils.MetaActions)
-				if err != nil {
-					t.Error("Error when migrating Actions ", err.Error())
-				}
-				result, err := mig.dataDB.GetActions((*v1act)[0].Id, true, utils.NonTransactional)
-				if err != nil {
-					t.Error("Error when getting Actions ", err.Error())
-				}
-				if !reflect.DeepEqual(*act, result) {
+
+	case dbtype == utils.MONGO:
+		err := mig.oldDataDB.setV1Actions(v1act)
+		if err != nil {
+			t.Error("Error when setting v1 Actions ", err.Error())
+		}
+		err = mig.Migrate(utils.MetaActions)
+		if err != nil {
+			t.Error("Error when migrating Actions ", err.Error())
+		}
+		result, err := mig.dataDB.GetActions((*v1act)[0].Id, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting Actions ", err.Error())
+		}
+		if !reflect.DeepEqual(*act, result) {
 			t.Errorf("Expecting: %+v, received: %+v", *act, result)
 		}
 	}
 }
 
-// 5
-/*
 func testMigratorSharedGroups(t *testing.T) {
 	v1sg := &v1SharedGroup{
 		Id: "Test",
@@ -477,12 +438,7 @@ func testMigratorSharedGroups(t *testing.T) {
 	}
 	switch {
 	case dbtype == utils.REDIS:
-		bit, err := mig.mrshlr.Marshal(v1sg)
-		if err != nil {
-			t.Error("Error when marshaling ", err.Error())
-		}
-		setv1id := utils.SHARED_GROUP_PREFIX + v1sg.Id
-		err = mig.SetV1onRedis(setv1id, bit)
+		err := mig.oldDataDB.setV1SharedGroup(v1sg)
 		if err != nil {
 			t.Error("Error when setting v1 SharedGroup ", err.Error())
 		}
@@ -497,24 +453,22 @@ func testMigratorSharedGroups(t *testing.T) {
 		if !reflect.DeepEqual(sg, result) {
 			t.Errorf("Expecting: %+v, received: %+v", sg, result)
 		}
-		
-			case dbtype == utils.MONGO:
-				err := mig.SetV1onMongoSharedGroup(utils.SHARED_GROUP_PREFIX, v1sg)
-				if err != nil {
-					t.Error("Error when setting v1 SharedGroup ", err.Error())
-				}
-				err = mig.Migrate("migrateSharedGroups")
-				if err != nil {
-					t.Error("Error when migrating SharedGroup ", err.Error())
-				}
-				result, err := mig.dataDB.GetSharedGroup(v1sg.Id, true, utils.NonTransactional)
-				if err != nil {
-					t.Error("Error when getting SharedGroup ", err.Error())
-				}
-				if !reflect.DeepEqual(sg, result) {
-					t.Errorf("Expecting: %+v, received: %+v", sg, result)
-				}
-		
+	case dbtype == utils.MONGO:
+		err := mig.oldDataDB.setV1SharedGroup(v1sg)
+		if err != nil {
+			t.Error("Error when setting v1 SharedGroup ", err.Error())
+		}
+		err = mig.Migrate(utils.MetaSharedGroups)
+		if err != nil {
+			t.Error("Error when migrating SharedGroup ", err.Error())
+		}
+		result, err := mig.dataDB.GetSharedGroup(v1sg.Id, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting SharedGroup ", err.Error())
+		}
+		if !reflect.DeepEqual(sg, result) {
+			t.Errorf("Expecting: %+v, received: %+v", sg, result)
+		}
+
 	}
 }
-*/

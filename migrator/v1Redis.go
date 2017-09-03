@@ -18,20 +18,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-"fmt"
-//"log"
-	"github.com/cgrates/cgrates/utils"
+	"fmt"
+	//"log"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 
-	"github.com/mediocregopher/radix.v2/redis"
 	"github.com/mediocregopher/radix.v2/pool"
+	"github.com/mediocregopher/radix.v2/redis"
 )
-type  v1Redis struct{
- 	dbPool          *pool.Pool
-	ms              engine.Marshaler
-	dataKeys  		[]string
-	qryIdx			*int
 
+type v1Redis struct {
+	dbPool   *pool.Pool
+	ms       engine.Marshaler
+	dataKeys []string
+	qryIdx   *int
 }
 
 func newv1RedisStorage(address string, db int, pass, mrshlerStr string) (*v1Redis, error) {
@@ -66,7 +66,7 @@ func newv1RedisStorage(address string, db int, pass, mrshlerStr string) (*v1Redi
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
-	return &v1Redis{dbPool: p,ms: mrshler}, nil
+	return &v1Redis{dbPool: p, ms: mrshler}, nil
 }
 
 // This CMD function get a connection from the pool.
@@ -80,18 +80,17 @@ func (v1rs *v1Redis) cmd(cmd string, args ...interface{}) *redis.Resp {
 	if result.IsType(redis.IOErr) { // Failover mecanism
 		utils.Logger.Warning(fmt.Sprintf("<RedisStorage> error <%s>, attempting failover.", result.Err.Error()))
 		c2, err := v1rs.dbPool.Get()
-			if err == nil {
-				if result2 := c2.Cmd(cmd, args...); !result2.IsType(redis.IOErr) {
-					v1rs.dbPool.Put(c2)
-					return result2
-				}
+		if err == nil {
+			if result2 := c2.Cmd(cmd, args...); !result2.IsType(redis.IOErr) {
+				v1rs.dbPool.Put(c2)
+				return result2
 			}
+		}
 	} else {
 		v1rs.dbPool.Put(c1)
 	}
 	return result
 }
-
 
 func (v1rs *v1Redis) getKeysForPrefix(prefix string) ([]string, error) {
 	r := v1rs.cmd("KEYS", prefix+"*")
@@ -103,41 +102,41 @@ func (v1rs *v1Redis) getKeysForPrefix(prefix string) ([]string, error) {
 
 //Account methods
 //get
-func (v1rs *v1Redis) getv1Account() (v1Acnt *v1Account, err error){
-if v1rs.qryIdx==nil{
-	v1rs.dataKeys, err = v1rs.getKeysForPrefix(v1AccountDBPrefix);
+func (v1rs *v1Redis) getv1Account() (v1Acnt *v1Account, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(v1AccountDBPrefix)
 		if err != nil {
-				return
-			}else if len(v1rs.dataKeys)==0{
-				return nil,utils.ErrNotFound
-			}
-			v1rs.qryIdx=utils.IntPointer(0)
-	}
-if *v1rs.qryIdx<=len(v1rs.dataKeys)-1{
-strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-	if err != nil {
-			return nil ,err
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
 		}
-	v1Acnt = &v1Account{Id: v1rs.dataKeys[*v1rs.qryIdx]}
-	if err := v1rs.ms.Unmarshal(strVal, v1Acnt); err != nil {
-			return nil,err
-			}
-*v1rs.qryIdx=*v1rs.qryIdx+1
-}else{
-v1rs.qryIdx=nil
-	return nil,utils.ErrNoMoreData
+		v1rs.qryIdx = utils.IntPointer(0)
 	}
-	return v1Acnt,nil 
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		v1Acnt = &v1Account{Id: v1rs.dataKeys[*v1rs.qryIdx]}
+		if err := v1rs.ms.Unmarshal(strVal, v1Acnt); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v1Acnt, nil
 }
 
 //set
-func (v1rs *v1Redis) setV1Account( x *v1Account) (err error) {
-key:=v1AccountDBPrefix + x.Id
-bit, err := v1rs.ms.Marshal(x)
-		if err != nil {
-			return err
-		}
-if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+func (v1rs *v1Redis) setV1Account(x *v1Account) (err error) {
+	key := v1AccountDBPrefix + x.Id
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
 		return err
 	}
 	return
@@ -145,40 +144,40 @@ if err = v1rs.cmd("SET", key, bit).Err; err != nil {
 
 //ActionPlans methods
 //get
-func (v1rs *v1Redis) getV1ActionPlans() (v1aps *v1ActionPlans, err error){
-if v1rs.qryIdx==nil{
-	v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PLAN_PREFIX);
+func (v1rs *v1Redis) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 		if err != nil {
-				return
-			}else if len(v1rs.dataKeys)==0{
-				return nil,utils.ErrNotFound
-			}
-			v1rs.qryIdx=utils.IntPointer(0)
-	}
-if *v1rs.qryIdx<=len(v1rs.dataKeys)-1{
-strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-	if err != nil {
-			return nil ,err
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
 		}
-	if err := v1rs.ms.Unmarshal(strVal, &v1aps); err != nil {
-			return nil,err
-			}
-*v1rs.qryIdx=*v1rs.qryIdx+1
-}else{
-v1rs.qryIdx=nil	
-	return nil,utils.ErrNoMoreData
+		v1rs.qryIdx = utils.IntPointer(0)
 	}
-	return v1aps,nil 
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.ms.Unmarshal(strVal, &v1aps); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v1aps, nil
 }
 
 //set
-func (v1rs *v1Redis) setV1ActionPlans( x *v1ActionPlans) (err error) {
-key:=utils.ACTION_PLAN_PREFIX + (*x)[0].Id
-bit, err := v1rs.ms.Marshal(x)
-		if err != nil {
-			return err
-		}
-if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+func (v1rs *v1Redis) setV1ActionPlans(x *v1ActionPlans) (err error) {
+	key := utils.ACTION_PLAN_PREFIX + (*x)[0].Id
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
 		return err
 	}
 	return
@@ -186,40 +185,122 @@ if err = v1rs.cmd("SET", key, bit).Err; err != nil {
 
 //Actions methods
 //get
-func (v1rs *v1Redis) getV1Actions() (v1acs *v1Actions, err error){
-if v1rs.qryIdx==nil{
-	v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PREFIX);
+func (v1rs *v1Redis) getV1Actions() (v1acs *v1Actions, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PREFIX)
 		if err != nil {
-				return
-			}else if len(v1rs.dataKeys)==0{
-				return nil,utils.ErrNotFound
-			}
-			v1rs.qryIdx=utils.IntPointer(0)
-	}
-if *v1rs.qryIdx<=len(v1rs.dataKeys)-1{
-strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
-	if err != nil {
-			return nil ,err
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
 		}
-	if err := v1rs.ms.Unmarshal(strVal, &v1acs); err != nil {
-			return nil,err
-			}
-*v1rs.qryIdx=*v1rs.qryIdx+1
-}else{
-v1rs.qryIdx=nil	
-	return nil,utils.ErrNoMoreData
+		v1rs.qryIdx = utils.IntPointer(0)
 	}
-	return v1acs,nil 
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.ms.Unmarshal(strVal, &v1acs); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v1acs, nil
 }
 
 //set
-func (v1rs *v1Redis) setV1Actions(x *v1Actions) (err error){
-key:=utils.ACTION_PREFIX + (*x)[0].Id
-bit, err := v1rs.ms.Marshal(x)
+func (v1rs *v1Redis) setV1Actions(x *v1Actions) (err error) {
+	key := utils.ACTION_PREFIX + (*x)[0].Id
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//ActionTriggers methods
+//get
+func (v1rs *v1Redis) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {
-			return err
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
 		}
-if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.ms.Unmarshal(strVal, &v1acts); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v1acts, nil
+}
+
+//set
+func (v1rs *v1Redis) setV1ActionTriggers(x *v1ActionTriggers) (err error) {
+	key := utils.ACTION_TRIGGER_PREFIX + (*x)[0].Id
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//SharedGroup methods
+//get
+func (v1rs *v1Redis) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.SHARED_GROUP_PREFIX)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.ms.Unmarshal(strVal, &v1sg); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v1sg, nil
+}
+
+//set
+func (v1rs *v1Redis) setV1SharedGroup(x *v1SharedGroup) (err error) {
+	key := utils.SHARED_GROUP_PREFIX + x.Id
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
 		return err
 	}
 	return

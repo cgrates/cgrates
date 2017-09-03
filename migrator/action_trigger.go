@@ -2,8 +2,6 @@ package migrator
 
 import (
 	"fmt"
-	"gopkg.in/mgo.v2/bson"
-	"log"
 	"strings"
 	"time"
 
@@ -38,97 +36,38 @@ type v1ActionTrigger struct {
 type v1ActionTriggers []*v1ActionTrigger
 
 func (m *Migrator) migrateActionTriggers() (err error) {
-	switch m.dataDBType {
-	case utils.REDIS:
-		var atrrs engine.ActionTriggers
-		var v1atrskeys []string
-		v1atrskeys, err = m.dataDB.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
-		if err != nil {
-			return
+	var v1ACTs *v1ActionTriggers
+	var acts engine.ActionTriggers
+	for {
+		v1ACTs, err = m.oldDataDB.getV1ActionTriggers()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
 		}
-		for _, v1atrskey := range v1atrskeys {
-			v1atrs, err := m.getV1ActionTriggerFromDB(v1atrskey)
-			if err != nil {
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if *v1ACTs != nil {
+			for _, v1ac := range *v1ACTs {
+				act := v1ac.AsActionTrigger()
+				acts = append(acts, act)
+
+			}
+			if err := m.dataDB.SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
 				return err
 			}
-			if v1atrs == nil {
-				log.Print("No Action Triggers found key:", v1atrskey)
-			} else {
-				for _, v1atr := range *v1atrs {
-					atr := v1atr.AsActionTrigger()
-					atrrs = append(atrrs, atr)
-				}
-			}
+
 		}
-		if err := m.dataDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
-			return err
-		}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating ActionTrigger version into StorDB", err.Error()))
-		}
-		return
-	case utils.MONGO:
-		dataDB := m.dataDB.(*engine.MongoStorage)
-		mgoDB := dataDB.DB()
-		defer mgoDB.Session.Close()
-		var atrrs engine.ActionTriggers
-		var v1atr v1ActionTrigger
-		iter := mgoDB.C(utils.ACTION_TRIGGER_PREFIX).Find(nil).Iter()
-		for iter.Next(&v1atr) {
-			atr := v1atr.AsActionTrigger()
-			atrrs = append(atrrs, atr)
-		}
-		if err := m.dataDB.SetActionTriggers(atrrs[0].ID, atrrs, utils.NonTransactional); err != nil {
-			return err
-		}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.ACTION_TRIGGER_PREFIX: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating ActionTrigger version into StorDB", err.Error()))
-		}
-		return
-	default:
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
+	if err = m.dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
-			utils.UnsupportedDB,
-			fmt.Sprintf("error: unsupported: <%s> for migrateActionTriggers method", m.dataDBType))
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 	}
-}
-func (m *Migrator) getV1ActionTriggerFromDB(key string) (v1Atr *v1ActionTriggers, err error) {
-	switch m.dataDBType {
-	case utils.REDIS:
-		dataDB := m.dataDB.(*engine.RedisStorage)
-		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
-			return nil, err
-		} else {
-			if err := m.mrshlr.Unmarshal(strVal, &v1Atr); err != nil {
-				return nil, err
-			}
-			return v1Atr, nil
-		}
-	case utils.MONGO:
-		dataDB := m.dataDB.(*engine.MongoStorage)
-		mgoDB := dataDB.DB()
-		defer mgoDB.Session.Close()
-		v1Atr := new(v1ActionTriggers)
-		if err := mgoDB.C(utils.ACTION_TRIGGER_PREFIX).Find(bson.M{"id": key}).One(v1Atr); err != nil {
-			return nil, err
-		}
-		return v1Atr, nil
-	default:
-		return nil, utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			utils.UnsupportedDB,
-			fmt.Sprintf("error: unsupported: <%s> for getV1ActionTriggerFromDB method", m.dataDBType))
-	}
+	return
+
 }
 
 func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {

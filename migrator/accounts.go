@@ -33,29 +33,31 @@ const (
 )
 
 func (m *Migrator) migrateAccounts() (err error) {
-			var v1Acnt *v1Account
-		for {
-			v1Acnt,err=m.oldDataDB.getv1Account()
-			if err!=nil&&err!=utils.ErrNoMoreData{
+	var v1Acnt *v1Account
+	for {
+		v1Acnt, err = m.oldDataDB.getv1Account()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v1Acnt != nil {
+			acnt := v1Acnt.AsAccount()
+			if err = m.dataDB.SetAccount(acnt); err != nil {
 				return err
 			}
-	if err==utils.ErrNoMoreData{break}
-			if v1Acnt != nil {
-				acnt := v1Acnt.AsAccount()
-				if err = m.dataDB.SetAccount(acnt); err != nil {
-					return err
-				}
-			}
 		}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
-		}
-		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+	if err = m.dataDB.SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+	}
+	return
 }
 
 type v1Account struct {

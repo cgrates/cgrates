@@ -19,7 +19,7 @@ package migrator
 
 import (
 	"fmt"
-//	"log"
+	//	"log"
 
 	"github.com/cgrates/cgrates/utils"
 
@@ -27,12 +27,11 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-type  v1Mongo struct{
-	session			*mgo.Session
-	db 				string
-	v1ms			engine.Marshaler
-	qryIter 		*mgo.Iter 
-
+type v1Mongo struct {
+	session *mgo.Session
+	db      string
+	v1ms    engine.Marshaler
+	qryIter *mgo.Iter
 }
 
 type AcKeyValue struct {
@@ -64,28 +63,28 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	return
 }
 
-	func (v1ms *v1Mongo) getKeysForPrefix(prefix string) ([]string, error){
-return nil,nil
+func (v1ms *v1Mongo) getKeysForPrefix(prefix string) ([]string, error) {
+	return nil, nil
 }
 
 //Account methods
 //get
- func (v1ms *v1Mongo) getv1Account() (v1Acnt *v1Account, err error){
- 	if v1ms.qryIter==nil{
- 	v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v1AccountDBPrefix).Find(nil).Iter()
+func (v1ms *v1Mongo) getv1Account() (v1Acnt *v1Account, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v1AccountDBPrefix).Find(nil).Iter()
 	}
- 	v1ms.qryIter.Next(&v1Acnt) 
+	v1ms.qryIter.Next(&v1Acnt)
 
-	if v1Acnt==nil{
-		v1ms.qryIter=nil
-			return nil,utils.ErrNoMoreData
+	if v1Acnt == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
 
 	}
-	return v1Acnt,nil
- }
+	return v1Acnt, nil
+}
 
 //set
-func (v1ms *v1Mongo) setV1Account( x *v1Account) (err error) {
+func (v1ms *v1Mongo) setV1Account(x *v1Account) (err error) {
 	if err := v1ms.session.DB(v1ms.db).C(v1AccountDBPrefix).Insert(x); err != nil {
 		return err
 	}
@@ -94,23 +93,23 @@ func (v1ms *v1Mongo) setV1Account( x *v1Account) (err error) {
 
 //Action methods
 //get
-func (v1ms *v1Mongo) getV1ActionPlans() (v1aps *v1ActionPlans, err error){
-var strct *AtKeyValue
-	if v1ms.qryIter==nil{
- 	v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actiontimings").Find(nil).Iter()
+func (v1ms *v1Mongo) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
+	var strct *AtKeyValue
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actiontimings").Find(nil).Iter()
 	}
- 	v1ms.qryIter.Next(&strct) 
-	if strct==nil{
-		v1ms.qryIter=nil
-			return nil,utils.ErrNoMoreData
+	v1ms.qryIter.Next(&strct)
+	if strct == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
 	}
-	v1aps=&strct.Value
-	return v1aps,nil
+	v1aps = &strct.Value
+	return v1aps, nil
 }
 
 //set
 func (v1ms *v1Mongo) setV1ActionPlans(x *v1ActionPlans) (err error) {
-	key:=utils.ACTION_PLAN_PREFIX + (*x)[0].Id
+	key := utils.ACTION_PLAN_PREFIX + (*x)[0].Id
 	if err := v1ms.session.DB(v1ms.db).C("actiontimings").Insert(&AtKeyValue{key, *x}); err != nil {
 		return err
 	}
@@ -119,45 +118,60 @@ func (v1ms *v1Mongo) setV1ActionPlans(x *v1ActionPlans) (err error) {
 
 //Actions methods
 //get
-func (v1ms *v1Mongo) getV1Actions() (v1acs *v1Actions, err error){
-var strct *AcKeyValue
-	if v1ms.qryIter==nil{
- 	v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actions").Find(nil).Iter()
+func (v1ms *v1Mongo) getV1Actions() (v1acs *v1Actions, err error) {
+	var strct *AcKeyValue
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actions").Find(nil).Iter()
 	}
- 	v1ms.qryIter.Next(&strct) 
-	if strct==nil{
-		v1ms.qryIter=nil
-			return nil,utils.ErrNoMoreData
+	v1ms.qryIter.Next(&strct)
+	if strct == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
 	}
 
-	v1acs=&strct.Value
-	return v1acs,nil
+	v1acs = &strct.Value
+	return v1acs, nil
 }
 
+//set
 func (v1ms *v1Mongo) setV1Actions(x *v1Actions) (err error) {
-		key:=utils.ACTION_PREFIX + (*x)[0].Id
+	key := utils.ACTION_PREFIX + (*x)[0].Id
 	if err := v1ms.session.DB(v1ms.db).C("actions").Insert(&AcKeyValue{key, *x}); err != nil {
 		return err
 	}
 	return
 }
 
-// func (v1ms *v1Mongo) setV1onMongoActionTrigger(pref string, x *v1ActionTriggers) (err error) {
-// 	if err := v1ms.session.DB(v1ms.db).C(pref).Insert(x); err != nil {
-// 		return err
-// 	}
-// 	return
-// }
+//ActionTriggers methods
+//get
+func (v1ms *v1Mongo) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {
+	return nil, utils.ErrNotImplemented
+}
 
-// func (v1ms *v1Mongo) setV1onMongoSharedGroup(pref string, x *v1SharedGroup) (err error) {
-// 	if err := v1ms.session.DB(v1ms.db).C(pref).Insert(x); err != nil {
-// 		return err
-// 	}
-// 	return
-// }
-// func (v1ms *v1Mongo) DropV1Colection(pref string) (err error) {
-// 	if err := v1ms.session.DB(v1ms.db).C(pref).DropCollection(); err != nil {
-// 		return err
-// 	}
-// 	return
-// }
+//set
+func (v1ms *v1Mongo) setV1ActionTriggers(x *v1ActionTriggers) (err error) {
+	return utils.ErrNotImplemented
+}
+
+//Actions methods
+//get
+func (v1ms *v1Mongo) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.SHARED_GROUP_PREFIX).Find(nil).Iter()
+	}
+	v1ms.qryIter.Next(&v1sg)
+	if v1sg == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
+
+	}
+	return v1sg, nil
+}
+
+//set
+func (v1ms *v1Mongo) setV1SharedGroup(x *v1SharedGroup) (err error) {
+	if err := v1ms.session.DB(v1ms.db).C(utils.SHARED_GROUP_PREFIX).Insert(x); err != nil {
+		return err
+	}
+	return
+}

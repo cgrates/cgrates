@@ -19,7 +19,6 @@ package migrator
 
 import (
 	"fmt"
-	//"log"
 	"strings"
 	"time"
 
@@ -52,15 +51,17 @@ func (at *v1ActionPlan) IsASAP() bool {
 }
 
 func (m *Migrator) migrateActionPlans() (err error) {
-				var v1APs *v1ActionPlans
-			for {
-			v1APs,err=m.oldDataDB.getV1ActionPlans()
-			if err!=nil&&err!=utils.ErrNoMoreData{
-				return err
-			}
-	if err==utils.ErrNoMoreData{break}
+	var v1APs *v1ActionPlans
+	for {
+		v1APs, err = m.oldDataDB.getV1ActionPlans()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
 		if *v1APs != nil {
-				for _, v1ap := range *v1APs{ 
+			for _, v1ap := range *v1APs {
 				ap := v1ap.AsActionPlan()
 				if err = m.dataDB.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 					return err
@@ -68,15 +69,15 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			}
 		}
 	}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
-		}
-		return
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.ACTION_PLAN_PREFIX]}
+	if err = m.dataDB.SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+	}
+	return
 }
 
 func (v1AP v1ActionPlan) AsActionPlan() (ap *engine.ActionPlan) {
