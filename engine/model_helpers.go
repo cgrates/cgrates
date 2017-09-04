@@ -1837,6 +1837,8 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 		if tp.AllocationMessage != "" {
 			rl.AllocationMessage = tp.AllocationMessage
 		}
+		rl.Blocker = tp.Blocker
+		rl.Stored = tp.Stored
 		if len(tp.ActivationInterval) != 0 {
 			rl.ActivationInterval = new(utils.TPActivationInterval)
 			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
@@ -1884,6 +1886,8 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 			mdl.Weight = rl.Weight
 			mdl.Limit = rl.Limit
 			mdl.AllocationMessage = rl.AllocationMessage
+			mdl.Blocker = rl.Blocker
+			mdl.Stored = rl.Stored
 			if rl.ActivationInterval != nil {
 				if rl.ActivationInterval.ActivationTime != "" {
 					mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
@@ -1894,20 +1898,20 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 			}
 			for i, val := range rl.Thresholds {
 				if i != 0 {
-					mdl.Thresholds = mdl.Thresholds + utils.INFIELD_SEP + val
-				} else {
-					mdl.Thresholds = val
+					mdl.Thresholds += utils.INFIELD_SEP
 				}
+				mdl.Thresholds += val
+
 			}
 		}
 		mdl.FilterType = fltr.Type
 		mdl.FilterFieldName = fltr.FieldName
 		for i, val := range fltr.Values {
 			if i != 0 {
-				mdl.FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
-			} else {
-				mdl.FilterFieldValues = val
+				mdl.FilterFieldValues += utils.INFIELD_SEP
 			}
+			mdl.FilterFieldValues += val
+
 		}
 		mdls = append(mdls, mdl)
 	}
@@ -1961,6 +1965,13 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 				Stored:  tp.Stored,
 			}
 		}
+		if tp.Blocker == false || tp.Blocker == true {
+			st.Blocker = tp.Blocker
+		}
+		if tp.Stored == false || tp.Stored == true {
+			st.Stored = tp.Stored
+		}
+
 		if tp.QueueLength != 0 {
 			st.QueueLength = tp.QueueLength
 		}
@@ -2030,8 +2041,11 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 				}
 				mdl.Metrics += val
 			}
-			for _, val := range st.Thresholds {
-				mdl.Thresholds = mdl.Thresholds + utils.INFIELD_SEP + val
+			for i, val := range st.Thresholds {
+				if i != 0 {
+					mdl.Thresholds += utils.INFIELD_SEP
+				}
+				mdl.Thresholds += val
 			}
 			if st.ActivationInterval != nil {
 				if st.ActivationInterval.ActivationTime != "" {
@@ -2046,10 +2060,9 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 		mdl.FilterFieldName = fltr.FieldName
 		for i, val := range fltr.Values {
 			if i != 0 {
-				mdl.FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
-			} else {
-				mdl.FilterFieldValues = val
+				mdl.FilterFieldValues += utils.INFIELD_SEP
 			}
+			mdl.FilterFieldValues += val
 		}
 		mdls = append(mdls, mdl)
 	}

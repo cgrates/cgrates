@@ -1440,6 +1440,8 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 					Values:    []string{"test1", "test2"},
 				},
 			},
+			Blocker: true,
+			Stored:  true,
 		},
 		&utils.TPResource{
 			TPid:               "testTPid",
@@ -1455,6 +1457,8 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 					Values:    []string{"test1", "test2"},
 				},
 			},
+			Blocker: true,
+			Stored:  false,
 		},
 	}
 	if err := storDB.SetTPResources(snd); err != nil {
