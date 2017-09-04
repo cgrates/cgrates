@@ -44,9 +44,10 @@ func (self *ApierV1) GetTPResource(attr AttrGetTPResource, reply *utils.TPResour
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if rls, err := self.StorDb.GetTPResources(attr.TPid, attr.ID); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(rls) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *rls[0]
 	}

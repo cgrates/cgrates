@@ -22,7 +22,6 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type v1SharedGroup struct {
@@ -32,89 +31,31 @@ type v1SharedGroup struct {
 }
 
 func (m *Migrator) migrateSharedGroups() (err error) {
-	switch m.dataDBType {
-	case utils.REDIS:
-		var sgv1keys []string
-		sgv1keys, err = m.dataDB.GetKeysForPrefix(utils.SHARED_GROUP_PREFIX)
-		if err != nil {
-			return
+	var v1SG *v1SharedGroup
+	for {
+		v1SG, err = m.oldDataDB.getV1SharedGroup()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
 		}
-		for _, sgv1key := range sgv1keys {
-			v1sg, err := m.getv1SharedGroupFromDB(sgv1key)
-			if err != nil {
-				return err
-			}
-			sg := v1sg.AsSharedGroup()
-			if err = m.dataDB.SetSharedGroup(sg, utils.NonTransactional); err != nil {
-				return err
-			}
+		if err == utils.ErrNoMoreData {
+			break
 		}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.SHARED_GROUP_PREFIX: engine.CurrentStorDBVersions()[utils.SHARED_GROUP_PREFIX]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating SharedGroup version into dataDB", err.Error()))
-		}
-		return
-	case utils.MONGO:
-		dataDB := m.dataDB.(*engine.MongoStorage)
-		mgoDB := dataDB.DB()
-		defer mgoDB.Session.Close()
-		var v1sg v1SharedGroup
-		iter := mgoDB.C(utils.SHARED_GROUP_PREFIX).Find(nil).Iter()
-		for iter.Next(&v1sg) {
-			sg := v1sg.AsSharedGroup()
-			if err = m.dataDB.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+		if v1SG != nil {
+			acnt := v1SG.AsSharedGroup()
+			if err = m.dataDB.SetSharedGroup(acnt, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.SHARED_GROUP_PREFIX: engine.CurrentStorDBVersions()[utils.SHARED_GROUP_PREFIX]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating SharedGroup version into dataDB", err.Error()))
-		}
-		return
-	default:
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+	if err = m.dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
-			utils.UnsupportedDB,
-			fmt.Sprintf("error: unsupported: <%s> for migrateSharedGroups method", m.dataDBType))
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 	}
-}
-
-func (m *Migrator) getv1SharedGroupFromDB(key string) (*v1SharedGroup, error) {
-	switch m.dataDBType {
-	case utils.REDIS:
-		dataDB := m.dataDB.(*engine.RedisStorage)
-		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
-			return nil, err
-		} else {
-			v1SG := &v1SharedGroup{Id: key}
-			if err := m.mrshlr.Unmarshal(strVal, v1SG); err != nil {
-				return nil, err
-			}
-			return v1SG, nil
-		}
-	case utils.MONGO:
-		dataDB := m.dataDB.(*engine.MongoStorage)
-		mgoDB := dataDB.DB()
-		defer mgoDB.Session.Close()
-		v1SG := new(v1SharedGroup)
-		if err := mgoDB.C(utils.SHARED_GROUP_PREFIX).Find(bson.M{"id": key}).One(v1SG); err != nil {
-			return nil, err
-		}
-		return v1SG, nil
-	default:
-		return nil, utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			utils.UnsupportedDB,
-			fmt.Sprintf("error: unsupported: <%s> for getv1SharedGroupFromDB method", m.dataDBType))
-	}
+	return
 }
 
 func (v1SG v1SharedGroup) AsSharedGroup() (sg *engine.SharedGroup) {

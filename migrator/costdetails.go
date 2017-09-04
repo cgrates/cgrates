@@ -21,6 +21,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -47,12 +48,13 @@ func (m *Migrator) migrateCostDetails() (err error) {
 			"version number is not defined for CostDetails model")
 	}
 	if vrs[utils.COST_DETAILS] != 1 { // Right now we only support migrating from version 1
+		log.Print("Wrong version")
 		return
 	}
 	var storSQL *sql.DB
 	switch m.storDBType {
 	case utils.MYSQL:
-		storSQL = m.storDB.(*engine.MySQLStorage).Db
+		storSQL = m.storDB.(*engine.SQLStorage).Db
 	case utils.POSTGRES:
 		storSQL = m.storDB.(*engine.PostgresStorage).Db
 	default:
@@ -61,19 +63,22 @@ func (m *Migrator) migrateCostDetails() (err error) {
 			utils.UnsupportedDB,
 			fmt.Sprintf("unsupported database type: <%s>", m.storDBType))
 	}
-	rows, err := storSQL.Query("SELECT id, tor, direction, tenant, category, account, subject, destination, cost, cost_details FROM cdrs WHERE run_id!= '*raw' and cost_details IS NOT NULL AND deleted_at IS NULL")
+	rows, err := storSQL.Query("SELECT id, tor, direction, tenant, category, account, subject, destination, cost, cost_details FROM cdrs")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
 			fmt.Sprintf("error: <%s> when querying storDB for cdrs", err.Error()))
 	}
+
 	defer rows.Close()
+
 	for cnt := 0; rows.Next(); cnt++ {
 		var id int64
 		var ccDirection, ccCategory, ccTenant, ccSubject, ccAccount, ccDestination, ccTor sql.NullString
 		var ccCost sql.NullFloat64
 		var tts []byte
+
 		if err := rows.Scan(&id, &ccTor, &ccDirection, &ccTenant, &ccCategory, &ccAccount, &ccSubject, &ccDestination, &ccCost, &tts); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
@@ -89,6 +94,7 @@ func (m *Migrator) migrateCostDetails() (err error) {
 		v1CC := &v1CallCost{Direction: ccDirection.String, Category: ccCategory.String, Tenant: ccTenant.String,
 			Subject: ccSubject.String, Account: ccAccount.String, Destination: ccDestination.String, TOR: ccTor.String,
 			Cost: ccCost.Float64, Timespans: v1tmsps}
+
 		cc := v1CC.AsCallCost()
 		if cc == nil {
 			utils.Logger.Warning(
