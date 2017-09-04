@@ -265,7 +265,7 @@ type CGRConfig struct {
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
 	UserServerIndexes        []string                 // List of user profile field indexes
-	resourceLimiterCfg       *ResourceLimiterConfig   // Configuration for resource limiter
+	resourceSCfg             *ResourceLimiterConfig   // Configuration for resource limiter
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
@@ -417,7 +417,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, smFSRLsConn := range self.SmFsConfig.RLsConns {
-			if smFSRLsConn.Address == utils.MetaInternal && !self.resourceLimiterCfg.Enabled {
+			if smFSRLsConn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
 				return errors.New("RLs not enabled but referenced by SMFreeSWITCH component")
 			}
 		}
@@ -441,7 +441,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, smKamRLsConn := range self.SmKamConfig.RLsConns {
-			if smKamRLsConn.Address == utils.MetaInternal && !self.resourceLimiterCfg.Enabled {
+			if smKamRLsConn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
 				return errors.New("RLs not enabled but requested by SM-Kamailio component")
 			}
 		}
@@ -502,8 +502,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// ResourceLimiter checks
-	if self.resourceLimiterCfg != nil && self.resourceLimiterCfg.Enabled {
-		for _, connCfg := range self.resourceLimiterCfg.StatSConns {
+	if self.resourceSCfg != nil && self.resourceSCfg.Enabled {
+		for _, connCfg := range self.resourceSCfg.StatSConns {
 			if connCfg.Address == utils.MetaInternal && !self.statsCfg.Enabled {
 				return errors.New("StatS not enabled but requested by ResourceLimiter component.")
 			}
@@ -1075,10 +1075,10 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	if jsnRLSCfg != nil {
-		if self.resourceLimiterCfg == nil {
-			self.resourceLimiterCfg = new(ResourceLimiterConfig)
+		if self.resourceSCfg == nil {
+			self.resourceSCfg = new(ResourceLimiterConfig)
 		}
-		if self.resourceLimiterCfg.loadFromJsonCfg(jsnRLSCfg); err != nil {
+		if self.resourceSCfg.loadFromJsonCfg(jsnRLSCfg); err != nil {
 			return err
 		}
 	}
@@ -1146,8 +1146,8 @@ func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
 }
 
 // ToDo: fix locking here
-func (self *CGRConfig) ResourceLimiterCfg() *ResourceLimiterConfig {
-	return self.resourceLimiterCfg
+func (self *CGRConfig) ResourceSCfg() *ResourceLimiterConfig {
+	return self.resourceSCfg
 }
 
 // ToDo: fix locking
