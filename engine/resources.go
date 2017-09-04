@@ -193,7 +193,7 @@ func (rs Resources) ids() (ids []string) {
 // returns utils.ErrResourceUnavailable if allocation is not possible
 func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage string, err error) {
 	if len(rs) == 0 {
-		return utils.META_NONE, nil
+		return "", utils.ErrResourceUnavailable
 	}
 	lockIDs := utils.PrefixSliceItems(rs.ids(), utils.ResourcesPrefix)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)

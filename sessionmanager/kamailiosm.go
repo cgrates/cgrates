@@ -74,7 +74,6 @@ func (self *KamailioSessionManager) allocateResources(kev KamEvent) (err error) 
 	if self.rlS == nil {
 		return errors.New("no RLs connection")
 	}
-	fmt.Printf("In allocateResources, rls: %+v", self.rlS)
 	var ev map[string]interface{}
 	if ev, err = kev.AsMapStringIface(); err != nil {
 		return
@@ -85,7 +84,9 @@ func (self *KamailioSessionManager) allocateResources(kev KamEvent) (err error) 
 		Units:   1, // One channel reserved
 	}
 	var reply string
-	return self.rlS.Call("RLsV1.AllocateResource", attrRU, &reply)
+	if err = self.rlS.Call("ResourceSV1.AllocateResource", attrRU, &reply); err == nil && reply == utils.META_NONE {
+		err = errors.New("no resource found")
+	}
 }
 
 func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
@@ -217,7 +218,7 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 				Event:   ev,
 				Units:   1,
 			}
-			if err := self.rlS.Call("RLsV1.ReleaseResource", attrRU, &reply); err != nil {
+			if err := self.rlS.Call("ResourceSV1.ReleaseResource", attrRU, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs API error: %s", err.Error()))
 			}
 		}()
