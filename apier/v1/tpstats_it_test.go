@@ -30,99 +30,140 @@ import (
 	"testing"
 )
 
-var tpCfgPath string
-var tpCfg *config.CGRConfig
-var tpRPC *rpc.Client
-var tpDataDir = "/usr/share/cgrates"
+var (
+	tpStatCfgPath   string
+	tpStatCfg       *config.CGRConfig
+	tpStatRPC       *rpc.Client
+	tpStatDataDir   = "/usr/share/cgrates"
+	tpStat          *utils.TPStats
+	tpStatDelay     int
+	tpStatConfigDIR string //run tests for specific configuration
+)
 
-func TestTPStatInitCfg(t *testing.T) {
+var sTestsTPStats = []func(t *testing.T){
+	testTPStatsInitCfg,
+	testTPStatsResetStorDb,
+	testTPStatsStartEngine,
+	testTPStatsRpcConn,
+	testTPStatsGetTPStatBeforeSet,
+	testTPStatsSetTPStat,
+	testTPStatsGetTPStatAfterSet,
+	testTPStatsUpdateTPStat,
+	testTPStatsGetTPStatAfterUpdate,
+	testTPStatsRemTPStat,
+	testTPStatsGetTPStatAfterRemove,
+	testTPStatsKillEngine,
+}
+
+//Test start here
+func TestTPStatITMySql(t *testing.T) {
+	tpStatConfigDIR = "tutmysql"
+	for _, stest := range sTestsTPStats {
+		t.Run(tpStatConfigDIR, stest)
+	}
+}
+
+func TestTPStatITMongo(t *testing.T) {
+	tpStatConfigDIR = "tutmongo"
+	for _, stest := range sTestsTPStats {
+		t.Run(tpStatConfigDIR, stest)
+	}
+}
+
+func TestTPStatITPG(t *testing.T) {
+	tpStatConfigDIR = "tutpostgres"
+	for _, stest := range sTestsTPStats {
+		t.Run(tpStatConfigDIR, stest)
+	}
+}
+
+func testTPStatsInitCfg(t *testing.T) {
 	var err error
-	tpCfgPath = path.Join(tpDataDir, "conf", "samples", "tutmysql")
-	tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath)
+	tpStatCfgPath = path.Join(tpStatDataDir, "conf", "samples", tpStatConfigDIR)
+	tpStatCfg, err = config.NewCGRConfigFromFolder(tpStatCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	tpCfg.DataFolderPath = tpDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpCfg)
+	tpStatCfg.DataFolderPath = tpStatDataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(tpStatCfg)
+	switch tpStatConfigDIR {
+	case "tutmongo": // Mongo needs more time to reset db, need to investigate
+		tpStatDelay = 4000
+	default:
+		tpStatDelay = 1000
+	}
 }
 
 // Wipe out the cdr database
-func TestTPStatResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tpCfg); err != nil {
+func testTPStatsResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(tpStatCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-
-func TestTPStatStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tpCfgPath, 1000); err != nil {
+func testTPStatsStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(tpStatCfgPath, tpStatDelay); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestTPStatRpcConn(t *testing.T) {
+func testTPStatsRpcConn(t *testing.T) {
 	var err error
-	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpStatRPC, err = jsonrpc.Dial("tcp", tpStatCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-var tpStat = &utils.TPStats{
-	TPid: "TPS1",
-	ID:   "Stat1",
-	Filters: []*utils.TPRequestFilter{
-		&utils.TPRequestFilter{
-			Type:      "*string",
-			FieldName: "Account",
-			Values:    []string{"1001", "1002"},
-		},
-		&utils.TPRequestFilter{
-			Type:      "*string_prefix",
-			FieldName: "Destination",
-			Values:    []string{"10", "20"},
-		},
-	},
-	ActivationInterval: &utils.TPActivationInterval{
-		ActivationTime: "2014-07-29T15:00:00Z",
-		ExpiryTime:     "",
-	},
-	TTL:        "1",
-	Metrics:    []string{"MetricValue", "MetricValueTwo"},
-	Blocker:    true,
-	Stored:     true,
-	Weight:     20,
-	Thresholds: nil,
-}
-
-func TestTPStatGetTPStatIDs(t *testing.T) {
-	var reply []string
-	if err := tpRPC.Call("ApierV1.GetTPStatIDs", AttrGetTPStatIds{TPid: "TPS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+func testTPStatsGetTPStatBeforeSet(t *testing.T) {
+	var reply *utils.TPStats
+	if err := tpStatRPC.Call("ApierV1.GetTPStat", AttrGetTPStat{TPid: "TPS1", ID: "Stat1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func TestTPStatSetTPStat(t *testing.T) {
+func testTPStatsSetTPStat(t *testing.T) {
+	tpStat = &utils.TPStats{
+		TPid: "TPS1",
+		ID:   "Stat1",
+		Filters: []*utils.TPRequestFilter{
+			&utils.TPRequestFilter{
+				Type:      "*string",
+				FieldName: "Account",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "",
+		},
+		TTL:        "1",
+		Metrics:    []string{"MetricValue", "MetricValueTwo"},
+		Blocker:    false,
+		Stored:     false,
+		Weight:     20,
+		Thresholds: []string{"ThreshValue", "ThreshValueTwo"},
+	}
 	var result string
-	if err := tpRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
+	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func TestTPStatGetTPStat(t *testing.T) {
+func testTPStatsGetTPStatAfterSet(t *testing.T) {
 	var respond *utils.TPStats
-	if err := tpRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &respond); err != nil {
+	if err := tpStatRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpStat, respond) {
-		t.Errorf("Expecting: %+v, received: %+v", tpStat.TPid, respond.TPid)
+		t.Errorf("Expecting: %+v, received: %+v", tpStat, respond)
 	}
 }
 
-func TestTPStatUpdateTPStat(t *testing.T) {
+func testTPStatsUpdateTPStat(t *testing.T) {
 	var result string
 	tpStat.Weight = 21
 	tpStat.Filters = []*utils.TPRequestFilter{
@@ -136,43 +177,41 @@ func TestTPStatUpdateTPStat(t *testing.T) {
 			FieldName: "Destination",
 			Values:    []string{"10", "20"},
 		},
-		&utils.TPRequestFilter{
-			Type:      "*rsr_fields",
-			FieldName: "",
-			Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
-		},
 	}
-	if err := tpRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
+	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+}
+
+func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 	var expectedTPS *utils.TPStats
-	if err := tpRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &expectedTPS); err != nil {
+	if err := tpStatRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &expectedTPS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpStat, expectedTPS) {
 		t.Errorf("Expecting: %+v, received: %+v", tpStat, expectedTPS)
 	}
 }
 
-func TestTPStatRemTPStat(t *testing.T) {
+func testTPStatsRemTPStat(t *testing.T) {
 	var resp string
-	if err := tpRPC.Call("ApierV1.RemTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &resp); err != nil {
+	if err := tpStatRPC.Call("ApierV1.RemTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 }
 
-func TestTPStatCheckDelete(t *testing.T) {
+func testTPStatsGetTPStatAfterRemove(t *testing.T) {
 	var respond *utils.TPStats
-	if err := tpRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: "TPS1", ID: "Stat1"}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpStatRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: "TPS1", ID: "Stat1"}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func TestTPStatKillEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
+func testTPStatsKillEngine(t *testing.T) {
+	if err := engine.KillEngine(tpStatDelay); err != nil {
 		t.Error(err)
 	}
 }
