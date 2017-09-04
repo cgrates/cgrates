@@ -23,13 +23,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ResourceLimiterConfig struct {
+type ResourceSConfig struct {
 	Enabled       bool
 	StatSConns    []*HaPoolConfig // Connections towards StatS
 	StoreInterval time.Duration   // Dump regularly from cache into dataDB
+	ShortCache    *CacheParamConfig
 }
 
-func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJsonCfg) (err error) {
+func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -45,7 +46,13 @@ func (rlcfg *ResourceLimiterConfig) loadFromJsonCfg(jsnCfg *ResourceLimiterServJ
 	}
 	if jsnCfg.Store_interval != nil {
 		if rlcfg.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
-			return err
+			return
+		}
+	}
+	if jsnCfg.Short_cache != nil {
+		rlcfg.ShortCache = new(CacheParamConfig)
+		if err = rlcfg.ShortCache.loadFromJsonCfg(jsnCfg.Short_cache); err != nil {
+			return
 		}
 	}
 	return nil

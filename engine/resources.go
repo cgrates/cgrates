@@ -220,12 +220,13 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceService(dataDB DataDB, storeInterval time.Duration, statS rpcclient.RpcClientConnection) (*ResourceService, error) {
+func NewResourceService(dataDB DataDB, shortCache *config.CacheParamConfig, storeInterval time.Duration,
+	statS rpcclient.RpcClientConnection) (*ResourceService, error) {
 	if statS != nil && reflect.ValueOf(statS).IsNil() {
 		statS = nil
 	}
 	return &ResourceService{dataDB: dataDB, statS: statS,
-		scEventResources: ltcache.New(ltcache.UnlimitedCaching, time.Duration(1)*time.Minute, false, nil),
+		scEventResources: ltcache.New(shortCache.Limit, shortCache.TTL, shortCache.StaticTTL, nil),
 		lcEventResources: ltcache.New(ltcache.UnlimitedCaching, ltcache.UnlimitedCaching, false, nil),
 		storeInterval:    storeInterval}, nil
 }

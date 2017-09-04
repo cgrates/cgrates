@@ -539,7 +539,7 @@ func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcCl
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(dataDB, cfg.ResourceSCfg().StoreInterval, statsConn)
+	rS, err := engine.NewResourceService(dataDB, cfg.ResourceSCfg().ShortCache, cfg.ResourceSCfg().StoreInterval, statsConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true

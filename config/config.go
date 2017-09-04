@@ -265,7 +265,7 @@ type CGRConfig struct {
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
 	UserServerIndexes        []string                 // List of user profile field indexes
-	resourceSCfg             *ResourceLimiterConfig   // Configuration for resource limiter
+	resourceSCfg             *ResourceSConfig         // Configuration for resource limiter
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
@@ -632,7 +632,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
-	jsnRLSCfg, err := jsnCfg.ResourceLimiterJsonCfg()
+	jsnRLSCfg, err := jsnCfg.ResourceSJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1076,7 +1076,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 
 	if jsnRLSCfg != nil {
 		if self.resourceSCfg == nil {
-			self.resourceSCfg = new(ResourceLimiterConfig)
+			self.resourceSCfg = new(ResourceSConfig)
 		}
 		if self.resourceSCfg.loadFromJsonCfg(jsnRLSCfg); err != nil {
 			return err
@@ -1146,7 +1146,7 @@ func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
 }
 
 // ToDo: fix locking here
-func (self *CGRConfig) ResourceSCfg() *ResourceLimiterConfig {
+func (self *CGRConfig) ResourceSCfg() *ResourceSConfig {
 	return self.resourceSCfg
 }
 
