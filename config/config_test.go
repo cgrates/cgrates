@@ -561,8 +561,8 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		StoreInterval: 0,
 	}
 
-	if !reflect.DeepEqual(cgrCfg.resourceLimiterCfg, eResLiCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.resourceLimiterCfg, eResLiCfg)
+	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.resourceSCfg, eResLiCfg)
 	}
 
 }
