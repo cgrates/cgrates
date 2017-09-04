@@ -84,9 +84,7 @@ func (self *KamailioSessionManager) allocateResources(kev KamEvent) (err error) 
 		Units:   1, // One channel reserved
 	}
 	var reply string
-	if err = self.rlS.Call("ResourceSV1.AllocateResource", attrRU, &reply); err == nil && reply == utils.META_NONE {
-		err = errors.New("no resource found")
-	}
+	return self.rlS.Call("ResourceSV1.AllocateResource", attrRU, &reply)
 }
 
 func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
