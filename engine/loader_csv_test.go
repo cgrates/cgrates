@@ -348,7 +348,7 @@ func init() {
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
 	dataStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	dataStorage.LoadAccountingCache(nil, nil, nil)
+	dataStorage.LoadAccountingCache(nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

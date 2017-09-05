@@ -111,7 +111,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	}
 	cache.Flush()
 	dataDB2.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	dataDB2.LoadAccountingCache(nil, nil, nil)
+	dataDB2.LoadAccountingCache(nil, nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

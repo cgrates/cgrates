@@ -60,9 +60,9 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheLCR,
 	testOnStorITCacheAlias,
 	testOnStorITCacheReverseAlias,
+	testOnStorITCacheResource,
 	testOnStorITCacheResourceCfg,
 	testOnStorITCacheTiming,
-	testOnStorITCacheResource,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
@@ -84,9 +84,9 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDUser,
 	testOnStorITCRUDAlias,
 	testOnStorITCRUDReverseAlias,
+	testOnStorITCRUDResource,
 	testOnStorITCRUDResourceCfg,
 	testOnStorITCRUDTiming,
-	testOnStorITCRUDResource,
 	testOnStorITCRUDHistory,
 	testOnStorITCRUDStructVersion,
 	testOnStorITCRUDSQStoredMetrics,
@@ -851,7 +851,6 @@ func testOnStorITCacheTiming(t *testing.T) {
 	}
 }
 
-//test here Cache
 func testOnStorITCacheResource(t *testing.T) {
 	res := &Resource{
 		ID: "RL1",
@@ -1892,7 +1891,6 @@ func testOnStorITCRUDHistory(t *testing.T) {
 	}
 }
 
-//test here Crud
 func testOnStorITCRUDResource(t *testing.T) {
 	res := &Resource{
 		ID: "RL1",

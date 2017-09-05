@@ -64,7 +64,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 
 	cache.Flush()
 	dbAcntActs.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	dbAcntActs.LoadAccountingCache(nil, nil, nil)
+	dbAcntActs.LoadAccountingCache(nil, nil, nil, nil)
 
 	expectAcnt := &engine.Account{ID: "cgrates.org:1"}
 	if acnt, err := dbAcntActs.GetAccount("cgrates.org:1"); err != nil {

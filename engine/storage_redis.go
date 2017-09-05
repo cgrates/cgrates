@@ -1,4 +1,4 @@
-/* 
+/*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
@@ -140,11 +140,12 @@ func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 	return
 }
 
-func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
+func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
 		utils.ResourceConfigsPrefix:  rlIDs,
+		utils.ResourcesPrefix:        resIDs,
 	} {
 		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -1424,7 +1425,6 @@ func (rs *RedisStorage) RemoveResourceCfg(id string, transactionID string) (err 
 	return
 }
 
-//from here
 func (rs *RedisStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
 	key := utils.ResourcesPrefix + id
 	if !skipCache {
@@ -1466,8 +1466,6 @@ func (rs *RedisStorage) RemoveResource(id string, transactionID string) (err err
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
-
-// to here
 
 func (rs *RedisStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
 	key := utils.TimingsPrefix + id
