@@ -1,4 +1,4 @@
-/* 
+/*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
@@ -1903,8 +1903,6 @@ func (ms *MongoStorage) RemoveResourceCfg(id string, transactionID string) (err 
 	return nil
 }
 
-//from here
-//find the right collumn
 func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
 	key := utils.ResourcesPrefix + id
 	if !skipCache {
@@ -1945,8 +1943,6 @@ func (ms *MongoStorage) RemoveResource(id string, transactionID string) (err err
 	cache.RemKey(utils.ResourcesPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil
 }
-
-//to here
 
 func (ms *MongoStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
 	key := utils.TimingsPrefix + id
