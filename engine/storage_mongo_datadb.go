@@ -438,11 +438,12 @@ func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 	return
 }
 
-func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
+func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
 		utils.ResourceConfigsPrefix:  rlIDs,
+		utils.ResourcesPrefix:        resIDs,
 	} {
 		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
 			return
