@@ -60,6 +60,7 @@ const (
 	colSts   = "stats"
 	colRFI   = "request_filter_indexes"
 	colTmg   = "timings"
+	colRes   = "resources"
 )
 
 var (
@@ -149,7 +150,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 	}
 	var colectNames []string // collection names containing this index
 	if ms.storageType == utils.DataDB {
-		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRCfgs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht}
+		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRCfgs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht, colRes}
 	}
 	for _, col := range colectNames {
 		if err = db.C(col).EnsureIndex(idx); err != nil {
@@ -180,7 +181,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Sparse:     false,
 		}
 		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPStats} {
+			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPStats, utils.TBLTPResources} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
 			}
@@ -326,6 +327,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.ResourceConfigsPrefix:      colRCfg,
 		utils.StatsPrefix:                colSts,
 		utils.TimingsPrefix:              colTmg,
+		utils.ResourcesPrefix:            colRes,
 	}
 	name, ok = colMap[prefix]
 	return
@@ -467,7 +469,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceConfigsPrefix,
-		utils.TimingsPrefix}, prfx) {
+		utils.TimingsPrefix,
+		utils.ResourcesPrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -534,6 +537,8 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
+		case utils.ResourcesPrefix:
+			_, err = ms.GetResource(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -648,6 +653,11 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		iter := db.C(colTmg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.TimingsPrefix+idResult.Id)
+		}
+	case utils.ResourcesPrefix:
+		iter := db.C(colRes).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.ResourcesPrefix+idResult.Id)
 		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -1892,17 +1902,50 @@ func (ms *MongoStorage) RemoveResourceCfg(id string, transactionID string) (err 
 	return nil
 }
 
+//from here
+//find the right collumn
 func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
+	key := utils.ResourcesPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Resource), nil
+		}
+	}
+	session, col := ms.conn(colRes)
+	defer session.Close()
+	r = new(Resource)
+	if err = col.Find(bson.M{"id": id}).One(r); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, r, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (ms *MongoStorage) SetResource(r *Resource) (err error) {
+	session, col := ms.conn(colRes)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"id": r.ID}, r)
 	return
 }
 
 func (ms *MongoStorage) RemoveResource(id string, transactionID string) (err error) {
-	return
+	session, col := ms.conn(colRes)
+	defer session.Close()
+	if err = col.Remove(bson.M{"id": id}); err != nil {
+		return
+	}
+	cache.RemKey(utils.ResourcesPrefix+id, cacheCommit(transactionID), transactionID)
+	return nil
 }
+
+//to here
 
 func (ms *MongoStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
 	key := utils.TimingsPrefix + id
