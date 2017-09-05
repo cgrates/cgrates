@@ -228,7 +228,8 @@ func NewResourceService(dataDB DataDB, shortCache *config.CacheParamConfig, stor
 	return &ResourceService{dataDB: dataDB, statS: statS,
 		scEventResources: ltcache.New(shortCache.Limit, shortCache.TTL, shortCache.StaticTTL, nil),
 		lcEventResources: ltcache.New(ltcache.UnlimitedCaching, ltcache.UnlimitedCaching, false, nil),
-		storeInterval:    storeInterval}, nil
+		storedResources:  make(utils.StringMap),
+		storeInterval:    storeInterval, stopBackup: make(chan struct{})}, nil
 }
 
 // ResourceService is the service handling resources
@@ -453,6 +454,7 @@ func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *
 			Units: args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			rS.scEventResources.Set(args.UsageID, nil)
+			err = nil
 			return // not error but still not allowed
 		}
 		return err

@@ -52,7 +52,8 @@ type TpReader struct {
 	cdrStats         map[string]*CdrStats
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
-	resLimits        map[string]*utils.TPResource
+	resCfgs          map[string]*utils.TPResource
+	res              []string // IDs of resources which need creation based on resourceConfigs
 	stats            map[string]*utils.TPStats
 	thresholds       map[string]*utils.TPThreshold
 
@@ -126,7 +127,7 @@ func (tpr *TpReader) Init() {
 	tpr.users = make(map[string]*UserProfile)
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
-	tpr.resLimits = make(map[string]*utils.TPResource)
+	tpr.resCfgs = make(map[string]*utils.TPResource)
 	tpr.stats = make(map[string]*utils.TPStats)
 	tpr.thresholds = make(map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
@@ -1600,7 +1601,14 @@ func (tpr *TpReader) LoadResourcesFiltered(tag string) error {
 	for _, rl := range rls {
 		mapRLs[rl.ID] = rl
 	}
-	tpr.resLimits = mapRLs
+	tpr.resCfgs = mapRLs
+	for rID := range mapRLs {
+		if has, err := tpr.dataStorage.HasData(utils.ResourcesPrefix, rID); err != nil {
+			return err
+		} else if !has {
+			tpr.res = append(tpr.res, rID)
+		}
+	}
 	return nil
 }
 
@@ -1933,9 +1941,29 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
+		log.Print("ResourceConfigs:")
+	}
+	for _, tpRL := range tpr.resCfgs {
+		rl, err := APItoResource(tpRL, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dataStorage.SetResourceCfg(rl, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", rl.ID)
+		}
+	}
+	if verbose {
 		log.Print("Resources:")
 	}
-	for _, tpRL := range tpr.resLimits {
+	for _, rID := range tpr.res {
+		if err = tpr.dataStorage.SetResource(&Resource{ID: rID, Usages: make(map[string]*ResourceUsage)}); err != nil {
+			return
+		}
+	}
+	for _, tpRL := range tpr.resCfgs {
 		rl, err := APItoResource(tpRL, tpr.timezone)
 		if err != nil {
 			return err
@@ -2013,7 +2041,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
-		if len(tpr.resLimits) > 0 {
+		if len(tpr.resCfgs) > 0 {
 			if verbose {
 				log.Print("Indexing resource limits")
 			}
@@ -2021,7 +2049,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if err != nil {
 				return err
 			}
-			for _, tpRL := range tpr.resLimits {
+			for _, tpRL := range tpr.resCfgs {
 				if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
 					return err
 				} else {
@@ -2141,7 +2169,7 @@ func (tpr *TpReader) ShowStatistics() {
 	// cdr stats
 	log.Print("CDR stats: ", len(tpr.cdrStats))
 	// resource limits
-	log.Print("ResourceLimits: ", len(tpr.resLimits))
+	log.Print("ResourceLimits: ", len(tpr.resCfgs))
 	// stats
 	log.Print("Stats: ", len(tpr.stats))
 }
@@ -2254,9 +2282,9 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		}
 		return keys, nil
 	case utils.ResourceConfigsPrefix:
-		keys := make([]string, len(tpr.resLimits))
+		keys := make([]string, len(tpr.resCfgs))
 		i := 0
-		for k := range tpr.resLimits {
+		for k := range tpr.resCfgs {
 			keys[i] = k
 			i++
 		}
