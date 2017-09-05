@@ -283,7 +283,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 		Units:   1,
 	}
 	if sm.rls != nil {
-		if err := sm.rls.Call("RLsV1.ReleaseResource", attrRU, &reply); err != nil {
+		if err := sm.rls.Call("ResourceSV1.ReleaseResource", attrRU, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> RLs API error: %s", err.Error()))
 		}
 	}

@@ -405,9 +405,10 @@ const CGRATES_CFG_JSON = `
 
 
 "resources": {
-	"enabled": false,				// starts ResourceLimiter service: <true|false>.
-	"stats_conns": [],				// address where to reach the stats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"store_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+	"enabled": false,												// starts ResourceLimiter service: <true|false>.
+	"stats_conns": [],												// address where to reach the stats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"store_interval": "",											// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+	"short_cache": {"limit": -1, "ttl": "1m", "static_ttl": false},	// short cache for data like resources for events in case of allow queries 
 },
 
 

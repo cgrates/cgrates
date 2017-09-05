@@ -530,27 +530,31 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, data
 func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dataDB engine.DataDB, server *utils.Server, exitChan chan bool) {
 	var statsConn *rpcclient.RpcClientPool
-	if len(cfg.ResourceLimiterCfg().StatSConns) != 0 { // Stats connection init
+	if len(cfg.ResourceSCfg().StatSConns) != 0 { // Stats connection init
 		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.ResourceLimiterCfg().StatSConns, internalStatSConn, cfg.InternalTtl)
+			cfg.ResourceSCfg().StatSConns, internalStatSConn, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not connect to StatS: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(cfg, dataDB, statsConn)
+	rS, err := engine.NewResourceService(dataDB, cfg.ResourceSCfg().ShortCache, cfg.ResourceSCfg().StoreInterval, statsConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting Resource Service"))
-	if err := rS.ListenAndServe(exitChan); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not start, error: %s", err.Error()))
+	go func() {
+		if err := rS.ListenAndServe(exitChan); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not start, error: %s", err.Error()))
+
+		}
+		rS.Shutdown()
 		exitChan <- true
 		return
-	}
+	}()
 	rsV1 := v1.NewResourceSV1(rS)
 	server.RpcRegister(rsV1)
 	internalRsChan <- rsV1
@@ -848,7 +852,7 @@ func main() {
 	}
 
 	// Start RL service
-	if cfg.ResourceLimiterCfg().Enabled {
+	if cfg.ResourceSCfg().Enabled {
 		go startResourceService(internalRsChan,
 			internalStatSChan, cfg, dataDB, server, exitChan)
 	}

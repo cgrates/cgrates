@@ -555,14 +555,16 @@ func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
-	eResLiCfg := &ResourceLimiterConfig{
+	eResLiCfg := &ResourceSConfig{
 		Enabled:       false,
 		StatSConns:    []*HaPoolConfig{},
 		StoreInterval: 0,
+		ShortCache: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(1 * time.Minute), StaticTTL: false},
 	}
 
-	if !reflect.DeepEqual(cgrCfg.resourceLimiterCfg, eResLiCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.resourceLimiterCfg, eResLiCfg)
+	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
+		t.Errorf("expecting: %s, received: %s", utils.ToIJSON(eResLiCfg), utils.ToIJSON(cgrCfg.resourceSCfg))
 	}
 
 }

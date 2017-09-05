@@ -7,16 +7,19 @@
 	"reply_timeout": "30s",
 },
 
+
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
 	"http": ":2080",
 },
 
+
 "data_db": {
 	"db_type": "mongo",
 	"db_port": 27017,
 },
+
 
 "stor_db": {
 	"db_type": "mongo",
@@ -40,9 +43,11 @@
 	],
 },
 
+
 "scheduler": {
 	"enabled": true,
 },
+
 
 "cdrs": {
 	"enabled": true,
@@ -51,36 +56,38 @@
 	],
 },
 
+
 "cdrstats": {
 	"enabled": true,
 },
 
+
 "pubsubs": {
 	"enabled": true,
 },
+
 
 "users": {
 	"enabled": true,
 	"indexes": ["Uuid"],
 },
 
+
 "aliases": {
 	"enabled": true,
 },
 
+
 "resources": {
 	"enabled": true,
-	"stats_conns": [
-		//{"address": "*internal"}
-	],
-	"cache_dump_interval": "0s",
-	"usage_ttl": "3h",
 },
+
 
 "stats": {
 	"enabled": true,
 	"store_interval": "0s",
 },
+
 
 "sm_generic": {
 	"enabled": true,

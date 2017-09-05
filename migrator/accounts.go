@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"gopkg.in/mgo.v2/bson"
 )
 
 const (
@@ -34,92 +33,31 @@ const (
 )
 
 func (m *Migrator) migrateAccounts() (err error) {
-	switch m.dataDBType {
-	case utils.REDIS:
-		var acntV1Keys []string
-		acntV1Keys, err = m.dataDB.GetKeysForPrefix(v1AccountDBPrefix)
-		if err != nil {
-			return
+	var v1Acnt *v1Account
+	for {
+		v1Acnt, err = m.oldDataDB.getv1Account()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
 		}
-		for _, acntV1Key := range acntV1Keys {
-			v1Acnt, err := m.getV1AccountFromDB(acntV1Key)
-			if err != nil {
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v1Acnt != nil {
+			acnt := v1Acnt.AsAccount()
+			if err = m.dataDB.SetAccount(acnt); err != nil {
 				return err
 			}
-			if v1Acnt != nil {
-				acnt := v1Acnt.AsAccount()
-				if err = m.dataDB.SetAccount(acnt); err != nil {
-					return err
-				}
-			}
 		}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
-		}
-		return
-	case utils.MONGO:
-		dataDB := m.dataDB.(*engine.MongoStorage)
-		mgoDB := dataDB.DB()
-		defer mgoDB.Session.Close()
-		var accn v1Account
-		iter := mgoDB.C(v1AccountDBPrefix).Find(nil).Iter()
-		for iter.Next(&accn) {
-			if acnt := accn.AsAccount(); acnt != nil {
-				if err = m.dataDB.SetAccount(acnt); err != nil {
-					return err
-				}
-			}
-		}
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
-		}
-		return
-	default:
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+	if err = m.dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
-			utils.UnsupportedDB,
-			fmt.Sprintf("error: unsupported: <%s> for migrateAccounts method", m.dataDBType))
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 	}
-}
-
-func (m *Migrator) getV1AccountFromDB(key string) (*v1Account, error) {
-	switch m.dataDBType {
-	case utils.REDIS:
-		dataDB := m.dataDB.(*engine.RedisStorage)
-		if strVal, err := dataDB.Cmd("GET", key).Bytes(); err != nil {
-			return nil, err
-		} else {
-			v1Acnt := &v1Account{Id: key}
-			if err := m.mrshlr.Unmarshal(strVal, v1Acnt); err != nil {
-				return nil, err
-			}
-			return v1Acnt, nil
-		}
-	case utils.MONGO:
-		dataDB := m.dataDB.(*engine.MongoStorage)
-		mgoDB := dataDB.DB()
-		defer mgoDB.Session.Close()
-		v1Acnt := new(v1Account)
-		if err := mgoDB.C(v1AccountTBL).Find(bson.M{"id": key}).One(v1Acnt); err != nil {
-			return nil, err
-		}
-		return v1Acnt, nil
-	default:
-		return nil, utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			utils.UnsupportedDB,
-			fmt.Sprintf("error: unsupported: <%s> for getV1AccountFromDB method", m.dataDBType))
-	}
+	return
 }
 
 type v1Account struct {
@@ -183,7 +121,7 @@ func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 	for oldBalKey, oldBalChain := range v1Acc.BalanceMap {
 		keyElements := strings.Split(oldBalKey, "*")
 		newBalKey := "*" + keyElements[1]
-		newBalDirection := "*" + idElements[0]
+		newBalDirection := idElements[0]
 		ac.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
 			// check default to set new id
@@ -295,9 +233,6 @@ func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 		}
 		if oldAtr.BalanceWeight != 0 {
 			bf.Weight = utils.Float64Pointer(oldAtr.BalanceWeight)
-		}
-		if oldAtr.BalanceDisabled != false {
-			bf.Disabled = utils.BoolPointer(oldAtr.BalanceDisabled)
 		}
 		if !oldAtr.BalanceExpirationDate.IsZero() {
 			bf.ExpirationDate = utils.TimePointer(oldAtr.BalanceExpirationDate)

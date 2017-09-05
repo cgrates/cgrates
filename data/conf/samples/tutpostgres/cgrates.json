@@ -4,17 +4,20 @@
 // Used for cgradmin
 // Starts rater, scheduler
 
+
 "listen": {
 	"rpc_json": ":2012",				// RPC JSON listening address
 	"rpc_gob": ":2013",					// RPC GOB listening address
 	"http": ":2080",					// HTTP listening address
 },
 
+
 "stor_db": {
 	"db_type": "postgres",					// stor database type to use: <mysql|postgres>
 	"db_port": 5432, 						// the port to reach the stordb
 	"db_password": "CGRateS.org",
 },
+
 
 "rals": {
 	"enabled": true,					// enable Rater service: <true|false>
@@ -32,9 +35,11 @@
 	],
 },
 
+
 "scheduler": {
 	"enabled": true,					// start Scheduler service: <true|false>
 },
+
 
 "cdrs": {
 	"enabled": true,					// start the CDR Server service:  <true|false>
@@ -43,9 +48,11 @@
 	],
 },
 
+
 "cdrstats": {
 	"enabled": true,					// starts the cdrstats service: <true|false>
 },
+
 
 "pubsubs": {
 	"enabled": true,				// starts PubSub service: <true|false>.
@@ -57,8 +64,14 @@
 	"indexes": ["Uuid"],			// user profile field indexes
 },
 
+
 "aliases": {
 	"enabled": true,							// starts Aliases service: <true|false>.
+},
+
+
+"resources": {
+	"enabled": true,
 },
 
 
