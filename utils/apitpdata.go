@@ -705,7 +705,7 @@ type CacheStats struct {
 	Users               int
 	Aliases             int
 	ReverseAliases      int
-	ResourcesConfig     int
+	ResourceConfigs     int
 	Resources           int
 	//Stats               int
 	//thresholds		  int
