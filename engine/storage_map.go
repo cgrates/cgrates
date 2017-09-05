@@ -165,7 +165,7 @@ func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, 
 	return
 }
 
-func (ms *MapStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error {
+func (ms *MapStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) error {
 	if ms.cacheCfg == nil {
 		return nil
 	}

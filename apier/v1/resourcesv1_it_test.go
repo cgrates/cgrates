@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package v1
 
+/*
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -361,3 +362,4 @@ func testV1RsStopEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

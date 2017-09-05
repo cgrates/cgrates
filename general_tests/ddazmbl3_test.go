@@ -109,7 +109,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	}
 	cache.Flush()
 	dataDB3.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	dataDB3.LoadAccountingCache(nil, nil, nil)
+	dataDB3.LoadAccountingCache(nil, nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

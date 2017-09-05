@@ -438,11 +438,12 @@ func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 	return
 }
 
-func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
+func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
 		utils.ResourceConfigsPrefix:  rlIDs,
+		utils.ResourcesPrefix:        resIDs,
 	} {
 		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -1905,8 +1906,6 @@ func (ms *MongoStorage) RemoveResourceCfg(id string, transactionID string) (err 
 	return nil
 }
 
-//from here
-//find the right collumn
 func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
 	key := utils.ResourcesPrefix + id
 	if !skipCache {
@@ -1947,8 +1946,6 @@ func (ms *MongoStorage) RemoveResource(id string, transactionID string) (err err
 	cache.RemKey(utils.ResourcesPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil
 }
-
-//to here
 
 func (ms *MongoStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
 	key := utils.TimingsPrefix + id
