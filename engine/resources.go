@@ -238,9 +238,9 @@ type ResourceService struct {
 	scEventResources *ltcache.Cache                // short cache map[ruID], used to keep references to matched resources for events in allow queries
 	lcEventResources *ltcache.Cache                // cache recording resources for events in alocation phase
 	storedResources  utils.StringMap               // keep a record of resources which need saving, map[resID]bool
-	srMux            sync.RWMutex
-	stopBackup       chan struct{} // control storing process
-	storeInterval    time.Duration
+	srMux            sync.RWMutex                  // protects storedResources
+	storeInterval    time.Duration                 // interval to dump data on
+	stopBackup       chan struct{}                 // control storing process
 }
 
 // Called to start the service
