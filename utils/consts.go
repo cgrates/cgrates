@@ -57,6 +57,8 @@ var (
 		CacheResourceConfigs:     ResourceConfigsPrefix,
 		CacheResources:           ResourcesPrefix,
 		CacheTimings:             TimingsPrefix,
+		CacheStatSQueues:         META_NONE,
+		CacheStatSEventQueues:    META_NONE,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )
@@ -433,6 +435,8 @@ const (
 	CostSource                   = "CostSource"
 	ExtraInfo                    = "ExtraInfo"
 	MetaPrefix                   = "*"
+	CacheStatSQueues             = "stats_queues"
+	CacheStatSEventQueues        = "stats_event_queues"
 )
 
 func buildCacheInstRevPrefixes() {

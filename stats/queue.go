@@ -27,16 +27,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// StatsInstances is a sortable list of StatsInstance
-type StatsInstances []*StatsInstance
+// StatQueues is a sortable list of StatQueue
+type StatQueues []*StatQueue
 
 // Sort is part of sort interface, sort based on Weight
-func (sis StatsInstances) Sort() {
+func (sis StatQueues) Sort() {
 	sort.Slice(sis, func(i, j int) bool { return sis[i].cfg.Weight > sis[j].cfg.Weight })
 }
 
 // remWithID removes the queue with ID from slice
-func (sis StatsInstances) remWithID(qID string) {
+func (sis StatQueues) remWithID(qID string) {
 	for i, q := range sis {
 		if q.cfg.ID == qID {
 			copy(sis[i:], sis[i+1:])
@@ -47,10 +47,10 @@ func (sis StatsInstances) remWithID(qID string) {
 	}
 }
 
-// NewStatsInstance instantiates a StatsInstance
-func NewStatsInstance(sec *StatsEventCache, ms engine.Marshaler,
-	sqCfg *engine.StatsConfig, sqSM *engine.SQStoredMetrics) (si *StatsInstance, err error) {
-	si = &StatsInstance{sec: sec, ms: ms, cfg: sqCfg, sqMetrics: make(map[string]StatsMetric)}
+// NewStatQueue instantiates a StatQueue
+func NewStatQueue(sec *StatsEventCache, ms engine.Marshaler,
+	sqCfg *engine.StatsConfig, sqSM *engine.SQStoredMetrics) (si *StatQueue, err error) {
+	si = &StatQueue{sec: sec, ms: ms, cfg: sqCfg, sqMetrics: make(map[string]StatsMetric)}
 	for _, metricID := range sqCfg.Metrics {
 		if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
 			return
@@ -77,8 +77,8 @@ func NewStatsInstance(sec *StatsEventCache, ms engine.Marshaler,
 	return
 }
 
-// StatsInstance represents an individual stats instance
-type StatsInstance struct {
+// StatQueue represents an individual stats instance
+type StatQueue struct {
 	sync.RWMutex
 	dirty     bool // needs save
 	sec       *StatsEventCache
@@ -89,7 +89,7 @@ type StatsInstance struct {
 }
 
 // GetSQStoredMetrics retrieves the data used for store to DB
-func (sq *StatsInstance) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
+func (sq *StatQueue) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
 	sq.RLock()
 	defer sq.RUnlock()
 	sEvents := make(map[string]engine.StatsEvent)
@@ -97,7 +97,7 @@ func (sq *StatsInstance) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
 	for _, sqItem := range sq.sqItems { // make sure event is properly retrieved from cache
 		ev := sq.sec.GetEvent(sqItem.EventID)
 		if ev == nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatsInstance> querying for storage eventID: %s, error: event not cached",
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> querying for storage eventID: %s, error: event not cached",
 				sqItem.EventID))
 			continue
 		}
@@ -111,7 +111,7 @@ func (sq *StatsInstance) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
 	for metricID, metric := range sq.sqMetrics {
 		var err error
 		if sqSM.SQMetrics[metricID], err = metric.GetMarshaled(sq.ms); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatsInstance> querying for storage metricID: %s, error: %s",
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> querying for storage metricID: %s, error: %s",
 				metricID, err.Error()))
 			continue
 		}
@@ -120,7 +120,7 @@ func (sq *StatsInstance) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
 }
 
 // ProcessEvent processes a StatsEvent, returns true if processed
-func (sq *StatsInstance) ProcessEvent(ev engine.StatsEvent) (err error) {
+func (sq *StatQueue) ProcessEvent(ev engine.StatsEvent) (err error) {
 	sq.Lock()
 	sq.remExpired()
 	sq.remOnQueueLength()
@@ -130,7 +130,7 @@ func (sq *StatsInstance) ProcessEvent(ev engine.StatsEvent) (err error) {
 }
 
 // remExpired expires items in queue
-func (sq *StatsInstance) remExpired() {
+func (sq *StatQueue) remExpired() {
 	var expIdx *int // index of last item to be expired
 	for i, item := range sq.sqItems {
 		if item.ExpiryTime == nil {
@@ -151,7 +151,7 @@ func (sq *StatsInstance) remExpired() {
 }
 
 // remOnQueueLength rems elements based on QueueLength setting
-func (sq *StatsInstance) remOnQueueLength() {
+func (sq *StatQueue) remOnQueueLength() {
 	if sq.cfg.QueueLength == 0 {
 		return
 	}
@@ -164,26 +164,26 @@ func (sq *StatsInstance) remOnQueueLength() {
 }
 
 // addStatsEvent computes metrics for an event
-func (sq *StatsInstance) addStatsEvent(ev engine.StatsEvent) {
+func (sq *StatQueue) addStatsEvent(ev engine.StatsEvent) {
 	evID := ev.ID()
 	for metricID, metric := range sq.sqMetrics {
 		if err := metric.AddEvent(ev); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatsInstance> metricID: %s, add eventID: %s, error: %s",
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
 				metricID, evID, err.Error()))
 		}
 	}
 }
 
 // remStatsEvent removes an event from metrics
-func (sq *StatsInstance) remEventWithID(evID string) {
+func (sq *StatQueue) remEventWithID(evID string) {
 	ev := sq.sec.GetEvent(evID)
 	if ev == nil {
-		utils.Logger.Warning(fmt.Sprintf("<StatsInstance> removing eventID: %s, error: event not cached", evID))
+		utils.Logger.Warning(fmt.Sprintf("<StatQueue> removing eventID: %s, error: event not cached", evID))
 		return
 	}
 	for metricID, metric := range sq.sqMetrics {
 		if err := metric.RemEvent(ev); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatsInstance> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
 		}
 	}
 }
