@@ -18,15 +18,15 @@ package migrator
 
 import (
 	"flag"
-	//	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"log"
 	"path"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -38,40 +38,7 @@ var (
 	dbtype    string
 	mig       *Migrator
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-
-	dataDBType = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <redis>")
-	dataDBHost = flag.String("datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
-	dataDBPort = flag.String("datadb_port", config.CgrConfig().DataDbPort, "The DataDb port to bind to.")
-	dataDBName = flag.String("datadb_name", config.CgrConfig().DataDbName, "The name/number of the DataDb to connect to.")
-	dataDBUser = flag.String("datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
-	dataDBPass = flag.String("datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
-
-	storDBType = flag.String("stordb_type", config.CgrConfig().StorDBType, "The type of the storDb database <mysql>")
-	storDBHost = flag.String("stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
-	storDBPort = flag.String("stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
-	storDBName = flag.String("stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
-	storDBUser = flag.String("stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
-	storDBPass = flag.String("stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
-
-	oldDataDBType = flag.String("old_datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <redis>")
-	oldDataDBHost = flag.String("old_datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
-	oldDataDBPort = flag.String("old_datadb_port", config.CgrConfig().DataDbPort, "The DataDb port to bind to.")
-	oldDataDBName = flag.String("old_datadb_name", "11", "The name/number of the DataDb to connect to.")
-	oldDataDBUser = flag.String("old_datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
-	oldDataDBPass = flag.String("old_datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
-
-	oldStorDBType = flag.String("old_stordb_type", config.CgrConfig().StorDBType, "The type of the storDb database <mysql>")
-	oldStorDBHost = flag.String("old_stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
-	oldStorDBPort = flag.String("old_stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
-	oldStorDBName = flag.String("old_stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
-	oldStorDBUser = flag.String("old_stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
-	oldStorDBPass = flag.String("old_stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
-
 	loadHistorySize    = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
-	oldLoadHistorySize = flag.Int("old_load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
-
-	dbDataEncoding    = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
-	oldDBDataEncoding = flag.String("old_dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
 )
 
 // subtests to be executed for each migrator
@@ -85,26 +52,69 @@ var sTestsITMigrator = []func(t *testing.T){
 	testOnStorITFlush,
 }
 
+func TestOnStorITPostgresConnect(t *testing.T) {
+	cdrsPostgresCfgPath := path.Join(*dataDir, "conf", "samples", "tutpostgres")
+	postgresITCfg, err := config.NewCGRConfigFromFolder(cdrsPostgresCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataDB, err := engine.ConfigureDataStorage(postgresITCfg.DataDbType, postgresITCfg.DataDbHost, postgresITCfg.DataDbPort, postgresITCfg.DataDbName, postgresITCfg.DataDbUser, postgresITCfg.DataDbPass, postgresITCfg.DBDataEncoding, postgresITCfg.CacheConfig, *loadHistorySize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	oldDataDB, err := ConfigureV1DataStorage(postgresITCfg.DataDbType, postgresITCfg.DataDbHost, postgresITCfg.DataDbPort, postgresITCfg.DataDbName, postgresITCfg.DataDbUser, postgresITCfg.DataDbPass, postgresITCfg.DBDataEncoding)
+	if err != nil {
+		log.Fatal(err)
+	}
+	storDB, err := engine.ConfigureStorStorage(postgresITCfg.StorDBType, postgresITCfg.StorDBHost, postgresITCfg.StorDBPort, postgresITCfg.StorDBName, postgresITCfg.StorDBUser, postgresITCfg.StorDBPass, postgresITCfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	oldstorDB, err := engine.ConfigureStorStorage(postgresITCfg.StorDBType, postgresITCfg.StorDBHost, postgresITCfg.StorDBPort, postgresITCfg.StorDBName, postgresITCfg.StorDBUser, postgresITCfg.StorDBPass, postgresITCfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mig, err = NewMigrator(dataDB, postgresITCfg.DataDbType, postgresITCfg.DBDataEncoding, storDB, postgresITCfg.StorDBType, oldDataDB, postgresITCfg.DataDbType, postgresITCfg.DBDataEncoding, oldstorDB, postgresITCfg.StorDBType)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func TestOnStorITPostgres(t *testing.T) {
+	dbtype = utils.REDIS
+	for _, stest := range sTestsITMigrator {
+		t.Run("TestITMigratorOnPostgres", stest)
+	}
+}
+
+
 func TestOnStorITRedisConnect(t *testing.T) {
-	dataDB, err := engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
+	cdrsMysqlCfgPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	mysqlITCfg, err := config.NewCGRConfigFromFolder(cdrsMysqlCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataDB, err := engine.ConfigureDataStorage(mysqlITCfg.DataDbType, mysqlITCfg.DataDbHost, mysqlITCfg.DataDbPort, mysqlITCfg.DataDbName, mysqlITCfg.DataDbUser, mysqlITCfg.DataDbPass, mysqlITCfg.DBDataEncoding, mysqlITCfg.CacheConfig, *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldDataDB, err := ConfigureV1DataStorage(*oldDataDBType, *oldDataDBHost, *oldDataDBPort, *oldDataDBName, *oldDataDBUser, *oldDataDBPass, *oldDBDataEncoding)
+	oldDataDB, err := ConfigureV1DataStorage(mysqlITCfg.DataDbType, mysqlITCfg.DataDbHost, mysqlITCfg.DataDbPort, mysqlITCfg.DataDbName, mysqlITCfg.DataDbUser, mysqlITCfg.DataDbPass, mysqlITCfg.DBDataEncoding)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort, *storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
+	storDB, err := engine.ConfigureStorStorage(mysqlITCfg.StorDBType, mysqlITCfg.StorDBHost, mysqlITCfg.StorDBPort, mysqlITCfg.StorDBName, mysqlITCfg.StorDBUser, mysqlITCfg.StorDBPass, mysqlITCfg.DBDataEncoding,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(*oldStorDBType, *oldStorDBHost, *oldStorDBPort, *oldStorDBName, *oldStorDBUser, *oldStorDBPass, *oldDBDataEncoding,
+	oldstorDB, err := engine.ConfigureStorStorage(mysqlITCfg.StorDBType, mysqlITCfg.StorDBHost, mysqlITCfg.StorDBPort, mysqlITCfg.StorDBName, mysqlITCfg.StorDBUser, mysqlITCfg.StorDBPass, mysqlITCfg.DBDataEncoding,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	mig, err = NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType, oldDataDB, *oldDataDBType, *oldDBDataEncoding, oldstorDB, *oldStorDBType)
+	mig, err = NewMigrator(dataDB, mysqlITCfg.DataDbType, mysqlITCfg.DBDataEncoding, storDB, mysqlITCfg.StorDBType, oldDataDB, mysqlITCfg.DataDbType, mysqlITCfg.DBDataEncoding, oldstorDB, mysqlITCfg.StorDBType)
 	if err != nil {
 		log.Fatal(err)
 	}

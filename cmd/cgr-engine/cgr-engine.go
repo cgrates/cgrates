@@ -720,7 +720,7 @@ func main() {
 		}
 		defer dataDB.Close()
 		engine.SetDataStorage(dataDB)
-		if err := engine.CheckVersion(nil); err != nil {
+		if err := engine.CheckVersions(nil); err != nil {
 			fmt.Println(err.Error())
 			return
 		}

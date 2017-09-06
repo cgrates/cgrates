@@ -25,7 +25,7 @@ import (
 )
 
 func CheckVersions(storage Storage) error {
-x:=Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 2,utils.COST_DETAILS: 2}
+	x:=Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 2,utils.COST_DETAILS: 2}
 	// get current db version
 	if storage == nil {
 		storage = dataStorage

@@ -1357,28 +1357,6 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-//Remove?
-// func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
-// 	var result []byte
-// 	result, err = rs.ms.Marshal(v)
-// 	if err != nil {
-// 		return
-// 	}
-// 	return rs.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
-// }
-
-// func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
-// 	var values []byte
-// 	if values, err = rs.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err != nil {
-// 		if err == redis.ErrRespNil { // did not find the destination
-// 			err = utils.ErrNotFound
-// 		}
-// 		return
-// 	}
-// 	err = rs.ms.Unmarshal(values, &rsv)
-// 	return
-// }
-
 func (rs *RedisStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
 	key := utils.ResourceConfigsPrefix + id
 	if !skipCache {
@@ -1604,7 +1582,7 @@ if overwrite{
 
 func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 for key,_:=range vrs{
-	err = rs.Cmd("HDEL", key).Err
+	err = rs.Cmd("HDEL",utils.TBLVersions, key).Err
 	if err!=nil{
 		return err
 		}

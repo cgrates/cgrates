@@ -1833,33 +1833,6 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-// func (ms *MongoStorage) SetStructVersion(v *StructVersion) (err error) {
-// 	session, col := ms.conn(colVer)
-// 	defer session.Close()
-// 	_, err = col.Upsert(bson.M{"key": utils.VERSION_PREFIX + "struct"}, &struct {
-// 		Key   string
-// 		Value *StructVersion
-// 	}{utils.VERSION_PREFIX + "struct", v})
-// 	return
-// }
-
-// func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
-// 	var result struct {
-// 		Key   string
-// 		Value StructVersion
-// 	}
-// 	session, col := ms.conn(colVer)
-// 	defer session.Close()
-// 	if err = col.Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result); err != nil {
-// 		if err == mgo.ErrNotFound {
-// 			err = utils.ErrNotFound
-// 		}
-// 		return nil, err
-// 	}
-// 	rsv = &result.Value
-// 	return
-// }
-
 func (ms *MongoStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
 	key := utils.ResourceConfigsPrefix + id
 	if !skipCache {
