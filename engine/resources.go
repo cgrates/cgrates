@@ -193,7 +193,7 @@ func (rs Resources) ids() (ids []string) {
 // returns utils.ErrResourceUnavailable if allocation is not possible
 func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage string, err error) {
 	if len(rs) == 0 {
-		return utils.META_NONE, nil
+		return "", utils.ErrResourceUnavailable
 	}
 	lockIDs := utils.PrefixSliceItems(rs.ids(), utils.ResourcesPrefix)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
@@ -220,26 +220,29 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceService(cfg *config.CGRConfig, dataDB DataDB, statS rpcclient.RpcClientConnection) (*ResourceService, error) {
+func NewResourceService(dataDB DataDB, shortCache *config.CacheParamConfig, storeInterval time.Duration,
+	statS rpcclient.RpcClientConnection) (*ResourceService, error) {
 	if statS != nil && reflect.ValueOf(statS).IsNil() {
 		statS = nil
 	}
 	return &ResourceService{dataDB: dataDB, statS: statS,
-		scEventResources: ltcache.New(ltcache.UnlimitedCaching, time.Duration(1)*time.Minute, false, nil),
-		lcEventResources: ltcache.New(ltcache.UnlimitedCaching, ltcache.UnlimitedCaching, false, nil)}, nil
+		scEventResources: ltcache.New(shortCache.Limit, shortCache.TTL, shortCache.StaticTTL, nil),
+		lcEventResources: make(map[string][]string),
+		storedResources:  make(utils.StringMap),
+		storeInterval:    storeInterval, stopBackup: make(chan struct{})}, nil
 }
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	cfg              *config.CGRConfig
 	dataDB           DataDB                        // So we can load the data in cache and index it
 	statS            rpcclient.RpcClientConnection // allows applying filters based on stats
 	scEventResources *ltcache.Cache                // short cache map[ruID], used to keep references to matched resources for events in allow queries
-	lcEventResources *ltcache.Cache                // cache recording resources for events in alocation phase
+	lcEventResources map[string][]string           // cache recording resources for events in alocation phase
+	lcERMux          sync.RWMutex                  // protects the lcEventResources
 	storedResources  utils.StringMap               // keep a record of resources which need saving, map[resID]bool
-	srMux            sync.RWMutex
-	stopBackup       chan struct{} // control storing process
-	backupInterval   time.Duration
+	srMux            sync.RWMutex                  // protects storedResources
+	storeInterval    time.Duration                 // interval to dump data on
+	stopBackup       chan struct{}                 // control storing process
 }
 
 // Called to start the service
@@ -251,7 +254,7 @@ func (rS *ResourceService) ListenAndServe(exitChan chan bool) error {
 }
 
 // Called to shutdown the service
-func (rS *ResourceService) ServiceShutdown() error {
+func (rS *ResourceService) Shutdown() error {
 	utils.Logger.Info("<ResourceS> service shutdown initialized")
 	close(rS.stopBackup)
 	rS.storeResources()
@@ -306,7 +309,7 @@ func (rS *ResourceService) storeResources() {
 
 // backup will regularly store resources changed to dataDB
 func (rS *ResourceService) runBackup() {
-	if rS.backupInterval <= 0 {
+	if rS.storeInterval <= 0 {
 		return
 	}
 	for {
@@ -316,7 +319,7 @@ func (rS *ResourceService) runBackup() {
 		}
 		rS.storeResources()
 	}
-	time.Sleep(rS.backupInterval)
+	time.Sleep(rS.storeInterval)
 }
 
 // cachedResourcesForEvent attempts to retrieve cached resources for an event
@@ -324,16 +327,16 @@ func (rS *ResourceService) runBackup() {
 // returns []Resource if negative reply was cached
 func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources) {
 	var shortCached bool
-	rIDsIf, has := rS.lcEventResources.Get(evUUID)
+	rS.lcERMux.RLock()
+	rIDs, has := rS.lcEventResources[evUUID]
+	rS.lcERMux.RUnlock()
 	if !has {
-		if rIDsIf, has = rS.scEventResources.Get(evUUID); !has {
+		if rIDsIf, has := rS.scEventResources.Get(evUUID); !has {
 			return nil
+		} else if rIDsIf != nil {
+			rIDs = rIDsIf.([]string)
 		}
 		shortCached = true
-	}
-	var rIDs []string
-	if rIDsIf != nil {
-		rIDs = rIDsIf.([]string)
 	}
 	rs = make(Resources, len(rIDs))
 	if len(rIDs) == 0 {
@@ -341,7 +344,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	}
 
 	lockIDs := utils.PrefixSliceItems(rIDs, utils.ResourcesPrefix)
-	guardian.Guardian.GuardIDs(rS.cfg.LockingTimeout, lockIDs...)
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for i, rID := range rIDs {
 		if r, err := rS.dataDB.GetResource(rID, false, ""); err != nil {
@@ -352,7 +355,9 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 			if shortCached {
 				rS.scEventResources.Remove(evUUID)
 			} else {
-				rS.lcEventResources.Remove(evUUID)
+				rS.lcERMux.Lock()
+				delete(rS.lcEventResources, evUUID)
+				rS.lcERMux.Unlock()
 			}
 			return nil
 		} else {
@@ -370,7 +375,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) 
 		return nil, err
 	}
 	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourcesPrefix)
-	guardian.Guardian.GuardIDs(rS.cfg.LockingTimeout, lockIDs...)
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
 		rCfg, err := rS.dataDB.GetResourceCfg(resName, false, utils.NonTransactional)
@@ -452,6 +457,7 @@ func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *
 			Units: args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			rS.scEventResources.Set(args.UsageID, nil)
+			err = nil
 			return // not error but still not allowed
 		}
 		return err
@@ -486,13 +492,14 @@ func (rS *ResourceService) V1AllocateResource(args utils.AttrRLsResourceUsage, r
 		}
 	}
 	if wasShortCached || !wasCached {
-		rS.lcEventResources.Set(args.UsageID, mtcRLs.ids())
+		rS.lcERMux.Lock()
+		rS.lcEventResources[args.UsageID] = mtcRLs.ids()
+		rS.lcERMux.Unlock()
 	}
-
 	// index it for storing
 	rS.srMux.Lock()
 	for _, r := range mtcRLs {
-		if rS.backupInterval == -1 {
+		if rS.storeInterval == -1 {
 			rS.StoreResource(r)
 		} else if r.dirty != nil {
 			*r.dirty = true // mark it to be saved
@@ -513,13 +520,15 @@ func (rS *ResourceService) V1ReleaseResource(args utils.AttrRLsResourceUsage, re
 		}
 	}
 	mtcRLs.clearUsage(args.UsageID)
-	rS.lcEventResources.Remove(args.UsageID)
-	if rS.backupInterval != -1 {
+	rS.lcERMux.Lock()
+	delete(rS.lcEventResources, args.UsageID)
+	rS.lcERMux.Unlock()
+	if rS.storeInterval != -1 {
 		rS.srMux.Lock()
 	}
 	for _, r := range mtcRLs {
 		if r.dirty != nil {
-			if rS.backupInterval == -1 {
+			if rS.storeInterval == -1 {
 				rS.StoreResource(r)
 			} else {
 				*r.dirty = true // mark it to be saved
@@ -527,7 +536,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.AttrRLsResourceUsage, re
 			}
 		}
 	}
-	if rS.backupInterval != -1 {
+	if rS.storeInterval != -1 {
 		rS.srMux.Unlock()
 	}
 	*reply = utils.OK

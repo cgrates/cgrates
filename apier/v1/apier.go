@@ -926,7 +926,20 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.DataDB.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, dataIDs, true); err != nil {
 		return
 	}
-	// Resources
+	// ResourceConfig
+	dataIDs = make([]string, 0)
+	if attrs.ResourceConfigIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ResourceConfigIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ResourceConfigIDs))
+		for idx, dId := range *attrs.ResourceConfigIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataDB.CacheDataFromDB(utils.ResourceConfigsPrefix, dataIDs, true); err != nil {
+		return
+	}
+	// Resource
 	dataIDs = make([]string, 0)
 	if attrs.ResourceIDs == nil {
 		dataIDs = nil // Reload all
@@ -936,7 +949,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataDB.CacheDataFromDB(utils.ResourceConfigsPrefix, dataIDs, true); err != nil {
+	if err = self.DataDB.CacheDataFromDB(utils.ResourcesPrefix, dataIDs, true); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -947,7 +960,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if args.FlushAll {
 		cache.Flush()
 	}
-	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs []string
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string
 	if args.DestinationIDs == nil {
 		dstIDs = nil
 	} else {
@@ -1013,15 +1026,21 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		rvAlsIDs = *args.ReverseAliasIDs
 	}
-	if args.ResourceIDs == nil {
+	if args.ResourceConfigIDs == nil {
 		rlIDs = nil
 	} else {
-		rlIDs = *args.ResourceIDs
+		rlIDs = *args.ResourceConfigIDs
 	}
+	if args.ResourceIDs == nil {
+		resIDs = nil
+	} else {
+		resIDs = *args.ResourceIDs
+	}
+
 	if err := self.DataDB.LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataDB.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs); err != nil {
+	if err := self.DataDB.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

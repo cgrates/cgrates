@@ -43,42 +43,42 @@ var (
 )
 
 var sTestsRLSV1 = []func(t *testing.T){
-	testV1RLSLoadConfig,
-	testV1RLSInitDataDb,
-	testV1RLSResetStorDb,
-	testV1RLSStartEngine,
-	testV1RLSRpcConn,
-	testV1RLSFromFolder,
-	testV1RLSGetResourcesFromEvent,
-	testV1RLSAllocateResource,
-	testV1RLSAllowUsage,
-	testV1RLSReleaseResource,
-	testV1RLSGetResourceConfigBeforeSet,
-	testV1RLSSetResourceConfig,
-	testV1RLSGetResourceConfigAfterSet,
-	testV1RLSUpdateResourceConfig,
-	testV1RLSGetResourceConfigAfterUpdate,
-	testV1RLSRemResourceCOnfig,
-	testV1RLSGetResourceConfigAfterDelete,
-	testV1RLSStopEngine,
+	testV1RsLoadConfig,
+	testV1RsInitDataDb,
+	testV1RsResetStorDb,
+	testV1RsStartEngine,
+	testV1RsRpcConn,
+	testV1RsFromFolder,
+	testV1RsGetResourcesFromEvent,
+	testV1RsAllocateResource,
+	testV1RsAllowUsage,
+	testV1RsReleaseResource,
+	testV1RsGetResourceConfigBeforeSet,
+	testV1RsSetResourceConfig,
+	testV1RsGetResourceConfigAfterSet,
+	testV1RsUpdateResourceConfig,
+	testV1RsGetResourceConfigAfterUpdate,
+	testV1RsRemResourceCOnfig,
+	testV1RsGetResourceConfigAfterDelete,
+	testV1RsStopEngine,
 }
 
 //Test start here
-func TestRLSV1ITMySQL(t *testing.T) {
+func TestRsV1ITMySQL(t *testing.T) {
 	rlsV1ConfDIR = "tutmysql"
 	for _, stest := range sTestsRLSV1 {
 		t.Run(rlsV1ConfDIR, stest)
 	}
 }
 
-func TestRLSV1ITMongo(t *testing.T) {
+func TestRsV1ITMongo(t *testing.T) {
 	rlsV1ConfDIR = "tutmongo"
 	for _, stest := range sTestsRLSV1 {
 		t.Run(rlsV1ConfDIR, stest)
 	}
 }
 
-func testV1RLSLoadConfig(t *testing.T) {
+func testV1RsLoadConfig(t *testing.T) {
 	var err error
 	rlsV1CfgPath = path.Join(*dataDir, "conf", "samples", rlsV1ConfDIR)
 	if rlsV1Cfg, err = config.NewCGRConfigFromFolder(rlsV1CfgPath); err != nil {
@@ -92,26 +92,26 @@ func testV1RLSLoadConfig(t *testing.T) {
 	}
 }
 
-func testV1RLSInitDataDb(t *testing.T) {
+func testV1RsInitDataDb(t *testing.T) {
 	if err := engine.InitDataDb(rlsV1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func testV1RLSResetStorDb(t *testing.T) {
+func testV1RsResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(rlsV1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testV1RLSStartEngine(t *testing.T) {
+func testV1RsStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(rlsV1CfgPath, resDelay); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testV1RLSRpcConn(t *testing.T) {
+func testV1RsRpcConn(t *testing.T) {
 	var err error
 	rlsV1Rpc, err = jsonrpc.Dial("tcp", rlsV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -119,7 +119,7 @@ func testV1RLSRpcConn(t *testing.T) {
 	}
 }
 
-func testV1RLSFromFolder(t *testing.T) {
+func testV1RsFromFolder(t *testing.T) {
 	var reply string
 	time.Sleep(time.Duration(2000) * time.Millisecond)
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
@@ -129,7 +129,7 @@ func testV1RLSFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(1000) * time.Millisecond)
 }
 
-func testV1RLSGetResourcesFromEvent(t *testing.T) {
+func testV1RsGetResourcesFromEvent(t *testing.T) {
 	var reply *[]*engine.ResourceCfg
 	ev := map[string]interface{}{"Unknown": "unknown"}
 	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -171,7 +171,7 @@ func testV1RLSGetResourcesFromEvent(t *testing.T) {
 	}
 }
 
-func testV1RLSAllocateResource(t *testing.T) {
+func testV1RsAllocateResource(t *testing.T) {
 	var reply string
 
 	attrRU := utils.AttrRLsResourceUsage{
@@ -216,17 +216,17 @@ func testV1RLSAllocateResource(t *testing.T) {
 
 }
 
-func testV1RLSAllowUsage(t *testing.T) {
-	var reply bool
+func testV1RsAllowUsage(t *testing.T) {
+	var allowed bool
 	attrRU := utils.AttrRLsResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		Event:   map[string]interface{}{"Account": "1002", "Subject": "1001", "Destination": "1002"},
 		Units:   1,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &allowed); err != nil {
 		t.Error(err)
-	} else if reply != true {
-		t.Errorf("Expecting: %+v, received: %+v", true, reply)
+	} else if !allowed {
+		t.Errorf("Expecting: %+v, received: %+v", true, allowed)
 	}
 
 	attrRU = utils.AttrRLsResourceUsage{
@@ -234,14 +234,15 @@ func testV1RLSAllowUsage(t *testing.T) {
 		Event:   map[string]interface{}{"Account": "1002", "Subject": "1001", "Destination": "1002"},
 		Units:   2,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &allowed); err != nil { // already
 		t.Error(err)
+	} else if allowed { // already 3 usages active before allow call, we should have now more than allowed
+		t.Error("Resource allowed")
 	}
 }
 
-func testV1RLSReleaseResource(t *testing.T) {
-	var reply interface{}
-
+func testV1RsReleaseResource(t *testing.T) {
+	var reply string
 	attrRU := utils.AttrRLsResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e52",
 		Event:   map[string]interface{}{"Destination": "100"},
@@ -250,29 +251,28 @@ func testV1RLSReleaseResource(t *testing.T) {
 	if err := rlsV1Rpc.Call("ResourceSV1.ReleaseResource", attrRU, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
+	var allowed bool
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &allowed); err != nil {
 		t.Error(err)
-	} else {
-		if reply != true {
-			t.Errorf("Expecting: %+v, received: %+v", true, reply)
-		}
+	} else if !allowed {
+		t.Error("not allowed")
 	}
-
 	attrRU.Units += 7
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err == nil {
-		t.Errorf("Expecting: %+v, received: %+v", false, reply)
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &allowed); err != nil {
+		t.Error(err)
+	} else if allowed {
+		t.Error("Resource should not be allowed")
 	}
-
 }
 
-func testV1RLSGetResourceConfigBeforeSet(t *testing.T) {
+func testV1RsGetResourceConfigBeforeSet(t *testing.T) {
 	var reply *string
 	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: "RCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testV1RLSSetResourceConfig(t *testing.T) {
+func testV1RsSetResourceConfig(t *testing.T) {
 	rlsConfig = &engine.ResourceCfg{
 		ID: "RCFG1",
 		Filters: []*engine.RequestFilter{
@@ -302,7 +302,7 @@ func testV1RLSSetResourceConfig(t *testing.T) {
 	}
 }
 
-func testV1RLSGetResourceConfigAfterSet(t *testing.T) {
+func testV1RsGetResourceConfigAfterSet(t *testing.T) {
 	var reply *engine.ResourceCfg
 	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
@@ -311,7 +311,7 @@ func testV1RLSGetResourceConfigAfterSet(t *testing.T) {
 	}
 }
 
-func testV1RLSUpdateResourceConfig(t *testing.T) {
+func testV1RsUpdateResourceConfig(t *testing.T) {
 	var result string
 	rlsConfig.Filters = []*engine.RequestFilter{
 		&engine.RequestFilter{
@@ -332,7 +332,7 @@ func testV1RLSUpdateResourceConfig(t *testing.T) {
 	}
 }
 
-func testV1RLSGetResourceConfigAfterUpdate(t *testing.T) {
+func testV1RsGetResourceConfigAfterUpdate(t *testing.T) {
 	var reply *engine.ResourceCfg
 	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
@@ -341,7 +341,7 @@ func testV1RLSGetResourceConfigAfterUpdate(t *testing.T) {
 	}
 }
 
-func testV1RLSRemResourceCOnfig(t *testing.T) {
+func testV1RsRemResourceCOnfig(t *testing.T) {
 	var resp string
 	if err := rlsV1Rpc.Call("ApierV1.RemResourceConfig", &AttrGetResCfg{ID: rlsConfig.ID}, &resp); err != nil {
 		t.Error(err)
@@ -350,14 +350,14 @@ func testV1RLSRemResourceCOnfig(t *testing.T) {
 	}
 }
 
-func testV1RLSGetResourceConfigAfterDelete(t *testing.T) {
+func testV1RsGetResourceConfigAfterDelete(t *testing.T) {
 	var reply *string
 	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &AttrGetResCfg{ID: "RCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testV1RLSStopEngine(t *testing.T) {
+func testV1RsStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

@@ -80,7 +80,7 @@ type DataDB interface {
 	RemAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
-	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) error
+	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error

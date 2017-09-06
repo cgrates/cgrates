@@ -1,4 +1,4 @@
-/* 
+/*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
@@ -140,11 +140,12 @@ func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 	return
 }
 
-func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs []string) (err error) {
+func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
 		utils.ResourceConfigsPrefix:  rlIDs,
+		utils.ResourcesPrefix:        resIDs,
 	} {
 		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -231,7 +232,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceConfigsPrefix,
-		utils.TimingsPrefix}, prfx) {
+		utils.TimingsPrefix,
+		utils.ResourcesPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -298,6 +300,8 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetResourceCfg(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
+		case utils.ResourcesPrefix:
+			_, err = rs.GetResource(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -324,7 +328,7 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
-	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ResourcesPrefix:
 		i, err := rs.Cmd("EXISTS", category+subject).Int()
 		return i == 1, err
 	}
@@ -1375,8 +1379,7 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 // 	return
 // }
 
-func (rs *RedisStorage) GetResourceCfg(id string,
-	skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
+func (rs *RedisStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
 	key := utils.ResourceConfigsPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
@@ -1424,14 +1427,44 @@ func (rs *RedisStorage) RemoveResourceCfg(id string, transactionID string) (err 
 }
 
 func (rs *RedisStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
+	key := utils.ResourcesPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Resource), nil
+		}
+	}
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err == redis.ErrRespNil { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &r); err != nil {
+		return
+	}
+	cache.Set(key, r, cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (rs *RedisStorage) SetResource(r *Resource) (err error) {
-	return
+	result, err := rs.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	return rs.Cmd("SET", utils.ResourcesPrefix+r.ID, result).Err
 }
 
 func (rs *RedisStorage) RemoveResource(id string, transactionID string) (err error) {
+	key := utils.ResourcesPrefix + id
+	if err = rs.Cmd("DEL", key).Err; err != nil {
+		return
+	}
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
