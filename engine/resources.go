@@ -37,8 +37,8 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-// ResourceCfg represents the user configuration for the resource
-type ResourceCfg struct {
+// ResourceProfile represents the user configuration for the resource
+type ResourceProfile struct {
 	ID                 string                    // identifier of this resource
 	Filters            []*RequestFilter          // filters for the request
 	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
@@ -68,10 +68,10 @@ func (ru *ResourceUsage) isActive(atTime time.Time) bool {
 type Resource struct {
 	ID     string
 	Usages map[string]*ResourceUsage
-	TTLIdx []string     // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
-	tUsage *float64     // sum of all usages
-	dirty  *bool        // the usages were modified, needs save, *bool so we only save if enabled in config
-	rCfg   *ResourceCfg // for ordering purposes
+	TTLIdx []string         // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+	tUsage *float64         // sum of all usages
+	dirty  *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
+	rPrf   *ResourceProfile // for ordering purposes
 }
 
 // removeExpiredUnits removes units which are expired from the resource
@@ -147,7 +147,7 @@ type Resources []*Resource
 
 // sort based on Weight
 func (rs Resources) Sort() {
-	sort.Slice(rs, func(i, j int) bool { return rs[i].rCfg.Weight > rs[j].rCfg.Weight })
+	sort.Slice(rs, func(i, j int) bool { return rs[i].rPrf.Weight > rs[j].rPrf.Weight })
 }
 
 // recordUsage will record the usage in all the resource limits, failing back on errors
@@ -200,12 +200,12 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	// Simulate resource usage
 	for _, r := range rs {
-		if r.rCfg.Limit >= r.totalUsage()+ru.Units {
+		if r.rPrf.Limit >= r.totalUsage()+ru.Units {
 			if alcMessage == "" {
-				alcMessage = r.rCfg.AllocationMessage
+				alcMessage = r.rPrf.AllocationMessage
 			}
 			if alcMessage == "" { // rl.AllocationMessage is not populated
-				alcMessage = r.rCfg.ID
+				alcMessage = r.rPrf.ID
 			}
 		}
 	}
@@ -370,27 +370,27 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourcesIndex)
+	rIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourceProfilesIndex)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourcesPrefix)
+	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourceProfilesIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
-		rCfg, err := rS.dataDB.GetResourceCfg(resName, false, utils.NonTransactional)
+		rPrf, err := rS.dataDB.GetResourceProfile(resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if rCfg.ActivationInterval != nil &&
-			!rCfg.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+		if rPrf.ActivationInterval != nil &&
+			!rPrf.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
 		passAllFilters := true
-		for _, fltr := range rCfg.Filters {
+		for _, fltr := range rPrf.Filters {
 			if pass, err := fltr.Pass(ev, "", rS.statS); err != nil {
 				return nil, err
 			} else if !pass {
@@ -401,15 +401,15 @@ func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) 
 		if !passAllFilters {
 			continue
 		}
-		r, err := rS.dataDB.GetResource(rCfg.ID, false, "")
+		r, err := rS.dataDB.GetResource(rPrf.ID, false, "")
 		if err != nil {
 			return nil, err
 		}
-		if rCfg.Stored {
+		if rPrf.Stored {
 			r.dirty = utils.BoolPointer(false)
 		}
-		r.rCfg = rCfg
-		matchingResources[rCfg.ID] = r // Cannot save it here since we could have errors after and resource will remain unused
+		r.rPrf = rPrf
+		matchingResources[rPrf.ID] = r // Cannot save it here since we could have errors after and resource will remain unused
 	}
 	// All good, convert from Map to Slice so we can sort
 	rs = make(Resources, len(matchingResources))
@@ -420,7 +420,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) 
 	}
 	rs.Sort()
 	for i, r := range rs {
-		if r.rCfg.Blocker { // blocker will stop processing
+		if r.rPrf.Blocker { // blocker will stop processing
 			rs = rs[:i+1]
 			break
 		}
@@ -429,7 +429,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) 
 }
 
 // V1ResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{}, reply *[]*ResourceCfg) error {
+func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{}, reply *[]*ResourceProfile) error {
 	matchingRLForEv, err := rS.matchingResourcesForEvent(ev)
 	if err != nil {
 		return err
@@ -438,7 +438,7 @@ func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{}, reply 
 		return utils.ErrNotFound
 	}
 	for _, r := range matchingRLForEv {
-		*reply = append(*reply, r.rCfg)
+		*reply = append(*reply, r.rPrf)
 	}
 	return nil
 }

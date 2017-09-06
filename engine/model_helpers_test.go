@@ -808,7 +808,7 @@ func TestAPItoResource(t *testing.T) {
 		Weight:             10,
 		Limit:              "2",
 	}
-	eRL := &ResourceCfg{
+	eRL := &ResourceProfile{
 		ID:      tpRL.ID,
 		Stored:  tpRL.Stored,
 		Blocker: tpRL.Blocker,

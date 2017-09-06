@@ -35,7 +35,8 @@
 	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
 	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
 	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
-	"resource_configs": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
 },
 
 
@@ -71,7 +72,7 @@
 
 "cdre": {
 	"TestTutITExportCDR": {
-		"content_fields": [	
+		"content_fields": [
 			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
 			{"tag": "RunID", "type": "*composed", "value": "RunID"},
 			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},

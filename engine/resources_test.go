@@ -45,7 +45,7 @@ func TestRSRecordUsage(t *testing.T) {
 
 	r1 = &Resource{
 		ID: "RL1",
-		rCfg: &ResourceCfg{
+		rPrf: &ResourceProfile{
 			ID: "RL1",
 			Filters: []*RequestFilter{
 				&RequestFilter{
@@ -125,7 +125,7 @@ func TestRSUsedUnits(t *testing.T) {
 func TestRSRsort(t *testing.T) {
 	r2 = &Resource{
 		ID: "RL2",
-		rCfg: &ResourceCfg{
+		rPrf: &ResourceProfile{
 			ID: "RL2",
 			Filters: []*RequestFilter{
 				&RequestFilter{
@@ -159,7 +159,7 @@ func TestRSRsort(t *testing.T) {
 	rs = Resources{r2, r1}
 	rs.Sort()
 
-	if rs[0].rCfg.ID != "RL1" {
+	if rs[0].rPrf.ID != "RL1" {
 		t.Error("Sort failed")
 	}
 }
@@ -199,8 +199,8 @@ func TestRSAllocateResource(t *testing.T) {
 	rs.clearUsage(ru1.ID)
 	rs.clearUsage(ru2.ID)
 
-	rs[0].rCfg.UsageTTL = time.Duration(20 * time.Second)
-	rs[1].rCfg.UsageTTL = time.Duration(20 * time.Second)
+	rs[0].rPrf.UsageTTL = time.Duration(20 * time.Second)
+	rs[1].rPrf.UsageTTL = time.Duration(20 * time.Second)
 	//ru1.ExpiryTime = time.Now()
 	//ru2.Time = time.Now()
 
@@ -216,8 +216,8 @@ func TestRSAllocateResource(t *testing.T) {
 		t.Error("Did not receive " + utils.ErrResourceUnavailable.Error() + " error")
 	}
 
-	rs[0].rCfg.Limit = 2
-	rs[1].rCfg.Limit = 4
+	rs[0].rPrf.Limit = 2
+	rs[1].rPrf.Limit = 4
 
 	if alcMessage, err := rs.AllocateResource(ru1, true); err != nil {
 		t.Error(err.Error())

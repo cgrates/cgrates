@@ -104,7 +104,7 @@ func TestTutITCacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 9,
 		Actions: 8, ActionPlans: 4, AccountActionPlans: 5, SharedGroups: 1, DerivedChargers: 1, LcrProfiles: 5,
-		CdrStats: 6, Users: 3, Aliases: 1, ReverseAliases: 2, ResourcesConfig: 0, Resources: 3}
+		CdrStats: 6, Users: 3, Aliases: 1, ReverseAliases: 2, ResourceProfiles: 3, Resources: 0}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())

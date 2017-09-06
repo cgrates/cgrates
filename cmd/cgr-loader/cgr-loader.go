@@ -31,7 +31,6 @@ import (
 )
 
 var (
-
 	datadb_type = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <redis>")
 	datadb_host = flag.String("datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
 	datadb_port = flag.String("datadb_port", config.CgrConfig().DataDbPort, "The DataDb port to bind to.")
@@ -225,7 +224,7 @@ func main() {
 	if len(*historyServer) != 0 && *verbose {
 		log.Print("Wrote history.")
 	}
-	var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rlIDs, aatIDs, ralsIDs []string
+	var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs []string
 	if rater != nil {
 		dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
 		revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
@@ -237,7 +236,8 @@ func main() {
 		alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
 		lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
 		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
-		rlIDs, _ = tpReader.GetLoadedIds(utils.ResourceConfigsPrefix)
+		rspIDs, _ = tpReader.GetLoadedIds(utils.ResourceProfilesPrefix)
+		resIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
 		aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
 		ralsIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_ALIASES_PREFIX)
 	}
@@ -275,7 +275,8 @@ func main() {
 			DerivedChargerIDs:     &dcsIds,
 			AliasIDs:              &alsIds,
 			ReverseAliasIDs:       &ralsIDs,
-			ResourceIDs:           &rlIDs},
+			ResourceProfileIDs:    &rspIDs,
+			ResourceIDs:           &resIDs},
 			FlushAll: *flush,
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
