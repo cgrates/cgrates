@@ -265,7 +265,7 @@ cgrates.org,mas,true,another,value,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Subject,remo,minu,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
-	resLimits = `
+	resProfiles = `
 #Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],TTL[5],Limit[6],AllocationMessage[7],Weight[8],Thresholds[9]
 ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
 ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
@@ -286,7 +286,7 @@ var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(dataStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds), testTPID, "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resProfiles, stats, thresholds), testTPID, "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -335,8 +335,8 @@ func init() {
 	if err := csvr.LoadAliases(); err != nil {
 		log.Print("error in LoadAliases:", err)
 	}
-	if err := csvr.LoadResources(); err != nil {
-		log.Print("error in LoadResources:", err)
+	if err := csvr.LoadResourceProfiles(); err != nil {
+		log.Print("error in LoadResourceProfiles:", err)
 
 	}
 	if err := csvr.LoadStats(); err != nil {
@@ -1388,8 +1388,8 @@ func TestLoadReverseAliases(t *testing.T) {
 	}
 }
 
-func TestLoadResources(t *testing.T) {
-	eResLimits := map[string]*utils.TPResource{
+func TestLoadResourceProfiles(t *testing.T) {
+	eResProfiles := map[string]*utils.TPResource{
 		"ResGroup21": &utils.TPResource{
 			TPid: testTPID,
 			ID:   "ResGroup21",
@@ -1423,10 +1423,10 @@ func TestLoadResources(t *testing.T) {
 			Limit:             "2",
 		},
 	}
-	if len(csvr.resLimits) != len(eResLimits) {
-		t.Error("Failed to load resourcelimits: ", len(csvr.resLimits))
-	} else if !reflect.DeepEqual(eResLimits["ResGroup22"], csvr.resLimits["ResGroup22"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eResLimits["ResGroup22"], csvr.resLimits["ResGroup22"])
+	if len(csvr.resProfiles) != len(eResProfiles) {
+		t.Error("Failed to load resourceProfiles: ", len(csvr.resProfiles))
+	} else if !reflect.DeepEqual(eResProfiles["ResGroup22"], csvr.resProfiles["ResGroup22"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eResProfiles["ResGroup22"], csvr.resProfiles["ResGroup22"])
 	}
 
 }

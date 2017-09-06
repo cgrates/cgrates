@@ -667,7 +667,7 @@ type ArgsCache struct {
 	DerivedChargerIDs     *[]string
 	AliasIDs              *[]string
 	ReverseAliasIDs       *[]string
-	ResourceConfigIDs     *[]string
+	ResourceProfileIDs    *[]string
 	ResourceIDs           *[]string
 	StatsIDs              *[]string
 	ThresholdsIDs         *[]string
@@ -705,7 +705,7 @@ type CacheStats struct {
 	Users               int
 	Aliases             int
 	ReverseAliases      int
-	ResourceConfigs     int
+	ResourceProfiles    int
 	Resources           int
 	//Stats               int
 	//thresholds		  int

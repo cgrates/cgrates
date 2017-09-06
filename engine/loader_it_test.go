@@ -151,8 +151,8 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadAliases(); err != nil {
 		t.Error("Failed loading aliases: ", err.Error())
 	}
-	if err = loader.LoadResources(); err != nil {
-		t.Error("Failed loading resource limits: ", err.Error())
+	if err = loader.LoadResourceProfiles(); err != nil {
+		t.Error("Failed loading resource profiles: ", err.Error())
 	}
 	if err = loader.LoadStats(); err != nil {
 		t.Error("Failed loading stats: ", err.Error())
@@ -309,10 +309,10 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for k, rl := range loader.resLimits {
-		rcv, err := loader.dataStorage.GetResourceCfg(k, true, utils.NonTransactional)
+	for k, rl := range loader.resProfiles {
+		rcv, err := loader.dataStorage.GetResourceProfile(k, true, utils.NonTransactional)
 		if err != nil {
-			t.Error("Failed GetResourceLimit: ", err.Error())
+			t.Error("Failed GetResourceProfile: ", err.Error())
 		}
 		rlT, err := APItoResource(rl, "UTC")
 		if err != nil {

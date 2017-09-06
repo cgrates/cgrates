@@ -61,7 +61,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheAlias,
 	testOnStorITCacheReverseAlias,
 	testOnStorITCacheResource,
-	testOnStorITCacheResourceCfg,
+	testOnStorITCacheResourceProfile,
 	testOnStorITCacheTiming,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
@@ -85,7 +85,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDAlias,
 	testOnStorITCRUDReverseAlias,
 	testOnStorITCRUDResource,
-	testOnStorITCRUDResourceCfg,
+	testOnStorITCRUDResourceProfile,
 	testOnStorITCRUDTiming,
 	testOnStorITCRUDHistory,
 	testOnStorITCRUDStructVersion,
@@ -196,7 +196,7 @@ func testOnStorITSetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.SetReqFilterIndexes(utils.ResourcesIndex, idxes); err != nil {
+	if err := onStor.SetReqFilterIndexes(utils.ResourceProfilesIndex, idxes); err != nil {
 		t.Error(err)
 	}
 }
@@ -227,7 +227,7 @@ func testOnStorITGetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if idxes, err := onStor.GetReqFilterIndexes(utils.ResourcesIndex); err != nil {
+	if idxes, err := onStor.GetReqFilterIndexes(utils.ResourceProfilesIndex); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, idxes) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
@@ -242,12 +242,12 @@ func testOnStorITMatchReqFilterIndex(t *testing.T) {
 		"RL1": true,
 		"RL2": true,
 	}
-	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourcesIndex, "Account", "1002"); err != nil {
+	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesIndex, "Account", "1002"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
-	if _, err := onStor.MatchReqFilterIndex(utils.ResourcesIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -780,8 +780,8 @@ func testOnStorITCacheReverseAlias(t *testing.T) {
 	}
 }
 
-func testOnStorITCacheResourceCfg(t *testing.T) {
-	rCfg := &ResourceCfg{
+func testOnStorITCacheResourceProfile(t *testing.T) {
+	rCfg := &ResourceProfile{
 		ID:     "RL_TEST",
 		Weight: 10,
 		Filters: []*RequestFilter{
@@ -796,24 +796,24 @@ func testOnStorITCacheResourceCfg(t *testing.T) {
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if err := onStor.SetResourceCfg(rCfg, utils.NonTransactional); err != nil {
+	if err := onStor.SetResourceProfile(rCfg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	expectedR := []string{"rcf_RL_TEST"}
-	if itm, err := onStor.GetKeysForPrefix(utils.ResourceConfigsPrefix); err != nil {
+	expectedR := []string{"rsp_RL_TEST"}
+	if itm, err := onStor.GetKeysForPrefix(utils.ResourceProfilesPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedR, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
 	}
-	if _, hasIt := cache.Get(utils.ResourceConfigsPrefix + rCfg.ID); hasIt {
+	if _, hasIt := cache.Get(utils.ResourceProfilesPrefix + rCfg.ID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.ResourceConfigsPrefix, []string{rCfg.ID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ResourceProfilesPrefix, []string{rCfg.ID}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.ResourceConfigsPrefix + rCfg.ID); !hasIt {
+	if itm, hasIt := cache.Get(utils.ResourceProfilesPrefix + rCfg.ID); !hasIt {
 		t.Error("Did not cache")
-	} else if rcv := itm.(*ResourceCfg); !reflect.DeepEqual(rCfg, rcv) {
+	} else if rcv := itm.(*ResourceProfile); !reflect.DeepEqual(rCfg, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", rCfg, rcv)
 	}
 }
@@ -1782,8 +1782,8 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 	// }
 }
 
-func testOnStorITCRUDResourceCfg(t *testing.T) {
-	rL := &ResourceCfg{
+func testOnStorITCRUDResourceProfile(t *testing.T) {
+	rL := &ResourceProfile{
 		ID:     "RL_TEST2",
 		Weight: 10,
 		Filters: []*RequestFilter{
@@ -1798,13 +1798,13 @@ func testOnStorITCRUDResourceCfg(t *testing.T) {
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if _, rcvErr := onStor.GetResourceCfg(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResourceProfile(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetResourceCfg(rL, utils.NonTransactional); err != nil {
+	if err := onStor.SetResourceProfile(rL, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetResourceCfg(rL.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResourceProfile(rL.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
@@ -1817,7 +1817,7 @@ func testOnStorITCRUDResourceCfg(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.GetResourceCfg(rL.ID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResourceProfile(rL.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
@@ -1825,10 +1825,46 @@ func testOnStorITCRUDResourceCfg(t *testing.T) {
 	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err := onStor.RemoveResourceCfg(rL.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResourceProfile(rL.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetResourceCfg(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResourceProfile(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDResource(t *testing.T) {
+	res := &Resource{
+		ID: "RL1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": &ResourceUsage{
+				ID:         "RU1",
+				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+				Units:      2,
+			},
+		},
+		TTLIdx: []string{"RU1"},
+	}
+	if _, rcvErr := onStor.GetResource("RL1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetResource(res); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetResource("RL1", true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(res, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", res, rcv)
+	}
+	if rcv, err := onStor.GetResource("RL1", false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(res, rcv) {
+		t.Errorf("Expecting: %v, received: %v", res, rcv)
+	}
+	if err := onStor.RemoveResource(res.ID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetResource(res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
@@ -1891,63 +1927,27 @@ func testOnStorITCRUDHistory(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDResource(t *testing.T) {
-	res := &Resource{
-		ID: "RL1",
-		Usages: map[string]*ResourceUsage{
-			"RU1": &ResourceUsage{
-				ID:         "RU1",
-				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-				Units:      2,
-			},
-		},
-		TTLIdx: []string{"RU1"},
-	}
-	if _, rcvErr := onStor.GetResource("RL1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.SetResource(res); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := onStor.GetResource("RL1", true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(res, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", res, rcv)
-	}
-	if rcv, err := onStor.GetResource("RL1", false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(res, rcv) {
-		t.Errorf("Expecting: %v, received: %v", res, rcv)
-	}
-	if err := onStor.RemoveResource(res.ID, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	if _, rcvErr := onStor.GetResource(res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-}
-
 func testOnStorITCRUDStructVersion(t *testing.T) {
 	cv := &StructVersion{
-		Destinations:    "1",
-		RatingPlans:     "1",
-		RatingProfiles:  "1",
-		Lcrs:            "1",
-		DerivedChargers: "1",
-		Actions:         "1",
-		ActionPlans:     "1",
-		ActionTriggers:  "1",
-		SharedGroups:    "1",
-		Accounts:        "1",
-		CdrStats:        "1",
-		Users:           "1",
-		Alias:           "1",
-		PubSubs:         "1",
-		LoadHistory:     "1",
-		Cdrs:            "1",
-		SMCosts:         "1",
-		ResourceConfigs: "1",
-		Timings:         "1",
+		Destinations:     "1",
+		RatingPlans:      "1",
+		RatingProfiles:   "1",
+		Lcrs:             "1",
+		DerivedChargers:  "1",
+		Actions:          "1",
+		ActionPlans:      "1",
+		ActionTriggers:   "1",
+		SharedGroups:     "1",
+		Accounts:         "1",
+		CdrStats:         "1",
+		Users:            "1",
+		Alias:            "1",
+		PubSubs:          "1",
+		LoadHistory:      "1",
+		Cdrs:             "1",
+		SMCosts:          "1",
+		ResourceProfiles: "1",
+		Timings:          "1",
 	}
 	if _, rcvErr := onStor.GetStructVersion(); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

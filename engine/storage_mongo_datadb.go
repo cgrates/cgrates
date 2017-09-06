@@ -56,7 +56,7 @@ const (
 	colCrs   = "cdr_stats"
 	colLht   = "load_history"
 	colVer   = "versions"
-	colRCfg  = "resource_configs"
+	colRsP   = "resource_profiles"
 	colSts   = "stats"
 	colRFI   = "request_filter_indexes"
 	colTmg   = "timings"
@@ -150,7 +150,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 	}
 	var colectNames []string // collection names containing this index
 	if ms.storageType == utils.DataDB {
-		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRCfgs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht, colRes}
+		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRsP, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht, colRes}
 	}
 	for _, col := range colectNames {
 		if err = db.C(col).EnsureIndex(idx); err != nil {
@@ -324,7 +324,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.CDR_STATS_PREFIX:           colCrs,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
-		utils.ResourceConfigsPrefix:      colRCfg,
+		utils.ResourceProfilesPrefix:     colRsP,
 		utils.StatsPrefix:                colSts,
 		utils.TimingsPrefix:              colTmg,
 		utils.ResourcesPrefix:            colRes,
@@ -438,11 +438,11 @@ func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 	return
 }
 
-func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
+func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourceConfigsPrefix:  rlIDs,
+		utils.ResourceProfilesPrefix: rpIDs,
 		utils.ResourcesPrefix:        resIDs,
 	} {
 		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
@@ -469,7 +469,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceConfigsPrefix,
+		utils.ResourceProfilesPrefix,
 		utils.TimingsPrefix,
 		utils.ResourcesPrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
@@ -534,12 +534,12 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourceConfigsPrefix:
-			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
-		case utils.TimingsPrefix:
-			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
+		case utils.ResourceProfilesPrefix:
+			_, err = ms.GetResourceProfile(dataID, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			_, err = ms.GetResource(dataID, true, utils.NonTransactional)
+		case utils.TimingsPrefix:
+			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -630,10 +630,15 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&keyResult) {
 			result = append(result, utils.REVERSE_ALIASES_PREFIX+keyResult.Key)
 		}
-	case utils.ResourceConfigsPrefix:
-		iter := db.C(colRCfg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+	case utils.ResourceProfilesPrefix:
+		iter := db.C(colRsP).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.ResourceConfigsPrefix+idResult.Id)
+			result = append(result, utils.ResourceProfilesPrefix+idResult.Id)
+		}
+	case utils.ResourcesPrefix:
+		iter := db.C(colRes).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.ResourcesPrefix+idResult.Id)
 		}
 	case utils.StatsPrefix:
 		iter := db.C(colSts).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
@@ -654,11 +659,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		iter := db.C(colTmg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.TimingsPrefix+idResult.Id)
-		}
-	case utils.ResourcesPrefix:
-		iter := db.C(colRes).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
-		for iter.Next(&idResult) {
-			result = append(result, utils.ResourcesPrefix+idResult.Id)
 		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -1857,49 +1857,49 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
-	key := utils.ResourceConfigsPrefix + id
+func (ms *MongoStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
+	key := utils.ResourceProfilesPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ResourceCfg), nil
+			return x.(*ResourceProfile), nil
 		}
 	}
-	session, col := ms.conn(colRCfg)
+	session, col := ms.conn(colRsP)
 	defer session.Close()
-	rl = new(ResourceCfg)
-	if err = col.Find(bson.M{"id": id}).One(rl); err != nil {
+	rp = new(ResourceProfile)
+	if err = col.Find(bson.M{"id": id}).One(rp); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	for _, fltr := range rl.Filters {
+	for _, fltr := range rp.Filters {
 		if err = fltr.CompileValues(); err != nil {
 			return
 		}
 	}
-	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
+	cache.Set(key, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetResourceCfg(rl *ResourceCfg, transactionID string) (err error) {
-	session, col := ms.conn(colRCfg)
+func (ms *MongoStorage) SetResourceProfile(rp *ResourceProfile, transactionID string) (err error) {
+	session, col := ms.conn(colRsP)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"id": rl.ID}, rl)
+	_, err = col.Upsert(bson.M{"id": rp.ID}, rp)
 	return
 }
 
-func (ms *MongoStorage) RemoveResourceCfg(id string, transactionID string) (err error) {
-	session, col := ms.conn(colRCfg)
+func (ms *MongoStorage) RemoveResourceProfile(id string, transactionID string) (err error) {
+	session, col := ms.conn(colRsP)
 	defer session.Close()
 	if err = col.Remove(bson.M{"id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ResourceConfigsPrefix+id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ResourceProfilesPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil
 }
 

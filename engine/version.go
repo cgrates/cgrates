@@ -56,48 +56,48 @@ func CheckVersion(dataDB DataDB) error {
 
 var (
 	CurrentVersion = &StructVersion{
-		Destinations:    "1",
-		RatingPlans:     "1",
-		RatingProfiles:  "1",
-		Lcrs:            "1",
-		DerivedChargers: "1",
-		Actions:         "1",
-		ActionPlans:     "1",
-		ActionTriggers:  "1",
-		SharedGroups:    "1",
-		Accounts:        "1",
-		CdrStats:        "1",
-		Users:           "1",
-		Alias:           "1",
-		PubSubs:         "1",
-		LoadHistory:     "1",
-		Cdrs:            "1",
-		SMCosts:         "1",
-		ResourceConfigs: "1",
-		Timings:         "1",
+		Destinations:     "1",
+		RatingPlans:      "1",
+		RatingProfiles:   "1",
+		Lcrs:             "1",
+		DerivedChargers:  "1",
+		Actions:          "1",
+		ActionPlans:      "1",
+		ActionTriggers:   "1",
+		SharedGroups:     "1",
+		Accounts:         "1",
+		CdrStats:         "1",
+		Users:            "1",
+		Alias:            "1",
+		PubSubs:          "1",
+		LoadHistory:      "1",
+		Cdrs:             "1",
+		SMCosts:          "1",
+		ResourceProfiles: "1",
+		Timings:          "1",
 	}
 )
 
 type StructVersion struct {
-	Destinations    string
-	RatingPlans     string
-	RatingProfiles  string
-	Lcrs            string
-	DerivedChargers string
-	Actions         string
-	ActionPlans     string
-	ActionTriggers  string
-	SharedGroups    string
-	Accounts        string
-	CdrStats        string
-	Users           string
-	Alias           string
-	PubSubs         string
-	LoadHistory     string
-	Cdrs            string
-	SMCosts         string
-	ResourceConfigs string
-	Timings         string
+	Destinations     string
+	RatingPlans      string
+	RatingProfiles   string
+	Lcrs             string
+	DerivedChargers  string
+	Actions          string
+	ActionPlans      string
+	ActionTriggers   string
+	SharedGroups     string
+	Accounts         string
+	CdrStats         string
+	Users            string
+	Alias            string
+	PubSubs          string
+	LoadHistory      string
+	Cdrs             string
+	SMCosts          string
+	ResourceProfiles string
+	Timings          string
 }
 
 type MigrationInfo struct {
@@ -228,11 +228,11 @@ func (sv *StructVersion) CompareAndMigrate(dbVer *StructVersion) []*MigrationInf
 			CurrentVersion: CurrentVersion.SMCosts,
 		})
 	}
-	if sv.ResourceConfigs != dbVer.ResourceConfigs {
+	if sv.ResourceProfiles != dbVer.ResourceProfiles {
 		migrationInfoList = append(migrationInfoList, &MigrationInfo{
-			Prefix:         utils.ResourceConfigsPrefix,
-			DbVersion:      dbVer.ResourceConfigs,
-			CurrentVersion: CurrentVersion.ResourceConfigs,
+			Prefix:         utils.ResourceProfilesPrefix,
+			DbVersion:      dbVer.ResourceProfiles,
+			CurrentVersion: CurrentVersion.ResourceProfiles,
 		})
 	}
 	return migrationInfoList

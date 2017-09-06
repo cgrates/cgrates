@@ -52,7 +52,7 @@ type TpReader struct {
 	cdrStats         map[string]*CdrStats
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
-	resLimits        map[string]*utils.TPResource
+	resProfiles      map[string]*utils.TPResource
 	stats            map[string]*utils.TPStats
 	thresholds       map[string]*utils.TPThreshold
 
@@ -126,7 +126,7 @@ func (tpr *TpReader) Init() {
 	tpr.users = make(map[string]*UserProfile)
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
-	tpr.resLimits = make(map[string]*utils.TPResource)
+	tpr.resProfiles = make(map[string]*utils.TPResource)
 	tpr.stats = make(map[string]*utils.TPStats)
 	tpr.thresholds = make(map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
@@ -1591,21 +1591,21 @@ func (tpr *TpReader) LoadAliases() error {
 	return err
 }
 
-func (tpr *TpReader) LoadResourcesFiltered(tag string) error {
+func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) error {
 	rls, err := tpr.lr.GetTPResources(tpr.tpid, tag)
 	if err != nil {
 		return err
 	}
-	mapRLs := make(map[string]*utils.TPResource)
+	mapRsPs := make(map[string]*utils.TPResource)
 	for _, rl := range rls {
-		mapRLs[rl.ID] = rl
+		mapRsPs[rl.ID] = rl
 	}
-	tpr.resLimits = mapRLs
+	tpr.resProfiles = mapRsPs
 	return nil
 }
 
-func (tpr *TpReader) LoadResources() error {
-	return tpr.LoadResourcesFiltered("")
+func (tpr *TpReader) LoadResourceProfiles() error {
+	return tpr.LoadResourceProfilesFiltered("")
 }
 
 func (tpr *TpReader) LoadStatsFiltered(tag string) error {
@@ -1691,7 +1691,7 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadAliases(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadResources(); err != nil && err.Error() != utils.NotFoundCaps {
+	if err = tpr.LoadResourceProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1933,18 +1933,18 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("Resources:")
+		log.Print("ResourceProfiles:")
 	}
-	for _, tpRL := range tpr.resLimits {
-		rl, err := APItoResource(tpRL, tpr.timezone)
+	for _, tpRsp := range tpr.resProfiles {
+		rsp, err := APItoResource(tpRsp, tpr.timezone)
 		if err != nil {
 			return err
 		}
-		if err = tpr.dataStorage.SetResourceCfg(rl, utils.NonTransactional); err != nil {
+		if err = tpr.dataStorage.SetResourceProfile(rsp, utils.NonTransactional); err != nil {
 			return err
 		}
 		if verbose {
-			log.Print("\t", rl.ID)
+			log.Print("\t", rsp.ID)
 		}
 	}
 	if verbose {
@@ -2013,15 +2013,15 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
-		if len(tpr.resLimits) > 0 {
+		if len(tpr.resProfiles) > 0 {
 			if verbose {
-				log.Print("Indexing resource limits")
+				log.Print("Indexing resource profiles")
 			}
-			rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourcesIndex)
+			rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourceProfilesIndex)
 			if err != nil {
 				return err
 			}
-			for _, tpRL := range tpr.resLimits {
+			for _, tpRL := range tpr.resProfiles {
 				if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
 					return err
 				} else {
@@ -2029,7 +2029,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 			if verbose {
-				log.Printf("Indexed ResourceLimit keys: %+v", rlIdxr.ChangedKeys().Slice())
+				log.Printf("Indexed ResourceProfile keys: %+v", rlIdxr.ChangedKeys().Slice())
 			}
 			if err := rlIdxr.StoreIndexes(); err != nil {
 				return err
@@ -2141,7 +2141,7 @@ func (tpr *TpReader) ShowStatistics() {
 	// cdr stats
 	log.Print("CDR stats: ", len(tpr.cdrStats))
 	// resource limits
-	log.Print("ResourceLimits: ", len(tpr.resLimits))
+	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
 	// stats
 	log.Print("Stats: ", len(tpr.stats))
 }
@@ -2253,10 +2253,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ResourceConfigsPrefix:
-		keys := make([]string, len(tpr.resLimits))
+	case utils.ResourceProfilesPrefix:
+		keys := make([]string, len(tpr.resProfiles))
 		i := 0
-		for k := range tpr.resLimits {
+		for k := range tpr.resProfiles {
 			keys[i] = k
 			i++
 		}

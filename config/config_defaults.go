@@ -64,7 +64,8 @@ const CGRATES_CFG_JSON = `
 	"aliases": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control aliases caching
 	"reverse_aliases": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control reverse aliases index caching
 	"derived_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control derived charging rule caching
-	"resource_configs": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource configs caching
+	"resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
+	"resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resources caching
 	"timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control timings caching
 },
 
@@ -408,7 +409,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,												// starts ResourceLimiter service: <true|false>.
 	"stats_conns": [],												// address where to reach the stats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"store_interval": "",											// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
-	"short_cache": {"limit": -1, "ttl": "1m", "static_ttl": false},	// short cache for data like resources for events in case of allow queries 
+	"short_cache": {"limit": -1, "ttl": "1m", "static_ttl": false},	// short cache for data like resources for events in case of allow queries
 },
 
 
