@@ -689,6 +689,9 @@ func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
 	case utils.ACCOUNT_PREFIX:
 		count, err := db.C(colAcc).Find(bson.M{"id": subject}).Count()
 		return count > 0, err
+	case utils.ResourcesPrefix:
+		count, err := db.C(colRes).Find(bson.M{"id": subject}).Count()
+		return count > 0, err
 	}
 	return false, errors.New("unsupported category in HasData")
 }

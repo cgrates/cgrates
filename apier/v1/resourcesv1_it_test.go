@@ -217,16 +217,16 @@ func testV1RsAllocateResource(t *testing.T) {
 }
 
 func testV1RsAllowUsage(t *testing.T) {
-	var reply bool
+	var allowed bool
 	attrRU := utils.AttrRLsResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		Event:   map[string]interface{}{"Account": "1002", "Subject": "1001", "Destination": "1002"},
 		Units:   1,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &allowed); err != nil {
 		t.Error(err)
-	} else if reply != true {
-		t.Errorf("Expecting: %+v, received: %+v", true, reply)
+	} else if !allowed {
+		t.Errorf("Expecting: %+v, received: %+v", true, allowed)
 	}
 
 	attrRU = utils.AttrRLsResourceUsage{
@@ -234,14 +234,15 @@ func testV1RsAllowUsage(t *testing.T) {
 		Event:   map[string]interface{}{"Account": "1002", "Subject": "1001", "Destination": "1002"},
 		Units:   2,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &allowed); err != nil { // already
 		t.Error(err)
+	} else if allowed { // already 3 usages active before allow call, we should have now more than allowed
+		t.Error("Resource allowed")
 	}
 }
 
 func testV1RsReleaseResource(t *testing.T) {
-	var reply interface{}
-
+	var reply string
 	attrRU := utils.AttrRLsResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e52",
 		Event:   map[string]interface{}{"Destination": "100"},
@@ -250,19 +251,18 @@ func testV1RsReleaseResource(t *testing.T) {
 	if err := rlsV1Rpc.Call("ResourceSV1.ReleaseResource", attrRU, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err != nil {
+	var allowed bool
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &allowed); err != nil {
 		t.Error(err)
-	} else {
-		if reply != true {
-			t.Errorf("Expecting: %+v, received: %+v", true, reply)
-		}
+	} else if !allowed {
+		t.Error("not allowed")
 	}
-
 	attrRU.Units += 7
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &reply); err == nil {
-		t.Errorf("Expecting: %+v, received: %+v", false, reply)
+	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", attrRU, &allowed); err != nil {
+		t.Error(err)
+	} else if allowed {
+		t.Error("Resource should not be allowed")
 	}
-
 }
 
 func testV1RsGetResourceConfigBeforeSet(t *testing.T) {

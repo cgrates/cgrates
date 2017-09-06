@@ -25,6 +25,7 @@ import (
 
 // matchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // helper on top of dataDB.MatchReqFilterIndex, adding utils.NOT_AVAILABLE to list of fields queried
+// executes a number of $(len(fields) + 1) queries to dataDB so the size of event influences the speed of return
 func matchingItemIDsForEvent(ev map[string]interface{}, dataDB DataDB, dbIdxKey string) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)
 	for fldName, fieldValIf := range ev {
