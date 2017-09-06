@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -1198,14 +1199,40 @@ func (ms *MongoStorage) SetTPThreshold(tpTHs []*utils.TPThreshold) (err error) {
 	return
 }
 
+
 func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
+session, col := ms.conn(colVer)
+	defer session.Close()
+	if err = col.Find(bson.M{"key":colVer}).One(vrs); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
 	return
 }
 
 func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+	session, col := ms.conn(colVer)
+	defer session.Close()
+	if overwrite {
+if err=ms.RemoveVersions(vrs);err!=nil{
+		return err
+		}
+	}
+	_, err = col.Upsert(bson.M{"key":colVer },vrs)
 	return
 }
 
 func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
+	session, col := ms.conn(colVer)
+	defer session.Close()
+	for key,_:=range vrs{
+	if err = col.Remove(bson.M{"id": key}); err != nil {
+		return
+	}
+	return nil
+}
+
 	return
 }

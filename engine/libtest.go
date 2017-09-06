@@ -41,7 +41,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 		return err
 	}
 	dataDB.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	CheckVersion(dataDB) // Write version before starting
+	CheckVersions(dataDB) // Write version before starting
 	return nil
 }
 

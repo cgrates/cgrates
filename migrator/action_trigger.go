@@ -59,12 +59,12 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 		}
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
+	vrs := engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
 	if err = m.dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+			fmt.Sprintf("error: <%s> when updating ActionTriggers version into DataDB", err.Error()))
 	}
 	return
 

@@ -70,12 +70,12 @@ func (m *Migrator) migrateActionPlans() (err error) {
 		}
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.ACTION_PLAN_PREFIX]}
+	vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
 	if err = m.dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+			fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
 	}
 	return
 }

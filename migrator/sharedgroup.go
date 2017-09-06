@@ -48,12 +48,12 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 		}
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+	vrs := engine.Versions{utils.SharedGroups: engine.CurrentStorDBVersions()[utils.SharedGroups]}
 	if err = m.dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+			fmt.Sprintf("error: <%s> when updating SharedGroups version into dataDB", err.Error()))
 	}
 	return
 }

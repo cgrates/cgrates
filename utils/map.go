@@ -17,7 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package utils
 
-import "strings"
+import (
+		"strings"
+		"strconv"
+)
 
 // Converts map[string]string into map[string]interface{}
 func ConvertMapValStrIf(inMap map[string]string) map[string]interface{} {
@@ -190,7 +193,6 @@ func MapKeysReplace(m map[string]struct{}, old, new string) map[string]struct{} 
 	return m
 }
 */
-
 // Used to merge multiple maps (eg: output of struct having ExtraFields)
 func MergeMapsStringIface(mps ...map[string]interface{}) (outMp map[string]interface{}) {
 	outMp = make(map[string]interface{})
@@ -216,4 +218,16 @@ func (fmp FieldMultiplyFactor) Clone() (cln FieldMultiplyFactor) {
 		cln[k] = v
 	}
 	return
+}
+
+func MapStringToInt64(in map[string]string) (out map[string]int64, err error){
+mapout := make(map[string]int64, len(in))
+	for key, val := range in {
+	x,err:=strconv.Atoi(val)
+		if err!=nil{
+			return nil,err
+		}
+		mapout[key] = int64(x)
+	}
+	return mapout,nil
 }
