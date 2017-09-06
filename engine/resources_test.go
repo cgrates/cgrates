@@ -18,9 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -45,7 +47,7 @@ func TestRSRecordUsage(t *testing.T) {
 
 	r1 = &Resource{
 		ID: "RL1",
-		rCfg: &ResourceCfg{
+		rPrf: &ResourceProfile{
 			ID: "RL1",
 			Filters: []*RequestFilter{
 				&RequestFilter{
@@ -125,7 +127,7 @@ func TestRSUsedUnits(t *testing.T) {
 func TestRSRsort(t *testing.T) {
 	r2 = &Resource{
 		ID: "RL2",
-		rCfg: &ResourceCfg{
+		rPrf: &ResourceProfile{
 			ID: "RL2",
 			Filters: []*RequestFilter{
 				&RequestFilter{
@@ -159,7 +161,7 @@ func TestRSRsort(t *testing.T) {
 	rs = Resources{r2, r1}
 	rs.Sort()
 
-	if rs[0].rCfg.ID != "RL1" {
+	if rs[0].rPrf.ID != "RL1" {
 		t.Error("Sort failed")
 	}
 }
@@ -199,8 +201,8 @@ func TestRSAllocateResource(t *testing.T) {
 	rs.clearUsage(ru1.ID)
 	rs.clearUsage(ru2.ID)
 
-	rs[0].rCfg.UsageTTL = time.Duration(20 * time.Second)
-	rs[1].rCfg.UsageTTL = time.Duration(20 * time.Second)
+	rs[0].rPrf.UsageTTL = time.Duration(20 * time.Second)
+	rs[1].rPrf.UsageTTL = time.Duration(20 * time.Second)
 	//ru1.ExpiryTime = time.Now()
 	//ru2.Time = time.Now()
 
@@ -216,8 +218,8 @@ func TestRSAllocateResource(t *testing.T) {
 		t.Error("Did not receive " + utils.ErrResourceUnavailable.Error() + " error")
 	}
 
-	rs[0].rCfg.Limit = 2
-	rs[1].rCfg.Limit = 4
+	rs[0].rPrf.Limit = 2
+	rs[1].rPrf.Limit = 4
 
 	if alcMessage, err := rs.AllocateResource(ru1, true); err != nil {
 		t.Error(err.Error())
@@ -238,5 +240,54 @@ func TestRSAllocateResource(t *testing.T) {
 	ru2.Units = 0
 	if _, err := rs.AllocateResource(ru2, false); err == nil {
 		t.Error("Duplicate ResourceUsage id should not be allowed")
+	}
+}
+
+// TestRSCacheSetGet assurace the presence of private params in cached resource
+func TestRSCacheSetGet(t *testing.T) {
+	r := &Resource{
+		ID: "RL",
+		rPrf: &ResourceProfile{
+			ID: "RL",
+			Filters: []*RequestFilter{
+				&RequestFilter{
+					Type:      MetaString,
+					FieldName: "Account",
+					Values:    []string{"1001", "1002"},
+				},
+				&RequestFilter{
+					Type:      MetaRSRFields,
+					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+				},
+			},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+			},
+			AllocationMessage: "ALLOC_RL",
+			Weight:            50,
+			Limit:             2,
+			Thresholds:        []string{"TEST_ACTIONS"},
+			UsageTTL:          time.Duration(1 * time.Millisecond),
+		},
+		Usages: map[string]*ResourceUsage{
+			"RU2": &ResourceUsage{
+				ID:         "RU2",
+				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+				Units:      2,
+			},
+		},
+		tUsage: utils.Float64Pointer(2),
+		dirty:  utils.BoolPointer(true),
+	}
+	key := utils.ResourcesPrefix + r.ID
+	cache.Set(key, r, true, "")
+	if x, ok := cache.Get(key); !ok {
+		t.Error("not in cache")
+	} else if x == nil {
+		t.Error("nil resource")
+	} else if !reflect.DeepEqual(r, x.(*Resource)) {
+		t.Errorf("Expecting: +v, received: %+v", r, x)
 	}
 }

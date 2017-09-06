@@ -140,11 +140,11 @@ func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 	return
 }
 
-func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
+func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.ALIASES_PREFIX:         alsIDs,
 		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourceConfigsPrefix:  rlIDs,
+		utils.ResourceProfilesPrefix: rpIDs,
 		utils.ResourcesPrefix:        resIDs,
 	} {
 		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
@@ -231,9 +231,9 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceConfigsPrefix,
-		utils.TimingsPrefix,
-		utils.ResourcesPrefix}, prfx) {
+		utils.ResourceProfilesPrefix,
+		utils.ResourcesPrefix,
+		utils.TimingsPrefix}, prfx) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -296,12 +296,12 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = rs.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = rs.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourceConfigsPrefix:
-			_, err = rs.GetResourceCfg(dataID, true, utils.NonTransactional)
-		case utils.TimingsPrefix:
-			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
+		case utils.ResourceProfilesPrefix:
+			_, err = rs.GetResourceProfile(dataID, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			_, err = rs.GetResource(dataID, true, utils.NonTransactional)
+		case utils.TimingsPrefix:
+			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.REDIS,
@@ -1357,14 +1357,35 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
-	key := utils.ResourceConfigsPrefix + id
+func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
+	var result []byte
+	result, err = rs.ms.Marshal(v)
+	if err != nil {
+		return
+	}
+	return rs.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
+}
+
+func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
+	var values []byte
+	if values, err = rs.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err != nil {
+		if err == redis.ErrRespNil { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	err = rs.ms.Unmarshal(values, &rsv)
+	return
+}
+
+func (rs *RedisStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
+	key := utils.ResourceProfilesPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ResourceCfg), nil
+			return x.(*ResourceProfile), nil
 		}
 	}
 	var values []byte
@@ -1375,28 +1396,28 @@ func (rs *RedisStorage) GetResourceCfg(id string, skipCache bool, transactionID 
 		}
 		return
 	}
-	if err = rs.ms.Unmarshal(values, &rl); err != nil {
+	if err = rs.ms.Unmarshal(values, &rsp); err != nil {
 		return
 	}
-	for _, fltr := range rl.Filters {
+	for _, fltr := range rsp.Filters {
 		if err = fltr.CompileValues(); err != nil {
 			return
 		}
 	}
-	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
+	cache.Set(key, rsp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (rs *RedisStorage) SetResourceCfg(r *ResourceCfg, transactionID string) error {
-	result, err := rs.ms.Marshal(r)
+func (rs *RedisStorage) SetResourceProfile(rsp *ResourceProfile, transactionID string) error {
+	result, err := rs.ms.Marshal(rsp)
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.ResourceConfigsPrefix+r.ID, result).Err
+	return rs.Cmd("SET", utils.ResourceProfilesPrefix+rsp.ID, result).Err
 }
 
-func (rs *RedisStorage) RemoveResourceCfg(id string, transactionID string) (err error) {
-	key := utils.ResourceConfigsPrefix + id
+func (rs *RedisStorage) RemoveResourceProfile(id string, transactionID string) (err error) {
+	key := utils.ResourceProfilesPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

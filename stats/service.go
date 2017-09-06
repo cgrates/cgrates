@@ -43,8 +43,8 @@ func NewStatService(dataDB engine.DataDB, ms engine.Marshaler, storeInterval tim
 	if err != nil {
 		return nil, err
 	}
-	ss.queuesCache = make(map[string]*StatsInstance)
-	ss.queues = make(StatsInstances, 0)
+	ss.queuesCache = make(map[string]*StatQueue)
+	ss.queues = make(StatQueues, 0)
 	for _, prfx := range sqPrfxs {
 		if q, err := ss.loadQueue(prfx[len(utils.StatsConfigPrefix):]); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
@@ -66,9 +66,9 @@ type StatService struct {
 	ms            engine.Marshaler
 	storeInterval time.Duration
 	stopStoring   chan struct{}
-	evCache       *StatsEventCache          // so we can pass it to queues
-	queuesCache   map[string]*StatsInstance // unordered db of StatsQueues, used for fast queries
-	queues        StatsInstances            // ordered list of StatsQueues
+	evCache       *StatsEventCache      // so we can pass it to queues
+	queuesCache   map[string]*StatQueue // unordered db of StatQueues, used for fast queries
+	queues        StatQueues            // ordered list of StatQueues
 
 }
 
@@ -91,7 +91,7 @@ func (ss *StatService) Shutdown() error {
 
 // setQueue adds or modifies a queue into cache
 // sort will reorder the ss.queues
-func (ss *StatService) loadQueue(qID string) (q *StatsInstance, err error) {
+func (ss *StatService) loadQueue(qID string) (q *StatQueue, err error) {
 	sq, err := ss.dataDB.GetStatsConfig(qID)
 	if err != nil {
 		return nil, err
@@ -102,16 +102,16 @@ func (ss *StatService) loadQueue(qID string) (q *StatsInstance, err error) {
 			return nil, err
 		}
 	}
-	return NewStatsInstance(ss.evCache, ss.ms, sq, sqSM)
+	return NewStatQueue(ss.evCache, ss.ms, sq, sqSM)
 }
 
-func (ss *StatService) setQueue(q *StatsInstance) {
+func (ss *StatService) setQueue(q *StatQueue) {
 	ss.queuesCache[q.cfg.ID] = q
 	ss.queues = append(ss.queues, q)
 }
 
 // remQueue will remove a queue based on it's ID
-func (ss *StatService) remQueue(qID string) (si *StatsInstance) {
+func (ss *StatService) remQueue(qID string) (si *StatQueue) {
 	si = ss.queuesCache[qID]
 	ss.queues.remWithID(qID)
 	delete(ss.queuesCache, qID)
@@ -240,7 +240,7 @@ func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err err
 	if qIDs == nil || len(*qIDs) == 0 {
 		return utils.ErrNotFound
 	}
-	var sQs []*StatsInstance // cache here so we lock only later when data available
+	var sQs []*StatQueue // cache here so we lock only later when data available
 	for _, qID := range *qIDs {
 		if _, hasPrev := ss.queuesCache[qID]; hasPrev {
 			continue // don't overwrite previous, could be extended in the future by carefully checking cached events

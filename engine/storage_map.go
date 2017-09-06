@@ -221,7 +221,8 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceConfigsPrefix,
+		utils.ResourceProfilesPrefix,
+		utils.ResourcesPrefix,
 		utils.TimingsPrefix}, prefix) {
 		return utils.NewCGRError(utils.REDIS,
 			utils.MandatoryIEMissingCaps,
@@ -285,8 +286,10 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourceConfigsPrefix:
-			_, err = ms.GetResourceCfg(dataID, true, utils.NonTransactional)
+		case utils.ResourceProfilesPrefix:
+			_, err = ms.GetResourceProfile(dataID, true, utils.NonTransactional)
+		case utils.ResourcesPrefix:
+			_, err = ms.GetResource(dataID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
@@ -1285,14 +1288,38 @@ func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID strin
 	return
 }
 
-func (ms *MapStorage) GetResourceCfg(id string, skipCache bool, transactionID string) (rl *ResourceCfg, err error) {
+func (ms *MapStorage) SetStructVersion(v *StructVersion) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	var result []byte
+	result, err = ms.ms.Marshal(v)
+	if err != nil {
+		return
+	}
+	ms.dict[utils.VERSION_PREFIX+"struct"] = result
+	return
+}
+
+func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.ResourceConfigsPrefix + id
+	rsv = &StructVersion{}
+	if values, ok := ms.dict[utils.VERSION_PREFIX+"struct"]; ok {
+		err = ms.ms.Unmarshal(values, &rsv)
+	} else {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+func (ms *MapStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	key := utils.ResourceProfilesPrefix + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x != nil {
-				return x.(*ResourceCfg), nil
+				return x.(*ResourceProfile), nil
 			}
 			return nil, utils.ErrNotFound
 		}
@@ -1302,34 +1329,34 @@ func (ms *MapStorage) GetResourceCfg(id string, skipCache bool, transactionID st
 		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, &rl)
+	err = ms.ms.Unmarshal(values, &rsp)
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range rl.Filters {
+	for _, fltr := range rsp.Filters {
 		if err := fltr.CompileValues(); err != nil {
 			return nil, err
 		}
 	}
-	cache.Set(key, rl, cacheCommit(transactionID), transactionID)
+	cache.Set(key, rsp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MapStorage) SetResourceCfg(r *ResourceCfg, transactionID string) error {
+func (ms *MapStorage) SetResourceProfile(r *ResourceProfile, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.ResourceConfigsPrefix+r.ID] = result
+	ms.dict[utils.ResourceProfilesPrefix+r.ID] = result
 	return nil
 }
 
-func (ms *MapStorage) RemoveResourceCfg(id string, transactionID string) error {
+func (ms *MapStorage) RemoveResourceProfile(id string, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.ResourceConfigsPrefix + id
+	key := utils.ResourceProfilesPrefix + id
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
@@ -1484,56 +1511,14 @@ func (ms *MapStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemID
 }
 
 func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	values, ok := ms.dict[itm]
-	if !ok {
-		return nil, utils.ErrNotFound
-	}
-	err = ms.ms.Unmarshal(values, &vrs)
-	if err != nil {
-		return nil, err
-	}
 	return
 }
 
 func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	var result []byte
-	var x Versions
-	if !overwrite {
-		x, err = ms.GetVersions(utils.TBLVersions)
-		if err != nil {
-			return err
-		}
-		for key, _ := range vrs {
-			if x[key] != vrs[key] {
-				x[key] = vrs[key]
-			}
-		}
-		result, err = ms.ms.Marshal(x)
-		if err != nil {
-			return err
-		}
-		ms.dict[utils.TBLVersions] = result
-		return
-	} else {
-		result, err = ms.ms.Marshal(vrs)
-		if err != nil {
-			return err
-		}
-		if ms.RemoveVersions(vrs); err != nil {
-			return err
-		}
-		ms.dict[utils.TBLVersions] = result
-		return
-	}
+	return
 }
+
 func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	delete(ms.dict, utils.TBLVersions)
 	return
 }
 
@@ -1663,4 +1648,53 @@ func (ms *MapStorage) RemThresholdCfg(sqID string, transactionID string) (err er
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
+}
+
+
+func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	values, ok := ms.dict[itm]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &vrs)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	var result []byte
+	var x Versions
+	if !overwrite {
+		x, err = ms.GetVersions(utils.TBLVersions)
+		if err != nil {
+			return err
+		}
+		for key, _ := range vrs {
+			if x[key] != vrs[key] {
+				x[key] = vrs[key]
+			}
+		}
+		result, err = ms.ms.Marshal(x)
+		if err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return
+	} else {
+		result, err = ms.ms.Marshal(vrs)
+		if err != nil {
+			return err
+		}
+		if ms.RemoveVersions(vrs); err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return
+	}
 }

@@ -80,7 +80,7 @@ type DataDB interface {
 	RemAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
-	LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) error
+	LoadAccountingCache(alsIDs, rvAlsIDs, rspIDs, resIDs []string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
@@ -98,9 +98,9 @@ type DataDB interface {
 	RemoveAlias(string, string) error
 	SetReverseAlias(*Alias, string) error
 	GetReverseAlias(string, bool, string) ([]string, error)
-	GetResourceCfg(string, bool, string) (*ResourceCfg, error)
-	SetResourceCfg(*ResourceCfg, string) error
-	RemoveResourceCfg(string, string) error
+	GetResourceProfile(string, bool, string) (*ResourceProfile, error)
+	SetResourceProfile(*ResourceProfile, string) error
+	RemoveResourceProfile(string, string) error
 	GetResource(string, bool, string) (*Resource, error)
 	SetResource(*Resource) error
 	RemoveResource(string, string) error

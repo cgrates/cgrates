@@ -1918,8 +1918,8 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 	return
 }
 
-func APItoResource(tpRL *utils.TPResource, timezone string) (rl *ResourceCfg, err error) {
-	rl = &ResourceCfg{
+func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile, err error) {
+	rp = &ResourceProfile{
 		ID:      tpRL.ID,
 		Weight:  tpRL.Weight,
 		Blocker: tpRL.Blocker,
@@ -1927,7 +1927,7 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rl *ResourceCfg, er
 		Filters: make([]*RequestFilter, len(tpRL.Filters)),
 	}
 	if tpRL.UsageTTL != "" {
-		if rl.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {
+		if rp.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {
 			return nil, err
 		}
 	}
@@ -1936,19 +1936,19 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rl *ResourceCfg, er
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
-		rl.Filters[i] = rf
+		rp.Filters[i] = rf
 	}
 	if tpRL.ActivationInterval != nil {
-		if rl.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
+		if rp.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
 		}
 	}
 	if tpRL.Limit != "" {
-		if rl.Limit, err = strconv.ParseFloat(tpRL.Limit, 64); err != nil {
+		if rp.Limit, err = strconv.ParseFloat(tpRL.Limit, 64); err != nil {
 			return nil, err
 		}
 	}
-	return rl, nil
+	return rp, nil
 }
 
 type TpStatsS []*TpStats
