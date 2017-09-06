@@ -1,17 +1,14 @@
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
@@ -52,12 +49,7 @@ type TpReader struct {
 	cdrStats         map[string]*CdrStats
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
-<<<<<<< HEAD
 	resProfiles      map[string]*utils.TPResource
-=======
-	resCfgs          map[string]*utils.TPResource
-	res              []string // IDs of resources which need creation based on resourceConfigs
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 	stats            map[string]*utils.TPStats
 	thresholds       map[string]*utils.TPThreshold
 
@@ -131,11 +123,7 @@ func (tpr *TpReader) Init() {
 	tpr.users = make(map[string]*UserProfile)
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
-<<<<<<< HEAD
 	tpr.resProfiles = make(map[string]*utils.TPResource)
-=======
-	tpr.resCfgs = make(map[string]*utils.TPResource)
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 	tpr.stats = make(map[string]*utils.TPStats)
 	tpr.thresholds = make(map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
@@ -1609,18 +1597,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) error {
 	for _, rl := range rls {
 		mapRsPs[rl.ID] = rl
 	}
-<<<<<<< HEAD
 	tpr.resProfiles = mapRsPs
-=======
-	tpr.resCfgs = mapRLs
-	for rID := range mapRLs {
-		if has, err := tpr.dataStorage.HasData(utils.ResourcesPrefix, rID); err != nil {
-			return err
-		} else if !has {
-			tpr.res = append(tpr.res, rID)
-		}
-	}
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 	return nil
 }
 
@@ -1953,37 +1930,10 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-<<<<<<< HEAD
 		log.Print("ResourceProfiles:")
 	}
 	for _, tpRsp := range tpr.resProfiles {
 		rsp, err := APItoResource(tpRsp, tpr.timezone)
-=======
-		log.Print("ResourceConfigs:")
-	}
-	for _, tpRL := range tpr.resCfgs {
-		rl, err := APItoResource(tpRL, tpr.timezone)
-		if err != nil {
-			return err
-		}
-		if err = tpr.dataStorage.SetResourceCfg(rl, utils.NonTransactional); err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", rl.ID)
-		}
-	}
-	if verbose {
-		log.Print("Resources:")
-	}
-	for _, rID := range tpr.res {
-		if err = tpr.dataStorage.SetResource(&Resource{ID: rID, Usages: make(map[string]*ResourceUsage)}); err != nil {
-			return
-		}
-	}
-	for _, tpRL := range tpr.resCfgs {
-		rl, err := APItoResource(tpRL, tpr.timezone)
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 		if err != nil {
 			return err
 		}
@@ -2060,11 +2010,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
-<<<<<<< HEAD
 		if len(tpr.resProfiles) > 0 {
-=======
-		if len(tpr.resCfgs) > 0 {
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 			if verbose {
 				log.Print("Indexing resource profiles")
 			}
@@ -2072,11 +2018,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if err != nil {
 				return err
 			}
-<<<<<<< HEAD
 			for _, tpRL := range tpr.resProfiles {
-=======
-			for _, tpRL := range tpr.resCfgs {
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 				if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
 					return err
 				} else {
@@ -2196,11 +2138,7 @@ func (tpr *TpReader) ShowStatistics() {
 	// cdr stats
 	log.Print("CDR stats: ", len(tpr.cdrStats))
 	// resource limits
-<<<<<<< HEAD
 	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
-=======
-	log.Print("ResourceLimits: ", len(tpr.resCfgs))
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 	// stats
 	log.Print("Stats: ", len(tpr.stats))
 }
@@ -2312,17 +2250,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-<<<<<<< HEAD
 	case utils.ResourceProfilesPrefix:
 		keys := make([]string, len(tpr.resProfiles))
 		i := 0
 		for k := range tpr.resProfiles {
-=======
-	case utils.ResourceConfigsPrefix:
-		keys := make([]string, len(tpr.resCfgs))
-		i := 0
-		for k := range tpr.resCfgs {
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 			keys[i] = k
 			i++
 		}

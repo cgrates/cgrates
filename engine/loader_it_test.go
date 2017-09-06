@@ -309,13 +309,8 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-<<<<<<< HEAD
 	for k, rl := range loader.resProfiles {
 		rcv, err := loader.dataStorage.GetResourceProfile(k, true, utils.NonTransactional)
-=======
-	for k, rl := range loader.resCfgs {
-		rcv, err := loader.dataStorage.GetResourceCfg(k, true, utils.NonTransactional)
->>>>>>> dd8afa24867e3d532c7a2b81fc8070aceec07dad
 		if err != nil {
 			t.Error("Failed GetResourceProfile: ", err.Error())
 		}
