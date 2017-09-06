@@ -54,7 +54,7 @@ var (
 		CacheAliases:             ALIASES_PREFIX,
 		CacheReverseAliases:      REVERSE_ALIASES_PREFIX,
 		CacheDerivedChargers:     DERIVEDCHARGERS_PREFIX,
-		CacheResourceConfigs:     ResourceConfigsPrefix,
+		CacheResourceProfiles:    ResourceProfilesPrefix,
 		CacheResources:           ResourcesPrefix,
 		CacheTimings:             TimingsPrefix,
 	}
@@ -236,8 +236,8 @@ const (
 	ALIASES_PREFIX                = "als_"
 	REVERSE_ALIASES_PREFIX        = "rls_"
 	ResourcesPrefix               = "res_"
-	ResourcesIndex                = "rsi_"
-	ResourceConfigsPrefix         = "rcf_"
+	ResourceProfilesIndex         = "rsi_"
+	ResourceProfilesPrefix        = "rsp_"
 	StatsPrefix                   = "sts_"
 	StatsIndex                    = "sti_"
 	ThresholdsPrefix              = "ths_"
@@ -427,7 +427,7 @@ const (
 	CacheReverseAliases          = "reverse_aliases"
 	CacheDerivedChargers         = "derived_chargers"
 	CacheResources               = "resources"
-	CacheResourceConfigs         = "resource_configs"
+	CacheResourceProfiles        = "resource_profiles"
 	CacheTimings                 = "timings"
 	StatS                        = "stats"
 	CostSource                   = "CostSource"

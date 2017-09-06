@@ -42,7 +42,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	waitTasks = append(waitTasks, cacheTaskChan)
 	go func() {
 		defer close(cacheTaskChan)
-		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string
+		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs []string
 		if cCfg, has := cfg.CacheConfig[utils.CacheDestinations]; !has || !cCfg.Precache {
 			dstIDs = make([]string, 0) // Don't cache any
 		}
@@ -82,8 +82,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		if cCfg, has := cfg.CacheConfig[utils.CacheReverseAliases]; !has || !cCfg.Precache {
 			rvAlsIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheResourceConfigs]; !has || !cCfg.Precache {
-			rlIDs = make([]string, 0)
+		if cCfg, has := cfg.CacheConfig[utils.CacheResourceProfiles]; !has || !cCfg.Precache {
+			rspIDs = make([]string, 0)
 		}
 		if cCfg, has := cfg.CacheConfig[utils.CacheResources]; !has || !cCfg.Precache {
 			resIDs = make([]string, 0)
@@ -95,7 +95,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 			exitChan <- true
 			return
 		}
-		if err := dataDB.LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs); err != nil {
+		if err := dataDB.LoadAccountingCache(alsIDs, rvAlsIDs, rspIDs, resIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache accounting error: %s", err.Error()))
 			exitChan <- true
 			return
