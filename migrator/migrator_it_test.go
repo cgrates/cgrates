@@ -30,29 +30,24 @@ import (
 )
 
 var (
-	mongo     *config.CGRConfig
-	rdsITdb   *engine.RedisStorage
-	mgoITdb   *engine.MongoStorage
-	onStor    engine.DataDB
-	onStorCfg string
-	dbtype    string
-	mig       *Migrator
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	loadHistorySize    = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+	dbtype          string
+	mig             *Migrator
+	dataDir         = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
 )
 
 // subtests to be executed for each migrator
 var sTestsITMigrator = []func(t *testing.T){
-	testOnStorITFlush,
+	testFlush,
 	testMigratorAccounts,
 	testMigratorActionPlans,
 	testMigratorActionTriggers,
 	testMigratorActions,
 	testMigratorSharedGroups,
-	testOnStorITFlush,
+	testFlush,
 }
 
-func TestOnStorITPostgresConnect(t *testing.T) {
+func TestMigratorITPostgresConnect(t *testing.T) {
 	cdrsPostgresCfgPath := path.Join(*dataDir, "conf", "samples", "tutpostgres")
 	postgresITCfg, err := config.NewCGRConfigFromFolder(cdrsPostgresCfgPath)
 	if err != nil {
@@ -82,15 +77,14 @@ func TestOnStorITPostgresConnect(t *testing.T) {
 	}
 }
 
-func TestOnStorITPostgres(t *testing.T) {
+func TestMigratorITPostgres(t *testing.T) {
 	dbtype = utils.REDIS
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnPostgres", stest)
 	}
 }
 
-
-func TestOnStorITRedisConnect(t *testing.T) {
+func TestMigratorITRedisConnect(t *testing.T) {
 	cdrsMysqlCfgPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
 	mysqlITCfg, err := config.NewCGRConfigFromFolder(cdrsMysqlCfgPath)
 	if err != nil {
@@ -120,14 +114,14 @@ func TestOnStorITRedisConnect(t *testing.T) {
 	}
 }
 
-func TestOnStorITRedis(t *testing.T) {
+func TestMigratorITRedis(t *testing.T) {
 	dbtype = utils.REDIS
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnRedis", stest)
 	}
 }
 
-func TestOnStorITMongoConnect(t *testing.T) {
+func TestMigratorITMongoConnect(t *testing.T) {
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
@@ -157,14 +151,14 @@ func TestOnStorITMongoConnect(t *testing.T) {
 	}
 }
 
-func TestOnStorITMongo(t *testing.T) {
+func TestMigratorITMongo(t *testing.T) {
 	dbtype = utils.MONGO
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnMongo", stest)
 	}
 }
 
-func testOnStorITFlush(t *testing.T) {
+func testFlush(t *testing.T) {
 	switch {
 	case dbtype == utils.REDIS:
 		dataDB := mig.dataDB.(*engine.RedisStorage)

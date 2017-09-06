@@ -1199,9 +1199,8 @@ func (ms *MongoStorage) SetTPThreshold(tpTHs []*utils.TPThreshold) (err error) {
 	return
 }
 
-
 func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
-session, col := ms.conn(colVer)
+	session, col := ms.conn(colVer)
 	defer session.Close()
 	if err = col.Find(bson.M{}).One(&vrs); err != nil {
 		if err == mgo.ErrNotFound {
@@ -1216,14 +1215,14 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	session, col := ms.conn(colVer)
 	defer session.Close()
 	if overwrite {
-	if err=ms.RemoveVersions(vrs);err!=nil{
-		return err
+		if err = ms.RemoveVersions(vrs); err != nil {
+			return err
 		}
-	}	
-	if _, err = col.Upsert(bson.M{},&vrs);err!=nil{
-		return 
 	}
-	
+	if _, err = col.Upsert(bson.M{}, &vrs); err != nil {
+		return
+	}
+
 	return
 }
 
@@ -1232,9 +1231,9 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	defer session.Close()
 	err = col.Remove(bson.M{})
 	if err == mgo.ErrNotFound {
-			err = utils.ErrNotFound
-		}else{	
-			return err
-		}
+		err = utils.ErrNotFound
+	} else {
+		return err
+	}
 	return nil
 }

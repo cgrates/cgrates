@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	migrate = flag.String("migrate", "", "Fire up automatic migration <*cost_details|*set_versions>")
+	migrate = flag.String("migrate", "", "Fire up automatic migration <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups>")
 	version = flag.Bool("version", false, "Prints the application version.")
 
 	dataDBType = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <redis>")

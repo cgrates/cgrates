@@ -1593,7 +1593,7 @@ func (self *SQLStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, e
 // GetVersions returns slice of all versions or a specific version if tag is specified
 func (self *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
 	q := self.db.Model(&TBLVersion{})
-	if itm != "" {
+	if itm != utils.TBLVersions && itm != "" {
 		q = self.db.Where(&TBLVersion{Item: itm})
 	}
 	var verModels []*TBLVersion
@@ -1603,6 +1603,10 @@ func (self *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
 	vrs = make(Versions)
 	for _, verModel := range verModels {
 		vrs[verModel.Item] = verModel.Version
+	}
+	if len(vrs) == 0 {
+		return nil, utils.ErrNotFound
+
 	}
 	return
 }

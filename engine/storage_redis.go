@@ -1560,31 +1560,32 @@ func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
 	x, err := rs.Cmd("HGETALL", itm).Map()
 	if err != nil {
-		return
-	} else if len(x) == 0 {
+		return nil, err
+	}
+	vrs, err = utils.MapStringToInt64(x)
+	if err != nil {
+		return nil, err
+	}
+	if len(vrs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-vrs,err = utils.MapStringToInt64(x)
-	if err != nil {
-		return
-	}
-	return 
+	return
 }
 
 func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-if overwrite{
-	if err=rs.RemoveVersions(vrs);err!=nil{
-		return
+	if overwrite {
+		if err = rs.RemoveVersions(vrs); err != nil {
+			return
+		}
 	}
-}
-	return	rs.Cmd("HMSET", utils.TBLVersions, vrs).Err
+	return rs.Cmd("HMSET", utils.TBLVersions, vrs).Err
 }
 
 func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
-for key,_:=range vrs{
-	err = rs.Cmd("HDEL",utils.TBLVersions, key).Err
-	if err!=nil{
-		return err
+	for key, _ := range vrs {
+		err = rs.Cmd("HDEL", utils.TBLVersions, key).Err
+		if err != nil {
+			return err
 		}
 	}
 

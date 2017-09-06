@@ -25,61 +25,54 @@ import (
 )
 
 func CheckVersions(storage Storage) error {
-	x:=Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 2,utils.COST_DETAILS: 2}
+	x := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
 	// get current db version
 	if storage == nil {
 		storage = dataStorage
 	}
 	dbVersion, err := storage.GetVersions(utils.TBLVersions)
 	if err != nil {
-			// no data, write version
-			if err := storage.SetVersions(x,false); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
-			}
+		// no data, write version
+		if err := storage.SetVersions(x, false); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
+		}
 
-		
 	} else {
 		// comparing versions
-		message:=dbVersion.Compare(x)
-	if len(message) > 0 {
-	
+		message := dbVersion.Compare(x)
+		if len(message) > 0 {
 			// write the new values
-	
-	msg := "Migration needed: please backup cgr data and run : "+message
-	
-	utils.Logger.Crit(msg)
-	
-	return errors.New(msg)
-	}
+			msg := "Migration needed: please backup cgr data and run : <" + message + ">"
+			utils.Logger.Crit(msg)
+			return errors.New(msg)
+		}
 	}
 	return nil
 }
 
-
-func (vers Versions)Compare(curent Versions) string{
-x:=map[string]string{
-	utils.Accounts: "cgr-migrator -migrate=*accounts",
-	utils.Actions: "cgr-migrator -migrate=*actions",
-	utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
-	utils.ActionPlans: "cgr-migrator -migrate=*action_plans",
-	utils.SharedGroups: "cgr-migrator -migrate=*shared_groups",
-	utils.COST_DETAILS: "cgr-migrator -migrate=*cost_details",
-}
-	for x,val :=range x{
-		if vers[x]!=curent[x]{
-		return val
+func (vers Versions) Compare(curent Versions) string {
+	x := map[string]string{
+		utils.Accounts:       "cgr-migrator -migrate=*accounts",
+		utils.Actions:        "cgr-migrator -migrate=*actions",
+		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
+		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
+		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
+		utils.COST_DETAILS:   "cgr-migrator -migrate=*cost_details",
+	}
+	for x, val := range x {
+		if vers[x] != curent[x] {
+			return val
 		}
 	}
 	return ""
 }
-
 
 func CurrentStorDBVersions() Versions {
 	return Versions{utils.COST_DETAILS: 2}
 }
 
 func CurrentDataDBVersions() Versions {
-	return Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 2}
+	return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
 }
 
 // Versions will keep trac of various item versions

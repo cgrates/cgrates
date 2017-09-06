@@ -1928,19 +1928,18 @@ func testOnStorITCRUDResource(t *testing.T) {
 }
 
 func testOnStorITCRUDStructVersion(t *testing.T) {
-CurrentVersion:=Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 2,utils.COST_DETAILS: 2}
-
+	CurrentVersion := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
 	if _, rcvErr := onStor.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetVersions(CurrentVersion,false); err != nil {
+	if err := onStor.SetVersions(CurrentVersion, false); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetVersions(utils.TBLVersions); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(CurrentVersion, rcv) {
 		t.Errorf("Expecting: %v, received: %v", CurrentVersion, rcv)
-	}else if err = onStor.RemoveVersions(rcv); err != nil {
+	} else if err = onStor.RemoveVersions(rcv); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {

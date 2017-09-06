@@ -24,26 +24,26 @@ import (
 )
 
 func TestVersionCompare(t *testing.T) {
-x:=Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 2,utils.COST_DETAILS: 2}
-y:=Versions{utils.Accounts: 1,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 2,utils.COST_DETAILS: 2}
-z:=Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 1,utils.SharedGroups: 2,utils.COST_DETAILS: 2}
-q:=Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 1,utils.COST_DETAILS: 2}
-c:=Versions{utils.Accounts: 2,utils.Actions: 2,utils.ActionTriggers: 2,utils.ActionPlans: 2,utils.SharedGroups: 2,utils.COST_DETAILS: 1}
+	x := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	y := Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	z := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 1, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	q := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 1, utils.COST_DETAILS: 2}
+	c := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 1}
 
-message1:=y.Compare(x)
-if message1!="cgr-migrator -migrate=*accounts"{
-	t.Errorf("Error failed to compare to curent version expected: %s received: %s","cgr-migrator -migrate=*accounts", message1)
-}
-message2:=z.Compare(x)
-if message2!="cgr-migrator -migrate=*action_plans"{
-	t.Errorf("Error failed to compare to curent version expected: %s received: %s","cgr-migrator -migrate=*action_plans", message2)
-}
-message3:=q.Compare(x)
-if message3!="cgr-migrator -migrate=*shared_groups"{
-	t.Errorf("Error failed to compare to curent version expected: %s received: %s","cgr-migrator -migrate=*shared_groups", message3)
-}
-message4:=c.Compare(x)
-if message4!="cgr-migrator -migrate=*cost_details"{
-	t.Errorf("Error failed to compare to curent version expected: %s received: %s","cgr-migrator -migrate=*cost_details", message4)
-}
+	message1 := y.Compare(x)
+	if message1 != "cgr-migrator -migrate=*accounts" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*accounts", message1)
+	}
+	message2 := z.Compare(x)
+	if message2 != "cgr-migrator -migrate=*action_plans" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*action_plans", message2)
+	}
+	message3 := q.Compare(x)
+	if message3 != "cgr-migrator -migrate=*shared_groups" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*shared_groups", message3)
+	}
+	message4 := c.Compare(x)
+	if message4 != "cgr-migrator -migrate=*cost_details" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*cost_details", message4)
+	}
 }

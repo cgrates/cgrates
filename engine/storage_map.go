@@ -1500,33 +1500,35 @@ func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
 func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	var	result []byte
+	var result []byte
 	var x Versions
-if !overwrite{
-	x,err =ms.GetVersions(utils.TBLVersions)
-	if err != nil {
-		return err
+	if !overwrite {
+		x, err = ms.GetVersions(utils.TBLVersions)
+		if err != nil {
+			return err
+		}
+		for key, _ := range vrs {
+			if x[key] != vrs[key] {
+				x[key] = vrs[key]
+			}
+		}
+		result, err = ms.ms.Marshal(x)
+		if err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return
+	} else {
+		result, err = ms.ms.Marshal(vrs)
+		if err != nil {
+			return err
+		}
+		if ms.RemoveVersions(vrs); err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return
 	}
-	for key,_:= range vrs{
-		if x[key]!=vrs[key]{x[key]=vrs[key]}
-	}
-	result, err = ms.ms.Marshal(x)
-	if err != nil {
-		return err
-	}
-	ms.dict[utils.TBLVersions] = result
-return
-}else{
-	result, err = ms.ms.Marshal(vrs)
-	if err != nil {
-		return err
-	}
-	if ms.RemoveVersions(vrs);err != nil {
-		return err
-	}
-			ms.dict[utils.TBLVersions] = result
-	return
-}
 }
 func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
 	ms.mu.Lock()
