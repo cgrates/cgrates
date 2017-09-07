@@ -40,7 +40,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	if err := dataDB.Flush(""); err != nil {
 		return err
 	}
-	dataDB.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	CheckVersion(dataDB) // Write version before starting
 	return nil
 }
