@@ -255,7 +255,7 @@ const (
 	LOG_CDR                       = "cdr_"
 	LOG_MEDIATED_CDR              = "mcd_"
 	SQStoredMetricsPrefix         = "ssm_"
-	StatsConfigPrefix             = "scf_"
+	StatQueueProfilePrefix        = "sqp_"
 	ThresholdCfgPrefix            = "thc_"
 	LOADINST_KEY                  = "load_history"
 	SESSION_MANAGER_SOURCE        = "SMR"

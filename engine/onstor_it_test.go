@@ -90,7 +90,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDHistory,
 	testOnStorITCRUDStructVersion,
 	testOnStorITCRUDSQStoredMetrics,
-	testOnStorITCRUDStats,
+	testOnStorITCRUDStatQueueProfile,
 	testOnStorITCRUDThresholdCfg,
 }
 
@@ -1988,9 +1988,9 @@ func testOnStorITCRUDSQStoredMetrics(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDStats(t *testing.T) {
+func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	timeTTL := time.Duration(0 * time.Second)
-	sq := &StatsConfig{
+	sq := &StatQueueProfile{
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
 		Filters:            []*RequestFilter{},
@@ -2000,33 +2000,33 @@ func testOnStorITCRUDStats(t *testing.T) {
 		Store:              true,
 		Thresholds:         []string{},
 	}
-	if _, rcvErr := onStor.GetStatsConfig(sq.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatQueueProfile(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, ok := cache.Get(utils.StatsConfigPrefix + sq.ID); ok != false {
+	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.SetStatsConfig(sq); err != nil {
+	if err := onStor.SetStatQueueProfile(sq); err != nil {
 		t.Error(err)
 	}
-	if _, ok := cache.Get(utils.StatsConfigPrefix + sq.ID); ok != false {
+	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if rcv, err := onStor.GetStatsConfig(sq.ID); err != nil {
+	if rcv, err := onStor.GetStatQueueProfile(sq.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
-	if _, ok := cache.Get(utils.StatsConfigPrefix + sq.ID); ok != false {
+	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.RemStatsConfig(sq.ID); err != nil {
+	if err := onStor.RemStatQueueProfile(sq.ID); err != nil {
 		t.Error(err)
 	}
-	if _, ok := cache.Get(utils.StatsConfigPrefix + sq.ID); ok != false {
+	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if _, rcvErr := onStor.GetStatsConfig(sq.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatQueueProfile(sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
