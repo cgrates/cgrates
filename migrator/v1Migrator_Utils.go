@@ -26,7 +26,7 @@ import (
 )
 
 func ConfigureV1DataStorage(db_type, host, port, name, user, pass, marshaler string) (db V1DataDB, err error) {
-	var d v1DataDB
+	var d V1DataDB
 	switch db_type {
 	case utils.REDIS:
 		var db_nb int
