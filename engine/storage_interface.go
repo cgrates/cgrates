@@ -46,7 +46,7 @@ type DataDB interface {
 	Storage
 	Marshaler() Marshaler
 	HasData(string, string) (bool, error)
-	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
+	LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan, string) error
 	GetRatingProfile(string, bool, string) (*RatingProfile, error)
@@ -81,7 +81,6 @@ type DataDB interface {
 	RemAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
-	LoadAccountingCache(alsIDs, rvAlsIDs, rspIDs, resIDs []string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error

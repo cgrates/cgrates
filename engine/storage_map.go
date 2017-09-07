@@ -146,7 +146,7 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
-func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (ms *MapStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
 	if ms.cacheCfg == nil {
 		return
 	}
@@ -155,7 +155,7 @@ func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, 
 		if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
 			utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
 			utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
-			utils.SHARED_GROUP_PREFIX}, k) && cacheCfg.Precache {
+			utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX}, k) && cacheCfg.Precache {
 			if err := ms.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 				return err
 			}
@@ -163,21 +163,6 @@ func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, 
 	}
 	// add more prefixes if needed
 	return
-}
-
-func (ms *MapStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) error {
-	if ms.cacheCfg == nil {
-		return nil
-	}
-	for k, cacheCfg := range ms.cacheCfg {
-		k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
-		if utils.IsSliceMember([]string{utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX}, k) && cacheCfg.Precache {
-			if err := ms.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {

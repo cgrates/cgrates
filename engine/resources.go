@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -220,13 +219,12 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceService(dataDB DataDB, shortCache *config.CacheParamConfig, storeInterval time.Duration,
+func NewResourceService(dataDB DataDB, storeInterval time.Duration,
 	statS rpcclient.RpcClientConnection) (*ResourceService, error) {
 	if statS != nil && reflect.ValueOf(statS).IsNil() {
 		statS = nil
 	}
 	return &ResourceService{dataDB: dataDB, statS: statS,
-		scEventResources: ltcache.New(shortCache.Limit, shortCache.TTL, shortCache.StaticTTL, nil),
 		lcEventResources: make(map[string][]string),
 		storedResources:  make(utils.StringMap),
 		storeInterval:    storeInterval, stopBackup: make(chan struct{})}, nil
@@ -236,7 +234,6 @@ func NewResourceService(dataDB DataDB, shortCache *config.CacheParamConfig, stor
 type ResourceService struct {
 	dataDB           DataDB                        // So we can load the data in cache and index it
 	statS            rpcclient.RpcClientConnection // allows applying filters based on stats
-	scEventResources *ltcache.Cache                // short cache map[ruID], used to keep references to matched resources for events in allow queries
 	lcEventResources map[string][]string           // cache recording resources for events in alocation phase
 	lcERMux          sync.RWMutex                  // protects the lcEventResources
 	storedResources  utils.StringMap               // keep a record of resources which need saving, map[resID]bool
@@ -331,7 +328,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	rIDs, has := rS.lcEventResources[evUUID]
 	rS.lcERMux.RUnlock()
 	if !has {
-		if rIDsIf, has := rS.scEventResources.Get(evUUID); !has {
+		if rIDsIf, has := cache.Get(utils.EventResourcesPrefix + evUUID); !has {
 			return nil
 		} else if rIDsIf != nil {
 			rIDs = rIDsIf.([]string)
@@ -342,7 +339,6 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	if len(rIDs) == 0 {
 		return
 	}
-
 	lockIDs := utils.PrefixSliceItems(rIDs, utils.ResourcesPrefix)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
@@ -353,7 +349,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 					evUUID, err.Error()))
 			// on errors, cleanup cache so we recache
 			if shortCached {
-				rS.scEventResources.Remove(evUUID)
+				cache.RemKey(utils.EventResourcesPrefix+evUUID, true, "")
 			} else {
 				rS.lcERMux.Lock()
 				delete(rS.lcEventResources, evUUID)
@@ -450,13 +446,13 @@ func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *
 		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
 			return err
 		}
-		rS.scEventResources.Set(args.UsageID, mtcRLs.ids())
+		cache.Set(utils.EventResourcesPrefix+args.UsageID, mtcRLs.ids(), true, "")
 	}
 	if _, err = mtcRLs.AllocateResource(
 		&ResourceUsage{ID: args.UsageID,
 			Units: args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
-			rS.scEventResources.Set(args.UsageID, nil)
+			cache.Set(utils.EventResourcesPrefix+args.UsageID, nil, true, "")
 			err = nil
 			return // not error but still not allowed
 		}
@@ -485,10 +481,10 @@ func (rS *ResourceService) V1AllocateResource(args utils.AttrRLsResourceUsage, r
 	// index it for matching out of cache
 	var wasShortCached bool
 	if wasCached {
-		if _, has := rS.scEventResources.Get(args.UsageID); has {
+		if _, has := cache.Get(utils.EventResourcesPrefix + args.UsageID); has {
 			// remove from short cache to populate event cache
 			wasShortCached = true
-			rS.scEventResources.Remove(args.UsageID)
+			cache.RemKey(utils.EventResourcesPrefix+args.UsageID, true, "")
 		}
 	}
 	if wasShortCached || !wasCached {

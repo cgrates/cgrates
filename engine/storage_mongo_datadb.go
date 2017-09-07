@@ -417,7 +417,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	return nil
 }
 
-func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (ms *MongoStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.DESTINATION_PREFIX:         dstIDs,
 		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
@@ -430,20 +430,10 @@ func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.SHARED_GROUP_PREFIX:        sgIDs,
 		utils.LCR_PREFIX:                 lcrIDs,
 		utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
-	} {
-		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
-			return
-		}
-	}
-	return
-}
-
-func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
-	for key, ids := range map[string][]string{
-		utils.ALIASES_PREFIX:         alsIDs,
-		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourceProfilesPrefix: rpIDs,
-		utils.ResourcesPrefix:        resIDs,
+		utils.ALIASES_PREFIX:             alsIDs,
+		utils.REVERSE_ALIASES_PREFIX:     rvAlsIDs,
+		utils.ResourceProfilesPrefix:     rpIDs,
+		utils.ResourcesPrefix:            resIDs,
 	} {
 		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
 			return

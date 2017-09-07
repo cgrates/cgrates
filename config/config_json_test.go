@@ -115,15 +115,16 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheResources: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
+		utils.CacheEventResources: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer("1m"), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheTimings: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
 		utils.CacheStatSQueues: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer("5m"), Static_ttl: utils.BoolPointer(false),
+			Ttl: utils.StringPointer("1m"), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheStatSEventQueues: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer("5m"), Static_ttl: utils.BoolPointer(false),
-			Precache: utils.BoolPointer(false)},
+		utils.CacheEventQueues: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer("1m"), Static_ttl: utils.BoolPointer(false)},
 	}
 
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
@@ -679,15 +680,11 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Enabled:        utils.BoolPointer(false),
 		Stats_conns:    &[]*HaPoolJsonCfg{},
 		Store_interval: utils.StringPointer(""),
-		Short_cache: &CacheParamJsonCfg{
-			Limit:      utils.IntPointer(-1),
-			Ttl:        utils.StringPointer("1m"),
-			Static_ttl: utils.BoolPointer(false)},
 	}
 	if cfg, err := dfCgrJsonCfg.ResourceSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Received: %s", utils.ToIJSON(cfg))
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 

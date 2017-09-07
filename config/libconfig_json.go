@@ -383,7 +383,6 @@ type ResourceSJsonCfg struct {
 	Enabled        *bool
 	Stats_conns    *[]*HaPoolJsonCfg
 	Store_interval *string
-	Short_cache    *CacheParamJsonCfg
 }
 
 // Stat service config section
