@@ -51,23 +51,3 @@ func ConfigureV1DataStorage(db_type, host, port, name, user, pass, marshaler str
 	}
 	return d, nil
 }
-
-// func ConfigureV1Storage(db_type, host, port, name, user, pass, marshaler string) (db v1StorDB, err error) {
-// func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db Storage, err error) {
-// 	var d Storage
-// 	switch db_type {
-// 	case utils.MONGO:
-// 		d, err = newv1MongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
-// 	case utils.POSTGRES:
-// 		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-// 	case utils.MYSQL:
-// 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-// 	default:
-// 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
-// 			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
-// 	}
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return d, nil
-// }

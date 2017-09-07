@@ -26,10 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// const (
-// 	v1AccountDBPrefix = "ubl_"
-// )
-
 type v1ActionPlan struct {
 	Uuid       string // uniquely identify the timing
 	Id         string // informative purpose only

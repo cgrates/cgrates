@@ -12,7 +12,6 @@ import (
 type v1ActionTrigger struct {
 	Id            string // for visual identification
 	ThresholdType string //*min_counter, *max_counter, *min_balance, *max_balance
-	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc
 	ThresholdValue        float64
 	Recurrent             bool          // reset eexcuted flag each run
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
