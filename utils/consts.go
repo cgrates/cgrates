@@ -56,9 +56,10 @@ var (
 		CacheDerivedChargers:     DERIVEDCHARGERS_PREFIX,
 		CacheResourceProfiles:    ResourceProfilesPrefix,
 		CacheResources:           ResourcesPrefix,
+		CacheEventResources:      EventResourcesPrefix,
 		CacheTimings:             TimingsPrefix,
 		CacheStatSQueues:         META_NONE,
-		CacheStatSEventQueues:    META_NONE,
+		CacheEventQueues:         META_NONE,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )
@@ -436,7 +437,9 @@ const (
 	ExtraInfo                    = "ExtraInfo"
 	MetaPrefix                   = "*"
 	CacheStatSQueues             = "stats_queues"
-	CacheStatSEventQueues        = "stats_event_queues"
+	CacheEventQueues             = "event_queues"
+	CacheEventResources          = "event_resources"
+	EventResourcesPrefix         = "ers_"
 )
 
 func buildCacheInstRevPrefixes() {
