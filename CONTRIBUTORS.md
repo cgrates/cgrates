@@ -58,6 +58,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @wasimbaig | Wasim Baig |
 | @MrGab | Gabriele Proni |
 | @TeoV | Teofil Voivozeanu |
+| @paolovisintin | Paolo Visintin |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
