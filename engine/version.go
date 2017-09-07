@@ -99,11 +99,11 @@ func CurrentDBVersions(storType string) Versions {
 	case utils.MONGO:
 		return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
 	case utils.POSTGRES:
-		return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-	case utils.MYSQL:
-		return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-	case utils.REDIS:
 		return Versions{utils.COST_DETAILS: 2}
+	case utils.MYSQL:
+		return Versions{utils.COST_DETAILS: 2}
+	case utils.REDIS:
+		return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
 	case utils.MAPSTOR:
 		return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
 	}
