@@ -87,7 +87,7 @@ func testTPStatsInitCfg(t *testing.T) {
 	tpStatCfg.DataFolderPath = tpStatDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tpStatCfg)
 	switch tpStatConfigDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
+	case "tutmongo": // Mongo needs more time to reset db
 		tpStatDelay = 4000
 	default:
 		tpStatDelay = 1000

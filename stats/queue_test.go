@@ -26,17 +26,17 @@ import (
 
 func TestStatQueuesSort(t *testing.T) {
 	sInsts := StatQueues{
-		&StatQueue{cfg: &engine.StatsConfig{ID: "FIRST", Weight: 30.0}},
-		&StatQueue{cfg: &engine.StatsConfig{ID: "SECOND", Weight: 40.0}},
-		&StatQueue{cfg: &engine.StatsConfig{ID: "THIRD", Weight: 30.0}},
-		&StatQueue{cfg: &engine.StatsConfig{ID: "FOURTH", Weight: 35.0}},
+		&StatQueue{sqp: &engine.StatQueueProfile{ID: "FIRST", Weight: 30.0}},
+		&StatQueue{sqp: &engine.StatQueueProfile{ID: "SECOND", Weight: 40.0}},
+		&StatQueue{sqp: &engine.StatQueueProfile{ID: "THIRD", Weight: 30.0}},
+		&StatQueue{sqp: &engine.StatQueueProfile{ID: "FOURTH", Weight: 35.0}},
 	}
 	sInsts.Sort()
 	eSInst := StatQueues{
-		&StatQueue{cfg: &engine.StatsConfig{ID: "SECOND", Weight: 40.0}},
-		&StatQueue{cfg: &engine.StatsConfig{ID: "FOURTH", Weight: 35.0}},
-		&StatQueue{cfg: &engine.StatsConfig{ID: "FIRST", Weight: 30.0}},
-		&StatQueue{cfg: &engine.StatsConfig{ID: "THIRD", Weight: 30.0}},
+		&StatQueue{sqp: &engine.StatQueueProfile{ID: "SECOND", Weight: 40.0}},
+		&StatQueue{sqp: &engine.StatQueueProfile{ID: "FOURTH", Weight: 35.0}},
+		&StatQueue{sqp: &engine.StatQueueProfile{ID: "FIRST", Weight: 30.0}},
+		&StatQueue{sqp: &engine.StatQueueProfile{ID: "THIRD", Weight: 30.0}},
 	}
 	if !reflect.DeepEqual(eSInst, sInsts) {
 		t.Errorf("expecting: %+v, received: %+v", eSInst, sInsts)

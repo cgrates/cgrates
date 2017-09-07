@@ -32,13 +32,13 @@ type StatQueues []*StatQueue
 
 // Sort is part of sort interface, sort based on Weight
 func (sis StatQueues) Sort() {
-	sort.Slice(sis, func(i, j int) bool { return sis[i].cfg.Weight > sis[j].cfg.Weight })
+	sort.Slice(sis, func(i, j int) bool { return sis[i].sqp.Weight > sis[j].sqp.Weight })
 }
 
 // remWithID removes the queue with ID from slice
 func (sis StatQueues) remWithID(qID string) {
 	for i, q := range sis {
-		if q.cfg.ID == qID {
+		if q.sqp.ID == qID {
 			copy(sis[i:], sis[i+1:])
 			sis[len(sis)-1] = nil
 			sis = sis[:len(sis)-1]
@@ -49,8 +49,8 @@ func (sis StatQueues) remWithID(qID string) {
 
 // NewStatQueue instantiates a StatQueue
 func NewStatQueue(sec *StatsEventCache, ms engine.Marshaler,
-	sqCfg *engine.StatsConfig, sqSM *engine.SQStoredMetrics) (si *StatQueue, err error) {
-	si = &StatQueue{sec: sec, ms: ms, cfg: sqCfg, sqMetrics: make(map[string]StatsMetric)}
+	sqCfg *engine.StatQueueProfile, sqSM *engine.SQStoredMetrics) (si *StatQueue, err error) {
+	si = &StatQueue{sec: sec, ms: ms, sqp: sqCfg, sqMetrics: make(map[string]StatsMetric)}
 	for _, metricID := range sqCfg.Metrics {
 		if si.sqMetrics[metricID], err = NewStatsMetric(metricID); err != nil {
 			return
@@ -58,7 +58,7 @@ func NewStatQueue(sec *StatsEventCache, ms engine.Marshaler,
 	}
 	if sqSM != nil {
 		for evID, ev := range sqSM.SEvents {
-			si.sec.Cache(evID, ev, si.cfg.ID)
+			si.sec.Cache(evID, ev, si.sqp.ID)
 		}
 		si.sqItems = sqSM.SQItems
 		for metricID := range si.sqMetrics {
@@ -85,7 +85,7 @@ type StatQueue struct {
 	sqItems   []*engine.SQItem
 	sqMetrics map[string]StatsMetric
 	ms        engine.Marshaler // used to get/set Metrics
-	cfg       *engine.StatsConfig
+	sqp       *engine.StatQueueProfile
 }
 
 // GetSQStoredMetrics retrieves the data used for store to DB
@@ -152,10 +152,10 @@ func (sq *StatQueue) remExpired() {
 
 // remOnQueueLength rems elements based on QueueLength setting
 func (sq *StatQueue) remOnQueueLength() {
-	if sq.cfg.QueueLength == 0 {
+	if sq.sqp.QueueLength == 0 {
 		return
 	}
-	if len(sq.sqItems) == sq.cfg.QueueLength { // reached limit, rem first element
+	if len(sq.sqItems) == sq.sqp.QueueLength { // reached limit, rem first element
 		itm := sq.sqItems[0]
 		sq.remEventWithID(itm.EventID)
 		itm = nil
