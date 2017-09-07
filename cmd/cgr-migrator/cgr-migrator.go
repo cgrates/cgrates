@@ -70,7 +70,7 @@ var (
 
 	dbDataEncoding = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
 	oldDBDataEncoding = flag.String("old_dbdata_encoding", "", "The encoding used to store object data in strings")
-	//nu salvez doar citesc din oldDb 
+	//TO DO: 
 	//dryRun          = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
 	//verbose         = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	//slice mapstring int  cate acc [0]am citit si [1]cate acc am scris

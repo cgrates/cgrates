@@ -19,11 +19,9 @@ package migrator
 
 import (
 	"fmt"
-	// /"log"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	//"gopkg.in/mgo.v2/bson"
 )
 
 type v1Action struct {
