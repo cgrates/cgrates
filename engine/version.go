@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
-	"log"
 )
 
 func CheckVersions(storage Storage) error {
@@ -30,10 +29,8 @@ func CheckVersions(storage Storage) error {
 		storage = dataStorage
 	}
 	storType := storage.GetStorageType()
-	log.Print(storType)
 	x := CurrentDBVersions(storType)
 	dbVersion, err := storage.GetVersions(utils.TBLVersions)
-	log.Print(dbVersion)
 	if err != nil {
 		// no data, write version
 		if err := storage.SetVersions(x, false); err != nil {
@@ -85,8 +82,6 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 		x = m
 	}
 	for y, val := range x {
-		log.Print("x:", vers[y], "y", curent[y])
-
 		if vers[y] != curent[y] {
 			return val
 		}
