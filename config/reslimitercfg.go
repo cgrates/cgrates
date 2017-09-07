@@ -27,7 +27,6 @@ type ResourceSConfig struct {
 	Enabled       bool
 	StatSConns    []*HaPoolConfig // Connections towards StatS
 	StoreInterval time.Duration   // Dump regularly from cache into dataDB
-	ShortCache    *CacheParamConfig
 }
 
 func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err error) {
@@ -46,12 +45,6 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 	}
 	if jsnCfg.Store_interval != nil {
 		if rlcfg.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
-			return
-		}
-	}
-	if jsnCfg.Short_cache != nil {
-		rlcfg.ShortCache = new(CacheParamConfig)
-		if err = rlcfg.ShortCache.loadFromJsonCfg(jsnCfg.Short_cache); err != nil {
 			return
 		}
 	}

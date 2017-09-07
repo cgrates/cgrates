@@ -439,12 +439,14 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheResources: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheEventResources: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(1 * time.Minute), StaticTTL: false},
 		utils.CacheTimings: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheStatSQueues: &CacheParamConfig{Limit: -1,
-			TTL: time.Duration(5 * time.Minute), StaticTTL: false, Precache: false},
-		utils.CacheStatSEventQueues: &CacheParamConfig{Limit: -1,
-			TTL: time.Duration(5 * time.Minute), StaticTTL: false, Precache: false},
+			TTL: time.Duration(1 * time.Minute), StaticTTL: false, Precache: false},
+		utils.CacheEventQueues: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(1 * time.Minute), StaticTTL: false},
 	}
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheConfig) {
 		t.Errorf("received: %s, \nexpecting: %s", utils.ToJSON(eCacheCfg), utils.ToJSON(cgrCfg.CacheConfig))
@@ -565,12 +567,9 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		Enabled:       false,
 		StatSConns:    []*HaPoolConfig{},
 		StoreInterval: 0,
-		ShortCache: &CacheParamConfig{Limit: -1,
-			TTL: time.Duration(1 * time.Minute), StaticTTL: false},
 	}
-
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
-		t.Errorf("expecting: %s, received: %s", utils.ToIJSON(eResLiCfg), utils.ToIJSON(cgrCfg.resourceSCfg))
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eResLiCfg), utils.ToJSON(cgrCfg.resourceSCfg))
 	}
 
 }
