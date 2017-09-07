@@ -118,6 +118,12 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheTimings: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
+		utils.CacheStatSQueues: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer("5m"), Static_ttl: utils.BoolPointer(false),
+			Precache: utils.BoolPointer(false)},
+		utils.CacheStatSEventQueues: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer("5m"), Static_ttl: utils.BoolPointer(false),
+			Precache: utils.BoolPointer(false)},
 	}
 
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
