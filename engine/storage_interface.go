@@ -38,6 +38,7 @@ type Storage interface {
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
 	SelectDatabase(dbName string) (err error)
+	GetStorageType() string
 }
 
 // OnlineStorage contains methods to use for administering online data

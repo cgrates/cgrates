@@ -88,3 +88,7 @@ func (self *PostgresStorage) notExtraFieldsExistsQry(field string) string {
 func (self *PostgresStorage) notExtraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" NOT (extra_fields ?'%s' AND (extra_fields ->> '%s') = '%s')", field, field, value)
 }
+
+func (self *PostgresStorage) GetStorageType() string {
+	return utils.POSTGRES
+}

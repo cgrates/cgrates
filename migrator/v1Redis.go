@@ -19,7 +19,6 @@ package migrator
 
 import (
 	"fmt"
-	//"log"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 

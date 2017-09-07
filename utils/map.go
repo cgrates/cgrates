@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-		"strings"
-		"strconv"
+	"strconv"
+	"strings"
 )
 
 // Converts map[string]string into map[string]interface{}
@@ -220,14 +220,14 @@ func (fmp FieldMultiplyFactor) Clone() (cln FieldMultiplyFactor) {
 	return
 }
 
-func MapStringToInt64(in map[string]string) (out map[string]int64, err error){
-mapout := make(map[string]int64, len(in))
+func MapStringToInt64(in map[string]string) (out map[string]int64, err error) {
+	mapout := make(map[string]int64, len(in))
 	for key, val := range in {
-	x,err:=strconv.Atoi(val)
-		if err!=nil{
-			return nil,err
+		x, err := strconv.Atoi(val)
+		if err != nil {
+			return nil, err
 		}
 		mapout[key] = int64(x)
 	}
-	return mapout,nil
+	return mapout, nil
 }

@@ -142,9 +142,32 @@ func testVersionsFlush(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	test := "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
-	currentVersion := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-	testVersion := Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	var test string
+	var currentVersion Versions
+	var testVersion Versions
+	storType := dataDb.GetStorageType()
+	switch storType {
+	case utils.MONGO:
+		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+	case utils.POSTGRES:
+		currentVersion = CurrentStorDBVersions()
+		testVersion = Versions{utils.COST_DETAILS: 1}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
+	case utils.MYSQL:
+		currentVersion = CurrentStorDBVersions()
+		testVersion = Versions{utils.COST_DETAILS: 1}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
+	case utils.REDIS:
+		currentVersion = CurrentDataDBVersions()
+		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+	case utils.MAPSTOR:
+		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+	}
 
 	//dataDB
 	if _, rcvErr := dataDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
@@ -174,6 +197,29 @@ func TestVersion(t *testing.T) {
 		t.Error(err)
 	}
 
+	storType = storDb.GetStorageType()
+	switch storType {
+	case utils.MONGO:
+		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+	case utils.POSTGRES:
+		currentVersion = CurrentStorDBVersions()
+		testVersion = Versions{utils.COST_DETAILS: 1}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
+	case utils.MYSQL:
+		currentVersion = CurrentStorDBVersions()
+		testVersion = Versions{utils.COST_DETAILS: 1}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
+	case utils.REDIS:
+		currentVersion = CurrentDataDBVersions()
+		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+	case utils.MAPSTOR:
+		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+	}
 	//storDB
 	if _, rcvErr := storDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

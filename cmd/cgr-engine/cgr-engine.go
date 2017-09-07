@@ -720,7 +720,7 @@ func main() {
 		}
 		defer dataDB.Close()
 		engine.SetDataStorage(dataDB)
-		if err := engine.CheckVersions(nil); err != nil {
+		if err := engine.CheckVersions(dataDB); err != nil {
 			fmt.Println(err.Error())
 			return
 		}
@@ -737,6 +737,10 @@ func main() {
 		loadDb = storDb.(engine.LoadStorage)
 		cdrDb = storDb.(engine.CdrStorage)
 		engine.SetCdrStorage(cdrDb)
+			if err := engine.CheckVersions(storDb); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 
 	engine.SetRoundingDecimals(cfg.RoundingDecimals)

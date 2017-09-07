@@ -18,5 +18,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 // type v1StorDB interface {
-
+// 	getV1CallCost() (v1CC *v1CallCost, err error)
 // }

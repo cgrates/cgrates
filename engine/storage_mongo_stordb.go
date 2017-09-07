@@ -1237,3 +1237,7 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	}
 	return nil
 }
+
+func (ms *MongoStorage) GetStorageType() string {
+	return utils.MONGO
+}

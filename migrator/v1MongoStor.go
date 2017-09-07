@@ -16,3 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package migrator
+
+// import (
+// 	"github.com/cgrates/cgrates/utils"
+// 	)
+// getV1CallCost() (v1CC *v1CallCost, err error){
+// 	return utils.ErrNotImplemented
+// }
