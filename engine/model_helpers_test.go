@@ -901,7 +901,7 @@ func TestAPItoTPStats(t *testing.T) {
 		Weight:             20.0,
 	}
 
-	eTPs := &StatsConfig{ID: tps.ID,
+	eTPs := &StatQueueProfile{ID: tps.ID,
 		QueueLength: tps.QueueLength,
 		Metrics:     []string{"*asr", "*acd", "*acc"},
 		Thresholds:  []string{"THRESH1", "THRESH2"},

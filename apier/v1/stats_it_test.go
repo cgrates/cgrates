@@ -37,7 +37,7 @@ var (
 	stsV1CfgPath string
 	stsV1Cfg     *config.CGRConfig
 	stsV1Rpc     *rpc.Client
-	statConfig   *engine.StatsConfig
+	statConfig   *engine.StatQueueProfile
 	stsV1ConfDIR string //run tests for specific configuration
 	statsDelay   int
 )
@@ -66,13 +66,13 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSFromFolder,
 	testV1STSGetStats,
 	testV1STSProcessEvent,
-	testV1STSGetStatConfigBeforeSet,
-	testV1STSSetStatConfig,
-	testV1STSGetStatAfterSet,
-	testV1STSUpdateStatConfig,
-	testV1STSGetStatAfterUpdate,
-	testV1STSRemoveStatConfig,
-	testV1STSGetStatConfigAfterRemove,
+	testV1STSGetStatQueueProfileBeforeSet,
+	testV1STSSetStatQueueProfile,
+	testV1STSGetStatQueueProfileAfterSet,
+	testV1STSUpdateStatQueueProfile,
+	testV1STSGetStatQueueProfileAfterUpdate,
+	testV1STSRemoveStatQueueProfile,
+	testV1STSGetStatQueueProfileAfterRemove,
 	testV1STSStopEngine,
 }
 
@@ -209,15 +209,15 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 }
 
-func testV1STSGetStatConfigBeforeSet(t *testing.T) {
-	var reply *engine.StatsConfig
-	if err := stsV1Rpc.Call("ApierV1.GetStatConfig", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+func testV1STSGetStatQueueProfileBeforeSet(t *testing.T) {
+	var reply *engine.StatQueueProfile
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testV1STSSetStatConfig(t *testing.T) {
-	statConfig = &engine.StatsConfig{
+func testV1STSSetStatQueueProfile(t *testing.T) {
+	statConfig = &engine.StatQueueProfile{
 		ID: "SCFG1",
 		Filters: []*engine.RequestFilter{
 			&engine.RequestFilter{
@@ -240,23 +240,23 @@ func testV1STSSetStatConfig(t *testing.T) {
 		Weight:      20,
 	}
 	var result string
-	if err := stsV1Rpc.Call("ApierV1.SetStatConfig", statConfig, &result); err != nil {
+	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testV1STSGetStatAfterSet(t *testing.T) {
-	var reply *engine.StatsConfig
-	if err := stsV1Rpc.Call("ApierV1.GetStatConfig", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err != nil {
+func testV1STSGetStatQueueProfileAfterSet(t *testing.T) {
+	var reply *engine.StatQueueProfile
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
 	}
 }
 
-func testV1STSUpdateStatConfig(t *testing.T) {
+func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	var result string
 	statConfig.Filters = []*engine.RequestFilter{
 		&engine.RequestFilter{
@@ -275,34 +275,34 @@ func testV1STSUpdateStatConfig(t *testing.T) {
 			Values:    []string{"10", "20"},
 		},
 	}
-	if err := stsV1Rpc.Call("ApierV1.SetStatConfig", statConfig, &result); err != nil {
+	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testV1STSGetStatAfterUpdate(t *testing.T) {
-	var reply *engine.StatsConfig
-	if err := stsV1Rpc.Call("ApierV1.GetStatConfig", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err != nil {
+func testV1STSGetStatQueueProfileAfterUpdate(t *testing.T) {
+	var reply *engine.StatQueueProfile
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
 	}
 }
 
-func testV1STSRemoveStatConfig(t *testing.T) {
+func testV1STSRemoveStatQueueProfile(t *testing.T) {
 	var resp string
-	if err := stsV1Rpc.Call("ApierV1.RemStatConfig", &AttrGetStatsCfg{ID: "SCFG1"}, &resp); err != nil {
+	if err := stsV1Rpc.Call("ApierV1.RemStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 }
 
-func testV1STSGetStatConfigAfterRemove(t *testing.T) {
-	var reply *engine.StatsConfig
-	if err := stsV1Rpc.Call("ApierV1.GetStatConfig", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+func testV1STSGetStatQueueProfileAfterRemove(t *testing.T) {
+	var reply *engine.StatQueueProfile
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

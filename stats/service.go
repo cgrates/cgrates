@@ -39,16 +39,16 @@ func init() {
 func NewStatService(dataDB engine.DataDB, ms engine.Marshaler, storeInterval time.Duration) (ss *StatService, err error) {
 	ss = &StatService{dataDB: dataDB, ms: ms, storeInterval: storeInterval,
 		stopStoring: make(chan struct{}), evCache: NewStatsEventCache()}
-	sqPrfxs, err := dataDB.GetKeysForPrefix(utils.StatsConfigPrefix)
+	sqPrfxs, err := dataDB.GetKeysForPrefix(utils.StatQueueProfilePrefix)
 	if err != nil {
 		return nil, err
 	}
 	ss.queuesCache = make(map[string]*StatQueue)
 	ss.queues = make(StatQueues, 0)
 	for _, prfx := range sqPrfxs {
-		if q, err := ss.loadQueue(prfx[len(utils.StatsConfigPrefix):]); err != nil {
+		if q, err := ss.loadQueue(prfx[len(utils.StatQueueProfilePrefix):]); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
-				q.cfg.ID, err.Error()))
+				q.sqp.ID, err.Error()))
 			continue
 		} else {
 			ss.setQueue(q)
@@ -92,7 +92,7 @@ func (ss *StatService) Shutdown() error {
 // setQueue adds or modifies a queue into cache
 // sort will reorder the ss.queues
 func (ss *StatService) loadQueue(qID string) (q *StatQueue, err error) {
-	sq, err := ss.dataDB.GetStatsConfig(qID)
+	sq, err := ss.dataDB.GetStatQueueProfile(qID)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (ss *StatService) loadQueue(qID string) (q *StatQueue, err error) {
 }
 
 func (ss *StatService) setQueue(q *StatQueue) {
-	ss.queuesCache[q.cfg.ID] = q
+	ss.queuesCache[q.sqp.ID] = q
 	ss.queues = append(ss.queues, q)
 }
 
@@ -121,14 +121,14 @@ func (ss *StatService) remQueue(qID string) (si *StatQueue) {
 // store stores the necessary storedMetrics to dataDB
 func (ss *StatService) storeMetrics() {
 	for _, si := range ss.queues {
-		if !si.cfg.Store || !si.dirty { // no need to save
+		if !si.sqp.Store || !si.dirty { // no need to save
 			continue
 		}
 		if siSM := si.GetStoredMetrics(); siSM != nil {
 			if err := ss.dataDB.SetSQStoredMetrics(siSM); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<StatService> failed saving StoredMetrics for QueueID: %s, error: %s",
-						si.cfg.ID, err.Error()))
+						si.sqp.ID, err.Error()))
 			}
 		}
 		// randomize the CPU load and give up thread control
@@ -159,9 +159,9 @@ func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
 		if err := stInst.ProcessEvent(ev); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
-					stInst.cfg.ID, evStatsID, err.Error()))
+					stInst.sqp.ID, evStatsID, err.Error()))
 		}
-		if stInst.cfg.Blocker {
+		if stInst.sqp.Blocker {
 			break
 		}
 	}
@@ -225,13 +225,13 @@ type ArgsLoadQueues struct {
 func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err error) {
 	qIDs := args.QueueIDs
 	if qIDs == nil {
-		sqPrfxs, err := ss.dataDB.GetKeysForPrefix(utils.StatsConfigPrefix)
+		sqPrfxs, err := ss.dataDB.GetKeysForPrefix(utils.StatQueueProfilePrefix)
 		if err != nil {
 			return err
 		}
 		queueIDs := make([]string, len(sqPrfxs))
 		for i, prfx := range sqPrfxs {
-			queueIDs[i] = prfx[len(utils.StatsConfigPrefix):]
+			queueIDs[i] = prfx[len(utils.StatQueueProfilePrefix):]
 		}
 		if len(queueIDs) != 0 {
 			qIDs = &queueIDs
@@ -247,7 +247,7 @@ func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err err
 		}
 		if q, err := ss.loadQueue(qID); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
-				q.cfg.ID, err.Error()))
+				q.sqp.ID, err.Error()))
 			continue
 		} else {
 			sQs = append(sQs, q)
