@@ -1273,30 +1273,6 @@ func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID strin
 	return
 }
 
-func (ms *MapStorage) SetStructVersion(v *StructVersion) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	var result []byte
-	result, err = ms.ms.Marshal(v)
-	if err != nil {
-		return
-	}
-	ms.dict[utils.VERSION_PREFIX+"struct"] = result
-	return
-}
-
-func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	rsv = &StructVersion{}
-	if values, ok := ms.dict[utils.VERSION_PREFIX+"struct"]; ok {
-		err = ms.ms.Unmarshal(values, &rsv)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
 func (ms *MapStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -1495,18 +1471,6 @@ func (ms *MapStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemID
 	return
 }
 
-func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
-	return
-}
-
-func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	return
-}
-
-func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
-	return
-}
-
 // GetStatsQueue retrieves a StatsQueue from dataDB
 func (ms *MapStorage) GetStatQueueProfile(sqID string) (scf *StatQueueProfile, err error) {
 	ms.mu.RLock()
@@ -1633,4 +1597,63 @@ func (ms *MapStorage) RemThresholdCfg(sqID string, transactionID string) (err er
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
+}
+
+func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	values, ok := ms.dict[itm]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &vrs)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	var result []byte
+	var x Versions
+	if !overwrite {
+		x, err = ms.GetVersions(utils.TBLVersions)
+		if err != nil {
+			return err
+		}
+		for key, _ := range vrs {
+			if x[key] != vrs[key] {
+				x[key] = vrs[key]
+			}
+		}
+		result, err = ms.ms.Marshal(x)
+		if err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return
+	} else {
+		result, err = ms.ms.Marshal(vrs)
+		if err != nil {
+			return err
+		}
+		if ms.RemoveVersions(vrs); err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return
+	}
+}
+
+func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, utils.TBLVersions)
+	return
+}
+
+func (ms *MapStorage) GetStorageType() string {
+	return utils.MAPSTOR
 }

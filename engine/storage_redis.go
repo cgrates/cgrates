@@ -1347,27 +1347,6 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
-	var result []byte
-	result, err = rs.ms.Marshal(v)
-	if err != nil {
-		return
-	}
-	return rs.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
-}
-
-func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
-	var values []byte
-	if values, err = rs.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			err = utils.ErrNotFound
-		}
-		return
-	}
-	err = rs.ms.Unmarshal(values, &rsv)
-	return
-}
-
 func (rs *RedisStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
 	key := utils.ResourceProfilesPrefix + id
 	if !skipCache {
@@ -1569,14 +1548,37 @@ func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 }
 
 func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
+	x, err := rs.Cmd("HGETALL", itm).Map()
+	if err != nil {
+		return nil, err
+	}
+	vrs, err = utils.MapStringToInt64(x)
+	if err != nil {
+		return nil, err
+	}
+	if len(vrs) == 0 {
+		return nil, utils.ErrNotFound
+	}
 	return
 }
 
 func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	return
+	if overwrite {
+		if err = rs.RemoveVersions(vrs); err != nil {
+			return
+		}
+	}
+	return rs.Cmd("HMSET", utils.TBLVersions, vrs).Err
 }
 
 func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
+	for key, _ := range vrs {
+		err = rs.Cmd("HDEL", utils.TBLVersions, key).Err
+		if err != nil {
+			return err
+		}
+	}
+
 	return
 }
 
@@ -1700,4 +1702,8 @@ func (rs *RedisStorage) RemThresholdCfg(ID string, transactionID string) (err er
 	err = rs.Cmd("DEL", key).Err
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
+}
+
+func (rs *RedisStorage) GetStorageType() string {
+	return utils.REDIS
 }

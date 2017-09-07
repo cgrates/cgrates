@@ -1,0 +1,49 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+package engine
+
+import (
+	"testing"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
+func TestVersionCompare(t *testing.T) {
+	x := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	y := Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	z := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 1, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	q := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 1, utils.COST_DETAILS: 2}
+	c := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 1}
+
+	message1 := y.Compare(x, utils.MONGO)
+	if message1 != "cgr-migrator -migrate=*accounts" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*accounts", message1)
+	}
+	message2 := z.Compare(x, utils.MONGO)
+	if message2 != "cgr-migrator -migrate=*action_plans" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*action_plans", message2)
+	}
+	message3 := q.Compare(x, utils.MONGO)
+	if message3 != "cgr-migrator -migrate=*shared_groups" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*shared_groups", message3)
+	}
+	message4 := c.Compare(x, utils.MONGO)
+	if message4 != "cgr-migrator -migrate=*cost_details" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*cost_details", message4)
+	}
+}

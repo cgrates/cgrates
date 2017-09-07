@@ -41,7 +41,11 @@ func InitDataDb(cfg *config.CGRConfig) error {
 		return err
 	}
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	CheckVersion(dataDB) // Write version before starting
+	 // Write version before starting
+		if err := CheckVersions(dataDB); err != nil {
+		return err
+	}
+
 	return nil
 }
 

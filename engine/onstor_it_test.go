@@ -1928,37 +1928,22 @@ func testOnStorITCRUDHistory(t *testing.T) {
 }
 
 func testOnStorITCRUDStructVersion(t *testing.T) {
-	cv := &StructVersion{
-		Destinations:     "1",
-		RatingPlans:      "1",
-		RatingProfiles:   "1",
-		Lcrs:             "1",
-		DerivedChargers:  "1",
-		Actions:          "1",
-		ActionPlans:      "1",
-		ActionTriggers:   "1",
-		SharedGroups:     "1",
-		Accounts:         "1",
-		CdrStats:         "1",
-		Users:            "1",
-		Alias:            "1",
-		PubSubs:          "1",
-		LoadHistory:      "1",
-		Cdrs:             "1",
-		SMCosts:          "1",
-		ResourceProfiles: "1",
-		Timings:          "1",
-	}
-	if _, rcvErr := onStor.GetStructVersion(); rcvErr != utils.ErrNotFound {
+	CurrentVersion := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	if _, rcvErr := onStor.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetStructVersion(CurrentVersion); err != nil {
+	if err := onStor.SetVersions(CurrentVersion, false); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetStructVersion(); err != nil {
+	if rcv, err := onStor.GetVersions(utils.TBLVersions); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(cv, rcv) {
-		t.Errorf("Expecting: %v, received: %v", cv, rcv)
+	} else if !reflect.DeepEqual(CurrentVersion, rcv) {
+		t.Errorf("Expecting: %v, received: %v", CurrentVersion, rcv)
+	} else if err = onStor.RemoveVersions(rcv); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
 	}
 }
 

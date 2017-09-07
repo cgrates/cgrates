@@ -38,6 +38,7 @@ type Storage interface {
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
 	SelectDatabase(dbName string) (err error)
+	GetStorageType() string
 }
 
 // OnlineStorage contains methods to use for administering online data
@@ -108,8 +109,6 @@ type DataDB interface {
 	RemoveTiming(string, string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetStructVersion() (*StructVersion, error)
-	SetStructVersion(*StructVersion) error
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
