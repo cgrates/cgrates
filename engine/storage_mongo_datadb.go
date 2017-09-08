@@ -61,6 +61,7 @@ const (
 	colRFI   = "request_filter_indexes"
 	colTmg   = "timings"
 	colRes   = "resources"
+	colStQs  = "statqueues"
 )
 
 var (
@@ -2082,11 +2083,11 @@ func (ms *MongoStorage) RemStatsConfig(sqID string) (err error) {
 	return
 }
 
-// GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
-func (ms *MongoStorage) GetSQStoredMetrics(sqmID string) (sqSM *SQStoredMetrics, err error) {
-	session, col := ms.conn(utils.SQStoredMetricsPrefix)
+// GetStatQueue retrieves a StatsQueue
+func (ms *MongoStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
+	session, col := ms.conn(colStQs)
 	defer session.Close()
-	if err = col.Find(bson.M{"sqid": sqmID}).One(&sqSM); err != nil {
+	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 		}
@@ -2096,16 +2097,16 @@ func (ms *MongoStorage) GetSQStoredMetrics(sqmID string) (sqSM *SQStoredMetrics,
 }
 
 // SetStoredSQ stores the metrics for a StatsQueue
-func (ms *MongoStorage) SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error) {
-	session, col := ms.conn(utils.SQStoredMetricsPrefix)
+func (ms *MongoStorage) SetStatQueue(sq *StatQueue) (err error) {
+	session, col := ms.conn(colStQs)
 	defer session.Close()
-	_, err = col.UpsertId(bson.M{"sqid": sqSM.SqID}, sqSM)
+	_, err = col.Upsert(bson.M{"id": sq.ID}, sq)
 	return
 }
 
-// RemSQStoredMetrics removes stored metrics for a StatsQueue
-func (ms *MongoStorage) RemSQStoredMetrics(sqmID string) (err error) {
-	session, col := ms.conn(utils.SQStoredMetricsPrefix)
+// RemStatQueue removes stored metrics for a StatsQueue
+func (ms *MongoStorage) RemStatQueue(sqmID string) (err error) {
+	session, col := ms.conn(colStQs)
 	defer session.Close()
 	err = col.Remove(bson.M{"sqid": sqmID})
 	return err

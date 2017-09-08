@@ -19,6 +19,7 @@ package engine
 
 import (
 	"errors"
+	"sort"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -28,14 +29,6 @@ import (
 type SQItem struct {
 	EventID    string     // Bounded to the original StatsEvent
 	ExpiryTime *time.Time // Used to auto-expire events
-}
-
-// SQStoredMetrics contains metrics saved in DB
-type SQStoredMetrics struct {
-	SqID      string                // StatsInstanceID
-	SEvents   map[string]StatsEvent // Events used by SQItems
-	SQItems   []*SQItem             // SQItems
-	SQMetrics map[string][]byte
 }
 
 // StatsConfig represents the configuration of a  StatsInstance in StatS
@@ -77,4 +70,124 @@ func (se StatsEvent) AnswerTime(timezone string) (at time.Time, err error) {
 		return at, errors.New("cannot cast to string")
 	}
 	return utils.ParseTimeDetectLayout(atStr, timezone)
+}
+
+// StatQueue represents an individual stats instance
+type StatQueue struct {
+	ID        string
+	SQItems   []*SQItem // SQItems
+	SQMetrics map[string]StatsMetric
+	sqItems   []*SQItem
+	sqPrfl    *StatsConfig
+	dirty     *bool // needs save
+}
+
+/*
+// GetSQStoredMetrics retrieves the data used for store to DB
+func (sq *StatQueue) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
+	sq.RLock()
+	defer sq.RUnlock()
+	sEvents := make(map[string]engine.StatsEvent)
+	var sItems []*engine.SQItem
+	for _, sqItem := range sq.sqItems { // make sure event is properly retrieved from cache
+		ev := sq.sec.GetEvent(sqItem.EventID)
+		if ev == nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> querying for storage eventID: %s, error: event not cached",
+				sqItem.EventID))
+			continue
+		}
+		sEvents[sqItem.EventID] = ev
+		sItems = append(sItems, sqItem)
+	}
+	sqSM = &engine.SQStoredMetrics{
+		SEvents:   sEvents,
+		SQItems:   sItems,
+		SQMetrics: make(map[string][]byte, len(sq.sqMetrics))}
+	for metricID, metric := range sq.sqMetrics {
+		var err error
+		if sqSM.SQMetrics[metricID], err = metric.GetMarshaled(sq.ms); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> querying for storage metricID: %s, error: %s",
+				metricID, err.Error()))
+			continue
+		}
+	}
+	return
+}
+
+// ProcessEvent processes a StatsEvent, returns true if processed
+func (sq *StatQueue) ProcessEvent(ev engine.StatsEvent) (err error) {
+	sq.Lock()
+	sq.remExpired()
+	sq.remOnQueueLength()
+	sq.addStatsEvent(ev)
+	sq.Unlock()
+	return
+}
+
+// remExpired expires items in queue
+func (sq *StatQueue) remExpired() {
+	var expIdx *int // index of last item to be expired
+	for i, item := range sq.sqItems {
+		if item.ExpiryTime == nil {
+			break
+		}
+		if item.ExpiryTime.After(time.Now()) {
+			break
+		}
+		sq.remEventWithID(item.EventID)
+		item = nil // garbage collected asap
+		expIdx = &i
+	}
+	if expIdx == nil {
+		return
+	}
+	nextValidIdx := *expIdx + 1
+	sq.sqItems = sq.sqItems[nextValidIdx:]
+}
+
+// remOnQueueLength rems elements based on QueueLength setting
+func (sq *StatQueue) remOnQueueLength() {
+	if sq.cfg.QueueLength == 0 {
+		return
+	}
+	if len(sq.sqItems) == sq.cfg.QueueLength { // reached limit, rem first element
+		itm := sq.sqItems[0]
+		sq.remEventWithID(itm.EventID)
+		itm = nil
+		sq.sqItems = sq.sqItems[1:]
+	}
+}
+
+// addStatsEvent computes metrics for an event
+func (sq *StatQueue) addStatsEvent(ev engine.StatsEvent) {
+	evID := ev.ID()
+	for metricID, metric := range sq.sqMetrics {
+		if err := metric.AddEvent(ev); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
+				metricID, evID, err.Error()))
+		}
+	}
+}
+
+// remStatsEvent removes an event from metrics
+func (sq *StatQueue) remEventWithID(evID string) {
+	ev := sq.sec.GetEvent(evID)
+	if ev == nil {
+		utils.Logger.Warning(fmt.Sprintf("<StatQueue> removing eventID: %s, error: event not cached", evID))
+		return
+	}
+	for metricID, metric := range sq.sqMetrics {
+		if err := metric.RemEvent(ev); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
+		}
+	}
+}
+*/
+
+// StatQueues is a sortable list of StatQueue
+type StatQueues []*StatQueue
+
+// Sort is part of sort interface, sort based on Weight
+func (sis StatQueues) Sort() {
+	sort.Slice(sis, func(i, j int) bool { return sis[i].sqPrfl.Weight > sis[j].sqPrfl.Weight })
 }

@@ -1564,36 +1564,36 @@ func (ms *MapStorage) RemStatsConfig(scfID string) (err error) {
 	return
 }
 
-// GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
-func (ms *MapStorage) GetSQStoredMetrics(sqID string) (sqSM *SQStoredMetrics, err error) {
+// GetStatQueue retrieves the stored metrics for a StatsQueue
+func (ms *MapStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	values, ok := ms.dict[utils.SQStoredMetricsPrefix+sqID]
+	values, ok := ms.dict[utils.StatQueuePrefix+sqID]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, &sqSM)
+	err = ms.ms.Unmarshal(values, &sq)
 	return
 }
 
-// SetStoredSQ stores the metrics for a StatsQueue
-func (ms *MapStorage) SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error) {
+// SetStatQueue stores the metrics for a StatsQueue
+func (ms *MapStorage) SetStatQueue(sq *StatQueue) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	var result []byte
-	result, err = ms.ms.Marshal(sqSM)
+	result, err = ms.ms.Marshal(sq)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.SQStoredMetricsPrefix+sqSM.SqID] = result
+	ms.dict[utils.StatQueuePrefix+sq.ID] = result
 	return
 }
 
-// RemSQStoredMetrics removes stored metrics for a StatsQueue
-func (ms *MapStorage) RemSQStoredMetrics(sqID string) (err error) {
+// RemStatQueue removes a StatsQueue
+func (ms *MapStorage) RemStatQueue(sqID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	delete(ms.dict, utils.SQStoredMetricsPrefix+sqID)
+	delete(ms.dict, utils.StatQueuePrefix+sqID)
 	return
 }
 

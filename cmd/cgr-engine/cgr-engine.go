@@ -39,7 +39,6 @@ import (
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessionmanager"
-	"github.com/cgrates/cgrates/stats"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -560,6 +559,7 @@ func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcCl
 	internalRsChan <- rsV1
 }
 
+/*
 // startStatService fires up the StatS
 func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dataDB engine.DataDB, ms engine.Marshaler, server *utils.Server, exitChan chan bool) {
@@ -582,6 +582,7 @@ func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cfg 
 	server.RpcRegister(stsV1)
 	internalStatSChan <- stsV1
 }
+*/
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
@@ -695,17 +696,6 @@ func main() {
 
 	// Init cache
 	cache.NewCache(cfg.CacheConfig)
-
-	var ms engine.Marshaler
-	if ms, err = engine.NewMarshaler(cfg.DBDataEncoding); err != nil {
-		log.Fatalf("error initializing marshaler: ", err)
-		return
-	}
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not start, error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
 
 	var dataDB engine.DataDB
 	var loadDb engine.LoadStorage
@@ -857,9 +847,9 @@ func main() {
 			internalStatSChan, cfg, dataDB, server, exitChan)
 	}
 
-	if cfg.StatSCfg().Enabled {
-		go startStatService(internalStatSChan, cfg, dataDB, ms, server, exitChan)
-	}
+	//if cfg.StatSCfg().Enabled {
+	//	go startStatService(internalStatSChan, cfg, dataDB, ms, server, exitChan)
+	//}
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan, internalHistorySChan,

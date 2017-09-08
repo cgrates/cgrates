@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package v1
 
+/*
 import (
 	"reflect"
 	"strings"
@@ -136,3 +137,4 @@ func (apierV1 *ApierV1) RemStatConfig(attrs AttrGetStatsCfg, reply *string) erro
 	return nil
 
 }
+*/
