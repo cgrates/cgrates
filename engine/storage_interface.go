@@ -38,6 +38,7 @@ type Storage interface {
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
 	SelectDatabase(dbName string) (err error)
+	GetStorageType() string
 }
 
 // OnlineStorage contains methods to use for administering online data
@@ -45,7 +46,7 @@ type DataDB interface {
 	Storage
 	Marshaler() Marshaler
 	HasData(string, string) (bool, error)
-	LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) error
+	LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan, string) error
 	GetRatingProfile(string, bool, string) (*RatingProfile, error)
@@ -80,7 +81,6 @@ type DataDB interface {
 	RemAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
-	LoadAccountingCache(alsIDs, rvAlsIDs, rspIDs, resIDs []string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
@@ -109,17 +109,12 @@ type DataDB interface {
 	RemoveTiming(string, string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetStructVersion() (*StructVersion, error)
-	SetStructVersion(*StructVersion) error
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
-	GetStatsConfig(sqID string) (sq *StatsConfig, err error)
-	SetStatsConfig(sq *StatsConfig) (err error)
-	RemStatsConfig(sqID string) (err error)
-	GetStatQueue(sqID string) (sqSM *StatQueue, err error)
-	SetStatQueue(sq *StatQueue) (err error)
-	RemStatQueue(sqID string) (err error)
+	GetStatQueueProfile(sqID string) (sq *StatQueueProfile, err error)
+	SetStatQueueProfile(sq *StatQueueProfile) (err error)
+	RemStatQueueProfile(sqID string) (err error)
 	GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error)
 	SetThresholdCfg(th *ThresholdCfg) (err error)
 	RemThresholdCfg(ID string, transactionID string) (err error)

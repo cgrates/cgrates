@@ -94,11 +94,11 @@ type AttrGetStatsCfg struct {
 }
 
 //GetStatConfig returns a stat configuration
-func (apierV1 *ApierV1) GetStatConfig(attr AttrGetStatsCfg, reply *engine.StatsConfig) error {
+func (apierV1 *ApierV1) GetStatQueueProfile(attr AttrGetStatsCfg, reply *engine.StatQueueProfile) error {
 	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sCfg, err := apierV1.DataDB.GetStatsConfig(attr.ID); err != nil {
+	if sCfg, err := apierV1.DataDB.GetStatQueueProfile(attr.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -110,11 +110,11 @@ func (apierV1 *ApierV1) GetStatConfig(attr AttrGetStatsCfg, reply *engine.StatsC
 }
 
 //SetStatConfig add a new stat configuration
-func (apierV1 *ApierV1) SetStatConfig(attr *engine.StatsConfig, reply *string) error {
+func (apierV1 *ApierV1) SetStatQueueProfile(attr *engine.StatQueueProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataDB.SetStatsConfig(attr); err != nil {
+	if err := apierV1.DataDB.SetStatQueueProfile(attr); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -123,11 +123,11 @@ func (apierV1 *ApierV1) SetStatConfig(attr *engine.StatsConfig, reply *string) e
 }
 
 //Remove a specific stat configuration
-func (apierV1 *ApierV1) RemStatConfig(attrs AttrGetStatsCfg, reply *string) error {
+func (apierV1 *ApierV1) RemStatQueueProfile(attrs AttrGetStatsCfg, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataDB.RemStatsConfig(attrs.ID); err != nil {
+	if err := apierV1.DataDB.RemStatQueueProfile(attrs.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

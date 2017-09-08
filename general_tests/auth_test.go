@@ -75,8 +75,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	}
 
 	cache.Flush()
-	dbAuth.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	dbAuth.LoadAccountingCache(nil, nil, nil, nil)
+	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

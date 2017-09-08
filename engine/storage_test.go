@@ -102,7 +102,7 @@ func TestStorageCacheRefresh(t *testing.T) {
 	dataStorage.GetDestination("T11", false, utils.NonTransactional)
 	dataStorage.SetDestination(&Destination{"T11", []string{"1"}}, utils.NonTransactional)
 	t.Log("Test cache refresh")
-	err := dataStorage.LoadRatingCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	err := dataStorage.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Error("Error cache rating: ", err)
 	}

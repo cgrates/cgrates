@@ -32,7 +32,7 @@ type SQItem struct {
 }
 
 // StatsConfig represents the configuration of a  StatsInstance in StatS
-type StatsConfig struct {
+type StatQueueProfile struct {
 	ID                 string // QueueID
 	Filters            []*RequestFilter
 	ActivationInterval *utils.ActivationInterval // Activation interval
@@ -78,7 +78,7 @@ type StatQueue struct {
 	SQItems   []*SQItem // SQItems
 	SQMetrics map[string]StatsMetric
 	sqItems   []*SQItem
-	sqPrfl    *StatsConfig
+	sqPrfl    *StatQueueProfile
 	dirty     *bool // needs save
 }
 

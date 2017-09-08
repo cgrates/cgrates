@@ -91,3 +91,15 @@ func TestIsEmpty(t *testing.T) {
 		t.Error("Expecting:", expected, ", received:", result)
 	}
 }
+
+func TestMapStringToInt64(t *testing.T) {
+	t1 := map[string]int64{"test": int64(21)}
+	t2 := map[string]string{"test": "21"}
+	t3, err := MapStringToInt64(t2)
+	if err != nil {
+		t.Error("Got Error: ", err)
+	}
+	if !reflect.DeepEqual(t1, t3) {
+		t.Errorf("Expecting: %+v, received: %+v", t1, t3)
+	}
+}

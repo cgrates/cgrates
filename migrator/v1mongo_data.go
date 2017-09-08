@@ -19,11 +19,9 @@ package migrator
 
 import (
 	"fmt"
-	//	"log"
-
-	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"gopkg.in/mgo.v2"
 )
 
@@ -43,7 +41,7 @@ type AtKeyValue struct {
 	Value v1ActionPlans
 }
 
-func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string) (v1ms *v1Mongo, err error) {
+func newv1MongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string) (v1ms *v1Mongo, err error) {
 	url := host
 	if port != "" {
 		url += ":" + port

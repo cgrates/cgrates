@@ -1867,19 +1867,23 @@ func testStorDBitCRUDVersions(t *testing.T) {
 	} else if len(rcv) != 1 || rcv[utils.COST_DETAILS] != 2 {
 		t.Errorf("Received: %+v", rcv)
 	}
-	if _, err := storDB.GetVersions("UNKNOWN"); err != nil {
+
+	if _, err := storDB.GetVersions("UNKNOWN"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
+
 	vrs = Versions{"UNKNOWN": 1}
 	if err := storDB.RemoveVersions(vrs); err != nil {
 		t.Error(err)
 	}
+
 	if err := storDB.RemoveVersions(nil); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := storDB.GetVersions(""); err != nil {
+
+	if rcv, err := storDB.GetVersions(""); err != utils.ErrNotFound {
 		t.Error(err)
-	} else if len(rcv) != 0 {
+	} else if rcv != nil {
 		t.Errorf("Received: %+v", rcv)
 	}
 

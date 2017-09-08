@@ -57,7 +57,7 @@ const (
 	colLht   = "load_history"
 	colVer   = "versions"
 	colRsP   = "resource_profiles"
-	colSts   = "stats"
+	colSqp   = "stat_queue_profiles"
 	colRFI   = "request_filter_indexes"
 	colTmg   = "timings"
 	colRes   = "resources"
@@ -326,7 +326,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
 		utils.ResourceProfilesPrefix:     colRsP,
-		utils.StatsPrefix:                colSts,
+		utils.StatsPrefix:                colStq,
 		utils.TimingsPrefix:              colTmg,
 		utils.ResourcesPrefix:            colRes,
 	}
@@ -418,7 +418,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	return nil
 }
 
-func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (ms *MongoStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.DESTINATION_PREFIX:         dstIDs,
 		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
@@ -431,20 +431,10 @@ func (ms *MongoStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.SHARED_GROUP_PREFIX:        sgIDs,
 		utils.LCR_PREFIX:                 lcrIDs,
 		utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
-	} {
-		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
-			return
-		}
-	}
-	return
-}
-
-func (ms *MongoStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
-	for key, ids := range map[string][]string{
-		utils.ALIASES_PREFIX:         alsIDs,
-		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourceProfilesPrefix: rpIDs,
-		utils.ResourcesPrefix:        resIDs,
+		utils.ALIASES_PREFIX:             alsIDs,
+		utils.REVERSE_ALIASES_PREFIX:     rvAlsIDs,
+		utils.ResourceProfilesPrefix:     rpIDs,
+		utils.ResourcesPrefix:            resIDs,
 	} {
 		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -642,14 +632,14 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result = append(result, utils.ResourcesPrefix+idResult.Id)
 		}
 	case utils.StatsPrefix:
-		iter := db.C(colSts).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.StatsPrefix+idResult.Id)
 		}
-	case utils.StatsConfigPrefix:
-		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+	case utils.StatQueueProfilePrefix:
+		iter := db.C(colSqp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.StatsConfigPrefix+idResult.Id)
+			result = append(result, utils.StatQueueProfilePrefix+idResult.Id)
 		}
 	case utils.AccountActionPlansPrefix:
 		iter := db.C(colAAp).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
@@ -1834,33 +1824,6 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (ms *MongoStorage) SetStructVersion(v *StructVersion) (err error) {
-	session, col := ms.conn(colVer)
-	defer session.Close()
-	_, err = col.Upsert(bson.M{"key": utils.VERSION_PREFIX + "struct"}, &struct {
-		Key   string
-		Value *StructVersion
-	}{utils.VERSION_PREFIX + "struct", v})
-	return
-}
-
-func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
-	var result struct {
-		Key   string
-		Value StructVersion
-	}
-	session, col := ms.conn(colVer)
-	defer session.Close()
-	if err = col.Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result); err != nil {
-		if err == mgo.ErrNotFound {
-			err = utils.ErrNotFound
-		}
-		return nil, err
-	}
-	rsv = &result.Value
-	return
-}
-
 func (ms *MongoStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
 	key := utils.ResourceProfilesPrefix + id
 	if !skipCache {
@@ -2046,10 +2009,10 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 }
 
 // GetStatsQueue retrieves a StatsQueue from dataDB
-func (ms *MongoStorage) GetStatsConfig(sqID string) (sq *StatsConfig, err error) {
-	session, col := ms.conn(utils.StatsConfigPrefix)
+func (ms *MongoStorage) GetStatQueueProfile(sqID string) (sq *StatQueueProfile, err error) {
+	session, col := ms.conn(utils.StatQueueProfilePrefix)
 	defer session.Close()
-	sq = new(StatsConfig)
+	sq = new(StatQueueProfile)
 	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
@@ -2065,16 +2028,16 @@ func (ms *MongoStorage) GetStatsConfig(sqID string) (sq *StatsConfig, err error)
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
-func (ms *MongoStorage) SetStatsConfig(sq *StatsConfig) (err error) {
-	session, col := ms.conn(utils.StatsConfigPrefix)
+func (ms *MongoStorage) SetStatQueueProfile(sq *StatQueueProfile) (err error) {
+	session, col := ms.conn(utils.StatQueueProfilePrefix)
 	defer session.Close()
 	_, err = col.UpsertId(bson.M{"id": sq.ID}, sq)
 	return
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MongoStorage) RemStatsConfig(sqID string) (err error) {
-	session, col := ms.conn(utils.StatsConfigPrefix)
+func (ms *MongoStorage) RemStatQueueProfile(sqID string) (err error) {
+	session, col := ms.conn(utils.StatQueueProfilePrefix)
 	err = col.Remove(bson.M{"id": sqID})
 	if err != nil {
 		return err

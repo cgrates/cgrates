@@ -16,3 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package migrator
+
+type V1DataDB interface {
+	getKeysForPrefix(prefix string) ([]string, error)
+	getv1Account() (v1Acnt *v1Account, err error)
+	setV1Account(x *v1Account) (err error)
+	getV1ActionPlans() (v1aps *v1ActionPlans, err error)
+	setV1ActionPlans(x *v1ActionPlans) (err error)
+	getV1Actions() (v1acs *v1Actions, err error)
+	setV1Actions(x *v1Actions) (err error)
+	getV1ActionTriggers() (v1acts *v1ActionTriggers, err error)
+	setV1ActionTriggers(x *v1ActionTriggers) (err error)
+	getV1SharedGroup() (v1acts *v1SharedGroup, err error)
+	setV1SharedGroup(x *v1SharedGroup) (err error)
+}

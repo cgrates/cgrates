@@ -12,7 +12,6 @@ import (
 type v1ActionTrigger struct {
 	Id            string // for visual identification
 	ThresholdType string //*min_counter, *max_counter, *min_balance, *max_balance
-	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc
 	ThresholdValue        float64
 	Recurrent             bool          // reset eexcuted flag each run
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
@@ -59,12 +58,12 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 		}
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.ACTION_TRIGGER_PREFIX]}
+	vrs := engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
 	if err = m.dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+			fmt.Sprintf("error: <%s> when updating ActionTriggers version into DataDB", err.Error()))
 	}
 	return
 

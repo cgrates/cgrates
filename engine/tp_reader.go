@@ -1945,14 +1945,14 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("Stats:")
+		log.Print("StatQueueProfile:")
 	}
 	for _, tpST := range tpr.stats {
 		st, err := APItoStats(tpST, tpr.timezone)
 		if err != nil {
 			return err
 		}
-		if err = tpr.dataStorage.SetStatsConfig(st); err != nil {
+		if err = tpr.dataStorage.SetStatQueueProfile(st); err != nil {
 			return err
 		}
 		if verbose {

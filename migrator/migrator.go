@@ -23,7 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB v1DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string) (m *Migrator, err error) {
+func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB V1DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -50,7 +50,7 @@ type Migrator struct {
 	storDB        engine.Storage
 	storDBType    string
 	mrshlr        engine.Marshaler
-	oldDataDB     v1DataDB
+	oldDataDB     V1DataDB
 	oldDataDBType string
 	oldStorDB     engine.Storage
 	oldStorDBType string
@@ -66,12 +66,19 @@ func (m *Migrator) Migrate(taskID string) (err error) {
 			utils.UnsupportedMigrationTask,
 			fmt.Sprintf("task <%s> is not a supported migration task", taskID))
 	case utils.MetaSetVersions:
-		if err := m.storDB.SetVersions(engine.CurrentStorDBVersions(), false); err != nil {
+		if err := m.storDB.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
 		}
+		if err := m.dataDB.SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
+		}
+
 	case utils.MetaCostDetails:
 		err = m.migrateCostDetails()
 	case utils.MetaAccounts:

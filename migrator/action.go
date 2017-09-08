@@ -19,11 +19,9 @@ package migrator
 
 import (
 	"fmt"
-	// /"log"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	//"gopkg.in/mgo.v2/bson"
 )
 
 type v1Action struct {
@@ -63,12 +61,12 @@ func (m *Migrator) migrateActions() (err error) {
 		}
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.ACTION_PREFIX]}
+	vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
 	if err = m.dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+			fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
 	}
 	return
 }

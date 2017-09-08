@@ -324,7 +324,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, st := range loader.stats {
-		rcv, err := loader.dataStorage.GetStatsConfig(k)
+		rcv, err := loader.dataStorage.GetStatQueueProfile(k)
 		if err != nil {
 			t.Error("Failed GetStatsQueue: ", err.Error())
 		}

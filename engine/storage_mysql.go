@@ -84,3 +84,7 @@ func (self *MySQLStorage) notExtraFieldsExistsQry(field string) string {
 func (self *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":\"%s\"%%'", field, value)
 }
+
+func (self *SQLStorage) GetStorageType() string {
+	return utils.MYSQL
+}

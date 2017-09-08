@@ -118,8 +118,8 @@ func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 	return rs.Cmd("SELECT", dbName).Err
 }
 
-func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
-	aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (rs *RedisStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
+	aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.DESTINATION_PREFIX:         dstIDs,
 		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
@@ -132,20 +132,10 @@ func (rs *RedisStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.SHARED_GROUP_PREFIX:        sgIDs,
 		utils.LCR_PREFIX:                 lcrIDs,
 		utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
-	} {
-		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
-			return
-		}
-	}
-	return
-}
-
-func (rs *RedisStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
-	for key, ids := range map[string][]string{
-		utils.ALIASES_PREFIX:         alsIDs,
-		utils.REVERSE_ALIASES_PREFIX: rvAlsIDs,
-		utils.ResourceProfilesPrefix: rpIDs,
-		utils.ResourcesPrefix:        resIDs,
+		utils.ALIASES_PREFIX:             alsIDs,
+		utils.REVERSE_ALIASES_PREFIX:     rvAlsIDs,
+		utils.ResourceProfilesPrefix:     rpIDs,
+		utils.ResourcesPrefix:            resIDs,
 	} {
 		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
 			return
@@ -1357,27 +1347,6 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
-	var result []byte
-	result, err = rs.ms.Marshal(v)
-	if err != nil {
-		return
-	}
-	return rs.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
-}
-
-func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
-	var values []byte
-	if values, err = rs.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			err = utils.ErrNotFound
-		}
-		return
-	}
-	err = rs.ms.Unmarshal(values, &rsv)
-	return
-}
-
 func (rs *RedisStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
 	key := utils.ResourceProfilesPrefix + id
 	if !skipCache {
@@ -1579,20 +1548,43 @@ func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 }
 
 func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
+	x, err := rs.Cmd("HGETALL", itm).Map()
+	if err != nil {
+		return nil, err
+	}
+	vrs, err = utils.MapStringToInt64(x)
+	if err != nil {
+		return nil, err
+	}
+	if len(vrs) == 0 {
+		return nil, utils.ErrNotFound
+	}
 	return
 }
 
 func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	return
+	if overwrite {
+		if err = rs.RemoveVersions(vrs); err != nil {
+			return
+		}
+	}
+	return rs.Cmd("HMSET", utils.TBLVersions, vrs).Err
 }
 
 func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
+	for key, _ := range vrs {
+		err = rs.Cmd("HDEL", utils.TBLVersions, key).Err
+		if err != nil {
+			return err
+		}
+	}
+
 	return
 }
 
 // GetStatsConfig retrieves a StatsConfig from dataDB
-func (rs *RedisStorage) GetStatsConfig(sqID string) (sq *StatsConfig, err error) {
-	key := utils.StatsConfigPrefix + sqID
+func (rs *RedisStorage) GetStatQueueProfile(sqID string) (sq *StatQueueProfile, err error) {
+	key := utils.StatQueueProfilePrefix + sqID
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil {
@@ -1612,18 +1604,18 @@ func (rs *RedisStorage) GetStatsConfig(sqID string) (sq *StatsConfig, err error)
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
-func (rs *RedisStorage) SetStatsConfig(sq *StatsConfig) (err error) {
+func (rs *RedisStorage) SetStatQueueProfile(sq *StatQueueProfile) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(sq)
 	if err != nil {
 		return
 	}
-	return rs.Cmd("SET", utils.StatsConfigPrefix+sq.ID, result).Err
+	return rs.Cmd("SET", utils.StatQueueProfilePrefix+sq.ID, result).Err
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (rs *RedisStorage) RemStatsConfig(sqID string) (err error) {
-	key := utils.StatsConfigPrefix + sqID
+func (rs *RedisStorage) RemStatQueueProfile(sqID string) (err error) {
+	key := utils.StatQueueProfilePrefix + sqID
 	err = rs.Cmd("DEL", key).Err
 	return
 }
@@ -1710,4 +1702,8 @@ func (rs *RedisStorage) RemThresholdCfg(ID string, transactionID string) (err er
 	err = rs.Cmd("DEL", key).Err
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
+}
+
+func (rs *RedisStorage) GetStorageType() string {
+	return utils.REDIS
 }

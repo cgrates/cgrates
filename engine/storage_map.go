@@ -146,7 +146,7 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
-func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs []string) (err error) {
+func (ms *MapStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
 	if ms.cacheCfg == nil {
 		return
 	}
@@ -155,7 +155,7 @@ func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, 
 		if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
 			utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
 			utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
-			utils.SHARED_GROUP_PREFIX}, k) && cacheCfg.Precache {
+			utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX}, k) && cacheCfg.Precache {
 			if err := ms.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 				return err
 			}
@@ -163,21 +163,6 @@ func (ms *MapStorage) LoadRatingCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, 
 	}
 	// add more prefixes if needed
 	return
-}
-
-func (ms *MapStorage) LoadAccountingCache(alsIDs, rvAlsIDs, rlIDs, resIDs []string) error {
-	if ms.cacheCfg == nil {
-		return nil
-	}
-	for k, cacheCfg := range ms.cacheCfg {
-		k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
-		if utils.IsSliceMember([]string{utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX}, k) && cacheCfg.Precache {
-			if err := ms.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {
@@ -1288,30 +1273,6 @@ func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID strin
 	return
 }
 
-func (ms *MapStorage) SetStructVersion(v *StructVersion) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	var result []byte
-	result, err = ms.ms.Marshal(v)
-	if err != nil {
-		return
-	}
-	ms.dict[utils.VERSION_PREFIX+"struct"] = result
-	return
-}
-
-func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	rsv = &StructVersion{}
-	if values, ok := ms.dict[utils.VERSION_PREFIX+"struct"]; ok {
-		err = ms.ms.Unmarshal(values, &rsv)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
 func (ms *MapStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -1510,23 +1471,11 @@ func (ms *MapStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemID
 	return
 }
 
-func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
-	return
-}
-
-func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	return
-}
-
-func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
-	return
-}
-
 // GetStatsQueue retrieves a StatsQueue from dataDB
-func (ms *MapStorage) GetStatsConfig(sqID string) (scf *StatsConfig, err error) {
+func (ms *MapStorage) GetStatQueueProfile(sqID string) (scf *StatQueueProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.StatsConfigPrefix + sqID
+	key := utils.StatQueueProfilePrefix + sqID
 	values, ok := ms.dict[key]
 	if !ok {
 		return nil, utils.ErrNotFound
@@ -1544,22 +1493,22 @@ func (ms *MapStorage) GetStatsConfig(sqID string) (scf *StatsConfig, err error) 
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
-func (ms *MapStorage) SetStatsConfig(scf *StatsConfig) (err error) {
+func (ms *MapStorage) SetStatQueueProfile(scf *StatQueueProfile) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(scf)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.StatsConfigPrefix+scf.ID] = result
+	ms.dict[utils.StatQueueProfilePrefix+scf.ID] = result
 	return
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MapStorage) RemStatsConfig(scfID string) (err error) {
+func (ms *MapStorage) RemStatQueueProfile(scfID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.StatsConfigPrefix + scfID
+	key := utils.StatQueueProfilePrefix + scfID
 	delete(ms.dict, key)
 	return
 }
@@ -1648,4 +1597,63 @@ func (ms *MapStorage) RemThresholdCfg(sqID string, transactionID string) (err er
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
+}
+
+func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	values, ok := ms.dict[itm]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &vrs)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	var result []byte
+	var x Versions
+	if !overwrite {
+		x, err = ms.GetVersions(utils.TBLVersions)
+		if err != nil {
+			return err
+		}
+		for key, _ := range vrs {
+			if x[key] != vrs[key] {
+				x[key] = vrs[key]
+			}
+		}
+		result, err = ms.ms.Marshal(x)
+		if err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return
+	} else {
+		result, err = ms.ms.Marshal(vrs)
+		if err != nil {
+			return err
+		}
+		if ms.RemoveVersions(vrs); err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return
+	}
+}
+
+func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, utils.TBLVersions)
+	return
+}
+
+func (ms *MapStorage) GetStorageType() string {
+	return utils.MAPSTOR
 }

@@ -58,19 +58,6 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db Storage, err error) {
 	var d Storage
 	switch db_type {
-	/*
-		case utils.REDIS:
-			var db_nb int
-			db_nb, err = strconv.Atoi(name)
-			if err != nil {
-				utils.Logger.Crit("Redis db name must be an integer!")
-				return nil, err
-			}
-			if port != "" {
-				host += ":" + port
-			}
-			d, err = NewRedisStorage(host, db_nb, pass, marshaler)
-	*/
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
 	case utils.POSTGRES:
