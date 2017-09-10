@@ -15,13 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package stats
+package engine
 
+/*
 import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -83,3 +83,4 @@ func TestASRGetValue(t *testing.T) {
 		t.Errorf("wrong asr value: %f", v)
 	}
 }
+*/

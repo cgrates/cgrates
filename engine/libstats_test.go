@@ -15,28 +15,26 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package stats
+package engine
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/cgrates/cgrates/engine"
 )
 
 func TestStatQueuesSort(t *testing.T) {
 	sInsts := StatQueues{
-		&StatQueue{sqp: &engine.StatQueueProfile{ID: "FIRST", Weight: 30.0}},
-		&StatQueue{sqp: &engine.StatQueueProfile{ID: "SECOND", Weight: 40.0}},
-		&StatQueue{sqp: &engine.StatQueueProfile{ID: "THIRD", Weight: 30.0}},
-		&StatQueue{sqp: &engine.StatQueueProfile{ID: "FOURTH", Weight: 35.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FIRST", Weight: 30.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "SECOND", Weight: 40.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "THIRD", Weight: 30.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FOURTH", Weight: 35.0}},
 	}
 	sInsts.Sort()
 	eSInst := StatQueues{
-		&StatQueue{sqp: &engine.StatQueueProfile{ID: "SECOND", Weight: 40.0}},
-		&StatQueue{sqp: &engine.StatQueueProfile{ID: "FOURTH", Weight: 35.0}},
-		&StatQueue{sqp: &engine.StatQueueProfile{ID: "FIRST", Weight: 30.0}},
-		&StatQueue{sqp: &engine.StatQueueProfile{ID: "THIRD", Weight: 30.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "SECOND", Weight: 40.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FOURTH", Weight: 35.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "FIRST", Weight: 30.0}},
+		&StatQueue{sqPrfl: &StatQueueProfile{ID: "THIRD", Weight: 30.0}},
 	}
 	if !reflect.DeepEqual(eSInst, sInsts) {
 		t.Errorf("expecting: %+v, received: %+v", eSInst, sInsts)

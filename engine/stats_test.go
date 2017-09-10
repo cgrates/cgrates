@@ -15,14 +15,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package stats
+package engine
 
+/*
 import (
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,8 +32,8 @@ func TestReqFilterPassStatS(t *testing.T) {
 		config.SetCgrConfig(cgrCfg)
 	}
 	dataStorage, _ := engine.NewMapStorage()
-	dataStorage.SetStatQueueProfile(
-		&engine.StatQueueProfile{ID: "CDRST1",
+	dataStorage.SetStatsConfig(
+		&engine.StatsConfig{ID: "CDRST1",
 			Filters: []*engine.RequestFilter{
 				&engine.RequestFilter{Type: engine.MetaString, FieldName: "Tenant",
 					Values: []string{"cgrates.org"}}},
@@ -75,3 +75,4 @@ func TestReqFilterPassStatS(t *testing.T) {
 		t.Error("Not passing")
 	}
 }
+*/

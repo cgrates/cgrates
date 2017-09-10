@@ -1620,9 +1620,9 @@ func (rs *RedisStorage) RemStatQueueProfile(sqID string) (err error) {
 	return
 }
 
-// GetSQStoredMetrics retrieves the stored metrics for a StatsQueue
-func (rs *RedisStorage) GetSQStoredMetrics(sqmID string) (sqSM *SQStoredMetrics, err error) {
-	key := utils.SQStoredMetricsPrefix + sqmID
+// GetStatQueue retrieves the stored metrics for a StatsQueue
+func (rs *RedisStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
+	key := utils.StatQueuePrefix + sqID
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil {
@@ -1630,25 +1630,25 @@ func (rs *RedisStorage) GetSQStoredMetrics(sqmID string) (sqSM *SQStoredMetrics,
 		}
 		return
 	}
-	if err = rs.ms.Unmarshal(values, &sqSM); err != nil {
+	if err = rs.ms.Unmarshal(values, &sq); err != nil {
 		return
 	}
 	return
 }
 
-// SetStoredSQ stores the metrics for a StatsQueue
-func (rs *RedisStorage) SetSQStoredMetrics(sqSM *SQStoredMetrics) (err error) {
+// SetStatQueue stores the metrics for a StatsQueue
+func (rs *RedisStorage) SetStatQueue(sq *StatQueue) (err error) {
 	var result []byte
-	result, err = rs.ms.Marshal(sqSM)
+	result, err = rs.ms.Marshal(sq)
 	if err != nil {
 		return
 	}
-	return rs.Cmd("SET", utils.SQStoredMetricsPrefix+sqSM.SqID, result).Err
+	return rs.Cmd("SET", utils.StatQueuePrefix+sq.ID, result).Err
 }
 
-// RemSQStoredMetrics removes stored metrics for a StatsQueue
-func (rs *RedisStorage) RemSQStoredMetrics(sqmID string) (err error) {
-	key := utils.SQStoredMetricsPrefix + sqmID
+// RemStatQueue removes a StatsQueue
+func (rs *RedisStorage) RemStatQueue(sqID string) (err error) {
+	key := utils.StatQueuePrefix + sqID
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

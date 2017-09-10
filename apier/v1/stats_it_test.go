@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package v1
 
+/*
 import (
 	"math/rand"
 	"net/rpc"
@@ -346,3 +347,4 @@ func BenchmarkStatSV1GetStringMetrics(b *testing.B) {
 		}
 	}
 }
+*/

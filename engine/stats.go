@@ -15,61 +15,37 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package stats
+
+package engine
 
 import (
-	"errors"
-	"fmt"
 	"math/rand"
-	"reflect"
-	"strings"
-	"sync"
 	"time"
-
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+/*
 // NewStatService initializes a StatService
-func NewStatService(dataDB engine.DataDB, ms engine.Marshaler, storeInterval time.Duration) (ss *StatService, err error) {
+func NewStatService(dataDB DataDB, ms Marshaler, storeInterval time.Duration) (ss *StatService, err error) {
 	ss = &StatService{dataDB: dataDB, ms: ms, storeInterval: storeInterval,
-		stopStoring: make(chan struct{}), evCache: NewStatsEventCache()}
-	sqPrfxs, err := dataDB.GetKeysForPrefix(utils.StatQueueProfilePrefix)
+		stopStoring: make(chan struct{})}
+	sqPrfxs, err := dataDB.GetKeysForPrefix(utils.StatsConfigPrefix)
 	if err != nil {
 		return nil, err
 	}
-	ss.queuesCache = make(map[string]*StatQueue)
-	ss.queues = make(StatQueues, 0)
-	for _, prfx := range sqPrfxs {
-		if q, err := ss.loadQueue(prfx[len(utils.StatQueueProfilePrefix):]); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
-				q.sqp.ID, err.Error()))
-			continue
-		} else {
-			ss.setQueue(q)
-		}
-	}
-	ss.queues.Sort()
 	go ss.dumpStoredMetrics() // start dumpStoredMetrics loop
 	return
 }
 
 // StatService builds stats for events
 type StatService struct {
-	sync.RWMutex
-	dataDB        engine.DataDB
-	ms            engine.Marshaler
+	dataDB        DataDB
+	ms            Marshaler
 	storeInterval time.Duration
 	stopStoring   chan struct{}
-	evCache       *StatsEventCache      // so we can pass it to queues
-	queuesCache   map[string]*StatQueue // unordered db of StatQueues, used for fast queries
-	queues        StatQueues            // ordered list of StatQueues
-
 }
 
 // ListenAndServe loops keeps the service alive
@@ -92,21 +68,15 @@ func (ss *StatService) Shutdown() error {
 // setQueue adds or modifies a queue into cache
 // sort will reorder the ss.queues
 func (ss *StatService) loadQueue(qID string) (q *StatQueue, err error) {
-	sq, err := ss.dataDB.GetStatQueueProfile(qID)
+	sq, err := ss.dataDB.GetStatsConfig(qID)
 	if err != nil {
 		return nil, err
-	}
-	var sqSM *engine.SQStoredMetrics
-	if sq.Store {
-		if sqSM, err = ss.dataDB.GetSQStoredMetrics(sq.ID); err != nil && err != utils.ErrNotFound {
-			return nil, err
-		}
 	}
 	return NewStatQueue(ss.evCache, ss.ms, sq, sqSM)
 }
 
 func (ss *StatService) setQueue(q *StatQueue) {
-	ss.queuesCache[q.sqp.ID] = q
+	ss.queuesCache[q.cfg.ID] = q
 	ss.queues = append(ss.queues, q)
 }
 
@@ -121,14 +91,14 @@ func (ss *StatService) remQueue(qID string) (si *StatQueue) {
 // store stores the necessary storedMetrics to dataDB
 func (ss *StatService) storeMetrics() {
 	for _, si := range ss.queues {
-		if !si.sqp.Store || !si.dirty { // no need to save
+		if !si.cfg.Store || !si.dirty { // no need to save
 			continue
 		}
 		if siSM := si.GetStoredMetrics(); siSM != nil {
 			if err := ss.dataDB.SetSQStoredMetrics(siSM); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<StatService> failed saving StoredMetrics for QueueID: %s, error: %s",
-						si.sqp.ID, err.Error()))
+						si.cfg.ID, err.Error()))
 			}
 		}
 		// randomize the CPU load and give up thread control
@@ -150,7 +120,7 @@ func (ss *StatService) dumpStoredMetrics() {
 }
 
 // processEvent processes a StatsEvent through the queues and caches it when needed
-func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
+func (ss *StatService) processEvent(ev StatsEvent) (err error) {
 	evStatsID := ev.ID()
 	if evStatsID == "" { // ID is mandatory
 		return errors.New("missing ID field")
@@ -159,9 +129,9 @@ func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
 		if err := stInst.ProcessEvent(ev); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
-					stInst.sqp.ID, evStatsID, err.Error()))
+					stInst.cfg.ID, evStatsID, err.Error()))
 		}
-		if stInst.sqp.Blocker {
+		if stInst.cfg.Blocker {
 			break
 		}
 	}
@@ -169,7 +139,7 @@ func (ss *StatService) processEvent(ev engine.StatsEvent) (err error) {
 }
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (ss *StatService) V1ProcessEvent(ev engine.StatsEvent, reply *string) (err error) {
+func (ss *StatService) V1ProcessEvent(ev StatsEvent, reply *string) (err error) {
 	if err = ss.processEvent(ev); err == nil {
 		*reply = utils.OK
 	}
@@ -225,13 +195,13 @@ type ArgsLoadQueues struct {
 func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err error) {
 	qIDs := args.QueueIDs
 	if qIDs == nil {
-		sqPrfxs, err := ss.dataDB.GetKeysForPrefix(utils.StatQueueProfilePrefix)
+		sqPrfxs, err := ss.dataDB.GetKeysForPrefix(utils.StatsConfigPrefix)
 		if err != nil {
 			return err
 		}
 		queueIDs := make([]string, len(sqPrfxs))
 		for i, prfx := range sqPrfxs {
-			queueIDs[i] = prfx[len(utils.StatQueueProfilePrefix):]
+			queueIDs[i] = prfx[len(utils.StatsConfigPrefix):]
 		}
 		if len(queueIDs) != 0 {
 			qIDs = &queueIDs
@@ -247,7 +217,7 @@ func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err err
 		}
 		if q, err := ss.loadQueue(qID); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
-				q.sqp.ID, err.Error()))
+				q.cfg.ID, err.Error()))
 			continue
 		} else {
 			sQs = append(sQs, q)
@@ -288,3 +258,5 @@ func (ss *StatService) Call(serviceMethod string, args interface{}, reply interf
 	}
 	return err
 }
+
+*/
