@@ -46,14 +46,16 @@ type StatMetric interface {
 	GetFloat64Value() (val float64)
 	AddEvent(ev StatEvent) error
 	RemEvent(evID string) error
+	Marshal(ms Marshaler) (marshaled []byte, err error)
+	LoadFromMarshaled(ms Marshaler, marshaled []byte) (err error)
 }
 
 func NewASR() (StatMetric, error) {
-	return new(ASRStat), nil
+	return new(StatASR), nil
 }
 
 // ASR implements AverageSuccessRatio metric
-type ASRStat struct {
+type StatASR struct {
 	Answered float64
 	Count    float64
 	Events   map[string]bool // map[EventID]Answered
@@ -61,7 +63,7 @@ type ASRStat struct {
 }
 
 // getValue returns asr.val
-func (asr *ASRStat) getValue() float64 {
+func (asr *StatASR) getValue() float64 {
 	if asr.val == nil {
 		if asr.Count == 0 {
 			asr.val = utils.Float64Pointer(float64(STATS_NA))
@@ -74,11 +76,11 @@ func (asr *ASRStat) getValue() float64 {
 }
 
 // GetValue returns the ASR value as part of StatMetric interface
-func (asr *ASRStat) GetValue() (v interface{}) {
+func (asr *StatASR) GetValue() (v interface{}) {
 	return asr.getValue()
 }
 
-func (asr *ASRStat) GetStringValue(fmtOpts string) (valStr string) {
+func (asr *StatASR) GetStringValue(fmtOpts string) (valStr string) {
 	if asr.Count == 0 {
 		return utils.NOT_AVAILABLE
 	}
@@ -86,12 +88,12 @@ func (asr *ASRStat) GetStringValue(fmtOpts string) (valStr string) {
 }
 
 // GetFloat64Value is part of StatMetric interface
-func (asr *ASRStat) GetFloat64Value() (val float64) {
+func (asr *StatASR) GetFloat64Value() (val float64) {
 	return asr.getValue()
 }
 
 // AddEvent is part of StatMetric interface
-func (asr *ASRStat) AddEvent(ev StatEvent) (err error) {
+func (asr *StatASR) AddEvent(ev StatEvent) (err error) {
 	var answered bool
 	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
@@ -107,7 +109,7 @@ func (asr *ASRStat) AddEvent(ev StatEvent) (err error) {
 	return
 }
 
-func (asr *ASRStat) RemEvent(evID string) (err error) {
+func (asr *StatASR) RemEvent(evID string) (err error) {
 	answered, has := asr.Events[evID]
 	if !has {
 		return utils.ErrNotFound
@@ -120,32 +122,46 @@ func (asr *ASRStat) RemEvent(evID string) (err error) {
 	return
 }
 
+func (asr *StatASR) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(asr)
+}
+func (asr *StatASR) LoadFromMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return
+}
+
 func NewACD() (StatMetric, error) {
-	return new(ACDStat), nil
+	return new(StatACD), nil
 }
 
 // ACD implements AverageCallDuration metric
-type ACDStat struct {
+type StatACD struct {
 	Sum   time.Duration
 	Count int
 }
 
-func (acd *ACDStat) GetStringValue(fmtOpts string) (val string) {
+func (acd *StatACD) GetStringValue(fmtOpts string) (val string) {
 	return
 }
 
-func (acd *ACDStat) GetValue() (v interface{}) {
+func (acd *StatACD) GetValue() (v interface{}) {
 	return
 }
 
-func (acd *ACDStat) GetFloat64Value() (v float64) {
+func (acd *StatACD) GetFloat64Value() (v float64) {
 	return float64(STATS_NA)
 }
 
-func (acd *ACDStat) AddEvent(ev StatEvent) (err error) {
+func (acd *StatACD) AddEvent(ev StatEvent) (err error) {
 	return
 }
 
-func (acd *ACDStat) RemEvent(evID string) (err error) {
+func (acd *StatACD) RemEvent(evID string) (err error) {
+	return
+}
+
+func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return
+}
+func (acd *StatACD) LoadFromMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return
 }

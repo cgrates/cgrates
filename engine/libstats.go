@@ -64,6 +64,72 @@ func (se StatEvent) AnswerTime(timezone string) (at time.Time, err error) {
 	return utils.ParseTimeDetectLayout(atStr, timezone)
 }
 
+// NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
+func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
+	sSQ = &StoredStatQueue{
+		Tenant: sq.Tenant,
+		ID:     sq.ID,
+		SQItems: make([]struct {
+			EventID    string
+			ExpiryTime *time.Time
+		}, len(sq.SQItems)),
+		SQMetrics: make(map[string][]byte, len(sq.SQMetrics)),
+	}
+	for i, sqItm := range sq.SQItems {
+		sSQ.SQItems[i] = sqItm
+	}
+	for metricID, metric := range sq.SQMetrics {
+		if marshaled, err := metric.Marshal(ms); err != nil {
+			return nil, err
+		} else {
+			sSQ.SQMetrics[metricID] = marshaled
+		}
+	}
+	return
+}
+
+// StoredStatQueue differs from StatQueue due to serialization of SQMetrics
+type StoredStatQueue struct {
+	Tenant  string
+	ID      string
+	SQItems []struct {
+		EventID    string     // Bounded to the original StatEvent
+		ExpiryTime *time.Time // Used to auto-expire events
+	}
+	SQMetrics map[string][]byte
+}
+
+// SqID will compose the unique identifier for the StatQueue out of Tenant and ID
+func (ssq *StoredStatQueue) SqID() string {
+	return utils.ConcatenatedKey(ssq.Tenant, ssq.ID)
+}
+
+// AsStatQueue converts into StatQueue unmarshaling SQMetrics
+func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error) {
+	sq = &StatQueue{
+		Tenant: ssq.Tenant,
+		ID:     ssq.ID,
+		SQItems: make([]struct {
+			EventID    string
+			ExpiryTime *time.Time
+		}, len(ssq.SQItems)),
+		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
+	}
+	for i, sqItm := range ssq.SQItems {
+		sq.SQItems[i] = sqItm
+	}
+	for metricID, marshaled := range ssq.SQMetrics {
+		if metric, err := NewStatMetric(metricID); err != nil {
+			return nil, err
+		} else if err := metric.LoadFromMarshaled(ms, marshaled); err != nil {
+			return nil, err
+		} else {
+			sq.SQMetrics[metricID] = metric
+		}
+	}
+	return
+}
+
 // StatQueue represents an individual stats instance
 type StatQueue struct {
 	Tenant  string
@@ -75,6 +141,11 @@ type StatQueue struct {
 	SQMetrics map[string]StatMetric
 	sqPrfl    *StatQueueProfile
 	dirty     *bool // needs save
+}
+
+// SqID will compose the unique identifier for the StatQueue out of Tenant and ID
+func (sq *StatQueue) SqID() string {
+	return utils.ConcatenatedKey(sq.Tenant, sq.ID)
 }
 
 /*

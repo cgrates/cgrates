@@ -89,8 +89,8 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDTiming,
 	testOnStorITCRUDHistory,
 	testOnStorITCRUDStructVersion,
-	testOnStorITCRUDSQStoredMetrics,
 	testOnStorITCRUDStatQueueProfile,
+	testOnStorITCRUDStoredStatQueue,
 	testOnStorITCRUDThresholdCfg,
 }
 
@@ -1947,32 +1947,6 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDSQStoredMetrics(t *testing.T) {
-	sqm := &SQStoredMetrics{
-		SqID:      "test",
-		SEvents:   map[string]StatsEvent{},
-		SQItems:   []*SQItem{},
-		SQMetrics: map[string][]byte{},
-	}
-	if _, rcvErr := onStor.GetSQStoredMetrics(sqm.SqID); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.SetSQStoredMetrics(sqm); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := onStor.GetSQStoredMetrics(sqm.SqID); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sqm, rcv) {
-		t.Errorf("Expecting: %v, received: %v", sqm, rcv)
-	}
-	if err := onStor.RemSQStoredMetrics(sqm.SqID); err != nil {
-		t.Error(err)
-	}
-	if _, rcvErr := onStor.GetSQStoredMetrics(sqm.SqID); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-}
-
 func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	timeTTL := time.Duration(0 * time.Second)
 	sq := &StatQueueProfile{
@@ -2012,6 +1986,50 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 		t.Error("Should not be in cache")
 	}
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.ID); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDStoredStatQueue(t *testing.T) {
+	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local())
+	asr := &StatASR{
+		Answered: 2,
+		Count:    3,
+		Events: map[string]bool{
+			"cgrates.org:ev1": true,
+			"cgrates.org:ev2": true,
+			"cgrates.org:ev3": false,
+		},
+	}
+	msrshled, err := asr.Marshal(onStor.Marshaler())
+	if err != nil {
+		t.Error(err)
+	}
+	sq := &StoredStatQueue{
+		Tenant: "cgrates.org",
+		ID:     "testOnStorITCRUDStatQueue",
+		SQItems: []struct {
+			EventID    string     // Bounded to the original StatEvent
+			ExpiryTime *time.Time // Used to auto-expire events
+		}{{EventID: "cgrates.org:ev1", ExpiryTime: eTime},
+			{EventID: "cgrates.org:ev2", ExpiryTime: eTime},
+			{EventID: "cgrates.org:ev3", ExpiryTime: eTime}},
+		SQMetrics: map[string][]byte{
+			utils.MetaASR: msrshled,
+		},
+	}
+	if err := onStor.SetStoredStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetStoredStatQueue(sq.Tenant, sq.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(sq, rcv) {
+		t.Errorf("Expecting: %v, received: %v", sq, rcv)
+	}
+	if err := onStor.RemStoredStatQueue(sq.Tenant, sq.ID); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetStoredStatQueue(sq.Tenant, sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

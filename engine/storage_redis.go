@@ -1620,9 +1620,9 @@ func (rs *RedisStorage) RemStatQueueProfile(sqID string) (err error) {
 	return
 }
 
-// GetStatQueue retrieves the stored metrics for a StatsQueue
-func (rs *RedisStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
-	key := utils.StatQueuePrefix + sqID
+// GetStoredStatQueue retrieves the stored metrics for a StatsQueue
+func (rs *RedisStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error) {
+	key := utils.StatQueuePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil {
@@ -1636,19 +1636,19 @@ func (rs *RedisStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
 	return
 }
 
-// SetStatQueue stores the metrics for a StatsQueue
-func (rs *RedisStorage) SetStatQueue(sq *StatQueue) (err error) {
+// SetStoredStatQueue stores the metrics for a StatsQueue
+func (rs *RedisStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(sq)
 	if err != nil {
 		return
 	}
-	return rs.Cmd("SET", utils.StatQueuePrefix+sq.ID, result).Err
+	return rs.Cmd("SET", utils.StatQueuePrefix+sq.SqID(), result).Err
 }
 
 // RemStatQueue removes a StatsQueue
-func (rs *RedisStorage) RemStatQueue(sqID string) (err error) {
-	key := utils.StatQueuePrefix + sqID
+func (rs *RedisStorage) RemStoredStatQueue(tenant, id string) (err error) {
+	key := utils.StatQueuePrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
