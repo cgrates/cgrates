@@ -121,7 +121,7 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 	for metricID, marshaled := range ssq.SQMetrics {
 		if metric, err := NewStatMetric(metricID); err != nil {
 			return nil, err
-		} else if err := metric.LoadFromMarshaled(ms, marshaled); err != nil {
+		} else if err := metric.LoadMarshaled(ms, marshaled); err != nil {
 			return nil, err
 		} else {
 			sq.SQMetrics[metricID] = metric

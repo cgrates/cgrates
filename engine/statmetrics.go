@@ -47,7 +47,7 @@ type StatMetric interface {
 	AddEvent(ev StatEvent) error
 	RemEvent(evID string) error
 	Marshal(ms Marshaler) (marshaled []byte, err error)
-	LoadFromMarshaled(ms Marshaler, marshaled []byte) (err error)
+	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 }
 
 func NewASR() (StatMetric, error) {
@@ -122,11 +122,14 @@ func (asr *StatASR) RemEvent(evID string) (err error) {
 	return
 }
 
+// Marshal is part of StatMetric interface
 func (asr *StatASR) Marshal(ms Marshaler) (marshaled []byte, err error) {
 	return ms.Marshal(asr)
 }
-func (asr *StatASR) LoadFromMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return
+
+// LoadMarshaled is part of StatMetric interface
+func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, asr)
 }
 
 func NewACD() (StatMetric, error) {
@@ -162,6 +165,6 @@ func (acd *StatACD) RemEvent(evID string) (err error) {
 func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 	return
 }
-func (acd *StatACD) LoadFromMarshaled(ms Marshaler, marshaled []byte) (err error) {
+func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return
 }
