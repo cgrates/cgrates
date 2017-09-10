@@ -199,7 +199,6 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 		tx.Commit()
 		return nil
 	}
-	utils.Logger.Debug(fmt.Sprintf("#Rem sterge %s", tpid))
 	// Remove from a single table
 	tx = tx.Table(table).Where("tpid = ?", tpid)
 	// Compose filters

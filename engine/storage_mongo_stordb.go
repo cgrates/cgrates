@@ -19,13 +19,12 @@ package engine
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
-	"time"
-
 	"github.com/cgrates/cgrates/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"regexp"
+	"strings"
+	"time"
 )
 
 func (ms *MongoStorage) GetTpIds() ([]string, error) {
@@ -63,7 +62,11 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	for k, v := range filter {
 		findMap[k] = v
 	}
-
+	for k, v := range distinct { //fix for MongoStorage on TPUsers
+		if v == "user_name" {
+			distinct[k] = "username"
+		}
+	}
 	if pag != nil && pag.SearchTerm != "" {
 		var searchItems []bson.M
 		for _, d := range distinct {
@@ -521,6 +524,13 @@ func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) er
 	if args == nil {
 		args = make(map[string]string)
 	}
+	for arg, val := range args { //fix for Mongo TPUsers tables
+		if arg == "user_name" {
+			delete(args, arg)
+			args["username"] = val
+		}
+	}
+
 	if _, has := args["tag"]; has { // API uses tag to be compatible with SQL models, fix it here
 		args["id"] = args["tag"]
 		delete(args, "tag")
