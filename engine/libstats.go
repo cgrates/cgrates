@@ -25,14 +25,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SQItem represents one item in the stats queue
-type SQItem struct {
-	EventID    string     // Bounded to the original StatsEvent
-	ExpiryTime *time.Time // Used to auto-expire events
-}
-
 // StatsConfig represents the configuration of a  StatsInstance in StatS
 type StatQueueProfile struct {
+	Tenant             string
 	ID                 string // QueueID
 	Filters            []*RequestFilter
 	ActivationInterval *utils.ActivationInterval // Activation interval
@@ -46,19 +41,16 @@ type StatQueueProfile struct {
 	Weight             float64
 }
 
-// StatsEvent is an event received by StatService
-type StatsEvent map[string]interface{}
-
-func (se StatsEvent) ID() (id string) {
-	if sID, has := se[utils.ID]; has {
-		id = sID.(string)
-	}
-	return
+// StatEvent is an event processed by StatService
+type StatEvent struct {
+	Tenant string
+	ID     string
+	Fields map[string]interface{}
 }
 
-// AnswerTime returns the AnswerTime of StatsEvent
-func (se StatsEvent) AnswerTime(timezone string) (at time.Time, err error) {
-	atIf, has := se[utils.ANSWER_TIME]
+// AnswerTime returns the AnswerTime of StatEvent
+func (se StatEvent) AnswerTime(timezone string) (at time.Time, err error) {
+	atIf, has := se.Fields[utils.ANSWER_TIME]
 	if !has {
 		return at, utils.ErrNotFound
 	}
@@ -74,10 +66,13 @@ func (se StatsEvent) AnswerTime(timezone string) (at time.Time, err error) {
 
 // StatQueue represents an individual stats instance
 type StatQueue struct {
-	ID        string
-	SQItems   []*SQItem // SQItems
-	SQMetrics map[string]StatsMetric
-	sqItems   []*SQItem
+	Tenant  string
+	ID      string
+	SQItems []struct {
+		EventID    string     // Bounded to the original StatEvent
+		ExpiryTime *time.Time // Used to auto-expire events
+	}
+	SQMetrics map[string]StatMetric
 	sqPrfl    *StatQueueProfile
 	dirty     *bool // needs save
 }
@@ -87,7 +82,7 @@ type StatQueue struct {
 func (sq *StatQueue) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
 	sq.RLock()
 	defer sq.RUnlock()
-	sEvents := make(map[string]engine.StatsEvent)
+	sEvents := make(map[string]engine.StatEvent)
 	var sItems []*engine.SQItem
 	for _, sqItem := range sq.sqItems { // make sure event is properly retrieved from cache
 		ev := sq.sec.GetEvent(sqItem.EventID)
@@ -114,12 +109,12 @@ func (sq *StatQueue) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
 	return
 }
 
-// ProcessEvent processes a StatsEvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(ev engine.StatsEvent) (err error) {
+// ProcessEvent processes a StatEvent, returns true if processed
+func (sq *StatQueue) ProcessEvent(ev engine.StatEvent) (err error) {
 	sq.Lock()
 	sq.remExpired()
 	sq.remOnQueueLength()
-	sq.addStatsEvent(ev)
+	sq.addStatEvent(ev)
 	sq.Unlock()
 	return
 }
@@ -158,8 +153,8 @@ func (sq *StatQueue) remOnQueueLength() {
 	}
 }
 
-// addStatsEvent computes metrics for an event
-func (sq *StatQueue) addStatsEvent(ev engine.StatsEvent) {
+// addStatEvent computes metrics for an event
+func (sq *StatQueue) addStatEvent(ev engine.StatEvent) {
 	evID := ev.ID()
 	for metricID, metric := range sq.sqMetrics {
 		if err := metric.AddEvent(ev); err != nil {
@@ -169,7 +164,7 @@ func (sq *StatQueue) addStatsEvent(ev engine.StatsEvent) {
 	}
 }
 
-// remStatsEvent removes an event from metrics
+// remStatEvent removes an event from metrics
 func (sq *StatQueue) remEventWithID(evID string) {
 	ev := sq.sec.GetEvent(evID)
 	if ev == nil {
