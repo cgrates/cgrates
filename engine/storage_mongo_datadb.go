@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package engine
 
 import (
@@ -2046,11 +2047,11 @@ func (ms *MongoStorage) RemStatQueueProfile(sqID string) (err error) {
 	return
 }
 
-// GetStatQueue retrieves a StatsQueue
-func (ms *MongoStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
+// GetStoredStatQueue retrieves a StoredStatQueue
+func (ms *MongoStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error) {
 	session, col := ms.conn(colStQs)
 	defer session.Close()
-	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 		}
@@ -2059,19 +2060,22 @@ func (ms *MongoStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
 	return
 }
 
-// SetStoredSQ stores the metrics for a StatsQueue
-func (ms *MongoStorage) SetStatQueue(sq *StatQueue) (err error) {
+// SetStoredStatQueue stores the metrics for a StoredStatQueue
+func (ms *MongoStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
 	session, col := ms.conn(colStQs)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"id": sq.ID}, sq)
+	_, err = col.Upsert(bson.M{"tenant": sq.Tenant, "id": sq.ID}, sq)
 	return
 }
 
-// RemStatQueue removes stored metrics for a StatsQueue
-func (ms *MongoStorage) RemStatQueue(sqmID string) (err error) {
+// RemStatQueue removes stored metrics for a StoredStatQueue
+func (ms *MongoStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	session, col := ms.conn(colStQs)
 	defer session.Close()
-	err = col.Remove(bson.M{"sqid": sqmID})
+	err = col.Remove(bson.M{"tenant": tenant, "id": id})
+	if err == mgo.ErrNotFound {
+		err = utils.ErrNotFound
+	}
 	return err
 }
 

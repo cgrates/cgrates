@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package engine
 
 import (
@@ -115,6 +116,9 @@ type DataDB interface {
 	GetStatQueueProfile(sqID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfile(sq *StatQueueProfile) (err error)
 	RemStatQueueProfile(sqID string) (err error)
+	GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error)
+	SetStoredStatQueue(sq *StoredStatQueue) (err error)
+	RemStoredStatQueue(tenant, id string) (err error)
 	GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error)
 	SetThresholdCfg(th *ThresholdCfg) (err error)
 	RemThresholdCfg(ID string, transactionID string) (err error)

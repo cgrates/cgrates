@@ -26,10 +26,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewStatsMetrics instantiates the StatsMetrics
+// NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
-func NewStatsMetric(metricID string) (sm StatsMetric, err error) {
-	metrics := map[string]func() (StatsMetric, error){
+func NewStatMetric(metricID string) (sm StatMetric, err error) {
+	metrics := map[string]func() (StatMetric, error){
 		utils.MetaASR: NewASR,
 		utils.MetaACD: NewACD,
 	}
@@ -39,111 +39,132 @@ func NewStatsMetric(metricID string) (sm StatsMetric, err error) {
 	return metrics[metricID]()
 }
 
-// StatsMetric is the interface which a metric should implement
-type StatsMetric interface {
+// StatMetric is the interface which a metric should implement
+type StatMetric interface {
 	GetValue() interface{}
 	GetStringValue(fmtOpts string) (val string)
 	GetFloat64Value() (val float64)
-	AddEvent(ev StatsEvent) error
-	RemEvent(ev StatsEvent) error
-	GetMarshaled(ms Marshaler) (vals []byte, err error)
-	SetFromMarshaled(vals []byte, ms Marshaler) (err error) // mostly used to load from DB
+	AddEvent(ev StatEvent) error
+	RemEvent(evID string) error
+	Marshal(ms Marshaler) (marshaled []byte, err error)
+	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 }
 
-func NewASR() (StatsMetric, error) {
-	return new(ASRStat), nil
+func NewASR() (StatMetric, error) {
+	return new(StatASR), nil
 }
 
 // ASR implements AverageSuccessRatio metric
-type ASRStat struct {
+type StatASR struct {
 	Answered float64
 	Count    float64
+	Events   map[string]bool // map[EventID]Answered
+	val      *float64        // cached ASR value
 }
 
-func (asr *ASRStat) GetValue() (v interface{}) {
-	if asr.Count == 0 {
-		return float64(STATS_NA)
+// getValue returns asr.val
+func (asr *StatASR) getValue() float64 {
+	if asr.val == nil {
+		if asr.Count == 0 {
+			asr.val = utils.Float64Pointer(float64(STATS_NA))
+		} else {
+			asr.val = utils.Float64Pointer(utils.Round((asr.Answered / asr.Count * 100),
+				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+		}
 	}
-	return utils.Round((asr.Answered / asr.Count * 100),
-		config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+	return *asr.val
 }
 
-func (asr *ASRStat) GetStringValue(fmtOpts string) (valStr string) {
+// GetValue returns the ASR value as part of StatMetric interface
+func (asr *StatASR) GetValue() (v interface{}) {
+	return asr.getValue()
+}
+
+func (asr *StatASR) GetStringValue(fmtOpts string) (valStr string) {
 	if asr.Count == 0 {
 		return utils.NOT_AVAILABLE
 	}
-	val := asr.GetValue().(float64)
-	return fmt.Sprintf("%v%%", val) // %v will automatically limit the number of decimals printed
+	return fmt.Sprintf("%v%%", asr.getValue()) // %v will automatically limit the number of decimals printed
 }
 
-func (asr *ASRStat) GetFloat64Value() (val float64) {
-	return asr.GetValue().(float64)
+// GetFloat64Value is part of StatMetric interface
+func (asr *StatASR) GetFloat64Value() (val float64) {
+	return asr.getValue()
 }
 
-func (asr *ASRStat) AddEvent(ev StatsEvent) (err error) {
+// AddEvent is part of StatMetric interface
+func (asr *StatASR) AddEvent(ev StatEvent) (err error) {
+	var answered bool
 	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
-		asr.Answered += 1
+		answered = true
 	}
 	asr.Count += 1
+	if answered {
+		asr.Answered += 1
+	}
+	asr.val = nil
 	return
 }
 
-func (asr *ASRStat) RemEvent(ev StatsEvent) (err error) {
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
-		return err
-	} else if !at.IsZero() {
+func (asr *StatASR) RemEvent(evID string) (err error) {
+	answered, has := asr.Events[evID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if answered {
 		asr.Answered -= 1
 	}
 	asr.Count -= 1
+	asr.val = nil
 	return
 }
 
-func (asr *ASRStat) GetMarshaled(ms Marshaler) (vals []byte, err error) {
+// Marshal is part of StatMetric interface
+func (asr *StatASR) Marshal(ms Marshaler) (marshaled []byte, err error) {
 	return ms.Marshal(asr)
 }
 
-func (asr *ASRStat) SetFromMarshaled(vals []byte, ms Marshaler) (err error) {
-	return ms.Unmarshal(vals, asr)
+// LoadMarshaled is part of StatMetric interface
+func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, asr)
 }
 
-func NewACD() (StatsMetric, error) {
-	return new(ACDStat), nil
+func NewACD() (StatMetric, error) {
+	return new(StatACD), nil
 }
 
 // ACD implements AverageCallDuration metric
-type ACDStat struct {
+type StatACD struct {
 	Sum   time.Duration
 	Count int
 }
 
-func (acd *ACDStat) GetStringValue(fmtOpts string) (val string) {
+func (acd *StatACD) GetStringValue(fmtOpts string) (val string) {
 	return
 }
 
-func (acd *ACDStat) GetValue() (v interface{}) {
+func (acd *StatACD) GetValue() (v interface{}) {
 	return
 }
 
-func (acd *ACDStat) GetFloat64Value() (v float64) {
+func (acd *StatACD) GetFloat64Value() (v float64) {
 	return float64(STATS_NA)
 }
 
-func (acd *ACDStat) AddEvent(ev StatsEvent) (err error) {
+func (acd *StatACD) AddEvent(ev StatEvent) (err error) {
 	return
 }
 
-func (acd *ACDStat) RemEvent(ev StatsEvent) (err error) {
+func (acd *StatACD) RemEvent(evID string) (err error) {
 	return
 }
 
-func (acd *ACDStat) GetMarshaled(ms Marshaler) (vals []byte, err error) {
+func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 	return
 }
-
-func (acd *ACDStat) SetFromMarshaled(vals []byte, ms Marshaler) (err error) {
+func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return
 }

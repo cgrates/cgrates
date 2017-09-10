@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package engine
 
 import (
@@ -1514,10 +1515,10 @@ func (ms *MapStorage) RemStatQueueProfile(scfID string) (err error) {
 }
 
 // GetStatQueue retrieves the stored metrics for a StatsQueue
-func (ms *MapStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
+func (ms *MapStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	values, ok := ms.dict[utils.StatQueuePrefix+sqID]
+	values, ok := ms.dict[utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id)]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
@@ -1526,7 +1527,7 @@ func (ms *MapStorage) GetStatQueue(sqID string) (sq *StatQueue, err error) {
 }
 
 // SetStatQueue stores the metrics for a StatsQueue
-func (ms *MapStorage) SetStatQueue(sq *StatQueue) (err error) {
+func (ms *MapStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	var result []byte
@@ -1534,15 +1535,15 @@ func (ms *MapStorage) SetStatQueue(sq *StatQueue) (err error) {
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.StatQueuePrefix+sq.ID] = result
+	ms.dict[utils.StatQueuePrefix+sq.SqID()] = result
 	return
 }
 
 // RemStatQueue removes a StatsQueue
-func (ms *MapStorage) RemStatQueue(sqID string) (err error) {
+func (ms *MapStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	delete(ms.dict, utils.StatQueuePrefix+sqID)
+	delete(ms.dict, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 	return
 }
 

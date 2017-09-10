@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package engine
 
 import (
@@ -25,14 +26,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SQItem represents one item in the stats queue
-type SQItem struct {
-	EventID    string     // Bounded to the original StatsEvent
-	ExpiryTime *time.Time // Used to auto-expire events
-}
-
 // StatsConfig represents the configuration of a  StatsInstance in StatS
 type StatQueueProfile struct {
+	Tenant             string
 	ID                 string // QueueID
 	Filters            []*RequestFilter
 	ActivationInterval *utils.ActivationInterval // Activation interval
@@ -46,19 +42,16 @@ type StatQueueProfile struct {
 	Weight             float64
 }
 
-// StatsEvent is an event received by StatService
-type StatsEvent map[string]interface{}
-
-func (se StatsEvent) ID() (id string) {
-	if sID, has := se[utils.ID]; has {
-		id = sID.(string)
-	}
-	return
+// StatEvent is an event processed by StatService
+type StatEvent struct {
+	Tenant string
+	ID     string
+	Fields map[string]interface{}
 }
 
-// AnswerTime returns the AnswerTime of StatsEvent
-func (se StatsEvent) AnswerTime(timezone string) (at time.Time, err error) {
-	atIf, has := se[utils.ANSWER_TIME]
+// AnswerTime returns the AnswerTime of StatEvent
+func (se StatEvent) AnswerTime(timezone string) (at time.Time, err error) {
+	atIf, has := se.Fields[utils.ANSWER_TIME]
 	if !has {
 		return at, utils.ErrNotFound
 	}
@@ -72,14 +65,88 @@ func (se StatsEvent) AnswerTime(timezone string) (at time.Time, err error) {
 	return utils.ParseTimeDetectLayout(atStr, timezone)
 }
 
+// NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
+func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
+	sSQ = &StoredStatQueue{
+		Tenant: sq.Tenant,
+		ID:     sq.ID,
+		SQItems: make([]struct {
+			EventID    string
+			ExpiryTime *time.Time
+		}, len(sq.SQItems)),
+		SQMetrics: make(map[string][]byte, len(sq.SQMetrics)),
+	}
+	for i, sqItm := range sq.SQItems {
+		sSQ.SQItems[i] = sqItm
+	}
+	for metricID, metric := range sq.SQMetrics {
+		if marshaled, err := metric.Marshal(ms); err != nil {
+			return nil, err
+		} else {
+			sSQ.SQMetrics[metricID] = marshaled
+		}
+	}
+	return
+}
+
+// StoredStatQueue differs from StatQueue due to serialization of SQMetrics
+type StoredStatQueue struct {
+	Tenant  string
+	ID      string
+	SQItems []struct {
+		EventID    string     // Bounded to the original StatEvent
+		ExpiryTime *time.Time // Used to auto-expire events
+	}
+	SQMetrics map[string][]byte
+}
+
+// SqID will compose the unique identifier for the StatQueue out of Tenant and ID
+func (ssq *StoredStatQueue) SqID() string {
+	return utils.ConcatenatedKey(ssq.Tenant, ssq.ID)
+}
+
+// AsStatQueue converts into StatQueue unmarshaling SQMetrics
+func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error) {
+	sq = &StatQueue{
+		Tenant: ssq.Tenant,
+		ID:     ssq.ID,
+		SQItems: make([]struct {
+			EventID    string
+			ExpiryTime *time.Time
+		}, len(ssq.SQItems)),
+		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
+	}
+	for i, sqItm := range ssq.SQItems {
+		sq.SQItems[i] = sqItm
+	}
+	for metricID, marshaled := range ssq.SQMetrics {
+		if metric, err := NewStatMetric(metricID); err != nil {
+			return nil, err
+		} else if err := metric.LoadMarshaled(ms, marshaled); err != nil {
+			return nil, err
+		} else {
+			sq.SQMetrics[metricID] = metric
+		}
+	}
+	return
+}
+
 // StatQueue represents an individual stats instance
 type StatQueue struct {
-	ID        string
-	SQItems   []*SQItem // SQItems
-	SQMetrics map[string]StatsMetric
-	sqItems   []*SQItem
+	Tenant  string
+	ID      string
+	SQItems []struct {
+		EventID    string     // Bounded to the original StatEvent
+		ExpiryTime *time.Time // Used to auto-expire events
+	}
+	SQMetrics map[string]StatMetric
 	sqPrfl    *StatQueueProfile
 	dirty     *bool // needs save
+}
+
+// SqID will compose the unique identifier for the StatQueue out of Tenant and ID
+func (sq *StatQueue) SqID() string {
+	return utils.ConcatenatedKey(sq.Tenant, sq.ID)
 }
 
 /*
@@ -87,7 +154,7 @@ type StatQueue struct {
 func (sq *StatQueue) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
 	sq.RLock()
 	defer sq.RUnlock()
-	sEvents := make(map[string]engine.StatsEvent)
+	sEvents := make(map[string]engine.StatEvent)
 	var sItems []*engine.SQItem
 	for _, sqItem := range sq.sqItems { // make sure event is properly retrieved from cache
 		ev := sq.sec.GetEvent(sqItem.EventID)
@@ -114,12 +181,12 @@ func (sq *StatQueue) GetStoredMetrics() (sqSM *engine.SQStoredMetrics) {
 	return
 }
 
-// ProcessEvent processes a StatsEvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(ev engine.StatsEvent) (err error) {
+// ProcessEvent processes a StatEvent, returns true if processed
+func (sq *StatQueue) ProcessEvent(ev engine.StatEvent) (err error) {
 	sq.Lock()
 	sq.remExpired()
 	sq.remOnQueueLength()
-	sq.addStatsEvent(ev)
+	sq.addStatEvent(ev)
 	sq.Unlock()
 	return
 }
@@ -158,8 +225,8 @@ func (sq *StatQueue) remOnQueueLength() {
 	}
 }
 
-// addStatsEvent computes metrics for an event
-func (sq *StatQueue) addStatsEvent(ev engine.StatsEvent) {
+// addStatEvent computes metrics for an event
+func (sq *StatQueue) addStatEvent(ev engine.StatEvent) {
 	evID := ev.ID()
 	for metricID, metric := range sq.sqMetrics {
 		if err := metric.AddEvent(ev); err != nil {
@@ -169,7 +236,7 @@ func (sq *StatQueue) addStatsEvent(ev engine.StatsEvent) {
 	}
 }
 
-// remStatsEvent removes an event from metrics
+// remStatEvent removes an event from metrics
 func (sq *StatQueue) remEventWithID(evID string) {
 	ev := sq.sec.GetEvent(evID)
 	if ev == nil {
