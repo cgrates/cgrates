@@ -20,15 +20,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewDataManager(dataDB DataDB, ms Marshaler) *DataManager {
-	return &DataManager{dataDB: dataDB, ms: ms}
+func NewDataManager(dataDB DataDB) *DataManager {
+	return &DataManager{dataDB: dataDB}
 }
 
 // DataManager is the data storage manager for CGRateS
 // transparently manages data retrieval, further serialization and caching
 type DataManager struct {
 	dataDB DataDB
-	ms     Marshaler
 }
 
 // GetStatQueue retrieves a StatQueue from dataDB
@@ -50,7 +49,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string, skipCache bool, transacti
 		}
 		return nil, err
 	}
-	if sq, err = ssq.AsStatQueue(dm.ms); err != nil {
+	if sq, err = ssq.AsStatQueue(dm.dataDB.Marshaler()); err != nil {
 		return nil, err
 	}
 	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
@@ -59,7 +58,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string, skipCache bool, transacti
 
 // SetStatQueue converts to StoredStatQueue and stores the result in dataDB
 func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
-	ssq, err := NewStoredStatQueue(sq, dm.ms)
+	ssq, err := NewStoredStatQueue(sq, dm.dataDB.Marshaler())
 	if err != nil {
 		return err
 	}
