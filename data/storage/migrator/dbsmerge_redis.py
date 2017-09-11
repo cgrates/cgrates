@@ -8,12 +8,12 @@
 # behaviour:
 #   ^ the script will not overwrite keys on the destination server/database
 
-from_host   = '127.0.0.1'
+from_host   = '192.168.100.40'
 from_port   = 6379
 from_db     = 11
 from_pass   = ''
 
-to_host     = '127.0.0.1'
+to_host     = '192.168.100.40'
 to_port     = 6379
 to_db       = 10
 to_pass     = '' # Not used
