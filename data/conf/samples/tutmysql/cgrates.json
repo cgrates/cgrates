@@ -112,13 +112,13 @@
 
 
 "stats": {
-	"enabled": true,
+	"enabled": false,
 	"store_interval": "0s",
 },
 
 
 "historys": {
-	"enabled": true,
+	"enabled": false,
 },
 
 
