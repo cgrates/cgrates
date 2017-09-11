@@ -84,7 +84,7 @@
 
 
 "stats": {
-	"enabled": true,
+	"enabled": false,
 	"store_interval": "0s",
 },
 
