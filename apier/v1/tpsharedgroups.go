@@ -45,9 +45,10 @@ func (self *ApierV1) GetTPSharedGroups(attrs AttrGetTPSharedGroups, reply *utils
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if sgs, err := self.StorDb.GetTPSharedGroups(attrs.TPid, attrs.ID); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(sgs) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *sgs[0]
 	}
