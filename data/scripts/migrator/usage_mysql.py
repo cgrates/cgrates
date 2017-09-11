@@ -3,7 +3,7 @@
 # depends:
 #   ^ mysql (debian: python-mysql.connector)
 
-host = '127.0.0.1'
+host = '192.168.100.40'
 port = 3306
 database = 'cgrates'
 user = 'root'
