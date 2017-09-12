@@ -45,7 +45,7 @@ type StatMetric interface {
 	GetStringValue(fmtOpts string) (val string)
 	GetFloat64Value() (val float64)
 	AddEvent(ev StatEvent) error
-	RemEvent(evID string) error
+	RemEvent(evTenantID string) error
 	Marshal(ms Marshaler) (marshaled []byte, err error)
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 }
@@ -58,7 +58,7 @@ func NewASR() (StatMetric, error) {
 type StatASR struct {
 	Answered float64
 	Count    float64
-	Events   map[string]bool // map[EventID]Answered
+	Events   map[string]bool // map[EventTenantID]Answered
 	val      *float64        // cached ASR value
 }
 
@@ -101,6 +101,7 @@ func (asr *StatASR) AddEvent(ev StatEvent) (err error) {
 	} else if !at.IsZero() {
 		answered = true
 	}
+	asr.Events[ev.TenantID()] = answered
 	asr.Count += 1
 	if answered {
 		asr.Answered += 1
@@ -109,8 +110,8 @@ func (asr *StatASR) AddEvent(ev StatEvent) (err error) {
 	return
 }
 
-func (asr *StatASR) RemEvent(evID string) (err error) {
-	answered, has := asr.Events[evID]
+func (asr *StatASR) RemEvent(evTenantID string) (err error) {
+	answered, has := asr.Events[evTenantID]
 	if !has {
 		return utils.ErrNotFound
 	}
@@ -118,6 +119,7 @@ func (asr *StatASR) RemEvent(evID string) (err error) {
 		asr.Answered -= 1
 	}
 	asr.Count -= 1
+	delete(asr.Events, evTenantID)
 	asr.val = nil
 	return
 }
@@ -158,7 +160,7 @@ func (acd *StatACD) AddEvent(ev StatEvent) (err error) {
 	return
 }
 
-func (acd *StatACD) RemEvent(evID string) (err error) {
+func (acd *StatACD) RemEvent(evTenantID string) (err error) {
 	return
 }
 
