@@ -221,7 +221,6 @@ func (self *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 
 	tx := self.db.Begin()
 	for _, timing := range timings {
-		utils.Logger.Debug(fmt.Sprintf("#1(set) Id care trimite  %s", timing.ID))
 		if err := tx.Where(&TpTiming{Tpid: timing.TPid, Tag: timing.ID}).Delete(TpTiming{}).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -1171,8 +1170,6 @@ func (self *SQLStorage) GetTPDestinationRates(tpid, id string, pagination *utils
 func (self *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
 	var tpTimings TpTimings
 	q := self.db.Where("tpid = ?", tpid)
-	utils.Logger.Debug(fmt.Sprintf("#1 Id care trimite  %s", id))
-	utils.Logger.Debug(fmt.Sprintf("#1 TPId care trimite  %s", tpid))
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
 	}
@@ -1180,7 +1177,6 @@ func (self *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, e
 		return nil, err
 	}
 	ts := tpTimings.AsTPTimings()
-	utils.Logger.Debug(fmt.Sprintf("#2 ce gaseste : %s", ts))
 	if len(ts) == 0 {
 		return ts, utils.ErrNotFound
 	}
