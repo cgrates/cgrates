@@ -1,4 +1,4 @@
-// +build integration
+// +build offline_TP
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -90,9 +90,9 @@ func testTPSharedGroupsInitCfg(t *testing.T) {
 	config.SetCgrConfig(tpSharedGroupCfg)
 	switch tpSharedGroupConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db
-		tpSharedGroupDelay = 4000
-	default:
 		tpSharedGroupDelay = 2000
+	default:
+		tpSharedGroupDelay = 1000
 	}
 }
 
