@@ -45,9 +45,10 @@ func (self *ApierV1) GetTPTiming(attrs AttrGetTPTiming, reply *utils.ApierTPTimi
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if tms, err := self.StorDb.GetTPTimings(attrs.TPid, attrs.ID); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(tms) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *tms[0]
 	}
