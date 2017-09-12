@@ -151,7 +151,7 @@ type StatQueue struct {
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
-func (sq *StatQueue) SqID() string {
+func (sq *StatQueue) TenantID() string {
 	return utils.ConcatenatedKey(sq.Tenant, sq.ID)
 }
 
