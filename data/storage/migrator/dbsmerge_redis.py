@@ -7,17 +7,6 @@
 #     (https://github.com/antirez/redis/pull/2507)
 # behaviour:
 #   ^ the script will not overwrite keys on the destination server/database
-
-from_host   = '192.168.100.40'
-from_port   = 6379
-from_db     = 11
-from_pass   = ''
-
-to_host     = '192.168.100.40'
-to_port     = 6379
-to_db       = 10
-to_pass     = '' # Not used
-
 keymask     = '*'
 timeout     = 2000
 
@@ -25,17 +14,15 @@ import time
 import redis
 import os
 
-from_host =os.environ["from_host"]
-from_port =os.environ["from_port"]
-from_db =os.environ["from_db"]
-from_pass =os.environ["from_pass"]
+from_host =str(os.environ["cgr_from_host"])
+from_port = int(os.environ["cgr_from_port"])
+from_db =int(os.environ["cgr_from_db"])
+from_pass =os.environ["cgr_from_pass"]
 
-to_host =os.environ["to_host"]
-to_port =os.environ["to_port"]
-to_db =os.environ["to_db"]
-to_pass =os.environ["to_pass"]
-
-
+to_host =os.environ["cgr_to_host"]
+to_port =int(os.environ["cgr_to_port"])
+to_db =int(os.environ["cgr_to_db"])
+# to_pass =os.environ["cgr_to_pass"] # Not used
 
 from_redis = redis.Redis(host = from_host, port = from_port, password=from_pass, db = from_db)
 to_redis = redis.Redis(host = to_host, port = to_port, db = to_db)
