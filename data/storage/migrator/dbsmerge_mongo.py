@@ -6,19 +6,20 @@
 #   ^ the script will "move" the collections if source and target server are the same
 #     but will "copy" (dump/restore) if source and target servers are different
 
-from_host    = '127.0.0.1'
-from_port    = '27017'
-from_db      = '11'
-from_auth_db = 'cgrates' # Auth db on source server
-from_user    = 'cgrates'
-from_pass    = ''
 
-to_host      = '127.0.0.1'
-to_port      = '27017'
-to_db        = '10'
-to_auth_db   = "cgrates" # Auth db on target server
-to_user      = 'cgrates'
-to_pass      = ''
+from_host =os.environ["from_host"]
+from_port =os.environ["from_port"]
+from_auth_db =os.environ["from_auth_db"]
+from_user =os.environ["from_user"]
+from_pass =os.environ["from_pass"]
+
+to_host =os.environ["to_host"]
+to_port =os.environ["to_port"]
+to_auth_db =os.environ["to_auth_db"]
+to_user =os.environ["to_user"]
+to_pass =os.environ["to_pass"]
+
+
 
 ignore_empty_cols = True
 # Do not migrate collections with 0 document count.

@@ -1960,6 +1960,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 		st, found := mst[tp.Tag]
 		if !found {
 			st = &utils.TPStats{
+				Tenant:	 tp.Tenant,
 				TPid:    tp.Tpid,
 				ID:      tp.Tag,
 				Blocker: tp.Blocker,
@@ -2027,6 +2028,7 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 	}
 	for i, fltr := range st.Filters {
 		mdl := &TpStats{
+			Tenant:	 st.Tenant,
 			Tpid: st.TPid,
 			Tag:  st.ID,
 		}
@@ -2072,6 +2074,7 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 
 func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err error) {
 	st = &StatQueueProfile{
+		Tenant:	 	 tpST.Tenant,
 		ID:          tpST.ID,
 		QueueLength: tpST.QueueLength,
 		Weight:      tpST.Weight,

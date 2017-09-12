@@ -419,6 +419,7 @@ CREATE INDEX tp_resources_unique ON tp_resources  ("tpid", "tag", "filter_type",
 
 DROP TABLE IF EXISTS tp_stats;
 CREATE TABLE tp_stats (
+  "tenant"varchar(64) NOT NULL,
   "id" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
   "tag" varchar(64) NOT NULL,

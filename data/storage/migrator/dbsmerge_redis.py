@@ -23,6 +23,19 @@ timeout     = 2000
 
 import time
 import redis
+import os
+
+from_host =os.environ["from_host"]
+from_port =os.environ["from_port"]
+from_db =os.environ["from_db"]
+from_pass =os.environ["from_pass"]
+
+to_host =os.environ["to_host"]
+to_port =os.environ["to_port"]
+to_db =os.environ["to_db"]
+to_pass =os.environ["to_pass"]
+
+
 
 from_redis = redis.Redis(host = from_host, port = from_port, password=from_pass, db = from_db)
 to_redis = redis.Redis(host = to_host, port = to_port, db = to_db)

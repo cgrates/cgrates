@@ -273,12 +273,13 @@ ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
 ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
-#Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],QueueLength[5],TTL[6],Metrics[7],Blocker[8],Stored[9],Weight[10],Thresholds[11]
-Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,true,20,THRESH1;THRESH2
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
+Tester,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,true,20,THRESH1;THRESH2
 `
 	thresholds = `
 #Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],ThresholdType[5],ThresholdValue[6],MinItems[7],Recurrent[8],MinSleep[9],Blocker[10],Stored[11],Weight[12],ActionIDs[13]
 Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,,1.2,10,true,1s,true,true,10,
+
 `
 )
 
@@ -1435,6 +1436,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 func TestLoadStats(t *testing.T) {
 	eStats := map[string]*utils.TPStats{
 		"Stats1": &utils.TPStats{
+			Tenant:"Tester",
 			TPid: testTPID,
 			ID:   "Stats1",
 			Filters: []*utils.TPRequestFilter{

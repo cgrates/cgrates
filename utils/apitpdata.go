@@ -1335,6 +1335,7 @@ type AttrDisconnectSession struct {
 // TPStats is used in APIs to manage remotely offline Stats config
 type TPStats struct {
 	TPid               string
+	Tenant  		   string
 	ID                 string
 	Filters            []*TPRequestFilter
 	ActivationInterval *TPActivationInterval

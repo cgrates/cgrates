@@ -1541,6 +1541,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 	eTPs := []*utils.TPStats{
 		&utils.TPStats{
 			TPid: "TEST_TPID",
+			Tenant:"Test",
 			ID:   "Stats1",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
