@@ -1,4 +1,4 @@
-// +build integration
+// +build offline_TP
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -90,9 +90,9 @@ func testTPUsersInitCfg(t *testing.T) {
 	config.SetCgrConfig(tpUserCfg)
 	switch tpUserConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db
-		tpUserDelay = 4000
-	default:
 		tpUserDelay = 2000
+	default:
+		tpUserDelay = 1000
 	}
 }
 

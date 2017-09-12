@@ -47,9 +47,10 @@ func (self *ApierV1) GetTPRate(attrs AttrGetTPRate, reply *utils.TPRate) error {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if rs, err := self.StorDb.GetTPRates(attrs.TPid, attrs.ID); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(rs) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *rs[0]
 	}
