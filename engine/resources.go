@@ -39,6 +39,7 @@ func init() {
 
 // ResourceProfile represents the user configuration for the resource
 type ResourceProfile struct {
+	Tenant  		   string
 	ID                 string                    // identifier of this resource
 	Filters            []*RequestFilter          // filters for the request
 	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
@@ -53,6 +54,7 @@ type ResourceProfile struct {
 
 // ResourceUsage represents an usage counted
 type ResourceUsage struct {
+	Tenant  		   string
 	ID         string // Unique identifier of this ResourceUsage, Eg: FreeSWITCH UUID
 	ExpiryTime time.Time
 	Units      float64 // Number of units used
@@ -66,6 +68,7 @@ func (ru *ResourceUsage) isActive(atTime time.Time) bool {
 // Resource represents a resource in the system
 // not thread safe, needs locking at process level
 type Resource struct {
+	Tenant  		   string
 	ID     string
 	Usages map[string]*ResourceUsage
 	TTLIdx []string         // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled

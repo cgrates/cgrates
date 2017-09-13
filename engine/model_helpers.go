@@ -1821,6 +1821,7 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 		if !found {
 			rl = &utils.TPResource{
 				TPid:    tp.Tpid,
+				Tenant:  tp.Tenant,
 				ID:      tp.Tag,
 				Blocker: tp.Blocker,
 				Stored:  tp.Stored,
@@ -1880,6 +1881,7 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 	for i, fltr := range rl.Filters {
 		mdl := &TpResource{
 			Tpid: rl.TPid,
+			Tenant:  rl.Tenant,
 			Tag:  rl.ID,
 		}
 		if i == 0 {
@@ -1921,6 +1923,7 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 
 func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile, err error) {
 	rp = &ResourceProfile{
+		Tenant:  tpRL.Tenant,
 		ID:      tpRL.ID,
 		Weight:  tpRL.Weight,
 		Blocker: tpRL.Blocker,

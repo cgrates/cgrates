@@ -397,6 +397,7 @@ CREATE TABLE tp_aliases (
 
 DROP TABLE IF EXISTS tp_resources;
 CREATE TABLE tp_resources (
+  `tenant` varchar(64) NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,

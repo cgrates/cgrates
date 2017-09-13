@@ -1270,6 +1270,7 @@ type AttrSetBalance struct {
 
 type TPResource struct {
 	TPid               string
+	Tenant  		   string
 	ID                 string                // Identifier of this limit
 	Filters            []*TPRequestFilter    // Filters for the request
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active/expires

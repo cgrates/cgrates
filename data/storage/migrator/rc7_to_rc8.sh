@@ -66,11 +66,15 @@ DIR="$(dirname "$(readlink -f "$0")")"
 case $datadb in 
 
 "redis")
-./dbsmerge_redis.py
+echo "executing  dbsmerge_redis.py"
+./dbsmerge_redis.py 
+echo "done!"
 ;;
 
 "mongo")
+echo "executing  dbsmerge_mongo.py"
 ./dbsmerge_mongo.py
+echo "done!"
 ;;
 esac
 
