@@ -39,6 +39,15 @@ type AttrGetTPLcrRules struct {
 	LcrRuleId string // Lcr id
 }
 
+type AttrRemTPLcrRules struct {
+	TPid      string // Tariff plan id
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+}
+
 // Queries specific LcrRules profile on tariff plan
 func (self *ApierV1) GetTPLcrRule(attr AttrGetTPLcrRules, reply *utils.TPLcrRules) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "LcrRuleId"}); len(missing) != 0 { //Params missing
@@ -47,9 +56,10 @@ func (self *ApierV1) GetTPLcrRule(attr AttrGetTPLcrRules, reply *utils.TPLcrRule
 	filter := &utils.TPLcrRules{TPid: attr.TPid}
 	filter.SetId(attr.LcrRuleId)
 	if lcrs, err := self.StorDb.GetTPLCRs(filter); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(lcrs) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *lcrs[0]
 	}
@@ -77,11 +87,11 @@ func (self *ApierV1) GetTPLcrRuleIds(attrs AttrGetTPLcrIds, reply *[]string) err
 }
 
 // Removes specific LcrRules on Tariff plan
-func (self *ApierV1) RemTPLcrRule(attrs AttrGetTPLcrRules, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrRulesId"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) RemTPLcrRule(attrs AttrRemTPLcrRules, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Direction", "Tenant", "Category", "Account", "Subject"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPLcrs, attrs.TPid, map[string]string{"tag": attrs.LcrRuleId}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPLcrs, attrs.TPid, map[string]string{"direction": attrs.Direction, "tenant": attrs.Tenant, "category": attrs.Category, "account": attrs.Account, "subject": attrs.Subject}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK
