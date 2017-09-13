@@ -21,7 +21,6 @@ package engine
 import (
 	"bytes"
 	"compress/zlib"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -327,7 +326,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
 		utils.ResourceProfilesPrefix:     colRsP,
-		utils.StatsPrefix:                colStq,
+		utils.StatQueuePrefix:            colStq,
 		utils.TimingsPrefix:              colTmg,
 		utils.ResourcesPrefix:            colRes,
 	}
@@ -632,10 +631,10 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.ResourcesPrefix+idResult.Id)
 		}
-	case utils.StatsPrefix:
+	case utils.StatQueuePrefix:
 		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.StatsPrefix+idResult.Id)
+			result = append(result, utils.StatQueuePrefix+idResult.Id)
 		}
 	case utils.StatQueueProfilePrefix:
 		iter := db.C(colSqp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
@@ -658,34 +657,40 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	return
 }
 
-func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
+func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) {
 	session := ms.session.Copy()
 	defer session.Close()
 	db := session.DB(ms.db)
+	var count int
 	switch category {
 	case utils.DESTINATION_PREFIX:
-		count, err := db.C(colDst).Find(bson.M{"key": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colDst).Find(bson.M{"key": subject}).Count()
+		has = count > 0
 	case utils.RATING_PLAN_PREFIX:
-		count, err := db.C(colRpl).Find(bson.M{"key": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colRpl).Find(bson.M{"key": subject}).Count()
+		has = count > 0
 	case utils.RATING_PROFILE_PREFIX:
-		count, err := db.C(colRpf).Find(bson.M{"id": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colRpf).Find(bson.M{"id": subject}).Count()
+		has = count > 0
 	case utils.ACTION_PREFIX:
-		count, err := db.C(colAct).Find(bson.M{"key": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colAct).Find(bson.M{"key": subject}).Count()
+		has = count > 0
 	case utils.ACTION_PLAN_PREFIX:
-		count, err := db.C(colApl).Find(bson.M{"key": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colApl).Find(bson.M{"key": subject}).Count()
+		has = count > 0
 	case utils.ACCOUNT_PREFIX:
-		count, err := db.C(colAcc).Find(bson.M{"id": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colAcc).Find(bson.M{"id": subject}).Count()
+		has = count > 0
 	case utils.ResourcesPrefix:
-		count, err := db.C(colRes).Find(bson.M{"id": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
+		has = count > 0
+	case utils.StatQueuePrefix:
+		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
+		has = count > 0
+	default:
+		err = fmt.Errorf("unsupported category in HasData: %s", category)
 	}
-	return false, errors.New("unsupported category in HasData")
+	return
 }
 
 func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {

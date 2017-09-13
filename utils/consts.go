@@ -243,7 +243,6 @@ const (
 	ResourcesPrefix               = "res_"
 	ResourceProfilesIndex         = "rsi_"
 	ResourceProfilesPrefix        = "rsp_"
-	StatsPrefix                   = "sts_"
 	StatsIndex                    = "sti_"
 	ThresholdsPrefix              = "ths_"
 	ThresholdsIndex               = "thi_"

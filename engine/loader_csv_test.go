@@ -1453,10 +1453,10 @@ func TestLoadStats(t *testing.T) {
 		},
 	}
 
-	if len(csvr.stats) != len(eStats) {
-		t.Error("Failed to load stats: ", len(csvr.stats))
-	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.stats["Stats1"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.stats["Stats1"])
+	if len(csvr.sqProfiles) != len(eStats) {
+		t.Error("Failed to load stats: ", len(csvr.sqProfiles))
+	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.sqProfiles["Stats1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.sqProfiles["Stats1"])
 	}
 }
 
