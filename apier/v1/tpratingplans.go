@@ -48,9 +48,10 @@ func (self *ApierV1) GetTPRatingPlan(attrs AttrGetTPRatingPlan, reply *utils.TPR
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if rps, err := self.StorDb.GetTPRatingPlans(attrs.TPid, attrs.ID, &attrs.Paginator); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(rps) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *rps[0]
 	}
