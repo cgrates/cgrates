@@ -30,6 +30,11 @@ type DataManager struct {
 	dataDB DataDB
 }
 
+// DataDB exports access to dataDB
+func (dm *DataManager) DataDB() DataDB {
+	return dm.dataDB
+}
+
 // GetStatQueue retrieves a StatQueue from dataDB
 // handles caching and deserialization of metrics
 func (dm *DataManager) GetStatQueue(tenant, id string, skipCache bool, transactionID string) (sq *StatQueue, err error) {

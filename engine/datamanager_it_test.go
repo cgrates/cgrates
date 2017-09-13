@@ -99,7 +99,7 @@ func testDMitCRUDStatQueue(t *testing.T) {
 			},
 		},
 	}
-	cacheKey := utils.StatQueuePrefix + sq.SqID()
+	cacheKey := utils.StatQueuePrefix + sq.TenantID()
 	if _, rcvErr := dm.GetStatQueue(sq.Tenant, sq.ID, false, ""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
