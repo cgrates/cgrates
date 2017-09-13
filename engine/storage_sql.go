@@ -221,7 +221,6 @@ func (self *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 
 	tx := self.db.Begin()
 	for _, timing := range timings {
-		utils.Logger.Debug(fmt.Sprintf("#1(set) Id care trimite  %s", timing.ID))
 		if err := tx.Where(&TpTiming{Tpid: timing.TPid, Tag: timing.ID}).Delete(TpTiming{}).Error; err != nil {
 			tx.Rollback()
 			return err
