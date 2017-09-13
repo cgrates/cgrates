@@ -1,4 +1,4 @@
-// +build offline_TP
+// +build offline_tp
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -39,7 +39,6 @@ var (
 	tpRate          *utils.TPRate
 	tpRateDelay     int
 	tpRateConfigDIR string //run tests for specific configuration
-
 )
 
 var sTestsTPRates = []func(t *testing.T){
