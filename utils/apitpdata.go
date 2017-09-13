@@ -1270,6 +1270,7 @@ type AttrSetBalance struct {
 
 type TPResource struct {
 	TPid               string
+	Tenant  		   string
 	ID                 string                // Identifier of this limit
 	Filters            []*TPRequestFilter    // Filters for the request
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active/expires
@@ -1335,6 +1336,7 @@ type AttrDisconnectSession struct {
 // TPStats is used in APIs to manage remotely offline Stats config
 type TPStats struct {
 	TPid               string
+	Tenant  		   string
 	ID                 string
 	Filters            []*TPRequestFilter
 	ActivationInterval *TPActivationInterval
