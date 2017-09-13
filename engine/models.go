@@ -454,7 +454,7 @@ func (t TBLSMCosts) TableName() string {
 type TpResource struct {
 	ID                 int64
 	Tpid               string
-	Tenant 			   string  `index:"0" re:""`
+	Tenant             string  `index:"0" re:""`
 	Tag                string  `index:"1" re:""`
 	FilterType         string  `index:"2" re:"^\*[A-Za-z].*"`
 	FilterFieldName    string  `index:"3" re:""`
@@ -483,7 +483,7 @@ func (t TBLVersion) TableName() string {
 type TpStats struct {
 	ID                 int64
 	Tpid               string
-	Tenant 			   string  `index:"0" re:""`
+	Tenant             string  `index:"0" re:""`
 	Tag                string  `index:"1" re:""`
 	FilterType         string  `index:"2" re:"^\*[A-Za-z].*"`
 	FilterFieldName    string  `index:"3" re:""`

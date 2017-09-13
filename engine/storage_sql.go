@@ -587,7 +587,7 @@ func (self *SQLStorage) SetTPStats(sts []*utils.TPStats) error {
 	tx := self.db.Begin()
 	for _, stq := range sts {
 		// Remove previous
-		if err := tx.Where(&TpStats{Tpid: stq.TPid,Tag: stq.ID}).Delete(TpStats{}).Error; err != nil {
+		if err := tx.Where(&TpStats{Tpid: stq.TPid, Tag: stq.ID}).Delete(TpStats{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}

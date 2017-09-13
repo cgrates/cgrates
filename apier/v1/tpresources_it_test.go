@@ -127,6 +127,7 @@ func testTPResGetTPResourceBeforeSet(t *testing.T) {
 
 func testTPResSetTPResource(t *testing.T) {
 	tpRes = &utils.TPResource{
+		Tenant:"Tester",
 		TPid: "TPR1",
 		ID:   "Res",
 		Filters: []*utils.TPRequestFilter{

@@ -1392,9 +1392,9 @@ func TestLoadReverseAliases(t *testing.T) {
 func TestLoadResourceProfiles(t *testing.T) {
 	eResProfiles := map[string]*utils.TPResource{
 		"ResGroup21": &utils.TPResource{
-			TPid: testTPID,
-			Tenant:"Tester",
-			ID:   "ResGroup21",
+			TPid:   testTPID,
+			Tenant: "Tester",
+			ID:     "ResGroup21",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
 				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
@@ -1409,9 +1409,9 @@ func TestLoadResourceProfiles(t *testing.T) {
 			Limit:             "2",
 		},
 		"ResGroup22": &utils.TPResource{
-			TPid: testTPID,
-			Tenant:"Tester",
-			ID:   "ResGroup22",
+			TPid:   testTPID,
+			Tenant: "Tester",
+			ID:     "ResGroup22",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
 			},
@@ -1438,9 +1438,9 @@ func TestLoadResourceProfiles(t *testing.T) {
 func TestLoadStats(t *testing.T) {
 	eStats := map[string]*utils.TPStats{
 		"Stats1": &utils.TPStats{
-			Tenant:"Tester",
-			TPid: testTPID,
-			ID:   "Stats1",
+			Tenant: "Tester",
+			TPid:   testTPID,
+			ID:     "Stats1",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
 			},

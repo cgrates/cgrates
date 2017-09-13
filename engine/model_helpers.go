@@ -1880,9 +1880,9 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 	}
 	for i, fltr := range rl.Filters {
 		mdl := &TpResource{
-			Tpid: rl.TPid,
-			Tenant:  rl.Tenant,
-			Tag:  rl.ID,
+			Tpid:   rl.TPid,
+			Tenant: rl.Tenant,
+			Tag:    rl.ID,
 		}
 		if i == 0 {
 			mdl.UsageTTL = rl.UsageTTL
@@ -1963,7 +1963,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 		st, found := mst[tp.Tag]
 		if !found {
 			st = &utils.TPStats{
-				Tenant:	 tp.Tenant,
+				Tenant:  tp.Tenant,
 				TPid:    tp.Tpid,
 				ID:      tp.Tag,
 				Blocker: tp.Blocker,
@@ -2031,9 +2031,9 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 	}
 	for i, fltr := range st.Filters {
 		mdl := &TpStats{
-			Tenant:	 st.Tenant,
-			Tpid: st.TPid,
-			Tag:  st.ID,
+			Tenant: st.Tenant,
+			Tpid:   st.TPid,
+			Tag:    st.ID,
 		}
 		if i == 0 {
 			mdl.TTL = st.TTL
@@ -2077,7 +2077,7 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 
 func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err error) {
 	st = &StatQueueProfile{
-		Tenant:	 	 tpST.Tenant,
+		Tenant:      tpST.Tenant,
 		ID:          tpST.ID,
 		QueueLength: tpST.QueueLength,
 		Weight:      tpST.Weight,

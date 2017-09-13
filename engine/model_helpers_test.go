@@ -713,7 +713,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 	tps := []*TpResource{
 		&TpResource{
 			Tpid:               "TEST_TPID",
-			Tenant:				"Tester",
+			Tenant:             "Tester",
 			Tag:                "ResGroup1",
 			FilterType:         MetaStringPrefix,
 			FilterFieldName:    "Destination",
@@ -727,14 +727,14 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 		&TpResource{
 			Tpid:              "TEST_TPID",
 			Tag:               "ResGroup1",
-			Tenant:				"Tester",
+			Tenant:            "Tester",
 			FilterType:        MetaStringPrefix,
 			FilterFieldName:   "Category",
 			FilterFieldValues: "call;inbound_call",
 			Thresholds:        "WARN3"},
 		&TpResource{
 			Tpid:               "TEST_TPID",
-			Tenant:				"Tester",
+			Tenant:             "Tester",
 			Tag:                "ResGroup2",
 			FilterType:         MetaStringPrefix,
 			FilterFieldName:    "Destination",
@@ -747,9 +747,9 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 	}
 	eTPs := []*utils.TPResource{
 		&utils.TPResource{
-			TPid: tps[0].Tpid,
-			Tenant:	tps[0].Tenant,
-			ID:   tps[0].Tag,
+			TPid:   tps[0].Tpid,
+			Tenant: tps[0].Tenant,
+			ID:     tps[0].Tag,
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
 					Type:      tps[0].FilterType,
@@ -772,9 +772,9 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Thresholds: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
 		&utils.TPResource{
-			TPid: tps[2].Tpid,
-			Tenant:	tps[2].Tenant,
-			ID:   tps[2].Tag,
+			TPid:   tps[2].Tpid,
+			Tenant: tps[2].Tenant,
+			ID:     tps[2].Tag,
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
 					Type:      tps[2].FilterType,
