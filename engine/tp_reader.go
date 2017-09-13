@@ -56,6 +56,7 @@ type TpReader struct {
 	resProfiles      map[string]*utils.TPResource
 	stats            map[string]*utils.TPStats
 	thresholds       map[string]*utils.TPThreshold
+	resources        []string // IDs of resources which need creation based on resourceConfigs
 
 	revDests,
 	revAliases,
@@ -1602,6 +1603,13 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) error {
 		mapRsPs[rl.ID] = rl
 	}
 	tpr.resProfiles = mapRsPs
+	for rID := range mapRsPs {
+		if has, err := tpr.dataStorage.HasData(utils.ResourcesPrefix, rID); err != nil {
+			return err
+		} else if !has {
+			tpr.resources = append(tpr.resources, rID)
+		}
+	}
 	return nil
 }
 
@@ -1946,6 +1954,17 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if verbose {
 			log.Print("\t", rsp.ID)
+		}
+	}
+	if verbose {
+		log.Print("Resources:")
+	}
+	for _, rID := range tpr.resources {
+		if err = tpr.dataStorage.SetResource(&Resource{ID: rID, Usages: make(map[string]*ResourceUsage)}); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", rID)
 		}
 	}
 	if verbose {
