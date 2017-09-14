@@ -53,9 +53,10 @@ func (self *ApierV1) GetTPActionPlan(attrs AttrGetTPActionPlan, reply *utils.TPA
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if aps, err := self.StorDb.GetTPActionPlans(attrs.TPid, attrs.ID); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(aps) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *aps[0]
 	}
