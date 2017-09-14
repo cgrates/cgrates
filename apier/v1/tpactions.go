@@ -45,9 +45,10 @@ func (self *ApierV1) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if as, err := self.StorDb.GetTPActions(attrs.TPid, attrs.ID); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(as) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *as[0]
 	}

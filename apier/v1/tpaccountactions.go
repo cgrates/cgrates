@@ -51,9 +51,10 @@ func (self *ApierV1) GetTPAccountActionsByLoadId(attrs utils.TPAccountActions, r
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if aas, err := self.StorDb.GetTPAccountActions(&attrs); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(aas) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		reply = &aas
 	}
@@ -75,9 +76,10 @@ func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *u
 		return err
 	}
 	if aas, err := self.StorDb.GetTPAccountActions(filter); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(aas) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *aas[0]
 	}
