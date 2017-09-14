@@ -266,19 +266,20 @@ cgrates.org,mas,true,another,value,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
 	resProfiles = `
-#Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],TTL[5],Limit[6],AllocationMessage[7],Weight[8],Thresholds[9]
-ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
-ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
-ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
-ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],TTL[6],Limit[7],AllocationMessage[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
+Tester,ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
+Tester,ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
+Tester,ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
+Tester,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
-#Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],QueueLength[5],TTL[6],Metrics[7],Blocker[8],Stored[9],Weight[10],Thresholds[11]
-Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,true,20,THRESH1;THRESH2
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
+Tester,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,true,20,THRESH1;THRESH2
 `
 	thresholds = `
 #Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],ThresholdType[5],ThresholdValue[6],MinItems[7],Recurrent[8],MinSleep[9],Blocker[10],Stored[11],Weight[12],ActionIDs[13]
 Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,,1.2,10,true,1s,true,true,10,
+
 `
 )
 
@@ -1391,8 +1392,9 @@ func TestLoadReverseAliases(t *testing.T) {
 func TestLoadResourceProfiles(t *testing.T) {
 	eResProfiles := map[string]*utils.TPResource{
 		"ResGroup21": &utils.TPResource{
-			TPid: testTPID,
-			ID:   "ResGroup21",
+			TPid:   testTPID,
+			Tenant: "Tester",
+			ID:     "ResGroup21",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
 				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
@@ -1407,8 +1409,9 @@ func TestLoadResourceProfiles(t *testing.T) {
 			Limit:             "2",
 		},
 		"ResGroup22": &utils.TPResource{
-			TPid: testTPID,
-			ID:   "ResGroup22",
+			TPid:   testTPID,
+			Tenant: "Tester",
+			ID:     "ResGroup22",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
 			},
@@ -1435,8 +1438,9 @@ func TestLoadResourceProfiles(t *testing.T) {
 func TestLoadStats(t *testing.T) {
 	eStats := map[string]*utils.TPStats{
 		"Stats1": &utils.TPStats{
-			TPid: testTPID,
-			ID:   "Stats1",
+			Tenant: "Tester",
+			TPid:   testTPID,
+			ID:     "Stats1",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
 			},
@@ -1453,10 +1457,10 @@ func TestLoadStats(t *testing.T) {
 		},
 	}
 
-	if len(csvr.stats) != len(eStats) {
-		t.Error("Failed to load stats: ", len(csvr.stats))
-	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.stats["Stats1"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.stats["Stats1"])
+	if len(csvr.sqProfiles) != len(eStats) {
+		t.Error("Failed to load stats: ", len(csvr.sqProfiles))
+	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.sqProfiles["Stats1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.sqProfiles["Stats1"])
 	}
 }
 

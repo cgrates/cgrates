@@ -306,7 +306,9 @@ func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	switch categ {
-	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ResourcesPrefix:
+	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
+		utils.ResourcesPrefix, utils.StatQueuePrefix:
 		_, exists := ms.dict[categ+subject]
 		return exists, nil
 	}

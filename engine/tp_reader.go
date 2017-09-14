@@ -54,9 +54,10 @@ type TpReader struct {
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
 	resProfiles      map[string]*utils.TPResource
-	stats            map[string]*utils.TPStats
+	sqProfiles       map[string]*utils.TPStats
 	thresholds       map[string]*utils.TPThreshold
-	resources        []string // IDs of resources which need creation based on resourceConfigs
+	resources        []string // IDs of resources which need creation based on resourceProfiles
+	statQueues       []string // IDs of statQueues which need creation based on statQueueProfiles
 
 	revDests,
 	revAliases,
@@ -129,7 +130,7 @@ func (tpr *TpReader) Init() {
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resProfiles = make(map[string]*utils.TPResource)
-	tpr.stats = make(map[string]*utils.TPStats)
+	tpr.sqProfiles = make(map[string]*utils.TPStats)
 	tpr.thresholds = make(map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -1626,7 +1627,14 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) error {
 	for _, st := range tps {
 		mapSTs[st.ID] = st
 	}
-	tpr.stats = mapSTs
+	tpr.sqProfiles = mapSTs
+	for sqID := range mapSTs {
+		if has, err := tpr.dataStorage.HasData(utils.StatQueuePrefix, sqID); err != nil {
+			return err
+		} else if !has {
+			tpr.statQueues = append(tpr.statQueues, sqID)
+		}
+	}
 	return nil
 }
 
@@ -1970,7 +1978,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if verbose {
 		log.Print("StatQueueProfiles:")
 	}
-	for _, tpST := range tpr.stats {
+	for _, tpST := range tpr.sqProfiles {
 		st, err := APItoStats(tpST, tpr.timezone)
 		if err != nil {
 			return err
@@ -1980,6 +1988,18 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if verbose {
 			log.Print("\t", st.ID)
+		}
+	}
+	if verbose {
+		log.Print("StatQueues:")
+	}
+	for _, sqID := range tpr.statQueues {
+		if err = tpr.dataStorage.SetStoredStatQueue(&StoredStatQueue{Tenant: "", ID: sqID,
+			SQMetrics: make(map[string][]byte)}); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", sqID)
 		}
 	}
 	if verbose {
@@ -2055,7 +2075,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
-		if len(tpr.stats) > 0 {
+		if len(tpr.sqProfiles) > 0 {
 			if verbose {
 				log.Print("Indexing stats")
 			}
@@ -2063,7 +2083,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if err != nil {
 				return err
 			}
-			for _, tpST := range tpr.stats {
+			for _, tpST := range tpr.sqProfiles {
 				if st, err := APItoStats(tpST, tpr.timezone); err != nil {
 					return err
 				} else {
@@ -2163,7 +2183,7 @@ func (tpr *TpReader) ShowStatistics() {
 	// resource limits
 	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
 	// stats
-	log.Print("Stats: ", len(tpr.stats))
+	log.Print("Stats: ", len(tpr.sqProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2297,10 +2317,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.StatsPrefix:
-		keys := make([]string, len(tpr.stats))
+	case utils.StatQueueProfilePrefix:
+		keys := make([]string, len(tpr.sqProfiles))
 		i := 0
-		for k := range tpr.stats {
+		for k := range tpr.sqProfiles {
 			keys[i] = k
 			i++
 		}

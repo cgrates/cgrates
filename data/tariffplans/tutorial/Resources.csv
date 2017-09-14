@@ -1,8 +1,8 @@
-#Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],TTL[5],Limit[6],AllocationMessage[7],Blocker[8],Stored[9],Weight[10],Thresholds[11]
-ResGroup1,*string,Account,1001;1002,2014-07-29T15:00:00Z,1s,7,,true,true,20,
-ResGroup1,*string_prefix,Destination,10;20,,,,,,,,
-ResGroup1,*rsr_fields,,Subject(~^1.*1$);Destination(1002),,,,,,,,
-ResGroup2,*destinations,Destination,DST_FS,2014-07-29T15:00:00Z,3600s,8,SPECIAL_1002,true,true,10,
-ResGroup3,*string,Account,3001,2014-07-29T15:00:00Z,1s,3,,true,true,20,
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],TTL[6],Limit[7],AllocationMessage[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
+Tester,ResGroup1,*string,Account,1001;1002,2014-07-29T15:00:00Z,1s,7,,true,true,20,
+Tester,ResGroup1,*string_prefix,Destination,10;20,,,,,,,,
+Tester,ResGroup1,*rsr_fields,,Subject(~^1.*1$);Destination(1002),,,,,,,,
+Tester,ResGroup2,*destinations,Destination,DST_FS,2014-07-29T15:00:00Z,3600s,8,SPECIAL_1002,true,true,10,
+Tester,ResGroup3,*string,Account,3001,2014-07-29T15:00:00Z,1s,3,,true,true,20,
 #ResGroup3,*timings,SetupTime,PEAK,,,,,,,,
 #ResGroup3,*cdr_stats,,CDRST1:*min_ASR:34;CDRST_1001:*min_ASR:20,,,,,,,,

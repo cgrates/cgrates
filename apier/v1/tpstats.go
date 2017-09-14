@@ -36,6 +36,7 @@ func (self *ApierV1) SetTPStat(attr utils.TPStats, reply *string) error {
 
 type AttrGetTPStat struct {
 	TPid string // Tariff plan id
+	Tenant string
 	ID   string
 }
 
@@ -57,6 +58,7 @@ func (self *ApierV1) GetTPStat(attr AttrGetTPStat, reply *utils.TPStats) error {
 
 type AttrGetTPStatIds struct {
 	TPid string // Tariff plan id
+	Tenant string
 	utils.Paginator
 }
 
