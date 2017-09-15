@@ -266,19 +266,11 @@ cgrates.org,mas,true,another,value,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
 	resProfiles = `
-<<<<<<< HEAD
 #Id[0]Tenant[1],,FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],TTL[6],Limit[7],AllocationMessage[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
 ResGroup21,cgrates.org,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
 ResGroup21,cgrates.org,*string_prefix,HdrDestination,10;20,,,,,,,,
 ResGroup21,cgrates.org,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
 ResGroup22,cgrates.org,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
-=======
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],TTL[6],Limit[7],AllocationMessage[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
-cgrates.org,ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
-cgrates.org,ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
-cgrates.org,ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
-cgrates.org,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
->>>>>>> 72be574e2485078deacebbbd01c7df1d05991615
 `
 	stats = `
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
@@ -1398,32 +1390,6 @@ func TestLoadReverseAliases(t *testing.T) {
 }
 
 func TestLoadResourceProfiles(t *testing.T) {
-<<<<<<< HEAD
-	eResProfiles := map[string]*utils.TPResource{
-		"ResGroup21": &utils.TPResource{
-			TPid:   testTPID,
-			Tenant: "cgrates.org",
-			ID:     "ResGroup21",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
-				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
-				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"HdrSubject(~^1.*1$)", "HdrDestination(1002)"}},
-			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			UsageTTL:          "1s",
-			AllocationMessage: "call",
-			Weight:            10,
-			Limit:             "2",
-		},
-		"ResGroup22": &utils.TPResource{
-			TPid:   testTPID,
-			Tenant: "cgrates.org",
-			ID:     "ResGroup22",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
-=======
 	eResProfiles := map[string]map[string]*utils.TPResource{
 		"cgrates.org": map[string]*utils.TPResource{
 			"ResGroup21": &utils.TPResource{
@@ -1442,7 +1408,6 @@ func TestLoadResourceProfiles(t *testing.T) {
 				AllocationMessage: "call",
 				Weight:            10,
 				Limit:             "2",
->>>>>>> 72be574e2485078deacebbbd01c7df1d05991615
 			},
 			"ResGroup22": &utils.TPResource{
 				TPid:   testTPID,
