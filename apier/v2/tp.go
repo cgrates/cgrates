@@ -30,8 +30,8 @@ type AttrRemTp struct {
 }
 
 func (self *ApierV2) RemTP(attrs AttrRemTp, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.RemTpData("", attrs.TPid, nil); err != nil {
 		return utils.NewErrServerError(err)
@@ -42,8 +42,8 @@ func (self *ApierV2) RemTP(attrs AttrRemTp, reply *string) error {
 }
 
 func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
-	if len(*attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ExportPath"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	dir := self.Config.TpExportPath
 	if attrs.ExportPath != nil {
@@ -75,8 +75,8 @@ func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *uti
 }
 
 func (self *ApierV2) ExportTPToZipString(attrs utils.AttrDirExportTP, reply *string) error {
-	if len(*attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	dir := ""
 	fileFormat := utils.CSV
