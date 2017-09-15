@@ -52,6 +52,11 @@ type ResourceProfile struct {
 	Thresholds         []string // Thresholds to check after changing Limit
 }
 
+// TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
+func (rp *ResourceProfile) TenantID() string {
+	return utils.ConcatenatedKey(rp.Tenant, rp.ID)
+}
+
 // ResourceUsage represents an usage counted
 type ResourceUsage struct {
 	Tenant     string

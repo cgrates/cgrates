@@ -53,11 +53,11 @@ type TpReader struct {
 	cdrStats         map[string]*CdrStats
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
-	resProfiles      map[string]*utils.TPResource
+	resProfiles      map[string]map[string]*utils.TPResource
 	sqProfiles       map[string]*utils.TPStats
 	thresholds       map[string]*utils.TPThreshold
-	resources        []string // IDs of resources which need creation based on resourceProfiles
-	statQueues       []string // IDs of statQueues which need creation based on statQueueProfiles
+	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
+	statQueues       []string          // IDs of statQueues which need creation based on statQueueProfiles
 
 	revDests,
 	revAliases,
@@ -129,7 +129,7 @@ func (tpr *TpReader) Init() {
 	tpr.users = make(map[string]*UserProfile)
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
-	tpr.resProfiles = make(map[string]*utils.TPResource)
+	tpr.resProfiles = make(map[string]map[string]*utils.TPResource)
 	tpr.sqProfiles = make(map[string]*utils.TPStats)
 	tpr.thresholds = make(map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
@@ -1599,16 +1599,22 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) error {
 	if err != nil {
 		return err
 	}
-	mapRsPs := make(map[string]*utils.TPResource)
+	mapRsPfls := make(map[string]map[string]*utils.TPResource)
 	for _, rl := range rls {
-		mapRsPs[rl.ID] = rl
+		if _, has := mapRsPfls[rl.Tenant]; !has {
+			mapRsPfls[rl.Tenant] = make(map[string]*utils.TPResource)
+		}
+		mapRsPfls[rl.Tenant][rl.ID] = rl
 	}
-	tpr.resProfiles = mapRsPs
-	for rID := range mapRsPs {
-		if has, err := tpr.dataStorage.HasData(utils.ResourcesPrefix, rID); err != nil {
-			return err
-		} else if !has {
-			tpr.resources = append(tpr.resources, rID)
+	tpr.resProfiles = mapRsPfls
+	for tenant, mpID := range mapRsPfls {
+		for id := range mpID {
+			rTid := &utils.TenantID{tenant, id}
+			if has, err := tpr.dataStorage.HasData(utils.ResourcesPrefix, rTid.TenantID()); err != nil {
+				return err
+			} else if !has {
+				tpr.resources = append(tpr.resources, rTid)
+			}
 		}
 	}
 	return nil
@@ -1952,27 +1958,29 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if verbose {
 		log.Print("ResourceProfiles:")
 	}
-	for _, tpRsp := range tpr.resProfiles {
-		rsp, err := APItoResource(tpRsp, tpr.timezone)
-		if err != nil {
-			return err
-		}
-		if err = tpr.dataStorage.SetResourceProfile(rsp, utils.NonTransactional); err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", rsp.ID)
+	for _, mpID := range tpr.resProfiles {
+		for _, tpRsp := range mpID {
+			rsp, err := APItoResource(tpRsp, tpr.timezone)
+			if err != nil {
+				return err
+			}
+			if err = tpr.dataStorage.SetResourceProfile(rsp, utils.NonTransactional); err != nil {
+				return err
+			}
+			if verbose {
+				log.Print("\t", rsp.TenantID())
+			}
 		}
 	}
 	if verbose {
 		log.Print("Resources:")
 	}
-	for _, rID := range tpr.resources {
-		if err = tpr.dataStorage.SetResource(&Resource{ID: rID, Usages: make(map[string]*ResourceUsage)}); err != nil {
+	for _, rTid := range tpr.resources {
+		if err = tpr.dataStorage.SetResource(&Resource{Tenant: rTid.Tenant, ID: rTid.ID, Usages: make(map[string]*ResourceUsage)}); err != nil {
 			return
 		}
 		if verbose {
-			log.Print("\t", rID)
+			log.Print("\t", rTid.TenantID())
 		}
 	}
 	if verbose {
@@ -2057,22 +2065,24 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if verbose {
 				log.Print("Indexing resource profiles")
 			}
-			rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourceProfilesIndex)
-			if err != nil {
-				return err
-			}
-			for _, tpRL := range tpr.resProfiles {
-				if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
+			for tenant, mpID := range tpr.resProfiles {
+				rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourceProfilesIndex+tenant)
+				if err != nil {
 					return err
-				} else {
-					rlIdxr.IndexFilters(rl.ID, rl.Filters)
 				}
-			}
-			if verbose {
-				log.Printf("Indexed ResourceProfile keys: %+v", rlIdxr.ChangedKeys().Slice())
-			}
-			if err := rlIdxr.StoreIndexes(); err != nil {
-				return err
+				for _, tpRL := range mpID {
+					if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
+						return err
+					} else {
+						rlIdxr.IndexFilters(rl.ID, rl.Filters)
+					}
+				}
+				if verbose {
+					log.Printf("Indexed ResourceProfile tenant: %s keys: %+v", tenant, rlIdxr.ChangedKeys().Slice())
+				}
+				if err := rlIdxr.StoreIndexes(); err != nil {
+					return err
+				}
 			}
 		}
 		if len(tpr.sqProfiles) > 0 {
@@ -2294,11 +2304,11 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		}
 		return keys, nil
 	case utils.ResourceProfilesPrefix:
-		keys := make([]string, len(tpr.resProfiles))
-		i := 0
-		for k := range tpr.resProfiles {
-			keys[i] = k
-			i++
+		keys := make([]string, 0)
+		for tenant, mpID := range tpr.resProfiles {
+			for id := range mpID {
+				keys = append(keys, utils.ConcatenatedKey(tenant, id))
+			}
 		}
 		return keys, nil
 	case utils.ACTION_TRIGGER_PREFIX:
