@@ -759,3 +759,23 @@ func AppendToFile(fName, text string) error {
 	f.Close()
 	return nil
 }
+
+func NewTenantID(tntID string) *TenantID {
+	if strings.Index(tntID, CONCATENATED_KEY_SEP) == -1 { // no :, ID without Tenant
+		return &TenantID{ID: tntID}
+	}
+	tIDSplt := strings.Split(tntID, CONCATENATED_KEY_SEP)
+	if len(tIDSplt) == 1 { // only Tenant present
+		return &TenantID{Tenant: tIDSplt[0]}
+	}
+	return &TenantID{Tenant: tIDSplt[0], ID: tIDSplt[1]}
+}
+
+type TenantID struct {
+	Tenant string
+	ID     string
+}
+
+func (tID *TenantID) TenantID() string {
+	return ConcatenatedKey(tID.Tenant, tID.ID)
+}
