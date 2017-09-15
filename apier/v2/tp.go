@@ -42,7 +42,7 @@ func (self *ApierV2) RemTP(attrs AttrRemTp, reply *string) error {
 }
 
 func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
-	if len(*attrs.TPid) == 0 {
+	if attrs.TPid == nil || *attrs.TPid == "" {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dir := self.Config.TpExportPath
@@ -75,7 +75,7 @@ func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *uti
 }
 
 func (self *ApierV2) ExportTPToZipString(attrs utils.AttrDirExportTP, reply *string) error {
-	if len(*attrs.TPid) == 0 {
+	if attrs.TPid == nil || *attrs.TPid == "" {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dir := ""

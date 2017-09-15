@@ -565,7 +565,7 @@ func (self *SQLStorage) SetTPResources(rls []*utils.TPResource) error {
 	tx := self.db.Begin()
 	for _, rl := range rls {
 		// Remove previous
-		if err := tx.Where(&TpResource{Tpid: rl.TPid, Tag: rl.ID}).Delete(TpResource{}).Error; err != nil {
+		if err := tx.Where(&TpResource{Tpid: rl.TPid, ID: rl.ID}).Delete(TpResource{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -1542,7 +1542,7 @@ func (self *SQLStorage) GetTPResources(tpid, id string) ([]*utils.TPResource, er
 	var rls TpResources
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
-		q = q.Where("tag = ?", id)
+		q = q.Where("id = ?", id)
 	}
 	if err := q.Find(&rls).Error; err != nil {
 		return nil, err
