@@ -5,19 +5,19 @@
 
 #DBs Config
 datadb="redis"
-stordb="mysql"
+stordb="postgres"
 	echo "dataDB:"$datadb " storDB:"$stordb
 	echo ""
 #dataDBs
 case $datadb in
 "redis")
 #Redis Config
-export cgr_from_host='127.0.0.1' 
+export cgr_from_host='192.168.100.40'
 export cgr_from_port=6379
 export cgr_from_db=11
 export cgr_from_pass=''
 
-export cgr_to_host='127.0.0.1'
+export cgr_to_host='192.168.100.40'
 export cgr_to_port=6379
 export cgr_to_db=10
 export cgr_to_pass='' # Not used
@@ -55,7 +55,7 @@ db="cgrates"
 "postgres")
 #postgres Config
 user="cgrates"
-host="127.0.0.1"
+host="192.168.100.40"
 db="cgrates"
 ;;
 esac
@@ -89,14 +89,15 @@ mig=$?
 ;;
 
 "postgres")
-psql -U $user -h $host -d cgrates -f "$DIR"/pq_tables_update.sql
+psql -U $user -h $host -d cgrates -f "$DIR"/pg_tables_update.sql
+echo "not mysql"
 up=$?
-psql -U $user -h $host -d cgrates -f "$DIR"/pg_cdr_migration.sql
+ psql -U $user -h $host -d cgrates -f "$DIR"/pg_cdr_migration.sql
 mig=$?
 ;;
 esac
 
-if [ $up = 0 ] && [ $mig = 0 ]; then
-	echo -e "\n\t+++ The script ran successfully ! +++\n"
-	exit 0
-fi
+# if [ $up == 0 ] && [ $mig == 0 ]; then
+# 	echo -e "\n\t+++ The script ran successfully ! +++\n"
+# 	exit 0
+# fi
