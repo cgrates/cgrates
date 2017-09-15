@@ -782,6 +782,7 @@ func testOnStorITCacheReverseAlias(t *testing.T) {
 
 func testOnStorITCacheResourceProfile(t *testing.T) {
 	rCfg := &ResourceProfile{
+		Tenant: "cgrates.org",
 		ID:     "RL_TEST",
 		Weight: 10,
 		Filters: []*RequestFilter{
@@ -799,19 +800,19 @@ func testOnStorITCacheResourceProfile(t *testing.T) {
 	if err := onStor.SetResourceProfile(rCfg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	expectedR := []string{"rsp_RL_TEST"}
+	expectedR := []string{"rsp_cgrates.org:RL_TEST"}
 	if itm, err := onStor.GetKeysForPrefix(utils.ResourceProfilesPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedR, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
 	}
-	if _, hasIt := cache.Get(utils.ResourceProfilesPrefix + rCfg.ID); hasIt {
+	if _, hasIt := cache.Get(utils.ResourceProfilesPrefix + rCfg.TenantID()); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.ResourceProfilesPrefix, []string{rCfg.ID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ResourceProfilesPrefix, []string{rCfg.TenantID()}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.ResourceProfilesPrefix + rCfg.ID); !hasIt {
+	if itm, hasIt := cache.Get(utils.ResourceProfilesPrefix + rCfg.TenantID()); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ResourceProfile); !reflect.DeepEqual(rCfg, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", rCfg, rcv)
@@ -853,7 +854,8 @@ func testOnStorITCacheTiming(t *testing.T) {
 
 func testOnStorITCacheResource(t *testing.T) {
 	res := &Resource{
-		ID: "RL1",
+		Tenant: "cgrates.org",
+		ID:     "RL1",
 		Usages: map[string]*ResourceUsage{
 			"RU1": &ResourceUsage{
 				ID:         "RU1",
@@ -866,20 +868,20 @@ func testOnStorITCacheResource(t *testing.T) {
 	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
-	expectedT := []string{"res_RL1"}
+	expectedT := []string{"res_cgrates.org:RL1"}
 	if itm, err := onStor.GetKeysForPrefix(utils.ResourcesPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 
-	if _, hasIt := cache.Get(utils.ResourcesPrefix + res.ID); hasIt {
+	if _, hasIt := cache.Get(utils.ResourcesPrefix + res.TenantID()); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.ResourcesPrefix, []string{res.ID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ResourcesPrefix, []string{res.TenantID()}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.ResourcesPrefix + res.ID); !hasIt {
+	if itm, hasIt := cache.Get(utils.ResourcesPrefix + res.TenantID()); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*Resource); !reflect.DeepEqual(res, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", res, rcv)
@@ -1798,13 +1800,13 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if _, rcvErr := onStor.GetResourceProfile(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetResourceProfile(rL, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetResourceProfile(rL.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
@@ -1817,7 +1819,7 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.GetResourceProfile(rL.ID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
@@ -1825,17 +1827,18 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	// if err = onStor.SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err := onStor.RemoveResourceProfile(rL.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResourceProfile(rL.Tenant, rL.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetResourceProfile(rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
 
 func testOnStorITCRUDResource(t *testing.T) {
 	res := &Resource{
-		ID: "RL1",
+		Tenant: "cgrates.org",
+		ID:     "RL1",
 		Usages: map[string]*ResourceUsage{
 			"RU1": &ResourceUsage{
 				ID:         "RU1",
@@ -1845,26 +1848,26 @@ func testOnStorITCRUDResource(t *testing.T) {
 		},
 		TTLIdx: []string{"RU1"},
 	}
-	if _, rcvErr := onStor.GetResource("RL1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResource("cgrates.org", "RL1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetResource("RL1", true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResource("cgrates.org", "RL1", true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
 	}
-	if rcv, err := onStor.GetResource("RL1", false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResource("cgrates.org", "RL1", false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(res, rcv) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
 	}
-	if err := onStor.RemoveResource(res.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResource(res.Tenant, res.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetResource(res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

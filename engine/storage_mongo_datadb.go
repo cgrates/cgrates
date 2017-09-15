@@ -556,7 +556,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	defer session.Close()
 	db := session.DB(ms.db)
 	keyResult := struct{ Key string }{}
-	idResult := struct{ Id string }{}
+	idResult := struct{ Tenant, Id string }{}
 	switch category {
 	case utils.DESTINATION_PREFIX:
 		iter := db.C(colDst).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
@@ -624,14 +624,14 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result = append(result, utils.REVERSE_ALIASES_PREFIX+keyResult.Key)
 		}
 	case utils.ResourceProfilesPrefix:
-		iter := db.C(colRsP).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colRsP).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.ResourceProfilesPrefix+idResult.Id)
+			result = append(result, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.ResourcesPrefix:
-		iter := db.C(colRes).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colRes).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.ResourcesPrefix+idResult.Id)
+			result = append(result, utils.ResourcesPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.StatQueuePrefix:
 		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
