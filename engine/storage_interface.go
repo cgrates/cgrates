@@ -99,12 +99,12 @@ type DataDB interface {
 	RemoveAlias(string, string) error
 	SetReverseAlias(*Alias, string) error
 	GetReverseAlias(string, bool, string) ([]string, error)
-	GetResourceProfile(string, bool, string) (*ResourceProfile, error)
+	GetResourceProfile(string, string, bool, string) (*ResourceProfile, error)
 	SetResourceProfile(*ResourceProfile, string) error
-	RemoveResourceProfile(string, string) error
-	GetResource(string, bool, string) (*Resource, error)
+	RemoveResourceProfile(string, string, string) error
+	GetResource(string, string, bool, string) (*Resource, error)
 	SetResource(*Resource) error
-	RemoveResource(string, string) error
+	RemoveResource(string, string, string) error
 	GetTiming(string, bool, string) (*utils.TPTiming, error)
 	SetTiming(*utils.TPTiming, string) error
 	RemoveTiming(string, string) error

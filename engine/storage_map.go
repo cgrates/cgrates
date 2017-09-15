@@ -193,6 +193,7 @@ func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {
 
 // CacheDataFromDB loads data to cache,
 // prefix represents the cache prefix, IDs should be nil if all available data should be loaded
+// ToDo: convert IDs into []*utils.TenantIDs when infrastructure will be ready
 func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) (err error) {
 	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
@@ -273,9 +274,11 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
-			_, err = ms.GetResourceProfile(dataID, true, utils.NonTransactional)
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
-			_, err = ms.GetResource(dataID, true, utils.NonTransactional)
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
@@ -1276,10 +1279,10 @@ func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID strin
 	return
 }
 
-func (ms *MapStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
+func (ms *MapStorage) GetResourceProfile(tenant, id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.ResourceProfilesPrefix + id
+	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x != nil {
@@ -1313,23 +1316,23 @@ func (ms *MapStorage) SetResourceProfile(r *ResourceProfile, transactionID strin
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.ResourceProfilesPrefix+r.ID] = result
+	ms.dict[utils.ResourceProfilesPrefix+r.TenantID()] = result
 	return nil
 }
 
-func (ms *MapStorage) RemoveResourceProfile(id string, transactionID string) error {
+func (ms *MapStorage) RemoveResourceProfile(tenant, id string, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.ResourceProfilesPrefix + id
+	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
 }
 
-func (ms *MapStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
+func (ms *MapStorage) GetResource(tenant, id string, skipCache bool, transactionID string) (r *Resource, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.ResourcesPrefix + id
+	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x != nil {
@@ -1358,14 +1361,14 @@ func (ms *MapStorage) SetResource(r *Resource) (err error) {
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.ResourcesPrefix+r.ID] = result
+	ms.dict[utils.ResourcesPrefix+r.TenantID()] = result
 	return
 }
 
-func (ms *MapStorage) RemoveResource(id string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveResource(tenant, id string, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.ResourcesPrefix + id
+	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return

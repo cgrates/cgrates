@@ -526,9 +526,11 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
-			_, err = ms.GetResourceProfile(dataID, true, utils.NonTransactional)
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
-			_, err = ms.GetResource(dataID, true, utils.NonTransactional)
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
@@ -1830,8 +1832,8 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
-	key := utils.ResourceProfilesPrefix + id
+func (ms *MongoStorage) GetResourceProfile(tenant, id string, skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
+	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1843,7 +1845,7 @@ func (ms *MongoStorage) GetResourceProfile(id string, skipCache bool, transactio
 	session, col := ms.conn(colRsP)
 	defer session.Close()
 	rp = new(ResourceProfile)
-	if err = col.Find(bson.M{"id": id}).One(rp); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(rp); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
@@ -1862,22 +1864,23 @@ func (ms *MongoStorage) GetResourceProfile(id string, skipCache bool, transactio
 func (ms *MongoStorage) SetResourceProfile(rp *ResourceProfile, transactionID string) (err error) {
 	session, col := ms.conn(colRsP)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"id": rp.ID}, rp)
+	_, err = col.Upsert(bson.M{"tenant": rp.Tenant, "id": rp.ID}, rp)
 	return
 }
 
-func (ms *MongoStorage) RemoveResourceProfile(id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveResourceProfile(tenant, id string, transactionID string) (err error) {
 	session, col := ms.conn(colRsP)
 	defer session.Close()
-	if err = col.Remove(bson.M{"id": id}); err != nil {
+	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ResourceProfilesPrefix+id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
 	return nil
 }
 
-func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
-	key := utils.ResourcesPrefix + id
+func (ms *MongoStorage) GetResource(tenant, id string, skipCache bool, transactionID string) (r *Resource, err error) {
+	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1889,7 +1892,7 @@ func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID str
 	session, col := ms.conn(colRes)
 	defer session.Close()
 	r = new(Resource)
-	if err = col.Find(bson.M{"id": id}).One(r); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(r); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
@@ -1903,17 +1906,18 @@ func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID str
 func (ms *MongoStorage) SetResource(r *Resource) (err error) {
 	session, col := ms.conn(colRes)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"id": r.ID}, r)
+	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
 	return
 }
 
-func (ms *MongoStorage) RemoveResource(id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveResource(tenant, id string, transactionID string) (err error) {
 	session, col := ms.conn(colRes)
 	defer session.Close()
-	if err = col.Remove(bson.M{"id": id}); err != nil {
+	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ResourcesPrefix+id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
 	return nil
 }
 

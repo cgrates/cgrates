@@ -82,6 +82,11 @@ type Resource struct {
 	rPrf   *ResourceProfile // for ordering purposes
 }
 
+// TenantID returns the unique ID in a multi-tenant environment
+func (r *Resource) TenantID() string {
+	return utils.ConcatenatedKey(r.Tenant, r.ID)
+}
+
 // removeExpiredUnits removes units which are expired from the resource
 func (r *Resource) removeExpiredUnits() {
 	var firstActive int
@@ -187,13 +192,21 @@ func (rs Resources) clearUsage(ruID string) (err error) {
 	return
 }
 
-// ids returns list of resource IDs in resources
-func (rs Resources) ids() (ids []string) {
-	ids = make([]string, len(rs))
+// tenantIDs returns list of TenantIDs in resources
+func (rs Resources) tenantIDs() []*utils.TenantID {
+	tntIDs := make([]*utils.TenantID, len(rs))
 	for i, r := range rs {
-		ids[i] = r.ID
+		tntIDs[i] = &utils.TenantID{r.Tenant, r.ID}
 	}
-	return
+	return tntIDs
+}
+
+func (rs Resources) tenatIDsStr() []string {
+	ids := make([]string, len(rs))
+	for i, r := range rs {
+		ids[i] = r.TenantID()
+	}
+	return ids
 }
 
 // AllocateResource attempts allocating resources for a *ResourceUsage
@@ -203,7 +216,7 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	if len(rs) == 0 {
 		return "", utils.ErrResourceUnavailable
 	}
-	lockIDs := utils.PrefixSliceItems(rs.ids(), utils.ResourcesPrefix)
+	lockIDs := utils.PrefixSliceItems(rs.tenatIDsStr(), utils.ResourcesPrefix)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	// Simulate resource usage
@@ -234,7 +247,7 @@ func NewResourceService(dataDB DataDB, storeInterval time.Duration,
 		statS = nil
 	}
 	return &ResourceService{dataDB: dataDB, statS: statS,
-		lcEventResources: make(map[string][]string),
+		lcEventResources: make(map[string][]*utils.TenantID),
 		storedResources:  make(utils.StringMap),
 		storeInterval:    storeInterval, stopBackup: make(chan struct{})}, nil
 }
@@ -243,7 +256,7 @@ func NewResourceService(dataDB DataDB, storeInterval time.Duration,
 type ResourceService struct {
 	dataDB           DataDB                        // So we can load the data in cache and index it
 	statS            rpcclient.RpcClientConnection // allows applying filters based on stats
-	lcEventResources map[string][]string           // cache recording resources for events in alocation phase
+	lcEventResources map[string][]*utils.TenantID  // cache recording resources for events in alocation phase
 	lcERMux          sync.RWMutex                  // protects the lcEventResources
 	storedResources  utils.StringMap               // keep a record of resources which need saving, map[resID]bool
 	srMux            sync.RWMutex                  // protects storedResources
@@ -340,7 +353,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 		if rIDsIf, has := cache.Get(utils.EventResourcesPrefix + evUUID); !has {
 			return nil
 		} else if rIDsIf != nil {
-			rIDs = rIDsIf.([]string)
+			rIDs = rIDsIf.([]*utils.TenantID)
 		}
 		shortCached = true
 	}
@@ -348,11 +361,14 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	if len(rIDs) == 0 {
 		return
 	}
-	lockIDs := utils.PrefixSliceItems(rIDs, utils.ResourcesPrefix)
+	lockIDs := make([]string, len(rIDs))
+	for i, rTid := range rIDs {
+		lockIDs[i] = utils.ResourcesPrefix + rTid.TenantID()
+	}
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
-	for i, rID := range rIDs {
-		if r, err := rS.dataDB.GetResource(rID, false, ""); err != nil {
+	for i, rTid := range rIDs {
+		if r, err := rS.dataDB.GetResource(rTid.Tenant, rTid.ID, false, ""); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ResourceS> force-uncaching resources for evUUID: <%s>, error: <%s>",
 					evUUID, err.Error()))
@@ -383,7 +399,8 @@ func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) 
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
-		rPrf, err := rS.dataDB.GetResourceProfile(resName, false, utils.NonTransactional)
+		rTntID := utils.NewTenantID(resName)
+		rPrf, err := rS.dataDB.GetResourceProfile(rTntID.Tenant, rTntID.ID, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -406,7 +423,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) 
 		if !passAllFilters {
 			continue
 		}
-		r, err := rS.dataDB.GetResource(rPrf.ID, false, "")
+		r, err := rS.dataDB.GetResource(rPrf.Tenant, rPrf.ID, false, "")
 		if err != nil {
 			return nil, err
 		}
@@ -455,7 +472,7 @@ func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *
 		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
 			return err
 		}
-		cache.Set(utils.EventResourcesPrefix+args.UsageID, mtcRLs.ids(), true, "")
+		cache.Set(utils.EventResourcesPrefix+args.UsageID, mtcRLs.tenantIDs(), true, "")
 	}
 	if _, err = mtcRLs.AllocateResource(
 		&ResourceUsage{ID: args.UsageID,
@@ -498,7 +515,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.AttrRLsResourceUsage, r
 	}
 	if wasShortCached || !wasCached {
 		rS.lcERMux.Lock()
-		rS.lcEventResources[args.UsageID] = mtcRLs.ids()
+		rS.lcEventResources[args.UsageID] = mtcRLs.tenantIDs()
 		rS.lcERMux.Unlock()
 	}
 	// index it for storing
