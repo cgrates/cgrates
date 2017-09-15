@@ -1428,7 +1428,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			},
 		},
 	}
-	if len(csvr.resProfiles["ResGroup21"]) != len(eResProfiles["ResGroup21"]) {
+	if len(csvr.resProfiles["cgrates.org"]) != len(eResProfiles["cgrates.org"]) {
 		t.Errorf("Failed to load resourceProfiles: %s", utils.ToIJSON(csvr.resProfiles))
 	} else if !reflect.DeepEqual(eResProfiles["ResGroup22"], csvr.resProfiles["ResGroup22"]) {
 		t.Errorf("Expecting: %+v, received: %+v", eResProfiles["ResGroup22"], csvr.resProfiles["ResGroup22"])
