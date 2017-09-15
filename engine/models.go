@@ -454,8 +454,8 @@ func (t TBLSMCosts) TableName() string {
 type TpResource struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	ID                 string  `index:"0" re:""`
-	Tenant             string  `index:"1" re:""`
+	Tenant             string  `index:"0" re:""`
+	ID                 string  `index:"1" re:""`
 	FilterType         string  `index:"2" re:"^\*[A-Za-z].*"`
 	FilterFieldName    string  `index:"3" re:""`
 	FilterFieldValues  string  `index:"4" re:""`
