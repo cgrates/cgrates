@@ -1817,12 +1817,12 @@ type TpResources []*TpResource
 func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 	mrl := make(map[string]*utils.TPResource)
 	for _, tp := range tps {
-		rl, found := mrl[tp.Tag]
+		rl, found := mrl[tp.ID]
 		if !found {
 			rl = &utils.TPResource{
 				TPid:    tp.Tpid,
 				Tenant:  tp.Tenant,
-				ID:      tp.Tag,
+				ID:      tp.ID,
 				Blocker: tp.Blocker,
 				Stored:  tp.Stored,
 			}
@@ -1863,7 +1863,7 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 				FieldName: tp.FilterFieldName,
 				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
-		mrl[tp.Tag] = rl
+		mrl[tp.ID] = rl
 	}
 	result = make([]*utils.TPResource, len(mrl))
 	i := 0
@@ -1880,9 +1880,11 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 	}
 	for i, fltr := range rl.Filters {
 		mdl := &TpResource{
-			Tpid:   rl.TPid,
-			Tenant: rl.Tenant,
-			Tag:    rl.ID,
+			Tpid:    rl.TPid,
+			Tenant:  rl.Tenant,
+			ID:      rl.ID,
+			Blocker: rl.Blocker,
+			Stored:  rl.Stored,
 		}
 		if i == 0 {
 			mdl.UsageTTL = rl.UsageTTL
