@@ -48,9 +48,10 @@ func (self *ApierV1) GetTPDerivedChargers(attrs AttrGetTPDerivedChargers, reply 
 	filter := &utils.TPDerivedChargers{TPid: attrs.TPid}
 	filter.SetDerivedChargersId(attrs.DerivedChargersId)
 	if dcs, err := self.StorDb.GetTPDerivedChargers(filter); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(dcs) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *dcs[0]
 	}
