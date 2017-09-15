@@ -65,6 +65,10 @@ type ResourceUsage struct {
 	Units      float64 // Number of units used
 }
 
+func (ru *ResourceUsage) TenantID() string {
+	return utils.ConcatenatedKey(ru.Tenant, ru.ID)
+}
+
 // isActive checks ExpiryTime at some time
 func (ru *ResourceUsage) isActive(atTime time.Time) bool {
 	return ru.ExpiryTime.IsZero() || ru.ExpiryTime.Sub(atTime) > 0
@@ -132,10 +136,10 @@ func (r *Resource) totalUsage() (tU float64) {
 
 // recordUsage records a new usage
 func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
-	if _, hasID := r.Usages[ru.ID]; hasID {
-		return fmt.Errorf("duplicate resource usage with id: %s", ru.ID)
+	if _, hasID := r.Usages[ru.TenantID()]; hasID {
+		return fmt.Errorf("duplicate resource usage with id: %s", ru.TenantID())
 	}
-	r.Usages[ru.ID] = ru
+	r.Usages[ru.TenantID()] = ru
 	if r.tUsage != nil {
 		*r.tUsage += ru.Units
 	}
@@ -143,12 +147,12 @@ func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
 }
 
 // clearUsage clears the usage for an ID
-func (r *Resource) clearUsage(ruID string) (err error) {
-	ru, hasIt := r.Usages[ruID]
+func (r *Resource) clearUsage(ruTntID string) (err error) {
+	ru, hasIt := r.Usages[ruTntID]
 	if !hasIt {
-		return fmt.Errorf("Cannot find usage record with id: %s", ruID)
+		return fmt.Errorf("Cannot find usage record with id: %s", ruTntID)
 	}
-	delete(r.Usages, ruID)
+	delete(r.Usages, ruTntID)
 	if r.tUsage != nil {
 		*r.tUsage -= ru.Units
 	}
@@ -175,17 +179,17 @@ func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
 	}
 	if err != nil {
 		for _, r := range rs[:nonReservedIdx] {
-			r.clearUsage(ru.ID) // best effort
+			r.clearUsage(ru.TenantID()) // best effort
 		}
 	}
 	return
 }
 
 // clearUsage gives back the units to the pool
-func (rs Resources) clearUsage(ruID string) (err error) {
+func (rs Resources) clearUsage(ruTntID string) (err error) {
 	for _, r := range rs {
-		if errClear := r.clearUsage(ruID); errClear != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, err: %s", errClear.Error()))
+		if errClear := r.clearUsage(ruTntID); errClear != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, clear ruID: %s, err: %s", ruTntID, errClear.Error()))
 			err = errClear
 		}
 	}
@@ -389,13 +393,13 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) (rs Resources, err error) {
+func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourceProfilesIndex)
+	rIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourceProfilesStringIndex+tenant)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourceProfilesIndex)
+	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourceProfilesStringIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
@@ -451,32 +455,46 @@ func (rS *ResourceService) matchingResourcesForEvent(ev map[string]interface{}) 
 }
 
 // V1ResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceService) V1ResourcesForEvent(ev map[string]interface{}, reply *[]*ResourceProfile) error {
-	matchingRLForEv, err := rS.matchingResourcesForEvent(ev)
-	if err != nil {
-		return err
+func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *[]*ResourceProfile) (err error) {
+	if args.Tenant == "" {
+		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
-	if len(matchingRLForEv) == 0 {
+	var mtcRLs Resources
+	if args.UsageID != "" { // only cached if UsageID is present
+		mtcRLs = rS.cachedResourcesForEvent(args.TenantID())
+	}
+	if mtcRLs == nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
+			return err
+		}
+		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
+	}
+	if len(mtcRLs) == 0 {
 		return utils.ErrNotFound
 	}
-	for _, r := range matchingRLForEv {
+	for _, r := range mtcRLs {
 		*reply = append(*reply, r.rPrf)
 	}
 	return nil
 }
 
 // V1AllowUsage queries service to find if an Usage is allowed
-func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *bool) (err error) {
-	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
+func (rS *ResourceService) V1AllowUsage(args utils.ArgRSv1ResourceUsage, allow *bool) (err error) {
+	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	mtcRLs := rS.cachedResourcesForEvent(args.TenantID())
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
 			return err
 		}
-		cache.Set(utils.EventResourcesPrefix+args.UsageID, mtcRLs.tenantIDs(), true, "")
+		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
 	}
 	if _, err = mtcRLs.AllocateResource(
-		&ResourceUsage{ID: args.UsageID,
-			Units: args.Units}, true); err != nil {
+		&ResourceUsage{
+			Tenant: args.Tenant,
+			ID:     args.UsageID,
+			Units:  args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			cache.Set(utils.EventResourcesPrefix+args.UsageID, nil, true, "")
 			err = nil
@@ -489,11 +507,14 @@ func (rS *ResourceService) V1AllowUsage(args utils.AttrRLsResourceUsage, allow *
 }
 
 // V1AllocateResource is called when a resource requires allocation
-func (rS *ResourceService) V1AllocateResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
+func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
+	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	var wasCached bool
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
 			return
 		}
 	} else {
@@ -534,10 +555,13 @@ func (rS *ResourceService) V1AllocateResource(args utils.AttrRLsResourceUsage, r
 }
 
 // V1ReleaseResource is called when we need to clear an allocation
-func (rS *ResourceService) V1ReleaseResource(args utils.AttrRLsResourceUsage, reply *string) (err error) {
+func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
+	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
 			return
 		}
 	}

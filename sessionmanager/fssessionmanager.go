@@ -213,7 +213,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	}
 	if sm.rls != nil {
 		var reply string
-		attrRU := utils.AttrRLsResourceUsage{
+		attrRU := utils.ArgRSv1ResourceUsage{
 			UsageID: ev.GetUUID(),
 			Event:   ev.(FSEvent).AsMapStringInterface(sm.timezone),
 			Units:   1,
@@ -278,7 +278,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 		sm.ProcessCdr(ev.AsStoredCdr(config.CgrConfig().DefaultTimezone))
 	}
 	var reply string
-	attrRU := utils.AttrRLsResourceUsage{
+	attrRU := utils.ArgRSv1ResourceUsage{
 		UsageID: ev.GetUUID(),
 		Event:   ev.(FSEvent).AsMapStringInterface(sm.timezone),
 		Units:   1,

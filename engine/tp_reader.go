@@ -2066,7 +2066,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Print("Indexing resource profiles")
 			}
 			for tenant, mpID := range tpr.resProfiles {
-				rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourceProfilesIndex+tenant)
+				rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourceProfilesStringIndex+tenant)
 				if err != nil {
 					return err
 				}
@@ -2074,7 +2074,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 					if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
 						return err
 					} else {
-						rlIdxr.IndexFilters(rl.ID, rl.Filters)
+						rlIdxr.IndexFilters(rl.TenantID(), rl.Filters)
 					}
 				}
 				if verbose {

@@ -241,7 +241,7 @@ const (
 	ALIASES_PREFIX                = "als_"
 	REVERSE_ALIASES_PREFIX        = "rls_"
 	ResourcesPrefix               = "res_"
-	ResourceProfilesIndex         = "rsi_"
+	ResourceProfilesStringIndex   = "rsi_"
 	ResourceProfilesPrefix        = "rsp_"
 	StatsIndex                    = "sti_"
 	ThresholdsPrefix              = "ths_"

@@ -62,32 +62,27 @@ func (rsv1 *ResourceSV1) Call(serviceMethod string, args interface{}, reply inte
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSV1) GetResourcesForEvent(ev map[string]interface{}, reply *[]*engine.ResourceProfile) error {
-	return rsv1.rls.V1ResourcesForEvent(ev, reply)
+func (rsv1 *ResourceSV1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *[]*engine.ResourceProfile) error {
+	return rsv1.rls.V1ResourcesForEvent(args, reply)
 }
 
 // AllowUsage checks if there are limits imposed for event
-func (rsv1 *ResourceSV1) AllowUsage(args utils.AttrRLsResourceUsage, allowed *bool) error {
+func (rsv1 *ResourceSV1) AllowUsage(args utils.ArgRSv1ResourceUsage, allowed *bool) error {
 	return rsv1.rls.V1AllowUsage(args, allowed)
 }
 
 // V1InitiateResourceUsage records usage for an event
-func (rsv1 *ResourceSV1) AllocateResource(args utils.AttrRLsResourceUsage, reply *string) error {
+func (rsv1 *ResourceSV1) AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) error {
 	return rsv1.rls.V1AllocateResource(args, reply)
 }
 
 // V1TerminateResourceUsage releases usage for an event
-func (rsv1 *ResourceSV1) ReleaseResource(args utils.AttrRLsResourceUsage, reply *string) error {
+func (rsv1 *ResourceSV1) ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) error {
 	return rsv1.rls.V1ReleaseResource(args, reply)
 }
 
-type ArgGetResPrf struct {
-	Tenant string
-	ID     string
-}
-
 // GetResourceProfile returns a resource configuration
-func (apierV1 *ApierV1) GetResourceProfile(arg ArgGetResPrf, reply *engine.ResourceProfile) error {
+func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.ResourceProfile) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -115,7 +110,7 @@ func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *s
 }
 
 //RemResourceProfile remove a specific resource configuration
-func (apierV1 *ApierV1) RemResourceProfile(arg ArgGetResPrf, reply *string) error {
+func (apierV1 *ApierV1) RemResourceProfile(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
