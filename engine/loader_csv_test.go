@@ -266,11 +266,11 @@ cgrates.org,mas,true,another,value,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
 	resProfiles = `
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],TTL[6],Limit[7],AllocationMessage[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
-Tester,ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
-Tester,ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
-Tester,ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
-Tester,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
+#Id[0]Tenant[1],,FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],TTL[6],Limit[7],AllocationMessage[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
+ResGroup21,cgrates.org,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
+ResGroup21,cgrates.org,*string_prefix,HdrDestination,10;20,,,,,,,,
+ResGroup21,cgrates.org,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
+ResGroup22,cgrates.org,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
@@ -1393,7 +1393,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 	eResProfiles := map[string]*utils.TPResource{
 		"ResGroup21": &utils.TPResource{
 			TPid:   testTPID,
-			Tenant: "Tester",
+			Tenant: "cgrates.org",
 			ID:     "ResGroup21",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
@@ -1410,7 +1410,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 		},
 		"ResGroup22": &utils.TPResource{
 			TPid:   testTPID,
-			Tenant: "Tester",
+			Tenant: "cgrates.org",
 			ID:     "ResGroup22",
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
