@@ -33,8 +33,7 @@ print('Setting new values...')
 cursor.execute('UPDATE cdrs SET `usage` = `usage_old` * 1000000000 WHERE usage_old IS NOT NULL')
 
 print('Deleting old column...')
-cursor.execute('ALTER TABLEX cdrs DROP COLUMN usage_old')
+cursor.execute('ALTER TABLE cdrs DROP COLUMN usage_old')
 
 print('Closing MySQL connection...')
 cnx.close()
-

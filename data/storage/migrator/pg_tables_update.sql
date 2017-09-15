@@ -77,3 +77,7 @@ CREATE TABLE versions (
 
 
 
+ALTER TABLE cdrs RENAME COLUMN usage to usage_old;
+ALTER TABLE cdrs ADD usage NUMERIC(30);
+UPDATE cdrs SET usage = usage_old * 1000000000 WHERE usage_old IS NOT NULL;
+ALTER TABLE cdrs DROP COLUMN usage_old;
