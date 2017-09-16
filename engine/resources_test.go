@@ -32,23 +32,27 @@ var (
 	rs            Resources
 )
 
-func TestRSRecordUsage(t *testing.T) {
+func TestRSRecordUsage1(t *testing.T) {
 	ru1 = &ResourceUsage{
+		Tenant:     "cgrates.org",
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      2,
 	}
 
 	ru2 = &ResourceUsage{
+		Tenant:     "cgrates.org",
 		ID:         "RU2",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      2,
 	}
 
 	r1 = &Resource{
-		ID: "RL1",
+		Tenant: "cgrates.org",
+		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			ID: "RL1",
+			Tenant: "cgrates.org",
+			ID:     "RL1",
 			Filters: []*RequestFilter{
 				&RequestFilter{
 					Type:      MetaString,
@@ -83,13 +87,13 @@ func TestRSRecordUsage(t *testing.T) {
 		t.Error(err.Error())
 	} else {
 		if err := r1.recordUsage(ru1); err == nil {
-			t.Error("Duplicate ResourceUsage id should not be allowed")
+			t.Error("duplicate ResourceUsage id should not be allowed")
 		}
 		if _, found := r1.Usages[ru2.ID]; !found {
 			t.Error("ResourceUsage was not recorded")
 		}
 		if *r1.tUsage != 4 {
-			t.Errorf("Expecting: %+v, received: %+v", 4, r1.tUsage)
+			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
 		}
 	}
 
@@ -126,7 +130,8 @@ func TestRSUsedUnits(t *testing.T) {
 
 func TestRSRsort(t *testing.T) {
 	r2 = &Resource{
-		ID: "RL2",
+		Tenant: "cgrates.org",
+		ID:     "RL2",
 		rPrf: &ResourceProfile{
 			ID: "RL2",
 			Filters: []*RequestFilter{
@@ -246,9 +251,11 @@ func TestRSAllocateResource(t *testing.T) {
 // TestRSCacheSetGet assurace the presence of private params in cached resource
 func TestRSCacheSetGet(t *testing.T) {
 	r := &Resource{
-		ID: "RL",
+		Tenant: "cgrates.org",
+		ID:     "RL",
 		rPrf: &ResourceProfile{
-			ID: "RL",
+			Tenant: "cgrates.org",
+			ID:     "RL",
 			Filters: []*RequestFilter{
 				&RequestFilter{
 					Type:      MetaString,
@@ -273,6 +280,7 @@ func TestRSCacheSetGet(t *testing.T) {
 		},
 		Usages: map[string]*ResourceUsage{
 			"RU2": &ResourceUsage{
+				Tenant:     "cgrates.org",
 				ID:         "RU2",
 				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 				Units:      2,
@@ -281,7 +289,7 @@ func TestRSCacheSetGet(t *testing.T) {
 		tUsage: utils.Float64Pointer(2),
 		dirty:  utils.BoolPointer(true),
 	}
-	key := utils.ResourcesPrefix + r.ID
+	key := utils.ResourcesPrefix + r.TenantID()
 	cache.Set(key, r, true, "")
 	if x, ok := cache.Get(key); !ok {
 		t.Error("not in cache")

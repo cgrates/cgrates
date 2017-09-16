@@ -196,7 +196,7 @@ func testOnStorITSetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.SetReqFilterIndexes(utils.ResourceProfilesIndex, idxes); err != nil {
+	if err := onStor.SetReqFilterIndexes(utils.ResourceProfilesStringIndex, idxes); err != nil {
 		t.Error(err)
 	}
 }
@@ -227,7 +227,7 @@ func testOnStorITGetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if idxes, err := onStor.GetReqFilterIndexes(utils.ResourceProfilesIndex); err != nil {
+	if idxes, err := onStor.GetReqFilterIndexes(utils.ResourceProfilesStringIndex); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, idxes) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
@@ -242,12 +242,12 @@ func testOnStorITMatchReqFilterIndex(t *testing.T) {
 		"RL1": true,
 		"RL2": true,
 	}
-	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesIndex, "Account", "1002"); err != nil {
+	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesStringIndex, "Account", "1002"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
-	if _, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesStringIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

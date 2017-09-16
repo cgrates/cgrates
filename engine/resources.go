@@ -136,10 +136,10 @@ func (r *Resource) totalUsage() (tU float64) {
 
 // recordUsage records a new usage
 func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
-	if _, hasID := r.Usages[ru.TenantID()]; hasID {
+	if _, hasID := r.Usages[ru.ID]; hasID {
 		return fmt.Errorf("duplicate resource usage with id: %s", ru.TenantID())
 	}
-	r.Usages[ru.TenantID()] = ru
+	r.Usages[ru.ID] = ru
 	if r.tUsage != nil {
 		*r.tUsage += ru.Units
 	}
@@ -147,12 +147,12 @@ func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
 }
 
 // clearUsage clears the usage for an ID
-func (r *Resource) clearUsage(ruTntID string) (err error) {
-	ru, hasIt := r.Usages[ruTntID]
+func (r *Resource) clearUsage(ruID string) (err error) {
+	ru, hasIt := r.Usages[ruID]
 	if !hasIt {
-		return fmt.Errorf("Cannot find usage record with id: %s", ruTntID)
+		return fmt.Errorf("cannot find usage record with id: %s", ruID)
 	}
-	delete(r.Usages, ruTntID)
+	delete(r.Usages, ruID)
 	if r.tUsage != nil {
 		*r.tUsage -= ru.Units
 	}
@@ -403,8 +403,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
-		rTntID := utils.NewTenantID(resName)
-		rPrf, err := rS.dataDB.GetResourceProfile(rTntID.Tenant, rTntID.ID, false, utils.NonTransactional)
+		rPrf, err := rS.dataDB.GetResourceProfile(tenant, resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue

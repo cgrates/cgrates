@@ -2074,7 +2074,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 					if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
 						return err
 					} else {
-						rlIdxr.IndexFilters(rl.TenantID(), rl.Filters)
+						rlIdxr.IndexFilters(rl.ID, rl.Filters)
 					}
 				}
 				if verbose {
