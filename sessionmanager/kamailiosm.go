@@ -80,6 +80,7 @@ func (self *KamailioSessionManager) allocateResources(kev KamEvent) (err error) 
 		return
 	}
 	attrRU := utils.ArgRSv1ResourceUsage{
+		Tenant:  kev.GetTenant(utils.META_DEFAULT),
 		UsageID: kev.GetUUID(),
 		Event:   ev,
 		Units:   1, // One channel reserved
@@ -213,6 +214,7 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 			}
 			var reply string
 			attrRU := utils.ArgRSv1ResourceUsage{
+				Tenant:  kev.GetTenant(utils.META_DEFAULT),
 				UsageID: kev.GetUUID(),
 				Event:   ev,
 				Units:   1,
