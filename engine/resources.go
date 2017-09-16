@@ -74,6 +74,13 @@ func (ru *ResourceUsage) isActive(atTime time.Time) bool {
 	return ru.ExpiryTime.IsZero() || ru.ExpiryTime.Sub(atTime) > 0
 }
 
+// clone duplicates ru
+func (ru *ResourceUsage) Clone() (cln *ResourceUsage) {
+	cln = new(ResourceUsage)
+	*cln = *ru
+	return
+}
+
 // Resource represents a resource in the system
 // not thread safe, needs locking at process level
 type Resource struct {
@@ -81,6 +88,7 @@ type Resource struct {
 	ID     string
 	Usages map[string]*ResourceUsage
 	TTLIdx []string         // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+	ttl    *time.Duration   // time to leave for this resource, picked up on each Resource initialization out of config
 	tUsage *float64         // sum of all usages
 	dirty  *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
 	rPrf   *ResourceProfile // for ordering purposes
@@ -139,9 +147,16 @@ func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
 	if _, hasID := r.Usages[ru.ID]; hasID {
 		return fmt.Errorf("duplicate resource usage with id: %s", ru.TenantID())
 	}
+	if r.ttl != nil {
+		ru = ru.Clone() // don't influence the initial ru
+		ru.ExpiryTime = time.Now().Add(*r.ttl)
+	}
 	r.Usages[ru.ID] = ru
 	if r.tUsage != nil {
 		*r.tUsage += ru.Units
+	}
+	if !ru.ExpiryTime.IsZero() {
+		r.TTLIdx = append(r.TTLIdx, ru.ID)
 	}
 	return
 }
@@ -152,10 +167,18 @@ func (r *Resource) clearUsage(ruID string) (err error) {
 	if !hasIt {
 		return fmt.Errorf("cannot find usage record with id: %s", ruID)
 	}
-	delete(r.Usages, ruID)
+	if !ru.ExpiryTime.IsZero() {
+		for i, ruIDIdx := range r.TTLIdx {
+			if ruIDIdx == ruID {
+				r.TTLIdx = append(r.TTLIdx[:i], r.TTLIdx[i+1:]...)
+				break
+			}
+		}
+	}
 	if r.tUsage != nil {
 		*r.tUsage -= ru.Units
 	}
+	delete(r.Usages, ruID)
 	return
 }
 
@@ -227,10 +250,11 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	for _, r := range rs {
 		if r.rPrf.Limit >= r.totalUsage()+ru.Units {
 			if alcMessage == "" {
-				alcMessage = r.rPrf.AllocationMessage
-			}
-			if alcMessage == "" { // rl.AllocationMessage is not populated
-				alcMessage = r.rPrf.ID
+				if r.rPrf.AllocationMessage != "" {
+					alcMessage = r.rPrf.AllocationMessage
+				} else {
+					alcMessage = r.rPrf.ID
+				}
 			}
 		}
 	}
@@ -432,6 +456,9 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 		}
 		if rPrf.Stored {
 			r.dirty = utils.BoolPointer(false)
+		}
+		if rPrf.UsageTTL > 0 {
+			r.ttl = utils.DurationPointer(rPrf.UsageTTL)
 		}
 		r.rPrf = rPrf
 		matchingResources[rPrf.ID] = r // Cannot save it here since we could have errors after and resource will remain unused

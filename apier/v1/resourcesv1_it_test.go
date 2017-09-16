@@ -71,14 +71,12 @@ func TestRsV1ITMySQL(t *testing.T) {
 	}
 }
 
-/*
 func TestRsV1ITMongo(t *testing.T) {
 	rlsV1ConfDIR = "tutmongo"
 	for _, stest := range sTestsRLSV1 {
 		t.Run(rlsV1ConfDIR, stest)
 	}
 }
-*/
 
 func testV1RsLoadConfig(t *testing.T) {
 	var err error
