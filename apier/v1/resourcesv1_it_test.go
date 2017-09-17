@@ -54,14 +54,13 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsAllowUsage,
 	testV1RsReleaseResource,
 	testV1RsDBStore,
-	/*testV1RsGetResourceConfigBeforeSet,
-	testV1RsSetResourceConfig,
-	testV1RsGetResourceConfigAfterSet,
-	testV1RsUpdateResourceConfig,
-	testV1RsGetResourceConfigAfterUpdate,
-	testV1RsRemResourceCOnfig,
-	testV1RsGetResourceConfigAfterDelete,
-	*/
+	testV1RsGetResourceProfileBeforeSet,
+	testV1RsSetResourceProfile,
+	testV1RsGetResourceProfileAfterSet,
+	testV1RsUpdateResourceProfile,
+	testV1RsGetResourceProfileAfterUpdate,
+	testV1RsRemResourceProfile,
+	testV1RsGetResourceProfileAfterDelete,
 	testV1RsStopEngine,
 }
 
@@ -493,17 +492,18 @@ func testV1RsDBStore(t *testing.T) {
 	}
 }
 
-func testV1RsGetResourceConfigBeforeSet(t *testing.T) {
+func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 	var reply *string
-	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig", &utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testV1RsSetResourceConfig(t *testing.T) {
+func testV1RsSetResourceProfile(t *testing.T) {
 	rlsConfig = &engine.ResourceProfile{
-		ID: "RCFG1",
+		Tenant: "cgrates.org",
+		ID:     "RCFG1",
 		Filters: []*engine.RequestFilter{
 			&engine.RequestFilter{
 				Type:      "type",
@@ -524,16 +524,16 @@ func testV1RsSetResourceConfig(t *testing.T) {
 		Thresholds:        []string{"Val1", "Val2"},
 	}
 	var result string
-	if err := rlsV1Rpc.Call("ApierV1.SetResourceConfig", rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testV1RsGetResourceConfigAfterSet(t *testing.T) {
+func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 	var reply *engine.ResourceProfile
-	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig",
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsConfig) {
@@ -541,7 +541,7 @@ func testV1RsGetResourceConfigAfterSet(t *testing.T) {
 	}
 }
 
-func testV1RsUpdateResourceConfig(t *testing.T) {
+func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
 	rlsConfig.Filters = []*engine.RequestFilter{
 		&engine.RequestFilter{
@@ -555,16 +555,16 @@ func testV1RsUpdateResourceConfig(t *testing.T) {
 			Values:    []string{"1001", "1002"},
 		},
 	}
-	if err := rlsV1Rpc.Call("ApierV1.SetResourceConfig", rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testV1RsGetResourceConfigAfterUpdate(t *testing.T) {
+func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 	var reply *engine.ResourceProfile
-	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig",
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsConfig) {
@@ -572,9 +572,9 @@ func testV1RsGetResourceConfigAfterUpdate(t *testing.T) {
 	}
 }
 
-func testV1RsRemResourceCOnfig(t *testing.T) {
+func testV1RsRemResourceProfile(t *testing.T) {
 	var resp string
-	if err := rlsV1Rpc.Call("ApierV1.RemResourceConfig",
+	if err := rlsV1Rpc.Call("ApierV1.RemResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -582,9 +582,9 @@ func testV1RsRemResourceCOnfig(t *testing.T) {
 	}
 }
 
-func testV1RsGetResourceConfigAfterDelete(t *testing.T) {
+func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 	var reply *string
-	if err := rlsV1Rpc.Call("ApierV1.GetResourceConfig",
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
