@@ -43,8 +43,11 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 		}
 		if v1SG != nil {
 			acnt := v1SG.AsSharedGroup()
-			if err = m.dataDB.SetSharedGroup(acnt, utils.NonTransactional); err != nil {
-				return err
+			if m.dryRun != true {
+				if err = m.dataDB.SetSharedGroup(acnt, utils.NonTransactional); err != nil {
+					return err
+				}
+				m.stats[utils.SharedGroups] += 1
 			}
 		}
 	}

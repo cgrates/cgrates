@@ -45,18 +45,24 @@ func (m *Migrator) migrateAccounts() (err error) {
 		}
 		if v1Acnt != nil {
 			acnt := v1Acnt.AsAccount()
-			if err = m.dataDB.SetAccount(acnt); err != nil {
-				return err
+			if m.dryRun != true {
+				if err = m.dataDB.SetAccount(acnt); err != nil {
+					return err
+				}
+				m.stats[utils.Accounts] += 1
+
 			}
 		}
 	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-	if err = m.dataDB.SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+	if m.dryRun != true {
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+		}
 	}
 	return
 }

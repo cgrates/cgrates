@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -35,7 +36,7 @@ var (
 	oStorDBType     string
 	odataDBType     string
 	oDBDataEncoding string
-	migrate         = flag.String("migrate", "", "Fire up automatic migration <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups>")
+	migrate         = flag.String("migrate", "", "Fire up automatic migration *to use multiple values use ',' as separator \n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups> ")
 	version         = flag.Bool("version", false, "Prints the application version.")
 
 	dataDBType = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <redis>")
@@ -71,12 +72,9 @@ var (
 
 	dbDataEncoding    = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
 	oldDBDataEncoding = flag.String("old_dbdata_encoding", "", "The encoding used to store object data in strings")
-	//TO DO:
-	//dryRun          = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
-	//verbose         = flag.Bool("verbose", false, "Enable detailed verbose logging output")
-	//slice mapstring int  cate acc [0]am citit si [1]cate acc am scris
-	//stats           = flag.Bool("stats", false, "Generates statsistics about given data.")
-
+	dryRun            = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
+	verbose           = flag.Bool("verbose", false, "Enable detailed verbose logging output")
+	stats             = flag.Bool("stats", false, "Generates statsistics about given data.")
 )
 
 func main() {
@@ -86,6 +84,10 @@ func main() {
 		return
 	}
 	if migrate != nil && *migrate != "" { // Run migrator
+		if *verbose {
+			log.Print("Initializing dataDB:", *dataDBType)
+			log.Print("Initializing storDB:", *storDBType)
+		}
 		dataDB, err := engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
 		if err != nil {
 			log.Fatal(err)
@@ -95,7 +97,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		if *oldDataDBType == "" {
 			*oldDataDBType = *dataDBType
 			*oldDataDBHost = *dataDBHost
@@ -103,13 +104,23 @@ func main() {
 			*oldDataDBName = *dataDBName
 			*oldDataDBUser = *dataDBUser
 			*oldDataDBPass = *dataDBPass
-
+		}
+		if *verbose {
+			log.Print("Initializing oldDataDB:", *oldDataDBType)
 		}
 		oldDataDB, err := migrator.ConfigureV1DataStorage(*oldDataDBType, *oldDataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding)
 		if err != nil {
 			log.Fatal(err)
 		}
 		oldstorDB = storDB
+
+		if *verbose {
+			if *oldStorDBType != "" {
+				log.Print("Initializing oldstorDB:", *oldStorDBType)
+			} else {
+				log.Print("Initializing oldstorDB:", *storDBType)
+			}
+		}
 		if *oldStorDBType != "" {
 			oldstorDB, err = engine.ConfigureStorStorage(oStorDBType, *oldStorDBHost, *oldStorDBPort, *oldStorDBName, *oldStorDBUser, *oldStorDBPass, *oldDBDataEncoding,
 				config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
@@ -117,16 +128,30 @@ func main() {
 				log.Fatal(err)
 			}
 		}
-		m, err := migrator.NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType, oldDataDB, *oldDataDBType, *oldDBDataEncoding, oldstorDB, *oldStorDBType)
+		if *verbose {
+			log.Print("Migrating: ", *migrate)
+		}
+		m, err := migrator.NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType, oldDataDB, *oldDataDBType, *oldDBDataEncoding, oldstorDB, *oldStorDBType, *dryRun)
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = m.Migrate(*migrate)
+		migrstats := make(map[string]int)
+		mig := strings.Split(*migrate, ",")
+		log.Print("migrating", mig)
+		err, migrstats = m.Migrate(mig)
 		if err != nil {
 			log.Fatal(err)
+		}
+		if *stats != false {
+			for k, v := range migrstats {
+				log.Print(" ", k, " : ", v)
+			}
+		}
+		if *verbose {
+			log.Print("Done migrating!")
 		}
 
-		log.Print("Done migrating!")
 		return
 	}
+
 }

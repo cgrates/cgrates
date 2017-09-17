@@ -28,8 +28,8 @@ import (
 )
 
 type v1ActionTrigger struct {
-	Id            string // for visual identification
-	ThresholdType string //*min_counter, *max_counter, *min_balance, *max_balance
+	Id                    string // for visual identification
+	ThresholdType         string //*min_counter, *max_counter, *min_balance, *max_balance
 	ThresholdValue        float64
 	Recurrent             bool          // reset eexcuted flag each run
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
@@ -69,10 +69,44 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 				acts = append(acts, act)
 
 			}
-			if err := m.dataDB.SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
-				return err
+			if m.dryRun != true {
+				if err := m.dataDB.SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
+					return err
+				}
+				m.stats[utils.ActionTriggers] += 1
 			}
+		}
+	}
+	if m.dryRun != true {
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating ActionTriggers version into DataDB", err.Error()))
+		}
+	}
+	return
 
+}
+
+func (m *Migrator) dryRunActionTriggers() (err error) {
+	var v1ACTs *v1ActionTriggers
+	var acts engine.ActionTriggers
+	for {
+		v1ACTs, err = m.oldDataDB.getV1ActionTriggers()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if *v1ACTs != nil {
+			for _, v1ac := range *v1ACTs {
+				act := v1ac.AsActionTrigger()
+				acts = append(acts, act)
+			}
 		}
 	}
 	// All done, update version wtih current one

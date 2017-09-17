@@ -121,23 +121,5 @@ echo 'Setting version for CostDetails'
 ;;
 esac
 
-echo 'Executing command cgr-migrator -migrate="*cost_details"'
-cgr-migrator -datadb_host=$cgr_from_host -datadb_name=$cgr_to_db -datadb_passwd=$cgr_from_pass -datadb_port=$cgr_from_port -datadb_type=$datadb -stordb_host=$host -stordb_name=$user -stordb_passwd=$PGPASSWORD -stordb_port=$port  -stordb_type=$stordb -stordb_user=$user -migrate="*cost_details"
-
-echo 'Executing command cgr-migrator -migrate="*accounts"'
-cgr-migrator -datadb_host=$cgr_from_host -datadb_name=$cgr_to_db -datadb_passwd=$cgr_from_pass -datadb_port=$cgr_from_port -datadb_type=$datadb -stordb_host=$host -stordb_name=$user -stordb_passwd=$PGPASSWORD -stordb_port=$port  -stordb_type=$stordb -stordb_user=$user -migrate="*accounts"
-
-echo 'Executing command cgr-migrator -migrate="*actions"'
-cgr-migrator -datadb_host=$cgr_from_host -datadb_name=$cgr_to_db -datadb_passwd=$cgr_from_pass -datadb_port=$cgr_from_port -datadb_type=$datadb -stordb_host=$host -stordb_name=$user -stordb_passwd=$PGPASSWORD -stordb_port=$port  -stordb_type=$stordb -stordb_user=$user -migrate="*actions"
-
-echo 'Executing command cgr-migrator -migrate="*action_triggers"'
-cgr-migrator -datadb_host=$cgr_from_host -datadb_name=$cgr_to_db -datadb_passwd=$cgr_from_pass -datadb_port=$cgr_from_port -datadb_type=$datadb -stordb_host=$host -stordb_name=$user -stordb_passwd=$PGPASSWORD -stordb_port=$port  -stordb_type=$stordb -stordb_user=$user -migrate="*action_triggers"
-
-echo 'Executing command cgr-migrator -migrate="*action_plans"'
-cgr-migrator -datadb_host=$cgr_from_host -datadb_name=$cgr_to_db -datadb_passwd=$cgr_from_pass -datadb_port=$cgr_from_port -datadb_type=$datadb -stordb_host=$host -stordb_name=$user -stordb_passwd=$PGPASSWORD -stordb_port=$port  -stordb_type=$stordb -stordb_user=$user -migrate="*action_plans"
-
-echo 'Executing command cgr-migrator -migrate="*shared_groups"'
-cgr-migrator -datadb_host=$cgr_from_host -datadb_name=$cgr_to_db -datadb_passwd=$cgr_from_pass -datadb_port=$cgr_from_port -datadb_type=$datadb -stordb_host=$host -stordb_name=$user -stordb_passwd=$PGPASSWORD -stordb_port=$port  -stordb_type=$stordb -stordb_user=$user -migrate="*shared_groups"
-
-echo 'Executing command cgr-migrator -migrate="*set_versions"'
-cgr-migrator -datadb_host=$cgr_from_host -datadb_name=$cgr_to_db -datadb_passwd=$cgr_from_pass -datadb_port=$cgr_from_port -datadb_type=$datadb -stordb_host=$host -stordb_name=$user -stordb_passwd=$PGPASSWORD -stordb_port=$port  -stordb_type=$stordb -stordb_user=$user -migrate="*set_versions"
+echo 'Executing command cgr-migrator -migrate="*cost_details,*accounts,*actions,*action_triggers,*action_plans,*shared_groups,*set_versions"'
+cgr-migrator -datadb_host=$cgr_from_host -datadb_name=$cgr_to_db -datadb_passwd=$cgr_from_pass -datadb_port=$cgr_from_port -datadb_type=$datadb -stordb_host=$host -stordb_name=$user -stordb_passwd=$PGPASSWORD -stordb_port=$port  -stordb_type=$stordb -stordb_user=$user -verbose=true -stats=true -migrate="*cost_details,*accounts,*actions,*action_triggers,*action_plans,*shared_groups,*set_versions"
