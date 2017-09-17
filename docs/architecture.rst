@@ -1,6 +1,6 @@
 2. Architecture
 ===============
-The CGRateS suite consists of **four** software applications described below.
+The CGRateS suite consists of **five** software applications described below.
 
 .. hlist::
    :columns: 5
