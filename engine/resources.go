@@ -125,6 +125,7 @@ func (r *Resource) removeExpiredUnits() {
 		}
 	}
 	r.TTLIdx = r.TTLIdx[firstActive:]
+	r.tUsage = nil
 }
 
 // totalUsage returns the sum of all usage units
@@ -236,10 +237,10 @@ func (rs Resources) tenatIDsStr() []string {
 	return ids
 }
 
-// AllocateResource attempts allocating resources for a *ResourceUsage
+// allocateResource attempts allocating resources for a *ResourceUsage
 // simulates on dryRun
 // returns utils.ErrResourceUnavailable if allocation is not possible
-func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage string, err error) {
+func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage string, err error) {
 	if len(rs) == 0 {
 		return "", utils.ErrResourceUnavailable
 	}
@@ -248,6 +249,7 @@ func (rs Resources) AllocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	// Simulate resource usage
 	for _, r := range rs {
+		r.removeExpiredUnits()
 		if r.rPrf.Limit >= r.totalUsage()+ru.Units {
 			if alcMessage == "" {
 				if r.rPrf.AllocationMessage != "" {
@@ -363,10 +365,12 @@ func (rS *ResourceService) runBackup() {
 		select {
 		case <-rS.stopBackup:
 			return
+		default:
 		}
 		rS.storeResources()
+		time.Sleep(rS.storeInterval)
 	}
-	time.Sleep(rS.storeInterval)
+
 }
 
 // cachedResourcesForEvent attempts to retrieve cached resources for an event
@@ -454,7 +458,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 		if err != nil {
 			return nil, err
 		}
-		if rPrf.Stored {
+		if rPrf.Stored && r.dirty == nil {
 			r.dirty = utils.BoolPointer(false)
 		}
 		if rPrf.UsageTTL > 0 {
@@ -481,7 +485,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 }
 
 // V1ResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *[]*ResourceProfile) (err error) {
+func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
 	if args.Tenant == "" {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
@@ -498,10 +502,8 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 	if len(mtcRLs) == 0 {
 		return utils.ErrNotFound
 	}
-	for _, r := range mtcRLs {
-		*reply = append(*reply, r.rPrf)
-	}
-	return nil
+	*reply = mtcRLs
+	return
 }
 
 // V1AllowUsage queries service to find if an Usage is allowed
@@ -516,7 +518,7 @@ func (rS *ResourceService) V1AllowUsage(args utils.ArgRSv1ResourceUsage, allow *
 		}
 		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
 	}
-	if _, err = mtcRLs.AllocateResource(
+	if _, err = mtcRLs.allocateResource(
 		&ResourceUsage{
 			Tenant: args.Tenant,
 			ID:     args.UsageID,
@@ -546,7 +548,8 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	} else {
 		wasCached = true
 	}
-	alcMsg, err := mtcRLs.AllocateResource(&ResourceUsage{ID: args.UsageID, Units: args.Units}, false)
+	alcMsg, err := mtcRLs.allocateResource(
+		&ResourceUsage{Tenant: args.Tenant, ID: args.UsageID, Units: args.Units}, false)
 	if err != nil {
 		return err
 	}
@@ -572,8 +575,8 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			rS.StoreResource(r)
 		} else if r.dirty != nil {
 			*r.dirty = true // mark it to be saved
+			rS.storedResources[r.TenantID()] = true
 		}
-		rS.storedResources[r.ID] = true
 	}
 	rS.srMux.Unlock()
 	*reply = alcMsg
@@ -604,7 +607,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 				rS.StoreResource(r)
 			} else {
 				*r.dirty = true // mark it to be saved
-				rS.storedResources[r.ID] = true
+				rS.storedResources[r.TenantID()] = true
 			}
 		}
 	}

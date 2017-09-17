@@ -62,7 +62,7 @@ func (rsv1 *ResourceSV1) Call(serviceMethod string, args interface{}, reply inte
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSV1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *[]*engine.ResourceProfile) error {
+func (rsv1 *ResourceSV1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *engine.Resources) error {
 	return rsv1.rls.V1ResourcesForEvent(args, reply)
 }
 

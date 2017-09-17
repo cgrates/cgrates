@@ -72,6 +72,7 @@
 
 "resources": {
 	"enabled": true,
+	"store_interval": "1s",
 },
 
 
