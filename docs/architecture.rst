@@ -509,7 +509,7 @@ Command line migration tool.
 
  cgrates@OCS:~$ cgr-migrator --help
  Usage of cgr-migrator:
-  -datadb_host string
+ -datadb_host string
       The DataDb host to connect to. (default "127.0.0.1")
   -datadb_name string
       The name/number of the DataDb to connect to. (default "10")
@@ -552,7 +552,7 @@ Command line migration tool.
   -old_stordb_port string
       The storDb port to bind to. (default "3306")
   -old_stordb_type string
-      The type of the storDb database <mysql>
+      The type of the storDb database <mysql|postgres>
   -old_stordb_user string
       The storDb user to sign in as. (default "cgrates")
   -stordb_host string
@@ -564,7 +564,7 @@ Command line migration tool.
   -stordb_port string
       The storDb port to bind to. (default "3306")
   -stordb_type string
-      The type of the storDb database <mysql> (default "mysql")
+      The type of the storDb database <mysql|postgres> (default "mysql")
   -stordb_user string
       The storDb user to sign in as. (default "cgrates")
   -version
