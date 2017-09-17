@@ -57,7 +57,7 @@ func (m *Migrator) migrateCostDetails() (err error) {
 	case utils.MYSQL:
 		storSQL = m.storDB.(*engine.SQLStorage).Db
 	case utils.POSTGRES:
-		storSQL = m.storDB.(*engine.PostgresStorage).Db
+		storSQL = m.storDB.(*engine.SQLStorage).Db
 	default:
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,

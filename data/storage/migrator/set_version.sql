@@ -1,0 +1,1 @@
+UPDATE versions SET version=1 WHERE item='CostDetails';
