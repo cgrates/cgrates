@@ -37,7 +37,7 @@ func TestRSRecordUsage1(t *testing.T) {
 		Tenant:     "cgrates.org",
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      2,
+		Units:      1,
 	}
 
 	ru2 = &ResourceUsage{
@@ -113,7 +113,7 @@ func TestRSRemoveExpiredUnits(t *testing.T) {
 	if len(r1.TTLIdx) != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.TTLIdx))
 	}
-	if *r1.tUsage != 0 {
+	if r1.tUsage != nil && *r1.tUsage != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, r1.tUsage)
 	}
 }
@@ -123,8 +123,8 @@ func TestRSUsedUnits(t *testing.T) {
 		ru1.ID: ru1,
 	}
 	r1.tUsage = nil
-	if usedUnits := r1.totalUsage(); usedUnits != 2 {
-		t.Errorf("Expecting: %+v, received: %+v", 2, usedUnits)
+	if usedUnits := r1.totalUsage(); usedUnits != 1 {
+		t.Errorf("Expecting: %+v, received: %+v", 1, usedUnits)
 	}
 }
 
@@ -205,28 +205,21 @@ func TestRSRecordUsages(t *testing.T) {
 func TestRSAllocateResource(t *testing.T) {
 	rs.clearUsage(ru1.ID)
 	rs.clearUsage(ru2.ID)
-
-	rs[0].rPrf.UsageTTL = time.Duration(20 * time.Second)
-	rs[1].rPrf.UsageTTL = time.Duration(20 * time.Second)
-	//ru1.ExpiryTime = time.Now()
-	//ru2.Time = time.Now()
-
-	if alcMessage, err := rs.AllocateResource(ru1, false); err != nil {
+	ru1.ExpiryTime = time.Now().Add(time.Duration(1 * time.Second))
+	ru2.ExpiryTime = time.Now().Add(time.Duration(1 * time.Second))
+	if alcMessage, err := rs.allocateResource(ru1, false); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "ALLOC" {
 			t.Errorf("Wrong allocation message: %v", alcMessage)
 		}
 	}
-
-	if _, err := rs.AllocateResource(ru2, false); err != utils.ErrResourceUnavailable {
+	if _, err := rs.allocateResource(ru2, false); err != utils.ErrResourceUnavailable {
 		t.Error("Did not receive " + utils.ErrResourceUnavailable.Error() + " error")
 	}
-
-	rs[0].rPrf.Limit = 2
+	rs[0].rPrf.Limit = 1
 	rs[1].rPrf.Limit = 4
-
-	if alcMessage, err := rs.AllocateResource(ru1, true); err != nil {
+	if alcMessage, err := rs.allocateResource(ru1, true); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "RL2" {
@@ -234,7 +227,7 @@ func TestRSAllocateResource(t *testing.T) {
 		}
 	}
 
-	if alcMessage, err := rs.AllocateResource(ru2, false); err != nil {
+	if alcMessage, err := rs.allocateResource(ru2, false); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "RL2" {
@@ -243,7 +236,7 @@ func TestRSAllocateResource(t *testing.T) {
 	}
 
 	ru2.Units = 0
-	if _, err := rs.AllocateResource(ru2, false); err == nil {
+	if _, err := rs.allocateResource(ru2, false); err == nil {
 		t.Error("Duplicate ResourceUsage id should not be allowed")
 	}
 }

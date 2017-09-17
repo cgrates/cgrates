@@ -149,6 +149,9 @@ func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
 		return fmt.Errorf("duplicate resource usage with id: %s", ru.TenantID())
 	}
 	if r.ttl != nil {
+		if *r.ttl == 0 {
+			return // no recording for ttl of 0
+		}
 		ru = ru.Clone() // don't influence the initial ru
 		ru.ExpiryTime = time.Now().Add(*r.ttl)
 	}
@@ -212,7 +215,8 @@ func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
 // clearUsage gives back the units to the pool
 func (rs Resources) clearUsage(ruTntID string) (err error) {
 	for _, r := range rs {
-		if errClear := r.clearUsage(ruTntID); errClear != nil {
+		if errClear := r.clearUsage(ruTntID); errClear != nil &&
+			r.ttl != nil && *r.ttl != 0 { // we only consider not found error in case of ttl different than 0
 			utils.Logger.Warning(fmt.Sprintf("<ResourceLimits>, clear ruID: %s, err: %s", ruTntID, errClear.Error()))
 			err = errClear
 		}
@@ -461,7 +465,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 		if rPrf.Stored && r.dirty == nil {
 			r.dirty = utils.BoolPointer(false)
 		}
-		if rPrf.UsageTTL > 0 {
+		if rPrf.UsageTTL >= 0 {
 			r.ttl = utils.DurationPointer(rPrf.UsageTTL)
 		}
 		r.rPrf = rPrf
