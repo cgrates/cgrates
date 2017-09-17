@@ -44,7 +44,7 @@ var (
 var sTestsTPResources = []func(t *testing.T){
 	testTPResInitCfg,
 	testTPResResetStorDb,
-	testTPResStartEngine,
+	//testTPResStartEngine,
 	testTPResRpcConn,
 	testTPResGetTPResourceBeforeSet,
 	testTPResSetTPResource,
@@ -120,16 +120,16 @@ func testTPResRpcConn(t *testing.T) {
 
 func testTPResGetTPResourceBeforeSet(t *testing.T) {
 	var reply *utils.TPResource
-	if err := tpResRPC.Call("ApierV1.GetTPResource", AttrGetTPResource{TPid: "TPR1", ID: "Res"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpResRPC.Call("ApierV1.GetTPResource", AttrGetTPResource{TPid: "TPR1", ID: "ResGroup1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
 func testTPResSetTPResource(t *testing.T) {
 	tpRes = &utils.TPResource{
-		Tenant:"Tester",
-		TPid: "TPR1",
-		ID:   "Res",
+		Tenant: "cgrates.org",
+		TPid:   "TPR1",
+		ID:     "ResGroup1",
 		Filters: []*utils.TPRequestFilter{
 			&utils.TPRequestFilter{
 				Type:      "*string",
@@ -141,11 +141,11 @@ func testTPResSetTPResource(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		UsageTTL:          "1",
-		Limit:             "1",
-		AllocationMessage: "Message",
-		Blocker:           false,
-		Stored:            false,
+		UsageTTL:          "1s",
+		Limit:             "7",
+		AllocationMessage: "",
+		Blocker:           true,
+		Stored:            true,
 		Weight:            20,
 		Thresholds:        []string{"ValOne", "ValTwo"},
 	}
@@ -159,7 +159,7 @@ func testTPResSetTPResource(t *testing.T) {
 
 func testTPResGetTPResourceAfterSet(t *testing.T) {
 	var respond *utils.TPResource
-	if err := tpResRPC.Call("ApierV1.GetTPResource", &AttrGetTPResource{TPid: tpRes.TPid, ID: tpRes.ID}, &respond); err != nil {
+	if err := tpResRPC.Call("ApierV1.GetTPResource", AttrGetTPResource{TPid: tpRes.TPid, ID: tpRes.ID}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRes, respond) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRes, respond)
@@ -189,7 +189,7 @@ func testTPResUpdateTPResource(t *testing.T) {
 
 func testTPResGetTPResourceAfterUpdate(t *testing.T) {
 	var expectedTPR *utils.TPResource
-	if err := tpResRPC.Call("ApierV1.GetTPResource", &AttrGetTPResource{TPid: tpRes.TPid, ID: tpRes.ID}, &expectedTPR); err != nil {
+	if err := tpResRPC.Call("ApierV1.GetTPResource", AttrGetTPResource{TPid: tpRes.TPid, ID: tpRes.ID}, &expectedTPR); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRes, expectedTPR) {
 		t.Errorf("Expecting: %+v, received: %+v", tpRes, expectedTPR)
@@ -198,7 +198,7 @@ func testTPResGetTPResourceAfterUpdate(t *testing.T) {
 
 func testTPResRemTPResource(t *testing.T) {
 	var resp string
-	if err := tpResRPC.Call("ApierV1.RemTPResource", &AttrGetTPResource{TPid: tpRes.TPid, ID: tpRes.ID}, &resp); err != nil {
+	if err := tpResRPC.Call("ApierV1.RemTPResource", AttrGetTPResource{TPid: tpRes.TPid, ID: tpRes.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -207,7 +207,7 @@ func testTPResRemTPResource(t *testing.T) {
 
 func testTPResGetTPResourceAfterRemove(t *testing.T) {
 	var respond *utils.TPResource
-	if err := tpResRPC.Call("ApierV1.GetTPResource", &AttrGetTPStat{TPid: "TPS1", ID: "Stat1"}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpResRPC.Call("ApierV1.GetTPResource", AttrGetTPStat{TPid: "TPS1", ID: "ResGroup1"}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

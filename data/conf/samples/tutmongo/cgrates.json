@@ -27,6 +27,26 @@
 },
 
 
+"cache":{
+	"destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
+	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"lcr_rules": {"limit": 10000, "ttl":"0s", "precache": true},
+	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": true},
+	"actions": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
+	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
+},
+
+
 "rals": {
 	"enabled": true,
 	"cdrstats_conns": [
@@ -57,6 +77,26 @@
 },
 
 
+"cdre": {
+	"TestTutITExportCDR": {
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "RunID"},
+			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
+			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
+			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "Category"},
+			{"tag":"Account", "type": "*composed", "value": "Account"},
+			{"tag":"Destination", "type": "*composed", "value": "Destination"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "type": "*composed", "value": "Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
+			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+		],
+	},
+},
+
+
 "cdrstats": {
 	"enabled": true,
 },
@@ -73,11 +113,6 @@
 },
 
 
-"aliases": {
-	"enabled": true,
-},
-
-
 "resources": {
 	"enabled": true,
 },
@@ -86,6 +121,16 @@
 "stats": {
 	"enabled": false,
 	"store_interval": "0s",
+},
+
+
+"historys": {
+	"enabled": true,
+},
+
+
+"aliases": {
+	"enabled": true,
 },
 
 

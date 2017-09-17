@@ -288,9 +288,11 @@ func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = rs.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
-			_, err = rs.GetResourceProfile(dataID, true, utils.NonTransactional)
+			tntID := utils.NewTenantID(dataID)
+			_, err = rs.GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
-			_, err = rs.GetResource(dataID, true, utils.NonTransactional)
+			tntID := utils.NewTenantID(dataID)
+			_, err = rs.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = rs.GetTiming(dataID, true, utils.NonTransactional)
 		}
@@ -319,7 +321,9 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
-	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ResourcesPrefix:
+	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
+		utils.ResourcesPrefix, utils.StatQueuePrefix:
 		i, err := rs.Cmd("EXISTS", category+subject).Int()
 		return i == 1, err
 	}
@@ -1348,8 +1352,8 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
-	key := utils.ResourceProfilesPrefix + id
+func (rs *RedisStorage) GetResourceProfile(tenant, id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
+	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1383,11 +1387,11 @@ func (rs *RedisStorage) SetResourceProfile(rsp *ResourceProfile, transactionID s
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.ResourceProfilesPrefix+rsp.ID, result).Err
+	return rs.Cmd("SET", utils.ResourceProfilesPrefix+rsp.TenantID(), result).Err
 }
 
-func (rs *RedisStorage) RemoveResourceProfile(id string, transactionID string) (err error) {
-	key := utils.ResourceProfilesPrefix + id
+func (rs *RedisStorage) RemoveResourceProfile(tenant, id string, transactionID string) (err error) {
+	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
@@ -1395,8 +1399,8 @@ func (rs *RedisStorage) RemoveResourceProfile(id string, transactionID string) (
 	return
 }
 
-func (rs *RedisStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
-	key := utils.ResourcesPrefix + id
+func (rs *RedisStorage) GetResource(tenant, id string, skipCache bool, transactionID string) (r *Resource, err error) {
+	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1425,11 +1429,11 @@ func (rs *RedisStorage) SetResource(r *Resource) (err error) {
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.ResourcesPrefix+r.ID, result).Err
+	return rs.Cmd("SET", utils.ResourcesPrefix+r.TenantID(), result).Err
 }
 
-func (rs *RedisStorage) RemoveResource(id string, transactionID string) (err error) {
-	key := utils.ResourcesPrefix + id
+func (rs *RedisStorage) RemoveResource(tenant, id string, transactionID string) (err error) {
+	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

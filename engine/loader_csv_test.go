@@ -267,10 +267,10 @@ cgrates.org,mas,true,another,value,10
 `
 	resProfiles = `
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],TTL[6],Limit[7],AllocationMessage[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
-Tester,ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
-Tester,ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
-Tester,ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
-Tester,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
+cgrates.org,ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
+cgrates.org,ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
+cgrates.org,ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
+cgrates.org,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
@@ -1390,44 +1390,46 @@ func TestLoadReverseAliases(t *testing.T) {
 }
 
 func TestLoadResourceProfiles(t *testing.T) {
-	eResProfiles := map[string]*utils.TPResource{
-		"ResGroup21": &utils.TPResource{
-			TPid:   testTPID,
-			Tenant: "Tester",
-			ID:     "ResGroup21",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
-				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
-				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"HdrSubject(~^1.*1$)", "HdrDestination(1002)"}},
+	eResProfiles := map[string]map[string]*utils.TPResource{
+		"cgrates.org": map[string]*utils.TPResource{
+			"ResGroup21": &utils.TPResource{
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "ResGroup21",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
+					&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
+					&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"HdrSubject(~^1.*1$)", "HdrDestination(1002)"}},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
+				UsageTTL:          "1s",
+				AllocationMessage: "call",
+				Weight:            10,
+				Limit:             "2",
 			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
+			"ResGroup22": &utils.TPResource{
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "ResGroup22",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
+				UsageTTL:          "3600s",
+				AllocationMessage: "premium_call",
+				Blocker:           true,
+				Stored:            true,
+				Weight:            10,
+				Limit:             "2",
 			},
-			UsageTTL:          "1s",
-			AllocationMessage: "call",
-			Weight:            10,
-			Limit:             "2",
-		},
-		"ResGroup22": &utils.TPResource{
-			TPid:   testTPID,
-			Tenant: "Tester",
-			ID:     "ResGroup22",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
-			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			UsageTTL:          "3600s",
-			AllocationMessage: "premium_call",
-			Blocker:           true,
-			Stored:            true,
-			Weight:            10,
-			Limit:             "2",
 		},
 	}
-	if len(csvr.resProfiles) != len(eResProfiles) {
-		t.Error("Failed to load resourceProfiles: ", len(csvr.resProfiles))
+	if len(csvr.resProfiles["cgrates.org"]) != len(eResProfiles["cgrates.org"]) {
+		t.Errorf("Failed to load resourceProfiles: %s", utils.ToIJSON(csvr.resProfiles))
 	} else if !reflect.DeepEqual(eResProfiles["ResGroup22"], csvr.resProfiles["ResGroup22"]) {
 		t.Errorf("Expecting: %+v, received: %+v", eResProfiles["ResGroup22"], csvr.resProfiles["ResGroup22"])
 
@@ -1457,10 +1459,10 @@ func TestLoadStats(t *testing.T) {
 		},
 	}
 
-	if len(csvr.stats) != len(eStats) {
-		t.Error("Failed to load stats: ", len(csvr.stats))
-	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.stats["Stats1"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.stats["Stats1"])
+	if len(csvr.sqProfiles) != len(eStats) {
+		t.Error("Failed to load stats: ", len(csvr.sqProfiles))
+	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.sqProfiles["Stats1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.sqProfiles["Stats1"])
 	}
 }
 

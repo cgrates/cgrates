@@ -309,21 +309,23 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for k, rl := range loader.resProfiles {
-		rcv, err := loader.dataStorage.GetResourceProfile(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetResourceProfile: ", err.Error())
-		}
-		rlT, err := APItoResource(rl, "UTC")
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(rlT, rcv) {
-			t.Errorf("Expecting: %v, received: %v", rlT, rcv)
+	for _, mapIDs := range loader.resProfiles {
+		for _, rl := range mapIDs {
+			rcv, err := loader.dataStorage.GetResourceProfile(rl.Tenant, rl.ID, true, utils.NonTransactional)
+			if err != nil {
+				t.Error("Failed GetResourceProfile: ", err.Error())
+			}
+			rlT, err := APItoResource(rl, "UTC")
+			if err != nil {
+				t.Error(err)
+			}
+			if !reflect.DeepEqual(rlT, rcv) {
+				t.Errorf("Expecting: %v, received: %v", rlT, rcv)
+			}
 		}
 	}
 
-	for k, st := range loader.stats {
+	for k, st := range loader.sqProfiles {
 		rcv, err := loader.dataStorage.GetStatQueueProfile(k)
 		if err != nil {
 			t.Error("Failed GetStatsQueue: ", err.Error())

@@ -21,7 +21,6 @@ package engine
 import (
 	"bytes"
 	"compress/zlib"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -327,7 +326,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
 		utils.ResourceProfilesPrefix:     colRsP,
-		utils.StatsPrefix:                colStq,
+		utils.StatQueuePrefix:            colStq,
 		utils.TimingsPrefix:              colTmg,
 		utils.ResourcesPrefix:            colRes,
 	}
@@ -527,9 +526,11 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		case utils.REVERSE_ALIASES_PREFIX:
 			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
-			_, err = ms.GetResourceProfile(dataID, true, utils.NonTransactional)
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
-			_, err = ms.GetResource(dataID, true, utils.NonTransactional)
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		}
@@ -555,7 +556,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	defer session.Close()
 	db := session.DB(ms.db)
 	keyResult := struct{ Key string }{}
-	idResult := struct{ Id string }{}
+	idResult := struct{ Tenant, Id string }{}
 	switch category {
 	case utils.DESTINATION_PREFIX:
 		iter := db.C(colDst).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
@@ -623,19 +624,19 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result = append(result, utils.REVERSE_ALIASES_PREFIX+keyResult.Key)
 		}
 	case utils.ResourceProfilesPrefix:
-		iter := db.C(colRsP).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colRsP).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.ResourceProfilesPrefix+idResult.Id)
+			result = append(result, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.ResourcesPrefix:
-		iter := db.C(colRes).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colRes).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.ResourcesPrefix+idResult.Id)
+			result = append(result, utils.ResourcesPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
-	case utils.StatsPrefix:
+	case utils.StatQueuePrefix:
 		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.StatsPrefix+idResult.Id)
+			result = append(result, utils.StatQueuePrefix+idResult.Id)
 		}
 	case utils.StatQueueProfilePrefix:
 		iter := db.C(colSqp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
@@ -658,34 +659,40 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	return
 }
 
-func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
+func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) {
 	session := ms.session.Copy()
 	defer session.Close()
 	db := session.DB(ms.db)
+	var count int
 	switch category {
 	case utils.DESTINATION_PREFIX:
-		count, err := db.C(colDst).Find(bson.M{"key": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colDst).Find(bson.M{"key": subject}).Count()
+		has = count > 0
 	case utils.RATING_PLAN_PREFIX:
-		count, err := db.C(colRpl).Find(bson.M{"key": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colRpl).Find(bson.M{"key": subject}).Count()
+		has = count > 0
 	case utils.RATING_PROFILE_PREFIX:
-		count, err := db.C(colRpf).Find(bson.M{"id": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colRpf).Find(bson.M{"id": subject}).Count()
+		has = count > 0
 	case utils.ACTION_PREFIX:
-		count, err := db.C(colAct).Find(bson.M{"key": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colAct).Find(bson.M{"key": subject}).Count()
+		has = count > 0
 	case utils.ACTION_PLAN_PREFIX:
-		count, err := db.C(colApl).Find(bson.M{"key": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colApl).Find(bson.M{"key": subject}).Count()
+		has = count > 0
 	case utils.ACCOUNT_PREFIX:
-		count, err := db.C(colAcc).Find(bson.M{"id": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colAcc).Find(bson.M{"id": subject}).Count()
+		has = count > 0
 	case utils.ResourcesPrefix:
-		count, err := db.C(colRes).Find(bson.M{"id": subject}).Count()
-		return count > 0, err
+		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
+		has = count > 0
+	case utils.StatQueuePrefix:
+		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
+		has = count > 0
+	default:
+		err = fmt.Errorf("unsupported category in HasData: %s", category)
 	}
-	return false, errors.New("unsupported category in HasData")
+	return
 }
 
 func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {
@@ -1825,8 +1832,8 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetResourceProfile(id string, skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
-	key := utils.ResourceProfilesPrefix + id
+func (ms *MongoStorage) GetResourceProfile(tenant, id string, skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
+	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1838,7 +1845,7 @@ func (ms *MongoStorage) GetResourceProfile(id string, skipCache bool, transactio
 	session, col := ms.conn(colRsP)
 	defer session.Close()
 	rp = new(ResourceProfile)
-	if err = col.Find(bson.M{"id": id}).One(rp); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(rp); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
@@ -1857,22 +1864,23 @@ func (ms *MongoStorage) GetResourceProfile(id string, skipCache bool, transactio
 func (ms *MongoStorage) SetResourceProfile(rp *ResourceProfile, transactionID string) (err error) {
 	session, col := ms.conn(colRsP)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"id": rp.ID}, rp)
+	_, err = col.Upsert(bson.M{"tenant": rp.Tenant, "id": rp.ID}, rp)
 	return
 }
 
-func (ms *MongoStorage) RemoveResourceProfile(id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveResourceProfile(tenant, id string, transactionID string) (err error) {
 	session, col := ms.conn(colRsP)
 	defer session.Close()
-	if err = col.Remove(bson.M{"id": id}); err != nil {
+	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ResourceProfilesPrefix+id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
 	return nil
 }
 
-func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID string) (r *Resource, err error) {
-	key := utils.ResourcesPrefix + id
+func (ms *MongoStorage) GetResource(tenant, id string, skipCache bool, transactionID string) (r *Resource, err error) {
+	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1884,7 +1892,7 @@ func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID str
 	session, col := ms.conn(colRes)
 	defer session.Close()
 	r = new(Resource)
-	if err = col.Find(bson.M{"id": id}).One(r); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(r); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
@@ -1898,17 +1906,18 @@ func (ms *MongoStorage) GetResource(id string, skipCache bool, transactionID str
 func (ms *MongoStorage) SetResource(r *Resource) (err error) {
 	session, col := ms.conn(colRes)
 	defer session.Close()
-	_, err = col.Upsert(bson.M{"id": r.ID}, r)
+	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
 	return
 }
 
-func (ms *MongoStorage) RemoveResource(id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveResource(tenant, id string, transactionID string) (err error) {
 	session, col := ms.conn(colRes)
 	defer session.Close()
-	if err = col.Remove(bson.M{"id": id}); err != nil {
+	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ResourcesPrefix+id, cacheCommit(transactionID), transactionID)
+	cache.RemKey(utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
 	return nil
 }
 

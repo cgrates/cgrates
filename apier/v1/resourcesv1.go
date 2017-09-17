@@ -62,35 +62,31 @@ func (rsv1 *ResourceSV1) Call(serviceMethod string, args interface{}, reply inte
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSV1) GetResourcesForEvent(ev map[string]interface{}, reply *[]*engine.ResourceProfile) error {
-	return rsv1.rls.V1ResourcesForEvent(ev, reply)
+func (rsv1 *ResourceSV1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *[]*engine.ResourceProfile) error {
+	return rsv1.rls.V1ResourcesForEvent(args, reply)
 }
 
 // AllowUsage checks if there are limits imposed for event
-func (rsv1 *ResourceSV1) AllowUsage(args utils.AttrRLsResourceUsage, allowed *bool) error {
+func (rsv1 *ResourceSV1) AllowUsage(args utils.ArgRSv1ResourceUsage, allowed *bool) error {
 	return rsv1.rls.V1AllowUsage(args, allowed)
 }
 
 // V1InitiateResourceUsage records usage for an event
-func (rsv1 *ResourceSV1) AllocateResource(args utils.AttrRLsResourceUsage, reply *string) error {
+func (rsv1 *ResourceSV1) AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) error {
 	return rsv1.rls.V1AllocateResource(args, reply)
 }
 
 // V1TerminateResourceUsage releases usage for an event
-func (rsv1 *ResourceSV1) ReleaseResource(args utils.AttrRLsResourceUsage, reply *string) error {
+func (rsv1 *ResourceSV1) ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) error {
 	return rsv1.rls.V1ReleaseResource(args, reply)
 }
 
-type AttrGetResPrf struct {
-	ID string
-}
-
 // GetResourceProfile returns a resource configuration
-func (apierV1 *ApierV1) GetResourceProfile(attr AttrGetResPrf, reply *engine.ResourceProfile) error {
-	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 { //Params missing
+func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.ResourceProfile) error {
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rcfg, err := apierV1.DataDB.GetResourceProfile(attr.ID, true, utils.NonTransactional); err != nil {
+	if rcfg, err := apierV1.DataDB.GetResourceProfile(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -102,11 +98,11 @@ func (apierV1 *ApierV1) GetResourceProfile(attr AttrGetResPrf, reply *engine.Res
 }
 
 //SetResourceProfile add a new resource configuration
-func (apierV1 *ApierV1) SetResourceProfile(attr *engine.ResourceProfile, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
+func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *string) error {
+	if missing := utils.MissingStructFields(res, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataDB.SetResourceProfile(attr, utils.NonTransactional); err != nil {
+	if err := apierV1.DataDB.SetResourceProfile(res, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -114,11 +110,11 @@ func (apierV1 *ApierV1) SetResourceProfile(attr *engine.ResourceProfile, reply *
 }
 
 //RemResourceProfile remove a specific resource configuration
-func (apierV1 *ApierV1) RemResourceProfile(attrs AttrGetResPrf, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"ID"}); len(missing) != 0 { //Params missing
+func (apierV1 *ApierV1) RemResourceProfile(arg utils.TenantID, reply *string) error {
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataDB.RemoveResourceProfile(attrs.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataDB.RemoveResourceProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

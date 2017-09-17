@@ -393,10 +393,10 @@ CREATE INDEX tpaliases_idx ON tp_aliases (tpid,direction,tenant,category,account
 
 DROP TABLE IF EXISTS tp_resources;
 CREATE TABLE tp_resources (
-  "tenant"varchar(64) NOT NULL,
-  "id" SERIAL PRIMARY KEY,
+  "pk" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
-  "tag" varchar(64) NOT NULL,
+  "tenant"varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
   "filter_type" varchar(16) NOT NULL,
   "filter_field_name" varchar(64) NOT NULL,
   "filter_field_values" varchar(256) NOT NULL,
@@ -411,7 +411,7 @@ CREATE TABLE tp_resources (
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_resources_idx ON tp_resources (tpid);
-CREATE INDEX tp_resources_unique ON tp_resources  ("tpid", "tag", "filter_type", "filter_field_name");
+CREATE INDEX tp_resources_unique ON tp_resources  ("tpid",  "tenant", "id", "filter_type", "filter_field_name");
 
 
 --
@@ -420,9 +420,9 @@ CREATE INDEX tp_resources_unique ON tp_resources  ("tpid", "tag", "filter_type",
 
 DROP TABLE IF EXISTS tp_stats;
 CREATE TABLE tp_stats (
-  "tenant"varchar(64) NOT NULL,
   "id" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
+  "tenant"varchar(64) NOT NULL,
   "tag" varchar(64) NOT NULL,
   "filter_type" varchar(16) NOT NULL,
   "filter_field_name" varchar(64) NOT NULL,
@@ -438,7 +438,7 @@ CREATE TABLE tp_stats (
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);
-CREATE INDEX tp_stats_unique ON tp_stats  ("tpid", "tag", "filter_type", "filter_field_name");
+CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "tag", "filter_type", "filter_field_name");
 
 --
 -- Table structure for table `tp_threshold_cfgs`
@@ -479,6 +479,3 @@ CREATE TABLE versions (
   "version" INTEGER NOT NULL,
   UNIQUE (item)
 );
-
-
-
