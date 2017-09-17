@@ -74,7 +74,7 @@ var (
 	oldDBDataEncoding = flag.String("old_dbdata_encoding", "", "The encoding used to store object data in strings")
 	dryRun            = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
 	verbose           = flag.Bool("verbose", false, "Enable detailed verbose logging output")
-	stats             = flag.Bool("stats", false, "Generates statsistics about given data.")
+	stats             = flag.Bool("stats", false, "Generates statsistics about migrated data.")
 )
 
 func main() {

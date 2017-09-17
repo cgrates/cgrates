@@ -4,7 +4,7 @@ but it only migrate CDRs where the duration is > 0.
 If you need CDRs also with duration is = 0 you can make the appropriate change in the line beginning WHERE cdrs_primary.usage
 Also the script will process 10,000 CDRs before committing to save system resources 
 especially in systems where they are millions of CDRs to be migrated
-You can increase or lower the value of step in the line after BEGIN below.P
+You can increase or lower the value of step in the line after BEGIN below.
 
 You have to use 'CALL cgrates.migration();' to execute the script. If named other then default use that database name.
 */

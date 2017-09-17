@@ -108,15 +108,16 @@ func (m *Migrator) migrateCostDetails() (err error) {
 					fmt.Sprintf("<Migrator> Error: <%s> updating CDR with id <%d> into StorDB", err.Error(), id))
 				continue
 			}
-		}
-		m.stats[utils.COST_DETAILS] += 1
-		// All done, update version wtih current one
-		vrs = engine.Versions{utils.COST_DETAILS: engine.CurrentStorDBVersions()[utils.COST_DETAILS]}
-		if err := m.storDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
+
+			m.stats[utils.COST_DETAILS] += 1
+			// All done, update version wtih current one
+			vrs = engine.Versions{utils.COST_DETAILS: engine.CurrentStorDBVersions()[utils.COST_DETAILS]}
+			if err := m.storDB.SetVersions(vrs, false); err != nil {
+				return utils.NewCGRError(utils.Migrator,
+					utils.ServerErrorCaps,
+					err.Error(),
+					fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
+			}
 		}
 	}
 	return

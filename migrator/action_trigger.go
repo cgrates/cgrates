@@ -88,37 +88,6 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 		}
 	}
 	return
-
-}
-
-func (m *Migrator) dryRunActionTriggers() (err error) {
-	var v1ACTs *v1ActionTriggers
-	var acts engine.ActionTriggers
-	for {
-		v1ACTs, err = m.oldDataDB.getV1ActionTriggers()
-		if err != nil && err != utils.ErrNoMoreData {
-			return err
-		}
-		if err == utils.ErrNoMoreData {
-			break
-		}
-		if *v1ACTs != nil {
-			for _, v1ac := range *v1ACTs {
-				act := v1ac.AsActionTrigger()
-				acts = append(acts, act)
-			}
-		}
-	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
-	if err = m.dataDB.SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating ActionTriggers version into DataDB", err.Error()))
-	}
-	return
-
 }
 
 func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {
