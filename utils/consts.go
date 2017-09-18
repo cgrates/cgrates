@@ -445,6 +445,8 @@ const (
 	CacheEventQueues             = "event_queues"
 	CacheEventResources          = "event_resources"
 	EventResourcesPrefix         = "ers_"
+	MetaSysLog                   = "*syslog"
+	MetaStdLog                   = "*stdout"
 )
 
 func buildCacheInstRevPrefixes() {

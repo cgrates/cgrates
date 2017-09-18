@@ -225,6 +225,7 @@ type CGRConfig struct {
 	FailedPostsDir           string          // Directory path where we store failed http requests
 	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
+	Logger                   string          // dictates the way logs are displayed/stored
 	LogLevel                 int             // system wide log level, nothing higher than this will be logged
 	RALsEnabled              bool            // start standalone server (no balancer)
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
@@ -714,6 +715,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnGeneralCfg.Instance_id != nil && *jsnGeneralCfg.Instance_id != "" {
 			self.InstanceID = *jsnGeneralCfg.Instance_id
 		}
+		if jsnGeneralCfg.Logger != nil {
+			self.Logger = *jsnGeneralCfg.Logger
+		}
+		if jsnGeneralCfg.Log_level != nil {
+			self.LogLevel = *jsnGeneralCfg.Log_level
+		}
+
 		if jsnGeneralCfg.Dbdata_encoding != nil {
 			self.DBDataEncoding = *jsnGeneralCfg.Dbdata_encoding
 		}
@@ -774,9 +782,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			if self.LockingTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Locking_timeout); err != nil {
 				return err
 			}
-		}
-		if jsnGeneralCfg.Log_level != nil {
-			self.LogLevel = *jsnGeneralCfg.Log_level
 		}
 	}
 

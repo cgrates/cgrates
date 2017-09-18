@@ -22,23 +22,36 @@ import (
 	"fmt"
 	"log"
 	"log/syslog"
+	"reflect"
 	"runtime"
 )
 
 var Logger LoggerInterface
 
 func init() {
-	Logger = new(StdLogger)
-
-	// Attempt to connect to syslog. We'll fallback to `log` otherwise.
-	var err error
-	var l *syslog.Writer
-	l, err = syslog.New(syslog.LOG_INFO, "CGRateS ")
-	if err != nil {
-		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
-	} else {
-		Logger.SetSyslog(l)
+	if Logger == nil || reflect.ValueOf(Logger).IsNil() {
+		err := Newlogger(MetaSysLog)
+		if err != nil {
+			Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
+		}
 	}
+}
+
+//functie Newlogger (logger type)
+func Newlogger(loggertype string) (err error) {
+	Logger = new(StdLogger)
+	var l *syslog.Writer
+	if loggertype == MetaSysLog {
+		if l, err = syslog.New(syslog.LOG_INFO, "CGRateS"); err != nil {
+			return err
+		} else {
+			Logger.SetSyslog(l)
+		}
+		return nil
+	} else if loggertype != MetaStdLog {
+		return fmt.Errorf("unsuported logger: <%s>", loggertype)
+	}
+	return nil
 }
 
 type LoggerInterface interface {

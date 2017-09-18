@@ -22,7 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"log/syslog"
 	"os"
 	"runtime"
 	"runtime/pprof"
@@ -64,6 +63,7 @@ var (
 	cpuprofile        = flag.String("cpuprofile", "", "write cpu profile to file")
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
+	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
 	logLevel          = flag.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
 
 	cfg   *config.CGRConfig
@@ -635,11 +635,13 @@ func writePid() {
 
 // initLogger will initialize syslog writter, needs to be called after config init
 func initLogger(cfg *config.CGRConfig) error {
-	if l, err := syslog.New(syslog.LOG_INFO,
-		fmt.Sprintf("CGRateS <%s> ", cfg.InstanceID)); err != nil {
+	sylogger := cfg.Logger
+	if *syslogger != "" { // Modify the log level if provided by command arguments
+		sylogger = *syslogger
+	}
+	err := utils.Newlogger(sylogger)
+	if err != nil {
 		return err
-	} else {
-		utils.Logger.SetSyslog(l)
 	}
 	return nil
 }
@@ -728,7 +730,7 @@ func main() {
 		loadDb = storDb.(engine.LoadStorage)
 		cdrDb = storDb.(engine.CdrStorage)
 		engine.SetCdrStorage(cdrDb)
-			if err := engine.CheckVersions(storDb); err != nil {
+		if err := engine.CheckVersions(storDb); err != nil {
 			fmt.Println(err.Error())
 			return
 		}
