@@ -20,7 +20,11 @@ package engine
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
+
+var sq *StatQueue
 
 func TestStatQueuesSort(t *testing.T) {
 	sInsts := StatQueues{
@@ -38,5 +42,31 @@ func TestStatQueuesSort(t *testing.T) {
 	}
 	if !reflect.DeepEqual(eSInst, sInsts) {
 		t.Errorf("expecting: %+v, received: %+v", eSInst, sInsts)
+	}
+}
+
+func TestRemEventWithID(t *testing.T) {
+	sq = &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 1,
+				Count:    2,
+				Events: map[string]bool{
+					"cgrates.org:TestRemEventWithID_1": true,
+					"cgrates.org:TestRemEventWithID_2": false,
+				},
+			},
+		},
+	}
+	if asrIf := sq.SQMetrics[utils.MetaASR].GetValue(); asrIf.(float64) != 50 {
+		t.Errorf("received ASR: %v", asrIf)
+	}
+	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
+	if asrIf := sq.SQMetrics[utils.MetaASR].GetValue(); asrIf.(float64) != 0 {
+		t.Errorf("received ASR: %v", asrIf)
+	}
+	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
+	if asrIf := sq.SQMetrics[utils.MetaASR].GetValue(); asrIf.(float64) != -1 {
+		t.Errorf("received ASR: %v", asrIf)
 	}
 }
