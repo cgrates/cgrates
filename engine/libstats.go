@@ -183,13 +183,12 @@ func (sq *StatQueue) remExpired() {
 			break
 		}
 		sq.remEventWithID(item.EventID)
-		expIdx = &i
+		expIdx = utils.IntPointer(i)
 	}
 	if expIdx == nil {
 		return
 	}
-	nextValidIdx := *expIdx + 1
-	sq.SQItems = sq.SQItems[nextValidIdx:]
+	sq.SQItems = sq.SQItems[*expIdx+1:]
 }
 
 // remOnQueueLength removes elements based on QueueLength setting

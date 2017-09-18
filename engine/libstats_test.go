@@ -20,6 +20,7 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -45,7 +46,7 @@ func TestStatQueuesSort(t *testing.T) {
 	}
 }
 
-func TestRemEventWithID(t *testing.T) {
+func TestStatRemEventWithID(t *testing.T) {
 	sq = &StatQueue{
 		SQMetrics: map[string]StatMetric{
 			utils.MetaASR: &StatASR{
@@ -58,15 +59,72 @@ func TestRemEventWithID(t *testing.T) {
 			},
 		},
 	}
-	if asrIf := sq.SQMetrics[utils.MetaASR].GetValue(); asrIf.(float64) != 50 {
-		t.Errorf("received ASR: %v", asrIf)
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 50 {
+		t.Errorf("received asrMetric: %v", asrMetricIf)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
-	if asrIf := sq.SQMetrics[utils.MetaASR].GetValue(); asrIf.(float64) != 0 {
-		t.Errorf("received ASR: %v", asrIf)
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 0 {
+		t.Errorf("received asrMetric: %v", asrMetricIf)
+	} else if len(asrMetric.Events) != 1 {
+		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
+	}
+	sq.remEventWithID("cgrates.org:TestRemEventWithID_5") // non existent
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 0 {
+		t.Errorf("received asrMetric: %v", asrMetricIf)
+	} else if len(asrMetric.Events) != 1 {
+		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asrIf := sq.SQMetrics[utils.MetaASR].GetValue(); asrIf.(float64) != -1 {
-		t.Errorf("received ASR: %v", asrIf)
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != -1 {
+		t.Errorf("received asrMetric: %v", asrMetricIf)
+	} else if len(asrMetric.Events) != 0 {
+		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
+	}
+	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != -1 {
+		t.Errorf("received asrMetric: %v", asrMetricIf)
+	} else if len(asrMetric.Events) != 0 {
+		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
+	}
+}
+
+func TestStatRemExpired(t *testing.T) {
+	sq = &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 2,
+				Count:    3,
+				Events: map[string]bool{
+					"cgrates.org:TestStatRemExpired_1": true,
+					"cgrates.org:TestStatRemExpired_2": false,
+					"cgrates.org:TestStatRemExpired_3": true,
+				},
+			},
+		},
+		SQItems: []struct {
+			EventID    string
+			ExpiryTime *time.Time
+		}{
+			struct {
+				EventID    string     // Bounded to the original StatEvent
+				ExpiryTime *time.Time // Used to auto-expire events
+			}{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
+			{"cgrates.org:TestStatRemExpired_2", utils.TimePointer(time.Now())},
+			{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Duration(time.Minute)))},
+		},
+	}
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 66.66667 {
+		t.Errorf("received asrMetric: %v", asrMetricIf)
+	}
+	sq.remExpired()
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 100 {
+		t.Errorf("received asrMetric: %v", asrMetricIf)
+	} else if len(asrMetric.Events) != 1 {
+		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
+	}
+	if len(sq.SQItems) != 1 {
+		t.Errorf("Unexpected items: %+v", sq.SQItems)
 	}
 }
