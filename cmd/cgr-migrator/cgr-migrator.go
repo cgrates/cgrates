@@ -22,21 +22,22 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 
-	"github.com/cgrates/cgrates/migrator"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/migrator"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	oldDataDB 		migrator.V1DataDB
-	oldstorDB 		engine.Storage
-	oStorDBType 	string
-	odataDBType 	string
+	oldDataDB       migrator.V1DataDB
+	oldstorDB       engine.Storage
+	oStorDBType     string
+	odataDBType     string
 	oDBDataEncoding string
-	migrate = flag.String("migrate", "", "Fire up automatic migration <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups>")
-	version = flag.Bool("version", false, "Prints the application version.")
+	migrate         = flag.String("migrate", "", "Fire up automatic migration *to use multiple values use ',' as separator \n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups> ")
+	version         = flag.Bool("version", false, "Prints the application version.")
 
 	dataDBType = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <redis>")
 	dataDBHost = flag.String("datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
@@ -45,7 +46,7 @@ var (
 	dataDBUser = flag.String("datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
 	dataDBPass = flag.String("datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
 
-	storDBType = flag.String("stordb_type", config.CgrConfig().StorDBType, "The type of the storDb database <mysql>")
+	storDBType = flag.String("stordb_type", config.CgrConfig().StorDBType, "The type of the storDb database <mysql|postgres>")
 	storDBHost = flag.String("stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
 	storDBPort = flag.String("stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
 	storDBName = flag.String("stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
@@ -59,24 +60,21 @@ var (
 	oldDataDBUser = flag.String("old_datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
 	oldDataDBPass = flag.String("old_datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
 
-	oldStorDBType = flag.String("old_stordb_type", "", "The type of the storDb database <mysql>")
+	oldStorDBType = flag.String("old_stordb_type", "", "The type of the storDb database <mysql|postgres>")
 	oldStorDBHost = flag.String("old_stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
 	oldStorDBPort = flag.String("old_stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
 	oldStorDBName = flag.String("old_stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
 	oldStorDBUser = flag.String("old_stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
 	oldStorDBPass = flag.String("old_stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
 
-	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+	loadHistorySize    = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
 	oldLoadHistorySize = flag.Int("old_load_history_size", 0, "Limit the number of records in the load history")
 
-	dbDataEncoding = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
+	dbDataEncoding    = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
 	oldDBDataEncoding = flag.String("old_dbdata_encoding", "", "The encoding used to store object data in strings")
-	//TO DO: 
-	//dryRun          = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
-	//verbose         = flag.Bool("verbose", false, "Enable detailed verbose logging output")
-	//slice mapstring int  cate acc [0]am citit si [1]cate acc am scris
-	//stats           = flag.Bool("stats", false, "Generates statsistics about given data.")
-
+	dryRun            = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
+	verbose           = flag.Bool("verbose", false, "Enable detailed verbose logging output")
+	stats             = flag.Bool("stats", false, "Generates statsistics about migrated data.")
 )
 
 func main() {
@@ -85,48 +83,75 @@ func main() {
 		fmt.Println(utils.GetCGRVersion())
 		return
 	}
-if migrate != nil && *migrate != "" { // Run migrator
+	if migrate != nil && *migrate != "" { // Run migrator
+		if *verbose {
+			log.Print("Initializing dataDB:", *dataDBType)
+			log.Print("Initializing storDB:", *storDBType)
+		}
 		dataDB, err := engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
 		if err != nil {
 			log.Fatal(err)
 		}
 		storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort, *storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
-		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		if *oldDataDBType==""{
-			*oldDataDBType=*dataDBType
-			*oldDataDBHost=*dataDBHost
-			*oldDataDBPort=*dataDBPort
-			*oldDataDBName=*dataDBName
-			*oldDataDBUser=*dataDBUser
-			*oldDataDBPass=*dataDBPass
-
+		if *oldDataDBType == "" {
+			*oldDataDBType = *dataDBType
+			*oldDataDBHost = *dataDBHost
+			*oldDataDBPort = *dataDBPort
+			*oldDataDBName = *dataDBName
+			*oldDataDBUser = *dataDBUser
+			*oldDataDBPass = *dataDBPass
+		}
+		if *verbose {
+			log.Print("Initializing oldDataDB:", *oldDataDBType)
 		}
 		oldDataDB, err := migrator.ConfigureV1DataStorage(*oldDataDBType, *oldDataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding)
 		if err != nil {
 			log.Fatal(err)
 		}
-		oldstorDB=storDB
-		if *oldStorDBType!="" {
-			oldstorDB, err = engine.ConfigureStorStorage(oStorDBType, *oldStorDBHost, *oldStorDBPort, *oldStorDBName, *oldStorDBUser, *oldStorDBPass, *oldDBDataEncoding,
-			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
-		if err != nil {
-			log.Fatal(err)
+		oldstorDB = storDB
+
+		if *verbose {
+			if *oldStorDBType != "" {
+				log.Print("Initializing oldstorDB:", *oldStorDBType)
+			} else {
+				log.Print("Initializing oldstorDB:", *storDBType)
 			}
 		}
-		m,err := migrator.NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType, oldDataDB, *oldDataDBType,*oldDBDataEncoding,oldstorDB,*oldStorDBType)
-		 if err != nil {
-			log.Fatal(err)
+		if *oldStorDBType != "" {
+			oldstorDB, err = engine.ConfigureStorStorage(oStorDBType, *oldStorDBHost, *oldStorDBPort, *oldStorDBName, *oldStorDBUser, *oldStorDBPass, *oldDBDataEncoding,
+				config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
-		err = m.Migrate(*migrate); 
+		if *verbose {
+			log.Print("Migrating: ", *migrate)
+		}
+		m, err := migrator.NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType, oldDataDB, *oldDataDBType, *oldDBDataEncoding, oldstorDB, *oldStorDBType, *dryRun)
 		if err != nil {
 			log.Fatal(err)
 		}
-		
-		log.Print("Done migrating!")
+		migrstats := make(map[string]int)
+		mig := strings.Split(*migrate, ",")
+		log.Print("migrating", mig)
+		err, migrstats = m.Migrate(mig)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if *stats != false {
+			for k, v := range migrstats {
+				log.Print(" ", k, " : ", v)
+			}
+		}
+		if *verbose {
+			log.Print("Done migrating!")
+		}
+
 		return
 	}
+
 }

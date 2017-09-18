@@ -20,11 +20,13 @@ package migrator
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB V1DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string) (m *Migrator, err error) {
+func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB V1DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string, dryRun bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -36,11 +38,14 @@ func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB
 	} else if oldDataDBEncoding == utils.JSON {
 		oldmrshlr = new(engine.JSONMarshaler)
 	}
+	stats := make(map[string]int)
+
 	m = &Migrator{
 		dataDB: dataDB, dataDBType: dataDBType,
 		storDB: storDB, storDBType: storDBType, mrshlr: mrshlr,
 		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
-		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType, oldmrshlr: oldmrshlr,
+		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType,
+		oldmrshlr: oldmrshlr, dryRun: dryRun, stats: stats,
 	}
 	return m, err
 }
@@ -56,42 +61,54 @@ type Migrator struct {
 	oldStorDB     engine.Storage
 	oldStorDBType string
 	oldmrshlr     engine.Marshaler
+	dryRun        bool
+	stats         map[string]int
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods
-func (m *Migrator) Migrate(taskID string) (err error) {
-	switch taskID {
-	default: // unsupported taskID
-		err = utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UnsupportedMigrationTask,
-			fmt.Sprintf("task <%s> is not a supported migration task", taskID))
-	case utils.MetaSetVersions:
-		if err := m.storDB.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
+func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
+	stats = make(map[string]int)
+	for _, taskID := range taskIDs {
+		log.Print("migrating", taskID)
+		switch taskID {
+		default: // unsupported taskID
+			err = utils.NewCGRError(utils.Migrator,
+				utils.MandatoryIEMissingCaps,
+				utils.UnsupportedMigrationTask,
+				fmt.Sprintf("task <%s> is not a supported migration task", taskID))
+		case utils.MetaSetVersions:
+			if m.dryRun != true {
+				if err := m.storDB.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
+					return utils.NewCGRError(utils.Migrator,
+						utils.ServerErrorCaps,
+						err.Error(),
+						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
+				}
+				if err := m.dataDB.SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
+					return utils.NewCGRError(utils.Migrator,
+						utils.ServerErrorCaps,
+						err.Error(),
+						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
+				}
+			} else {
+				log.Print("Cannot dryRun SetVersions!")
+			}
+		case utils.MetaCostDetails:
+			err = m.migrateCostDetails()
+		case utils.MetaAccounts:
+			err = m.migrateAccounts()
+		case utils.MetaActionPlans:
+			err = m.migrateActionPlans()
+		case utils.MetaActionTriggers:
+			err = m.migrateActionTriggers()
+		case utils.MetaActions:
+			err = m.migrateActions()
+		case utils.MetaSharedGroups:
+			err = m.migrateSharedGroups()
 		}
-		if err := m.dataDB.SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error()))
-		}
-
-	case utils.MetaCostDetails:
-		err = m.migrateCostDetails()
-	case utils.MetaAccounts:
-		err = m.migrateAccounts()
-	case utils.MetaActionPlans:
-		err = m.migrateActionPlans()
-	case utils.MetaActionTriggers:
-		err = m.migrateActionTriggers()
-	case utils.MetaActions:
-		err = m.migrateActions()
-	case utils.MetaSharedGroups:
-		err = m.migrateSharedGroups()
+	}
+	for k, v := range m.stats {
+		stats[k] = v
 	}
 	return
 }

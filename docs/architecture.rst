@@ -1,14 +1,16 @@
 2. Architecture
 ===============
-The CGRateS suite consists of **four** software applications described below.
+The CGRateS suite consists of **five** software applications described below.
 
 .. hlist::
-   :columns: 4
+   :columns: 5
 
    - cgr-engine
    - cgr-loader
    - cgr-console
    - cgr-tester
+   - cgr-migrator
+
 
 CGRateS has an internal cache.
 
@@ -499,3 +501,78 @@ Command line stress testing tool.
 
 .. hint:: # cgr-tester -runs=10000
 
+2.5. cgr-migrator
+-----------------
+Command line migration tool.
+
+::
+
+ cgrates@OCS:~$ cgr-migrator --help
+ Usage of cgr-migrator:
+  -datadb_host string
+      The DataDb host to connect to. (default "192.168.100.40")
+  -datadb_name string
+      The name/number of the DataDb to connect to. (default "10")
+  -datadb_passwd string
+      The DataDb user's password.
+  -datadb_port string
+      The DataDb port to bind to. (default "6379")
+  -datadb_type string
+      The type of the DataDb database <redis> (default "redis")
+  -datadb_user string
+      The DataDb user to sign in as. (default "cgrates")
+  -dbdata_encoding string
+      The encoding used to store object data in strings (default "msgpack")
+  -dry_run
+      When true will not save loaded data to dataDb but just parse it for consistency and errors.(default "false")
+  -load_history_size int
+      Limit the number of records in the load history (default 10)
+  -migrate string
+      Fire up automatic migration *to use multiple values use ',' as separator 
+      <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups> 
+  -old_datadb_host string
+      The DataDb host to connect to. (default "192.168.100.40")
+  -old_datadb_name string
+      The name/number of the DataDb to connect to. (default "10")
+  -old_datadb_passwd string
+      The DataDb user's password.
+  -old_datadb_port string
+      The DataDb port to bind to. (default "6379")
+  -old_datadb_type string
+      The type of the DataDb database <redis>
+  -old_datadb_user string
+      The DataDb user to sign in as. (default "cgrates")
+  -old_dbdata_encoding string
+      The encoding used to store object data in strings
+  -old_load_history_size int
+      Limit the number of records in the load history
+  -old_stordb_host string
+      The storDb host to connect to. (default "192.168.100.40")
+  -old_stordb_name string
+      The name/number of the storDb to connect to. (default "cgrates")
+  -old_stordb_passwd string
+      The storDb user's password.
+  -old_stordb_port string
+      The storDb port to bind to. (default "3306")
+  -old_stordb_type string
+      The type of the storDb database <mysql|postgres>
+  -old_stordb_user string
+      The storDb user to sign in as. (default "cgrates")
+  -stats
+      Generates statsistics about given data.(default "false")
+  -stordb_host string
+      The storDb host to connect to. (default "192.168.100.40")
+  -stordb_name string
+      The name/number of the storDb to connect to. (default "cgrates")
+  -stordb_passwd string
+      The storDb user's password.
+  -stordb_port string
+      The storDb port to bind to. (default "3306")
+  -stordb_type string
+      The type of the storDb database <mysql|postgres> (default "mysql")
+  -stordb_user string
+      The storDb user to sign in as. (default "cgrates")
+  -verbose
+      Enable detailed verbose logging output.(default "false")
+  -version
+      Prints the application version.

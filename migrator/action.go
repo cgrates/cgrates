@@ -55,19 +55,23 @@ func (m *Migrator) migrateActions() (err error) {
 				acts = append(acts, act)
 
 			}
-			if err := m.dataDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
-				return err
+			if m.dryRun != true {
+				if err := m.dataDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+					return err
+				}
+				m.stats[utils.Actions] += 1
 			}
-
 		}
 	}
-	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
-	if err = m.dataDB.SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
+	if m.dryRun != true {
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
+		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
+		}
 	}
 	return
 }
