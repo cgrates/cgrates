@@ -193,6 +193,9 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.LockingTimeout != 5*time.Second {
 		t.Error(cgrCfg.LockingTimeout)
 	}
+	if cgrCfg.Logger != utils.MetaSysLog {
+		t.Error(cgrCfg.Logger)
+	}
 	if cgrCfg.LogLevel != 6 {
 		t.Error(cgrCfg.LogLevel)
 	}

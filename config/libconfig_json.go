@@ -21,6 +21,7 @@ package config
 // General config section
 type GeneralJsonCfg struct {
 	Instance_id          *string
+	Logger               *string
 	Log_level            *int
 	Http_skip_tls_verify *bool
 	Rounding_decimals    *int
