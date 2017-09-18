@@ -69,10 +69,11 @@ func (sS *StatService) runBackup() {
 		select {
 		case <-sS.stopBackup:
 			return
+		default:
 		}
 		sS.storeStats()
+		time.Sleep(sS.storeInterval)
 	}
-	time.Sleep(sS.storeInterval)
 }
 
 // storeResources represents one task of complete backup
