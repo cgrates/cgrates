@@ -39,7 +39,7 @@ func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
 func TestDfGeneralJsonCfg(t *testing.T) {
 	eCfg := &GeneralJsonCfg{
 		Instance_id:          utils.StringPointer(""),
-		SysLogger:			  utils.StringPointer(utils.LoggerSysLog)
+		Logger:			  utils.StringPointer(utils.LoggerSysLog)
 		Log_level:            utils.IntPointer(utils.LOGLEVEL_INFO),
 		Http_skip_tls_verify: utils.BoolPointer(false),
 		Rounding_decimals:    utils.IntPointer(5),
