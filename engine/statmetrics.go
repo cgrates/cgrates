@@ -44,7 +44,7 @@ type StatMetric interface {
 	GetValue() interface{}
 	GetStringValue(fmtOpts string) (val string)
 	GetFloat64Value() (val float64)
-	AddEvent(ev StatEvent) error
+	AddEvent(ev *StatEvent) error
 	RemEvent(evTenantID string) error
 	Marshal(ms Marshaler) (marshaled []byte, err error)
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
@@ -93,7 +93,7 @@ func (asr *StatASR) GetFloat64Value() (val float64) {
 }
 
 // AddEvent is part of StatMetric interface
-func (asr *StatASR) AddEvent(ev StatEvent) (err error) {
+func (asr *StatASR) AddEvent(ev *StatEvent) (err error) {
 	var answered bool
 	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
@@ -156,7 +156,7 @@ func (acd *StatACD) GetFloat64Value() (v float64) {
 	return float64(STATS_NA)
 }
 
-func (acd *StatACD) AddEvent(ev StatEvent) (err error) {
+func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
 	return
 }
 

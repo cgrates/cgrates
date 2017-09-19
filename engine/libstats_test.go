@@ -172,3 +172,36 @@ func TestStatRemOnQueueLength(t *testing.T) {
 		t.Errorf("wrong items: %+v", sq.SQItems)
 	}
 }
+
+func TestStatAddStatEvent(t *testing.T) {
+	sq = &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 1,
+				Count:    1,
+				Events: map[string]bool{
+					"cgrates.org:TestStatRemExpired_1": true,
+				},
+			},
+		},
+	}
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 100 {
+		t.Errorf("received ASR: %v", asrMetricIf)
+	}
+	ev1 := &StatEvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+	sq.addStatEvent(ev1)
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 50 {
+		t.Errorf("received ASR: %v", asrMetricIf)
+	} else if asrMetric.Answered != 1 || asrMetric.Count != 2 {
+		t.Errorf("received ASR: %v", asrMetricIf)
+	}
+	ev1.Fields = map[string]interface{}{
+		utils.ANSWER_TIME: time.Now()}
+	sq.addStatEvent(ev1)
+	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 66.66667 {
+		t.Errorf("received ASR: %v", asrMetricIf)
+	} else if asrMetric.Answered != 2 || asrMetric.Count != 3 {
+		t.Errorf("received ASR: %v", asrMetricIf)
+	}
+}

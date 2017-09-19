@@ -156,7 +156,7 @@ func (sq *StatQueue) TenantID() string {
 }
 
 // ProcessEvent processes a StatEvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(ev StatEvent) (err error) {
+func (sq *StatQueue) ProcessEvent(ev *StatEvent) (err error) {
 	sq.remExpired()
 	sq.remOnQueueLength()
 	sq.addStatEvent(ev)
@@ -204,7 +204,7 @@ func (sq *StatQueue) remOnQueueLength() {
 }
 
 // addStatEvent computes metrics for an event
-func (sq *StatQueue) addStatEvent(ev StatEvent) {
+func (sq *StatQueue) addStatEvent(ev *StatEvent) {
 	for metricID, metric := range sq.SQMetrics {
 		if err := metric.AddEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
