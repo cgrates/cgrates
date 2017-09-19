@@ -57,6 +57,7 @@ var (
 	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
 	version         = flag.Bool("version", false, "Prints the application version.")
 	nilDuration     = time.Duration(0)
+	usage           = flag.String("usage", "1m", "The duration to use in call simulation.")
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
@@ -89,6 +90,7 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 		j = i
 	}
 	log.Print(result, j, err)
+
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	log.Printf("memstats before GC: Kbytes = %d footprint = %d",
@@ -151,9 +153,13 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
+	var timeparsed time.Duration
+	var err error
+	timeparsed, err = time.ParseDuration(*usage)
+	timeout := time.Now().UTC().Add(timeparsed)
 	cd := &engine.CallDescriptor{
-		TimeStart:     time.Date(2014, time.December, 11, 55, 30, 0, 0, time.UTC),
-		TimeEnd:       time.Date(2014, time.December, 11, 55, 31, 0, 0, time.UTC),
+		TimeStart:     time.Now().UTC(),
+		TimeEnd:       timeout,
 		DurationIndex: 60 * time.Second,
 		Direction:     "*out",
 		TOR:           *tor,
@@ -163,7 +169,6 @@ func main() {
 		Destination:   *destination,
 	}
 	var duration time.Duration
-	var err error
 	if len(*raterAddress) == 0 {
 		duration, err = durInternalRater(cd)
 	} else {
