@@ -93,23 +93,27 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 
 func csvDump(s interface{}) ([]string, error) {
 	fieldIndexMap := make(map[string]int)
-	st := reflect.TypeOf(s)
+	st := reflect.ValueOf(s)
+	if st.Kind() == reflect.Ptr {
+		st = st.Elem()
+		s = st.Interface()
+	}
 	numFields := st.NumField()
+	stcopy := reflect.TypeOf(s)
 	for i := 0; i < numFields; i++ {
-		field := st.Field(i)
+		field := stcopy.Field(i)
 		index := field.Tag.Get("index")
 		if index != "" {
 			if idx, err := strconv.Atoi(index); err != nil {
-				return nil, fmt.Errorf("invalid %v.%v index %v", st.Name(), field.Name, index)
+				return nil, fmt.Errorf("invalid %v.%v index %v", stcopy.Name(), field.Name, index)
 			} else {
 				fieldIndexMap[field.Name] = idx
 			}
 		}
 	}
-	elem := reflect.ValueOf(s)
 	result := make([]string, len(fieldIndexMap))
 	for fieldName, fieldIndex := range fieldIndexMap {
-		field := elem.FieldByName(fieldName)
+		field := st.FieldByName(fieldName)
 		if field.IsValid() && fieldIndex < len(result) {
 			switch field.Kind() {
 			case reflect.Float64:
