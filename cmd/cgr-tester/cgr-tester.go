@@ -156,9 +156,9 @@ func main() {
 	var timeparsed time.Duration
 	var err error
 	timeparsed, err = time.ParseDuration(*usage)
-	timeout := time.Now().UTC().Add(timeparsed)
+	timeout := time.Now().Local().Add(timeparsed)
 	cd := &engine.CallDescriptor{
-		TimeStart:     time.Now().UTC(),
+		TimeStart:     time.Now().Local(),
 		TimeEnd:       timeout,
 		DurationIndex: 60 * time.Second,
 		Direction:     "*out",
