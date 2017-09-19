@@ -128,3 +128,47 @@ func TestStatRemExpired(t *testing.T) {
 		t.Errorf("Unexpected items: %+v", sq.SQItems)
 	}
 }
+
+func TestStatRemOnQueueLength(t *testing.T) {
+	sq = &StatQueue{
+		sqPrfl: &StatQueueProfile{
+			QueueLength: 2,
+		},
+		SQItems: []struct {
+			EventID    string
+			ExpiryTime *time.Time
+		}{
+			{"cgrates.org:TestStatRemExpired_1", nil},
+		},
+	}
+	sq.remOnQueueLength()
+	if len(sq.SQItems) != 1 {
+		t.Errorf("wrong items: %+v", sq.SQItems)
+	}
+	sq.SQItems = []struct {
+		EventID    string
+		ExpiryTime *time.Time
+	}{
+		{"cgrates.org:TestStatRemExpired_1", nil},
+		{"cgrates.org:TestStatRemExpired_2", nil},
+	}
+	sq.remOnQueueLength()
+	if len(sq.SQItems) != 1 {
+		t.Errorf("wrong items: %+v", sq.SQItems)
+	} else if sq.SQItems[0].EventID != "cgrates.org:TestStatRemExpired_2" {
+		t.Errorf("wrong item in SQItems: %+v", sq.SQItems[0])
+	}
+	sq.sqPrfl.QueueLength = -1
+	sq.SQItems = []struct {
+		EventID    string
+		ExpiryTime *time.Time
+	}{
+		{"cgrates.org:TestStatRemExpired_1", nil},
+		{"cgrates.org:TestStatRemExpired_2", nil},
+		{"cgrates.org:TestStatRemExpired_3", nil},
+	}
+	sq.remOnQueueLength()
+	if len(sq.SQItems) != 3 {
+		t.Errorf("wrong items: %+v", sq.SQItems)
+	}
+}
