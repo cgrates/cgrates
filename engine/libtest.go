@@ -80,7 +80,10 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	var connected bool
 	for i := 0; i < 200; i++ {
 		time.Sleep(time.Duration(fib()) * time.Millisecond)
-		if _, err := jsonrpc.Dial("tcp", cfg.RPCJSONListen); err == nil {
+		if _, err := jsonrpc.Dial("tcp", cfg.RPCJSONListen); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
+				err.Error(), cfg.RPCJSONListen))
+		} else {
 			connected = true
 			break
 		}

@@ -163,6 +163,15 @@ func (sq *StatQueue) ProcessEvent(ev StatEvent) (err error) {
 	return
 }
 
+// remStatEvent removes an event from metrics
+func (sq *StatQueue) remEventWithID(evTenantID string) {
+	for metricID, metric := range sq.SQMetrics {
+		if err := metric.RemEvent(evTenantID); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evTenantID, err.Error()))
+		}
+	}
+}
+
 // remExpired expires items in queue
 func (sq *StatQueue) remExpired() {
 	var expIdx *int // index of last item to be expired
@@ -174,13 +183,12 @@ func (sq *StatQueue) remExpired() {
 			break
 		}
 		sq.remEventWithID(item.EventID)
-		expIdx = &i
+		expIdx = utils.IntPointer(i)
 	}
 	if expIdx == nil {
 		return
 	}
-	nextValidIdx := *expIdx + 1
-	sq.SQItems = sq.SQItems[nextValidIdx:]
+	sq.SQItems = sq.SQItems[*expIdx+1:]
 }
 
 // remOnQueueLength removes elements based on QueueLength setting
@@ -201,15 +209,6 @@ func (sq *StatQueue) addStatEvent(ev StatEvent) {
 		if err := metric.AddEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
 				metricID, ev.TenantID(), err.Error()))
-		}
-	}
-}
-
-// remStatEvent removes an event from metrics
-func (sq *StatQueue) remEventWithID(evTenantID string) {
-	for metricID, metric := range sq.SQMetrics {
-		if err := metric.RemEvent(evTenantID); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evTenantID, err.Error()))
 		}
 	}
 }
