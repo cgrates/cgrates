@@ -274,7 +274,7 @@ cgrates.org,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,
 `
 	stats = `
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
-Tester,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,true,20,THRESH1;THRESH2
+cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,true,20,THRESH1;THRESH2
 `
 	thresholds = `
 #Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],ThresholdType[5],ThresholdValue[6],MinItems[7],Recurrent[8],MinSleep[9],Blocker[10],Stored[11],Weight[12],ActionIDs[13]
@@ -1430,39 +1430,42 @@ func TestLoadResourceProfiles(t *testing.T) {
 	}
 	if len(csvr.resProfiles["cgrates.org"]) != len(eResProfiles["cgrates.org"]) {
 		t.Errorf("Failed to load resourceProfiles: %s", utils.ToIJSON(csvr.resProfiles))
-	} else if !reflect.DeepEqual(eResProfiles["ResGroup22"], csvr.resProfiles["ResGroup22"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eResProfiles["ResGroup22"], csvr.resProfiles["ResGroup22"])
+	} else if !reflect.DeepEqual(eResProfiles["cgrates.org"]["ResGroup22"], csvr.resProfiles["cgrates.org"]["ResGroup22"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eResProfiles["cgrates.org"]["ResGroup22"], csvr.resProfiles["cgrates.org"]["ResGroup22"])
 
 	}
 
 }
 
 func TestLoadStats(t *testing.T) {
-	eStats := map[string]*utils.TPStats{
-		"Stats1": &utils.TPStats{
-			Tenant: "Tester",
-			TPid:   testTPID,
-			ID:     "Stats1",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+	eStats := map[string]map[string]*utils.TPStats{
+		"cgrates.org": map[string]*utils.TPStats{
+			"Stats1": &utils.TPStats{
+				Tenant: "cgrates.org",
+				TPid:   testTPID,
+				ID:     "Stats1",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
+				QueueLength: 100,
+				TTL:         "1s",
+				Metrics:     []string{"*asr", "*acd", "*acc"},
+				Thresholds:  []string{"THRESH1", "THRESH2"},
+				Blocker:     true,
+				Stored:      true,
+				Weight:      20,
 			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			QueueLength: 100,
-			TTL:         "1s",
-			Metrics:     []string{"*asr", "*acd", "*acc"},
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Blocker:     true,
-			Stored:      true,
-			Weight:      20,
 		},
 	}
 
-	if len(csvr.sqProfiles) != len(eStats) {
+	if len(csvr.sqProfiles["cgrates.org"]) != len(eStats["cgrates.org"]) {
 		t.Error("Failed to load stats: ", len(csvr.sqProfiles))
-	} else if !reflect.DeepEqual(eStats["Stats1"], csvr.sqProfiles["Stats1"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eStats["Stats1"], csvr.sqProfiles["Stats1"])
+	} else if !reflect.DeepEqual(eStats["cgrates.org"]["Stats1"], csvr.sqProfiles["cgrates.org"]["Stats1"]) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eStats["cgrates.org"]["Stats1"]), utils.ToJSON(csvr.sqProfiles["cgrates.org"]["Stats1"]))
 	}
 }
 

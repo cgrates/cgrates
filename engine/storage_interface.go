@@ -100,7 +100,7 @@ type DataDB interface {
 	SetReverseAlias(*Alias, string) error
 	GetReverseAlias(string, bool, string) ([]string, error)
 	GetResourceProfile(string, string, bool, string) (*ResourceProfile, error)
-	SetResourceProfile(*ResourceProfile, string) error
+	SetResourceProfile(*ResourceProfile) error
 	RemoveResourceProfile(string, string, string) error
 	GetResource(string, string, bool, string) (*Resource, error)
 	SetResource(*Resource) error
@@ -113,9 +113,9 @@ type DataDB interface {
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
-	GetStatQueueProfile(sqID string) (sq *StatQueueProfile, err error)
+	GetStatQueueProfile(tenant string, ID string, skipCache bool, transID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfile(sq *StatQueueProfile) (err error)
-	RemStatQueueProfile(sqID string) (err error)
+	RemStatQueueProfile(tenant, id, transactionID string) (err error)
 	GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error)
 	SetStoredStatQueue(sq *StoredStatQueue) (err error)
 	RemStoredStatQueue(tenant, id string) (err error)

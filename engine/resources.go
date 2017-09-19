@@ -469,7 +469,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 			r.ttl = utils.DurationPointer(rPrf.UsageTTL)
 		}
 		r.rPrf = rPrf
-		matchingResources[rPrf.ID] = r // Cannot save it here since we could have errors after and resource will remain unused
+		matchingResources[rPrf.ID] = r
 	}
 	// All good, convert from Map to Slice so we can sort
 	rs = make(Resources, len(matchingResources))

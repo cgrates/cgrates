@@ -43,6 +43,10 @@ type StatQueueProfile struct {
 	Weight             float64
 }
 
+func (sqp *StatQueueProfile) TenantID() string {
+	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
+}
+
 // StatEvent is an event processed by StatService
 type StatEvent struct {
 	Tenant string
@@ -147,7 +151,8 @@ type StatQueue struct {
 	}
 	SQMetrics map[string]StatMetric
 	sqPrfl    *StatQueueProfile
-	dirty     *bool // needs save
+	dirty     *bool          // needs save
+	ttl       *time.Duration // timeToLeave, picked on each init
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID

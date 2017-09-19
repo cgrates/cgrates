@@ -1309,7 +1309,7 @@ func (ms *MapStorage) GetResourceProfile(tenant, id string, skipCache bool, tran
 	return
 }
 
-func (ms *MapStorage) SetResourceProfile(r *ResourceProfile, transactionID string) error {
+func (ms *MapStorage) SetResourceProfile(r *ResourceProfile) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)
@@ -1477,24 +1477,35 @@ func (ms *MapStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemID
 	return
 }
 
-// GetStatsQueue retrieves a StatsQueue from dataDB
-func (ms *MapStorage) GetStatQueueProfile(sqID string) (scf *StatQueueProfile, err error) {
+// GetStatQueueProfile retrieves a StatQueueProfile from dataDB
+func (ms *MapStorage) GetStatQueueProfile(tenant string, id string,
+	skipCache bool, transactionID string) (sq *StatQueueProfile, err error) {
+	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*StatQueueProfile), nil
+		}
+	}
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.StatQueueProfilePrefix + sqID
 	values, ok := ms.dict[key]
 	if !ok {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, &scf)
+	err = ms.ms.Unmarshal(values, &sq)
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range scf.Filters {
+	for _, fltr := range sq.Filters {
 		if err := fltr.CompileValues(); err != nil {
 			return nil, err
 		}
 	}
+	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1511,11 +1522,12 @@ func (ms *MapStorage) SetStatQueueProfile(scf *StatQueueProfile) (err error) {
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MapStorage) RemStatQueueProfile(scfID string) (err error) {
+func (ms *MapStorage) RemStatQueueProfile(tenant, id, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.StatQueueProfilePrefix + scfID
+	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

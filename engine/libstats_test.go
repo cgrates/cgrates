@@ -60,30 +60,30 @@ func TestStatRemEventWithID(t *testing.T) {
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 50 {
-		t.Errorf("received asrMetric: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != 50 {
+		t.Errorf("received asrMetric: %v", asrMetric)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 0 {
-		t.Errorf("received asrMetric: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != 0 {
+		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_5") // non existent
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 0 {
-		t.Errorf("received asrMetric: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != 0 {
+		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != -1 {
-		t.Errorf("received asrMetric: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != -1 {
+		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != -1 {
-		t.Errorf("received asrMetric: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != -1 {
+		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
@@ -115,12 +115,12 @@ func TestStatRemExpired(t *testing.T) {
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 66.66667 {
-		t.Errorf("received asrMetric: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != 66.66667 {
+		t.Errorf("received asrMetric: %v", asrMetric)
 	}
 	sq.remExpired()
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 100 {
-		t.Errorf("received asrMetric: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != 100 {
+		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
@@ -186,22 +186,22 @@ func TestStatAddStatEvent(t *testing.T) {
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 100 {
-		t.Errorf("received ASR: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != 100 {
+		t.Errorf("received ASR: %v", asr)
 	}
 	ev1 := &StatEvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 	sq.addStatEvent(ev1)
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 50 {
-		t.Errorf("received ASR: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != 50 {
+		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Answered != 1 || asrMetric.Count != 2 {
-		t.Errorf("received ASR: %v", asrMetricIf)
+		t.Errorf("ASR: %v", asrMetric)
 	}
 	ev1.Fields = map[string]interface{}{
 		utils.ANSWER_TIME: time.Now()}
 	sq.addStatEvent(ev1)
-	if asrMetricIf := asrMetric.GetValue(); asrMetricIf.(float64) != 66.66667 {
-		t.Errorf("received ASR: %v", asrMetricIf)
+	if asr := asrMetric.GetFloat64Value(); asr != 66.66667 {
+		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Answered != 2 || asrMetric.Count != 3 {
-		t.Errorf("received ASR: %v", asrMetricIf)
+		t.Errorf("ASR: %v", asrMetric)
 	}
 }
