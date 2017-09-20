@@ -35,9 +35,9 @@ func (self *ApierV1) SetTPStat(attr utils.TPStats, reply *string) error {
 }
 
 type AttrGetTPStat struct {
-	TPid string // Tariff plan id
+	TPid   string // Tariff plan id
 	Tenant string
-	ID   string
+	ID     string
 }
 
 // Queries specific Stat on Tariff plan
@@ -57,7 +57,7 @@ func (self *ApierV1) GetTPStat(attr AttrGetTPStat, reply *utils.TPStats) error {
 }
 
 type AttrGetTPStatIds struct {
-	TPid string // Tariff plan id
+	TPid   string // Tariff plan id
 	Tenant string
 	utils.Paginator
 }
@@ -68,9 +68,10 @@ func (self *ApierV1) GetTPStatIDs(attrs AttrGetTPStatIds, reply *[]string) error
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPStats, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
-		return utils.NewErrServerError(err)
-	} else if ids == nil {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = ids
 	}
