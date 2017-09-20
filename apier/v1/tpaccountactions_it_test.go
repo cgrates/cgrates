@@ -50,7 +50,8 @@ var sTestsTPAccActions = []func(t *testing.T){
 	testTPAccActionsGetTPAccActionBeforeSet,
 	testTPAccActionsSetTPAccAction,
 	testTPAccActionsGetTPAccActionAfterSet,
-	testTPAccActionsGetTPAccActionIds,
+	testTPAccActionsGetTPAccountActionLoadIds,
+	testTPAccActionsGetTPAccountActionIds,
 	testTPAccActionsUpdateTPAccAction,
 	testTPAccActionsGetTPAccActionAfterUpdate,
 	testTPAccActionsRemTPAccAction,
@@ -156,7 +157,7 @@ func testTPAccActionsGetTPAccActionAfterSet(t *testing.T) {
 	}
 }
 
-func testTPAccActionsGetTPAccActionIds(t *testing.T) {
+func testTPAccActionsGetTPAccountActionLoadIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
 	if err := tpAccActionsRPC.Call("ApierV1.GetTPAccountActionLoadIds", &AttrGetTPAccountActionIds{TPid: "TPAcc"}, &result); err != nil {
@@ -164,7 +165,16 @@ func testTPAccActionsGetTPAccActionIds(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
 	}
+}
 
+func testTPAccActionsGetTPAccountActionIds(t *testing.T) {
+	var result []string
+	expectedTPID := []string{"ID:cgrates.org:1001"}
+	if err := tpAccActionsRPC.Call("ApierV1.GetTPAccountActionIds", &AttrGetTPAccountActionIds{TPid: "TPAcc"}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedTPID, result) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
+	}
 }
 
 func testTPAccActionsUpdateTPAccAction(t *testing.T) {

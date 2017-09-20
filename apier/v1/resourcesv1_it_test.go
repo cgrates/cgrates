@@ -89,7 +89,7 @@ func testV1RsLoadConfig(t *testing.T) {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		resDelay = 4000
 	default:
-		resDelay = 1000
+		resDelay = 2000
 	}
 }
 

@@ -44,7 +44,7 @@ var (
 var sTestsTPResources = []func(t *testing.T){
 	testTPResInitCfg,
 	testTPResResetStorDb,
-	//testTPResStartEngine,
+	testTPResStartEngine,
 	testTPResRpcConn,
 	testTPResGetTPResourceBeforeSet,
 	testTPResSetTPResource,
