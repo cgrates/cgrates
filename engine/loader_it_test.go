@@ -328,7 +328,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		for _, st := range mpIDs {
 			rcv, err := loader.dataStorage.GetStatQueueProfile(st.Tenant, st.ID, true, utils.NonTransactional)
 			if err != nil {
-				t.Error("Failed GetStatsQueue: ", err.Error())
+				t.Errorf("Failed GetStatsQueue, tenant: %s, id: %s,  error: %s ", st.Tenant, st.ID, err.Error())
 			}
 			sts, err := APItoStats(st, "UTC")
 			if err != nil {

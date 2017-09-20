@@ -1626,7 +1626,7 @@ func (rs *RedisStorage) SetStatQueueProfile(sq *StatQueueProfile) (err error) {
 	if err != nil {
 		return
 	}
-	return rs.Cmd("SET", utils.StatQueueProfilePrefix+sq.ID, result).Err
+	return rs.Cmd("SET", utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), result).Err
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB

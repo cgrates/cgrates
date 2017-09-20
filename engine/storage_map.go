@@ -1510,14 +1510,14 @@ func (ms *MapStorage) GetStatQueueProfile(tenant string, id string,
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
-func (ms *MapStorage) SetStatQueueProfile(scf *StatQueueProfile) (err error) {
+func (ms *MapStorage) SetStatQueueProfile(sqp *StatQueueProfile) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(scf)
+	result, err := ms.ms.Marshal(sqp)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.StatQueueProfilePrefix+scf.ID] = result
+	ms.dict[utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sqp.Tenant, sqp.ID)] = result
 	return
 }
 
