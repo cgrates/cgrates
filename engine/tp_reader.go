@@ -2086,7 +2086,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 					}
 				}
 				if verbose {
-					log.Printf("Indexed ResourceProfile tenant: %s keys: %+v", tenant, rlIdxr.ChangedKeys().Slice())
+					log.Printf("Indexed ResourceProfile tenant: %s, keys: %+v", tenant, rlIdxr.ChangedKeys().Slice())
 				}
 				if err := rlIdxr.StoreIndexes(); err != nil {
 					return err
@@ -2110,7 +2110,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 					}
 				}
 				if verbose {
-					log.Printf("Indexed Stats tenant: %s, keys %+v", stIdxr.ChangedKeys().Slice())
+					log.Printf("Indexed Stats tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
 				}
 				if err := stIdxr.StoreIndexes(); err != nil {
 					return err
@@ -2133,7 +2133,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 			if verbose {
-				log.Printf("Indexed Stats keys: %+v", stIdxr.ChangedKeys().Slice())
+				log.Printf("Indexed Threshold keys: %+v", stIdxr.ChangedKeys().Slice())
 			}
 			if err := stIdxr.StoreIndexes(); err != nil {
 				return err
