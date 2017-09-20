@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	ErrNoMoreData              = errors.New("no more data")
+	ErrNoMoreData              = errors.New("NO_MORE_DATA")
 	ErrNotImplemented          = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound                = errors.New("NOT_FOUND")
 	ErrTimedOut                = errors.New("TIMED_OUT")
@@ -45,6 +45,7 @@ var (
 	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
 	ErrResourceUnavailable     = errors.New("RESOURCE_UNAVAILABLE")
 	ErrNoActiveSession         = errors.New("NO_ACTIVE_SESSION")
+	ErrPartiallyExecuted       = errors.New("PARTIALLY_EXECUTED")
 )
 
 // NewCGRError initialises a new CGRError
