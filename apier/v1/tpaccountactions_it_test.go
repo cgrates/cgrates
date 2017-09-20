@@ -73,7 +73,7 @@ func TestTPAccActionsITMongo(t *testing.T) {
 	}
 }
 
-func TestTTPAccActionsITPG(t *testing.T) {
+func TestTPAccActionsITPG(t *testing.T) {
 	tpAccActionsConfigDIR = "tutpostgres"
 	for _, stest := range sTestsTPAccActions {
 		t.Run(tpAccActionsConfigDIR, stest)
