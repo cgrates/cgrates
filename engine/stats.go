@@ -260,7 +260,7 @@ func (sS *StatService) V1ProcessEvent(ev *StatEvent, reply *string) (err error) 
 }
 
 // V1StatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1StatQueuesForEvent(ev *StatEvent, reply *StatQueues) (err error) {
+func (sS *StatService) V1GetStatQueuesForEvent(ev *StatEvent, reply *StatQueues) (err error) {
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(ev); err == nil {
 		*reply = sQs

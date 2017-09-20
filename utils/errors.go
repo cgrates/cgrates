@@ -93,14 +93,14 @@ func NewErrServerError(err error) error {
 }
 
 // Centralized returns for APIs
-func APIErrorHandler(err error) error {
-	cgrErr, ok := err.(*CGRError)
+func APIErrorHandler(errIn error) (err error) {
+	cgrErr, ok := errIn.(*CGRError)
 	if !ok {
-		if err == ErrNotFound {
-			return err
-		} else {
-			return NewErrServerError(err)
+		err = errIn
+		if err != ErrNotFound {
+			err = NewErrServerError(err)
 		}
+		return
 	}
 	cgrErr.ActivateAPIError()
 	return cgrErr
