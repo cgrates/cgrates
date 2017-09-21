@@ -66,9 +66,10 @@ func (self *ApierV1) GetTPResourceIDs(attrs AttrGetTPResourceIds, reply *[]strin
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPResources, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
-		return utils.NewErrServerError(err)
-	} else if ids == nil {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = ids
 	}

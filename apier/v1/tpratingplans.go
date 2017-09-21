@@ -69,9 +69,10 @@ func (self *ApierV1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]s
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRatingPlans, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
-		return utils.NewErrServerError(err)
-	} else if ids == nil {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = ids
 	}
