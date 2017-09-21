@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	ErrNoMoreData              = errors.New("no more data")
+	ErrNoMoreData              = errors.New("NO_MORE_DATA")
 	ErrNotImplemented          = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound                = errors.New("NOT_FOUND")
 	ErrTimedOut                = errors.New("TIMED_OUT")
@@ -45,6 +45,7 @@ var (
 	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
 	ErrResourceUnavailable     = errors.New("RESOURCE_UNAVAILABLE")
 	ErrNoActiveSession         = errors.New("NO_ACTIVE_SESSION")
+	ErrPartiallyExecuted       = errors.New("PARTIALLY_EXECUTED")
 )
 
 // NewCGRError initialises a new CGRError
@@ -92,14 +93,14 @@ func NewErrServerError(err error) error {
 }
 
 // Centralized returns for APIs
-func APIErrorHandler(err error) error {
-	cgrErr, ok := err.(*CGRError)
+func APIErrorHandler(errIn error) (err error) {
+	cgrErr, ok := errIn.(*CGRError)
 	if !ok {
-		if err == ErrNotFound {
-			return err
-		} else {
-			return NewErrServerError(err)
+		err = errIn
+		if err != ErrNotFound {
+			err = NewErrServerError(err)
 		}
+		return
 	}
 	cgrErr.ActivateAPIError()
 	return cgrErr

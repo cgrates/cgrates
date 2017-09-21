@@ -120,8 +120,8 @@
 
 
 "stats": {
-	"enabled": false,
-	"store_interval": "0s",
+	"enabled": true,
+	"store_interval": "1s",
 },
 
 
