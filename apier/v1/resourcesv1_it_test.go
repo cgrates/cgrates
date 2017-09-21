@@ -127,6 +127,7 @@ func testV1RsFromFolder(t *testing.T) {
 	if err := rlsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(1000) * time.Millisecond)
 
 }
 
