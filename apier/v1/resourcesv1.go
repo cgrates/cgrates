@@ -102,7 +102,7 @@ func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *s
 	if missing := utils.MissingStructFields(res, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataDB.SetResourceProfile(res, utils.NonTransactional); err != nil {
+	if err := apierV1.DataDB.SetResourceProfile(res); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

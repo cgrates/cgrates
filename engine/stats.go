@@ -19,13 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
+	"reflect"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // NewStatService initializes a StatService
@@ -115,183 +121,81 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<StatS> failed saving StatQueue with ID: %s, error: %s",
 				sq.TenantID(), err.Error()))
-	} else {
-		*sq.dirty = false
+		return
 	}
+	*sq.dirty = false
 	return
 }
 
-/*
-// setQueue adds or modifies a queue into cache
-// sort will reorder the sS.queues
-func (ss *StatService) loadQueue(qID string) (q *StatQueue, err error) {
-	sq, err := sS.dataDB.GetStatsConfig(qID)
+// matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
+func (sS *StatService) matchingStatQueuesForEvent(ev *StatEvent) (sqs StatQueues, err error) {
+	if ev.Tenant == "" {
+		return nil, errors.New("missing Tenant information")
+	}
+	matchingSQs := make(map[string]*StatQueue)
+	sqIDs, err := matchingItemIDsForEvent(ev.Fields, sS.dm.DataDB(), utils.StatQueuesStringIndex+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
-	return NewStatQueue(sS.evCache, sS.ms, sq, sqSM)
-}
-
-func (ss *StatService) setQueue(q *StatQueue) {
-	sS.queuesCache[q.cfg.ID] = q
-	sS.queues = append(sS.queues, q)
-}
-
-// remQueue will remove a queue based on it's ID
-func (ss *StatService) remQueue(qID string) (si *StatQueue) {
-	si = sS.queuesCache[qID]
-	sS.queues.remWithID(qID)
-	delete(sS.queuesCache, qID)
-	return
-}
-
-// store stores the necessary storedMetrics to dataDB
-func (ss *StatService) storeMetrics() {
-	for _, si := range sS.queues {
-		if !si.cfg.Store || !si.dirty { // no need to save
+	lockIDs := utils.PrefixSliceItems(sqIDs.Slice(), utils.StatQueuesStringIndex)
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
+	for sqID := range sqIDs {
+		sqPrfl, err := sS.dm.DataDB().GetStatQueueProfile(ev.Tenant, sqID, false, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				continue
+			}
+			return nil, err
+		}
+		if sqPrfl.ActivationInterval != nil &&
+			!sqPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		if siSM := si.GetStoredMetrics(); siSM != nil {
-			if err := sS.dataDB.SetSQStoredMetrics(siSM); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<StatService> failed saving StoredMetrics for QueueID: %s, error: %s",
-						si.cfg.ID, err.Error()))
+		passAllFilters := true
+		for _, fltr := range sqPrfl.Filters {
+			if pass, err := fltr.Pass(ev, "", sS); err != nil {
+				return nil, err
+			} else if !pass {
+				passAllFilters = false
+				continue
 			}
 		}
-		// randomize the CPU load and give up thread control
-		time.Sleep(time.Duration(rand.Intn(1000)) * time.Nanosecond)
-	}
-	return
-}
-
-// dumpStoredMetrics regularly dumps metrics to dataDB
-func (ss *StatService) dumpStoredMetrics() {
-	for {
-		select {
-		case <-sS.stopStoring:
-			return
+		if !passAllFilters {
+			continue
 		}
-		sS.storeMetrics()
-		time.Sleep(sS.storeInterval)
-	}
-}
-
-// processEvent processes a StatsEvent through the queues and caches it when needed
-func (ss *StatService) processEvent(ev StatsEvent) (err error) {
-	evStatsID := ev.ID()
-	if evStatsID == "" { // ID is mandatory
-		return errors.New("missing ID field")
-	}
-	for _, stInst := range sS.queues {
-		if err := stInst.ProcessEvent(ev); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<StatService> QueueID: %s, ignoring event with ID: %s, error: %s",
-					stInst.cfg.ID, evStatsID, err.Error()))
+		s, err := sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, false, "")
+		if err != nil {
+			return nil, err
 		}
-		if stInst.cfg.Blocker {
+		if sqPrfl.Stored && s.dirty == nil {
+			s.dirty = utils.BoolPointer(false)
+		}
+		if sqPrfl.TTL >= 0 {
+			s.ttl = utils.DurationPointer(sqPrfl.TTL)
+		}
+		s.sqPrfl = sqPrfl
+		matchingSQs[sqPrfl.ID] = s
+	}
+	// All good, convert from Map to Slice so we can sort
+	sqs = make(StatQueues, len(matchingSQs))
+	i := 0
+	for _, s := range matchingSQs {
+		sqs[i] = s
+		i++
+	}
+	sqs.Sort()
+	for i, s := range sqs {
+		if s.sqPrfl.Blocker { // blocker will stop processing
+			sqs = sqs[:i+1]
 			break
 		}
 	}
 	return
 }
 
-// V1ProcessEvent implements StatV1 method for processing an Event
-func (ss *StatService) V1ProcessEvent(ev StatsEvent, reply *string) (err error) {
-	if err = sS.processEvent(ev); err == nil {
-		*reply = utils.OK
-	}
-	return
-}
-
-// V1GetQueueIDs returns list of queue IDs configured in the service
-func (ss *StatService) V1GetQueueIDs(ignored struct{}, reply *[]string) (err error) {
-	if len(sS.queuesCache) == 0 {
-		return utils.ErrNotFound
-	}
-	for k := range sS.queuesCache {
-		*reply = append(*reply, k)
-	}
-	return
-}
-
-// V1GetStringMetrics returns the metrics as string values
-func (ss *StatService) V1GetStringMetrics(queueID string, reply *map[string]string) (err error) {
-	sq, has := sS.queuesCache[queueID]
-	if !has {
-		return utils.ErrNotFound
-	}
-	metrics := make(map[string]string, len(sq.sqMetrics))
-	for metricID, metric := range sq.sqMetrics {
-		metrics[metricID] = metric.GetStringValue("")
-	}
-	*reply = metrics
-	return
-}
-
-// V1GetFloatMetrics returns the metrics as float64 values
-func (ss *StatService) V1GetFloatMetrics(queueID string, reply *map[string]float64) (err error) {
-	sq, has := sS.queuesCache[queueID]
-	if !has {
-		return utils.ErrNotFound
-	}
-	metrics := make(map[string]float64, len(sq.sqMetrics))
-	for metricID, metric := range sq.sqMetrics {
-		metrics[metricID] = metric.GetFloat64Value()
-	}
-	*reply = metrics
-	return
-}
-
-// ArgsLoadQueues are the arguments passed to V1LoadQueues
-type ArgsLoadQueues struct {
-	QueueIDs *[]string
-}
-
-// V1LoadQueues loads the queues specified by qIDs into the service
-// loads all if args.QueueIDs is nil
-func (ss *StatService) V1LoadQueues(args ArgsLoadQueues, reply *string) (err error) {
-	qIDs := args.QueueIDs
-	if qIDs == nil {
-		sqPrfxs, err := sS.dataDB.GetKeysForPrefix(utils.StatsConfigPrefix)
-		if err != nil {
-			return err
-		}
-		queueIDs := make([]string, len(sqPrfxs))
-		for i, prfx := range sqPrfxs {
-			queueIDs[i] = prfx[len(utils.StatsConfigPrefix):]
-		}
-		if len(queueIDs) != 0 {
-			qIDs = &queueIDs
-		}
-	}
-	if qIDs == nil || len(*qIDs) == 0 {
-		return utils.ErrNotFound
-	}
-	var sQs []*StatQueue // cache here so we lock only later when data available
-	for _, qID := range *qIDs {
-		if _, hasPrev := sS.queuesCache[qID]; hasPrev {
-			continue // don't overwrite previous, could be extended in the future by carefully checking cached events
-		}
-		if q, err := sS.loadQueue(qID); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<StatS> failed loading quueue with id: <%s>, err: <%s>",
-				q.cfg.ID, err.Error()))
-			continue
-		} else {
-			sQs = append(sQs, q)
-		}
-	}
-	sS.Lock()
-	for _, q := range sQs {
-		sS.setQueue(q)
-	}
-	sS.queues.Sort()
-	sS.Unlock()
-	*reply = utils.OK
-	return
-}
-
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-// here for testing purposes
+// here for cases when passing StatsService as rpccclient.RpcClientConnection (ie. in ResourceS)
 func (ss *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
@@ -316,4 +220,90 @@ func (ss *StatService) Call(serviceMethod string, args interface{}, reply interf
 	return err
 }
 
-*/
+// processEvent processes a new event, dispatching to matching queues
+// queues matching are also cached to speed up
+func (sS *StatService) processEvent(ev *StatEvent) (err error) {
+	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	matchSQs, err := sS.matchingStatQueuesForEvent(ev)
+	if err != nil {
+		return err
+	}
+	if len(matchSQs) == 0 {
+		return utils.ErrNotFound
+	}
+	var withErrors bool
+	for _, sq := range matchSQs {
+		if err = sq.ProcessEvent(ev); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<StatService> Queue: %s, ignoring event: %s, error: %s",
+					sq.TenantID(), ev.TenantID(), err.Error()))
+			withErrors = true
+		}
+		if sq.sqPrfl.Blocker {
+			break
+		}
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
+	return
+}
+
+// V1ProcessEvent implements StatV1 method for processing an Event
+func (sS *StatService) V1ProcessEvent(ev *StatEvent, reply *string) (err error) {
+	if err = sS.processEvent(ev); err == nil {
+		*reply = utils.OK
+	}
+	return
+}
+
+// V1StatQueuesForEvent implements StatV1 method for processing an Event
+func (sS *StatService) V1GetStatQueuesForEvent(ev *StatEvent, reply *StatQueues) (err error) {
+	var sQs StatQueues
+	if sQs, err = sS.matchingStatQueuesForEvent(ev); err == nil {
+		*reply = sQs
+	}
+	return
+}
+
+// V1GetQueueStringMetrics returns the metrics of a Queue as string values
+func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, false, "")
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	metrics := make(map[string]string, len(sq.SQMetrics))
+	for metricID, metric := range sq.SQMetrics {
+		metrics[metricID] = metric.GetStringValue("")
+	}
+	*reply = metrics
+	return
+}
+
+// V1GetFloatMetrics returns the metrics as float64 values
+func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, false, "")
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	metrics := make(map[string]float64, len(sq.SQMetrics))
+	for metricID, metric := range sq.SQMetrics {
+		metrics[metricID] = metric.GetFloat64Value()
+	}
+	*reply = metrics
+	return
+}

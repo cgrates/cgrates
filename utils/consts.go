@@ -243,7 +243,7 @@ const (
 	ResourcesPrefix               = "res_"
 	ResourceProfilesStringIndex   = "rsi_"
 	ResourceProfilesPrefix        = "rsp_"
-	StatsIndex                    = "sti_"
+	StatQueuesStringIndex         = "ssi_"
 	ThresholdsPrefix              = "ths_"
 	ThresholdsIndex               = "thi_"
 	TimingsPrefix                 = "tmg_"

@@ -45,9 +45,10 @@ func (self *ApierV1) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *u
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ats, err := self.StorDb.GetTPActionTriggers(attrs.TPid, attrs.ID); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(ats) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *ats[0]
 	}
@@ -65,9 +66,10 @@ func (self *ApierV1) GetTPActionTriggerIds(attrs AttrGetTPActionTriggerIds, repl
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPActionTriggers, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
-		return utils.NewErrServerError(err)
-	} else if ids == nil {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = ids
 	}

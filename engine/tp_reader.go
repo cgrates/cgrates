@@ -54,10 +54,10 @@ type TpReader struct {
 	users            map[string]*UserProfile
 	aliases          map[string]*Alias
 	resProfiles      map[string]map[string]*utils.TPResource
-	sqProfiles       map[string]*utils.TPStats
+	sqProfiles       map[string]map[string]*utils.TPStats
 	thresholds       map[string]*utils.TPThreshold
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
-	statQueues       []string          // IDs of statQueues which need creation based on statQueueProfiles
+	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 
 	revDests,
 	revAliases,
@@ -130,7 +130,7 @@ func (tpr *TpReader) Init() {
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resProfiles = make(map[string]map[string]*utils.TPResource)
-	tpr.sqProfiles = make(map[string]*utils.TPStats)
+	tpr.sqProfiles = make(map[string]map[string]*utils.TPStats)
 	tpr.thresholds = make(map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -1629,16 +1629,22 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) error {
 	if err != nil {
 		return err
 	}
-	mapSTs := make(map[string]*utils.TPStats)
+	mapSTs := make(map[string]map[string]*utils.TPStats)
 	for _, st := range tps {
-		mapSTs[st.ID] = st
+		if _, has := mapSTs[st.Tenant]; !has {
+			mapSTs[st.Tenant] = make(map[string]*utils.TPStats)
+		}
+		mapSTs[st.Tenant][st.ID] = st
 	}
 	tpr.sqProfiles = mapSTs
-	for sqID := range mapSTs {
-		if has, err := tpr.dataStorage.HasData(utils.StatQueuePrefix, sqID); err != nil {
-			return err
-		} else if !has {
-			tpr.statQueues = append(tpr.statQueues, sqID)
+	for tenant, mpID := range mapSTs {
+		for sqID := range mpID {
+			sqTntID := &utils.TenantID{tenant, sqID}
+			if has, err := tpr.dataStorage.HasData(utils.StatQueuePrefix, sqTntID.TenantID()); err != nil {
+				return err
+			} else if !has {
+				tpr.statQueues = append(tpr.statQueues, sqTntID)
+			}
 		}
 	}
 	return nil
@@ -1964,7 +1970,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if err != nil {
 				return err
 			}
-			if err = tpr.dataStorage.SetResourceProfile(rsp, utils.NonTransactional); err != nil {
+			if err = tpr.dataStorage.SetResourceProfile(rsp); err != nil {
 				return err
 			}
 			if verbose {
@@ -1986,28 +1992,30 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if verbose {
 		log.Print("StatQueueProfiles:")
 	}
-	for _, tpST := range tpr.sqProfiles {
-		st, err := APItoStats(tpST, tpr.timezone)
-		if err != nil {
-			return err
-		}
-		if err = tpr.dataStorage.SetStatQueueProfile(st); err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", st.ID)
+	for _, mpID := range tpr.sqProfiles {
+		for _, tpST := range mpID {
+			st, err := APItoStats(tpST, tpr.timezone)
+			if err != nil {
+				return err
+			}
+			if err = tpr.dataStorage.SetStatQueueProfile(st); err != nil {
+				return err
+			}
+			if verbose {
+				log.Print("\t", st.TenantID())
+			}
 		}
 	}
 	if verbose {
 		log.Print("StatQueues:")
 	}
-	for _, sqID := range tpr.statQueues {
-		if err = tpr.dataStorage.SetStoredStatQueue(&StoredStatQueue{Tenant: "", ID: sqID,
+	for _, sqTntID := range tpr.statQueues {
+		if err = tpr.dataStorage.SetStoredStatQueue(&StoredStatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID,
 			SQMetrics: make(map[string][]byte)}); err != nil {
 			return
 		}
 		if verbose {
-			log.Print("\t", sqID)
+			log.Print("\t", sqTntID.TenantID())
 		}
 	}
 	if verbose {
@@ -2078,7 +2086,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 					}
 				}
 				if verbose {
-					log.Printf("Indexed ResourceProfile tenant: %s keys: %+v", tenant, rlIdxr.ChangedKeys().Slice())
+					log.Printf("Indexed ResourceProfile tenant: %s, keys: %+v", tenant, rlIdxr.ChangedKeys().Slice())
 				}
 				if err := rlIdxr.StoreIndexes(); err != nil {
 					return err
@@ -2089,22 +2097,24 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if verbose {
 				log.Print("Indexing stats")
 			}
-			stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.StatsIndex)
-			if err != nil {
-				return err
-			}
-			for _, tpST := range tpr.sqProfiles {
-				if st, err := APItoStats(tpST, tpr.timezone); err != nil {
+			for tenant, mpID := range tpr.sqProfiles {
+				stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.StatQueuesStringIndex+tenant)
+				if err != nil {
 					return err
-				} else {
-					stIdxr.IndexFilters(st.ID, st.Filters)
 				}
-			}
-			if verbose {
-				log.Printf("Indexed Stats keys: %+v", stIdxr.ChangedKeys().Slice())
-			}
-			if err := stIdxr.StoreIndexes(); err != nil {
-				return err
+				for _, tpST := range mpID {
+					if st, err := APItoStats(tpST, tpr.timezone); err != nil {
+						return err
+					} else {
+						stIdxr.IndexFilters(st.ID, st.Filters)
+					}
+				}
+				if verbose {
+					log.Printf("Indexed Stats tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
+				}
+				if err := stIdxr.StoreIndexes(); err != nil {
+					return err
+				}
 			}
 		}
 		if len(tpr.thresholds) > 0 {
@@ -2123,7 +2133,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 			if verbose {
-				log.Printf("Indexed Stats keys: %+v", stIdxr.ChangedKeys().Slice())
+				log.Printf("Indexed Threshold keys: %+v", stIdxr.ChangedKeys().Slice())
 			}
 			if err := stIdxr.StoreIndexes(); err != nil {
 				return err

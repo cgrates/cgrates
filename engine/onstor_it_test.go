@@ -797,7 +797,7 @@ func testOnStorITCacheResourceProfile(t *testing.T) {
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if err := onStor.SetResourceProfile(rCfg, utils.NonTransactional); err != nil {
+	if err := onStor.SetResourceProfile(rCfg); err != nil {
 		t.Error(err)
 	}
 	expectedR := []string{"rsp_cgrates.org:RL_TEST"}
@@ -1803,7 +1803,7 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetResourceProfile(rL, utils.NonTransactional); err != nil {
+	if err := onStor.SetResourceProfile(rL); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); err != nil {
@@ -1962,7 +1962,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 		Store:              true,
 		Thresholds:         []string{},
 	}
-	if _, rcvErr := onStor.GetStatQueueProfile(sq.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
@@ -1974,7 +1974,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if rcv, err := onStor.GetStatQueueProfile(sq.ID); err != nil {
+	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
@@ -1982,13 +1982,13 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.RemStatQueueProfile(sq.ID); err != nil {
+	if err := onStor.RemStatQueueProfile(sq.Tenant, sq.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if _, rcvErr := onStor.GetStatQueueProfile(sq.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

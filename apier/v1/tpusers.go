@@ -68,9 +68,10 @@ func (self *ApierV1) GetTPUserIds(attrs AttrGetTPUserIds, reply *[]string) error
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPUsers, utils.TPDistinctIds{"tenant", "user_name"}, nil, &attrs.Paginator); err != nil {
-		return utils.NewErrServerError(err)
-	} else if ids == nil {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = ids
 	}

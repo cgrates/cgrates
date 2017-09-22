@@ -560,30 +560,28 @@ func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcCl
 	internalRsChan <- rsV1
 }
 
-/*
 // startStatService fires up the StatS
 func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
-	dataDB engine.DataDB, ms engine.Marshaler, server *utils.Server, exitChan chan bool) {
-	sts, err := stats.NewStatService(dataDB, ms, cfg.StatSCfg().StoreInterval)
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("Starting Stat service"))
+	utils.Logger.Info(fmt.Sprintf("Starting Stat Service"))
 	go func() {
-		if err := sts.ListenAndServe(exitChan); err != nil {
+		if err := sS.ListenAndServe(exitChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<StatS> Error: %s listening for packets", err.Error()))
 		}
-		sts.Shutdown()
+		sS.Shutdown()
 		exitChan <- true
 		return
 	}()
-	stsV1 := v1.NewStatSV1(sts)
+	stsV1 := v1.NewStatSV1(sS)
 	server.RpcRegister(stsV1)
 	internalStatSChan <- stsV1
 }
-*/
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
@@ -703,6 +701,7 @@ func main() {
 	var dataDB engine.DataDB
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
+	var dm *engine.DataManager
 
 	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled || cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerEnabled {
 		dataDB, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
@@ -736,6 +735,8 @@ func main() {
 		}
 	}
 
+	dm = engine.NewDataManager(dataDB)
+	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.RoundingDecimals)
 	engine.SetRpSubjectPrefixMatching(cfg.RpSubjectPrefixMatching)
 	engine.SetLcrSubjectPrefixMatching(cfg.LcrSubjectPrefixMatching)
@@ -854,9 +855,9 @@ func main() {
 			internalStatSChan, cfg, dataDB, server, exitChan)
 	}
 
-	//if cfg.StatSCfg().Enabled {
-	//	go startStatService(internalStatSChan, cfg, dataDB, ms, server, exitChan)
-	//}
+	if cfg.StatSCfg().Enabled {
+		go startStatService(internalStatSChan, cfg, dm, server, exitChan)
+	}
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan, internalHistorySChan,

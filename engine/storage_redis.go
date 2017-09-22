@@ -1382,7 +1382,7 @@ func (rs *RedisStorage) GetResourceProfile(tenant, id string, skipCache bool, tr
 	return
 }
 
-func (rs *RedisStorage) SetResourceProfile(rsp *ResourceProfile, transactionID string) error {
+func (rs *RedisStorage) SetResourceProfile(rsp *ResourceProfile) error {
 	result, err := rs.ms.Marshal(rsp)
 	if err != nil {
 		return err
@@ -1587,14 +1587,24 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-// GetStatsConfig retrieves a StatsConfig from dataDB
-func (rs *RedisStorage) GetStatQueueProfile(sqID string) (sq *StatQueueProfile, err error) {
-	key := utils.StatQueueProfilePrefix + sqID
+// GetStatQueueProfile retrieves a StatQueueProfile from dataDB
+func (rs *RedisStorage) GetStatQueueProfile(tenant string, id string, skipCache bool, transactionID string) (sq *StatQueueProfile, err error) {
+	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*StatQueueProfile), nil
+		}
+	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil {
 			err = utils.ErrNotFound
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
+
 		return
 	}
 	if err = rs.ms.Unmarshal(values, &sq); err != nil {
@@ -1605,6 +1615,7 @@ func (rs *RedisStorage) GetStatQueueProfile(sqID string) (sq *StatQueueProfile, 
 			return
 		}
 	}
+	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1615,13 +1626,14 @@ func (rs *RedisStorage) SetStatQueueProfile(sq *StatQueueProfile) (err error) {
 	if err != nil {
 		return
 	}
-	return rs.Cmd("SET", utils.StatQueueProfilePrefix+sq.ID, result).Err
+	return rs.Cmd("SET", utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), result).Err
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (rs *RedisStorage) RemStatQueueProfile(sqID string) (err error) {
-	key := utils.StatQueueProfilePrefix + sqID
+func (rs *RedisStorage) RemStatQueueProfile(tenant, id string, transactionID string) (err error) {
+	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	err = rs.Cmd("DEL", key).Err
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

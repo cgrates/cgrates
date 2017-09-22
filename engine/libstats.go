@@ -43,6 +43,10 @@ type StatQueueProfile struct {
 	Weight             float64
 }
 
+func (sqp *StatQueueProfile) TenantID() string {
+	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
+}
+
 // StatEvent is an event processed by StatService
 type StatEvent struct {
 	Tenant string
@@ -147,7 +151,8 @@ type StatQueue struct {
 	}
 	SQMetrics map[string]StatMetric
 	sqPrfl    *StatQueueProfile
-	dirty     *bool // needs save
+	dirty     *bool          // needs save
+	ttl       *time.Duration // timeToLeave, picked on each init
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
@@ -156,7 +161,7 @@ func (sq *StatQueue) TenantID() string {
 }
 
 // ProcessEvent processes a StatEvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(ev StatEvent) (err error) {
+func (sq *StatQueue) ProcessEvent(ev *StatEvent) (err error) {
 	sq.remExpired()
 	sq.remOnQueueLength()
 	sq.addStatEvent(ev)
@@ -204,7 +209,7 @@ func (sq *StatQueue) remOnQueueLength() {
 }
 
 // addStatEvent computes metrics for an event
-func (sq *StatQueue) addStatEvent(ev StatEvent) {
+func (sq *StatQueue) addStatEvent(ev *StatEvent) {
 	for metricID, metric := range sq.SQMetrics {
 		if err := metric.AddEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",

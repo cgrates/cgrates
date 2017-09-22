@@ -324,18 +324,19 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 			}
 		}
 	}
-
-	for k, st := range loader.sqProfiles {
-		rcv, err := loader.dataStorage.GetStatQueueProfile(k)
-		if err != nil {
-			t.Error("Failed GetStatsQueue: ", err.Error())
-		}
-		sts, err := APItoStats(st, "UTC")
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(sts, rcv) {
-			t.Errorf("Expecting: %v, received: %v", sts, rcv)
+	for _, mpIDs := range loader.sqProfiles {
+		for _, st := range mpIDs {
+			rcv, err := loader.dataStorage.GetStatQueueProfile(st.Tenant, st.ID, true, utils.NonTransactional)
+			if err != nil {
+				t.Errorf("Failed GetStatsQueue, tenant: %s, id: %s,  error: %s ", st.Tenant, st.ID, err.Error())
+			}
+			sts, err := APItoStats(st, "UTC")
+			if err != nil {
+				t.Error(err)
+			}
+			if !reflect.DeepEqual(sts, rcv) {
+				t.Errorf("Expecting: %v, received: %v", sts, rcv)
+			}
 		}
 	}
 

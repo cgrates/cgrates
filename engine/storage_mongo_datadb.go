@@ -57,11 +57,11 @@ const (
 	colLht   = "load_history"
 	colVer   = "versions"
 	colRsP   = "resource_profiles"
-	colSqp   = "stat_queue_profiles"
 	colRFI   = "request_filter_indexes"
 	colTmg   = "timings"
 	colRes   = "resources"
 	colStQs  = "statqueues"
+	colSqp   = "statqueue_profiles"
 )
 
 var (
@@ -633,20 +633,20 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.ResourcesPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
-	case utils.StatQueuePrefix:
+	case utils.StatQueuePrefix: // used with CDRStatS
 		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.StatQueuePrefix+idResult.Id)
 		}
 	case utils.StatQueueProfilePrefix:
-		iter := db.C(colSqp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colSqp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.StatQueueProfilePrefix+idResult.Id)
+			result = append(result, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.AccountActionPlansPrefix:
-		iter := db.C(colAAp).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colAAp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.AccountActionPlansPrefix+keyResult.Key)
+			result = append(result, utils.AccountActionPlansPrefix+idResult.Id)
 		}
 	case utils.TimingsPrefix:
 		iter := db.C(colTmg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
@@ -1861,7 +1861,7 @@ func (ms *MongoStorage) GetResourceProfile(tenant, id string, skipCache bool, tr
 	return
 }
 
-func (ms *MongoStorage) SetResourceProfile(rp *ResourceProfile, transactionID string) (err error) {
+func (ms *MongoStorage) SetResourceProfile(rp *ResourceProfile) (err error) {
 	session, col := ms.conn(colRsP)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": rp.Tenant, "id": rp.ID}, rp)
@@ -2018,14 +2018,25 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 	return
 }
 
-// GetStatsQueue retrieves a StatsQueue from dataDB
-func (ms *MongoStorage) GetStatQueueProfile(sqID string) (sq *StatQueueProfile, err error) {
-	session, col := ms.conn(utils.StatQueueProfilePrefix)
+// GetStatQueueProfile retrieves a StatQueueProfile from dataDB
+func (ms *MongoStorage) GetStatQueueProfile(tenant string, id string,
+	skipCache bool, transactionID string) (sq *StatQueueProfile, err error) {
+	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*StatQueueProfile), nil
+		}
+	}
+	session, col := ms.conn(colSqp)
 	defer session.Close()
 	sq = new(StatQueueProfile)
-	if err = col.Find(bson.M{"id": sqID}).One(&sq); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
@@ -2034,25 +2045,28 @@ func (ms *MongoStorage) GetStatQueueProfile(sqID string) (sq *StatQueueProfile, 
 			return
 		}
 	}
+	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
 
 // SetStatsQueue stores a StatsQueue into DataDB
 func (ms *MongoStorage) SetStatQueueProfile(sq *StatQueueProfile) (err error) {
-	session, col := ms.conn(utils.StatQueueProfilePrefix)
+	session, col := ms.conn(colSqp)
 	defer session.Close()
-	_, err = col.UpsertId(bson.M{"id": sq.ID}, sq)
+	_, err = col.UpsertId(bson.M{"tennat": sq.Tenant, "id": sq.ID}, sq)
 	return
 }
 
 // RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MongoStorage) RemStatQueueProfile(sqID string) (err error) {
-	session, col := ms.conn(utils.StatQueueProfilePrefix)
-	err = col.Remove(bson.M{"id": sqID})
+func (ms *MongoStorage) RemStatQueueProfile(tenant, id string, transactionID string) (err error) {
+	session, col := ms.conn(colSqp)
+	err = col.Remove(bson.M{"tenant": tenant, "id": id})
 	if err != nil {
 		return err
 	}
 	session.Close()
+	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
 	return
 }
 

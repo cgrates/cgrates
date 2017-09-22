@@ -48,9 +48,10 @@ func (self *ApierV1) GetTPDestinationRate(attrs AttrGetTPDestinationRate, reply 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if drs, err := self.StorDb.GetTPDestinationRates(attrs.TPid, attrs.ID, &attrs.Paginator); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(drs) == 0 {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = *drs[0]
 	}
@@ -68,9 +69,10 @@ func (self *ApierV1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]st
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDestinationRates, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
-		return utils.NewErrServerError(err)
-	} else if ids == nil {
-		return utils.ErrNotFound
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
 	} else {
 		*reply = ids
 	}
