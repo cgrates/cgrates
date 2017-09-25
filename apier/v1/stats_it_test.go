@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package v1
 
-/*
 import (
 	"math/rand"
 	"net/rpc"
@@ -43,16 +42,22 @@ var (
 	statsDelay   int
 )
 
-var evs = []engine.StatsEvent{
-	engine.StatsEvent{
-		utils.ID:          "event1",
-		utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()},
-	engine.StatsEvent{
-		utils.ID:          "event2",
-		utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()},
-	engine.StatsEvent{
-		utils.ID:         "event3",
-		utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()},
+var evs = []*engine.StatEvent{
+	&engine.StatEvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Fields: map[string]interface{}{
+			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}},
+	&engine.StatEvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Fields: map[string]interface{}{
+			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}},
+	&engine.StatEvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Fields: map[string]interface{}{
+			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}},
 }
 
 func init() {
@@ -66,15 +71,15 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSRpcConn,
 	testV1STSFromFolder,
 	testV1STSGetStats,
-	testV1STSProcessEvent,
-	testV1STSGetStatQueueProfileBeforeSet,
-	testV1STSSetStatQueueProfile,
-	testV1STSGetStatQueueProfileAfterSet,
-	testV1STSUpdateStatQueueProfile,
-	testV1STSGetStatQueueProfileAfterUpdate,
-	testV1STSRemoveStatQueueProfile,
-	testV1STSGetStatQueueProfileAfterRemove,
-	testV1STSStopEngine,
+	//testV1STSProcessEvent,
+	//testV1STSGetStatQueueProfileBeforeSet,
+	//testV1STSSetStatQueueProfile,
+	//testV1STSGetStatQueueProfileAfterSet,
+	//testV1STSUpdateStatQueueProfile,
+	//testV1STSGetStatQueueProfileAfterUpdate,
+	//testV1STSRemoveStatQueueProfile,
+	//testV1STSGetStatQueueProfileAfterRemove,
+	//testV1STSStopEngine,
 }
 
 //Test start here
@@ -128,46 +133,34 @@ func testV1STSRpcConn(t *testing.T) {
 
 func testV1STSFromFolder(t *testing.T) {
 	var reply string
-	time.Sleep(time.Duration(2000) * time.Millisecond)
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := stsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(1000) * time.Millisecond)
 }
 
 func testV1STSGetStats(t *testing.T) {
 	var reply []string
-	// first attempt should be empty since there is no queue in cache yet
-	if err := stsV1Rpc.Call("StatSV1.GetQueueIDs", struct{}{}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	var metrics map[string]string
-	if err := stsV1Rpc.Call("StatSV1.GetStringMetrics", "Stats1", &metrics); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	var replyStr string
-	if err := stsV1Rpc.Call("StatSV1.LoadQueues", nil, &replyStr); err != nil {
-		t.Error(err)
-	} else if replyStr != utils.OK {
-		t.Errorf("reply received: %s", replyStr)
-	}
-	expectedIDs := []string{"Stats1"}
-	if err := stsV1Rpc.Call("StatSV1.GetQueueIDs", struct{}{}, &reply); err != nil {
+	expectedIDs := []string{"STATS_1"}
+	if err := stsV1Rpc.Call("StatSV1.GetQueueIDs", "cgrates.org", &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
 	}
+	var metrics map[string]string
 	expectedMetrics := map[string]string{
 		utils.MetaASR: utils.NOT_AVAILABLE,
 		utils.MetaACD: "",
 	}
-	if err := stsV1Rpc.Call("StatSV1.GetStringMetrics", "Stats1", &metrics); err != nil {
+	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics",
+		&utils.TenantID{"cgrates.org", expectedIDs[0]}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 }
+
+/*
 
 func testV1STSProcessEvent(t *testing.T) {
 	var reply string
@@ -203,7 +196,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.MetaACD: "",
 	}
 	var metrics map[string]string
-	if err := stsV1Rpc.Call("StatSV1.GetStringMetrics", "Stats1", &metrics); err != nil {
+	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", "Stats1", &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -337,11 +330,11 @@ func BenchmarkStatSV1SetEvent(b *testing.B) {
 	}
 }
 
-// BenchmarkStatSV1GetStringMetrics 	   20000	     94607 ns/op
-func BenchmarkStatSV1GetStringMetrics(b *testing.B) {
+// BenchmarkStatSV1GetQueueStringMetrics 	   20000	     94607 ns/op
+func BenchmarkStatSV1GetQueueStringMetrics(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var metrics map[string]string
-		if err := stsV1Rpc.Call("StatSV1.GetStringMetrics", "Stats1",
+		if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", "Stats1",
 			&metrics); err != nil {
 			b.Error(err)
 		}

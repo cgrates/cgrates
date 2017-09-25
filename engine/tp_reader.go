@@ -34,6 +34,7 @@ type TpReader struct {
 	tpid             string
 	timezone         string
 	dataStorage      DataDB
+	dm               *DataManager
 	lr               LoadReader
 	actions          map[string][]*Action
 	actionPlans      map[string]*ActionPlan
@@ -69,6 +70,7 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
 		tpid:        tpid,
 		timezone:    timezone,
 		dataStorage: db,
+		dm:          NewDataManager(db),
 		lr:          lr,
 	}
 	tpr.Init()
@@ -2010,8 +2012,16 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("StatQueues:")
 	}
 	for _, sqTntID := range tpr.statQueues {
-		if err = tpr.dataStorage.SetStoredStatQueue(&StoredStatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID,
-			SQMetrics: make(map[string][]byte)}); err != nil {
+		sq := &StatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID,
+			SQMetrics: make(map[string]StatMetric)}
+		for _, metricID := range tpr.sqProfiles[sqTntID.Tenant][sqTntID.ID].Metrics {
+			if metric, err := NewStatMetric(metricID); err != nil {
+				return err
+			} else {
+				sq.SQMetrics[metricID] = metric
+			}
+		}
+		if err = tpr.dm.SetStatQueue(sq); err != nil {
 			return
 		}
 		if verbose {

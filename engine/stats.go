@@ -307,3 +307,18 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 	*reply = metrics
 	return
 }
+
+// V1GetQueueIDs returns list of queueIDs registered for a tenant
+func (sS *StatService) V1GetQueueIDs(tenant string, qIDs *[]string) (err error) {
+	prfx := utils.StatQueuePrefix + tenant + utils.CONCATENATED_KEY_SEP
+	keys, err := sS.dm.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*qIDs = retIDs
+	return
+}
