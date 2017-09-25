@@ -110,6 +110,9 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheDerivedChargers: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
+		utils.CacheTimings: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+			Precache: utils.BoolPointer(false)},
 		utils.CacheResourceProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
@@ -118,14 +121,12 @@ func TestCacheJsonCfg(t *testing.T) {
 			Precache: utils.BoolPointer(false)},
 		utils.CacheEventResources: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer("1m"), Static_ttl: utils.BoolPointer(false)},
-		utils.CacheTimings: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-			Precache: utils.BoolPointer(false)},
-		utils.CacheStatSQueues: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+		utils.CacheStatQueueProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer("1m"), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheEventQueues: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer("1m"), Static_ttl: utils.BoolPointer(false)},
+		utils.CacheStatQueues: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer("1m"), Static_ttl: utils.BoolPointer(false),
+			Precache: utils.BoolPointer(false)},
 	}
 
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {

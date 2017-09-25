@@ -73,7 +73,6 @@ func TestTPITPG(t *testing.T) {
 }
 
 func testTPInitCfg(t *testing.T) {
-	utils.Logger.Debug("init config")
 	var err error
 	tpCfgPath = path.Join(tpDataDir, "conf", "samples", tpConfigDIR)
 	tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath)
@@ -92,7 +91,6 @@ func testTPInitCfg(t *testing.T) {
 
 // Wipe out the cdr database
 func testTPResetStorDb(t *testing.T) {
-	utils.Logger.Debug("ResetStorDB")
 	if err := engine.InitStorDb(tpCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +98,6 @@ func testTPResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testTPStartEngine(t *testing.T) {
-	utils.Logger.Debug("StartEngine")
 	if _, err := engine.StopStartEngine(tpCfgPath, tpDelay); err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +105,6 @@ func testTPStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testTPRpcConn(t *testing.T) {
-	utils.Logger.Debug("RPCCONN")
 	var err error
 	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -149,7 +145,6 @@ func testTPExportTPToFolder(t *testing.T) {
 }
 
 func testTPKillEngine(t *testing.T) {
-	utils.Logger.Debug("KillEngine")
 	if err := engine.KillEngine(tpDelay); err != nil {
 		t.Error(err)
 	}

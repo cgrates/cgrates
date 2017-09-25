@@ -154,7 +154,7 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *StatEvent) (sqs StatQueues
 		}
 		passAllFilters := true
 		for _, fltr := range sqPrfl.Filters {
-			if pass, err := fltr.Pass(ev, "", sS); err != nil {
+			if pass, err := fltr.Pass(ev.Fields, "", sS); err != nil {
 				return nil, err
 			} else if !pass {
 				passAllFilters = false
