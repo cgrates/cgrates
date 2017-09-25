@@ -100,6 +100,11 @@ func (stsv1 *StatSV1) Call(serviceMethod string, args interface{}, reply interfa
 	return err
 }
 
+// GetQueueIDs returns list of queueIDs registered for a tenant
+func (stsv1 *StatSV1) GetQueueIDs(tenant string, qIDs *[]string) error {
+	return stsv1.sS.V1GetQueueIDs(tenant, qIDs)
+}
+
 // ProcessEvent returns processes a new Event
 func (stsv1 *StatSV1) ProcessEvent(ev *engine.StatEvent, reply *string) error {
 	return stsv1.sS.V1ProcessEvent(ev, reply)
