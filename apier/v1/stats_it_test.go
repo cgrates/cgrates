@@ -71,7 +71,7 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSRpcConn,
 	testV1STSFromFolder,
 	testV1STSGetStats,
-	//testV1STSProcessEvent,
+	testV1STSProcessEvent,
 	//testV1STSGetStatQueueProfileBeforeSet,
 	//testV1STSSetStatQueueProfile,
 	//testV1STSGetStatQueueProfileAfterSet,
@@ -79,7 +79,7 @@ var sTestsStatSV1 = []func(t *testing.T){
 	//testV1STSGetStatQueueProfileAfterUpdate,
 	//testV1STSRemoveStatQueueProfile,
 	//testV1STSGetStatQueueProfileAfterRemove,
-	//testV1STSStopEngine,
+	testV1STSStopEngine,
 }
 
 //Test start here
@@ -150,7 +150,7 @@ func testV1STSGetStats(t *testing.T) {
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
 		utils.MetaASR: utils.NOT_AVAILABLE,
-		utils.MetaACD: "",
+		utils.MetaACD: utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics",
 		&utils.TenantID{"cgrates.org", expectedIDs[0]}, &metrics); err != nil {
@@ -160,32 +160,42 @@ func testV1STSGetStats(t *testing.T) {
 	}
 }
 
-/*
-
 func testV1STSProcessEvent(t *testing.T) {
 	var reply string
 	if err := stsV1Rpc.Call("StatSV1.ProcessEvent",
-		engine.StatsEvent{
-			utils.ID:          "event1",
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)},
+		engine.StatEvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Fields: map[string]interface{}{
+				utils.ACCOUNT:     "1001",
+				utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.USAGE:       time.Duration(125 * time.Second)}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
 	if err := stsV1Rpc.Call("StatSV1.ProcessEvent",
-		engine.StatsEvent{
-			utils.ID:          "event2",
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)},
+		engine.StatEvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Fields: map[string]interface{}{
+				utils.ACCOUNT:     "1002",
+				utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.USAGE:       time.Duration(45 * time.Second)}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
 	if err := stsV1Rpc.Call("StatSV1.ProcessEvent",
-		engine.StatsEvent{
-			utils.ID:         "event3",
-			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)},
+		engine.StatEvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Fields: map[string]interface{}{
+				utils.ACCOUNT:    "1002",
+				utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.USAGE:      0}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -193,15 +203,17 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	expectedMetrics := map[string]string{
 		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "",
+		utils.MetaACD: "0",
 	}
 	var metrics map[string]string
-	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", "Stats1", &metrics); err != nil {
+	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{"cgrates.org", "STATS_1"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 }
+
+/*
 
 func testV1STSGetStatQueueProfileBeforeSet(t *testing.T) {
 	var reply *engine.StatQueueProfile
@@ -300,6 +312,7 @@ func testV1STSGetStatQueueProfileAfterRemove(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/
 
 func testV1STSStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
@@ -307,6 +320,7 @@ func testV1STSStopEngine(t *testing.T) {
 	}
 }
 
+/*
 // BenchmarkStatSV1SetEvent         	    5000	    263437 ns/op
 func BenchmarkStatSV1SetEvent(b *testing.B) {
 	if _, err := engine.StopStartEngine(stsV1CfgPath, 1000); err != nil {

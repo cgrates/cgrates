@@ -59,8 +59,8 @@ var (
 		CacheResources:           ResourcesPrefix,
 		CacheEventResources:      EventResourcesPrefix,
 		CacheTimings:             TimingsPrefix,
-		CacheStatSQueues:         META_NONE,
-		CacheEventQueues:         META_NONE,
+		CacheStatQueueProfiles:   StatQueueProfilePrefix,
+		CacheStatQueues:          StatQueuePrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )
@@ -446,9 +446,9 @@ const (
 	CostSource                   = "CostSource"
 	ExtraInfo                    = "ExtraInfo"
 	MetaPrefix                   = "*"
-	CacheStatSQueues             = "stats_queues"
-	CacheEventQueues             = "event_queues"
 	CacheEventResources          = "event_resources"
+	CacheStatQueueProfiles       = "statqueue_profiles"
+	CacheStatQueues              = "statqueues"
 	EventResourcesPrefix         = "ers_"
 	MetaSysLog                   = "*syslog"
 	MetaStdLog                   = "*stdout"
