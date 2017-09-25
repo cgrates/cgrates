@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -51,7 +50,7 @@ type StatMetric interface {
 }
 
 func NewASR() (StatMetric, error) {
-	return new(StatASR), nil
+	return &StatASR{Events: make(map[string]bool)}, nil
 }
 
 // ASR implements AverageSuccessRatio metric
@@ -135,38 +134,78 @@ func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 }
 
 func NewACD() (StatMetric, error) {
-	return new(StatACD), nil
+	return &StatACD{Events: make(map[string]float64)}, nil
 }
 
 // ACD implements AverageCallDuration metric
 type StatACD struct {
-	Sum   time.Duration
-	Count int
+	Sum    float64
+	Count  float64
+	Events map[string]float64 // map[EventTenantID]Duration
+	val    *float64           // cached ACD value
+}
+
+// getValue returns asr.val
+func (acd *StatACD) getValue() float64 {
+	if acd.val == nil {
+		if acd.Count == 0 {
+			acd.val = utils.Float64Pointer(float64(STATS_NA))
+		} else {
+			acd.val = utils.Float64Pointer(utils.Round(acd.Sum/acd.Count,
+				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+		}
+	}
+	return *acd.val
 }
 
 func (acd *StatACD) GetStringValue(fmtOpts string) (val string) {
-	return
+	if acd.Count == 0 {
+		return utils.NOT_AVAILABLE
+	}
+	return fmt.Sprintf("%+v", acd.getValue())
 }
 
 func (acd *StatACD) GetValue() (v interface{}) {
-	return
+	return acd.getValue()
 }
 
 func (acd *StatACD) GetFloat64Value() (v float64) {
-	return float64(STATS_NA)
+	return acd.getValue()
 }
 
 func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
+	var answered float64
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
+		return err
+	} else if !at.IsZero() {
+		duration, _ := ev.Usage(config.CgrConfig().DefaultTimezone)
+		answered = duration.Seconds()
+		acd.Sum += duration.Seconds()
+	}
+	acd.Events[ev.TenantID()] = answered
+	acd.Count += 1
+	acd.val = nil
 	return
 }
 
 func (acd *StatACD) RemEvent(evTenantID string) (err error) {
+	duration, has := acd.Events[evTenantID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if duration != 0 {
+		acd.Sum -= duration
+	}
+	acd.Count -= 1
+	delete(acd.Events, evTenantID)
+	acd.val = nil
 	return
 }
 
 func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return
+	return ms.Marshal(acd)
 }
 func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return
+	return ms.Unmarshal(marshaled, acd)
 }
