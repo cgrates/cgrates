@@ -20,9 +20,9 @@ package engine
 
 import (
 	"fmt"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 // NewStatMetric instantiates the StatMetric
@@ -31,6 +31,7 @@ func NewStatMetric(metricID string) (sm StatMetric, err error) {
 	metrics := map[string]func() (StatMetric, error){
 		utils.MetaASR: NewASR,
 		utils.MetaACD: NewACD,
+		utils.MetaTCD: NewTCD,
 	}
 	if _, has := metrics[metricID]; !has {
 		return nil, fmt.Errorf("unsupported metric: %s", metricID)
@@ -134,24 +135,24 @@ func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 }
 
 func NewACD() (StatMetric, error) {
-	return &StatACD{Events: make(map[string]float64)}, nil
+	return &StatACD{Events: make(map[string]time.Duration)}, nil
 }
 
 // ACD implements AverageCallDuration metric
 type StatACD struct {
-	Sum    float64
+	Sum    time.Duration
 	Count  float64
-	Events map[string]float64 // map[EventTenantID]Duration
-	val    *float64           // cached ACD value
+	Events map[string]time.Duration // map[EventTenantID]Duration
+	val    *float64                 // cached ACD value
 }
 
-// getValue returns asr.val
+// getValue returns acr.val
 func (acd *StatACD) getValue() float64 {
 	if acd.val == nil {
 		if acd.Count == 0 {
 			acd.val = utils.Float64Pointer(float64(STATS_NA))
 		} else {
-			acd.val = utils.Float64Pointer(utils.Round(acd.Sum/acd.Count,
+			acd.val = utils.Float64Pointer(utils.Round(acd.Sum.Seconds()/acd.Count,
 				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -174,16 +175,20 @@ func (acd *StatACD) GetFloat64Value() (v float64) {
 }
 
 func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
-	var answered float64
+	var value time.Duration
 	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
-		duration, _ := ev.Usage(config.CgrConfig().DefaultTimezone)
-		answered = duration.Seconds()
-		acd.Sum += duration.Seconds()
+		if duration, err := ev.Usage(config.CgrConfig().DefaultTimezone); err != nil &&
+			err != utils.ErrNotFound {
+			return err
+		} else {
+			value = duration
+			acd.Sum += duration
+		}
 	}
-	acd.Events[ev.TenantID()] = answered
+	acd.Events[ev.TenantID()] = value
 	acd.Count += 1
 	acd.val = nil
 	return
@@ -208,4 +213,87 @@ func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acd)
+}
+
+func NewTCD() (StatMetric, error) {
+	return &StatTCD{Events: make(map[string]time.Duration)}, nil
+}
+
+// TCD implements TotalCallDuration metric
+type StatTCD struct {
+	Sum    time.Duration
+	Count  float64
+	Events map[string]time.Duration // map[EventTenantID]Duration
+	val    *float64                 // cached TCD value
+}
+
+// getValue returns tcd.val
+func (tcd *StatTCD) getValue() float64 {
+	if tcd.val == nil {
+		if tcd.Count == 0 {
+			tcd.val = utils.Float64Pointer(float64(STATS_NA))
+		} else {
+			tcd.val = utils.Float64Pointer(utils.Round(tcd.Sum.Seconds(),
+				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+		}
+	}
+	return *tcd.val
+}
+
+func (tcd *StatTCD) GetStringValue(fmtOpts string) (val string) {
+	if tcd.Count == 0 {
+		return utils.NOT_AVAILABLE
+	}
+	return fmt.Sprintf("%+v", tcd.getValue())
+}
+
+func (tcd *StatTCD) GetValue() (v interface{}) {
+	return tcd.getValue()
+}
+
+func (tcd *StatTCD) GetFloat64Value() (v float64) {
+	return tcd.getValue()
+}
+
+func (tcd *StatTCD) AddEvent(ev *StatEvent) (err error) {
+	var value time.Duration
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
+		return err
+	} else if !at.IsZero() {
+		if duration, err := ev.Usage(config.CgrConfig().DefaultTimezone); err != nil &&
+			err != utils.ErrNotFound {
+			return err
+		} else {
+			value = duration
+			tcd.Sum += duration
+		}
+
+	}
+	tcd.Events[ev.TenantID()] = value
+	tcd.Count += 1
+	tcd.val = nil
+	return
+}
+
+func (tcd *StatTCD) RemEvent(evTenantID string) (err error) {
+	duration, has := tcd.Events[evTenantID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if duration != 0 {
+		tcd.Sum -= duration
+	}
+	tcd.Count -= 1
+	delete(tcd.Events, evTenantID)
+	tcd.val = nil
+	return
+}
+
+func (tcd *StatTCD) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(tcd)
+}
+
+func (tcd *StatTCD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, tcd)
 }

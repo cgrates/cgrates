@@ -131,26 +131,101 @@ func TestACDGetValue(t *testing.T) {
 			"Usage":      time.Duration(10 * time.Second)}}
 	acd.AddEvent(ev)
 	if v := acd.GetValue(); v != 10.0 {
-		t.Errorf("wrong asr value: %f", v)
+		t.Errorf("wrong acd value: %f", v)
 	}
 	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acd.AddEvent(ev2)
 	acd.AddEvent(ev3)
 	if v := acd.GetValue(); v != 3.33333 {
-		t.Errorf("wrong asr value: %f", v)
+		t.Errorf("wrong acd value: %f", v)
 	}
 	acd.RemEvent(ev3.TenantID())
 	if v := acd.GetValue(); v != 5.0 {
-		t.Errorf("wrong asr value: %f", v)
+		t.Errorf("wrong acd value: %f", v)
 	}
 	acd.RemEvent(ev.TenantID())
 	if v := acd.GetValue(); v != 0.0 {
-		t.Errorf("wrong asr value: %f", v)
+		t.Errorf("wrong acd value: %f", v)
 	}
 	acd.RemEvent(ev2.TenantID())
 	if v := acd.GetValue(); v != -1.0 {
-		t.Errorf("wrong asr value: %f", v)
+		t.Errorf("wrong acd value: %f", v)
+	}
+
+}
+
+func TestTCDGetStringValue(t *testing.T) {
+	tcd, _ := NewTCD()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"Usage":      time.Duration(10 * time.Second),
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		}}
+	if strVal := tcd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	tcd.AddEvent(ev)
+	if strVal := tcd.GetStringValue(""); strVal != "10" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Fields: map[string]interface{}{
+			"Usage":      time.Duration(10 * time.Second),
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		}}
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	tcd.AddEvent(ev2)
+	tcd.AddEvent(ev3)
+	if strVal := tcd.GetStringValue(""); strVal != "20" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	tcd.RemEvent(ev2.TenantID())
+	if strVal := tcd.GetStringValue(""); strVal != "10" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	tcd.RemEvent(ev.TenantID())
+	if strVal := tcd.GetStringValue(""); strVal != "0" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	tcd.RemEvent(ev3.TenantID())
+	if strVal := tcd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+
+}
+
+func TestTCDGetValue(t *testing.T) {
+	tcd, _ := NewTCD()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":      time.Duration(10 * time.Second)}}
+	tcd.AddEvent(ev)
+	if v := tcd.GetValue(); v != 10.0 {
+		t.Errorf("wrong tcd value: %f", v)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":      time.Duration(5 * time.Second)}}
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	tcd.AddEvent(ev2)
+	tcd.AddEvent(ev3)
+	if v := tcd.GetValue(); v != 15.000000 {
+		t.Errorf("wrong tcd value: %f", v)
+	}
+	tcd.RemEvent(ev.TenantID())
+	if v := tcd.GetValue(); v != 5.000000 {
+		t.Errorf("wrong tcd value: %f", v)
+	}
+	tcd.RemEvent(ev2.TenantID())
+	if v := tcd.GetValue(); v != 0.0 {
+		t.Errorf("wrong tcd value: %f", v)
+	}
+	tcd.RemEvent(ev3.TenantID())
+	if v := tcd.GetValue(); v != -1.0 {
+		t.Errorf("wrong tcd value: %f", v)
 	}
 
 }
