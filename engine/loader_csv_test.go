@@ -274,7 +274,7 @@ cgrates.org,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,
 `
 	stats = `
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
-cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd;*acc,true,true,20,THRESH1;THRESH2
+cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd,true,true,20,THRESH1;THRESH2
 `
 	thresholds = `
 #Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],ThresholdType[5],ThresholdValue[6],MinItems[7],Recurrent[8],MinSleep[9],Blocker[10],Stored[11],Weight[12],ActionIDs[13]
@@ -1452,7 +1452,7 @@ func TestLoadStats(t *testing.T) {
 				},
 				QueueLength: 100,
 				TTL:         "1s",
-				Metrics:     []string{"*asr", "*acd", "*acc"},
+				Metrics:     []string{"*asr", "*acd"},
 				Thresholds:  []string{"THRESH1", "THRESH2"},
 				Blocker:     true,
 				Stored:      true,
