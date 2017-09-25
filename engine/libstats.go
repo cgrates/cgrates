@@ -75,6 +75,22 @@ func (se StatEvent) AnswerTime(timezone string) (at time.Time, err error) {
 	return utils.ParseTimeDetectLayout(atStr, timezone)
 }
 
+// Usage returns the Usage of StatEvent
+func (se StatEvent) Usage(timezone string) (at time.Duration, err error) {
+	usIf, has := se.Fields[utils.USAGE]
+	if !has {
+		return at, utils.ErrNotFound
+	}
+	if us, canCast := usIf.(time.Duration); canCast {
+		return us, nil
+	}
+	usStr, canCast := usIf.(string)
+	if !canCast {
+		return at, errors.New("cannot cast to string")
+	}
+	return utils.ParseDurationWithSecs(usStr)
+}
+
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
 func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
