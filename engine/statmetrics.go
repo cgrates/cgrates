@@ -141,19 +141,18 @@ func NewACD() (StatMetric, error) {
 // ACD implements AverageCallDuration metric
 type StatACD struct {
 	Sum    time.Duration
-	Count  float64
+	Count  int64
 	Events map[string]time.Duration // map[EventTenantID]Duration
-	val    *float64                 // cached ACD value
+	val    *time.Duration           // cached ACD value
 }
 
 // getValue returns acr.val
-func (acd *StatACD) getValue() float64 {
+func (acd *StatACD) getValue() time.Duration {
 	if acd.val == nil {
 		if acd.Count == 0 {
-			acd.val = utils.Float64Pointer(float64(STATS_NA))
+			acd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
-			acd.val = utils.Float64Pointer(utils.Round(acd.Sum.Seconds()/acd.Count,
-				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+			acd.val = utils.DurationPointer(time.Duration(acd.Sum.Nanoseconds() / acd.Count))
 		}
 	}
 	return *acd.val
@@ -171,7 +170,10 @@ func (acd *StatACD) GetValue() (v interface{}) {
 }
 
 func (acd *StatACD) GetFloat64Value() (v float64) {
-	return acd.getValue()
+	if acd.Count == 0 {
+		return -1.0
+	}
+	return acd.getValue().Seconds()
 }
 
 func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
@@ -222,19 +224,18 @@ func NewTCD() (StatMetric, error) {
 // TCD implements TotalCallDuration metric
 type StatTCD struct {
 	Sum    time.Duration
-	Count  float64
+	Count  int64
 	Events map[string]time.Duration // map[EventTenantID]Duration
-	val    *float64                 // cached TCD value
+	val    *time.Duration           // cached TCD value
 }
 
 // getValue returns tcd.val
-func (tcd *StatTCD) getValue() float64 {
+func (tcd *StatTCD) getValue() time.Duration {
 	if tcd.val == nil {
 		if tcd.Count == 0 {
-			tcd.val = utils.Float64Pointer(float64(STATS_NA))
+			tcd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
-			tcd.val = utils.Float64Pointer(utils.Round(tcd.Sum.Seconds(),
-				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+			tcd.val = utils.DurationPointer(time.Duration(tcd.Sum.Nanoseconds()))
 		}
 	}
 	return *tcd.val
@@ -252,7 +253,10 @@ func (tcd *StatTCD) GetValue() (v interface{}) {
 }
 
 func (tcd *StatTCD) GetFloat64Value() (v float64) {
-	return tcd.getValue()
+	if tcd.Count == 0 {
+		return -1.0
+	}
+	return tcd.getValue().Seconds()
 }
 
 func (tcd *StatTCD) AddEvent(ev *StatEvent) (err error) {
