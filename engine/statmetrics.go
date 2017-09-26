@@ -323,7 +323,7 @@ func (acc *StatACC) getValue() float64 {
 		if acc.Count == 0 {
 			acc.val = utils.Float64Pointer(float64(STATS_NA))
 		} else {
-			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / acc.Count * 100),
+			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / acc.Count),
 				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -334,7 +334,8 @@ func (acc *StatACC) GetStringValue(fmtOpts string) (val string) {
 	if acc.Count == 0 {
 		return utils.NOT_AVAILABLE
 	}
-	return fmt.Sprintf("%s", strconv.FormatFloat(acc.getValue(), 'E', -1, 64))
+	return strconv.FormatFloat(acc.getValue(), 'f', -1, 64)
+
 }
 
 func (acc *StatACC) GetValue() (v interface{}) {
@@ -416,7 +417,7 @@ func (tcc *StatTCC) GetStringValue(fmtOpts string) (val string) {
 	if tcc.Count == 0 {
 		return utils.NOT_AVAILABLE
 	}
-	return fmt.Sprintf("%s", strconv.FormatFloat(tcc.getValue(), 'E', -1, 64))
+	return strconv.FormatFloat(tcc.getValue(), 'f', -1, 64)
 }
 
 func (tcc *StatTCC) GetValue() (v interface{}) {

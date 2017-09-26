@@ -454,3 +454,205 @@ func TestTCDGetValue(t *testing.T) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 }
+
+func TestACCGetStringValue(t *testing.T) {
+	acc, _ := NewACC()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       12.3}}
+	if strVal := acc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	acc.AddEvent(ev)
+	if strVal := acc.GetStringValue(""); strVal != "12.3" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	acc.AddEvent(ev2)
+	acc.AddEvent(ev3)
+	if strVal := acc.GetStringValue(""); strVal != "4.1" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	acc.RemEvent(ev3.TenantID())
+	if strVal := acc.GetStringValue(""); strVal != "6.15" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       5.6}}
+	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       1.2}}
+	acc.AddEvent(ev4)
+	acc.AddEvent(ev5)
+	acc.RemEvent(ev.TenantID())
+	if strVal := acc.GetStringValue(""); strVal != "2.26667" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	acc.RemEvent(ev2.TenantID())
+	if strVal := acc.GetStringValue(""); strVal != "3.4" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	acc.RemEvent(ev4.TenantID())
+	acc.RemEvent(ev5.TenantID())
+	if strVal := acc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+}
+
+func TestACCGetValue(t *testing.T) {
+	acc, _ := NewACC()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       "12.3"}}
+	if strVal := acc.GetValue(); strVal != -1.0 {
+		t.Errorf("wrong acc value: %v", strVal)
+	}
+	acc.AddEvent(ev)
+	if strVal := acc.GetValue(); strVal != 12.3 {
+		t.Errorf("wrong acc value: %v", strVal)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	acc.AddEvent(ev2)
+	acc.AddEvent(ev3)
+	if strVal := acc.GetValue(); strVal != 4.1 {
+		t.Errorf("wrong acc value: %v", strVal)
+	}
+	acc.RemEvent(ev3.TenantID())
+	if strVal := acc.GetValue(); strVal != 6.15 {
+		t.Errorf("wrong acc value: %v", strVal)
+	}
+	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       "5.6"}}
+	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       "1.2"}}
+	acc.AddEvent(ev4)
+	acc.AddEvent(ev5)
+	acc.RemEvent(ev.TenantID())
+	if strVal := acc.GetValue(); strVal != 2.26667 {
+		t.Errorf("wrong acc value: %v", strVal)
+	}
+	acc.RemEvent(ev2.TenantID())
+	if strVal := acc.GetValue(); strVal != 3.4 {
+		t.Errorf("wrong acc value: %v", strVal)
+	}
+	acc.RemEvent(ev4.TenantID())
+	acc.RemEvent(ev5.TenantID())
+	if strVal := acc.GetValue(); strVal != -1.0 {
+		t.Errorf("wrong acc value: %v", strVal)
+	}
+}
+
+func TestTCCGetStringValue(t *testing.T) {
+	tcc, _ := NewTCC()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       12.3}}
+	if strVal := tcc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	tcc.AddEvent(ev)
+	if strVal := tcc.GetStringValue(""); strVal != "12.3" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       5.7}}
+	tcc.AddEvent(ev2)
+	tcc.AddEvent(ev3)
+	if strVal := tcc.GetStringValue(""); strVal != "18" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	tcc.RemEvent(ev3.TenantID())
+	if strVal := tcc.GetStringValue(""); strVal != "12.3" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       5.6}}
+	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       1.2}}
+	tcc.AddEvent(ev4)
+	tcc.AddEvent(ev5)
+	tcc.RemEvent(ev.TenantID())
+	if strVal := tcc.GetStringValue(""); strVal != "6.8" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	tcc.RemEvent(ev2.TenantID())
+	if strVal := tcc.GetStringValue(""); strVal != "6.8" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	tcc.RemEvent(ev4.TenantID())
+	tcc.RemEvent(ev5.TenantID())
+	if strVal := tcc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+}
+
+func TestTCCGetValue(t *testing.T) {
+	tcc, _ := NewTCC()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       "12.3"}}
+	if strVal := tcc.GetValue(); strVal != -1.0 {
+		t.Errorf("wrong tcc value: %v", strVal)
+	}
+	tcc.AddEvent(ev)
+	if strVal := tcc.GetValue(); strVal != 12.3 {
+		t.Errorf("wrong tcc value: %v", strVal)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       1.2}}
+	tcc.AddEvent(ev2)
+	tcc.AddEvent(ev3)
+	if strVal := tcc.GetValue(); strVal != 13.5 {
+		t.Errorf("wrong tcc value: %v", strVal)
+	}
+	tcc.RemEvent(ev3.TenantID())
+	if strVal := tcc.GetValue(); strVal != 12.3 {
+		t.Errorf("wrong tcc value: %v", strVal)
+	}
+	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       "5.6"}}
+	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       "1.2"}}
+	tcc.AddEvent(ev4)
+	tcc.AddEvent(ev5)
+	tcc.RemEvent(ev.TenantID())
+	if strVal := tcc.GetValue(); strVal != 6.8 {
+		t.Errorf("wrong tcc value: %v", strVal)
+	}
+	tcc.RemEvent(ev2.TenantID())
+	if strVal := tcc.GetValue(); strVal != 6.8 {
+		t.Errorf("wrong tcc value: %v", strVal)
+	}
+	tcc.RemEvent(ev4.TenantID())
+	tcc.RemEvent(ev5.TenantID())
+	if strVal := tcc.GetValue(); strVal != -1.0 {
+		t.Errorf("wrong tcc value: %v", strVal)
+	}
+}

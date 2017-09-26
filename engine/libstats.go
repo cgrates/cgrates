@@ -96,8 +96,8 @@ func (se StatEvent) Cost(timezone string) (cs float64, err error) {
 	if !has {
 		return cs, utils.ErrNotFound
 	}
-	if cs, canCast := csIf.(float64); canCast {
-		return cs, nil
+	if val, canCast := csIf.(float64); canCast {
+		return val, nil
 	}
 	csStr, canCast := csIf.(string)
 	if !canCast {
