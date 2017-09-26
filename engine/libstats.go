@@ -21,10 +21,10 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"sort"
-	"time"
-
 	"github.com/cgrates/cgrates/utils"
+	"sort"
+	"strconv"
+	"time"
 )
 
 // StatsConfig represents the configuration of a  StatsInstance in StatS
@@ -88,6 +88,22 @@ func (se StatEvent) Usage(timezone string) (at time.Duration, err error) {
 		return at, errors.New("cannot cast to string")
 	}
 	return utils.ParseDurationWithSecs(usStr)
+}
+
+// Cost returns the Cost of StatEvent
+func (se StatEvent) Cost(timezone string) (cs float64, err error) {
+	csIf, has := se.Fields[utils.COST]
+	if !has {
+		return cs, utils.ErrNotFound
+	}
+	if cs, canCast := csIf.(float64); canCast {
+		return cs, nil
+	}
+	csStr, canCast := csIf.(string)
+	if !canCast {
+		return cs, errors.New("cannot cast to string")
+	}
+	return strconv.ParseFloat(csStr, 64)
 }
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue

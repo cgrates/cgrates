@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"strconv"
 	"time"
 )
 
@@ -32,6 +33,8 @@ func NewStatMetric(metricID string) (sm StatMetric, err error) {
 		utils.MetaASR: NewASR,
 		utils.MetaACD: NewACD,
 		utils.MetaTCD: NewTCD,
+		utils.MetaACC: NewACC,
+		utils.MetaTCC: NewTCC,
 	}
 	if _, has := metrics[metricID]; !has {
 		return nil, fmt.Errorf("unsupported metric: %s", metricID)
@@ -300,4 +303,168 @@ func (tcd *StatTCD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 
 func (tcd *StatTCD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcd)
+}
+
+func NewACC() (StatMetric, error) {
+	return &StatACC{Events: make(map[string]float64)}, nil
+}
+
+// ACC implements AverageCallCost metric
+type StatACC struct {
+	Sum    float64
+	Count  float64
+	Events map[string]float64 // map[EventTenantID]Cost
+	val    *float64           // cached ACC value
+}
+
+// getValue returns tcd.val
+func (acc *StatACC) getValue() float64 {
+	if acc.val == nil {
+		if acc.Count == 0 {
+			acc.val = utils.Float64Pointer(float64(STATS_NA))
+		} else {
+			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / acc.Count * 100),
+				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+		}
+	}
+	return *acc.val
+}
+
+func (acc *StatACC) GetStringValue(fmtOpts string) (val string) {
+	if acc.Count == 0 {
+		return utils.NOT_AVAILABLE
+	}
+	return fmt.Sprintf("%s", strconv.FormatFloat(acc.getValue(), 'E', -1, 64))
+}
+
+func (acc *StatACC) GetValue() (v interface{}) {
+	return acc.getValue()
+}
+
+func (acc *StatACC) GetFloat64Value() (v float64) {
+	return acc.getValue()
+}
+
+func (acc *StatACC) AddEvent(ev *StatEvent) (err error) {
+	var value float64
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
+		return err
+	} else if !at.IsZero() {
+		if cost, err := ev.Cost(config.CgrConfig().DefaultTimezone); err != nil &&
+			err != utils.ErrNotFound {
+			return err
+		} else if cost >= 0 {
+			value = cost
+			acc.Sum += cost
+		}
+	}
+	acc.Events[ev.TenantID()] = value
+	acc.Count += 1
+	acc.val = nil
+	return
+}
+
+func (acc *StatACC) RemEvent(evTenantID string) (err error) {
+	cost, has := acc.Events[evTenantID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if cost != 0 {
+		acc.Sum -= cost
+	}
+	acc.Count -= 1
+	delete(acc.Events, evTenantID)
+	acc.val = nil
+	return
+}
+
+func (acc *StatACC) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(acc)
+}
+
+func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, acc)
+}
+
+func NewTCC() (StatMetric, error) {
+	return &StatTCC{Events: make(map[string]float64)}, nil
+}
+
+// TCC implements TotalCallCost metric
+type StatTCC struct {
+	Sum    float64
+	Count  float64
+	Events map[string]float64 // map[EventTenantID]Cost
+	val    *float64           // cached TCC value
+}
+
+// getValue returns tcd.val
+func (tcc *StatTCC) getValue() float64 {
+	if tcc.val == nil {
+		if tcc.Count == 0 {
+			tcc.val = utils.Float64Pointer(float64(STATS_NA))
+		} else {
+			tcc.val = utils.Float64Pointer(utils.Round(tcc.Sum,
+				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+		}
+	}
+	return *tcc.val
+}
+
+func (tcc *StatTCC) GetStringValue(fmtOpts string) (val string) {
+	if tcc.Count == 0 {
+		return utils.NOT_AVAILABLE
+	}
+	return fmt.Sprintf("%s", strconv.FormatFloat(tcc.getValue(), 'E', -1, 64))
+}
+
+func (tcc *StatTCC) GetValue() (v interface{}) {
+	return tcc.getValue()
+}
+
+func (tcc *StatTCC) GetFloat64Value() (v float64) {
+	return tcc.getValue()
+}
+
+func (tcc *StatTCC) AddEvent(ev *StatEvent) (err error) {
+	var value float64
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
+		return err
+	} else if !at.IsZero() {
+		if cost, err := ev.Cost(config.CgrConfig().DefaultTimezone); err != nil &&
+			err != utils.ErrNotFound {
+			return err
+		} else if cost >= 0 {
+			value = cost
+			tcc.Sum += cost
+		}
+	}
+	tcc.Events[ev.TenantID()] = value
+	tcc.Count += 1
+	tcc.val = nil
+	return
+}
+
+func (tcc *StatTCC) RemEvent(evTenantID string) (err error) {
+	cost, has := tcc.Events[evTenantID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if cost != 0 {
+		tcc.Sum -= cost
+	}
+	tcc.Count -= 1
+	delete(tcc.Events, evTenantID)
+	tcc.val = nil
+	return
+}
+
+func (tcc *StatTCC) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(tcc)
+}
+
+func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, tcc)
 }

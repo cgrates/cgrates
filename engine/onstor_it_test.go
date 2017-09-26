@@ -1959,7 +1959,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 		QueueLength:        2,
 		TTL:                timeTTL,
 		Metrics:            []string{},
-		Store:              true,
+		Stored:             true,
 		Thresholds:         []string{},
 	}
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
