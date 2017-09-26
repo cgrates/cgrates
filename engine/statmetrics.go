@@ -181,8 +181,7 @@ func (acd *StatACD) GetFloat64Value() (v float64) {
 
 func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
 	var value time.Duration
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if duration, err := ev.Usage(config.CgrConfig().DefaultTimezone); err != nil &&
@@ -264,8 +263,7 @@ func (tcd *StatTCD) GetFloat64Value() (v float64) {
 
 func (tcd *StatTCD) AddEvent(ev *StatEvent) (err error) {
 	var value time.Duration
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if duration, err := ev.Usage(config.CgrConfig().DefaultTimezone); err != nil &&
@@ -348,8 +346,7 @@ func (acc *StatACC) GetFloat64Value() (v float64) {
 
 func (acc *StatACC) AddEvent(ev *StatEvent) (err error) {
 	var value float64
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if cost, err := ev.Cost(config.CgrConfig().DefaultTimezone); err != nil &&
@@ -430,8 +427,7 @@ func (tcc *StatTCC) GetFloat64Value() (v float64) {
 
 func (tcc *StatTCC) AddEvent(ev *StatEvent) (err error) {
 	var value float64
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if cost, err := ev.Cost(config.CgrConfig().DefaultTimezone); err != nil &&

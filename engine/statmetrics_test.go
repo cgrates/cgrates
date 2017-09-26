@@ -119,7 +119,7 @@ func TestACDGetStringValue(t *testing.T) {
 	acd, _ := NewACD()
 	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Fields: map[string]interface{}{
-			"Usage":      time.Duration(10 * time.Second),
+			utils.USAGE:  time.Duration(10 * time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		}}
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
