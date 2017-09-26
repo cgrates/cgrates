@@ -60,7 +60,7 @@ const (
 	colRFI   = "request_filter_indexes"
 	colTmg   = "timings"
 	colRes   = "resources"
-	colStQs  = "statqueues"
+	colSqs   = "statqueues"
 	colSqp   = "statqueue_profiles"
 )
 
@@ -325,10 +325,10 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.CDR_STATS_PREFIX:           colCrs,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
-		utils.ResourceProfilesPrefix:     colRsP,
-		utils.StatQueuePrefix:            colStq,
-		utils.TimingsPrefix:              colTmg,
-		utils.ResourcesPrefix:            colRes,
+		//utils.CDR_STATS_QUEUE_PREFIX:            colStq,
+		utils.TimingsPrefix:          colTmg,
+		utils.ResourcesPrefix:        colRes,
+		utils.ResourceProfilesPrefix: colRsP,
 	}
 	name, ok = colMap[prefix]
 	return
@@ -551,7 +551,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 	}
 	category = prefix[:keyLen] // prefix lenght
-	subject = fmt.Sprintf("^%s", prefix[keyLen:])
+	tntID := utils.NewTenantID(prefix[keyLen:])
+	subject = fmt.Sprintf("^%s", prefix[keyLen:]) // old way, no tenant support
 	session := ms.session.Copy()
 	defer session.Close()
 	db := session.DB(ms.db)
@@ -633,10 +634,17 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.ResourcesPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
-	case utils.StatQueuePrefix: // used with CDRStatS
-		iter := db.C(colStq).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+	case utils.StatQueuePrefix:
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colSqs).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.StatQueuePrefix+idResult.Id)
+			result = append(result, utils.StatQueuePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.StatQueueProfilePrefix:
 		iter := db.C(colSqp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
@@ -2072,7 +2080,7 @@ func (ms *MongoStorage) RemStatQueueProfile(tenant, id string, transactionID str
 
 // GetStoredStatQueue retrieves a StoredStatQueue
 func (ms *MongoStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error) {
-	session, col := ms.conn(colStQs)
+	session, col := ms.conn(colSqs)
 	defer session.Close()
 	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
@@ -2085,7 +2093,7 @@ func (ms *MongoStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQue
 
 // SetStoredStatQueue stores the metrics for a StoredStatQueue
 func (ms *MongoStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
-	session, col := ms.conn(colStQs)
+	session, col := ms.conn(colSqs)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": sq.Tenant, "id": sq.ID}, sq)
 	return
@@ -2093,7 +2101,7 @@ func (ms *MongoStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
 
 // RemStatQueue removes stored metrics for a StoredStatQueue
 func (ms *MongoStorage) RemStoredStatQueue(tenant, id string) (err error) {
-	session, col := ms.conn(colStQs)
+	session, col := ms.conn(colSqs)
 	defer session.Close()
 	err = col.Remove(bson.M{"tenant": tenant, "id": id})
 	if err == mgo.ErrNotFound {

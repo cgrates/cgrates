@@ -72,12 +72,9 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSFromFolder,
 	testV1STSGetStats,
 	testV1STSProcessEvent,
-	//testV1STSGetStatQueueProfileBeforeSet,
-	//testV1STSSetStatQueueProfile,
-	//testV1STSGetStatQueueProfileAfterSet,
-	//testV1STSUpdateStatQueueProfile,
-	//testV1STSGetStatQueueProfileAfterUpdate,
-	//testV1STSRemoveStatQueueProfile,
+	testV1STSSetStatQueueProfile,
+	testV1STSUpdateStatQueueProfile,
+	testV1STSRemoveStatQueueProfile,
 	//testV1STSGetStatQueueProfileAfterRemove,
 	testV1STSStopEngine,
 }
@@ -92,6 +89,7 @@ func TestSTSV1ITMySQL(t *testing.T) {
 
 func TestSTSV1ITMongo(t *testing.T) {
 	stsV1ConfDIR = "tutmongo"
+	time.Sleep(time.Duration(5 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsStatSV1 {
 		t.Run(stsV1ConfDIR, stest)
 	}
@@ -203,7 +201,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	expectedMetrics := map[string]string{
 		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "0s",
+		utils.MetaACD: "170s",
 	}
 	var metrics map[string]string
 	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{"cgrates.org", "STATS_1"}, &metrics); err != nil {
@@ -213,18 +211,16 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 }
 
-/*
-
-func testV1STSGetStatQueueProfileBeforeSet(t *testing.T) {
+func testV1STSSetStatQueueProfile(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{"cgrates.org", "TEST_PROFILE1"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-}
-
-func testV1STSSetStatQueueProfile(t *testing.T) {
 	statConfig = &engine.StatQueueProfile{
-		ID: "SCFG1",
+		Tenant: "cgrates.org",
+		ID:     "TEST_PROFILE1",
 		Filters: []*engine.RequestFilter{
 			&engine.RequestFilter{
 				Type:      "type",
@@ -239,7 +235,6 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
 		Metrics:     []string{"MetricValue", "MetricValueTwo"},
-		Store:       false,
 		Thresholds:  []string{"Val1", "Val2"},
 		Blocker:     true,
 		Stored:      true,
@@ -251,11 +246,8 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-}
-
-func testV1STSGetStatQueueProfileAfterSet(t *testing.T) {
-	var reply *engine.StatQueueProfile
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err != nil {
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{"cgrates.org", "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
@@ -286,11 +278,9 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-}
-
-func testV1STSGetStatQueueProfileAfterUpdate(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err != nil {
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{statConfig.Tenant, statConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
@@ -299,20 +289,18 @@ func testV1STSGetStatQueueProfileAfterUpdate(t *testing.T) {
 
 func testV1STSRemoveStatQueueProfile(t *testing.T) {
 	var resp string
-	if err := stsV1Rpc.Call("ApierV1.RemStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &resp); err != nil {
+	if err := stsV1Rpc.Call("ApierV1.RemStatQueueProfile",
+		&utils.TenantID{statConfig.Tenant, statConfig.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-}
-
-func testV1STSGetStatQueueProfileAfterRemove(t *testing.T) {
-	var reply *engine.StatQueueProfile
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile", &AttrGetStatsCfg{ID: "SCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var sqp *engine.StatQueueProfile
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{statConfig.Tenant, statConfig.ID}, sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
-*/
 
 func testV1STSStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {

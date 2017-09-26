@@ -22,6 +22,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -49,6 +50,8 @@ func (apierV1 *ApierV1) SetStatQueueProfile(sqp *engine.StatQueueProfile, reply 
 	if err := apierV1.DataDB.SetStatQueueProfile(sqp); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sqp.Tenant, sqp.ID),
+		true, utils.NonTransactional) // Temporary work around util proper cacheDataFromDB will be implemented
 	*reply = utils.OK
 	return nil
 }
