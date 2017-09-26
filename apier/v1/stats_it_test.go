@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"math/rand"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -27,10 +30,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -47,12 +46,14 @@ var evs = []*engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Fields: map[string]interface{}{
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}},
+			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		}},
 	&engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Fields: map[string]interface{}{
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}},
+			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		}},
 	&engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
@@ -151,9 +152,12 @@ func testV1STSGetStats(t *testing.T) {
 	expectedMetrics := map[string]string{
 		utils.MetaASR: utils.NOT_AVAILABLE,
 		utils.MetaACD: utils.NOT_AVAILABLE,
+		utils.MetaTCC: utils.NOT_AVAILABLE,
+		utils.MetaTCD: utils.NOT_AVAILABLE,
+		utils.MetaACC: utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics",
-		&utils.TenantID{"cgrates.org", expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -162,51 +166,52 @@ func testV1STSGetStats(t *testing.T) {
 
 func testV1STSProcessEvent(t *testing.T) {
 	var reply string
-	if err := stsV1Rpc.Call("StatSV1.ProcessEvent",
-		engine.StatEvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Fields: map[string]interface{}{
-				utils.ACCOUNT:     "1001",
-				utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.USAGE:       time.Duration(125 * time.Second)}},
-		&reply); err != nil {
+	ev1 := engine.StatEvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Fields: map[string]interface{}{
+			utils.ACCOUNT:     "1001",
+			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.USAGE:       time.Duration(135 * time.Second),
+			utils.COST:        123.0}}
+	if err := stsV1Rpc.Call("StatSV1.ProcessEvent", &ev1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
-	if err := stsV1Rpc.Call("StatSV1.ProcessEvent",
-		engine.StatEvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Fields: map[string]interface{}{
-				utils.ACCOUNT:     "1002",
-				utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.USAGE:       time.Duration(45 * time.Second)}},
-		&reply); err != nil {
+	ev2 := engine.StatEvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Fields: map[string]interface{}{
+			utils.ACCOUNT:     "1002",
+			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.USAGE:       time.Duration(45 * time.Second)}}
+	if err := stsV1Rpc.Call("StatSV1.ProcessEvent", &ev2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
-	if err := stsV1Rpc.Call("StatSV1.ProcessEvent",
-		engine.StatEvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Fields: map[string]interface{}{
-				utils.ACCOUNT:    "1002",
-				utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.USAGE:      0}},
-		&reply); err != nil {
+	ev3 := engine.StatEvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Fields: map[string]interface{}{
+			utils.ACCOUNT:    "1002",
+			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.USAGE:      0}}
+	if err := stsV1Rpc.Call("StatSV1.ProcessEvent", &ev3, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
 	expectedMetrics := map[string]string{
 		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "0s",
+		utils.MetaACD: "1m30s",
+		utils.MetaACC: "61.5",
+		utils.MetaTCD: "3m0s",
+		utils.MetaTCC: "123",
 	}
 	var metrics map[string]string
-	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{"cgrates.org", "STATS_1"}, &metrics); err != nil {
+	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
