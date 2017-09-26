@@ -46,19 +46,24 @@ var evs = []*engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Fields: map[string]interface{}{
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-		}},
+			utils.ACCOUNT:     "1001",
+			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.USAGE:       time.Duration(135 * time.Second),
+			utils.COST:        123.0}},
 	&engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Fields: map[string]interface{}{
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-		}},
+			utils.ACCOUNT:     "1002",
+			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.USAGE:       time.Duration(45 * time.Second)}},
 	&engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Fields: map[string]interface{}{
-			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}},
+			utils.ACCOUNT:    "1002",
+			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.USAGE:      0}},
 }
 
 func init() {
@@ -188,7 +193,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
-	ev3 := engine.StatEvent{
+	ev3 := &engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Fields: map[string]interface{}{
@@ -312,9 +317,9 @@ func testV1STSStopEngine(t *testing.T) {
 	}
 }
 
-/*
+// Run benchmarks with: <go test -tags=integration -run=TestSTSV1 -bench=.>
 // BenchmarkStatSV1SetEvent         	    5000	    263437 ns/op
-func BenchmarkStatSV1SetEvent(b *testing.B) {
+func BenchmarkSTSV1SetEvent(b *testing.B) {
 	if _, err := engine.StopStartEngine(stsV1CfgPath, 1000); err != nil {
 		b.Fatal(err)
 	}
@@ -336,4 +341,14 @@ func BenchmarkStatSV1SetEvent(b *testing.B) {
 	}
 }
 
-// BenchmarkStatSV1GetQueueStringMetrics 	   20000	  
+// BenchmarkStatSV1GetQueueStringMetrics 	   20000	     94607 ns/op
+func BenchmarkSTSV1GetQueueStringMetrics(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		var metrics map[string]string
+		if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics",
+			&utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"},
+			&metrics); err != nil {
+			b.Error(err)
+		}
+	}
+}
