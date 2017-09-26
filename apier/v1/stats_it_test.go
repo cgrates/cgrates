@@ -203,7 +203,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	expectedMetrics := map[string]string{
 		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "0",
+		utils.MetaACD: "0s",
 	}
 	var metrics map[string]string
 	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{"cgrates.org", "STATS_1"}, &metrics); err != nil {
