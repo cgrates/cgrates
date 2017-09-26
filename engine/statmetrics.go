@@ -181,8 +181,7 @@ func (acd *StatACD) GetFloat64Value() (v float64) {
 
 func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
 	var value time.Duration
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if duration, err := ev.Usage(config.CgrConfig().DefaultTimezone); err != nil &&
@@ -264,8 +263,7 @@ func (tcd *StatTCD) GetFloat64Value() (v float64) {
 
 func (tcd *StatTCD) AddEvent(ev *StatEvent) (err error) {
 	var value time.Duration
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if duration, err := ev.Usage(config.CgrConfig().DefaultTimezone); err != nil &&
@@ -323,7 +321,7 @@ func (acc *StatACC) getValue() float64 {
 		if acc.Count == 0 {
 			acc.val = utils.Float64Pointer(float64(STATS_NA))
 		} else {
-			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / acc.Count * 100),
+			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / acc.Count),
 				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -334,7 +332,8 @@ func (acc *StatACC) GetStringValue(fmtOpts string) (val string) {
 	if acc.Count == 0 {
 		return utils.NOT_AVAILABLE
 	}
-	return fmt.Sprintf("%s", strconv.FormatFloat(acc.getValue(), 'E', -1, 64))
+	return strconv.FormatFloat(acc.getValue(), 'f', -1, 64)
+
 }
 
 func (acc *StatACC) GetValue() (v interface{}) {
@@ -347,8 +346,7 @@ func (acc *StatACC) GetFloat64Value() (v float64) {
 
 func (acc *StatACC) AddEvent(ev *StatEvent) (err error) {
 	var value float64
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if cost, err := ev.Cost(config.CgrConfig().DefaultTimezone); err != nil &&
@@ -416,7 +414,7 @@ func (tcc *StatTCC) GetStringValue(fmtOpts string) (val string) {
 	if tcc.Count == 0 {
 		return utils.NOT_AVAILABLE
 	}
-	return fmt.Sprintf("%s", strconv.FormatFloat(tcc.getValue(), 'E', -1, 64))
+	return strconv.FormatFloat(tcc.getValue(), 'f', -1, 64)
 }
 
 func (tcc *StatTCC) GetValue() (v interface{}) {
@@ -429,8 +427,7 @@ func (tcc *StatTCC) GetFloat64Value() (v float64) {
 
 func (tcc *StatTCC) AddEvent(ev *StatEvent) (err error) {
 	var value float64
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if cost, err := ev.Cost(config.CgrConfig().DefaultTimezone); err != nil &&

@@ -83,6 +83,9 @@ func (se StatEvent) Usage(timezone string) (at time.Duration, err error) {
 	if us, canCast := usIf.(time.Duration); canCast {
 		return us, nil
 	}
+	if us, canCast := usIf.(float64); canCast {
+		return time.Duration(int64(us)), nil
+	}
 	usStr, canCast := usIf.(string)
 	if !canCast {
 		return at, errors.New("cannot cast to string")
@@ -96,8 +99,8 @@ func (se StatEvent) Cost(timezone string) (cs float64, err error) {
 	if !has {
 		return cs, utils.ErrNotFound
 	}
-	if cs, canCast := csIf.(float64); canCast {
-		return cs, nil
+	if val, canCast := csIf.(float64); canCast {
+		return val, nil
 	}
 	csStr, canCast := csIf.(string)
 	if !canCast {
