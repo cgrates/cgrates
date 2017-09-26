@@ -29,6 +29,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var (
@@ -119,6 +120,7 @@ func testTPImportTPFromFolderPath(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.ImportTarrifPlanFromFolder got reply: ", reply)
 	}
+	time.Sleep(time.Duration(2 * time.Second))
 }
 
 func testTPExportTPToFolder(t *testing.T) {
@@ -141,6 +143,7 @@ func testTPExportTPToFolder(t *testing.T) {
 	} else if !reflect.DeepEqual(len(reply.ExportedFiles), len(expectedTPStas.ExportedFiles)) {
 		t.Errorf("Expecting : %+v, received: %+v", len(reply.ExportedFiles), len(expectedTPStas.ExportedFiles))
 	}
+	time.Sleep(time.Duration(2 * time.Second))
 
 }
 
