@@ -80,11 +80,11 @@ func (se StatEvent) Usage(timezone string) (at time.Duration, err error) {
 	if !has {
 		return at, utils.ErrNotFound
 	}
-	if us, canCast := usIf.(float64); canCast {
-		return time.Duration(int64(us)), nil
-	}
 	if us, canCast := usIf.(time.Duration); canCast {
 		return us, nil
+	}
+	if us, canCast := usIf.(float64); canCast {
+		return time.Duration(int64(us)), nil
 	}
 	usStr, canCast := usIf.(string)
 	if !canCast {

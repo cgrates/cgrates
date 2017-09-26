@@ -133,15 +133,15 @@ func TestACDGetStringValue(t *testing.T) {
 	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acd.AddEvent(ev2)
 	acd.AddEvent(ev3)
-	if strVal := acd.GetStringValue(""); strVal != "3.333333333s" {
+	if strVal := acd.GetStringValue(""); strVal != "10s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev3.TenantID())
-	if strVal := acd.GetStringValue(""); strVal != "5s" {
+	if strVal := acd.GetStringValue(""); strVal != "10s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev.TenantID())
-	if strVal := acd.GetStringValue(""); strVal != "0s" {
+	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -157,11 +157,11 @@ func TestACDGetStringValue(t *testing.T) {
 		},
 	}
 	acd.AddEvent(ev4)
-	if strVal := acd.GetStringValue(""); strVal != "30s" {
+	if strVal := acd.GetStringValue(""); strVal != "1m0s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.AddEvent(ev5)
-	if strVal := acd.GetStringValue(""); strVal != "50s" {
+	if strVal := acd.GetStringValue(""); strVal != "1m15s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev2.TenantID())
@@ -184,48 +184,48 @@ func TestACDGetFloat64Value(t *testing.T) {
 			"Usage":      time.Duration(10 * time.Second)}}
 	acd.AddEvent(ev)
 	if v := acd.GetFloat64Value(); v != 10.0 {
-		t.Errorf("wrong acd value: %f", v)
+		t.Errorf("wrong acd value: %v", v)
 	}
 	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	acd.AddEvent(ev2)
-	if v := acd.GetFloat64Value(); v != 5.0 {
-		t.Errorf("wrong acd value: %f", v)
+	if v := acd.GetFloat64Value(); v != 10.0 {
+		t.Errorf("wrong acd value: %v", v)
 	}
 	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Fields: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
-			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Fields: map[string]interface{}{
 			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
-			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	acd.AddEvent(ev4)
-	if strVal := acd.GetFloat64Value(); strVal != 23.333333333 {
-		t.Errorf("wrong acd value: %f", strVal)
+	if strVal := acd.GetFloat64Value(); strVal != 35.0 {
+		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.AddEvent(ev5)
-	if strVal := acd.GetFloat64Value(); strVal != 40.0 {
-		t.Errorf("wrong acd value: %f", strVal)
+	if strVal := acd.GetFloat64Value(); strVal != 53.333333333 {
+		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.RemEvent(ev2.TenantID())
 	if strVal := acd.GetFloat64Value(); strVal != 53.333333333 {
-		t.Errorf("wrong acd value: %f", strVal)
+		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.RemEvent(ev4.TenantID())
 	if strVal := acd.GetFloat64Value(); strVal != 50.0 {
-		t.Errorf("wrong acd value: %f", strVal)
+		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.RemEvent(ev.TenantID())
 	if strVal := acd.GetFloat64Value(); strVal != 90.0 {
-		t.Errorf("wrong acd value: %f", strVal)
+		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.RemEvent(ev5.TenantID())
 	if strVal := acd.GetFloat64Value(); strVal != -1.0 {
-		t.Errorf("wrong acd value: %f", strVal)
+		t.Errorf("wrong acd value: %v", strVal)
 	}
 }
 
@@ -246,15 +246,15 @@ func TestACDGetValue(t *testing.T) {
 	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acd.AddEvent(ev2)
 	acd.AddEvent(ev3)
-	if v := acd.GetValue(); v != time.Duration(6*time.Second) {
+	if v := acd.GetValue(); v != time.Duration(9*time.Second) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	acd.RemEvent(ev.TenantID())
-	if v := acd.GetValue(); v != time.Duration(4*time.Second) {
+	if v := acd.GetValue(); v != time.Duration(8*time.Second) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	acd.RemEvent(ev2.TenantID())
-	if v := acd.GetValue(); v != time.Duration(0*time.Second) {
+	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -271,12 +271,12 @@ func TestACDGetValue(t *testing.T) {
 	}
 	acd.AddEvent(ev4)
 	acd.AddEvent(ev5)
-	if v := acd.GetValue(); v != time.Duration(1*time.Minute+50*time.Second) {
+	if v := acd.GetValue(); v != time.Duration(2*time.Minute+45*time.Second) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	acd.RemEvent(ev5.TenantID())
 	acd.RemEvent(ev4.TenantID())
-	if v := acd.GetValue(); v != time.Duration(0*time.Second) {
+	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
 	acd.RemEvent(ev3.TenantID())
@@ -315,7 +315,7 @@ func TestTCDGetStringValue(t *testing.T) {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev.TenantID())
-	if strVal := tcd.GetStringValue(""); strVal != "0s" {
+	if strVal := tcd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -424,7 +424,7 @@ func TestTCDGetValue(t *testing.T) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 	tcd.RemEvent(ev2.TenantID())
-	if v := tcd.GetValue(); v != time.Duration(0*time.Second) {
+	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -446,7 +446,7 @@ func TestTCDGetValue(t *testing.T) {
 	}
 	tcd.RemEvent(ev5.TenantID())
 	tcd.RemEvent(ev4.TenantID())
-	if v := tcd.GetValue(); v != time.Duration(0*time.Second) {
+	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
 	tcd.RemEvent(ev3.TenantID())
@@ -472,11 +472,11 @@ func TestACCGetStringValue(t *testing.T) {
 	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acc.AddEvent(ev2)
 	acc.AddEvent(ev3)
-	if strVal := acc.GetStringValue(""); strVal != "4.1" {
+	if strVal := acc.GetStringValue(""); strVal != "12.3" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.RemEvent(ev3.TenantID())
-	if strVal := acc.GetStringValue(""); strVal != "6.15" {
+	if strVal := acc.GetStringValue(""); strVal != "12.3" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -490,7 +490,7 @@ func TestACCGetStringValue(t *testing.T) {
 	acc.AddEvent(ev4)
 	acc.AddEvent(ev5)
 	acc.RemEvent(ev.TenantID())
-	if strVal := acc.GetStringValue(""); strVal != "2.26667" {
+	if strVal := acc.GetStringValue(""); strVal != "3.4" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.RemEvent(ev2.TenantID())
@@ -521,11 +521,11 @@ func TestACCGetValue(t *testing.T) {
 	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acc.AddEvent(ev2)
 	acc.AddEvent(ev3)
-	if strVal := acc.GetValue(); strVal != 4.1 {
+	if strVal := acc.GetValue(); strVal != 12.3 {
 		t.Errorf("wrong acc value: %v", strVal)
 	}
 	acc.RemEvent(ev3.TenantID())
-	if strVal := acc.GetValue(); strVal != 6.15 {
+	if strVal := acc.GetValue(); strVal != 12.3 {
 		t.Errorf("wrong acc value: %v", strVal)
 	}
 	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -539,7 +539,7 @@ func TestACCGetValue(t *testing.T) {
 	acc.AddEvent(ev4)
 	acc.AddEvent(ev5)
 	acc.RemEvent(ev.TenantID())
-	if strVal := acc.GetValue(); strVal != 2.26667 {
+	if strVal := acc.GetValue(); strVal != 3.4 {
 		t.Errorf("wrong acc value: %v", strVal)
 	}
 	acc.RemEvent(ev2.TenantID())
