@@ -656,3 +656,179 @@ func TestTCCGetValue(t *testing.T) {
 		t.Errorf("wrong tcc value: %v", strVal)
 	}
 }
+
+func TestPDDGetStringValue(t *testing.T) {
+	pdd, _ := NewPDD()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			utils.USAGE:  time.Duration(10 * time.Second),
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.PDD:    time.Duration(5 * time.Second),
+		}}
+	if strVal := pdd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.AddEvent(ev)
+	if strVal := pdd.GetStringValue(""); strVal != "5s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	pdd.AddEvent(ev2)
+	pdd.AddEvent(ev3)
+	if strVal := pdd.GetStringValue(""); strVal != "1.666666666s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.RemEvent(ev3.TenantID())
+	if strVal := pdd.GetStringValue(""); strVal != "2.5s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.RemEvent(ev.TenantID())
+	if strVal := pdd.GetStringValue(""); strVal != "0s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Fields: map[string]interface{}{
+			"Usage":      time.Duration(1 * time.Minute),
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.PDD:    time.Duration(10 * time.Second),
+		},
+	}
+	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Fields: map[string]interface{}{
+			utils.PDD: time.Duration(10 * time.Second),
+		},
+	}
+	pdd.AddEvent(ev4)
+	if strVal := pdd.GetStringValue(""); strVal != "5s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.AddEvent(ev5)
+	if strVal := pdd.GetStringValue(""); strVal != "3.333333333s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.RemEvent(ev2.TenantID())
+	if strVal := pdd.GetStringValue(""); strVal != "5s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.RemEvent(ev5.TenantID())
+	pdd.RemEvent(ev4.TenantID())
+	pdd.RemEvent(ev5.TenantID())
+	if strVal := pdd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+}
+
+func TestPDDGetFloat64Value(t *testing.T) {
+	pdd, _ := NewPDD()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":      time.Duration(10 * time.Second),
+			utils.PDD:    time.Duration(5 * time.Second)}}
+	pdd.AddEvent(ev)
+	if v := pdd.GetFloat64Value(); v != 5.0 {
+		t.Errorf("wrong pdd value: %v", v)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	pdd.AddEvent(ev2)
+	if v := pdd.GetFloat64Value(); v != 2.5 {
+		t.Errorf("wrong pdd value: %v", v)
+	}
+	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Fields: map[string]interface{}{
+			"Usage":      time.Duration(1 * time.Minute),
+			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.PDD:    time.Duration(10 * time.Second),
+		},
+	}
+	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Fields: map[string]interface{}{
+			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
+			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+	}
+	pdd.AddEvent(ev4)
+	if strVal := pdd.GetFloat64Value(); strVal != 5 {
+		t.Errorf("wrong pdd value: %v", strVal)
+	}
+	pdd.AddEvent(ev5)
+	if strVal := pdd.GetFloat64Value(); strVal != 3.75 {
+		t.Errorf("wrong pdd value: %v", strVal)
+	}
+	pdd.RemEvent(ev2.TenantID())
+	if strVal := pdd.GetFloat64Value(); strVal != 5 {
+		t.Errorf("wrong pdd value: %v", strVal)
+	}
+	pdd.RemEvent(ev4.TenantID())
+	if strVal := pdd.GetFloat64Value(); strVal != 2.5 {
+		t.Errorf("wrong pdd value: %v", strVal)
+	}
+	pdd.RemEvent(ev.TenantID())
+	if strVal := pdd.GetFloat64Value(); strVal != 0 {
+		t.Errorf("wrong pdd value: %v", strVal)
+	}
+	pdd.RemEvent(ev5.TenantID())
+	if strVal := pdd.GetFloat64Value(); strVal != -1.0 {
+		t.Errorf("wrong pdd value: %v", strVal)
+	}
+}
+
+func TestPDDGetValue(t *testing.T) {
+	pdd, _ := NewPDD()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":      time.Duration(10 * time.Second),
+			utils.PDD:    time.Duration(9 * time.Second)}}
+	pdd.AddEvent(ev)
+	if v := pdd.GetValue(); v != time.Duration(9*time.Second) {
+		t.Errorf("wrong pdd value: %+v", v)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Fields: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":      time.Duration(8 * time.Second),
+			utils.PDD:    time.Duration(10 * time.Second)}}
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	pdd.AddEvent(ev2)
+	pdd.AddEvent(ev3)
+	if v := pdd.GetValue(); v != time.Duration(6333333333*time.Nanosecond) {
+		t.Errorf("wrong pdd value: %+v", v)
+	}
+	pdd.RemEvent(ev.TenantID())
+	if v := pdd.GetValue(); v != time.Duration(5*time.Second) {
+		t.Errorf("wrong pdd value: %+v", v)
+	}
+	pdd.RemEvent(ev2.TenantID())
+	if v := pdd.GetValue(); v != time.Duration(0*time.Second) {
+		t.Errorf("wrong pdd value: %+v", v)
+	}
+	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Fields: map[string]interface{}{
+			"Usage":      time.Duration(1 * time.Minute),
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.PDD:    time.Duration(8 * time.Second),
+		},
+	}
+	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Fields: map[string]interface{}{
+			"Usage":      time.Duration(4*time.Minute + 30*time.Second),
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+	}
+	pdd.AddEvent(ev4)
+	pdd.AddEvent(ev5)
+	if v := pdd.GetValue(); v != time.Duration(2666666666*time.Nanosecond) {
+		t.Errorf("wrong pdd value: %+v", v)
+	}
+	pdd.RemEvent(ev5.TenantID())
+	pdd.RemEvent(ev4.TenantID())
+	if v := pdd.GetValue(); v != time.Duration(0*time.Second) {
+		t.Errorf("wrong pdd value: %+v", v)
+	}
+	pdd.RemEvent(ev3.TenantID())
+	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
+		t.Errorf("wrong pdd value: %+v", v)
+	}
+}

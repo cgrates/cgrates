@@ -35,6 +35,7 @@ func NewStatMetric(metricID string) (sm StatMetric, err error) {
 		utils.MetaTCD: NewTCD,
 		utils.MetaACC: NewACC,
 		utils.MetaTCC: NewTCC,
+		utils.MetaPDD: NewPDD,
 	}
 	if _, has := metrics[metricID]; !has {
 		return nil, fmt.Errorf("unsupported metric: %s", metricID)
@@ -368,7 +369,7 @@ func (acc *StatACC) RemEvent(evTenantID string) (err error) {
 	if !has {
 		return utils.ErrNotFound
 	}
-	if cost != 0 {
+	if cost >= 0 {
 		acc.Sum -= cost
 	}
 	acc.Count -= 1
@@ -464,4 +465,87 @@ func (tcc *StatTCC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 
 func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcc)
+}
+
+func NewPDD() (StatMetric, error) {
+	return &StatPDD{Events: make(map[string]time.Duration)}, nil
+}
+
+// ACD implements AverageCallDuration metric
+type StatPDD struct {
+	Sum    time.Duration
+	Count  int64
+	Events map[string]time.Duration // map[EventTenantID]Duration
+	val    *time.Duration           // cached PDD value
+}
+
+// getValue returns pdd.val
+func (pdd *StatPDD) getValue() time.Duration {
+	if pdd.val == nil {
+		if pdd.Count == 0 {
+			pdd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
+		} else {
+			pdd.val = utils.DurationPointer(time.Duration(pdd.Sum.Nanoseconds() / pdd.Count))
+		}
+	}
+	return *pdd.val
+}
+
+func (pdd *StatPDD) GetStringValue(fmtOpts string) (val string) {
+	if pdd.Count == 0 {
+		return utils.NOT_AVAILABLE
+	}
+	return fmt.Sprintf("%+v", pdd.getValue())
+}
+
+func (pdd *StatPDD) GetValue() (v interface{}) {
+	return pdd.getValue()
+}
+
+func (pdd *StatPDD) GetFloat64Value() (v float64) {
+	if pdd.Count == 0 {
+		return -1.0
+	}
+	return pdd.getValue().Seconds()
+}
+
+func (pdd *StatPDD) AddEvent(ev *StatEvent) (err error) {
+	var value time.Duration
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
+		return err
+	} else if !at.IsZero() {
+		if duration, err := ev.Pdd(config.CgrConfig().DefaultTimezone); err != nil &&
+			err != utils.ErrNotFound {
+			return err
+		} else {
+			value = duration
+			pdd.Sum += duration
+		}
+	}
+	pdd.Events[ev.TenantID()] = value
+	pdd.Count += 1
+	pdd.val = nil
+	return
+}
+
+func (pdd *StatPDD) RemEvent(evTenantID string) (err error) {
+	duration, has := pdd.Events[evTenantID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if duration != 0 {
+		pdd.Sum -= duration
+	}
+	pdd.Count -= 1
+	delete(pdd.Events, evTenantID)
+	pdd.val = nil
+	return
+}
+
+func (pdd *StatPDD) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(pdd)
+}
+func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, pdd)
 }

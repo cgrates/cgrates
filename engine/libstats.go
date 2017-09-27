@@ -109,6 +109,25 @@ func (se StatEvent) Cost(timezone string) (cs float64, err error) {
 	return strconv.ParseFloat(csStr, 64)
 }
 
+// Pdd returns the Pdd of StatEvent
+func (se StatEvent) Pdd(timezone string) (pdd time.Duration, err error) {
+	pddIf, has := se.Fields[utils.PDD]
+	if !has {
+		return pdd, utils.ErrNotFound
+	}
+	if pdd, canCast := pddIf.(time.Duration); canCast {
+		return pdd, nil
+	}
+	if pdd, canCast := pddIf.(float64); canCast {
+		return time.Duration(int64(pdd)), nil
+	}
+	pddStr, canCast := pddIf.(string)
+	if !canCast {
+		return pdd, errors.New("cannot cast to string")
+	}
+	return utils.ParseDurationWithSecs(pddStr)
+}
+
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
 func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
