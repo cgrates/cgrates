@@ -172,6 +172,10 @@ func testFlush(t *testing.T) {
 			t.Error("Error when flushing Mongo ", err.Error())
 		}
 	}
+	if err = SetDBVersions(mig.dataDB); err != nil {
+		return err
+	}
+
 }
 
 func testMigratorAccounts(t *testing.T) {
