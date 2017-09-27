@@ -35,7 +35,7 @@ func CheckVersions(storage Storage) error {
 			return err
 		}
 		if !empty {
-			msg := "Migration needed: please backup cgr data and run : <cgr-migrator>" + storType
+			msg := "Migration needed: please backup cgrates data and run : <cgr-migrator>"
 			return errors.New(msg)
 		}
 		// no data, write version
@@ -107,7 +107,11 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 func CurrentDBVersions(storType string) Versions {
 	dataDbVersions := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
 	storDbVersions := Versions{utils.COST_DETAILS: 2}
-	allVersions := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+	allVersions := dataDbVersions
+	for k, v := range storDbVersions {
+		allVersions[k] = v
+	}
+
 	switch storType {
 	case utils.MONGO, utils.MAPSTOR:
 		return allVersions
