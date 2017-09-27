@@ -471,7 +471,7 @@ func NewPDD() (StatMetric, error) {
 	return &StatPDD{Events: make(map[string]time.Duration)}, nil
 }
 
-// ACD implements AverageCallDuration metric
+// PDD implements Post Dial Delay (average) metric
 type StatPDD struct {
 	Sum    time.Duration
 	Count  int64
