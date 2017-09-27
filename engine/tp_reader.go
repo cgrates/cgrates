@@ -2032,11 +2032,11 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Thresholds:")
 	}
 	for _, tpTH := range tpr.thresholds {
-		th, err := APItoThresholdCfg(tpTH, tpr.timezone)
+		th, err := APItoThresholdProfile(tpTH, tpr.timezone)
 		if err != nil {
 			return err
 		}
-		if err = tpr.dataStorage.SetThresholdCfg(th); err != nil {
+		if err = tpr.dataStorage.SetThresholdProfile(th); err != nil {
 			return err
 		}
 		if verbose {
@@ -2136,7 +2136,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 			for _, tpTH := range tpr.thresholds {
-				if th, err := APItoThresholdCfg(tpTH, tpr.timezone); err != nil {
+				if th, err := APItoThresholdProfile(tpTH, tpr.timezone); err != nil {
 					return err
 				} else {
 					stIdxr.IndexFilters(th.ID, th.Filters)

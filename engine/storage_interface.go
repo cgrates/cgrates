@@ -119,9 +119,9 @@ type DataDB interface {
 	GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error)
 	SetStoredStatQueue(sq *StoredStatQueue) (err error)
 	RemStoredStatQueue(tenant, id string) (err error)
-	GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error)
-	SetThresholdCfg(th *ThresholdCfg) (err error)
-	RemThresholdCfg(ID string, transactionID string) (err error)
+	GetThresholdProfile(tenant string, ID string, skipCache bool, transID string) (tp *ThresholdProfile, err error)
+	SetThresholdProfile(tp *ThresholdProfile) (err error)
+	RemThresholdProfile(tenant, id, transactionID string) (err error)
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }

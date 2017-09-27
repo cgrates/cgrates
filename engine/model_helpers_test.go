@@ -1001,16 +1001,15 @@ func TestAPItoTPThreshold(t *testing.T) {
 		ActionIDs:          []string{"WARN3"},
 	}
 
-	eTPs := &ThresholdCfg{ID: tps.ID,
-		Filters:        make([]*RequestFilter, len(tps.Filters)),
-		MinItems:       tps.MinItems,
-		Recurrent:      tps.Recurrent,
-		ThresholdType:  tps.ThresholdType,
-		ThresholdValue: tps.ThresholdValue,
-		Stored:         tps.Stored,
-		Blocker:        tps.Blocker,
-		Weight:         tps.Weight,
-		ActionIDs:      []string{"WARN3"},
+	eTPs := &ThresholdProfile{
+		ID:        tps.ID,
+		Filters:   make([]*RequestFilter, len(tps.Filters)),
+		MinItems:  tps.MinItems,
+		Recurrent: tps.Recurrent,
+		Stored:    tps.Stored,
+		Blocker:   tps.Blocker,
+		Weight:    tps.Weight,
+		ActionIDs: []string{"WARN3"},
 	}
 	if eTPs.MinSleep, err = utils.ParseDurationWithSecs(tps.MinSleep); err != nil {
 		t.Errorf("Got error: %+v", err)
@@ -1019,7 +1018,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 		FieldName: "Account", Values: []string{"1001", "1002"}}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
-	if st, err := APItoThresholdCfg(tps, "UTC"); err != nil {
+	if st, err := APItoThresholdProfile(tps, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)

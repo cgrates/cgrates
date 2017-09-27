@@ -1672,15 +1672,16 @@ func (rs *RedisStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	return
 }
 
-// GetThresholdCfg retrieves a ThresholdCfg from dataDB/cache
-func (rs *RedisStorage) GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error) {
-	key := utils.ThresholdCfgPrefix + ID
+// GetThresholdProfile retrieves a ThresholdProfile from dataDB/cache
+func (rs *RedisStorage) GetThresholdProfile(tenant, ID string,
+	skipCache bool, transactionID string) (tp *ThresholdProfile, err error) {
+	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, ID)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ThresholdCfg), nil
+			return x.(*ThresholdProfile), nil
 		}
 	}
 	var values []byte
@@ -1691,31 +1692,31 @@ func (rs *RedisStorage) GetThresholdCfg(ID string, skipCache bool, transactionID
 		}
 		return
 	}
-	if err = rs.ms.Unmarshal(values, &th); err != nil {
+	if err = rs.ms.Unmarshal(values, &tp); err != nil {
 		return
 	}
-	for _, fltr := range th.Filters {
+	for _, fltr := range tp.Filters {
 		if err = fltr.CompileValues(); err != nil {
 			return
 		}
 	}
-	cache.Set(key, th, cacheCommit(transactionID), transactionID)
+	cache.Set(key, tp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-// SetThresholdCfg stores a ThresholdCfg into DataDB
-func (rs *RedisStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
+// SetThresholdProfile stores a ThresholdProfile into DataDB
+func (rs *RedisStorage) SetThresholdProfile(tp *ThresholdProfile) (err error) {
 	var result []byte
-	result, err = rs.ms.Marshal(th)
+	result, err = rs.ms.Marshal(tp)
 	if err != nil {
 		return
 	}
-	return rs.Cmd("SET", utils.ThresholdCfgPrefix+th.ID, result).Err
+	return rs.Cmd("SET", utils.ThresholdProfilePrefix+tp.TenantID(), result).Err
 }
 
-// RemThresholdCfg removes a ThresholdCfg from dataDB/cache
-func (rs *RedisStorage) RemThresholdCfg(ID string, transactionID string) (err error) {
-	key := utils.ThresholdCfgPrefix + ID
+// RemThresholdProfile removes a ThresholdProfile from dataDB/cache
+func (rs *RedisStorage) RemThresholdProfile(tenant, id, transactionID string) (err error) {
+	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	err = rs.Cmd("DEL", key).Err
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return

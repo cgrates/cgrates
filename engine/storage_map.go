@@ -1564,17 +1564,18 @@ func (ms *MapStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	return
 }
 
-// GetThresholdCfg retrieves a ThresholdCfg from dataDB/cache
-func (ms *MapStorage) GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error) {
+// GetThresholdProfile retrieves a ThresholdProfile from dataDB/cache
+func (ms *MapStorage) GetThresholdProfile(tenant, ID string,
+	skipCache bool, transactionID string) (tp *ThresholdProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.ThresholdCfgPrefix + ID
+	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, ID)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ThresholdCfg), nil
+			return x.(*ThresholdProfile), nil
 		}
 	}
 	values, ok := ms.dict[key]
@@ -1582,36 +1583,36 @@ func (ms *MapStorage) GetThresholdCfg(ID string, skipCache bool, transactionID s
 		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, &th)
+	err = ms.ms.Unmarshal(values, &tp)
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range th.Filters {
+	for _, fltr := range tp.Filters {
 		if err := fltr.CompileValues(); err != nil {
 			return nil, err
 		}
 	}
-	cache.Set(key, th, cacheCommit(transactionID), transactionID)
+	cache.Set(key, tp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-// SetThresholdCfg stores a ThresholdCfg into DataDB
-func (ms *MapStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
+// SetThresholdProfile stores a ThresholdProfile into DataDB
+func (ms *MapStorage) SetThresholdProfile(tp *ThresholdProfile) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(th)
+	result, err := ms.ms.Marshal(tp)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.ThresholdCfgPrefix+th.ID] = result
+	ms.dict[utils.ThresholdProfilePrefix+tp.TenantID()] = result
 	return
 }
 
-// RemThresholdCfg removes a ThresholdCfg from dataDB/cache
-func (ms *MapStorage) RemThresholdCfg(sqID string, transactionID string) (err error) {
+// RemThresholdProfile removes a ThresholdProfile from dataDB/cache
+func (ms *MapStorage) RemThresholdProfile(tenant, id, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.ThresholdCfgPrefix + sqID
+	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return

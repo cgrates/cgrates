@@ -341,11 +341,11 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, th := range loader.thresholds {
-		rcv, err := loader.dataStorage.GetThresholdCfg(k, true, utils.NonTransactional)
+		rcv, err := loader.dataStorage.GetThresholdProfile("", k, true, utils.NonTransactional)
 		if err != nil {
-			t.Error("Failed GetThresholdCfg: ", err.Error())
+			t.Error("Failed GetThresholdProfile: ", err.Error())
 		}
-		sts, err := APItoThresholdCfg(th, "UTC")
+		sts, err := APItoThresholdProfile(th, "UTC")
 		if err != nil {
 			t.Error(err)
 		}

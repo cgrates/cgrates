@@ -2225,17 +2225,15 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 	return
 }
 
-func APItoThresholdCfg(tpTH *utils.TPThreshold, timezone string) (th *ThresholdCfg, err error) {
-	th = &ThresholdCfg{
-		ID:             tpTH.ID,
-		ThresholdType:  tpTH.ThresholdType,
-		ThresholdValue: tpTH.ThresholdValue,
-		MinItems:       tpTH.MinItems,
-		Recurrent:      tpTH.Recurrent,
-		Weight:         tpTH.Weight,
-		Blocker:        tpTH.Blocker,
-		Stored:         tpTH.Stored,
-		Filters:        make([]*RequestFilter, len(tpTH.Filters)),
+func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *ThresholdProfile, err error) {
+	th = &ThresholdProfile{
+		ID:        tpTH.ID,
+		MinItems:  tpTH.MinItems,
+		Recurrent: tpTH.Recurrent,
+		Weight:    tpTH.Weight,
+		Blocker:   tpTH.Blocker,
+		Stored:    tpTH.Stored,
+		Filters:   make([]*RequestFilter, len(tpTH.Filters)),
 	}
 	if tpTH.MinSleep != "" {
 		if th.MinSleep, err = utils.ParseDurationWithSecs(tpTH.MinSleep); err != nil {

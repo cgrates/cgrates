@@ -62,6 +62,7 @@ const (
 	colRes   = "resources"
 	colSqs   = "statqueues"
 	colSqp   = "statqueue_profiles"
+	colTlds  = "thresholds"
 )
 
 var (
@@ -329,6 +330,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.TimingsPrefix:          colTmg,
 		utils.ResourcesPrefix:        colRes,
 		utils.ResourceProfilesPrefix: colRsP,
+		utils.ThresholdProfilePrefix: colTlds,
 	}
 	name, ok = colMap[prefix]
 	return
@@ -2110,54 +2112,55 @@ func (ms *MongoStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	return err
 }
 
-// GetThresholdCfg retrieves a ThresholdCfg from dataDB/cache
-func (ms *MongoStorage) GetThresholdCfg(ID string, skipCache bool, transactionID string) (th *ThresholdCfg, err error) {
-	cacheKey := utils.ThresholdCfgPrefix + ID
+// GetThresholdProfile retrieves a ThresholdProfile from dataDB/cache
+func (ms *MongoStorage) GetThresholdProfile(tenant, ID string,
+	skipCache bool, transactionID string) (tp *ThresholdProfile, err error) {
+	cacheKey := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, ID)
 	if !skipCache {
 		if x, ok := cache.Get(cacheKey); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ThresholdCfg), nil
+			return x.(*ThresholdProfile), nil
 		}
 	}
-	session, col := ms.conn(utils.ThresholdCfgPrefix)
+	session, col := ms.conn(colTlds)
 	defer session.Close()
-	th = new(ThresholdCfg)
+	tp = new(ThresholdProfile)
 	cCommit := cacheCommit(transactionID)
-	if err = col.Find(bson.M{"id": ID}).One(&th); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": ID}).One(&tp); err != nil {
 		if err == mgo.ErrNotFound {
 			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	for _, fltr := range th.Filters {
+	for _, fltr := range tp.Filters {
 		if err = fltr.CompileValues(); err != nil {
 			return
 		}
 	}
-	cache.Set(cacheKey, th, cCommit, transactionID)
+	cache.Set(cacheKey, tp, cCommit, transactionID)
 	return
 }
 
-// SetThresholdCfg stores a ThresholdCfg into DataDB
-func (ms *MongoStorage) SetThresholdCfg(th *ThresholdCfg) (err error) {
-	session, col := ms.conn(utils.ThresholdCfgPrefix)
+// SetThresholdProfile stores a ThresholdProfile into DataDB
+func (ms *MongoStorage) SetThresholdProfile(tp *ThresholdProfile) (err error) {
+	session, col := ms.conn(colTlds)
 	defer session.Close()
-	_, err = col.UpsertId(bson.M{"id": th.ID}, th)
+	_, err = col.UpsertId(bson.M{"tenant": tp.Tenant, "id": tp.ID}, tp)
 	return
 }
 
-// RemThresholdCfg removes a ThresholdCfg from dataDB/cache
-func (ms *MongoStorage) RemThresholdCfg(ID string, transactionID string) (err error) {
-	session, col := ms.conn(utils.ThresholdCfgPrefix)
-	key := utils.ThresholdCfgPrefix + ID
-	err = col.Remove(bson.M{"id": ID})
+// RemThresholdProfile removes a ThresholdProfile from dataDB/cache
+func (ms *MongoStorage) RemThresholdProfile(tenant, id, transactionID string) (err error) {
+	session, col := ms.conn(colTlds)
+	defer session.Close()
+	err = col.Remove(bson.M{"tenant": tenant, "id": id})
 	if err != nil {
 		return err
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
-	session.Close()
+	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
 	return
 }
