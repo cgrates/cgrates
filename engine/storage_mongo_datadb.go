@@ -22,16 +22,15 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
-	"io/ioutil"
-	"strings"
-	"time"
-
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
+	"strings"
+	"time"
 )
 
 const (
@@ -542,6 +541,18 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		}
 	}
 	return
+}
+
+func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
+	session := ms.session.Copy()
+	defer session.Close()
+	db := session.DB(ms.db)
+
+	col, err := db.CollectionNames()
+	if err != nil {
+		return
+	}
+	return len(col) == 0, nil
 }
 
 func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err error) {

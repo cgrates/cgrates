@@ -60,6 +60,11 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 FROM %s", utils.TBLCDRs)); err != nil {
 		return err
 	}
+
+	if err = SetDBVersions(self); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -95,6 +100,19 @@ func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 		}
 	}
 	return nil
+}
+
+func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
+	tbls := []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
+		utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
+		utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats}
+	for _, tbl := range tbls {
+		resp = self.db.HasTable(tbl)
+		if resp != false {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.

@@ -43,7 +43,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	}
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	// Write version before starting
-	if err := CheckVersions(dataDB); err != nil {
+	if err := SetDBVersions(dataDB); err != nil {
 		return err
 	}
 
@@ -57,6 +57,10 @@ func InitStorDb(cfg *config.CGRConfig) error {
 		return err
 	}
 	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDBType)); err != nil {
+		return err
+	}
+	// Write version before starting
+	if err := SetDBVersions(storDb); err != nil {
 		return err
 	}
 	return nil

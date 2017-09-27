@@ -39,6 +39,7 @@ var (
 // subtests to be executed for each confDIR
 var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitFlush,
+	testStorDBitIsDBEmpty,
 	testStorDBitCRUDVersions,
 	testStorDBitCRUDTpTimings,
 	testStorDBitCRUDTpDestinations,
@@ -112,6 +113,25 @@ func TestStorDBitMongo(t *testing.T) {
 		if stestName != "testStorDBitCRUDVersions" {
 			stestName := split[len(split)-1]
 			t.Run(stestName, stest)
+		}
+	}
+}
+func testStorDBitIsDBEmpty(t *testing.T) {
+	x := storDB.GetStorageType()
+	switch x {
+	case utils.MONGO:
+		test, err := storDB.IsDBEmpty()
+		if err != nil {
+			t.Error(err)
+		} else if test != true {
+			t.Errorf("\nExpecting: true got :%+v", test)
+		}
+	case utils.POSTGRES, utils.MYSQL:
+		test, err := storDB.IsDBEmpty()
+		if err != nil {
+			t.Error(err)
+		} else if test != false {
+			t.Errorf("\nExpecting: false got :%+v", test)
 		}
 	}
 }
@@ -1534,7 +1554,7 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 
 func testStorDBitCRUDTpStats(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTPStats("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPStats("TEST_TPID", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//WRITE
@@ -1611,11 +1631,11 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 
 	}
 	// REMOVE
-	if err := storDB.RemTpData("", "testTPid", nil); err != nil {
+	if err := storDB.RemTpData(utils.TBLTPStats, "TEST_TPID", nil); err != nil {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTPStats("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPStats("TEST_TPID", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

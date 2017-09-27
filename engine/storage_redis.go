@@ -119,6 +119,42 @@ func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 	return rs.Cmd("SELECT", dbName).Err
 }
 
+func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
+
+	var keys []string
+	prefixes := []string{
+		utils.DESTINATION_PREFIX,
+		utils.REVERSE_DESTINATION_PREFIX,
+		utils.RATING_PLAN_PREFIX,
+		utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX,
+		utils.ACTION_PLAN_PREFIX,
+		utils.ACTION_TRIGGER_PREFIX,
+		utils.SHARED_GROUP_PREFIX,
+		utils.DERIVEDCHARGERS_PREFIX,
+		utils.LCR_PREFIX,
+		utils.ACCOUNT_PREFIX,
+		utils.ALIASES_PREFIX,
+		utils.REVERSE_ALIASES_PREFIX,
+		utils.ResourceProfilesPrefix,
+		utils.ResourcesPrefix,
+		utils.StatQueuePrefix, // used with CDRStatS
+		utils.StatQueueProfilePrefix,
+		utils.AccountActionPlansPrefix,
+		utils.TimingsPrefix,
+	}
+	for _, key := range prefixes {
+		keys, err = rs.GetKeysForPrefix(key)
+		if err != nil {
+			return
+		}
+		if len(keys) != 0 {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
 func (rs *RedisStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 	aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
