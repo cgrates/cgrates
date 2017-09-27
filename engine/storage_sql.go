@@ -103,14 +103,16 @@ func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 }
 
 func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
-	tbls := []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
-		utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
+	tbls := []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
+		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
+		utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions,
+		utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
 		utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats}
 	for _, tbl := range tbls {
-		resp = self.db.HasTable(tbl)
-		if resp != false {
+		if self.db.HasTable(tbl) {
 			return false, nil
 		}
+
 	}
 	return true, nil
 }

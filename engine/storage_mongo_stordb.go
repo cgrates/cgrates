@@ -1246,7 +1246,7 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	} else {
 		return err
 	}
-	return
+	return nil
 }
 
 func (ms *MongoStorage) GetStorageType() string {
