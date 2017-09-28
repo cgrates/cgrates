@@ -1231,7 +1231,7 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 		}
 	}
 	if _, err = col.Upsert(bson.M{}, &vrs); err != nil {
-		return
+		return err
 	}
 
 	return

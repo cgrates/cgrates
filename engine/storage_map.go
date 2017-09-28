@@ -292,6 +292,12 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 	return
 }
 
+func (ms *MapStorage) IsDBEmpty() (resp bool, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	return len(ms.dict) == 0, nil
+}
+
 func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -311,7 +317,7 @@ func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	switch categ {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix:
+		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdProfilePrefix:
 		_, exists := ms.dict[categ+subject]
 		return exists, nil
 	}

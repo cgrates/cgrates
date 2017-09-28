@@ -127,9 +127,9 @@ func testTPStatsGetTPStatBeforeSet(t *testing.T) {
 
 func testTPStatsSetTPStat(t *testing.T) {
 	tpStat = &utils.TPStats{
-		Tenant: "Tester",
-		TPid: "TPS1",
-		ID:   "Stat1",
+		Tenant: "cgrates.org",
+		TPid:   "TPS1",
+		ID:     "Stat1",
 		Filters: []*utils.TPRequestFilter{
 			&utils.TPRequestFilter{
 				Type:      "*string",

@@ -22,16 +22,15 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
-	"io/ioutil"
-	"strings"
-	"time"
-
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
+	"strings"
+	"time"
 )
 
 const (
@@ -535,6 +534,9 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
+		case utils.ThresholdProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetThresholdProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -544,6 +546,18 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		}
 	}
 	return
+}
+
+func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
+	session := ms.session.Copy()
+	defer session.Close()
+	db := session.DB(ms.db)
+
+	col, err := db.CollectionNames()
+	if err != nil {
+		return
+	}
+	return len(col) == 0, nil
 }
 
 func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err error) {
@@ -698,6 +712,9 @@ func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) 
 		has = count > 0
 	case utils.StatQueuePrefix:
 		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
+		has = count > 0
+	case utils.ThresholdProfilePrefix:
+		count, err = db.C(colTlds).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	default:
 		err = fmt.Errorf("unsupported category in HasData: %s", category)

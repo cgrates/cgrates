@@ -1,2 +1,2 @@
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinSleep[7],Blocker[8],Stored[9],Weight[10],ActionIDs[11]
-Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,,1.2,10,true,1s,true,true,10,THRESH1;THRESH2
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],MinItems[6],Recurrent[7],MinSleep[8],Blocker[9],Weight[10],MinItems[11],ActionIDs[12]
+cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,10,true,1s,true,10,THRESH1;THRESH2
