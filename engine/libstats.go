@@ -128,6 +128,22 @@ func (se StatEvent) Pdd(timezone string) (pdd time.Duration, err error) {
 	return utils.ParseDurationWithSecs(pddStr)
 }
 
+// Destination returns the Destination of StatEvent
+func (se StatEvent) Destination(timezone string) (ddc string, err error) {
+	ddcIf, has := se.Fields[utils.DESTINATION]
+	if !has {
+		return ddc, utils.ErrNotFound
+	}
+	if ddcInt, canCast := ddcIf.(int64); canCast {
+		return strconv.FormatInt(ddcInt, 64), nil
+	}
+	ddcStr, canCast := ddcIf.(string)
+	if !canCast {
+		return ddc, errors.New("cannot cast to string")
+	}
+	return ddcStr, nil
+}
+
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
 func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
