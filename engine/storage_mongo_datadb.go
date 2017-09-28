@@ -535,6 +535,9 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
+		case utils.ThresholdProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetThresholdProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -698,6 +701,9 @@ func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) 
 		has = count > 0
 	case utils.StatQueuePrefix:
 		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
+		has = count > 0
+	case utils.ThresholdProfilePrefix:
+		count, err = db.C(colTlds).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	default:
 		err = fmt.Errorf("unsupported category in HasData: %s", category)

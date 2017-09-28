@@ -276,10 +276,10 @@ cgrates.org,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
 cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd,true,true,20,THRESH1;THRESH2
 `
-	thresholds = `
-#Id[0],FilterType[1],FilterFieldName[2],FilterFieldValues[3],ActivationInterval[4],ThresholdType[5],ThresholdValue[6],MinItems[7],Recurrent[8],MinSleep[9],Blocker[10],Stored[11],Weight[12],ActionIDs[13]
-Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,,1.2,10,true,1s,true,true,10,
 
+	thresholds = `
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],MinItems[6],Recurrent[7],MinSleep[8],Blocker[9],Weight[10],ActionIDs[11]
+cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,10,true,1s,true,10,THRESH1;THRESH2
 `
 )
 
@@ -1470,29 +1470,30 @@ func TestLoadStats(t *testing.T) {
 }
 
 func TestLoadThresholds(t *testing.T) {
-	eThresholds := map[string]*utils.TPThreshold{
-		"Threshold1": &utils.TPThreshold{
-			TPid: testTPID,
-			ID:   "Threshold1",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+	eThresholds := map[string]map[string]*utils.TPThreshold{
+		"cgrates.org": map[string]*utils.TPThreshold{
+			"Threshold1": &utils.TPThreshold{
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "Threshold1",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
+				MinItems:  10,
+				Recurrent: true,
+				MinSleep:  "1s",
+				Blocker:   true,
+				Weight:    10,
+				ActionIDs: []string{"THRESH1", "THRESH2"},
 			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			ThresholdType:  "",
-			ThresholdValue: 1.2,
-			MinItems:       10,
-			Recurrent:      true,
-			MinSleep:       "1s",
-			Blocker:        true,
-			Stored:         true,
-			Weight:         10,
 		},
 	}
-	if len(csvr.thresholds) != len(eThresholds) {
-		t.Error("Failed to load thresholds: ", len(csvr.thresholds))
-	} else if !reflect.DeepEqual(eThresholds["Threshold1"], csvr.thresholds["Threshold1"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eThresholds["Threshold1"], csvr.thresholds["Threshold1"])
+	if len(csvr.thProfiles["cgrates.org"]) != len(eThresholds["cgrates.org"]) {
+		t.Error("Failed to load thresholds: ", len(csvr.thProfiles))
+	} else if !reflect.DeepEqual(eThresholds["cgrates.org"]["Threshold1"], csvr.thProfiles["cgrates.org"]["Threshold1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eThresholds["cgrates.org"]["Threshold1"], csvr.thProfiles["cgrates.org"]["Threshold1"])
 	}
 }

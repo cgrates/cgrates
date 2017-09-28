@@ -2040,6 +2040,7 @@ func testOnStorITCRUDStoredStatQueue(t *testing.T) {
 func testOnStorITCRUDThresholdProfile(t *testing.T) {
 	timeMinSleep := time.Duration(0 * time.Second)
 	th := &ThresholdProfile{
+		Tenant:             "cgrates.org",
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
 		Filters:            []*RequestFilter{},
@@ -2047,7 +2048,6 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		Recurrent:          true,
 		MinSleep:           timeMinSleep,
 		Blocker:            true,
-		Stored:             true,
 		Weight:             1.4,
 		ActionIDs:          []string{},
 	}
