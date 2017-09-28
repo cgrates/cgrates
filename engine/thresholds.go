@@ -21,6 +21,7 @@ package engine
 import (
 	//"fmt"
 	//"math/rand"
+	"sort"
 	"sync"
 	"time"
 
@@ -28,6 +29,7 @@ import (
 	//"github.com/cgrates/cgrates/config"
 	//"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type ThresholdProfile struct {
@@ -70,8 +72,18 @@ func (t *Threshold) TenantID() string {
 	return utils.ConcatenatedKey(t.Tenant, t.ID)
 }
 
-func NewThresholdService(dm *DataManager, storeInterval time.Duration) (tS *ThresholdService, err error) {
+// Thresholds is a sortable slice of Threshold
+type Thresholds []*Threshold
+
+// sort based on Weight
+func (ts Thresholds) Sort() {
+	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
+}
+
+func NewThresholdService(dm *DataManager, storeInterval time.Duration,
+	statS rpcclient.RpcClientConnection) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm, storeInterval: storeInterval,
+		statS:      statS,
 		stopBackup: make(chan struct{})}, nil
 }
 
@@ -79,6 +91,7 @@ func NewThresholdService(dm *DataManager, storeInterval time.Duration) (tS *Thre
 type ThresholdService struct {
 	dm            *DataManager
 	storeInterval time.Duration
+	statS         rpcclient.RpcClientConnection // allows applying filters based on stats
 	stopBackup    chan struct{}
 	storedTdIDs   utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
 	stMux         sync.RWMutex    // protects storedTdIDs
@@ -153,6 +166,68 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 		return
 	} else {
 		*t.dirty = false
+	}
+	return
+}
+
+
+// matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
+func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts Thresholds, err error) {
+	matchingTs := make(map[string]*Threshold)
+	tIDs, err := matchingItemIDsForEvent(ev.Fields, tS.dm.DataDB(), utils.ThresholdsIndex+ev.Tenant)
+	if err != nil {
+		return nil, err
+	}
+	lockIDs := utils.PrefixSliceItems(tIDs.Slice(), utils.ThresholdsIndex)
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
+	for tID := range tIDs {
+		tPrfl, err := tS.dm.DataDB().GetThresholdProfile(ev.Tenant, tID, false, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				continue
+			}
+			return nil, err
+		}
+		if tPrfl.ActivationInterval != nil &&
+			!tPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+			continue
+		}
+		passAllFilters := true
+		for _, fltr := range tPrfl.Filters {
+			if pass, err := fltr.Pass(ev.Fields, "", tS.statS); err != nil {
+				return nil, err
+			} else if !pass {
+				passAllFilters = false
+				continue
+			}
+		}
+		if !passAllFilters {
+			continue
+		}
+		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
+		if err != nil {
+			return nil, err
+		}
+		if tPrfl.Recurrent && t.dirty == nil {
+			t.dirty = utils.BoolPointer(false)
+		}
+		t.tPrfl = tPrfl
+		matchingTs[tPrfl.ID] = t
+	}
+	// All good, convert from Map to Slice so we can sort
+	ts = make(Thresholds, len(matchingTs))
+	i := 0
+	for _, t := range matchingTs {
+		ts[i] = t
+		i++
+	}
+	ts.Sort()
+	for i, t := range ts {
+		if t.tPrfl.Blocker { // blocker will stop processing
+			ts = ts[:i+1]
+			break
+		}
 	}
 	return
 }

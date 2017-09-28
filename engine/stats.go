@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"reflect"
@@ -127,11 +126,8 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 	return
 }
 
-// matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
+// matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(ev *StatEvent) (sqs StatQueues, err error) {
-	if ev.Tenant == "" {
-		return nil, errors.New("missing Tenant information")
-	}
 	matchingSQs := make(map[string]*StatQueue)
 	sqIDs, err := matchingItemIDsForEvent(ev.Fields, sS.dm.DataDB(), utils.StatQueuesStringIndex+ev.Tenant)
 	if err != nil {
@@ -261,6 +257,9 @@ func (sS *StatService) V1ProcessEvent(ev *StatEvent, reply *string) (err error) 
 
 // V1StatQueuesForEvent implements StatV1 method for processing an Event
 func (sS *StatService) V1GetStatQueuesForEvent(ev *StatEvent, reply *StatQueues) (err error) {
+	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(ev); err == nil {
 		*reply = sQs
