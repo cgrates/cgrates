@@ -555,6 +555,7 @@ func NewDCC() (StatMetric, error) {
 	return &StatDDC{Destinations: make(map[string]utils.StringMap), EventDestinations: make(map[string]string)}, nil
 }
 
+// DDC implements Destination Distinct Count metric
 type StatDDC struct {
 	Destinations      map[string]utils.StringMap
 	EventDestinations map[string]string // map[EventTenantID]Destination
@@ -580,19 +581,14 @@ func (ddc *StatDDC) GetFloat64Value() (v float64) {
 
 func (ddc *StatDDC) AddEvent(ev *StatEvent) (err error) {
 	var dest string
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
+	if destination, err := ev.Destination(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
-	} else if !at.IsZero() {
-		if destination, err := ev.Destination(config.CgrConfig().DefaultTimezone); err != nil {
-			return err
-		} else {
-			dest = destination
-			if _, has := ddc.Destinations[dest]; !has {
-				ddc.Destinations[dest] = make(map[string]bool)
-			}
-			ddc.Destinations[dest][ev.TenantID()] = true
+	} else {
+		dest = destination
+		if _, has := ddc.Destinations[dest]; !has {
+			ddc.Destinations[dest] = make(map[string]bool)
 		}
+		ddc.Destinations[dest][ev.TenantID()] = true
 	}
 	ddc.EventDestinations[ev.TenantID()] = dest
 	return
@@ -603,13 +599,12 @@ func (ddc *StatDDC) RemEvent(evTenantID string) (err error) {
 	if !has {
 		return utils.ErrNotFound
 	}
+	delete(ddc.EventDestinations, evTenantID)
 	if len(ddc.Destinations[destination]) == 1 {
 		delete(ddc.Destinations, destination)
-	} else {
-		delete(ddc.Destinations[destination], evTenantID)
+		return
 	}
-
-	delete(ddc.EventDestinations, evTenantID)
+	delete(ddc.Destinations[destination], evTenantID)
 	return
 }
 
