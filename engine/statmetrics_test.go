@@ -832,3 +832,103 @@ func TestPDDGetValue(t *testing.T) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
 }
+
+func TestDDCGetStringValue(t *testing.T) {
+	ddc, _ := NewDCC()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.DESTINATION: "1002"}}
+	if strVal := ddc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong ddc value: %s", strVal)
+	}
+
+	ddc.AddEvent(ev)
+	if strVal := ddc.GetStringValue(""); strVal != "1" {
+		t.Errorf("wrong ddc value: %s", strVal)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Fields: map[string]interface{}{
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.DESTINATION: "1002"}}
+
+	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Fields: map[string]interface{}{
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.DESTINATION: "1001"}}
+	ddc.AddEvent(ev2)
+	ddc.AddEvent(ev3)
+	if strVal := ddc.GetStringValue(""); strVal != "2" {
+		t.Errorf("wrong ddc value: %s", strVal)
+	}
+	ddc.RemEvent(ev.TenantID())
+	if strVal := ddc.GetStringValue(""); strVal != "2" {
+		t.Errorf("wrong ddc value: %s", strVal)
+	}
+	ddc.RemEvent(ev2.TenantID())
+	if strVal := ddc.GetStringValue(""); strVal != "1" {
+		t.Errorf("wrong ddc value: %s", strVal)
+	}
+	ddc.RemEvent(ev3.TenantID())
+	if strVal := ddc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong ddc value: %s", strVal)
+	}
+}
+
+func TestDDCGetFloat64Value(t *testing.T) {
+	ddc, _ := NewDCC()
+	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Fields: map[string]interface{}{
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":           time.Duration(10 * time.Second),
+			utils.PDD:         time.Duration(5 * time.Second),
+			utils.DESTINATION: "1002"}}
+	ddc.AddEvent(ev)
+	if v := ddc.GetFloat64Value(); v != 1 {
+		t.Errorf("wrong ddc value: %v", v)
+	}
+	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ddc.AddEvent(ev2)
+	if v := ddc.GetFloat64Value(); v != 1 {
+		t.Errorf("wrong ddc value: %v", v)
+	}
+	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Fields: map[string]interface{}{
+			"Usage":           time.Duration(1 * time.Minute),
+			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.PDD:         time.Duration(10 * time.Second),
+			utils.DESTINATION: "1001",
+		},
+	}
+	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Fields: map[string]interface{}{
+			"Usage":           time.Duration(1*time.Minute + 30*time.Second),
+			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.DESTINATION: "1003",
+		},
+	}
+	ddc.AddEvent(ev4)
+	if strVal := ddc.GetFloat64Value(); strVal != 2 {
+		t.Errorf("wrong ddc value: %v", strVal)
+	}
+	ddc.AddEvent(ev5)
+	if strVal := ddc.GetFloat64Value(); strVal != 3 {
+		t.Errorf("wrong ddc value: %v", strVal)
+	}
+	ddc.RemEvent(ev2.TenantID())
+	if strVal := ddc.GetFloat64Value(); strVal != 3 {
+		t.Errorf("wrong pdd value: %v", strVal)
+	}
+	ddc.RemEvent(ev4.TenantID())
+	if strVal := ddc.GetFloat64Value(); strVal != 2 {
+		t.Errorf("wrong ddc value: %v", strVal)
+	}
+	ddc.RemEvent(ev.TenantID())
+	if strVal := ddc.GetFloat64Value(); strVal != 1 {
+		t.Errorf("wrong ddc value: %v", strVal)
+	}
+	ddc.RemEvent(ev5.TenantID())
+	if strVal := ddc.GetFloat64Value(); strVal != -1.0 {
+		t.Errorf("wrong ddc value: %v", strVal)
+	}
+}

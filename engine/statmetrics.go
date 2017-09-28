@@ -36,6 +36,7 @@ func NewStatMetric(metricID string) (sm StatMetric, err error) {
 		utils.MetaACC: NewACC,
 		utils.MetaTCC: NewTCC,
 		utils.MetaPDD: NewPDD,
+		utils.MetaDDC: NewDCC,
 	}
 	if _, has := metrics[metricID]; !has {
 		return nil, fmt.Errorf("unsupported metric: %s", metricID)
@@ -548,4 +549,73 @@ func (pdd *StatPDD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, pdd)
+}
+
+func NewDCC() (StatMetric, error) {
+	return &StatDDC{Destinations: make(map[string]utils.StringMap), EventDestinations: make(map[string]string)}, nil
+}
+
+type StatDDC struct {
+	Destinations      map[string]utils.StringMap
+	EventDestinations map[string]string // map[EventTenantID]Destination
+}
+
+func (ddc *StatDDC) GetStringValue(fmtOpts string) (val string) {
+	if len(ddc.Destinations) == 0 {
+		return utils.NOT_AVAILABLE
+	}
+	return fmt.Sprintf("%+v", len(ddc.Destinations))
+}
+
+func (ddc *StatDDC) GetValue() (v interface{}) {
+	return len(ddc.Destinations)
+}
+
+func (ddc *StatDDC) GetFloat64Value() (v float64) {
+	if len(ddc.Destinations) == 0 {
+		return -1.0
+	}
+	return float64(len(ddc.Destinations))
+}
+
+func (ddc *StatDDC) AddEvent(ev *StatEvent) (err error) {
+	var dest string
+	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
+		return err
+	} else if !at.IsZero() {
+		if destination, err := ev.Destination(config.CgrConfig().DefaultTimezone); err != nil {
+			return err
+		} else {
+			dest = destination
+			if _, has := ddc.Destinations[dest]; !has {
+				ddc.Destinations[dest] = make(map[string]bool)
+			}
+			ddc.Destinations[dest][ev.TenantID()] = true
+		}
+	}
+	ddc.EventDestinations[ev.TenantID()] = dest
+	return
+}
+
+func (ddc *StatDDC) RemEvent(evTenantID string) (err error) {
+	destination, has := ddc.EventDestinations[evTenantID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if len(ddc.Destinations[destination]) == 1 {
+		delete(ddc.Destinations, destination)
+	} else {
+		delete(ddc.Destinations[destination], evTenantID)
+	}
+
+	delete(ddc.EventDestinations, evTenantID)
+	return
+}
+
+func (ddc *StatDDC) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(DDC)
+}
+func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, ddc)
 }
