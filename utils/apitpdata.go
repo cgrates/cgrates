@@ -1356,16 +1356,14 @@ type TPStats struct {
 
 type TPThreshold struct {
 	TPid               string
+	Tenant             string
 	ID                 string
 	Filters            []*TPRequestFilter    // Filters for the request
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	ThresholdType      string
-	ThresholdValue     float64 // threshold value
-	MinItems           int     // number of items agregated for the threshold to match
+	MinItems           int                   // number of items agregated for the threshold to match
 	Recurrent          bool
 	MinSleep           string
-	Blocker            bool // blocker flag to stop processing on filters matched
-	Stored             bool
+	Blocker            bool    // blocker flag to stop processing on filters matched
 	Weight             float64 // Weight to sort the thresholds
 	ActionIDs          []string
 }

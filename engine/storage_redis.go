@@ -335,7 +335,7 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix:
+		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdProfilePrefix:
 		i, err := rs.Cmd("EXISTS", category+subject).Int()
 		return i == 1, err
 	}

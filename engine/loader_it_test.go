@@ -340,17 +340,19 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for k, th := range loader.thresholds {
-		rcv, err := loader.dataStorage.GetThresholdProfile("", k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetThresholdProfile: ", err.Error())
-		}
-		sts, err := APItoThresholdProfile(th, "UTC")
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(sts, rcv) {
-			t.Errorf("Expecting: %v, received: %v", sts, rcv)
+	for _, mpIDs := range loader.thProfiles {
+		for _, th := range mpIDs {
+			rcv, err := loader.dataStorage.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional)
+			if err != nil {
+				t.Errorf("Failed GetThresholdProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
+			}
+			sts, err := APItoThresholdProfile(th, "UTC")
+			if err != nil {
+				t.Error(err)
+			}
+			if !reflect.DeepEqual(sts, rcv) {
+				t.Errorf("Expecting: %v, received: %v", sts, rcv)
+			}
 		}
 	}
 }

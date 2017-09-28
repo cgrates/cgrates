@@ -56,10 +56,10 @@ type TpReader struct {
 	aliases          map[string]*Alias
 	resProfiles      map[string]map[string]*utils.TPResource
 	sqProfiles       map[string]map[string]*utils.TPStats
-	thresholds       map[string]*utils.TPThreshold
+	thProfiles       map[string]map[string]*utils.TPThreshold
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
-
+	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
@@ -133,7 +133,7 @@ func (tpr *TpReader) Init() {
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resProfiles = make(map[string]map[string]*utils.TPResource)
 	tpr.sqProfiles = make(map[string]map[string]*utils.TPStats)
-	tpr.thresholds = make(map[string]*utils.TPThreshold)
+	tpr.thProfiles = make(map[string]map[string]*utils.TPThreshold)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1661,11 +1661,24 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) error {
 	if err != nil {
 		return err
 	}
-	mapTHs := make(map[string]*utils.TPThreshold)
+	mapTHs := make(map[string]map[string]*utils.TPThreshold)
 	for _, th := range tps {
-		mapTHs[th.ID] = th
+		if _, has := mapTHs[th.Tenant]; !has {
+			mapTHs[th.Tenant] = make(map[string]*utils.TPThreshold)
+		}
+		mapTHs[th.Tenant][th.ID] = th
 	}
-	tpr.thresholds = mapTHs
+	tpr.thProfiles = mapTHs
+	for tenant, mpID := range mapTHs {
+		for thID := range mpID {
+			thTntID := &utils.TenantID{tenant, thID}
+			if has, err := tpr.dataStorage.HasData(utils.ThresholdProfilePrefix, thTntID.TenantID()); err != nil {
+				return err
+			} else if !has {
+				tpr.thresholds = append(tpr.thresholds, thTntID)
+			}
+		}
+	}
 	return nil
 }
 
@@ -2031,16 +2044,18 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if verbose {
 		log.Print("Thresholds:")
 	}
-	for _, tpTH := range tpr.thresholds {
-		th, err := APItoThresholdProfile(tpTH, tpr.timezone)
-		if err != nil {
-			return err
-		}
-		if err = tpr.dataStorage.SetThresholdProfile(th); err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", th.ID)
+	for _, mpID := range tpr.thProfiles {
+		for _, tpTH := range mpID {
+			th, err := APItoThresholdProfile(tpTH, tpr.timezone)
+			if err != nil {
+				return err
+			}
+			if err = tpr.dataStorage.SetThresholdProfile(th); err != nil {
+				return err
+			}
+			if verbose {
+				log.Print("\t", th.TenantID())
+			}
 		}
 	}
 	if verbose {
@@ -2127,26 +2142,28 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 		}
-		if len(tpr.thresholds) > 0 {
+		if len(tpr.thProfiles) > 0 {
 			if verbose {
 				log.Print("Indexing thresholds")
 			}
-			stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ThresholdsIndex)
-			if err != nil {
-				return err
-			}
-			for _, tpTH := range tpr.thresholds {
-				if th, err := APItoThresholdProfile(tpTH, tpr.timezone); err != nil {
+			for tenant, mpID := range tpr.thProfiles {
+				stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ThresholdsIndex+tenant)
+				if err != nil {
 					return err
-				} else {
-					stIdxr.IndexFilters(th.ID, th.Filters)
 				}
-			}
-			if verbose {
-				log.Printf("Indexed Threshold keys: %+v", stIdxr.ChangedKeys().Slice())
-			}
-			if err := stIdxr.StoreIndexes(); err != nil {
-				return err
+				for _, tpTH := range mpID {
+					if th, err := APItoThresholdProfile(tpTH, tpr.timezone); err != nil {
+						return err
+					} else {
+						stIdxr.IndexFilters(th.ID, th.Filters)
+					}
+				}
+				if verbose {
+					log.Printf("Indexed thresholds tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
+				}
+				if err := stIdxr.StoreIndexes(); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -2214,6 +2231,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
 	// stats
 	log.Print("Stats: ", len(tpr.sqProfiles))
+	// thresholds
+	log.Print("Thresholds: ", len(tpr.thProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2355,10 +2374,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ThresholdsPrefix:
-		keys := make([]string, len(tpr.thresholds))
+	case utils.ThresholdProfilePrefix:
+		keys := make([]string, len(tpr.thProfiles))
 		i := 0
-		for k := range tpr.thresholds {
+		for k := range tpr.thProfiles {
 			keys[i] = k
 			i++
 		}

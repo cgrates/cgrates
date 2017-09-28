@@ -32,8 +32,7 @@ type ThresholdProfile struct {
 	MinItems           int                       // number of items agregated for the threshold to match
 	Recurrent          bool
 	MinSleep           time.Duration
-	Blocker            bool // blocker flag to stop processing on filters matched
-	Stored             bool
+	Blocker            bool    // blocker flag to stop processing on filters matched
 	Weight             float64 // Weight to sort the thresholds
 	ActionIDs          []string
 }
