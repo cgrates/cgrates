@@ -41,3 +41,22 @@ type ThresholdProfile struct {
 func (tp *ThresholdProfile) TenantID() string {
 	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
 }
+
+// ThresholdEvent is an event processed by ThresholdService
+type ThresholdEvent struct {
+	Tenant string
+	ID     string
+	Fields map[string]interface{}
+}
+
+// Threshold is the unit matched by filters
+// It's WakeupTime is stored on demand
+type Threshold struct {
+	Tenant       string
+	ID           string
+	LastExecuted time.Time
+	WakeupTime   time.Time // prevent threshold to run too early
+
+	tPrfl *ThresholdProfile
+	dirty *bool // needs save
+}
