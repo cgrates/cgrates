@@ -75,7 +75,7 @@ func (se StatEvent) AnswerTime(timezone string) (at time.Time, err error) {
 }
 
 // Usage returns the Usage of StatEvent
-func (se StatEvent) Usage(timezone string) (at time.Duration, err error) {
+func (se StatEvent) Usage() (at time.Duration, err error) {
 	usIf, has := se.Fields[utils.USAGE]
 	if !has {
 		return at, utils.ErrNotFound
@@ -94,7 +94,7 @@ func (se StatEvent) Usage(timezone string) (at time.Duration, err error) {
 }
 
 // Cost returns the Cost of StatEvent
-func (se StatEvent) Cost(timezone string) (cs float64, err error) {
+func (se StatEvent) Cost() (cs float64, err error) {
 	csIf, has := se.Fields[utils.COST]
 	if !has {
 		return cs, utils.ErrNotFound
@@ -110,7 +110,7 @@ func (se StatEvent) Cost(timezone string) (cs float64, err error) {
 }
 
 // Pdd returns the Pdd of StatEvent
-func (se StatEvent) Pdd(timezone string) (pdd time.Duration, err error) {
+func (se StatEvent) Pdd() (pdd time.Duration, err error) {
 	pddIf, has := se.Fields[utils.PDD]
 	if !has {
 		return pdd, utils.ErrNotFound
@@ -129,7 +129,7 @@ func (se StatEvent) Pdd(timezone string) (pdd time.Duration, err error) {
 }
 
 // Destination returns the Destination of StatEvent
-func (se StatEvent) Destination(timezone string) (ddc string, err error) {
+func (se StatEvent) Destination() (ddc string, err error) {
 	ddcIf, has := se.Fields[utils.DESTINATION]
 	if !has {
 		return ddc, utils.ErrNotFound
