@@ -324,6 +324,7 @@ func (rS *ResourceService) StoreResource(r *Resource) (err error) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
 				r.ID, err.Error()))
+		return
 	} else {
 		*r.dirty = false
 	}
@@ -374,7 +375,6 @@ func (rS *ResourceService) runBackup() {
 		rS.storeResources()
 		time.Sleep(rS.storeInterval)
 	}
-
 }
 
 // cachedResourcesForEvent attempts to retrieve cached resources for an event
