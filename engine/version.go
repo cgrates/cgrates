@@ -26,16 +26,21 @@ import (
 
 func CheckVersions(storage Storage) error {
 	// get current db version
-	if storage == nil {
-		storage = dataStorage
-	}
 	storType := storage.GetStorageType()
 	x := CurrentDBVersions(storType)
 	dbVersion, err := storage.GetVersions(utils.TBLVersions)
 	if err != nil {
+		empty, err := storage.IsDBEmpty()
+		if err != nil {
+			return err
+		}
+		if !empty {
+			msg := "Migration needed: please backup cgrates data and run : <cgr-migrator>"
+			return errors.New(msg)
+		}
 		// no data, write version
-		if err := storage.SetVersions(x, false); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
+		if err := SetDBVersions(storage); err != nil {
+			return err
 		}
 
 	} else {
@@ -48,6 +53,17 @@ func CheckVersions(storage Storage) error {
 		}
 	}
 	return nil
+}
+
+func SetDBVersions(storage Storage) error {
+	storType := storage.GetStorageType()
+	x := CurrentDBVersions(storType)
+	// no data, write version
+	if err := storage.SetVersions(x, false); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
+	}
+	return nil
+
 }
 
 func (vers Versions) Compare(curent Versions, storType string) string {
@@ -73,9 +89,7 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	switch storType {
 	case utils.MONGO:
 		x = m
-	case utils.POSTGRES:
-		x = stor
-	case utils.MYSQL:
+	case utils.POSTGRES, utils.MYSQL:
 		x = stor
 	case utils.REDIS:
 		x = data
@@ -91,17 +105,20 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 }
 
 func CurrentDBVersions(storType string) Versions {
+	dataDbVersions := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
+	storDbVersions := Versions{utils.COST_DETAILS: 2}
+	allVersions := dataDbVersions
+	for k, v := range storDbVersions {
+		allVersions[k] = v
+	}
+
 	switch storType {
-	case utils.MONGO:
-		return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-	case utils.POSTGRES:
-		return Versions{utils.COST_DETAILS: 2}
-	case utils.MYSQL:
-		return Versions{utils.COST_DETAILS: 2}
+	case utils.MONGO, utils.MAPSTOR:
+		return allVersions
+	case utils.POSTGRES, utils.MYSQL:
+		return storDbVersions
 	case utils.REDIS:
-		return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-	case utils.MAPSTOR:
-		return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		return dataDbVersions
 	}
 	return nil
 }

@@ -43,6 +43,7 @@ var (
 // subtests to be executed for each confDIR
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
+	testOnStorITIsDBEmpty,
 	testOnStorITSetGetDerivedCharges,
 	testOnStorITSetReqFilterIndexes,
 	testOnStorITGetReqFilterIndexes,
@@ -91,7 +92,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDStructVersion,
 	testOnStorITCRUDStatQueueProfile,
 	testOnStorITCRUDStoredStatQueue,
-	testOnStorITCRUDThresholdCfg,
+	testOnStorITCRUDThresholdProfile,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -134,6 +135,15 @@ func testOnStorITFlush(t *testing.T) {
 		t.Error(err)
 	}
 	cache.Flush()
+}
+func testOnStorITIsDBEmpty(t *testing.T) {
+	test, err := onStor.IsDBEmpty()
+	if err != nil {
+		t.Error(err)
+	} else if test != true {
+		t.Errorf("\nExpecting: true got :%+v", test)
+	}
+
 }
 
 func testOnStorITSetGetDerivedCharges(t *testing.T) {
@@ -2037,14 +2047,12 @@ func testOnStorITCRUDStoredStatQueue(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDThresholdCfg(t *testing.T) {
+func testOnStorITCRUDThresholdProfile(t *testing.T) {
 	timeMinSleep := time.Duration(0 * time.Second)
-	th := &ThresholdCfg{
+	th := &ThresholdProfile{
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
 		Filters:            []*RequestFilter{},
-		ThresholdType:      "",
-		ThresholdValue:     1.2,
 		MinItems:           10,
 		Recurrent:          true,
 		MinSleep:           timeMinSleep,
@@ -2053,29 +2061,30 @@ func testOnStorITCRUDThresholdCfg(t *testing.T) {
 		Weight:             1.4,
 		ActionIDs:          []string{},
 	}
-	if _, rcvErr := onStor.GetThresholdCfg(th.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID,
+		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetThresholdCfg(th); err != nil {
+	if err := onStor.SetThresholdProfile(th); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetThresholdCfg(th.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
-	if rcv, err := onStor.GetThresholdCfg(th.ID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
-	if err := onStor.RemThresholdCfg(th.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetThresholdCfg(th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, rcvErr := onStor.GetThresholdCfg(th.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

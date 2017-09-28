@@ -24,17 +24,20 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ThresholdCfg struct {
+type ThresholdProfile struct {
+	Tenant             string
 	ID                 string
 	Filters            []*RequestFilter          // Filters for the request
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
-	ThresholdType      string
-	ThresholdValue     float64 // threshold value
-	MinItems           int     // number of items agregated for the threshold to match
+	MinItems           int                       // number of items agregated for the threshold to match
 	Recurrent          bool
 	MinSleep           time.Duration
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64 // Weight to sort the thresholds
 	ActionIDs          []string
+}
+
+func (tp *ThresholdProfile) TenantID() string {
+	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
 }

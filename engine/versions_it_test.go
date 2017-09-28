@@ -38,7 +38,6 @@ var (
 var sTestsITVersions = []func(t *testing.T){
 	testVersionsFlush,
 	TestVersion,
-	testVersionsFlush,
 }
 
 func TestVersionsITMongoConnect(t *testing.T) {
@@ -139,6 +138,13 @@ func testVersionsFlush(t *testing.T) {
 			t.Error(err)
 		}
 	}
+	if err = SetDBVersions(dataDb); err != nil {
+		t.Error(err)
+	}
+	if err = SetDBVersions(storDB); err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestVersion(t *testing.T) {
@@ -147,15 +153,11 @@ func TestVersion(t *testing.T) {
 	var testVersion Versions
 	storType := dataDb.GetStorageType()
 	switch storType {
-	case utils.MONGO:
+	case utils.MONGO, utils.MAPSTOR:
 		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
 		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
-	case utils.POSTGRES:
-		currentVersion = CurrentStorDBVersions()
-		testVersion = Versions{utils.COST_DETAILS: 1}
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
-	case utils.MYSQL:
+	case utils.POSTGRES, utils.MYSQL:
 		currentVersion = CurrentStorDBVersions()
 		testVersion = Versions{utils.COST_DETAILS: 1}
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
@@ -163,15 +165,11 @@ func TestVersion(t *testing.T) {
 		currentVersion = CurrentDataDBVersions()
 		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
-	case utils.MAPSTOR:
-		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
 	}
 
 	//dataDB
-	if _, rcvErr := dataDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
+	if err := SetDBVersions(dataDb); err != nil {
+		t.Error(err)
 	}
 	if err := CheckVersions(dataDb); err != nil {
 		t.Error(err)
@@ -196,18 +194,17 @@ func TestVersion(t *testing.T) {
 	if err = dataDb.RemoveVersions(testVersion); err != nil {
 		t.Error(err)
 	}
+	if err := SetDBVersions(dataDb); err != nil {
+		t.Error(err)
+	}
 
 	storType = storDb.GetStorageType()
 	switch storType {
-	case utils.MONGO:
+	case utils.MONGO, utils.MAPSTOR:
 		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
 		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
-	case utils.POSTGRES:
-		currentVersion = CurrentStorDBVersions()
-		testVersion = Versions{utils.COST_DETAILS: 1}
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
-	case utils.MYSQL:
+	case utils.POSTGRES, utils.MYSQL:
 		currentVersion = CurrentStorDBVersions()
 		testVersion = Versions{utils.COST_DETAILS: 1}
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
@@ -215,18 +212,15 @@ func TestVersion(t *testing.T) {
 		currentVersion = CurrentDataDBVersions()
 		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
-	case utils.MAPSTOR:
-		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
 	}
 	//storDB
-	if _, rcvErr := storDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
+	if err := SetDBVersions(storDb); err != nil {
+		t.Error(err)
 	}
 	if err := CheckVersions(storDb); err != nil {
 		t.Error(err)
 	}
+
 	if rcv, err := storDb.GetVersions(utils.TBLVersions); err != nil {
 		t.Error(err)
 	} else if len(currentVersion) != len(rcv) {
@@ -245,6 +239,9 @@ func TestVersion(t *testing.T) {
 		t.Error(err)
 	}
 	if err = storDb.RemoveVersions(testVersion); err != nil {
+		t.Error(err)
+	}
+	if err := SetDBVersions(storDb); err != nil {
 		t.Error(err)
 	}
 
