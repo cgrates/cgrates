@@ -186,7 +186,7 @@ func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
 	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if duration, err := ev.Usage(config.CgrConfig().DefaultTimezone); err != nil &&
+		if duration, err := ev.Usage(); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else {
@@ -268,7 +268,7 @@ func (tcd *StatTCD) AddEvent(ev *StatEvent) (err error) {
 	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if duration, err := ev.Usage(config.CgrConfig().DefaultTimezone); err != nil &&
+		if duration, err := ev.Usage(); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else {
@@ -351,7 +351,7 @@ func (acc *StatACC) AddEvent(ev *StatEvent) (err error) {
 	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if cost, err := ev.Cost(config.CgrConfig().DefaultTimezone); err != nil &&
+		if cost, err := ev.Cost(); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else if cost >= 0 {
@@ -432,7 +432,7 @@ func (tcc *StatTCC) AddEvent(ev *StatEvent) (err error) {
 	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if cost, err := ev.Cost(config.CgrConfig().DefaultTimezone); err != nil &&
+		if cost, err := ev.Cost(); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else if cost >= 0 {
@@ -516,7 +516,7 @@ func (pdd *StatPDD) AddEvent(ev *StatEvent) (err error) {
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
-		if duration, err := ev.Pdd(config.CgrConfig().DefaultTimezone); err != nil &&
+		if duration, err := ev.Pdd(); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else {
@@ -581,15 +581,13 @@ func (ddc *StatDDC) GetFloat64Value() (v float64) {
 
 func (ddc *StatDDC) AddEvent(ev *StatEvent) (err error) {
 	var dest string
-	if destination, err := ev.Destination(config.CgrConfig().DefaultTimezone); err != nil {
+	if dest, err = ev.Destination(); err != nil {
 		return err
-	} else {
-		dest = destination
-		if _, has := ddc.Destinations[dest]; !has {
-			ddc.Destinations[dest] = make(map[string]bool)
-		}
-		ddc.Destinations[dest][ev.TenantID()] = true
 	}
+	if _, has := ddc.Destinations[dest]; !has {
+		ddc.Destinations[dest] = make(map[string]bool)
+	}
+	ddc.Destinations[dest][ev.TenantID()] = true
 	ddc.EventDestinations[ev.TenantID()] = dest
 	return
 }
