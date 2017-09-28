@@ -40,6 +40,7 @@ type Storage interface {
 	RemoveVersions(vrs Versions) (err error)
 	SelectDatabase(dbName string) (err error)
 	GetStorageType() string
+	IsDBEmpty() (resp bool, err error)
 }
 
 // OnlineStorage contains methods to use for administering online data

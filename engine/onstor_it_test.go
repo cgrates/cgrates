@@ -43,6 +43,7 @@ var (
 // subtests to be executed for each confDIR
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
+	testOnStorITIsDBEmpty,
 	testOnStorITSetGetDerivedCharges,
 	testOnStorITSetReqFilterIndexes,
 	testOnStorITGetReqFilterIndexes,
@@ -134,6 +135,15 @@ func testOnStorITFlush(t *testing.T) {
 		t.Error(err)
 	}
 	cache.Flush()
+}
+func testOnStorITIsDBEmpty(t *testing.T) {
+	test, err := onStor.IsDBEmpty()
+	if err != nil {
+		t.Error(err)
+	} else if test != true {
+		t.Errorf("\nExpecting: true got :%+v", test)
+	}
+
 }
 
 func testOnStorITSetGetDerivedCharges(t *testing.T) {

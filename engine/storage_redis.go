@@ -119,6 +119,18 @@ func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 	return rs.Cmd("SELECT", dbName).Err
 }
 
+func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
+	var keys []string
+	keys, err = rs.GetKeysForPrefix("")
+	if err != nil {
+		return
+	}
+	if len(keys) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
 func (rs *RedisStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 	aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
