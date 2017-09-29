@@ -853,6 +853,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			ActivationInterval: "2014-07-29T15:00:00Z",
 			QueueLength:        100,
 			TTL:                "1s",
+			MinItems:           1,
 			Metrics:            "*asr;*acd;*acc",
 			Thresholds:         "THRESH1;THRESH2",
 			Stored:             false,
@@ -877,6 +878,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			QueueLength: tps[0].QueueLength,
 			TTL:         tps[0].TTL,
 			Metrics:     []string{"*asr", "*acd", "*acc"},
+			MinItems:    tps[0].MinItems,
 			Thresholds:  []string{"THRESH1", "THRESH2"},
 			Stored:      tps[0].Stored,
 			Blocker:     tps[0].Blocker,
@@ -900,6 +902,7 @@ func TestAPItoTPStats(t *testing.T) {
 		QueueLength:        100,
 		TTL:                "1s",
 		Metrics:            []string{"*asr", "*acd", "*acc"},
+		MinItems:           1,
 		Thresholds:         []string{"THRESH1", "THRESH2"},
 		Stored:             false,
 		Blocker:            false,
@@ -914,6 +917,7 @@ func TestAPItoTPStats(t *testing.T) {
 		Stored:      tps.Stored,
 		Blocker:     tps.Blocker,
 		Weight:      20.0,
+		MinItems:    tps.MinItems,
 	}
 	if eTPs.TTL, err = utils.ParseDurationWithSecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)

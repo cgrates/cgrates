@@ -495,7 +495,8 @@ type TpStats struct {
 	Blocker            bool    `index:"9" re:""`
 	Stored             bool    `index:"10" re:""`
 	Weight             float64 `index:"11" re:"\d+\.?\d*"`
-	Thresholds         string  `index:"12" re:""`
+	MinItems           int     `index:"12" re:""`
+	Thresholds         string  `index:"13" re:""`
 	CreatedAt          time.Time
 }
 

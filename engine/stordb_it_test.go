@@ -1578,6 +1578,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			Metrics:     []string{"*asr", "*acd", "*acc"},
 			Thresholds:  []string{"THRESH1", "THRESH2"},
 			Weight:      20.0,
+			MinItems:    1,
 		},
 	}
 

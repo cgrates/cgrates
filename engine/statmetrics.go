@@ -28,8 +28,8 @@ import (
 
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
-func NewStatMetric(metricID string) (sm StatMetric, err error) {
-	metrics := map[string]func() (StatMetric, error){
+func NewStatMetric(metricID string, minItems int) (sm StatMetric, err error) {
+	metrics := map[string]func(int) (StatMetric, error){
 		utils.MetaASR: NewASR,
 		utils.MetaACD: NewACD,
 		utils.MetaTCD: NewTCD,
@@ -41,7 +41,7 @@ func NewStatMetric(metricID string) (sm StatMetric, err error) {
 	if _, has := metrics[metricID]; !has {
 		return nil, fmt.Errorf("unsupported metric: %s", metricID)
 	}
-	return metrics[metricID]()
+	return metrics[metricID](minItems)
 }
 
 // StatMetric is the interface which a metric should implement
@@ -55,8 +55,8 @@ type StatMetric interface {
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 }
 
-func NewASR() (StatMetric, error) {
-	return &StatASR{Events: make(map[string]bool)}, nil
+func NewASR(minItems int) (StatMetric, error) {
+	return &StatASR{Events: make(map[string]bool), MinItems: minItems}, nil
 }
 
 // ASR implements AverageSuccessRatio metric
@@ -64,14 +64,15 @@ type StatASR struct {
 	Answered float64
 	Count    float64
 	Events   map[string]bool // map[EventTenantID]Answered
-	val      *float64        // cached ASR value
+	MinItems int
+	val      *float64 // cached ASR value
 }
 
 // getValue returns asr.val
 func (asr *StatASR) getValue() float64 {
 	if asr.val == nil {
-		if asr.Count == 0 {
-			asr.val = utils.Float64Pointer(float64(STATS_NA))
+		if (asr.MinItems > 0 && len(asr.Events) < asr.MinItems) || (asr.Count == 0) {
+			asr.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			asr.val = utils.Float64Pointer(utils.Round((asr.Answered / asr.Count * 100),
 				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
@@ -86,10 +87,12 @@ func (asr *StatASR) GetValue() (v interface{}) {
 }
 
 func (asr *StatASR) GetStringValue(fmtOpts string) (valStr string) {
-	if asr.Count == 0 {
-		return utils.NOT_AVAILABLE
+	if val := asr.getValue(); val == STATS_NA {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = fmt.Sprintf("%v%%", asr.getValue())
 	}
-	return fmt.Sprintf("%v%%", asr.getValue()) // %v will automatically limit the number of decimals printed
+	return
 }
 
 // GetFloat64Value is part of StatMetric interface
@@ -139,22 +142,23 @@ func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, asr)
 }
 
-func NewACD() (StatMetric, error) {
-	return &StatACD{Events: make(map[string]time.Duration)}, nil
+func NewACD(minItems int) (StatMetric, error) {
+	return &StatACD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
 }
 
 // ACD implements AverageCallDuration metric
 type StatACD struct {
-	Sum    time.Duration
-	Count  int64
-	Events map[string]time.Duration // map[EventTenantID]Duration
-	val    *time.Duration           // cached ACD value
+	Sum      time.Duration
+	Count    int64
+	Events   map[string]time.Duration // map[EventTenantID]Duration
+	MinItems int
+	val      *time.Duration // cached ACD value
 }
 
 // getValue returns acr.val
 func (acd *StatACD) getValue() time.Duration {
 	if acd.val == nil {
-		if acd.Count == 0 {
+		if (acd.MinItems > 0 && len(acd.Events) < acd.MinItems) || (acd.Count == 0) {
 			acd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
 			acd.val = utils.DurationPointer(time.Duration(acd.Sum.Nanoseconds() / acd.Count))
@@ -163,11 +167,13 @@ func (acd *StatACD) getValue() time.Duration {
 	return *acd.val
 }
 
-func (acd *StatACD) GetStringValue(fmtOpts string) (val string) {
-	if acd.Count == 0 {
-		return utils.NOT_AVAILABLE
+func (acd *StatACD) GetStringValue(fmtOpts string) (valStr string) {
+	if val := acd.getValue(); val == time.Duration((-1)*time.Nanosecond) {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = fmt.Sprintf("%+v", acd.getValue())
 	}
-	return fmt.Sprintf("%+v", acd.getValue())
+	return
 }
 
 func (acd *StatACD) GetValue() (v interface{}) {
@@ -175,10 +181,12 @@ func (acd *StatACD) GetValue() (v interface{}) {
 }
 
 func (acd *StatACD) GetFloat64Value() (v float64) {
-	if acd.Count == 0 {
-		return -1.0
+	if val := acd.getValue(); val == time.Duration((-1)*time.Nanosecond) {
+		v = -1.0
+	} else {
+		v = acd.getValue().Seconds()
 	}
-	return acd.getValue().Seconds()
+	return
 }
 
 func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
@@ -221,22 +229,23 @@ func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acd)
 }
 
-func NewTCD() (StatMetric, error) {
-	return &StatTCD{Events: make(map[string]time.Duration)}, nil
+func NewTCD(minItems int) (StatMetric, error) {
+	return &StatTCD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
 }
 
 // TCD implements TotalCallDuration metric
 type StatTCD struct {
-	Sum    time.Duration
-	Count  int64
-	Events map[string]time.Duration // map[EventTenantID]Duration
-	val    *time.Duration           // cached TCD value
+	Sum      time.Duration
+	Count    int64
+	Events   map[string]time.Duration // map[EventTenantID]Duration
+	MinItems int
+	val      *time.Duration // cached TCD value
 }
 
 // getValue returns tcd.val
 func (tcd *StatTCD) getValue() time.Duration {
 	if tcd.val == nil {
-		if tcd.Count == 0 {
+		if (tcd.MinItems > 0 && len(tcd.Events) < tcd.MinItems) || (tcd.Count == 0) {
 			tcd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
 			tcd.val = utils.DurationPointer(time.Duration(tcd.Sum.Nanoseconds()))
@@ -245,11 +254,13 @@ func (tcd *StatTCD) getValue() time.Duration {
 	return *tcd.val
 }
 
-func (tcd *StatTCD) GetStringValue(fmtOpts string) (val string) {
-	if tcd.Count == 0 {
-		return utils.NOT_AVAILABLE
+func (tcd *StatTCD) GetStringValue(fmtOpts string) (valStr string) {
+	if val := tcd.getValue(); val == time.Duration((-1)*time.Nanosecond) {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = fmt.Sprintf("%+v", tcd.getValue())
 	}
-	return fmt.Sprintf("%+v", tcd.getValue())
+	return
 }
 
 func (tcd *StatTCD) GetValue() (v interface{}) {
@@ -257,10 +268,12 @@ func (tcd *StatTCD) GetValue() (v interface{}) {
 }
 
 func (tcd *StatTCD) GetFloat64Value() (v float64) {
-	if tcd.Count == 0 {
-		return -1.0
+	if val := tcd.getValue(); val == time.Duration((-1)*time.Nanosecond) {
+		v = -1.0
+	} else {
+		v = tcd.getValue().Seconds()
 	}
-	return tcd.getValue().Seconds()
+	return
 }
 
 func (tcd *StatTCD) AddEvent(ev *StatEvent) (err error) {
@@ -305,23 +318,24 @@ func (tcd *StatTCD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcd)
 }
 
-func NewACC() (StatMetric, error) {
-	return &StatACC{Events: make(map[string]float64)}, nil
+func NewACC(minItems int) (StatMetric, error) {
+	return &StatACC{Events: make(map[string]float64), MinItems: minItems}, nil
 }
 
 // ACC implements AverageCallCost metric
 type StatACC struct {
-	Sum    float64
-	Count  float64
-	Events map[string]float64 // map[EventTenantID]Cost
-	val    *float64           // cached ACC value
+	Sum      float64
+	Count    float64
+	Events   map[string]float64 // map[EventTenantID]Cost
+	MinItems int
+	val      *float64 // cached ACC value
 }
 
 // getValue returns tcd.val
 func (acc *StatACC) getValue() float64 {
 	if acc.val == nil {
-		if acc.Count == 0 {
-			acc.val = utils.Float64Pointer(float64(STATS_NA))
+		if (acc.MinItems > 0 && len(acc.Events) < acc.MinItems) || (acc.Count == 0) {
+			acc.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / acc.Count),
 				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
@@ -330,11 +344,13 @@ func (acc *StatACC) getValue() float64 {
 	return *acc.val
 }
 
-func (acc *StatACC) GetStringValue(fmtOpts string) (val string) {
-	if acc.Count == 0 {
-		return utils.NOT_AVAILABLE
+func (acc *StatACC) GetStringValue(fmtOpts string) (valStr string) {
+	if val := acc.getValue(); val == STATS_NA {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = strconv.FormatFloat(acc.getValue(), 'f', -1, 64)
 	}
-	return strconv.FormatFloat(acc.getValue(), 'f', -1, 64)
+	return
 
 }
 
@@ -387,23 +403,24 @@ func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acc)
 }
 
-func NewTCC() (StatMetric, error) {
-	return &StatTCC{Events: make(map[string]float64)}, nil
+func NewTCC(minItems int) (StatMetric, error) {
+	return &StatTCC{Events: make(map[string]float64), MinItems: minItems}, nil
 }
 
 // TCC implements TotalCallCost metric
 type StatTCC struct {
-	Sum    float64
-	Count  float64
-	Events map[string]float64 // map[EventTenantID]Cost
-	val    *float64           // cached TCC value
+	Sum      float64
+	Count    float64
+	Events   map[string]float64 // map[EventTenantID]Cost
+	MinItems int
+	val      *float64 // cached TCC value
 }
 
 // getValue returns tcd.val
 func (tcc *StatTCC) getValue() float64 {
 	if tcc.val == nil {
-		if tcc.Count == 0 {
-			tcc.val = utils.Float64Pointer(float64(STATS_NA))
+		if (tcc.MinItems > 0 && len(tcc.Events) < tcc.MinItems) || (tcc.Count == 0) {
+			tcc.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			tcc.val = utils.Float64Pointer(utils.Round(tcc.Sum,
 				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
@@ -412,11 +429,13 @@ func (tcc *StatTCC) getValue() float64 {
 	return *tcc.val
 }
 
-func (tcc *StatTCC) GetStringValue(fmtOpts string) (val string) {
-	if tcc.Count == 0 {
-		return utils.NOT_AVAILABLE
+func (tcc *StatTCC) GetStringValue(fmtOpts string) (valStr string) {
+	if val := tcc.getValue(); val == STATS_NA {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = strconv.FormatFloat(tcc.getValue(), 'f', -1, 64)
 	}
-	return strconv.FormatFloat(tcc.getValue(), 'f', -1, 64)
+	return
 }
 
 func (tcc *StatTCC) GetValue() (v interface{}) {
@@ -468,22 +487,23 @@ func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcc)
 }
 
-func NewPDD() (StatMetric, error) {
-	return &StatPDD{Events: make(map[string]time.Duration)}, nil
+func NewPDD(minItems int) (StatMetric, error) {
+	return &StatPDD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
 }
 
 // PDD implements Post Dial Delay (average) metric
 type StatPDD struct {
-	Sum    time.Duration
-	Count  int64
-	Events map[string]time.Duration // map[EventTenantID]Duration
-	val    *time.Duration           // cached PDD value
+	Sum      time.Duration
+	Count    int64
+	Events   map[string]time.Duration // map[EventTenantID]Duration
+	MinItems int
+	val      *time.Duration // cached PDD value
 }
 
 // getValue returns pdd.val
 func (pdd *StatPDD) getValue() time.Duration {
 	if pdd.val == nil {
-		if pdd.Count == 0 {
+		if (pdd.MinItems > 0 && len(pdd.Events) < pdd.MinItems) || (pdd.Count == 0) {
 			pdd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
 			pdd.val = utils.DurationPointer(time.Duration(pdd.Sum.Nanoseconds() / pdd.Count))
@@ -492,11 +512,13 @@ func (pdd *StatPDD) getValue() time.Duration {
 	return *pdd.val
 }
 
-func (pdd *StatPDD) GetStringValue(fmtOpts string) (val string) {
-	if pdd.Count == 0 {
-		return utils.NOT_AVAILABLE
+func (pdd *StatPDD) GetStringValue(fmtOpts string) (valStr string) {
+	if val := pdd.getValue(); val == time.Duration((-1)*time.Nanosecond) {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = fmt.Sprintf("%+v", pdd.getValue())
 	}
-	return fmt.Sprintf("%+v", pdd.getValue())
+	return
 }
 
 func (pdd *StatPDD) GetValue() (v interface{}) {
@@ -504,10 +526,12 @@ func (pdd *StatPDD) GetValue() (v interface{}) {
 }
 
 func (pdd *StatPDD) GetFloat64Value() (v float64) {
-	if pdd.Count == 0 {
-		return -1.0
+	if val := pdd.getValue(); val == time.Duration((-1)*time.Nanosecond) {
+		v = -1.0
+	} else {
+		v = pdd.getValue().Seconds()
 	}
-	return pdd.getValue().Seconds()
+	return
 }
 
 func (pdd *StatPDD) AddEvent(ev *StatEvent) (err error) {
@@ -551,21 +575,24 @@ func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, pdd)
 }
 
-func NewDCC() (StatMetric, error) {
-	return &StatDDC{Destinations: make(map[string]utils.StringMap), EventDestinations: make(map[string]string)}, nil
+func NewDCC(minItems int) (StatMetric, error) {
+	return &StatDDC{Destinations: make(map[string]utils.StringMap), Events: make(map[string]string), MinItems: minItems}, nil
 }
 
 // DDC implements Destination Distinct Count metric
 type StatDDC struct {
-	Destinations      map[string]utils.StringMap
-	EventDestinations map[string]string // map[EventTenantID]Destination
+	Destinations map[string]utils.StringMap
+	Events       map[string]string // map[EventTenantID]Destination
+	MinItems     int
 }
 
-func (ddc *StatDDC) GetStringValue(fmtOpts string) (val string) {
-	if len(ddc.Destinations) == 0 {
-		return utils.NOT_AVAILABLE
+func (ddc *StatDDC) GetStringValue(fmtOpts string) (valStr string) {
+	if val := len(ddc.Destinations); (val == 0) || (ddc.MinItems > 0 && len(ddc.Events) < ddc.MinItems) {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = fmt.Sprintf("%+v", len(ddc.Destinations))
 	}
-	return fmt.Sprintf("%+v", len(ddc.Destinations))
+	return
 }
 
 func (ddc *StatDDC) GetValue() (v interface{}) {
@@ -573,10 +600,12 @@ func (ddc *StatDDC) GetValue() (v interface{}) {
 }
 
 func (ddc *StatDDC) GetFloat64Value() (v float64) {
-	if len(ddc.Destinations) == 0 {
-		return -1.0
+	if val := len(ddc.Destinations); (val == 0) || (ddc.MinItems > 0 && len(ddc.Events) < ddc.MinItems) {
+		v = -1.0
+	} else {
+		v = float64(len(ddc.Destinations))
 	}
-	return float64(len(ddc.Destinations))
+	return
 }
 
 func (ddc *StatDDC) AddEvent(ev *StatEvent) (err error) {
@@ -588,16 +617,16 @@ func (ddc *StatDDC) AddEvent(ev *StatEvent) (err error) {
 		ddc.Destinations[dest] = make(map[string]bool)
 	}
 	ddc.Destinations[dest][ev.TenantID()] = true
-	ddc.EventDestinations[ev.TenantID()] = dest
+	ddc.Events[ev.TenantID()] = dest
 	return
 }
 
 func (ddc *StatDDC) RemEvent(evTenantID string) (err error) {
-	destination, has := ddc.EventDestinations[evTenantID]
+	destination, has := ddc.Events[evTenantID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	delete(ddc.EventDestinations, evTenantID)
+	delete(ddc.Events, evTenantID)
 	if len(ddc.Destinations[destination]) == 1 {
 		delete(ddc.Destinations, destination)
 		return

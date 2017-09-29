@@ -40,6 +40,7 @@ type StatQueueProfile struct {
 	Blocker            bool     // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64
+	MinItems           int
 }
 
 func (sqp *StatQueueProfile) TenantID() string {
@@ -154,6 +155,7 @@ func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err 
 			ExpiryTime *time.Time
 		}, len(sq.SQItems)),
 		SQMetrics: make(map[string][]byte, len(sq.SQMetrics)),
+		MinItems:  sq.MinItems,
 	}
 	for i, sqItm := range sq.SQItems {
 		sSQ.SQItems[i] = sqItm
@@ -177,6 +179,7 @@ type StoredStatQueue struct {
 		ExpiryTime *time.Time // Used to auto-expire events
 	}
 	SQMetrics map[string][]byte
+	MinItems  int
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
@@ -194,12 +197,13 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 			ExpiryTime *time.Time
 		}, len(ssq.SQItems)),
 		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
+		MinItems:  ssq.MinItems,
 	}
 	for i, sqItm := range ssq.SQItems {
 		sq.SQItems[i] = sqItm
 	}
 	for metricID, marshaled := range ssq.SQMetrics {
-		if metric, err := NewStatMetric(metricID); err != nil {
+		if metric, err := NewStatMetric(metricID, ssq.MinItems); err != nil {
 			return nil, err
 		} else if err := metric.LoadMarshaled(ms, marshaled); err != nil {
 			return nil, err
@@ -219,6 +223,7 @@ type StatQueue struct {
 		ExpiryTime *time.Time // Used to auto-expire events
 	}
 	SQMetrics map[string]StatMetric
+	MinItems  int
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
 	ttl       *time.Duration // timeToLeave, picked on each init

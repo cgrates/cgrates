@@ -1351,6 +1351,7 @@ type TPStats struct {
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64
+	MinItems           int
 	Thresholds         []string
 }
 

@@ -434,6 +434,7 @@ CREATE TABLE tp_stats (
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
+  "min_items" INTEGER NOT NULL,
   "thresholds" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
