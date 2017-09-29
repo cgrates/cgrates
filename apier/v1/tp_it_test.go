@@ -84,7 +84,7 @@ func testTPInitCfg(t *testing.T) {
 	config.SetCgrConfig(tpCfg)
 	switch tpConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		tpDelay = 2000
+		tpDelay = 4000
 	default:
 		tpDelay = 2000
 	}
@@ -114,6 +114,7 @@ func testTPRpcConn(t *testing.T) {
 }
 
 func testTPImportTPFromFolderPath(t *testing.T) {
+	time.Sleep(time.Duration(1 * time.Second))
 	var reply string
 	if err := tpRPC.Call("ApierV1.ImportTariffPlanFromFolder", utils.AttrImportTPFromFolder{TPid: "TEST_TPID2", FolderPath: path.Join(tpDataDir, "tariffplans", "tutorial")}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ImportTarrifPlanFromFolder: ", err.Error())

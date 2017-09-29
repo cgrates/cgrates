@@ -2055,7 +2055,6 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
 		Filters:            []*RequestFilter{},
-		MinItems:           10,
 		Recurrent:          true,
 		MinSleep:           timeMinSleep,
 		Blocker:            true,

@@ -718,7 +718,7 @@ func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) 
 	case utils.StatQueuePrefix:
 		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
 		has = count > 0
-	case utils.ThresholdsPrefix:
+	case utils.ThresholdProfilePrefix:
 		count, err = db.C(colThs).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	default:

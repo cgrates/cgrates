@@ -940,7 +940,6 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 			FilterFieldName:    "Account",
 			FilterFieldValues:  "1001;1002",
 			ActivationInterval: "2014-07-29T15:00:00Z",
-			MinItems:           100,
 			Recurrent:          false,
 			MinSleep:           "1s",
 			Blocker:            false,
@@ -962,7 +961,6 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
-			MinItems:  tps[0].MinItems,
 			MinSleep:  tps[0].MinSleep,
 			Recurrent: tps[0].Recurrent,
 			Blocker:   tps[0].Blocker,
@@ -984,7 +982,6 @@ func TestAPItoTPThreshold(t *testing.T) {
 			&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
 		},
 		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
-		MinItems:           100,
 		Recurrent:          false,
 		MinSleep:           "1s",
 		Blocker:            false,
@@ -995,7 +992,6 @@ func TestAPItoTPThreshold(t *testing.T) {
 	eTPs := &ThresholdProfile{
 		ID:        tps.ID,
 		Filters:   make([]*RequestFilter, len(tps.Filters)),
-		MinItems:  tps.MinItems,
 		Recurrent: tps.Recurrent,
 		Blocker:   tps.Blocker,
 		Weight:    tps.Weight,
