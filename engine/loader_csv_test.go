@@ -273,8 +273,8 @@ cgrates.org,ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,
 cgrates.org,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
-cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acd,true,true,20,THRESH1;THRESH2
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],MinItems[12],Thresholds[13]
+cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,true,true,20,2,THRESH1;THRESH2
 `
 
 	thresholds = `
@@ -1452,11 +1452,12 @@ func TestLoadStats(t *testing.T) {
 				},
 				QueueLength: 100,
 				TTL:         "1s",
-				Metrics:     []string{"*asr", "*acd"},
+				Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
 				Thresholds:  []string{"THRESH1", "THRESH2"},
 				Blocker:     true,
 				Stored:      true,
 				Weight:      20,
+				MinItems:    2,
 			},
 		},
 	}

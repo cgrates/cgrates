@@ -37,7 +37,7 @@ const ACC = "ACC"
 const TCC = "TCC"
 const PDD = "PDD"
 const DDC = "DDC"
-const STATS_NA = -1
+const STATS_NA = -1.0
 
 func CreateMetric(metric string) Metric {
 	switch metric {

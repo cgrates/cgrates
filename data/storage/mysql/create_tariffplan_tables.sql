@@ -424,10 +424,10 @@ CREATE TABLE tp_resources (
 
 DROP TABLE IF EXISTS tp_stats;
 CREATE TABLE tp_stats (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
-  `tag` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
   `filter_type` varchar(16) NOT NULL,
   `filter_field_name` varchar(64) NOT NULL,
   `filter_field_values` varchar(256) NOT NULL,
@@ -438,11 +438,12 @@ CREATE TABLE tp_stats (
   `blocker` BOOLEAN NOT NULL,
   `stored` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
+  `min_items` int(11) NOT NULL,
   `thresholds` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_stats` (`tpid`,  `tenant`, `tag`, `filter_type`, `filter_field_name`)
+  UNIQUE KEY `unique_tp_stats` (`tpid`,  `tenant`, `id`, `filter_type`, `filter_field_name`)
 );
 
 --
@@ -451,10 +452,10 @@ CREATE TABLE tp_stats (
 
 DROP TABLE IF EXISTS tp_thresholds;
 CREATE TABLE tp_thresholds (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
-  `tag` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
   `filter_type` varchar(16) NOT NULL,
   `filter_field_name` varchar(64) NOT NULL,
   `filter_field_values` varchar(256) NOT NULL,
@@ -465,9 +466,9 @@ CREATE TABLE tp_thresholds (
   `weight` decimal(8,2) NOT NULL,
   `action_ids` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_thresholds` (`tpid`, `tag`, `filter_type`, `filter_field_name`)
+  UNIQUE KEY `unique_tp_thresholds` (`tpid`,`tenant`, `id`, `filter_type`, `filter_field_name`)
 );
 
 --

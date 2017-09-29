@@ -145,7 +145,7 @@ func testV1STSFromFolder(t *testing.T) {
 
 func testV1STSGetStats(t *testing.T) {
 	var reply []string
-	expectedIDs := []string{"STATS_1"}
+	expectedIDs := []string{"Stats1"}
 	if err := stsV1Rpc.Call("StatSV1.GetQueueIDs", "cgrates.org", &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
@@ -184,6 +184,21 @@ func testV1STSProcessEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
+	//process with one event (should be N/A becaus MinItems is 2)
+	expectedMetrics := map[string]string{
+		utils.MetaASR: utils.NOT_AVAILABLE,
+		utils.MetaACD: utils.NOT_AVAILABLE,
+		utils.MetaTCC: utils.NOT_AVAILABLE,
+		utils.MetaTCD: utils.NOT_AVAILABLE,
+		utils.MetaACC: utils.NOT_AVAILABLE,
+		utils.MetaPDD: utils.NOT_AVAILABLE,
+	}
+	var metrics map[string]string
+	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
 	ev2 := engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
@@ -208,7 +223,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
-	expectedMetrics := map[string]string{
+	expectedMetrics2 := map[string]string{
 		utils.MetaASR: "66.66667%",
 		utils.MetaACD: "1m30s",
 		utils.MetaACC: "61.5",
@@ -216,11 +231,11 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.MetaTCC: "123",
 		utils.MetaPDD: "4s",
 	}
-	var metrics map[string]string
-	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"}, &metrics); err != nil {
+	var metrics2 map[string]string
+	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
 	}
 }
 
@@ -235,7 +250,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	}
 	var metrics map[string]string
 	//get stats metrics before restart
-	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"}, &metrics); err != nil {
+	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -258,10 +273,10 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 		utils.MetaPDD: "4s",
 	}
 	var metrics2 map[string]string
-	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"}, &metrics2); err != nil {
+	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
-		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
+		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
 	}
 	time.Sleep(time.Duration(1 * time.Second))
 }
@@ -269,7 +284,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 func testV1STSSetStatQueueProfile(t *testing.T) {
 	var reply *engine.StatQueueProfile
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
-		&utils.TenantID{"cgrates.org", "TEST_PROFILE1"}, &reply); err == nil ||
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -294,6 +309,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		Blocker:     true,
 		Stored:      true,
 		Weight:      20,
+		MinItems:    1,
 	}
 	var result string
 	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
@@ -302,7 +318,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
-		&utils.TenantID{"cgrates.org", "TEST_PROFILE1"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
@@ -333,9 +349,10 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	time.Sleep(time.Duration(1 * time.Second))
 	var reply *engine.StatQueueProfile
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
-		&utils.TenantID{statConfig.Tenant, statConfig.ID}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
@@ -345,14 +362,14 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 func testV1STSRemoveStatQueueProfile(t *testing.T) {
 	var resp string
 	if err := stsV1Rpc.Call("ApierV1.RemStatQueueProfile",
-		&utils.TenantID{statConfig.Tenant, statConfig.ID}, &resp); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var sqp *engine.StatQueueProfile
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
-		&utils.TenantID{statConfig.Tenant, statConfig.ID}, sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

@@ -420,10 +420,10 @@ CREATE INDEX tp_resources_unique ON tp_resources  ("tpid",  "tenant", "id", "fil
 
 DROP TABLE IF EXISTS tp_stats;
 CREATE TABLE tp_stats (
-  "id" SERIAL PRIMARY KEY,
+  "pk" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
   "tenant"varchar(64) NOT NULL,
-  "tag" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
   "filter_type" varchar(16) NOT NULL,
   "filter_field_name" varchar(64) NOT NULL,
   "filter_field_values" varchar(256) NOT NULL,
@@ -434,11 +434,12 @@ CREATE TABLE tp_stats (
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
+  "min_items" INTEGER NOT NULL,
   "thresholds" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);
-CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "tag", "filter_type", "filter_field_name");
+CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "id", "filter_type", "filter_field_name");
 
 --
 -- Table structure for table `tp_threshold_cfgs`
@@ -446,10 +447,10 @@ CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "tag", "filter_type"
 
 DROP TABLE IF EXISTS tp_thresholds;
 CREATE TABLE tp_thresholds (
-  "id" SERIAL PRIMARY KEY,
+  "pk" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
   "tenant"varchar(64) NOT NULL,
-  "tag" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
   "filter_type" varchar(16) NOT NULL,
   "filter_field_name" varchar(64) NOT NULL,
   "filter_field_values" varchar(256) NOT NULL,
@@ -462,7 +463,7 @@ CREATE TABLE tp_thresholds (
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_thresholds_idx ON tp_thresholds (tpid);
-CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid", "tag", "filter_type", "filter_field_name");
+CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid","tenant", "id", "filter_type", "filter_field_name");
 
 
 --

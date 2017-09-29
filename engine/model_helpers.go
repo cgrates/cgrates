@@ -1966,14 +1966,15 @@ type TpStatsS []*TpStats
 func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 	mst := make(map[string]*utils.TPStats)
 	for _, tp := range tps {
-		st, found := mst[tp.Tag]
+		st, found := mst[tp.ID]
 		if !found {
 			st = &utils.TPStats{
-				Tenant:  tp.Tenant,
-				TPid:    tp.Tpid,
-				ID:      tp.Tag,
-				Blocker: tp.Blocker,
-				Stored:  tp.Stored,
+				Tenant:   tp.Tenant,
+				TPid:     tp.Tpid,
+				ID:       tp.ID,
+				Blocker:  tp.Blocker,
+				Stored:   tp.Stored,
+				MinItems: tp.MinItems,
 			}
 		}
 		if tp.Blocker == false || tp.Blocker == true {
@@ -1982,7 +1983,9 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 		if tp.Stored == false || tp.Stored == true {
 			st.Stored = tp.Stored
 		}
-
+		if tp.MinItems != 0 {
+			st.MinItems = tp.MinItems
+		}
 		if tp.QueueLength != 0 {
 			st.QueueLength = tp.QueueLength
 		}
@@ -2020,7 +2023,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 				FieldName: tp.FilterFieldName,
 				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
-		mst[tp.Tag] = st
+		mst[tp.ID] = st
 	}
 	result = make([]*utils.TPStats, len(mst))
 	i := 0
@@ -2037,9 +2040,10 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 	}
 	for i, fltr := range st.Filters {
 		mdl := &TpStats{
-			Tenant: st.Tenant,
-			Tpid:   st.TPid,
-			Tag:    st.ID,
+			Tenant:   st.Tenant,
+			Tpid:     st.TPid,
+			ID:       st.ID,
+			MinItems: st.MinItems,
 		}
 		if i == 0 {
 			mdl.TTL = st.TTL
@@ -2047,6 +2051,7 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 			mdl.Stored = st.Stored
 			mdl.Weight = st.Weight
 			mdl.QueueLength = st.QueueLength
+			mdl.MinItems = st.MinItems
 			for i, val := range st.Metrics {
 				if i != 0 {
 					mdl.Metrics += utils.INFIELD_SEP
@@ -2089,6 +2094,7 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 		Weight:      tpST.Weight,
 		Blocker:     tpST.Blocker,
 		Stored:      tpST.Stored,
+		MinItems:    tpST.MinItems,
 		Filters:     make([]*RequestFilter, len(tpST.Filters)),
 	}
 	if tpST.TTL != "" {
@@ -2123,12 +2129,12 @@ type TpThresholdS []*TpThreshold
 func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 	mst := make(map[string]*utils.TPThreshold)
 	for _, tp := range tps {
-		th, found := mst[tp.Tag]
+		th, found := mst[tp.ID]
 		if !found {
 			th = &utils.TPThreshold{
 				TPid:      tp.Tpid,
 				Tenant:    tp.Tenant,
-				ID:        tp.Tag,
+				ID:        tp.ID,
 				Blocker:   tp.Blocker,
 				Recurrent: tp.Recurrent,
 				MinSleep:  tp.MinSleep,
@@ -2156,7 +2162,7 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 				FieldName: tp.FilterFieldName,
 				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
-		mst[tp.Tag] = th
+		mst[tp.ID] = th
 	}
 	result = make([]*utils.TPThreshold, len(mst))
 	i := 0
@@ -2174,7 +2180,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 	for i, fltr := range th.Filters {
 		mdl := &TpThreshold{
 			Tpid: th.TPid,
-			Tag:  th.ID,
+			ID:   th.ID,
 		}
 		if i == 0 {
 			mdl.Blocker = th.Blocker

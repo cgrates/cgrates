@@ -146,6 +146,7 @@ func testTPStatsSetTPStat(t *testing.T) {
 		Blocker:    false,
 		Stored:     false,
 		Weight:     20,
+		MinItems:   1,
 		Thresholds: []string{"ThreshValue", "ThreshValueTwo"},
 	}
 	var result string
