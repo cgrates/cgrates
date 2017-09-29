@@ -579,7 +579,9 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			rS.StoreResource(r)
 		} else if r.dirty != nil {
 			*r.dirty = true // mark it to be saved
+			rS.srMux.Lock()
 			rS.storedResources[r.TenantID()] = true
+			rS.srMux.Unlock()
 		}
 	}
 	rS.srMux.Unlock()

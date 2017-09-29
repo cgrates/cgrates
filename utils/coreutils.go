@@ -41,6 +41,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cgrates/rpcclient"
 )
 
 func NewCounter(start, limit int64) *Counter {
@@ -778,4 +780,31 @@ type TenantID struct {
 
 func (tID *TenantID) TenantID() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
+}
+
+// RPCCall is a generic method calling RPC on a struct instance
+// serviceMethod is assumed to be in the form InstanceV1.Method
+// where V1Method will become RPC method called on instance
+func RPCCall(inst interface{}, serviceMethod string, args interface{}, reply interface{}) error {
+	methodSplit := strings.Split(serviceMethod, ".")
+	if len(methodSplit) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	method := reflect.ValueOf(inst).MethodByName(methodSplit[0][len(methodSplit[0])-2:] + methodSplit[1])
+	if !method.IsValid() {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return ErrServerError
+	}
+	return err
 }

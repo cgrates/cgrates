@@ -21,8 +21,6 @@ package engine
 import (
 	"fmt"
 	"math/rand"
-	"reflect"
-	"strings"
 	"sync"
 	"time"
 
@@ -30,7 +28,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewStatService initializes a StatService
@@ -193,35 +190,12 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *StatEvent) (sqs StatQueues
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection (ie. in ResourceS)
 func (ss *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	methodSplit := strings.Split(serviceMethod, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(ss).MethodByName(methodSplit[0][len(methodSplit[0])-2:] + methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
+	return utils.RPCCall(ss, serviceMethod, args, reply)
 }
 
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
 func (sS *StatService) processEvent(ev *StatEvent) (err error) {
-	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
 	matchSQs, err := sS.matchingStatQueuesForEvent(ev)
 	if err != nil {
 		return err
@@ -237,9 +211,6 @@ func (sS *StatService) processEvent(ev *StatEvent) (err error) {
 					sq.TenantID(), ev.TenantID(), err.Error()))
 			withErrors = true
 		}
-		if sq.sqPrfl.Blocker {
-			break
-		}
 	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
@@ -249,6 +220,9 @@ func (sS *StatService) processEvent(ev *StatEvent) (err error) {
 
 // V1ProcessEvent implements StatV1 method for processing an Event
 func (sS *StatService) V1ProcessEvent(ev *StatEvent, reply *string) (err error) {
+	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	if err = sS.processEvent(ev); err == nil {
 		*reply = utils.OK
 	}

@@ -55,13 +55,27 @@ type ThresholdEvent struct {
 	Fields map[string]interface{}
 }
 
+func (te *ThresholdEvent) TenantID() string {
+	return utils.ConcatenatedKey(te.Tenant, te.ID)
+}
+
+func (te *ThresholdEvent) Account() (acnt string, err error) {
+	acntIf, has := te.Fields[utils.ACCOUNT]
+	if !has {
+		return "", utils.ErrNotFound
+	}
+	var canCast bool
+	if acnt, canCast = acntIf.(string); !canCast {
+		return "", fmt.Errorf("field %s is not string", utils.ACCOUNT)
+	}
+	return
+}
+
 // Threshold is the unit matched by filters
-// It's WakeupTime is stored on demand
 type Threshold struct {
-	Tenant       string
-	ID           string
-	LastExecuted time.Time
-	WakeupTime   time.Time // prevent threshold to run too early
+	Tenant string
+	ID     string
+	Snooze time.Time // prevent threshold to run too early
 
 	tPrfl *ThresholdProfile
 	dirty *bool // needs save
@@ -69,6 +83,33 @@ type Threshold struct {
 
 func (t *Threshold) TenantID() string {
 	return utils.ConcatenatedKey(t.Tenant, t.ID)
+}
+
+// ProcessEvent processes an ThresholdEvent
+// concurrentActions limits the number of simultaneous action sets executed
+func (t *Threshold) ProcessEvent(ev *ThresholdEvent, dm *DataManager) (err error) {
+	if t.Snooze.After(time.Now()) { // ignore the event
+		return
+	}
+	acnt, _ := ev.Account()
+	var acntID string
+	if acnt != "" {
+		acntID = utils.ConcatenatedKey(ev.Tenant, acnt)
+	}
+	for _, actionSetID := range t.tPrfl.ActionIDs {
+		at := &ActionTiming{
+			Uuid:      utils.GenUUID(),
+			ActionsID: actionSetID,
+		}
+		if acntID != "" {
+			at.accountIDs = utils.NewStringMap(acntID)
+		}
+		if errExec := at.Execute(nil, nil); errExec != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
+			err = utils.ErrPartiallyExecuted
+		}
+	}
+	return
 }
 
 // Thresholds is a sortable slice of Threshold
@@ -79,16 +120,19 @@ func (ts Thresholds) Sort() {
 	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
 }
 
-func NewThresholdService(dm *DataManager, storeInterval time.Duration,
+func NewThresholdService(dm *DataManager, filterFields []string, storeInterval time.Duration,
 	statS rpcclient.RpcClientConnection) (tS *ThresholdService, err error) {
-	return &ThresholdService{dm: dm, storeInterval: storeInterval,
-		statS:      statS,
-		stopBackup: make(chan struct{})}, nil
+	return &ThresholdService{dm: dm,
+		filterFields:  filterFields,
+		storeInterval: storeInterval,
+		statS:         statS,
+		stopBackup:    make(chan struct{})}, nil
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB
 type ThresholdService struct {
 	dm            *DataManager
+	filterFields  []string // fields considered when searching for matching thresholds
 	storeInterval time.Duration
 	statS         rpcclient.RpcClientConnection // allows applying filters based on stats
 	stopBackup    chan struct{}
@@ -229,6 +273,50 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 			ts = ts[:i+1]
 			break
 		}
+	}
+	return
+}
+
+// processEvent processes a new event, dispatching to matching thresholds
+func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (err error) {
+	matchTs, err := tS.matchingThresholdsForEvent(ev)
+	if err != nil {
+		return err
+	} else if len(matchTs) == 0 {
+		return utils.ErrNotFound
+	}
+	var withErrors bool
+	for _, t := range matchTs {
+		err = t.ProcessEvent(ev, tS.dm)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
+					t.TenantID(), ev.TenantID(), err.Error()))
+			withErrors = true
+			continue
+		}
+		lockThreshold := utils.ThresholdPrefix + t.TenantID()
+		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
+		if t.dirty == nil { // one time threshold
+			if err = tS.dm.DataDB().RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
+						t.TenantID(), err.Error()))
+				withErrors = true
+				guardian.Guardian.UnguardIDs(lockThreshold)
+				continue
+			}
+		}
+		// recurrent threshold
+		*t.dirty = true // mark it to be saved
+		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
+		tS.stMux.Lock()
+		tS.storedTdIDs[t.TenantID()] = true
+		tS.stMux.Unlock()
+		guardian.Guardian.UnguardIDs(lockThreshold)
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
 	}
 	return
 }
