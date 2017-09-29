@@ -136,26 +136,6 @@ func testStorDBitIsDBEmpty(t *testing.T) {
 	}
 }
 
-func testStorDBitIsDBEmpty(t *testing.T) {
-	x := storDB.GetStorageType()
-	switch x {
-	case utils.MONGO:
-		test, err := storDB.IsDBEmpty()
-		if err != nil {
-			t.Error(err)
-		} else if test != true {
-			t.Errorf("\nExpecting: true got :%+v", test)
-		}
-	case utils.POSTGRES, utils.MYSQL:
-		test, err := storDB.IsDBEmpty()
-		if err != nil {
-			t.Error(err)
-		} else if test != false {
-			t.Errorf("\nExpecting: false got :%+v", test)
-		}
-	}
-}
-
 func testStorDBitCRUDTpTimings(t *testing.T) {
 	// READ
 	if _, err := storDB.GetTPTimings("testTPid", ""); err != utils.ErrNotFound {

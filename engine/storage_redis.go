@@ -157,18 +157,6 @@ func (rs *RedisStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 	return
 }
 
-func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
-	var keys []string
-	keys, err = rs.GetKeysForPrefix("")
-	if err != nil {
-		return
-	}
-	if len(keys) != 0 {
-		return false, nil
-	}
-	return true, nil
-}
-
 func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey

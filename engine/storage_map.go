@@ -298,12 +298,6 @@ func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached 
 	return
 }
 
-func (ms *MapStorage) IsDBEmpty() (resp bool, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	return len(ms.dict) == 0, nil
-}
-
 func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
