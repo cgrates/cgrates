@@ -1624,6 +1624,51 @@ func (ms *MapStorage) RemThresholdProfile(tenant, id, transactionID string) (err
 	return
 }
 
+func (ms *MapStorage) GetThreshold(tenant, id string, skipCache bool, transactionID string) (r *Threshold, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x != nil {
+				return x.(*Threshold), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	values, ok := ms.dict[key]
+	if !ok {
+		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, r)
+	if err != nil {
+		return nil, err
+	}
+	cache.Set(key, r, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (ms *MapStorage) SetThreshold(r *Threshold) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.ThresholdsPrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	return
+}
+
+func (ms *MapStorage) RemoveThreshold(tenant, id string, transactionID string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	delete(ms.dict, key)
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
+}
+
 func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

@@ -93,6 +93,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDStatQueueProfile,
 	testOnStorITCRUDStoredStatQueue,
 	testOnStorITCRUDThresholdProfile,
+	testOnStorITCRUDThreshold,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -2085,6 +2086,37 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		t.Error(rcvErr)
 	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDThreshold(t *testing.T) {
+	res := &Threshold{
+		Tenant:       "cgrates.org",
+		ID:           "TH1",
+		LastExecuted: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+		WakeupTime:   time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+	}
+	if _, rcvErr := onStor.GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetThreshold(res); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(res, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", res, rcv)
+	}
+	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1", false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(res, rcv) {
+		t.Errorf("Expecting: %v, received: %v", res, rcv)
+	}
+	if err := onStor.RemoveThreshold(res.Tenant, res.ID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetThreshold(res.Tenant, res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
