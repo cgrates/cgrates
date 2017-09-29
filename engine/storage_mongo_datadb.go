@@ -331,7 +331,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.ResourcesPrefix:        colRes,
 		utils.ResourceProfilesPrefix: colRsP,
 		utils.ThresholdProfilePrefix: colTlds,
-		utils.ThresholdsPrefix:       colThs,
+		utils.ThresholdPrefix:        colThs,
 	}
 	name, ok = colMap[prefix]
 	return
@@ -539,7 +539,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = ms.GetThresholdProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
-		case utils.ThresholdsPrefix:
+		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = ms.GetThreshold(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
@@ -2188,7 +2188,7 @@ func (ms *MongoStorage) RemThresholdProfile(tenant, id, transactionID string) (e
 }
 
 func (ms *MongoStorage) GetThreshold(tenant, id string, skipCache bool, transactionID string) (r *Threshold, err error) {
-	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -2224,7 +2224,7 @@ func (ms *MongoStorage) RemoveThreshold(tenant, id string, transactionID string)
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ThresholdsPrefix+utils.ConcatenatedKey(tenant, id),
+	cache.RemKey(utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	return nil
 }

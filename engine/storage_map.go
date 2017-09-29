@@ -1627,7 +1627,7 @@ func (ms *MapStorage) RemThresholdProfile(tenant, id, transactionID string) (err
 func (ms *MapStorage) GetThreshold(tenant, id string, skipCache bool, transactionID string) (r *Threshold, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x != nil {
@@ -1656,14 +1656,14 @@ func (ms *MapStorage) SetThreshold(r *Threshold) (err error) {
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.ThresholdsPrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	ms.dict[utils.ThresholdPrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
 	return
 }
 
 func (ms *MapStorage) RemoveThreshold(tenant, id string, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return

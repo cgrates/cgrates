@@ -133,7 +133,7 @@ func (tS *ThresholdService) storeThresholds() {
 		if tID == "" {
 			break // no more keys, backup completed
 		}
-		if tIf, ok := cache.Get(utils.ThresholdsPrefix + tID); !ok || tIf == nil {
+		if tIf, ok := cache.Get(utils.ThresholdPrefix + tID); !ok || tIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache resource with ID: %s", tID))
 		} else if err := tS.StoreThreshold(tIf.(*Threshold)); err != nil {
 			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
@@ -155,8 +155,8 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 	if t.dirty == nil || !*t.dirty {
 		return
 	}
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, utils.ThresholdsPrefix+t.TenantID())
-	defer guardian.Guardian.UnguardIDs(utils.ThresholdsPrefix + t.TenantID())
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, utils.ThresholdPrefix+t.TenantID())
+	defer guardian.Guardian.UnguardIDs(utils.ThresholdPrefix + t.TenantID())
 	if err = tS.dm.DataDB().SetThreshold(t); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
@@ -202,14 +202,18 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 		if !passAllFilters {
 			continue
 		}
+		lockThreshold := utils.ThresholdPrefix + tPrfl.TenantID()
+		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
 		t, err := tS.dm.DataDB().GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
 		if err != nil {
+			guardian.Guardian.UnguardIDs(lockThreshold)
 			return nil, err
 		}
 		if tPrfl.Recurrent && t.dirty == nil {
 			t.dirty = utils.BoolPointer(false)
 		}
 		t.tPrfl = tPrfl
+		guardian.Guardian.UnguardIDs(lockThreshold)
 		matchingTs[tPrfl.ID] = t
 	}
 	// All good, convert from Map to Slice so we can sort

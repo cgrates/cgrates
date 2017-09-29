@@ -1735,7 +1735,7 @@ func (rs *RedisStorage) RemThresholdProfile(tenant, id, transactionID string) (e
 }
 
 func (rs *RedisStorage) GetThreshold(tenant, id string, skipCache bool, transactionID string) (r *Threshold, err error) {
-	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
@@ -1764,11 +1764,11 @@ func (rs *RedisStorage) SetThreshold(r *Threshold) (err error) {
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.ThresholdsPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
+	return rs.Cmd("SET", utils.ThresholdPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
 }
 
 func (rs *RedisStorage) RemoveThreshold(tenant, id string, transactionID string) (err error) {
-	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
