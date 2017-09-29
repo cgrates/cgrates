@@ -184,7 +184,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
-	//add an event (should be N/A becaus MinItems is 2)
+	//process with one event (should be N/A becaus MinItems is 2)
 	expectedMetrics := map[string]string{
 		utils.MetaASR: utils.NOT_AVAILABLE,
 		utils.MetaACD: utils.NOT_AVAILABLE,
