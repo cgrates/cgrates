@@ -1734,6 +1734,48 @@ func (rs *RedisStorage) RemThresholdProfile(tenant, id, transactionID string) (e
 	return
 }
 
+func (rs *RedisStorage) GetThreshold(tenant, id string, skipCache bool, transactionID string) (r *Threshold, err error) {
+	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Threshold), nil
+		}
+	}
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err == redis.ErrRespNil { // did not find the destination
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &r); err != nil {
+		return
+	}
+	cache.Set(key, r, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (rs *RedisStorage) SetThreshold(r *Threshold) (err error) {
+	result, err := rs.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	return rs.Cmd("SET", utils.ThresholdsPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
+}
+
+func (rs *RedisStorage) RemoveThreshold(tenant, id string, transactionID string) (err error) {
+	key := utils.ThresholdsPrefix + utils.ConcatenatedKey(tenant, id)
+	if err = rs.Cmd("DEL", key).Err; err != nil {
+		return
+	}
+	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	return
+}
+
 func (rs *RedisStorage) GetStorageType() string {
 	return utils.REDIS
 }

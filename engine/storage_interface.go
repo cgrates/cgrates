@@ -123,6 +123,9 @@ type DataDB interface {
 	GetThresholdProfile(tenant string, ID string, skipCache bool, transID string) (tp *ThresholdProfile, err error)
 	SetThresholdProfile(tp *ThresholdProfile) (err error)
 	RemThresholdProfile(tenant, id, transactionID string) (err error)
+	GetThreshold(string, string, bool, string) (*Threshold, error)
+	SetThreshold(*Threshold) error
+	RemoveThreshold(string, string, string) error
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }
