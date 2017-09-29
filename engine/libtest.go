@@ -42,15 +42,15 @@ func InitDataDb(cfg *config.CGRConfig) error {
 		return err
 	}
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	// Write version before starting
-	if err := CheckVersions(dataDB); err != nil {
+	//	Write version before starting
+	if err := SetDBVersions(dataDB); err != nil {
 		return err
 	}
-
 	return nil
 }
 
 func InitStorDb(cfg *config.CGRConfig) error {
+	x := []string{utils.MYSQL, utils.POSTGRES}
 	storDb, err := ConfigureLoadStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
 		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
 	if err != nil {
@@ -58,6 +58,11 @@ func InitStorDb(cfg *config.CGRConfig) error {
 	}
 	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDBType)); err != nil {
 		return err
+	}
+	if utils.IsSliceMember(x, cfg.StorDBType) {
+		if err := SetDBVersions(storDb); err != nil {
+			return err
+		}
 	}
 	return nil
 }

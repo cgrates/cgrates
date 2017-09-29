@@ -43,17 +43,17 @@ var sTestsITVersions = []func(t *testing.T){
 
 func TestVersionsITMongo(t *testing.T) {
 	var err error
-	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
+	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "tutmongo")); err != nil {
 		t.Fatal(err)
 	}
-	dataDb, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize)
-	if err != nil {
+	if dataDb, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass,
+		cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize); err != nil {
 		log.Fatal(err)
 	}
-
-	if storageDb, err = NewMongoStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName,
-		cfg.StorDBUser, cfg.StorDBPass, utils.StorDB, cfg.StorDBCDRSIndexes, nil, cfg.LoadHistorySize); err != nil {
-		t.Fatal(err)
+	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
 	}
 	dbtype = utils.MONGO
 	for _, stest := range sTestsITVersions {
@@ -61,9 +61,9 @@ func TestVersionsITMongo(t *testing.T) {
 	}
 }
 
-func TestVersionsITRedis_MYSQL(t *testing.T) {
+func TestVersionsITRedisMYSQL(t *testing.T) {
 	var err error
-	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
+	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "tutmysql")); err != nil {
 		t.Fatal(err)
 	}
 	dataDb, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize)
@@ -71,9 +71,10 @@ func TestVersionsITRedis_MYSQL(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	if storageDb, err = NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName,
-		cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime); err != nil {
-		t.Fatal(err)
+	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
 	}
 	dbtype = utils.REDIS
 	for _, stest := range sTestsITVersions {
@@ -81,7 +82,7 @@ func TestVersionsITRedis_MYSQL(t *testing.T) {
 	}
 }
 
-func TestVersionsITPostgres(t *testing.T) {
+func TestVersionsITRedisPostgres(t *testing.T) {
 	var err error
 	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 		t.Fatal(err)
@@ -90,10 +91,12 @@ func TestVersionsITPostgres(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if storageDb, err = NewPostgresStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName,
-		cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime); err != nil {
-		t.Fatal(err)
+	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
 	}
+
 	dbtype = utils.REDIS
 	for _, stest := range sTestsITVersions {
 		t.Run("TestMigratorITPostgres", stest)
@@ -127,10 +130,6 @@ func testVersion(t *testing.T) {
 	}
 
 	//dataDB
-	storType = dataDb.GetStorageType()
-
-	log.Print("storType:", storType)
-
 	if _, rcvErr := dataDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -157,7 +156,6 @@ func testVersion(t *testing.T) {
 	if err = dataDb.RemoveVersions(testVersion); err != nil {
 		t.Error(err)
 	}
-
 	storType = storageDb.GetStorageType()
 	switch storType {
 	case utils.MONGO, utils.MAPSTOR:
@@ -170,13 +168,7 @@ func testVersion(t *testing.T) {
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
 	}
 	//storageDb
-	storType = storageDb.GetStorageType()
 
-	log.Print("storType:", storType)
-
-	// if _, rcvErr := storageDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr)
-	// }
 	if err := CheckVersions(storageDb); err != nil {
 		t.Error(err)
 	}

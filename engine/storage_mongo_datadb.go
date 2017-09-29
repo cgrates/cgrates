@@ -557,12 +557,11 @@ func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
 	session := ms.session.Copy()
 	defer session.Close()
 	db := session.DB(ms.db)
-
-	col, err := db.CollectionNames()
+	cols, err := db.CollectionNames()
 	if err != nil {
 		return
 	}
-	return len(col) == 0, nil
+	return len(cols) == 0 || cols[0] == "cdrs", nil
 }
 
 func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err error) {

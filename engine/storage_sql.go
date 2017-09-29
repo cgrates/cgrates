@@ -1620,7 +1620,6 @@ func (self *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
 	}
 	if len(vrs) == 0 {
 		return nil, utils.ErrNotFound
-
 	}
 	return
 }
