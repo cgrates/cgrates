@@ -481,10 +481,10 @@ func (t TBLVersion) TableName() string {
 }
 
 type TpStats struct {
-	ID                 int64
+	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
-	Tag                string  `index:"1" re:""`
+	ID                 string  `index:"1" re:""`
 	FilterType         string  `index:"2" re:"^\*[A-Za-z].*"`
 	FilterFieldName    string  `index:"3" re:""`
 	FilterFieldValues  string  `index:"4" re:""`
@@ -501,10 +501,10 @@ type TpStats struct {
 }
 
 type TpThreshold struct {
-	ID                 int64
+	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
-	Tag                string  `index:"1" re:""`
+	ID                 string  `index:"1" re:""`
 	FilterType         string  `index:"2" re:"^\*[A-Za-z].*"`
 	FilterFieldName    string  `index:"3" re:""`
 	FilterFieldValues  string  `index:"4" re:""`

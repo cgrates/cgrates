@@ -67,7 +67,7 @@ func (self *ApierV1) GetTPStatIDs(attrs AttrGetTPStatIds, reply *[]string) error
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPStats, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPStats, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -83,7 +83,7 @@ func (self *ApierV1) RemTPStat(attrs AttrGetTPStat, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPStats, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPStats, attrs.TPid, map[string]string{"id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

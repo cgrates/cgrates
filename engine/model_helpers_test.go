@@ -846,7 +846,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 	tps := []*TpStats{
 		&TpStats{
 			Tpid:               "TEST_TPID",
-			Tag:                "Stats1",
+			ID:                 "Stats1",
 			FilterType:         MetaStringPrefix,
 			FilterFieldName:    "Account",
 			FilterFieldValues:  "1001;1002",
@@ -864,7 +864,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 	eTPs := []*utils.TPStats{
 		&utils.TPStats{
 			TPid: tps[0].Tpid,
-			ID:   tps[0].Tag,
+			ID:   tps[0].ID,
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
 					Type:      tps[0].FilterType,
@@ -939,7 +939,7 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 	tps := []*TpThreshold{
 		&TpThreshold{
 			Tpid:               "TEST_TPID",
-			Tag:                "Stats1",
+			ID:                 "Stats1",
 			FilterType:         MetaStringPrefix,
 			FilterFieldName:    "Account",
 			FilterFieldValues:  "1001;1002",
@@ -954,7 +954,7 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 	eTPs := []*utils.TPThreshold{
 		&utils.TPThreshold{
 			TPid: tps[0].Tpid,
-			ID:   tps[0].Tag,
+			ID:   tps[0].ID,
 			Filters: []*utils.TPRequestFilter{
 				&utils.TPRequestFilter{
 					Type:      tps[0].FilterType,

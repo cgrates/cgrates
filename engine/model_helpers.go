@@ -1966,12 +1966,12 @@ type TpStatsS []*TpStats
 func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 	mst := make(map[string]*utils.TPStats)
 	for _, tp := range tps {
-		st, found := mst[tp.Tag]
+		st, found := mst[tp.ID]
 		if !found {
 			st = &utils.TPStats{
 				Tenant:   tp.Tenant,
 				TPid:     tp.Tpid,
-				ID:       tp.Tag,
+				ID:       tp.ID,
 				Blocker:  tp.Blocker,
 				Stored:   tp.Stored,
 				MinItems: tp.MinItems,
@@ -2023,7 +2023,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 				FieldName: tp.FilterFieldName,
 				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
-		mst[tp.Tag] = st
+		mst[tp.ID] = st
 	}
 	result = make([]*utils.TPStats, len(mst))
 	i := 0
@@ -2042,7 +2042,7 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 		mdl := &TpStats{
 			Tenant:   st.Tenant,
 			Tpid:     st.TPid,
-			Tag:      st.ID,
+			ID:       st.ID,
 			MinItems: st.MinItems,
 		}
 		if i == 0 {
@@ -2129,12 +2129,12 @@ type TpThresholdS []*TpThreshold
 func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 	mst := make(map[string]*utils.TPThreshold)
 	for _, tp := range tps {
-		th, found := mst[tp.Tag]
+		th, found := mst[tp.ID]
 		if !found {
 			th = &utils.TPThreshold{
 				TPid:      tp.Tpid,
 				Tenant:    tp.Tenant,
-				ID:        tp.Tag,
+				ID:        tp.ID,
 				Blocker:   tp.Blocker,
 				Recurrent: tp.Recurrent,
 				MinSleep:  tp.MinSleep,
@@ -2162,7 +2162,7 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 				FieldName: tp.FilterFieldName,
 				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
-		mst[tp.Tag] = th
+		mst[tp.ID] = th
 	}
 	result = make([]*utils.TPThreshold, len(mst))
 	i := 0
@@ -2180,7 +2180,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 	for i, fltr := range th.Filters {
 		mdl := &TpThreshold{
 			Tpid: th.TPid,
-			Tag:  th.ID,
+			ID:   th.ID,
 		}
 		if i == 0 {
 			mdl.Blocker = th.Blocker

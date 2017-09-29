@@ -607,7 +607,7 @@ func (self *SQLStorage) SetTPStats(sts []*utils.TPStats) error {
 	tx := self.db.Begin()
 	for _, stq := range sts {
 		// Remove previous
-		if err := tx.Where(&TpStats{Tpid: stq.TPid, Tag: stq.ID}).Delete(TpStats{}).Error; err != nil {
+		if err := tx.Where(&TpStats{Tpid: stq.TPid, ID: stq.ID}).Delete(TpStats{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -629,7 +629,7 @@ func (self *SQLStorage) SetTPThreshold(ths []*utils.TPThreshold) error {
 	tx := self.db.Begin()
 	for _, th := range ths {
 		// Remove previous
-		if err := tx.Where(&TpThreshold{Tpid: th.TPid, Tag: th.ID}).Delete(TpThreshold{}).Error; err != nil {
+		if err := tx.Where(&TpThreshold{Tpid: th.TPid, ID: th.ID}).Delete(TpThreshold{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -1578,7 +1578,7 @@ func (self *SQLStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
 	var sts TpStatsS
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
-		q = q.Where("tag = ?", id)
+		q = q.Where("id = ?", id)
 	}
 	if err := q.Find(&sts).Error; err != nil {
 		return nil, err
@@ -1594,7 +1594,7 @@ func (self *SQLStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, e
 	var ths TpThresholdS
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
-		q = q.Where("tag = ?", id)
+		q = q.Where("id = ?", id)
 	}
 	if err := q.Find(&ths).Error; err != nil {
 		return nil, err
