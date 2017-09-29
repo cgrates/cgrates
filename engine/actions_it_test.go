@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
+/*
 import (
 	"flag"
 	"net/rpc"
@@ -169,3 +170,4 @@ func TestActionsitStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

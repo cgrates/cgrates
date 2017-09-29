@@ -147,6 +147,12 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
+func (ms *MapStorage) IsDBEmpty() (resp bool, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	return len(ms.dict) == 0, nil
+}
+
 func (ms *MapStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
 	if ms.cacheCfg == nil {
 		return

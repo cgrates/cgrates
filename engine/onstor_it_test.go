@@ -147,6 +147,16 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 
 }
 
+func testOnStorITIsDBEmpty(t *testing.T) {
+	test, err := onStor.IsDBEmpty()
+	if err != nil {
+		t.Error(err)
+	} else if test != true {
+		t.Errorf("\nExpecting: true got :%+v", test)
+	}
+
+}
+
 func testOnStorITSetGetDerivedCharges(t *testing.T) {
 	keyCharger1 := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
 	if _, err := onStor.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err == nil {

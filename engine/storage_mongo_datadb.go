@@ -421,6 +421,18 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	return nil
 }
 
+func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
+	session := ms.session.Copy()
+	defer session.Close()
+	db := session.DB(ms.db)
+
+	col, err := db.CollectionNames()
+	if err != nil {
+		return
+	}
+	return len(col) == 0, nil
+}
+
 func (ms *MongoStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
 	for key, ids := range map[string][]string{
 		utils.DESTINATION_PREFIX:         dstIDs,

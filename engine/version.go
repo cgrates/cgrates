@@ -29,7 +29,7 @@ func CheckVersions(storage Storage) error {
 	storType := storage.GetStorageType()
 	x := CurrentDBVersions(storType)
 	dbVersion, err := storage.GetVersions(utils.TBLVersions)
-	if err != nil {
+	if err == utils.ErrNotFound {
 		empty, err := storage.IsDBEmpty()
 		if err != nil {
 			return err
@@ -107,7 +107,11 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 func CurrentDBVersions(storType string) Versions {
 	dataDbVersions := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
 	storDbVersions := Versions{utils.COST_DETAILS: 2}
-	allVersions := dataDbVersions
+
+	allVersions := make(Versions)
+	for k, v := range dataDbVersions {
+		allVersions[k] = v
+	}
 	for k, v := range storDbVersions {
 		allVersions[k] = v
 	}
