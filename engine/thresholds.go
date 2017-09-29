@@ -19,15 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	//"fmt"
-	//"math/rand"
+	"fmt"
+	"math/rand"
 	"sort"
 	"sync"
 	"time"
 
-	//"github.com/cgrates/cgrates/cache"
-	//"github.com/cgrates/cgrates/config"
-	//"github.com/cgrates/cgrates/guardian"
+	"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -104,7 +104,6 @@ func (tS *ThresholdService) ListenAndServe(exitChan chan bool) error {
 	return nil
 }
 
-/*
 // backup will regularly store resources changed to dataDB
 func (tS *ThresholdService) runBackup() {
 	if tS.storeInterval <= 0 {
@@ -169,7 +168,6 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 	return
 }
 
-
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
 func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts Thresholds, err error) {
 	matchingTs := make(map[string]*Threshold)
@@ -204,7 +202,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 		if !passAllFilters {
 			continue
 		}
-		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
+		t, err := tS.dm.DataDB().GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
 		if err != nil {
 			return nil, err
 		}
@@ -230,4 +228,3 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 	}
 	return
 }
-*/
