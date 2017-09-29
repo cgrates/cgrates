@@ -60,11 +60,9 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 FROM %s", utils.TBLCDRs)); err != nil {
 		return err
 	}
-
-	if err = SetDBVersions(self); err != nil {
+	if err := SetDBVersions(self); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -1622,7 +1620,6 @@ func (self *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
 	}
 	if len(vrs) == 0 {
 		return nil, utils.ErrNotFound
-
 	}
 	return
 }
