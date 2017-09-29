@@ -2137,9 +2137,6 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 		if tp.ActionIDs != "" {
 			th.ActionIDs = append(th.ActionIDs, strings.Split(tp.ActionIDs, utils.INFIELD_SEP)...)
 		}
-		if tp.MinItems != 0 {
-			th.MinItems = tp.MinItems
-		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
 		}
@@ -2182,7 +2179,6 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 		if i == 0 {
 			mdl.Blocker = th.Blocker
 			mdl.Weight = th.Weight
-			mdl.MinItems = th.MinItems
 			mdl.Recurrent = th.Recurrent
 			mdl.MinSleep = th.MinSleep
 			if th.ActivationInterval != nil {
@@ -2220,7 +2216,6 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 	th = &ThresholdProfile{
 		Tenant:    tpTH.Tenant,
 		ID:        tpTH.ID,
-		MinItems:  tpTH.MinItems,
 		Recurrent: tpTH.Recurrent,
 		Weight:    tpTH.Weight,
 		Blocker:   tpTH.Blocker,

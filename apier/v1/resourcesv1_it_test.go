@@ -122,7 +122,6 @@ func testV1RsRpcConn(t *testing.T) {
 
 func testV1RsFromFolder(t *testing.T) {
 	var reply string
-	time.Sleep(time.Duration(2000) * time.Millisecond)
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := rlsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
@@ -132,6 +131,7 @@ func testV1RsFromFolder(t *testing.T) {
 }
 
 func testV1RsGetResourcesForEvent(t *testing.T) {
+	time.Sleep(time.Duration(1000) * time.Millisecond)
 	var reply *[]*engine.ResourceProfile
 	args := &utils.ArgRSv1ResourceUsage{
 		Tenant: "cgrates.org",

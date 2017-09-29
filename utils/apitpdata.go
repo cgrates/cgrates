@@ -1360,7 +1360,6 @@ type TPThreshold struct {
 	ID                 string
 	Filters            []*TPRequestFilter    // Filters for the request
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	MinItems           int                   // number of items agregated for the threshold to match
 	Recurrent          bool
 	MinSleep           string
 	Blocker            bool    // blocker flag to stop processing on filters matched

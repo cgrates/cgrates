@@ -37,7 +37,6 @@ type ThresholdProfile struct {
 	ID                 string
 	Filters            []*RequestFilter          // Filters for the request
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
-	MinItems           int                       // number of items agregated for the threshold to match
 	Recurrent          bool
 	MinSleep           time.Duration
 	Blocker            bool    // blocker flag to stop processing on filters matched
