@@ -213,9 +213,12 @@ func (sS *StatService) processEvent(ev *StatEvent) (err error) {
 					sq.TenantID(), ev.TenantID(), err.Error()))
 			withErrors = true
 		}
+		if sS.storeInterval == 0 || sq.dirty == nil { // don't save
+			continue
+		}
 		if sS.storeInterval == -1 {
 			sS.StoreStatQueue(sq)
-		} else if sq.dirty != nil {
+		} else {
 			*sq.dirty = true // mark it to be saved
 			sS.ssqMux.Lock()
 			sS.storedStatQueues[sq.TenantID()] = true
