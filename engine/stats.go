@@ -32,8 +32,10 @@ import (
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, storeInterval time.Duration) (ss *StatService, err error) {
-	return &StatService{dm: dm, storeInterval: storeInterval,
-		stopBackup: make(chan struct{})}, nil
+	return &StatService{dm: dm,
+		storeInterval:    storeInterval,
+		storedStatQueues: make(utils.StringMap),
+		stopBackup:       make(chan struct{})}, nil
 }
 
 // StatService builds stats for events
@@ -210,6 +212,14 @@ func (sS *StatService) processEvent(ev *StatEvent) (err error) {
 				fmt.Sprintf("<StatService> Queue: %s, ignoring event: %s, error: %s",
 					sq.TenantID(), ev.TenantID(), err.Error()))
 			withErrors = true
+		}
+		if sS.storeInterval == -1 {
+			sS.StoreStatQueue(sq)
+		} else if sq.dirty != nil {
+			*sq.dirty = true // mark it to be saved
+			sS.ssqMux.Lock()
+			sS.storedStatQueues[sq.TenantID()] = true
+			sS.ssqMux.Unlock()
 		}
 	}
 	if withErrors {
