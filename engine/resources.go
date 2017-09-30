@@ -573,7 +573,6 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 		rS.lcERMux.Unlock()
 	}
 	// index it for storing
-	rS.srMux.Lock()
 	for _, r := range mtcRLs {
 		if rS.storeInterval == -1 {
 			rS.StoreResource(r)
@@ -584,7 +583,6 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			rS.srMux.Unlock()
 		}
 	}
-	rS.srMux.Unlock()
 	*reply = alcMsg
 	return
 }
