@@ -325,7 +325,7 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (err error) {
 	return
 }
 
-// V1ProcessEvent implements StatV1 method for processing an Event
+// V1ProcessEvent implements ThresholdService method for processing an Event
 func (tS *ThresholdService) V1ProcessEvent(ev *ThresholdEvent, reply *string) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -336,7 +336,7 @@ func (tS *ThresholdService) V1ProcessEvent(ev *ThresholdEvent, reply *string) (e
 	return
 }
 
-// V1StatQueuesForEvent implements StatV1 method for processing an Event
+// V1GetThresholdsForEvent queries thresholds matching an Event
 func (tS *ThresholdService) V1GetThresholdsForEvent(ev *ThresholdEvent, reply *Thresholds) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -345,5 +345,20 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(ev *ThresholdEvent, reply *T
 	if ts, err = tS.matchingThresholdsForEvent(ev); err == nil {
 		*reply = ts
 	}
+	return
+}
+
+// V1GetQueueIDs returns list of queueIDs registered for a tenant
+func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (err error) {
+	prfx := utils.ThresholdPrefix + tenant + ":"
+	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*tIDs = retIDs
 	return
 }
