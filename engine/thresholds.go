@@ -121,23 +121,23 @@ func (ts Thresholds) Sort() {
 }
 
 func NewThresholdService(dm *DataManager, filteredFields []string, storeInterval time.Duration,
-	statS rpcclient.RpcClientConnection) (tS *ThresholdService, err error) {
+	statS *rpcclient.RpcClientPool) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm,
-		filterFields:  filterFields,
-		storeInterval: storeInterval,
-		statS:         statS,
-		stopBackup:    make(chan struct{})}, nil
+		filteredFields: filteredFields,
+		storeInterval:  storeInterval,
+		statS:          statS,
+		stopBackup:     make(chan struct{})}, nil
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB
 type ThresholdService struct {
-	dm            *DataManager
-	filterFields  []string // fields considered when searching for matching thresholds
-	storeInterval time.Duration
-	statS         rpcclient.RpcClientConnection // allows applying filters based on stats
-	stopBackup    chan struct{}
-	storedTdIDs   utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
-	stMux         sync.RWMutex    // protects storedTdIDs
+	dm             *DataManager
+	filteredFields []string // fields considered when searching for matching thresholds
+	storeInterval  time.Duration
+	statS          *rpcclient.RpcClientPool // allows applying filters based on stats
+	stopBackup     chan struct{}
+	storedTdIDs    utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	stMux          sync.RWMutex    // protects storedTdIDs
 }
 
 // Called to start the service
@@ -145,6 +145,15 @@ func (tS *ThresholdService) ListenAndServe(exitChan chan bool) error {
 	//go tS.runBackup() // start backup loop
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
+	return nil
+}
+
+// Shutdown is called to shutdown the service
+func (tS *ThresholdService) Shutdown() error {
+	utils.Logger.Info("<ThresholdS> shutdown initialized")
+	close(tS.stopBackup)
+	tS.storeThresholds()
+	utils.Logger.Info("<ThresholdS> shutdown complete")
 	return nil
 }
 

@@ -82,6 +82,13 @@
 },
 
 
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
 "sm_generic": {
 	"enabled": true,
 },
