@@ -120,7 +120,7 @@ func (ts Thresholds) Sort() {
 	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
 }
 
-func NewThresholdService(dm *DataManager, filterFields []string, storeInterval time.Duration,
+func NewThresholdService(dm *DataManager, filteredFields []string, storeInterval time.Duration,
 	statS rpcclient.RpcClientConnection) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm,
 		filterFields:  filterFields,

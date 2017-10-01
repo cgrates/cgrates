@@ -452,6 +452,7 @@ const (
 	EventResourcesPrefix         = "ers_"
 	MetaSysLog                   = "*syslog"
 	MetaStdLog                   = "*stdout"
+	MetaNever                    = "*never"
 )
 
 func buildCacheInstRevPrefixes() {

@@ -587,6 +587,16 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 	}
 }
 
+func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
+	eThresholdSCfg := &ThresholdSCfg{
+		Enabled:       false,
+		StoreInterval: 0,
+	}
+	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", eThresholdSCfg, cgrCfg.statsCfg)
+	}
+}
+
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	testDA := &DiameterAgentCfg{
 		Enabled:           false,
