@@ -19,12 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"reflect"
-	"strings"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func NewResourceSV1(rls *engine.ResourceService) *ResourceSV1 {
@@ -38,27 +34,7 @@ type ResourceSV1 struct {
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
 func (rsv1 *ResourceSV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	methodSplit := strings.Split(serviceMethod, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(rsv1).MethodByName(methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
+	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
