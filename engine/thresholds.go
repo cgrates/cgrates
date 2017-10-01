@@ -295,28 +295,55 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (err error) {
 			withErrors = true
 			continue
 		}
-		lockThreshold := utils.ThresholdPrefix + t.TenantID()
-		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
 		if t.dirty == nil { // one time threshold
+			lockThreshold := utils.ThresholdPrefix + t.TenantID()
+			guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
 			if err = tS.dm.DataDB().RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))
 				withErrors = true
-				guardian.Guardian.UnguardIDs(lockThreshold)
-				continue
+
 			}
+			guardian.Guardian.UnguardIDs(lockThreshold)
+			continue
 		}
-		// recurrent threshold
-		*t.dirty = true // mark it to be saved
 		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
-		tS.stMux.Lock()
-		tS.storedTdIDs[t.TenantID()] = true
-		tS.stMux.Unlock()
-		guardian.Guardian.UnguardIDs(lockThreshold)
+		// recurrent threshold
+		if tS.storeInterval == -1 {
+			tS.StoreThreshold(t)
+		} else {
+			*t.dirty = true // mark it to be saved
+			tS.stMux.Lock()
+			tS.storedTdIDs[t.TenantID()] = true
+			tS.stMux.Unlock()
+		}
 	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
+	}
+	return
+}
+
+// V1ProcessEvent implements StatV1 method for processing an Event
+func (tS *ThresholdService) V1ProcessEvent(ev *ThresholdEvent, reply *string) (err error) {
+	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err = tS.processEvent(ev); err == nil {
+		*reply = utils.OK
+	}
+	return
+}
+
+// V1StatQueuesForEvent implements StatV1 method for processing an Event
+func (tS *ThresholdService) V1GetThresholdsForEvent(ev *ThresholdEvent, reply *Thresholds) (err error) {
+	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	var ts Thresholds
+	if ts, err = tS.matchingThresholdsForEvent(ev); err == nil {
+		*reply = ts
 	}
 	return
 }
