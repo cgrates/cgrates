@@ -40,7 +40,7 @@ type AttrGetTPThreshold struct {
 	ID     string
 }
 
-// Queries specific Stat on Tariff plan
+// Queries specific Threshold on Tariff plan
 func (self *ApierV1) GetTPThreshold(attr AttrGetTPThreshold, reply *utils.TPThreshold) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
