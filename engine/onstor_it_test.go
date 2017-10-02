@@ -2091,10 +2091,9 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 
 func testOnStorITCRUDThreshold(t *testing.T) {
 	res := &Threshold{
-		Tenant:       "cgrates.org",
-		ID:           "TH1",
-		LastExecuted: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
-		WakeupTime:   time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Snooze: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
 	}
 	if _, rcvErr := onStor.GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
