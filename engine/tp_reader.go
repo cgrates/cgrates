@@ -57,9 +57,11 @@ type TpReader struct {
 	resProfiles      map[string]map[string]*utils.TPResource
 	sqProfiles       map[string]map[string]*utils.TPStats
 	thProfiles       map[string]map[string]*utils.TPThreshold
+	flProfiles       map[string]map[string]*utils.TPFilter
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
+	filters          []*utils.TenantID
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
@@ -134,6 +136,7 @@ func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[string]map[string]*utils.TPResource)
 	tpr.sqProfiles = make(map[string]map[string]*utils.TPStats)
 	tpr.thProfiles = make(map[string]map[string]*utils.TPThreshold)
+	tpr.flProfiles = make(map[string]map[string]*utils.TPFilter)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1671,7 +1674,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) error {
 	tpr.thProfiles = mapTHs
 	for tenant, mpID := range mapTHs {
 		for thID := range mpID {
-			thTntID := &utils.TenantID{tenant, thID}
+			thTntID := &utils.TenantID{Tenant: tenant, ID: thID}
 			if has, err := tpr.dataStorage.HasData(utils.ThresholdProfilePrefix, thTntID.TenantID()); err != nil {
 				return err
 			} else if !has {
@@ -1684,6 +1687,36 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) error {
 
 func (tpr *TpReader) LoadThresholds() error {
 	return tpr.LoadThresholdsFiltered("")
+}
+
+func (tpr *TpReader) LoadFilterFiltered(tag string) error {
+	tps, err := tpr.lr.GetTPFilter(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	mapTHs := make(map[string]map[string]*utils.TPFilter)
+	for _, th := range tps {
+		if _, has := mapTHs[th.Tenant]; !has {
+			mapTHs[th.Tenant] = make(map[string]*utils.TPFilter)
+		}
+		mapTHs[th.Tenant][th.ID] = th
+	}
+	tpr.flProfiles = mapTHs
+	for tenant, mpID := range mapTHs {
+		for thID := range mpID {
+			thTntID := &utils.TenantID{Tenant: tenant, ID: thID}
+			if has, err := tpr.dataStorage.HasData(utils.FilterProfilePrefix, thTntID.TenantID()); err != nil {
+				return err
+			} else if !has {
+				tpr.thresholds = append(tpr.filters, thTntID)
+			}
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadFilter() error {
+	return tpr.LoadFilterFiltered("")
 }
 
 func (tpr *TpReader) LoadAll() (err error) {
@@ -1742,6 +1775,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadFilter(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -2051,6 +2087,23 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 			if err = tpr.dataStorage.SetThresholdProfile(th); err != nil {
+				return err
+			}
+			if verbose {
+				log.Print("\t", th.TenantID())
+			}
+		}
+	}
+	if verbose {
+		log.Print("Filters:")
+	}
+	for _, mpID := range tpr.flProfiles {
+		for _, tpTH := range mpID {
+			th, err := APItoFilterProfile(tpTH)
+			if err != nil {
+				return err
+			}
+			if err = tpr.dataStorage.SetFilterProfile(th); err != nil {
 				return err
 			}
 			if verbose {
@@ -2378,6 +2431,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.thProfiles))
 		i := 0
 		for k := range tpr.thProfiles {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.FilterProfilePrefix:
+		keys := make([]string, len(tpr.flProfiles))
+		i := 0
+		for k := range tpr.flProfiles {
 			keys[i] = k
 			i++
 		}

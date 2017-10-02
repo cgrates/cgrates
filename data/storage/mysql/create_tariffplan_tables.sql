@@ -472,6 +472,25 @@ CREATE TABLE tp_thresholds (
 );
 
 --
+-- Table structure for table `tp_filter`
+--
+
+DROP TABLE IF EXISTS tp_filters;
+CREATE TABLE tp_filters (
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `filter_type` varchar(16) NOT NULL,
+  `filter_field_name` varchar(64) NOT NULL,
+  `filter_field_values` varchar(256) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_filters` (`tpid`,`tenant`, `id`, `filter_type`, `filter_field_name`)
+);
+
+--
 -- Table structure for table `versions`
 --
 

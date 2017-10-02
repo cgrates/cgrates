@@ -465,6 +465,25 @@ CREATE TABLE tp_thresholds (
 CREATE INDEX tp_thresholds_idx ON tp_thresholds (tpid);
 CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid","tenant", "id", "filter_type", "filter_field_name");
 
+--
+-- Table structure for table `tp_filter`
+--
+
+DROP TABLE IF EXISTS tp_filters;
+CREATE TABLE tp_filters (
+  "pk" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "filter_type" varchar(16) NOT NULL,
+  "filter_field_name" varchar(64) NOT NULL,
+  "filter_field_values" varchar(256) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+);
+  CREATE INDEX tp_filters_idx ON tp_filters (tpid);
+  CREATE INDEX tp_filters_unique ON tp_filters  ("tpid","tenant", "id", "filter_type", "filter_field_name");
+
+
 
 --
 -- Table structure for table `versions`

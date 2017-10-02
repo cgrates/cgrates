@@ -130,7 +130,7 @@ func testTPExportTPToFolder(t *testing.T) {
 		Compressed: true,
 		ExportPath: "/tmp/",
 		ExportedFiles: []string{"RatingProfiles.csv", "CdrStats.csv", "Users.csv", "RatingPlans.csv", "Actions.csv", "AccountActions.csv",
-			"Timings.csv", "SharedGroups.csv", "ActionPlans.csv", "ActionTriggers.cs", "DerivedChargers.csv", "Resources.csv", "Stats.csv", "Thresholds.csv", "Destinations.csv", "Rates.csv", "DestinationRates.csv"},
+			"Timings.csv", "SharedGroups.csv", "ActionPlans.csv", "ActionTriggers.cs", "DerivedChargers.csv", "Resources.csv", "Stats.csv", "Thresholds.csv", "Destinations.csv", "Rates.csv", "DestinationRates.csv", "Filters.csv"},
 	}
 	tpid := "TEST_TPID2"
 	compress := true

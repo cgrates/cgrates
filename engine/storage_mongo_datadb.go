@@ -63,6 +63,7 @@ const (
 	colSqp   = "statqueue_profiles"
 	colTlds  = "threshold_profiles"
 	colThs   = "thresholds"
+	colFlt   = "filter_profiles"
 )
 
 var (
@@ -332,6 +333,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.ResourceProfilesPrefix: colRsP,
 		utils.ThresholdProfilePrefix: colTlds,
 		utils.ThresholdPrefix:        colThs,
+		utils.FilterProfilePrefix:    colFlt,
 	}
 	name, ok = colMap[prefix]
 	return
@@ -542,6 +544,9 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = ms.GetThreshold(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+		case utils.FilterProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = ms.GetFilterProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -680,6 +685,11 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		iter := db.C(colTmg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.TimingsPrefix+idResult.Id)
+		}
+	case utils.FilterProfilePrefix:
+		iter := db.C(colFlt).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.FilterProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -2224,6 +2234,48 @@ func (ms *MongoStorage) RemoveThreshold(tenant, id string, transactionID string)
 		return
 	}
 	cache.RemKey(utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	return nil
+}
+
+func (ms *MongoStorage) GetFilterProfile(tenant, id string, skipCache bool, transactionID string) (r *FilterProfile, err error) {
+	key := utils.FilterProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*FilterProfile), nil
+		}
+	}
+	session, col := ms.conn(colFlt)
+	defer session.Close()
+	r = new(FilterProfile)
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(r); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, r, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (ms *MongoStorage) SetFilterProfile(r *FilterProfile) (err error) {
+	session, col := ms.conn(colFlt)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
+	return
+}
+
+func (ms *MongoStorage) RemoveFilterProfile(tenant, id string, transactionID string) (err error) {
+	session, col := ms.conn(colFlt)
+	defer session.Close()
+	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
+		return
+	}
+	cache.RemKey(utils.FilterProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	return nil
 }

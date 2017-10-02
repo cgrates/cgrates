@@ -2251,3 +2251,63 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 	}
 	return th, nil
 }
+
+type TpFilterS []*TpFilter
+
+func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
+	mst := make(map[string]*utils.TPFilter)
+	for _, tp := range tps {
+		th, found := mst[tp.ID]
+		if !found {
+			th = &utils.TPFilter{
+				TPid:            tp.Tpid,
+				Tenant:          tp.Tenant,
+				ID:              tp.ID,
+				FilterType:      tp.FilterType,
+				FilterFieldName: tp.FilterFieldName,
+			}
+		}
+		if tp.FilterFieldValues != "" {
+			th.FilterFielValues = append(th.FilterFielValues, strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)...)
+		}
+		mst[tp.ID] = th
+	}
+	result = make([]*utils.TPFilter, len(mst))
+	i := 0
+	for _, th := range mst {
+		result[i] = th
+		i++
+	}
+	return
+}
+
+func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
+	mdl := &TpFilter{
+		Tpid:            th.TPid,
+		Tenant:          th.Tenant,
+		ID:              th.ID,
+		FilterFieldName: th.FilterFieldName,
+		FilterType:      th.FilterType,
+	}
+	for i, val := range th.FilterFielValues {
+		if i != 0 {
+			mdl.FilterFieldValues += utils.INFIELD_SEP
+		}
+		mdl.FilterFieldValues += val
+	}
+	mdls = append(mdls, mdl)
+	return
+}
+
+func APItoFilterProfile(tpTH *utils.TPFilter) (th *FilterProfile, err error) {
+	th = &FilterProfile{
+		Tenant:          tpTH.Tenant,
+		ID:              tpTH.ID,
+		FilterFieldName: tpTH.FilterFieldName,
+		FilterType:      tpTH.FilterType,
+	}
+	for _, ati := range tpTH.FilterFielValues {
+		th.FilterFieldValues = append(th.FilterFieldValues, ati)
+	}
+	return th, nil
+}

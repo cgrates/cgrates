@@ -126,6 +126,9 @@ type DataDB interface {
 	GetThreshold(string, string, bool, string) (*Threshold, error)
 	SetThreshold(*Threshold) error
 	RemoveThreshold(string, string, string) error
+	GetFilterProfile(string, string, bool, string) (*FilterProfile, error)
+	SetFilterProfile(*FilterProfile) error
+	RemoveFilterProfile(string, string, string) error
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }
@@ -174,6 +177,7 @@ type LoadReader interface {
 	GetTPResources(string, string) ([]*utils.TPResource, error)
 	GetTPStats(string, string) ([]*utils.TPStats, error)
 	GetTPThreshold(string, string) ([]*utils.TPThreshold, error)
+	GetTPFilter(string, string) ([]*utils.TPFilter, error)
 }
 
 type LoadWriter interface {
@@ -197,6 +201,7 @@ type LoadWriter interface {
 	SetTPResources([]*utils.TPResource) error
 	SetTPStats([]*utils.TPStats) error
 	SetTPThreshold([]*utils.TPThreshold) error
+	SetTPFilter([]*utils.TPFilter) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr
