@@ -2179,8 +2179,9 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 	}
 	for i, fltr := range th.Filters {
 		mdl := &TpThreshold{
-			Tpid: th.TPid,
-			ID:   th.ID,
+			Tpid:   th.TPid,
+			Tenant: th.Tenant,
+			ID:     th.ID,
 		}
 		if i == 0 {
 			mdl.Blocker = th.Blocker
