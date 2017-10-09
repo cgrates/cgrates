@@ -411,6 +411,7 @@ const (
 	MetaFileCSV                  = "*file_csv"
 	MetaFileFWV                  = "*file_fwv"
 	Accounts                     = "Accounts"
+	AccountService               = "AccountS"
 	Actions                      = "Actions"
 	ActionPlans                  = "ActionPlans"
 	ActionTriggers               = "ActionTriggers"
@@ -443,6 +444,8 @@ const (
 	CacheResourceProfiles        = "resource_profiles"
 	CacheTimings                 = "timings"
 	StatS                        = "stats"
+	StatService                  = "StatS"
+	RALService                   = "RALs"
 	CostSource                   = "CostSource"
 	ExtraInfo                    = "ExtraInfo"
 	MetaPrefix                   = "*"
@@ -453,6 +456,11 @@ const (
 	MetaSysLog                   = "*syslog"
 	MetaStdLog                   = "*stdout"
 	MetaNever                    = "*never"
+	EventType                    = "EventType"
+	EventSource                  = "EventSource"
+	AccountID                    = "AccountID"
+	ResourceID                   = "ResourceID"
+	TotalUsage                   = "TotalUsage"
 )
 
 func buildCacheInstRevPrefixes() {
