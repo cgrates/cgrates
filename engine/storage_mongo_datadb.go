@@ -690,6 +690,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		iter := db.C(colFlt).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.FilterProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
+		}
 	case utils.ThresholdPrefix:
 		qry := bson.M{}
 		if tntID.Tenant != "" {
