@@ -22,15 +22,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewReqFilterIndexer(dataDB DataDB, dbKey string) (*ReqFilterIndexer, error) {
-	indexes, err := dataDB.GetReqFilterIndexes(dbKey)
+func NewReqFilterIndexer(dm *DataManager, dbKey string) (*ReqFilterIndexer, error) {
+	indexes, err := dm.DataDB().GetReqFilterIndexes(dbKey)
 	if err != nil && err != utils.ErrNotFound {
 		return nil, err
 	}
 	if indexes == nil {
 		indexes = make(map[string]map[string]utils.StringMap)
 	}
-	return &ReqFilterIndexer{dataDB: dataDB, dbKey: dbKey,
+	return &ReqFilterIndexer{dm: dm, dbKey: dbKey,
 		indexes: indexes, chngdIndxKeys: make(utils.StringMap)}, nil
 }
 
@@ -39,7 +39,7 @@ func NewReqFilterIndexer(dataDB DataDB, dbKey string) (*ReqFilterIndexer, error)
 // not thread safe, meant to be used as logic within other code blocks
 type ReqFilterIndexer struct {
 	indexes       map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[resourceID]
-	dataDB        DataDB
+	dm            *DataManager
 	dbKey         string          // get/store the result from/into this key
 	chngdIndxKeys utils.StringMap // keep record of the changed fieldName:fieldValue pair so we can re-cache wisely
 }
@@ -82,5 +82,5 @@ func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilt
 
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *ReqFilterIndexer) StoreIndexes() error {
-	return rfi.dataDB.SetReqFilterIndexes(rfi.dbKey, rfi.indexes)
+	return rfi.dm.DataDB().SetReqFilterIndexes(rfi.dbKey, rfi.indexes)
 }

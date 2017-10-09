@@ -45,7 +45,7 @@ type Stats struct {
 	queues              map[string]*CDRStatsQueue
 	queueSavers         map[string]*queueSaver
 	mux                 sync.RWMutex
-	dataDB              DataDB
+	dm                  *DataManager
 	defaultSaveInterval time.Duration
 }
 
@@ -54,38 +54,38 @@ type queueSaver struct {
 	stopper chan bool
 	save    func(*queueSaver)
 	sq      *CDRStatsQueue
-	dataDB  DataDB
+	dm      *DataManager
 }
 
-func newQueueSaver(saveInterval time.Duration, sq *CDRStatsQueue, db DataDB) *queueSaver {
+func newQueueSaver(saveInterval time.Duration, sq *CDRStatsQueue, dm *DataManager) *queueSaver {
 	svr := &queueSaver{
 		ticker:  time.NewTicker(saveInterval),
 		stopper: make(chan bool),
 		sq:      sq,
-		dataDB:  db,
+		dm:      dm,
 	}
-	go func(saveInterval time.Duration, sq *CDRStatsQueue, db DataDB) {
+	go func(saveInterval time.Duration, sq *CDRStatsQueue, dm *DataManager) {
 		for {
 			select {
 			case <-svr.ticker.C:
-				sq.Save(db)
+				sq.Save(dm.dataDB)
 			case <-svr.stopper:
 				break
 			}
 		}
-	}(saveInterval, sq, db)
+	}(saveInterval, sq, dm)
 	return svr
 }
 
 func (svr *queueSaver) stop() {
-	svr.sq.Save(svr.dataDB)
+	svr.sq.Save(svr.dm.dataDB)
 	svr.ticker.Stop()
 	svr.stopper <- true
 }
 
-func NewStats(dataDB DataDB, saveInterval time.Duration) *Stats {
-	cdrStats := &Stats{dataDB: dataDB, defaultSaveInterval: saveInterval}
-	if css, err := dataDB.GetAllCdrStats(); err == nil {
+func NewStats(dm *DataManager, saveInterval time.Duration) *Stats {
+	cdrStats := &Stats{dm: dm, defaultSaveInterval: saveInterval}
+	if css, err := dm.DataDB().GetAllCdrStats(); err == nil {
 		cdrStats.UpdateQueues(css, nil)
 	} else {
 		utils.Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
@@ -158,7 +158,7 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 		s.queues[cs.Id] = sq
 	}
 	// save the conf
-	if err := s.dataDB.SetCdrStats(cs); err != nil {
+	if err := s.dm.DataDB().SetCdrStats(cs); err != nil {
 		return err
 	}
 	if _, exists = s.queueSavers[sq.GetId()]; !exists {
@@ -185,14 +185,14 @@ func (s *Stats) RemoveQueue(qID string, out *int) error {
 
 func (s *Stats) ReloadQueues(ids []string, out *int) error {
 	if len(ids) == 0 {
-		if css, err := s.dataDB.GetAllCdrStats(); err == nil {
+		if css, err := s.dm.DataDB().GetAllCdrStats(); err == nil {
 			s.UpdateQueues(css, nil)
 		} else {
 			return fmt.Errorf("Cannot load cdr stats: %v", err)
 		}
 	}
 	for _, id := range ids {
-		if cs, err := s.dataDB.GetCdrStats(id); err == nil {
+		if cs, err := s.dm.DataDB().GetCdrStats(id); err == nil {
 			s.AddQueue(cs, nil)
 		} else {
 			return err
@@ -254,7 +254,7 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		if sq == nil {
 			sq = NewCDRStatsQueue(cs)
 			// load queue from storage if exists
-			if saved, err := s.dataDB.GetCdrStatsQueue(sq.GetId()); err == nil {
+			if saved, err := s.dm.DataDB().GetCdrStatsQueue(sq.GetId()); err == nil {
 				sq.Load(saved)
 			}
 			s.setupQueueSaver(sq)
@@ -284,7 +284,7 @@ func (s *Stats) setupQueueSaver(sq *CDRStatsQueue) {
 		si = s.defaultSaveInterval
 	}
 	if si > 0 {
-		s.queueSavers[sq.GetId()] = newQueueSaver(si, sq, s.dataDB)
+		s.queueSavers[sq.GetId()] = newQueueSaver(si, sq, s.dm)
 	}
 }
 

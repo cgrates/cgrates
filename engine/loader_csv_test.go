@@ -295,7 +295,7 @@ cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL
 var csvr *TpReader
 
 func init() {
-	csvr = NewTpReader(dataStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resProfiles, stats, thresholds, filters), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
@@ -358,7 +358,7 @@ func init() {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	dataStorage.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dm.DataDB().LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -1242,12 +1242,12 @@ func TestLoadAccountActions(t *testing.T) {
 		t.Errorf("Error loading account action: %+v", utils.ToIJSON(aa.UnitCounters[utils.VOICE][0].Counters[0].Filter))
 	}
 	// test that it does not overwrite balances
-	existing, err := dataStorage.GetAccount(aa.ID)
+	existing, err := dm.DataDB().GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The account was not set before load: %+v", existing)
 	}
-	dataStorage.SetAccount(aa)
-	existing, err = dataStorage.GetAccount(aa.ID)
+	dm.DataDB().SetAccount(aa)
+	existing, err = dm.DataDB().GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The set account altered the balances: %+v", existing)
 	}

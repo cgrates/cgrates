@@ -29,7 +29,7 @@ func (apierV1 *ApierV1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.S
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sCfg, err := apierV1.DataDB.GetStatQueueProfile(arg.Tenant, arg.ID,
+	if sCfg, err := apierV1.DataManager.DataDB().GetStatQueueProfile(arg.Tenant, arg.ID,
 		false, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
@@ -43,7 +43,7 @@ func (apierV1 *ApierV1) SetStatQueueProfile(sqp *engine.StatQueueProfile, reply 
 	if missing := utils.MissingStructFields(sqp, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataDB.SetStatQueueProfile(sqp); err != nil {
+	if err := apierV1.DataManager.DataDB().SetStatQueueProfile(sqp); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sqp.Tenant, sqp.ID),
@@ -57,7 +57,7 @@ func (apierV1 *ApierV1) RemStatQueueProfile(args *utils.TenantID, reply *string)
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataDB.RemStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.DataDB().RemStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -70,7 +70,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 
 			}
 			if m.dryRun != true {
-				if err := m.dataDB.SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
+				if err := m.dm.DataDB().SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.ActionTriggers] += 1
@@ -80,7 +80,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),

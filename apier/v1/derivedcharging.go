@@ -31,7 +31,7 @@ func (self *ApierV1) GetDerivedChargers(attrs utils.AttrDerivedChargers, reply *
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Direction", "Account", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if hDc, err := engine.HandleGetDerivedChargers(self.DataDB, &attrs); err != nil {
+	if hDc, err := engine.HandleGetDerivedChargers(self.DataManager, &attrs); err != nil {
 		return utils.NewErrServerError(err)
 	} else if hDc != nil {
 		*reply = *hDc
@@ -71,7 +71,7 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	}
 	dcKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	if !attrs.Overwrite {
-		if exists, err := self.DataDB.HasData(utils.DERIVEDCHARGERS_PREFIX, dcKey); err != nil {
+		if exists, err := self.DataManager.DataDB().HasData(utils.DERIVEDCHARGERS_PREFIX, dcKey); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists
@@ -79,10 +79,10 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	}
 	dstIds := strings.Split(attrs.DestinationIds, utils.INFIELD_SEP)
 	dcs := &utils.DerivedChargers{DestinationIDs: utils.NewStringMap(dstIds...), Chargers: attrs.DerivedChargers}
-	if err := self.DataDB.SetDerivedChargers(dcKey, dcs, utils.NonTransactional); err != nil {
+	if err := self.DataManager.DataDB().SetDerivedChargers(dcKey, dcs, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataDB.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{dcKey}, true); err != nil {
+	if err := self.DataManager.DataDB().CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{dcKey}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -109,10 +109,10 @@ func (self *ApierV1) RemDerivedChargers(attrs AttrRemDerivedChargers, reply *str
 	if len(attrs.Subject) == 0 {
 		attrs.Subject = utils.ANY
 	}
-	if err := self.DataDB.SetDerivedChargers(utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject), nil, utils.NonTransactional); err != nil {
+	if err := self.DataManager.DataDB().SetDerivedChargers(utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject), nil, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataDB.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX,
+	if err := self.DataManager.DataDB().CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX,
 		[]string{utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -44,7 +44,7 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 		if v1SG != nil {
 			acnt := v1SG.AsSharedGroup()
 			if m.dryRun != true {
-				if err = m.dataDB.SetSharedGroup(acnt, utils.NonTransactional); err != nil {
+				if err = m.dm.DataDB().SetSharedGroup(acnt, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.SharedGroups] += 1
@@ -53,7 +53,7 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 	}
 	// All done, update version wtih current one
 	vrs := engine.Versions{utils.SharedGroups: engine.CurrentStorDBVersions()[utils.SharedGroups]}
-	if err = m.dataDB.SetVersions(vrs, false); err != nil {
+	if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),

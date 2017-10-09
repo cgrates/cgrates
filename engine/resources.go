@@ -275,12 +275,12 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 }
 
 // Pas the config as a whole so we can ask access concurrently
-func NewResourceService(dataDB DataDB, storeInterval time.Duration,
+func NewResourceService(dm *DataManager, storeInterval time.Duration,
 	statS rpcclient.RpcClientConnection) (*ResourceService, error) {
 	if statS != nil && reflect.ValueOf(statS).IsNil() {
 		statS = nil
 	}
-	return &ResourceService{dataDB: dataDB, statS: statS,
+	return &ResourceService{dm: dm, statS: statS,
 		lcEventResources: make(map[string][]*utils.TenantID),
 		storedResources:  make(utils.StringMap),
 		storeInterval:    storeInterval, stopBackup: make(chan struct{})}, nil
@@ -288,7 +288,7 @@ func NewResourceService(dataDB DataDB, storeInterval time.Duration,
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	dataDB           DataDB                        // So we can load the data in cache and index it
+	dm               *DataManager                  // So we can load the data in cache and index it
 	statS            rpcclient.RpcClientConnection // allows applying filters based on stats
 	lcEventResources map[string][]*utils.TenantID  // cache recording resources for events in alocation phase
 	lcERMux          sync.RWMutex                  // protects the lcEventResources
@@ -320,7 +320,7 @@ func (rS *ResourceService) StoreResource(r *Resource) (err error) {
 	if r.dirty == nil || !*r.dirty {
 		return
 	}
-	if err = rS.dataDB.SetResource(r); err != nil {
+	if err = rS.dm.DataDB().SetResource(r); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
 				r.ID, err.Error()))
@@ -404,7 +404,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for i, rTid := range rIDs {
-		if r, err := rS.dataDB.GetResource(rTid.Tenant, rTid.ID, false, ""); err != nil {
+		if r, err := rS.dm.DataDB().GetResource(rTid.Tenant, rTid.ID, false, ""); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ResourceS> force-uncaching resources for evUUID: <%s>, error: <%s>",
 					evUUID, err.Error()))
@@ -427,7 +427,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rIDs, err := matchingItemIDsForEvent(ev, rS.dataDB, utils.ResourceProfilesStringIndex+tenant)
+	rIDs, err := matchingItemIDsForEvent(ev, rS.dm, utils.ResourceProfilesStringIndex+tenant)
 	if err != nil {
 		return nil, err
 	}
@@ -435,7 +435,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
-		rPrf, err := rS.dataDB.GetResourceProfile(tenant, resName, false, utils.NonTransactional)
+		rPrf, err := rS.dm.DataDB().GetResourceProfile(tenant, resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -458,7 +458,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 		if !passAllFilters {
 			continue
 		}
-		r, err := rS.dataDB.GetResource(rPrf.Tenant, rPrf.ID, false, "")
+		r, err := rS.dm.DataDB().GetResource(rPrf.Tenant, rPrf.ID, false, "")
 		if err != nil {
 			return nil, err
 		}

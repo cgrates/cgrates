@@ -518,20 +518,20 @@ func setddestinations(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 			i++
 		}
 		newDest := &Destination{Id: ddcDestId, Prefixes: prefixes}
-		oldDest, err := dataStorage.GetDestination(ddcDestId, false, utils.NonTransactional)
+		oldDest, err := dm.DataDB().GetDestination(ddcDestId, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		// update destid in storage
-		if err = dataStorage.SetDestination(newDest, utils.NonTransactional); err != nil {
+		if err = dm.DataDB().SetDestination(newDest, utils.NonTransactional); err != nil {
 			return err
 		}
-		if err = dataStorage.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
+		if err = dm.DataDB().CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
 			return err
 		}
 
 		if err == nil && oldDest != nil {
-			if err = dataStorage.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional); err != nil {
+			if err = dm.DataDB().UpdateReverseDestination(oldDest, newDest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -562,36 +562,36 @@ func removeAccountAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs
 		return utils.ErrInvalidKey
 	}
 
-	if err := dataStorage.RemoveAccount(accID); err != nil {
+	if err := dm.DataDB().RemoveAccount(accID); err != nil {
 		utils.Logger.Err(fmt.Sprintf("Could not remove account Id: %s: %v", accID, err))
 		return err
 	}
 
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acntAPids, err := dataStorage.GetAccountActionPlans(accID, false, utils.NonTransactional)
+		acntAPids, err := dm.DataDB().GetAccountActionPlans(accID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
 			return 0, err
 		}
 		for _, apID := range acntAPids {
-			ap, err := dataStorage.GetActionPlan(apID, false, utils.NonTransactional)
+			ap, err := dm.DataDB().GetActionPlan(apID, false, utils.NonTransactional)
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf("Could not retrieve action plan: %s: %v", apID, err))
 				return 0, err
 			}
 			delete(ap.AccountIDs, accID)
-			if err := dataStorage.SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
+			if err := dm.DataDB().SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Could not save action plan: %s: %v", apID, err))
 				return 0, err
 			}
 		}
-		if err = dataStorage.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
+		if err = dm.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
 			return 0, err
 		}
-		if err = dataStorage.RemAccountActionPlans(accID, nil); err != nil {
+		if err = dm.DataDB().RemAccountActionPlans(accID, nil); err != nil {
 			return 0, err
 		}
-		if err = dataStorage.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		if err = dm.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
 			return 0, err
 		}
 		return 0, nil

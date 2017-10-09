@@ -61,7 +61,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			for _, v1ap := range *v1APs {
 				ap := v1ap.AsActionPlan()
 				if m.dryRun != true {
-					if err = m.dataDB.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+					if err = m.dm.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 						return err
 					}
 					m.stats[utils.ActionPlans] += 1
@@ -72,7 +72,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),

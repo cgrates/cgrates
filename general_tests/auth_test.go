@@ -27,12 +27,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var dbAuth engine.DataDB
+var dbAuth *engine.DataManager
 var rsponder *engine.Responder
 
 func TestAuthSetStorage(t *testing.T) {
 	config.CgrConfig().CacheConfig[utils.CacheRatingPlans].Precache = true // precache rating plan
-	dbAuth, _ = engine.NewMapStorageJson()
+	data, _ := engine.NewMapStorageJson()
+	dbAuth = engine.NewDataManager(data)
 	engine.SetDataStorage(dbAuth)
 	rsponder = new(engine.Responder)
 
@@ -63,20 +64,20 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	stats := ``
 	thresholds := ``
 	filters := ``
-	csvr := engine.NewTpReader(dbAuth, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+	csvr := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds, filters), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false, false)
-	if acnt, err := dbAuth.GetAccount("cgrates.org:testauthpostpaid1"); err != nil {
+	if acnt, err := dbAuth.DataDB().GetAccount("cgrates.org:testauthpostpaid1"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
 
 	cache.Flush()
-	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dbAuth.DataDB().LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

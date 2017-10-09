@@ -2152,7 +2152,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Print("Indexing resource profiles")
 			}
 			for tenant, mpID := range tpr.resProfiles {
-				rlIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ResourceProfilesStringIndex+tenant)
+				rlIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesStringIndex+tenant)
 				if err != nil {
 					return err
 				}
@@ -2176,7 +2176,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Print("Indexing stats")
 			}
 			for tenant, mpID := range tpr.sqProfiles {
-				stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.StatQueuesStringIndex+tenant)
+				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.StatQueuesStringIndex+tenant)
 				if err != nil {
 					return err
 				}
@@ -2200,7 +2200,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Print("Indexing thresholds")
 			}
 			for tenant, mpID := range tpr.thProfiles {
-				stIdxr, err := NewReqFilterIndexer(tpr.dataStorage, utils.ThresholdsIndex+tenant)
+				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ThresholdsIndex+tenant)
 				if err != nil {
 					return err
 				}

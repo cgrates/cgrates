@@ -21,7 +21,7 @@ package engine
 import "github.com/cgrates/cgrates/utils"
 
 // Handles retrieving of DerivedChargers profile based on longest match from DataDb
-func HandleGetDerivedChargers(dataDB DataDB, attrs *utils.AttrDerivedChargers) (*utils.DerivedChargers, error) {
+func HandleGetDerivedChargers(dm *DataManager, attrs *utils.AttrDerivedChargers) (*utils.DerivedChargers, error) {
 	dcs := &utils.DerivedChargers{}
 	strictKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	anySubjKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, utils.ANY)
@@ -29,7 +29,7 @@ func HandleGetDerivedChargers(dataDB DataDB, attrs *utils.AttrDerivedChargers) (
 	anyCategKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, utils.ANY, utils.ANY, utils.ANY)
 	anyTenantKey := utils.DerivedChargersKey(attrs.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY)
 	for _, dcKey := range []string{strictKey, anySubjKey, anyAcntKey, anyCategKey, anyTenantKey} {
-		if dcsDb, err := dataDB.GetDerivedChargers(dcKey, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if dcsDb, err := dm.DataDB().GetDerivedChargers(dcKey, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return nil, err
 		} else if dcsDb != nil && DerivedChargersMatchesDest(dcsDb, attrs.Destination) {
 			dcs = dcsDb
@@ -45,7 +45,7 @@ func DerivedChargersMatchesDest(dcs *utils.DerivedChargers, dest string) bool {
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-		if destIDs, err := dataStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+		if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, dId := range destIDs {
 				includeDest, found := dcs.DestinationIDs[dId]
 				if found {
