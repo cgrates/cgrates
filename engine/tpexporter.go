@@ -250,6 +250,16 @@ func (self *TPExporter) Run() error {
 		toExportMap[utils.ThresholdsCsv][i] = sdModel[0]
 	}
 
+	storDataFilters, err := self.storDb.GetTPFilter(self.tpID, "")
+	if err != nil && err.Error() != utils.ErrNotFound.Error() {
+		return err
+	}
+	toExportMap[utils.FiltersCsv] = make([]interface{}, len(storDataFilters))
+	for i, sd := range storDataFilters {
+		sdModel := APItoModelTPFilter(sd)
+		toExportMap[utils.FiltersCsv][i] = sdModel[0]
+	}
+
 	storDataUsers, err := self.storDb.GetTPUsers(&utils.TPUsers{TPid: self.tpID})
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err

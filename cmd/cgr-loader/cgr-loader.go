@@ -152,6 +152,7 @@ func main() {
 			path.Join(*dataPath, utils.ResourcesCsv),
 			path.Join(*dataPath, utils.StatsCsv),
 			path.Join(*dataPath, utils.ThresholdsCsv),
+			path.Join(*dataPath, utils.FiltersCsv),
 		)
 	}
 	tpReader := engine.NewTpReader(dataDB, loader, *tpid, *timezone)

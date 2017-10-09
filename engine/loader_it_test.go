@@ -107,6 +107,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.FiltersCsv),
 	), "", "")
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -158,6 +159,9 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		t.Error("Failed loading stats: ", err.Error())
 	}
 	if err = loader.LoadThresholds(); err != nil {
+		t.Error("Failed loading thresholds: ", err.Error())
+	}
+	if err = loader.LoadFilter(); err != nil {
 		t.Error("Failed loading thresholds: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {

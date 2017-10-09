@@ -94,6 +94,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDStoredStatQueue,
 	testOnStorITCRUDThresholdProfile,
 	testOnStorITCRUDThreshold,
+	testOnStorITCRUDFilterProfile,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -2115,6 +2116,38 @@ func testOnStorITCRUDThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThreshold(res.Tenant, res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDFilterProfile(t *testing.T) {
+	fp := &FilterProfile{
+		Tenant:            "cgrates.org",
+		ID:                "Filter1",
+		FilterFieldName:   "*string",
+		FilterType:        "Account",
+		FilterFieldValues: []string{"1001", "1002"},
+	}
+	if _, rcvErr := onStor.GetFilterProfile("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetFilterProfile(fp); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetFilterProfile("cgrates.org", "Filter1", true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(fp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", fp, rcv)
+	}
+	if rcv, err := onStor.GetFilterProfile("cgrates.org", "Filter1", false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fp, rcv) {
+		t.Errorf("Expecting: %v, received: %v", fp, rcv)
+	}
+	if err := onStor.RemoveFilterProfile(fp.Tenant, fp.ID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetFilterProfile("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

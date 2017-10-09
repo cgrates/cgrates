@@ -209,7 +209,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats} {
+			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -632,6 +632,28 @@ func (self *SQLStorage) SetTPThreshold(ths []*utils.TPThreshold) error {
 			return err
 		}
 		for _, mst := range APItoModelTPThreshold(th) {
+			if err := tx.Save(&mst).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func (self *SQLStorage) SetTPFilter(ths []*utils.TPFilter) error {
+	if len(ths) == 0 {
+		return nil
+	}
+	tx := self.db.Begin()
+	for _, th := range ths {
+		// Remove previous
+		if err := tx.Where(&TpFilter{Tpid: th.TPid, ID: th.ID}).Delete(TpFilter{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mst := range APItoModelTPFilter(th) {
 			if err := tx.Save(&mst).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1598,6 +1620,22 @@ func (self *SQLStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, e
 		return nil, err
 	}
 	aths := ths.AsTPThreshold()
+	if len(aths) == 0 {
+		return aths, utils.ErrNotFound
+	}
+	return aths, nil
+}
+
+func (self *SQLStorage) GetTPFilter(tpid, id string) ([]*utils.TPFilter, error) {
+	var ths TpFilterS
+	q := self.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if err := q.Find(&ths).Error; err != nil {
+		return nil, err
+	}
+	aths := ths.AsTPFilter()
 	if len(aths) == 0 {
 		return aths, utils.ErrNotFound
 	}

@@ -939,7 +939,7 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 	tps := []*TpThreshold{
 		&TpThreshold{
 			Tpid:               "TEST_TPID",
-			ID:                 "Stats1",
+			ID:                 "Threhold",
 			FilterType:         MetaStringPrefix,
 			FilterFieldName:    "Account",
 			FilterFieldValues:  "1001;1002",
@@ -1009,6 +1009,56 @@ func TestAPItoTPThreshold(t *testing.T) {
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 	if st, err := APItoThresholdProfile(tps, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTPs, st) {
+		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)
+	}
+}
+
+func TestTPFilterAsTPFilter(t *testing.T) {
+	tps := []*TpFilter{
+		&TpFilter{
+			Tpid:              "TEST_TPID",
+			ID:                "Filter1",
+			FilterType:        MetaStringPrefix,
+			FilterFieldName:   "Account",
+			FilterFieldValues: "1001;1002",
+		},
+	}
+	eTPs := []*utils.TPFilter{
+		&utils.TPFilter{
+			TPid:             tps[0].Tpid,
+			ID:               tps[0].ID,
+			FilterType:       tps[0].FilterType,
+			FilterFieldName:  tps[0].FilterFieldName,
+			FilterFielValues: []string{"1001", "1002"},
+		},
+	}
+
+	rcvTPs := TpFilterS(tps).AsTPFilter()
+	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	}
+}
+
+func TestAPItoTPFilter(t *testing.T) {
+	tps := &utils.TPFilter{
+		TPid:             testTPID,
+		Tenant:           "cgrates.org",
+		ID:               "Filter1",
+		FilterType:       "*string",
+		FilterFieldName:  "Acount",
+		FilterFielValues: []string{"1001", "1002"},
+	}
+
+	eTPs := &FilterProfile{
+		Tenant:            "cgrates.org",
+		ID:                tps.ID,
+		FilterFieldName:   tps.FilterFieldName,
+		FilterType:        tps.FilterType,
+		FilterFieldValues: tps.FilterFielValues,
+	}
+	if st, err := APItoFilterProfile(tps); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)

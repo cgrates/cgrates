@@ -131,7 +131,6 @@ func testV1RsFromFolder(t *testing.T) {
 }
 
 func testV1RsGetResourcesForEvent(t *testing.T) {
-	time.Sleep(time.Duration(1000) * time.Millisecond)
 	var reply *[]*engine.ResourceProfile
 	args := &utils.ArgRSv1ResourceUsage{
 		Tenant: "cgrates.org",
@@ -139,10 +138,12 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(500) * time.Millisecond)
 	args.Event = map[string]interface{}{"Destination": "10"}
 	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &reply); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(500) * time.Millisecond)
 	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
 	}

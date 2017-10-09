@@ -60,6 +60,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ResourcesCsv:          (*TPCSVImporter).importResources,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
+	utils.FiltersCsv:            (*TPCSVImporter).importFilters,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -83,6 +84,7 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.ResourcesCsv),
 		path.Join(self.DirPath, utils.StatsCsv),
 		path.Join(self.DirPath, utils.ThresholdsCsv),
+		path.Join(self.DirPath, utils.FiltersCsv),
 	)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
@@ -383,4 +385,15 @@ func (self *TPCSVImporter) importThresholds(fn string) error {
 		return err
 	}
 	return self.StorDb.SetTPThreshold(sts)
+}
+
+func (self *TPCSVImporter) importFilters(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	sts, err := self.csvr.GetTPFilter(self.TPid, "")
+	if err != nil {
+		return err
+	}
+	return self.StorDb.SetTPFilter(sts)
 }

@@ -281,13 +281,22 @@ cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*a
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinSleep[7],Blocker[8],Weight[9],ActionIDs[10]
 cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,true,10,THRESH1;THRESH2
 `
+	filters = `
+#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4]
+cgrates.org,FLTR_1,*string,Account,1001;1002
+cgrates.org,FLTR_1,*string_prefix,Destination,10;20
+cgrates.org,FLTR_1,*rsr_fields,,Subject(~^1.*1$);Destination(1002)
+cgrates.org,FLTR_ACNT_dan,*string,Account,dan
+cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE
+cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL
+`
 )
 
 var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(dataStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resProfiles, stats, thresholds), testTPID, "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resProfiles, stats, thresholds, filters), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)

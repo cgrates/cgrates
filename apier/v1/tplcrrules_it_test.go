@@ -50,7 +50,7 @@ var sTestsTPLcrRules = []func(t *testing.T){
 	testTPLcrRulesGetTPLcrRulesBeforeSet,
 	testTPLcrRulesSetTPLcrRules,
 	testTPLcrRulesGetTPLcrRulesAfterSet,
-	testTPLcrRulesGetTPDestinationIds,
+	testTPLcrRulesGetTPLcrRuleIds,
 	testTPLcrRulesUpdateTPLcrRules,
 	testTPLcrRulesGetTPLcrRulesAfterUpdate,
 	testTPLcrRulesRemTPLcrRules,
@@ -176,7 +176,7 @@ func testTPLcrRulesGetTPLcrRulesAfterSet(t *testing.T) {
 
 }
 
-func testTPLcrRulesGetTPDestinationIds(t *testing.T) {
+func testTPLcrRulesGetTPLcrRuleIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"*out:cgrates.org:call:1001:*any"}
 	if err := tpLcrRuleRPC.Call("ApierV1.GetTPLcrRuleIds", &AttrGetTPLcrIds{TPid: "TPLRC1"}, &result); err != nil {
