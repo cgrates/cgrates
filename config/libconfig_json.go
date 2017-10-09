@@ -393,6 +393,13 @@ type StatServJsonCfg struct {
 	Store_interval *string
 }
 
+// Threshold service config section
+type ThresholdSJsonCfg struct {
+	Enabled         *bool
+	Store_interval  *string
+	Filtered_fields *[]string
+}
+
 // Mailer config section
 type MailerJsonCfg struct {
 	Server        *string

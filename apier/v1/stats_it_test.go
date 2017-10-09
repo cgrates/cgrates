@@ -240,21 +240,7 @@ func testV1STSProcessEvent(t *testing.T) {
 }
 
 func testV1STSGetStatsAfterRestart(t *testing.T) {
-	expectedMetrics := map[string]string{
-		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "1m30s",
-		utils.MetaACC: "61.5",
-		utils.MetaTCD: "3m0s",
-		utils.MetaTCC: "123",
-		utils.MetaPDD: "4s",
-	}
-	var metrics map[string]string
-	//get stats metrics before restart
-	if err := stsV1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
-	}
+	time.Sleep(time.Second)
 	if _, err := engine.StopStartEngine(stsV1CfgPath, statsDelay); err != nil {
 		t.Fatal(err)
 	}

@@ -57,6 +57,8 @@ const (
 	ALIASESSERV_JSN = "aliases"
 	USERSERV_JSN    = "users"
 	RESOURCES_JSON  = "resources"
+	STATS_JSON      = "stats"
+	THRESHOLDS_JSON = "thresholds"
 	MAILER_JSN      = "mailer"
 	SURETAX_JSON    = "suretax"
 )
@@ -366,6 +368,18 @@ func (self CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(StatServJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
+	rawCfg, hasKey := self[THRESHOLDS_JSON]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(ThresholdSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

@@ -395,31 +395,38 @@ const CGRATES_CFG_JSON = `
 
 
 "pubsubs": {
-	"enabled": false,							// starts PubSub service: <true|false>.
+	"enabled": false,				// starts PubSub service: <true|false>.
 },
 
 
 "aliases": {
-	"enabled": false,							// starts Aliases service: <true|false>.
+	"enabled": false,				// starts Aliases service: <true|false>.
 },
 
 
 "users": {
-	"enabled": false,							// starts User service: <true|false>.
-	"indexes": [],								// user profile field indexes
+	"enabled": false,				// starts User service: <true|false>.
+	"indexes": [],					// user profile field indexes
 },
 
 
 "resources": {
-	"enabled": false,												// starts ResourceLimiter service: <true|false>.
-	"stats_conns": [],												// address where to reach the stats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"store_interval": "",											// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+	"enabled": false,				// starts ResourceLimiter service: <true|false>.
+	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"stats_conns": [],				// address where to reach the stats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 },
 
 
 "stats": {
 	"enabled": false,				// starts Stat service: <true|false>.
-	"store_interval": "0s",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|*never|$dur>
+	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+},
+
+
+"thresholds": {
+	"enabled": false,				// starts ThresholdS service: <true|false>.
+	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"filtered_fields": [],			// match filters based on these fields for dynamic filtering, empty to use all
 },
 
 

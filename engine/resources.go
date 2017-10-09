@@ -574,9 +574,12 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	}
 	// index it for storing
 	for _, r := range mtcRLs {
+		if rS.storeInterval == 0 || r.dirty == nil {
+			continue
+		}
 		if rS.storeInterval == -1 {
 			rS.StoreResource(r)
-		} else if r.dirty != nil {
+		} else {
 			*r.dirty = true // mark it to be saved
 			rS.srMux.Lock()
 			rS.storedResources[r.TenantID()] = true

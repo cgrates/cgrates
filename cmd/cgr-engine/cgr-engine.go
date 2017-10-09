@@ -583,6 +583,30 @@ func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cfg 
 	internalStatSChan <- stsV1
 }
 
+// startThresholdService fires up the ThresholdS
+func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().FilteredFields,
+		cfg.ThresholdSCfg().StoreInterval, nil)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Could not init, error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	utils.Logger.Info(fmt.Sprintf("Starting Threshold Service"))
+	go func() {
+		if err := tS.ListenAndServe(exitChan); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Error: %s listening for packets", err.Error()))
+		}
+		tS.Shutdown()
+		exitChan <- true
+		return
+	}()
+	tSv1 := v1.NewThresholdSV1(tS)
+	server.RpcRegister(tSv1)
+	internalThresholdSChan <- tSv1
+}
+
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan, internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
@@ -759,6 +783,7 @@ func main() {
 	internalSMGChan := make(chan *sessionmanager.SMGeneric, 1)
 	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dataDB, exitChan, cacheDoneChan)
@@ -857,6 +882,10 @@ func main() {
 
 	if cfg.StatSCfg().Enabled {
 		go startStatService(internalStatSChan, cfg, dm, server, exitChan)
+	}
+
+	if cfg.ThresholdSCfg().Enabled {
+		go startThresholdService(internalThresholdSChan, cfg, dm, server, exitChan)
 	}
 
 	// Serve rpc connections

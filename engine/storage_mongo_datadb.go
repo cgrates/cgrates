@@ -61,7 +61,7 @@ const (
 	colRes   = "resources"
 	colSqs   = "statqueues"
 	colSqp   = "statqueue_profiles"
-	colTlds  = "threshold_profiles"
+	colTps   = "threshold_profiles"
 	colThs   = "thresholds"
 	colFlt   = "filter_profiles"
 )
@@ -331,7 +331,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.TimingsPrefix:          colTmg,
 		utils.ResourcesPrefix:        colRes,
 		utils.ResourceProfilesPrefix: colRsP,
-		utils.ThresholdProfilePrefix: colTlds,
+		utils.ThresholdProfilePrefix: colTps,
 		utils.ThresholdPrefix:        colThs,
 		utils.FilterProfilePrefix:    colFlt,
 	}
@@ -690,6 +690,17 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		iter := db.C(colFlt).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.FilterProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
+	case utils.ThresholdPrefix:
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colThs).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.ThresholdPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -728,7 +739,7 @@ func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) 
 		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	case utils.ThresholdProfilePrefix:
-		count, err = db.C(colThs).Find(bson.M{"id": subject}).Count()
+		count, err = db.C(colTps).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	default:
 		err = fmt.Errorf("unsupported category in HasData: %s", category)
@@ -2155,7 +2166,7 @@ func (ms *MongoStorage) GetThresholdProfile(tenant, ID string,
 			return x.(*ThresholdProfile), nil
 		}
 	}
-	session, col := ms.conn(colTlds)
+	session, col := ms.conn(colTps)
 	defer session.Close()
 	tp = new(ThresholdProfile)
 	cCommit := cacheCommit(transactionID)
@@ -2177,7 +2188,7 @@ func (ms *MongoStorage) GetThresholdProfile(tenant, ID string,
 
 // SetThresholdProfile stores a ThresholdProfile into DataDB
 func (ms *MongoStorage) SetThresholdProfile(tp *ThresholdProfile) (err error) {
-	session, col := ms.conn(colTlds)
+	session, col := ms.conn(colTps)
 	defer session.Close()
 	_, err = col.UpsertId(bson.M{"tenant": tp.Tenant, "id": tp.ID}, tp)
 	return
@@ -2185,7 +2196,7 @@ func (ms *MongoStorage) SetThresholdProfile(tp *ThresholdProfile) (err error) {
 
 // RemThresholdProfile removes a ThresholdProfile from dataDB/cache
 func (ms *MongoStorage) RemThresholdProfile(tenant, id, transactionID string) (err error) {
-	session, col := ms.conn(colTlds)
+	session, col := ms.conn(colTps)
 	defer session.Close()
 	err = col.Remove(bson.M{"tenant": tenant, "id": id})
 	if err != nil {

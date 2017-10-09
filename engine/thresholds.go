@@ -120,24 +120,24 @@ func (ts Thresholds) Sort() {
 	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
 }
 
-func NewThresholdService(dm *DataManager, filterFields []string, storeInterval time.Duration,
-	statS rpcclient.RpcClientConnection) (tS *ThresholdService, err error) {
+func NewThresholdService(dm *DataManager, filteredFields []string, storeInterval time.Duration,
+	statS *rpcclient.RpcClientPool) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm,
-		filterFields:  filterFields,
-		storeInterval: storeInterval,
-		statS:         statS,
-		stopBackup:    make(chan struct{})}, nil
+		filteredFields: filteredFields,
+		storeInterval:  storeInterval,
+		statS:          statS,
+		stopBackup:     make(chan struct{})}, nil
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB
 type ThresholdService struct {
-	dm            *DataManager
-	filterFields  []string // fields considered when searching for matching thresholds
-	storeInterval time.Duration
-	statS         rpcclient.RpcClientConnection // allows applying filters based on stats
-	stopBackup    chan struct{}
-	storedTdIDs   utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
-	stMux         sync.RWMutex    // protects storedTdIDs
+	dm             *DataManager
+	filteredFields []string // fields considered when searching for matching thresholds
+	storeInterval  time.Duration
+	statS          *rpcclient.RpcClientPool // allows applying filters based on stats
+	stopBackup     chan struct{}
+	storedTdIDs    utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	stMux          sync.RWMutex    // protects storedTdIDs
 }
 
 // Called to start the service
@@ -145,6 +145,15 @@ func (tS *ThresholdService) ListenAndServe(exitChan chan bool) error {
 	//go tS.runBackup() // start backup loop
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
+	return nil
+}
+
+// Shutdown is called to shutdown the service
+func (tS *ThresholdService) Shutdown() error {
+	utils.Logger.Info("<ThresholdS> shutdown initialized")
+	close(tS.stopBackup)
+	tS.storeThresholds()
+	utils.Logger.Info("<ThresholdS> shutdown complete")
 	return nil
 }
 
@@ -295,28 +304,70 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (err error) {
 			withErrors = true
 			continue
 		}
-		lockThreshold := utils.ThresholdPrefix + t.TenantID()
-		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
 		if t.dirty == nil { // one time threshold
+			lockThreshold := utils.ThresholdPrefix + t.TenantID()
+			guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
 			if err = tS.dm.DataDB().RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))
 				withErrors = true
-				guardian.Guardian.UnguardIDs(lockThreshold)
-				continue
+
 			}
+			guardian.Guardian.UnguardIDs(lockThreshold)
+			continue
 		}
-		// recurrent threshold
-		*t.dirty = true // mark it to be saved
 		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
-		tS.stMux.Lock()
-		tS.storedTdIDs[t.TenantID()] = true
-		tS.stMux.Unlock()
-		guardian.Guardian.UnguardIDs(lockThreshold)
+		// recurrent threshold
+		if tS.storeInterval == -1 {
+			tS.StoreThreshold(t)
+		} else {
+			*t.dirty = true // mark it to be saved
+			tS.stMux.Lock()
+			tS.storedTdIDs[t.TenantID()] = true
+			tS.stMux.Unlock()
+		}
 	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
+	return
+}
+
+// V1ProcessEvent implements ThresholdService method for processing an Event
+func (tS *ThresholdService) V1ProcessEvent(ev *ThresholdEvent, reply *string) (err error) {
+	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err = tS.processEvent(ev); err == nil {
+		*reply = utils.OK
+	}
+	return
+}
+
+// V1GetThresholdsForEvent queries thresholds matching an Event
+func (tS *ThresholdService) V1GetThresholdsForEvent(ev *ThresholdEvent, reply *Thresholds) (err error) {
+	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	var ts Thresholds
+	if ts, err = tS.matchingThresholdsForEvent(ev); err == nil {
+		*reply = ts
+	}
+	return
+}
+
+// V1GetQueueIDs returns list of queueIDs registered for a tenant
+func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (err error) {
+	prfx := utils.ThresholdPrefix + tenant + ":"
+	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*tIDs = retIDs
 	return
 }

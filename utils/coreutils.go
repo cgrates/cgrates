@@ -808,3 +808,28 @@ func RPCCall(inst interface{}, serviceMethod string, args interface{}, reply int
 	}
 	return err
 }
+
+// ApierRPCCall implements generic RPCCall for APIer instances
+func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, reply interface{}) error {
+	methodSplit := strings.Split(serviceMethod, ".")
+	if len(methodSplit) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	method := reflect.ValueOf(inst).MethodByName(methodSplit[1])
+	if !method.IsValid() {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return ErrServerError
+	}
+	return err
+}
