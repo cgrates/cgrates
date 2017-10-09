@@ -34,7 +34,7 @@ type Scheduler struct {
 	queue                           engine.ActionTimingPriorityList
 	timer                           *time.Timer
 	restartLoop                     chan bool
-	storage                         engine.DataDB
+	dm                              *engine.DataManager
 	schedulerStarted                bool
 	actStatsInterval                time.Duration                 // How long time to keep the stats in memory
 	actSucessChan, actFailedChan    chan *engine.Action           // ActionPlan will pass actions via these channels
@@ -42,10 +42,10 @@ type Scheduler struct {
 	actSuccessStats, actFailedStats map[string]map[time.Time]bool // keep here stats regarding executed actions, map[actionType]map[execTime]bool
 }
 
-func NewScheduler(storage engine.DataDB) *Scheduler {
+func NewScheduler(dm *engine.DataManager) *Scheduler {
 	s := &Scheduler{
 		restartLoop: make(chan bool),
-		storage:     storage,
+		dm:          dm,
 	}
 	s.Reload()
 	return s
@@ -138,7 +138,7 @@ func (s *Scheduler) loadActionPlans() {
 	limit := make(chan bool, 10)
 	// execute existing tasks
 	for {
-		task, err := s.storage.PopTask()
+		task, err := s.dm.DataDB().PopTask()
 		if err != nil || task == nil {
 			break
 		}
@@ -150,7 +150,7 @@ func (s *Scheduler) loadActionPlans() {
 		}()
 	}
 
-	actionPlans, err := s.storage.GetAllActionPlans()
+	actionPlans, err := s.dm.DataDB().GetAllActionPlans()
 	if err != nil && err != utils.ErrNotFound {
 		utils.Logger.Warning(fmt.Sprintf("<Scheduler> Cannot get action plans: %v", err))
 	}

@@ -95,7 +95,6 @@ func TestSTSV1ITMySQL(t *testing.T) {
 
 func TestSTSV1ITMongo(t *testing.T) {
 	stsV1ConfDIR = "tutmongo"
-	time.Sleep(time.Duration(5 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsStatSV1 {
 		t.Run(stsV1ConfDIR, stest)
 	}
@@ -141,6 +140,7 @@ func testV1STSFromFolder(t *testing.T) {
 	if err := stsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(1000) * time.Millisecond)
 }
 
 func testV1STSGetStats(t *testing.T) {
@@ -361,7 +361,7 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 }
 
 func testV1STSStopEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
+	if err := engine.KillEngine(statsDelay); err != nil {
 		t.Error(err)
 	}
 }

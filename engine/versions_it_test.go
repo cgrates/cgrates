@@ -30,7 +30,7 @@ import (
 
 var (
 	storageDb       Storage
-	dataDb          DataDB
+	dm3             *DataManager
 	dbtype          string
 	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
 )
@@ -46,7 +46,7 @@ func TestVersionsITMongo(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "tutmongo")); err != nil {
 		t.Fatal(err)
 	}
-	if dataDb, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass,
+	if dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass,
 		cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize); err != nil {
 		log.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "tutmysql")); err != nil {
 		t.Fatal(err)
 	}
-	dataDb, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize)
+	dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 		t.Fatal(err)
 	}
-	dataDb, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize)
+	dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 }
 
 func testVersionsFlush(t *testing.T) {
-	err := dataDb.Flush("")
+	err := dm3.DataDB().Flush("")
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
 	}
@@ -117,7 +117,7 @@ func testVersion(t *testing.T) {
 	var test string
 	var currentVersion Versions
 	var testVersion Versions
-	storType := dataDb.GetStorageType()
+	storType := dm3.DataDB().GetStorageType()
 	switch storType {
 	case utils.MONGO, utils.MAPSTOR:
 		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
@@ -130,30 +130,30 @@ func testVersion(t *testing.T) {
 	}
 
 	//dataDB
-	if _, rcvErr := dataDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm3.DataDB().GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := CheckVersions(dataDb); err != nil {
+	if err := CheckVersions(dm3.DataDB()); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := dataDb.GetVersions(utils.TBLVersions); err != nil {
+	if rcv, err := dm3.DataDB().GetVersions(utils.TBLVersions); err != nil {
 		t.Error(err)
 	} else if len(currentVersion) != len(rcv) {
 		t.Errorf("Expecting: %v, received: %v", currentVersion, rcv)
 	}
-	if err = dataDb.RemoveVersions(currentVersion); err != nil {
+	if err = dm3.DataDB().RemoveVersions(currentVersion); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := dataDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm3.DataDB().GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := dataDb.SetVersions(testVersion, false); err != nil {
+	if err := dm3.DataDB().SetVersions(testVersion, false); err != nil {
 		t.Error(err)
 	}
-	if err := CheckVersions(dataDb); err.Error() != test {
+	if err := CheckVersions(dm3.DataDB()); err.Error() != test {
 		t.Error(err)
 	}
-	if err = dataDb.RemoveVersions(testVersion); err != nil {
+	if err = dm3.DataDB().RemoveVersions(testVersion); err != nil {
 		t.Error(err)
 	}
 	storType = storageDb.GetStorageType()

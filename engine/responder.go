@@ -477,7 +477,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 }
 
 func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
-	if dcsH, err := HandleGetDerivedChargers(dataStorage, attrs); err != nil {
+	if dcsH, err := HandleGetDerivedChargers(dm, attrs); err != nil {
 		return err
 	} else if dcsH != nil {
 		*dcs = *dcsH
@@ -548,7 +548,7 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 }
 
 func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
-	dataStorage.Close()
+	dm.DataDB().Close()
 	cdrStorage.Close()
 	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"

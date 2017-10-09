@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB V1DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string, dryRun bool) (m *Migrator, err error) {
+func NewMigrator(dm *engine.DataManager, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB V1DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string, dryRun bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -41,7 +41,7 @@ func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB
 	stats := make(map[string]int)
 
 	m = &Migrator{
-		dataDB: dataDB, dataDBType: dataDBType,
+		dm: dm, dataDBType: dataDBType,
 		storDB: storDB, storDBType: storDBType, mrshlr: mrshlr,
 		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
 		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType,
@@ -51,7 +51,7 @@ func NewMigrator(dataDB engine.DataDB, dataDBType, dataDBEncoding string, storDB
 }
 
 type Migrator struct {
-	dataDB        engine.DataDB
+	dm            *engine.DataManager
 	dataDBType    string
 	storDB        engine.Storage
 	storDBType    string
@@ -84,7 +84,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
-				if err := m.dataDB.SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
+				if err := m.dm.DataDB().SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),

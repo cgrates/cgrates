@@ -172,13 +172,13 @@ type AliasService interface {
 }
 
 type AliasHandler struct {
-	dataDB DataDB
-	mu     sync.RWMutex
+	dm *DataManager
+	mu sync.RWMutex
 }
 
-func NewAliasHandler(dataDB DataDB) *AliasHandler {
+func NewAliasHandler(dm *DataManager) *AliasHandler {
 	return &AliasHandler{
-		dataDB: dataDB,
+		dm: dm,
 	}
 }
 
@@ -194,19 +194,19 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) (err error) 
 
 	var oldAlias *Alias
 	if !attr.Overwrite { // get previous value
-		oldAlias, _ = am.dataDB.GetAlias(attr.Alias.GetId(), false, utils.NonTransactional)
+		oldAlias, _ = am.dm.DataDB().GetAlias(attr.Alias.GetId(), false, utils.NonTransactional)
 	}
 	if attr.Overwrite || oldAlias == nil {
-		if err = am.dataDB.SetAlias(attr.Alias, utils.NonTransactional); err != nil {
+		if err = am.dm.DataDB().SetAlias(attr.Alias, utils.NonTransactional); err != nil {
 			return err
 		}
-		if err = am.dataDB.CacheDataFromDB(utils.ALIASES_PREFIX, []string{attr.Alias.GetId()}, true); err != nil {
+		if err = am.dm.DataDB().CacheDataFromDB(utils.ALIASES_PREFIX, []string{attr.Alias.GetId()}, true); err != nil {
 			return
 		}
-		if err = am.dataDB.SetReverseAlias(attr.Alias, utils.NonTransactional); err != nil {
+		if err = am.dm.DataDB().SetReverseAlias(attr.Alias, utils.NonTransactional); err != nil {
 			return
 		}
-		if err = am.dataDB.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
+		if err = am.dm.DataDB().CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
 			return
 		}
 	} else {
@@ -234,16 +234,16 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) (err error) 
 				oldAlias.Values = append(oldAlias.Values, value)
 			}
 		}
-		if err = am.dataDB.SetAlias(oldAlias, utils.NonTransactional); err != nil {
+		if err = am.dm.DataDB().SetAlias(oldAlias, utils.NonTransactional); err != nil {
 			return
 		}
-		if err = am.dataDB.CacheDataFromDB(utils.ALIASES_PREFIX, []string{oldAlias.GetId()}, true); err != nil {
+		if err = am.dm.DataDB().CacheDataFromDB(utils.ALIASES_PREFIX, []string{oldAlias.GetId()}, true); err != nil {
 			return
 		}
-		if err = am.dataDB.SetReverseAlias(oldAlias, utils.NonTransactional); err != nil {
+		if err = am.dm.DataDB().SetReverseAlias(oldAlias, utils.NonTransactional); err != nil {
 			return
 		}
-		if err = am.dataDB.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
+		if err = am.dm.DataDB().CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
 			return
 		}
 	}
@@ -255,7 +255,7 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) (err error) 
 func (am *AliasHandler) RemoveAlias(al *Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-	if err := am.dataDB.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
+	if err := am.dm.DataDB().RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -268,7 +268,7 @@ func (am *AliasHandler) GetAlias(al *Alias, result *Alias) error {
 	defer am.mu.RUnlock()
 	variants := al.GenerateIds()
 	for _, variant := range variants {
-		if r, err := am.dataDB.GetAlias(variant, false, utils.NonTransactional); err == nil && r != nil {
+		if r, err := am.dm.DataDB().GetAlias(variant, false, utils.NonTransactional); err == nil && r != nil {
 			*result = *r
 			return nil
 		}
@@ -281,7 +281,7 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
 	rKey := attr.Alias + attr.Target + attr.Context
-	if ids, err := am.dataDB.GetReverseAlias(rKey, false, utils.NonTransactional); err == nil {
+	if ids, err := am.dm.DataDB().GetReverseAlias(rKey, false, utils.NonTransactional); err == nil {
 		for _, key := range ids {
 			// get destination id
 			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
@@ -290,7 +290,7 @@ func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[stri
 				destID = elems[len(elems)-1]
 				key = strings.Join(elems[:len(elems)-1], utils.CONCATENATED_KEY_SEP)
 			}
-			if r, err := am.dataDB.GetAlias(key, false, utils.NonTransactional); err != nil {
+			if r, err := am.dm.DataDB().GetAlias(key, false, utils.NonTransactional); err != nil {
 				return err
 			} else {
 				aliases[destID] = append(aliases[destID], r)
@@ -331,7 +331,7 @@ func (am *AliasHandler) GetMatchingAlias(attr *AttrMatchingAlias, result *string
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-		if destIDs, err := dataStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+		if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, value := range values {
 				for _, dId := range destIDs {
 					if value.DestinationId == utils.ANY || value.DestinationId == dId {
@@ -410,7 +410,7 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 	if rightPairs == nil {
 		// check destination ids
 		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-			if destIDs, err := dataStorage.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+			if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 				for _, value := range values {
 					for _, dId := range destIDs {
 						if value.DestinationId == utils.ANY || value.DestinationId == dId {

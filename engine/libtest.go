@@ -34,16 +34,16 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	dataDB, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
+	dm, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 	if err != nil {
 		return err
 	}
-	if err := dataDB.Flush(""); err != nil {
+	if err := dm.DataDB().Flush(""); err != nil {
 		return err
 	}
-	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dm.DataDB().LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	//	Write version before starting
-	if err := SetDBVersions(dataDB); err != nil {
+	if err := SetDBVersions(dm.dataDB); err != nil {
 		return err
 	}
 	return nil
@@ -112,8 +112,8 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return StartEngine(cfgPath, waitEngine)
 }
 
-func LoadTariffPlanFromFolder(tpPath, timezone string, dataDB DataDB, disable_reverse bool) error {
-	loader := NewTpReader(dataDB, NewFileCSVStorage(utils.CSV_SEP,
+func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool) error {
+	loader := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(tpPath, utils.DESTINATIONS_CSV),
 		path.Join(tpPath, utils.TIMINGS_CSV),
 		path.Join(tpPath, utils.RATES_CSV),

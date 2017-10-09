@@ -388,7 +388,7 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 }
 
 func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
-	cdrDb engine.CdrStorage, dataDB engine.DataDB,
+	cdrDb engine.CdrStorage, dm *engine.DataManager,
 	internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
 	internalCdrStatSChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool) {
@@ -448,7 +448,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dataDB, ralConn, pubSubConn,
+	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dm, ralConn, pubSubConn,
 		usersConn, aliasesConn, cdrstatsConn, statsConn)
 	cdrServer.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
@@ -462,20 +462,20 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	internalCdrSChan <- cdrServer // Signal that cdrS is operational
 }
 
-func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneChan chan struct{}, dataDB engine.DataDB, exitChan chan bool) {
+func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneChan chan struct{}, dm *engine.DataManager, exitChan chan bool) {
 	// Wait for cache to load data before starting
 	cacheDone := <-cacheDoneChan
 	cacheDoneChan <- cacheDone
 	utils.Logger.Info("Starting CGRateS Scheduler.")
-	sched := scheduler.NewScheduler(dataDB)
+	sched := scheduler.NewScheduler(dm)
 	internalSchedulerChan <- sched
 
 	sched.Loop()
 	exitChan <- true // Should not get out of loop though
 }
 
-func startCdrStats(internalCdrStatSChan chan rpcclient.RpcClientConnection, dataDB engine.DataDB, server *utils.Server) {
-	cdrStats := engine.NewStats(dataDB, cfg.CDRStatsSaveInterval)
+func startCdrStats(internalCdrStatSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server) {
+	cdrStats := engine.NewStats(dm, cfg.CDRStatsSaveInterval)
 	server.RpcRegister(cdrStats)
 	server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
 	internalCdrStatSChan <- cdrStats
@@ -492,8 +492,8 @@ func startHistoryServer(internalHistorySChan chan rpcclient.RpcClientConnection,
 	internalHistorySChan <- scribeServer
 }
 
-func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, dataDB engine.DataDB, server *utils.Server, exitChan chan bool) {
-	pubSubServer, err := engine.NewPubSub(dataDB, cfg.HttpSkipTlsVerify)
+func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	pubSubServer, err := engine.NewPubSub(dm, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<PubSubS> Could not start, error: %s", err.Error()))
 		exitChan <- true
@@ -504,10 +504,10 @@ func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, d
 }
 
 // ToDo: Make sure we are caching before starting this one
-func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, dataDB engine.DataDB, server *utils.Server, exitChan chan bool) {
-	aliasesServer := engine.NewAliasHandler(dataDB)
+func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	aliasesServer := engine.NewAliasHandler(dm)
 	server.RpcRegisterName("AliasesV1", aliasesServer)
-	loadHist, err := dataDB.GetLoadHistory(1, true, utils.NonTransactional)
+	loadHist, err := dm.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
 	if err != nil || len(loadHist) == 0 {
 		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
 		internalAliaseSChan <- aliasesServer
@@ -516,8 +516,8 @@ func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, 
 	internalAliaseSChan <- aliasesServer
 }
 
-func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dataDB engine.DataDB, server *utils.Server, exitChan chan bool) {
-	userServer, err := engine.NewUserMap(dataDB, cfg.UserServerIndexes)
+func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	userServer, err := engine.NewUserMap(dm, cfg.UserServerIndexes)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
 		exitChan <- true
@@ -528,7 +528,7 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, data
 }
 
 func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
-	dataDB engine.DataDB, server *utils.Server, exitChan chan bool) {
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
 	var statsConn *rpcclient.RpcClientPool
 	if len(cfg.ResourceSCfg().StatSConns) != 0 { // Stats connection init
 		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
@@ -539,7 +539,7 @@ func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcCl
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(dataDB, cfg.ResourceSCfg().StoreInterval, statsConn)
+	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, statsConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -722,21 +722,21 @@ func main() {
 	// Init cache
 	cache.NewCache(cfg.CacheConfig)
 
-	var dataDB engine.DataDB
+	var dm2 *engine.DataManager
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
 
 	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled || cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerEnabled {
-		dataDB, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
+		dm2, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
 			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
 		}
-		defer dataDB.Close()
-		engine.SetDataStorage(dataDB)
-		if err := engine.CheckVersions(dataDB); err != nil {
+		defer dm2.DataDB().Close()
+		engine.SetDataStorage(dm2)
+		if err := engine.CheckVersions(dm2.DataDB()); err != nil {
 			fmt.Println(err.Error())
 			return
 		}
@@ -759,7 +759,7 @@ func main() {
 		}
 	}
 
-	dm = engine.NewDataManager(dataDB)
+	dm = engine.NewDataManager(dm2.DataDB())
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.RoundingDecimals)
 	engine.SetRpSubjectPrefixMatching(cfg.RpSubjectPrefixMatching)
@@ -786,13 +786,13 @@ func main() {
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// Start ServiceManager
-	srvManager := servmanager.NewServiceManager(cfg, dataDB, exitChan, cacheDoneChan)
+	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheDoneChan)
 
 	// Start rater service
 	if cfg.RALsEnabled {
 		go startRater(internalRaterChan, cacheDoneChan, internalCdrStatSChan, internalStatSChan,
 			internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
-			srvManager, server, dataDB, loadDb, cdrDb, &stopHandled, exitChan)
+			srvManager, server, dm, loadDb, cdrDb, &stopHandled, exitChan)
 	}
 
 	// Start Scheduler
@@ -802,14 +802,14 @@ func main() {
 
 	// Start CDR Server
 	if cfg.CDRSEnabled {
-		go startCDRS(internalCdrSChan, cdrDb, dataDB,
+		go startCDRS(internalCdrSChan, cdrDb, dm,
 			internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
 			internalCdrStatSChan, internalStatSChan, server, exitChan)
 	}
 
 	// Start CDR Stats server
 	if cfg.CDRStatsEnabled {
-		go startCdrStats(internalCdrStatSChan, dataDB, server)
+		go startCdrStats(internalCdrStatSChan, dm, server)
 	}
 
 	// Start CDRC components if necessary
@@ -861,23 +861,23 @@ func main() {
 
 	// Start PubSubS service
 	if cfg.PubSubServerEnabled {
-		go startPubSubServer(internalPubSubSChan, dataDB, server, exitChan)
+		go startPubSubServer(internalPubSubSChan, dm, server, exitChan)
 	}
 
 	// Start Aliases service
 	if cfg.AliasesServerEnabled {
-		go startAliasesServer(internalAliaseSChan, dataDB, server, exitChan)
+		go startAliasesServer(internalAliaseSChan, dm, server, exitChan)
 	}
 
 	// Start users service
 	if cfg.UserServerEnabled {
-		go startUsersServer(internalUserSChan, dataDB, server, exitChan)
+		go startUsersServer(internalUserSChan, dm, server, exitChan)
 	}
 
 	// Start RL service
 	if cfg.ResourceSCfg().Enabled {
 		go startResourceService(internalRsChan,
-			internalStatSChan, cfg, dataDB, server, exitChan)
+			internalStatSChan, cfg, dm, server, exitChan)
 	}
 
 	if cfg.StatSCfg().Enabled {

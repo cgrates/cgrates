@@ -25,7 +25,7 @@ import (
 )
 
 func init() {
-	aliasService = NewAliasHandler(dataStorage)
+	aliasService = NewAliasHandler(dm)
 }
 func TestAliasesGetAlias(t *testing.T) {
 	alias := Alias{}
@@ -225,7 +225,7 @@ func TestAliasesLoadAlias(t *testing.T) {
 
 func TestAliasesCache(t *testing.T) {
 	key := "*out:cgrates.org:call:remo:remo:*rating"
-	_, err := dataStorage.GetAlias(key, false, utils.NonTransactional)
+	_, err := dm.DataDB().GetAlias(key, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting alias: ", err)
 	}
@@ -235,7 +235,7 @@ func TestAliasesCache(t *testing.T) {
 		t.Error("Error getting alias from cache: ", err, a)
 	}
 	rKey1 := "minuAccount*rating"
-	_, err = dataStorage.GetReverseAlias(rKey1, false, utils.NonTransactional)
+	_, err = dm.DataDB().GetReverseAlias(rKey1, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting reverse alias: ", err)
 	}
@@ -244,7 +244,7 @@ func TestAliasesCache(t *testing.T) {
 		t.Error("Error getting reverse alias 1: ", ra1)
 	}
 	rKey2 := "minuSubject*rating"
-	_, err = dataStorage.GetReverseAlias(rKey2, false, utils.NonTransactional)
+	_, err = dm.DataDB().GetReverseAlias(rKey2, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting reverse alias: ", err)
 	}
@@ -252,12 +252,12 @@ func TestAliasesCache(t *testing.T) {
 	if !found || len(ra2.([]string)) != 2 {
 		t.Error("Error getting reverse alias 2: ", ra2)
 	}
-	dataStorage.RemoveAlias(key, utils.NonTransactional)
+	dm.DataDB().RemoveAlias(key, utils.NonTransactional)
 	a, found = cache.Get(utils.ALIASES_PREFIX + key)
 	if found {
 		t.Error("Error getting alias from cache: ", found)
 	}
-	_, err = dataStorage.GetReverseAlias(rKey1, false, utils.NonTransactional)
+	_, err = dm.DataDB().GetReverseAlias(rKey1, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting reverse alias: ", err)
 	}
@@ -265,7 +265,7 @@ func TestAliasesCache(t *testing.T) {
 	if !found || len(ra1.([]string)) != 1 {
 		t.Error("Error getting reverse alias 1: ", ra1)
 	}
-	_, err = dataStorage.GetReverseAlias(rKey2, false, utils.NonTransactional)
+	_, err = dm.DataDB().GetReverseAlias(rKey2, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting reverse alias: ", err)
 	}

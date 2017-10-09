@@ -46,7 +46,7 @@ func (m *Migrator) migrateAccounts() (err error) {
 		if v1Acnt != nil {
 			acnt := v1Acnt.AsAccount()
 			if m.dryRun != true {
-				if err = m.dataDB.SetAccount(acnt); err != nil {
+				if err = m.dm.DataDB().SetAccount(acnt); err != nil {
 					return err
 				}
 				m.stats[utils.Accounts] += 1
@@ -57,7 +57,7 @@ func (m *Migrator) migrateAccounts() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),

@@ -29,7 +29,7 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg config.CacheConfig, loadHistorySize int) (db DataDB, err error) {
+func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg config.CacheConfig, loadHistorySize int) (dm *DataManager, err error) {
 	var d DataDB
 	switch db_type {
 	case utils.REDIS:
@@ -43,9 +43,10 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheCfg, loadHistorySize)
+		dm = NewDataManager(d.(DataDB))
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, cacheCfg, loadHistorySize)
-		db = d.(DataDB)
+		dm = NewDataManager(d.(DataDB))
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
 			db_type, utils.REDIS, utils.MONGO))
@@ -53,7 +54,7 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 	if err != nil {
 		return nil, err
 	}
-	return d, nil
+	return dm, nil
 }
 
 func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db Storage, err error) {

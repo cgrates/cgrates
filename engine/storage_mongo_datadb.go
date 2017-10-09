@@ -742,6 +742,9 @@ func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) 
 	case utils.ThresholdProfilePrefix:
 		count, err = db.C(colTps).Find(bson.M{"id": subject}).Count()
 		has = count > 0
+	case utils.FilterProfilePrefix:
+		count, err = db.C(colFlt).Find(bson.M{"id": subject}).Count()
+		has = count > 0
 	default:
 		err = fmt.Errorf("unsupported category in HasData: %s", category)
 	}

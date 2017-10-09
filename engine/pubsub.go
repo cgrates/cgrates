@@ -57,19 +57,19 @@ type PubSub struct {
 	ttlVerify   bool
 	pubFunc     func(string, bool, []byte) ([]byte, error)
 	mux         *sync.Mutex
-	dataDB      DataDB
+	dm          *DataManager
 }
 
-func NewPubSub(dataDB DataDB, ttlVerify bool) (*PubSub, error) {
+func NewPubSub(dm *DataManager, ttlVerify bool) (*PubSub, error) {
 	ps := &PubSub{
 		ttlVerify:   ttlVerify,
 		subscribers: make(map[string]*SubscriberData),
 		pubFunc:     utils.HttpJsonPost,
 		mux:         &sync.Mutex{},
-		dataDB:      dataDB,
+		dm:          dm,
 	}
 	// load subscribers
-	if subs, err := dataDB.GetSubscribers(); err != nil {
+	if subs, err := dm.DataDB().GetSubscribers(); err != nil {
 		return nil, err
 	} else {
 		ps.subscribers = subs
@@ -87,13 +87,13 @@ func (ps *PubSub) saveSubscriber(key string) {
 	if !found {
 		return
 	}
-	if err := dataStorage.SetSubscriber(key, subData); err != nil {
+	if err := dm.DataDB().SetSubscriber(key, subData); err != nil {
 		utils.Logger.Err("<PubSub> Error saving subscriber: " + err.Error())
 	}
 }
 
 func (ps *PubSub) removeSubscriber(key string) {
-	if err := dataStorage.RemoveSubscriber(key); err != nil {
+	if err := dm.DataDB().RemoveSubscriber(key); err != nil {
 		utils.Logger.Err("<PubSub> Error removing subscriber: " + err.Error())
 	}
 }

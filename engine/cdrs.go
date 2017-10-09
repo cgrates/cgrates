@@ -69,7 +69,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB DataDB, rater, pubsub, users,
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub, users,
 	aliases, cdrstats, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
 	if rater == nil || reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
@@ -89,7 +89,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB DataDB, rat
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		stats = nil
 	}
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dataDB: dataDB,
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
 		rals: rater, pubsub: pubsub, users: users, aliases: aliases,
 		cdrstats: cdrstats, stats: stats, guard: guardian.Guardian,
 		httpPoster: utils.NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
@@ -98,7 +98,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dataDB DataDB, rat
 type CdrServer struct {
 	cgrCfg        *config.CGRConfig
 	cdrDb         CdrStorage
-	dataDB        DataDB
+	dm            *DataManager
 	rals          rpcclient.RpcClientConnection
 	pubsub        rpcclient.RpcClientConnection
 	users         rpcclient.RpcClientConnection
@@ -265,7 +265,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 			if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID, utils.META_PSEUDOPREPAID, utils.PSEUDOPREPAID,
 				utils.META_POSTPAID, utils.POSTPAID}, ratedCDR.RequestType) {
 				acntID := utils.ConcatenatedKey(ratedCDR.Tenant, ratedCDR.Account)
-				acnt, err := self.dataDB.GetAccount(acntID)
+				acnt, err := self.dm.DataDB().GetAccount(acntID)
 				if err != nil {
 					utils.Logger.Err(fmt.Sprintf("<CDRS> Querying AccountDigest for account: %s got error: %s", acntID, err.Error()))
 				} else if acnt.ID != "" {

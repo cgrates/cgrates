@@ -39,11 +39,11 @@ func TestDestinationStoreRestore(t *testing.T) {
 
 func TestDestinationStorageStore(t *testing.T) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	err := dataStorage.SetDestination(nationale, utils.NonTransactional)
+	err := dm.DataDB().SetDestination(nationale, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
-	result, err := dataStorage.GetDestination(nationale.Id, false, utils.NonTransactional)
+	result, err := dm.DataDB().GetDestination(nationale.Id, false, utils.NonTransactional)
 	if nationale.containsPrefix("0257") == 0 || nationale.containsPrefix("0256") == 0 || nationale.containsPrefix("0723") == 0 {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
@@ -74,28 +74,28 @@ func TestDestinationContainsPrefixWrong(t *testing.T) {
 }
 
 func TestDestinationGetExists(t *testing.T) {
-	d, err := dataStorage.GetDestination("NAT", false, utils.NonTransactional)
+	d, err := dm.DataDB().GetDestination("NAT", false, utils.NonTransactional)
 	if err != nil || d == nil {
 		t.Error("Could not get destination: ", d)
 	}
 }
 
 func TestDestinationReverseGetExistsCache(t *testing.T) {
-	dataStorage.GetReverseDestination("0256", false, utils.NonTransactional)
+	dm.DataDB().GetReverseDestination("0256", false, utils.NonTransactional)
 	if _, ok := cache.Get(utils.REVERSE_DESTINATION_PREFIX + "0256"); !ok {
 		t.Error("Destination not cached:", err)
 	}
 }
 
 func TestDestinationGetNotExists(t *testing.T) {
-	d, err := dataStorage.GetDestination("not existing", false, utils.NonTransactional)
+	d, err := dm.DataDB().GetDestination("not existing", false, utils.NonTransactional)
 	if d != nil {
 		t.Error("Got false destination: ", d, err)
 	}
 }
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
-	dataStorage.GetDestination("not existing", false, utils.NonTransactional)
+	dm.DataDB().GetDestination("not existing", false, utils.NonTransactional)
 	if d, ok := cache.Get("not existing"); ok {
 		t.Error("Bad destination cached: ", d)
 	}
@@ -148,7 +148,7 @@ func TestCleanStalePrefixes(t *testing.T) {
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
-		dataStorage.SetDestination(nationale, utils.NonTransactional)
-		dataStorage.GetDestination(nationale.Id, true, utils.NonTransactional)
+		dm.DataDB().SetDestination(nationale, utils.NonTransactional)
+		dm.DataDB().GetDestination(nationale.Id, true, utils.NonTransactional)
 	}
 }

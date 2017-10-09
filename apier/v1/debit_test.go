@@ -31,18 +31,20 @@ var (
 	apierDebit        *ApierV1
 	apierDebitStorage *engine.MapStorage
 	responder         *engine.Responder
+	dm                *engine.DataManager
 )
 
 func init() {
 	apierDebitStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
 	responder := new(engine.Responder)
+	dm = engine.NewDataManager(apierDebitStorage)
 
-	engine.SetDataStorage(apierDebitStorage)
+	engine.SetDataStorage(dm)
 	apierDebit = &ApierV1{
-		DataDB:    engine.DataDB(apierDebitStorage),
-		Config:    cfg,
-		Responder: responder,
+		DataManager: dm,
+		Config:      cfg,
+		Responder:   responder,
 	}
 }
 

@@ -35,7 +35,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	internalCdrStatSChan, internalStatSChan, internalHistorySChan,
 	internalPubSubSChan, internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
-	dataDB engine.DataDB, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
+	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
 	var waitTasks []chan struct{}
 
 	//Cache load
@@ -91,7 +91,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		}
 
 		// ToDo: Add here timings
-		if err := dataDB.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs); err != nil {
+		if err := dm.DataDB().LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
 			exitChan <- true
 			return
@@ -195,7 +195,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	}
 	responder := &engine.Responder{ExitChan: exitChan}
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
-	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, DataDB: dataDB, CdrDb: cdrDb,
+	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, DataManager: dm, CdrDb: cdrDb,
 		Config: cfg, Responder: responder, ServManager: serviceManager, HTTPPoster: utils.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout)}
 	if cdrStats != nil { // ToDo: Fix here properly the init of stats
 		responder.Stats = cdrStats

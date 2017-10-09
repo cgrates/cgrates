@@ -27,14 +27,14 @@ import (
 // matchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // helper on top of dataDB.MatchReqFilterIndex, adding utils.NOT_AVAILABLE to list of fields queried
 // executes a number of $(len(fields) + 1) queries to dataDB so the size of event influences the speed of return
-func matchingItemIDsForEvent(ev map[string]interface{}, dataDB DataDB, dbIdxKey string) (itemIDs utils.StringMap, err error) {
+func matchingItemIDsForEvent(ev map[string]interface{}, dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)
 	for fldName, fieldValIf := range ev {
 		fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
 		if !canCast {
 			return nil, fmt.Errorf("Cannot cast field: %s into string", fldName)
 		}
-		dbItemIDs, err := dataDB.MatchReqFilterIndex(dbIdxKey, fldName, fldVal)
+		dbItemIDs, err := dm.DataDB().MatchReqFilterIndex(dbIdxKey, fldName, fldVal)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -47,7 +47,7 @@ func matchingItemIDsForEvent(ev map[string]interface{}, dataDB DataDB, dbIdxKey 
 			}
 		}
 	}
-	dbItemIDs, err := dataDB.MatchReqFilterIndex(dbIdxKey, utils.NOT_AVAILABLE, utils.NOT_AVAILABLE) // add unindexed itemIDs to be checked
+	dbItemIDs, err := dm.DataDB().MatchReqFilterIndex(dbIdxKey, utils.NOT_AVAILABLE, utils.NOT_AVAILABLE) // add unindexed itemIDs to be checked
 	if err != nil {
 		if err != utils.ErrNotFound {
 			return nil, err

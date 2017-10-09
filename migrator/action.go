@@ -56,7 +56,7 @@ func (m *Migrator) migrateActions() (err error) {
 
 			}
 			if m.dryRun != true {
-				if err := m.dataDB.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+				if err := m.dm.DataDB().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.Actions] += 1
@@ -66,7 +66,7 @@ func (m *Migrator) migrateActions() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
-		if err = m.dataDB.SetVersions(vrs, false); err != nil {
+		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),

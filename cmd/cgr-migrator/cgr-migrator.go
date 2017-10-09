@@ -88,10 +88,8 @@ func main() {
 			log.Print("Initializing dataDB:", *dataDBType)
 			log.Print("Initializing storDB:", *storDBType)
 		}
-		dataDB, err := engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
-		if err != nil {
-			log.Fatal(err)
-		}
+		var dm *engine.DataManager
+		dm, _ = engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
 		storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort, *storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
@@ -131,7 +129,7 @@ func main() {
 		if *verbose {
 			log.Print("Migrating: ", *migrate)
 		}
-		m, err := migrator.NewMigrator(dataDB, *dataDBType, *dbDataEncoding, storDB, *storDBType, oldDataDB, *oldDataDBType, *oldDBDataEncoding, oldstorDB, *oldStorDBType, *dryRun)
+		m, err := migrator.NewMigrator(dm, *dataDBType, *dbDataEncoding, storDB, *storDBType, oldDataDB, *oldDataDBType, *oldDBDataEncoding, oldstorDB, *oldStorDBType, *dryRun)
 		if err != nil {
 			log.Fatal(err)
 		}

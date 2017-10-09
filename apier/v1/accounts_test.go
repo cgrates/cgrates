@@ -34,7 +34,7 @@ var (
 func init() {
 	apierAcntsAcntStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	apierAcnts = &ApierV1{DataDB: engine.DataDB(apierAcntsAcntStorage), Config: cfg}
+	apierAcnts = &ApierV1{DataManager: engine.NewDataManager(apierAcntsAcntStorage), Config: cfg}
 }
 
 func TestSetAccounts(t *testing.T) {
@@ -59,7 +59,7 @@ func TestSetAccounts(t *testing.T) {
 	//apierAcntsAcntStorage.CacheRatingPrefixes(utils.ACTION_PREFIX)
 }
 
-/*
+/* This was a comment
 func TestGetAccountIds(t *testing.T) {
 	var accountIds []string
 	var attrs AttrGetAccountIds

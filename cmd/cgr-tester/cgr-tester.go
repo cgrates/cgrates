@@ -61,13 +61,13 @@ var (
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
-	dataDb, err := engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+	dm, err := engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
-	defer dataDb.Close()
-	engine.SetDataStorage(dataDb)
-	if err := dataDb.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
+	defer dm.DataDB().Close()
+	engine.SetDataStorage(dm)
+	if err := dm.DataDB().LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
 		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)

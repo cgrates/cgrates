@@ -76,7 +76,7 @@ func main() {
 		return
 	}
 	var errDataDB, errStorDb, err error
-	var dataDB engine.DataDB
+	var dm *engine.DataManager
 	var storDb engine.LoadStorage
 	var rater, cdrstats, users rpcclient.RpcClientConnection
 	var loader engine.LoadReader
@@ -84,17 +84,17 @@ func main() {
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
-			dataDB, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, config.CgrConfig().CacheConfig, *loadHistorySize)
+			dm, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, config.CgrConfig().CacheConfig, *loadHistorySize)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		} else if *toStorDb { // Import from csv files to storDb
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		} else { // Default load from csv files to dataDb
-			dataDB, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, config.CgrConfig().CacheConfig, *loadHistorySize)
+			dm, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, config.CgrConfig().CacheConfig, *loadHistorySize)
 		}
 		// Defer databases opened to be closed when we are done
-		for _, db := range []engine.Storage{dataDB, storDb} {
+		for _, db := range []engine.Storage{dm.DataDB(), storDb} {
 			if db != nil {
 				defer db.Close()
 			}
@@ -155,7 +155,8 @@ func main() {
 			path.Join(*dataPath, utils.FiltersCsv),
 		)
 	}
-	tpReader := engine.NewTpReader(dataDB, loader, *tpid, *timezone)
+
+	tpReader := engine.NewTpReader(dm.DataDB(), loader, *tpid, *timezone)
 	err = tpReader.LoadAll()
 	if err != nil {
 		log.Fatal(err)

@@ -30,7 +30,7 @@ import (
 )
 
 // Globals used
-var dataDbCsv, dataDbStor, dataDbApier DataDB // Each dataDb will have it's own sources to collect data
+var dataDbCsv, dataDbStor, dataDbApier *DataManager // Each dataDb will have it's own sources to collect data
 var storDb LoadStorage
 var lCfg *config.CGRConfig
 var loader *TpReader
@@ -55,7 +55,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	for _, db := range []Storage{dataDbCsv, dataDbStor, dataDbApier, dataDbCsv, dataDbStor, dataDbApier} {
+	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(), dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
 		if err = db.Flush(""); err != nil {
 			t.Fatal("Error when flushing datadb")
 		}
@@ -87,7 +87,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader = NewTpReader(dataDbCsv, NewFileCSVStorage(utils.CSV_SEP,
+	loader = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
@@ -383,7 +383,7 @@ func TestLoaderITImportToStorDb(t *testing.T) {
 // Loads data from storDb into dataDb
 func TestLoaderITLoadFromStorDb(t *testing.T) {
 
-	loader := NewTpReader(dataDbStor, storDb, utils.TEST_SQL, "")
+	loader := NewTpReader(dataDbStor.DataDB(), storDb, utils.TEST_SQL, "")
 	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -429,7 +429,7 @@ func TestLoaderITLoadFromStorDb(t *testing.T) {
 }
 
 func TestLoaderITLoadIndividualProfiles(t *testing.T) {
-	loader := NewTpReader(dataDbApier, storDb, utils.TEST_SQL, "")
+	loader := NewTpReader(dataDbApier.DataDB(), storDb, utils.TEST_SQL, "")
 	// Load ratingPlans. This will also set destination keys
 	if rps, err := storDb.GetTPRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")

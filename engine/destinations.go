@@ -79,7 +79,7 @@ func (d *Destination) GetHistoryRecord(deleted bool) history.Record {
 
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
-	if cached, err := dataStorage.GetReverseDestination(prefix, false, utils.NonTransactional); err == nil {
+	if cached, err := dm.DataDB().GetReverseDestination(prefix, false, utils.NonTransactional); err == nil {
 		return utils.IsSliceMember(cached, destId)
 	}
 	return false
