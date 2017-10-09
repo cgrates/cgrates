@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-/*
 import (
 	"testing"
 	"time"
@@ -32,16 +31,18 @@ var (
 	apierDebit        *ApierV1
 	apierDebitStorage *engine.MapStorage
 	responder         *engine.Responder
+	dm                *engine.DataManager
 )
 
 func init() {
 	apierDebitStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
 	responder := new(engine.Responder)
+	dm = engine.NewDataManager(apierDebitStorage)
 
-	engine.SetDataStorage(apierDebitStorage)
+	engine.SetDataStorage(dm)
 	apierDebit = &ApierV1{
-		DataManager: engine.DataManager.DataDB(),
+		DataManager: dm,
 		Config:      cfg,
 		Responder:   responder,
 	}
@@ -147,4 +148,3 @@ func TestDebitUsageWithOptions(t *testing.T) {
 			resolvedAccount.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
-*/

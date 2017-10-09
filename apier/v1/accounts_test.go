@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-/*
 import (
 	"testing"
 
@@ -35,7 +34,7 @@ var (
 func init() {
 	apierAcntsAcntStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	apierAcnts = &ApierV1{DataManager: apierAcntsAcntStorage, Config: cfg}
+	apierAcnts = &ApierV1{DataManager: engine.NewDataManager(apierAcntsAcntStorage), Config: cfg}
 }
 
 func TestSetAccounts(t *testing.T) {
@@ -72,7 +71,6 @@ func TestGetAccountIds(t *testing.T) {
 }
 */
 
-/*
 func TestGetAccounts(t *testing.T) {
 	var accounts []interface{}
 	var attrs utils.AttrGetAccounts
@@ -106,4 +104,3 @@ func TestGetAccounts(t *testing.T) {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 }
-*/

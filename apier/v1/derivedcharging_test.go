@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-/*
 import (
 	"reflect"
 	"testing"
@@ -33,10 +32,10 @@ var apierDcT *ApierV1
 func init() {
 	dataStorage, _ := engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	apierDcT = &ApierV1{DataManager: engine.DataDB(dataStorage), Config: cfg}
+	apierDcT = &ApierV1{DataManager: engine.NewDataManager(dataStorage), Config: cfg}
 }
 
-/* this was comment
+/*
 func TestGetEmptyDC(t *testing.T) {
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
 	var dcs utils.DerivedChargers
@@ -46,7 +45,7 @@ func TestGetEmptyDC(t *testing.T) {
 		t.Error("Returned DerivedChargers not matching the configured ones")
 	}
 }
-
+*/
 
 func TestSetDC(t *testing.T) {
 	dcs1 := []*utils.DerivedCharger{
@@ -91,14 +90,14 @@ func TestRemDC(t *testing.T) {
 	}
 }
 
-
+/*
 func TestGetEmptyDC2(t *testing.T) {
-	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
-	var dcs utils.DerivedChargers
-	if err := apierDcT.GetDerivedChargers(attrs, &dcs); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if !reflect.DeepEqual(dcs, apierDcT.Config.DerivedChargers) {
-		t.Error("Returned DerivedChargers not matching the configured ones")
-	}
+ attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
+ var dcs utils.DerivedChargers
+ if err := apierDcT.GetDerivedChargers(attrs, &dcs); err != nil {
+   t.Error("Unexpected error", err.Error())
+ } else if !reflect.DeepEqual(dcs, apierDcT.Config.DerivedChargers) {
+   t.Error("Returned DerivedChargers not matching the configured ones")
+ }
 }
 */
