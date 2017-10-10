@@ -52,3 +52,40 @@ func (tSv1 *ThresholdSV1) GetThresholdsForEvent(ev *engine.ThresholdEvent, reply
 func (tSv1 *ThresholdSV1) ProcessEvent(ev *engine.ThresholdEvent, reply *string) error {
 	return tSv1.tS.V1ProcessEvent(ev, reply)
 }
+
+// GetThresholdProfile returns a Threshold Profile
+func (apierV1 *ApierV1) GetThresholdProfile(arg *utils.TenantID, reply *engine.ThresholdProfile) (err error) {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if th, err := apierV1.DataManager.DataDB().GetThresholdProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	} else {
+		*reply = *th
+	}
+	return
+}
+
+// SetThresholdProfile alters/creates a ThresholdProfile
+func (apierV1 *ApierV1) SetThresholdProfile(thp *engine.ThresholdProfile, reply *string) error {
+	if missing := utils.MissingStructFields(thp, []string{"Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataManager.DataDB().SetThresholdProfile(thp); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// Remove a specific Threshold Profile
+func (apierV1 *ApierV1) RemThresholdProfile(args *utils.TenantID, reply *string) error {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataManager.DataDB().RemThresholdProfile(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
