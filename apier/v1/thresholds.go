@@ -48,6 +48,11 @@ func (tSv1 *ThresholdSV1) GetThresholdsForEvent(ev *engine.ThresholdEvent, reply
 	return tSv1.tS.V1GetThresholdsForEvent(ev, reply)
 }
 
+// GetThreshold queries a Threshold
+func (tSv1 *ThresholdSV1) GetThreshold(tntID *utils.TenantID, t *engine.Threshold) error {
+	return tSv1.tS.V1GetThreshold(tntID, t)
+}
+
 // ProcessEvent will process an Event
 func (tSv1 *ThresholdSV1) ProcessEvent(ev *engine.ThresholdEvent, reply *string) error {
 	return tSv1.tS.V1ProcessEvent(ev, reply)

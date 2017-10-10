@@ -465,6 +465,11 @@ const (
 	AccountID                    = "AccountID"
 	ResourceID                   = "ResourceID"
 	TotalUsage                   = "TotalUsage"
+	StatID                       = "StatID"
+	BalanceType                  = "BalanceType"
+	BalanceID                    = "BalanceID"
+	BalanceValue                 = "BalanceValue"
+	ResourceS                    = "ResourceS"
 )
 
 func buildCacheInstRevPrefixes() {

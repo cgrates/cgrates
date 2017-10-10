@@ -371,3 +371,13 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 	*tIDs = retIDs
 	return
 }
+
+// V1GetThreshold retrieves a Threshold
+func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) (err error) {
+	if thd, err := tS.dm.DataDB().GetThreshold(tntID.Tenant, tntID.ID, false, ""); err != nil {
+		return err
+	} else {
+		*t = *thd
+	}
+	return
+}

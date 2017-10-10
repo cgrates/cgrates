@@ -1675,7 +1675,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) error {
 	for tenant, mpID := range mapTHs {
 		for thID := range mpID {
 			thTntID := &utils.TenantID{Tenant: tenant, ID: thID}
-			if has, err := tpr.dataStorage.HasData(utils.ThresholdProfilePrefix, thTntID.TenantID()); err != nil {
+			if has, err := tpr.dataStorage.HasData(utils.ThresholdPrefix, thTntID.TenantID()); err != nil {
 				return err
 			} else if !has {
 				tpr.thresholds = append(tpr.thresholds, thTntID)
@@ -1708,7 +1708,7 @@ func (tpr *TpReader) LoadFilterFiltered(tag string) error {
 			if has, err := tpr.dataStorage.HasData(utils.FilterPrefix, thTntID.TenantID()); err != nil {
 				return err
 			} else if !has {
-				tpr.thresholds = append(tpr.filters, thTntID)
+				tpr.filters = append(tpr.filters, thTntID)
 			}
 		}
 	}
@@ -2078,7 +2078,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("Thresholds:")
+		log.Print("ThresholdProfiles:")
 	}
 	for _, mpID := range tpr.thProfiles {
 		for _, tpTH := range mpID {
@@ -2092,6 +2092,17 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if verbose {
 				log.Print("\t", th.TenantID())
 			}
+		}
+	}
+	if verbose {
+		log.Print("Thresholds:")
+	}
+	for _, thd := range tpr.thresholds {
+		if err = tpr.dataStorage.SetThreshold(&Threshold{Tenant: thd.Tenant, ID: thd.ID}); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", thd.TenantID())
 		}
 	}
 	if verbose {
