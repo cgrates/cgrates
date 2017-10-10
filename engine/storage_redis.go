@@ -335,7 +335,7 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdProfilePrefix, utils.FilterProfilePrefix:
+		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix:
 		i, err := rs.Cmd("EXISTS", category+subject).Int()
 		return i == 1, err
 	}
@@ -1776,14 +1776,14 @@ func (rs *RedisStorage) RemoveThreshold(tenant, id string, transactionID string)
 	return
 }
 
-func (rs *RedisStorage) GetFilterProfile(tenant, id string, skipCache bool, transactionID string) (r *FilterProfile, err error) {
-	key := utils.FilterProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (rs *RedisStorage) GetFilter(tenant, id string, skipCache bool, transactionID string) (r *Filter, err error) {
+	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*FilterProfile), nil
+			return x.(*Filter), nil
 		}
 	}
 	var values []byte
@@ -1801,16 +1801,16 @@ func (rs *RedisStorage) GetFilterProfile(tenant, id string, skipCache bool, tran
 	return
 }
 
-func (rs *RedisStorage) SetFilterProfile(r *FilterProfile) (err error) {
+func (rs *RedisStorage) SetFilter(r *Filter) (err error) {
 	result, err := rs.ms.Marshal(r)
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.FilterProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
+	return rs.Cmd("SET", utils.FilterPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
 }
 
-func (rs *RedisStorage) RemoveFilterProfile(tenant, id string, transactionID string) (err error) {
-	key := utils.FilterProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (rs *RedisStorage) RemoveFilter(tenant, id string, transactionID string) (err error) {
+	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

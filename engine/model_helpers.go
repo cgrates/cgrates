@@ -1934,7 +1934,7 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 		Weight:  tpRL.Weight,
 		Blocker: tpRL.Blocker,
 		Stored:  tpRL.Stored,
-		Filters: make([]*RequestFilter, len(tpRL.Filters)),
+		Filters: make([]*Filter, len(tpRL.Filters)),
 	}
 	if tpRL.UsageTTL != "" {
 		if rp.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {
@@ -1942,7 +1942,7 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 		}
 	}
 	for i, f := range tpRL.Filters {
-		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &Filter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -2095,7 +2095,7 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 		Blocker:     tpST.Blocker,
 		Stored:      tpST.Stored,
 		MinItems:    tpST.MinItems,
-		Filters:     make([]*RequestFilter, len(tpST.Filters)),
+		Filters:     make([]*Filter, len(tpST.Filters)),
 	}
 	if tpST.TTL != "" {
 		if st.TTL, err = utils.ParseDurationWithSecs(tpST.TTL); err != nil {
@@ -2110,7 +2110,7 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 
 	}
 	for i, f := range tpST.Filters {
-		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &Filter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -2226,7 +2226,7 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 		Recurrent: tpTH.Recurrent,
 		Weight:    tpTH.Weight,
 		Blocker:   tpTH.Blocker,
-		Filters:   make([]*RequestFilter, len(tpTH.Filters)),
+		Filters:   make([]*Filter, len(tpTH.Filters)),
 	}
 	if tpTH.MinSleep != "" {
 		if th.MinSleep, err = utils.ParseDurationWithSecs(tpTH.MinSleep); err != nil {
@@ -2238,7 +2238,7 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 
 	}
 	for i, f := range tpTH.Filters {
-		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &Filter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -2263,12 +2263,12 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
 				TPid:            tp.Tpid,
 				Tenant:          tp.Tenant,
 				ID:              tp.ID,
-				FilterType:      tp.FilterType,
-				FilterFieldName: tp.FilterFieldName,
+				FilterType:      tp.Type,
+				FilterFieldName: tp.Name,
 			}
 		}
-		if tp.FilterFieldValues != "" {
-			th.FilterFielValues = append(th.FilterFielValues, strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)...)
+		if tp.Values != "" {
+			th.FilterFielValues = append(th.FilterFielValues, strings.Split(tp.Values, utils.INFIELD_SEP)...)
 		}
 		mst[tp.ID] = th
 	}
@@ -2283,31 +2283,31 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
 
 func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
 	mdl := &TpFilter{
-		Tpid:            th.TPid,
-		Tenant:          th.Tenant,
-		ID:              th.ID,
-		FilterFieldName: th.FilterFieldName,
-		FilterType:      th.FilterType,
+		Tpid:   th.TPid,
+		Tenant: th.Tenant,
+		ID:     th.ID,
+		Name:   th.FilterFieldName,
+		Type:   th.FilterType,
 	}
 	for i, val := range th.FilterFielValues {
 		if i != 0 {
-			mdl.FilterFieldValues += utils.INFIELD_SEP
+			mdl.Values += utils.INFIELD_SEP
 		}
-		mdl.FilterFieldValues += val
+		mdl.Values += val
 	}
 	mdls = append(mdls, mdl)
 	return
 }
 
-func APItoFilterProfile(tpTH *utils.TPFilter) (th *FilterProfile, err error) {
-	th = &FilterProfile{
-		Tenant:          tpTH.Tenant,
-		ID:              tpTH.ID,
-		FilterFieldName: tpTH.FilterFieldName,
-		FilterType:      tpTH.FilterType,
+func APItoFilter(tpTH *utils.TPFilter) (th *Filter, err error) {
+	th = &Filter{
+		Tenant:    tpTH.Tenant,
+		ID:        tpTH.ID,
+		FieldName: tpTH.FilterFieldName,
+		Type:      tpTH.FilterType,
 	}
 	for _, ati := range tpTH.FilterFielValues {
-		th.FilterFieldValues = append(th.FilterFieldValues, ati)
+		th.Values = append(th.Values, ati)
 	}
 	return th, nil
 }

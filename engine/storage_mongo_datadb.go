@@ -63,7 +63,7 @@ const (
 	colSqp   = "statqueue_profiles"
 	colTps   = "threshold_profiles"
 	colThs   = "thresholds"
-	colFlt   = "filter_profiles"
+	colFlt   = "filters"
 )
 
 var (
@@ -333,7 +333,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.ResourceProfilesPrefix: colRsP,
 		utils.ThresholdProfilePrefix: colTps,
 		utils.ThresholdPrefix:        colThs,
-		utils.FilterProfilePrefix:    colFlt,
+		utils.FilterPrefix:           colFlt,
 	}
 	name, ok = colMap[prefix]
 	return
@@ -544,9 +544,9 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = ms.GetThreshold(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
-		case utils.FilterProfilePrefix:
+		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = ms.GetFilterProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = ms.GetFilter(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -686,10 +686,10 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.TimingsPrefix+idResult.Id)
 		}
-	case utils.FilterProfilePrefix:
+	case utils.FilterPrefix:
 		iter := db.C(colFlt).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.FilterProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
+			result = append(result, utils.FilterPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.ThresholdPrefix:
 		qry := bson.M{}
@@ -742,7 +742,7 @@ func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) 
 	case utils.ThresholdProfilePrefix:
 		count, err = db.C(colTps).Find(bson.M{"id": subject}).Count()
 		has = count > 0
-	case utils.FilterProfilePrefix:
+	case utils.FilterPrefix:
 		count, err = db.C(colFlt).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	default:
@@ -2253,19 +2253,19 @@ func (ms *MongoStorage) RemoveThreshold(tenant, id string, transactionID string)
 	return nil
 }
 
-func (ms *MongoStorage) GetFilterProfile(tenant, id string, skipCache bool, transactionID string) (r *FilterProfile, err error) {
-	key := utils.FilterProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (ms *MongoStorage) GetFilter(tenant, id string, skipCache bool, transactionID string) (r *Filter, err error) {
+	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*FilterProfile), nil
+			return x.(*Filter), nil
 		}
 	}
 	session, col := ms.conn(colFlt)
 	defer session.Close()
-	r = new(FilterProfile)
+	r = new(Filter)
 	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(r); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
@@ -2277,20 +2277,20 @@ func (ms *MongoStorage) GetFilterProfile(tenant, id string, skipCache bool, tran
 	return
 }
 
-func (ms *MongoStorage) SetFilterProfile(r *FilterProfile) (err error) {
+func (ms *MongoStorage) SetFilter(r *Filter) (err error) {
 	session, col := ms.conn(colFlt)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
 	return
 }
 
-func (ms *MongoStorage) RemoveFilterProfile(tenant, id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveFilter(tenant, id string, transactionID string) (err error) {
 	session, col := ms.conn(colFlt)
 	defer session.Close()
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.FilterProfilePrefix+utils.ConcatenatedKey(tenant, id),
+	cache.RemKey(utils.FilterPrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	return nil
 }

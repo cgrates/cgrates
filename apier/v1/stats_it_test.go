@@ -277,8 +277,8 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 	statConfig = &engine.StatQueueProfile{
 		Tenant: "cgrates.org",
 		ID:     "TEST_PROFILE1",
-		Filters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Filters: []*engine.Filter{
+			&engine.Filter{
 				Type:      "type",
 				FieldName: "Name",
 				Values:    []string{"FilterValue1", "FilterValue2"},
@@ -313,18 +313,18 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 
 func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	var result string
-	statConfig.Filters = []*engine.RequestFilter{
-		&engine.RequestFilter{
+	statConfig.Filters = []*engine.Filter{
+		&engine.Filter{
 			Type:      "type",
 			FieldName: "Name",
 			Values:    []string{"FilterValue1", "FilterValue2"},
 		},
-		&engine.RequestFilter{
+		&engine.Filter{
 			Type:      "*string",
 			FieldName: "Accout",
 			Values:    []string{"1001", "1002"},
 		},
-		&engine.RequestFilter{
+		&engine.Filter{
 			Type:      "*string_prefix",
 			FieldName: "Destination",
 			Values:    []string{"10", "20"},
