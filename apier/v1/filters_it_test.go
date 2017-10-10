@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-/*
 import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,169 +32,168 @@ import (
 )
 
 var (
-	filterProfileCfgPath   string
-	filterProfileCfg       *config.CGRConfig
-	filterProfileRPC       *rpc.Client
-	filterProfileDataDir   = "/usr/share/cgrates"
-	filterProfile          *engine.FilterProfile
-	filterProfileDelay     int
-	filterProfileConfigDIR string //run tests for specific configuration
+	filterCfgPath   string
+	filterCfg       *config.CGRConfig
+	filterRPC       *rpc.Client
+	filterDataDir   = "/usr/share/cgrates"
+	filter          *engine.Filter
+	filterDelay     int
+	filterConfigDIR string //run tests for specific configuration
 )
 
-var sTestsFilterProfile = []func(t *testing.T){
-	testFilterProfileInitCfg,
-	testFilterProfileResetDataDB,
-	testFilterProfileStartEngine,
-	testFilterProfileRpcConn,
-	testFilterProfileGetFilterProfileBeforeSet,
-	testFilterProfileSetFilterProfile,
-	testFilterProfileGetFilterProfileAfterSet,
-	testFilterProfileUpdateFilterProfile,
-	testFilterProfileGetFilterProfileAfterUpdate,
-	testFilterProfileRemFilterProfile,
-	testFilterProfileGetFilterProfileAfterRemove,
-	testFilterProfileKillEngine,
+var sTestsFilter = []func(t *testing.T){
+	testFilterInitCfg,
+	testFilterResetDataDB,
+	testFilterStartEngine,
+	testFilterRpcConn,
+	testFilterGetFilterBeforeSet,
+	testFilterSetFilter,
+	testFilterGetFilterAfterSet,
+	testFilterUpdateFilter,
+	testFilterGetFilterAfterUpdate,
+	testFilterRemFilter,
+	testFilterGetFilterAfterRemove,
+	testFilterKillEngine,
 }
 
 //Test start here
-func TestFilterProfileITMySql(t *testing.T) {
-	filterProfileConfigDIR = "tutmysql"
-	for _, stest := range sTestsFilterProfile {
-		t.Run(filterProfileConfigDIR, stest)
+func TestFilterITMySql(t *testing.T) {
+	filterConfigDIR = "tutmysql"
+	for _, stest := range sTestsFilter {
+		t.Run(filterConfigDIR, stest)
 	}
 }
 
-func TestFilterProfileITMongo(t *testing.T) {
-	filterProfileConfigDIR = "tutmongo"
-	for _, stest := range sTestsFilterProfile {
-		t.Run(filterProfileConfigDIR, stest)
+func TestFilterITMongo(t *testing.T) {
+	filterConfigDIR = "tutmongo"
+	for _, stest := range sTestsFilter {
+		t.Run(filterConfigDIR, stest)
 	}
 }
 
-func TestFilterProfileITPG(t *testing.T) {
-	filterProfileConfigDIR = "tutpostgres"
-	for _, stest := range sTestsFilterProfile {
-		t.Run(filterProfileConfigDIR, stest)
+func TestFilterITPG(t *testing.T) {
+	filterConfigDIR = "tutpostgres"
+	for _, stest := range sTestsFilter {
+		t.Run(filterConfigDIR, stest)
 	}
 }
 
-func testFilterProfileInitCfg(t *testing.T) {
+func testFilterInitCfg(t *testing.T) {
 	var err error
-	filterProfileCfgPath = path.Join(filterProfileDataDir, "conf", "samples", filterProfileConfigDIR)
-	filterProfileCfg, err = config.NewCGRConfigFromFolder(filterProfileCfgPath)
+	filterCfgPath = path.Join(filterDataDir, "conf", "samples", filterConfigDIR)
+	filterCfg, err = config.NewCGRConfigFromFolder(filterCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	filterProfileCfg.DataFolderPath = filterProfileDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(filterProfileCfg)
-	switch filterProfileConfigDIR {
+	filterCfg.DataFolderPath = filterDataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(filterCfg)
+	switch filterConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		filterProfileDelay = 2000
+		filterDelay = 2000
 	default:
-		filterProfileDelay = 1000
+		filterDelay = 1000
 	}
 }
 
 // Wipe out the cdr database
-func testFilterProfileResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(filterProfileCfg); err != nil {
+func testFilterResetDataDB(t *testing.T) {
+	if err := engine.InitDataDb(filterCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func testFilterProfileStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(filterProfileCfgPath, filterProfileDelay); err != nil {
+func testFilterStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(filterCfgPath, filterDelay); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func testFilterProfileRpcConn(t *testing.T) {
+func testFilterRpcConn(t *testing.T) {
 	var err error
-	filterProfileRPC, err = jsonrpc.Dial("tcp", filterProfileCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	filterRPC, err = jsonrpc.Dial("tcp", filterCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testFilterProfileGetFilterProfileBeforeSet(t *testing.T) {
-	var reply *engine.FilterProfile
-	if err := filterProfileRPC.Call("ApierV1.GetFilterProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+func testFilterGetFilterBeforeSet(t *testing.T) {
+	var reply *engine.Filter
+	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testFilterProfileSetFilterProfile(t *testing.T) {
-	filterProfile = &engine.FilterProfile{
-		Tenant:            "cgrates.org",
-		ID:                "Filter1",
-		FilterType:        "*string_prefix",
-		FilterFieldName:   "Account",
-		FilterFieldValues: []string{"10", "20"},
+func testFilterSetFilter(t *testing.T) {
+	filter = &engine.Filter{
+		Tenant:    "cgrates.org",
+		ID:        "Filter1",
+		Type:      "*string_prefix",
+		FieldName: "Account",
+		Values:    []string{"10", "20"},
 	}
 
 	var result string
-	if err := filterProfileRPC.Call("ApierV1.SetFilterProfile", filterProfile, &result); err != nil {
+	if err := filterRPC.Call("ApierV1.SetFilter", filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testFilterProfileGetFilterProfileAfterSet(t *testing.T) {
-	var reply *engine.FilterProfile
-	if err := filterProfileRPC.Call("ApierV1.GetFilterProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
+func testFilterGetFilterAfterSet(t *testing.T) {
+	var reply *engine.Filter
+	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(filterProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", filterProfile, reply)
+	} else if !reflect.DeepEqual(filter, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", filter, reply)
 	}
 }
 
-func testFilterProfileUpdateFilterProfile(t *testing.T) {
-	filterProfile = &engine.FilterProfile{
-		Tenant:            "cgrates.org",
-		ID:                "Filter1",
-		FilterType:        "*string_prefix",
-		FilterFieldName:   "Destination",
-		FilterFieldValues: []string{"1001", "1002"},
+func testFilterUpdateFilter(t *testing.T) {
+	filter = &engine.Filter{
+		Tenant:    "cgrates.org",
+		ID:        "Filter1",
+		Type:      "*string_prefix",
+		FieldName: "Destination",
+		Values:    []string{"1001", "1002"},
 	}
 	var result string
-	if err := filterProfileRPC.Call("ApierV1.SetFilterProfile", filterProfile, &result); err != nil {
+	if err := filterRPC.Call("ApierV1.SetFilter", filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testFilterProfileGetFilterProfileAfterUpdate(t *testing.T) {
-	var reply *engine.FilterProfile
-	if err := filterProfileRPC.Call("ApierV1.GetFilterProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
+func testFilterGetFilterAfterUpdate(t *testing.T) {
+	var reply *engine.Filter
+	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(filterProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", filterProfile, reply)
+	} else if !reflect.DeepEqual(filter, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", filter, reply)
 	}
 }
 
-func testFilterProfileRemFilterProfile(t *testing.T) {
+func testFilterRemFilter(t *testing.T) {
 	var resp string
-	if err := filterProfileRPC.Call("ApierV1.RemFilterProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
+	if err := filterRPC.Call("ApierV1.RemFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 }
 
-func testFilterProfileGetFilterProfileAfterRemove(t *testing.T) {
-	var reply *engine.FilterProfile
-	if err := filterProfileRPC.Call("ApierV1.GetFilterProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+func testFilterGetFilterAfterRemove(t *testing.T) {
+	var reply *engine.Filter
+	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testFilterProfileKillEngine(t *testing.T) {
-	if err := engine.KillEngine(filterProfileDelay); err != nil {
+func testFilterKillEngine(t *testing.T) {
+	if err := engine.KillEngine(filterDelay); err != nil {
 		t.Error(err)
 	}
 }
-*/
