@@ -126,9 +126,9 @@ type DataDB interface {
 	GetThreshold(string, string, bool, string) (*Threshold, error)
 	SetThreshold(*Threshold) error
 	RemoveThreshold(string, string, string) error
-	GetFilterProfile(string, string, bool, string) (*FilterProfile, error)
-	SetFilterProfile(*FilterProfile) error
-	RemoveFilterProfile(string, string, string) error
+	GetFilter(string, string, bool, string) (*Filter, error)
+	SetFilter(*Filter) error
+	RemoveFilter(string, string, string) error
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }

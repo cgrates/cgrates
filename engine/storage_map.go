@@ -1669,14 +1669,14 @@ func (ms *MapStorage) RemoveThreshold(tenant, id string, transactionID string) (
 	return
 }
 
-func (ms *MapStorage) GetFilterProfile(tenant, id string, skipCache bool, transactionID string) (r *FilterProfile, err error) {
+func (ms *MapStorage) GetFilter(tenant, id string, skipCache bool, transactionID string) (r *Filter, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.FilterProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x != nil {
-				return x.(*FilterProfile), nil
+				return x.(*Filter), nil
 			}
 			return nil, utils.ErrNotFound
 		}
@@ -1694,21 +1694,21 @@ func (ms *MapStorage) GetFilterProfile(tenant, id string, skipCache bool, transa
 	return
 }
 
-func (ms *MapStorage) SetFilterProfile(r *FilterProfile) (err error) {
+func (ms *MapStorage) SetFilter(r *Filter) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.FilterProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	ms.dict[utils.FilterPrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
 	return
 }
 
-func (ms *MapStorage) RemoveFilterProfile(tenant, id string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveFilter(tenant, id string, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.FilterProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return

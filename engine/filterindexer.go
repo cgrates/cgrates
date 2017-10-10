@@ -50,7 +50,7 @@ func (rfi *ReqFilterIndexer) ChangedKeys() utils.StringMap {
 }
 
 // IndexFilters parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
-func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilter) {
+func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*Filter) {
 	var hasMetaString bool
 	for _, fltr := range reqFltrs {
 		if fltr.Type != MetaString {

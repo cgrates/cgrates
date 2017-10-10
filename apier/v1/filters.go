@@ -23,24 +23,24 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//SetFilterProfile add a new FilterProfile
-func (self *ApierV1) SetFilterProfile(attrs *engine.FilterProfile, reply *string) error {
+//SetFilter add a new Filter
+func (self *ApierV1) SetFilter(attrs *engine.Filter, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.DataManager.DataDB().SetFilterProfile(attrs); err != nil {
+	if err := self.DataManager.DataDB().SetFilter(attrs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//GetFilterProfile returns a FilterProfile
-func (self *ApierV1) GetFilterProfile(arg utils.TenantID, reply *engine.FilterProfile) error {
+//GetFilter returns a Filter
+func (self *ApierV1) GetFilter(arg utils.TenantID, reply *engine.Filter) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if fltr, err := self.DataManager.DataDB().GetFilterProfile(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
+	if fltr, err := self.DataManager.DataDB().GetFilter(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -51,12 +51,12 @@ func (self *ApierV1) GetFilterProfile(arg utils.TenantID, reply *engine.FilterPr
 	return nil
 }
 
-//RemFilterProfile  remove a specific filter profile
-func (self *ApierV1) RemFilterProfile(arg utils.TenantID, reply *string) error {
+//RemFilter  remove a specific filter
+func (self *ApierV1) RemFilter(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.DataManager.DataDB().RemoveFilterProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := self.DataManager.DataDB().RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

@@ -94,7 +94,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDStoredStatQueue,
 	testOnStorITCRUDThresholdProfile,
 	testOnStorITCRUDThreshold,
-	testOnStorITCRUDFilterProfile,
+	testOnStorITCRUDFilter,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -797,9 +797,9 @@ func testOnStorITCacheResourceProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL_TEST",
 		Weight: 10,
-		Filters: []*RequestFilter{
-			&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
-			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+		Filters: []*Filter{
+			&Filter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
+			&Filter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 			}},
 		ActivationInterval: &utils.ActivationInterval{
@@ -1800,9 +1800,9 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	rL := &ResourceProfile{
 		ID:     "RL_TEST2",
 		Weight: 10,
-		Filters: []*RequestFilter{
-			&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
-			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+		Filters: []*Filter{
+			&Filter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
+			&Filter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 			}},
 		ActivationInterval: &utils.ActivationInterval{
@@ -1967,7 +1967,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	sq := &StatQueueProfile{
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
-		Filters:            []*RequestFilter{},
+		Filters:            []*Filter{},
 		QueueLength:        2,
 		TTL:                timeTTL,
 		Metrics:            []string{},
@@ -2055,7 +2055,7 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		Tenant:             "cgrates.org",
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
-		Filters:            []*RequestFilter{},
+		Filters:            []*Filter{},
 		Recurrent:          true,
 		MinSleep:           timeMinSleep,
 		Blocker:            true,
@@ -2120,34 +2120,34 @@ func testOnStorITCRUDThreshold(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDFilterProfile(t *testing.T) {
-	fp := &FilterProfile{
-		Tenant:            "cgrates.org",
-		ID:                "Filter1",
-		FilterFieldName:   "*string",
-		FilterType:        "Account",
-		FilterFieldValues: []string{"1001", "1002"},
+func testOnStorITCRUDFilter(t *testing.T) {
+	fp := &Filter{
+		Tenant:    "cgrates.org",
+		ID:        "Filter1",
+		FieldName: "*string",
+		Type:      "Account",
+		Values:    []string{"1001", "1002"},
 	}
-	if _, rcvErr := onStor.GetFilterProfile("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetFilterProfile(fp); err != nil {
+	if err := onStor.SetFilter(fp); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetFilterProfile("cgrates.org", "Filter1", true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
-	if rcv, err := onStor.GetFilterProfile("cgrates.org", "Filter1", false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1", false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
-	if err := onStor.RemoveFilterProfile(fp.Tenant, fp.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveFilter(fp.Tenant, fp.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetFilterProfile("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

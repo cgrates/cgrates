@@ -1705,7 +1705,7 @@ func (tpr *TpReader) LoadFilterFiltered(tag string) error {
 	for tenant, mpID := range mapTHs {
 		for thID := range mpID {
 			thTntID := &utils.TenantID{Tenant: tenant, ID: thID}
-			if has, err := tpr.dataStorage.HasData(utils.FilterProfilePrefix, thTntID.TenantID()); err != nil {
+			if has, err := tpr.dataStorage.HasData(utils.FilterPrefix, thTntID.TenantID()); err != nil {
 				return err
 			} else if !has {
 				tpr.thresholds = append(tpr.filters, thTntID)
@@ -2099,11 +2099,11 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 	for _, mpID := range tpr.flProfiles {
 		for _, tpTH := range mpID {
-			th, err := APItoFilterProfile(tpTH)
+			th, err := APItoFilter(tpTH)
 			if err != nil {
 				return err
 			}
-			if err = tpr.dataStorage.SetFilterProfile(th); err != nil {
+			if err = tpr.dataStorage.SetFilter(th); err != nil {
 				return err
 			}
 			if verbose {
@@ -2435,7 +2435,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.FilterProfilePrefix:
+	case utils.FilterPrefix:
 		keys := make([]string, len(tpr.flProfiles))
 		i := 0
 		for k := range tpr.flProfiles {

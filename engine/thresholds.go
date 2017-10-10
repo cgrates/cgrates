@@ -35,7 +35,7 @@ import (
 type ThresholdProfile struct {
 	Tenant             string
 	ID                 string
-	Filters            []*RequestFilter          // Filters for the request
+	Filters            []*Filter                 // Filters for the request
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
 	Recurrent          bool
 	MinSleep           time.Duration

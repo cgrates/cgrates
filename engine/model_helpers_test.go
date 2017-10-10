@@ -818,18 +818,18 @@ func TestAPItoResource(t *testing.T) {
 		Stored:  tpRL.Stored,
 		Blocker: tpRL.Blocker,
 		Weight:  tpRL.Weight,
-		Filters: make([]*RequestFilter, len(tpRL.Filters))}
-	eRL.Filters[0] = &RequestFilter{Type: MetaString,
+		Filters: make([]*Filter, len(tpRL.Filters))}
+	eRL.Filters[0] = &Filter{Type: MetaString,
 		FieldName: "Account", Values: []string{"1001", "1002"}}
-	eRL.Filters[1] = &RequestFilter{Type: MetaStringPrefix,
+	eRL.Filters[1] = &Filter{Type: MetaStringPrefix,
 		FieldName: "Destination", Values: []string{"10", "20"}}
-	eRL.Filters[2] = &RequestFilter{Type: MetaStatS,
+	eRL.Filters[2] = &Filter{Type: MetaStatS,
 		Values: []string{"CDRST1:*min_asr:34", "CDRST_1001:*min_asr:20"},
 		statSThresholds: []*RFStatSThreshold{
 			&RFStatSThreshold{QueueID: "CDRST1", ThresholdType: "*min_asr", ThresholdValue: 34},
 			&RFStatSThreshold{QueueID: "CDRST_1001", ThresholdType: "*min_asr", ThresholdValue: 20},
 		}}
-	eRL.Filters[3] = &RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+	eRL.Filters[3] = &Filter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 		rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 	}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
@@ -913,7 +913,7 @@ func TestAPItoTPStats(t *testing.T) {
 		QueueLength: tps.QueueLength,
 		Metrics:     []string{"*asr", "*acd", "*acc"},
 		Thresholds:  []string{"THRESH1", "THRESH2"},
-		Filters:     make([]*RequestFilter, len(tps.Filters)),
+		Filters:     make([]*Filter, len(tps.Filters)),
 		Stored:      tps.Stored,
 		Blocker:     tps.Blocker,
 		Weight:      20.0,
@@ -923,7 +923,7 @@ func TestAPItoTPStats(t *testing.T) {
 		t.Errorf("Got error: %+v", err)
 	}
 
-	eTPs.Filters[0] = &RequestFilter{Type: MetaString,
+	eTPs.Filters[0] = &Filter{Type: MetaString,
 		FieldName: "Account", Values: []string{"1001", "1002"}}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
@@ -995,7 +995,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 
 	eTPs := &ThresholdProfile{
 		ID:        tps.ID,
-		Filters:   make([]*RequestFilter, len(tps.Filters)),
+		Filters:   make([]*Filter, len(tps.Filters)),
 		Recurrent: tps.Recurrent,
 		Blocker:   tps.Blocker,
 		Weight:    tps.Weight,
@@ -1004,7 +1004,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 	if eTPs.MinSleep, err = utils.ParseDurationWithSecs(tps.MinSleep); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
-	eTPs.Filters[0] = &RequestFilter{Type: MetaString,
+	eTPs.Filters[0] = &Filter{Type: MetaString,
 		FieldName: "Account", Values: []string{"1001", "1002"}}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
@@ -1018,19 +1018,19 @@ func TestAPItoTPThreshold(t *testing.T) {
 func TestTPFilterAsTPFilter(t *testing.T) {
 	tps := []*TpFilter{
 		&TpFilter{
-			Tpid:              "TEST_TPID",
-			ID:                "Filter1",
-			FilterType:        MetaStringPrefix,
-			FilterFieldName:   "Account",
-			FilterFieldValues: "1001;1002",
+			Tpid:   "TEST_TPID",
+			ID:     "Filter1",
+			Type:   MetaStringPrefix,
+			Name:   "Account",
+			Values: "1001;1002",
 		},
 	}
 	eTPs := []*utils.TPFilter{
 		&utils.TPFilter{
 			TPid:             tps[0].Tpid,
 			ID:               tps[0].ID,
-			FilterType:       tps[0].FilterType,
-			FilterFieldName:  tps[0].FilterFieldName,
+			FilterType:       tps[0].Type,
+			FilterFieldName:  tps[0].Name,
 			FilterFielValues: []string{"1001", "1002"},
 		},
 	}
@@ -1051,14 +1051,14 @@ func TestAPItoTPFilter(t *testing.T) {
 		FilterFielValues: []string{"1001", "1002"},
 	}
 
-	eTPs := &FilterProfile{
-		Tenant:            "cgrates.org",
-		ID:                tps.ID,
-		FilterFieldName:   tps.FilterFieldName,
-		FilterType:        tps.FilterType,
-		FilterFieldValues: tps.FilterFielValues,
+	eTPs := &Filter{
+		Tenant:    "cgrates.org",
+		ID:        tps.ID,
+		FieldName: tps.FilterFieldName,
+		Type:      tps.FilterType,
+		Values:    tps.FilterFielValues,
 	}
-	if st, err := APItoFilterProfile(tps); err != nil {
+	if st, err := APItoFilter(tps); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)

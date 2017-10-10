@@ -507,8 +507,8 @@ func testV1RsSetResourceProfile(t *testing.T) {
 	rlsConfig = &engine.ResourceProfile{
 		Tenant: "cgrates.org",
 		ID:     "RCFG1",
-		Filters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Filters: []*engine.Filter{
+			&engine.Filter{
 				Type:      "type",
 				FieldName: "Name",
 				Values:    []string{"FilterValue1", "FilterValue2"},
@@ -546,13 +546,13 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
-	rlsConfig.Filters = []*engine.RequestFilter{
-		&engine.RequestFilter{
+	rlsConfig.Filters = []*engine.Filter{
+		&engine.Filter{
 			Type:      "type",
 			FieldName: "Name",
 			Values:    []string{"FilterValue1", "FilterValue2"},
 		},
-		&engine.RequestFilter{
+		&engine.Filter{
 			Type:      "*string",
 			FieldName: "Accout",
 			Values:    []string{"1001", "1002"},
