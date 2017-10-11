@@ -2138,6 +2138,7 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 				Blocker:   tp.Blocker,
 				Recurrent: tp.Recurrent,
 				MinSleep:  tp.MinSleep,
+				Async:     tp.Async,
 			}
 		}
 		if tp.ActionIDs != "" {
@@ -2188,6 +2189,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 			mdl.Weight = th.Weight
 			mdl.Recurrent = th.Recurrent
 			mdl.MinSleep = th.MinSleep
+			mdl.Async = th.Async
 			if th.ActivationInterval != nil {
 				if th.ActivationInterval.ActivationTime != "" {
 					mdl.ActivationInterval = th.ActivationInterval.ActivationTime
@@ -2226,6 +2228,7 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 		Recurrent: tpTH.Recurrent,
 		Weight:    tpTH.Weight,
 		Blocker:   tpTH.Blocker,
+		Async:     tpTH.Async,
 		Filters:   make([]*Filter, len(tpTH.Filters)),
 	}
 	if tpTH.MinSleep != "" {
@@ -2260,12 +2263,16 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
 		th, found := mst[tp.ID]
 		if !found {
 			th = &utils.TPFilter{
-				TPid:            tp.Tpid,
-				Tenant:          tp.Tenant,
-				ID:              tp.ID,
-				FilterType:      tp.Type,
-				FilterFieldName: tp.Name,
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
 			}
+		}
+		if tp.Type != "" {
+			th.FilterType = tp.Type
+		}
+		if tp.Name != "" {
+			th.FilterFieldName = tp.Name
 		}
 		if tp.Values != "" {
 			th.FilterFielValues = append(th.FilterFielValues, strings.Split(tp.Values, utils.INFIELD_SEP)...)

@@ -2106,7 +2106,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("Filters:")
+		log.Print("FilterProfile:")
 	}
 	for _, mpID := range tpr.flProfiles {
 		for _, tpTH := range mpID {
@@ -2120,6 +2120,17 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if verbose {
 				log.Print("\t", th.TenantID())
 			}
+		}
+	}
+	if verbose {
+		log.Print("Filters:")
+	}
+	for _, thd := range tpr.filters {
+		if err = tpr.dataStorage.SetFilter(&Filter{Tenant: thd.Tenant, ID: thd.ID}); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", thd.TenantID())
 		}
 	}
 	if verbose {
@@ -2297,7 +2308,7 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Stats: ", len(tpr.sqProfiles))
 	// thresholds
 	log.Print("Thresholds: ", len(tpr.thProfiles))
-	// thresholds
+	// filters
 	log.Print("Filters: ", len(tpr.flProfiles))
 }
 

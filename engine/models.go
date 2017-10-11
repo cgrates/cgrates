@@ -514,6 +514,7 @@ type TpThreshold struct {
 	Blocker            bool    `index:"8" re:""`
 	Weight             float64 `index:"9" re:"\d+\.?\d*"`
 	ActionIDs          string  `index:"10" re:""`
+	Async              bool    `index:"8" re:""`
 	CreatedAt          time.Time
 }
 
