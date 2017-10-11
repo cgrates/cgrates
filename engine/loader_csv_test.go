@@ -356,6 +356,9 @@ func init() {
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
 	}
+	if err := csvr.LoadFilter(); err != nil {
+		log.Print("error in LoadFilter:", err)
+	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
 	dm.DataDB().LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
@@ -1441,12 +1444,11 @@ func TestLoadResourceProfiles(t *testing.T) {
 		t.Errorf("Failed to load resourceProfiles: %s", utils.ToIJSON(csvr.resProfiles))
 	} else if !reflect.DeepEqual(eResProfiles["cgrates.org"]["ResGroup22"], csvr.resProfiles["cgrates.org"]["ResGroup22"]) {
 		t.Errorf("Expecting: %+v, received: %+v", eResProfiles["cgrates.org"]["ResGroup22"], csvr.resProfiles["cgrates.org"]["ResGroup22"])
-
 	}
 
 }
 
-func TestLoadStats(t *testing.T) {
+func TestLoadStatProfiles(t *testing.T) {
 	eStats := map[string]map[string]*utils.TPStats{
 		"cgrates.org": map[string]*utils.TPStats{
 			"Stats1": &utils.TPStats{
@@ -1479,7 +1481,7 @@ func TestLoadStats(t *testing.T) {
 	}
 }
 
-func TestLoadThresholds(t *testing.T) {
+func TestLoadThresholdProfiles(t *testing.T) {
 	eThresholds := map[string]map[string]*utils.TPThreshold{
 		"cgrates.org": map[string]*utils.TPThreshold{
 			"Threshold1": &utils.TPThreshold{
@@ -1506,3 +1508,81 @@ func TestLoadThresholds(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eThresholds["cgrates.org"]["Threshold1"], csvr.thProfiles["cgrates.org"]["Threshold1"])
 	}
 }
+
+func TestLoadFilterProfiles(t *testing.T) {
+}
+
+func TestLoadResource(t *testing.T) {
+	eResources := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ResGroup21",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ResGroup22",
+		},
+	}
+
+	if len(csvr.resources) != len(eResources) {
+		t.Errorf("Failed to load resources: %s", utils.ToIJSON(csvr.resources))
+	} else if !reflect.DeepEqual(eResources, csvr.resources) {
+		t.Errorf("Expecting: %+v, received: %+v", eResources, csvr.resources)
+	}
+}
+
+func TestLoadstatQueues(t *testing.T) {
+	eStatQueues := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+		},
+	}
+
+	if len(csvr.statQueues) != len(eStatQueues) {
+		t.Errorf("Failed to load statQueues: %s", utils.ToIJSON(csvr.statQueues))
+	} else if !reflect.DeepEqual(eStatQueues, csvr.statQueues) {
+		t.Errorf("Expecting: %+v, received: %+v", eStatQueues, csvr.statQueues)
+	}
+}
+
+func TestLoadThresholds(t *testing.T) {
+	eThresholds := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Threshold1",
+		},
+	}
+
+	if len(csvr.thresholds) != len(eThresholds) {
+		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
+	} else if !reflect.DeepEqual(eThresholds, csvr.thresholds) {
+		t.Errorf("Expecting: %+v, received: %+v", eThresholds, csvr.thresholds)
+	}
+}
+
+/*
+func TestLoadFilters(t *testing.T) {
+	eFilters := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Threshold1",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Threshold1",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Threshold1",
+		},
+	}
+
+	if len(csvr.filters) != len(eFilters) {
+		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
+	} else if !reflect.DeepEqual(eThresholds, csvr.thresholds) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters, csvr.thresholds)
+	}
+
+}
+*/

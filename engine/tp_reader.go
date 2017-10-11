@@ -2297,6 +2297,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Stats: ", len(tpr.sqProfiles))
 	// thresholds
 	log.Print("Thresholds: ", len(tpr.thProfiles))
+	// thresholds
+	log.Print("Filters: ", len(tpr.flProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
