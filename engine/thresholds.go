@@ -287,13 +287,12 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (err error) {
+func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (hits int, err error) {
 	matchTs, err := tS.matchingThresholdsForEvent(ev)
 	if err != nil {
-		return err
-	} else if len(matchTs) == 0 {
-		return utils.ErrNotFound
+		return 0, err
 	}
+	hits = len(matchTs)
 	var withErrors bool
 	for _, t := range matchTs {
 		err = t.ProcessEvent(ev, tS.dm)
@@ -335,12 +334,14 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (err error) {
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(ev *ThresholdEvent, reply *string) (err error) {
+func (tS *ThresholdService) V1ProcessEvent(ev *ThresholdEvent, reply *int) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err = tS.processEvent(ev); err == nil {
-		*reply = utils.OK
+	if hits, err := tS.processEvent(ev); err != nil {
+		return err
+	} else {
+		*reply = hits
 	}
 	return
 }
