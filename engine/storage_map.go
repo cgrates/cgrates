@@ -317,11 +317,7 @@ func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	switch categ {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-<<<<<<< HEAD
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix:
-=======
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix:
->>>>>>> Add test in loader_csv_test.go for resources,statQueue,thresholds,filters
+		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix, utils.FilterPrefix:
 		_, exists := ms.dict[categ+subject]
 		return exists, nil
 	}

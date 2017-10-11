@@ -18,13 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/utils"
 	"log"
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/cgrates/cgrates/cache"
-	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -1509,8 +1508,52 @@ func TestLoadThresholdProfiles(t *testing.T) {
 	}
 }
 
+/*
 func TestLoadFilterProfiles(t *testing.T) {
+	eFilters := map[string]map[string]*utils.TPFilter{
+		"cgrates.org": map[string]*utils.TPFilter{
+			"FLTR_1": &utils.TPFilter{
+				TPid:             testTPID,
+				Tenant:           "cgrates.org",
+				ID:               "FLTR_1",
+				FilterType:       "*string",
+				FilterFieldName:  "Account",
+				FilterFielValues: []string{"1001", "1002"},
+			},
+			"FLTR_ACNT_dan": &utils.TPFilter{
+				TPid:             testTPID,
+				Tenant:           "cgrates.org",
+				ID:               "FLTR_ACNT_dan",
+				FilterType:       "*string",
+				FilterFieldName:  "Account",
+				FilterFielValues: []string{"dan"},
+			},
+			"FLTR_DST_NL": &utils.TPFilter{
+				TPid:             testTPID,
+				Tenant:           "cgrates.org",
+				ID:               "FLTR_DST_NL",
+				FilterType:       "*destinations",
+				FilterFieldName:  "Destination",
+				FilterFielValues: []string{"DST_NL"},
+			},
+			"FLTR_DST_DE": &utils.TPFilter{
+				TPid:             testTPID,
+				Tenant:           "cgrates.org",
+				ID:               "FLTR_DST_DE",
+				FilterType:       "*destinations",
+				FilterFieldName:  "Destination",
+				FilterFielValues: []string{"DST_DE"},
+			},
+		},
+	}
+	if len(csvr.flProfiles["cgrates.org"]) != len(eFilters["cgrates.org"]) {
+		t.Errorf("Failed to load FilterProfiles: %s", utils.ToIJSON(csvr.flProfiles))
+	} else if !reflect.DeepEqual(eFilters["cgrates.org"]["FLTR_1"], csvr.flProfiles["cgrates.org"]["FLTR_1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters["cgrates.org"]["FLTR_1"], csvr.flProfiles["cgrates.org"]["FLTR_1"])
+	}
+
 }
+*/
 
 func TestLoadResource(t *testing.T) {
 	eResources := []*utils.TenantID{
@@ -1561,28 +1604,29 @@ func TestLoadThresholds(t *testing.T) {
 	}
 }
 
-/*
 func TestLoadFilters(t *testing.T) {
 	eFilters := []*utils.TenantID{
 		&utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "Threshold1",
+			ID:     "FLTR_1",
 		},
 		&utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "Threshold1",
+			ID:     "FLTR_ACNT_dan",
 		},
 		&utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "Threshold1",
+			ID:     "FLTR_DST_DE",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_DST_NL",
 		},
 	}
 
 	if len(csvr.filters) != len(eFilters) {
-		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
-	} else if !reflect.DeepEqual(eThresholds, csvr.thresholds) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters, csvr.thresholds)
+		t.Errorf("Failed to load filters: %s", utils.ToIJSON(csvr.filters))
+	} else if !reflect.DeepEqual(eFilters, csvr.filters) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters, csvr.filters)
 	}
-
 }
-*/

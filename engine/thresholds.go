@@ -42,6 +42,7 @@ type ThresholdProfile struct {
 	Blocker            bool    // blocker flag to stop processing on filters matched
 	Weight             float64 // Weight to sort the thresholds
 	ActionIDs          []string
+	Async              bool
 }
 
 func (tp *ThresholdProfile) TenantID() string {
