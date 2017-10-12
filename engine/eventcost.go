@@ -616,6 +616,6 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 			incr.AccountingID = srplusEC.accountingGetIDFromEventCost(ec, incr.AccountingID)
 		}
 	}
-	ec.RemoveStaleReferences() // data should be transfered by now, can clean the old one
+	ec.RemoveStaleReferences() // data should be transferred by now, can clean the old one
 	return
 }
