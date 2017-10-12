@@ -72,9 +72,13 @@ type RequestFilter struct {
 }
 
 type Filter struct {
-	Tenant     string
-	ID         string
-	ReqFilters []*RequestFilter
+	Tenant  string
+	ID      string
+	Filters []*RequestFilter
+}
+
+func (flt *Filter) TenantID() string {
+	return utils.ConcatenatedKey(flt.Tenant, flt.ID)
 }
 
 // Separate method to compile RSR fields

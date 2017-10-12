@@ -2211,10 +2211,9 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 		mdl.FilterFieldName = fltr.FieldName
 		for i, val := range fltr.Values {
 			if i != 0 {
-				mdl.FilterFieldValues = mdl.FilterFieldValues + utils.INFIELD_SEP + val
-			} else {
-				mdl.FilterFieldValues = val
+				mdl.FilterFieldValues += utils.INFIELD_SEP
 			}
+			mdl.FilterFieldValues += val
 		}
 		mdls = append(mdls, mdl)
 	}
@@ -2268,14 +2267,11 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
 				ID:     tp.ID,
 			}
 		}
-		if tp.Type != "" {
-			th.FilterType = tp.Type
-		}
-		if tp.Name != "" {
-			th.FilterFieldName = tp.Name
-		}
-		if tp.Values != "" {
-			th.FilterFielValues = append(th.FilterFielValues, strings.Split(tp.Values, utils.INFIELD_SEP)...)
+		if tp.FilterType != "" {
+			th.Filters = append(th.Filters, &utils.TPRequestFilter{
+				Type:      tp.FilterType,
+				FieldName: tp.FilterFieldName,
+				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
 		mst[tp.ID] = th
 	}
@@ -2289,27 +2285,41 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
 }
 
 func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
-	mdl := &TpFilter{
-		Tpid:   th.TPid,
-		Tenant: th.Tenant,
-		ID:     th.ID,
-		Name:   th.FilterFieldName,
-		Type:   th.FilterType,
+	if len(th.Filters) == 0 {
+		return
 	}
-	for i, val := range th.FilterFielValues {
-		if i != 0 {
-			mdl.Values += utils.INFIELD_SEP
+	for _, fltr := range th.Filters {
+		mdl := &TpFilter{
+			Tpid:   th.TPid,
+			Tenant: th.Tenant,
+			ID:     th.ID,
 		}
-		mdl.Values += val
+		mdl.FilterType = fltr.Type
+		mdl.FilterFieldName = fltr.FieldName
+		for i, val := range fltr.Values {
+			if i != 0 {
+				mdl.FilterFieldValues += utils.INFIELD_SEP
+			}
+			mdl.FilterFieldValues += val
+		}
+		mdls = append(mdls, mdl)
 	}
-	mdls = append(mdls, mdl)
 	return
+
 }
 
 func APItoFilter(tpTH *utils.TPFilter) (th *Filter, err error) {
 	th = &Filter{
-		Tenant: tpTH.Tenant,
-		ID:     tpTH.ID,
+		Tenant:  tpTH.Tenant,
+		ID:      tpTH.ID,
+		Filters: make([]*RequestFilter, len(tpTH.Filters)),
+	}
+	for i, f := range tpTH.Filters {
+		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		if err := rf.CompileValues(); err != nil {
+			return nil, err
+		}
+		th.Filters[i] = rf
 	}
 	return th, nil
 }

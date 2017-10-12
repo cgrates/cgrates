@@ -1370,11 +1370,8 @@ type TPThreshold struct {
 }
 
 type TPFilter struct {
-	TPid             string
-	Tenant           string
-	ID               string
-	FilterType       string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FilterFieldName  string   // Name of the field providing us the Values to check (used in case of some )
-	FilterFielValues []string // Filter definition
-
+	TPid    string
+	Tenant  string
+	ID      string
+	Filters []*TPRequestFilter
 }
