@@ -1509,41 +1509,66 @@ func TestLoadThresholdProfiles(t *testing.T) {
 	}
 }
 
-/*
 func TestLoadFilterProfiles(t *testing.T) {
 	eFilters := map[string]map[string]*utils.TPFilter{
 		"cgrates.org": map[string]*utils.TPFilter{
 			"FLTR_1": &utils.TPFilter{
-				TPid:             testTPID,
-				Tenant:           "cgrates.org",
-				ID:               "FLTR_1",
-				FilterType:       "*string",
-				FilterFieldName:  "Account",
-				FilterFielValues: []string{"1001", "1002"},
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "FLTR_1",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{
+						FieldName: "Account",
+						Type:      "*string",
+						Values:    []string{"1001", "1002"},
+					},
+					&utils.TPRequestFilter{
+						FieldName: "Destination",
+						Type:      "*string_prefix",
+						Values:    []string{"10", "20"},
+					},
+					&utils.TPRequestFilter{
+						FieldName: "",
+						Type:      "*rsr_fields",
+						Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					},
+				},
 			},
 			"FLTR_ACNT_dan": &utils.TPFilter{
-				TPid:             testTPID,
-				Tenant:           "cgrates.org",
-				ID:               "FLTR_ACNT_dan",
-				FilterType:       "*string",
-				FilterFieldName:  "Account",
-				FilterFielValues: []string{"dan"},
-			},
-			"FLTR_DST_NL": &utils.TPFilter{
-				TPid:             testTPID,
-				Tenant:           "cgrates.org",
-				ID:               "FLTR_DST_NL",
-				FilterType:       "*destinations",
-				FilterFieldName:  "Destination",
-				FilterFielValues: []string{"DST_NL"},
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "FLTR_ACNT_dan",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{
+						FieldName: "Account",
+						Type:      "*string",
+						Values:    []string{"dan"},
+					},
+				},
 			},
 			"FLTR_DST_DE": &utils.TPFilter{
-				TPid:             testTPID,
-				Tenant:           "cgrates.org",
-				ID:               "FLTR_DST_DE",
-				FilterType:       "*destinations",
-				FilterFieldName:  "Destination",
-				FilterFielValues: []string{"DST_DE"},
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "FLTR_DST_DE",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{
+						FieldName: "Destination",
+						Type:      "*destinations",
+						Values:    []string{"DST_DE"},
+					},
+				},
+			},
+			"FLTR_DST_NL": &utils.TPFilter{
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "FLTR_DST_NL",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{
+						FieldName: "Destination",
+						Type:      "*destinations",
+						Values:    []string{"DST_NL"},
+					},
+				},
 			},
 		},
 	}
@@ -1554,9 +1579,7 @@ func TestLoadFilterProfiles(t *testing.T) {
 	}
 
 }
-*/
 
-/*
 func TestLoadResource(t *testing.T) {
 	eResources := []*utils.TenantID{
 		&utils.TenantID{
@@ -1570,11 +1593,12 @@ func TestLoadResource(t *testing.T) {
 	}
 	if len(csvr.resources) != len(eResources) {
 		t.Errorf("Failed to load resources: %s", utils.ToIJSON(csvr.resources))
-	} else if !reflect.DeepEqual(eResources, csvr.resources) {
-		t.Errorf("Expecting: %+v, received: %+v", eResources, csvr.resources)
+	} else if !reflect.DeepEqual(eResources[0], csvr.resources[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", eResources[0], csvr.resources[0])
+	} else if !reflect.DeepEqual(eResources[1], csvr.resources[1]) {
+		t.Errorf("Expecting: %+v, received: %+v", eResources[1], csvr.resources[1])
 	}
 }
-*/
 
 func TestLoadstatQueues(t *testing.T) {
 	eStatQueues := []*utils.TenantID{
@@ -1606,7 +1630,6 @@ func TestLoadThresholds(t *testing.T) {
 	}
 }
 
-/*
 func TestLoadFilters(t *testing.T) {
 	eFilters := []*utils.TenantID{
 		&utils.TenantID{
@@ -1626,11 +1649,15 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_DST_NL",
 		},
 	}
-
 	if len(csvr.filters) != len(eFilters) {
 		t.Errorf("Failed to load filters: %s", utils.ToIJSON(csvr.filters))
-	} else if !reflect.DeepEqual(eFilters, csvr.filters) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters, csvr.filters)
+	} else if !reflect.DeepEqual(eFilters[0], csvr.filters[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters[0], csvr.filters[0])
+	} else if !reflect.DeepEqual(eFilters[1], csvr.filters[1]) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters[1], csvr.filters[1])
+	} else if !reflect.DeepEqual(eFilters[2], csvr.filters[2]) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters[2], csvr.filters[2])
+	} else if !reflect.DeepEqual(eFilters[3], csvr.filters[3]) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters[3], csvr.filters[3])
 	}
 }
-*/
