@@ -1,17 +1,14 @@
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
@@ -40,7 +37,7 @@ const (
 	MetaMaxCapPrefix = "*max_"
 )
 
-func NewFilter(rfType, fieldName string, vals []string) (*Filter, error) {
+func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
 	if !utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaStatS, MetaDestinations}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
@@ -50,7 +47,7 @@ func NewFilter(rfType, fieldName string, vals []string) (*Filter, error) {
 	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaDestinations, MetaDestinations}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
-	rf := &Filter{Type: rfType, FieldName: fieldName, Values: vals}
+	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals}
 	if err := rf.CompileValues(); err != nil {
 		return nil, err
 	}
@@ -63,24 +60,25 @@ type RFStatSThreshold struct {
 	ThresholdValue float64
 }
 
-// Filter filters requests coming into various places
+// RequestFilter filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
-type Filter struct {
-	Tenant          string
-	ID              string
-	Type            string              // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FieldName       string              // Name of the field providing us the Values to check (used in case of some )
-	Values          []string            // Filter definition
-	rsrFields       utils.RSRFields     // Cache here the RSRFilter Values
-	statSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
+type RequestFilter struct {
+	Type               string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName          string   // Name of the field providing us the Values to check (used in case of some )
+	Values             []string // Filter definition
+	ActivationInterval *utils.ActivationInterval
+	rsrFields          utils.RSRFields     // Cache here the RSRFilter Values
+	statSThresholds    []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
 }
 
-func (flt *Filter) TenantID() string {
-	return utils.ConcatenatedKey(flt.Tenant, flt.ID)
+type Filter struct {
+	Tenant     string
+	ID         string
+	ReqFilters []*RequestFilter
 }
 
 // Separate method to compile RSR fields
-func (rf *Filter) CompileValues() (err error) {
+func (rf *RequestFilter) CompileValues() (err error) {
 	if rf.Type == MetaRSRFields {
 		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(rf.Values); err != nil {
 			return
@@ -110,7 +108,7 @@ func (rf *Filter) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *Filter) Pass(req interface{}, extraFieldsLabel string, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
 	switch fltr.Type {
 	case MetaString:
 		return fltr.passString(req, extraFieldsLabel)
@@ -129,7 +127,7 @@ func (fltr *Filter) Pass(req interface{}, extraFieldsLabel string, rpcClnt rpccl
 	}
 }
 
-func (fltr *Filter) passString(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *RequestFilter) passString(req interface{}, extraFieldsLabel string) (bool, error) {
 	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -145,7 +143,7 @@ func (fltr *Filter) passString(req interface{}, extraFieldsLabel string) (bool, 
 	return false, nil
 }
 
-func (fltr *Filter) passStringPrefix(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel string) (bool, error) {
 	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -162,11 +160,11 @@ func (fltr *Filter) passStringPrefix(req interface{}, extraFieldsLabel string) (
 }
 
 // ToDo when Timings will be available in DataDb
-func (fltr *Filter) passTimings(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *RequestFilter) passTimings(req interface{}, extraFieldsLabel string) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *Filter) passDestinations(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel string) (bool, error) {
 	dst, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -188,7 +186,7 @@ func (fltr *Filter) passDestinations(req interface{}, extraFieldsLabel string) (
 	return false, nil
 }
 
-func (fltr *Filter) passRSRFields(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel string) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
 		if strVal, err := utils.ReflectFieldAsString(req, rsrFld.Id, extraFieldsLabel); err != nil {
 			if err == utils.ErrNotFound {
@@ -202,7 +200,7 @@ func (fltr *Filter) passRSRFields(req interface{}, extraFieldsLabel string) (boo
 	return false, nil
 }
 
-func (fltr *Filter) passStatS(req interface{}, extraFieldsLabel string, stats rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *RequestFilter) passStatS(req interface{}, extraFieldsLabel string, stats rpcclient.RpcClientConnection) (bool, error) {
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		return false, errors.New("Missing StatS information")
 	}
