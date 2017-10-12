@@ -797,9 +797,9 @@ func testOnStorITCacheResourceProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL_TEST",
 		Weight: 10,
-		Filters: []*Filter{
-			&Filter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
-			&Filter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+		Filters: []*RequestFilter{
+			&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
+			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 			}},
 		ActivationInterval: &utils.ActivationInterval{
@@ -1800,9 +1800,9 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	rL := &ResourceProfile{
 		ID:     "RL_TEST2",
 		Weight: 10,
-		Filters: []*Filter{
-			&Filter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
-			&Filter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
+		Filters: []*RequestFilter{
+			&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
+			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
 			}},
 		ActivationInterval: &utils.ActivationInterval{
@@ -1967,7 +1967,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	sq := &StatQueueProfile{
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
-		Filters:            []*Filter{},
+		Filters:            []*RequestFilter{},
 		QueueLength:        2,
 		TTL:                timeTTL,
 		Metrics:            []string{},
@@ -2055,7 +2055,7 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		Tenant:             "cgrates.org",
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
-		Filters:            []*Filter{},
+		Filters:            []*RequestFilter{},
 		Recurrent:          true,
 		MinSleep:           timeMinSleep,
 		Blocker:            true,
@@ -2122,11 +2122,15 @@ func testOnStorITCRUDThreshold(t *testing.T) {
 
 func testOnStorITCRUDFilter(t *testing.T) {
 	fp := &Filter{
-		Tenant:    "cgrates.org",
-		ID:        "Filter1",
-		FieldName: "*string",
-		Type:      "Account",
-		Values:    []string{"1001", "1002"},
+		Tenant: "cgrates.org",
+		ID:     "Filter1",
+		Filters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1001", "1002"},
+			},
+		},
 	}
 	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

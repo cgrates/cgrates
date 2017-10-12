@@ -127,11 +127,15 @@ func testFilterGetFilterBeforeSet(t *testing.T) {
 
 func testFilterSetFilter(t *testing.T) {
 	filter = &engine.Filter{
-		Tenant:    "cgrates.org",
-		ID:        "Filter1",
-		Type:      "*string_prefix",
-		FieldName: "Account",
-		Values:    []string{"10", "20"},
+		Tenant: "cgrates.org",
+		ID:     "Filter1",
+		Filters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "*string",
+				Type:      "Account",
+				Values:    []string{"1001", "1002"},
+			},
+		},
 	}
 
 	var result string
@@ -152,12 +156,17 @@ func testFilterGetFilterAfterSet(t *testing.T) {
 }
 
 func testFilterUpdateFilter(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant:    "cgrates.org",
-		ID:        "Filter1",
-		Type:      "*string_prefix",
-		FieldName: "Destination",
-		Values:    []string{"1001", "1002"},
+	filter.Filters = []*engine.RequestFilter{
+		&engine.RequestFilter{
+			FieldName: "*string",
+			Type:      "Account",
+			Values:    []string{"1001", "1002"},
+		},
+		&engine.RequestFilter{
+			FieldName: "*string_prefix",
+			Type:      "Destination",
+			Values:    []string{"10", "20"},
+		},
 	}
 	var result string
 	if err := filterRPC.Call("ApierV1.SetFilter", filter, &result); err != nil {
