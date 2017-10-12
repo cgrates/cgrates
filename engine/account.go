@@ -598,7 +598,7 @@ func (ub *Account) GetDefaultMoneyBalance() *Balance {
 	return defaultBalance
 }
 
-// Scans the action trigers and execute the actions for which trigger is met
+// Scans the action triggers and execute the actions for which trigger is met
 func (acc *Account) ExecuteActionTriggers(a *Action) {
 	if acc.executingTriggers {
 		return

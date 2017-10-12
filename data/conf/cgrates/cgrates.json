@@ -270,7 +270,7 @@
 // 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 // 	"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
 // 	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
-// 	"empty_balance_context": "",			// if defined, prepaid calls will be transfered to this context on empty balance
+// 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 // 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 // 	"subscribe_park": true,					// subscribe via fsock to receive park events
 // 	"channel_sync_interval": "5m",			// sync channels with freeswitch regularly

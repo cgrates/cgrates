@@ -710,7 +710,7 @@ func main() {
 	config.SetCgrConfig(cfg) // Share the config object
 	// init syslog
 	if err = initLogger(cfg); err != nil {
-		log.Fatalf("Could not initialize sylog connection, err: <%s>", err.Error())
+		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())
 		return
 	}
 	lgLevel := cfg.LogLevel

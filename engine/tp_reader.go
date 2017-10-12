@@ -2281,8 +2281,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Actions: ", len(tpr.actions))
 	// action plans
 	log.Print("Action plans: ", len(tpr.actionPlans))
-	// action trigers
-	log.Print("Action trigers: ", len(tpr.actionsTriggers))
+	// action triggers
+	log.Print("Action triggers: ", len(tpr.actionsTriggers))
 	// account actions
 	log.Print("Account actions: ", len(tpr.accountActions))
 	// derivedChargers
