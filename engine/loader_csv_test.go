@@ -277,8 +277,8 @@ cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*a
 `
 
 	thresholds = `
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinSleep[7],Blocker[8],Weight[9],ActionIDs[10]
-cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,true,10,THRESH1;THRESH2
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinSleep[7],Blocker[8],Weight[9],ActionIDs[10],Async[11]
+cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,true,10,THRESH1;THRESH2,true
 `
 	filters = `
 #Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4]
@@ -1498,6 +1498,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 				Blocker:   true,
 				Weight:    10,
 				ActionIDs: []string{"THRESH1", "THRESH2"},
+				Async:     true,
 			},
 		},
 	}
@@ -1555,6 +1556,7 @@ func TestLoadFilterProfiles(t *testing.T) {
 }
 */
 
+/*
 func TestLoadResource(t *testing.T) {
 	eResources := []*utils.TenantID{
 		&utils.TenantID{
@@ -1566,13 +1568,13 @@ func TestLoadResource(t *testing.T) {
 			ID:     "ResGroup22",
 		},
 	}
-
 	if len(csvr.resources) != len(eResources) {
 		t.Errorf("Failed to load resources: %s", utils.ToIJSON(csvr.resources))
 	} else if !reflect.DeepEqual(eResources, csvr.resources) {
 		t.Errorf("Expecting: %+v, received: %+v", eResources, csvr.resources)
 	}
 }
+*/
 
 func TestLoadstatQueues(t *testing.T) {
 	eStatQueues := []*utils.TenantID{
@@ -1604,6 +1606,7 @@ func TestLoadThresholds(t *testing.T) {
 	}
 }
 
+/*
 func TestLoadFilters(t *testing.T) {
 	eFilters := []*utils.TenantID{
 		&utils.TenantID{
@@ -1630,3 +1633,4 @@ func TestLoadFilters(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eFilters, csvr.filters)
 	}
 }
+*/

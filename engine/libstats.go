@@ -31,7 +31,7 @@ import (
 type StatQueueProfile struct {
 	Tenant             string
 	ID                 string // QueueID
-	Filters            []*Filter
+	Filters            []*RequestFilter
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	QueueLength        int
 	TTL                time.Duration

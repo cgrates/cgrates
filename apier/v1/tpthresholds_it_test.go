@@ -147,6 +147,7 @@ func testTPThreholdSetTPThrehold(t *testing.T) {
 		Blocker:   true,
 		Weight:    10,
 		ActionIDs: []string{"Thresh1", "Thresh2"},
+		Async:     true,
 	}
 	var result string
 	if err := tpThresholdRPC.Call("ApierV1.SetTPThreshold", tpThreshold, &result); err != nil {

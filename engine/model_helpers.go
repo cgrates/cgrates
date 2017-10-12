@@ -1934,7 +1934,7 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 		Weight:  tpRL.Weight,
 		Blocker: tpRL.Blocker,
 		Stored:  tpRL.Stored,
-		Filters: make([]*Filter, len(tpRL.Filters)),
+		Filters: make([]*RequestFilter, len(tpRL.Filters)),
 	}
 	if tpRL.UsageTTL != "" {
 		if rp.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {
@@ -1942,7 +1942,7 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 		}
 	}
 	for i, f := range tpRL.Filters {
-		rf := &Filter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -2095,7 +2095,7 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 		Blocker:     tpST.Blocker,
 		Stored:      tpST.Stored,
 		MinItems:    tpST.MinItems,
-		Filters:     make([]*Filter, len(tpST.Filters)),
+		Filters:     make([]*RequestFilter, len(tpST.Filters)),
 	}
 	if tpST.TTL != "" {
 		if st.TTL, err = utils.ParseDurationWithSecs(tpST.TTL); err != nil {
@@ -2110,7 +2110,7 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 
 	}
 	for i, f := range tpST.Filters {
-		rf := &Filter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -2229,7 +2229,7 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 		Weight:    tpTH.Weight,
 		Blocker:   tpTH.Blocker,
 		Async:     tpTH.Async,
-		Filters:   make([]*Filter, len(tpTH.Filters)),
+		Filters:   make([]*RequestFilter, len(tpTH.Filters)),
 	}
 	if tpTH.MinSleep != "" {
 		if th.MinSleep, err = utils.ParseDurationWithSecs(tpTH.MinSleep); err != nil {
@@ -2241,7 +2241,7 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 
 	}
 	for i, f := range tpTH.Filters {
-		rf := &Filter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -2308,13 +2308,8 @@ func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
 
 func APItoFilter(tpTH *utils.TPFilter) (th *Filter, err error) {
 	th = &Filter{
-		Tenant:    tpTH.Tenant,
-		ID:        tpTH.ID,
-		FieldName: tpTH.FilterFieldName,
-		Type:      tpTH.FilterType,
-	}
-	for _, ati := range tpTH.FilterFielValues {
-		th.Values = append(th.Values, ati)
+		Tenant: tpTH.Tenant,
+		ID:     tpTH.ID,
 	}
 	return th, nil
 }

@@ -465,6 +465,7 @@ CREATE TABLE tp_thresholds (
   `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `action_ids` varchar(64) NOT NULL,
+  `async` BOOLEAN NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
