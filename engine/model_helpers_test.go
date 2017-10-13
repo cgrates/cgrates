@@ -1062,7 +1062,7 @@ func TestAPItoTPFilter(t *testing.T) {
 	eTPs := &Filter{
 		Tenant: "cgrates.org",
 		ID:     tps.ID,
-		Filters: []*RequestFilter{
+		RequestFilters: []*RequestFilter{
 			&RequestFilter{
 				FieldName: "Account",
 				Type:      "*string",
@@ -1070,7 +1070,7 @@ func TestAPItoTPFilter(t *testing.T) {
 			},
 		},
 	}
-	if st, err := APItoFilter(tps); err != nil {
+	if st, err := APItoFilter(tps, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)

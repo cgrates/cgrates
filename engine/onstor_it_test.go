@@ -2124,12 +2124,16 @@ func testOnStorITCRUDFilter(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		Filters: []*RequestFilter{
+		RequestFilters: []*RequestFilter{
 			&RequestFilter{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
 			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
 	}
 	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {

@@ -29,6 +29,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var (
@@ -129,12 +130,16 @@ func testFilterSetFilter(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		Filters: []*engine.RequestFilter{
+		RequestFilters: []*engine.RequestFilter{
 			&engine.RequestFilter{
 				FieldName: "*string",
 				Type:      "Account",
 				Values:    []string{"1001", "1002"},
 			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
 	}
 
@@ -156,7 +161,7 @@ func testFilterGetFilterAfterSet(t *testing.T) {
 }
 
 func testFilterUpdateFilter(t *testing.T) {
-	filter.Filters = []*engine.RequestFilter{
+	filter.RequestFilters = []*engine.RequestFilter{
 		&engine.RequestFilter{
 			FieldName: "*string",
 			Type:      "Account",

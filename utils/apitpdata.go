@@ -1370,8 +1370,9 @@ type TPThreshold struct {
 }
 
 type TPFilter struct {
-	TPid    string
-	Tenant  string
-	ID      string
-	Filters []*TPRequestFilter
+	TPid               string
+	Tenant             string
+	ID                 string
+	Filters            []*TPRequestFilter
+	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 }
