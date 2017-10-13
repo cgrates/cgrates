@@ -137,3 +137,12 @@ func (dm *DataManager) GetThreshold(tenant, id string, skipCache bool, transacti
 func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 	return dm.DataDB().SetThresholdDrv(th)
 }
+
+func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveThresholdDrv(tenant, id); err != nil {
+		return
+	}
+	cache.RemKey(utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	return
+}

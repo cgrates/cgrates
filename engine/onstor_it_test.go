@@ -2112,7 +2112,7 @@ func testOnStorITCRUDThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(res, rcv) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
 	}
-	if err := onStor.DataDB().RemoveThreshold(res.Tenant, res.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveThreshold(res.Tenant, res.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThreshold(res.Tenant, res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {

@@ -2230,14 +2230,12 @@ func (ms *MongoStorage) SetThresholdDrv(r *Threshold) (err error) {
 	return
 }
 
-func (ms *MongoStorage) RemoveThreshold(tenant, id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveThresholdDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colThs)
 	defer session.Close()
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	return nil
 }
 
