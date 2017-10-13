@@ -28,7 +28,7 @@ func (self *ApierV1) SetFilter(attrs *engine.Filter, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.DataManager.DataDB().SetFilter(attrs); err != nil {
+	if err := self.DataManager.SetFilter(attrs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

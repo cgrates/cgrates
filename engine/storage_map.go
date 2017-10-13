@@ -1680,7 +1680,7 @@ func (ms *MapStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	return
 }
 
-func (ms *MapStorage) SetFilter(r *Filter) (err error) {
+func (ms *MapStorage) SetFilterDrv(r *Filter) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)

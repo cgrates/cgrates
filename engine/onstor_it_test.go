@@ -2139,7 +2139,7 @@ func testOnStorITCRUDFilter(t *testing.T) {
 	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetFilter(fp); err != nil {
+	if err := onStor.SetFilter(fp); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); err != nil {

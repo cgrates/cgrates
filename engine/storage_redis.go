@@ -1791,7 +1791,7 @@ func (rs *RedisStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetFilter(r *Filter) (err error) {
+func (rs *RedisStorage) SetFilterDrv(r *Filter) (err error) {
 	result, err := rs.ms.Marshal(r)
 	if err != nil {
 		return err
