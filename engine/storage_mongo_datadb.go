@@ -2272,13 +2272,11 @@ func (ms *MongoStorage) SetFilterDrv(r *Filter) (err error) {
 	return
 }
 
-func (ms *MongoStorage) RemoveFilter(tenant, id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colFlt)
 	defer session.Close()
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.FilterPrefix+utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	return nil
 }

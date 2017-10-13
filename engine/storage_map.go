@@ -1691,12 +1691,12 @@ func (ms *MapStorage) SetFilterDrv(r *Filter) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveFilter(tenant, id string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+
 	return
 }
 

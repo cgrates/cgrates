@@ -2152,7 +2152,7 @@ func testOnStorITCRUDFilter(t *testing.T) {
 	} else if !reflect.DeepEqual(fp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
-	if err := onStor.DataDB().RemoveFilter(fp.Tenant, fp.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveFilter(fp.Tenant, fp.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {

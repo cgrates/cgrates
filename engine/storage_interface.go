@@ -128,7 +128,7 @@ type DataDB interface {
 	RemoveThreshold(string, string, string) error
 	GetFilterDrv(string, string) (*Filter, error)
 	SetFilterDrv(*Filter) error
-	RemoveFilter(string, string, string) error
+	RemoveFilterDrv(string, string) error
 	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 	CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }
