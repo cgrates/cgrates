@@ -479,6 +479,7 @@ CREATE TABLE tp_filters (
   "filter_type" varchar(16) NOT NULL,
   "filter_field_name" varchar(64) NOT NULL,
   "filter_field_values" varchar(256) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
   CREATE INDEX tp_filters_idx ON tp_filters (tpid);

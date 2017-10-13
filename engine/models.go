@@ -519,12 +519,13 @@ type TpThreshold struct {
 }
 
 type TpFilter struct {
-	PK                uint `gorm:"primary_key"`
-	Tpid              string
-	Tenant            string `index:"0" re:""`
-	ID                string `index:"1" re:""`
-	FilterType        string `index:"2" re:"^\*[A-Za-z].*"`
-	FilterFieldName   string `index:"3" re:""`
-	FilterFieldValues string `index:"4" re:""`
-	CreatedAt         time.Time
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string `index:"0" re:""`
+	ID                 string `index:"1" re:""`
+	FilterType         string `index:"2" re:"^\*[A-Za-z].*"`
+	FilterFieldName    string `index:"3" re:""`
+	FilterFieldValues  string `index:"4" re:""`
+	ActivationInterval string `index:"5" re:""`
+	CreatedAt          time.Time
 }

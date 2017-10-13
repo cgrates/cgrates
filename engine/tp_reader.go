@@ -2110,7 +2110,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 	for _, mpID := range tpr.flProfiles {
 		for _, tpTH := range mpID {
-			th, err := APItoFilter(tpTH)
+			th, err := APItoFilter(tpTH, tpr.timezone)
 			if err != nil {
 				return err
 			}
@@ -2235,6 +2235,31 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 				if verbose {
 					log.Printf("Indexed thresholds tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
+				}
+				if err := stIdxr.StoreIndexes(); err != nil {
+					return err
+				}
+			}
+		}
+
+		if len(tpr.flProfiles) > 0 {
+			if verbose {
+				log.Print("Indexing Filters")
+			}
+			for tenant, mpID := range tpr.flProfiles {
+				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ThresholdsIndex+tenant)
+				if err != nil {
+					return err
+				}
+				for _, tpTH := range mpID {
+					if th, err := APItoFilter(tpTH, tpr.timezone); err != nil {
+						return err
+					} else {
+						stIdxr.IndexFilters(th.ID, th.RequestFilters)
+					}
+				}
+				if verbose {
+					log.Printf("Indexed filters tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
 				}
 				if err := stIdxr.StoreIndexes(); err != nil {
 					return err

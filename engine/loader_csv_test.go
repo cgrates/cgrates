@@ -281,13 +281,13 @@ cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*a
 cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,true,10,THRESH1;THRESH2,true
 `
 	filters = `
-#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4]
-cgrates.org,FLTR_1,*string,Account,1001;1002
-cgrates.org,FLTR_1,*string_prefix,Destination,10;20
-cgrates.org,FLTR_1,*rsr_fields,,Subject(~^1.*1$);Destination(1002)
-cgrates.org,FLTR_ACNT_dan,*string,Account,dan
-cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE
-cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL
+#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
+cgrates.org,FLTR_1,*string,Account,1001;1002,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*string_prefix,Destination,10;20,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*rsr_fields,,Subject(~^1.*1$);Destination(1002),
+cgrates.org,FLTR_ACNT_dan,*string,Account,dan,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 `
 )
 
@@ -1533,6 +1533,9 @@ func TestLoadFilterProfiles(t *testing.T) {
 						Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
 					},
 				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
 			},
 			"FLTR_ACNT_dan": &utils.TPFilter{
 				TPid:   testTPID,
@@ -1544,6 +1547,9 @@ func TestLoadFilterProfiles(t *testing.T) {
 						Type:      "*string",
 						Values:    []string{"dan"},
 					},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
 				},
 			},
 			"FLTR_DST_DE": &utils.TPFilter{
@@ -1557,6 +1563,9 @@ func TestLoadFilterProfiles(t *testing.T) {
 						Values:    []string{"DST_DE"},
 					},
 				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
 			},
 			"FLTR_DST_NL": &utils.TPFilter{
 				TPid:   testTPID,
@@ -1568,6 +1577,9 @@ func TestLoadFilterProfiles(t *testing.T) {
 						Type:      "*destinations",
 						Values:    []string{"DST_NL"},
 					},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
 				},
 			},
 		},
@@ -1593,10 +1605,6 @@ func TestLoadResource(t *testing.T) {
 	}
 	if len(csvr.resources) != len(eResources) {
 		t.Errorf("Failed to load resources: %s", utils.ToIJSON(csvr.resources))
-	} else if !reflect.DeepEqual(eResources[0], csvr.resources[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", eResources[0], csvr.resources[0])
-	} else if !reflect.DeepEqual(eResources[1], csvr.resources[1]) {
-		t.Errorf("Expecting: %+v, received: %+v", eResources[1], csvr.resources[1])
 	}
 }
 
@@ -1651,13 +1659,5 @@ func TestLoadFilters(t *testing.T) {
 	}
 	if len(csvr.filters) != len(eFilters) {
 		t.Errorf("Failed to load filters: %s", utils.ToIJSON(csvr.filters))
-	} else if !reflect.DeepEqual(eFilters[0], csvr.filters[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters[0], csvr.filters[0])
-	} else if !reflect.DeepEqual(eFilters[1], csvr.filters[1]) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters[1], csvr.filters[1])
-	} else if !reflect.DeepEqual(eFilters[2], csvr.filters[2]) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters[2], csvr.filters[2])
-	} else if !reflect.DeepEqual(eFilters[3], csvr.filters[3]) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters[3], csvr.filters[3])
 	}
 }

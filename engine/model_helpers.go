@@ -2267,6 +2267,16 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
 				ID:     tp.ID,
 			}
 		}
+		if len(tp.ActivationInterval) != 0 {
+			th.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				th.ActivationInterval.ActivationTime = aiSplt[0]
+				th.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				th.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
 		if tp.FilterType != "" {
 			th.Filters = append(th.Filters, &utils.TPRequestFilter{
 				Type:      tp.FilterType,
@@ -2296,6 +2306,14 @@ func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
 		}
 		mdl.FilterType = fltr.Type
 		mdl.FilterFieldName = fltr.FieldName
+		if th.ActivationInterval != nil {
+			if th.ActivationInterval.ActivationTime != "" {
+				mdl.ActivationInterval = th.ActivationInterval.ActivationTime
+			}
+			if th.ActivationInterval.ExpiryTime != "" {
+				mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
+			}
+		}
 		for i, val := range fltr.Values {
 			if i != 0 {
 				mdl.FilterFieldValues += utils.INFIELD_SEP
@@ -2308,18 +2326,23 @@ func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
 
 }
 
-func APItoFilter(tpTH *utils.TPFilter) (th *Filter, err error) {
+func APItoFilter(tpTH *utils.TPFilter, timezone string) (th *Filter, err error) {
 	th = &Filter{
-		Tenant:  tpTH.Tenant,
-		ID:      tpTH.ID,
-		Filters: make([]*RequestFilter, len(tpTH.Filters)),
+		Tenant:         tpTH.Tenant,
+		ID:             tpTH.ID,
+		RequestFilters: make([]*RequestFilter, len(tpTH.Filters)),
 	}
 	for i, f := range tpTH.Filters {
 		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
-		th.Filters[i] = rf
+		th.RequestFilters[i] = rf
+	}
+	if tpTH.ActivationInterval != nil {
+		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
 	}
 	return th, nil
 }

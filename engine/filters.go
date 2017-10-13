@@ -72,9 +72,10 @@ type RequestFilter struct {
 }
 
 type Filter struct {
-	Tenant  string
-	ID      string
-	Filters []*RequestFilter
+	Tenant             string
+	ID                 string
+	RequestFilters     []*RequestFilter
+	ActivationInterval *utils.ActivationInterval
 }
 
 func (flt *Filter) TenantID() string {
