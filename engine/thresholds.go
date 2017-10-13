@@ -238,7 +238,7 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 	}
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, utils.ThresholdPrefix+t.TenantID())
 	defer guardian.Guardian.UnguardIDs(utils.ThresholdPrefix + t.TenantID())
-	if err = tS.dm.DataDB().SetThreshold(t); err != nil {
+	if err = tS.dm.SetThreshold(t); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
 				t.Tenant, t.ID, err.Error()))
@@ -285,7 +285,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 		}
 		lockThreshold := utils.ThresholdPrefix + tPrfl.TenantID()
 		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
-		t, err := tS.dm.DataDB().GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
+		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lockThreshold)
 			return nil, err
@@ -334,7 +334,7 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (hits int, err erro
 		if t.dirty == nil { // one time threshold
 			lockThreshold := utils.ThresholdPrefix + t.TenantID()
 			guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
-			if err = tS.dm.DataDB().RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
+			if err = tS.dm.RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))
@@ -403,7 +403,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 
 // V1GetThreshold retrieves a Threshold
 func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) (err error) {
-	if thd, err := tS.dm.DataDB().GetThreshold(tntID.Tenant, tntID.ID, false, ""); err != nil {
+	if thd, err := tS.dm.GetThreshold(tntID.Tenant, tntID.ID, false, ""); err != nil {
 		return err
 	} else {
 		*t = *thd

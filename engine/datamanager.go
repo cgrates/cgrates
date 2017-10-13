@@ -112,3 +112,37 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error
 		cacheCommit(transactionID), transactionID)
 	return
 }
+
+func (dm *DataManager) GetThreshold(tenant, id string, skipCache bool, transactionID string) (th *Threshold, err error) {
+	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Threshold), nil
+		}
+	}
+	th, err = dm.dataDB.GetThresholdDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, th, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
+	return dm.DataDB().SetThresholdDrv(th)
+}
+
+func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveThresholdDrv(tenant, id); err != nil {
+		return
+	}
+	cache.RemKey(utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	return
+}
