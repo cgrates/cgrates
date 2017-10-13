@@ -1776,20 +1776,11 @@ func (rs *RedisStorage) RemoveThreshold(tenant, id string, transactionID string)
 	return
 }
 
-func (rs *RedisStorage) GetFilter(tenant, id string, skipCache bool, transactionID string) (r *Filter, err error) {
+func (rs *RedisStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*Filter), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -1797,7 +1788,6 @@ func (rs *RedisStorage) GetFilter(tenant, id string, skipCache bool, transaction
 	if err = rs.ms.Unmarshal(values, &r); err != nil {
 		return
 	}
-	cache.Set(key, r, cacheCommit(transactionID), transactionID)
 	return
 }
 
