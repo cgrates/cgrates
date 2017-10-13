@@ -61,6 +61,8 @@ var (
 		CacheTimings:             TimingsPrefix,
 		CacheStatQueueProfiles:   StatQueueProfilePrefix,
 		CacheStatQueues:          StatQueuePrefix,
+		CacheThresholdProfiles:   ThresholdProfilePrefix,
+		CacheThresholds:          ThresholdPrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )
@@ -470,6 +472,8 @@ const (
 	BalanceID                    = "BalanceID"
 	BalanceValue                 = "BalanceValue"
 	ResourceS                    = "ResourceS"
+	CacheThresholdProfiles       = "threshold_profiles"
+	CacheThresholds              = "thresholds"
 )
 
 func buildCacheInstRevPrefixes() {

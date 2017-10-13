@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"math/rand"
+	"reflect"
 	"sort"
 	"sync"
 	"time"
@@ -68,6 +69,31 @@ func (te *ThresholdEvent) Account() (acnt string, err error) {
 	var canCast bool
 	if acnt, canCast = acntIf.(string); !canCast {
 		return "", fmt.Errorf("field %s is not string", utils.ACCOUNT)
+	}
+	return
+}
+
+func (te *ThresholdEvent) FilterableEvent(fltredFields []string) (fEv map[string]interface{}) {
+	fEv = make(map[string]interface{})
+	if len(fltredFields) == 0 {
+		i := 0
+		fltredFields = make([]string, len(te.Fields))
+		for k := range te.Fields {
+			fltredFields[i] = k
+			i++
+		}
+	}
+	for _, fltrFld := range fltredFields {
+		fldVal, has := te.Fields[fltrFld]
+		if !has {
+			continue // the field does not exist in map, ignore it
+		}
+		valOf := reflect.ValueOf(fldVal)
+		if valOf.Kind() == reflect.String {
+			fEv[fltrFld] = utils.StringToInterface(valOf.String()) // attempt converting from string to comparable interface
+		} else {
+			fEv[fltrFld] = fldVal
+		}
 	}
 	return
 }
@@ -127,7 +153,8 @@ func NewThresholdService(dm *DataManager, filteredFields []string, storeInterval
 		filteredFields: filteredFields,
 		storeInterval:  storeInterval,
 		statS:          statS,
-		stopBackup:     make(chan struct{})}, nil
+		stopBackup:     make(chan struct{}),
+		storedTdIDs:    make(utils.StringMap)}, nil
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB
@@ -246,7 +273,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 		}
 		passAllFilters := true
 		for _, fltr := range tPrfl.Filters {
-			if pass, err := fltr.Pass(ev.Fields, "", tS.statS); err != nil {
+			if pass, err := fltr.Pass(ev.FilterableEvent(nil), "", tS.statS); err != nil {
 				return nil, err
 			} else if !pass {
 				passAllFilters = false

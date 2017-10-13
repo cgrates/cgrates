@@ -72,6 +72,8 @@ const CGRATES_CFG_JSON = `
 	"event_resources": {"limit": -1, "ttl": "1m", "static_ttl": false},							// matching resources to events
 	"statqueue_profiles": {"limit": -1, "ttl": "1m", "static_ttl": false, "precache": false},	// statqueue profiles
 	"statqueues": {"limit": -1, "ttl": "1m", "static_ttl": false, "precache": false},			// statqueues with metrics
+	"threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control threshold profiles caching
+	"thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control thresholds caching
 },
 
 
