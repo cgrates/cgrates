@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 func CastFieldIfToString(fld interface{}) (string, bool) {
@@ -52,6 +53,29 @@ func CastFieldIfToString(fld interface{}) (string, bool) {
 		strVal, converted = fld.(string)
 	}
 	return strVal, converted
+}
+
+// StringToInterface will parse string into supported types
+// if no other conversion possible, original string will be returned
+func StringToInterface(s string) interface{} {
+	// int64
+	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+		return i
+	}
+	// bool
+	if b, err := strconv.ParseBool(s); err == nil {
+		return b
+	}
+	// float64
+	if f, err := strconv.ParseFloat(s, 64); err == nil {
+		return f
+	}
+	// time.Duration
+	if d, err := time.ParseDuration(s); err == nil {
+		return d
+	}
+	// string
+	return s
 }
 
 // ReflectFieldInterface parses intf attepting to return the field as string or error otherwise

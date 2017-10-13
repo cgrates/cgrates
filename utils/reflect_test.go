@@ -181,3 +181,21 @@ func TestGreaterThan(t *testing.T) {
 		t.Error("should be less than")
 	}
 }
+
+func TestStringToInterface(t *testing.T) {
+	if res := StringToInterface("1"); res != int64(1) {
+		t.Error("not parsing int")
+	}
+	if res := StringToInterface("true"); res != true {
+		t.Error("not parsing bool")
+	}
+	if res := StringToInterface("1.2"); res != 1.2 {
+		t.Error("not parsing float64")
+	}
+	if res := StringToInterface("1.2"); res != 1.2 {
+		t.Error("not parsing float64")
+	}
+	if res := StringToInterface("45s"); res != time.Duration(45*time.Second) {
+		t.Error("not parsing time.Duration")
+	}
+}
