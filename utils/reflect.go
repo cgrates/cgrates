@@ -161,28 +161,45 @@ func AsMapStringIface(item interface{}) (map[string]interface{}, error) {
 // GreaterThan attempts to compare two items
 // returns the result or error if not comparable
 func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
+	valItm := reflect.ValueOf(item)
+	valOtItm := reflect.ValueOf(oItem)
+	// convert to wider type so we can be compatible with StringToInterface function
+	switch valItm.Kind() {
+	case reflect.Float32:
+		item = valItm.Float()
+		valItm = reflect.ValueOf(item)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
+		item = valItm.Int()
+		valItm = reflect.ValueOf(item)
+	}
+	switch valOtItm.Kind() {
+	case reflect.Float32:
+		oItem = valOtItm.Float()
+		valOtItm = reflect.ValueOf(oItem)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
+		oItem = valOtItm.Int()
+		valOtItm = reflect.ValueOf(oItem)
+	}
 	typItem := reflect.TypeOf(item)
 	typOItem := reflect.TypeOf(oItem)
-	fmt.Println(typItem.Comparable(),
-		typOItem.Comparable(),
-		typItem,
-		typOItem,
-		typItem == typOItem)
 	if !typItem.Comparable() ||
 		!typOItem.Comparable() ||
 		typItem != typOItem {
 		return false, errors.New("incomparable")
 	}
-	if orEqual && reflect.DeepEqual(item, oItem) {
-		return true, nil
-	}
-	valItm := reflect.ValueOf(item)
-	valOItm := reflect.ValueOf(oItem)
 	switch typItem.Kind() {
 	case reflect.Float32, reflect.Float64:
-		gte = valItm.Float() > valOItm.Float()
+		if orEqual {
+			gte = valItm.Float() >= valOtItm.Float()
+		} else {
+			gte = valItm.Float() > valOtItm.Float()
+		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		gte = valItm.Int() > valOItm.Int()
+		if orEqual {
+			gte = valItm.Int() >= valOtItm.Int()
+		} else {
+			gte = valItm.Int() > valOtItm.Int()
+		}
 	default: // unsupported comparison
 		err = fmt.Errorf("unsupported type: %v", typItem)
 	}

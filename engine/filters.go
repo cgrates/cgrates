@@ -27,24 +27,42 @@ import (
 )
 
 const (
-	MetaString       = "*string"
-	MetaStringPrefix = "*string_prefix"
-	MetaTimings      = "*timings"
-	MetaRSRFields    = "*rsr_fields"
-	MetaStatS        = "*stats"
-	MetaDestinations = "*destinations"
-	MetaMinCapPrefix = "*min_"
-	MetaMaxCapPrefix = "*max_"
+	MetaString         = "*string"
+	MetaStringPrefix   = "*string_prefix"
+	MetaTimings        = "*timings"
+	MetaRSRFields      = "*rsr_fields"
+	MetaStatS          = "*stats"
+	MetaDestinations   = "*destinations"
+	MetaMinCapPrefix   = "*min_"
+	MetaMaxCapPrefix   = "*max_"
+	MetaLessThan       = "*lt"
+	MetaLessOrEqual    = "*lte"
+	MetaGreaterThan    = "*gt"
+	MetaGreaterOrEqual = "*gte"
 )
 
+type Filter struct {
+	Tenant             string
+	ID                 string
+	RequestFilters     []*RequestFilter
+	ActivationInterval *utils.ActivationInterval
+}
+
+func (flt *Filter) TenantID() string {
+	return utils.ConcatenatedKey(flt.Tenant, flt.ID)
+}
+
 func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
-	if !utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaStatS, MetaDestinations}, rfType) {
+	if !utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaStatS, MetaDestinations,
+		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaDestinations}, rfType) {
+	if fieldName == "" && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaDestinations,
+		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaDestinations, MetaDestinations}, rfType) {
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields,
+		MetaDestinations, MetaDestinations, MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals}
@@ -63,23 +81,12 @@ type RFStatSThreshold struct {
 // RequestFilter filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
 type RequestFilter struct {
-	Type               string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	Type               string   // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
 	FieldName          string   // Name of the field providing us the Values to check (used in case of some )
 	Values             []string // Filter definition
 	ActivationInterval *utils.ActivationInterval
 	rsrFields          utils.RSRFields     // Cache here the RSRFilter Values
 	statSThresholds    []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
-}
-
-type Filter struct {
-	Tenant             string
-	ID                 string
-	RequestFilters     []*RequestFilter
-	ActivationInterval *utils.ActivationInterval
-}
-
-func (flt *Filter) TenantID() string {
-	return utils.ConcatenatedKey(flt.Tenant, flt.ID)
 }
 
 // Separate method to compile RSR fields
@@ -127,6 +134,8 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, rpcCln
 		return fltr.passRSRFields(req, extraFieldsLabel)
 	case MetaStatS:
 		return fltr.passStatS(req, extraFieldsLabel, rpcClnt)
+	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
+		return fltr.passGreaterThan(req, extraFieldsLabel)
 	default:
 		return false, utils.ErrNotImplemented
 	}
@@ -223,6 +232,32 @@ func (fltr *RequestFilter) passStatS(req interface{}, extraFieldsLabel string, s
 			return true, nil
 		} else if strings.HasPrefix(threshold.ThresholdType, MetaMaxCapPrefix) &&
 			val < threshold.ThresholdValue {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (fltr *RequestFilter) passGreaterThan(req interface{}, extraFieldsLabel string) (bool, error) {
+	fldIf, err := utils.ReflectFieldInterface(req, fltr.FieldName, extraFieldsLabel)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	for _, val := range fltr.Values {
+		ifVal := utils.StringToInterface(val)
+		orEqual := false
+		if fltr.Type == MetaGreaterOrEqual ||
+			fltr.Type == MetaLessThan {
+			orEqual = true
+		}
+		if gte, err := utils.GreaterThan(fldIf, ifVal, orEqual); err != nil {
+			return false, err
+		} else if utils.IsSliceMember([]string{MetaGreaterThan, MetaGreaterOrEqual}, fltr.Type) && gte {
+			return true, nil
+		} else if !gte && utils.IsSliceMember([]string{MetaLessThan, MetaLessOrEqual}, fltr.Type) && !gte {
 			return true, nil
 		}
 	}

@@ -139,3 +139,64 @@ func TestReqFilterPassDestinations(t *testing.T) {
 		t.Error("Passing")
 	}
 }
+
+func TestReqFilterPassGreaterThan(t *testing.T) {
+	rf, err := NewRequestFilter(MetaLessThan, "ASR", []string{"40"})
+	if err != nil {
+		t.Error(err)
+	}
+	ev := map[string]interface{}{
+		"ASR": 20,
+	}
+	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+	ev = map[string]interface{}{
+		"ASR": 40,
+	}
+	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("equal should not be passing")
+	}
+	rf, err = NewRequestFilter(MetaLessOrEqual, "ASR", []string{"40"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+	rf, err = NewRequestFilter(MetaGreaterOrEqual, "ASR", []string{"40"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+	ev = map[string]interface{}{
+		"ASR": 20,
+	}
+	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("should not pass")
+	}
+	rf, err = NewRequestFilter(MetaGreaterOrEqual, "ACD", []string{"1m50s"})
+	if err != nil {
+		t.Error(err)
+	}
+	ev = map[string]interface{}{
+		"ACD": time.Duration(2 * time.Minute),
+	}
+	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not pass")
+	}
+}
