@@ -103,3 +103,12 @@ func (dm *DataManager) GetFilter(tenant, id string, skipCache bool, transactionI
 func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 	return dm.DataDB().SetFilterDrv(fltr)
 }
+
+func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
+		return
+	}
+	cache.RemKey(utils.FilterPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	return
+}

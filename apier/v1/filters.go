@@ -56,7 +56,7 @@ func (self *ApierV1) RemFilter(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.DataManager.DataDB().RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := self.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

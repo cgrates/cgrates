@@ -1799,12 +1799,11 @@ func (rs *RedisStorage) SetFilterDrv(r *Filter) (err error) {
 	return rs.Cmd("SET", utils.FilterPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
 }
 
-func (rs *RedisStorage) RemoveFilter(tenant, id string, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
