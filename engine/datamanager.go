@@ -78,3 +78,24 @@ func (dm *DataManager) RemStatQueue(tenant, id string, transactionID string) (er
 	cache.RemKey(utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id), cacheCommit(transactionID), transactionID)
 	return
 }
+
+func (dm *DataManager) GetFilter(tenant, id string, skipCache bool, transactionID string) (fltr *Filter, err error) {
+	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Filter), nil
+		}
+	}
+	fltr, err = dm.dataDB.GetFilterDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, fltr, cacheCommit(transactionID), transactionID)
+	return
+}

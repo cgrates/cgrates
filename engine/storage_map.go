@@ -1669,28 +1669,14 @@ func (ms *MapStorage) RemoveThreshold(tenant, id string, transactionID string) (
 	return
 }
 
-func (ms *MapStorage) GetFilter(tenant, id string, skipCache bool, transactionID string) (r *Filter, err error) {
+func (ms *MapStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*Filter), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	values, ok := ms.dict[key]
+	values, ok := ms.dict[utils.FilterPrefix+utils.ConcatenatedKey(tenant, id)]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, r)
-	if err != nil {
-		return nil, err
-	}
-	cache.Set(key, r, cacheCommit(transactionID), transactionID)
+	err = ms.ms.Unmarshal(values, &r)
 	return
 }
 

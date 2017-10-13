@@ -2247,7 +2247,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Print("Indexing Filters")
 			}
 			for tenant, mpID := range tpr.flProfiles {
-				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ThresholdsIndex+tenant)
+				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.FilterIndex+tenant)
 				if err != nil {
 					return err
 				}
