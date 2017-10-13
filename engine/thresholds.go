@@ -211,7 +211,7 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 	}
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, utils.ThresholdPrefix+t.TenantID())
 	defer guardian.Guardian.UnguardIDs(utils.ThresholdPrefix + t.TenantID())
-	if err = tS.dm.DataDB().SetThreshold(t); err != nil {
+	if err = tS.dm.SetThreshold(t); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
 				t.Tenant, t.ID, err.Error()))

@@ -1749,7 +1749,7 @@ func (rs *RedisStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err er
 	return
 }
 
-func (rs *RedisStorage) SetThreshold(r *Threshold) (err error) {
+func (rs *RedisStorage) SetThresholdDrv(r *Threshold) (err error) {
 	result, err := rs.ms.Marshal(r)
 	if err != nil {
 		return err

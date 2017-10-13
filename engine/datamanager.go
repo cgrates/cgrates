@@ -133,3 +133,7 @@ func (dm *DataManager) GetThreshold(tenant, id string, skipCache bool, transacti
 	cache.Set(key, th, cacheCommit(transactionID), transactionID)
 	return
 }
+
+func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
+	return dm.DataDB().SetThresholdDrv(th)
+}
