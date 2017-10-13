@@ -317,7 +317,7 @@ func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	switch categ {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix:
+		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix, utils.FilterPrefix:
 		_, exists := ms.dict[categ+subject]
 		return exists, nil
 	}
@@ -1669,32 +1669,18 @@ func (ms *MapStorage) RemoveThreshold(tenant, id string, transactionID string) (
 	return
 }
 
-func (ms *MapStorage) GetFilter(tenant, id string, skipCache bool, transactionID string) (r *Filter, err error) {
+func (ms *MapStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*Filter), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	values, ok := ms.dict[key]
+	values, ok := ms.dict[utils.FilterPrefix+utils.ConcatenatedKey(tenant, id)]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, r)
-	if err != nil {
-		return nil, err
-	}
-	cache.Set(key, r, cacheCommit(transactionID), transactionID)
+	err = ms.ms.Unmarshal(values, &r)
 	return
 }
 
-func (ms *MapStorage) SetFilter(r *Filter) (err error) {
+func (ms *MapStorage) SetFilterDrv(r *Filter) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)
@@ -1705,12 +1691,12 @@ func (ms *MapStorage) SetFilter(r *Filter) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveFilter(tenant, id string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+
 	return
 }
 

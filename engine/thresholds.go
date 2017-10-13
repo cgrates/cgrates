@@ -35,13 +35,14 @@ import (
 type ThresholdProfile struct {
 	Tenant             string
 	ID                 string
-	Filters            []*Filter                 // Filters for the request
+	Filters            []*RequestFilter          // Filters for the request
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
 	Recurrent          bool
 	MinSleep           time.Duration
 	Blocker            bool    // blocker flag to stop processing on filters matched
 	Weight             float64 // Weight to sort the thresholds
 	ActionIDs          []string
+	Async              bool
 }
 
 func (tp *ThresholdProfile) TenantID() string {

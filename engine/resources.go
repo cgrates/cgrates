@@ -41,7 +41,7 @@ func init() {
 type ResourceProfile struct {
 	Tenant             string
 	ID                 string                    // identifier of this resource
-	Filters            []*Filter                 // filters for the request
+	Filters            []*RequestFilter          // filters for the request
 	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
 	UsageTTL           time.Duration             // auto-expire the usage after this duration
 	Limit              float64                   // limit value

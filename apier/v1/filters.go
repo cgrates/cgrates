@@ -28,7 +28,7 @@ func (self *ApierV1) SetFilter(attrs *engine.Filter, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.DataManager.DataDB().SetFilter(attrs); err != nil {
+	if err := self.DataManager.SetFilter(attrs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -40,7 +40,7 @@ func (self *ApierV1) GetFilter(arg utils.TenantID, reply *engine.Filter) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if fltr, err := self.DataManager.DataDB().GetFilter(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
+	if fltr, err := self.DataManager.GetFilter(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -56,7 +56,7 @@ func (self *ApierV1) RemFilter(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.DataManager.DataDB().RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := self.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

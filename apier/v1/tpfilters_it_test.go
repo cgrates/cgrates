@@ -128,12 +128,20 @@ func ttestTPFilterGetTPFilterBeforeSet(t *testing.T) {
 
 func testTPFilterSetTPFilter(t *testing.T) {
 	tpFilter = &utils.TPFilter{
-		TPid:             "TP1",
-		Tenant:           "cgrates.org",
-		ID:               "Filter",
-		FilterType:       "*string",
-		FilterFieldName:  "Account",
-		FilterFielValues: []string{"1001", "1002"},
+		TPid:   "TP1",
+		Tenant: "cgrates.org",
+		ID:     "Filter",
+		Filters: []*utils.TPRequestFilter{
+			&utils.TPRequestFilter{
+				Type:      "*string",
+				FieldName: "Account",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "",
+		},
 	}
 
 	var result string
@@ -166,15 +174,18 @@ func testTPFilterGetFilterIds(t *testing.T) {
 }
 
 func testTPFilterUpdateTPFilter(t *testing.T) {
-	tpFilter = &utils.TPFilter{
-		TPid:             "TP1",
-		Tenant:           "cgrates.org",
-		ID:               "Filter",
-		FilterType:       "*string_prefix",
-		FilterFieldName:  "Account",
-		FilterFielValues: []string{"10", "20"},
+	tpFilter.Filters = []*utils.TPRequestFilter{
+		&utils.TPRequestFilter{
+			Type:      "*string",
+			FieldName: "Account",
+			Values:    []string{"1001", "1002"},
+		},
+		&utils.TPRequestFilter{
+			Type:      "*string_prefix",
+			FieldName: "Destination",
+			Values:    []string{"10", "20"},
+		},
 	}
-
 	var result string
 	if err := tpFilterRPC.Call("ApierV1.SetTPFilter", tpFilter, &result); err != nil {
 		t.Error(err)

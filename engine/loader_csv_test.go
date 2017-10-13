@@ -18,13 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/utils"
 	"log"
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/cgrates/cgrates/cache"
-	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -278,17 +277,17 @@ cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*a
 `
 
 	thresholds = `
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinSleep[7],Blocker[8],Weight[9],ActionIDs[10]
-cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,true,10,THRESH1;THRESH2
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinSleep[7],Blocker[8],Weight[9],ActionIDs[10],Async[11]
+cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,true,10,THRESH1;THRESH2,true
 `
 	filters = `
-#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4]
-cgrates.org,FLTR_1,*string,Account,1001;1002
-cgrates.org,FLTR_1,*string_prefix,Destination,10;20
-cgrates.org,FLTR_1,*rsr_fields,,Subject(~^1.*1$);Destination(1002)
-cgrates.org,FLTR_ACNT_dan,*string,Account,dan
-cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE
-cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL
+#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
+cgrates.org,FLTR_1,*string,Account,1001;1002,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*string_prefix,Destination,10;20,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*rsr_fields,,Subject(~^1.*1$);Destination(1002),
+cgrates.org,FLTR_ACNT_dan,*string,Account,dan,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 `
 )
 
@@ -355,6 +354,9 @@ func init() {
 	}
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
+	}
+	if err := csvr.LoadFilter(); err != nil {
+		log.Print("error in LoadFilter:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
@@ -1441,12 +1443,11 @@ func TestLoadResourceProfiles(t *testing.T) {
 		t.Errorf("Failed to load resourceProfiles: %s", utils.ToIJSON(csvr.resProfiles))
 	} else if !reflect.DeepEqual(eResProfiles["cgrates.org"]["ResGroup22"], csvr.resProfiles["cgrates.org"]["ResGroup22"]) {
 		t.Errorf("Expecting: %+v, received: %+v", eResProfiles["cgrates.org"]["ResGroup22"], csvr.resProfiles["cgrates.org"]["ResGroup22"])
-
 	}
 
 }
 
-func TestLoadStats(t *testing.T) {
+func TestLoadStatProfiles(t *testing.T) {
 	eStats := map[string]map[string]*utils.TPStats{
 		"cgrates.org": map[string]*utils.TPStats{
 			"Stats1": &utils.TPStats{
@@ -1479,7 +1480,7 @@ func TestLoadStats(t *testing.T) {
 	}
 }
 
-func TestLoadThresholds(t *testing.T) {
+func TestLoadThresholdProfiles(t *testing.T) {
 	eThresholds := map[string]map[string]*utils.TPThreshold{
 		"cgrates.org": map[string]*utils.TPThreshold{
 			"Threshold1": &utils.TPThreshold{
@@ -1497,6 +1498,7 @@ func TestLoadThresholds(t *testing.T) {
 				Blocker:   true,
 				Weight:    10,
 				ActionIDs: []string{"THRESH1", "THRESH2"},
+				Async:     true,
 			},
 		},
 	}
@@ -1504,5 +1506,158 @@ func TestLoadThresholds(t *testing.T) {
 		t.Error("Failed to load thresholds: ", len(csvr.thProfiles))
 	} else if !reflect.DeepEqual(eThresholds["cgrates.org"]["Threshold1"], csvr.thProfiles["cgrates.org"]["Threshold1"]) {
 		t.Errorf("Expecting: %+v, received: %+v", eThresholds["cgrates.org"]["Threshold1"], csvr.thProfiles["cgrates.org"]["Threshold1"])
+	}
+}
+
+func TestLoadFilterProfiles(t *testing.T) {
+	eFilters := map[string]map[string]*utils.TPFilter{
+		"cgrates.org": map[string]*utils.TPFilter{
+			"FLTR_1": &utils.TPFilter{
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "FLTR_1",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{
+						FieldName: "Account",
+						Type:      "*string",
+						Values:    []string{"1001", "1002"},
+					},
+					&utils.TPRequestFilter{
+						FieldName: "Destination",
+						Type:      "*string_prefix",
+						Values:    []string{"10", "20"},
+					},
+					&utils.TPRequestFilter{
+						FieldName: "",
+						Type:      "*rsr_fields",
+						Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
+			},
+			"FLTR_ACNT_dan": &utils.TPFilter{
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "FLTR_ACNT_dan",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{
+						FieldName: "Account",
+						Type:      "*string",
+						Values:    []string{"dan"},
+					},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
+			},
+			"FLTR_DST_DE": &utils.TPFilter{
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "FLTR_DST_DE",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{
+						FieldName: "Destination",
+						Type:      "*destinations",
+						Values:    []string{"DST_DE"},
+					},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
+			},
+			"FLTR_DST_NL": &utils.TPFilter{
+				TPid:   testTPID,
+				Tenant: "cgrates.org",
+				ID:     "FLTR_DST_NL",
+				Filters: []*utils.TPRequestFilter{
+					&utils.TPRequestFilter{
+						FieldName: "Destination",
+						Type:      "*destinations",
+						Values:    []string{"DST_NL"},
+					},
+				},
+				ActivationInterval: &utils.TPActivationInterval{
+					ActivationTime: "2014-07-29T15:00:00Z",
+				},
+			},
+		},
+	}
+	if len(csvr.flProfiles["cgrates.org"]) != len(eFilters["cgrates.org"]) {
+		t.Errorf("Failed to load FilterProfiles: %s", utils.ToIJSON(csvr.flProfiles))
+	} else if !reflect.DeepEqual(eFilters["cgrates.org"]["FLTR_1"], csvr.flProfiles["cgrates.org"]["FLTR_1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters["cgrates.org"]["FLTR_1"], csvr.flProfiles["cgrates.org"]["FLTR_1"])
+	}
+
+}
+
+func TestLoadResource(t *testing.T) {
+	eResources := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ResGroup21",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ResGroup22",
+		},
+	}
+	if len(csvr.resources) != len(eResources) {
+		t.Errorf("Failed to load resources: %s", utils.ToIJSON(csvr.resources))
+	}
+}
+
+func TestLoadstatQueues(t *testing.T) {
+	eStatQueues := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+		},
+	}
+
+	if len(csvr.statQueues) != len(eStatQueues) {
+		t.Errorf("Failed to load statQueues: %s", utils.ToIJSON(csvr.statQueues))
+	} else if !reflect.DeepEqual(eStatQueues, csvr.statQueues) {
+		t.Errorf("Expecting: %+v, received: %+v", eStatQueues, csvr.statQueues)
+	}
+}
+
+func TestLoadThresholds(t *testing.T) {
+	eThresholds := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Threshold1",
+		},
+	}
+
+	if len(csvr.thresholds) != len(eThresholds) {
+		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
+	} else if !reflect.DeepEqual(eThresholds, csvr.thresholds) {
+		t.Errorf("Expecting: %+v, received: %+v", eThresholds, csvr.thresholds)
+	}
+}
+
+func TestLoadFilters(t *testing.T) {
+	eFilters := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_1",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_ACNT_dan",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_DST_DE",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_DST_NL",
+		},
+	}
+	if len(csvr.filters) != len(eFilters) {
+		t.Errorf("Failed to load filters: %s", utils.ToIJSON(csvr.filters))
 	}
 }

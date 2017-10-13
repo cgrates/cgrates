@@ -53,13 +53,13 @@ func TestRSRecordUsage1(t *testing.T) {
 		rPrf: &ResourceProfile{
 			Tenant: "cgrates.org",
 			ID:     "RL1",
-			Filters: []*Filter{
-				&Filter{
+			Filters: []*RequestFilter{
+				&RequestFilter{
 					Type:      MetaString,
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
 				},
-				&Filter{
+				&RequestFilter{
 					Type:      MetaRSRFields,
 					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
 					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
@@ -134,13 +134,13 @@ func TestRSRsort(t *testing.T) {
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
 			ID: "RL2",
-			Filters: []*Filter{
-				&Filter{
+			Filters: []*RequestFilter{
+				&RequestFilter{
 					Type:      MetaString,
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
 				},
-				&Filter{
+				&RequestFilter{
 					Type:      MetaRSRFields,
 					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
 					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
@@ -249,13 +249,13 @@ func TestRSCacheSetGet(t *testing.T) {
 		rPrf: &ResourceProfile{
 			Tenant: "cgrates.org",
 			ID:     "RL",
-			Filters: []*Filter{
-				&Filter{
+			Filters: []*RequestFilter{
+				&RequestFilter{
 					Type:      MetaString,
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
 				},
-				&Filter{
+				&RequestFilter{
 					Type:      MetaRSRFields,
 					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
 					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),

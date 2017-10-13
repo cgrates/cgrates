@@ -514,16 +514,18 @@ type TpThreshold struct {
 	Blocker            bool    `index:"8" re:""`
 	Weight             float64 `index:"9" re:"\d+\.?\d*"`
 	ActionIDs          string  `index:"10" re:""`
+	Async              bool    `index:"8" re:""`
 	CreatedAt          time.Time
 }
 
 type TpFilter struct {
-	PK        uint `gorm:"primary_key"`
-	Tpid      string
-	Tenant    string `index:"0" re:""`
-	ID        string `index:"1" re:""`
-	Type      string `index:"2" re:"^\*[A-Za-z].*"`
-	Name      string `index:"3" re:""`
-	Values    string `index:"4" re:""`
-	CreatedAt time.Time
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string `index:"0" re:""`
+	ID                 string `index:"1" re:""`
+	FilterType         string `index:"2" re:"^\*[A-Za-z].*"`
+	FilterFieldName    string `index:"3" re:""`
+	FilterFieldValues  string `index:"4" re:""`
+	ActivationInterval string `index:"5" re:""`
+	CreatedAt          time.Time
 }
