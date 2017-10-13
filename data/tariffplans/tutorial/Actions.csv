@@ -9,3 +9,4 @@ TOPUP_RST_DATA_100,*topup_reset,,,,*data,*out,,*any,,,*unlimited,,102400,10,fals
 LOG_WARNING,*log,,,,,,,,,,,,,,false,false,10
 DISABLE_AND_LOG,*log,,,,,,,,,,,,,,false,false,10
 DISABLE_AND_LOG,*disable_account,,,,,,,,,,,,,,false,false,10
+TOPUP_100SMS_DE_MOBILE,*topup,,,,*sms,*out,,DST_DE_MOBILE,,,,,100,10,false,false,10

@@ -42,34 +42,53 @@ var (
 )
 
 var tEvs = []*engine.ThresholdEvent{
-	&engine.ThresholdEvent{
+	&engine.ThresholdEvent{ // hitting THD_ACNT_BALANCE_1
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Fields: map[string]interface{}{
-			utils.EventSource: utils.StatService,
-			utils.StatID:      "Stats1",
-			utils.MetaASR:     35.0,
-			utils.MetaACD:     time.Duration(2*time.Minute + 45*time.Second),
-			utils.MetaTCC:     12.7,
-			utils.MetaTCD:     time.Duration(12*time.Minute + 15*time.Second),
-			utils.MetaACC:     0.75,
-			utils.MetaPDD:     time.Duration(2 * time.Second),
-		}},
-	&engine.ThresholdEvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Fields: map[string]interface{}{
 			utils.EventSource:  utils.AccountService,
-			utils.AccountID:    "1002",
+			utils.ACCOUNT:      "1002",
 			utils.BalanceType:  utils.MONETARY,
 			utils.BalanceID:    utils.META_DEFAULT,
 			utils.BalanceValue: 12.3}},
-	&engine.ThresholdEvent{
+	&engine.ThresholdEvent{ // hitting THD_STATS_1
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Fields: map[string]interface{}{
+			utils.EventSource: utils.StatService,
+			utils.StatID:      "Stats1",
+			"ASR":             35.0,
+			"ACD":             time.Duration(2*time.Minute + 45*time.Second),
+			"TCC":             12.7,
+			"TCD":             time.Duration(12*time.Minute + 15*time.Second),
+			"ACC":             0.75,
+			"PDD":             time.Duration(2 * time.Second),
+		}},
+	&engine.ThresholdEvent{ // hitting THD_STATS_1 and THD_STATS_2
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Fields: map[string]interface{}{
+			utils.EventSource: utils.StatService,
+			utils.StatID:      "STATS_HOURLY_DE",
+			"ASR":             35.0,
+			"ACD":             time.Duration(2*time.Minute + 45*time.Second),
+			"TCD":             time.Duration(1 * time.Hour),
+		}},
+	&engine.ThresholdEvent{ // hitting THD_STATS_3
+		Tenant: "cgrates.org",
+		ID:     "event4",
+		Fields: map[string]interface{}{
+			utils.EventSource: utils.StatService,
+			utils.StatID:      "STATS_DAILY_DE",
+			"ACD":             time.Duration(2*time.Minute + 45*time.Second),
+			"TCD":             time.Duration(3*time.Hour + 1*time.Second),
+		}},
+	&engine.ThresholdEvent{ // hitting THD_RES_1
+		Tenant: "cgrates.org",
+		ID:     "event5",
+		Fields: map[string]interface{}{
 			utils.EventSource: utils.ResourceS,
-			utils.ResourceID:  "ResGroup1",
+			utils.ResourceID:  "RES_GRP_1",
 			utils.USAGE:       10.0}},
 }
 
@@ -166,12 +185,31 @@ func testV1TSGetThresholds(t *testing.T) {
 
 func testV1TSProcessEvent(t *testing.T) {
 	var hits int
-	for _, ev := range tEvs {
-		if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", ev, &hits); err != nil {
-			t.Error(err)
-		}
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[0], &hits); err != nil {
+		t.Error(err)
+	} else if hits != 0 {
+		t.Error("Expecting hits: %d, received: %d", 0, hits)
 	}
-
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[1], &hits); err != nil {
+		t.Error(err)
+	} else if hits != 0 {
+		t.Error("Expecting hits: %d, received: %d", 0, hits)
+	}
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[2], &hits); err != nil {
+		t.Error(err)
+	} else if hits != 0 {
+		t.Error("Expecting hits: %d, received: %d", 0, hits)
+	}
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[3], &hits); err != nil {
+		t.Error(err)
+	} else if hits != 0 {
+		t.Error("Expecting hits: %d, received: %d", 0, hits)
+	}
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[4], &hits); err != nil {
+		t.Error(err)
+	} else if hits != 0 {
+		t.Error("Expecting hits: %d, received: %d", 0, hits)
+	}
 }
 
 /*
