@@ -307,7 +307,7 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (hits int, err erro
 		if t.dirty == nil { // one time threshold
 			lockThreshold := utils.ThresholdPrefix + t.TenantID()
 			guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
-			if err = tS.dm.DataDB().RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
+			if err = tS.dm.RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))

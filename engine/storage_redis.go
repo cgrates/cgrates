@@ -1757,12 +1757,11 @@ func (rs *RedisStorage) SetThresholdDrv(r *Threshold) (err error) {
 	return rs.Cmd("SET", utils.ThresholdPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
 }
 
-func (rs *RedisStorage) RemoveThreshold(tenant, id string, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveThresholdDrv(tenant, id string) (err error) {
 	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

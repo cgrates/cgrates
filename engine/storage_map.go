@@ -1650,12 +1650,11 @@ func (ms *MapStorage) SetThresholdDrv(r *Threshold) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveThreshold(tenant, id string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveThresholdDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
