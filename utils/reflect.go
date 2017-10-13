@@ -54,9 +54,9 @@ func CastFieldIfToString(fld interface{}) (string, bool) {
 	return strVal, converted
 }
 
-// ReflectFieldAsString parses intf and attepting to return the field as string or error otherwise
+// ReflectFieldInterface parses intf attepting to return the field as string or error otherwise
 // Supports "ExtraFields" where additional fields are dynamically inserted in map with field name: extraFieldsLabel
-func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (string, error) {
+func ReflectFieldInterface(intf interface{}, fldName, extraFieldsLabel string) (retIf interface{}, err error) {
 	v := reflect.ValueOf(intf)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -68,41 +68,52 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 	case reflect.Map:
 		field = v.MapIndex(reflect.ValueOf(fldName))
 		if !field.IsValid() { // Not looking in extra fields anymore
-			return "", ErrNotFound
+			return nil, ErrNotFound
 		}
 	default:
-		return "", fmt.Errorf("Unsupported field kind: %v", v.Kind())
+		return nil, fmt.Errorf("Unsupported field kind: %v", v.Kind())
 	}
 
 	if !field.IsValid() {
 		if extraFieldsLabel == "" {
-			return "", ErrNotFound
+			return nil, ErrNotFound
 		}
 		mpVal := v.FieldByName(extraFieldsLabel)
 		if !mpVal.IsValid() || mpVal.Kind() != reflect.Map {
-			return "", ErrNotFound
+			return nil, ErrNotFound
 		}
 		field = mpVal.MapIndex(reflect.ValueOf(fldName))
 		if !field.IsValid() {
-			return "", ErrNotFound
+			return nil, ErrNotFound
 		}
 	}
-	switch field.Kind() {
+	return field.Interface(), nil
+}
+
+// ReflectFieldAsString parses intf and attepting to return the field as string or error otherwise
+// Supports "ExtraFields" where additional fields are dynamically inserted in map with field name: extraFieldsLabel
+func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (string, error) {
+	field, err := ReflectFieldInterface(intf, fldName, extraFieldsLabel)
+	if err != nil {
+		return "", err
+	}
+	vOf := reflect.ValueOf(field)
+	switch vOf.Kind() {
 	case reflect.String:
-		return field.String(), nil
+		return vOf.String(), nil
 	case reflect.Int, reflect.Int64:
-		return strconv.FormatInt(field.Int(), 10), nil
+		return strconv.FormatInt(vOf.Int(), 10), nil
 	case reflect.Float64:
-		return strconv.FormatFloat(field.Float(), 'f', -1, 64), nil
+		return strconv.FormatFloat(vOf.Float(), 'f', -1, 64), nil
 	case reflect.Interface:
-		strVal, converted := CastFieldIfToString(field.Interface())
+		strVal, converted := CastFieldIfToString(field)
 		if !converted {
-			return "", fmt.Errorf("Cannot convert to string field type: %s", field.Kind().String())
+			return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
 		} else {
 			return strVal, nil
 		}
 	default:
-		return "", fmt.Errorf("Cannot convert to string field type: %s", field.Kind().String())
+		return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
 	}
 }
 
