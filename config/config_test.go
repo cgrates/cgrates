@@ -450,6 +450,10 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(1 * time.Minute), StaticTTL: false, Precache: false},
 		utils.CacheStatQueues: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(1 * time.Minute), StaticTTL: false, Precache: false},
+		utils.CacheThresholdProfiles: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheThresholds: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 	}
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheConfig) {
 		t.Errorf("received: %s, \nexpecting: %s", utils.ToJSON(eCacheCfg), utils.ToJSON(cgrCfg.CacheConfig))
