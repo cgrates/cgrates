@@ -1639,7 +1639,7 @@ func (ms *MapStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err erro
 	return
 }
 
-func (ms *MapStorage) SetThreshold(r *Threshold) (err error) {
+func (ms *MapStorage) SetThresholdDrv(r *Threshold) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)

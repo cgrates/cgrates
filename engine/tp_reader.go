@@ -2098,7 +2098,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Thresholds:")
 	}
 	for _, thd := range tpr.thresholds {
-		if err = tpr.dm.DataDB().SetThreshold(&Threshold{Tenant: thd.Tenant, ID: thd.ID}); err != nil {
+		if err = tpr.dm.SetThreshold(&Threshold{Tenant: thd.Tenant, ID: thd.ID}); err != nil {
 			return err
 		}
 		if verbose {

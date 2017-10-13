@@ -2099,7 +2099,7 @@ func testOnStorITCRUDThreshold(t *testing.T) {
 	if _, rcvErr := onStor.GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetThreshold(res); err != nil {
+	if err := onStor.SetThreshold(res); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); err != nil {

@@ -2223,7 +2223,7 @@ func (ms *MongoStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err er
 	return
 }
 
-func (ms *MongoStorage) SetThreshold(r *Threshold) (err error) {
+func (ms *MongoStorage) SetThresholdDrv(r *Threshold) (err error) {
 	session, col := ms.conn(colThs)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
