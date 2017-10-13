@@ -2096,18 +2096,18 @@ func testOnStorITCRUDThreshold(t *testing.T) {
 		ID:     "TH1",
 		Snooze: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
 	}
-	if _, rcvErr := onStor.DataDB().GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetThreshold(res); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1", true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
 	}
-	if rcv, err := onStor.DataDB().GetThreshold("cgrates.org", "TH1", false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1", false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(res, rcv) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
@@ -2115,7 +2115,7 @@ func testOnStorITCRUDThreshold(t *testing.T) {
 	if err := onStor.DataDB().RemoveThreshold(res.Tenant, res.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetThreshold(res.Tenant, res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetThreshold(res.Tenant, res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
