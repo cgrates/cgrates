@@ -543,7 +543,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetThresholdProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = ms.GetThreshold(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = ms.GetThresholdDrv(tntID.Tenant, tntID.ID)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = ms.GetFilterDrv(tntID.Tenant, tntID.ID)
@@ -2211,27 +2211,15 @@ func (ms *MongoStorage) RemThresholdProfile(tenant, id, transactionID string) (e
 	return
 }
 
-func (ms *MongoStorage) GetThreshold(tenant, id string, skipCache bool, transactionID string) (r *Threshold, err error) {
-	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*Threshold), nil
-		}
-	}
+func (ms *MongoStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err error) {
 	session, col := ms.conn(colThs)
 	defer session.Close()
-	r = new(Threshold)
-	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(r); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&r); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	cache.Set(key, r, cacheCommit(transactionID), transactionID)
 	return
 }
 

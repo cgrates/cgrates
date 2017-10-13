@@ -258,7 +258,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 		}
 		lockThreshold := utils.ThresholdPrefix + tPrfl.TenantID()
 		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
-		t, err := tS.dm.DataDB().GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
+		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lockThreshold)
 			return nil, err
@@ -376,7 +376,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 
 // V1GetThreshold retrieves a Threshold
 func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) (err error) {
-	if thd, err := tS.dm.DataDB().GetThreshold(tntID.Tenant, tntID.ID, false, ""); err != nil {
+	if thd, err := tS.dm.GetThreshold(tntID.Tenant, tntID.ID, false, ""); err != nil {
 		return err
 	} else {
 		*t = *thd

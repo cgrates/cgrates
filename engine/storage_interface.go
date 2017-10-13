@@ -123,7 +123,7 @@ type DataDB interface {
 	GetThresholdProfile(tenant string, ID string, skipCache bool, transID string) (tp *ThresholdProfile, err error)
 	SetThresholdProfile(tp *ThresholdProfile) (err error)
 	RemThresholdProfile(tenant, id, transactionID string) (err error)
-	GetThreshold(string, string, bool, string) (*Threshold, error)
+	GetThresholdDrv(string, string) (*Threshold, error)
 	SetThreshold(*Threshold) error
 	RemoveThreshold(string, string, string) error
 	GetFilterDrv(string, string) (*Filter, error)

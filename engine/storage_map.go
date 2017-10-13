@@ -1624,28 +1624,18 @@ func (ms *MapStorage) RemThresholdProfile(tenant, id, transactionID string) (err
 	return
 }
 
-func (ms *MapStorage) GetThreshold(tenant, id string, skipCache bool, transactionID string) (r *Threshold, err error) {
+func (ms *MapStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key := utils.ThresholdPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*Threshold), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
 	values, ok := ms.dict[key]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
 	err = ms.ms.Unmarshal(values, r)
 	if err != nil {
 		return nil, err
 	}
-	cache.Set(key, r, cacheCommit(transactionID), transactionID)
 	return
 }
 
