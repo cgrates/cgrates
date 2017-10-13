@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -120,4 +121,35 @@ func AsMapStringIface(item interface{}) (map[string]interface{}, error) {
 		out[typ.Field(i).Name] = v.Field(i).Interface()
 	}
 	return out, nil
+}
+
+// GreaterThan attempts to compare two items
+// returns the result or error if not comparable
+func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
+	typItem := reflect.TypeOf(item)
+	typOItem := reflect.TypeOf(oItem)
+	fmt.Println(typItem.Comparable(),
+		typOItem.Comparable(),
+		typItem,
+		typOItem,
+		typItem == typOItem)
+	if !typItem.Comparable() ||
+		!typOItem.Comparable() ||
+		typItem != typOItem {
+		return false, errors.New("incomparable")
+	}
+	if orEqual && reflect.DeepEqual(item, oItem) {
+		return true, nil
+	}
+	valItm := reflect.ValueOf(item)
+	valOItm := reflect.ValueOf(oItem)
+	switch typItem.Kind() {
+	case reflect.Float32, reflect.Float64:
+		gte = valItm.Float() > valOItm.Float()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		gte = valItm.Int() > valOItm.Int()
+	default: // unsupported comparison
+		err = fmt.Errorf("unsupported type: %v", typItem)
+	}
+	return
 }

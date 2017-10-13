@@ -20,6 +20,7 @@ package utils
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestReflectFieldAsStringOnStruct(t *testing.T) {
@@ -136,5 +137,47 @@ func TestReflectAsMapStringIface(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectOutMp, outMp) {
 		t.Errorf("Expecting: %+v, received: %+v", expectOutMp, outMp)
+	}
+}
+
+func TestGreaterThan(t *testing.T) {
+	if _, err := GreaterThan(1, 1.2, false); err == nil || err.Error() != "incomparable" {
+		t.Error(err)
+	}
+	if _, err := GreaterThan(struct{}{},
+		map[string]interface{}{"a": "a"}, false); err == nil || err.Error() != "incomparable" {
+		t.Error(err)
+	}
+	if gte, err := GreaterThan(1.2, 1.2, true); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+	if gte, err := GreaterThan(1.3, 1.2, false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
+	if gte, err := GreaterThan(1.2, 1.3, false); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should be greater than")
+	}
+	if gte, err := GreaterThan(2, 1, false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
+	if gte, err := GreaterThan(time.Duration(2*time.Second),
+		time.Duration(1*time.Second), false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
+	if gte, err := GreaterThan(time.Duration(1*time.Second),
+		time.Duration(2*time.Second), false); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should be less than")
 	}
 }
