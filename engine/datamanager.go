@@ -99,3 +99,7 @@ func (dm *DataManager) GetFilter(tenant, id string, skipCache bool, transactionI
 	cache.Set(key, fltr, cacheCommit(transactionID), transactionID)
 	return
 }
+
+func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
+	return dm.DataDB().SetFilterDrv(fltr)
+}

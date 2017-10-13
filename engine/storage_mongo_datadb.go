@@ -2265,7 +2265,7 @@ func (ms *MongoStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	return
 }
 
-func (ms *MongoStorage) SetFilter(r *Filter) (err error) {
+func (ms *MongoStorage) SetFilterDrv(r *Filter) (err error) {
 	session, col := ms.conn(colFlt)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
