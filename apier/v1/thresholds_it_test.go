@@ -107,8 +107,8 @@ var sTestsThresholdSV1 = []func(t *testing.T){
 	testV1TSGetThresholdsAfterProcess,
 	testV1TSGetThresholdsAfterRestart,
 	testV1TSSetThresholdProfile,
-	//testV1STSUpdateThresholdProfile,
-	//testV1STSRemoveThresholdProfile,
+	testV1TSUpdateThresholdProfile,
+	testV1TSRemoveThresholdProfile,
 	testV1TSStopEngine,
 }
 
@@ -301,9 +301,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 	}
 }
 
-/*
-
-func testV1STSUpdateThresholdProfile(t *testing.T) {
+func testV1TSUpdateThresholdProfile(t *testing.T) {
 	var result string
 	tPrfl.Filters = []*engine.RequestFilter{
 		&engine.RequestFilter{
@@ -327,7 +325,7 @@ func testV1STSUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(time.Duration(1 * time.Second))
+	//time.Sleep(time.Duration(1 * time.Second))
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
@@ -337,7 +335,7 @@ func testV1STSUpdateThresholdProfile(t *testing.T) {
 	}
 }
 
-func testV1STSRemoveThresholdProfile(t *testing.T) {
+func testV1TSRemoveThresholdProfile(t *testing.T) {
 	var resp string
 	if err := tSv1Rpc.Call("ApierV1.RemThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
@@ -351,7 +349,7 @@ func testV1STSRemoveThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
+
 func testV1TSStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
