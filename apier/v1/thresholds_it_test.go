@@ -57,6 +57,7 @@ var tEvs = []*engine.ThresholdEvent{
 		Fields: map[string]interface{}{
 			utils.EventSource: utils.StatService,
 			utils.StatID:      "Stats1",
+			utils.ACCOUNT:     "1002",
 			"ASR":             35.0,
 			"ACD":             "2m45s",
 			"TCC":             12.7,
@@ -70,6 +71,7 @@ var tEvs = []*engine.ThresholdEvent{
 		Fields: map[string]interface{}{
 			utils.EventSource: utils.StatService,
 			utils.StatID:      "STATS_HOURLY_DE",
+			utils.ACCOUNT:     "1002",
 			"ASR":             35.0,
 			"ACD":             "2m45s",
 			"TCD":             "1h",
@@ -80,6 +82,7 @@ var tEvs = []*engine.ThresholdEvent{
 		Fields: map[string]interface{}{
 			utils.EventSource: utils.StatService,
 			utils.StatID:      "STATS_DAILY_DE",
+			utils.ACCOUNT:     "1002",
 			"ACD":             "2m45s",
 			"TCD":             "3h1s",
 		}},
@@ -88,6 +91,7 @@ var tEvs = []*engine.ThresholdEvent{
 		ID:     "event5",
 		Fields: map[string]interface{}{
 			utils.EventSource: utils.ResourceS,
+			utils.ACCOUNT:     "1002",
 			utils.ResourceID:  "RES_GRP_1",
 			utils.USAGE:       10.0}},
 }
@@ -170,7 +174,7 @@ func testV1TSGetThresholds(t *testing.T) {
 	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_STATS_3"}
 	if err := tSv1Rpc.Call("ThresholdSV1.GetThresholdIDs", "cgrates.org", &tIDs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expectedIDs, tIDs) {
+	} else if len(expectedIDs) != len(tIDs) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, tIDs)
 	}
 	var td engine.Threshold
