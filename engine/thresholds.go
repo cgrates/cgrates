@@ -170,7 +170,7 @@ type ThresholdService struct {
 
 // Called to start the service
 func (tS *ThresholdService) ListenAndServe(exitChan chan bool) error {
-	//go tS.runBackup() // start backup loop
+	go tS.runBackup() // start backup loop
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return nil
@@ -283,18 +283,14 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 		if !passAllFilters {
 			continue
 		}
-		lockThreshold := utils.ThresholdPrefix + tPrfl.TenantID()
-		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
 		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lockThreshold)
 			return nil, err
 		}
 		if tPrfl.Recurrent && t.dirty == nil {
 			t.dirty = utils.BoolPointer(false)
 		}
 		t.tPrfl = tPrfl
-		guardian.Guardian.UnguardIDs(lockThreshold)
 		matchingTs[tPrfl.ID] = t
 	}
 	// All good, convert from Map to Slice so we can sort

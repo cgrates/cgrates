@@ -104,7 +104,8 @@ var sTestsThresholdSV1 = []func(t *testing.T){
 	testV1TSFromFolder,
 	testV1TSGetThresholds,
 	testV1TSProcessEvent,
-	//testV1TSGetThresholdsAfterRestart,
+	testV1TSGetThresholdsAfterProcess,
+	testV1TSGetThresholdsAfterRestart,
 	//testV1STSSetThresholdProfile,
 	//testV1STSUpdateThresholdProfile,
 	//testV1STSRemoveThresholdProfile,
@@ -221,7 +222,22 @@ func testV1TSProcessEvent(t *testing.T) {
 	}
 }
 
-/*
+func testV1TSGetThresholdsAfterProcess(t *testing.T) {
+	var tIDs []string
+	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1"}
+	if err := tSv1Rpc.Call("ThresholdSV1.GetThresholdIDs", "cgrates.org", &tIDs); err != nil {
+		t.Error(err)
+	} else if len(expectedIDs) != len(tIDs) { // THD_STATS_3 is not reccurent, so it was removed
+		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, tIDs)
+	}
+	var td engine.Threshold
+	if err := tSv1Rpc.Call("ThresholdSV1.GetThreshold",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &td); err != nil {
+		t.Error(err)
+	} else if td.Snooze.IsZero() { // make sure Snooze time was reset during execution
+		t.Errorf("received: %+v", td)
+	}
+}
 
 func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 	time.Sleep(time.Second)
@@ -233,24 +249,17 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	//get stats metrics after restart
-	expectedMetrics2 := map[string]string{
-		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "1m30s",
-		utils.MetaACC: "61.5",
-		utils.MetaTCD: "3m0s",
-		utils.MetaTCC: "123",
-		utils.MetaPDD: "4s",
-	}
-	var metrics2 map[string]string
-	if err := tSv1Rpc.Call("StatSV1.GetQueueStringMetrics", &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
+	var td engine.Threshold
+	if err := tSv1Rpc.Call("ThresholdSV1.GetThreshold",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &td); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
-		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
+	} else if td.Snooze.IsZero() { // make sure Snooze time was reset during execution
+		t.Errorf("received: %+v", td)
 	}
 	time.Sleep(time.Duration(1 * time.Second))
 }
 
+/*
 func testV1STSSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
