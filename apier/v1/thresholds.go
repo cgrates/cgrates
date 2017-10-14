@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -79,6 +80,7 @@ func (apierV1 *ApierV1) SetThresholdProfile(thp *engine.ThresholdProfile, reply 
 	if err := apierV1.DataManager.DataDB().SetThresholdProfile(thp); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(thp.Tenant, thp.ID), true, "") // ToDo: Remove here with autoreload
 	*reply = utils.OK
 	return nil
 }

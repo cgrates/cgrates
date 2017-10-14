@@ -236,8 +236,6 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 	if t.dirty == nil || !*t.dirty {
 		return
 	}
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, utils.ThresholdPrefix+t.TenantID())
-	defer guardian.Guardian.UnguardIDs(utils.ThresholdPrefix + t.TenantID())
 	if err = tS.dm.SetThreshold(t); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
@@ -328,8 +326,6 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (hits int, err erro
 			continue
 		}
 		if t.dirty == nil { // one time threshold
-			lockThreshold := utils.ThresholdPrefix + t.TenantID()
-			guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockThreshold)
 			if err = tS.dm.RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
@@ -337,7 +333,6 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (hits int, err erro
 				withErrors = true
 
 			}
-			guardian.Guardian.UnguardIDs(lockThreshold)
 			continue
 		}
 		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)

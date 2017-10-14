@@ -106,7 +106,7 @@ var sTestsThresholdSV1 = []func(t *testing.T){
 	testV1TSProcessEvent,
 	testV1TSGetThresholdsAfterProcess,
 	testV1TSGetThresholdsAfterRestart,
-	//testV1STSSetThresholdProfile,
+	testV1TSSetThresholdProfile,
 	//testV1STSUpdateThresholdProfile,
 	//testV1STSRemoveThresholdProfile,
 	testV1TSStopEngine,
@@ -259,8 +259,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 	time.Sleep(time.Duration(1 * time.Second))
 }
 
-/*
-func testV1STSSetThresholdProfile(t *testing.T) {
+func testV1TSSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
@@ -281,14 +280,12 @@ func testV1STSSetThresholdProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		QueueLength: 10,
-		TTL:         time.Duration(10) * time.Second,
-		Metrics:     []string{"MetricValue", "MetricValueTwo"},
-		Thresholds:  []string{"Val1", "Val2"},
-		Blocker:     true,
-		Stored:      true,
-		Weight:      20,
-		MinItems:    1,
+		Recurrent: true,
+		MinSleep:  time.Duration(5 * time.Minute),
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"ACT_1", "ACT_2"},
+		Async:     true,
 	}
 	var result string
 	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
@@ -303,6 +300,8 @@ func testV1STSSetThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
 	}
 }
+
+/*
 
 func testV1STSUpdateThresholdProfile(t *testing.T) {
 	var result string

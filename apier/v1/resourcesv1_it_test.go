@@ -532,6 +532,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	//cache.RemKey(utils.ResourceProfilePrefix+utils.ConcatenatedKey(rlsConfig.Tenant, rlsConfig.ID), true, "")
 }
 
 func testV1RsGetResourceProfileAfterSet(t *testing.T) {
