@@ -325,7 +325,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	//time.Sleep(time.Duration(1 * time.Second))
+	time.Sleep(time.Duration(10 * time.Millisecond)) // mongo is async
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
