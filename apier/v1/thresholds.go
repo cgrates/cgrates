@@ -90,7 +90,7 @@ func (apierV1 *ApierV1) RemThresholdProfile(args *utils.TenantID, reply *string)
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.DataDB().RemThresholdProfile(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.RemoveThresholdProfile(args.Tenant, args.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

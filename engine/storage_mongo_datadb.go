@@ -2185,15 +2185,13 @@ func (ms *MongoStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
 }
 
 // RemThresholdProfile removes a ThresholdProfile from dataDB/cache
-func (ms *MongoStorage) RemThresholdProfile(tenant, id, transactionID string) (err error) {
+func (ms *MongoStorage) RemThresholdProfileDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colTps)
 	defer session.Close()
 	err = col.Remove(bson.M{"tenant": tenant, "id": id})
 	if err != nil {
 		return err
 	}
-	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	return
 }
 

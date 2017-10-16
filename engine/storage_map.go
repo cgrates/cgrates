@@ -1604,12 +1604,11 @@ func (ms *MapStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
 }
 
 // RemThresholdProfile removes a ThresholdProfile from dataDB/cache
-func (ms *MapStorage) RemThresholdProfile(tenant, id, transactionID string) (err error) {
+func (ms *MapStorage) RemThresholdProfileDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
