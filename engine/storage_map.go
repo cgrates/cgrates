@@ -1504,8 +1504,8 @@ func (ms *MapStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *Stat
 	return
 }
 
-// SetStatsQueue stores a StatsQueue into DataDB
-func (ms *MapStorage) SetStatQueueProfile(sqp *StatQueueProfile) (err error) {
+// SetStatsQueueDrv stores a StatsQueue into DataDB
+func (ms *MapStorage) SetStatQueueProfileDrv(sqp *StatQueueProfile) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sqp)

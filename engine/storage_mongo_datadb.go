@@ -2092,8 +2092,8 @@ func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 	return
 }
 
-// SetStatsQueue stores a StatsQueue into DataDB
-func (ms *MongoStorage) SetStatQueueProfile(sq *StatQueueProfile) (err error) {
+// SetStatsQueueDrv stores a StatsQueue into DataDB
+func (ms *MongoStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
 	session, col := ms.conn(colSqp)
 	defer session.Close()
 	_, err = col.UpsertId(bson.M{"tennat": sq.Tenant, "id": sq.ID}, sq)
