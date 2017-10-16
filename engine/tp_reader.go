@@ -2086,7 +2086,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if err != nil {
 				return err
 			}
-			if err = tpr.dm.DataDB().SetThresholdProfile(th); err != nil {
+			if err = tpr.dm.SetThresholdProfile(th); err != nil {
 				return err
 			}
 			if verbose {

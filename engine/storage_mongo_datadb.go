@@ -2176,8 +2176,8 @@ func (ms *MongoStorage) GetThresholdProfileDrv(tenant, ID string) (tp *Threshold
 	return
 }
 
-// SetThresholdProfile stores a ThresholdProfile into DataDB
-func (ms *MongoStorage) SetThresholdProfile(tp *ThresholdProfile) (err error) {
+// SetThresholdProfileDrv stores a ThresholdProfile into DataDB
+func (ms *MongoStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
 	session, col := ms.conn(colTps)
 	defer session.Close()
 	_, err = col.UpsertId(bson.M{"tenant": tp.Tenant, "id": tp.ID}, tp)
