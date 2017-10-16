@@ -171,3 +171,12 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool, tr
 func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile) (err error) {
 	return dm.DataDB().SetThresholdProfileDrv(th)
 }
+
+func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemThresholdProfileDrv(tenant, id); err != nil {
+		return
+	}
+	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	return
+}

@@ -2079,7 +2079,7 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
-	if err := onStor.DataDB().RemThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
