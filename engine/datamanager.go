@@ -201,3 +201,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool, tr
 	cache.Set(key, sqp, cacheCommit(transactionID), transactionID)
 	return
 }
+
+func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile) (err error) {
+	return dm.DataDB().SetStatQueueProfileDrv(sqp)
+}

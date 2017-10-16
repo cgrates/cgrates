@@ -2049,7 +2049,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if err != nil {
 				return err
 			}
-			if err = tpr.dm.DataDB().SetStatQueueProfile(st); err != nil {
+			if err = tpr.dm.SetStatQueueProfile(st); err != nil {
 				return err
 			}
 			if verbose {

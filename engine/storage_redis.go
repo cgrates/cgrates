@@ -1599,7 +1599,7 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-// GetStatQueueProfile retrieves a StatQueueProfile from dataDB
+// GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB
 func (rs *RedisStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
@@ -1620,8 +1620,8 @@ func (rs *RedisStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 	return
 }
 
-// SetStatsQueue stores a StatsQueue into DataDB
-func (rs *RedisStorage) SetStatQueueProfile(sq *StatQueueProfile) (err error) {
+// SetStatsQueueDrv stores a StatsQueue into DataDB
+func (rs *RedisStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(sq)
 	if err != nil {
