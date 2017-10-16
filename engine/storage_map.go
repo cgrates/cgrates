@@ -1591,8 +1591,8 @@ func (ms *MapStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdPr
 	return
 }
 
-// SetThresholdProfile stores a ThresholdProfile into DataDB
-func (ms *MapStorage) SetThresholdProfile(tp *ThresholdProfile) (err error) {
+// SetThresholdProfileDrv stores a ThresholdProfile into DataDB
+func (ms *MapStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(tp)

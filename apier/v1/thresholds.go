@@ -77,7 +77,7 @@ func (apierV1 *ApierV1) SetThresholdProfile(thp *engine.ThresholdProfile, reply 
 	if missing := utils.MissingStructFields(thp, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.DataDB().SetThresholdProfile(thp); err != nil {
+	if err := apierV1.DataManager.SetThresholdProfile(thp); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(thp.Tenant, thp.ID), true, "") // ToDo: Remove here with autoreload

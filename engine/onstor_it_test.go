@@ -2066,7 +2066,7 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetThresholdProfile(th); err != nil {
+	if err := onStor.SetThresholdProfile(th); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); err != nil {

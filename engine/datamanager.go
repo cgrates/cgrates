@@ -166,5 +166,8 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool, tr
 	}
 	cache.Set(key, th, cacheCommit(transactionID), transactionID)
 	return
+}
 
+func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile) (err error) {
+	return dm.DataDB().SetThresholdProfileDrv(th)
 }

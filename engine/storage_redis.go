@@ -1684,7 +1684,7 @@ func (rs *RedisStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	return
 }
 
-// GetThresholdProfile retrieves a ThresholdProfile from dataDB
+// GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
 func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, ID)
 	var values []byte
@@ -1705,8 +1705,8 @@ func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *Threshold
 	return
 }
 
-// SetThresholdProfile stores a ThresholdProfile into DataDB
-func (rs *RedisStorage) SetThresholdProfile(tp *ThresholdProfile) (err error) {
+// SetThresholdProfileDrv stores a ThresholdProfile into DataDB
+func (rs *RedisStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(tp)
 	if err != nil {
