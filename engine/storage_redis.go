@@ -1684,22 +1684,12 @@ func (rs *RedisStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	return
 }
 
-// GetThresholdProfile retrieves a ThresholdProfile from dataDB/cache
-func (rs *RedisStorage) GetThresholdProfile(tenant, ID string,
-	skipCache bool, transactionID string) (tp *ThresholdProfile, err error) {
+// GetThresholdProfile retrieves a ThresholdProfile from dataDB
+func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, ID)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*ThresholdProfile), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil {
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -1712,7 +1702,6 @@ func (rs *RedisStorage) GetThresholdProfile(tenant, ID string,
 			return
 		}
 	}
-	cache.Set(key, tp, cacheCommit(transactionID), transactionID)
 	return
 }
 

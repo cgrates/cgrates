@@ -540,7 +540,7 @@ func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached 
 			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = ms.GetThresholdProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = ms.GetThresholdProfileDrv(tntID.Tenant, tntID.ID)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = ms.GetThresholdDrv(tntID.Tenant, tntID.ID)
@@ -2158,25 +2158,12 @@ func (ms *MongoStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	return err
 }
 
-// GetThresholdProfile retrieves a ThresholdProfile from dataDB/cache
-func (ms *MongoStorage) GetThresholdProfile(tenant, ID string,
-	skipCache bool, transactionID string) (tp *ThresholdProfile, err error) {
-	cacheKey := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, ID)
-	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*ThresholdProfile), nil
-		}
-	}
+// GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
+func (ms *MongoStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
 	session, col := ms.conn(colTps)
 	defer session.Close()
-	tp = new(ThresholdProfile)
-	cCommit := cacheCommit(transactionID)
 	if err = col.Find(bson.M{"tenant": tenant, "id": ID}).One(&tp); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
@@ -2186,7 +2173,6 @@ func (ms *MongoStorage) GetThresholdProfile(tenant, ID string,
 			return
 		}
 	}
-	cache.Set(cacheKey, tp, cCommit, transactionID)
 	return
 }
 
