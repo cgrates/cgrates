@@ -1630,11 +1630,10 @@ func (rs *RedisStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	return rs.Cmd("SET", utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), result).Err
 }
 
-// RemStatsQueue removes a StatsQueue from dataDB
-func (rs *RedisStorage) RemStatQueueProfile(tenant, id string, transactionID string) (err error) {
+// RemStatsQueueDrv removes a StatsQueue from dataDB
+func (rs *RedisStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	err = rs.Cmd("DEL", key).Err
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

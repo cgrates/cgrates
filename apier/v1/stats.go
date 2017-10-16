@@ -57,7 +57,7 @@ func (apierV1 *ApierV1) RemStatQueueProfile(args *utils.TenantID, reply *string)
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.DataDB().RemStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.RemoveStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -116,7 +116,7 @@ type DataDB interface {
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
-	RemStatQueueProfile(tenant, id, transactionID string) (err error)
+	RemStatQueueProfileDrv(tenant, id string) (err error)
 	GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error)
 	SetStoredStatQueue(sq *StoredStatQueue) (err error)
 	RemStoredStatQueue(tenant, id string) (err error)

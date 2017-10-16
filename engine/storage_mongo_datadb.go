@@ -2100,16 +2100,14 @@ func (ms *MongoStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	return
 }
 
-// RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MongoStorage) RemStatQueueProfile(tenant, id string, transactionID string) (err error) {
+// RemStatsQueueDrv removes a StatsQueue from dataDB
+func (ms *MongoStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colSqp)
 	err = col.Remove(bson.M{"tenant": tenant, "id": id})
 	if err != nil {
 		return err
 	}
 	session.Close()
-	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	return
 }
 

@@ -1994,7 +1994,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.DataDB().RemStatQueueProfile(sq.Tenant, sq.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveStatQueueProfile(sq.Tenant, sq.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
