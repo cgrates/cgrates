@@ -330,7 +330,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 	for _, mpIDs := range loader.sqProfiles {
 		for _, st := range mpIDs {
-			rcv, err := loader.dataStorage.GetStatQueueProfile(st.Tenant, st.ID, true, utils.NonTransactional)
+			rcv, err := loader.dm.GetStatQueueProfile(st.Tenant, st.ID, true, utils.NonTransactional)
 			if err != nil {
 				t.Errorf("Failed GetStatsQueue, tenant: %s, id: %s,  error: %s ", st.Tenant, st.ID, err.Error())
 			}

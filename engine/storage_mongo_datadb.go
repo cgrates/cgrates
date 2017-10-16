@@ -2075,24 +2075,12 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 }
 
 // GetStatQueueProfile retrieves a StatQueueProfile from dataDB
-func (ms *MongoStorage) GetStatQueueProfile(tenant string, id string,
-	skipCache bool, transactionID string) (sq *StatQueueProfile, err error) {
-	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*StatQueueProfile), nil
-		}
-	}
+func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	session, col := ms.conn(colSqp)
 	defer session.Close()
-	sq = new(StatQueueProfile)
 	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&sq); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
@@ -2101,7 +2089,6 @@ func (ms *MongoStorage) GetStatQueueProfile(tenant string, id string,
 			return
 		}
 	}
-	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
 

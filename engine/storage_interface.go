@@ -114,7 +114,7 @@ type DataDB interface {
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
-	GetStatQueueProfile(tenant string, ID string, skipCache bool, transID string) (sq *StatQueueProfile, err error)
+	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfile(sq *StatQueueProfile) (err error)
 	RemStatQueueProfile(tenant, id, transactionID string) (err error)
 	GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error)

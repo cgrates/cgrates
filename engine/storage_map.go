@@ -1484,22 +1484,12 @@ func (ms *MapStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemID
 }
 
 // GetStatQueueProfile retrieves a StatQueueProfile from dataDB
-func (ms *MapStorage) GetStatQueueProfile(tenant string, id string,
-	skipCache bool, transactionID string) (sq *StatQueueProfile, err error) {
+func (ms *MapStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*StatQueueProfile), nil
-		}
-	}
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[key]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
 	err = ms.ms.Unmarshal(values, &sq)
@@ -1511,7 +1501,6 @@ func (ms *MapStorage) GetStatQueueProfile(tenant string, id string,
 			return nil, err
 		}
 	}
-	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
 
