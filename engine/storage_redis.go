@@ -1600,23 +1600,13 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 }
 
 // GetStatQueueProfile retrieves a StatQueueProfile from dataDB
-func (rs *RedisStorage) GetStatQueueProfile(tenant string, id string, skipCache bool, transactionID string) (sq *StatQueueProfile, err error) {
+func (rs *RedisStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*StatQueueProfile), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil {
 			err = utils.ErrNotFound
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
-
 		return
 	}
 	if err = rs.ms.Unmarshal(values, &sq); err != nil {
@@ -1627,7 +1617,6 @@ func (rs *RedisStorage) GetStatQueueProfile(tenant string, id string, skipCache 
 			return
 		}
 	}
-	cache.Set(key, sq, cacheCommit(transactionID), transactionID)
 	return
 }
 

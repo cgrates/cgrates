@@ -180,3 +180,24 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string) 
 		cacheCommit(transactionID), transactionID)
 	return
 }
+
+func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool, transactionID string) (sqp *StatQueueProfile, err error) {
+	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*StatQueueProfile), nil
+		}
+	}
+	sqp, err = dm.dataDB.GetStatQueueProfileDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, sqp, cacheCommit(transactionID), transactionID)
+	return
+}

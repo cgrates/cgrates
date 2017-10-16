@@ -136,7 +136,7 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *StatEvent) (sqs StatQueues
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for sqID := range sqIDs {
-		sqPrfl, err := sS.dm.DataDB().GetStatQueueProfile(ev.Tenant, sqID, false, utils.NonTransactional)
+		sqPrfl, err := sS.dm.GetStatQueueProfile(ev.Tenant, sqID, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue

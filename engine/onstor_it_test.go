@@ -1974,7 +1974,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 		Stored:             true,
 		Thresholds:         []string{},
 	}
-	if _, rcvErr := onStor.DataDB().GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
@@ -1986,7 +1986,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if rcv, err := onStor.DataDB().GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
@@ -2000,7 +2000,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if _, rcvErr := onStor.DataDB().GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

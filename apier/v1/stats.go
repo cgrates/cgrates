@@ -29,7 +29,7 @@ func (apierV1 *ApierV1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.S
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sCfg, err := apierV1.DataManager.DataDB().GetStatQueueProfile(arg.Tenant, arg.ID,
+	if sCfg, err := apierV1.DataManager.GetStatQueueProfile(arg.Tenant, arg.ID,
 		false, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
