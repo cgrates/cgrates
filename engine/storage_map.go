@@ -1516,13 +1516,12 @@ func (ms *MapStorage) SetStatQueueProfileDrv(sqp *StatQueueProfile) (err error) 
 	return
 }
 
-// RemStatsQueue removes a StatsQueue from dataDB
-func (ms *MapStorage) RemStatQueueProfile(tenant, id, transactionID string) (err error) {
+// RemStatsQueueDrv removes a StatsQueue from dataDB
+func (ms *MapStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

@@ -205,3 +205,12 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool, tr
 func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile) (err error) {
 	return dm.DataDB().SetStatQueueProfileDrv(sqp)
 }
+
+func (dm *DataManager) RemoveStatQueueProfile(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemStatQueueProfileDrv(tenant, id); err != nil {
+		return
+	}
+	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	return
+}
