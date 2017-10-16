@@ -120,7 +120,7 @@ type DataDB interface {
 	GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error)
 	SetStoredStatQueue(sq *StoredStatQueue) (err error)
 	RemStoredStatQueue(tenant, id string) (err error)
-	GetThresholdProfile(tenant string, ID string, skipCache bool, transID string) (tp *ThresholdProfile, err error)
+	GetThresholdProfileDrv(tenant string, ID string) (tp *ThresholdProfile, err error)
 	SetThresholdProfile(tp *ThresholdProfile) (err error)
 	RemThresholdProfile(tenant, id, transactionID string) (err error)
 	GetThresholdDrv(string, string) (*Threshold, error)

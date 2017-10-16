@@ -2062,19 +2062,19 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		Weight:             1.4,
 		ActionIDs:          []string{},
 	}
-	if _, rcvErr := onStor.DataDB().GetThresholdProfile(th.Tenant, th.ID,
+	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetThresholdProfile(th); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
-	if rcv, err := onStor.DataDB().GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
@@ -2082,10 +2082,10 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 	if err := onStor.DataDB().RemThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, rcvErr := onStor.DataDB().GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

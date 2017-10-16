@@ -346,7 +346,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 
 	for _, mpIDs := range loader.thProfiles {
 		for _, th := range mpIDs {
-			rcv, err := loader.dataStorage.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional)
+			rcv, err := loader.dm.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional)
 			if err != nil {
 				t.Errorf("Failed GetThresholdProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
 			}

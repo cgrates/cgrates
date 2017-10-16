@@ -1570,23 +1570,13 @@ func (ms *MapStorage) RemStoredStatQueue(tenant, id string) (err error) {
 	return
 }
 
-// GetThresholdProfile retrieves a ThresholdProfile from dataDB/cache
-func (ms *MapStorage) GetThresholdProfile(tenant, ID string,
-	skipCache bool, transactionID string) (tp *ThresholdProfile, err error) {
+// GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
+func (ms *MapStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, ID)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*ThresholdProfile), nil
-		}
-	}
 	values, ok := ms.dict[key]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
 	err = ms.ms.Unmarshal(values, &tp)
@@ -1598,7 +1588,6 @@ func (ms *MapStorage) GetThresholdProfile(tenant, ID string,
 			return nil, err
 		}
 	}
-	cache.Set(key, tp, cacheCommit(transactionID), transactionID)
 	return
 }
 
