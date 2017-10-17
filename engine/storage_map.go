@@ -152,53 +152,6 @@ func (ms *MapStorage) IsDBEmpty() (resp bool, err error) {
 	return len(ms.dict) == 0, nil
 }
 
-/*
-func (ms *MapStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
-	if ms.cacheCfg == nil {
-		return
-	}
-	for k, cacheCfg := range ms.cacheCfg {
-		k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
-		if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
-			utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
-			utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
-			utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX}, k) && cacheCfg.Precache {
-			if err := ms.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
-				return err
-			}
-		}
-	}
-	// add more prefixes if needed
-	return
-}
-
-func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {
-	transID := cache.BeginTransaction()
-	cache.RemPrefixKey(prefix, false, transID)
-	keyList, err := ms.GetKeysForPrefix(prefix)
-	if err != nil {
-		cache.RollbackTransaction(transID)
-		return err
-	}
-	switch prefix {
-	case utils.RATING_PLAN_PREFIX:
-		for _, key := range keyList {
-			_, err := ms.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
-			if err != nil {
-				cache.RollbackTransaction(transID)
-				return err
-			}
-		}
-	default:
-		cache.RollbackTransaction(transID)
-		return utils.ErrInvalidKey
-	}
-	cache.CommitTransaction(transID)
-	return nil
-}
-
-*/
-
 func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -1281,34 +1234,23 @@ func (ms *MapStorage) RemoveResource(tenant, id string, transactionID string) (e
 	return
 }
 
-func (ms *MapStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
+func (ms *MapStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key := utils.TimingsPrefix + id
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*utils.TPTiming), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	cCommit := cacheCommit(transactionID)
 	if values, ok := ms.dict[key]; ok {
 		t = new(utils.TPTiming)
 		if err = ms.ms.Unmarshal(values, &t); err != nil {
 			return nil, err
 		}
 	} else {
-		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, t, cCommit, transactionID)
 	return
 
 }
 
-func (ms *MapStorage) SetTiming(t *utils.TPTiming, transactionID string) error {
+func (ms *MapStorage) SetTimingDrv(t *utils.TPTiming) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(t)
@@ -1320,12 +1262,11 @@ func (ms *MapStorage) SetTiming(t *utils.TPTiming, transactionID string) error {
 	return nil
 }
 
-func (ms *MapStorage) RemoveTiming(id string, transactionID string) error {
+func (ms *MapStorage) RemoveTimingDrv(id string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.TimingsPrefix + id
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
 }
 

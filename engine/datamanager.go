@@ -39,28 +39,72 @@ func (dm *DataManager) DataDB() DataDB {
 }
 
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
-	for key, ids := range map[string][]string{
-		utils.DESTINATION_PREFIX:         dstIDs,
-		utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
-		utils.RATING_PLAN_PREFIX:         rplIDs,
-		utils.RATING_PROFILE_PREFIX:      rpfIDs,
-		utils.ACTION_PREFIX:              actIDs,
-		utils.ACTION_PLAN_PREFIX:         aplIDs,
-		utils.AccountActionPlansPrefix:   aaPlIDs,
-		utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
-		utils.SHARED_GROUP_PREFIX:        sgIDs,
-		utils.LCR_PREFIX:                 lcrIDs,
-		utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
-		utils.ALIASES_PREFIX:             alsIDs,
-		utils.REVERSE_ALIASES_PREFIX:     rvAlsIDs,
-		utils.ResourceProfilesPrefix:     rpIDs,
-		utils.ResourcesPrefix:            resIDs,
-	} {
-		if err = dm.CacheDataFromDB(key, ids, false); err != nil {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if dm.cacheCfg == nil {
 			return
+		}
+		for k, cacheCfg := range dm.cacheCfg {
+			k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
+			if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
+				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
+				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
+				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX}, k) && cacheCfg.Precache {
+				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
+					return err
+				}
+			}
+		}
+		return
+	} else {
+		for key, ids := range map[string][]string{
+			utils.DESTINATION_PREFIX:         dstIDs,
+			utils.REVERSE_DESTINATION_PREFIX: rvDstIDs,
+			utils.RATING_PLAN_PREFIX:         rplIDs,
+			utils.RATING_PROFILE_PREFIX:      rpfIDs,
+			utils.ACTION_PREFIX:              actIDs,
+			utils.ACTION_PLAN_PREFIX:         aplIDs,
+			utils.AccountActionPlansPrefix:   aaPlIDs,
+			utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
+			utils.SHARED_GROUP_PREFIX:        sgIDs,
+			utils.LCR_PREFIX:                 lcrIDs,
+			utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
+			utils.ALIASES_PREFIX:             alsIDs,
+			utils.REVERSE_ALIASES_PREFIX:     rvAlsIDs,
+			utils.ResourceProfilesPrefix:     rpIDs,
+			utils.ResourcesPrefix:            resIDs,
+		} {
+			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
+				return
+			}
 		}
 	}
 	return
+}
+
+//Used for MapStorage
+func (dm *DataManager) PreloadCacheForPrefix(prefix string) error {
+	transID := cache.BeginTransaction()
+	cache.RemPrefixKey(prefix, false, transID)
+	keyList, err := dm.DataDB().GetKeysForPrefix(prefix)
+	if err != nil {
+		cache.RollbackTransaction(transID)
+		return err
+	}
+	switch prefix {
+	case utils.RATING_PLAN_PREFIX:
+		for _, key := range keyList {
+			_, err := dm.DataDB().GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
+			if err != nil {
+				cache.RollbackTransaction(transID)
+				return err
+			}
+		}
+	default:
+		cache.RollbackTransaction(transID)
+		return utils.ErrInvalidKey
+	}
+	cache.CommitTransaction(transID)
+	return nil
 }
 
 func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
@@ -149,7 +193,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.DataDB().GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
-			_, err = dm.DataDB().GetTiming(dataID, true, utils.NonTransactional)
+			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetThresholdProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
@@ -347,5 +391,38 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id, transactionID string) 
 	}
 	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
+	key := utils.TimingsPrefix + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*utils.TPTiming), nil
+		}
+	}
+	t, err = dm.dataDB.GetTimingDrv(id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, t, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
+	return dm.DataDB().SetTimingDrv(t)
+}
+
+func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveTimingDrv(id); err != nil {
+		return
+	}
+	cache.RemKey(utils.TimingsPrefix+id, cacheCommit(transactionID), transactionID)
 	return
 }
