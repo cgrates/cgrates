@@ -191,7 +191,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.DataDB().GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.DataDB().GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
@@ -424,5 +424,39 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 		return
 	}
 	cache.RemKey(utils.TimingsPrefix+id, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) GetResource(tenant, id string, skipCache bool, transactionID string) (rs *Resource, err error) {
+	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Resource), nil
+		}
+	}
+	rs, err = dm.dataDB.GetResourceDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, rs, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) SetResource(rs *Resource) (err error) {
+	return dm.DataDB().SetResourceDrv(rs)
+}
+
+func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveResourceDrv(tenant, id); err != nil {
+		return
+	}
+	cache.RemKey(utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
 	return
 }

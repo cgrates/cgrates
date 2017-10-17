@@ -1284,20 +1284,11 @@ func (rs *RedisStorage) RemoveResourceProfile(tenant, id string, transactionID s
 	return
 }
 
-func (rs *RedisStorage) GetResource(tenant, id string, skipCache bool, transactionID string) (r *Resource, err error) {
+func (rs *RedisStorage) GetResourceDrv(tenant, id string) (r *Resource, err error) {
 	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*Resource), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -1305,11 +1296,10 @@ func (rs *RedisStorage) GetResource(tenant, id string, skipCache bool, transacti
 	if err = rs.ms.Unmarshal(values, &r); err != nil {
 		return
 	}
-	cache.Set(key, r, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (rs *RedisStorage) SetResource(r *Resource) (err error) {
+func (rs *RedisStorage) SetResourceDrv(r *Resource) (err error) {
 	result, err := rs.ms.Marshal(r)
 	if err != nil {
 		return err
@@ -1317,12 +1307,11 @@ func (rs *RedisStorage) SetResource(r *Resource) (err error) {
 	return rs.Cmd("SET", utils.ResourcesPrefix+r.TenantID(), result).Err
 }
 
-func (rs *RedisStorage) RemoveResource(tenant, id string, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveResourceDrv(tenant, id string) (err error) {
 	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

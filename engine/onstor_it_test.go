@@ -877,7 +877,7 @@ func testOnStorITCacheResource(t *testing.T) {
 		},
 		TTLIdx: []string{"RU1"},
 	}
-	if err := onStor.DataDB().SetResource(res); err != nil {
+	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
 	expectedT := []string{"res_cgrates.org:RL1"}
@@ -1860,26 +1860,26 @@ func testOnStorITCRUDResource(t *testing.T) {
 		},
 		TTLIdx: []string{"RU1"},
 	}
-	if _, rcvErr := onStor.DataDB().GetResource("cgrates.org", "RL1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResource("cgrates.org", "RL1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetResource(res); err != nil {
+	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetResource("cgrates.org", "RL1", true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResource("cgrates.org", "RL1", true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
 	}
-	if rcv, err := onStor.DataDB().GetResource("cgrates.org", "RL1", false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResource("cgrates.org", "RL1", false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(res, rcv) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
 	}
-	if err := onStor.DataDB().RemoveResource(res.Tenant, res.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResource(res.Tenant, res.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetResource(res.Tenant, res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

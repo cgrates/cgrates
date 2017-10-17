@@ -1189,32 +1189,22 @@ func (ms *MapStorage) RemoveResourceProfile(tenant, id string, transactionID str
 	return nil
 }
 
-func (ms *MapStorage) GetResource(tenant, id string, skipCache bool, transactionID string) (r *Resource, err error) {
+func (ms *MapStorage) GetResourceDrv(tenant, id string) (r *Resource, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*Resource), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
 	values, ok := ms.dict[key]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, r)
+	err = ms.ms.Unmarshal(values, &r)
 	if err != nil {
 		return nil, err
 	}
-	cache.Set(key, r, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MapStorage) SetResource(r *Resource) (err error) {
+func (ms *MapStorage) SetResourceDrv(r *Resource) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)
@@ -1225,12 +1215,11 @@ func (ms *MapStorage) SetResource(r *Resource) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveResource(tenant, id string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveResourceDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 
