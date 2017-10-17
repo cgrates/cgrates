@@ -48,7 +48,7 @@ type DataDB interface {
 	Storage
 	Marshaler() Marshaler
 	HasData(string, string) (bool, error)
-	LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) error
+	//LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan, string) error
 	GetRatingProfile(string, bool, string) (*RatingProfile, error)
@@ -129,8 +129,6 @@ type DataDB interface {
 	GetFilterDrv(string, string) (*Filter, error)
 	SetFilterDrv(*Filter) error
 	RemoveFilterDrv(string, string) error
-	// CacheDataFromDB loads data to cache, prefix represents the cache prefix, IDs should be nil if all available data should be loaded
-	CacheDataFromDB2(prefix string, IDs []string, mustBeCached bool) error // ToDo: Move this to dataManager
 }
 
 type StorDB interface {

@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"strings"
 	"sync"
@@ -153,6 +152,7 @@ func (ms *MapStorage) IsDBEmpty() (resp bool, err error) {
 	return len(ms.dict) == 0, nil
 }
 
+/*
 func (ms *MapStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) (err error) {
 	if ms.cacheCfg == nil {
 		return
@@ -197,106 +197,7 @@ func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {
 	return nil
 }
 
-// CacheDataFromDB loads data to cache,
-// prefix represents the cache prefix, IDs should be nil if all available data should be loaded
-// ToDo: convert IDs into []*utils.TenantIDs when infrastructure will be ready
-func (ms *MapStorage) CacheDataFromDB2(prefix string, IDs []string, mustBeCached bool) (err error) {
-	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
-		utils.REVERSE_DESTINATION_PREFIX,
-		utils.RATING_PLAN_PREFIX,
-		utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX,
-		utils.ACTION_PLAN_PREFIX,
-		utils.AccountActionPlansPrefix,
-		utils.ACTION_TRIGGER_PREFIX,
-		utils.SHARED_GROUP_PREFIX,
-		utils.DERIVEDCHARGERS_PREFIX,
-		utils.LCR_PREFIX,
-		utils.ALIASES_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceProfilesPrefix,
-		utils.ResourcesPrefix,
-		utils.TimingsPrefix}, prefix) {
-		return utils.NewCGRError(utils.REDIS,
-			utils.MandatoryIEMissingCaps,
-			utils.UnsupportedCachePrefix,
-			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prefix))
-	}
-	if IDs == nil {
-		keyIDs, err := ms.GetKeysForPrefix(prefix)
-		if err != nil {
-			return utils.NewCGRError(utils.REDIS,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("MapStorage error <%s> querying keys for prefix: <%s>", prefix))
-		}
-		for _, keyID := range keyIDs {
-			if mustBeCached { // Only consider loading ids which are already in cache
-				if _, hasIt := cache.Get(keyID); !hasIt {
-					continue
-				}
-			}
-			IDs = append(IDs, keyID[len(prefix):])
-		}
-		var nrItems int
-		if cCfg, has := ms.cacheCfg[utils.CachePrefixToInstance[prefix]]; has {
-			nrItems = cCfg.Limit
-		}
-		if nrItems > 0 && nrItems < len(IDs) {
-			IDs = IDs[:nrItems]
-		}
-	}
-	for _, dataID := range IDs {
-		if mustBeCached {
-			if _, hasIt := cache.Get(prefix + dataID); !hasIt { // only cache if previously there
-				continue
-			}
-		}
-		switch prefix {
-		case utils.DESTINATION_PREFIX:
-			_, err = ms.GetDestination(dataID, true, utils.NonTransactional)
-		case utils.REVERSE_DESTINATION_PREFIX:
-			_, err = ms.GetReverseDestination(dataID, true, utils.NonTransactional)
-		case utils.RATING_PLAN_PREFIX:
-			_, err = ms.GetRatingPlan(dataID, true, utils.NonTransactional)
-		case utils.RATING_PROFILE_PREFIX:
-			_, err = ms.GetRatingProfile(dataID, true, utils.NonTransactional)
-		case utils.ACTION_PREFIX:
-			_, err = ms.GetActions(dataID, true, utils.NonTransactional)
-		case utils.ACTION_PLAN_PREFIX:
-			_, err = ms.GetActionPlan(dataID, true, utils.NonTransactional)
-		case utils.AccountActionPlansPrefix:
-			_, err = ms.GetAccountActionPlans(dataID, true, utils.NonTransactional)
-		case utils.ACTION_TRIGGER_PREFIX:
-			_, err = ms.GetActionTriggers(dataID, true, utils.NonTransactional)
-		case utils.SHARED_GROUP_PREFIX:
-			_, err = ms.GetSharedGroup(dataID, true, utils.NonTransactional)
-		case utils.DERIVEDCHARGERS_PREFIX:
-			_, err = ms.GetDerivedChargers(dataID, true, utils.NonTransactional)
-		case utils.LCR_PREFIX:
-			_, err = ms.GetLCR(dataID, true, utils.NonTransactional)
-		case utils.ALIASES_PREFIX:
-			_, err = ms.GetAlias(dataID, true, utils.NonTransactional)
-		case utils.REVERSE_ALIASES_PREFIX:
-			_, err = ms.GetReverseAlias(dataID, true, utils.NonTransactional)
-		case utils.ResourceProfilesPrefix:
-			tntID := utils.NewTenantID(dataID)
-			_, err = ms.GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
-		case utils.ResourcesPrefix:
-			tntID := utils.NewTenantID(dataID)
-			_, err = ms.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
-		case utils.TimingsPrefix:
-			_, err = ms.GetTiming(dataID, true, utils.NonTransactional)
-		}
-		if err != nil {
-			return utils.NewCGRError(utils.REDIS,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error <%s> querying MapStorage for category: <%s>, dataID: <%s>", prefix, dataID))
-		}
-	}
-	return
-}
+*/
 
 func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	ms.mu.RLock()
