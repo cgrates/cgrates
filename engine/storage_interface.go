@@ -48,7 +48,6 @@ type DataDB interface {
 	Storage
 	Marshaler() Marshaler
 	HasData(string, string) (bool, error)
-	//LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rlIDs, resIDs []string) error
 	GetRatingPlan(string, bool, string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan, string) error
 	GetRatingProfile(string, bool, string) (*RatingProfile, error)
@@ -106,9 +105,9 @@ type DataDB interface {
 	GetResource(string, string, bool, string) (*Resource, error)
 	SetResource(*Resource) error
 	RemoveResource(string, string, string) error
-	GetTiming(string, bool, string) (*utils.TPTiming, error)
-	SetTiming(*utils.TPTiming, string) error
-	RemoveTiming(string, string) error
+	GetTimingDrv(string) (*utils.TPTiming, error)
+	SetTimingDrv(*utils.TPTiming) error
+	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)

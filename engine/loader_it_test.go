@@ -221,7 +221,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, tm := range loader.timings {
-		rcv, err := loader.dataStorage.GetTiming(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetTiming(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetTiming: ", err.Error())
 		}

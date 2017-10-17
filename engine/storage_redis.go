@@ -1326,20 +1326,11 @@ func (rs *RedisStorage) RemoveResource(tenant, id string, transactionID string) 
 	return
 }
 
-func (rs *RedisStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
+func (rs *RedisStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
 	key := utils.TimingsPrefix + id
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*utils.TPTiming), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -1347,11 +1338,10 @@ func (rs *RedisStorage) GetTiming(id string, skipCache bool, transactionID strin
 	if err = rs.ms.Unmarshal(values, &t); err != nil {
 		return
 	}
-	cache.Set(key, t, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (rs *RedisStorage) SetTiming(t *utils.TPTiming, transactionID string) error {
+func (rs *RedisStorage) SetTimingDrv(t *utils.TPTiming) error {
 	result, err := rs.ms.Marshal(t)
 	if err != nil {
 		return err
@@ -1359,12 +1349,11 @@ func (rs *RedisStorage) SetTiming(t *utils.TPTiming, transactionID string) error
 	return rs.Cmd("SET", utils.TimingsPrefix+t.ID, result).Err
 }
 
-func (rs *RedisStorage) RemoveTiming(id string, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 	key := utils.TimingsPrefix + id
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

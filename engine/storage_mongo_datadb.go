@@ -1842,44 +1842,31 @@ func (ms *MongoStorage) RemoveResource(tenant, id string, transactionID string) 
 	return nil
 }
 
-func (ms *MongoStorage) GetTiming(id string, skipCache bool, transactionID string) (t *utils.TPTiming, err error) {
-	key := utils.TimingsPrefix + id
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*utils.TPTiming), nil
-		}
-	}
+func (ms *MongoStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
 	session, col := ms.conn(colTmg)
 	defer session.Close()
-	t = new(utils.TPTiming)
-	if err = col.Find(bson.M{"id": id}).One(t); err != nil {
+	if err = col.Find(bson.M{"id": id}).One(&t); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	cache.Set(key, t, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetTiming(t *utils.TPTiming, transactionID string) (err error) {
+func (ms *MongoStorage) SetTimingDrv(t *utils.TPTiming) (err error) {
 	session, col := ms.conn(colTmg)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"id": t.ID}, t)
 	return
 }
 
-func (ms *MongoStorage) RemoveTiming(id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 	session, col := ms.conn(colTmg)
 	defer session.Close()
 	if err = col.Remove(bson.M{"id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.TimingsPrefix+id, cacheCommit(transactionID), transactionID)
 	return nil
 }
 

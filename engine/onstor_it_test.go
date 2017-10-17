@@ -842,7 +842,7 @@ func testOnStorITCacheTiming(t *testing.T) {
 		EndTime:   "",
 	}
 
-	if err := onStor.DataDB().SetTiming(tmg, utils.NonTransactional); err != nil {
+	if err := onStor.SetTiming(tmg); err != nil {
 		t.Error(err)
 	}
 	expectedT := []string{"tmg_TEST_TMG"}
@@ -1894,13 +1894,13 @@ func testOnStorITCRUDTiming(t *testing.T) {
 		StartTime: "00:00:00",
 		EndTime:   "",
 	}
-	if _, rcvErr := onStor.DataDB().GetTiming(tmg.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetTiming(tmg.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetTiming(tmg, utils.NonTransactional); err != nil {
+	if err := onStor.SetTiming(tmg); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetTiming(tmg.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetTiming(tmg.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tmg, rcv) {
 		t.Errorf("Expecting: %v, received: %v", tmg, rcv)
@@ -1913,7 +1913,7 @@ func testOnStorITCRUDTiming(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.DataDB().GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tmg, rcv) {
 		t.Errorf("Expecting: %v, received: %v", tmg, rcv)
@@ -1921,10 +1921,10 @@ func testOnStorITCRUDTiming(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err := onStor.DataDB().RemoveTiming(tmg.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveTiming(tmg.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetTiming(tmg.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetTiming(tmg.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

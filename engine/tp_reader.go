@@ -2137,7 +2137,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
-		if err = tpr.dm.DataDB().SetTiming(t, utils.NonTransactional); err != nil {
+		if err = tpr.dm.SetTiming(t); err != nil {
 			return err
 		}
 		if verbose {
