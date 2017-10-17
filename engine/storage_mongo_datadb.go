@@ -1800,45 +1800,31 @@ func (ms *MongoStorage) RemoveResourceProfile(tenant, id string, transactionID s
 	return nil
 }
 
-func (ms *MongoStorage) GetResource(tenant, id string, skipCache bool, transactionID string) (r *Resource, err error) {
-	key := utils.ResourcesPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*Resource), nil
-		}
-	}
+func (ms *MongoStorage) GetResourceDrv(tenant, id string) (r *Resource, err error) {
 	session, col := ms.conn(colRes)
 	defer session.Close()
-	r = new(Resource)
-	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(r); err != nil {
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&r); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	cache.Set(key, r, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetResource(r *Resource) (err error) {
+func (ms *MongoStorage) SetResourceDrv(r *Resource) (err error) {
 	session, col := ms.conn(colRes)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
 	return
 }
 
-func (ms *MongoStorage) RemoveResource(tenant, id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveResourceDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colRes)
 	defer session.Close()
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	return nil
 }
 

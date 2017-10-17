@@ -102,9 +102,9 @@ type DataDB interface {
 	GetResourceProfile(string, string, bool, string) (*ResourceProfile, error)
 	SetResourceProfile(*ResourceProfile) error
 	RemoveResourceProfile(string, string, string) error
-	GetResource(string, string, bool, string) (*Resource, error)
-	SetResource(*Resource) error
-	RemoveResource(string, string, string) error
+	GetResourceDrv(string, string) (*Resource, error)
+	SetResourceDrv(*Resource) error
+	RemoveResourceDrv(string, string) error
 	GetTimingDrv(string) (*utils.TPTiming, error)
 	SetTimingDrv(*utils.TPTiming) error
 	RemoveTimingDrv(string) error

@@ -320,7 +320,7 @@ func (rS *ResourceService) StoreResource(r *Resource) (err error) {
 	if r.dirty == nil || !*r.dirty {
 		return
 	}
-	if err = rS.dm.DataDB().SetResource(r); err != nil {
+	if err = rS.dm.SetResource(r); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
 				r.ID, err.Error()))
@@ -404,7 +404,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for i, rTid := range rIDs {
-		if r, err := rS.dm.DataDB().GetResource(rTid.Tenant, rTid.ID, false, ""); err != nil {
+		if r, err := rS.dm.GetResource(rTid.Tenant, rTid.ID, false, ""); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ResourceS> force-uncaching resources for evUUID: <%s>, error: <%s>",
 					evUUID, err.Error()))
@@ -458,7 +458,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 		if !passAllFilters {
 			continue
 		}
-		r, err := rS.dm.DataDB().GetResource(rPrf.Tenant, rPrf.ID, false, "")
+		r, err := rS.dm.GetResource(rPrf.Tenant, rPrf.ID, false, "")
 		if err != nil {
 			return nil, err
 		}
