@@ -155,13 +155,13 @@ func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *strin
 	if err := self.DataManager.DataDB().SetDestination(dest, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.Id}, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.Id}, true); err != nil {
 		return
 	}
 	if err = self.DataManager.DataDB().UpdateReverseDestination(oldDest, dest, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dest.Prefixes, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dest.Prefixes, true); err != nil {
 		return
 	}
 	*reply = OK
@@ -208,7 +208,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	} else if !loaded {
 		return utils.ErrNotFound
 	}
-	if err := self.DataManager.DataDB().CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.ID}, true); err != nil {
+	if err := self.DataManager.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.ID}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -224,7 +224,7 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 	if err := dbReader.LoadDerivedChargersFiltered(&attrs, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataManager.DataDB().CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{attrs.GetDerivedChargersKey()}, true); err != nil {
+	if err := self.DataManager.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{attrs.GetDerivedChargersKey()}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -247,7 +247,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	} else if !loaded {
 		return utils.ErrNotFound
 	}
-	if err := self.DataManager.DataDB().CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{attrs.RatingPlanId}, true); err != nil {
+	if err := self.DataManager.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{attrs.RatingPlanId}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -263,7 +263,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataManager.DataDB().CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{attrs.KeyId()}, true); err != nil {
+	if err := self.DataManager.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{attrs.KeyId()}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -284,7 +284,7 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataManager.DataDB().CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{attrs.SharedGroupId}, true); err != nil {
+	if err := self.DataManager.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{attrs.SharedGroupId}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -352,7 +352,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX} {
 		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
-		if err := self.DataManager.DataDB().CacheDataFromDB(prfx, loadedIDs, true); err != nil {
+		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
@@ -361,7 +361,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceProfilesPrefix} {
 		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
-		if err := self.DataManager.DataDB().CacheDataFromDB(prfx, loadedIDs, true); err != nil {
+		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
@@ -471,7 +471,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	if err := self.DataManager.DataDB().SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{keyId}, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{keyId}, true); err != nil {
 		return
 	}
 	*reply = OK
@@ -557,7 +557,7 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err erro
 	if err := self.DataManager.DataDB().SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.ACTION_PREFIX, []string{attrs.ActionsId}, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.ACTION_PREFIX, []string{attrs.ActionsId}, true); err != nil {
 		utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -664,7 +664,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 		if err := self.DataManager.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 			return 0, utils.NewErrServerError(err)
 		}
-		if err = self.DataManager.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
+		if err = self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
 			return 0, utils.NewErrServerError(err)
 		}
 		for acntID := range prevAccountIDs {
@@ -673,7 +673,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 			}
 		}
 		if len(prevAccountIDs) != 0 {
-			if err = self.DataManager.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, prevAccountIDs.Slice(), true); err != nil &&
+			if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, prevAccountIDs.Slice(), true); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				return 0, utils.NewErrServerError(err)
 			}
@@ -768,7 +768,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.DESTINATION_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.DESTINATION_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// Reload ReverseDestinations
@@ -781,7 +781,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// RatingPlans
@@ -794,7 +794,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.RATING_PLAN_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.RATING_PLAN_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// RatingProfiles
@@ -807,7 +807,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.RATING_PROFILE_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// Actions
@@ -820,7 +820,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.ACTION_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.ACTION_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// ActionPlans
@@ -833,7 +833,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// AccountActionPlans
@@ -846,7 +846,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, dataIDs, true); err != nil {
 		return
 	}
 	// ActionTriggers
@@ -859,7 +859,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// SharedGroups
@@ -872,7 +872,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.SHARED_GROUP_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// LCR Profiles
@@ -885,7 +885,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.LCR_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.LCR_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// DerivedChargers
@@ -898,7 +898,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// Aliases
@@ -911,7 +911,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.ALIASES_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.ALIASES_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// ReverseAliases
@@ -924,7 +924,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, dataIDs, true); err != nil {
 		return
 	}
 	// ResourceProfiles
@@ -937,7 +937,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.ResourceProfilesPrefix, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.ResourceProfilesPrefix, dataIDs, true); err != nil {
 		return
 	}
 	// Resources
@@ -950,7 +950,7 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 			dataIDs[idx] = dId
 		}
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.ResourcesPrefix, dataIDs, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.ResourcesPrefix, dataIDs, true); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1531,7 +1531,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.DERIVEDCHARGERS_PREFIX,
 		utils.LCR_PREFIX} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
-		if err := self.DataManager.DataDB().CacheDataFromDB(prfx, loadedIDs, true); err != nil {
+		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
@@ -1541,7 +1541,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.ResourceProfilesPrefix,
 		utils.ResourcesPrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
-		if err := self.DataManager.DataDB().CacheDataFromDB(prfx, loadedIDs, true); err != nil {
+		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}

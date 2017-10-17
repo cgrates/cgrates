@@ -912,7 +912,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			if err = tpr.dm.DataDB().SetAccountActionPlans(id, []string{accountAction.ActionPlanId}, false); err != nil {
 				return err
 			}
-			if err = tpr.dm.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{id}, true); err != nil {
+			if err = tpr.dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{id}, true); err != nil {
 				return err
 			}
 		}

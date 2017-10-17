@@ -441,7 +441,7 @@ func (ms *MongoStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.ResourceProfilesPrefix:     rpIDs,
 		utils.ResourcesPrefix:            resIDs,
 	} {
-		if err = ms.CacheDataFromDB(key, ids, false); err != nil {
+		if err = ms.CacheDataFromDB2(key, ids, false); err != nil {
 			return
 		}
 	}
@@ -451,7 +451,7 @@ func (ms *MongoStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 // CacheDataFromDB loads data to cache
 // prfx represents the cache prefix, ids should be nil if all available data should be loaded
 // mustBeCached specifies that data needs to be cached in order to be retrieved from db
-func (ms *MongoStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
+func (ms *MongoStorage) CacheDataFromDB2(prfx string, ids []string, mustBeCached bool) (err error) {
 	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,

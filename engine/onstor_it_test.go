@@ -265,7 +265,7 @@ func testOnStorITMatchReqFilterIndex(t *testing.T) {
 }
 
 func testOnStorITCacheDestinations(t *testing.T) {
-	if err := onStor.DataDB().CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
+	if err := onStor.CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
 		t.Error(err)
 	}
 	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
@@ -276,13 +276,13 @@ func testOnStorITCacheDestinations(t *testing.T) {
 	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
+	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
 		t.Error(err)
 	}
 	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); !hasIt {
@@ -302,7 +302,7 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 			t.Errorf("Prefix: %s already in cache", prfx)
 		}
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dst.Prefixes, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dst.Prefixes, false); err != nil {
 		t.Error(err)
 	}
 	for _, prfx := range dst.Prefixes {
@@ -363,7 +363,7 @@ func testOnStorITCacheRatingPlan(t *testing.T) {
 	if _, hasIt := cache.Get(utils.RATING_PLAN_PREFIX + rp.Id); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.RATING_PLAN_PREFIX + rp.Id); !hasIt {
@@ -396,7 +396,7 @@ func testOnStorITCacheRatingProfile(t *testing.T) {
 	if _, hasIt := cache.Get(utils.RATING_PROFILE_PREFIX + rpf.Id); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.RATING_PROFILE_PREFIX + rpf.Id); !hasIt {
@@ -457,7 +457,7 @@ func testOnStorITCacheActions(t *testing.T) {
 	if _, hasIt := cache.Get(utils.ACTION_PREFIX + acts[0].Id); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.ACTION_PREFIX, []string{acts[0].Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ACTION_PREFIX, []string{acts[0].Id}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.ACTION_PREFIX + acts[0].Id); !hasIt {
@@ -514,7 +514,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 	if _, hasIt := cache.Get(utils.ACTION_PLAN_PREFIX + ap.Id); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.ACTION_PLAN_PREFIX + ap.Id); !hasIt {
@@ -533,7 +533,7 @@ func testOnStorITCacheAccountActionPlans(t *testing.T) {
 	if _, hasIt := cache.Get(utils.AccountActionPlansPrefix + acntID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{acntID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{acntID}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.AccountActionPlansPrefix + acntID); !hasIt {
@@ -568,7 +568,7 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 	if _, hasIt := cache.Get(utils.ACTION_TRIGGER_PREFIX + atsID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{atsID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{atsID}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.ACTION_TRIGGER_PREFIX + atsID); !hasIt {
@@ -601,7 +601,7 @@ func testOnStorITCacheSharedGroup(t *testing.T) {
 	if _, hasIt := cache.Get(utils.SHARED_GROUP_PREFIX + sg.Id); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{sg.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{sg.Id}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.SHARED_GROUP_PREFIX + sg.Id); !hasIt {
@@ -631,7 +631,7 @@ func testOnStorITCacheDerivedChargers(t *testing.T) {
 	if _, hasIt := cache.Get(utils.DERIVEDCHARGERS_PREFIX + keyDCS); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{keyDCS}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{keyDCS}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.DERIVEDCHARGERS_PREFIX + keyDCS); !hasIt {
@@ -682,7 +682,7 @@ func testOnStorITCacheLCR(t *testing.T) {
 	if _, hasIt := cache.Get(utils.LCR_PREFIX + lcr.GetId()); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.LCR_PREFIX, []string{lcr.GetId()}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.LCR_PREFIX, []string{lcr.GetId()}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.LCR_PREFIX + lcr.GetId()); !hasIt {
@@ -734,7 +734,7 @@ func testOnStorITCacheAlias(t *testing.T) {
 	if _, hasIt := cache.Get(utils.ALIASES_PREFIX + als.GetId()); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.ALIASES_PREFIX, []string{als.GetId()}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ALIASES_PREFIX, []string{als.GetId()}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.ALIASES_PREFIX + als.GetId()); !hasIt {
@@ -781,7 +781,7 @@ func testOnStorITCacheReverseAlias(t *testing.T) {
 	if _, hasIt := cache.Get(utils.REVERSE_ALIASES_PREFIX + rvAlsID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, []string{rvAlsID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, []string{rvAlsID}, false); err != nil {
 		t.Error(err)
 	}
 	eRvrsAls := []string{utils.ConcatenatedKey(als.GetId(), als.Values[1].DestinationId)}
@@ -821,7 +821,7 @@ func testOnStorITCacheResourceProfile(t *testing.T) {
 	if _, hasIt := cache.Get(utils.ResourceProfilesPrefix + rCfg.TenantID()); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.ResourceProfilesPrefix, []string{rCfg.TenantID()}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ResourceProfilesPrefix, []string{rCfg.TenantID()}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.ResourceProfilesPrefix + rCfg.TenantID()); !hasIt {
@@ -854,7 +854,7 @@ func testOnStorITCacheTiming(t *testing.T) {
 	if _, hasIt := cache.Get(utils.TimingsPrefix + tmg.ID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.TimingsPrefix, []string{tmg.ID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.TimingsPrefix, []string{tmg.ID}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.TimingsPrefix + tmg.ID); !hasIt {
@@ -890,7 +890,7 @@ func testOnStorITCacheResource(t *testing.T) {
 	if _, hasIt := cache.Get(utils.ResourcesPrefix + res.TenantID()); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.DataDB().CacheDataFromDB(utils.ResourcesPrefix, []string{res.TenantID()}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ResourcesPrefix, []string{res.TenantID()}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := cache.Get(utils.ResourcesPrefix + res.TenantID()); !hasIt {

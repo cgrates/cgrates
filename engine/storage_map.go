@@ -200,7 +200,7 @@ func (ms *MapStorage) PreloadCacheForPrefix(prefix string) error {
 // CacheDataFromDB loads data to cache,
 // prefix represents the cache prefix, IDs should be nil if all available data should be loaded
 // ToDo: convert IDs into []*utils.TenantIDs when infrastructure will be ready
-func (ms *MapStorage) CacheDataFromDB(prefix string, IDs []string, mustBeCached bool) (err error) {
+func (ms *MapStorage) CacheDataFromDB2(prefix string, IDs []string, mustBeCached bool) (err error) {
 	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,

@@ -173,7 +173,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 				}
 				i++
 			}
-			dm.DataDB().CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
+			dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
 			return 0, nil
 		}, 0, balance.SharedGroups.Slice()...)
 		if err != nil {
@@ -265,7 +265,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 				}
 				i++
 			}
-			dm.DataDB().CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
+			dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
 			return 0, nil
 		}, 0, bClone.SharedGroups.Slice()...)
 		if err != nil {

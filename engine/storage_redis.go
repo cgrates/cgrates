@@ -150,7 +150,7 @@ func (rs *RedisStorage) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs
 		utils.ResourceProfilesPrefix:     rpIDs,
 		utils.ResourcesPrefix:            resIDs,
 	} {
-		if err = rs.CacheDataFromDB(key, ids, false); err != nil {
+		if err = rs.CacheDataFromDB2(key, ids, false); err != nil {
 			return
 		}
 	}
@@ -220,7 +220,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 // CacheDataFromDB loads data to cache
 // prfx represents the cache prefix, ids should be nil if all available data should be loaded
 // mustBeCached specifies that data needs to be cached in order to be retrieved from db
-func (rs *RedisStorage) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
+func (rs *RedisStorage) CacheDataFromDB2(prfx string, ids []string, mustBeCached bool) (err error) {
 	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,

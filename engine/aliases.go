@@ -200,13 +200,13 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) (err error) 
 		if err = am.dm.DataDB().SetAlias(attr.Alias, utils.NonTransactional); err != nil {
 			return err
 		}
-		if err = am.dm.DataDB().CacheDataFromDB(utils.ALIASES_PREFIX, []string{attr.Alias.GetId()}, true); err != nil {
+		if err = am.dm.CacheDataFromDB(utils.ALIASES_PREFIX, []string{attr.Alias.GetId()}, true); err != nil {
 			return
 		}
 		if err = am.dm.DataDB().SetReverseAlias(attr.Alias, utils.NonTransactional); err != nil {
 			return
 		}
-		if err = am.dm.DataDB().CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
+		if err = am.dm.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
 			return
 		}
 	} else {
@@ -237,13 +237,13 @@ func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) (err error) 
 		if err = am.dm.DataDB().SetAlias(oldAlias, utils.NonTransactional); err != nil {
 			return
 		}
-		if err = am.dm.DataDB().CacheDataFromDB(utils.ALIASES_PREFIX, []string{oldAlias.GetId()}, true); err != nil {
+		if err = am.dm.CacheDataFromDB(utils.ALIASES_PREFIX, []string{oldAlias.GetId()}, true); err != nil {
 			return
 		}
 		if err = am.dm.DataDB().SetReverseAlias(oldAlias, utils.NonTransactional); err != nil {
 			return
 		}
-		if err = am.dm.DataDB().CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
+		if err = am.dm.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, attr.Alias.ReverseAliasIDs(), true); err != nil {
 			return
 		}
 	}
