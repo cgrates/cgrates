@@ -556,20 +556,20 @@ func TestActionPlansRemoveMember(t *testing.T) {
 	if err = dm.DataDB().SetActionPlan(ap2.Id, ap2, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err = dm.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap1.Id, ap2.Id}, true); err != nil {
+	if err = dm.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap1.Id, ap2.Id}, true); err != nil {
 		t.Error(err)
 	}
 	if err = dm.DataDB().SetAccountActionPlans(account1.ID, []string{ap1.Id}, false); err != nil {
 		t.Error(err)
 	}
-	if err = dm.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account1.ID}, true); err != nil {
+	if err = dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account1.ID}, true); err != nil {
 		t.Error(err)
 	}
 	dm.DataDB().GetAccountActionPlans(account1.ID, true, utils.NonTransactional) // FixMe: remove here after finishing testing of map
 	if err = dm.DataDB().SetAccountActionPlans(account2.ID, []string{ap2.Id}, false); err != nil {
 		t.Error(err)
 	}
-	if err = dm.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account2.ID}, false); err != nil {
+	if err = dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{account2.ID}, false); err != nil {
 		t.Error(err)
 	}
 

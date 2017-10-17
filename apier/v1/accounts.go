@@ -142,7 +142,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		if err != nil {
 			return 0, err
 		}
-		if err = self.DataManager.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{attrs.ActionPlanId}, true); err != nil {
+		if err = self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{attrs.ActionPlanId}, true); err != nil {
 			return 0, err
 		}
 		for _, acntID := range remAcntAPids {
@@ -151,7 +151,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 			}
 		}
 		if len(remAcntAPids) != 0 {
-			if err = self.DataManager.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, remAcntAPids, true); err != nil {
+			if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, remAcntAPids, true); err != nil {
 				return 0, nil
 			}
 		}
@@ -243,13 +243,13 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 					apIDs[i] = actionPlanID
 					i++
 				}
-				if err := self.DataManager.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
+				if err := self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
 				if err := self.DataManager.DataDB().SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
-				if err = self.DataManager.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+				if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 					return 0, err
 				}
 				return 0, nil
@@ -341,7 +341,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err = self.DataManager.DataDB().RemAccountActionPlans(accID, nil); err != nil {
 		return
 	}
-	if err = self.DataManager.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+	if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 		return
 	}
 	*reply = OK

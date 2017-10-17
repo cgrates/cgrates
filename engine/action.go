@@ -526,7 +526,7 @@ func setddestinations(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 		if err = dm.DataDB().SetDestination(newDest, utils.NonTransactional); err != nil {
 			return err
 		}
-		if err = dm.DataDB().CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
+		if err = dm.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
 			return err
 		}
 
@@ -585,13 +585,13 @@ func removeAccountAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs
 				return 0, err
 			}
 		}
-		if err = dm.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
+		if err = dm.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
 			return 0, err
 		}
 		if err = dm.DataDB().RemAccountActionPlans(accID, nil); err != nil {
 			return 0, err
 		}
-		if err = dm.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		if err = dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
 			return 0, err
 		}
 		return 0, nil

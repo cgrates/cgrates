@@ -173,13 +173,13 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 					apIDs[i] = actionPlanID
 					i++
 				}
-				if err := self.DataManager.DataDB().CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
+				if err := self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
 				if err := self.DataManager.DataDB().SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
-				if err = self.DataManager.DataDB().CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+				if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 					return 0, err
 				}
 				return 0, nil

@@ -82,7 +82,7 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	if err := self.DataManager.DataDB().SetDerivedChargers(dcKey, dcs, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataManager.DataDB().CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{dcKey}, true); err != nil {
+	if err := self.DataManager.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{dcKey}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -112,7 +112,7 @@ func (self *ApierV1) RemDerivedChargers(attrs AttrRemDerivedChargers, reply *str
 	if err := self.DataManager.DataDB().SetDerivedChargers(utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject), nil, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataManager.DataDB().CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX,
+	if err := self.DataManager.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX,
 		[]string{utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
