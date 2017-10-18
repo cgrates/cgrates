@@ -260,7 +260,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		}
 
 		if attr.ActionTriggersId != "" {
-			atrs, err := self.DataManager.DataDB().GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
+			atrs, err := self.DataManager.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
 			if err != nil {
 				return 0, err
 			}

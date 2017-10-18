@@ -930,20 +930,11 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 	return err
 }
 
-func (rs *RedisStorage) GetActionTriggers(key string, skipCache bool, transactionID string) (atrs ActionTriggers, err error) {
+func (rs *RedisStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, err error) {
 	key = utils.ACTION_TRIGGER_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(ActionTriggers), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -951,7 +942,6 @@ func (rs *RedisStorage) GetActionTriggers(key string, skipCache bool, transactio
 	if err = rs.ms.Unmarshal(values, &atrs); err != nil {
 		return
 	}
-	cache.Set(key, atrs, cacheCommit(transactionID), transactionID)
 	return
 }
 

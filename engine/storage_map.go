@@ -832,26 +832,15 @@ func (ms *MapStorage) AddLoadHistory(*utils.LoadInstance, int, string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetActionTriggers(key string, skipCache bool, transactionID string) (atrs ActionTriggers, err error) {
+func (ms *MapStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	cCommit := cacheCommit(transactionID)
 	key = utils.ACTION_TRIGGER_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(ActionTriggers), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &atrs)
 	} else {
-		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, atrs, cCommit, transactionID)
 	return
 }
 

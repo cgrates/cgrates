@@ -191,7 +191,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, atrs := range loader.actionsTriggers {
-		rcv, err := loader.dataStorage.GetActionTriggers(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetActionTriggers(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetActionTriggers: ", err.Error())
 		}
