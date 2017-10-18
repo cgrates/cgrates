@@ -1410,17 +1410,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 	return err
 }
 
-func (ms *MongoStorage) GetActionTriggers(key string, skipCache bool, transactionID string) (atrs ActionTriggers, err error) {
-	cacheKey := utils.ACTION_TRIGGER_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
-			if x != nil {
-				return x.(ActionTriggers), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-
+func (ms *MongoStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, err error) {
 	var kv struct {
 		Key   string
 		Value ActionTriggers
@@ -1429,13 +1419,11 @@ func (ms *MongoStorage) GetActionTriggers(key string, skipCache bool, transactio
 	defer session.Close()
 	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
 	}
 	atrs = kv.Value
-	cache.Set(cacheKey, atrs, cacheCommit(transactionID), transactionID)
 	return
 }
 

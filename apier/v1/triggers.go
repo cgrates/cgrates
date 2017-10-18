@@ -74,7 +74,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 				account.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
 			for _, actionTriggerID := range *attr.ActionTriggerIDs {
-				atrs, err := self.DataManager.DataDB().GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
+				atrs, err := self.DataManager.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
 				if err != nil {
 					return 0, err
 				}
@@ -356,7 +356,7 @@ func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *st
 		}
 		return err
 	} else {
-		atrs, err := self.DataManager.DataDB().GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
+		atrs, err := self.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -410,7 +410,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	atrs, _ := self.DataManager.DataDB().GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
+	atrs, _ := self.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
 	var newAtr *engine.ActionTrigger
 	if attr.UniqueID != "" {
 		//search for exiting one
@@ -533,7 +533,7 @@ func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 	var allAttrs engine.ActionTriggers
 	if len(attr.GroupIDs) > 0 {
 		for _, key := range attr.GroupIDs {
-			getAttrs, err := self.DataManager.DataDB().GetActionTriggers(key, false, utils.NonTransactional)
+			getAttrs, err := self.DataManager.GetActionTriggers(key, false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -546,7 +546,7 @@ func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 			return err
 		}
 		for _, key := range keys {
-			getAttrs, err := self.DataManager.DataDB().GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
+			getAttrs, err := self.DataManager.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}

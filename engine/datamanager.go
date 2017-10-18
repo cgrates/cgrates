@@ -175,7 +175,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.AccountActionPlansPrefix:
 			_, err = dm.DataDB().GetAccountActionPlans(dataID, true, utils.NonTransactional)
 		case utils.ACTION_TRIGGER_PREFIX:
-			_, err = dm.DataDB().GetActionTriggers(dataID, true, utils.NonTransactional)
+			_, err = dm.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
 			_, err = dm.DataDB().GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
@@ -493,4 +493,26 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string) (
 	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	return
+}
+
+func (dm *DataManager) GetActionTriggers(id string, skipCache bool, transactionID string) (attrs ActionTriggers, err error) {
+	key := utils.ACTION_TRIGGER_PREFIX + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(ActionTriggers), nil
+		}
+	}
+	attrs, err = dm.dataDB.GetActionTriggersDrv(id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, attrs, cacheCommit(transactionID), transactionID)
+	return
+
 }

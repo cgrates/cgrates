@@ -1397,13 +1397,13 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()},
 	}
 	atsID := ats[0].ID
-	if _, rcvErr := onStor.DataDB().GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetActionTriggers(atsID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ats[0], rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", ats[0], rcv[0])
@@ -1416,7 +1416,7 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.DataDB().GetActionTriggers(atsID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetActionTriggers(atsID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ats[0], rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", ats[0], rcv[0])
@@ -1428,7 +1428,7 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 	if err := onStor.DataDB().RemoveActionTriggers(atsID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

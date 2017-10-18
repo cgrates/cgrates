@@ -194,7 +194,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				ub.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
 			for _, actionTriggerID := range *attr.ActionTriggerIDs {
-				atrs, err := self.DataManager.DataDB().GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
+				atrs, err := self.DataManager.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
 				if err != nil {
 					return 0, err
 				}
