@@ -809,7 +809,7 @@ func testOnStorITCacheResourceProfile(t *testing.T) {
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if err := onStor.DataDB().SetResourceProfile(rCfg); err != nil {
+	if err := onStor.SetResourceProfile(rCfg); err != nil {
 		t.Error(err)
 	}
 	expectedR := []string{"rsp_cgrates.org:RL_TEST"}
@@ -1812,13 +1812,13 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if _, rcvErr := onStor.DataDB().GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetResourceProfile(rL); err != nil {
+	if err := onStor.SetResourceProfile(rL); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
@@ -1831,7 +1831,7 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.DataDB().GetResourceProfile(rL.Tenant, rL.ID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rL, rcv)
@@ -1839,10 +1839,10 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err := onStor.DataDB().RemoveResourceProfile(rL.Tenant, rL.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResourceProfile(rL.Tenant, rL.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

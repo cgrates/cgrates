@@ -99,9 +99,9 @@ type DataDB interface {
 	RemoveAlias(string, string) error
 	SetReverseAlias(*Alias, string) error
 	GetReverseAlias(string, bool, string) ([]string, error)
-	GetResourceProfile(string, string, bool, string) (*ResourceProfile, error)
-	SetResourceProfile(*ResourceProfile) error
-	RemoveResourceProfile(string, string, string) error
+	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
+	SetResourceProfileDrv(*ResourceProfile) error
+	RemoveResourceProfileDrv(string, string) error
 	GetResourceDrv(string, string) (*Resource, error)
 	SetResourceDrv(*Resource) error
 	RemoveResourceDrv(string, string) error

@@ -188,7 +188,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.DataDB().GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.DataDB().GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
@@ -457,6 +457,40 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 		return
 	}
 	cache.RemKey(utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) GetResourceProfile(tenant, id string, skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
+	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*ResourceProfile), nil
+		}
+	}
+	rp, err = dm.dataDB.GetResourceProfileDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, rp, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) SetResourceProfile(rp *ResourceProfile) (err error) {
+	return dm.DataDB().SetResourceProfileDrv(rp)
+}
+
+func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveResourceProfileDrv(tenant, id); err != nil {
+		return
+	}
+	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	return
 }

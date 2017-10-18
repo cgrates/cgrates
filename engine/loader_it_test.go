@@ -315,7 +315,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 
 	for _, mapIDs := range loader.resProfiles {
 		for _, rl := range mapIDs {
-			rcv, err := loader.dataStorage.GetResourceProfile(rl.Tenant, rl.ID, true, utils.NonTransactional)
+			rcv, err := loader.dm.GetResourceProfile(rl.Tenant, rl.ID, true, utils.NonTransactional)
 			if err != nil {
 				t.Error("Failed GetResourceProfile: ", err.Error())
 			}
