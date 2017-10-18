@@ -63,7 +63,7 @@ func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.Res
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rcfg, err := apierV1.DataManager.DataDB().GetResourceProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+	if rcfg, err := apierV1.DataManager.GetResourceProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -79,7 +79,7 @@ func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *s
 	if missing := utils.MissingStructFields(res, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.DataDB().SetResourceProfile(res); err != nil {
+	if err := apierV1.DataManager.SetResourceProfile(res); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(res.Tenant, res.ID), true, "") // ToDo: Remove here with autoreload
@@ -92,7 +92,7 @@ func (apierV1 *ApierV1) RemResourceProfile(arg utils.TenantID, reply *string) er
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.DataDB().RemoveResourceProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.RemoveResourceProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

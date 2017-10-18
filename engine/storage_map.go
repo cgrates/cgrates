@@ -787,7 +787,7 @@ func (ms *MapStorage) SetReverseAlias(al *Alias, transactionID string) (err erro
 
 func (ms *MapStorage) RemoveAlias(key string, transactionID string) error {
 	// get alias for values list
-	al, err := ms.GetAlias(key, false, transactionID)
+	al, err := ms.GetAlias(key, false, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
@@ -1139,21 +1139,12 @@ func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID strin
 	return
 }
 
-func (ms *MapStorage) GetResourceProfile(tenant, id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
+func (ms *MapStorage) GetResourceProfileDrv(tenant, id string) (rsp *ResourceProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*ResourceProfile), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
 	values, ok := ms.dict[key]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
 	err = ms.ms.Unmarshal(values, &rsp)
@@ -1165,11 +1156,10 @@ func (ms *MapStorage) GetResourceProfile(tenant, id string, skipCache bool, tran
 			return nil, err
 		}
 	}
-	cache.Set(key, rsp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MapStorage) SetResourceProfile(r *ResourceProfile) error {
+func (ms *MapStorage) SetResourceProfileDrv(r *ResourceProfile) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)
@@ -1180,12 +1170,11 @@ func (ms *MapStorage) SetResourceProfile(r *ResourceProfile) error {
 	return nil
 }
 
-func (ms *MapStorage) RemoveResourceProfile(tenant, id string, transactionID string) error {
+func (ms *MapStorage) RemoveResourceProfileDrv(tenant, id string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return nil
 }
 

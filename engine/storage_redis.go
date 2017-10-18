@@ -1237,20 +1237,11 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetResourceProfile(tenant, id string, skipCache bool, transactionID string) (rsp *ResourceProfile, err error) {
+func (rs *RedisStorage) GetResourceProfileDrv(tenant, id string) (rsp *ResourceProfile, err error) {
 	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*ResourceProfile), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -1263,11 +1254,10 @@ func (rs *RedisStorage) GetResourceProfile(tenant, id string, skipCache bool, tr
 			return
 		}
 	}
-	cache.Set(key, rsp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (rs *RedisStorage) SetResourceProfile(rsp *ResourceProfile) error {
+func (rs *RedisStorage) SetResourceProfileDrv(rsp *ResourceProfile) error {
 	result, err := rs.ms.Marshal(rsp)
 	if err != nil {
 		return err
@@ -1275,12 +1265,11 @@ func (rs *RedisStorage) SetResourceProfile(rsp *ResourceProfile) error {
 	return rs.Cmd("SET", utils.ResourceProfilesPrefix+rsp.TenantID(), result).Err
 }
 
-func (rs *RedisStorage) RemoveResourceProfile(tenant, id string, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveResourceProfileDrv(tenant, id string) (err error) {
 	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

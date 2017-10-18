@@ -435,7 +435,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
-		rPrf, err := rS.dm.DataDB().GetResourceProfile(tenant, resName, false, utils.NonTransactional)
+		rPrf, err := rS.dm.GetResourceProfile(tenant, resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue

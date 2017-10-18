@@ -1753,23 +1753,13 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetResourceProfile(tenant, id string, skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
-	key := utils.ResourceProfilesPrefix + utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*ResourceProfile), nil
-		}
-	}
+func (ms *MongoStorage) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {
 	session, col := ms.conn(colRsP)
 	defer session.Close()
 	rp = new(ResourceProfile)
 	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(rp); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
@@ -1778,25 +1768,22 @@ func (ms *MongoStorage) GetResourceProfile(tenant, id string, skipCache bool, tr
 			return
 		}
 	}
-	cache.Set(key, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetResourceProfile(rp *ResourceProfile) (err error) {
+func (ms *MongoStorage) SetResourceProfileDrv(rp *ResourceProfile) (err error) {
 	session, col := ms.conn(colRsP)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": rp.Tenant, "id": rp.ID}, rp)
 	return
 }
 
-func (ms *MongoStorage) RemoveResourceProfile(tenant, id string, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveResourceProfileDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colRsP)
 	defer session.Close()
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
 	}
-	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	return nil
 }
 
