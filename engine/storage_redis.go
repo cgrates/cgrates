@@ -960,11 +960,9 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers, trans
 	return
 }
 
-func (rs *RedisStorage) RemoveActionTriggers(key string, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveActionTriggersDrv(key string) (err error) {
 	key = utils.ACTION_TRIGGER_PREFIX + key
 	err = rs.Cmd("DEL", key).Err
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
-
 	return
 }
 
