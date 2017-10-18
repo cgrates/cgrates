@@ -326,20 +326,11 @@ func (rs *RedisStorage) RemoveRatingProfile(key string, transactionID string) er
 	return nil
 }
 
-func (rs *RedisStorage) GetLCR(key string, skipCache bool, transactionID string) (lcr *LCR, err error) {
-	key = utils.LCR_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*LCR), nil
-		}
-	}
+func (rs *RedisStorage) GetLCRDrv(id string) (lcr *LCR, err error) {
+	key := utils.LCR_PREFIX + id
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -347,7 +338,6 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool, transactionID string)
 	if err = rs.ms.Unmarshal(values, &lcr); err != nil {
 		return
 	}
-	cache.Set(key, lcr, cacheCommit(transactionID), transactionID)
 	return
 }
 

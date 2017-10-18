@@ -1218,13 +1218,13 @@ func testOnStorITCRUDLCR(t *testing.T) {
 		},
 	}
 
-	if _, rcvErr := onStor.DataDB().GetLCR(lcr.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetLCR(lcr, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetLCR(lcr.GetId(), true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(lcr, rcv) {
 		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
@@ -1237,7 +1237,7 @@ func testOnStorITCRUDLCR(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.DataDB().GetLCR(lcr.GetId(), false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetLCR(lcr.GetId(), false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(lcr, rcv) {
 		t.Errorf("Expecting: %v, received: %v", lcr, rcv)

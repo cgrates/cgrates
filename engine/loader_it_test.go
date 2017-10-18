@@ -261,7 +261,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, lcr := range loader.lcrs {
-		rcv, err := loader.dataStorage.GetLCR(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetLCR(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetLCR: ", err.Error())
 		}

@@ -958,7 +958,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		keyVariants = append(keyVariants[:1], append(partialSubjects, keyVariants[1:]...)...)
 	}
 	for _, key := range keyVariants {
-		if lcr, err := dm.DataDB().GetLCR(key, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if lcr, err := dm.GetLCR(key, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return nil, err
 		} else if err == nil && lcr != nil {
 			return lcr, nil
