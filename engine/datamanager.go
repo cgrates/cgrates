@@ -514,5 +514,12 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool, transactionI
 	}
 	cache.Set(key, attrs, cacheCommit(transactionID), transactionID)
 	return
+}
 
+func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveActionTriggersDrv(id); err != nil {
+		return
+	}
+	cache.RemKey(utils.ACTION_TRIGGER_PREFIX+id, cacheCommit(transactionID), transactionID)
+	return
 }

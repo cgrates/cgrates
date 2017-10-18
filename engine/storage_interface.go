@@ -73,7 +73,7 @@ type DataDB interface {
 	SetSharedGroup(*SharedGroup, string) error
 	GetActionTriggersDrv(string) (ActionTriggers, error)
 	SetActionTriggers(string, ActionTriggers, string) error
-	RemoveActionTriggers(string, string) error
+	RemoveActionTriggersDrv(string) error
 	GetActionPlan(string, bool, string) (*ActionPlan, error)
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)

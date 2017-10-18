@@ -348,7 +348,7 @@ func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *st
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attr.UniqueID == "" {
-		err := self.DataManager.DataDB().RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
+		err := self.DataManager.RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 		} else {

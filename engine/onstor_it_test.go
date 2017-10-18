@@ -1425,7 +1425,7 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 	// 	t.Error(err)
 	// }
 
-	if err := onStor.DataDB().RemoveActionTriggers(atsID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveActionTriggers(atsID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {

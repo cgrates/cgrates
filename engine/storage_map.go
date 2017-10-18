@@ -858,11 +858,10 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers, transac
 	return
 }
 
-func (ms *MapStorage) RemoveActionTriggers(key string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveActionTriggersDrv(key string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACTION_TRIGGER_PREFIX+key)
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }
 

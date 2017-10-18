@@ -1444,13 +1444,10 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers, trans
 	return err
 }
 
-func (ms *MongoStorage) RemoveActionTriggers(key string, transactionID string) error {
+func (ms *MongoStorage) RemoveActionTriggersDrv(key string) error {
 	session, col := ms.conn(colAtr)
 	defer session.Close()
 	err := col.Remove(bson.M{"key": key})
-	if err == nil {
-		cache.RemKey(key, cacheCommit(transactionID), transactionID)
-	}
 	return err
 }
 
