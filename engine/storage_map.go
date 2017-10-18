@@ -285,26 +285,15 @@ func (ms *MapStorage) RemoveRatingProfile(key string, transactionID string) (err
 	return
 }
 
-func (ms *MapStorage) GetLCR(key string, skipCache bool, transactionID string) (lcr *LCR, err error) {
+func (ms *MapStorage) GetLCRDrv(id string) (lcr *LCR, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key = utils.LCR_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*LCR), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	cCommit := cacheCommit(transactionID)
+	key := utils.LCR_PREFIX + id
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &lcr)
 	} else {
-		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, lcr, cCommit, transactionID)
 	return
 }
 

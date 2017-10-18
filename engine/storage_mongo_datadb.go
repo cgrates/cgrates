@@ -735,32 +735,21 @@ func (ms *MongoStorage) RemoveRatingProfile(key, transactionID string) error {
 	return iter.Close()
 }
 
-func (ms *MongoStorage) GetLCR(key string, skipCache bool, transactionID string) (lcr *LCR, err error) {
-	cacheKey := utils.LCR_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*LCR), nil
-		}
-	}
+func (ms *MongoStorage) GetLCRDrv(key string) (lcr *LCR, err error) {
+
 	var result struct {
 		Key   string
 		Value *LCR
 	}
 	session, col := ms.conn(colLcr)
 	defer session.Close()
-	cCommit := cacheCommit(transactionID)
 	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
 	lcr = result.Value
-	cache.Set(cacheKey, lcr, cCommit, transactionID)
 	return
 }
 

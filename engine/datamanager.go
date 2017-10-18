@@ -181,7 +181,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.DERIVEDCHARGERS_PREFIX:
 			_, err = dm.DataDB().GetDerivedChargers(dataID, true, utils.NonTransactional)
 		case utils.LCR_PREFIX:
-			_, err = dm.DataDB().GetLCR(dataID, true, utils.NonTransactional)
+			_, err = dm.GetLCR(dataID, true, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
 			_, err = dm.DataDB().GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
@@ -521,5 +521,26 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 		return
 	}
 	cache.RemKey(utils.ACTION_TRIGGER_PREFIX+id, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) GetLCR(id string, skipCache bool, transactionID string) (lcr *LCR, err error) {
+	key := utils.LCR_PREFIX + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*LCR), nil
+		}
+	}
+	lcr, err = dm.DataDB().GetLCRDrv(id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, lcr, cacheCommit(transactionID), transactionID)
 	return
 }
