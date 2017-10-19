@@ -54,7 +54,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	for _, cb := range creditBalances {
 		if len(cb.SharedGroups) > 0 {
 			for sg := range cb.SharedGroups {
-				if sharedGroup, _ := dm.DataDB().GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
+				if sharedGroup, _ := dm.GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
 					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, ub)
 					sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
 					extendedCreditBalances = append(extendedCreditBalances, sgb...)
@@ -68,7 +68,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	for _, mb := range unitBalances {
 		if len(mb.SharedGroups) > 0 {
 			for sg := range mb.SharedGroups {
-				if sharedGroup, _ := dm.DataDB().GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
+				if sharedGroup, _ := dm.GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
 					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, cd.TOR, ub)
 					sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 					extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
@@ -157,7 +157,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 			i := 0
 			for sgID := range balance.SharedGroups {
 				// add shared group member
-				sg, err := dm.DataDB().GetSharedGroup(sgID, false, utils.NonTransactional)
+				sg, err := dm.GetSharedGroup(sgID, false, utils.NonTransactional)
 				if err != nil || sg == nil {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
@@ -249,7 +249,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			i := 0
 			for sgId := range bClone.SharedGroups {
 				// add shared group member
-				sg, err := dm.DataDB().GetSharedGroup(sgId, false, utils.NonTransactional)
+				sg, err := dm.GetSharedGroup(sgId, false, utils.NonTransactional)
 				if err != nil || sg == nil {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
@@ -355,7 +355,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, directio
 	for _, b := range balances {
 		if len(b.SharedGroups) > 0 {
 			for sgId := range b.SharedGroups {
-				sharedGroup, err := dm.DataDB().GetSharedGroup(sgId, false, utils.NonTransactional)
+				sharedGroup, err := dm.GetSharedGroup(sgId, false, utils.NonTransactional)
 				if err != nil || sharedGroup == nil {
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 					continue
@@ -810,7 +810,7 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.S
 	}
 	memberIds := make(utils.StringMap)
 	for _, sgID := range sharedGroupIds {
-		sharedGroup, err := dm.DataDB().GetSharedGroup(sgID, false, utils.NonTransactional)
+		sharedGroup, err := dm.GetSharedGroup(sgID, false, utils.NonTransactional)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 			return nil, err

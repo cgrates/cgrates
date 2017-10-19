@@ -37,11 +37,11 @@ func TestSharedSetGet(t *testing.T) {
 	if err != nil {
 		t.Error("Error storing Shared groudp: ", err)
 	}
-	received, err := dm.DataDB().GetSharedGroup(id, true, utils.NonTransactional)
+	received, err := dm.GetSharedGroup(id, true, utils.NonTransactional)
 	if err != nil || received == nil || !reflect.DeepEqual(sg, received) {
 		t.Error("Error getting shared group: ", err, received)
 	}
-	received, err = dm.DataDB().GetSharedGroup(id, false, utils.NonTransactional)
+	received, err = dm.GetSharedGroup(id, false, utils.NonTransactional)
 	if err != nil || received == nil || !reflect.DeepEqual(sg, received) {
 		t.Error("Error getting cached shared group: ", err, received)
 	}

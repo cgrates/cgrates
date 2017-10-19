@@ -559,20 +559,11 @@ func (rs *RedisStorage) RemoveActions(key string, transactionID string) (err err
 	return
 }
 
-func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool, transactionID string) (sg *SharedGroup, err error) {
+func (rs *RedisStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err error) {
 	key = utils.SHARED_GROUP_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*SharedGroup), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -580,7 +571,6 @@ func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool, transactionID
 	if err = rs.ms.Unmarshal(values, &sg); err != nil {
 		return
 	}
-	cache.Set(key, sg, cacheCommit(transactionID), transactionID)
 	return
 }
 
