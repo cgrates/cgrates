@@ -544,3 +544,14 @@ func (dm *DataManager) GetLCR(id string, skipCache bool, transactionID string) (
 	cache.Set(key, lcr, cacheCommit(transactionID), transactionID)
 	return
 }
+
+func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers, transactionID string) (err error) {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if err = dm.DataDB().SetActionTriggersDrv(key, attr); err != nil {
+			cache.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
+		}
+		return
+	} else {
+		return dm.DataDB().SetActionTriggersDrv(key, attr)
+	}
+}

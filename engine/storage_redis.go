@@ -935,7 +935,7 @@ func (rs *RedisStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, e
 	return
 }
 
-func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers, transactionID string) (err error) {
+func (rs *RedisStorage) SetActionTriggersDrv(key string, atrs ActionTriggers) (err error) {
 	if len(atrs) == 0 {
 		// delete the key
 		return rs.Cmd("DEL", utils.ACTION_TRIGGER_PREFIX+key).Err

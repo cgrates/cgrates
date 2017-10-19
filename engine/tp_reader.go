@@ -1012,7 +1012,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				actionIDs = append(actionIDs, atr.ActionsID)
 			}
 			// write action triggers
-			err = tpr.dm.DataDB().SetActionTriggers(accountAction.ActionTriggersId, actionTriggers, utils.NonTransactional)
+			err = tpr.dm.SetActionTriggers(accountAction.ActionTriggersId, actionTriggers, utils.NonTransactional)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionTriggers): " + accountAction.ActionTriggersId)
 			}
@@ -1352,7 +1352,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 				return fmt.Errorf("could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
 			}
 			// write action triggers
-			err = tpr.dm.DataDB().SetActionTriggers(triggerTag, triggers, utils.NonTransactional)
+			err = tpr.dm.SetActionTriggers(triggerTag, triggers, utils.NonTransactional)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionTriggers): " + triggerTag)
 			}
@@ -1902,7 +1902,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Action Triggers:")
 	}
 	for k, atrs := range tpr.actionsTriggers {
-		err = tpr.dm.DataDB().SetActionTriggers(k, atrs, utils.NonTransactional)
+		err = tpr.dm.SetActionTriggers(k, atrs, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
