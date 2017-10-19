@@ -179,7 +179,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.SHARED_GROUP_PREFIX:
 			_, err = dm.GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
-			_, err = dm.DataDB().GetDerivedChargers(dataID, true, utils.NonTransactional)
+			_, err = dm.GetDerivedChargers(dataID, true, utils.NonTransactional)
 		case utils.LCR_PREFIX:
 			_, err = dm.GetLCR(dataID, true, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
@@ -598,4 +598,25 @@ func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
 	} else {
 		return dm.DataDB().SetLCRDrv(lcr)
 	}
+}
+
+func (dm *DataManager) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
+	cacheKey := utils.DERIVEDCHARGERS_PREFIX + key
+	if !skipCache {
+		if x, ok := cache.Get(cacheKey); ok {
+			if x != nil {
+				return x.(*utils.DerivedChargers), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	dcs, err = dm.DataDB().GetDerivedChargersDrv(key)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(cacheKey, dcs, cacheCommit(transactionID), transactionID)
+	return
 }

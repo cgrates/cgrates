@@ -1010,26 +1010,15 @@ func (ms *MapStorage) PopTask() (t *Task, err error) {
 	return
 }
 
-func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
+func (ms *MapStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	cCommit := cacheCommit(transactionID)
 	key = utils.DERIVEDCHARGERS_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*utils.DerivedChargers), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &dcs)
 	} else {
-		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, dcs, cCommit, transactionID)
 	return
 }
 

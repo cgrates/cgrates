@@ -1121,20 +1121,11 @@ func (rs *RedisStorage) PopTask() (t *Task, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
+func (rs *RedisStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
 	key = utils.DERIVEDCHARGERS_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*utils.DerivedChargers), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -1142,7 +1133,6 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool, transacti
 	if err = rs.ms.Unmarshal(values, &dcs); err != nil {
 		return
 	}
-	cache.Set(key, dcs, cacheCommit(transactionID), transactionID)
 	return
 }
 
