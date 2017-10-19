@@ -1416,7 +1416,7 @@ func (ms *MongoStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, e
 	return
 }
 
-func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers, transactionID string) (err error) {
+func (ms *MongoStorage) SetActionTriggersDrv(key string, atrs ActionTriggers) (err error) {
 	session, col := ms.conn(colAtr)
 	defer session.Close()
 	if len(atrs) == 0 {

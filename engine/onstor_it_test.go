@@ -556,7 +556,7 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()},
 	}
 	atsID := ats[0].ID
-	if err := onStor.DataDB().SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
+	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedCAt := []string{"atr_testOnStorITCacheActionTrigger"}
@@ -1400,7 +1400,7 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
+	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); err != nil {

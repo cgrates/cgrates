@@ -369,7 +369,7 @@ func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *st
 			remainingAtrs = append(remainingAtrs, atr)
 		}
 		// set the cleared list back
-		err = self.DataManager.DataDB().SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional)
+		err = self.DataManager.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 		} else {
@@ -514,7 +514,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	if attr.ActionsID != nil {
 		newAtr.ActionsID = *attr.ActionsID
 	}
-	if err = self.DataManager.DataDB().SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
+	if err = self.DataManager.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = self.DataManager.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{attr.GroupID}, true); err != nil {

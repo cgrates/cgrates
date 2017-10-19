@@ -833,7 +833,7 @@ func (ms *MapStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, err
 	return
 }
 
-func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers, transactionID string) (err error) {
+func (ms *MapStorage) SetActionTriggersDrv(key string, atrs ActionTriggers) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if len(atrs) == 0 {
@@ -843,7 +843,6 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers, transac
 	}
 	result, err := ms.ms.Marshal(&atrs)
 	ms.dict[utils.ACTION_TRIGGER_PREFIX+key] = result
-	cache.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
 

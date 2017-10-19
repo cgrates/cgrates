@@ -70,7 +70,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 
 			}
 			if m.dryRun != true {
-				if err := m.dm.DataDB().SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
+				if err := m.dm.SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.ActionTriggers] += 1
