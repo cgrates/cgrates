@@ -1926,7 +1926,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("LCR Rules:")
 	}
 	for k, lcr := range tpr.lcrs {
-		err = tpr.dm.DataDB().SetLCR(lcr, utils.NonTransactional)
+		err = tpr.dm.SetLCR(lcr, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

@@ -297,12 +297,11 @@ func (ms *MapStorage) GetLCRDrv(id string) (lcr *LCR, err error) {
 	return
 }
 
-func (ms *MapStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
+func (ms *MapStorage) SetLCRDrv(lcr *LCR) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(lcr)
 	ms.dict[utils.LCR_PREFIX+lcr.GetId()] = result
-	cache.RemKey(utils.LCR_PREFIX+lcr.GetId(), cacheCommit(transactionID), transactionID)
 	return
 }
 

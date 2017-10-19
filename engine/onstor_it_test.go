@@ -670,7 +670,7 @@ func testOnStorITCacheLCR(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.DataDB().SetLCR(lcr, utils.NonTransactional); err != nil {
+	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedCLCR := []string{"lcr_*out:cgrates.org:call:*any:*any"}
@@ -1221,7 +1221,7 @@ func testOnStorITCRUDLCR(t *testing.T) {
 	if _, rcvErr := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetLCR(lcr, utils.NonTransactional); err != nil {
+	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetLCR(lcr.GetId(), true, utils.NonTransactional); err != nil {
