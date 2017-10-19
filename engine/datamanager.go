@@ -177,7 +177,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ACTION_TRIGGER_PREFIX:
 			_, err = dm.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
-			_, err = dm.DataDB().GetSharedGroup(dataID, true, utils.NonTransactional)
+			_, err = dm.GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
 			_, err = dm.DataDB().GetDerivedChargers(dataID, true, utils.NonTransactional)
 		case utils.LCR_PREFIX:
@@ -554,4 +554,26 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers, transa
 	} else {
 		return dm.DataDB().SetActionTriggersDrv(key, attr)
 	}
+}
+
+func (dm *DataManager) GetSharedGroup(key string, skipCache bool, transactionID string) (sg *SharedGroup, err error) {
+	cachekey := utils.SHARED_GROUP_PREFIX + key
+	if !skipCache {
+		if x, ok := cache.Get(cachekey); ok {
+			if x != nil {
+				return x.(*SharedGroup), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	sg, err = dm.DataDB().GetSharedGroupDrv(key)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(cachekey, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(cachekey, sg, cacheCommit(transactionID), transactionID)
+	return
+
 }

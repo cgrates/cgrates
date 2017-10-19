@@ -518,27 +518,15 @@ func (ms *MapStorage) RemoveActions(key string, transactionID string) (err error
 	return
 }
 
-func (ms *MapStorage) GetSharedGroup(key string, skipCache bool, transactionID string) (sg *SharedGroup, err error) {
+func (ms *MapStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	cachekey := utils.SHARED_GROUP_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(cachekey); ok {
-			if x != nil {
-				return x.(*SharedGroup), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	cCommit := cacheCommit(transactionID)
 	if values, ok := ms.dict[cachekey]; ok {
 		err = ms.ms.Unmarshal(values, &sg)
-		if err == nil {
-			cache.Set(cachekey, sg, cCommit, transactionID)
+		if err != nil {
+			return nil, err
 		}
-	} else {
-		cache.Set(cachekey, nil, cCommit, transactionID)
-		return nil, utils.ErrNotFound
 	}
 	return
 }
@@ -1193,7 +1181,6 @@ func (ms *MapStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
 	defer ms.mu.RUnlock()
 	key := utils.TimingsPrefix + id
 	if values, ok := ms.dict[key]; ok {
-		t = new(utils.TPTiming)
 		if err = ms.ms.Unmarshal(values, &t); err != nil {
 			return nil, err
 		}

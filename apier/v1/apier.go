@@ -129,7 +129,7 @@ func (v1 *ApierV1) ComputeAccountActionPlans(ignr string, reply *string) (err er
 }
 
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
-	if sg, err := apier.DataManager.DataDB().GetSharedGroup(sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+	if sg, err := apier.DataManager.GetSharedGroup(sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 		return err
 	} else {
 		if sg != nil {

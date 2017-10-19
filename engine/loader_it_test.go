@@ -251,7 +251,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, sg := range loader.sharedGroups {
-		rcv, err := loader.dataStorage.GetSharedGroup(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetSharedGroup(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetSharedGroup: ", err.Error())
 		}

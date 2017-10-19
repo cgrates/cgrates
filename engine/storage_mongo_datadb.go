@@ -1006,27 +1006,15 @@ func (ms *MongoStorage) RemoveActions(key string, transactionID string) error {
 	return err
 }
 
-func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool, transactionID string) (sg *SharedGroup, err error) {
-	cacheKey := utils.SHARED_GROUP_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*SharedGroup), nil
-		}
-	}
+func (ms *MongoStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err error) {
 	session, col := ms.conn(colShg)
 	defer session.Close()
-	sg = new(SharedGroup)
-	if err = col.Find(bson.M{"id": key}).One(sg); err != nil {
+	if err = col.Find(bson.M{"id": key}).One(&sg); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	cache.Set(cacheKey, sg, cacheCommit(transactionID), transactionID)
 	return
 }
 

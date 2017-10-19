@@ -1355,13 +1355,13 @@ func testOnStorITCRUDSharedGroup(t *testing.T) {
 		},
 		MemberIds: make(utils.StringMap),
 	}
-	if _, rcvErr := onStor.DataDB().GetSharedGroup(sg.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetSharedGroup(sg.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetSharedGroup(sg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetSharedGroup(sg.Id, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetSharedGroup(sg.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sg, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sg, rcv)
@@ -1374,7 +1374,7 @@ func testOnStorITCRUDSharedGroup(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 
-	if rcv, err := onStor.DataDB().GetSharedGroup(sg.Id, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetSharedGroup(sg.Id, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sg, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sg, rcv)
