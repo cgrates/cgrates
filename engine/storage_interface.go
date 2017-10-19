@@ -64,7 +64,7 @@ type DataDB interface {
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
-	GetDerivedChargers(string, bool, string) (*utils.DerivedChargers, error)
+	GetDerivedChargersDrv(string) (*utils.DerivedChargers, error)
 	SetDerivedChargers(string, *utils.DerivedChargers, string) error
 	GetActions(string, bool, string) (Actions, error)
 	SetActions(string, Actions, string) error

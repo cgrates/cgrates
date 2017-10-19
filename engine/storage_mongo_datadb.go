@@ -1629,32 +1629,20 @@ func (ms *MongoStorage) PopTask() (t *Task, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
-	cacheKey := utils.DERIVEDCHARGERS_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*utils.DerivedChargers), nil
-		}
-	}
+func (ms *MongoStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
 	var kv struct {
 		Key   string
 		Value *utils.DerivedChargers
 	}
 	session, col := ms.conn(colDcs)
 	defer session.Close()
-	cCommit := cacheCommit(transactionID)
 	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cCommit, transactionID)
 			err = utils.ErrNotFound
 		}
 		return
 	}
 	dcs = kv.Value
-	cache.Set(cacheKey, dcs, cCommit, transactionID)
 	return
 }
 

@@ -150,7 +150,7 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 
 func testOnStorITSetGetDerivedCharges(t *testing.T) {
 	keyCharger1 := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
-	if _, err := onStor.DataDB().GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err == nil {
+	if _, err := onStor.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err == nil {
 		t.Error("DC exists")
 	}
 	charger1 := &utils.DerivedChargers{DestinationIDs: make(utils.StringMap),
@@ -164,7 +164,7 @@ func testOnStorITSetGetDerivedCharges(t *testing.T) {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
 	// Retrieve from db
-	if rcvCharger, err := onStor.DataDB().GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err != nil {
+	if rcvCharger, err := onStor.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err != nil {
 		t.Error("Error when retrieving DerivedCHarger", err.Error())
 	} else if !reflect.DeepEqual(rcvCharger, charger1) {
 		for i, eChrg := range charger1.Chargers {
@@ -175,7 +175,7 @@ func testOnStorITSetGetDerivedCharges(t *testing.T) {
 		t.Errorf("Expecting %v, received: %v", charger1, rcvCharger)
 	}
 	// Retrieve from cache
-	if rcvCharger, err := onStor.DataDB().GetDerivedChargers(keyCharger1, false, utils.NonTransactional); err != nil {
+	if rcvCharger, err := onStor.GetDerivedChargers(keyCharger1, false, utils.NonTransactional); err != nil {
 		t.Error("Error when retrieving DerivedCHarger", err.Error())
 	} else if !reflect.DeepEqual(rcvCharger, charger1) {
 		t.Errorf("Expecting %v, received: %v", charger1, rcvCharger)

@@ -29,7 +29,7 @@ func HandleGetDerivedChargers(dm *DataManager, attrs *utils.AttrDerivedChargers)
 	anyCategKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, utils.ANY, utils.ANY, utils.ANY)
 	anyTenantKey := utils.DerivedChargersKey(attrs.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY)
 	for _, dcKey := range []string{strictKey, anySubjKey, anyAcntKey, anyCategKey, anyTenantKey} {
-		if dcsDb, err := dm.DataDB().GetDerivedChargers(dcKey, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if dcsDb, err := dm.GetDerivedChargers(dcKey, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return nil, err
 		} else if dcsDb != nil && DerivedChargersMatchesDest(dcsDb, attrs.Destination) {
 			dcs = dcsDb
