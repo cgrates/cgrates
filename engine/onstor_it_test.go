@@ -589,7 +589,7 @@ func testOnStorITCacheSharedGroup(t *testing.T) {
 		},
 		MemberIds: make(utils.StringMap),
 	}
-	if err := onStor.DataDB().SetSharedGroup(sg, utils.NonTransactional); err != nil {
+	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedCSh := []string{"shg_SG1"}
@@ -1358,7 +1358,7 @@ func testOnStorITCRUDSharedGroup(t *testing.T) {
 	if _, rcvErr := onStor.GetSharedGroup(sg.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetSharedGroup(sg, utils.NonTransactional); err != nil {
+	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetSharedGroup(sg.Id, true, utils.NonTransactional); err != nil {

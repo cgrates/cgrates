@@ -531,12 +531,11 @@ func (ms *MapStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err error)
 	return
 }
 
-func (ms *MapStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
+func (ms *MapStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sg)
 	ms.dict[utils.SHARED_GROUP_PREFIX+sg.Id] = result
-	cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 

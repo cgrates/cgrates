@@ -168,7 +168,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 							sg.MemberIds = make(utils.StringMap)
 						}
 						sg.MemberIds[acc.ID] = true
-						dm.DataDB().SetSharedGroup(sg, utils.NonTransactional)
+						dm.SetSharedGroup(sg, utils.NonTransactional)
 					}
 				}
 				i++
@@ -260,7 +260,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 							sg.MemberIds = make(utils.StringMap)
 						}
 						sg.MemberIds[ub.ID] = true
-						dm.DataDB().SetSharedGroup(sg, utils.NonTransactional)
+						dm.SetSharedGroup(sg, utils.NonTransactional)
 					}
 				}
 				i++

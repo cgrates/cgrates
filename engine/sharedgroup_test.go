@@ -33,7 +33,7 @@ func TestSharedSetGet(t *testing.T) {
 		},
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
-	err := dm.DataDB().SetSharedGroup(sg, utils.NonTransactional)
+	err := dm.SetSharedGroup(sg, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error storing Shared groudp: ", err)
 	}
