@@ -373,7 +373,7 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 	}
 	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost, lcrQosThreshold, lcrQos, lcrLoad} {
-		if err := dm.DataDB().SetLCR(lcr, utils.NonTransactional); err != nil {
+		if err := dm.SetLCR(lcr, utils.NonTransactional); err != nil {
 			t.Error(err)
 		}
 	}

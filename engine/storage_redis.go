@@ -341,7 +341,7 @@ func (rs *RedisStorage) GetLCRDrv(id string) (lcr *LCR, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
+func (rs *RedisStorage) SetLCRDrv(lcr *LCR) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(lcr); err != nil {
 		return

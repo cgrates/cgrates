@@ -60,7 +60,7 @@ type DataDB interface {
 	GetReverseDestination(string, bool, string) ([]string, error)
 	UpdateReverseDestination(*Destination, *Destination, string) error
 	GetLCRDrv(string) (*LCR, error)
-	SetLCR(*LCR, string) error
+	SetLCRDrv(*LCR) error
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)

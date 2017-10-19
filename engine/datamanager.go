@@ -588,3 +588,14 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup, transactionID string) (er
 		return dm.DataDB().SetSharedGroupDrv(sg)
 	}
 }
+
+func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if err = dm.DataDB().SetLCRDrv(lcr); err != nil {
+			cache.RemKey(utils.LCR_PREFIX+lcr.GetId(), cacheCommit(transactionID), transactionID)
+		}
+		return
+	} else {
+		return dm.DataDB().SetLCRDrv(lcr)
+	}
+}

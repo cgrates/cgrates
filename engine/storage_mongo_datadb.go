@@ -753,7 +753,7 @@ func (ms *MongoStorage) GetLCRDrv(key string) (lcr *LCR, err error) {
 	return
 }
 
-func (ms *MongoStorage) SetLCR(lcr *LCR, transactionID string) (err error) {
+func (ms *MongoStorage) SetLCRDrv(lcr *LCR) (err error) {
 	session, col := ms.conn(colLcr)
 	defer session.Close()
 	if _, err = col.Upsert(bson.M{"key": lcr.GetId()}, &struct {
