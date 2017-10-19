@@ -465,7 +465,7 @@ func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error)
 	}
 	if save {
 		for _, sg := range tpr.sharedGroups {
-			if err := tpr.dm.DataDB().SetSharedGroup(sg, utils.NonTransactional); err != nil {
+			if err := tpr.dm.SetSharedGroup(sg, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -1914,7 +1914,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Shared Groups:")
 	}
 	for k, sg := range tpr.sharedGroups {
-		err = tpr.dm.DataDB().SetSharedGroup(sg, utils.NonTransactional)
+		err = tpr.dm.SetSharedGroup(sg, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

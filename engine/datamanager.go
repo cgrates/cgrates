@@ -577,3 +577,14 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool, transactionID 
 	return
 
 }
+
+func (dm *DataManager) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if err = dm.DataDB().SetSharedGroupDrv(sg); err != nil {
+			cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
+		}
+		return
+	} else {
+		return dm.DataDB().SetSharedGroupDrv(sg)
+	}
+}

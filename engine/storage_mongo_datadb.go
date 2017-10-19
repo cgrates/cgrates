@@ -1018,7 +1018,7 @@ func (ms *MongoStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err erro
 	return
 }
 
-func (ms *MongoStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
+func (ms *MongoStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	session, col := ms.conn(colShg)
 	defer session.Close()
 	if _, err = col.Upsert(bson.M{"id": sg.Id}, sg); err != nil {

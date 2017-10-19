@@ -574,7 +574,7 @@ func (rs *RedisStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err erro
 	return
 }
 
-func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
+func (rs *RedisStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sg); err != nil {
 		return

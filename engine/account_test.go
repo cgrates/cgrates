@@ -1248,7 +1248,7 @@ func TestDebitShared(t *testing.T) {
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	dm.DataDB().SetAccount(groupie)
-	dm.DataDB().SetSharedGroup(sg, utils.NonTransactional)
+	dm.SetSharedGroup(sg, utils.NonTransactional)
 	cc, err := rif.debitCreditBalance(cd, false, false, true)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
@@ -1317,7 +1317,7 @@ func TestMaxDurationShared(t *testing.T) {
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	dm.DataDB().SetAccount(groupie)
-	dm.DataDB().SetSharedGroup(sg, utils.NonTransactional)
+	dm.SetSharedGroup(sg, utils.NonTransactional)
 	duration, err := cd.getMaxSessionDuration(rif)
 	if err != nil {
 		t.Error("Error getting max session duration from shared group: ", err)

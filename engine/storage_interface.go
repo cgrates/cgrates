@@ -70,7 +70,7 @@ type DataDB interface {
 	SetActions(string, Actions, string) error
 	RemoveActions(string, string) error
 	GetSharedGroupDrv(string) (*SharedGroup, error)
-	SetSharedGroup(*SharedGroup, string) error
+	SetSharedGroupDrv(*SharedGroup) error
 	GetActionTriggersDrv(string) (ActionTriggers, error)
 	SetActionTriggersDrv(string, ActionTriggers) error
 	RemoveActionTriggersDrv(string) error
