@@ -67,7 +67,7 @@ type DataDB interface {
 	GetDerivedChargersDrv(string) (*utils.DerivedChargers, error)
 	SetDerivedChargers(string, *utils.DerivedChargers, string) error
 	GetActionsDrv(string) (Actions, error)
-	SetActions(string, Actions, string) error
+	SetActionsDrv(string, Actions) error
 	RemoveActions(string, string) error
 	GetSharedGroupDrv(string) (*SharedGroup, error)
 	SetSharedGroupDrv(*SharedGroup) error

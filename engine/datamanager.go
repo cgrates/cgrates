@@ -645,3 +645,14 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	return
 
 }
+
+func (dm *DataManager) SetActions(key string, as Actions, transactionID string) (err error) {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if err = dm.DataDB().SetActionsDrv(key, as); err != nil {
+			cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
+		}
+		return
+	} else {
+		return dm.DataDB().SetActionsDrv(key, as)
+	}
+}

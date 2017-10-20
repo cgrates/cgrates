@@ -534,7 +534,7 @@ func (rs *RedisStorage) GetActionsDrv(key string) (as Actions, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetActions(key string, as Actions, transactionID string) (err error) {
+func (rs *RedisStorage) SetActionsDrv(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.Cmd("SET", utils.ACTION_PREFIX+key, result).Err
 	return

@@ -373,7 +373,7 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 		}
 		storeActions[idx] = a
 	}
-	if err := self.DataManager.DataDB().SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
+	if err := self.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if err := self.DataManager.CacheDataFromDB(utils.ACTION_PREFIX, []string{attrs.ActionsId}, true); err != nil {

@@ -56,7 +56,7 @@ func (m *Migrator) migrateActions() (err error) {
 
 			}
 			if m.dryRun != true {
-				if err := m.dm.DataDB().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+				if err := m.dm.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.Actions] += 1

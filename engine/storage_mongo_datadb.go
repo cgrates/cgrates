@@ -974,7 +974,7 @@ func (ms *MongoStorage) GetActionsDrv(key string) (as Actions, err error) {
 	return
 }
 
-func (ms *MongoStorage) SetActions(key string, as Actions, transactionID string) error {
+func (ms *MongoStorage) SetActionsDrv(key string, as Actions) error {
 	session, col := ms.conn(colAct)
 	defer session.Close()
 	_, err := col.Upsert(bson.M{"key": key}, &struct {
