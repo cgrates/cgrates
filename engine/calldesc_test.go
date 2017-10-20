@@ -100,8 +100,8 @@ func populateDB() {
 			}},
 	}
 	if dm.dataDB != nil {
-		dm.DataDB().SetActions("TEST_ACTIONS", ats, utils.NonTransactional)
-		dm.DataDB().SetActions("TEST_ACTIONS_ORDER", ats1, utils.NonTransactional)
+		dm.SetActions("TEST_ACTIONS", ats, utils.NonTransactional)
+		dm.SetActions("TEST_ACTIONS_ORDER", ats1, utils.NonTransactional)
 		dm.DataDB().SetAccount(broker)
 		dm.DataDB().SetAccount(minu)
 		dm.DataDB().SetAccount(minitsboy)

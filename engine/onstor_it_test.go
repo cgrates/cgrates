@@ -445,7 +445,7 @@ func testOnStorITCacheActions(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.DataDB().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+	if err := onStor.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedCA := []string{"act_MINI"}
@@ -1310,7 +1310,7 @@ func testOnStorITCRUDActions(t *testing.T) {
 	if _, rcvErr := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+	if err := onStor.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); err != nil {

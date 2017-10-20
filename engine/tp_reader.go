@@ -1124,7 +1124,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		}
 		// write actions
 		for k, as := range facts {
-			err = tpr.dm.DataDB().SetActions(k, as, utils.NonTransactional)
+			err = tpr.dm.SetActions(k, as, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -1453,7 +1453,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 	if save {
 		// write actions
 		for k, as := range tpr.actions {
-			err = tpr.dm.DataDB().SetActions(k, as, utils.NonTransactional)
+			err = tpr.dm.SetActions(k, as, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -1938,7 +1938,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Actions:")
 	}
 	for k, as := range tpr.actions {
-		err = tpr.dm.DataDB().SetActions(k, as, utils.NonTransactional)
+		err = tpr.dm.SetActions(k, as, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
