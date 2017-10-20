@@ -46,15 +46,18 @@ var tEvs = []*engine.ThresholdEvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Fields: map[string]interface{}{
+			utils.EventType:    utils.BalanceStatus,
 			utils.EventSource:  utils.AccountService,
 			utils.ACCOUNT:      "1002",
 			utils.BalanceType:  utils.MONETARY,
 			utils.BalanceID:    utils.META_DEFAULT,
-			utils.BalanceValue: 12.3}},
+			utils.BalanceValue: 12.3,
+			utils.ExpiryTime:   "2009-11-10T23:00:00Z"}},
 	&engine.ThresholdEvent{ // hitting THD_STATS_1
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Fields: map[string]interface{}{
+			utils.EventType:   utils.StatUpdate,
 			utils.EventSource: utils.StatService,
 			utils.StatID:      "Stats1",
 			utils.ACCOUNT:     "1002",
@@ -69,6 +72,7 @@ var tEvs = []*engine.ThresholdEvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Fields: map[string]interface{}{
+			utils.EventType:   utils.StatUpdate,
 			utils.EventSource: utils.StatService,
 			utils.StatID:      "STATS_HOURLY_DE",
 			utils.ACCOUNT:     "1002",
@@ -80,6 +84,7 @@ var tEvs = []*engine.ThresholdEvent{
 		Tenant: "cgrates.org",
 		ID:     "event4",
 		Fields: map[string]interface{}{
+			utils.EventType:   utils.StatUpdate,
 			utils.EventSource: utils.StatService,
 			utils.StatID:      "STATS_DAILY_DE",
 			utils.ACCOUNT:     "1002",
@@ -90,6 +95,7 @@ var tEvs = []*engine.ThresholdEvent{
 		Tenant: "cgrates.org",
 		ID:     "event5",
 		Fields: map[string]interface{}{
+			utils.EventType:   utils.ResourceUpdate,
 			utils.EventSource: utils.ResourceS,
 			utils.ACCOUNT:     "1002",
 			utils.ResourceID:  "RES_GRP_1",
@@ -172,7 +178,7 @@ func testV1TSFromFolder(t *testing.T) {
 
 func testV1TSGetThresholds(t *testing.T) {
 	var tIDs []string
-	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_STATS_3"}
+	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED", "THD_STATS_3"}
 	if err := tSv1Rpc.Call("ThresholdSV1.GetThresholdIDs", "cgrates.org", &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) {
@@ -224,7 +230,7 @@ func testV1TSProcessEvent(t *testing.T) {
 
 func testV1TSGetThresholdsAfterProcess(t *testing.T) {
 	var tIDs []string
-	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1"}
+	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED"}
 	if err := tSv1Rpc.Call("ThresholdSV1.GetThresholdIDs", "cgrates.org", &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) { // THD_STATS_3 is not reccurent, so it was removed

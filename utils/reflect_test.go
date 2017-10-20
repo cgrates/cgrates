@@ -180,6 +180,23 @@ func TestGreaterThan(t *testing.T) {
 	} else if gte {
 		t.Error("should be less than")
 	}
+	if gte, err := GreaterThan(time.Duration(2*time.Second),
+		time.Duration(1*time.Second), false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
+	now := time.Now()
+	if gte, err := GreaterThan(now.Add(time.Second), now, false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
+	if gte, err := GreaterThan(now, now, true); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
 }
 
 func TestStringToInterface(t *testing.T) {

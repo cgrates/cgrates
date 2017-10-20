@@ -2,6 +2,8 @@
 cgrates.org,THD_ACNT_BALANCE_1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,false,10,LOG_WARNING,
 cgrates.org,THD_ACNT_BALANCE_1,*string,EventSource,AccountS,,,,,,,
 cgrates.org,THD_ACNT_BALANCE_1,*gte,BalanceValue,10.0,,,,,,,
+cgrates.org,THD_ACNT_EXPIRED,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,false,10,LOG_WARNING,
+cgrates.org,THD_ACNT_EXPIRED,*gte,ExpiryTime,*now,,,,,,,
 cgrates.org,THD_STATS_1,*string,EventSource,StatS,2014-07-29T15:00:00Z,true,1s,false,10,LOG_WARNING,
 cgrates.org,THD_STATS_1,*lt,ASR,40.0,,,,,,,
 cgrates.org,THD_STATS_1,*lt,ACD,3m,,,,,,,

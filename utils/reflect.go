@@ -74,6 +74,10 @@ func StringToInterface(s string) interface{} {
 	if d, err := time.ParseDuration(s); err == nil {
 		return d
 	}
+	// time.Time
+	if t, err := ParseTimeDetectLayout(s, "Local"); err == nil {
+		return t
+	}
 	// string
 	return s
 }
@@ -200,8 +204,20 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 		} else {
 			gte = valItm.Int() > valOtItm.Int()
 		}
+	case reflect.Struct:
+		tVal, ok := valItm.Interface().(time.Time)
+		tOVal, oOK := valOtItm.Interface().(time.Time)
+		if !ok || !oOK {
+			return false, fmt.Errorf("cannot cast struct to time: %v, %v", ok, oOK)
+		}
+		if orEqual {
+			gte = tVal == tOVal
+		}
+		if !gte {
+			gte = tVal.After(tOVal)
+		}
 	default: // unsupported comparison
-		err = fmt.Errorf("unsupported type: %v", typItem)
+		err = fmt.Errorf("unsupported comparison type: %v, kind: %v", typItem, typItem.Kind())
 	}
 	return
 }
