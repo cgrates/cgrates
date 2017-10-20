@@ -656,3 +656,11 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 		return dm.DataDB().SetActionsDrv(key, as)
 	}
 }
+
+func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveActionsDrv(key); err != nil {
+		return
+	}
+	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
+	return
+}

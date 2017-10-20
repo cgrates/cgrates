@@ -1709,7 +1709,7 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 		}
 	*/
 	for _, aID := range attr.ActionIDs {
-		if err := self.DataManager.DataDB().RemoveActions(aID, utils.NonTransactional); err != nil {
+		if err := self.DataManager.RemoveActions(aID, utils.NonTransactional); err != nil {
 			*reply = err.Error()
 			return err
 		}

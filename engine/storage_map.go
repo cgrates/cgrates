@@ -492,12 +492,11 @@ func (ms *MapStorage) SetActionsDrv(key string, as Actions) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveActions(key string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveActionsDrv(key string) (err error) {
 	cachekey := utils.ACTION_PREFIX + key
 	ms.mu.Lock()
 	delete(ms.dict, cachekey)
 	ms.mu.Unlock()
-	cache.RemKey(cachekey, cacheCommit(transactionID), transactionID)
 	return
 }
 

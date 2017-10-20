@@ -984,11 +984,10 @@ func (ms *MongoStorage) SetActionsDrv(key string, as Actions) error {
 	return err
 }
 
-func (ms *MongoStorage) RemoveActions(key string, transactionID string) error {
+func (ms *MongoStorage) RemoveActionsDrv(key string) error {
 	session, col := ms.conn(colAct)
 	defer session.Close()
 	err := col.Remove(bson.M{"key": key})
-	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return err
 }
 
