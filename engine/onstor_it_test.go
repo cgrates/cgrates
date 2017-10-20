@@ -1335,7 +1335,7 @@ func testOnStorITCRUDActions(t *testing.T) {
 	// 	t.Error(err)
 	// }
 
-	if err := onStor.DataDB().RemoveActions(acts[0].Id, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveActions(acts[0].Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {

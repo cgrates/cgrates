@@ -540,9 +540,8 @@ func (rs *RedisStorage) SetActionsDrv(key string, as Actions) (err error) {
 	return
 }
 
-func (rs *RedisStorage) RemoveActions(key string, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveActionsDrv(key string) (err error) {
 	err = rs.Cmd("DEL", utils.ACTION_PREFIX+key).Err
-	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
 
