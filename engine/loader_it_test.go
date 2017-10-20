@@ -171,7 +171,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 
 func TestLoaderITWriteToDatabase(t *testing.T) {
 	for k, as := range loader.actions {
-		rcv, err := loader.dataStorage.GetActions(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetActions(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetActions: ", err.Error())
 		}

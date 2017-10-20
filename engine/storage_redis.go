@@ -519,23 +519,11 @@ func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 	return nil
 }
 
-func (rs *RedisStorage) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
+func (rs *RedisStorage) GetActionsDrv(key string) (as Actions, err error) {
 	key = utils.ACTION_PREFIX + key
-	if !skipCache {
-		if x, err := cache.GetCloned(key); err != nil {
-			if err.Error() != utils.ItemNotFound {
-				return nil, err
-			}
-		} else if x == nil {
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(Actions), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -543,7 +531,6 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool, transactionID str
 	if err = rs.ms.Unmarshal(values, &as); err != nil {
 		return
 	}
-	cache.Set(key, as, cacheCommit(transactionID), transactionID)
 	return
 }
 

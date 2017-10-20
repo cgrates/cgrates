@@ -471,29 +471,15 @@ func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, tr
 	return err
 }
 
-func (ms *MapStorage) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
+func (ms *MapStorage) GetActionsDrv(key string) (as Actions, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	cCommit := cacheCommit(transactionID)
 	cachekey := utils.ACTION_PREFIX + key
-	if !skipCache {
-		if x, err := cache.GetCloned(cachekey); err != nil {
-			if err.Error() != utils.ItemNotFound {
-				return nil, err
-			}
-		} else if x == nil {
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(Actions), nil
-		}
-	}
 	if values, ok := ms.dict[cachekey]; ok {
 		err = ms.ms.Unmarshal(values, &as)
 	} else {
-		cache.Set(cachekey, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(cachekey, as, cCommit, transactionID)
 	return
 }
 

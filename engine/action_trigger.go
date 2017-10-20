@@ -57,7 +57,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *CDRStatsQueueTriggered) (err e
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
-	aac, err = dm.DataDB().GetActions(at.ActionsID, false, utils.NonTransactional)
+	aac, err = dm.GetActions(at.ActionsID, false, utils.NonTransactional)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
 		return

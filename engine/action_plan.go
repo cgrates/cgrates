@@ -277,7 +277,7 @@ func (at *ActionTiming) GetActionPlanID() string {
 
 func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		at.actions, err = dm.DataDB().GetActions(at.ActionsID, false, utils.NonTransactional)
+		at.actions, err = dm.GetActions(at.ActionsID, false, utils.NonTransactional)
 	}
 	at.actions.Sort()
 	return at.actions, err

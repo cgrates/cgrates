@@ -267,7 +267,7 @@ func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Ac
 	retActions := make(map[string]engine.Actions)
 	for _, accKey := range limitedActions {
 		key := accKey[len(utils.ACTION_PREFIX):]
-		acts, err := self.DataManager.DataDB().GetActions(key, false, utils.NonTransactional)
+		acts, err := self.DataManager.GetActions(key, false, utils.NonTransactional)
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}

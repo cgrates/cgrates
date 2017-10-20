@@ -1307,13 +1307,13 @@ func testOnStorITCRUDActions(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := onStor.DataDB().GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetActions(acts[0].Id, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", acts[0], rcv[0])
@@ -1338,7 +1338,7 @@ func testOnStorITCRUDActions(t *testing.T) {
 	if err := onStor.DataDB().RemoveActions(acts[0].Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetActions(acts[0].Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 
