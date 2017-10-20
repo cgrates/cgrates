@@ -1130,7 +1130,7 @@ func TestActionTriggerLogging(t *testing.T) {
 		Weight:         10.0,
 		ActionsID:      "TEST_ACTIONS",
 	}
-	as, err := dm.DataDB().GetActions(at.ActionsID, false, utils.NonTransactional)
+	as, err := dm.GetActions(at.ActionsID, false, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error getting actions for the action timing: ", as, err)
 	}
@@ -2137,7 +2137,7 @@ func TestActionSetBalance(t *testing.T) {
 }
 
 func TestActionCSVFilter(t *testing.T) {
-	act, err := dm.DataDB().GetActions("FILTER", false, utils.NonTransactional)
+	act, err := dm.GetActions("FILTER", false, utils.NonTransactional)
 	if err != nil {
 		t.Error("error getting actions: ", err)
 	}
@@ -2147,7 +2147,7 @@ func TestActionCSVFilter(t *testing.T) {
 }
 
 func TestActionExpirationTime(t *testing.T) {
-	a, err := dm.DataDB().GetActions("EXP", false, utils.NonTransactional)
+	a, err := dm.GetActions("EXP", false, utils.NonTransactional)
 	if err != nil || a == nil {
 		t.Error("Error getting actions: ", err)
 	}
@@ -2167,11 +2167,11 @@ func TestActionExpirationTime(t *testing.T) {
 }
 
 func TestActionExpNoExp(t *testing.T) {
-	exp, err := dm.DataDB().GetActions("EXP", false, utils.NonTransactional)
+	exp, err := dm.GetActions("EXP", false, utils.NonTransactional)
 	if err != nil || exp == nil {
 		t.Error("Error getting actions: ", err)
 	}
-	noexp, err := dm.DataDB().GetActions("NOEXP", false, utils.NonTransactional)
+	noexp, err := dm.GetActions("NOEXP", false, utils.NonTransactional)
 	if err != nil || noexp == nil {
 		t.Error("Error getting actions: ", err)
 	}

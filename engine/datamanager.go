@@ -169,7 +169,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.RATING_PROFILE_PREFIX:
 			_, err = dm.DataDB().GetRatingProfile(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PREFIX:
-			_, err = dm.DataDB().GetActions(dataID, true, utils.NonTransactional)
+			_, err = dm.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
 			_, err = dm.DataDB().GetActionPlan(dataID, true, utils.NonTransactional)
 		case utils.AccountActionPlansPrefix:
@@ -619,4 +619,29 @@ func (dm *DataManager) GetDerivedChargers(key string, skipCache bool, transactio
 	}
 	cache.Set(cacheKey, dcs, cacheCommit(transactionID), transactionID)
 	return
+}
+
+func (dm *DataManager) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
+	cachekey := utils.ACTION_PREFIX + key
+	if !skipCache {
+		if x, err := cache.GetCloned(cachekey); err != nil {
+			if err.Error() != utils.ItemNotFound {
+				return nil, err
+			}
+		} else if x == nil {
+			return nil, utils.ErrNotFound
+		} else {
+			return x.(Actions), nil
+		}
+	}
+	as, err = dm.DataDB().GetActionsDrv(key)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(cachekey, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(cachekey, as, cacheCommit(transactionID), transactionID)
+	return
+
 }

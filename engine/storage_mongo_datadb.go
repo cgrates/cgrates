@@ -957,19 +957,7 @@ func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination, 
 	return nil
 }
 
-func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
-	cacheKey := utils.ACTION_PREFIX + key
-	if !skipCache {
-		if x, err := cache.GetCloned(cacheKey); err != nil {
-			if err.Error() != utils.ItemNotFound {
-				return nil, err
-			}
-		} else if x == nil {
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(Actions), nil
-		}
-	}
+func (ms *MongoStorage) GetActionsDrv(key string) (as Actions, err error) {
 	var result struct {
 		Key   string
 		Value Actions
@@ -978,13 +966,11 @@ func (ms *MongoStorage) GetActions(key string, skipCache bool, transactionID str
 	defer session.Close()
 	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
 	as = result.Value
-	cache.Set(utils.ACTION_PREFIX+key, as, cacheCommit(transactionID), transactionID)
 	return
 }
 
