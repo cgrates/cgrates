@@ -1811,7 +1811,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		}},
 	}
 	for _, rpf := range []*RatingProfile{rpfTCDDBSWF, rpfAny} {
-		dm.DataDB().SetRatingProfile(rpf, utils.NonTransactional)
+		dm.SetRatingProfile(rpf, utils.NonTransactional)
 	}
 	cd1 := &CallDescriptor{ // test the cost for subject within balance setup
 		Direction:   "*out",

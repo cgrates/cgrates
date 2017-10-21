@@ -384,7 +384,7 @@ func testOnStorITCacheRatingProfile(t *testing.T) {
 				CdrStatQueueIds: []string{},
 			}},
 	}
-	if err := onStor.DataDB().SetRatingProfile(rpf, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedCRR := []string{"rpf_*out:test:0:trp"}
@@ -1072,7 +1072,7 @@ func testOnStorITCRUDRatingProfile(t *testing.T) {
 	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetRatingProfile(rpf, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); err != nil {

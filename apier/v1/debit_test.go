@@ -114,7 +114,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 			FallbackKeys:   []string{},
 		}},
 	}
-	if err := apierDebitStorage.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
+	if err := dm.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 

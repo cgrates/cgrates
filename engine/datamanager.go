@@ -718,3 +718,14 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool, transactionI
 	return
 
 }
+
+func (dm *DataManager) SetRatingProfile(rpf *RatingProfile, transactionID string) (err error) {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if err = dm.DataDB().SetRatingProfileDrv(rpf); err != nil {
+			cache.RemKey(utils.RATING_PROFILE_PREFIX+rpf.Id, cacheCommit(transactionID), transactionID)
+		}
+		return
+	} else {
+		return dm.DataDB().SetRatingProfileDrv(rpf)
+	}
+}

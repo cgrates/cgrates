@@ -396,7 +396,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 					CdrStatQueueIds: strings.Split(tpRa.CdrStatQueueIds, utils.INFIELD_SEP),
 				})
 		}
-		if err := tpr.dm.DataDB().SetRatingProfile(resultRatingProfile, utils.NonTransactional); err != nil {
+		if err := tpr.dm.SetRatingProfile(resultRatingProfile, utils.NonTransactional); err != nil {
 			return err
 		}
 	}
@@ -1843,7 +1843,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Rating Profiles:")
 	}
 	for _, rp := range tpr.ratingProfiles {
-		err = tpr.dm.DataDB().SetRatingProfile(rp, utils.NonTransactional)
+		err = tpr.dm.SetRatingProfile(rp, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

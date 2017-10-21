@@ -679,7 +679,7 @@ func (ms *MongoStorage) GetRatingProfileDrv(key string) (rp *RatingProfile, err 
 	return
 }
 
-func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile, transactionID string) (err error) {
+func (ms *MongoStorage) SetRatingProfileDrv(rp *RatingProfile) (err error) {
 	session, col := ms.conn(colRpf)
 	defer session.Close()
 	if _, err = col.Upsert(bson.M{"id": rp.Id}, rp); err != nil {

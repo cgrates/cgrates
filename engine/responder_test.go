@@ -323,7 +323,7 @@ func TestResponderGetLCR(t *testing.T) {
 		}},
 	}
 	for _, rpfl := range []*RatingProfile{danRpfl, rifRpfl, ivoRpfl} {
-		if err := dm.DataDB().SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
+		if err := dm.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 			t.Error(err)
 		}
 	}
