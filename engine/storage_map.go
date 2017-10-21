@@ -200,7 +200,7 @@ func (ms *MapStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error) {
 	return
 }
 
-func (ms *MapStorage) SetRatingPlan(rp *RatingPlan, transactionID string) (err error) {
+func (ms *MapStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rp)
@@ -213,7 +213,6 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan, transactionID string) (err e
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
-	cache.RemKey(utils.RATING_PLAN_PREFIX+rp.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 

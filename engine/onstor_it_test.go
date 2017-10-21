@@ -351,7 +351,7 @@ func testOnStorITCacheRatingPlan(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.DataDB().SetRatingPlan(rp, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedCRPl := []string{"rpl_TEST_RP_CACHE"}
@@ -938,7 +938,7 @@ func testOnStorITHasData(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.DataDB().SetRatingPlan(rp, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedRP := []string{"rpl_HasData", "rpl_TEST_RP_CACHE"}
@@ -1024,7 +1024,7 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 	if _, rcvErr := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetRatingPlan(rp, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedRP := []string{"rpl_TEST_RP_CACHE", "rpl_HasData", "rpl_CRUDRatingPlan"}

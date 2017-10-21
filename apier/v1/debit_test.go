@@ -103,7 +103,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 			},
 		},
 	}
-	if err := apierDebitStorage.SetRatingPlan(rp1, utils.NonTransactional); err != nil {
+	if err := dm.SetRatingPlan(rp1, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 

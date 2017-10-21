@@ -241,7 +241,7 @@ func (rs *RedisStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error)
 	return
 }
 
-func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan, transactionID string) (err error) {
+func (rs *RedisStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
 	result, err := rs.ms.Marshal(rp)
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
