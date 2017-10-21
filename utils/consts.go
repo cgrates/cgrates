@@ -474,11 +474,14 @@ const (
 	ResourceS                    = "ResourceS"
 	CacheThresholdProfiles       = "threshold_profiles"
 	CacheThresholds              = "thresholds"
-	AccountStatus                = "AccountStatus"
-	BalanceStatus                = "BalanceStatus"
+	AccountUpdate                = "AccountUpdate"
+	BalanceUpdate                = "BalanceUpdate"
 	StatUpdate                   = "StatUpdate"
 	ResourceUpdate               = "ResourceUpdate"
 	ExpiryTime                   = "ExpiryTime"
+	AllowNegative                = "AllowNegative"
+	Disabled                     = "Disabled"
+	Action                       = "Action"
 )
 
 func buildCacheInstRevPrefixes() {

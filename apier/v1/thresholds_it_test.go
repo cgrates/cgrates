@@ -46,7 +46,16 @@ var tEvs = []*engine.ThresholdEvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Fields: map[string]interface{}{
-			utils.EventType:    utils.BalanceStatus,
+			utils.EventType:     utils.AccountUpdate,
+			utils.EventSource:   utils.AccountService,
+			utils.ACCOUNT:       "1002",
+			utils.AllowNegative: true,
+			utils.Disabled:      false}},
+	&engine.ThresholdEvent{ // hitting THD_ACNT_BALANCE_1
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Fields: map[string]interface{}{
+			utils.EventType:    utils.BalanceUpdate,
 			utils.EventSource:  utils.AccountService,
 			utils.ACCOUNT:      "1002",
 			utils.BalanceType:  utils.MONETARY,
@@ -55,7 +64,7 @@ var tEvs = []*engine.ThresholdEvent{
 			utils.ExpiryTime:   "2009-11-10T23:00:00Z"}},
 	&engine.ThresholdEvent{ // hitting THD_STATS_1
 		Tenant: "cgrates.org",
-		ID:     "event2",
+		ID:     "event3",
 		Fields: map[string]interface{}{
 			utils.EventType:   utils.StatUpdate,
 			utils.EventSource: utils.StatService,
@@ -70,7 +79,7 @@ var tEvs = []*engine.ThresholdEvent{
 		}},
 	&engine.ThresholdEvent{ // hitting THD_STATS_1 and THD_STATS_2
 		Tenant: "cgrates.org",
-		ID:     "event3",
+		ID:     "event4",
 		Fields: map[string]interface{}{
 			utils.EventType:   utils.StatUpdate,
 			utils.EventSource: utils.StatService,
@@ -82,7 +91,7 @@ var tEvs = []*engine.ThresholdEvent{
 		}},
 	&engine.ThresholdEvent{ // hitting THD_STATS_3
 		Tenant: "cgrates.org",
-		ID:     "event4",
+		ID:     "event5",
 		Fields: map[string]interface{}{
 			utils.EventType:   utils.StatUpdate,
 			utils.EventSource: utils.StatService,
@@ -93,7 +102,7 @@ var tEvs = []*engine.ThresholdEvent{
 		}},
 	&engine.ThresholdEvent{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
-		ID:     "event5",
+		ID:     "event6",
 		Fields: map[string]interface{}{
 			utils.EventType:   utils.ResourceUpdate,
 			utils.EventSource: utils.ResourceS,
@@ -196,7 +205,7 @@ func testV1TSGetThresholds(t *testing.T) {
 
 func testV1TSProcessEvent(t *testing.T) {
 	var hits int
-	eHits := 1
+	eHits := 0
 	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[0], &hits); err != nil {
 		t.Error(err)
 	} else if hits != eHits {
@@ -208,13 +217,13 @@ func testV1TSProcessEvent(t *testing.T) {
 	} else if hits != eHits {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
-	eHits = 2
+	eHits = 1
 	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[2], &hits); err != nil {
 		t.Error(err)
 	} else if hits != eHits {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
-	eHits = 1
+	eHits = 2
 	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[3], &hits); err != nil {
 		t.Error(err)
 	} else if hits != eHits {
@@ -222,6 +231,12 @@ func testV1TSProcessEvent(t *testing.T) {
 	}
 	eHits = 1
 	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[4], &hits); err != nil {
+		t.Error(err)
+	} else if hits != eHits {
+		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	}
+	eHits = 1
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[5], &hits); err != nil {
 		t.Error(err)
 	} else if hits != eHits {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)

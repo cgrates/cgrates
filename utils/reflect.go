@@ -41,6 +41,7 @@ func CastFieldIfToString(fld interface{}) (string, bool) {
 		converted = true
 	case bool:
 		strVal = strconv.FormatBool(fld.(bool))
+		converted = true
 	case float64:
 		strVal = strconv.FormatFloat(fld.(float64), 'f', -1, 64)
 		converted = true
