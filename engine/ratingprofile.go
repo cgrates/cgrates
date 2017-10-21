@@ -155,7 +155,7 @@ func (ris RatingInfos) String() string {
 func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
 	for index, rpa := range rpf.RatingPlanActivations.GetActiveForCall(cd) {
-		rpl, err := dm.DataDB().GetRatingPlan(rpa.RatingPlanId, false, utils.NonTransactional)
+		rpl, err := dm.GetRatingPlan(rpa.RatingPlanId, false, utils.NonTransactional)
 		if err != nil || rpl == nil {
 			utils.Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 			continue

@@ -93,7 +93,7 @@ func (dm *DataManager) PreloadCacheForPrefix(prefix string) error {
 	switch prefix {
 	case utils.RATING_PLAN_PREFIX:
 		for _, key := range keyList {
-			_, err := dm.DataDB().GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
+			_, err := dm.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true, transID)
 			if err != nil {
 				cache.RollbackTransaction(transID)
 				return err
@@ -165,7 +165,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.REVERSE_DESTINATION_PREFIX:
 			_, err = dm.DataDB().GetReverseDestination(dataID, true, utils.NonTransactional)
 		case utils.RATING_PLAN_PREFIX:
-			_, err = dm.DataDB().GetRatingPlan(dataID, true, utils.NonTransactional)
+			_, err = dm.GetRatingPlan(dataID, true, utils.NonTransactional)
 		case utils.RATING_PROFILE_PREFIX:
 			_, err = dm.DataDB().GetRatingProfile(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PREFIX:
@@ -663,4 +663,26 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	}
 	cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
+}
+
+func (dm *DataManager) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {
+	cachekey := utils.RATING_PLAN_PREFIX + key
+	if !skipCache {
+		if x, ok := cache.Get(cachekey); ok {
+			if x != nil {
+				return x.(*RatingPlan), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	rp, err = dm.DataDB().GetRatingPlanDrv(key)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(cachekey, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(cachekey, rp, cacheCommit(transactionID), transactionID)
+	return
+
 }

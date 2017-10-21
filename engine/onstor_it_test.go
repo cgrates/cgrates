@@ -1021,7 +1021,7 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := onStor.DataDB().GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetRatingPlan(rp, utils.NonTransactional); err != nil {
@@ -1035,7 +1035,7 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
 	}
 
-	if rcv, err := onStor.DataDB().GetRatingPlan(rp.Id, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
@@ -1048,7 +1048,7 @@ func testOnStorITCRUDRatingPlan(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 
-	if rcv, err := onStor.DataDB().GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)

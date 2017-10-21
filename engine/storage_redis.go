@@ -215,20 +215,11 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	return false, errors.New("unsupported HasData category")
 }
 
-func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {
+func (rs *RedisStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error) {
 	key = utils.RATING_PLAN_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*RatingPlan), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
@@ -243,12 +234,10 @@ func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 		return nil, err
 	}
 	r.Close()
-	rp = new(RatingPlan)
-	err = rs.ms.Unmarshal(out, rp)
+	err = rs.ms.Unmarshal(out, &rp)
 	if err != nil {
 		return nil, err
 	}
-	cache.Set(key, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 

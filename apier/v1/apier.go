@@ -169,7 +169,7 @@ func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *strin
 }
 
 func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) error {
-	if rpln, err := self.DataManager.DataDB().GetRatingPlan(rplnId, false, utils.NonTransactional); err != nil {
+	if rpln, err := self.DataManager.GetRatingPlan(rplnId, false, utils.NonTransactional); err != nil {
 		return utils.ErrNotFound
 	} else {
 		*reply = *rpln

@@ -451,6 +451,6 @@ func BenchmarkRatingPlanRestore(b *testing.B) {
 	dm.DataDB().SetRatingPlan(rp, utils.NonTransactional)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		dm.DataDB().GetRatingPlan(rp.Id, true, utils.NonTransactional)
+		dm.GetRatingPlan(rp.Id, true, utils.NonTransactional)
 	}
 }

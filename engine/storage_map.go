@@ -178,19 +178,10 @@ func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	return false, errors.New("Unsupported HasData category")
 }
 
-func (ms *MapStorage) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {
+func (ms *MapStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.RATING_PLAN_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*RatingPlan), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	cCommit := cacheCommit(transactionID)
 	if values, ok := ms.dict[key]; ok {
 		b := bytes.NewBuffer(values)
 		r, err := zlib.NewReader(b)
@@ -202,13 +193,10 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool, transactionID st
 			return nil, err
 		}
 		r.Close()
-		rp = new(RatingPlan)
-		err = ms.ms.Unmarshal(out, rp)
+		err = ms.ms.Unmarshal(out, &rp)
 	} else {
-		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, rp, cCommit, transactionID)
 	return
 }
 
