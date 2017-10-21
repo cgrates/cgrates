@@ -684,5 +684,15 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool, transactionID s
 	}
 	cache.Set(cachekey, rp, cacheCommit(transactionID), transactionID)
 	return
+}
 
+func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err error) {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if err = dm.DataDB().SetRatingPlanDrv(rp); err != nil {
+			cache.RemKey(utils.RATING_PLAN_PREFIX+rp.Id, cacheCommit(transactionID), transactionID)
+		}
+		return
+	} else {
+		return dm.DataDB().SetRatingPlanDrv(rp)
+	}
 }

@@ -287,7 +287,7 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 	}
 	for _, rpf := range []*RatingPlan{rp1, rp2, rp3} {
-		if err := dm.DataDB().SetRatingPlan(rpf, utils.NonTransactional); err != nil {
+		if err := dm.SetRatingPlan(rpf, utils.NonTransactional); err != nil {
 			t.Error(err)
 		}
 	}

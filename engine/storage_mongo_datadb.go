@@ -645,7 +645,7 @@ func (ms *MongoStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error)
 	return
 }
 
-func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan, transactionID string) error {
+func (ms *MongoStorage) SetRatingPlanDrv(rp *RatingPlan) error {
 	result, err := ms.ms.Marshal(rp)
 	if err != nil {
 		return err

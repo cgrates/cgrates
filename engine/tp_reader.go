@@ -324,7 +324,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				}
 			}
 		}
-		if err := tpr.dm.DataDB().SetRatingPlan(ratingPlan, utils.NonTransactional); err != nil {
+		if err := tpr.dm.SetRatingPlan(ratingPlan, utils.NonTransactional); err != nil {
 			return false, err
 		}
 	}
@@ -1831,7 +1831,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Rating Plans:")
 	}
 	for _, rp := range tpr.ratingPlans {
-		err = tpr.dm.DataDB().SetRatingPlan(rp, utils.NonTransactional)
+		err = tpr.dm.SetRatingPlan(rp, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

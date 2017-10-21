@@ -1796,7 +1796,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		},
 	}
 	for _, rpl := range []*RatingPlan{rpSubj, rpDflt} {
-		dm.DataDB().SetRatingPlan(rpl, utils.NonTransactional)
+		dm.SetRatingPlan(rpl, utils.NonTransactional)
 	}
 	rpfTCDDBSWF := &RatingProfile{Id: "*out:TCDDBSWF:call:SubjTCDDBSWF",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
