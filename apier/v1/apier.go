@@ -1618,7 +1618,7 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 		return utils.ErrMandatoryIeMissing
 	}
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		err := self.DataManager.DataDB().RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
+		err := self.DataManager.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
 		if err != nil {
 			return 0, err
 		}

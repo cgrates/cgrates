@@ -692,7 +692,7 @@ func (ms *MongoStorage) SetRatingProfileDrv(rp *RatingProfile) (err error) {
 	return
 }
 
-func (ms *MongoStorage) RemoveRatingProfile(key, transactionID string) error {
+func (ms *MongoStorage) RemoveRatingProfileDrv(key string) error {
 	session, col := ms.conn(colRpf)
 	defer session.Close()
 	iter := col.Find(bson.M{"id": key}).Select(bson.M{"id": 1}).Iter()
@@ -701,7 +701,6 @@ func (ms *MongoStorage) RemoveRatingProfile(key, transactionID string) error {
 		if err := col.Remove(bson.M{"id": result.Id}); err != nil {
 			return err
 		}
-		cache.RemKey(utils.RATING_PROFILE_PREFIX+key, cacheCommit(transactionID), transactionID)
 		rpf := &RatingProfile{Id: result.Id}
 		if historyScribe != nil {
 			var response int

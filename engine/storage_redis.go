@@ -286,7 +286,7 @@ func (rs *RedisStorage) SetRatingProfileDrv(rpf *RatingProfile) (err error) {
 	return
 }
 
-func (rs *RedisStorage) RemoveRatingProfile(key string, transactionID string) error {
+func (rs *RedisStorage) RemoveRatingProfileDrv(key string) error {
 	keys, err := rs.Cmd("KEYS", utils.RATING_PROFILE_PREFIX+key+"*").List()
 	if err != nil {
 		return err
@@ -295,7 +295,6 @@ func (rs *RedisStorage) RemoveRatingProfile(key string, transactionID string) er
 		if err = rs.Cmd("DEL", key).Err; err != nil {
 			return err
 		}
-		cache.RemKey(key, cacheCommit(transactionID), transactionID)
 		rpf := &RatingProfile{Id: key}
 		if historyScribe != nil {
 			response := 0
