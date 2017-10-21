@@ -616,17 +616,7 @@ func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) 
 	return
 }
 
-func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {
-	cacheKey := utils.RATING_PLAN_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*RatingPlan), nil
-		}
-	}
-	rp = new(RatingPlan)
+func (ms *MongoStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error) {
 	var kv struct {
 		Key   string
 		Value []byte
@@ -635,7 +625,6 @@ func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 	defer session.Close()
 	if err = col.Find(bson.M{"key": key}).One(&kv); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err
@@ -653,7 +642,6 @@ func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool, transactionID 
 	if err = ms.ms.Unmarshal(out, &rp); err != nil {
 		return nil, err
 	}
-	cache.Set(cacheKey, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 

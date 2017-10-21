@@ -231,7 +231,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, rp := range loader.ratingPlans {
-		rcv, err := loader.dataStorage.GetRatingPlan(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetRatingPlan(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetRatingPlan: ", err.Error())
 		}
