@@ -51,6 +51,51 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_host": "127.0.0.1",					// data_db host address
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+	"db_user": "cgrates", 					// username to use when connecting to data_db
+	"db_password": "", 						// password to use when connecting to data_db
+	"load_history_size": 10,				// Number of records in the load history
+},
+
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_type": "mysql",						// stor database type to use: <mongo|mysql|postgres>
+	"db_host": "127.0.0.1",					// the host to connect to
+	"db_port": 3306,						// the port to reach the stordb
+	"db_name": "cgrates",					// stor database name
+	"db_user": "cgrates",					// username to use when connecting to stordb
+	"db_password": "",						// password to use when connecting to stordb
+	"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
+	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
+	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
+},
+
+
+"listen": {
+	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
+	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
+	"http": "127.0.0.1:2080",				// HTTP listening address
+},
+
+
+"http": {									// HTTP server configuration
+	"json_rpc_url": "/jsonrpc",				// JSON RPC relative URL ("" to disable)
+	"ws_url": "/ws",						// WebSockets relative URL ("" to disable)
+	"use_basic_auth": false,				// use basic authentication
+	"auth_users": {}						// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+},
+
+
+"scheduler": {
+	"enabled": false,						// start Scheduler service: <true|false>
+},
+
+
 "cache":{
 	"destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// destination caching
 	"reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// reverse destinations index caching
@@ -77,48 +122,9 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"listen": {
-	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
-	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
-	"http": "127.0.0.1:2080",				// HTTP listening address
-},
-
-
-"http": {									// HTTP server configuration
-	"json_rpc_url": "/jsonrpc",				// JSON RPC relative URL ("" to disable)
-	"ws_url": "/ws",						// WebSockets relative URL ("" to disable)
-	"use_basic_auth": false,				// use basic authentication
-	"auth_users": {}						// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
-},
-
-
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_host": "127.0.0.1",					// data_db host address
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
-	"db_user": "cgrates", 					// username to use when connecting to data_db
-	"db_password": "", 						// password to use when connecting to data_db
-	"load_history_size": 10,				// Number of records in the load history
-},
-
-
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_type": "mysql",						// stor database type to use: <mongo|mysql|postgres>
-	"db_host": "127.0.0.1",					// the host to connect to
-	"db_port": 3306,						// the port to reach the stordb
-	"db_name": "cgrates",					// stor database name
-	"db_user": "cgrates",					// username to use when connecting to stordb
-	"db_password": "",						// password to use when connecting to stordb
-	"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
-	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
-	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
-	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
-},
-
-
 "rals": {
 	"enabled": false,						// enable Rater service: <true|false>
+	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"historys_conns": [],					// address where to reach the history service, empty to disable history functionality: <""|*internal|x.y.z.y:1234>
@@ -127,11 +133,6 @@ const CGRATES_CFG_JSON = `
 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
 	"lcr_subject_prefix_matching": false	// enables prefix matching for the lcr subject
-},
-
-
-"scheduler": {
-	"enabled": false,						// start Scheduler service: <true|false>
 },
 
 
@@ -468,4 +469,6 @@ const CGRATES_CFG_JSON = `
 	"sales_type_code": "^R",				// template extracting sales type code out of StoredCdr; <$RSRFields>
 	"tax_exemption_code_list": "",			// template extracting tax exemption code list out of StoredCdr; <$RSRFields>
 },
+
+
 }`

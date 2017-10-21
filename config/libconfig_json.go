@@ -75,6 +75,7 @@ type DbJsonCfg struct {
 // Rater config section
 type RalsJsonCfg struct {
 	Enabled                     *bool
+	Thresholds_conns            *[]*HaPoolJsonCfg
 	Cdrstats_conns              *[]*HaPoolJsonCfg
 	Stats_conns                 *[]*HaPoolJsonCfg
 	Historys_conns              *[]*HaPoolJsonCfg

@@ -228,6 +228,7 @@ type CGRConfig struct {
 	Logger                   string          // dictates the way logs are displayed/stored
 	LogLevel                 int             // system wide log level, nothing higher than this will be logged
 	RALsEnabled              bool            // start standalone server (no balancer)
+	RALsThresholdSConns      []*HaPoolConfig // address where to reach ThresholdS config
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
 	RALsStatSConns           []*HaPoolConfig
 	RALsHistorySConns        []*HaPoolConfig
@@ -827,6 +828,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnRALsCfg != nil {
 		if jsnRALsCfg.Enabled != nil {
 			self.RALsEnabled = *jsnRALsCfg.Enabled
+		}
+		if jsnRALsCfg.Thresholds_conns != nil {
+			self.RALsThresholdSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Thresholds_conns))
+			for idx, jsnHaCfg := range *jsnRALsCfg.Thresholds_conns {
+				self.RALsThresholdSConns[idx] = NewDfltHaPoolConfig()
+				self.RALsThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
 		}
 		if jsnRALsCfg.Cdrstats_conns != nil {
 			self.RALsCDRStatSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Cdrstats_conns))
