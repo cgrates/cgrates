@@ -230,7 +230,7 @@ func (ms *MapStorage) GetRatingProfileDrv(key string) (rpf *RatingProfile, err e
 	return
 }
 
-func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile, transactionID string) (err error) {
+func (ms *MapStorage) SetRatingProfileDrv(rpf *RatingProfile) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rpf)
@@ -239,7 +239,6 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile, transactionID string)
 	if historyScribe != nil {
 		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
-	cache.RemKey(utils.RATING_PROFILE_PREFIX+rpf.Id, cacheCommit(transactionID), transactionID)
 	return
 }
 

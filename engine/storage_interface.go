@@ -51,7 +51,7 @@ type DataDB interface {
 	GetRatingPlanDrv(string) (*RatingPlan, error)
 	SetRatingPlanDrv(*RatingPlan) error
 	GetRatingProfileDrv(string) (*RatingProfile, error)
-	SetRatingProfile(*RatingProfile, string) error
+	SetRatingProfileDrv(*RatingProfile) error
 	RemoveRatingProfile(string, string) error
 	GetDestination(string, bool, string) (*Destination, error)
 	SetDestination(*Destination, string) error

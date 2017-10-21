@@ -270,7 +270,7 @@ func (rs *RedisStorage) GetRatingProfileDrv(key string) (rpf *RatingProfile, err
 	return
 }
 
-func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile, transactionID string) (err error) {
+func (rs *RedisStorage) SetRatingProfileDrv(rpf *RatingProfile) (err error) {
 	result, err := rs.ms.Marshal(rpf)
 	if err != nil {
 		return err
