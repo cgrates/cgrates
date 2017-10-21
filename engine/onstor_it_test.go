@@ -1096,7 +1096,7 @@ func testOnStorITCRUDRatingProfile(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err = onStor.DataDB().RemoveRatingProfile(rpf.Id, utils.NonTransactional); err != nil {
+	if err = onStor.RemoveRatingProfile(rpf.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {

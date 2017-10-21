@@ -242,13 +242,12 @@ func (ms *MapStorage) SetRatingProfileDrv(rpf *RatingProfile) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveRatingProfile(key string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveRatingProfileDrv(key string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	for k := range ms.dict {
 		if strings.HasPrefix(k, key) {
 			delete(ms.dict, key)
-			cache.RemKey(k, cacheCommit(transactionID), transactionID)
 			response := 0
 			rpf := &RatingProfile{Id: key}
 			if historyScribe != nil {

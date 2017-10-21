@@ -729,3 +729,11 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile, transactionID string
 		return dm.DataDB().SetRatingProfileDrv(rpf)
 	}
 }
+
+func (dm *DataManager) RemoveRatingProfile(key string, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveRatingProfileDrv(key); err != nil {
+		return
+	}
+	cache.RemKey(utils.RATING_PROFILE_PREFIX+key, cacheCommit(transactionID), transactionID)
+	return
+}
