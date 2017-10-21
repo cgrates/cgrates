@@ -167,7 +167,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.RATING_PLAN_PREFIX:
 			_, err = dm.GetRatingPlan(dataID, true, utils.NonTransactional)
 		case utils.RATING_PROFILE_PREFIX:
-			_, err = dm.DataDB().GetRatingProfile(dataID, true, utils.NonTransactional)
+			_, err = dm.GetRatingProfile(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PREFIX:
 			_, err = dm.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
@@ -695,4 +695,26 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 	} else {
 		return dm.DataDB().SetRatingPlanDrv(rp)
 	}
+}
+
+func (dm *DataManager) GetRatingProfile(key string, skipCache bool, transactionID string) (rpf *RatingProfile, err error) {
+	cachekey := utils.RATING_PROFILE_PREFIX + key
+	if !skipCache {
+		if x, ok := cache.Get(cachekey); ok {
+			if x != nil {
+				return x.(*RatingProfile), nil
+			}
+			return nil, utils.ErrNotFound
+		}
+	}
+	rpf, err = dm.DataDB().GetRatingProfileDrv(key)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(cachekey, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(cachekey, rpf, cacheCommit(transactionID), transactionID)
+	return
+
 }

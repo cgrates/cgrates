@@ -1043,7 +1043,7 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 			}
 			transID := utils.GenUUID()
 			for _, dbKey := range suppliers {
-				if _, err := dm.DataDB().GetRatingProfile(dbKey[len(utils.RATING_PROFILE_PREFIX):], true, transID); err != nil { // cache the keys here
+				if _, err := dm.GetRatingProfile(dbKey[len(utils.RATING_PROFILE_PREFIX):], true, transID); err != nil { // cache the keys here
 					cache.RollbackTransaction(transID)
 					return nil, err
 				}

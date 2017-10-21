@@ -1875,7 +1875,7 @@ func BenchmarkStorageGetting(b *testing.B) {
 	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		dm.DataDB().GetRatingProfile(cd.GetKey(cd.Subject), false, utils.NonTransactional)
+		dm.GetRatingProfile(cd.GetKey(cd.Subject), false, utils.NonTransactional)
 	}
 }
 

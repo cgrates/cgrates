@@ -257,9 +257,9 @@ type TenantRatingSubject struct {
 
 func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
 	if !rpSubjectPrefixMatching || strings.HasSuffix(key, utils.ANY) {
-		return dm.DataDB().GetRatingProfile(key, false, utils.NonTransactional)
+		return dm.GetRatingProfile(key, false, utils.NonTransactional)
 	}
-	if rp, err = dm.DataDB().GetRatingProfile(key, false, utils.NonTransactional); err == nil && rp != nil { // rp nil represents cached no-result
+	if rp, err = dm.GetRatingProfile(key, false, utils.NonTransactional); err == nil && rp != nil { // rp nil represents cached no-result
 		return
 	}
 	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
@@ -267,7 +267,7 @@ func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err erro
 	subject := key[lastIndex:]
 	lenSubject := len(subject)
 	for i := 1; i < lenSubject-1; i++ {
-		if rp, err = dm.DataDB().GetRatingProfile(baseKey+subject[:lenSubject-i], false, utils.NonTransactional); err == nil && rp != nil {
+		if rp, err = dm.GetRatingProfile(baseKey+subject[:lenSubject-i], false, utils.NonTransactional); err == nil && rp != nil {
 			return
 		}
 	}

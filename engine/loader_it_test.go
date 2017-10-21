@@ -241,7 +241,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, rp := range loader.ratingProfiles {
-		rcv, err := loader.dataStorage.GetRatingProfile(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetRatingProfile(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetRatingProfile: ", err.Error())
 		}

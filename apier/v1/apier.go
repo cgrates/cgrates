@@ -448,7 +448,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	keyId := tpRpf.KeyId()
 	var rpfl *engine.RatingProfile
 	if !attrs.Overwrite {
-		if rpfl, err = self.DataManager.DataDB().GetRatingProfile(keyId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if rpfl, err = self.DataManager.GetRatingProfile(keyId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return utils.NewErrServerError(err)
 		}
 	}

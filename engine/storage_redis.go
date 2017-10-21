@@ -255,20 +255,11 @@ func (rs *RedisStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool, transactionID string) (rpf *RatingProfile, err error) {
+func (rs *RedisStorage) GetRatingProfileDrv(key string) (rpf *RatingProfile, err error) {
 	key = utils.RATING_PROFILE_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*RatingProfile), nil
-		}
-	}
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -276,7 +267,6 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool, transaction
 	if err = rs.ms.Unmarshal(values, &rpf); err != nil {
 		return
 	}
-	cache.Set(key, rpf, cacheCommit(transactionID), transactionID)
 	return
 }
 

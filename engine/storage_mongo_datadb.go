@@ -667,27 +667,15 @@ func (ms *MongoStorage) SetRatingPlanDrv(rp *RatingPlan) error {
 	return err
 }
 
-func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool, transactionID string) (rp *RatingProfile, err error) {
-	cacheKey := utils.RATING_PROFILE_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*RatingProfile), nil
-		}
-	}
+func (ms *MongoStorage) GetRatingProfileDrv(key string) (rp *RatingProfile, err error) {
 	session, col := ms.conn(colRpf)
 	defer session.Close()
-	rp = new(RatingProfile)
-	if err = col.Find(bson.M{"id": key}).One(rp); err != nil {
+	if err = col.Find(bson.M{"id": key}).One(&rp); err != nil {
 		if err == mgo.ErrNotFound {
-			cache.Set(cacheKey, nil, cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return nil, err // Make sure we don't return new object on error
 	}
-	cache.Set(cacheKey, rp, cacheCommit(transactionID), transactionID)
 	return
 }
 
