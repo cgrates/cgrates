@@ -790,7 +790,8 @@ func main() {
 
 	// Start rater service
 	if cfg.RALsEnabled {
-		go startRater(internalRaterChan, cacheDoneChan, internalCdrStatSChan, internalStatSChan,
+		go startRater(internalRaterChan, cacheDoneChan, internalThresholdSChan,
+			internalCdrStatSChan, internalStatSChan,
 			internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
 			srvManager, server, dm, loadDb, cdrDb, &stopHandled, exitChan)
 	}

@@ -1,7 +1,7 @@
 #Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinHits[7],MinSleep[8],Blocker[9],Weight[10],ActionIDs[11],Async[12]
 cgrates.org,THD_ACNT_BALANCE_1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,false,10,LOG_WARNING,
-cgrates.org,THD_ACNT_BALANCE_1,*string,EventSource,AccountS,,,,,,,
-cgrates.org,THD_ACNT_BALANCE_1,*gte,BalanceValue,10.0,,,,,,,
+cgrates.org,THD_ACNT_BALANCE_1,*string,EventType,BalanceUpdate,,,,,,,
+cgrates.org,THD_ACNT_BALANCE_1,*gte,Units,10.0,,,,,,,
 cgrates.org,THD_ACNT_EXPIRED,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,false,10,LOG_WARNING,
 cgrates.org,THD_ACNT_EXPIRED,*gte,ExpiryTime,*now,,,,,,,
 cgrates.org,THD_STATS_1,*string,EventSource,StatS,2014-07-29T15:00:00Z,true,1s,false,10,LOG_WARNING,

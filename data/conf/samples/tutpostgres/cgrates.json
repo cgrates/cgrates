@@ -20,7 +20,10 @@
 
 
 "rals": {
-	"enabled": true,					// enable Rater service: <true|false>
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],

@@ -71,6 +71,7 @@ var (
 	cdrStorage               CdrStorage
 	debitPeriod              = 10 * time.Second
 	globalRoundingDecimals   = 6
+	thresholdS               rpcclient.RpcClientConnection // used by RALs to communicate with ThresholdS
 	historyScribe            rpcclient.RpcClientConnection
 	pubSubServer             rpcclient.RpcClientConnection
 	userService              rpcclient.RpcClientConnection
@@ -82,6 +83,10 @@ var (
 // Exported method to set the storage getter.
 func SetDataStorage(dm2 *DataManager) {
 	dm = dm2
+}
+
+func SetThresholdS(thdS rpcclient.RpcClientConnection) {
+	thresholdS = thdS
 }
 
 // Sets the global rounding method and decimal precision for GetCost method

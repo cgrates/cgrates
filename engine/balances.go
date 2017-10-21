@@ -766,41 +766,82 @@ func (bc Balances) HasBalance(balance *Balance) bool {
 }
 
 func (bc Balances) SaveDirtyBalances(acc *Account) {
-	savedAccounts := make(map[string]bool)
+	savedAccounts := make(map[string]*Account)
 	for _, b := range bc {
 		if b.dirty {
 			// publish event
 			accountId := ""
 			allowNegative := ""
 			disabled := ""
-			if b.account != nil { // only publish modifications for balances with account set
-				//utils.LogStack()
-				accountId = b.account.ID
-				allowNegative = strconv.FormatBool(b.account.AllowNegative)
-				disabled = strconv.FormatBool(b.account.Disabled)
-				Publish(CgrEvent{
-					"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
-					"Uuid":                 b.Uuid,
-					"Id":                   b.ID,
-					"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
-					"ExpirationDate":       b.ExpirationDate.String(),
-					"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
-					"DestinationIDs":       b.DestinationIDs.String(),
-					"Directions":           b.Directions.String(),
-					"RatingSubject":        b.RatingSubject,
-					"Categories":           b.Categories.String(),
-					"SharedGroups":         b.SharedGroups.String(),
-					"TimingIDs":            b.TimingIDs.String(),
-					"Account":              accountId,
-					"AccountAllowNegative": allowNegative,
-					"AccountDisabled":      disabled,
-				})
+			if b.account == nil { // only publish modifications for balances with account set
+				continue
+			}
+			accountId = b.account.ID
+			acntTnt := utils.NewTenantID(accountId)
+			if thresholdS != nil {
+				ev := &ThresholdEvent{
+					Tenant: acntTnt.Tenant,
+					ID:     utils.GenUUID(),
+					Fields: map[string]interface{}{
+						utils.EventType:   utils.BalanceUpdate,
+						utils.EventSource: utils.AccountService,
+						utils.ACCOUNT:     acntTnt.ID,
+						utils.BalanceID:   b.ID,
+						utils.Units:       b.Value}}
+				if !b.ExpirationDate.IsZero() {
+					ev.Fields[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
+				}
+				var hits int
+				if err := thresholdS.Call("ThresholdSV1.ProcessEvent", ev, &hits); err != nil {
+					utils.Logger.Warning(fmt.Sprintf("<AccountS> error: %s processing balance event %+v with thresholds.", err.Error(), ev))
+				}
+			}
+			//utils.LogStack()
+
+			allowNegative = strconv.FormatBool(b.account.AllowNegative)
+			disabled = strconv.FormatBool(b.account.Disabled)
+			Publish(CgrEvent{
+				"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
+				"Uuid":                 b.Uuid,
+				"Id":                   b.ID,
+				"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
+				"ExpirationDate":       b.ExpirationDate.String(),
+				"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
+				"DestinationIDs":       b.DestinationIDs.String(),
+				"Directions":           b.Directions.String(),
+				"RatingSubject":        b.RatingSubject,
+				"Categories":           b.Categories.String(),
+				"SharedGroups":         b.SharedGroups.String(),
+				"TimingIDs":            b.TimingIDs.String(),
+				"Account":              accountId,
+				"AccountAllowNegative": allowNegative,
+				"AccountDisabled":      disabled,
+			})
+		}
+		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == nil {
+			dm.DataDB().SetAccount(b.account)
+			savedAccounts[b.account.ID] = b.account
+		}
+	}
+	if len(savedAccounts) != 0 && thresholdS != nil {
+		for _, acnt := range savedAccounts {
+			acntTnt := utils.NewTenantID(acnt.ID)
+			ev := &ThresholdEvent{
+				Tenant: acntTnt.Tenant,
+				ID:     utils.GenUUID(),
+				Fields: map[string]interface{}{
+					utils.EventType:     utils.AccountUpdate,
+					utils.EventSource:   utils.AccountService,
+					utils.ACCOUNT:       acntTnt.ID,
+					utils.AllowNegative: acnt.AllowNegative,
+					utils.Disabled:      acnt.Disabled}}
+			var hits int
+			if err := thresholdS.Call("ThresholdSV1.ProcessEvent", ev, &hits); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<AccountS> error: %s processing account event %+v with thresholds.", err.Error(), ev))
 			}
 		}
-		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == false {
-			dm.DataDB().SetAccount(b.account)
-			savedAccounts[b.account.ID] = true
-		}
+
 	}
 }
 

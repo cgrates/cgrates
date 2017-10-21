@@ -42,6 +42,9 @@
 
 "rals": {
 	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],	
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],

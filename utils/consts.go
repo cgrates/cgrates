@@ -470,7 +470,7 @@ const (
 	StatID                       = "StatID"
 	BalanceType                  = "BalanceType"
 	BalanceID                    = "BalanceID"
-	BalanceValue                 = "BalanceValue"
+	Units                        = "Units"
 	ResourceS                    = "ResourceS"
 	CacheThresholdProfiles       = "threshold_profiles"
 	CacheThresholds              = "thresholds"
