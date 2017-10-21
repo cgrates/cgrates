@@ -1069,13 +1069,13 @@ func testOnStorITCRUDRatingProfile(t *testing.T) {
 				CdrStatQueueIds: []string{},
 			}},
 	}
-	if _, rcvErr := onStor.DataDB().GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetRatingProfile(rpf.Id, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
@@ -1088,7 +1088,7 @@ func testOnStorITCRUDRatingProfile(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.DataDB().GetRatingProfile(rpf.Id, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
@@ -1099,7 +1099,7 @@ func testOnStorITCRUDRatingProfile(t *testing.T) {
 	if err = onStor.DataDB().RemoveRatingProfile(rpf.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

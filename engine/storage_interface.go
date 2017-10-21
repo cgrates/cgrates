@@ -50,7 +50,7 @@ type DataDB interface {
 	HasData(string, string) (bool, error)
 	GetRatingPlanDrv(string) (*RatingPlan, error)
 	SetRatingPlanDrv(*RatingPlan) error
-	GetRatingProfile(string, bool, string) (*RatingProfile, error)
+	GetRatingProfileDrv(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile, string) error
 	RemoveRatingProfile(string, string) error
 	GetDestination(string, bool, string) (*Destination, error)

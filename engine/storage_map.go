@@ -216,29 +216,17 @@ func (ms *MapStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetRatingProfile(key string, skipCache bool, transactionID string) (rpf *RatingProfile, err error) {
+func (ms *MapStorage) GetRatingProfileDrv(key string) (rpf *RatingProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	key = utils.RATING_PROFILE_PREFIX + key
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x != nil {
-				return x.(*RatingProfile), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	cCommit := cacheCommit(transactionID)
 	if values, ok := ms.dict[key]; ok {
-		rpf = new(RatingProfile)
 		if err = ms.ms.Unmarshal(values, &rpf); err != nil {
 			return nil, err
 		}
 	} else {
-		cache.Set(key, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, rpf, cCommit, transactionID)
 	return
 }
 
