@@ -276,20 +276,21 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 
 // Pas the config as a whole so we can ask access concurrently
 func NewResourceService(dm *DataManager, storeInterval time.Duration,
-	statS rpcclient.RpcClientConnection) (*ResourceService, error) {
-	if statS != nil && reflect.ValueOf(statS).IsNil() {
-		statS = nil
+	thdS rpcclient.RpcClientConnection) (*ResourceService, error) {
+	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
+		thdS = nil
 	}
-	return &ResourceService{dm: dm, statS: statS,
+	return &ResourceService{dm: dm, thdS: thdS,
 		lcEventResources: make(map[string][]*utils.TenantID),
 		storedResources:  make(utils.StringMap),
-		storeInterval:    storeInterval, stopBackup: make(chan struct{})}, nil
+		storeInterval:    storeInterval,
+		stopBackup:       make(chan struct{})}, nil
 }
 
 // ResourceService is the service handling resources
 type ResourceService struct {
 	dm               *DataManager                  // So we can load the data in cache and index it
-	statS            rpcclient.RpcClientConnection // allows applying filters based on stats
+	thdS             rpcclient.RpcClientConnection // allows applying filters based on stats
 	lcEventResources map[string][]*utils.TenantID  // cache recording resources for events in alocation phase
 	lcERMux          sync.RWMutex                  // protects the lcEventResources
 	storedResources  utils.StringMap               // keep a record of resources which need saving, map[resID]bool
@@ -448,7 +449,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 		}
 		passAllFilters := true
 		for _, fltr := range rPrf.Filters {
-			if pass, err := fltr.Pass(ev, "", rS.statS); err != nil {
+			if pass, err := fltr.Pass(ev, "", nil); err != nil {
 				return nil, err
 			} else if !pass {
 				passAllFilters = false

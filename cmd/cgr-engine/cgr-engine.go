@@ -527,19 +527,19 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *
 	internalUserSChan <- userServer
 }
 
-func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
-	var statsConn *rpcclient.RpcClientPool
-	if len(cfg.ResourceSCfg().StatSConns) != 0 { // Stats connection init
-		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.ResourceSCfg().StatSConns, internalStatSConn, cfg.InternalTtl)
+	var thdSConn *rpcclient.RpcClientPool
+	if len(cfg.ResourceSCfg().ThresholdSConns) != 0 { // Stats connection init
+		thdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.ResourceSCfg().ThresholdSConns, internalThresholdSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not connect to StatS: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not connect to ThresholdS: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, statsConn)
+	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -888,7 +888,7 @@ func main() {
 	// Start RL service
 	if cfg.ResourceSCfg().Enabled {
 		go startResourceService(internalRsChan,
-			internalStatSChan, cfg, dm, server, exitChan)
+			internalThresholdSChan, cfg, dm, server, exitChan)
 	}
 
 	if cfg.StatSCfg().Enabled {
