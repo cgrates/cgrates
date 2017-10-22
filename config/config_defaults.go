@@ -124,7 +124,7 @@ const CGRATES_CFG_JSON = `
 
 "rals": {
 	"enabled": false,						// enable Rater service: <true|false>
-	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"historys_conns": [],					// address where to reach the history service, empty to disable history functionality: <""|*internal|x.y.z.y:1234>
@@ -416,14 +416,14 @@ const CGRATES_CFG_JSON = `
 "resources": {
 	"enabled": false,				// starts ResourceLimiter service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"stats_conns": [],				// address where to reach the stats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 },
 
 
 "stats": {
 	"enabled": false,				// starts Stat service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 },
 
 

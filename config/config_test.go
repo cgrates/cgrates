@@ -575,9 +575,9 @@ func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceSConfig{
-		Enabled:       false,
-		StatSConns:    []*HaPoolConfig{},
-		StoreInterval: 0,
+		Enabled:         false,
+		ThresholdSConns: []*HaPoolConfig{},
+		StoreInterval:   0,
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eResLiCfg), utils.ToJSON(cgrCfg.resourceSCfg))

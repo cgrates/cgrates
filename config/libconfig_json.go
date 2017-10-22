@@ -383,9 +383,9 @@ type UserServJsonCfg struct {
 
 // ResourceLimiter service config section
 type ResourceSJsonCfg struct {
-	Enabled        *bool
-	Stats_conns    *[]*HaPoolJsonCfg
-	Store_interval *string
+	Enabled          *bool
+	Thresholds_conns *[]*HaPoolJsonCfg
+	Store_interval   *string
 }
 
 // Stat service config section

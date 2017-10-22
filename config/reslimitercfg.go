@@ -25,9 +25,9 @@ import (
 )
 
 type ResourceSConfig struct {
-	Enabled       bool
-	StatSConns    []*HaPoolConfig // Connections towards StatS
-	StoreInterval time.Duration   // Dump regularly from cache into dataDB
+	Enabled         bool
+	ThresholdSConns []*HaPoolConfig // Connections towards StatS
+	StoreInterval   time.Duration   // Dump regularly from cache into dataDB
 }
 
 func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err error) {
@@ -37,11 +37,11 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 	if jsnCfg.Enabled != nil {
 		rlcfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Stats_conns != nil {
-		rlcfg.StatSConns = make([]*HaPoolConfig, len(*jsnCfg.Stats_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
-			rlcfg.StatSConns[idx] = NewDfltHaPoolConfig()
-			rlcfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Thresholds_conns != nil {
+		rlcfg.ThresholdSConns = make([]*HaPoolConfig, len(*jsnCfg.Thresholds_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
+			rlcfg.ThresholdSConns[idx] = NewDfltHaPoolConfig()
+			rlcfg.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Store_interval != nil {

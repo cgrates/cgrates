@@ -507,9 +507,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// ResourceLimiter checks
 	if self.resourceSCfg != nil && self.resourceSCfg.Enabled {
-		for _, connCfg := range self.resourceSCfg.StatSConns {
-			if connCfg.Address == utils.MetaInternal && !self.statsCfg.Enabled {
-				return errors.New("StatS not enabled but requested by ResourceLimiter component.")
+		for _, connCfg := range self.resourceSCfg.ThresholdSConns {
+			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+				return errors.New("ThresholdS not enabled but requested by ResourceS component.")
 			}
 		}
 	}
