@@ -50,6 +50,9 @@ func CastFieldIfToString(fld interface{}) (string, bool) {
 		if byteVal, converted = fld.([]byte); converted {
 			strVal = string(byteVal)
 		}
+	case time.Duration:
+		strVal = fld.(time.Duration).String()
+		converted = true
 	default: // Maybe we are lucky and the value converts to string
 		strVal, converted = fld.(string)
 	}

@@ -216,3 +216,11 @@ func TestStringToInterface(t *testing.T) {
 		t.Error("not parsing time.Duration")
 	}
 }
+
+func TestCastFieldIfToString(t *testing.T) {
+	if strVal, cast := CastFieldIfToString(time.Duration(1 * time.Second)); !cast {
+		t.Error("cannot cast time.Duration")
+	} else if strVal != "1s" {
+		t.Errorf("received: %s", strVal)
+	}
+}
