@@ -51,7 +51,7 @@ func (sqp *StatQueueProfile) TenantID() string {
 type StatEvent struct {
 	Tenant string
 	ID     string
-	Fields map[string]interface{}
+	Event  map[string]interface{}
 }
 
 // TenantID returns the unique identifier based on Tenant and ID
@@ -61,7 +61,7 @@ func (se StatEvent) TenantID() string {
 
 // AnswerTime returns the AnswerTime of StatEvent
 func (se StatEvent) AnswerTime(timezone string) (at time.Time, err error) {
-	atIf, has := se.Fields[utils.ANSWER_TIME]
+	atIf, has := se.Event[utils.ANSWER_TIME]
 	if !has {
 		return at, utils.ErrNotFound
 	}
@@ -77,7 +77,7 @@ func (se StatEvent) AnswerTime(timezone string) (at time.Time, err error) {
 
 // Usage returns the Usage of StatEvent
 func (se StatEvent) Usage() (at time.Duration, err error) {
-	usIf, has := se.Fields[utils.USAGE]
+	usIf, has := se.Event[utils.USAGE]
 	if !has {
 		return at, utils.ErrNotFound
 	}
@@ -96,7 +96,7 @@ func (se StatEvent) Usage() (at time.Duration, err error) {
 
 // Cost returns the Cost of StatEvent
 func (se StatEvent) Cost() (cs float64, err error) {
-	csIf, has := se.Fields[utils.COST]
+	csIf, has := se.Event[utils.COST]
 	if !has {
 		return cs, utils.ErrNotFound
 	}
@@ -112,7 +112,7 @@ func (se StatEvent) Cost() (cs float64, err error) {
 
 // Pdd returns the Pdd of StatEvent
 func (se StatEvent) Pdd() (pdd time.Duration, err error) {
-	pddIf, has := se.Fields[utils.PDD]
+	pddIf, has := se.Event[utils.PDD]
 	if !has {
 		return pdd, utils.ErrNotFound
 	}
@@ -131,7 +131,7 @@ func (se StatEvent) Pdd() (pdd time.Duration, err error) {
 
 // Destination returns the Destination of StatEvent
 func (se StatEvent) Destination() (ddc string, err error) {
-	ddcIf, has := se.Fields[utils.DESTINATION]
+	ddcIf, has := se.Event[utils.DESTINATION]
 	if !has {
 		return ddc, utils.ErrNotFound
 	}

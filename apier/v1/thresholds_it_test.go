@@ -339,7 +339,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(time.Duration(10 * time.Millisecond)) // mongo is async
+	time.Sleep(time.Duration(100 * time.Millisecond)) // mongo is async
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
@@ -359,7 +359,8 @@ func testV1TSRemoveThresholdProfile(t *testing.T) {
 	}
 	var sqp *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

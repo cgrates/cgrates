@@ -45,7 +45,7 @@ var evs = []*engine.StatEvent{
 	&engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Fields: map[string]interface{}{
+		Event: map[string]interface{}{
 			utils.ACCOUNT:     "1001",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(135 * time.Second),
@@ -53,14 +53,14 @@ var evs = []*engine.StatEvent{
 	&engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Fields: map[string]interface{}{
+		Event: map[string]interface{}{
 			utils.ACCOUNT:     "1002",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(45 * time.Second)}},
 	&engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Fields: map[string]interface{}{
+		Event: map[string]interface{}{
 			utils.ACCOUNT:    "1002",
 			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:      0}},
@@ -173,7 +173,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	ev1 := engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Fields: map[string]interface{}{
+		Event: map[string]interface{}{
 			utils.ACCOUNT:     "1001",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(135 * time.Second),
@@ -202,7 +202,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	ev2 := engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Fields: map[string]interface{}{
+		Event: map[string]interface{}{
 			utils.ACCOUNT:     "1002",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(45 * time.Second)}}
@@ -214,7 +214,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	ev3 := &engine.StatEvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Fields: map[string]interface{}{
+		Event: map[string]interface{}{
 			utils.ACCOUNT:    "1002",
 			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:      0}}
