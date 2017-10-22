@@ -275,6 +275,10 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if cgrCfg.RALsEnabled != false {
 		t.Error(cgrCfg.RALsEnabled)
 	}
+
+	if !reflect.DeepEqual(cgrCfg.RALsThresholdSConns, eHaPoolcfg) {
+		t.Error(cgrCfg.RALsThresholdSConns)
+	}
 	if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns, eHaPoolcfg) {
 		t.Error(cgrCfg.RALsCDRStatSConns)
 	}
@@ -583,8 +587,9 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 	eStatsCfg := &StatSCfg{
-		Enabled:       false,
-		StoreInterval: 0,
+		Enabled:         false,
+		StoreInterval:   0,
+		ThresholdSConns: []*HaPoolConfig{},
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)

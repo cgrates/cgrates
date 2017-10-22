@@ -25,8 +25,9 @@ import (
 )
 
 type StatSCfg struct {
-	Enabled       bool
-	StoreInterval time.Duration // Dump regularly from cache into dataDB
+	Enabled         bool
+	StoreInterval   time.Duration // Dump regularly from cache into dataDB
+	ThresholdSConns []*HaPoolConfig
 }
 
 func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -39,6 +40,13 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg.Store_interval != nil {
 		if st.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
 			return err
+		}
+	}
+	if jsnCfg.Thresholds_conns != nil {
+		st.ThresholdSConns = make([]*HaPoolConfig, len(*jsnCfg.Thresholds_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
+			st.ThresholdSConns[idx] = NewDfltHaPoolConfig()
+			st.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	return nil

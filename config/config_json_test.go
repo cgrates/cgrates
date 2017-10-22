@@ -699,8 +699,9 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 
 func TestDfStatServiceJsonCfg(t *testing.T) {
 	eCfg := &StatServJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Store_interval: utils.StringPointer(""),
+		Enabled:          utils.BoolPointer(false),
+		Store_interval:   utils.StringPointer(""),
+		Thresholds_conns: &[]*HaPoolJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)
