@@ -271,6 +271,9 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 		return
 	}
 	err = rs.recordUsage(ru)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -489,6 +492,26 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 	return
 }
 
+// processThresholds will pass the event for resource to ThresholdS
+func (rS *ResourceService) processThresholds(r *Resource) (err error) {
+	if rS.thdS == nil {
+		return
+	}
+	ev := &ThresholdEvent{
+		Tenant: r.Tenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			utils.EventType:  utils.ResourceUpdate,
+			utils.ResourceID: r.ID,
+			utils.USAGE:      r.totalUsage()}}
+	var hits int
+	if err = thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<ResourceS> error: %s processing event %+v with ThresholdS.", err.Error(), ev))
+	}
+	return
+}
+
 // V1ResourcesForEvent returns active resource configs matching the event
 func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
 	if args.Tenant == "" {
@@ -586,6 +609,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			rS.storedResources[r.TenantID()] = true
 			rS.srMux.Unlock()
 		}
+		rS.processThresholds(r)
 	}
 	*reply = alcMsg
 	return
@@ -618,6 +642,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 				rS.storedResources[r.TenantID()] = true
 			}
 		}
+		rS.processThresholds(r)
 	}
 	if rS.storeInterval != -1 {
 		rS.srMux.Unlock()
