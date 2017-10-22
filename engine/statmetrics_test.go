@@ -18,9 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestASRGetStringValue(t *testing.T) {

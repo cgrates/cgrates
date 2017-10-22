@@ -34,6 +34,7 @@ const (
 	HTTP_JSN        = "http"
 	DATADB_JSN      = "data_db"
 	STORDB_JSN      = "stor_db"
+	FilterSjsn      = "filters"
 	RALS_JSN        = "rals"
 	SCHEDULER_JSN   = "scheduler"
 	CDRS_JSN        = "cdrs"
@@ -140,6 +141,18 @@ func (self CgrJsonCfg) DbJsonCfg(section string) (*DbJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(DbJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (jsnCfg CgrJsonCfg) FilterSJsonCfg() (*FilterSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[FilterSjsn]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(FilterSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

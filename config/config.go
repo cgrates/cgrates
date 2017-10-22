@@ -75,6 +75,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.smAsteriskCfg = new(SMAsteriskCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
+	cfg.filterSCfg = new(FilterSCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -261,6 +262,7 @@ type CGRConfig struct {
 	smAsteriskCfg            *SMAsteriskCfg           // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
 	radiusAgentCfg           *RadiusAgentCfg          // RadiusAgent configuration
+	filterSCfg               *FilterSCfg              // FilterS configuration
 	HistoryServerEnabled     bool                     // Starts History as server: <true|false>.
 	HistoryDir               string                   // Location on disk where to store history files.
 	HistorySaveInterval      time.Duration            // The timout duration between pubsub writes
@@ -517,7 +519,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 }
 
 // Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
-func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
+func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 
 	// Load sections out of JSON config, stop on error
 	jsnGeneralCfg, err := jsnCfg.GeneralJsonCfg()
@@ -547,6 +549,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnStorDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN)
+	if err != nil {
+		return err
+	}
+
+	jsnFilterSCfg, err := jsnCfg.FilterSJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -822,6 +829,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnHttpCfg.Auth_users != nil {
 			self.HTTPAuthUsers = *jsnHttpCfg.Auth_users
+		}
+	}
+
+	if jsnFilterSCfg != nil {
+		if err = self.filterSCfg.loadFromJsonCfg(jsnFilterSCfg); err != nil {
+			return
 		}
 	}
 

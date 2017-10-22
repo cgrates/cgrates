@@ -122,6 +122,11 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"filters": {
+	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+},
+
+
 "rals": {
 	"enabled": false,						// enable Rater service: <true|false>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>

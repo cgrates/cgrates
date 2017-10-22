@@ -72,6 +72,11 @@ type DbJsonCfg struct {
 	Cdrs_indexes      *[]string
 }
 
+// Filters config
+type FilterSJsonCfg struct {
+	Stats_conns *[]*HaPoolJsonCfg
+}
+
 // Rater config section
 type RalsJsonCfg struct {
 	Enabled                     *bool
