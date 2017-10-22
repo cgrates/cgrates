@@ -782,18 +782,19 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				ev := &ThresholdEvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),
-					Fields: map[string]interface{}{
+					Event: map[string]interface{}{
 						utils.EventType:   utils.BalanceUpdate,
 						utils.EventSource: utils.AccountService,
 						utils.ACCOUNT:     acntTnt.ID,
 						utils.BalanceID:   b.ID,
 						utils.Units:       b.Value}}
 				if !b.ExpirationDate.IsZero() {
-					ev.Fields[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
+					ev.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
 				}
 				var hits int
-				if err := thresholdS.Call("ThresholdSV1.ProcessEvent", ev, &hits); err != nil {
-					utils.Logger.Warning(fmt.Sprintf("<AccountS> error: %s processing balance event %+v with thresholds.", err.Error(), ev))
+				if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.", err.Error(), ev))
 				}
 			}
 			//utils.LogStack()
@@ -829,7 +830,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			ev := &ThresholdEvent{
 				Tenant: acntTnt.Tenant,
 				ID:     utils.GenUUID(),
-				Fields: map[string]interface{}{
+				Event: map[string]interface{}{
 					utils.EventType:     utils.AccountUpdate,
 					utils.EventSource:   utils.AccountService,
 					utils.ACCOUNT:       acntTnt.ID,
@@ -838,7 +839,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			var hits int
 			if err := thresholdS.Call("ThresholdSV1.ProcessEvent", ev, &hits); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<AccountS> error: %s processing account event %+v with thresholds.", err.Error(), ev))
+					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), ev))
 			}
 		}
 

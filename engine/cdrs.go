@@ -71,22 +71,22 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub, users,
 	aliases, cdrstats, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
-	if rater == nil || reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
+	if rater != nil && reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
-	if pubsub == nil || reflect.ValueOf(pubsub).IsNil() {
+	if pubsub != nil && reflect.ValueOf(pubsub).IsNil() {
 		pubsub = nil
 	}
-	if users == nil || reflect.ValueOf(users).IsNil() {
+	if users != nil && reflect.ValueOf(users).IsNil() {
 		users = nil
 	}
-	if aliases == nil || reflect.ValueOf(aliases).IsNil() {
+	if aliases != nil && reflect.ValueOf(aliases).IsNil() {
 		aliases = nil
 	}
-	if cdrstats == nil || reflect.ValueOf(cdrstats).IsNil() {
+	if cdrstats != nil && reflect.ValueOf(cdrstats).IsNil() {
 		cdrstats = nil
 	}
-	if stats == nil || reflect.ValueOf(stats).IsNil() {
+	if stats != nil && reflect.ValueOf(stats).IsNil() {
 		stats = nil
 	}
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,

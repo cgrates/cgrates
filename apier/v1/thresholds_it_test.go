@@ -45,69 +45,63 @@ var tEvs = []*engine.ThresholdEvent{
 	&engine.ThresholdEvent{ // hitting THD_ACNT_BALANCE_1
 		Tenant: "cgrates.org",
 		ID:     "event1",
-		Fields: map[string]interface{}{
+		Event: map[string]interface{}{
 			utils.EventType:     utils.AccountUpdate,
-			utils.EventSource:   utils.AccountService,
 			utils.ACCOUNT:       "1002",
 			utils.AllowNegative: true,
 			utils.Disabled:      false}},
 	&engine.ThresholdEvent{ // hitting THD_ACNT_BALANCE_1
 		Tenant: "cgrates.org",
 		ID:     "event2",
-		Fields: map[string]interface{}{
-			utils.EventType:   utils.BalanceUpdate,
-			utils.EventSource: utils.AccountService,
-			utils.ACCOUNT:     "1002",
-			utils.BalanceID:   utils.META_DEFAULT,
-			utils.Units:       12.3,
-			utils.ExpiryTime:  "2009-11-10T23:00:00Z"}},
+		Event: map[string]interface{}{
+			utils.EventType:  utils.BalanceUpdate,
+			utils.ACCOUNT:    "1002",
+			utils.BalanceID:  utils.META_DEFAULT,
+			utils.Units:      12.3,
+			utils.ExpiryTime: "2009-11-10T23:00:00Z"}},
 	&engine.ThresholdEvent{ // hitting THD_STATS_1
 		Tenant: "cgrates.org",
 		ID:     "event3",
-		Fields: map[string]interface{}{
-			utils.EventType:   utils.StatUpdate,
-			utils.EventSource: utils.StatService,
-			utils.StatID:      "Stats1",
-			utils.ACCOUNT:     "1002",
-			"ASR":             35.0,
-			"ACD":             "2m45s",
-			"TCC":             12.7,
-			"TCD":             "12m15s",
-			"ACC":             0.75,
-			"PDD":             "2s",
+		Event: map[string]interface{}{
+			utils.EventType: utils.StatUpdate,
+			utils.StatID:    "Stats1",
+			utils.ACCOUNT:   "1002",
+			"ASR":           35.0,
+			"ACD":           "2m45s",
+			"TCC":           12.7,
+			"TCD":           "12m15s",
+			"ACC":           0.75,
+			"PDD":           "2s",
 		}},
 	&engine.ThresholdEvent{ // hitting THD_STATS_1 and THD_STATS_2
 		Tenant: "cgrates.org",
 		ID:     "event4",
-		Fields: map[string]interface{}{
-			utils.EventType:   utils.StatUpdate,
-			utils.EventSource: utils.StatService,
-			utils.StatID:      "STATS_HOURLY_DE",
-			utils.ACCOUNT:     "1002",
-			"ASR":             35.0,
-			"ACD":             "2m45s",
-			"TCD":             "1h",
+		Event: map[string]interface{}{
+			utils.EventType: utils.StatUpdate,
+			utils.StatID:    "STATS_HOURLY_DE",
+			utils.ACCOUNT:   "1002",
+			"ASR":           35.0,
+			"ACD":           "2m45s",
+			"TCD":           "1h",
 		}},
 	&engine.ThresholdEvent{ // hitting THD_STATS_3
 		Tenant: "cgrates.org",
 		ID:     "event5",
-		Fields: map[string]interface{}{
-			utils.EventType:   utils.StatUpdate,
-			utils.EventSource: utils.StatService,
-			utils.StatID:      "STATS_DAILY_DE",
-			utils.ACCOUNT:     "1002",
-			"ACD":             "2m45s",
-			"TCD":             "3h1s",
+		Event: map[string]interface{}{
+			utils.EventType: utils.StatUpdate,
+			utils.StatID:    "STATS_DAILY_DE",
+			utils.ACCOUNT:   "1002",
+			"ACD":           "2m45s",
+			"TCD":           "3h1s",
 		}},
 	&engine.ThresholdEvent{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
-		Fields: map[string]interface{}{
-			utils.EventType:   utils.ResourceUpdate,
-			utils.EventSource: utils.ResourceS,
-			utils.ACCOUNT:     "1002",
-			utils.ResourceID:  "RES_GRP_1",
-			utils.USAGE:       10.0}},
+		Event: map[string]interface{}{
+			utils.EventType:  utils.ResourceUpdate,
+			utils.ACCOUNT:    "1002",
+			utils.ResourceID: "RES_GRP_1",
+			utils.USAGE:      10.0}},
 }
 
 var sTestsThresholdSV1 = []func(t *testing.T){

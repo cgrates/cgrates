@@ -54,7 +54,7 @@ func (tp *ThresholdProfile) TenantID() string {
 type ThresholdEvent struct {
 	Tenant string
 	ID     string
-	Fields map[string]interface{}
+	Event  map[string]interface{}
 }
 
 func (te *ThresholdEvent) TenantID() string {
@@ -62,7 +62,7 @@ func (te *ThresholdEvent) TenantID() string {
 }
 
 func (te *ThresholdEvent) Account() (acnt string, err error) {
-	acntIf, has := te.Fields[utils.ACCOUNT]
+	acntIf, has := te.Event[utils.ACCOUNT]
 	if !has {
 		return "", utils.ErrNotFound
 	}
@@ -77,14 +77,14 @@ func (te *ThresholdEvent) FilterableEvent(fltredFields []string) (fEv map[string
 	fEv = make(map[string]interface{})
 	if len(fltredFields) == 0 {
 		i := 0
-		fltredFields = make([]string, len(te.Fields))
-		for k := range te.Fields {
+		fltredFields = make([]string, len(te.Event))
+		for k := range te.Event {
 			fltredFields[i] = k
 			i++
 		}
 	}
 	for _, fltrFld := range fltredFields {
-		fldVal, has := te.Fields[fltrFld]
+		fldVal, has := te.Event[fltrFld]
 		if !has {
 			continue // the field does not exist in map, ignore it
 		}
@@ -250,7 +250,7 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
 func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts Thresholds, err error) {
 	matchingTs := make(map[string]*Threshold)
-	tIDs, err := matchingItemIDsForEvent(ev.Fields, tS.dm, utils.ThresholdsIndex+ev.Tenant)
+	tIDs, err := matchingItemIDsForEvent(ev.Event, tS.dm, utils.ThresholdsIndex+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}

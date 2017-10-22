@@ -482,6 +482,7 @@ const (
 	AllowNegative                = "AllowNegative"
 	Disabled                     = "Disabled"
 	Action                       = "Action"
+	ThresholdSv1ProcessEvent     = "ThresholdSv1.ProcessEvent"
 )
 
 func buildCacheInstRevPrefixes() {

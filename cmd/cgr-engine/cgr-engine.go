@@ -561,9 +561,19 @@ func startResourceService(internalRsChan, internalStatSConn chan rpcclient.RpcCl
 }
 
 // startStatService fires up the StatS
-func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
-	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval)
+	var thdSConn *rpcclient.RpcClientPool
+	if len(cfg.StatSCfg().ThresholdSConns) != 0 { // Stats connection init
+		thdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.StatSCfg().ThresholdSConns, internalThresholdSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<StatS> Could not connect to ThresholdS: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval, thdSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -882,7 +892,7 @@ func main() {
 	}
 
 	if cfg.StatSCfg().Enabled {
-		go startStatService(internalStatSChan, cfg, dm, server, exitChan)
+		go startStatService(internalStatSChan, internalThresholdSChan, cfg, dm, server, exitChan)
 	}
 
 	if cfg.ThresholdSCfg().Enabled {

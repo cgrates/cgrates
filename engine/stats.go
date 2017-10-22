@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"math/rand"
+	"reflect"
 	"sync"
 	"time"
 
@@ -28,12 +29,19 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // NewStatService initializes a StatService
-func NewStatService(dm *DataManager, storeInterval time.Duration) (ss *StatService, err error) {
-	return &StatService{dm: dm,
+func NewStatService(dm *DataManager, storeInterval time.Duration,
+	thdS rpcclient.RpcClientConnection) (ss *StatService, err error) {
+	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
+		thdS = nil
+	}
+	return &StatService{
+		dm:               dm,
 		storeInterval:    storeInterval,
+		thdS:             thdS,
 		storedStatQueues: make(utils.StringMap),
 		stopBackup:       make(chan struct{})}, nil
 }
@@ -42,6 +50,7 @@ func NewStatService(dm *DataManager, storeInterval time.Duration) (ss *StatServi
 type StatService struct {
 	dm               *DataManager
 	storeInterval    time.Duration
+	thdS             rpcclient.RpcClientConnection // rpc connection towards ThresholdS
 	stopBackup       chan struct{}
 	storedStatQueues utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
 	ssqMux           sync.RWMutex    // protects storedStatQueues
@@ -209,7 +218,7 @@ func (sS *StatService) processEvent(ev *StatEvent) (err error) {
 	for _, sq := range matchSQs {
 		if err = sq.ProcessEvent(ev); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<StatService> Queue: %s, ignoring event: %s, error: %s",
+				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
 					sq.TenantID(), ev.TenantID(), err.Error()))
 			withErrors = true
 		}
@@ -223,6 +232,23 @@ func (sS *StatService) processEvent(ev *StatEvent) (err error) {
 			sS.ssqMux.Lock()
 			sS.storedStatQueues[sq.TenantID()] = true
 			sS.ssqMux.Unlock()
+		}
+		if sS.thdS != nil {
+			ev := &ThresholdEvent{
+				Tenant: sq.Tenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					utils.EventType: utils.StatUpdate,
+					utils.StatID:    sq.ID}}
+			for metricID, metric := range sq.SQMetrics {
+				ev.Event[metricID] = metric.GetValue()
+			}
+			var hits int
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), ev))
+				withErrors = true
+			}
 		}
 	}
 	if withErrors {
