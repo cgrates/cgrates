@@ -258,6 +258,7 @@ func (dm *DataManager) RemStatQueue(tenant, id string, transactionID string) (er
 	return
 }
 
+// GetFilter returns
 func (dm *DataManager) GetFilter(tenant, id string, skipCache bool, transactionID string) (fltr *Filter, err error) {
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
@@ -274,6 +275,9 @@ func (dm *DataManager) GetFilter(tenant, id string, skipCache bool, transactionI
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
+	}
+	if err = fltr.Compile(); err != nil {
+		return
 	}
 	cache.Set(key, fltr, cacheCommit(transactionID), transactionID)
 	return

@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -43,21 +44,74 @@ const (
 	MetaGreaterOrEqual = "*gte"
 )
 
-func NewFilterS(cfg *config.CGRConfig, statSChan chan rpcclient.RpcClientConnection) *FilterS {
-	return &FilterS{statSChan: statSChan}
+func NewFilterS(cfg *config.CGRConfig, statSChan chan rpcclient.RpcClientConnection, dm *DataManager) *FilterS {
+	return &FilterS{statSChan: statSChan, dm: dm}
 }
 
 // FilterS is a service used to take decisions in case of filters
 // uses lazy connections where necessary to avoid deadlocks on service startup
 type FilterS struct {
-	cfg          *config.CGRConfig
-	statSChan    chan rpcclient.RpcClientConnection // reference towards internal statS connection, used for lazy connect
-	statS        *rpcclient.RpcClientPool
-	statSConnMux sync.Mutex // make sure only one goroutine attempts connecting
+	cfg        *config.CGRConfig
+	statSChan  chan rpcclient.RpcClientConnection // reference towards internal statS connection, used for lazy connect
+	statSConns *rpcclient.RpcClientPool
+	sSConnMux  sync.RWMutex // make sure only one goroutine attempts connecting
+	dm         *DataManager
 }
 
-func (fS *FilterS) Pass(req interface{}, extraFieldsLabel string, filteredFields []string) (passes bool, err error) {
+// connStatS returns will connect towards StatS
+func (fS *FilterS) connStatS() (err error) {
+	fS.sSConnMux.Lock()
+	defer fS.sSConnMux.Unlock()
+	if fS.statSConns != nil { // connection was populated between locks
+		return
+	}
+	fS.statSConns, err = NewRPCPool(rpcclient.POOL_FIRST, fS.cfg.ConnectAttempts, fS.cfg.Reconnects, fS.cfg.ConnectTimeout, fS.cfg.ReplyTimeout,
+		fS.cfg.FilterSCfg().StatSConns, fS.statSChan, fS.cfg.InternalTtl)
 	return
+}
+
+// PassFiltersForEvent will check all filters wihin filterIDs and require them passing for event
+// there should be at least one filter passing, ie: if filters are not active event will fail to pass
+func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{}, filterIDs []string) (pass bool, err error) {
+	var atLeastOneFilterPassing bool
+	for _, fltrID := range filterIDs {
+		f, err := fS.dm.GetFilter(tenant, fltrID, false, utils.NonTransactional)
+		if err != nil {
+			return false, err
+		}
+		if f.ActivationInterval != nil &&
+			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+			continue
+		}
+		for _, fltr := range f.RequestFilters {
+			switch fltr.Type {
+			case MetaString:
+				pass, err = fltr.passString(ev, "")
+			case MetaStringPrefix:
+				pass, err = fltr.passStringPrefix(ev, "")
+			case MetaTimings:
+				pass, err = fltr.passTimings(ev, "")
+			case MetaDestinations:
+				pass, err = fltr.passDestinations(ev, "")
+			case MetaRSRFields:
+				pass, err = fltr.passRSRFields(ev, "")
+			case MetaStatS:
+				if err = fS.connStatS(); err != nil {
+					return false, err
+				}
+				pass, err = fltr.passStatS(ev, "", fS.statSConns)
+			case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
+				pass, err = fltr.passGreaterThan(ev, "")
+			default:
+				return false, fmt.Errorf("tenant: %s filter: %s unsupported filter type: <%s>", tenant, fltrID, fltr.Type)
+			}
+		}
+		if err != nil || !pass {
+			return pass, err
+		}
+		atLeastOneFilterPassing = true
+	}
+	return atLeastOneFilterPassing, nil
 }
 
 type Filter struct {
@@ -69,6 +123,16 @@ type Filter struct {
 
 func (flt *Filter) TenantID() string {
 	return utils.ConcatenatedKey(flt.Tenant, flt.ID)
+}
+
+// Compile will compile the underlaying request filters where necessary (ie. regexp rules)
+func (f *Filter) Compile() (err error) {
+	for _, rf := range f.RequestFilters {
+		if err = rf.CompileValues(); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {

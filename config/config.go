@@ -1207,3 +1207,7 @@ func (self *CGRConfig) SMAsteriskCfg() *SMAsteriskCfg {
 	defer func() { self.ConfigReloads[utils.SMAsterisk] <- cfgChan }()
 	return self.smAsteriskCfg
 }
+
+func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
+	return cfg.filterSCfg
+}
