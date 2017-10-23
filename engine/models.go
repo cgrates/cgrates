@@ -510,11 +510,12 @@ type TpThreshold struct {
 	FilterFieldValues  string  `index:"4" re:""`
 	ActivationInterval string  `index:"5" re:""`
 	Recurrent          bool    `index:"6" re:""`
-	MinSleep           string  `index:"7" re:""`
-	Blocker            bool    `index:"8" re:""`
-	Weight             float64 `index:"9" re:"\d+\.?\d*"`
-	ActionIDs          string  `index:"10" re:""`
-	Async              bool    `index:"8" re:""`
+	MinHits            int     `index:"7" re:""`
+	MinSleep           string  `index:"8" re:""`
+	Blocker            bool    `index:"9" re:""`
+	Weight             float64 `index:"10" re:"\d+\.?\d*"`
+	ActionIDs          string  `index:"11" re:""`
+	Async              bool    `index:"12" re:""`
 	CreatedAt          time.Time
 }
 

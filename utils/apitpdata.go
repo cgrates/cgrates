@@ -1362,6 +1362,7 @@ type TPThreshold struct {
 	Filters            []*TPRequestFilter    // Filters for the request
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Recurrent          bool
+	MinHits            int
 	MinSleep           string
 	Blocker            bool    // blocker flag to stop processing on filters matched
 	Weight             float64 // Weight to sort the thresholds

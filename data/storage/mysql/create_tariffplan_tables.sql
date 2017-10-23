@@ -461,6 +461,7 @@ CREATE TABLE tp_thresholds (
   `filter_field_values` varchar(256) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `recurrent` BOOLEAN NOT NULL,
+  `min_hits` int(11) NOT NULL,
   `min_sleep` varchar(16) NOT NULL,
   `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
