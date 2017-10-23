@@ -732,21 +732,20 @@ func main() {
 	// Init cache
 	cache.NewCache(cfg.CacheConfig)
 
-	var dm2 *engine.DataManager
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
 
 	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled || cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerEnabled {
-		dm2, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
+		dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
 			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
 		}
-		defer dm2.DataDB().Close()
-		engine.SetDataStorage(dm2)
-		if err := engine.CheckVersions(dm2.DataDB()); err != nil {
+		defer dm.DataDB().Close()
+		engine.SetDataStorage(dm)
+		if err := engine.CheckVersions(dm.DataDB()); err != nil {
 			fmt.Println(err.Error())
 			return
 		}
@@ -769,7 +768,6 @@ func main() {
 		}
 	}
 
-	dm = engine.NewDataManager(dm2.DataDB())
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.RoundingDecimals)
 	engine.SetRpSubjectPrefixMatching(cfg.RpSubjectPrefixMatching)

@@ -21,7 +21,9 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -40,6 +42,23 @@ const (
 	MetaGreaterThan    = "*gt"
 	MetaGreaterOrEqual = "*gte"
 )
+
+func NewFilterS(cfg *config.CGRConfig, statSChan chan rpcclient.RpcClientConnection) *FilterS {
+	return &FilterS{statSChan: statSChan}
+}
+
+// FilterS is a service used to take decisions in case of filters
+// uses lazy connections where necessary to avoid deadlocks on service startup
+type FilterS struct {
+	cfg          *config.CGRConfig
+	statSChan    chan rpcclient.RpcClientConnection // reference towards internal statS connection, used for lazy connect
+	statS        *rpcclient.RpcClientPool
+	statSConnMux sync.Mutex // make sure only one goroutine attempts connecting
+}
+
+func (fS *FilterS) Pass(req interface{}, extraFieldsLabel string, filteredFields []string) (passes bool, err error) {
+	return
+}
 
 type Filter struct {
 	Tenant             string
