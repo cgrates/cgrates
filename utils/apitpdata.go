@@ -1359,7 +1359,7 @@ type TPThreshold struct {
 	TPid               string
 	Tenant             string
 	ID                 string
-	Filters            []*TPRequestFilter    // Filters for the request
+	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Recurrent          bool
 	MinHits            int

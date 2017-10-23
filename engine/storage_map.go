@@ -1297,11 +1297,6 @@ func (ms *MapStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdPr
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range tp.Filters {
-		if err := fltr.CompileValues(); err != nil {
-			return nil, err
-		}
-	}
 	return
 }
 

@@ -1888,11 +1888,6 @@ func (ms *MongoStorage) GetThresholdProfileDrv(tenant, ID string) (tp *Threshold
 		}
 		return nil, err
 	}
-	for _, fltr := range tp.Filters {
-		if err = fltr.CompileValues(); err != nil {
-			return
-		}
-	}
 	return
 }
 

@@ -277,8 +277,8 @@ cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*a
 `
 
 	thresholds = `
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinHits[7],MinSleep[8],Blocker[9],Weight[10],ActionIDs[11],Async[12]
-cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,10,1s,true,10,THRESH1;THRESH2,true
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],Recurrent[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
+cgrates.org,Threshold1,FilterID1;FilterID2,2014-07-29T15:00:00Z,true,10,1s,true,10,THRESH1;THRESH2,true
 `
 
 	filters = `
@@ -1485,12 +1485,10 @@ func TestLoadThresholdProfiles(t *testing.T) {
 	eThresholds := map[string]map[string]*utils.TPThreshold{
 		"cgrates.org": map[string]*utils.TPThreshold{
 			"Threshold1": &utils.TPThreshold{
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "Threshold1",
-				Filters: []*utils.TPRequestFilter{
-					&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
-				},
+				TPid:      testTPID,
+				Tenant:    "cgrates.org",
+				ID:        "Threshold1",
+				FilterIDs: []string{"FilterID1", "FilterID2"},
 				ActivationInterval: &utils.TPActivationInterval{
 					ActivationTime: "2014-07-29T15:00:00Z",
 				},

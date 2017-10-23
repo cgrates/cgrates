@@ -451,9 +451,7 @@ CREATE TABLE tp_thresholds (
   "tpid" varchar(64) NOT NULL,
   "tenant"varchar(64) NOT NULL,
   "id" varchar(64) NOT NULL,
-  "filter_type" varchar(16) NOT NULL,
-  "filter_field_name" varchar(64) NOT NULL,
-  "filter_field_values" varchar(256) NOT NULL,
+  "filter_ids" varchar(64) NOT NULL,
   "activation_interval" varchar(64) NOT NULL,
   "recurrent" BOOLEAN NOT NULL,
   "min_hits" INTEGER NOT NULL,
@@ -465,7 +463,7 @@ CREATE TABLE tp_thresholds (
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_thresholds_idx ON tp_thresholds (tpid);
-CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid","tenant", "id", "filter_type", "filter_field_name");
+CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid","tenant", "id","filter_ids","action_ids");
 
 --
 -- Table structure for table `tp_filter`

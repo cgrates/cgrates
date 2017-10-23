@@ -2055,7 +2055,7 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		Tenant:             "cgrates.org",
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
-		Filters:            []*RequestFilter{},
+		FilterIDs:          []string{},
 		Recurrent:          true,
 		MinSleep:           timeMinSleep,
 		Blocker:            true,

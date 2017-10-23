@@ -1920,7 +1920,6 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 				mdl.FilterFieldValues += utils.INFIELD_SEP
 			}
 			mdl.FilterFieldValues += val
-
 		}
 		mdls = append(mdls, mdl)
 	}
@@ -2143,7 +2142,10 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 			}
 		}
 		if tp.ActionIDs != "" {
-			th.ActionIDs = append(th.ActionIDs, strings.Split(tp.ActionIDs, utils.INFIELD_SEP)...)
+			actionSplit := strings.Split(tp.ActionIDs, utils.INFIELD_SEP)
+			for _, action := range actionSplit {
+				th.ActionIDs = append(th.ActionIDs, action)
+			}
 		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
@@ -2158,12 +2160,13 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 				th.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.FilterType != "" {
-			th.Filters = append(th.Filters, &utils.TPRequestFilter{
-				Type:      tp.FilterType,
-				FieldName: tp.FilterFieldName,
-				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
+		if tp.FilterIDs != "" {
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				th.FilterIDs = append(th.FilterIDs, filter)
+			}
 		}
+
 		mst[tp.ID] = th
 	}
 	result = make([]*utils.TPThreshold, len(mst))
@@ -2176,48 +2179,119 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 }
 
 func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
-	if len(th.Filters) == 0 {
-		return
-	}
-	for i, fltr := range th.Filters {
-		mdl := &TpThreshold{
-			Tpid:   th.TPid,
-			Tenant: th.Tenant,
-			ID:     th.ID,
+	if th != nil {
+		if len(th.FilterIDs) == 0 && len(th.ActionIDs) == 0 {
+			return
 		}
-		if i == 0 {
-			mdl.Blocker = th.Blocker
-			mdl.Weight = th.Weight
-			mdl.Recurrent = th.Recurrent
-			mdl.MinHits = th.MinHits
-			mdl.MinSleep = th.MinSleep
-			mdl.Async = th.Async
-			if th.ActivationInterval != nil {
-				if th.ActivationInterval.ActivationTime != "" {
-					mdl.ActivationInterval = th.ActivationInterval.ActivationTime
+		lenFilter := len(th.FilterIDs)
+		lenAction := len(th.ActionIDs)
+		var w int
+		if lenFilter > lenAction {
+			for i, action := range th.ActionIDs {
+				mdl := &TpThreshold{
+					Tpid:      th.TPid,
+					Tenant:    th.Tenant,
+					ID:        th.ID,
+					ActionIDs: action,
+					FilterIDs: th.FilterIDs[i],
 				}
-				if th.ActivationInterval.ExpiryTime != "" {
-					mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
+				if i == 0 {
+					mdl.Blocker = th.Blocker
+					mdl.Weight = th.Weight
+					mdl.Recurrent = th.Recurrent
+					mdl.MinHits = th.MinHits
+					mdl.MinSleep = th.MinSleep
+					mdl.Async = th.Async
+					if th.ActivationInterval != nil {
+						if th.ActivationInterval.ActivationTime != "" {
+							mdl.ActivationInterval = th.ActivationInterval.ActivationTime
+						}
+						if th.ActivationInterval.ExpiryTime != "" {
+							mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
+						}
+					}
 				}
+				mdls = append(mdls, mdl)
+				w = i
 			}
-			for i, atid := range th.ActionIDs {
-				if i != 0 {
-					mdl.ActionIDs = mdl.ActionIDs + utils.INFIELD_SEP + atid
-				} else {
-					mdl.ActionIDs = atid
+			for j := w; j < lenFilter; j++ {
+				mdl := &TpThreshold{
+					Tpid:      th.TPid,
+					Tenant:    th.Tenant,
+					ID:        th.ID,
+					FilterIDs: th.FilterIDs[j],
 				}
+				mdls = append(mdls, mdl)
 			}
+		}
+		if lenAction > lenFilter {
+			for i, filter := range th.FilterIDs {
+				mdl := &TpThreshold{
+					Tpid:      th.TPid,
+					Tenant:    th.Tenant,
+					ID:        th.ID,
+					ActionIDs: th.ActionIDs[i],
+					FilterIDs: filter,
+				}
+				if i == 0 {
+					mdl.Blocker = th.Blocker
+					mdl.Weight = th.Weight
+					mdl.Recurrent = th.Recurrent
+					mdl.MinHits = th.MinHits
+					mdl.MinSleep = th.MinSleep
+					mdl.Async = th.Async
+					if th.ActivationInterval != nil {
+						if th.ActivationInterval.ActivationTime != "" {
+							mdl.ActivationInterval = th.ActivationInterval.ActivationTime
+						}
+						if th.ActivationInterval.ExpiryTime != "" {
+							mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
+						}
+					}
+				}
+				mdls = append(mdls, mdl)
+				w = i
+			}
+			for j := w; j < lenAction; j++ {
+				mdl := &TpThreshold{
+					Tpid:      th.TPid,
+					Tenant:    th.Tenant,
+					ID:        th.ID,
+					ActionIDs: th.ActionIDs[j],
+				}
+				mdls = append(mdls, mdl)
+			}
+		}
+		if lenFilter == lenAction {
+			for i, filter := range th.FilterIDs {
+				mdl := &TpThreshold{
+					Tpid:      th.TPid,
+					Tenant:    th.Tenant,
+					ID:        th.ID,
+					ActionIDs: th.ActionIDs[i],
+					FilterIDs: filter,
+				}
+				if i == 0 {
+					mdl.Blocker = th.Blocker
+					mdl.Weight = th.Weight
+					mdl.Recurrent = th.Recurrent
+					mdl.MinHits = th.MinHits
+					mdl.MinSleep = th.MinSleep
+					mdl.Async = th.Async
+					if th.ActivationInterval != nil {
+						if th.ActivationInterval.ActivationTime != "" {
+							mdl.ActivationInterval = th.ActivationInterval.ActivationTime
+						}
+						if th.ActivationInterval.ExpiryTime != "" {
+							mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
+						}
+					}
+				}
+				mdls = append(mdls, mdl)
 
-		}
-		mdl.FilterType = fltr.Type
-		mdl.FilterFieldName = fltr.FieldName
-		for i, val := range fltr.Values {
-			if i != 0 {
-				mdl.FilterFieldValues += utils.INFIELD_SEP
 			}
-			mdl.FilterFieldValues += val
 		}
-		mdls = append(mdls, mdl)
+
 	}
 	return
 }
@@ -2231,7 +2305,6 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 		Weight:    tpTH.Weight,
 		Blocker:   tpTH.Blocker,
 		Async:     tpTH.Async,
-		Filters:   make([]*RequestFilter, len(tpTH.Filters)),
 	}
 	if tpTH.MinSleep != "" {
 		if th.MinSleep, err = utils.ParseDurationWithSecs(tpTH.MinSleep); err != nil {
@@ -2242,12 +2315,9 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 		th.ActionIDs = append(th.ActionIDs, ati)
 
 	}
-	for i, f := range tpTH.Filters {
-		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
-		if err := rf.CompileValues(); err != nil {
-			return nil, err
-		}
-		th.Filters[i] = rf
+	for _, fli := range tpTH.FilterIDs {
+		th.FilterIDs = append(th.FilterIDs, fli)
+
 	}
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {

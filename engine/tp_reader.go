@@ -2217,31 +2217,32 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 		}
-		if len(tpr.thProfiles) > 0 {
-			if verbose {
-				log.Print("Indexing thresholds")
-			}
-			for tenant, mpID := range tpr.thProfiles {
-				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ThresholdsIndex+tenant)
-				if err != nil {
-					return err
+		/*
+			if len(tpr.thProfiles) > 0 {
+				if verbose {
+					log.Print("Indexing thresholds")
 				}
-				for _, tpTH := range mpID {
-					if th, err := APItoThresholdProfile(tpTH, tpr.timezone); err != nil {
+				for tenant, mpID := range tpr.thProfiles {
+					stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ThresholdsIndex+tenant)
+					if err != nil {
 						return err
-					} else {
-						stIdxr.IndexFilters(th.ID, th.Filters)
+					}
+					for _, tpTH := range mpID {
+						if th, err := APItoThresholdProfile(tpTH, tpr.timezone); err != nil {
+							return err
+						} else {
+							stIdxr.IndexFilters(th.ID, th.Filters)
+						}
+					}
+					if verbose {
+						log.Printf("Indexed thresholds tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
+					}
+					if err := stIdxr.StoreIndexes(); err != nil {
+						return err
 					}
 				}
-				if verbose {
-					log.Printf("Indexed thresholds tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
-				}
-				if err := stIdxr.StoreIndexes(); err != nil {
-					return err
-				}
 			}
-		}
-
+		*/
 		if len(tpr.flProfiles) > 0 {
 			if verbose {
 				log.Print("Indexing Filters")
