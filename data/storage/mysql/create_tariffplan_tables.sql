@@ -456,9 +456,7 @@ CREATE TABLE tp_thresholds (
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
-  `filter_type` varchar(16) NOT NULL,
-  `filter_field_name` varchar(64) NOT NULL,
-  `filter_field_values` varchar(256) NOT NULL,
+  `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `recurrent` BOOLEAN NOT NULL,
   `min_hits` int(11) NOT NULL,
@@ -470,7 +468,7 @@ CREATE TABLE tp_thresholds (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_thresholds` (`tpid`,`tenant`, `id`, `filter_type`, `filter_field_name`)
+  UNIQUE KEY `unique_tp_thresholds` (`tpid`,`tenant`, `id`,`filter_ids`,`action_ids`)
 );
 
 --

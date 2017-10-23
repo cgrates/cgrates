@@ -36,7 +36,7 @@ import (
 type ThresholdProfile struct {
 	Tenant             string
 	ID                 string
-	Filters            []*RequestFilter          // Filters for the request
+	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
 	Recurrent          bool
 	MinHits            int
@@ -270,18 +270,20 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 			!tPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		passAllFilters := true
-		for _, fltr := range tPrfl.Filters {
-			if pass, err := fltr.Pass(ev.FilterableEvent(nil), "", tS.statS); err != nil {
-				return nil, err
-			} else if !pass {
-				passAllFilters = false
+		/*
+			passAllFilters := true
+			for _, fltr := range tPrfl.Filters {
+				if pass, err := fltr.Pass(ev.FilterableEvent(nil), "", tS.statS); err != nil {
+					return nil, err
+				} else if !pass {
+					passAllFilters = false
+					continue
+				}
+			}
+			if !passAllFilters {
 				continue
 			}
-		}
-		if !passAllFilters {
-			continue
-		}
+		*/
 		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
 		if err != nil {
 			return nil, err

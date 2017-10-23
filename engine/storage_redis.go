@@ -1447,11 +1447,6 @@ func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *Threshold
 	if err = rs.ms.Unmarshal(values, &tp); err != nil {
 		return
 	}
-	for _, fltr := range tp.Filters {
-		if err = fltr.CompileValues(); err != nil {
-			return
-		}
-	}
 	return
 }
 

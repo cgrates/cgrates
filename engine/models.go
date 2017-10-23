@@ -505,17 +505,15 @@ type TpThreshold struct {
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
-	FilterType         string  `index:"2" re:"^\*[A-Za-z].*"`
-	FilterFieldName    string  `index:"3" re:""`
-	FilterFieldValues  string  `index:"4" re:""`
-	ActivationInterval string  `index:"5" re:""`
-	Recurrent          bool    `index:"6" re:""`
-	MinHits            int     `index:"7" re:""`
-	MinSleep           string  `index:"8" re:""`
-	Blocker            bool    `index:"9" re:""`
-	Weight             float64 `index:"10" re:"\d+\.?\d*"`
-	ActionIDs          string  `index:"11" re:""`
-	Async              bool    `index:"12" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	Recurrent          bool    `index:"4" re:""`
+	MinHits            int     `index:"5" re:""`
+	MinSleep           string  `index:"6" re:""`
+	Blocker            bool    `index:"7" re:""`
+	Weight             float64 `index:"8" re:"\d+\.?\d*"`
+	ActionIDs          string  `index:"9" re:""`
+	Async              bool    `index:"10" re:""`
 	CreatedAt          time.Time
 }
 

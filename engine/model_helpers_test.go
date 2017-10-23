@@ -940,9 +940,7 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 		&TpThreshold{
 			Tpid:               "TEST_TPID",
 			ID:                 "Threhold",
-			FilterType:         MetaStringPrefix,
-			FilterFieldName:    "Account",
-			FilterFieldValues:  "1001;1002",
+			FilterIDs:          "FilterID1;FilterID2",
 			ActivationInterval: "2014-07-29T15:00:00Z",
 			Recurrent:          false,
 			MinHits:            10,
@@ -954,15 +952,9 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 	}
 	eTPs := []*utils.TPThreshold{
 		&utils.TPThreshold{
-			TPid: tps[0].Tpid,
-			ID:   tps[0].ID,
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
-					Type:      tps[0].FilterType,
-					FieldName: tps[0].FilterFieldName,
-					Values:    []string{"1001", "1002"},
-				},
-			},
+			TPid:      tps[0].Tpid,
+			ID:        tps[0].ID,
+			FilterIDs: []string{"FilterID1", "FilterID2"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
@@ -982,11 +974,9 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 
 func TestAPItoTPThreshold(t *testing.T) {
 	tps := &utils.TPThreshold{
-		TPid: testTPID,
-		ID:   "Stats1",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
-		},
+		TPid:               testTPID,
+		ID:                 "TH1",
+		FilterIDs:          []string{"FilterID1", "FilterID2"},
 		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
 		Recurrent:          false,
 		MinHits:            10,
@@ -998,18 +988,16 @@ func TestAPItoTPThreshold(t *testing.T) {
 
 	eTPs := &ThresholdProfile{
 		ID:        tps.ID,
-		Filters:   make([]*RequestFilter, len(tps.Filters)),
 		Recurrent: tps.Recurrent,
 		Blocker:   tps.Blocker,
 		MinHits:   tps.MinHits,
 		Weight:    tps.Weight,
+		FilterIDs: tps.FilterIDs,
 		ActionIDs: []string{"WARN3"},
 	}
 	if eTPs.MinSleep, err = utils.ParseDurationWithSecs(tps.MinSleep); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
-	eTPs.Filters[0] = &RequestFilter{Type: MetaString,
-		FieldName: "Account", Values: []string{"1001", "1002"}}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 	if st, err := APItoThresholdProfile(tps, "UTC"); err != nil {
