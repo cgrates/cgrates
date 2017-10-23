@@ -277,9 +277,10 @@ cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*a
 `
 
 	thresholds = `
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinSleep[7],Blocker[8],Weight[9],ActionIDs[10],Async[11]
-cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,1s,true,10,THRESH1;THRESH2,true
+#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],Recurrent[6],MinHits[7],MinSleep[8],Blocker[9],Weight[10],ActionIDs[11],Async[12]
+cgrates.org,Threshold1,*string,Account,1001;1002,2014-07-29T15:00:00Z,true,10,1s,true,10,THRESH1;THRESH2,true
 `
+
 	filters = `
 #Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
 cgrates.org,FLTR_1,*string,Account,1001;1002,2014-07-29T15:00:00Z
@@ -1494,6 +1495,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 					ActivationTime: "2014-07-29T15:00:00Z",
 				},
 				Recurrent: true,
+				MinHits:   10,
 				MinSleep:  "1s",
 				Blocker:   true,
 				Weight:    10,
