@@ -1660,9 +1660,8 @@ func (tpr *TpReader) LoadStats() error {
 	return tpr.LoadStatsFiltered("")
 }
 
-
 func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
-	tps, err := tpr.lr.GetTPThreshold(tpr.tpid, tag)
+	tps, err := tpr.lr.GetTPThresholds(tpr.tpid, tag)
 	if err != nil {
 		return err
 	}
