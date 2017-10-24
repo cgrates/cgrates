@@ -1509,7 +1509,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 	}
 }
 
-func TestLoadFilterProfiles(t *testing.T) {
+func TestLoadFilters(t *testing.T) {
 	eFilters := map[string]map[string]*utils.TPFilter{
 		"cgrates.org": map[string]*utils.TPFilter{
 			"FLTR_1": &utils.TPFilter{
@@ -1584,10 +1584,10 @@ func TestLoadFilterProfiles(t *testing.T) {
 			},
 		},
 	}
-	if len(csvr.flProfiles["cgrates.org"]) != len(eFilters["cgrates.org"]) {
-		t.Errorf("Failed to load FilterProfiles: %s", utils.ToIJSON(csvr.flProfiles))
-	} else if !reflect.DeepEqual(eFilters["cgrates.org"]["FLTR_1"], csvr.flProfiles["cgrates.org"]["FLTR_1"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters["cgrates.org"]["FLTR_1"], csvr.flProfiles["cgrates.org"]["FLTR_1"])
+	if len(csvr.filters["cgrates.org"]) != len(eFilters["cgrates.org"]) {
+		t.Errorf("Failed to load FilterProfiles: %s", utils.ToIJSON(csvr.filters))
+	} else if !reflect.DeepEqual(eFilters["cgrates.org"]["FLTR_1"], csvr.filters["cgrates.org"]["FLTR_1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters["cgrates.org"]["FLTR_1"], csvr.filters["cgrates.org"]["FLTR_1"])
 	}
 
 }
@@ -1635,29 +1635,5 @@ func TestLoadThresholds(t *testing.T) {
 		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
 	} else if !reflect.DeepEqual(eThresholds, csvr.thresholds) {
 		t.Errorf("Expecting: %+v, received: %+v", eThresholds, csvr.thresholds)
-	}
-}
-
-func TestLoadFilters(t *testing.T) {
-	eFilters := []*utils.TenantID{
-		&utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "FLTR_1",
-		},
-		&utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "FLTR_ACNT_dan",
-		},
-		&utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "FLTR_DST_DE",
-		},
-		&utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "FLTR_DST_NL",
-		},
-	}
-	if len(csvr.filters) != len(eFilters) {
-		t.Errorf("Failed to load filters: %s", utils.ToIJSON(csvr.filters))
 	}
 }

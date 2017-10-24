@@ -57,11 +57,10 @@ type TpReader struct {
 	resProfiles      map[string]map[string]*utils.TPResource
 	sqProfiles       map[string]map[string]*utils.TPStats
 	thProfiles       map[string]map[string]*utils.TPThreshold
-	flProfiles       map[string]map[string]*utils.TPFilter
+	filters          map[string]map[string]*utils.TPFilter
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
-	filters          []*utils.TenantID
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
@@ -136,7 +135,7 @@ func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[string]map[string]*utils.TPResource)
 	tpr.sqProfiles = make(map[string]map[string]*utils.TPStats)
 	tpr.thProfiles = make(map[string]map[string]*utils.TPThreshold)
-	tpr.flProfiles = make(map[string]map[string]*utils.TPFilter)
+	tpr.filters = make(map[string]map[string]*utils.TPFilter)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1701,17 +1700,7 @@ func (tpr *TpReader) LoadFilterFiltered(tag string) error {
 		}
 		mapTHs[th.Tenant][th.ID] = th
 	}
-	tpr.flProfiles = mapTHs
-	for tenant, mpID := range mapTHs {
-		for thID := range mpID {
-			thTntID := &utils.TenantID{Tenant: tenant, ID: thID}
-			if has, err := tpr.dm.DataDB().HasData(utils.FilterPrefix, thTntID.TenantID()); err != nil {
-				return err
-			} else if !has {
-				tpr.filters = append(tpr.filters, thTntID)
-			}
-		}
-	}
+	tpr.filters = mapTHs
 	return nil
 }
 
@@ -2106,9 +2095,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("FilterProfile:")
+		log.Print("Filters:")
 	}
-	for _, mpID := range tpr.flProfiles {
+	for _, mpID := range tpr.filters {
 		for _, tpTH := range mpID {
 			th, err := APItoFilter(tpTH, tpr.timezone)
 			if err != nil {
@@ -2120,17 +2109,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if verbose {
 				log.Print("\t", th.TenantID())
 			}
-		}
-	}
-	if verbose {
-		log.Print("Filters:")
-	}
-	for _, thd := range tpr.filters {
-		if err = tpr.dm.SetFilter(&Filter{Tenant: thd.Tenant, ID: thd.ID}); err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", thd.TenantID())
 		}
 	}
 	if verbose {
@@ -2243,11 +2221,11 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 		*/
-		if len(tpr.flProfiles) > 0 {
+		if len(tpr.filters) > 0 {
 			if verbose {
 				log.Print("Indexing Filters")
 			}
-			for tenant, mpID := range tpr.flProfiles {
+			for tenant, mpID := range tpr.filters {
 				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.FilterIndex+tenant)
 				if err != nil {
 					return err
@@ -2335,7 +2313,7 @@ func (tpr *TpReader) ShowStatistics() {
 	// thresholds
 	log.Print("Thresholds: ", len(tpr.thProfiles))
 	// filters
-	log.Print("Filters: ", len(tpr.flProfiles))
+	log.Print("Filters: ", len(tpr.filters))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2486,9 +2464,9 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		}
 		return keys, nil
 	case utils.FilterPrefix:
-		keys := make([]string, len(tpr.flProfiles))
+		keys := make([]string, len(tpr.filters))
 		i := 0
-		for k := range tpr.flProfiles {
+		for k := range tpr.filters {
 			keys[i] = k
 			i++
 		}
