@@ -93,16 +93,16 @@ func main() {
 		} else { // Default load from csv files to dataDb
 			dm, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, config.CgrConfig().CacheConfig, *loadHistorySize)
 		}
-		// Defer databases opened to be closed when we are done
-		for _, db := range []engine.Storage{dm.DataDB(), storDb} {
-			if db != nil {
-				defer db.Close()
-			}
-		}
 		// Stop on db errors
 		for _, err = range []error{errDataDB, errDataDB, errStorDb} {
 			if err != nil {
 				log.Fatalf("Could not open database connection: %v", err)
+			}
+		}
+		// Defer databases opened to be closed when we are done
+		for _, db := range []engine.Storage{dm.DataDB(), storDb} {
+			if db != nil {
+				defer db.Close()
 			}
 		}
 		if *toStorDb { // Import files from a directory into storDb
