@@ -361,7 +361,7 @@ func init() {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

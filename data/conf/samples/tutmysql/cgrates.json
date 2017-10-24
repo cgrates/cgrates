@@ -37,6 +37,10 @@
 	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
 	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
+	"statqueues": {"limit": 10000, "ttl":"0s", "precache": true},
+	"statqueue_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"thresholds": {"limit": 10000, "ttl":"0s", "precache": true},
+	"threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 },
 
 
@@ -44,7 +48,7 @@
 	"enabled": true,
 	"thresholds_conns": [
 		{"address": "*internal"}
-	],	
+	],
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],

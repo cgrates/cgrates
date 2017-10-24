@@ -38,7 +38,7 @@ func (dm *DataManager) DataDB() DataDB {
 	return dm.dataDB
 }
 
-func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs []string) (err error) {
+func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs []string) (err error) {
 	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
 		if dm.cacheCfg == nil {
 			return
@@ -48,7 +48,8 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
 				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
-				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX}, k) && cacheCfg.Precache {
+				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix, utils.StatQueueProfilePrefix,
+				utils.ThresholdPrefix, utils.ThresholdProfilePrefix}, k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 					return err
 				}
@@ -72,6 +73,10 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.REVERSE_ALIASES_PREFIX:     rvAlsIDs,
 			utils.ResourceProfilesPrefix:     rpIDs,
 			utils.ResourcesPrefix:            resIDs,
+			utils.StatQueuePrefix:            stqIDs,
+			utils.StatQueueProfilePrefix:     stqpIDs,
+			utils.ThresholdPrefix:            thIDs,
+			utils.ThresholdProfilePrefix:     thpIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -123,7 +128,11 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceProfilesPrefix,
 		utils.TimingsPrefix,
-		utils.ResourcesPrefix}, prfx) {
+		utils.ResourcesPrefix,
+		utils.StatQueuePrefix,
+		utils.StatQueueProfilePrefix,
+		utils.ThresholdPrefix,
+		utils.ThresholdProfilePrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
