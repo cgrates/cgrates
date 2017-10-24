@@ -1179,7 +1179,7 @@ func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStats) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, error) {
+func (ms *MongoStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -1196,7 +1196,7 @@ func (ms *MongoStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, e
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPThreshold(tpTHs []*utils.TPThreshold) (err error) {
+func (ms *MongoStorage) SetTPThresholds(tpTHs []*utils.TPThreshold) (err error) {
 	if len(tpTHs) == 0 {
 		return
 	}
@@ -1210,7 +1210,7 @@ func (ms *MongoStorage) SetTPThreshold(tpTHs []*utils.TPThreshold) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPFilter(tpid, id string) ([]*utils.TPFilter, error) {
+func (ms *MongoStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -1227,7 +1227,7 @@ func (ms *MongoStorage) GetTPFilter(tpid, id string) ([]*utils.TPFilter, error) 
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPFilter(tpTHs []*utils.TPFilter) (err error) {
+func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilter) (err error) {
 	if len(tpTHs) == 0 {
 		return
 	}

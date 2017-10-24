@@ -27,7 +27,7 @@ func (self *ApierV1) SetTPFilter(attrs utils.TPFilter, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPFilter([]*utils.TPFilter{&attrs}); err != nil {
+	if err := self.StorDb.SetTPFilters([]*utils.TPFilter{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -44,7 +44,7 @@ func (self *ApierV1) GetTPFilter(attr AttrGetTPFilter, reply *utils.TPFilter) er
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if filter, err := self.StorDb.GetTPFilter(attr.TPid, attr.ID); err != nil {
+	if filter, err := self.StorDb.GetTPFilters(attr.TPid, attr.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

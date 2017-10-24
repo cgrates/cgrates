@@ -380,20 +380,20 @@ func (self *TPCSVImporter) importThresholds(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	sts, err := self.csvr.GetTPThreshold(self.TPid, "")
+	sts, err := self.csvr.GetTPThresholds(self.TPid, "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPThreshold(sts)
+	return self.StorDb.SetTPThresholds(sts)
 }
 
 func (self *TPCSVImporter) importFilters(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	sts, err := self.csvr.GetTPFilter(self.TPid, "")
+	sts, err := self.csvr.GetTPFilters(self.TPid, "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPFilter(sts)
+	return self.StorDb.SetTPFilters(sts)
 }

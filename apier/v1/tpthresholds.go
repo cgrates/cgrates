@@ -27,7 +27,7 @@ func (self *ApierV1) SetTPThreshold(attr utils.TPThreshold, reply *string) error
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPThreshold([]*utils.TPThreshold{&attr}); err != nil {
+	if err := self.StorDb.SetTPThresholds([]*utils.TPThreshold{&attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -45,7 +45,7 @@ func (self *ApierV1) GetTPThreshold(attr AttrGetTPThreshold, reply *utils.TPThre
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rls, err := self.StorDb.GetTPThreshold(attr.TPid, attr.ID); err != nil {
+	if rls, err := self.StorDb.GetTPThresholds(attr.TPid, attr.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
