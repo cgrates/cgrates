@@ -2419,3 +2419,28 @@ func APItoFilter(tpTH *utils.TPFilter, timezone string) (th *Filter, err error) 
 	}
 	return th, nil
 }
+
+func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilter) {
+	tpFltr = &utils.TPFilter{
+		Tenant:  f.Tenant,
+		ID:      f.ID,
+		Filters: make([]*utils.TPRequestFilter, len(f.RequestFilters)),
+	}
+	for i, reqFltr := range f.RequestFilters {
+		tpFltr.Filters[i] = &utils.TPRequestFilter{
+			Type:      reqFltr.Type,
+			FieldName: reqFltr.FieldName,
+			Values:    make([]string, len(reqFltr.Values)),
+		}
+		for j, val := range reqFltr.Values {
+			tpFltr.Filters[i].Values[j] = val
+		}
+	}
+	if f.ActivationInterval != nil {
+		tpFltr.ActivationInterval = &utils.TPActivationInterval{
+			ActivationTime: f.ActivationInterval.ActivationTime.Format(time.RFC3339),
+			ExpiryTime:     f.ActivationInterval.ExpiryTime.Format(time.RFC3339),
+		}
+	}
+	return
+}

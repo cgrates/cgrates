@@ -80,6 +80,37 @@ func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilt
 	return
 }
 
+// IndexFilters parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
+func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilter, itemID string) {
+	var hasMetaString bool
+	for _, fltr := range tpFltr.Filters {
+		if fltr.Type != MetaString {
+			continue
+		}
+		hasMetaString = true // Mark that we found at least one metatring so we don't index globally
+		if _, hastIt := rfi.indexes[fltr.FieldName]; !hastIt {
+			rfi.indexes[fltr.FieldName] = make(map[string]utils.StringMap)
+		}
+		for _, fldVal := range fltr.Values {
+			if _, hasIt := rfi.indexes[fltr.FieldName][fldVal]; !hasIt {
+				rfi.indexes[fltr.FieldName][fldVal] = make(utils.StringMap)
+			}
+			rfi.indexes[fltr.FieldName][fldVal][itemID] = true
+			rfi.chngdIndxKeys[utils.ConcatenatedKey(fltr.FieldName, fldVal)] = true
+		}
+	}
+	if !hasMetaString {
+		if _, hasIt := rfi.indexes[utils.NOT_AVAILABLE]; !hasIt {
+			rfi.indexes[utils.NOT_AVAILABLE] = make(map[string]utils.StringMap)
+		}
+		if _, hasIt := rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE]; !hasIt {
+			rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] = make(utils.StringMap)
+		}
+		rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE][NOT_AVAILABLE][rl.ID]
+	}
+	return
+}
+
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *ReqFilterIndexer) StoreIndexes() error {
 	return rfi.dm.DataDB().SetReqFilterIndexes(rfi.dbKey, rfi.indexes)

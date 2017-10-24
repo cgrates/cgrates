@@ -64,6 +64,7 @@ type TpReader struct {
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
+	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -139,6 +140,7 @@ func (tpr *TpReader) Init() {
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
+	tpr.thdsIndexers = make(map[string]*ReqFilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1658,7 +1660,7 @@ func (tpr *TpReader) LoadStats() error {
 	return tpr.LoadStatsFiltered("")
 }
 
-func (tpr *TpReader) LoadThresholdsFiltered(tag string) error {
+func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	tps, err := tpr.lr.GetTPThreshold(tpr.tpid, tag)
 	if err != nil {
 		return err
@@ -1672,12 +1674,34 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) error {
 	}
 	tpr.thProfiles = mapTHs
 	for tenant, mpID := range mapTHs {
-		for thID := range mpID {
+		thdIndxrKey := utils.ThresholdStringIndex + tenant
+		for thID, t := range mpID {
 			thTntID := &utils.TenantID{Tenant: tenant, ID: thID}
 			if has, err := tpr.dm.DataDB().HasData(utils.ThresholdPrefix, thTntID.TenantID()); err != nil {
 				return err
 			} else if !has {
 				tpr.thresholds = append(tpr.thresholds, thTntID)
+			}
+			// index thresholds for filters
+			if _, has := tpr.thdsIndexers[tenant]; !has {
+				if tpr.thdsIndexers[tenant], err = NewReqFilterIndexer(tpr.dm, thdIndxrKey); err != nil {
+					return
+				}
+			}
+			for _, fltrID := range t.FilterIDs {
+				tpFltr, has := tpr.filters[utils.TenantID{tenant, fltrID}]
+				if !has {
+					var fltr *Filter
+					if fltr, err = tpr.dm.GetFilter(tenant, fltrID, false, utils.NonTransactional); err != nil {
+						if err == utils.ErrNotFound {
+							err = fmt.Errorf("broken reference to filter: %s for threshold: %s", fltrID, thID)
+						}
+						return
+					} else {
+						tpFltr = FilterToTPFilter(fltr)
+					}
+				}
+				tpr.thdsIndexers[tenant].IndexTPFilter(tpFltr, thID)
 			}
 		}
 	}
@@ -1999,6 +2023,21 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
+		log.Print("Filters:")
+	}
+	for _, tpTH := range tpr.filters {
+		th, err := APItoFilter(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dm.SetFilter(th); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
+		}
+	}
+	if verbose {
 		log.Print("ResourceProfiles:")
 	}
 	for _, mpID := range tpr.resProfiles {
@@ -2092,21 +2131,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("Filters:")
-	}
-	for _, tpTH := range tpr.filters {
-		th, err := APItoFilter(tpTH, tpr.timezone)
-		if err != nil {
-			return err
-		}
-		if err = tpr.dm.SetFilter(th); err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", th.TenantID())
-		}
-	}
-	if verbose {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
@@ -2190,32 +2214,17 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 		}
-		/*
-			if len(tpr.thProfiles) > 0 {
-				if verbose {
-					log.Print("Indexing thresholds")
-				}
-				for tenant, mpID := range tpr.thProfiles {
-					stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ThresholdsIndex+tenant)
-					if err != nil {
-						return err
-					}
-					for _, tpTH := range mpID {
-						if th, err := APItoThresholdProfile(tpTH, tpr.timezone); err != nil {
-							return err
-						} else {
-							stIdxr.IndexFilters(th.ID, th.Filters)
-						}
-					}
-					if verbose {
-						log.Printf("Indexed thresholds tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
-					}
-					if err := stIdxr.StoreIndexes(); err != nil {
-						return err
-					}
-				}
+		if verbose {
+			log.Print("Threshold filter indexes:")
+		}
+		for tenant, fltrIdxer := range tpr.thdsIndexers {
+			if err := fltrIdxer.StoreIndexes(); err != nil {
+				return err
 			}
-		*/
+			if verbose {
+				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
+			}
+		}
 	}
 	return
 }
