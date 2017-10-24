@@ -250,11 +250,11 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
 func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts Thresholds, err error) {
 	matchingTs := make(map[string]*Threshold)
-	tIDs, err := matchingItemIDsForEvent(ev.Event, tS.dm, utils.ThresholdsIndex+ev.Tenant)
+	tIDs, err := matchingItemIDsForEvent(ev.Event, tS.dm, utils.ThresholdStringIndex+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(tIDs.Slice(), utils.ThresholdsIndex)
+	lockIDs := utils.PrefixSliceItems(tIDs.Slice(), utils.ThresholdStringIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for tID := range tIDs {

@@ -1287,12 +1287,6 @@ type TPResource struct {
 	Thresholds         []string // Thresholds to check after changing Limit
 }
 
-type TPRequestFilter struct {
-	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FieldName string   // Name of the field providing us the Values to check (used in case of some )
-	Values    []string // Filter definition
-}
-
 // TPActivationInterval represents an activation interval for an item
 type TPActivationInterval struct {
 	ActivationTime,
@@ -1380,4 +1374,10 @@ type TPFilter struct {
 	ID                 string
 	Filters            []*TPRequestFilter
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+}
+
+type TPRequestFilter struct {
+	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	FieldName string   // Name of the field providing us the Values to check (used in case of some )
+	Values    []string // Filter definition
 }
