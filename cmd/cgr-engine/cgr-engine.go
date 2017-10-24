@@ -595,9 +595,11 @@ func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.R
 
 // startThresholdService fires up the ThresholdS
 func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().FilteredFields,
-		cfg.ThresholdSCfg().StoreInterval, nil)
+		cfg.ThresholdSCfg().StoreInterval, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -615,6 +617,15 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 	tSv1 := v1.NewThresholdSV1(tS)
 	server.RpcRegister(tSv1)
 	internalThresholdSChan <- tSv1
+}
+
+// startFilterService fires up the FilterS
+func startFilterService(filterSChan chan *engine.FilterS,
+	internalStatSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+	dm *engine.DataManager, exitChan chan bool) {
+
+	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, dm)
+
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
@@ -792,6 +803,7 @@ func main() {
 	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
+	filterSChan := make(chan *engine.FilterS, 1)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheDoneChan)
@@ -893,8 +905,10 @@ func main() {
 		go startStatService(internalStatSChan, internalThresholdSChan, cfg, dm, server, exitChan)
 	}
 
+	startFilterService(filterSChan, internalStatSChan, cfg, dm, exitChan)
+
 	if cfg.ThresholdSCfg().Enabled {
-		go startThresholdService(internalThresholdSChan, cfg, dm, server, exitChan)
+		go startThresholdService(internalThresholdSChan, cfg, dm, server, exitChan, filterSChan)
 	}
 
 	// Serve rpc connections

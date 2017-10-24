@@ -30,7 +30,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type ThresholdProfile struct {
@@ -149,11 +148,11 @@ func (ts Thresholds) Sort() {
 }
 
 func NewThresholdService(dm *DataManager, filteredFields []string, storeInterval time.Duration,
-	statS *rpcclient.RpcClientPool) (tS *ThresholdService, err error) {
+	filterS *FilterS) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm,
 		filteredFields: filteredFields,
 		storeInterval:  storeInterval,
-		statS:          statS,
+		filterS:        filterS,
 		stopBackup:     make(chan struct{}),
 		storedTdIDs:    make(utils.StringMap)}, nil
 }
@@ -163,7 +162,7 @@ type ThresholdService struct {
 	dm             *DataManager
 	filteredFields []string // fields considered when searching for matching thresholds
 	storeInterval  time.Duration
-	statS          *rpcclient.RpcClientPool // allows applying filters based on stats
+	filterS        *FilterS
 	stopBackup     chan struct{}
 	storedTdIDs    utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
 	stMux          sync.RWMutex    // protects storedTdIDs
