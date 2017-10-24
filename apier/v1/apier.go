@@ -953,6 +953,59 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.DataManager.CacheDataFromDB(utils.ResourcesPrefix, dataIDs, true); err != nil {
 		return
 	}
+	// StatQueues
+	dataIDs = make([]string, 0)
+	if attrs.StatsQueueIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.StatsQueueIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.StatsQueueIDs))
+		for idx, dId := range *attrs.StatsQueueIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataManager.CacheDataFromDB(utils.StatQueuePrefix, dataIDs, true); err != nil {
+		return
+	}
+	// StatQueueProfiles
+	dataIDs = make([]string, 0)
+	if attrs.StatsQueueProfileIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.StatsQueueProfileIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.StatsQueueProfileIDs))
+		for idx, dId := range *attrs.StatsQueueProfileIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataManager.CacheDataFromDB(utils.StatQueueProfilePrefix, dataIDs, true); err != nil {
+		return
+	}
+	// Thresholds
+	dataIDs = make([]string, 0)
+	if attrs.ThresholdIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ThresholdIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ThresholdIDs))
+		for idx, dId := range *attrs.ThresholdIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataManager.CacheDataFromDB(utils.ThresholdPrefix, dataIDs, true); err != nil {
+		return
+	}
+	// ThresholdProfiles
+	dataIDs = make([]string, 0)
+	if attrs.ThresholdProfileIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ThresholdProfileIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ThresholdProfileIDs))
+		for idx, dId := range *attrs.ThresholdProfileIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataManager.CacheDataFromDB(utils.ThresholdProfilePrefix, dataIDs, true); err != nil {
+		return
+	}
+
 	*reply = utils.OK
 	return nil
 }
@@ -961,7 +1014,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if args.FlushAll {
 		cache.Flush()
 	}
-	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs []string
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs []string
 	if args.DestinationIDs == nil {
 		dstIDs = nil
 	} else {
@@ -1037,8 +1090,28 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		resIDs = *args.ResourceIDs
 	}
+	if args.StatsQueueIDs == nil {
+		stqIDs = nil
+	} else {
+		stqIDs = *args.StatsQueueIDs
+	}
+	if args.StatsQueueProfileIDs == nil {
+		stqpIDs = nil
+	} else {
+		stqpIDs = *args.StatsQueueProfileIDs
+	}
+	if args.ThresholdIDs == nil {
+		thIDs = nil
+	} else {
+		thIDs = *args.ThresholdIDs
+	}
+	if args.ThresholdProfileIDs == nil {
+		thpIDs = nil
+	} else {
+		thpIDs = *args.ThresholdProfileIDs
+	}
 
-	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs); err != nil {
+	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -1150,6 +1223,35 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 			cache.RemKey(utils.ResourcesPrefix+key, true, utils.NonTransactional)
 		}
 	}
+	if args.StatsQueueIDs == nil {
+		cache.RemPrefixKey(utils.StatQueuePrefix, true, utils.NonTransactional)
+	} else if len(*args.StatsQueueIDs) != 0 {
+		for _, key := range *args.StatsQueueIDs {
+			cache.RemKey(utils.StatQueuePrefix+key, true, utils.NonTransactional)
+		}
+	}
+	if args.StatsQueueProfileIDs == nil {
+		cache.RemPrefixKey(utils.StatQueueProfilePrefix, true, utils.NonTransactional)
+	} else if len(*args.StatsQueueProfileIDs) != 0 {
+		for _, key := range *args.StatsQueueProfileIDs {
+			cache.RemKey(utils.StatQueueProfilePrefix+key, true, utils.NonTransactional)
+		}
+	}
+	if args.ThresholdIDs == nil {
+		cache.RemPrefixKey(utils.ThresholdPrefix, true, utils.NonTransactional)
+	} else if len(*args.ThresholdIDs) != 0 {
+		for _, key := range *args.ThresholdProfileIDs {
+			cache.RemKey(utils.ThresholdPrefix+key, true, utils.NonTransactional)
+		}
+	}
+	if args.ThresholdProfileIDs == nil {
+		cache.RemPrefixKey(utils.ThresholdProfilePrefix, true, utils.NonTransactional)
+	} else if len(*args.ThresholdProfileIDs) != 0 {
+		for _, key := range *args.ThresholdProfileIDs {
+			cache.RemKey(utils.ThresholdProfilePrefix+key, true, utils.NonTransactional)
+		}
+	}
+
 	*reply = utils.OK
 	return
 }
@@ -1170,6 +1272,10 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.ReverseAliases = cache.CountEntries(utils.REVERSE_ALIASES_PREFIX)
 	cs.ResourceProfiles = cache.CountEntries(utils.ResourceProfilesPrefix)
 	cs.Resources = cache.CountEntries(utils.ResourcesPrefix)
+	cs.StatQueues = cache.CountEntries(utils.StatQueuePrefix)
+	cs.StatQueueProfiles = cache.CountEntries(utils.StatQueueProfilePrefix)
+	cs.Thresholds = cache.CountEntries(utils.ThresholdPrefix)
+	cs.ThresholdProfiles = cache.CountEntries(utils.ThresholdProfilePrefix)
 
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
@@ -1463,6 +1569,83 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 			reply.ResourceIDs = &ids
 		}
 	}
+
+	if args.StatsQueueIDs != nil {
+		var ids []string
+		if len(*args.StatsQueueIDs) != 0 {
+			for _, id := range *args.StatsQueueIDs {
+				if _, hasIt := cache.Get(utils.StatQueuePrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.StatQueuePrefix) {
+				ids = append(ids, id[len(utils.StatQueuePrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.StatsQueueIDs = &ids
+		}
+	}
+
+	if args.StatsQueueProfileIDs != nil {
+		var ids []string
+		if len(*args.StatsQueueProfileIDs) != 0 {
+			for _, id := range *args.StatsQueueProfileIDs {
+				if _, hasIt := cache.Get(utils.StatQueueProfilePrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.StatQueueProfilePrefix) {
+				ids = append(ids, id[len(utils.StatQueueProfilePrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.StatsQueueProfileIDs = &ids
+		}
+	}
+
+	if args.ThresholdIDs != nil {
+		var ids []string
+		if len(*args.ThresholdIDs) != 0 {
+			for _, id := range *args.ThresholdIDs {
+				if _, hasIt := cache.Get(utils.ThresholdPrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.ThresholdPrefix) {
+				ids = append(ids, id[len(utils.ThresholdPrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ThresholdIDs = &ids
+		}
+	}
+
+	if args.ThresholdProfileIDs != nil {
+		var ids []string
+		if len(*args.ThresholdProfileIDs) != 0 {
+			for _, id := range *args.ThresholdProfileIDs {
+				if _, hasIt := cache.Get(utils.ThresholdProfilePrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.ThresholdProfilePrefix) {
+				ids = append(ids, id[len(utils.ThresholdProfilePrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ThresholdProfileIDs = &ids
+		}
+	}
+
 	return
 }
 

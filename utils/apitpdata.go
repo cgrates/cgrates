@@ -670,8 +670,10 @@ type ArgsCache struct {
 	ReverseAliasIDs       *[]string
 	ResourceProfileIDs    *[]string
 	ResourceIDs           *[]string
-	StatsIDs              *[]string
-	ThresholdsIDs         *[]string
+	StatsQueueIDs         *[]string
+	StatsQueueProfileIDs  *[]string
+	ThresholdIDs          *[]string
+	ThresholdProfileIDs   *[]string
 }
 
 // Data used to do remote cache reloads via api
@@ -708,8 +710,10 @@ type CacheStats struct {
 	ReverseAliases      int
 	ResourceProfiles    int
 	Resources           int
-	//Stats               int
-	//thresholds		  int
+	StatQueues          int
+	StatQueueProfiles   int
+	Thresholds          int
+	ThresholdProfiles   int
 }
 
 type AttrExpFileCdrs struct {
