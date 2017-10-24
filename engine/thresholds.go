@@ -250,7 +250,7 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
 func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts Thresholds, err error) {
 	matchingTs := make(map[string]*Threshold)
-	tIDs, err := matchingItemIDsForEvent(ev.Event, tS.dm, utils.ThresholdsIndex+ev.Tenant)
+	tIDs, err := matchingItemIDsForEvent(ev.Event, tS.dm, utils.ThresholdStringIndex+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
