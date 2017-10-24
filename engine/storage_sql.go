@@ -620,7 +620,7 @@ func (self *SQLStorage) SetTPStats(sts []*utils.TPStats) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPThreshold(ths []*utils.TPThreshold) error {
+func (self *SQLStorage) SetTPThresholds(ths []*utils.TPThreshold) error {
 	if len(ths) == 0 {
 		return nil
 	}
@@ -642,7 +642,7 @@ func (self *SQLStorage) SetTPThreshold(ths []*utils.TPThreshold) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPFilter(ths []*utils.TPFilter) error {
+func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilter) error {
 	if len(ths) == 0 {
 		return nil
 	}
@@ -1610,7 +1610,7 @@ func (self *SQLStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
 	return asts, nil
 }
 
-func (self *SQLStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, error) {
+func (self *SQLStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, error) {
 	var ths TpThresholdS
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
@@ -1626,7 +1626,7 @@ func (self *SQLStorage) GetTPThreshold(tpid, id string) ([]*utils.TPThreshold, e
 	return aths, nil
 }
 
-func (self *SQLStorage) GetTPFilter(tpid, id string) ([]*utils.TPFilter, error) {
+func (self *SQLStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error) {
 	var ths TpFilterS
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
