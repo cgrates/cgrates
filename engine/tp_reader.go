@@ -57,7 +57,7 @@ type TpReader struct {
 	resProfiles      map[string]map[string]*utils.TPResource
 	sqProfiles       map[string]map[string]*utils.TPStats
 	thProfiles       map[string]map[string]*utils.TPThreshold
-	filters          map[string]map[string]*utils.TPFilter
+	filters          map[utils.TenantID]*utils.TPFilter
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
@@ -135,7 +135,7 @@ func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[string]map[string]*utils.TPResource)
 	tpr.sqProfiles = make(map[string]map[string]*utils.TPStats)
 	tpr.thProfiles = make(map[string]map[string]*utils.TPThreshold)
-	tpr.filters = make(map[string]map[string]*utils.TPFilter)
+	tpr.filters = make(map[utils.TenantID]*utils.TPFilter)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1693,12 +1693,9 @@ func (tpr *TpReader) LoadFilterFiltered(tag string) error {
 	if err != nil {
 		return err
 	}
-	mapTHs := make(map[string]map[string]*utils.TPFilter)
+	mapTHs := make(map[utils.TenantID]*utils.TPFilter)
 	for _, th := range tps {
-		if _, has := mapTHs[th.Tenant]; !has {
-			mapTHs[th.Tenant] = make(map[string]*utils.TPFilter)
-		}
-		mapTHs[th.Tenant][th.ID] = th
+		mapTHs[utils.TenantID{th.Tenant, th.ID}] = th
 	}
 	tpr.filters = mapTHs
 	return nil
@@ -2097,18 +2094,16 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if verbose {
 		log.Print("Filters:")
 	}
-	for _, mpID := range tpr.filters {
-		for _, tpTH := range mpID {
-			th, err := APItoFilter(tpTH, tpr.timezone)
-			if err != nil {
-				return err
-			}
-			if err = tpr.dm.SetFilter(th); err != nil {
-				return err
-			}
-			if verbose {
-				log.Print("\t", th.TenantID())
-			}
+	for _, tpTH := range tpr.filters {
+		th, err := APItoFilter(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dm.SetFilter(th); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
 		}
 	}
 	if verbose {
@@ -2221,30 +2216,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 		*/
-		if len(tpr.filters) > 0 {
-			if verbose {
-				log.Print("Indexing Filters")
-			}
-			for tenant, mpID := range tpr.filters {
-				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.FilterIndex+tenant)
-				if err != nil {
-					return err
-				}
-				for _, tpTH := range mpID {
-					if th, err := APItoFilter(tpTH, tpr.timezone); err != nil {
-						return err
-					} else {
-						stIdxr.IndexFilters(th.ID, th.RequestFilters)
-					}
-				}
-				if verbose {
-					log.Printf("Indexed filters tenant: %s, keys %+v", tenant, stIdxr.ChangedKeys().Slice())
-				}
-				if err := stIdxr.StoreIndexes(); err != nil {
-					return err
-				}
-			}
-		}
 	}
 	return
 }
@@ -2467,7 +2438,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.filters))
 		i := 0
 		for k := range tpr.filters {
-			keys[i] = k
+			keys[i] = k.TenantID()
 			i++
 		}
 		return keys, nil

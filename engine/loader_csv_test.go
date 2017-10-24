@@ -1510,84 +1510,83 @@ func TestLoadThresholdProfiles(t *testing.T) {
 }
 
 func TestLoadFilters(t *testing.T) {
-	eFilters := map[string]map[string]*utils.TPFilter{
-		"cgrates.org": map[string]*utils.TPFilter{
-			"FLTR_1": &utils.TPFilter{
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "FLTR_1",
-				Filters: []*utils.TPRequestFilter{
-					&utils.TPRequestFilter{
-						FieldName: "Account",
-						Type:      "*string",
-						Values:    []string{"1001", "1002"},
-					},
-					&utils.TPRequestFilter{
-						FieldName: "Destination",
-						Type:      "*string_prefix",
-						Values:    []string{"10", "20"},
-					},
-					&utils.TPRequestFilter{
-						FieldName: "",
-						Type:      "*rsr_fields",
-						Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
-					},
+	eFilters := map[utils.TenantID]*utils.TPFilter{
+		utils.TenantID{"cgrates.org", "FLTR_1"}: &utils.TPFilter{
+			TPid:   testTPID,
+			Tenant: "cgrates.org",
+			ID:     "FLTR_1",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					FieldName: "Account",
+					Type:      "*string",
+					Values:    []string{"1001", "1002"},
 				},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
+				&utils.TPRequestFilter{
+					FieldName: "Destination",
+					Type:      "*string_prefix",
+					Values:    []string{"10", "20"},
+				},
+				&utils.TPRequestFilter{
+					FieldName: "",
+					Type:      "*rsr_fields",
+					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				},
 			},
-			"FLTR_ACNT_dan": &utils.TPFilter{
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "FLTR_ACNT_dan",
-				Filters: []*utils.TPRequestFilter{
-					&utils.TPRequestFilter{
-						FieldName: "Account",
-						Type:      "*string",
-						Values:    []string{"dan"},
-					},
-				},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+		},
+		utils.TenantID{"cgrates.org", "FLTR_ACNT_dan"}: &utils.TPFilter{
+			TPid:   testTPID,
+			Tenant: "cgrates.org",
+			ID:     "FLTR_ACNT_dan",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					FieldName: "Account",
+					Type:      "*string",
+					Values:    []string{"dan"},
 				},
 			},
-			"FLTR_DST_DE": &utils.TPFilter{
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "FLTR_DST_DE",
-				Filters: []*utils.TPRequestFilter{
-					&utils.TPRequestFilter{
-						FieldName: "Destination",
-						Type:      "*destinations",
-						Values:    []string{"DST_DE"},
-					},
-				},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+		},
+		utils.TenantID{"cgrates.org", "FLTR_DST_DE"}: &utils.TPFilter{
+			TPid:   testTPID,
+			Tenant: "cgrates.org",
+			ID:     "FLTR_DST_DE",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					FieldName: "Destination",
+					Type:      "*destinations",
+					Values:    []string{"DST_DE"},
 				},
 			},
-			"FLTR_DST_NL": &utils.TPFilter{
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "FLTR_DST_NL",
-				Filters: []*utils.TPRequestFilter{
-					&utils.TPRequestFilter{
-						FieldName: "Destination",
-						Type:      "*destinations",
-						Values:    []string{"DST_NL"},
-					},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+		},
+		utils.TenantID{"cgrates.org", "FLTR_DST_NL"}: &utils.TPFilter{
+			TPid:   testTPID,
+			Tenant: "cgrates.org",
+			ID:     "FLTR_DST_NL",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{
+					FieldName: "Destination",
+					Type:      "*destinations",
+					Values:    []string{"DST_NL"},
 				},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
+			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
 	}
-	if len(csvr.filters["cgrates.org"]) != len(eFilters["cgrates.org"]) {
+	fltrKey := utils.TenantID{"cgrates.org", "FLTR_1"}
+	if len(csvr.filters) != len(eFilters) {
 		t.Errorf("Failed to load FilterProfiles: %s", utils.ToIJSON(csvr.filters))
-	} else if !reflect.DeepEqual(eFilters["cgrates.org"]["FLTR_1"], csvr.filters["cgrates.org"]["FLTR_1"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eFilters["cgrates.org"]["FLTR_1"], csvr.filters["cgrates.org"]["FLTR_1"])
+	} else if !reflect.DeepEqual(eFilters[fltrKey], csvr.filters[fltrKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eFilters[fltrKey], csvr.filters[fltrKey])
 	}
 
 }
