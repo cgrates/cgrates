@@ -152,6 +152,9 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadAliases(); err != nil {
 		t.Error("Failed loading aliases: ", err.Error())
 	}
+	if err = loader.LoadFilters(); err != nil {
+		t.Error("Failed loading thresholds: ", err.Error())
+	}
 	if err = loader.LoadResourceProfiles(); err != nil {
 		t.Error("Failed loading resource profiles: ", err.Error())
 	}
@@ -159,9 +162,6 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		t.Error("Failed loading stats: ", err.Error())
 	}
 	if err = loader.LoadThresholds(); err != nil {
-		t.Error("Failed loading thresholds: ", err.Error())
-	}
-	if err = loader.LoadFilter(); err != nil {
 		t.Error("Failed loading thresholds: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
