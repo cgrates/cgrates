@@ -60,6 +60,7 @@ const (
 	RESOURCES_JSON  = "resources"
 	STATS_JSON      = "stats"
 	THRESHOLDS_JSON = "thresholds"
+	FILTERS_JSON    = "filters"
 	MAILER_JSN      = "mailer"
 	SURETAX_JSON    = "suretax"
 )
