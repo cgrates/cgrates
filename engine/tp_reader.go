@@ -1712,7 +1712,7 @@ func (tpr *TpReader) LoadThresholds() error {
 	return tpr.LoadThresholdsFiltered("")
 }
 
-func (tpr *TpReader) LoadFilterFiltered(tag string) error {
+func (tpr *TpReader) LoadFiltersFiltered(tag string) error {
 	tps, err := tpr.lr.GetTPFilters(tpr.tpid, tag)
 	if err != nil {
 		return err
@@ -1725,8 +1725,8 @@ func (tpr *TpReader) LoadFilterFiltered(tag string) error {
 	return nil
 }
 
-func (tpr *TpReader) LoadFilter() error {
-	return tpr.LoadFilterFiltered("")
+func (tpr *TpReader) LoadFilters() error {
+	return tpr.LoadFiltersFiltered("")
 }
 
 func (tpr *TpReader) LoadAll() (err error) {
@@ -1778,6 +1778,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadAliases(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
+	if err = tpr.LoadFilters(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
 	if err = tpr.LoadResourceProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -1785,9 +1788,6 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
-	if err = tpr.LoadFilter(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil

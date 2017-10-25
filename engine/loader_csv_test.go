@@ -356,7 +356,7 @@ func init() {
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
 	}
-	if err := csvr.LoadFilter(); err != nil {
+	if err := csvr.LoadFilters(); err != nil {
 		log.Print("error in LoadFilter:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
