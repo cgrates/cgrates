@@ -674,6 +674,7 @@ type ArgsCache struct {
 	StatsQueueProfileIDs  *[]string
 	ThresholdIDs          *[]string
 	ThresholdProfileIDs   *[]string
+	FilterIDs             *[]string
 }
 
 // Data used to do remote cache reloads via api
@@ -714,6 +715,7 @@ type CacheStats struct {
 	StatQueueProfiles   int
 	Thresholds          int
 	ThresholdProfiles   int
+	Filters             int
 }
 
 type AttrExpFileCdrs struct {

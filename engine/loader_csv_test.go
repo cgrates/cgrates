@@ -346,9 +346,11 @@ func init() {
 	if err := csvr.LoadAliases(); err != nil {
 		log.Print("error in LoadAliases:", err)
 	}
+	if err := csvr.LoadFilters(); err != nil {
+		log.Print("error in LoadFilter:", err)
+	}
 	if err := csvr.LoadResourceProfiles(); err != nil {
 		log.Print("error in LoadResourceProfiles:", err)
-
 	}
 	if err := csvr.LoadStats(); err != nil {
 		log.Print("error in LoadStats:", err)
@@ -356,12 +358,9 @@ func init() {
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
 	}
-	if err := csvr.LoadFilters(); err != nil {
-		log.Print("error in LoadFilter:", err)
-	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

@@ -1363,6 +1363,14 @@ func (ms *MapStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 		return nil, utils.ErrNotFound
 	}
 	err = ms.ms.Unmarshal(values, &r)
+	if err != nil {
+		return nil, err
+	}
+	for _, fltr := range r.RequestFilters {
+		if err := fltr.CompileValues(); err != nil {
+			return nil, err
+		}
+	}
 	return
 }
 

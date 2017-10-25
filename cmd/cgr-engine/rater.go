@@ -43,7 +43,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	waitTasks = append(waitTasks, cacheTaskChan)
 	go func() {
 		defer close(cacheTaskChan)
-		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs []string
+		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs []string
 		if cCfg, has := cfg.CacheConfig[utils.CacheDestinations]; !has || !cCfg.Precache {
 			dstIDs = make([]string, 0) // Don't cache any
 		}
@@ -101,9 +101,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		if cCfg, has := cfg.CacheConfig[utils.CacheThresholdProfiles]; !has || !cCfg.Precache {
 			thpIDs = make([]string, 0)
 		}
+		if cCfg, has := cfg.CacheConfig[utils.CacheFilters]; !has || !cCfg.Precache {
+			fltrIDs = make([]string, 0)
+		}
 
 		// ToDo: Add here timings
-		if err := dm.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs); err != nil {
+		if err := dm.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
 			exitChan <- true
 			return
