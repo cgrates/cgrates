@@ -63,6 +63,7 @@ var (
 		CacheStatQueues:          StatQueuePrefix,
 		CacheThresholdProfiles:   ThresholdProfilePrefix,
 		CacheThresholds:          ThresholdPrefix,
+		CacheFilters:             FilterPrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )

@@ -119,6 +119,7 @@ const CGRATES_CFG_JSON = `
 	"statqueues": {"limit": -1, "ttl": "1m", "static_ttl": false, "precache": false},			// statqueues with metrics
 	"threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control threshold profiles caching
 	"thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control thresholds caching
+	"filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
 },
 
 
