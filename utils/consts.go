@@ -474,6 +474,7 @@ const (
 	ResourceS                    = "ResourceS"
 	CacheThresholdProfiles       = "threshold_profiles"
 	CacheThresholds              = "thresholds"
+	CacheFilters                 = "filters"
 	AccountUpdate                = "AccountUpdate"
 	BalanceUpdate                = "BalanceUpdate"
 	StatUpdate                   = "StatUpdate"

@@ -694,7 +694,7 @@ func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 			return nil, err
 		}
 		if filterCfg, err := csvLoad(TpFilter{}, record); err != nil {
-			log.Print("error loading TPThreshold: ", err)
+			log.Print("error loading TPFilter: ", err)
 			return nil, err
 		} else {
 			fIlterCfg := filterCfg.(TpFilter)

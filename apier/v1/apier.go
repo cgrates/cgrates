@@ -1005,6 +1005,19 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.DataManager.CacheDataFromDB(utils.ThresholdProfilePrefix, dataIDs, true); err != nil {
 		return
 	}
+	// Filters
+	dataIDs = make([]string, 0)
+	if attrs.FilterIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.FilterIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.FilterIDs))
+		for idx, dId := range *attrs.FilterIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataManager.CacheDataFromDB(utils.FilterPrefix, dataIDs, true); err != nil {
+		return
+	}
 
 	*reply = utils.OK
 	return nil
@@ -1014,7 +1027,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if args.FlushAll {
 		cache.Flush()
 	}
-	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs []string
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs []string
 	if args.DestinationIDs == nil {
 		dstIDs = nil
 	} else {
@@ -1110,8 +1123,13 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		thpIDs = *args.ThresholdProfileIDs
 	}
+	if args.FilterIDs == nil {
+		fltrIDs = nil
+	} else {
+		fltrIDs = *args.FilterIDs
+	}
 
-	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs); err != nil {
+	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -1251,6 +1269,13 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 			cache.RemKey(utils.ThresholdProfilePrefix+key, true, utils.NonTransactional)
 		}
 	}
+	if args.FilterIDs == nil {
+		cache.RemPrefixKey(utils.FilterPrefix, true, utils.NonTransactional)
+	} else if len(*args.FilterIDs) != 0 {
+		for _, key := range *args.FilterIDs {
+			cache.RemKey(utils.FilterPrefix+key, true, utils.NonTransactional)
+		}
+	}
 
 	*reply = utils.OK
 	return
@@ -1276,6 +1301,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.StatQueueProfiles = cache.CountEntries(utils.StatQueueProfilePrefix)
 	cs.Thresholds = cache.CountEntries(utils.ThresholdPrefix)
 	cs.ThresholdProfiles = cache.CountEntries(utils.ThresholdProfilePrefix)
+	cs.Filters = cache.CountEntries(utils.FilterPrefix)
 
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
@@ -1646,6 +1672,25 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		}
 	}
 
+	if args.FilterIDs != nil {
+		var ids []string
+		if len(*args.FilterIDs) != 0 {
+			for _, id := range *args.FilterIDs {
+				if _, hasIt := cache.Get(utils.FilterPrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.FilterPrefix) {
+				ids = append(ids, id[len(utils.FilterPrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.FilterIDs = &ids
+		}
+	}
+
 	return
 }
 
@@ -1712,17 +1757,16 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.LCR_PREFIX} {
-		loadedIDs, _ := loader.GetLoadedIds(prfx)
-		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
-			return utils.NewErrServerError(err)
-		}
-	}
-	for _, prfx := range []string{
+		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceProfilesPrefix,
-		utils.ResourcesPrefix} {
+		utils.ResourcesPrefix,
+		utils.StatQueuePrefix,
+		utils.StatQueueProfilePrefix,
+		utils.ThresholdPrefix,
+		utils.ThresholdProfilePrefix,
+		utils.FilterPrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)

@@ -1952,6 +1952,11 @@ func (ms *MongoStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 		}
 		return nil, err
 	}
+	for _, fltr := range r.RequestFilters {
+		if err = fltr.CompileValues(); err != nil {
+			return
+		}
+	}
 	return
 }
 

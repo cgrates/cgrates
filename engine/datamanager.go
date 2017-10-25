@@ -38,7 +38,7 @@ func (dm *DataManager) DataDB() DataDB {
 	return dm.dataDB
 }
 
-func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs []string) (err error) {
+func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs []string) (err error) {
 	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
 		if dm.cacheCfg == nil {
 			return
@@ -49,7 +49,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
 				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix, utils.StatQueueProfilePrefix,
-				utils.ThresholdPrefix, utils.ThresholdProfilePrefix}, k) && cacheCfg.Precache {
+				utils.ThresholdPrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix}, k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 					return err
 				}
@@ -77,6 +77,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.StatQueueProfilePrefix:     stqpIDs,
 			utils.ThresholdPrefix:            thIDs,
 			utils.ThresholdProfilePrefix:     thpIDs,
+			utils.FilterPrefix:               fltrIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -132,7 +133,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix,
 		utils.ThresholdPrefix,
-		utils.ThresholdProfilePrefix}, prfx) {
+		utils.ThresholdProfilePrefix,
+		utils.FilterPrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -284,9 +286,6 @@ func (dm *DataManager) GetFilter(tenant, id string, skipCache bool, transactionI
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
-	}
-	if err = fltr.Compile(); err != nil {
-		return
 	}
 	cache.Set(key, fltr, cacheCommit(transactionID), transactionID)
 	return
