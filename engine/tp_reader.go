@@ -33,7 +33,6 @@ import (
 type TpReader struct {
 	tpid             string
 	timezone         string
-	dataStorage      DataDB
 	dm               *DataManager
 	lr               LoadReader
 	actions          map[string][]*Action
@@ -69,11 +68,10 @@ type TpReader struct {
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
 	tpr := &TpReader{
-		tpid:        tpid,
-		timezone:    timezone,
-		dataStorage: db,
-		dm:          NewDataManager(db),
-		lr:          lr,
+		tpid:     tpid,
+		timezone: timezone,
+		dm:       NewDataManager(db),
+		lr:       lr,
 	}
 	tpr.Init()
 	//add *any and *asap timing tag (in case of no timings file)
@@ -239,7 +237,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 			if !destinationExists {
 				_, destinationExists = tpr.destinations[dr.DestinationId]
 			}
-			if !destinationExists && tpr.dataStorage != nil {
+			if !destinationExists && tpr.dm.dataDB != nil {
 				if destinationExists, err = tpr.dm.DataDB().HasData(utils.DESTINATION_PREFIX, dr.DestinationId); err != nil {
 					return err
 				}
@@ -308,7 +306,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 					dms[i] = NewDestinationFromTPDestination(tpDst)
 				}
 				destsExist := len(dms) != 0
-				if !destsExist && tpr.dataStorage != nil {
+				if !destsExist && tpr.dm.dataDB != nil {
 					if dbExists, err := tpr.dm.DataDB().HasData(utils.DESTINATION_PREFIX, drate.DestinationId); err != nil {
 						return false, err
 					} else if dbExists {
@@ -381,7 +379,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 				return fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
-			if !exists && tpr.dataStorage != nil {
+			if !exists && tpr.dm.dataDB != nil {
 				if exists, err = tpr.dm.DataDB().HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				}
@@ -421,7 +419,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 				return fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
-			if !exists && tpr.dataStorage != nil { // Only query if there is a connection, eg on dry run there is none
+			if !exists && tpr.dm.dataDB != nil { // Only query if there is a connection, eg on dry run there is none
 				if exists, err = tpr.dm.DataDB().HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				}
@@ -495,7 +493,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 						break
 					}
 				}
-				if !found && tpr.dataStorage != nil {
+				if !found && tpr.dm.dataDB != nil {
 					if keys, err := tpr.dm.DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil {
 						return fmt.Errorf("[LCR] error querying dataDb %s", err.Error())
 					} else if len(keys) != 0 {
@@ -509,7 +507,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 				// check destination tags
 				if rule.DestinationId != "" && rule.DestinationId != utils.ANY {
 					_, found := tpr.destinations[rule.DestinationId]
-					if !found && tpr.dataStorage != nil {
+					if !found && tpr.dm.dataDB != nil {
 						if found, err = tpr.dm.DataDB().HasData(utils.DESTINATION_PREFIX, rule.DestinationId); err != nil {
 							return fmt.Errorf("[LCR] error querying dataDb %s", err.Error())
 						}
@@ -675,7 +673,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 		for _, at := range ats {
 
 			_, exists := tpr.actions[at.ActionsId]
-			if !exists && tpr.dataStorage != nil {
+			if !exists && tpr.dm.dataDB != nil {
 				if exists, err = tpr.dm.DataDB().HasData(utils.ACTION_PREFIX, at.ActionsId); err != nil {
 					return fmt.Errorf("[ActionPlans] Error querying actions: %v - %s", at.ActionsId, err.Error())
 				}
@@ -1813,7 +1811,7 @@ func (tpr *TpReader) IsValid() bool {
 }
 
 func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err error) {
-	if tpr.dataStorage == nil {
+	if tpr.dm.dataDB == nil {
 		return errors.New("no database connection")
 	}
 	if flush { // ToDo
