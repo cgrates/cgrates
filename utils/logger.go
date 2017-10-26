@@ -67,6 +67,7 @@ type LoggerInterface interface {
 	Notice(m string) error
 	Info(m string) error
 	Debug(m string) error
+	Write(p []byte) (n int, err error)
 }
 
 // log severities following rfc3164
@@ -92,6 +93,11 @@ func (sl *StdLogger) Close() (err error) {
 		sl.Close()
 	}
 	return
+}
+func (sl *StdLogger) Write(p []byte) (n int, err error) {
+	s := string(p[:])
+	fmt.Print(s)
+	return 1, nil
 }
 
 //SetSyslog sets the logger for the server
