@@ -1401,116 +1401,111 @@ func TestLoadReverseAliases(t *testing.T) {
 }
 
 func TestLoadResourceProfiles(t *testing.T) {
-	eResProfiles := map[string]map[string]*utils.TPResource{
-		"cgrates.org": map[string]*utils.TPResource{
-			"ResGroup21": &utils.TPResource{
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "ResGroup21",
-				Filters: []*utils.TPRequestFilter{
-					&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
-					&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
-					&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"HdrSubject(~^1.*1$)", "HdrDestination(1002)"}},
-				},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
-				UsageTTL:          "1s",
-				AllocationMessage: "call",
-				Weight:            10,
-				Limit:             "2",
+	eResProfiles := map[utils.TenantID]*utils.TPResource{
+		utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup21"}: &utils.TPResource{
+			TPid:   testTPID,
+			Tenant: "cgrates.org",
+			ID:     "ResGroup21",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
+				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
+				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"HdrSubject(~^1.*1$)", "HdrDestination(1002)"}},
 			},
-			"ResGroup22": &utils.TPResource{
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "ResGroup22",
-				Filters: []*utils.TPRequestFilter{
-					&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
-				},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
-				UsageTTL:          "3600s",
-				AllocationMessage: "premium_call",
-				Blocker:           true,
-				Stored:            true,
-				Weight:            10,
-				Limit:             "2",
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
 			},
+			UsageTTL:          "1s",
+			AllocationMessage: "call",
+			Weight:            10,
+			Limit:             "2",
+		},
+		utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup22"}: &utils.TPResource{
+			TPid:   testTPID,
+			Tenant: "cgrates.org",
+			ID:     "ResGroup22",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
+			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			UsageTTL:          "3600s",
+			AllocationMessage: "premium_call",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            10,
+			Limit:             "2",
 		},
 	}
-	if len(csvr.resProfiles["cgrates.org"]) != len(eResProfiles["cgrates.org"]) {
-		t.Errorf("Failed to load resourceProfiles: %s", utils.ToIJSON(csvr.resProfiles))
-	} else if !reflect.DeepEqual(eResProfiles["cgrates.org"]["ResGroup22"], csvr.resProfiles["cgrates.org"]["ResGroup22"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eResProfiles["cgrates.org"]["ResGroup22"], csvr.resProfiles["cgrates.org"]["ResGroup22"])
+	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup21"}
+	if len(csvr.resProfiles) != len(eResProfiles) {
+		t.Errorf("Failed to load ResourceProfiles: %s", utils.ToIJSON(csvr.resProfiles))
+	} else if !reflect.DeepEqual(eResProfiles[resKey], csvr.resProfiles[resKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eResProfiles[resKey], csvr.resProfiles[resKey])
 	}
 
 }
 
 func TestLoadStatProfiles(t *testing.T) {
-	eStats := map[string]map[string]*utils.TPStats{
-		"cgrates.org": map[string]*utils.TPStats{
-			"Stats1": &utils.TPStats{
-				Tenant: "cgrates.org",
-				TPid:   testTPID,
-				ID:     "Stats1",
-				Filters: []*utils.TPRequestFilter{
-					&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
-				},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
-				QueueLength: 100,
-				TTL:         "1s",
-				Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
-				Thresholds:  []string{"THRESH1", "THRESH2"},
-				Blocker:     true,
-				Stored:      true,
-				Weight:      20,
-				MinItems:    2,
+	eStats := map[utils.TenantID]*utils.TPStats{
+		utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}: &utils.TPStats{
+			Tenant: "cgrates.org",
+			TPid:   testTPID,
+			ID:     "Stats1",
+			Filters: []*utils.TPRequestFilter{
+				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
 			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			QueueLength: 100,
+			TTL:         "1s",
+			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
+			Thresholds:  []string{"THRESH1", "THRESH2"},
+			Blocker:     true,
+			Stored:      true,
+			Weight:      20,
+			MinItems:    2,
 		},
 	}
-
-	if len(csvr.sqProfiles["cgrates.org"]) != len(eStats["cgrates.org"]) {
-		t.Error("Failed to load stats: ", len(csvr.sqProfiles))
-	} else if !reflect.DeepEqual(eStats["cgrates.org"]["Stats1"], csvr.sqProfiles["cgrates.org"]["Stats1"]) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eStats["cgrates.org"]["Stats1"]), utils.ToJSON(csvr.sqProfiles["cgrates.org"]["Stats1"]))
+	stKey := utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}
+	if len(csvr.sqProfiles) != len(eStats) {
+		t.Errorf("Failed to load StatQueueProfiles: %s", utils.ToIJSON(csvr.sqProfiles))
+	} else if !reflect.DeepEqual(eStats[stKey], csvr.sqProfiles[stKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eStats[stKey], csvr.sqProfiles[stKey])
 	}
 }
 
 func TestLoadThresholdProfiles(t *testing.T) {
-	eThresholds := map[string]map[string]*utils.TPThreshold{
-		"cgrates.org": map[string]*utils.TPThreshold{
-			"Threshold1": &utils.TPThreshold{
-				TPid:      testTPID,
-				Tenant:    "cgrates.org",
-				ID:        "Threshold1",
-				FilterIDs: []string{"FilterID1", "FilterID2"},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
-				Recurrent: true,
-				MinHits:   10,
-				MinSleep:  "1s",
-				Blocker:   true,
-				Weight:    10,
-				ActionIDs: []string{"THRESH1", "THRESH2"},
-				Async:     true,
+	eThresholds := map[utils.TenantID]*utils.TPThreshold{
+		utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}: &utils.TPThreshold{
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "Threshold1",
+			FilterIDs: []string{"FilterID1", "FilterID2"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
 			},
+			Recurrent: true,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   true,
+			Weight:    10,
+			ActionIDs: []string{"THRESH1", "THRESH2"},
+			Async:     true,
 		},
 	}
-	if len(csvr.thProfiles["cgrates.org"]) != len(eThresholds["cgrates.org"]) {
-		t.Error("Failed to load thresholds: ", len(csvr.thProfiles))
-	} else if !reflect.DeepEqual(eThresholds["cgrates.org"]["Threshold1"], csvr.thProfiles["cgrates.org"]["Threshold1"]) {
-		t.Errorf("Expecting: %+v, received: %+v", eThresholds["cgrates.org"]["Threshold1"], csvr.thProfiles["cgrates.org"]["Threshold1"])
+	thkey := utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}
+	if len(csvr.thProfiles) != len(eThresholds) {
+		t.Errorf("Failed to load ThresholdProfiles: %s", utils.ToIJSON(csvr.thProfiles))
+	} else if !reflect.DeepEqual(eThresholds[thkey], csvr.thProfiles[thkey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eThresholds[thkey], csvr.thProfiles[thkey])
 	}
 }
 
 func TestLoadFilters(t *testing.T) {
 	eFilters := map[utils.TenantID]*utils.TPFilter{
-		utils.TenantID{"cgrates.org", "FLTR_1"}: &utils.TPFilter{
+		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}: &utils.TPFilter{
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_1",
@@ -1535,7 +1530,7 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{"cgrates.org", "FLTR_ACNT_dan"}: &utils.TPFilter{
+		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_dan"}: &utils.TPFilter{
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_ACNT_dan",
@@ -1550,7 +1545,7 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{"cgrates.org", "FLTR_DST_DE"}: &utils.TPFilter{
+		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_DST_DE"}: &utils.TPFilter{
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_DST_DE",
@@ -1565,7 +1560,7 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{"cgrates.org", "FLTR_DST_NL"}: &utils.TPFilter{
+		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_DST_NL"}: &utils.TPFilter{
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_DST_NL",
@@ -1581,9 +1576,9 @@ func TestLoadFilters(t *testing.T) {
 			},
 		},
 	}
-	fltrKey := utils.TenantID{"cgrates.org", "FLTR_1"}
+	fltrKey := utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}
 	if len(csvr.filters) != len(eFilters) {
-		t.Errorf("Failed to load FilterProfiles: %s", utils.ToIJSON(csvr.filters))
+		t.Errorf("Failed to load Filters: %s", utils.ToIJSON(csvr.filters))
 	} else if !reflect.DeepEqual(eFilters[fltrKey], csvr.filters[fltrKey]) {
 		t.Errorf("Expecting: %+v, received: %+v", eFilters[fltrKey], csvr.filters[fltrKey])
 	}
