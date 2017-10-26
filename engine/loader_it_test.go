@@ -313,50 +313,44 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for _, mapIDs := range loader.resProfiles {
-		for _, rl := range mapIDs {
-			rcv, err := loader.dm.GetResourceProfile(rl.Tenant, rl.ID, true, utils.NonTransactional)
-			if err != nil {
-				t.Error("Failed GetResourceProfile: ", err.Error())
-			}
-			rlT, err := APItoResource(rl, "UTC")
-			if err != nil {
-				t.Error(err)
-			}
-			if !reflect.DeepEqual(rlT, rcv) {
-				t.Errorf("Expecting: %v, received: %v", rlT, rcv)
-			}
+	for tenantid, rl := range loader.resProfiles {
+		rcv, err := loader.dm.GetResourceProfile(tenantid.Tenant, tenantid.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Failed GetResourceProfile: ", err.Error())
+		}
+		rlT, err := APItoResource(rl, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(rlT, rcv) {
+			t.Errorf("Expecting: %v, received: %v", rlT, rcv)
 		}
 	}
-	for _, mpIDs := range loader.sqProfiles {
-		for _, st := range mpIDs {
-			rcv, err := loader.dm.GetStatQueueProfile(st.Tenant, st.ID, true, utils.NonTransactional)
-			if err != nil {
-				t.Errorf("Failed GetStatsQueue, tenant: %s, id: %s,  error: %s ", st.Tenant, st.ID, err.Error())
-			}
-			sts, err := APItoStats(st, "UTC")
-			if err != nil {
-				t.Error(err)
-			}
-			if !reflect.DeepEqual(sts, rcv) {
-				t.Errorf("Expecting: %v, received: %v", sts, rcv)
-			}
+	for tenantid, st := range loader.sqProfiles {
+		rcv, err := loader.dm.GetStatQueueProfile(tenantid.Tenant, tenantid.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Errorf("Failed GetStatsQueue, tenant: %s, id: %s,  error: %s ", tenantid.Tenant, tenantid.ID, err.Error())
+		}
+		sts, err := APItoStats(st, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(sts, rcv) {
+			t.Errorf("Expecting: %v, received: %v", sts, rcv)
 		}
 	}
 
-	for _, mpIDs := range loader.thProfiles {
-		for _, th := range mpIDs {
-			rcv, err := loader.dm.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional)
-			if err != nil {
-				t.Errorf("Failed GetThresholdProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
-			}
-			sts, err := APItoThresholdProfile(th, "UTC")
-			if err != nil {
-				t.Error(err)
-			}
-			if !reflect.DeepEqual(sts, rcv) {
-				t.Errorf("Expecting: %v, received: %v", sts, rcv)
-			}
+	for tenatid, th := range loader.thProfiles {
+		rcv, err := loader.dm.GetThresholdProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Errorf("Failed GetThresholdProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
+		}
+		sts, err := APItoThresholdProfile(th, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(sts, rcv) {
+			t.Errorf("Expecting: %v, received: %v", sts, rcv)
 		}
 	}
 }
