@@ -102,6 +102,7 @@ func (te *ThresholdEvent) FilterableEvent(fltredFields []string) (fEv map[string
 type Threshold struct {
 	Tenant string
 	ID     string
+	Hits   int       // number of hits for this threshold
 	Snooze time.Time // prevent threshold to run too early
 
 	tPrfl *ThresholdProfile
@@ -115,7 +116,10 @@ func (t *Threshold) TenantID() string {
 // ProcessEvent processes an ThresholdEvent
 // concurrentActions limits the number of simultaneous action sets executed
 func (t *Threshold) ProcessEvent(ev *ThresholdEvent, dm *DataManager) (err error) {
-	if t.Snooze.After(time.Now()) { // ignore the event
+	if t.Snooze.After(time.Now()) { // snoozed, not executing actions
+		return
+	}
+	if t.Hits < t.tPrfl.MinHits { // number of hits was not met, will not execute actions
 		return
 	}
 	acnt, _ := ev.Account()
@@ -269,20 +273,11 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 			!tPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		/*
-			passAllFilters := true
-			for _, fltr := range tPrfl.Filters {
-				if pass, err := fltr.Pass(ev.FilterableEvent(nil), "", tS.statS); err != nil {
-					return nil, err
-				} else if !pass {
-					passAllFilters = false
-					continue
-				}
-			}
-			if !passAllFilters {
-				continue
-			}
-		*/
+		if pass, err := tS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, tPrfl.FilterIDs); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
 		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
 		if err != nil {
 			return nil, err
@@ -319,6 +314,7 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (hits int, err erro
 	hits = len(matchTs)
 	var withErrors bool
 	for _, t := range matchTs {
+		t.Hits += 1
 		err = t.ProcessEvent(ev, tS.dm)
 		if err != nil {
 			utils.Logger.Warning(

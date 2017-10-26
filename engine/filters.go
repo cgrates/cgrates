@@ -105,9 +105,9 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 			default:
 				return false, fmt.Errorf("tenant: %s filter: %s unsupported filter type: <%s>", tenant, fltrID, fltr.Type)
 			}
-		}
-		if err != nil || !pass {
-			return pass, err
+			if !pass || err != nil {
+				return pass, err
+			}
 		}
 		atLeastOneFilterPassing = true
 	}
@@ -164,12 +164,11 @@ type RFStatSThreshold struct {
 // RequestFilter filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
 type RequestFilter struct {
-	Type               string   // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	FieldName          string   // Name of the field providing us the Values to check (used in case of some )
-	Values             []string // Filter definition
-	ActivationInterval *utils.ActivationInterval
-	rsrFields          utils.RSRFields     // Cache here the RSRFilter Values
-	statSThresholds    []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
+	Type            string              // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	FieldName       string              // Name of the field providing us the Values to check (used in case of some )
+	Values          []string            // Filter definition
+	rsrFields       utils.RSRFields     // Cache here the RSRFilter Values
+	statSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
 }
 
 // Separate method to compile RSR fields
@@ -329,14 +328,16 @@ func (fltr *RequestFilter) passGreaterThan(req interface{}, extraFieldsLabel str
 		}
 		return false, err
 	}
+	if fldStr, castStr := fldIf.(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
+		fldIf = utils.StringToInterface(fldStr)
+	}
 	for _, val := range fltr.Values {
-		ifVal := utils.StringToInterface(val)
 		orEqual := false
 		if fltr.Type == MetaGreaterOrEqual ||
 			fltr.Type == MetaLessThan {
 			orEqual = true
 		}
-		if gte, err := utils.GreaterThan(fldIf, ifVal, orEqual); err != nil {
+		if gte, err := utils.GreaterThan(fldIf, utils.StringToInterface(val), orEqual); err != nil {
 			return false, err
 		} else if utils.IsSliceMember([]string{MetaGreaterThan, MetaGreaterOrEqual}, fltr.Type) && gte {
 			return true, nil

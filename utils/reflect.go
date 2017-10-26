@@ -195,31 +195,38 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 		typItem != typOItem {
 		return false, errors.New("incomparable")
 	}
-	switch typItem.Kind() {
-	case reflect.Float32, reflect.Float64:
+	switch item.(type) {
+	case float64:
 		if orEqual {
 			gte = valItm.Float() >= valOtItm.Float()
 		} else {
 			gte = valItm.Float() > valOtItm.Float()
 		}
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+	case int64:
 		if orEqual {
 			gte = valItm.Int() >= valOtItm.Int()
 		} else {
 			gte = valItm.Int() > valOtItm.Int()
 		}
-	case reflect.Struct:
-		tVal, ok := valItm.Interface().(time.Time)
-		tOVal, oOK := valOtItm.Interface().(time.Time)
-		if !ok || !oOK {
-			return false, fmt.Errorf("cannot cast struct to time: %v, %v", ok, oOK)
-		}
+	case time.Time:
+		tVal := item.(time.Time)
+		tOVal := oItem.(time.Time)
 		if orEqual {
 			gte = tVal == tOVal
 		}
 		if !gte {
 			gte = tVal.After(tOVal)
 		}
+	case time.Duration:
+		tVal := item.(time.Duration)
+		tOVal := oItem.(time.Duration)
+		if orEqual {
+			gte = tVal == tOVal
+		}
+		if !gte {
+			gte = tVal > tOVal
+		}
+
 	default: // unsupported comparison
 		err = fmt.Errorf("unsupported comparison type: %v, kind: %v", typItem, typItem.Kind())
 	}

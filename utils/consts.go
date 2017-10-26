@@ -485,6 +485,7 @@ const (
 	Disabled                     = "Disabled"
 	Action                       = "Action"
 	ThresholdSv1ProcessEvent     = "ThresholdSv1.ProcessEvent"
+	MetaNow                      = "*now"
 )
 
 func buildCacheInstRevPrefixes() {
