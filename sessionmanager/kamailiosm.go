@@ -245,7 +245,7 @@ func (self *KamailioSessionManager) Connect() error {
 	errChan := make(chan error)
 	for _, connCfg := range self.cfg.EvapiConns {
 		connId := utils.GenUUID()
-		logger := log.New(utils.Logger, "Kamevapi:", 2)
+		logger := log.New(utils.Logger, "KamEvapi:", 2)
 		if self.conns[connId], err = kamevapi.NewKamEvapi(connCfg.Address, connId, connCfg.Reconnects, eventHandlers, logger); err != nil {
 			return err
 		}
