@@ -181,7 +181,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, ap := range loader.actionPlans {
-		rcv, err := loader.dataStorage.GetActionPlan(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.DataDB().GetActionPlan(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetActionPlan: ", err.Error())
 		}
@@ -201,7 +201,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, ub := range loader.accountActions {
-		rcv, err := loader.dataStorage.GetAccount(k)
+		rcv, err := loader.dm.DataDB().GetAccount(k)
 		if err != nil {
 			t.Error("Failed GetAccount: ", err.Error())
 		}
@@ -211,7 +211,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, d := range loader.destinations {
-		rcv, err := loader.dataStorage.GetDestination(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.DataDB().GetDestination(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetDestination: ", err.Error())
 		}
@@ -281,7 +281,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, sq := range loader.cdrStats {
-		rcv, err := loader.dataStorage.GetCdrStats(k)
+		rcv, err := loader.dm.DataDB().GetCdrStats(k)
 		// t.Log(utils.ToIJSON(sq))
 		// t.Log(utils.ToIJSON(rcv))
 		t.Log(k)
@@ -294,7 +294,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, u := range loader.users {
-		rcv, err := loader.dataStorage.GetUser(k)
+		rcv, err := loader.dm.DataDB().GetUser(k)
 		if err != nil {
 			t.Error("Failed GetUser: ", err.Error())
 		}
@@ -304,7 +304,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, al := range loader.aliases {
-		rcv, err := loader.dataStorage.GetAlias(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.DataDB().GetAlias(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetAlias: ", err.Error())
 		}
