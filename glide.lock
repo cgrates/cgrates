@@ -14,7 +14,7 @@ imports:
 - name: github.com/cgrates/fsock
   version: 5b60f0d72ff4f8885289bffab55435e5b8adfb55
 - name: github.com/cgrates/kamevapi
-  version: a376b1f937ba959857929fa3e111c0f3243278c0
+  version: be921812bc9e51a5054f3d36dba00d564249d122
 - name: github.com/cgrates/ltcache
   version: 74beef0471a1e04ec8c95b5459086a9308dfff84
 - name: github.com/cgrates/osipsdagram
