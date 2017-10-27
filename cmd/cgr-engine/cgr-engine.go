@@ -894,6 +894,8 @@ func main() {
 	if cfg.UserServerEnabled {
 		go startUsersServer(internalUserSChan, dm, server, exitChan)
 	}
+	// Start FilterS
+	go startFilterService(filterSChan, internalStatSChan, cfg, dm, exitChan)
 
 	// Start RL service
 	if cfg.ResourceSCfg().Enabled {
@@ -904,8 +906,6 @@ func main() {
 	if cfg.StatSCfg().Enabled {
 		go startStatService(internalStatSChan, internalThresholdSChan, cfg, dm, server, exitChan)
 	}
-
-	startFilterService(filterSChan, internalStatSChan, cfg, dm, exitChan)
 
 	if cfg.ThresholdSCfg().Enabled {
 		go startThresholdService(internalThresholdSChan, cfg, dm, server, exitChan, filterSChan)

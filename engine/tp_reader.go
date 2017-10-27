@@ -1656,24 +1656,24 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 		mapTHs[utils.TenantID{th.Tenant, th.ID}] = th
 	}
 	tpr.thProfiles = mapTHs
-	for tenant, th := range mapTHs {
-		thdIndxrKey := utils.ThresholdStringIndex + tenant.TenantID()
-		if has, err := tpr.dm.DataDB().HasData(utils.ThresholdPrefix, tenant.TenantID()); err != nil {
+	for tntID, th := range mapTHs {
+		thdIndxrKey := utils.ThresholdStringIndex + tntID.Tenant
+		if has, err := tpr.dm.DataDB().HasData(utils.ThresholdPrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
-			tpr.thresholds = append(tpr.thresholds, &utils.TenantID{Tenant: tenant.Tenant, ID: tenant.ID})
+			tpr.thresholds = append(tpr.thresholds, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index thresholds for filters
-		if _, has := tpr.thdsIndexers[tenant.TenantID()]; !has {
-			if tpr.thdsIndexers[tenant.TenantID()], err = NewReqFilterIndexer(tpr.dm, thdIndxrKey); err != nil {
+		if _, has := tpr.thdsIndexers[tntID.Tenant]; !has {
+			if tpr.thdsIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, thdIndxrKey); err != nil {
 				return
 			}
 		}
 		for _, fltrID := range th.FilterIDs {
-			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tenant.Tenant, ID: fltrID}]
+			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
 			if !has {
 				var fltr *Filter
-				if fltr, err = tpr.dm.GetFilter(tenant.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
 					if err == utils.ErrNotFound {
 						err = fmt.Errorf("broken reference to filter: %s for threshold: %s", fltrID, th)
 					}
@@ -1682,7 +1682,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 					tpFltr = FilterToTPFilter(fltr)
 				}
 			} else {
-				tpr.thdsIndexers[tenant.TenantID()].IndexTPFilter(tpFltr, th.ID)
+				tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
 			}
 		}
 	}
