@@ -788,7 +788,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	if gCfg, err := cgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
-		t.Errorf("Expecting: %+v, received: ", eCfg, gCfg)
+		t.Errorf("Expecting: %+v, received: %+v", eCfg, gCfg)
 	}
 	cdrFields := []*CdrFieldJsonCfg{
 		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.TOR), Value: utils.StringPointer("~7:s/^(voice|data|sms|mms|generic)$/*$1/")},

@@ -319,6 +319,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("User service not enabled but requested by RALs component.")
 			}
 		}
+		for _, connCfg := range self.RALsThresholdSConns {
+			if connCfg.Address == utils.MetaInternal && !self.UserServerEnabled {
+				return errors.New("ThresholdS not enabled but requested by RALs component.")
+			}
+		}
 	}
 	// CDRServer checks
 	if self.CDRSEnabled {
@@ -516,6 +521,15 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// Stat checks
+	if self.statsCfg != nil && self.statsCfg.Enabled {
+		for _, connCfg := range self.statsCfg.ThresholdSConns {
+			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+				return errors.New("ThresholdS not enabled but requested by StatS component.")
+			}
+		}
+	}
+
 	return nil
 }
 
