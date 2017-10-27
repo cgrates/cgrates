@@ -34,7 +34,7 @@ import (
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS) (ss *StatService, err error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS, indexedFields []string) (ss *StatService, err error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
 		thdS = nil
 	}
@@ -43,6 +43,7 @@ func NewStatService(dm *DataManager, storeInterval time.Duration,
 		storeInterval:    storeInterval,
 		thdS:             thdS,
 		filterS:          filterS,
+		indexedFields:    indexedFields,
 		storedStatQueues: make(utils.StringMap),
 		stopBackup:       make(chan struct{})}, nil
 }
@@ -53,6 +54,7 @@ type StatService struct {
 	storeInterval    time.Duration
 	thdS             rpcclient.RpcClientConnection // rpc connection towards ThresholdS
 	filterS          *FilterS
+	indexedFields    []string
 	stopBackup       chan struct{}
 	storedStatQueues utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
 	ssqMux           sync.RWMutex    // protects storedStatQueues
@@ -139,7 +141,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(ev *StatEvent) (sqs StatQueues, err error) {
 	matchingSQs := make(map[string]*StatQueue)
-	sqIDs, err := matchingItemIDsForEvent(ev.Event, nil, sS.dm, utils.StatQueuesStringIndex+ev.Tenant)
+	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.indexedFields, sS.dm, utils.StatQueuesStringIndex+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
