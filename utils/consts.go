@@ -480,7 +480,7 @@ const (
 	BalanceUpdate                = "BalanceUpdate"
 	StatUpdate                   = "StatUpdate"
 	ResourceUpdate               = "ResourceUpdate"
-	CDRUpdate                    = "CDR"
+	CDR                          = "CDR"
 	ExpiryTime                   = "ExpiryTime"
 	AllowNegative                = "AllowNegative"
 	Disabled                     = "Disabled"

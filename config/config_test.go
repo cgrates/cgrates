@@ -341,6 +341,12 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.CDRSCDRStatSConns, eHaPoolCfg) {
 		t.Error(cgrCfg.CDRSCDRStatSConns)
 	}
+	if !reflect.DeepEqual(cgrCfg.CDRSThresholdSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSThresholdSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSStatSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSStatSConns)
+	}
 	if cgrCfg.CDRSOnlineCDRExports != nil {
 		t.Error(cgrCfg.CDRSOnlineCDRExports)
 	}

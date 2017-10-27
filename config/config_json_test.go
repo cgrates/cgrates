@@ -231,6 +231,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Users_conns:        &[]*HaPoolJsonCfg{},
 		Aliases_conns:      &[]*HaPoolJsonCfg{},
 		Cdrstats_conns:     &[]*HaPoolJsonCfg{},
+		Thresholds_conns:   &[]*HaPoolJsonCfg{},
 		Stats_conns:        &[]*HaPoolJsonCfg{},
 		Online_cdr_exports: &[]string{},
 	}
