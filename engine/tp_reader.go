@@ -2146,7 +2146,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Print("Indexing resource profiles")
 			}
 			for tenantid, tpRL := range tpr.resProfiles {
-				rlIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesStringIndex+tenantid.TenantID())
+				rlIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesStringIndex+tenantid.Tenant)
 				if err != nil {
 					return err
 				}
@@ -2156,7 +2156,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 					rlIdxr.IndexFilters(rl.ID, rl.Filters)
 				}
 				if verbose {
-					log.Printf("Indexed ResourceProfile tenant: %s, keys: %+v", tenantid.TenantID(), rlIdxr.ChangedKeys().Slice())
+					log.Printf("Indexed ResourceProfile tenant: %s, keys: %+v", tenantid.Tenant, rlIdxr.ChangedKeys().Slice())
 				}
 				if err := rlIdxr.StoreIndexes(); err != nil {
 					return err
@@ -2168,7 +2168,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Print("Indexing stats")
 			}
 			for tenantid, st := range tpr.sqProfiles {
-				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.StatQueuesStringIndex+tenantid.TenantID())
+				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.StatQueuesStringIndex+tenantid.Tenant)
 				if err != nil {
 					return err
 				}
@@ -2178,7 +2178,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 					stIdxr.IndexFilters(st.ID, st.Filters)
 				}
 				if verbose {
-					log.Printf("Indexed Stats tenant: %s, keys %+v", tenantid.TenantID(), stIdxr.ChangedKeys().Slice())
+					log.Printf("Indexed Stats tenant: %s, keys %+v", tenantid.Tenant, stIdxr.ChangedKeys().Slice())
 				}
 				if err := stIdxr.StoreIndexes(); err != nil {
 					return err
