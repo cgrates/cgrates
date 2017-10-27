@@ -1343,7 +1343,7 @@ type TPStats struct {
 	TPid               string
 	Tenant             string
 	ID                 string
-	Filters            []*TPRequestFilter
+	FilterIDs          []string
 	ActivationInterval *TPActivationInterval
 	QueueLength        int
 	TTL                string

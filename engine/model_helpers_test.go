@@ -847,9 +847,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 		&TpStats{
 			Tpid:               "TEST_TPID",
 			ID:                 "Stats1",
-			FilterType:         MetaStringPrefix,
-			FilterFieldName:    "Account",
-			FilterFieldValues:  "1001;1002",
+			FilterIDs:          "FLTR_1",
 			ActivationInterval: "2014-07-29T15:00:00Z",
 			QueueLength:        100,
 			TTL:                "1s",
@@ -863,15 +861,9 @@ func TestTPStatsAsTPStats(t *testing.T) {
 	}
 	eTPs := []*utils.TPStats{
 		&utils.TPStats{
-			TPid: tps[0].Tpid,
-			ID:   tps[0].ID,
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
-					Type:      tps[0].FilterType,
-					FieldName: tps[0].FilterFieldName,
-					Values:    []string{"1001", "1002"},
-				},
-			},
+			TPid:      tps[0].Tpid,
+			ID:        tps[0].ID,
+			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
@@ -893,11 +885,9 @@ func TestTPStatsAsTPStats(t *testing.T) {
 
 func TestAPItoTPStats(t *testing.T) {
 	tps := &utils.TPStats{
-		TPid: testTPID,
-		ID:   "Stats1",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
-		},
+		TPid:               testTPID,
+		ID:                 "Stats1",
+		FilterIDs:          []string{"FLTR_1"},
 		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
 		QueueLength:        100,
 		TTL:                "1s",
@@ -913,7 +903,7 @@ func TestAPItoTPStats(t *testing.T) {
 		QueueLength: tps.QueueLength,
 		Metrics:     []string{"*asr", "*acd", "*acc"},
 		Thresholds:  []string{"THRESH1", "THRESH2"},
-		Filters:     make([]*RequestFilter, len(tps.Filters)),
+		FilterIDs:   []string{"FLTR_1"},
 		Stored:      tps.Stored,
 		Blocker:     tps.Blocker,
 		Weight:      20.0,
@@ -922,9 +912,6 @@ func TestAPItoTPStats(t *testing.T) {
 	if eTPs.TTL, err = utils.ParseDurationWithSecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
-
-	eTPs.Filters[0] = &RequestFilter{Type: MetaString,
-		FieldName: "Account", Values: []string{"1001", "1002"}}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 

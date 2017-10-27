@@ -1967,7 +1967,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	sq := &StatQueueProfile{
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
-		Filters:            []*RequestFilter{},
+		FilterIDs:          []string{},
 		QueueLength:        2,
 		TTL:                timeTTL,
 		Metrics:            []string{},

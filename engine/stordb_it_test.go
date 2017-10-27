@@ -1560,16 +1560,10 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 	//WRITE
 	eTPs := []*utils.TPStats{
 		&utils.TPStats{
-			TPid:   "TEST_TPID",
-			Tenant: "Test",
-			ID:     "Stats1",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
-					Type:      "filtertype",
-					FieldName: "Account",
-					Values:    []string{"1001", "1002"},
-				},
-			},
+			TPid:      "TEST_TPID",
+			Tenant:    "Test",
+			ID:        "Stats1",
+			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1601,11 +1595,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 		if !(reflect.DeepEqual(eTPs[0].Weight, rcv[0].Weight) || reflect.DeepEqual(eTPs[0].Weight, rcv[1].Weight)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].Weight, rcv[0].Weight, rcv[1].Weight)
 		}
-		for i, _ := range eTPs[0].Filters {
-			if !(reflect.DeepEqual(eTPs[0].Filters[i], rcv[0].Filters[i]) || reflect.DeepEqual(eTPs[0].Filters[i], rcv[1].Filters[i])) {
-				t.Errorf("Expecting: %+v, received: %+v || %+v", eTPs[0].Filters[i], rcv[0].Filters[i], rcv[1].Filters[i])
-			}
-		}
+
 	}
 	// UPDATE
 	eTPs[0].Weight = 2.1
