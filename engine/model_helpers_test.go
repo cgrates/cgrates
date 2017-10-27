@@ -786,19 +786,21 @@ func TestAPItoResource(t *testing.T) {
 		Weight:             10,
 		Limit:              "2",
 		Thresholds:         []string{"TRes1"},
+		AllocationMessage:  "asd",
 	}
 	eRL := &ResourceProfile{
-		Tenant:     "cgrates.org",
-		ID:         tpRL.ID,
-		Stored:     tpRL.Stored,
-		Blocker:    tpRL.Blocker,
-		Weight:     tpRL.Weight,
-		FilterIDs:  []string{"FLTR_RES_GR1"},
-		Thresholds: []string{"TRes1"},
+		Tenant:            "cgrates.org",
+		ID:                tpRL.ID,
+		Stored:            tpRL.Stored,
+		Blocker:           tpRL.Blocker,
+		Weight:            tpRL.Weight,
+		FilterIDs:         []string{"FLTR_RES_GR_1"},
+		Thresholds:        []string{"TRes1"},
+		AllocationMessage: tpRL.AllocationMessage,
+		Limit:             2,
 	}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eRL.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
-	eRL.Limit = 2
 	if rl, err := APItoResource(tpRL, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRL, rl) {

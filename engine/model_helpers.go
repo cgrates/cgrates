@@ -1865,7 +1865,6 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 				rl.FilterIDs = append(rl.FilterIDs, trsh)
 			}
 		}
-
 		mrl[tp.ID] = rl
 	}
 	result = make([]*utils.TPResource, len(mrl))
@@ -1928,7 +1927,12 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 			return nil, err
 		}
 	}
-
+	for _, fltr := range tpRL.FilterIDs {
+		rp.FilterIDs = append(rp.FilterIDs, fltr)
+	}
+	for _, th := range tpRL.Thresholds {
+		rp.Thresholds = append(rp.Thresholds, th)
+	}
 	if tpRL.ActivationInterval != nil {
 		if rp.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
@@ -1939,13 +1943,6 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 			return nil, err
 		}
 	}
-	for _, trh := range tpRL.Thresholds {
-		rp.Thresholds = append(rp.Thresholds, trh)
-	}
-	for _, fltr := range tpRL.FilterIDs {
-		rp.FilterIDs = append(rp.FilterIDs, fltr)
-	}
-
 	return rp, nil
 }
 

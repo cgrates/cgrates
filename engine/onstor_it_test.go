@@ -794,14 +794,10 @@ func testOnStorITCacheReverseAlias(t *testing.T) {
 
 func testOnStorITCacheResourceProfile(t *testing.T) {
 	rCfg := &ResourceProfile{
-		Tenant: "cgrates.org",
-		ID:     "RL_TEST",
-		Weight: 10,
-		Filters: []*RequestFilter{
-			&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
-			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
-				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
-			}},
+		Tenant:    "cgrates.org",
+		ID:        "RL_TEST",
+		Weight:    10,
+		FilterIDs: []string{"FLTR_RES_RL_TEST"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
@@ -1798,13 +1794,9 @@ func testOnStorITCRUDReverseAlias(t *testing.T) {
 
 func testOnStorITCRUDResourceProfile(t *testing.T) {
 	rL := &ResourceProfile{
-		ID:     "RL_TEST2",
-		Weight: 10,
-		Filters: []*RequestFilter{
-			&RequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"dan", "1002"}},
-			&RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
-				rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
-			}},
+		ID:        "RL_TEST2",
+		Weight:    10,
+		FilterIDs: []string{"FLTR_RES_RL_TEST2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local()},

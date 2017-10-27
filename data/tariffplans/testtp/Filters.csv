@@ -22,6 +22,6 @@ cgrates.org,FLTR_STATS_3,*gt,TCD,3h,
 cgrates.org,FLTR_RES_1,*string,EventType,ResourceUpdate,2014-07-29T15:00:00Z
 cgrates.org,FLTR_RES_1,*string,ResourceID,RES_GRP_1,
 cgrates.org,FLTR_RES_1,*gte,Usage,10.0,
-cgrates.org,FLTR_RES_GR2,*destinations,Destination,DST_FS,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_FS,*destinations,Destination,DST_FS,2014-07-29T15:00:00Z
 cgrates.org,FLTR_RES_GR3,*string,Account,3001,2014-07-29T15:00:00Z
-cgrates.org,FLTR_RES_GR3_2,*cdr_stats,,CDRST1:*min_ASR:34;CDRST_1001:*min_ASR:20,2014-07-29T15:00:00Z
+cgrates.org,FLTR_CDRS,*cdr_stats,,CDRST1:*min_ASR:34;CDRST_1001:*min_ASR:20,2014-07-29T15:00:00Z

@@ -528,8 +528,10 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *
 }
 
 func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	var thdSConn *rpcclient.RpcClientPool
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	if len(cfg.ResourceSCfg().ThresholdSConns) != 0 { // Stats connection init
 		thdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.ResourceSCfg().ThresholdSConns, internalThresholdSChan, cfg.InternalTtl)
@@ -539,7 +541,7 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn)
+	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -902,7 +904,7 @@ func main() {
 	// Start RL service
 	if cfg.ResourceSCfg().Enabled {
 		go startResourceService(internalRsChan,
-			internalThresholdSChan, cfg, dm, server, exitChan)
+			internalThresholdSChan, cfg, dm, server, exitChan, filterSChan)
 	}
 
 	if cfg.StatSCfg().Enabled {

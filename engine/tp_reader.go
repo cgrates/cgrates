@@ -1612,24 +1612,24 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.resProfiles = mapRsPfls
-	for tenantid, res := range mapRsPfls {
-		resIndxrKey := utils.ResourceProfilesStringIndex + tenantid.TenantID()
-		if has, err := tpr.dm.DataDB().HasData(utils.ResourcesPrefix, tenantid.TenantID()); err != nil {
+	for tntID, res := range mapRsPfls {
+		resIndxrKey := utils.ResourceProfilesStringIndex + tntID.Tenant
+		if has, err := tpr.dm.DataDB().HasData(utils.ResourcesPrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
-			tpr.resources = append(tpr.resources, &utils.TenantID{Tenant: tenantid.Tenant, ID: tenantid.ID})
+			tpr.resources = append(tpr.resources, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index resource for filters
-		if _, has := tpr.resIndexers[tenantid.TenantID()]; !has {
-			if tpr.resIndexers[tenantid.TenantID()], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
+		if _, has := tpr.resIndexers[tntID.Tenant]; !has {
+			if tpr.resIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
 				return
 			}
 		}
 		for _, fltrID := range res.FilterIDs {
-			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tenantid.Tenant, ID: fltrID}]
+			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
 			if !has {
 				var fltr *Filter
-				if fltr, err = tpr.dm.GetFilter(tenantid.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
 					if err == utils.ErrNotFound {
 						err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
 					}
@@ -1638,7 +1638,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 					tpFltr = FilterToTPFilter(fltr)
 				}
 			} else {
-				tpr.resIndexers[tenantid.TenantID()].IndexTPFilter(tpFltr, res.ID)
+				tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
 			}
 		}
 	}
@@ -1659,24 +1659,24 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 		mapSTs[utils.TenantID{Tenant: st.Tenant, ID: st.ID}] = st
 	}
 	tpr.sqProfiles = mapSTs
-	for tenantid, sq := range mapSTs {
-		sqpIndxrKey := utils.StatQueuesStringIndex + tenantid.TenantID()
-		if has, err := tpr.dm.DataDB().HasData(utils.StatQueuePrefix, tenantid.TenantID()); err != nil {
+	for tntID, sq := range mapSTs {
+		sqpIndxrKey := utils.StatQueuesStringIndex + tntID.Tenant
+		if has, err := tpr.dm.DataDB().HasData(utils.StatQueuePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
-			tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: tenantid.Tenant, ID: tenantid.ID})
+			tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index statQueues for filters
-		if _, has := tpr.sqpIndexers[tenantid.TenantID()]; !has {
-			if tpr.sqpIndexers[tenantid.TenantID()], err = NewReqFilterIndexer(tpr.dm, sqpIndxrKey); err != nil {
+		if _, has := tpr.sqpIndexers[tntID.Tenant]; !has {
+			if tpr.sqpIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, sqpIndxrKey); err != nil {
 				return
 			}
 		}
 		for _, fltrID := range sq.FilterIDs {
-			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tenantid.Tenant, ID: fltrID}]
+			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
 			if !has {
 				var fltr *Filter
-				if fltr, err = tpr.dm.GetFilter(tenantid.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
 					if err == utils.ErrNotFound {
 						err = fmt.Errorf("broken reference to filter: %+v for statQueue: %+v", fltrID, sq)
 					}
@@ -1685,7 +1685,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 					tpFltr = FilterToTPFilter(fltr)
 				}
 			} else {
-				tpr.sqpIndexers[tenantid.TenantID()].IndexTPFilter(tpFltr, sq.ID)
+				tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
 			}
 		}
 	}
