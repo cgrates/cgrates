@@ -541,7 +541,7 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn, filterS)
+	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn, filterS, cfg.ResourceSCfg().IndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
