@@ -456,17 +456,15 @@ type TpResource struct {
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
-	FilterType         string  `index:"2" re:"^\*[A-Za-z].*"`
-	FilterFieldName    string  `index:"3" re:""`
-	FilterFieldValues  string  `index:"4" re:""`
-	ActivationInterval string  `index:"5" re:""`
-	UsageTTL           string  `index:"6" re:""`
-	Limit              string  `index:"7" re:""`
-	AllocationMessage  string  `index:"8" re:""`
-	Blocker            bool    `index:"9" re:""`
-	Stored             bool    `index:"10" re:""`
-	Weight             float64 `index:"11" re:"\d+\.?\d*"`
-	Thresholds         string  `index:"12" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	UsageTTL           string  `index:"4" re:""`
+	Limit              string  `index:"5" re:""`
+	AllocationMessage  string  `index:"6" re:""`
+	Blocker            bool    `index:"7" re:""`
+	Stored             bool    `index:"8" re:""`
+	Weight             float64 `index:"9" re:"\d+\.?\d*"`
+	Thresholds         string  `index:"10" re:""`
 	CreatedAt          time.Time
 }
 

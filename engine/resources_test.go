@@ -51,20 +51,9 @@ func TestRSRecordUsage1(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant: "cgrates.org",
-			ID:     "RL1",
-			Filters: []*RequestFilter{
-				&RequestFilter{
-					Type:      MetaString,
-					FieldName: "Account",
-					Values:    []string{"1001", "1002"},
-				},
-				&RequestFilter{
-					Type:      MetaRSRFields,
-					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
-					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
-				},
-			},
+			Tenant:    "cgrates.org",
+			ID:        "RL1",
+			FilterIDs: []string{"FLTR_RES_RL1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Duration(1 * time.Millisecond)),
@@ -133,19 +122,8 @@ func TestRSRsort(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID: "RL2",
-			Filters: []*RequestFilter{
-				&RequestFilter{
-					Type:      MetaString,
-					FieldName: "Account",
-					Values:    []string{"1001", "1002"},
-				},
-				&RequestFilter{
-					Type:      MetaRSRFields,
-					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
-					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
-				},
-			},
+			ID:        "RL2",
+			FilterIDs: []string{"FLTR_RES_RL2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
@@ -247,20 +225,9 @@ func TestRSCacheSetGet(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL",
 		rPrf: &ResourceProfile{
-			Tenant: "cgrates.org",
-			ID:     "RL",
-			Filters: []*RequestFilter{
-				&RequestFilter{
-					Type:      MetaString,
-					FieldName: "Account",
-					Values:    []string{"1001", "1002"},
-				},
-				&RequestFilter{
-					Type:      MetaRSRFields,
-					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
-					rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
-				},
-			},
+			Tenant:    "cgrates.org",
+			ID:        "RL",
+			FilterIDs: []string{"FLTR_RES_RL"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
@@ -289,6 +256,6 @@ func TestRSCacheSetGet(t *testing.T) {
 	} else if x == nil {
 		t.Error("nil resource")
 	} else if !reflect.DeepEqual(r, x.(*Resource)) {
-		t.Errorf("Expecting: +v, received: %+v", r, x)
+		t.Errorf("Expecting: %+v, received: %+v", r, x)
 	}
 }

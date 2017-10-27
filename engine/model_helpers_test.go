@@ -715,9 +715,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Tpid:               "TEST_TPID",
 			Tenant:             "cgrates.org",
 			ID:                 "ResGroup1",
-			FilterType:         MetaStringPrefix,
-			FilterFieldName:    "Destination",
-			FilterFieldValues:  "+49151;+49161",
+			FilterIDs:          "FLTR_RES_GR1",
 			ActivationInterval: "2014-07-29T15:00:00Z",
 			Stored:             false,
 			Blocker:            false,
@@ -725,20 +723,16 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Limit:              "45",
 			Thresholds:         "WARN_RES1;WARN_RES2"},
 		&TpResource{
-			Tpid:              "TEST_TPID",
-			ID:                "ResGroup1",
-			Tenant:            "cgrates.org",
-			FilterType:        MetaStringPrefix,
-			FilterFieldName:   "Category",
-			FilterFieldValues: "call;inbound_call",
-			Thresholds:        "WARN3"},
+			Tpid:       "TEST_TPID",
+			ID:         "ResGroup1",
+			Tenant:     "cgrates.org",
+			FilterIDs:  "FLTR_RES_GR1_1",
+			Thresholds: "WARN3"},
 		&TpResource{
 			Tpid:               "TEST_TPID",
 			Tenant:             "cgrates.org",
 			ID:                 "ResGroup2",
-			FilterType:         MetaStringPrefix,
-			FilterFieldName:    "Destination",
-			FilterFieldValues:  "+40",
+			FilterIDs:          "FLTR_RES_GR2",
 			ActivationInterval: "2014-07-29T15:00:00Z",
 			Stored:             false,
 			Blocker:            false,
@@ -747,21 +741,10 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 	}
 	eTPs := []*utils.TPResource{
 		&utils.TPResource{
-			TPid:   tps[0].Tpid,
-			Tenant: tps[0].Tenant,
-			ID:     tps[0].ID,
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
-					Type:      tps[0].FilterType,
-					FieldName: tps[0].FilterFieldName,
-					Values:    []string{"+49151", "+49161"},
-				},
-				&utils.TPRequestFilter{
-					Type:      tps[1].FilterType,
-					FieldName: tps[1].FilterFieldName,
-					Values:    []string{"call", "inbound_call"},
-				},
-			},
+			TPid:      tps[0].Tpid,
+			Tenant:    tps[0].Tenant,
+			ID:        tps[0].ID,
+			FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR1_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
@@ -772,16 +755,10 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Thresholds: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
 		&utils.TPResource{
-			TPid:   tps[2].Tpid,
-			Tenant: tps[2].Tenant,
-			ID:     tps[2].ID,
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
-					Type:      tps[2].FilterType,
-					FieldName: tps[2].FilterFieldName,
-					Values:    []string{"+40"},
-				},
-			},
+			TPid:      tps[2].Tpid,
+			Tenant:    tps[2].Tenant,
+			ID:        tps[2].ID,
+			FilterIDs: []string{"FLTR_RES_GR2"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[2].ActivationInterval,
 			},
@@ -799,38 +776,25 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 
 func TestAPItoResource(t *testing.T) {
 	tpRL := &utils.TPResource{
-		TPid: testTPID,
-		ID:   "ResGroup1",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
-			&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"10", "20"}},
-			&utils.TPRequestFilter{Type: MetaStatS, Values: []string{"CDRST1:*min_asr:34", "CDRST_1001:*min_asr:20"}},
-			&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"}},
-		},
+		Tenant:             "cgrates.org",
+		TPid:               testTPID,
+		ID:                 "ResGroup1",
+		FilterIDs:          []string{"FLTR_RES_GR_1"},
 		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
 		Stored:             false,
 		Blocker:            false,
 		Weight:             10,
 		Limit:              "2",
+		Thresholds:         []string{"TRes1"},
 	}
 	eRL := &ResourceProfile{
-		ID:      tpRL.ID,
-		Stored:  tpRL.Stored,
-		Blocker: tpRL.Blocker,
-		Weight:  tpRL.Weight,
-		Filters: make([]*RequestFilter, len(tpRL.Filters))}
-	eRL.Filters[0] = &RequestFilter{Type: MetaString,
-		FieldName: "Account", Values: []string{"1001", "1002"}}
-	eRL.Filters[1] = &RequestFilter{Type: MetaStringPrefix,
-		FieldName: "Destination", Values: []string{"10", "20"}}
-	eRL.Filters[2] = &RequestFilter{Type: MetaStatS,
-		Values: []string{"CDRST1:*min_asr:34", "CDRST_1001:*min_asr:20"},
-		statSThresholds: []*RFStatSThreshold{
-			&RFStatSThreshold{QueueID: "CDRST1", ThresholdType: "*min_asr", ThresholdValue: 34},
-			&RFStatSThreshold{QueueID: "CDRST_1001", ThresholdType: "*min_asr", ThresholdValue: 20},
-		}}
-	eRL.Filters[3] = &RequestFilter{Type: MetaRSRFields, Values: []string{"Subject(~^1.*1$)", "Destination(1002)"},
-		rsrFields: utils.ParseRSRFieldsMustCompile("Subject(~^1.*1$);Destination(1002)", utils.INFIELD_SEP),
+		Tenant:     "cgrates.org",
+		ID:         tpRL.ID,
+		Stored:     tpRL.Stored,
+		Blocker:    tpRL.Blocker,
+		Weight:     tpRL.Weight,
+		FilterIDs:  []string{"FLTR_RES_GR1"},
+		Thresholds: []string{"TRes1"},
 	}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
 	eRL.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}

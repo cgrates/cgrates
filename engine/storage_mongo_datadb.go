@@ -1678,11 +1678,6 @@ func (ms *MongoStorage) GetResourceProfileDrv(tenant, id string) (rp *ResourcePr
 		}
 		return nil, err
 	}
-	for _, fltr := range rp.Filters {
-		if err = fltr.CompileValues(); err != nil {
-			return
-		}
-	}
 	return
 }
 

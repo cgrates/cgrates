@@ -1171,11 +1171,6 @@ func (rs *RedisStorage) GetResourceProfileDrv(tenant, id string) (rsp *ResourceP
 	if err = rs.ms.Unmarshal(values, &rsp); err != nil {
 		return
 	}
-	for _, fltr := range rsp.Filters {
-		if err = fltr.CompileValues(); err != nil {
-			return
-		}
-	}
 	return
 }
 
