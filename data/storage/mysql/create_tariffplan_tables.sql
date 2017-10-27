@@ -401,9 +401,7 @@ CREATE TABLE tp_resources (
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
-  `filter_type` varchar(16) NOT NULL,
-  `filter_field_name` varchar(64) NOT NULL,
-  `filter_field_values` varchar(256) NOT NULL,
+  `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `usage_ttl` varchar(32) NOT NULL,
   `limit` varchar(64) NOT NULL,
@@ -415,7 +413,7 @@ CREATE TABLE tp_resources (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_resource` (`tpid`,`tenant`, `id`, `filter_type`, `filter_field_name`)
+  UNIQUE KEY `unique_tp_resource` (`tpid`,`tenant`, `id`,`filter_ids` )
 );
 
 --
