@@ -1281,9 +1281,6 @@ func (rs *RedisStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]ma
 }
 
 func (rs *RedisStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
-	if err = rs.Cmd("DEL", dbKey).Err; err != nil { // DELETE before set
-		return
-	}
 	mp := make(map[string]string)
 	for fldName, fldValMp := range indexes {
 		for fldVal, strMp := range fldValMp {
