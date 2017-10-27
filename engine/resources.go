@@ -279,7 +279,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 
 // Pas the config as a whole so we can ask access concurrently
 func NewResourceService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection) (*ResourceService, error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS) (*ResourceService, error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
@@ -287,6 +287,7 @@ func NewResourceService(dm *DataManager, storeInterval time.Duration,
 		lcEventResources: make(map[string][]*utils.TenantID),
 		storedResources:  make(utils.StringMap),
 		storeInterval:    storeInterval,
+		filterS:          filterS,
 		stopBackup:       make(chan struct{})}, nil
 }
 
@@ -294,12 +295,13 @@ func NewResourceService(dm *DataManager, storeInterval time.Duration,
 type ResourceService struct {
 	dm               *DataManager                  // So we can load the data in cache and index it
 	thdS             rpcclient.RpcClientConnection // allows applying filters based on stats
-	lcEventResources map[string][]*utils.TenantID  // cache recording resources for events in alocation phase
-	lcERMux          sync.RWMutex                  // protects the lcEventResources
-	storedResources  utils.StringMap               // keep a record of resources which need saving, map[resID]bool
-	srMux            sync.RWMutex                  // protects storedResources
-	storeInterval    time.Duration                 // interval to dump data on
-	stopBackup       chan struct{}                 // control storing process
+	filterS          *FilterS
+	lcEventResources map[string][]*utils.TenantID // cache recording resources for events in alocation phase
+	lcERMux          sync.RWMutex                 // protects the lcEventResources
+	storedResources  utils.StringMap              // keep a record of resources which need saving, map[resID]bool
+	srMux            sync.RWMutex                 // protects storedResources
+	storeInterval    time.Duration                // interval to dump data on
+	stopBackup       chan struct{}                // control storing process
 }
 
 // Called to start the service
@@ -450,20 +452,11 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 			!rPrf.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		/*
-			passAllFilters := true
-			for _, fltr := range rPrf.Filters {
-				if pass, err := fltr.Pass(ev, "", nil); err != nil {
-					return nil, err
-				} else if !pass {
-					passAllFilters = false
-					continue
-				}
-			}
-			if !passAllFilters {
-				continue
-			}
-		*/
+		if pass, err := rS.filterS.PassFiltersForEvent(tenant, ev, rPrf.FilterIDs); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
 		r, err := rS.dm.GetResource(rPrf.Tenant, rPrf.ID, false, "")
 		if err != nil {
 			return nil, err

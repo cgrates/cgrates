@@ -1453,15 +1453,9 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 			Weight:     0.0,
 			Limit:      "test",
 			Thresholds: []string{"1x", "2x"},
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
-					Type:      "filtertype",
-					FieldName: "filtername",
-					Values:    []string{"test1", "test2"},
-				},
-			},
-			Blocker: true,
-			Stored:  true,
+			FilterIDs:  []string{"FILTR_RES_1"},
+			Blocker:    true,
+			Stored:     true,
 		},
 		&utils.TPResource{
 			TPid:               "testTPid",
@@ -1470,15 +1464,9 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 			Weight:             0.0,
 			Limit:              "test",
 			Thresholds:         []string{"1x", "2x"},
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
-					Type:      "filtertype",
-					FieldName: "filtername",
-					Values:    []string{"test1", "test2"},
-				},
-			},
-			Blocker: true,
-			Stored:  false,
+			FilterIDs:          []string{"FLTR_RES_2"},
+			Blocker:            true,
+			Stored:             false,
 		},
 	}
 	if err := storDB.SetTPResources(snd); err != nil {
@@ -1505,11 +1493,6 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		}
 		if !(reflect.DeepEqual(snd[0].Thresholds, rcv[0].Thresholds) || reflect.DeepEqual(snd[0].Thresholds, rcv[1].Thresholds)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Thresholds, rcv[0].Thresholds, rcv[1].Thresholds)
-		}
-		for i, _ := range snd[0].Filters {
-			if !(reflect.DeepEqual(snd[0].Filters[i], rcv[0].Filters[i]) || reflect.DeepEqual(snd[0].Filters[i], rcv[1].Filters[i])) {
-				t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Filters[i], rcv[0].Filters[i], rcv[1].Filters[i])
-			}
 		}
 	}
 	// UPDATE

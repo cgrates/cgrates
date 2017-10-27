@@ -266,17 +266,19 @@ cgrates.org,mas,true,another,value,10
 `
 	resProfiles = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
-cgrates.org,ResGroup21,FLTR_RES_GR21,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
-cgrates.org,ResGroup22,FLTR_RES_GR22,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
+cgrates.org,ResGroup21,FLTR_1,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
+cgrates.org,ResGroup22,FLTR_ACNT_dan,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],Blocker[7],Stored[8],Weight[9],MinItems[10],Thresholds[11]
 cgrates.org,Stats1,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,true,true,20,2,THRESH1;THRESH2
+cgrates.org,Stats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,true,true,20,2,THRESH1;THRESH2
+cgrates.org,Stats3,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,true,true,20,2,THRESH1;THRESH2
 `
 
 	thresholds = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],Recurrent[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,Threshold1,FilterID1;FilterID2,2014-07-29T15:00:00Z,true,10,1s,true,10,THRESH1;THRESH2,true
+cgrates.org,Threshold1,FLTR_1;FLTR_ACNT_dan,2014-07-29T15:00:00Z,true,10,1s,true,10,THRESH1;THRESH2,true
 `
 
 	filters = `
@@ -1404,7 +1406,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup21",
-			FilterIDs: []string{"FLTR_RES_GR21"},
+			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1419,7 +1421,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup22",
-			FilterIDs: []string{"FLTR_RES_GR22"},
+			FilterIDs: []string{"FLTR_ACNT_dan"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1459,10 +1461,44 @@ func TestLoadStatProfiles(t *testing.T) {
 			Weight:      20,
 			MinItems:    2,
 		},
+		utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}: &utils.TPStats{
+			Tenant:    "cgrates.org",
+			TPid:      testTPID,
+			ID:        "Stats2",
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			QueueLength: 100,
+			TTL:         "1s",
+			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
+			Thresholds:  []string{"THRESH1", "THRESH2"},
+			Blocker:     true,
+			Stored:      true,
+			Weight:      20,
+			MinItems:    2,
+		},
+		utils.TenantID{Tenant: "cgrates.org", ID: "Stats3"}: &utils.TPStats{
+			Tenant:    "cgrates.org",
+			TPid:      testTPID,
+			ID:        "Stats3",
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			QueueLength: 100,
+			TTL:         "1s",
+			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
+			Thresholds:  []string{"THRESH1", "THRESH2"},
+			Blocker:     true,
+			Stored:      true,
+			Weight:      20,
+			MinItems:    2,
+		},
 	}
 	stKey := utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}
 	if len(csvr.sqProfiles) != len(eStats) {
-		t.Errorf("Failed to load StatQueueProfiles: %s", utils.ToIJSON(csvr.sqProfiles))
+		t.Errorf("Failed to load StatQueueProfiles: %s", len(csvr.sqProfiles))
 	} else if !reflect.DeepEqual(eStats[stKey], csvr.sqProfiles[stKey]) {
 		t.Errorf("Expecting: %+v, received: %+v", eStats[stKey], csvr.sqProfiles[stKey])
 	}
@@ -1474,7 +1510,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Threshold1",
-			FilterIDs: []string{"FilterID1", "FilterID2"},
+			FilterIDs: []string{"FLTR_1", "FLTR_ACNT_dan"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1574,7 +1610,6 @@ func TestLoadFilters(t *testing.T) {
 	} else if !reflect.DeepEqual(eFilters[fltrKey], csvr.filters[fltrKey]) {
 		t.Errorf("Expecting: %+v, received: %+v", eFilters[fltrKey], csvr.filters[fltrKey])
 	}
-
 }
 
 func TestLoadResource(t *testing.T) {
@@ -1589,7 +1624,7 @@ func TestLoadResource(t *testing.T) {
 		},
 	}
 	if len(csvr.resources) != len(eResources) {
-		t.Errorf("Failed to load resources: %s", utils.ToIJSON(csvr.resources))
+		t.Errorf("Failed to load resources expecting 2 but received : %+v", len(csvr.resources))
 	}
 }
 
@@ -1599,12 +1634,18 @@ func TestLoadstatQueues(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "Stats1",
 		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Stats2",
+		},
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Stats3",
+		},
 	}
 
 	if len(csvr.statQueues) != len(eStatQueues) {
 		t.Errorf("Failed to load statQueues: %s", utils.ToIJSON(csvr.statQueues))
-	} else if !reflect.DeepEqual(eStatQueues, csvr.statQueues) {
-		t.Errorf("Expecting: %+v, received: %+v", eStatQueues, csvr.statQueues)
 	}
 }
 
@@ -1618,7 +1659,5 @@ func TestLoadThresholds(t *testing.T) {
 
 	if len(csvr.thresholds) != len(eThresholds) {
 		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
-	} else if !reflect.DeepEqual(eThresholds, csvr.thresholds) {
-		t.Errorf("Expecting: %+v, received: %+v", eThresholds, csvr.thresholds)
 	}
 }

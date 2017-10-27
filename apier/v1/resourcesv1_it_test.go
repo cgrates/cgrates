@@ -505,15 +505,9 @@ func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 
 func testV1RsSetResourceProfile(t *testing.T) {
 	rlsConfig = &engine.ResourceProfile{
-		Tenant: "cgrates.org",
-		ID:     "RCFG1",
-		Filters: []*engine.RequestFilter{
-			&engine.RequestFilter{
-				Type:      "type",
-				FieldName: "Name",
-				Values:    []string{"FilterValue1", "FilterValue2"},
-			},
-		},
+		Tenant:    "cgrates.org",
+		ID:        "RCFG1",
+		FilterIDs: []string{"FLTR_RES_RCFG1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
@@ -547,18 +541,7 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
-	rlsConfig.Filters = []*engine.RequestFilter{
-		&engine.RequestFilter{
-			Type:      "type",
-			FieldName: "Name",
-			Values:    []string{"FilterValue1", "FilterValue2"},
-		},
-		&engine.RequestFilter{
-			Type:      "*string",
-			FieldName: "Accout",
-			Values:    []string{"1001", "1002"},
-		},
-	}
+	rlsConfig.FilterIDs = []string{"FLTR_RES_RCFG1", "FLTR_RES_RCFG2"}
 	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
