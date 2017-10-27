@@ -341,6 +341,12 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.CDRSCDRStatSConns, eHaPoolCfg) {
 		t.Error(cgrCfg.CDRSCDRStatSConns)
 	}
+	if !reflect.DeepEqual(cgrCfg.CDRSThresholdSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSThresholdSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSStatSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSStatSConns)
+	}
 	if cgrCfg.CDRSOnlineCDRExports != nil {
 		t.Error(cgrCfg.CDRSOnlineCDRExports)
 	}
@@ -579,6 +585,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		Enabled:         false,
 		ThresholdSConns: []*HaPoolConfig{},
 		StoreInterval:   0,
+		IndexedFields:   []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eResLiCfg), utils.ToJSON(cgrCfg.resourceSCfg))
@@ -591,6 +598,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		Enabled:         false,
 		StoreInterval:   0,
 		ThresholdSConns: []*HaPoolConfig{},
+		IndexedFields:   []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
@@ -601,6 +609,7 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 	eThresholdSCfg := &ThresholdSCfg{
 		Enabled:       false,
 		StoreInterval: 0,
+		IndexedFields: []string{},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eThresholdSCfg, cgrCfg.statsCfg)

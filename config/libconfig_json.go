@@ -108,6 +108,7 @@ type CdrsJsonCfg struct {
 	Users_conns         *[]*HaPoolJsonCfg
 	Aliases_conns       *[]*HaPoolJsonCfg
 	Cdrstats_conns      *[]*HaPoolJsonCfg
+	Thresholds_conns    *[]*HaPoolJsonCfg
 	Stats_conns         *[]*HaPoolJsonCfg
 	Online_cdr_exports  *[]string
 }
@@ -391,6 +392,7 @@ type ResourceSJsonCfg struct {
 	Enabled          *bool
 	Thresholds_conns *[]*HaPoolJsonCfg
 	Store_interval   *string
+	Indexed_fields   *[]string
 }
 
 // Stat service config section
@@ -398,13 +400,14 @@ type StatServJsonCfg struct {
 	Enabled          *bool
 	Store_interval   *string
 	Thresholds_conns *[]*HaPoolJsonCfg
+	Indexed_fields   *[]string
 }
 
 // Threshold service config section
 type ThresholdSJsonCfg struct {
-	Enabled         *bool
-	Store_interval  *string
-	Filtered_fields *[]string
+	Enabled        *bool
+	Store_interval *string
+	Indexed_fields *[]string
 }
 
 // Mailer config section
