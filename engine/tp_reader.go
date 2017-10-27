@@ -65,6 +65,7 @@ type TpReader struct {
 	acntActionPlans map[string][]string
 	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
 	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
+	resIndexers  map[string]*ReqFilterIndexer // tenant, indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -141,6 +142,7 @@ func (tpr *TpReader) Init() {
 	tpr.acntActionPlans = make(map[string][]string)
 	tpr.thdsIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.resIndexers = make(map[string]*ReqFilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1600,7 +1602,7 @@ func (tpr *TpReader) LoadAliases() error {
 	return err
 }
 
-func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) error {
+func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	rls, err := tpr.lr.GetTPResources(tpr.tpid, tag)
 	if err != nil {
 		return err
@@ -1610,11 +1612,34 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) error {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.resProfiles = mapRsPfls
-	for tenantid, _ := range mapRsPfls {
+	for tenantid, res := range mapRsPfls {
+		resIndxrKey := utils.ResourceProfilesStringIndex + tenantid.TenantID()
 		if has, err := tpr.dm.DataDB().HasData(utils.ResourcesPrefix, tenantid.TenantID()); err != nil {
 			return err
 		} else if !has {
 			tpr.resources = append(tpr.resources, &utils.TenantID{Tenant: tenantid.Tenant, ID: tenantid.ID})
+		}
+		// index resource for filters
+		if _, has := tpr.resIndexers[tenantid.TenantID()]; !has {
+			if tpr.resIndexers[tenantid.TenantID()], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
+				return
+			}
+		}
+		for _, fltrID := range res.FilterIDs {
+			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tenantid.Tenant, ID: fltrID}]
+			if !has {
+				var fltr *Filter
+				if fltr, err = tpr.dm.GetFilter(tenantid.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
+					}
+					return
+				} else {
+					tpFltr = FilterToTPFilter(fltr)
+				}
+			} else {
+				tpr.resIndexers[tenantid.TenantID()].IndexTPFilter(tpFltr, res.ID)
+			}
 		}
 	}
 	return nil
@@ -1653,7 +1678,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 				var fltr *Filter
 				if fltr, err = tpr.dm.GetFilter(tenantid.Tenant, fltrID, false, utils.NonTransactional); err != nil {
 					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %s for statQueue: %s", fltrID, sq)
+						err = fmt.Errorf("broken reference to filter: %+v for statQueue: %+v", fltrID, sq)
 					}
 					return
 				} else {
@@ -1700,7 +1725,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 				var fltr *Filter
 				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
 					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %s for threshold: %s", fltrID, th)
+						err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
 					}
 					return
 				} else {
@@ -2166,26 +2191,15 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
-		if len(tpr.resProfiles) > 0 {
-			if verbose {
-				log.Print("Indexing resource profiles")
+		if verbose {
+			log.Print("Indexing resource profiles")
+		}
+		for tenant, fltrIdxer := range tpr.resIndexers {
+			if err := fltrIdxer.StoreIndexes(); err != nil {
+				return err
 			}
-			for tenantid, tpRL := range tpr.resProfiles {
-				rlIdxr, err := NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesStringIndex+tenantid.Tenant)
-				if err != nil {
-					return err
-				}
-				if rl, err := APItoResource(tpRL, tpr.timezone); err != nil {
-					return err
-				} else {
-					rlIdxr.IndexFilters(rl.ID, rl.Filters)
-				}
-				if verbose {
-					log.Printf("Indexed ResourceProfile tenant: %s, keys: %+v", tenantid.Tenant, rlIdxr.ChangedKeys().Slice())
-				}
-				if err := rlIdxr.StoreIndexes(); err != nil {
-					return err
-				}
+			if verbose {
+				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
 			}
 		}
 

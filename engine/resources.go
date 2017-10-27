@@ -40,8 +40,8 @@ func init() {
 // ResourceProfile represents the user configuration for the resource
 type ResourceProfile struct {
 	Tenant             string
-	ID                 string                    // identifier of this resource
-	Filters            []*RequestFilter          // filters for the request
+	ID                 string // identifier of this resource
+	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
 	UsageTTL           time.Duration             // auto-expire the usage after this duration
 	Limit              float64                   // limit value
@@ -450,18 +450,20 @@ func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[strin
 			!rPrf.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		passAllFilters := true
-		for _, fltr := range rPrf.Filters {
-			if pass, err := fltr.Pass(ev, "", nil); err != nil {
-				return nil, err
-			} else if !pass {
-				passAllFilters = false
+		/*
+			passAllFilters := true
+			for _, fltr := range rPrf.Filters {
+				if pass, err := fltr.Pass(ev, "", nil); err != nil {
+					return nil, err
+				} else if !pass {
+					passAllFilters = false
+					continue
+				}
+			}
+			if !passAllFilters {
 				continue
 			}
-		}
-		if !passAllFilters {
-			continue
-		}
+		*/
 		r, err := rS.dm.GetResource(rPrf.Tenant, rPrf.ID, false, "")
 		if err != nil {
 			return nil, err

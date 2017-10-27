@@ -1058,11 +1058,6 @@ func (ms *MapStorage) GetResourceProfileDrv(tenant, id string) (rsp *ResourcePro
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range rsp.Filters {
-		if err := fltr.CompileValues(); err != nil {
-			return nil, err
-		}
-	}
 	return
 }
 

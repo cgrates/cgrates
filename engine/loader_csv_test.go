@@ -265,11 +265,9 @@ cgrates.org,mas,true,another,value,10
 *out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
 	resProfiles = `
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],TTL[6],Limit[7],AllocationMessage[8],Blocker[9],Stored[10],Weight[11],Thresholds[12]
-cgrates.org,ResGroup21,*string,HdrAccount,1001;1002,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
-cgrates.org,ResGroup21,*string_prefix,HdrDestination,10;20,,,,,,,,
-cgrates.org,ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,,,,,
-cgrates.org,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
+cgrates.org,ResGroup21,FLTR_RES_GR21,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
+cgrates.org,ResGroup22,FLTR_RES_GR22,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],Blocker[7],Stored[8],Weight[9],MinItems[10],Thresholds[11]
@@ -1403,14 +1401,10 @@ func TestLoadReverseAliases(t *testing.T) {
 func TestLoadResourceProfiles(t *testing.T) {
 	eResProfiles := map[utils.TenantID]*utils.TPResource{
 		utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup21"}: &utils.TPResource{
-			TPid:   testTPID,
-			Tenant: "cgrates.org",
-			ID:     "ResGroup21",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaString, FieldName: "HdrAccount", Values: []string{"1001", "1002"}},
-				&utils.TPRequestFilter{Type: MetaStringPrefix, FieldName: "HdrDestination", Values: []string{"10", "20"}},
-				&utils.TPRequestFilter{Type: MetaRSRFields, Values: []string{"HdrSubject(~^1.*1$)", "HdrDestination(1002)"}},
-			},
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup21",
+			FilterIDs: []string{"FLTR_RES_GR21"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1418,14 +1412,14 @@ func TestLoadResourceProfiles(t *testing.T) {
 			AllocationMessage: "call",
 			Weight:            10,
 			Limit:             "2",
+			Blocker:           true,
+			Stored:            true,
 		},
 		utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup22"}: &utils.TPResource{
-			TPid:   testTPID,
-			Tenant: "cgrates.org",
-			ID:     "ResGroup22",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaDestinations, FieldName: "HdrDestination", Values: []string{"DST_FS"}},
-			},
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup22",
+			FilterIDs: []string{"FLTR_RES_GR22"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},

@@ -1824,11 +1824,9 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 		rl, found := mrl[tp.ID]
 		if !found {
 			rl = &utils.TPResource{
-				TPid:    tp.Tpid,
-				Tenant:  tp.Tenant,
-				ID:      tp.ID,
-				Blocker: tp.Blocker,
-				Stored:  tp.Stored,
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
 			}
 		}
 		if tp.UsageTTL != "" {
@@ -1861,12 +1859,13 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 				rl.Thresholds = append(rl.Thresholds, trsh)
 			}
 		}
-		if tp.FilterType != "" {
-			rl.Filters = append(rl.Filters, &utils.TPRequestFilter{
-				Type:      tp.FilterType,
-				FieldName: tp.FilterFieldName,
-				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
+		if tp.FilterIDs != "" {
+			trshSplt := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, trsh := range trshSplt {
+				rl.FilterIDs = append(rl.FilterIDs, trsh)
+			}
 		}
+
 		mrl[tp.ID] = rl
 	}
 	result = make([]*utils.TPResource, len(mrl))
@@ -1879,74 +1878,57 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 }
 
 func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
-	if len(rl.Filters) == 0 {
-		return
-	}
-	for i, fltr := range rl.Filters {
-		mdl := &TpResource{
-			Tpid:    rl.TPid,
-			Tenant:  rl.Tenant,
-			ID:      rl.ID,
-			Blocker: rl.Blocker,
-			Stored:  rl.Stored,
-		}
-		if i == 0 {
-			mdl.UsageTTL = rl.UsageTTL
-			mdl.Weight = rl.Weight
-			mdl.Limit = rl.Limit
-			mdl.AllocationMessage = rl.AllocationMessage
-			mdl.Blocker = rl.Blocker
-			mdl.Stored = rl.Stored
-			if rl.ActivationInterval != nil {
-				if rl.ActivationInterval.ActivationTime != "" {
-					mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
+	if rl != nil {
+		for i, fltr := range rl.FilterIDs {
+			mdl := &TpResource{
+				Tpid:   rl.TPid,
+				Tenant: rl.Tenant,
+				ID:     rl.ID,
+			}
+			if i == 0 {
+				mdl.UsageTTL = rl.UsageTTL
+				mdl.Weight = rl.Weight
+				mdl.Limit = rl.Limit
+				mdl.AllocationMessage = rl.AllocationMessage
+				mdl.Blocker = rl.Blocker
+				mdl.Stored = rl.Stored
+				if rl.ActivationInterval != nil {
+					if rl.ActivationInterval.ActivationTime != "" {
+						mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
+					}
+					if rl.ActivationInterval.ExpiryTime != "" {
+						mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
+					}
 				}
-				if rl.ActivationInterval.ExpiryTime != "" {
-					mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
+				for i, val := range rl.Thresholds {
+					if i != 0 {
+						mdl.Thresholds += utils.INFIELD_SEP
+					}
+					mdl.Thresholds += val
 				}
 			}
-			for i, val := range rl.Thresholds {
-				if i != 0 {
-					mdl.Thresholds += utils.INFIELD_SEP
-				}
-				mdl.Thresholds += val
-
-			}
+			mdl.FilterIDs = fltr
+			mdls = append(mdls, mdl)
 		}
-		mdl.FilterType = fltr.Type
-		mdl.FilterFieldName = fltr.FieldName
-		for i, val := range fltr.Values {
-			if i != 0 {
-				mdl.FilterFieldValues += utils.INFIELD_SEP
-			}
-			mdl.FilterFieldValues += val
-		}
-		mdls = append(mdls, mdl)
 	}
 	return
 }
 
 func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile, err error) {
 	rp = &ResourceProfile{
-		Tenant:  tpRL.Tenant,
-		ID:      tpRL.ID,
-		Weight:  tpRL.Weight,
-		Blocker: tpRL.Blocker,
-		Stored:  tpRL.Stored,
-		Filters: make([]*RequestFilter, len(tpRL.Filters)),
+		Tenant:            tpRL.Tenant,
+		ID:                tpRL.ID,
+		Weight:            tpRL.Weight,
+		Blocker:           tpRL.Blocker,
+		Stored:            tpRL.Stored,
+		AllocationMessage: tpRL.AllocationMessage,
 	}
 	if tpRL.UsageTTL != "" {
 		if rp.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {
 			return nil, err
 		}
 	}
-	for i, f := range tpRL.Filters {
-		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
-		if err := rf.CompileValues(); err != nil {
-			return nil, err
-		}
-		rp.Filters[i] = rf
-	}
+
 	if tpRL.ActivationInterval != nil {
 		if rp.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
@@ -1957,6 +1939,13 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 			return nil, err
 		}
 	}
+	for _, trh := range tpRL.Thresholds {
+		rp.Thresholds = append(rp.Thresholds, trh)
+	}
+	for _, fltr := range tpRL.FilterIDs {
+		rp.FilterIDs = append(rp.FilterIDs, fltr)
+	}
+
 	return rp, nil
 }
 
