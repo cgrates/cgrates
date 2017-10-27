@@ -402,9 +402,9 @@ type StatServJsonCfg struct {
 
 // Threshold service config section
 type ThresholdSJsonCfg struct {
-	Enabled         *bool
-	Store_interval  *string
-	Filtered_fields *[]string
+	Enabled        *bool
+	Store_interval *string
+	Indexed_fields *[]string
 }
 
 // Mailer config section

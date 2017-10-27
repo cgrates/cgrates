@@ -601,6 +601,7 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 	eThresholdSCfg := &ThresholdSCfg{
 		Enabled:       false,
 		StoreInterval: 0,
+		IndexedFields: []string{},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eThresholdSCfg, cgrCfg.statsCfg)

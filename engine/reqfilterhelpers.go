@@ -25,11 +25,24 @@ import (
 )
 
 // matchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
+// fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.MatchReqFilterIndex, adding utils.NOT_AVAILABLE to list of fields queried
 // executes a number of $(len(fields) + 1) queries to dataDB so the size of event influences the speed of return
-func matchingItemIDsForEvent(ev map[string]interface{}, dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
+func matchingItemIDsForEvent(ev map[string]interface{}, fieldIDs []string, dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
+	if len(fieldIDs) == 0 {
+		fieldIDs = make([]string, len(ev))
+		i := 0
+		for fldID := range ev {
+			fieldIDs[i] = fldID
+			i += 1
+		}
+	}
 	itemIDs = make(utils.StringMap)
-	for fldName, fieldValIf := range ev {
+	for _, fldName := range fieldIDs {
+		fieldValIf, has := ev[fldName]
+		if !has {
+			continue
+		}
 		fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
 		if !canCast {
 			return nil, fmt.Errorf("Cannot cast field: %s into string", fldName)

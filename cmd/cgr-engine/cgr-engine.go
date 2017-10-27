@@ -602,7 +602,7 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().FilteredFields,
+	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().IndexedFields,
 		cfg.ThresholdSCfg().StoreInterval, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Could not init, error: %s", err.Error()))

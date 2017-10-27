@@ -715,9 +715,9 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 
 func TestDfThresholdSJsonCfg(t *testing.T) {
 	eCfg := &ThresholdSJsonCfg{
-		Enabled:         utils.BoolPointer(false),
-		Store_interval:  utils.StringPointer(""),
-		Filtered_fields: utils.StringSlicePointer([]string{}),
+		Enabled:        utils.BoolPointer(false),
+		Store_interval: utils.StringPointer(""),
+		Indexed_fields: utils.StringSlicePointer([]string{}),
 	}
 	if cfg, err := dfCgrJsonCfg.ThresholdSJsonCfg(); err != nil {
 		t.Error(err)

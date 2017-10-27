@@ -436,7 +436,7 @@ const CGRATES_CFG_JSON = `
 "thresholds": {
 	"enabled": false,				// starts ThresholdS service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"filtered_fields": [],			// match filters based on these fields for dynamic filtering, empty to use all
+	"indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
