@@ -103,6 +103,22 @@ var tEvs = []*engine.ThresholdEvent{
 			utils.ACCOUNT:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.USAGE:      10.0}},
+	&engine.ThresholdEvent{ // hitting THD_RES_1
+		Tenant: "cgrates.org",
+		ID:     "event6",
+		Event: map[string]interface{}{
+			utils.EventType:  utils.ResourceUpdate,
+			utils.ACCOUNT:    "1002",
+			utils.ResourceID: "RES_GRP_1",
+			utils.USAGE:      10.0}},
+	&engine.ThresholdEvent{ // hitting THD_RES_1
+		Tenant: "cgrates.org",
+		ID:     "event6",
+		Event: map[string]interface{}{
+			utils.EventType:  utils.ResourceUpdate,
+			utils.ACCOUNT:    "1002",
+			utils.ResourceID: "RES_GRP_1",
+			utils.USAGE:      10.0}},
 }
 
 var sTestsThresholdSV1 = []func(t *testing.T){
