@@ -390,10 +390,10 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	cdrDb engine.CdrStorage, dm *engine.DataManager,
 	internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
-	internalCdrStatSChan, internalStatSChan chan rpcclient.RpcClientConnection,
+	internalCdrStatSChan, internalThresholdSChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS CDRS service.")
-	var ralConn, pubSubConn, usersConn, aliasesConn, cdrstatsConn, statsConn *rpcclient.RpcClientPool
+	var ralConn, pubSubConn, usersConn, aliasesConn, cdrstatsConn, thresholdSConn, statsConn *rpcclient.RpcClientPool
 	if len(cfg.CDRSRaterConns) != 0 { // Conn pool towards RAL
 		ralConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSRaterConns, internalRaterChan, cfg.InternalTtl)
@@ -439,6 +439,15 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
+	if len(cfg.CDRSThresholdSConns) != 0 { // Stats connection init
+		thresholdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.CDRSThresholdSConns, internalThresholdSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to ThresholdS: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
 	if len(cfg.CDRSStatSConns) != 0 { // Stats connection init
 		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.CDRSStatSConns, internalStatSChan, cfg.InternalTtl)
@@ -449,7 +458,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 		}
 	}
 	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dm, ralConn, pubSubConn,
-		usersConn, aliasesConn, cdrstatsConn, statsConn)
+		usersConn, aliasesConn, cdrstatsConn, thresholdSConn, statsConn)
 	cdrServer.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHandlersToServer(server)
@@ -829,7 +838,7 @@ func main() {
 	if cfg.CDRSEnabled {
 		go startCDRS(internalCdrSChan, cdrDb, dm,
 			internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
-			internalCdrStatSChan, internalStatSChan, server, exitChan)
+			internalCdrStatSChan, internalThresholdSChan, internalStatSChan, server, exitChan)
 	}
 
 	// Start CDR Stats server

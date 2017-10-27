@@ -70,7 +70,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub, users,
-	aliases, cdrstats, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
+	aliases, cdrstats, thdS, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
 	if rater != nil && reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -86,12 +86,15 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	if cdrstats != nil && reflect.ValueOf(cdrstats).IsNil() {
 		cdrstats = nil
 	}
+	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
+		thdS = nil
+	}
 	if stats != nil && reflect.ValueOf(stats).IsNil() {
 		stats = nil
 	}
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
 		rals: rater, pubsub: pubsub, users: users, aliases: aliases,
-		cdrstats: cdrstats, stats: stats, guard: guardian.Guardian,
+		cdrstats: cdrstats, stats: stats, thdS: thdS, guard: guardian.Guardian,
 		httpPoster: utils.NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
 }
 
@@ -104,6 +107,7 @@ type CdrServer struct {
 	users         rpcclient.RpcClientConnection
 	aliases       rpcclient.RpcClientConnection
 	cdrstats      rpcclient.RpcClientConnection
+	thdS          rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
 	guard         *guardian.GuardianLock
 	responseCache *cache.ResponseCache
@@ -191,6 +195,18 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		if err := self.cdrDb.SetCDR(cdr, false); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", cdr, err.Error()))
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
+		}
+	}
+	if self.thdS != nil {
+		cdrIf, _ := cdr.AsMapStringIface()
+		ev := &ThresholdEvent{
+			Tenant: cdr.Tenant,
+			ID:     utils.GenUUID(),
+			Event:  cdrIf}
+		var hits int
+		if err := self.thdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<CDRS> error: %s processing CDR event %+v with thdS.", err.Error(), ev))
 		}
 	}
 	// Attach raw CDR to stats

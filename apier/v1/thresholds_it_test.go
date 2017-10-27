@@ -119,6 +119,33 @@ var tEvs = []*engine.ThresholdEvent{
 			utils.ACCOUNT:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.USAGE:      10.0}},
+	&engine.ThresholdEvent{ // hitting THD_CDRS_1
+		Tenant: "cgrates.org",
+		ID:     "cdrev1",
+		Event: map[string]interface{}{
+			utils.EventType:   utils.CDR,
+			"field_extr1":     "val_extr1",
+			"fieldextr2":      "valextr2",
+			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.MEDI_RUNID:  utils.MetaRaw,
+			utils.ORDERID:     123,
+			utils.CDRHOST:     "192.168.1.1",
+			utils.CDRSOURCE:   utils.UNIT_TEST,
+			utils.ACCID:       "dsafdsaf",
+			utils.TOR:         utils.VOICE,
+			utils.REQTYPE:     utils.META_RATED,
+			utils.DIRECTION:   "*out",
+			utils.TENANT:      "cgrates.org",
+			utils.CATEGORY:    "call",
+			utils.ACCOUNT:     "1007",
+			utils.SUBJECT:     "1007",
+			utils.DESTINATION: "+4986517174963",
+			utils.SETUP_TIME:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+			utils.PDD:         time.Duration(0) * time.Second,
+			utils.ANSWER_TIME: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+			utils.USAGE:       time.Duration(10) * time.Second,
+			utils.SUPPLIER:    "SUPPL1",
+			utils.COST:        -1.0}},
 }
 
 var sTestsThresholdSV1 = []func(t *testing.T){
@@ -206,7 +233,7 @@ func testV1TSFromFolder(t *testing.T) {
 
 func testV1TSGetThresholds(t *testing.T) {
 	var tIDs []string
-	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED", "THD_STATS_3"}
+	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED", "THD_STATS_3", "THD_CDRS_1"}
 	if err := tSv1Rpc.Call("ThresholdSV1.GetThresholdIDs", "cgrates.org", &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) {
@@ -256,6 +283,24 @@ func testV1TSProcessEvent(t *testing.T) {
 	}
 	eHits = 1
 	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[5], &hits); err != nil {
+		t.Error(err)
+	} else if hits != eHits {
+		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	}
+	eHits = 1
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[6], &hits); err != nil {
+		t.Error(err)
+	} else if hits != eHits {
+		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	}
+	eHits = 1
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[7], &hits); err != nil {
+		t.Error(err)
+	} else if hits != eHits {
+		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	}
+	eHits = 1
+	if err := tSv1Rpc.Call("ThresholdSV1.ProcessEvent", tEvs[8], &hits); err != nil {
 		t.Error(err)
 	} else if hits != eHits {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
