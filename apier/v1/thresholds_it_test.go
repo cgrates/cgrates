@@ -185,6 +185,7 @@ func testV1TSFromFolder(t *testing.T) {
 	if err := tSv1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(500 * time.Millisecond)
 }
 
 func testV1TSGetThresholds(t *testing.T) {

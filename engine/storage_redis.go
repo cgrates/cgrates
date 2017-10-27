@@ -1374,11 +1374,6 @@ func (rs *RedisStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 	if err = rs.ms.Unmarshal(values, &sq); err != nil {
 		return
 	}
-	for _, fltr := range sq.Filters {
-		if err = fltr.CompileValues(); err != nil {
-			return
-		}
-	}
 	return
 }
 

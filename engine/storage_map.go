@@ -1222,11 +1222,6 @@ func (ms *MapStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *Stat
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range sq.Filters {
-		if err := fltr.CompileValues(); err != nil {
-			return nil, err
-		}
-	}
 	return
 }
 

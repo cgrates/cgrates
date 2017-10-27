@@ -34,7 +34,7 @@ import (
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection) (ss *StatService, err error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS) (ss *StatService, err error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
 		thdS = nil
 	}
@@ -42,6 +42,7 @@ func NewStatService(dm *DataManager, storeInterval time.Duration,
 		dm:               dm,
 		storeInterval:    storeInterval,
 		thdS:             thdS,
+		filterS:          filterS,
 		storedStatQueues: make(utils.StringMap),
 		stopBackup:       make(chan struct{})}, nil
 }
@@ -51,6 +52,7 @@ type StatService struct {
 	dm               *DataManager
 	storeInterval    time.Duration
 	thdS             rpcclient.RpcClientConnection // rpc connection towards ThresholdS
+	filterS          *FilterS
 	stopBackup       chan struct{}
 	storedStatQueues utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
 	ssqMux           sync.RWMutex    // protects storedStatQueues
@@ -156,16 +158,9 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *StatEvent) (sqs StatQueues
 			!sqPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		passAllFilters := true
-		for _, fltr := range sqPrfl.Filters {
-			if pass, err := fltr.Pass(ev.Event, "", sS); err != nil {
-				return nil, err
-			} else if !pass {
-				passAllFilters = false
-				continue
-			}
-		}
-		if !passAllFilters {
+		if pass, err := sS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, sqPrfl.FilterIDs); err != nil {
+			return nil, err
+		} else if !pass {
 			continue
 		}
 		s, err := sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, false, "")

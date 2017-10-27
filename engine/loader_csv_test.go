@@ -272,8 +272,8 @@ cgrates.org,ResGroup21,*rsr_fields,,HdrSubject(~^1.*1$);HdrDestination(1002),,,,
 cgrates.org,ResGroup22,*destinations,HdrDestination,DST_FS,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	stats = `
-#Tenant[0],Id[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5],QueueLength[6],TTL[7],Metrics[8],Blocker[9],Stored[10],Weight[11],MinItems[12],Thresholds[13]
-cgrates.org,Stats1,*string,Account,1001;1002,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,true,true,20,2,THRESH1;THRESH2
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],Blocker[7],Stored[8],Weight[9],MinItems[10],Thresholds[11]
+cgrates.org,Stats1,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,true,true,20,2,THRESH1;THRESH2
 `
 
 	thresholds = `
@@ -1449,12 +1449,10 @@ func TestLoadResourceProfiles(t *testing.T) {
 func TestLoadStatProfiles(t *testing.T) {
 	eStats := map[utils.TenantID]*utils.TPStats{
 		utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}: &utils.TPStats{
-			Tenant: "cgrates.org",
-			TPid:   testTPID,
-			ID:     "Stats1",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{Type: MetaString, FieldName: "Account", Values: []string{"1001", "1002"}},
-			},
+			Tenant:    "cgrates.org",
+			TPid:      testTPID,
+			ID:        "Stats1",
+			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},

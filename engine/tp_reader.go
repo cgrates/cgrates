@@ -64,6 +64,7 @@ type TpReader struct {
 	revAliases,
 	acntActionPlans map[string][]string
 	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
+	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -139,6 +140,7 @@ func (tpr *TpReader) Init() {
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
 	tpr.thdsIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1622,7 +1624,7 @@ func (tpr *TpReader) LoadResourceProfiles() error {
 	return tpr.LoadResourceProfilesFiltered("")
 }
 
-func (tpr *TpReader) LoadStatsFiltered(tag string) error {
+func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 	tps, err := tpr.lr.GetTPStats(tpr.tpid, tag)
 	if err != nil {
 		return err
@@ -1632,11 +1634,34 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) error {
 		mapSTs[utils.TenantID{Tenant: st.Tenant, ID: st.ID}] = st
 	}
 	tpr.sqProfiles = mapSTs
-	for tenantid, _ := range mapSTs {
+	for tenantid, sq := range mapSTs {
+		sqpIndxrKey := utils.StatQueuesStringIndex + tenantid.TenantID()
 		if has, err := tpr.dm.DataDB().HasData(utils.StatQueuePrefix, tenantid.TenantID()); err != nil {
 			return err
 		} else if !has {
 			tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: tenantid.Tenant, ID: tenantid.ID})
+		}
+		// index statQueues for filters
+		if _, has := tpr.sqpIndexers[tenantid.TenantID()]; !has {
+			if tpr.sqpIndexers[tenantid.TenantID()], err = NewReqFilterIndexer(tpr.dm, sqpIndxrKey); err != nil {
+				return
+			}
+		}
+		for _, fltrID := range sq.FilterIDs {
+			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tenantid.Tenant, ID: fltrID}]
+			if !has {
+				var fltr *Filter
+				if fltr, err = tpr.dm.GetFilter(tenantid.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %s for statQueue: %s", fltrID, sq)
+					}
+					return
+				} else {
+					tpFltr = FilterToTPFilter(fltr)
+				}
+			} else {
+				tpr.sqpIndexers[tenantid.TenantID()].IndexTPFilter(tpFltr, sq.ID)
+			}
 		}
 	}
 	return nil
@@ -1653,7 +1678,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	}
 	mapTHs := make(map[utils.TenantID]*utils.TPThreshold)
 	for _, th := range tps {
-		mapTHs[utils.TenantID{th.Tenant, th.ID}] = th
+		mapTHs[utils.TenantID{Tenant: th.Tenant, ID: th.ID}] = th
 	}
 	tpr.thProfiles = mapTHs
 	for tntID, th := range mapTHs {
@@ -1700,7 +1725,7 @@ func (tpr *TpReader) LoadFiltersFiltered(tag string) error {
 	}
 	mapTHs := make(map[utils.TenantID]*utils.TPFilter)
 	for _, th := range tps {
-		mapTHs[utils.TenantID{th.Tenant, th.ID}] = th
+		mapTHs[utils.TenantID{Tenant: th.Tenant, ID: th.ID}] = th
 	}
 	tpr.filters = mapTHs
 	return nil
@@ -2163,28 +2188,19 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				}
 			}
 		}
-		if len(tpr.sqProfiles) > 0 {
-			if verbose {
-				log.Print("Indexing stats")
+
+		if verbose {
+			log.Print("StatQueue filter indexes:")
+		}
+		for tenant, fltrIdxer := range tpr.sqpIndexers {
+			if err := fltrIdxer.StoreIndexes(); err != nil {
+				return err
 			}
-			for tenantid, st := range tpr.sqProfiles {
-				stIdxr, err := NewReqFilterIndexer(tpr.dm, utils.StatQueuesStringIndex+tenantid.Tenant)
-				if err != nil {
-					return err
-				}
-				if st, err := APItoStats(st, tpr.timezone); err != nil {
-					return err
-				} else {
-					stIdxr.IndexFilters(st.ID, st.Filters)
-				}
-				if verbose {
-					log.Printf("Indexed Stats tenant: %s, keys %+v", tenantid.Tenant, stIdxr.ChangedKeys().Slice())
-				}
-				if err := stIdxr.StoreIndexes(); err != nil {
-					return err
-				}
+			if verbose {
+				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
 			}
 		}
+
 		if verbose {
 			log.Print("Threshold filter indexes:")
 		}

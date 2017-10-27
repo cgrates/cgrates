@@ -275,15 +275,9 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	}
 	statConfig = &engine.StatQueueProfile{
-		Tenant: "cgrates.org",
-		ID:     "TEST_PROFILE1",
-		Filters: []*engine.RequestFilter{
-			&engine.RequestFilter{
-				Type:      "type",
-				FieldName: "Name",
-				Values:    []string{"FilterValue1", "FilterValue2"},
-			},
-		},
+		Tenant:    "cgrates.org",
+		ID:        "TEST_PROFILE1",
+		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
@@ -313,23 +307,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 
 func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	var result string
-	statConfig.Filters = []*engine.RequestFilter{
-		&engine.RequestFilter{
-			Type:      "type",
-			FieldName: "Name",
-			Values:    []string{"FilterValue1", "FilterValue2"},
-		},
-		&engine.RequestFilter{
-			Type:      "*string",
-			FieldName: "Accout",
-			Values:    []string{"1001", "1002"},
-		},
-		&engine.RequestFilter{
-			Type:      "*string_prefix",
-			FieldName: "Destination",
-			Values:    []string{"10", "20"},
-		},
-	}
+	statConfig.FilterIDs = []string{"FLTR_1", "FLTR_2"}
 	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

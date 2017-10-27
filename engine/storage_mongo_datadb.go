@@ -1824,11 +1824,6 @@ func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 		}
 		return nil, err
 	}
-	for _, fltr := range sq.Filters {
-		if err = fltr.CompileValues(); err != nil {
-			return
-		}
-	}
 	return
 }
 

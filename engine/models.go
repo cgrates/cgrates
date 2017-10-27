@@ -485,18 +485,16 @@ type TpStats struct {
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
-	FilterType         string  `index:"2" re:"^\*[A-Za-z].*"`
-	FilterFieldName    string  `index:"3" re:""`
-	FilterFieldValues  string  `index:"4" re:""`
-	ActivationInterval string  `index:"5" re:""`
-	QueueLength        int     `index:"6" re:""`
-	TTL                string  `index:"7" re:""`
-	Metrics            string  `index:"8" re:""`
-	Blocker            bool    `index:"9" re:""`
-	Stored             bool    `index:"10" re:""`
-	Weight             float64 `index:"11" re:"\d+\.?\d*"`
-	MinItems           int     `index:"12" re:""`
-	Thresholds         string  `index:"13" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	QueueLength        int     `index:"4" re:""`
+	TTL                string  `index:"5" re:""`
+	Metrics            string  `index:"6" re:""`
+	Blocker            bool    `index:"7" re:""`
+	Stored             bool    `index:"8" re:""`
+	Weight             float64 `index:"9" re:"\d+\.?\d*"`
+	MinItems           int     `index:"10" re:""`
+	Thresholds         string  `index:"11" re:""`
 	CreatedAt          time.Time
 }
 

@@ -2016,12 +2016,13 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 				st.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.FilterType != "" {
-			st.Filters = append(st.Filters, &utils.TPRequestFilter{
-				Type:      tp.FilterType,
-				FieldName: tp.FilterFieldName,
-				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
+		if tp.FilterIDs != "" {
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				st.FilterIDs = append(st.FilterIDs, filter)
+			}
 		}
+
 		mst[tp.ID] = st
 	}
 	result = make([]*utils.TPStats, len(mst))
@@ -2034,53 +2035,45 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 }
 
 func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
-	if len(st.Filters) == 0 {
-		return
-	}
-	for i, fltr := range st.Filters {
-		mdl := &TpStats{
-			Tenant:   st.Tenant,
-			Tpid:     st.TPid,
-			ID:       st.ID,
-			MinItems: st.MinItems,
+	if st != nil {
+		for i, fltr := range st.FilterIDs {
+			mdl := &TpStats{
+				Tenant:   st.Tenant,
+				Tpid:     st.TPid,
+				ID:       st.ID,
+				MinItems: st.MinItems,
+			}
+			if i == 0 {
+				mdl.TTL = st.TTL
+				mdl.Blocker = st.Blocker
+				mdl.Stored = st.Stored
+				mdl.Weight = st.Weight
+				mdl.QueueLength = st.QueueLength
+				mdl.MinItems = st.MinItems
+				for i, val := range st.Metrics {
+					if i != 0 {
+						mdl.Metrics += utils.INFIELD_SEP
+					}
+					mdl.Metrics += val
+				}
+				for i, val := range st.Thresholds {
+					if i != 0 {
+						mdl.Thresholds += utils.INFIELD_SEP
+					}
+					mdl.Thresholds += val
+				}
+				if st.ActivationInterval != nil {
+					if st.ActivationInterval.ActivationTime != "" {
+						mdl.ActivationInterval = st.ActivationInterval.ActivationTime
+					}
+					if st.ActivationInterval.ExpiryTime != "" {
+						mdl.ActivationInterval += utils.INFIELD_SEP + st.ActivationInterval.ExpiryTime
+					}
+				}
+			}
+			mdl.FilterIDs = fltr
+			mdls = append(mdls, mdl)
 		}
-		if i == 0 {
-			mdl.TTL = st.TTL
-			mdl.Blocker = st.Blocker
-			mdl.Stored = st.Stored
-			mdl.Weight = st.Weight
-			mdl.QueueLength = st.QueueLength
-			mdl.MinItems = st.MinItems
-			for i, val := range st.Metrics {
-				if i != 0 {
-					mdl.Metrics += utils.INFIELD_SEP
-				}
-				mdl.Metrics += val
-			}
-			for i, val := range st.Thresholds {
-				if i != 0 {
-					mdl.Thresholds += utils.INFIELD_SEP
-				}
-				mdl.Thresholds += val
-			}
-			if st.ActivationInterval != nil {
-				if st.ActivationInterval.ActivationTime != "" {
-					mdl.ActivationInterval = st.ActivationInterval.ActivationTime
-				}
-				if st.ActivationInterval.ExpiryTime != "" {
-					mdl.ActivationInterval += utils.INFIELD_SEP + st.ActivationInterval.ExpiryTime
-				}
-			}
-		}
-		mdl.FilterType = fltr.Type
-		mdl.FilterFieldName = fltr.FieldName
-		for i, val := range fltr.Values {
-			if i != 0 {
-				mdl.FilterFieldValues += utils.INFIELD_SEP
-			}
-			mdl.FilterFieldValues += val
-		}
-		mdls = append(mdls, mdl)
 	}
 	return
 }
@@ -2094,7 +2087,6 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 		Blocker:     tpST.Blocker,
 		Stored:      tpST.Stored,
 		MinItems:    tpST.MinItems,
-		Filters:     make([]*RequestFilter, len(tpST.Filters)),
 	}
 	if tpST.TTL != "" {
 		if st.TTL, err = utils.ParseDurationWithSecs(tpST.TTL); err != nil {
@@ -2108,12 +2100,8 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 		st.Thresholds = append(st.Thresholds, trh)
 
 	}
-	for i, f := range tpST.Filters {
-		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
-		if err := rf.CompileValues(); err != nil {
-			return nil, err
-		}
-		st.Filters[i] = rf
+	for _, fltr := range tpST.FilterIDs {
+		st.FilterIDs = append(st.FilterIDs, fltr)
 	}
 	if tpST.ActivationInterval != nil {
 		if st.ActivationInterval, err = tpST.ActivationInterval.AsActivationInterval(timezone); err != nil {

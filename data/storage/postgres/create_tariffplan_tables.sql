@@ -424,9 +424,7 @@ CREATE TABLE tp_stats (
   "tpid" varchar(64) NOT NULL,
   "tenant"varchar(64) NOT NULL,
   "id" varchar(64) NOT NULL,
-  "filter_type" varchar(16) NOT NULL,
-  "filter_field_name" varchar(64) NOT NULL,
-  "filter_field_values" varchar(256) NOT NULL,
+  "filter_ids" varchar(64) NOT NULL,
   "activation_interval" varchar(64) NOT NULL,
   "queue_length" INTEGER NOT NULL,
   "ttl" varchar(32) NOT NULL,
@@ -439,7 +437,7 @@ CREATE TABLE tp_stats (
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);
-CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "id", "filter_type", "filter_field_name");
+CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "id", "filter_ids");
 
 --
 -- Table structure for table `tp_threshold_cfgs`
