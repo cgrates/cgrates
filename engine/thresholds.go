@@ -135,9 +135,19 @@ func (t *Threshold) ProcessEvent(ev *ThresholdEvent, dm *DataManager) (err error
 		if acntID != "" {
 			at.accountIDs = utils.NewStringMap(acntID)
 		}
-		if errExec := at.Execute(nil, nil); errExec != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
-			err = utils.ErrPartiallyExecuted
+		if t.tPrfl.Async {
+
+			go func() {
+				if errExec := at.Execute(nil, nil); errExec != nil {
+					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
+				}
+			}()
+
+		} else {
+			if errExec := at.Execute(nil, nil); errExec != nil {
+				utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
+				err = utils.ErrPartiallyExecuted
+			}
 		}
 	}
 	return
