@@ -391,6 +391,7 @@ type ResourceSJsonCfg struct {
 	Enabled          *bool
 	Thresholds_conns *[]*HaPoolJsonCfg
 	Store_interval   *string
+	Indexed_fields   *[]string
 }
 
 // Stat service config section
@@ -398,6 +399,7 @@ type StatServJsonCfg struct {
 	Enabled          *bool
 	Store_interval   *string
 	Thresholds_conns *[]*HaPoolJsonCfg
+	Indexed_fields   *[]string
 }
 
 // Threshold service config section

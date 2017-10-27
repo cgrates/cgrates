@@ -692,6 +692,7 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Enabled:          utils.BoolPointer(false),
 		Thresholds_conns: &[]*HaPoolJsonCfg{},
 		Store_interval:   utils.StringPointer(""),
+		Indexed_fields:   utils.StringSlicePointer([]string{}),
 	}
 	if cfg, err := dfCgrJsonCfg.ResourceSJsonCfg(); err != nil {
 		t.Error(err)
@@ -705,6 +706,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Enabled:          utils.BoolPointer(false),
 		Store_interval:   utils.StringPointer(""),
 		Thresholds_conns: &[]*HaPoolJsonCfg{},
+		Indexed_fields:   utils.StringSlicePointer([]string{}),
 	}
 	if cfg, err := dfCgrJsonCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)

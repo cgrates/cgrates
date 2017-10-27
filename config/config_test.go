@@ -579,6 +579,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		Enabled:         false,
 		ThresholdSConns: []*HaPoolConfig{},
 		StoreInterval:   0,
+		IndexedFields:   []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eResLiCfg), utils.ToJSON(cgrCfg.resourceSCfg))
@@ -591,6 +592,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		Enabled:         false,
 		StoreInterval:   0,
 		ThresholdSConns: []*HaPoolConfig{},
+		IndexedFields:   []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)

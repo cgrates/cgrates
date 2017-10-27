@@ -28,6 +28,7 @@ type ResourceSConfig struct {
 	Enabled         bool
 	ThresholdSConns []*HaPoolConfig // Connections towards StatS
 	StoreInterval   time.Duration   // Dump regularly from cache into dataDB
+	IndexedFields   []string
 }
 
 func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err error) {
@@ -47,6 +48,12 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 	if jsnCfg.Store_interval != nil {
 		if rlcfg.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
 			return
+		}
+	}
+	if jsnCfg.Indexed_fields != nil {
+		rlcfg.IndexedFields = make([]string, len(*jsnCfg.Indexed_fields))
+		for i, fID := range *jsnCfg.Indexed_fields {
+			rlcfg.IndexedFields[i] = fID
 		}
 	}
 	return nil
