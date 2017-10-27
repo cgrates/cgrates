@@ -295,7 +295,7 @@ func testV1RsAllocateResource(t *testing.T) {
 	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err != nil {
 		t.Error(err)
 	}
-	eAllocationMsg = "ResGroup2"
+	eAllocationMsg = "SPECIAL_1002"
 	if reply != eAllocationMsg {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
