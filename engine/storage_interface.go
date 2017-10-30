@@ -90,10 +90,10 @@ type DataDB interface {
 	GetSubscribers() (map[string]*SubscriberData, error)
 	SetSubscriber(string, *SubscriberData) error
 	RemoveSubscriber(string) error
-	SetUser(*UserProfile) error
-	GetUser(string) (*UserProfile, error)
-	GetUsers() ([]*UserProfile, error)
-	RemoveUser(string) error
+	SetUserDrv(*UserProfile) error
+	GetUserDrv(string) (*UserProfile, error)
+	GetUsersDrv() ([]*UserProfile, error)
+	RemoveUserDrv(string) error
 	SetAlias(*Alias, string) error
 	GetAlias(string, bool, string) (*Alias, error)
 	RemoveAlias(string, string) error

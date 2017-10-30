@@ -294,7 +294,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, u := range loader.users {
-		rcv, err := loader.dm.DataDB().GetUser(k)
+		rcv, err := loader.dm.GetUser(k)
 		if err != nil {
 			t.Error("Failed GetUser: ", err.Error())
 		}

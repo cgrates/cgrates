@@ -1641,26 +1641,26 @@ func testOnStorITCRUDUser(t *testing.T) {
 			"t": "v",
 		},
 	}
-	if _, rcvErr := onStor.DataDB().GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetUser(usr); err != nil {
+	if err := onStor.SetUser(usr); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetUser(usr.GetId()); err != nil {
+	if rcv, err := onStor.GetUser(usr.GetId()); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(usr, rcv) {
 		t.Errorf("Expecting: %v, received: %v", usr, rcv)
 	}
-	if rcv, err := onStor.DataDB().GetUsers(); err != nil {
+	if rcv, err := onStor.GetUsers(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(usr, rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", usr, rcv[0])
 	}
-	if err := onStor.DataDB().RemoveUser(usr.GetId()); err != nil {
+	if err := onStor.RemoveUser(usr.GetId()); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

@@ -1488,7 +1488,7 @@ func (tpr *TpReader) LoadUsersFiltered(filter *utils.TPUsers) (bool, error) {
 		for _, up := range tpUser.Profile {
 			user.Profile[up.AttrName] = up.AttrValue
 		}
-		tpr.dm.DataDB().SetUser(user)
+		tpr.dm.SetUser(user)
 	}
 	return len(tpUsers) > 0, err
 }
@@ -2027,7 +2027,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Users:")
 	}
 	for _, u := range tpr.users {
-		err = tpr.dm.DataDB().SetUser(u)
+		err = tpr.dm.SetUser(u)
 		if err != nil {
 			return err
 		}

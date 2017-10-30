@@ -589,7 +589,7 @@ func (ms *MapStorage) RemoveSubscriber(key string) (err error) {
 	return
 }
 
-func (ms *MapStorage) SetUser(up *UserProfile) error {
+func (ms *MapStorage) SetUserDrv(up *UserProfile) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(up)
@@ -599,7 +599,7 @@ func (ms *MapStorage) SetUser(up *UserProfile) error {
 	ms.dict[utils.USERS_PREFIX+up.GetId()] = result
 	return nil
 }
-func (ms *MapStorage) GetUser(key string) (up *UserProfile, err error) {
+func (ms *MapStorage) GetUserDrv(key string) (up *UserProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	up = &UserProfile{}
@@ -611,7 +611,7 @@ func (ms *MapStorage) GetUser(key string) (up *UserProfile, err error) {
 	return
 }
 
-func (ms *MapStorage) GetUsers() (result []*UserProfile, err error) {
+func (ms *MapStorage) GetUsersDrv() (result []*UserProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	for key, value := range ms.dict {
@@ -625,7 +625,7 @@ func (ms *MapStorage) GetUsers() (result []*UserProfile, err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveUser(key string) error {
+func (ms *MapStorage) RemoveUserDrv(key string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.USERS_PREFIX+key)
