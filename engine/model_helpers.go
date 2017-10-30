@@ -1824,9 +1824,11 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 		rl, found := mrl[tp.ID]
 		if !found {
 			rl = &utils.TPResource{
-				TPid:   tp.Tpid,
-				Tenant: tp.Tenant,
-				ID:     tp.ID,
+				TPid:    tp.Tpid,
+				Tenant:  tp.Tenant,
+				ID:      tp.ID,
+				Blocker: tp.Blocker,
+				Stored:  tp.Stored,
 			}
 		}
 		if tp.UsageTTL != "" {
@@ -1880,17 +1882,17 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 	if rl != nil {
 		for i, fltr := range rl.FilterIDs {
 			mdl := &TpResource{
-				Tpid:   rl.TPid,
-				Tenant: rl.Tenant,
-				ID:     rl.ID,
+				Tpid:    rl.TPid,
+				Tenant:  rl.Tenant,
+				ID:      rl.ID,
+				Blocker: rl.Blocker,
+				Stored:  rl.Stored,
 			}
 			if i == 0 {
 				mdl.UsageTTL = rl.UsageTTL
 				mdl.Weight = rl.Weight
 				mdl.Limit = rl.Limit
 				mdl.AllocationMessage = rl.AllocationMessage
-				mdl.Blocker = rl.Blocker
-				mdl.Stored = rl.Stored
 				if rl.ActivationInterval != nil {
 					if rl.ActivationInterval.ActivationTime != "" {
 						mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
@@ -2186,7 +2188,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 					}
 				}
 				mdls = append(mdls, mdl)
-				w = i
+				w = i + 1
 			}
 			for j := w; j < lenFilter; j++ {
 				mdl := &TpThreshold{
@@ -2224,7 +2226,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 					}
 				}
 				mdls = append(mdls, mdl)
-				w = i
+				w = i + 1
 			}
 			for j := w; j < lenAction; j++ {
 				mdl := &TpThreshold{
@@ -2265,7 +2267,6 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 
 			}
 		}
-
 	}
 	return
 }

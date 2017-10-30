@@ -127,16 +127,10 @@ func testTPStatsGetTPStatBeforeSet(t *testing.T) {
 
 func testTPStatsSetTPStat(t *testing.T) {
 	tpStat = &utils.TPStats{
-		Tenant: "cgrates.org",
-		TPid:   "TPS1",
-		ID:     "Stat1",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{
-				Type:      "*string",
-				FieldName: "Account",
-				Values:    []string{"1001", "1002"},
-			},
-		},
+		Tenant:    "cgrates.org",
+		TPid:      "TPS1",
+		ID:        "Stat1",
+		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
@@ -169,18 +163,7 @@ func testTPStatsGetTPStatAfterSet(t *testing.T) {
 func testTPStatsUpdateTPStat(t *testing.T) {
 	var result string
 	tpStat.Weight = 21
-	tpStat.Filters = []*utils.TPRequestFilter{
-		&utils.TPRequestFilter{
-			Type:      "*string",
-			FieldName: "Account",
-			Values:    []string{"1001", "1002"},
-		},
-		&utils.TPRequestFilter{
-			Type:      "*string_prefix",
-			FieldName: "Destination",
-			Values:    []string{"10", "20"},
-		},
-	}
+	tpStat.FilterIDs = []string{"FLTR_1", "FLTR_STS1"}
 	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
