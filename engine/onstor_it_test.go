@@ -943,7 +943,7 @@ func testOnStorITHasData(t *testing.T) {
 	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
 	}
-	if rcv, err := onStor.DataDB().HasData(utils.RATING_PLAN_PREFIX, rp.Id); err != nil {
+	if rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id); err != nil {
 		t.Error(err)
 	} else if rcv != true {
 		t.Errorf("Expecting: true, received: %v", rcv)

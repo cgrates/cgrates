@@ -579,7 +579,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	return
 }
 
-func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) {
+func (ms *MongoStorage) HasDataDrv(category, subject string) (has bool, err error) {
 	session := ms.session.Copy()
 	defer session.Close()
 	db := session.DB(ms.db)
