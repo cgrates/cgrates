@@ -87,9 +87,9 @@ type DataDB interface {
 	RemoveAccount(string) error
 	GetCdrStatsQueue(string) (*CDRStatsQueue, error)
 	SetCdrStatsQueue(*CDRStatsQueue) error
-	GetSubscribers() (map[string]*SubscriberData, error)
-	SetSubscriber(string, *SubscriberData) error
-	RemoveSubscriber(string) error
+	GetSubscribersDrv() (map[string]*SubscriberData, error)
+	SetSubscriberDrv(string, *SubscriberData) error
+	RemoveSubscriberDrv(string) error
 	SetUserDrv(*UserProfile) error
 	GetUserDrv(string) (*UserProfile, error)
 	GetUsersDrv() ([]*UserProfile, error)

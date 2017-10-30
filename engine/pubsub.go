@@ -69,7 +69,7 @@ func NewPubSub(dm *DataManager, ttlVerify bool) (*PubSub, error) {
 		dm:          dm,
 	}
 	// load subscribers
-	if subs, err := dm.DataDB().GetSubscribers(); err != nil {
+	if subs, err := dm.GetSubscribers(); err != nil {
 		return nil, err
 	} else {
 		ps.subscribers = subs
@@ -87,13 +87,13 @@ func (ps *PubSub) saveSubscriber(key string) {
 	if !found {
 		return
 	}
-	if err := dm.DataDB().SetSubscriber(key, subData); err != nil {
+	if err := dm.SetSubscriber(key, subData); err != nil {
 		utils.Logger.Err("<PubSub> Error saving subscriber: " + err.Error())
 	}
 }
 
 func (ps *PubSub) removeSubscriber(key string) {
-	if err := dm.DataDB().RemoveSubscriber(key); err != nil {
+	if err := dm.RemoveSubscriber(key); err != nil {
 		utils.Logger.Err("<PubSub> Error removing subscriber: " + err.Error())
 	}
 }

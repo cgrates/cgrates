@@ -1607,7 +1607,7 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 }
 
 func testOnStorITCRUDSubscribers(t *testing.T) {
-	if sbs, err := onStor.DataDB().GetSubscribers(); err != nil {
+	if sbs, err := onStor.GetSubscribers(); err != nil {
 		t.Error(err)
 	} else if len(sbs) != 0 {
 		t.Errorf("Received subscribers: %+v", sbs)
@@ -1616,18 +1616,18 @@ func testOnStorITCRUDSubscribers(t *testing.T) {
 		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
 	sbscID := "testOnStorITCRUDSubscribers"
-	if err := onStor.DataDB().SetSubscriber(sbscID, sbsc); err != nil {
+	if err := onStor.SetSubscriber(sbscID, sbsc); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetSubscribers(); err != nil {
+	if rcv, err := onStor.GetSubscribers(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sbsc.ExpTime, rcv[sbscID].ExpTime) { // Test just ExpTime since RSRField is more complex behind
 		t.Errorf("Expecting: %v, received: %v", sbsc, rcv[sbscID])
 	}
-	if err := onStor.DataDB().RemoveSubscriber(sbscID); err != nil {
+	if err := onStor.RemoveSubscriber(sbscID); err != nil {
 		t.Error(err)
 	}
-	if sbs, err := onStor.DataDB().GetSubscribers(); err != nil {
+	if sbs, err := onStor.GetSubscribers(); err != nil {
 		t.Error(err)
 	} else if len(sbs) != 0 {
 		t.Errorf("Received subscribers: %+v", sbs)

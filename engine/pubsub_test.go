@@ -57,7 +57,7 @@ func TestSubscribeSave(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	subs, err := dm.DataDB().GetSubscribers()
+	subs, err := dm.GetSubscribers()
 	if err != nil || len(subs) != 1 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}
@@ -145,7 +145,7 @@ func TestUnsubscribeSave(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error unsubscribing: ", err)
 	}
-	subs, err := dm.DataDB().GetSubscribers()
+	subs, err := dm.GetSubscribers()
 	if err != nil || len(subs) != 0 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}
@@ -193,14 +193,14 @@ func TestPublishExpiredSave(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	subs, err := dm.DataDB().GetSubscribers()
+	subs, err := dm.GetSubscribers()
 	if err != nil || len(subs) != 1 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}
 	if err := ps.Publish(map[string]string{"EventFilter": "test"}, &r); err != nil {
 		t.Error("Error publishing: ", err)
 	}
-	subs, err = dm.DataDB().GetSubscribers()
+	subs, err = dm.GetSubscribers()
 	if err != nil || len(subs) != 0 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}

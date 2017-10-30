@@ -611,7 +611,7 @@ func (rs *RedisStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	return rs.Cmd("SET", utils.CDR_STATS_QUEUE_PREFIX+sq.GetId(), result).Err
 }
 
-func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
+func (rs *RedisStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
 	keys, err := rs.Cmd("KEYS", utils.PUBSUB_SUBSCRIBERS_PREFIX+"*").List()
 	if err != nil {
 		return nil, err
@@ -634,7 +634,7 @@ func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err
 	return
 }
 
-func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+func (rs *RedisStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
 	result, err := rs.ms.Marshal(sub)
 	if err != nil {
 		return err
@@ -642,7 +642,7 @@ func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err erro
 	return rs.Cmd("SET", utils.PUBSUB_SUBSCRIBERS_PREFIX+key, result).Err
 }
 
-func (rs *RedisStorage) RemoveSubscriber(key string) (err error) {
+func (rs *RedisStorage) RemoveSubscriberDrv(key string) (err error) {
 	err = rs.Cmd("DEL", utils.PUBSUB_SUBSCRIBERS_PREFIX+key).Err
 	return
 }
