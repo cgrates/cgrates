@@ -777,3 +777,7 @@ func (dm *DataManager) SetSubscriber(key string, sub *SubscriberData) (err error
 func (dm *DataManager) RemoveSubscriber(key string) (err error) {
 	return dm.DataDB().RemoveSubscriberDrv(key)
 }
+
+func (dm *DataManager) HasData(category, subject string) (has bool, err error) {
+	return dm.DataDB().HasDataDrv(category, subject)
+}

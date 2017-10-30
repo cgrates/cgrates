@@ -242,7 +242,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 				_, destinationExists = tpr.destinations[dr.DestinationId]
 			}
 			if !destinationExists && tpr.dm.dataDB != nil {
-				if destinationExists, err = tpr.dm.DataDB().HasData(utils.DESTINATION_PREFIX, dr.DestinationId); err != nil {
+				if destinationExists, err = tpr.dm.HasData(utils.DESTINATION_PREFIX, dr.DestinationId); err != nil {
 					return err
 				}
 			}
@@ -311,7 +311,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				}
 				destsExist := len(dms) != 0
 				if !destsExist && tpr.dm.dataDB != nil {
-					if dbExists, err := tpr.dm.DataDB().HasData(utils.DESTINATION_PREFIX, drate.DestinationId); err != nil {
+					if dbExists, err := tpr.dm.HasData(utils.DESTINATION_PREFIX, drate.DestinationId); err != nil {
 						return false, err
 					} else if dbExists {
 						destsExist = true
@@ -384,7 +384,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.dm.dataDB != nil {
-				if exists, err = tpr.dm.DataDB().HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				}
 			}
@@ -424,7 +424,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.dm.dataDB != nil { // Only query if there is a connection, eg on dry run there is none
-				if exists, err = tpr.dm.DataDB().HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				}
 			}
@@ -512,7 +512,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 				if rule.DestinationId != "" && rule.DestinationId != utils.ANY {
 					_, found := tpr.destinations[rule.DestinationId]
 					if !found && tpr.dm.dataDB != nil {
-						if found, err = tpr.dm.DataDB().HasData(utils.DESTINATION_PREFIX, rule.DestinationId); err != nil {
+						if found, err = tpr.dm.HasData(utils.DESTINATION_PREFIX, rule.DestinationId); err != nil {
 							return fmt.Errorf("[LCR] error querying dataDb %s", err.Error())
 						}
 					}
@@ -678,7 +678,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 
 			_, exists := tpr.actions[at.ActionsId]
 			if !exists && tpr.dm.dataDB != nil {
-				if exists, err = tpr.dm.DataDB().HasData(utils.ACTION_PREFIX, at.ActionsId); err != nil {
+				if exists, err = tpr.dm.HasData(utils.ACTION_PREFIX, at.ActionsId); err != nil {
 					return fmt.Errorf("[ActionPlans] Error querying actions: %v - %s", at.ActionsId, err.Error())
 				}
 			}
@@ -1614,7 +1614,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	tpr.resProfiles = mapRsPfls
 	for tntID, res := range mapRsPfls {
 		resIndxrKey := utils.ResourceProfilesStringIndex + tntID.Tenant
-		if has, err := tpr.dm.DataDB().HasData(utils.ResourcesPrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.ResourcesPrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
 			tpr.resources = append(tpr.resources, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
@@ -1661,7 +1661,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 	tpr.sqProfiles = mapSTs
 	for tntID, sq := range mapSTs {
 		sqpIndxrKey := utils.StatQueuesStringIndex + tntID.Tenant
-		if has, err := tpr.dm.DataDB().HasData(utils.StatQueuePrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.StatQueuePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
 			tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
@@ -1708,7 +1708,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	tpr.thProfiles = mapTHs
 	for tntID, th := range mapTHs {
 		thdIndxrKey := utils.ThresholdStringIndex + tntID.Tenant
-		if has, err := tpr.dm.DataDB().HasData(utils.ThresholdPrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.ThresholdPrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
 			tpr.thresholds = append(tpr.thresholds, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
