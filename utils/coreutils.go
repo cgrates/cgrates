@@ -278,6 +278,17 @@ func ParseDurationWithSecs(durStr string) (d time.Duration, err error) {
 	return time.ParseDuration(durStr)
 }
 
+// Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
+func ParseDurationWithNanosecs(durStr string) (d time.Duration, err error) {
+	if durStr == "" {
+		return
+	}
+	if _, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+		durStr += "ns"
+	}
+	return time.ParseDuration(durStr)
+}
+
 func AccountKey(tenant, account string) string {
 	return fmt.Sprintf("%s:%s", tenant, account)
 }

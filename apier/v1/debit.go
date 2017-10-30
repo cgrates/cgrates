@@ -59,9 +59,6 @@ func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, repl
 	if usageRecord.RequestType == "" {
 		usageRecord.RequestType = apier.Config.DefaultReqType
 	}
-	if usageRecord.Direction == "" {
-		usageRecord.Direction = utils.OUT
-	}
 	if usageRecord.Tenant == "" {
 		usageRecord.Tenant = apier.Config.DefaultTenant
 	}

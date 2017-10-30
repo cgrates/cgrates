@@ -261,7 +261,6 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 	defer self.mux.RUnlock()
 	sTime, _ := self.EventStart.GetSetupTime(utils.META_DEFAULT, timezone)
 	aTime, _ := self.EventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
-	pdd, _ := self.EventStart.GetPdd(utils.META_DEFAULT)
 	aSession := &ActiveSession{
 		CGRID:       self.CGRID,
 		TOR:         self.EventStart.GetTOR(utils.META_DEFAULT),
@@ -270,7 +269,6 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 		CdrHost:     self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
 		CdrSource:   self.EventStart.GetCdrSource(),
 		ReqType:     self.EventStart.GetReqType(utils.META_DEFAULT),
-		Direction:   self.EventStart.GetDirection(utils.META_DEFAULT),
 		Tenant:      self.EventStart.GetTenant(utils.META_DEFAULT),
 		Category:    self.EventStart.GetCategory(utils.META_DEFAULT),
 		Account:     self.EventStart.GetAccount(utils.META_DEFAULT),
@@ -279,9 +277,7 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 		SetupTime:   sTime,
 		AnswerTime:  aTime,
 		Usage:       self.TotalUsage,
-		Pdd:         pdd,
 		ExtraFields: self.EventStart.GetExtraFields(),
-		Supplier:    self.EventStart.GetSupplier(utils.META_DEFAULT),
 		SMId:        "CGR-DA",
 	}
 	if self.CD != nil {

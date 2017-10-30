@@ -610,7 +610,6 @@ func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 	ur := &UsageRecord{
 		ToR:         utils.USERS,
 		RequestType: utils.USERS,
-		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
 		Account:     utils.USERS,
@@ -628,7 +627,6 @@ func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 	expected := &UsageRecord{
 		ToR:         "04",
 		RequestType: "4",
-		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
 		Account:     "rif",
@@ -657,7 +655,6 @@ func TestUsersExternalCDRGetLoadUserProfileExtraFields(t *testing.T) {
 	ur := &ExternalCDR{
 		ToR:         utils.USERS,
 		RequestType: utils.USERS,
-		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
 		Account:     utils.USERS,
@@ -678,7 +675,6 @@ func TestUsersExternalCDRGetLoadUserProfileExtraFields(t *testing.T) {
 	expected := &ExternalCDR{
 		ToR:         "04",
 		RequestType: "4",
-		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
 		Account:     "rif",
@@ -710,7 +706,6 @@ func TestUsersExternalCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 	ur := &ExternalCDR{
 		ToR:         utils.USERS,
 		RequestType: utils.USERS,
-		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
 		Account:     utils.USERS,
@@ -744,7 +739,6 @@ func TestUsersExternalCDRGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 	ur := &ExternalCDR{
 		ToR:         utils.USERS,
 		RequestType: utils.USERS,
-		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
 		Account:     utils.USERS,
@@ -766,7 +760,6 @@ func TestUsersExternalCDRGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 	expected := &ExternalCDR{
 		ToR:         "04",
 		RequestType: "4",
-		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
 		Account:     "rif",

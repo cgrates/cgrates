@@ -125,7 +125,6 @@ func TestDebitUsageWithOptions(t *testing.T) {
 		Usage:       "1",
 		ToR:         utils.MONETARY,
 		Category:    "call",
-		Direction:   "*out",
 		SetupTime:   time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 		AnswerTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 	}

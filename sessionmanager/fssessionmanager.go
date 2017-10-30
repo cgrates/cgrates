@@ -128,7 +128,7 @@ func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 	}
 	cd := &engine.CallDescriptor{
 		CgrID:       ev.GetCgrId(sm.Timezone()),
-		Direction:   ev.GetDirection(utils.META_DEFAULT),
+		Direction:   utils.OUT,
 		Tenant:      ev.GetTenant(utils.META_DEFAULT),
 		Category:    ev.GetCategory(utils.META_DEFAULT),
 		Subject:     ev.GetSubject(utils.META_DEFAULT),

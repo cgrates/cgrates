@@ -424,7 +424,6 @@ func (self SMGenericEvent) AsStoredCdr(cfg *config.CGRConfig, timezone string) *
 	storCdr.OriginHost = self.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = self.GetCdrSource()
 	storCdr.RequestType = utils.FirstNonEmpty(self.GetReqType(utils.META_DEFAULT), storCdr.RequestType)
-	storCdr.Direction = utils.FirstNonEmpty(self.GetDirection(utils.META_DEFAULT), storCdr.Direction)
 	storCdr.Tenant = utils.FirstNonEmpty(self.GetTenant(utils.META_DEFAULT), storCdr.Tenant)
 	storCdr.Category = utils.FirstNonEmpty(self.GetCategory(utils.META_DEFAULT), storCdr.Category)
 	storCdr.Account = self.GetAccount(utils.META_DEFAULT)
@@ -433,9 +432,6 @@ func (self SMGenericEvent) AsStoredCdr(cfg *config.CGRConfig, timezone string) *
 	storCdr.SetupTime, _ = self.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = self.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = self.GetUsage(utils.META_DEFAULT)
-	storCdr.PDD, _ = self.GetPdd(utils.META_DEFAULT)
-	storCdr.Supplier = self.GetSupplier(utils.META_DEFAULT)
-	storCdr.DisconnectCause = self.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = self.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr

@@ -38,9 +38,6 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float
 	if usageRecord.RequestType == "" {
 		usageRecord.RequestType = self.Config.DefaultReqType
 	}
-	if usageRecord.Direction == "" {
-		usageRecord.Direction = utils.OUT
-	}
 	if usageRecord.Tenant == "" {
 		usageRecord.Tenant = self.Config.DefaultTenant
 	}

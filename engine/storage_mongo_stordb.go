@@ -888,13 +888,13 @@ func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
 	}
-	session, col := ms.conn(utils.TBLSMCosts)
+	session, col := ms.conn(utils.SMCostsTBL)
 	defer session.Close()
 	return col.Insert(smc)
 }
 
 func (ms *MongoStorage) RemoveSMCost(smc *SMCost) error {
-	session, col := ms.conn(utils.TBLSMCosts)
+	session, col := ms.conn(utils.SMCostsTBL)
 	defer session.Close()
 	tx := col.Bulk()
 	tx.Remove(bson.M{"cgrid": smc.CGRID, "runid": smc.RunID}, smc)
@@ -917,7 +917,7 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 		filter[OriginIDLow] = bson.M{"$regex": bson.RegEx{Pattern: fmt.Sprintf("^%s", originIDPrefix)}}
 	}
 	// Execute query
-	session, col := ms.conn(utils.TBLSMCosts)
+	session, col := ms.conn(utils.SMCostsTBL)
 	defer session.Close()
 	iter := col.Find(filter).Iter()
 	var smCost SMCost
@@ -938,7 +938,7 @@ func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	if cdr.OrderID == 0 {
 		cdr.OrderID = ms.cnter.Next()
 	}
-	session, col := ms.conn(utils.TBLCDRs)
+	session, col := ms.conn(utils.CDRsTBL)
 	defer session.Close()
 	if allowUpdate {
 		_, err = col.Upsert(bson.M{CGRIDLow: cdr.CGRID, RunIDLow: cdr.RunID}, cdr)
@@ -980,7 +980,7 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	}
 }
 
-//  _, err := col(utils.TBLCDRs).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
+//  _, err := col(utils.CDRsTBL).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
 func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var minPDD, maxPDD, minUsage, maxUsage *time.Duration
 	if len(qryFltr.MinPDD) != 0 {
@@ -1111,7 +1111,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	}
 	//file.WriteString(fmt.Sprintf("AFTER: %v\n", utils.ToIJSON(filters)))
 	//file.Close()
-	session, col := ms.conn(utils.TBLCDRs)
+	session, col := ms.conn(utils.CDRsTBL)
 	defer session.Close()
 	if remove {
 		if chgd, err := col.RemoveAll(filters); err != nil {

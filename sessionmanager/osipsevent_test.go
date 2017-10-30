@@ -142,12 +142,15 @@ func TestOsipsEventMissingParameter(t *testing.T) {
 func TestOsipsEventAsStoredCdr(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1406370492", "")
 	answerTime, _ := utils.ParseTimeDetectLayout("1406370499", "")
-	eStoredCdr := &engine.CDR{CGRID: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()),
-		ToR: utils.VOICE, OriginID: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", OriginHost: "172.16.254.77", Source: "OSIPS_E_ACC_CDR",
+	eStoredCdr := &engine.CDR{
+		CGRID: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()),
+		ToR:   utils.VOICE, OriginID: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ",
+		OriginHost: "172.16.254.77", Source: "OSIPS_E_ACC_CDR",
 		RequestType: utils.META_PREPAID,
-		Direction:   utils.OUT, Tenant: "itsyscom.com", Category: "call", Account: "dan", Subject: "dan",
+		Tenant:      "itsyscom.com", Category: "call", Account: "dan", Subject: "dan",
 		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime,
-		Usage: time.Duration(20) * time.Second, PDD: time.Duration(3) * time.Second, Supplier: "supplier3", DisconnectCause: "200", ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
+		Usage:       time.Duration(20) * time.Second,
+		ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
 	if storedCdr := osipsEv.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
@@ -163,8 +166,8 @@ func TestOsipsAccMissedToStoredCdr(t *testing.T) {
 	}}
 	eStoredCdr := &engine.CDR{CGRID: utils.Sha1("27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0", setupTime.UTC().String()),
 		ToR: utils.VOICE, OriginID: "27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0", OriginHost: "172.16.254.77", Source: "OSIPS_E_ACC_MISSED_EVENT",
-		RequestType: utils.META_PSEUDOPREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Supplier: "supplier1",
-		DisconnectCause: "404", Destination: "1002", SetupTime: setupTime, AnswerTime: setupTime,
+		RequestType: utils.META_PSEUDOPREPAID, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
+		Destination: "1002", SetupTime: setupTime, AnswerTime: setupTime,
 		Usage: time.Duration(0), ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
 	if storedCdr := osipsEv.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)

@@ -104,9 +104,17 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	return ""
 }
 
+func CurrentStorDBVersions() Versions {
+	return Versions{utils.COST_DETAILS: 2, utils.CDRsTBL: 2}
+}
+
+func CurrentDataDBVersions() Versions {
+	return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
+}
+
 func CurrentDBVersions(storType string) Versions {
-	dataDbVersions := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-	storDbVersions := Versions{utils.COST_DETAILS: 2}
+	dataDbVersions := CurrentDataDBVersions()
+	storDbVersions := CurrentStorDBVersions()
 
 	allVersions := make(Versions)
 	for k, v := range dataDbVersions {
@@ -125,14 +133,6 @@ func CurrentDBVersions(storType string) Versions {
 		return dataDbVersions
 	}
 	return nil
-}
-
-func CurrentStorDBVersions() Versions {
-	return Versions{utils.COST_DETAILS: 2}
-}
-
-func CurrentDataDBVersions() Versions {
-	return Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
 }
 
 // Versions will keep trac of various item versions

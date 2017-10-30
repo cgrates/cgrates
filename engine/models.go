@@ -398,59 +398,6 @@ func (ta *TpAlias) GetId() string {
 	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
 }
 
-type TBLCDRs struct {
-	ID              int64
-	Cgrid           string
-	RunID           string
-	OriginHost      string
-	Source          string
-	OriginID        string
-	Tor             string
-	RequestType     string
-	Direction       string
-	Tenant          string
-	Category        string
-	Account         string
-	Subject         string
-	Destination     string
-	SetupTime       time.Time
-	Pdd             float64
-	AnswerTime      time.Time
-	Usage           float64
-	Supplier        string
-	DisconnectCause string
-	ExtraFields     string
-	Cost            float64
-	CostDetails     string
-	CostSource      string
-	AccountSummary  string
-	ExtraInfo       string
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	DeletedAt       *time.Time
-}
-
-func (t TBLCDRs) TableName() string {
-	return utils.TBLCDRs
-}
-
-type TBLSMCosts struct {
-	ID          int64
-	Cgrid       string
-	RunID       string
-	OriginHost  string
-	OriginID    string
-	CostSource  string
-	Usage       float64
-	CostDetails string
-	CreatedAt   time.Time
-	DeletedAt   *time.Time
-}
-
-func (t TBLSMCosts) TableName() string {
-	return utils.TBLSMCosts
-}
-
 type TpResource struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
@@ -466,16 +413,6 @@ type TpResource struct {
 	Weight             float64 `index:"9" re:"\d+\.?\d*"`
 	Thresholds         string  `index:"10" re:""`
 	CreatedAt          time.Time
-}
-
-type TBLVersion struct {
-	ID      uint
-	Item    string
-	Version int64
-}
-
-func (t TBLVersion) TableName() string {
-	return utils.TBLVersions
 }
 
 type TpStats struct {
@@ -523,4 +460,62 @@ type TpFilter struct {
 	FilterFieldValues  string `index:"4" re:""`
 	ActivationInterval string `index:"5" re:""`
 	CreatedAt          time.Time
+}
+
+type CDRsql struct {
+	ID          int64
+	CGRID       string
+	RunID       string
+	OriginHost  string
+	Source      string
+	OriginID    string
+	TOR         string
+	RequestType string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	SetupTime   time.Time
+	AnswerTime  time.Time
+	Usage       int64
+	ExtraFields string
+	CostSource  string
+	Cost        float64
+	CostDetails string
+	ExtraInfo   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+}
+
+func (t CDRsql) TableName() string {
+	return utils.CDRsTBL
+}
+
+type SMCostSQL struct {
+	ID          int64
+	Cgrid       string
+	RunID       string
+	OriginHost  string
+	OriginID    string
+	CostSource  string
+	Usage       float64
+	CostDetails string
+	CreatedAt   time.Time
+	DeletedAt   *time.Time
+}
+
+func (t SMCostSQL) TableName() string {
+	return utils.SMCostsTBL
+}
+
+type TBLVersion struct {
+	ID      uint
+	Item    string
+	Version int64
+}
+
+func (t TBLVersion) TableName() string {
+	return utils.TBLVersions
 }

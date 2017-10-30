@@ -33,10 +33,6 @@ func TestCsvRecordToCDR(t *testing.T) {
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "RunID", Type: utils.META_COMPOSED,
 		FieldId: utils.MEDI_RUNID, Value: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)})
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.META_COMPOSED,
-		FieldId: utils.SUPPLIER, Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "DisconnectCauseTest", Type: utils.META_COMPOSED,
-		FieldId: utils.DISCONNECT_CAUSE, Value: []*utils.RSRField{&utils.RSRField{Id: "16"}}})
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
@@ -50,26 +46,23 @@ func TestCsvRecordToCDR(t *testing.T) {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	expectedCdr := &engine.CDR{
-		CGRID:           utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
-		RunID:           "*default",
-		ToR:             cdrRow[2],
-		OriginID:        cdrRow[3],
-		OriginHost:      "0.0.0.0", // Got it over internal interface
-		Source:          "TEST_CDRC",
-		RequestType:     cdrRow[4],
-		Direction:       cdrRow[5],
-		Tenant:          cdrRow[6],
-		Category:        cdrRow[7],
-		Account:         cdrRow[8],
-		Subject:         cdrRow[9],
-		Destination:     cdrRow[10],
-		SetupTime:       time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC),
-		AnswerTime:      time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
-		Usage:           time.Duration(62) * time.Second,
-		Supplier:        "supplier1",
-		DisconnectCause: "NORMAL_DISCONNECT",
-		ExtraFields:     map[string]string{},
-		Cost:            -1,
+		CGRID:       utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
+		RunID:       "*default",
+		ToR:         cdrRow[2],
+		OriginID:    cdrRow[3],
+		OriginHost:  "0.0.0.0", // Got it over internal interface
+		Source:      "TEST_CDRC",
+		RequestType: cdrRow[4],
+		Tenant:      cdrRow[6],
+		Category:    cdrRow[7],
+		Account:     cdrRow[8],
+		Subject:     cdrRow[9],
+		Destination: cdrRow[10],
+		SetupTime:   time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
+		Usage:       time.Duration(62) * time.Second,
+		ExtraFields: map[string]string{},
+		Cost:        -1,
 	}
 	if !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)

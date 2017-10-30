@@ -166,9 +166,6 @@ func (self *CdrServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) processCdr(cdr *CDR) (err error) {
-	if cdr.Direction == "" {
-		cdr.Direction = utils.OUT
-	}
 	if cdr.RequestType == "" {
 		cdr.RequestType = self.cgrCfg.DefaultReqType
 	}
@@ -248,7 +245,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 		}
 		if err := LoadAlias(&AttrMatchingAlias{
 			Destination: cdrRun.Destination,
-			Direction:   cdrRun.Direction,
+			Direction:   utils.OUT,
 			Tenant:      cdrRun.Tenant,
 			Category:    cdrRun.Category,
 			Account:     cdrRun.Account,
@@ -272,21 +269,6 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 			if err := SureTaxProcessCdr(ratedCDR); err != nil {
 				ratedCDR.Cost = -1.0
 				ratedCDR.ExtraInfo = err.Error() // Something failed, write the error in the ExtraInfo
-			}
-		}
-	}
-	// Store AccountSummary if requested
-	if self.cgrCfg.CDRScdrAccountSummary {
-		for _, ratedCDR := range ratedCDRs {
-			if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID, utils.META_PSEUDOPREPAID, utils.PSEUDOPREPAID,
-				utils.META_POSTPAID, utils.POSTPAID}, ratedCDR.RequestType) {
-				acntID := utils.ConcatenatedKey(ratedCDR.Tenant, ratedCDR.Account)
-				acnt, err := self.dm.DataDB().GetAccount(acntID)
-				if err != nil {
-					utils.Logger.Err(fmt.Sprintf("<CDRS> Querying AccountDigest for account: %s got error: %s", acntID, err.Error()))
-				} else if acnt.ID != "" {
-					ratedCDR.AccountSummary = acnt.AsAccountSummary()
-				}
 			}
 		}
 	}
@@ -340,7 +322,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 	}
 	if err := LoadAlias(&AttrMatchingAlias{
 		Destination: cdr.Destination,
-		Direction:   cdr.Direction,
+		Direction:   utils.OUT,
 		Tenant:      cdr.Tenant,
 		Category:    cdr.Category,
 		Account:     cdr.Account,
@@ -349,7 +331,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return nil, err
 	}
-	attrsDC := &utils.AttrDerivedChargers{Tenant: cdr.Tenant, Category: cdr.Category, Direction: cdr.Direction,
+	attrsDC := &utils.AttrDerivedChargers{Tenant: cdr.Tenant, Category: cdr.Category, Direction: utils.OUT,
 		Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination}
 	var dcs utils.DerivedChargers
 	if err := self.rals.Call("Responder.GetDerivedChargers", attrsDC, &dcs); err != nil {
@@ -369,18 +351,14 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 			continue
 		}
 		dcRequestTypeFld, _ := utils.NewRSRField(dc.RequestTypeField)
-		dcDirFld, _ := utils.NewRSRField(dc.DirectionField)
 		dcTenantFld, _ := utils.NewRSRField(dc.TenantField)
 		dcCategoryFld, _ := utils.NewRSRField(dc.CategoryField)
 		dcAcntFld, _ := utils.NewRSRField(dc.AccountField)
 		dcSubjFld, _ := utils.NewRSRField(dc.SubjectField)
 		dcDstFld, _ := utils.NewRSRField(dc.DestinationField)
 		dcSTimeFld, _ := utils.NewRSRField(dc.SetupTimeField)
-		dcPddFld, _ := utils.NewRSRField(dc.PDDField)
 		dcATimeFld, _ := utils.NewRSRField(dc.AnswerTimeField)
 		dcDurFld, _ := utils.NewRSRField(dc.UsageField)
-		dcSupplFld, _ := utils.NewRSRField(dc.SupplierField)
-		dcDCauseFld, _ := utils.NewRSRField(dc.DisconnectCauseField)
 		dcRatedFld, _ := utils.NewRSRField(dc.RatedField)
 		dcCostFld, _ := utils.NewRSRField(dc.CostField)
 
@@ -389,8 +367,8 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 			dcExtraFields = append(dcExtraFields, &utils.RSRField{Id: key})
 		}
 
-		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
-			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCauseFld, dcRatedFld, dcCostFld, dcExtraFields, true, self.cgrCfg.DefaultTimezone)
+		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
+			dcSTimeFld, dcATimeFld, dcDurFld, dcRatedFld, dcCostFld, dcExtraFields, true, self.cgrCfg.DefaultTimezone)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", cdr.CGRID, dc.RunID, err.Error()))
 			continue // do not add it to the forked CDR list
@@ -470,7 +448,7 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	}
 	cd := &CallDescriptor{
 		TOR:             cdr.ToR,
-		Direction:       cdr.Direction,
+		Direction:       utils.OUT,
 		Tenant:          cdr.Tenant,
 		Category:        cdr.Category,
 		Subject:         cdr.Subject,

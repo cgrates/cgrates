@@ -302,7 +302,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: ev.Destination,
-			Direction:   ev.Direction,
+			Direction:   utils.OUT,
 			Tenant:      ev.Tenant,
 			Category:    ev.Category,
 			Account:     ev.Account,
@@ -314,7 +314,8 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	}
 
 	maxCallDuration := -1.0
-	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT),
+		Category: ev.GetCategory(utils.META_DEFAULT), Direction: utils.OUT,
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
@@ -354,7 +355,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 			CgrID:       ev.GetCgrId(rs.Timezone),
 			RunID:       dc.RunID,
 			TOR:         ev.ToR,
-			Direction:   ev.GetDirection(dc.DirectionField),
+			Direction:   utils.OUT,
 			Tenant:      ev.GetTenant(dc.TenantField),
 			Category:    ev.GetCategory(dc.CategoryField),
 			Subject:     ev.GetSubject(dc.SubjectField),
@@ -407,7 +408,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: ev.Destination,
-			Direction:   ev.Direction,
+			Direction:   utils.OUT,
 			Tenant:      ev.Tenant,
 			Category:    ev.Category,
 			Account:     ev.Account,
@@ -418,8 +419,10 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	}
 
 	//utils.Logger.Info(fmt.Sprintf("DC after: %+v", ev))
-	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
-		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT), Destination: ev.GetDestination(utils.META_DEFAULT)}
+	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT),
+		Category: ev.GetCategory(utils.META_DEFAULT), Direction: utils.OUT,
+		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT),
+		Destination: ev.GetDestination(utils.META_DEFAULT)}
 	//utils.Logger.Info(fmt.Sprintf("Derived chargers for: %+v", attrsDC))
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
@@ -453,7 +456,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			CgrID:       ev.GetCgrId(rs.Timezone),
 			RunID:       dc.RunID,
 			TOR:         ev.ToR,
-			Direction:   ev.GetDirection(dc.DirectionField),
+			Direction:   utils.OUT,
 			Tenant:      ev.GetTenant(dc.TenantField),
 			Category:    ev.GetCategory(dc.CategoryField),
 			Subject:     ev.GetSubject(dc.SubjectField),

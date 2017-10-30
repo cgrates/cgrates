@@ -347,7 +347,6 @@ func (fsev FSEvent) AsStoredCdr(timezone string) *engine.CDR {
 	storCdr.OriginHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = "FS_" + fsev.GetName()
 	storCdr.RequestType = fsev.GetReqType(utils.META_DEFAULT)
-	storCdr.Direction = fsev.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = fsev.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = fsev.GetCategory(utils.META_DEFAULT)
 	storCdr.Account = fsev.GetAccount(utils.META_DEFAULT)
@@ -356,11 +355,8 @@ func (fsev FSEvent) AsStoredCdr(timezone string) *engine.CDR {
 	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
-	storCdr.PDD, _ = fsev.GetPdd(utils.META_DEFAULT)
 	storCdr.ExtraFields = fsev.GetExtraFields()
 	storCdr.Cost = -1
-	storCdr.Supplier = fsev.GetSupplier(utils.META_DEFAULT)
-	storCdr.DisconnectCause = fsev.GetDisconnectCause(utils.META_DEFAULT)
 	return storCdr
 }
 

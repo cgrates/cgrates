@@ -569,9 +569,6 @@ func TestEvCdrCorelate(t *testing.T) {
 	if evStoredCdr.RequestType != jsnStoredCdr.RequestType {
 		t.Errorf("evStoredCdr.RequestType: %s, jsnStoredCdr.RequestType: %s", evStoredCdr.RequestType, jsnStoredCdr.RequestType)
 	}
-	if evStoredCdr.Direction != jsnStoredCdr.Direction {
-		t.Errorf("evStoredCdr.Direction: %s, jsnStoredCdr.Direction: %s", evStoredCdr.Direction, jsnStoredCdr.Direction)
-	}
 	if evStoredCdr.Tenant != jsnStoredCdr.Tenant {
 		t.Errorf("evStoredCdr.Tenant: %s, jsnStoredCdr.Tenant: %s", evStoredCdr.Tenant, jsnStoredCdr.Tenant)
 	}
@@ -590,19 +587,10 @@ func TestEvCdrCorelate(t *testing.T) {
 	if evStoredCdr.SetupTime != jsnStoredCdr.SetupTime {
 		t.Errorf("evStoredCdr.SetupTime: %v, jsnStoredCdr.SetupTime: %v", evStoredCdr.SetupTime, jsnStoredCdr.SetupTime)
 	}
-	if evStoredCdr.PDD != jsnStoredCdr.PDD {
-		t.Errorf("evStoredCdr.PDD: %v, jsnStoredCdr.PDD: %v", evStoredCdr.PDD, jsnStoredCdr.PDD)
-	}
 	if evStoredCdr.AnswerTime != jsnStoredCdr.AnswerTime {
 		t.Errorf("evStoredCdr.AnswerTime: %v, jsnStoredCdr.AnswerTime: %v", evStoredCdr.AnswerTime, jsnStoredCdr.AnswerTime)
 	}
 	if evStoredCdr.Usage != jsnStoredCdr.Usage {
 		t.Errorf("evStoredCdr.Usage: %v, jsnStoredCdr.Usage: %v", evStoredCdr.Usage, jsnStoredCdr.Usage)
-	}
-	if evStoredCdr.Supplier != jsnStoredCdr.Supplier {
-		t.Errorf("evStoredCdr.Supplier: %s, jsnStoredCdr.Supplier: %s", evStoredCdr.Supplier, jsnStoredCdr.Supplier)
-	}
-	if evStoredCdr.DisconnectCause != jsnStoredCdr.DisconnectCause {
-		t.Errorf("evStoredCdr.DisconnectCause: %s, jsnStoredCdr.DisconnectCause: %s", evStoredCdr.DisconnectCause, jsnStoredCdr.DisconnectCause)
 	}
 }

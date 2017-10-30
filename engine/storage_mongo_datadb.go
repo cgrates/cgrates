@@ -256,7 +256,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		if err = db.C(utils.TBLCDRs).EnsureIndex(idx); err != nil {
+		if err = db.C(utils.CDRsTBL).EnsureIndex(idx); err != nil {
 			return
 		}
 		for _, idxKey := range ms.cdrsIndexes {
@@ -267,7 +267,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 				Background: false,
 				Sparse:     false,
 			}
-			if err = db.C(utils.TBLCDRs).EnsureIndex(idx); err != nil {
+			if err = db.C(utils.CDRsTBL).EnsureIndex(idx); err != nil {
 				return
 			}
 		}
@@ -278,7 +278,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		if err = db.C(utils.TBLSMCosts).EnsureIndex(idx); err != nil {
+		if err = db.C(utils.SMCostsTBL).EnsureIndex(idx); err != nil {
 			return
 		}
 		idx = mgo.Index{
@@ -288,7 +288,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		if err = db.C(utils.TBLSMCosts).EnsureIndex(idx); err != nil {
+		if err = db.C(utils.SMCostsTBL).EnsureIndex(idx); err != nil {
 			return
 		}
 		idx = mgo.Index{
@@ -298,7 +298,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		if err = db.C(utils.TBLSMCosts).EnsureIndex(idx); err != nil {
+		if err = db.C(utils.SMCostsTBL).EnsureIndex(idx); err != nil {
 			return
 		}
 	}
