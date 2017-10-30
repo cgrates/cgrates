@@ -647,7 +647,7 @@ func (rs *RedisStorage) RemoveSubscriber(key string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
+func (rs *RedisStorage) SetUserDrv(up *UserProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(up); err != nil {
 		return
@@ -655,7 +655,7 @@ func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
 	return rs.Cmd("SET", utils.USERS_PREFIX+up.GetId(), result).Err
 }
 
-func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
+func (rs *RedisStorage) GetUserDrv(key string) (up *UserProfile, err error) {
 	var values []byte
 	if values, err = rs.Cmd("GET", utils.USERS_PREFIX+key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
@@ -670,7 +670,7 @@ func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetUsers() (result []*UserProfile, err error) {
+func (rs *RedisStorage) GetUsersDrv() (result []*UserProfile, err error) {
 	keys, err := rs.Cmd("KEYS", utils.USERS_PREFIX+"*").List()
 	if err != nil {
 		return nil, err
@@ -687,7 +687,7 @@ func (rs *RedisStorage) GetUsers() (result []*UserProfile, err error) {
 	return
 }
 
-func (rs *RedisStorage) RemoveUser(key string) error {
+func (rs *RedisStorage) RemoveUserDrv(key string) error {
 	return rs.Cmd("DEL", utils.USERS_PREFIX+key).Err
 }
 
