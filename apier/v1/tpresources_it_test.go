@@ -127,16 +127,10 @@ func testTPResGetTPResourceBeforeSet(t *testing.T) {
 
 func testTPResSetTPResource(t *testing.T) {
 	tpRes = &utils.TPResource{
-		Tenant: "cgrates.org",
-		TPid:   "TPR1",
-		ID:     "ResGroup1",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{
-				Type:      "*string",
-				FieldName: "Account",
-				Values:    []string{"1001", "1002"},
-			},
-		},
+		Tenant:    "cgrates.org",
+		TPid:      "TPR1",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
@@ -168,18 +162,7 @@ func testTPResGetTPResourceAfterSet(t *testing.T) {
 
 func testTPResUpdateTPResource(t *testing.T) {
 	var result string
-	tpRes.Filters = []*utils.TPRequestFilter{
-		&utils.TPRequestFilter{
-			Type:      "*string",
-			FieldName: "Account",
-			Values:    []string{"1001", "1002"},
-		},
-		&utils.TPRequestFilter{
-			Type:      "*string_prefix",
-			FieldName: "Destination",
-			Values:    []string{"10", "20"},
-		},
-	}
+	tpRes.FilterIDs = []string{"FLTR_1", "FLTR_STS1"}
 	if err := tpResRPC.Call("ApierV1.SetTPResource", tpRes, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

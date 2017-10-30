@@ -47,7 +47,7 @@ type Storage interface {
 type DataDB interface {
 	Storage
 	Marshaler() Marshaler
-	HasData(string, string) (bool, error)
+	HasDataDrv(string, string) (bool, error)
 	GetRatingPlanDrv(string) (*RatingPlan, error)
 	SetRatingPlanDrv(*RatingPlan) error
 	GetRatingProfileDrv(string) (*RatingProfile, error)
@@ -87,13 +87,13 @@ type DataDB interface {
 	RemoveAccount(string) error
 	GetCdrStatsQueue(string) (*CDRStatsQueue, error)
 	SetCdrStatsQueue(*CDRStatsQueue) error
-	GetSubscribers() (map[string]*SubscriberData, error)
-	SetSubscriber(string, *SubscriberData) error
-	RemoveSubscriber(string) error
-	SetUser(*UserProfile) error
-	GetUser(string) (*UserProfile, error)
-	GetUsers() ([]*UserProfile, error)
-	RemoveUser(string) error
+	GetSubscribersDrv() (map[string]*SubscriberData, error)
+	SetSubscriberDrv(string, *SubscriberData) error
+	RemoveSubscriberDrv(string) error
+	SetUserDrv(*UserProfile) error
+	GetUserDrv(string) (*UserProfile, error)
+	GetUsersDrv() ([]*UserProfile, error)
+	RemoveUserDrv(string) error
 	SetAlias(*Alias, string) error
 	GetAlias(string, bool, string) (*Alias, error)
 	RemoveAlias(string, string) error

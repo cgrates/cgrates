@@ -579,7 +579,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	return
 }
 
-func (ms *MongoStorage) HasData(category, subject string) (has bool, err error) {
+func (ms *MongoStorage) HasDataDrv(category, subject string) (has bool, err error) {
 	session := ms.session.Copy()
 	defer session.Close()
 	db := session.DB(ms.db)
@@ -1057,7 +1057,7 @@ func (ms *MongoStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
+func (ms *MongoStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
 	session, col := ms.conn(colPbs)
 	defer session.Close()
 	iter := col.Find(nil).Iter()
@@ -1073,7 +1073,7 @@ func (ms *MongoStorage) GetSubscribers() (result map[string]*SubscriberData, err
 	return
 }
 
-func (ms *MongoStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+func (ms *MongoStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
 	session, col := ms.conn(colPbs)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"key": key}, &struct {
@@ -1083,13 +1083,13 @@ func (ms *MongoStorage) SetSubscriber(key string, sub *SubscriberData) (err erro
 	return err
 }
 
-func (ms *MongoStorage) RemoveSubscriber(key string) (err error) {
+func (ms *MongoStorage) RemoveSubscriberDrv(key string) (err error) {
 	session, col := ms.conn(colPbs)
 	defer session.Close()
 	return col.Remove(bson.M{"key": key})
 }
 
-func (ms *MongoStorage) SetUser(up *UserProfile) (err error) {
+func (ms *MongoStorage) SetUserDrv(up *UserProfile) (err error) {
 	session, col := ms.conn(colUsr)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"key": up.GetId()}, &struct {
@@ -1099,7 +1099,7 @@ func (ms *MongoStorage) SetUser(up *UserProfile) (err error) {
 	return err
 }
 
-func (ms *MongoStorage) GetUser(key string) (up *UserProfile, err error) {
+func (ms *MongoStorage) GetUserDrv(key string) (up *UserProfile, err error) {
 	var kv struct {
 		Key   string
 		Value *UserProfile
@@ -1116,7 +1116,7 @@ func (ms *MongoStorage) GetUser(key string) (up *UserProfile, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetUsers() (result []*UserProfile, err error) {
+func (ms *MongoStorage) GetUsersDrv() (result []*UserProfile, err error) {
 	session, col := ms.conn(colUsr)
 	defer session.Close()
 	iter := col.Find(nil).Iter()
@@ -1131,7 +1131,7 @@ func (ms *MongoStorage) GetUsers() (result []*UserProfile, err error) {
 	return
 }
 
-func (ms *MongoStorage) RemoveUser(key string) (err error) {
+func (ms *MongoStorage) RemoveUserDrv(key string) (err error) {
 	session, col := ms.conn(colUsr)
 	defer session.Close()
 	return col.Remove(bson.M{"key": key})

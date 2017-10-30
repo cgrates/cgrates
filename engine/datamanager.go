@@ -749,3 +749,35 @@ func (dm *DataManager) RemoveRatingProfile(key string, transactionID string) (er
 	cache.RemKey(utils.RATING_PROFILE_PREFIX+key, cacheCommit(transactionID), transactionID)
 	return
 }
+
+func (dm *DataManager) SetUser(up *UserProfile) (err error) {
+	return dm.DataDB().SetUserDrv(up)
+}
+
+func (dm *DataManager) GetUser(key string) (up *UserProfile, err error) {
+	return dm.DataDB().GetUserDrv(key)
+}
+
+func (dm *DataManager) GetUsers() (result []*UserProfile, err error) {
+	return dm.DataDB().GetUsersDrv()
+}
+
+func (dm *DataManager) RemoveUser(key string) error {
+	return dm.DataDB().RemoveUserDrv(key)
+}
+
+func (dm *DataManager) GetSubscribers() (result map[string]*SubscriberData, err error) {
+	return dm.DataDB().GetSubscribersDrv()
+}
+
+func (dm *DataManager) SetSubscriber(key string, sub *SubscriberData) (err error) {
+	return dm.DataDB().SetSubscriberDrv(key, sub)
+}
+
+func (dm *DataManager) RemoveSubscriber(key string) (err error) {
+	return dm.DataDB().RemoveSubscriberDrv(key)
+}
+
+func (dm *DataManager) HasData(category, subject string) (has bool, err error) {
+	return dm.DataDB().HasDataDrv(category, subject)
+}

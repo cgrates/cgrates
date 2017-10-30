@@ -204,7 +204,7 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
+func (rs *RedisStorage) HasDataDrv(category, subject string) (bool, error) {
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
@@ -611,7 +611,7 @@ func (rs *RedisStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	return rs.Cmd("SET", utils.CDR_STATS_QUEUE_PREFIX+sq.GetId(), result).Err
 }
 
-func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
+func (rs *RedisStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
 	keys, err := rs.Cmd("KEYS", utils.PUBSUB_SUBSCRIBERS_PREFIX+"*").List()
 	if err != nil {
 		return nil, err
@@ -634,7 +634,7 @@ func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err
 	return
 }
 
-func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+func (rs *RedisStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
 	result, err := rs.ms.Marshal(sub)
 	if err != nil {
 		return err
@@ -642,12 +642,12 @@ func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err erro
 	return rs.Cmd("SET", utils.PUBSUB_SUBSCRIBERS_PREFIX+key, result).Err
 }
 
-func (rs *RedisStorage) RemoveSubscriber(key string) (err error) {
+func (rs *RedisStorage) RemoveSubscriberDrv(key string) (err error) {
 	err = rs.Cmd("DEL", utils.PUBSUB_SUBSCRIBERS_PREFIX+key).Err
 	return
 }
 
-func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
+func (rs *RedisStorage) SetUserDrv(up *UserProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(up); err != nil {
 		return
@@ -655,7 +655,7 @@ func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
 	return rs.Cmd("SET", utils.USERS_PREFIX+up.GetId(), result).Err
 }
 
-func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
+func (rs *RedisStorage) GetUserDrv(key string) (up *UserProfile, err error) {
 	var values []byte
 	if values, err = rs.Cmd("GET", utils.USERS_PREFIX+key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
@@ -670,7 +670,7 @@ func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetUsers() (result []*UserProfile, err error) {
+func (rs *RedisStorage) GetUsersDrv() (result []*UserProfile, err error) {
 	keys, err := rs.Cmd("KEYS", utils.USERS_PREFIX+"*").List()
 	if err != nil {
 		return nil, err
@@ -687,7 +687,7 @@ func (rs *RedisStorage) GetUsers() (result []*UserProfile, err error) {
 	return
 }
 
-func (rs *RedisStorage) RemoveUser(key string) error {
+func (rs *RedisStorage) RemoveUserDrv(key string) error {
 	return rs.Cmd("DEL", utils.USERS_PREFIX+key).Err
 }
 

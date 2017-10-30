@@ -165,7 +165,7 @@ func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
+func (ms *MapStorage) HasDataDrv(categ, subject string) (bool, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	switch categ {
@@ -560,7 +560,7 @@ func (ms *MapStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
+func (ms *MapStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	result = make(map[string]*SubscriberData)
@@ -574,7 +574,7 @@ func (ms *MapStorage) GetSubscribers() (result map[string]*SubscriberData, err e
 	}
 	return
 }
-func (ms *MapStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+func (ms *MapStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sub)
@@ -582,14 +582,14 @@ func (ms *MapStorage) SetSubscriber(key string, sub *SubscriberData) (err error)
 	return
 }
 
-func (ms *MapStorage) RemoveSubscriber(key string) (err error) {
+func (ms *MapStorage) RemoveSubscriberDrv(key string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.PUBSUB_SUBSCRIBERS_PREFIX+key)
 	return
 }
 
-func (ms *MapStorage) SetUser(up *UserProfile) error {
+func (ms *MapStorage) SetUserDrv(up *UserProfile) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(up)
@@ -599,7 +599,7 @@ func (ms *MapStorage) SetUser(up *UserProfile) error {
 	ms.dict[utils.USERS_PREFIX+up.GetId()] = result
 	return nil
 }
-func (ms *MapStorage) GetUser(key string) (up *UserProfile, err error) {
+func (ms *MapStorage) GetUserDrv(key string) (up *UserProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	up = &UserProfile{}
@@ -611,7 +611,7 @@ func (ms *MapStorage) GetUser(key string) (up *UserProfile, err error) {
 	return
 }
 
-func (ms *MapStorage) GetUsers() (result []*UserProfile, err error) {
+func (ms *MapStorage) GetUsersDrv() (result []*UserProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	for key, value := range ms.dict {
@@ -625,7 +625,7 @@ func (ms *MapStorage) GetUsers() (result []*UserProfile, err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveUser(key string) error {
+func (ms *MapStorage) RemoveUserDrv(key string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.USERS_PREFIX+key)

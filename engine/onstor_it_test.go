@@ -943,7 +943,7 @@ func testOnStorITHasData(t *testing.T) {
 	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
 	}
-	if rcv, err := onStor.DataDB().HasData(utils.RATING_PLAN_PREFIX, rp.Id); err != nil {
+	if rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id); err != nil {
 		t.Error(err)
 	} else if rcv != true {
 		t.Errorf("Expecting: true, received: %v", rcv)
@@ -1607,7 +1607,7 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 }
 
 func testOnStorITCRUDSubscribers(t *testing.T) {
-	if sbs, err := onStor.DataDB().GetSubscribers(); err != nil {
+	if sbs, err := onStor.GetSubscribers(); err != nil {
 		t.Error(err)
 	} else if len(sbs) != 0 {
 		t.Errorf("Received subscribers: %+v", sbs)
@@ -1616,18 +1616,18 @@ func testOnStorITCRUDSubscribers(t *testing.T) {
 		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
 	sbscID := "testOnStorITCRUDSubscribers"
-	if err := onStor.DataDB().SetSubscriber(sbscID, sbsc); err != nil {
+	if err := onStor.SetSubscriber(sbscID, sbsc); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetSubscribers(); err != nil {
+	if rcv, err := onStor.GetSubscribers(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sbsc.ExpTime, rcv[sbscID].ExpTime) { // Test just ExpTime since RSRField is more complex behind
 		t.Errorf("Expecting: %v, received: %v", sbsc, rcv[sbscID])
 	}
-	if err := onStor.DataDB().RemoveSubscriber(sbscID); err != nil {
+	if err := onStor.RemoveSubscriber(sbscID); err != nil {
 		t.Error(err)
 	}
-	if sbs, err := onStor.DataDB().GetSubscribers(); err != nil {
+	if sbs, err := onStor.GetSubscribers(); err != nil {
 		t.Error(err)
 	} else if len(sbs) != 0 {
 		t.Errorf("Received subscribers: %+v", sbs)
@@ -1641,26 +1641,26 @@ func testOnStorITCRUDUser(t *testing.T) {
 			"t": "v",
 		},
 	}
-	if _, rcvErr := onStor.DataDB().GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetUser(usr); err != nil {
+	if err := onStor.SetUser(usr); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetUser(usr.GetId()); err != nil {
+	if rcv, err := onStor.GetUser(usr.GetId()); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(usr, rcv) {
 		t.Errorf("Expecting: %v, received: %v", usr, rcv)
 	}
-	if rcv, err := onStor.DataDB().GetUsers(); err != nil {
+	if rcv, err := onStor.GetUsers(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(usr, rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", usr, rcv[0])
 	}
-	if err := onStor.DataDB().RemoveUser(usr.GetId()); err != nil {
+	if err := onStor.RemoveUser(usr.GetId()); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

@@ -362,6 +362,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<CDRS> Cannot find CDR export template with ID: <%s>", cdrePrfl)
 			}
 		}
+		for _, connCfg := range self.CDRSThresholdSConns {
+			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+				return errors.New("ThresholdS not enabled but requested by CDRS component.")
+			}
+		}
 	}
 	// CDRC sanity checks
 	for _, cdrcCfgs := range self.CdrcProfiles {
