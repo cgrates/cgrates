@@ -38,7 +38,11 @@ func TestCgrCdrAsCDR(t *testing.T) {
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call",
 		utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002",
 		utils.SETUP_TIME: "2013-11-07T08:42:20Z", utils.ANSWER_TIME: "2013-11-07T08:42:26Z",
+<<<<<<< HEAD
 		utils.USAGE: "10s", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+=======
+		utils.USAGE: "10", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+>>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME], "")
 	expctRtCdr := &CDR{CGRID: utils.Sha1(cgrCdr[utils.ACCID], setupTime.String()),
 		ToR: utils.VOICE, OriginID: cgrCdr[utils.ACCID],

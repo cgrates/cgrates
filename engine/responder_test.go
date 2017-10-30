@@ -473,7 +473,11 @@ func TestResponderGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.Entry, lcrLc.Entry)
 
 	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
+<<<<<<< HEAD
 		t.Errorf("Expecting: %s\n, received: %+v", utils.ToJSON(eLcLcr.SupplierCosts), utils.ToJSON(lcrLc.SupplierCosts))
+=======
+		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts, lcrLc.SupplierCosts)
+>>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 	}
 	/*
 			// Test *qos_threshold strategy here,
@@ -505,6 +509,7 @@ func TestResponderGetLCR(t *testing.T) {
 				t.Error(err)
 			} else if !reflect.DeepEqual(eQTLcr.Entry, lcrQT.Entry) {
 				t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
+<<<<<<< HEAD
 
 			} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
 				t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts, lcrQT.SupplierCosts)
@@ -535,6 +540,38 @@ func TestResponderGetLCR(t *testing.T) {
 			}
 
 
+=======
+
+			} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
+				t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts, lcrQT.SupplierCosts)
+			}
+
+			cdr := &CDR{AnswerTime: time.Now(), Usage: 3 * time.Minute, Cost: 1}
+			rsponder.Stats.Call("CDRStatsV1.AppendCDR", cdr, &r)
+			cdr = &CDR{AnswerTime: time.Now(), Usage: 5 * time.Minute, Cost: 2}
+			rsponder.Stats.Call("CDRStatsV1.AppendCDR", cdr, &r)
+
+			eQTLcr = &LCRCost{
+				Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call",
+					Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;;;4m;;;;;;;;;", Weight: 10.0},
+				SupplierCosts: []*LCRSupplierCost{
+					&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second,
+						QOS: map[string]float64{PDD: -1, TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1, DDC: -1}, qosSortParams: []string{"35", "4m"}},
+					&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second,
+						QOS: map[string]float64{PDD: -1, ACD: 300, TCD: 300, ASR: 100, ACC: 2, TCC: 2, DDC: 2}, qosSortParams: []string{"35", "4m"}},
+				},
+			}
+			if err := rsponder.GetLCR(&AttrGetLcr{CallDescriptor: cdQosThreshold}, &lcrQT); err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(eQTLcr.Entry, lcrQT.Entry) {
+				t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
+			} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
+				t.Errorf("Expecting: %s, received: %s",
+					utils.ToJSON(eQTLcr.SupplierCosts), utils.ToJSON(lcrQT.SupplierCosts))
+			}
+
+
+>>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 		// Test *qos strategy here
 		cdQos := &CallDescriptor{
 			TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
