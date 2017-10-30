@@ -128,16 +128,10 @@ func testTPThreholdGetTPThreholdBeforeSet(t *testing.T) {
 
 func testTPThreholdSetTPThrehold(t *testing.T) {
 	tpThreshold = &utils.TPThreshold{
-		TPid:   "TH1",
-		Tenant: "cgrates.org",
-		ID:     "Threhold",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{
-				Type:      "*string",
-				FieldName: "Account",
-				Values:    []string{"1001", "1002"},
-			},
-		},
+		TPid:      "TH1",
+		Tenant:    "cgrates.org",
+		ID:        "Threhold",
+		FilterIDs: []string{"FLTR_1", "FLTR_2"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
@@ -178,18 +172,7 @@ func testTPThreholdGetTPThreholdIds(t *testing.T) {
 
 func testTPThreholdUpdateTPThrehold(t *testing.T) {
 	var result string
-	tpThreshold.Filters = []*utils.TPRequestFilter{
-		&utils.TPRequestFilter{
-			Type:      "*string",
-			FieldName: "Account",
-			Values:    []string{"1001", "1002"},
-		},
-		&utils.TPRequestFilter{
-			Type:      "*string_prefix",
-			FieldName: "Destination",
-			Values:    []string{"10", "20"},
-		},
-	}
+	tpThreshold.FilterIDs = []string{"FLTR_1", "FLTR_2", "FLTR_3"}
 	if err := tpThresholdRPC.Call("ApierV1.SetTPThreshold", tpThreshold, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
