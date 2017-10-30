@@ -560,7 +560,7 @@ func (ms *MapStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
+func (ms *MapStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	result = make(map[string]*SubscriberData)
@@ -574,7 +574,7 @@ func (ms *MapStorage) GetSubscribers() (result map[string]*SubscriberData, err e
 	}
 	return
 }
-func (ms *MapStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+func (ms *MapStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sub)
@@ -582,7 +582,7 @@ func (ms *MapStorage) SetSubscriber(key string, sub *SubscriberData) (err error)
 	return
 }
 
-func (ms *MapStorage) RemoveSubscriber(key string) (err error) {
+func (ms *MapStorage) RemoveSubscriberDrv(key string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.PUBSUB_SUBSCRIBERS_PREFIX+key)

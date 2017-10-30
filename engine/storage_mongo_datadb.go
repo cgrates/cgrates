@@ -1057,7 +1057,7 @@ func (ms *MongoStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
+func (ms *MongoStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
 	session, col := ms.conn(colPbs)
 	defer session.Close()
 	iter := col.Find(nil).Iter()
@@ -1073,7 +1073,7 @@ func (ms *MongoStorage) GetSubscribers() (result map[string]*SubscriberData, err
 	return
 }
 
-func (ms *MongoStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+func (ms *MongoStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
 	session, col := ms.conn(colPbs)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"key": key}, &struct {
@@ -1083,7 +1083,7 @@ func (ms *MongoStorage) SetSubscriber(key string, sub *SubscriberData) (err erro
 	return err
 }
 
-func (ms *MongoStorage) RemoveSubscriber(key string) (err error) {
+func (ms *MongoStorage) RemoveSubscriberDrv(key string) (err error) {
 	session, col := ms.conn(colPbs)
 	defer session.Close()
 	return col.Remove(bson.M{"key": key})
