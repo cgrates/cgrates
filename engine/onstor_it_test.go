@@ -208,7 +208,7 @@ func testOnStorITSetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.DataDB().SetReqFilterIndexes(utils.ResourceProfilesStringIndex, idxes); err != nil {
+	if err := onStor.SetReqFilterIndexes(utils.ResourceProfilesStringIndex, idxes); err != nil {
 		t.Error(err)
 	}
 }
@@ -239,12 +239,12 @@ func testOnStorITGetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if idxes, err := onStor.DataDB().GetReqFilterIndexes(utils.ResourceProfilesStringIndex); err != nil {
+	if idxes, err := onStor.GetReqFilterIndexes(utils.ResourceProfilesStringIndex); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, idxes) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
 	}
-	if _, err := onStor.DataDB().GetReqFilterIndexes("unknown_key"); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.GetReqFilterIndexes("unknown_key"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
