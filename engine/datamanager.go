@@ -781,3 +781,11 @@ func (dm *DataManager) RemoveSubscriber(key string) (err error) {
 func (dm *DataManager) HasData(category, subject string) (has bool, err error) {
 	return dm.DataDB().HasDataDrv(category, subject)
 }
+
+func (dm *DataManager) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+	return dm.DataDB().GetReqFilterIndexesDrv(dbKey)
+}
+
+func (dm *DataManager) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+	return dm.DataDB().SetReqFilterIndexesDrv(dbKey, indexes)
+}
