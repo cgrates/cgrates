@@ -1242,7 +1242,7 @@ func (ms *MapStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 }
 
 // GetStatQueue retrieves the stored metrics for a StatsQueue
-func (ms *MapStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error) {
+func (ms *MapStorage) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQueue, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id)]
@@ -1254,7 +1254,7 @@ func (ms *MapStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue
 }
 
 // SetStatQueue stores the metrics for a StatsQueue
-func (ms *MapStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
+func (ms *MapStorage) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	var result []byte
@@ -1267,7 +1267,7 @@ func (ms *MapStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
 }
 
 // RemStatQueue removes a StatsQueue
-func (ms *MapStorage) RemStoredStatQueue(tenant, id string) (err error) {
+func (ms *MapStorage) RemStoredStatQueueDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
