@@ -110,8 +110,8 @@ type DataDB interface {
 	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
-	SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
+	GetReqFilterIndexesDrv(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
+	SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
 	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)

@@ -1753,7 +1753,7 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 	return nil
 }
 
-func (ms *MongoStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	var result struct {
@@ -1769,7 +1769,7 @@ func (ms *MongoStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]ma
 	return result.Value, nil
 }
 
-func (ms *MongoStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (ms *MongoStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {

@@ -1149,7 +1149,7 @@ func (ms *MapStorage) RemoveTimingDrv(id string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+func (ms *MapStorage) GetReqFilterIndexesDrv(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[dbKey]
@@ -1162,7 +1162,7 @@ func (ms *MapStorage) GetReqFilterIndexes(dbKey string) (indexes map[string]map[
 	}
 	return
 }
-func (ms *MapStorage) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (ms *MapStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(indexes)

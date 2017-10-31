@@ -23,7 +23,7 @@ import (
 )
 
 func NewReqFilterIndexer(dm *DataManager, dbKey string) (*ReqFilterIndexer, error) {
-	indexes, err := dm.DataDB().GetReqFilterIndexes(dbKey)
+	indexes, err := dm.GetReqFilterIndexes(dbKey)
 	if err != nil && err != utils.ErrNotFound {
 		return nil, err
 	}
@@ -113,5 +113,5 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilter, itemID string
 
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *ReqFilterIndexer) StoreIndexes() error {
-	return rfi.dm.DataDB().SetReqFilterIndexes(rfi.dbKey, rfi.indexes)
+	return rfi.dm.SetReqFilterIndexes(rfi.dbKey, rfi.indexes)
 }
