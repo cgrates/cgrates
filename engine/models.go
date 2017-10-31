@@ -464,7 +464,7 @@ type TpFilter struct {
 
 type CDRsql struct {
 	ID          int64
-	CGRID       string
+	Cgrid       string
 	RunID       string
 	OriginHost  string
 	Source      string

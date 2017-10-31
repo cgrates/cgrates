@@ -498,7 +498,6 @@ func TestTutITDerivedMaxSessionTime(t *testing.T) {
 		OriginID:    "testevent1",
 		OriginHost:  "127.0.0.1",
 		RequestType: utils.META_PREPAID,
-		Direction:   utils.OUT,
 		Tenant:      "cgrates.org",
 		Category:    "call",
 		Account:     "1004",
@@ -507,7 +506,6 @@ func TestTutITDerivedMaxSessionTime(t *testing.T) {
 		SetupTime:   tStart,
 		AnswerTime:  tStart,
 		Usage:       time.Duration(120) * time.Second,
-		Supplier:    "suppl1",
 		Cost:        -1,
 	}
 	var maxTime float64
@@ -520,7 +518,7 @@ func TestTutITDerivedMaxSessionTime(t *testing.T) {
 
 // Check MaxUsage
 func TestTutITMaxUsage(t *testing.T) {
-	setupReq := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+	setupReq := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Tenant: "cgrates.org", Category: "call",
 		Account: "1003", Subject: "1003", Destination: "1001",
 		SetupTime: "2014-08-04T13:00:00Z", Usage: "1",
 	}
@@ -530,7 +528,7 @@ func TestTutITMaxUsage(t *testing.T) {
 	} else if maxTime != 1 {
 		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
 	}
-	setupReq = &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_RATED, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+	setupReq = &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
 		Account: "test_max_usage", Destination: "1001",
 		SetupTime: "2014-08-04T13:00:00Z",
 	}
@@ -543,7 +541,7 @@ func TestTutITMaxUsage(t *testing.T) {
 
 // Check DebitUsage
 func TestTutITDebitUsage(t *testing.T) {
-	setupReq := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+	setupReq := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Tenant: "cgrates.org", Category: "call",
 		Account: "1003", Subject: "1003", Destination: "1001",
 		AnswerTime: "2014-08-04T13:00:00Z", Usage: "1",
 	}
@@ -558,10 +556,10 @@ func TestTutITDebitUsage(t *testing.T) {
 // Test CDR from external sources
 func TestTutITProcessExternalCdr(t *testing.T) {
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "testextcdr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
-		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001", Supplier: "SUPPL1",
+		OriginID: "testextcdr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
-		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Usage: "1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
 	if err := tutLocalRpc.Call("CdrsV1.ProcessExternalCdr", cdr, &reply); err != nil {
@@ -574,10 +572,9 @@ func TestTutITProcessExternalCdr(t *testing.T) {
 // Test CDR involving UserProfile
 func TestTutITProcessExternalCdrUP(t *testing.T) {
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, Direction: utils.OUT,
-		RequestType: utils.USERS, Tenant: utils.USERS, Account: utils.USERS, Destination: "1001", Supplier: "SUPPL1",
-		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
-		Usage: "2", PDD: "0.2", DisconnectCause: "NORMAL_DISCONNECT",
+		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST,
+		RequestType: utils.USERS, Tenant: utils.USERS, Account: utils.USERS, Destination: "1001",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z", Usage: "2",
 		ExtraFields: map[string]string{"Cli": "+4986517174964", "fieldextr2": "valextr2", "SysUserName": utils.USERS},
 	}
 	var reply string
@@ -589,10 +586,10 @@ func TestTutITProcessExternalCdrUP(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	eCdr := &engine.ExternalCDR{CGRID: "63a8d2bfeca2cfb790826c3ec461696d6574cfde", OrderID: 2,
 		ToR:      utils.VOICE,
-		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
-		Tenant: "cgrates.org", Category: "call", Account: "1004", Subject: "1004", Destination: "1001", Supplier: "SUPPL1",
-		SetupTime: time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC).Local().Format(time.RFC3339), AnswerTime: time.Date(2014, 8, 4, 13, 0, 7, 0, time.UTC).Local().Format(time.RFC3339),
-		Usage: "2", PDD: "0.2", DisconnectCause: "NORMAL_DISCONNECT",
+		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1004", Subject: "1004", Destination: "1001",
+		SetupTime:  time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC).Local().Format(time.RFC3339),
+		AnswerTime: time.Date(2014, 8, 4, 13, 0, 7, 0, time.UTC).Local().Format(time.RFC3339), Usage: "2",
 		ExtraFields: map[string]string{"Cli": "+4986517174964", "fieldextr2": "valextr2", "SysUserName": "danb4"},
 		RunID:       utils.DEFAULT_RUNID, Cost: 1}
 	var cdrs []*engine.ExternalCDR
@@ -629,14 +626,8 @@ func TestTutITProcessExternalCdrUP(t *testing.T) {
 		if cdrs[0].Destination != eCdr.Destination {
 			t.Errorf("Unexpected Destination for CDR: %+v", cdrs[0])
 		}
-		if cdrs[0].Supplier != eCdr.Supplier {
-			t.Errorf("Unexpected Supplier for CDR: %+v", cdrs[0])
-		}
 		if cdrs[0].SetupTime != eCdr.SetupTime {
 			t.Errorf("Unexpected SetupTime for CDR: %+v", cdrs[0])
-		}
-		if cdrs[0].PDD != eCdr.PDD {
-			t.Errorf("Unexpected PDD for CDR: %+v", cdrs[0])
 		}
 		if cdrs[0].AnswerTime != eCdr.AnswerTime {
 			t.Errorf("Unexpected AnswerTime for CDR: %+v", cdrs[0])
@@ -644,18 +635,15 @@ func TestTutITProcessExternalCdrUP(t *testing.T) {
 		if cdrs[0].Usage != eCdr.Usage {
 			t.Errorf("Unexpected Usage for CDR: %+v", cdrs[0])
 		}
-		if cdrs[0].DisconnectCause != eCdr.DisconnectCause {
-			t.Errorf("Unexpected DisconnectCause for CDR: %+v", cdrs[0])
-		}
 	}
 }
 
 func TestTutITCostErrors(t *testing.T) {
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "TestTutIT_1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
-		Tenant: "cgrates.org", Category: "fake", Account: "2001", Subject: "2001", Destination: "1001", Supplier: "SUPPL1",
+		OriginID: "TestTutIT_1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "fake", Account: "2001", Subject: "2001", Destination: "1001",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
-		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Usage: "1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
 	if err := tutLocalRpc.Call("CdrsV1.ProcessExternalCdr", cdr, &reply); err != nil {
@@ -679,10 +667,10 @@ func TestTutITCostErrors(t *testing.T) {
 		}
 	}
 	cdr2 := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "TestTutIT_2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
-		Tenant: "cgrates.org", Category: "fake", Account: "2002", Subject: "2002", Destination: "1001", Supplier: "SUPPL1",
+		OriginID: "TestTutIT_2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID,
+		Tenant: "cgrates.org", Category: "fake", Account: "2002", Subject: "2002", Destination: "1001",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
-		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Usage: "1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	if err := tutLocalRpc.Call("CdrsV1.ProcessExternalCdr", cdr2, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -704,10 +692,10 @@ func TestTutITCostErrors(t *testing.T) {
 		}
 	}
 	cdr3 := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "TestTutIT_3", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
-		Tenant: "cgrates.org", Category: "fake", Account: "1001", Subject: "1001", Destination: "2002", Supplier: "SUPPL1",
+		OriginID: "TestTutIT_3", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID,
+		Tenant: "cgrates.org", Category: "fake", Account: "1001", Subject: "1001", Destination: "2002",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
-		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Usage: "1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	if err := tutLocalRpc.Call("CdrsV1.ProcessExternalCdr", cdr3, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -959,15 +947,15 @@ func TestTutITLcrQos(t *testing.T) {
 	// Post some CDRs to influence stats
 	testCdr1 := &engine.CDR{CGRID: utils.Sha1("testcdr1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testcdr1", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
-		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(2) * time.Minute, Supplier: "suppl1",
+		Usage:       time.Duration(2) * time.Minute,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	testCdr2 := &engine.CDR{CGRID: utils.Sha1("testcdr2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testcdr2", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
-		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1003",
+		Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1003",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(90) * time.Second, Supplier: "suppl2",
+		Usage:       time.Duration(90) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	var reply string
 	for _, cdr := range []*engine.CDR{testCdr1, testCdr2} {
@@ -998,9 +986,9 @@ func TestTutITLcrQos(t *testing.T) {
 	}
 	testCdr3 := &engine.CDR{CGRID: utils.Sha1("testcdr3", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testcdr3", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
-		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(180) * time.Second, Supplier: "suppl2"}
+		Usage: time.Duration(180) * time.Second}
 	if err := tutLocalRpc.Call("CdrsV1.ProcessCdr", testCdr3, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
@@ -1061,9 +1049,9 @@ func TestTutITLcrQosThreshold(t *testing.T) {
 	}
 	testCdr4 := &engine.CDR{CGRID: utils.Sha1("testcdr4", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testcdr4", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
-		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(60) * time.Second, Supplier: "suppl2"}
+		Usage: time.Duration(60) * time.Second}
 	var reply string
 	if err := tutLocalRpc.Call("CdrsV1.ProcessCdr", testCdr4, &reply); err != nil { // Should drop ACD under the 2m required by threshold,  removing suppl2 from lcr
 		t.Error("Unexpected error: ", err.Error())
@@ -1126,9 +1114,9 @@ func TestTutITLcrQosThreshold(t *testing.T) {
 	}
 	testCdr5 := &engine.CDR{CGRID: utils.Sha1("testcdr5", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testcdr5", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
-		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(1) * time.Second, Supplier: "suppl2"}
+		Usage: time.Duration(1) * time.Second}
 	if err := tutLocalRpc.Call("CdrsV1.ProcessCdr", testCdr5, &reply); err != nil { // Should drop ACD under the 1m required by threshold,  removing suppl2 from lcr
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
@@ -1302,9 +1290,9 @@ func TestTutITCdrStatsAfter(t *testing.T) {
 func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
 	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid1", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testprepaid1", OriginHost: "192.168.1.1", Source: "TEST_PREPAID_CDR_SMCOST1", RequestType: utils.META_PREPAID,
-		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
 		SetupTime: time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC), AnswerTime: time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
-		Usage: time.Duration(90) * time.Second, Supplier: "suppl1",
+		Usage:       time.Duration(90) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	smCost := &engine.SMCost{CGRID: cdr.CGRID,
 		RunID:      utils.META_DEFAULT,
@@ -1359,9 +1347,9 @@ func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
 func TestTutITPrepaidCDRWithoutSMCost(t *testing.T) {
 	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid2", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
 		ToR: utils.VOICE, OriginID: "testprepaid2", OriginHost: "192.168.1.1", Source: "TEST_PREPAID_CDR_NO_SMCOST1", RequestType: utils.META_PREPAID,
-		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
 		SetupTime: time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC), AnswerTime: time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
-		Usage: time.Duration(90) * time.Second, Supplier: "suppl1",
+		Usage:       time.Duration(90) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	var reply string
 	if err := tutLocalRpc.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
@@ -1390,9 +1378,9 @@ func TestTutITPrepaidCDRWithoutSMCost(t *testing.T) {
 
 func TestTutITExportCDR(t *testing.T) {
 	cdr := &engine.CDR{ToR: utils.VOICE, OriginID: "testexportcdr1", OriginHost: "192.168.1.1", Source: "TestTutITExportCDR", RequestType: utils.META_RATED,
-		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
 		SetupTime: time.Date(2016, 11, 30, 17, 5, 24, 0, time.UTC), AnswerTime: time.Date(2016, 11, 30, 17, 6, 4, 0, time.UTC),
-		Usage: time.Duration(98) * time.Second, Supplier: "suppl1",
+		Usage:       time.Duration(98) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	cdr.ComputeCGRID()
 	var reply string

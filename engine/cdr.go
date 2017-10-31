@@ -761,7 +761,7 @@ func (cdr *CDR) AsExportMap(exportFields []*config.CfgCdrField, httpSkipTlsCheck
 // AsCDRsTBL converts the CDR into the format used for SQL storage
 func (cdr *CDR) AsCDRsql() (cdrSql *CDRsql) {
 	cdrSql = new(CDRsql)
-	cdrSql.CGRID = cdr.CGRID
+	cdrSql.Cgrid = cdr.CGRID
 	cdrSql.RunID = cdr.RunID
 	cdrSql.OriginHost = cdr.OriginHost
 	cdrSql.Source = cdr.Source
@@ -788,7 +788,7 @@ func (cdr *CDR) AsCDRsql() (cdrSql *CDRsql) {
 // NewCDRFromSQL converts the CDRsql into CDR
 func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
 	cdr = new(CDR)
-	cdr.CGRID = cdrSql.CGRID
+	cdr.CGRID = cdrSql.Cgrid
 	cdr.RunID = cdrSql.RunID
 	cdr.OriginHost = cdrSql.OriginHost
 	cdr.Source = cdrSql.Source

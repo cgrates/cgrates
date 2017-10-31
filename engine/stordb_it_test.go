@@ -1677,9 +1677,6 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].RequestType, rcv[0].RequestType) || reflect.DeepEqual(snd[0].RequestType, rcv[1].RequestType)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].RequestType, rcv[0].RequestType, rcv[1].RequestType)
 		}
-		if !(reflect.DeepEqual(snd[0].Direction, rcv[0].Direction) || reflect.DeepEqual(snd[0].Direction, rcv[1].Direction)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Direction, rcv[0].Direction, rcv[1].Direction)
-		}
 		if !(reflect.DeepEqual(snd[0].Tenant, rcv[0].Tenant) || reflect.DeepEqual(snd[0].Tenant, rcv[1].Tenant)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Tenant, rcv[0].Tenant, rcv[1].Tenant)
 		}
@@ -1698,20 +1695,11 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 		if !(snd[0].SetupTime.Equal(rcv[0].SetupTime) || snd[0].SetupTime.Equal(rcv[1].SetupTime)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].SetupTime, rcv[0].SetupTime, rcv[1].SetupTime)
 		}
-		if !(reflect.DeepEqual(snd[0].PDD, rcv[0].PDD) || reflect.DeepEqual(snd[0].PDD, rcv[1].PDD)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].PDD, rcv[0].PDD, rcv[1].PDD)
-		}
 		if !(snd[0].AnswerTime.Equal(rcv[0].AnswerTime) || snd[0].AnswerTime.Equal(rcv[1].AnswerTime)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].AnswerTime, rcv[0].AnswerTime, rcv[1].AnswerTime)
 		}
 		if !(reflect.DeepEqual(snd[0].Usage, rcv[0].Usage) || reflect.DeepEqual(snd[0].Usage, rcv[1].Usage)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Usage, rcv[0].Usage, rcv[1].Usage)
-		}
-		if !(reflect.DeepEqual(snd[0].Supplier, rcv[0].Supplier) || reflect.DeepEqual(snd[0].Supplier, rcv[1].Supplier)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Supplier, rcv[0].Supplier, rcv[1].Supplier)
-		}
-		if !(reflect.DeepEqual(snd[0].DisconnectCause, rcv[0].DisconnectCause) || reflect.DeepEqual(snd[0].DisconnectCause, rcv[1].DisconnectCause)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].DisconnectCause, rcv[0].DisconnectCause, rcv[1].DisconnectCause)
 		}
 		if !(reflect.DeepEqual(snd[0].ExtraFields, rcv[0].ExtraFields) || reflect.DeepEqual(snd[0].ExtraFields, rcv[1].ExtraFields)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ExtraFields, rcv[0].ExtraFields, rcv[1].ExtraFields)
@@ -1724,9 +1712,6 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 		}
 		if !(reflect.DeepEqual(snd[0].CostDetails, rcv[0].CostDetails) || reflect.DeepEqual(snd[0].CostDetails, rcv[1].CostDetails)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].CostDetails, rcv[0].CostDetails, rcv[1].CostDetails)
-		}
-		if !(reflect.DeepEqual(snd[0].AccountSummary, rcv[0].AccountSummary) || reflect.DeepEqual(snd[0].AccountSummary, rcv[1].AccountSummary)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].AccountSummary, rcv[0].AccountSummary, rcv[1].AccountSummary)
 		}
 		if !(reflect.DeepEqual(snd[0].ExtraInfo, rcv[0].ExtraInfo) || reflect.DeepEqual(snd[0].ExtraInfo, rcv[1].ExtraInfo)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ExtraInfo, rcv[0].ExtraInfo, rcv[1].ExtraInfo)
