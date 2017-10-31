@@ -762,7 +762,7 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 		}
 		tx = self.db.Begin()
 		cdrSql.UpdatedAt = time.Now()
-		updated := tx.Model(&CDRsql{}).Where(&CDRsql{CGRID: cdr.CGRID, RunID: cdr.RunID, OriginID: cdr.OriginID}).Updates(cdrSql)
+		updated := tx.Model(&CDRsql{}).Where(&CDRsql{Cgrid: cdr.CGRID, RunID: cdr.RunID, OriginID: cdr.OriginID}).Updates(cdrSql)
 		if updated.Error != nil {
 			tx.Rollback()
 			return updated.Error
