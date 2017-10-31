@@ -2025,18 +2025,18 @@ func testOnStorITCRUDStoredStatQueue(t *testing.T) {
 			utils.MetaASR: msrshled,
 		},
 	}
-	if err := onStor.DataDB().SetStoredStatQueue(sq); err != nil {
+	if err := onStor.DataDB().SetStoredStatQueueDrv(sq); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetStoredStatQueue(sq.Tenant, sq.ID); err != nil {
+	if rcv, err := onStor.DataDB().GetStoredStatQueueDrv(sq.Tenant, sq.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
-	if err := onStor.DataDB().RemStoredStatQueue(sq.Tenant, sq.ID); err != nil {
+	if err := onStor.DataDB().RemStoredStatQueueDrv(sq.Tenant, sq.ID); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetStoredStatQueue(sq.Tenant, sq.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.DataDB().GetStoredStatQueueDrv(sq.Tenant, sq.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
