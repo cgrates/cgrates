@@ -733,7 +733,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 			if err != nil {
 				return err
 			}
-			minSleep, err := utils.ParseDurationWithSecs(atr.MinSleep)
+			minSleep, err := utils.ParseDurationWithNanosecs(atr.MinSleep)
 			if err != nil {
 				return err
 			}
@@ -932,7 +932,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			for key, atrsLst := range atrs {
 				atrs := make([]*ActionTrigger, len(atrsLst))
 				for idx, atr := range atrsLst {
-					minSleep, _ := utils.ParseDurationWithSecs(atr.MinSleep)
+					minSleep, _ := utils.ParseDurationWithNanosecs(atr.MinSleep)
 					expTime, _ := utils.ParseTimeDetectLayout(atr.ExpirationDate, tpr.timezone)
 					actTime, _ := utils.ParseTimeDetectLayout(atr.ActivationDate, tpr.timezone)
 					if atr.UniqueID == "" {
@@ -1266,7 +1266,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 					for _, atrsLst := range atrsM {
 						atrs := make([]*ActionTrigger, len(atrsLst))
 						for idx, atr := range atrsLst {
-							minSleep, _ := utils.ParseDurationWithSecs(atr.MinSleep)
+							minSleep, _ := utils.ParseDurationWithNanosecs(atr.MinSleep)
 							expTime, _ := utils.ParseTimeDetectLayout(atr.ExpirationDate, tpr.timezone)
 							actTime, _ := utils.ParseTimeDetectLayout(atr.ActivationDate, tpr.timezone)
 							if atr.UniqueID == "" {

@@ -73,7 +73,7 @@ func (cgrCdr CgrCdr) AsStoredCdr(timezone string) *CDR {
 	storCdr.Destination = cgrCdr[utils.DESTINATION]
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.ANSWER_TIME], timezone)
-	storCdr.Usage, _ = utils.ParseDurationWithSecs(cgrCdr[utils.USAGE])
+	storCdr.Usage, _ = utils.ParseDurationWithNanosecs(cgrCdr[utils.USAGE])
 	storCdr.ExtraFields = cgrCdr.getExtraFields()
 	storCdr.Cost = -1
 	if costStr, hasIt := cgrCdr[utils.COST]; hasIt {

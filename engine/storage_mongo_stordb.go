@@ -984,28 +984,28 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var minPDD, maxPDD, minUsage, maxUsage *time.Duration
 	if len(qryFltr.MinPDD) != 0 {
-		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MinPDD); err != nil {
+		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MinPDD); err != nil {
 			return nil, 0, err
 		} else {
 			minPDD = &parsed
 		}
 	}
 	if len(qryFltr.MaxPDD) != 0 {
-		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MaxPDD); err != nil {
+		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MaxPDD); err != nil {
 			return nil, 0, err
 		} else {
 			maxPDD = &parsed
 		}
 	}
 	if len(qryFltr.MinUsage) != 0 {
-		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MinUsage); err != nil {
+		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MinUsage); err != nil {
 			return nil, 0, err
 		} else {
 			minUsage = &parsed
 		}
 	}
 	if len(qryFltr.MaxUsage) != 0 {
-		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MaxUsage); err != nil {
+		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MaxUsage); err != nil {
 			return nil, 0, err
 		} else {
 			maxUsage = &parsed

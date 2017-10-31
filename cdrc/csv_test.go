@@ -40,7 +40,7 @@ func TestCsvRecordToCDR(t *testing.T) {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
-		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
+		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62s", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
 	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
@@ -88,7 +88,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
 		Source:      "TEST_CDRC",
-		Usage:       time.Duration(1) * time.Second,
+		Usage:       time.Duration(1),
 		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
@@ -101,14 +101,15 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
 		Source:      "TEST_CDRC",
-		Usage:       time.Duration(1024) * time.Second,
+		Usage:       time.Duration(1024),
 		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
-	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
+	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow,
+		cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
-	cdrRow = []string{"*voice", "1"}
+	cdrRow = []string{"*voice", "1s"}
 	expectedCdr = &engine.CDR{
 		CGRID:       utils.Sha1("", sTime.String()),
 		ToR:         cdrRow[0],
@@ -118,17 +119,25 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
-	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
+	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow,
+		cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 }
 
 func TestCsvPairToRecord(t *testing.T) {
-	eRecord := []string{"INVITE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454408", "*prepaid", "1001", "1002", "", "3401:2069362475", "2"}
-	invPr := &UnpairedRecord{Method: "INVITE", Timestamp: time.Date(2015, 7, 9, 15, 6, 48, 0, time.UTC),
-		Values: []string{"INVITE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454408", "*prepaid", "1001", "1002", "", "3401:2069362475"}}
+	eRecord := []string{"INVITE", "2daec40c", "548625ac",
+		"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454408",
+		"*prepaid", "1001", "1002", "", "3401:2069362475", "2"}
+	invPr := &UnpairedRecord{Method: "INVITE",
+		Timestamp: time.Date(2015, 7, 9, 15, 6, 48, 0, time.UTC),
+		Values: []string{"INVITE", "2daec40c", "548625ac",
+			"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK",
+			"1436454408", "*prepaid", "1001", "1002", "", "3401:2069362475"}}
 	byePr := &UnpairedRecord{Method: "BYE", Timestamp: time.Date(2015, 7, 9, 15, 6, 50, 0, time.UTC),
-		Values: []string{"BYE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454410", "", "", "", "", "3401:2069362475"}}
+		Values: []string{"BYE", "2daec40c", "548625ac",
+			"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK",
+			"1436454410", "", "", "", "", "3401:2069362475"}}
 	if rec, err := pairToRecord(invPr, byePr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRecord, rec) {
@@ -145,7 +154,9 @@ func TestCsvPairToRecord(t *testing.T) {
 	if _, err := pairToRecord(invPr, invPr); err == nil || err.Error() != "MISSING_BYE" {
 		t.Error(err)
 	}
-	byePr.Values = []string{"BYE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454410", "", "", "", "3401:2069362475"} // Took one value out
+	byePr.Values = []string{"BYE", "2daec40c", "548625ac",
+		"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK",
+		"1436454410", "", "", "", "3401:2069362475"} // Took one value out
 	if _, err := pairToRecord(invPr, byePr); err == nil || err.Error() != "INCONSISTENT_VALUES_LENGTH" {
 		t.Error(err)
 	}

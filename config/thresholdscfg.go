@@ -38,7 +38,7 @@ func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 		t.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Store_interval != nil {
-		if t.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
+		if t.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
 			return err
 		}
 	}

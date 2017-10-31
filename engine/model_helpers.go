@@ -1925,7 +1925,7 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 		AllocationMessage: tpRL.AllocationMessage,
 	}
 	if tpRL.UsageTTL != "" {
-		if rp.UsageTTL, err = utils.ParseDurationWithSecs(tpRL.UsageTTL); err != nil {
+		if rp.UsageTTL, err = utils.ParseDurationWithNanosecs(tpRL.UsageTTL); err != nil {
 			return nil, err
 		}
 	}
@@ -2077,7 +2077,7 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 		MinItems:    tpST.MinItems,
 	}
 	if tpST.TTL != "" {
-		if st.TTL, err = utils.ParseDurationWithSecs(tpST.TTL); err != nil {
+		if st.TTL, err = utils.ParseDurationWithNanosecs(tpST.TTL); err != nil {
 			return nil, err
 		}
 	}
@@ -2282,7 +2282,7 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 		Async:     tpTH.Async,
 	}
 	if tpTH.MinSleep != "" {
-		if th.MinSleep, err = utils.ParseDurationWithSecs(tpTH.MinSleep); err != nil {
+		if th.MinSleep, err = utils.ParseDurationWithNanosecs(tpTH.MinSleep); err != nil {
 			return nil, err
 		}
 	}

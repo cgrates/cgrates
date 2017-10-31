@@ -254,7 +254,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 					at.Executed = *attr.Executed
 				}
 				if attr.MinSleep != nil {
-					minSleep, err := utils.ParseDurationWithSecs(*attr.MinSleep)
+					minSleep, err := utils.ParseDurationWithNanosecs(*attr.MinSleep)
 					if err != nil {
 						return 0, err
 					}
@@ -443,7 +443,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 		newAtr.Recurrent = *attr.Recurrent
 	}
 	if attr.MinSleep != nil {
-		minSleep, err := utils.ParseDurationWithSecs(*attr.MinSleep)
+		minSleep, err := utils.ParseDurationWithNanosecs(*attr.MinSleep)
 		if err != nil {
 			*reply = err.Error()
 			return err

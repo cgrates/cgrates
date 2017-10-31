@@ -93,7 +93,7 @@ func TestLcrQOSSorterOACD(t *testing.T) {
 
 func TestLcrGetQosLimitsAll(t *testing.T) {
 	le := &LCREntry{
-		StrategyParams: "1.2;2.3;4;7;45s;67m;16s;17m;8.9;10.11;12.13;14.15;2;3",
+		StrategyParams: "1.2;2.3;4s;7s;45s;67m;16s;17m;8.9;10.11;12.13;14.15;2;3",
 	}
 	minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc, minDdc, maxDdc := le.GetQOSLimits()
 	if minAsr != 1.2 || maxAsr != 2.3 ||
@@ -109,7 +109,7 @@ func TestLcrGetQosLimitsAll(t *testing.T) {
 
 func TestLcrGetQosLimitsSome(t *testing.T) {
 	le := &LCREntry{
-		StrategyParams: "1.2;;3;;;67m;;30m;1;;3;;;2",
+		StrategyParams: "1.2;;3s;;;67m;;30m;1;;3;;;2",
 	}
 	minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc, minDdc, maxDdc := le.GetQOSLimits()
 	if minAsr != 1.2 || maxAsr != -1 ||

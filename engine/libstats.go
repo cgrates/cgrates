@@ -91,7 +91,7 @@ func (se StatEvent) Usage() (at time.Duration, err error) {
 	if !canCast {
 		return at, errors.New("cannot cast to string")
 	}
-	return utils.ParseDurationWithSecs(usStr)
+	return utils.ParseDurationWithNanosecs(usStr)
 }
 
 // Cost returns the Cost of StatEvent
@@ -126,7 +126,7 @@ func (se StatEvent) Pdd() (pdd time.Duration, err error) {
 	if !canCast {
 		return pdd, errors.New("cannot cast to string")
 	}
-	return utils.ParseDurationWithSecs(pddStr)
+	return utils.ParseDurationWithNanosecs(pddStr)
 }
 
 // Destination returns the Destination of StatEvent

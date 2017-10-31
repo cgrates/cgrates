@@ -88,7 +88,7 @@ func (attr *AttrSetAccountActionTriggers) UpdateActionTrigger(at *engine.ActionT
 		at.Executed = *attr.Executed
 	}
 	if attr.MinSleep != nil {
-		if at.MinSleep, err = utils.ParseDurationWithSecs(*attr.MinSleep); err != nil {
+		if at.MinSleep, err = utils.ParseDurationWithNanosecs(*attr.MinSleep); err != nil {
 			return
 		}
 	}
