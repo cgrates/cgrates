@@ -65,6 +65,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
+	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
 	cfg.InstanceID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SmGenericConfig = new(SmGenericConfig)
@@ -238,6 +239,7 @@ type CGRConfig struct {
 	RALsAliasSConns          []*HaPoolConfig
 	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
 	LcrSubjectPrefixMatching bool // enables prefix matching for the lcr subject
+	RALsMaxComputedUsage     map[string]time.Duration
 	SchedulerEnabled         bool
 	CDRSEnabled              bool              // Enable CDR Server service
 	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
@@ -916,6 +918,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnRALsCfg.Lcr_subject_prefix_matching != nil {
 			self.LcrSubjectPrefixMatching = *jsnRALsCfg.Lcr_subject_prefix_matching
+		}
+		if jsnRALsCfg.Max_computed_usage != nil {
+			for k, v := range *jsnRALsCfg.Max_computed_usage {
+				if self.RALsMaxComputedUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
+					return
+				}
+			}
 		}
 	}
 	if jsnSchedCfg != nil && jsnSchedCfg.Enabled != nil {

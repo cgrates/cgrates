@@ -89,6 +89,7 @@ type RalsJsonCfg struct {
 	Users_conns                 *[]*HaPoolJsonCfg
 	Rp_subject_prefix_matching  *bool
 	Lcr_subject_prefix_matching *bool
+	Max_computed_usage          *map[string]string
 }
 
 // Scheduler config section
