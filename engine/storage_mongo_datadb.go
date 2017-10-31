@@ -1842,7 +1842,7 @@ func (ms *MongoStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 }
 
 // GetStoredStatQueue retrieves a StoredStatQueue
-func (ms *MongoStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQueue, err error) {
+func (ms *MongoStorage) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQueue, err error) {
 	session, col := ms.conn(colSqs)
 	defer session.Close()
 	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&sq); err != nil {
@@ -1855,7 +1855,7 @@ func (ms *MongoStorage) GetStoredStatQueue(tenant, id string) (sq *StoredStatQue
 }
 
 // SetStoredStatQueue stores the metrics for a StoredStatQueue
-func (ms *MongoStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
+func (ms *MongoStorage) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
 	session, col := ms.conn(colSqs)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": sq.Tenant, "id": sq.ID}, sq)
@@ -1863,7 +1863,7 @@ func (ms *MongoStorage) SetStoredStatQueue(sq *StoredStatQueue) (err error) {
 }
 
 // RemStatQueue removes stored metrics for a StoredStatQueue
-func (ms *MongoStorage) RemStoredStatQueue(tenant, id string) (err error) {
+func (ms *MongoStorage) RemStoredStatQueueDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colSqs)
 	defer session.Close()
 	err = col.Remove(bson.M{"tenant": tenant, "id": id})

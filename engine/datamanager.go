@@ -237,7 +237,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string, skipCache bool, transacti
 			return x.(*StatQueue), nil
 		}
 	}
-	ssq, err := dm.dataDB.GetStoredStatQueue(tenant, id)
+	ssq, err := dm.dataDB.GetStoredStatQueueDrv(tenant, id)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
@@ -257,12 +257,12 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 	if err != nil {
 		return err
 	}
-	return dm.dataDB.SetStoredStatQueue(ssq)
+	return dm.dataDB.SetStoredStatQueueDrv(ssq)
 }
 
 // RemStatQueue removes the StoredStatQueue and clears the cache for StatQueue
 func (dm *DataManager) RemStatQueue(tenant, id string, transactionID string) (err error) {
-	if err = dm.dataDB.RemStoredStatQueue(tenant, id); err != nil {
+	if err = dm.dataDB.RemStoredStatQueueDrv(tenant, id); err != nil {
 		return
 	}
 	cache.RemKey(utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id), cacheCommit(transactionID), transactionID)
