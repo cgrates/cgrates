@@ -318,6 +318,15 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if cgrCfg.LcrSubjectPrefixMatching != false {
 		t.Error(cgrCfg.LcrSubjectPrefixMatching)
 	}
+	eMaxCU := map[string]time.Duration{
+		utils.ANY:   time.Duration(189 * time.Hour),
+		utils.VOICE: time.Duration(72 * time.Hour),
+		utils.DATA:  time.Duration(107374182400),
+		utils.SMS:   time.Duration(10000),
+	}
+	if !reflect.DeepEqual(eMaxCU, cgrCfg.RALsMaxComputedUsage) {
+		t.Errorf("Expecting: %+v, received: %+v", eMaxCU, cgrCfg.RALsMaxComputedUsage)
+	}
 }
 
 func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {

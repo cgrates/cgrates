@@ -725,7 +725,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	if *scheduledShutdown != "" {
-		shutdownDur, err := utils.ParseDurationWithSecs(*scheduledShutdown)
+		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
 		if err != nil {
 			log.Fatal(err)
 		}

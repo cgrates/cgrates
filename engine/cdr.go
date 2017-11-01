@@ -51,7 +51,7 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 		}
 	}
 	if extCdr.Usage != "" {
-		if cdr.Usage, err = utils.ParseDurationWithSecs(extCdr.Usage); err != nil {
+		if cdr.Usage, err = utils.ParseDurationWithNanosecs(extCdr.Usage); err != nil {
 			return nil, err
 		}
 	}
@@ -175,7 +175,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 	case utils.ANSWER_TIME:
 		return rsrFld.ParseValue(cdr.AnswerTime.Format(time.RFC3339))
 	case utils.USAGE:
-		return strconv.FormatFloat(cdr.Usage.Seconds(), 'f', -1, 64)
+		return cdr.Usage.String()
 	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(cdr.RunID)
 	case utils.RATED_FLD:
@@ -228,7 +228,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 		}
 	case utils.USAGE:
-		if cdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
+		if cdr.Usage, err = utils.ParseDurationWithNanosecs(fieldVal); err != nil {
 			return fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
 		}
 	case utils.COST:
@@ -380,7 +380,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 	durStr := cdr.FieldAsString(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.USAGE, durationFld.Id)
-	} else if frkStorCdr.Usage, err = utils.ParseDurationWithSecs(durStr); err != nil {
+	} else if frkStorCdr.Usage, err = utils.ParseDurationWithNanosecs(durStr); err != nil {
 		return nil, err
 	}
 	ratedStr := cdr.FieldAsString(ratedFld)
@@ -547,7 +547,7 @@ func (cdr *CDR) GetDuration(fieldName string) (time.Duration, error) {
 	} else {
 		durVal = cdr.FieldAsString(&utils.RSRField{Id: fieldName})
 	}
-	return utils.ParseDurationWithSecs(durVal)
+	return utils.ParseDurationWithNanosecs(durVal)
 }
 func (cdr *CDR) GetOriginatorIP(fieldName string) string {
 	if utils.IsSliceMember([]string{utils.CDRHOST, utils.META_DEFAULT, ""}, fieldName) {
@@ -870,7 +870,7 @@ func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 	if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(self.AnswerTime, timezone); err != nil {
 		return nil, err
 	}
-	if cdr.Usage, err = utils.ParseDurationWithSecs(self.Usage); err != nil {
+	if cdr.Usage, err = utils.ParseDurationWithNanosecs(self.Usage); err != nil {
 		return nil, err
 	}
 	if self.ExtraFields != nil {
@@ -902,7 +902,7 @@ func (self *UsageRecord) AsCallDescriptor(timezone string, denyNegative bool) (*
 	if cd.TimeStart, err = utils.ParseTimeDetectLayout(timeStr, timezone); err != nil {
 		return nil, err
 	}
-	if usage, err := utils.ParseDurationWithSecs(self.Usage); err != nil {
+	if usage, err := utils.ParseDurationWithNanosecs(self.Usage); err != nil {
 		return nil, err
 	} else {
 		cd.TimeEnd = cd.TimeStart.Add(usage)

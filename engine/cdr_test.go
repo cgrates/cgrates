@@ -39,7 +39,7 @@ func TestNewCDRFromExternalCDR(t *testing.T) {
 		Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.DEFAULT_RUNID,
-		Usage: "0.00000001", Cost: 1.01, Rated: true,
+		Usage: "10", Cost: 1.01, Rated: true,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
@@ -98,7 +98,7 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}) != cdr.Destination ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.SETUP_TIME}) != cdr.SetupTime.Format(time.RFC3339) ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.ANSWER_TIME}) != cdr.AnswerTime.Format(time.RFC3339) ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.USAGE}) != "10" ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.USAGE}) != "10s" ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.RunID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.COST}) != "1.01" ||
 		cdr.FieldAsString(&utils.RSRField{Id: "field_extr1"}) != cdr.ExtraFields["field_extr1"] ||
@@ -118,7 +118,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}) != cdr.Destination,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.SETUP_TIME}) != cdr.SetupTime.Format(time.RFC3339),
 			cdr.FieldAsString(&utils.RSRField{Id: utils.ANSWER_TIME}) != cdr.AnswerTime.Format(time.RFC3339),
-			cdr.FieldAsString(&utils.RSRField{Id: utils.USAGE}) != "10",
+			cdr.FieldAsString(&utils.RSRField{Id: utils.USAGE}) != "10s",
 			cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.RunID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.COST}) != "1.01",
 			cdr.FieldAsString(&utils.RSRField{Id: "field_extr1"}) != cdr.ExtraFields["field_extr1"],
@@ -497,9 +497,9 @@ func TestUsageReqAsCD(t *testing.T) {
 		Tenant: "cgrates.org", Category: "call",
 		Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z",
-		Usage: "0.00000001",
+		Usage: "10",
 	}
-	eCD := &CallDescriptor{CgrID: "48ca1a2eb82b028fbfc809e36a585061a775ffc3", TOR: req.ToR,
+	eCD := &CallDescriptor{CgrID: "c4630df20b2a0c5b11311e4b5a8c3178cf314344", TOR: req.ToR,
 		Direction: utils.OUT, Tenant: req.Tenant,
 		Category: req.Category, Account: req.Account,
 		Subject: req.Subject, Destination: req.Destination,

@@ -195,11 +195,23 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 }
 
 func TestDfRalsJsonCfg(t *testing.T) {
-	eCfg := &RalsJsonCfg{Enabled: utils.BoolPointer(false), Thresholds_conns: &[]*HaPoolJsonCfg{},
-		Cdrstats_conns: &[]*HaPoolJsonCfg{}, Stats_conns: &[]*HaPoolJsonCfg{},
-		Historys_conns: &[]*HaPoolJsonCfg{}, Pubsubs_conns: &[]*HaPoolJsonCfg{},
-		Users_conns: &[]*HaPoolJsonCfg{}, Aliases_conns: &[]*HaPoolJsonCfg{},
-		Rp_subject_prefix_matching: utils.BoolPointer(false), Lcr_subject_prefix_matching: utils.BoolPointer(false)}
+	eCfg := &RalsJsonCfg{
+		Enabled:                     utils.BoolPointer(false),
+		Thresholds_conns:            &[]*HaPoolJsonCfg{},
+		Cdrstats_conns:              &[]*HaPoolJsonCfg{},
+		Stats_conns:                 &[]*HaPoolJsonCfg{},
+		Historys_conns:              &[]*HaPoolJsonCfg{},
+		Pubsubs_conns:               &[]*HaPoolJsonCfg{},
+		Users_conns:                 &[]*HaPoolJsonCfg{},
+		Aliases_conns:               &[]*HaPoolJsonCfg{},
+		Rp_subject_prefix_matching:  utils.BoolPointer(false),
+		Lcr_subject_prefix_matching: utils.BoolPointer(false),
+		Max_computed_usage: &map[string]string{
+			utils.ANY:   "189h",
+			utils.VOICE: "72h",
+			utils.DATA:  "107374182400",
+			utils.SMS:   "10000"},
+	}
 	if cfg, err := dfCgrJsonCfg.RalsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {

@@ -91,7 +91,8 @@ func handlerSubstractUsage(xmlElmnt tree.Res, argsTpl utils.RSRFields, cdrPath u
 	return tEnd.Sub(tStart), nil
 }
 
-func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath, timezone string, httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig) (*XMLRecordsProcessor, error) {
+func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath, timezone string,
+	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig) (*XMLRecordsProcessor, error) {
 	xp, err := goxpath.Parse(cdrPath.AsString("/", true))
 	if err != nil {
 		return nil, err
@@ -103,7 +104,8 @@ func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath
 	if err != nil {
 		return nil, err
 	}
-	xmlProc := &XMLRecordsProcessor{cdrPath: cdrPath, timezone: timezone, httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs}
+	xmlProc := &XMLRecordsProcessor{cdrPath: cdrPath, timezone: timezone,
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs}
 	xmlProc.cdrXmlElmts = goxpath.MustExec(xp, xmlNode, nil)
 	return xmlProc, nil
 }
@@ -161,19 +163,19 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 	cdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var lazyHttpFields []*config.CfgCdrField
 	var err error
+	fldVals := make(map[string]string)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
-		var fieldVal string
 		if cdrFldCfg.Type == utils.META_COMPOSED {
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
-					fieldVal += cfgFieldRSR.ParseValue("")
+					fldVals[cdrFldCfg.FieldId] += cfgFieldRSR.ParseValue("")
 				} else { // Dynamic value extracted using path
 					absolutePath := utils.ParseHierarchyPath(cfgFieldRSR.Id, "")
 					relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
 					if elmntText, err := elementText(xmlEntity, relPath.AsString("/", true)); err != nil && err != utils.ErrNotFound {
 						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
 					} else {
-						fieldVal += cfgFieldRSR.ParseValue(elmntText)
+						fldVals[cdrFldCfg.FieldId] += cfgFieldRSR.ParseValue(elmntText)
 					}
 				}
 			}
@@ -184,11 +186,11 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 			if err != nil {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
 			}
-			fieldVal += strconv.FormatFloat(usage.Seconds(), 'f', -1, 64)
+			fldVals[cdrFldCfg.FieldId] += strconv.FormatFloat(usage.Seconds(), 'f', -1, 64)
 		} else {
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
-		if err := cdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, xmlProc.timezone); err != nil {
+		if err := cdr.ParseFieldValue(cdrFldCfg.FieldId, fldVals[cdrFldCfg.FieldId], xmlProc.timezone); err != nil {
 			return nil, err
 		}
 	}

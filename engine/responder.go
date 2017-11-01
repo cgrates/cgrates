@@ -535,7 +535,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 
 func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err error) {
 	if arg != "" { // Introduce  delay in answer, used in some automated tests
-		if delay, err := utils.ParseDurationWithSecs(arg); err == nil {
+		if delay, err := utils.ParseDurationWithNanosecs(arg); err == nil {
 			time.Sleep(delay)
 		}
 	}

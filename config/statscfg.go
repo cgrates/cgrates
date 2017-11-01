@@ -39,7 +39,7 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Store_interval != nil {
-		if st.StoreInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Store_interval); err != nil {
+		if st.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
 			return err
 		}
 	}

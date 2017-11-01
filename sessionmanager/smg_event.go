@@ -171,7 +171,7 @@ func (self SMGenericEvent) GetUsage(fieldName string) (time.Duration, error) {
 		return nilDuration, utils.ErrNotFound
 	}
 	result, _ := utils.ConvertIfaceToString(valIf)
-	return utils.ParseDurationWithSecs(result)
+	return utils.ParseDurationWithNanosecs(result)
 }
 
 func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) {
@@ -183,7 +183,7 @@ func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) 
 		return nilDuration, utils.ErrNotFound
 	}
 	result, _ := utils.ConvertIfaceToString(valStr)
-	return utils.ParseDurationWithSecs(result)
+	return utils.ParseDurationWithNanosecs(result)
 }
 
 // GetSessionTTL retrieves SessionTTL setting out of SMGenericEvent
@@ -197,7 +197,7 @@ func (self SMGenericEvent) GetSessionTTL(sesTTL time.Duration, cfgSessionTTLMaxD
 			return time.Duration(0)
 		}
 		var err error
-		if sesTTL, err = utils.ParseDurationWithSecs(ttlStr); err != nil {
+		if sesTTL, err = utils.ParseDurationWithNanosecs(ttlStr); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot parse SessionTTL, disabling functionality for event: <%s>",
 				self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
@@ -215,7 +215,7 @@ func (self SMGenericEvent) GetSessionTTL(sesTTL time.Duration, cfgSessionTTLMaxD
 				self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
 		}
-		if maxTTLDelay, err := utils.ParseDurationWithSecs(maxTTLDelaxStr); err != nil {
+		if maxTTLDelay, err := utils.ParseDurationWithNanosecs(maxTTLDelaxStr); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot parse SessionTTLMaxDelay, disabling functionality for event: <%s>",
 				self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
@@ -240,7 +240,7 @@ func (self SMGenericEvent) GetSessionTTLLastUsed() *time.Duration {
 	if !converted {
 		return nil
 	}
-	if ttl, err := utils.ParseDurationWithSecs(ttlStr); err != nil {
+	if ttl, err := utils.ParseDurationWithNanosecs(ttlStr); err != nil {
 		return nil
 	} else {
 		return &ttl
@@ -257,7 +257,7 @@ func (self SMGenericEvent) GetSessionTTLUsage() *time.Duration {
 	if !converted {
 		return nil
 	}
-	if ttl, err := utils.ParseDurationWithSecs(ttlStr); err != nil {
+	if ttl, err := utils.ParseDurationWithNanosecs(ttlStr); err != nil {
 		return nil
 	} else {
 		return &ttl
@@ -273,7 +273,7 @@ func (self SMGenericEvent) GetMaxUsage(fieldName string, cfgMaxUsage time.Durati
 		return cfgMaxUsage, nil
 	}
 	result, _ := utils.ConvertIfaceToString(maxUsageStr)
-	return utils.ParseDurationWithSecs(result)
+	return utils.ParseDurationWithNanosecs(result)
 }
 
 func (self SMGenericEvent) GetPdd(fieldName string) (time.Duration, error) {
@@ -281,7 +281,7 @@ func (self SMGenericEvent) GetPdd(fieldName string) (time.Duration, error) {
 		fieldName = utils.PDD
 	}
 	result, _ := utils.ConvertIfaceToString(self[fieldName])
-	return utils.ParseDurationWithSecs(result)
+	return utils.ParseDurationWithNanosecs(result)
 }
 
 func (self SMGenericEvent) GetSupplier(fieldName string) string {
