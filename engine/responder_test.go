@@ -33,6 +33,7 @@ var rsponder *Responder
 func init() {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
+	rsponder = &Responder{MaxComputedUsage: cfg.RALsMaxComputedUsage}
 }
 
 // Test internal abilites of GetDerivedChargers
@@ -40,7 +41,6 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 	cfgedDC := &utils.DerivedChargers{DestinationIDs: utils.StringMap{}, Chargers: []*utils.DerivedCharger{&utils.DerivedCharger{RunID: "responder1",
 		RequestTypeField: utils.META_DEFAULT, DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}}
-	rsponder = &Responder{}
 	attrs := &utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "responder_test", Subject: "responder_test"}
 	if err := dm.DataDB().SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC, utils.NonTransactional); err != nil {
 		t.Error(err)
