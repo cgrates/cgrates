@@ -37,7 +37,7 @@ var (
 func init() {
 	apierDebitStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	responder := new(engine.Responder)
+	responder := &engine.Responder{MaxComputedUsage: cfg.RALsMaxComputedUsage}
 	dm = engine.NewDataManager(apierDebitStorage)
 	engine.SetDataStorage(dm)
 	apierDebit = &ApierV1{

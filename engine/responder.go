@@ -46,12 +46,13 @@ type AttrGetLcr struct {
 }
 
 type Responder struct {
-	ExitChan      chan bool
-	Stats         rpcclient.RpcClientConnection
-	Timeout       time.Duration
-	Timezone      string
-	cnt           int64
-	responseCache *cache.ResponseCache
+	ExitChan         chan bool
+	Stats            rpcclient.RpcClientConnection
+	Timeout          time.Duration
+	Timezone         string
+	MaxComputedUsage map[string]time.Duration
+	cnt              int64
+	responseCache    *cache.ResponseCache
 }
 
 func (rs *Responder) SetTimeToLive(timeToLive time.Duration, out *int) error {
@@ -64,6 +65,18 @@ func (rs *Responder) getCache() *cache.ResponseCache {
 		rs.responseCache = cache.NewResponseCache(0)
 	}
 	return rs.responseCache
+}
+
+// usageAllowed checks requested usage against configured MaxComputedUsage
+func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed bool) {
+	mcu, has := rs.MaxComputedUsage[tor]
+	if !has {
+		mcu = rs.MaxComputedUsage[utils.ANY]
+	}
+	if reqUsage <= mcu {
+		allowed = true
+	}
+	return
 }
 
 /*
@@ -90,6 +103,9 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
+	}
+	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+		return utils.ErrMaxUsageExceeded
 	}
 	r, e := guardian.Guardian.Guard(func() (interface{}, error) {
 		return arg.GetCost()
@@ -123,6 +139,9 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
+	}
+	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+		return utils.ErrMaxUsageExceeded
 	}
 	r, e := arg.Debit()
 	if e != nil {
@@ -160,6 +179,9 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
+	}
+	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+		return utils.ErrMaxUsageExceeded
 	}
 	r, e := arg.MaxDebit()
 	if e != nil {
@@ -208,6 +230,9 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 		})
 		return err
 	}
+	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+		return utils.ErrMaxUsageExceeded
+	}
 	err = arg.RefundIncrements()
 	rs.getCache().Cache(cacheKey, &cache.CacheItem{
 		Value: reply,
@@ -247,6 +272,9 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 		})
 		return err
 	}
+	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+		return utils.ErrMaxUsageExceeded
+	}
 	err = arg.RefundRounding()
 	rs.getCache().Cache(cacheKey, &cache.CacheItem{
 		Value: reply,
@@ -275,6 +303,9 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
+	}
+	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+		return utils.ErrMaxUsageExceeded
 	}
 	r, e := arg.GetMaxSessionDuration()
 	*reply, err = float64(r), e
@@ -312,7 +343,9 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
 		return err
 	}
-
+	if !rs.usageAllowed(ev.ToR, ev.Usage) {
+		return utils.ErrMaxUsageExceeded
+	}
 	maxCallDuration := -1.0
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT),
 		Category: ev.GetCategory(utils.META_DEFAULT), Direction: utils.OUT,
@@ -517,6 +550,9 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 		}, cd, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
 		return err
+	}
+	if !rs.usageAllowed(cd.TOR, cd.GetDuration()) {
+		return utils.ErrMaxUsageExceeded
 	}
 	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.Stats, attrs.LCRFilter, attrs.Paginator)
 	if err != nil {

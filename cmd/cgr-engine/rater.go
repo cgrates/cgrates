@@ -229,7 +229,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	for _, chn := range waitTasks {
 		<-chn
 	}
-	responder := &engine.Responder{ExitChan: exitChan}
+	responder := &engine.Responder{ExitChan: exitChan, MaxComputedUsage: cfg.RALsMaxComputedUsage}
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, DataManager: dm, CdrDb: cdrDb,
 		Config: cfg, Responder: responder, ServManager: serviceManager,
