@@ -803,7 +803,6 @@ func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
 	cdr.SetupTime = cdrSql.SetupTime
 	cdr.AnswerTime = cdrSql.AnswerTime
 	cdr.Usage = time.Duration(cdrSql.Usage)
-
 	cdr.CostSource = cdrSql.CostSource
 	cdr.Cost = cdrSql.Cost
 	cdr.ExtraInfo = cdrSql.ExtraInfo
@@ -813,7 +812,7 @@ func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
 		}
 	}
 	if cdrSql.CostDetails != "" {
-		if err = json.Unmarshal([]byte(cdrSql.CostDetails), cdr.CostDetails); err != nil {
+		if err = json.Unmarshal([]byte(cdrSql.CostDetails), &cdr.CostDetails); err != nil {
 			return nil, err
 		}
 	}

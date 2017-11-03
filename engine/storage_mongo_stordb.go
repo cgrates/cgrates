@@ -982,21 +982,7 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 
 //  _, err := col(utils.CDRsTBL).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
 func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
-	var minPDD, maxPDD, minUsage, maxUsage *time.Duration
-	if len(qryFltr.MinPDD) != 0 {
-		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MinPDD); err != nil {
-			return nil, 0, err
-		} else {
-			minPDD = &parsed
-		}
-	}
-	if len(qryFltr.MaxPDD) != 0 {
-		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MaxPDD); err != nil {
-			return nil, 0, err
-		} else {
-			maxPDD = &parsed
-		}
-	}
+	var minUsage, maxUsage *time.Duration
 	if len(qryFltr.MinUsage) != 0 {
 		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MinUsage); err != nil {
 			return nil, 0, err
@@ -1012,26 +998,22 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		}
 	}
 	filters := bson.M{
-		CGRIDLow:           bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
-		RunIDLow:           bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
-		OrderIDLow:         bson.M{"$gte": qryFltr.OrderIDStart, "$lt": qryFltr.OrderIDEnd},
-		ToRLow:             bson.M{"$in": qryFltr.ToRs, "$nin": qryFltr.NotToRs},
-		CDRHostLow:         bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
-		CDRSourceLow:       bson.M{"$in": qryFltr.Sources, "$nin": qryFltr.NotSources},
-		RequestTypeLow:     bson.M{"$in": qryFltr.RequestTypes, "$nin": qryFltr.NotRequestTypes},
-		DirectionLow:       bson.M{"$in": qryFltr.Directions, "$nin": qryFltr.NotDirections},
-		TenantLow:          bson.M{"$in": qryFltr.Tenants, "$nin": qryFltr.NotTenants},
-		CategoryLow:        bson.M{"$in": qryFltr.Categories, "$nin": qryFltr.NotCategories},
-		AccountLow:         bson.M{"$in": qryFltr.Accounts, "$nin": qryFltr.NotAccounts},
-		SubjectLow:         bson.M{"$in": qryFltr.Subjects, "$nin": qryFltr.NotSubjects},
-		SupplierLow:        bson.M{"$in": qryFltr.Suppliers, "$nin": qryFltr.NotSuppliers},
-		DisconnectCauseLow: bson.M{"$in": qryFltr.DisconnectCauses, "$nin": qryFltr.NotDisconnectCauses},
-		SetupTimeLow:       bson.M{"$gte": qryFltr.SetupTimeStart, "$lt": qryFltr.SetupTimeEnd},
-		AnswerTimeLow:      bson.M{"$gte": qryFltr.AnswerTimeStart, "$lt": qryFltr.AnswerTimeEnd},
-		CreatedAtLow:       bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
-		UpdatedAtLow:       bson.M{"$gte": qryFltr.UpdatedAtStart, "$lt": qryFltr.UpdatedAtEnd},
-		UsageLow:           bson.M{"$gte": minUsage, "$lt": maxUsage},
-		PDDLow:             bson.M{"$gte": minPDD, "$lt": maxPDD},
+		CGRIDLow:       bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
+		RunIDLow:       bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
+		OrderIDLow:     bson.M{"$gte": qryFltr.OrderIDStart, "$lt": qryFltr.OrderIDEnd},
+		ToRLow:         bson.M{"$in": qryFltr.ToRs, "$nin": qryFltr.NotToRs},
+		CDRHostLow:     bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
+		CDRSourceLow:   bson.M{"$in": qryFltr.Sources, "$nin": qryFltr.NotSources},
+		RequestTypeLow: bson.M{"$in": qryFltr.RequestTypes, "$nin": qryFltr.NotRequestTypes},
+		TenantLow:      bson.M{"$in": qryFltr.Tenants, "$nin": qryFltr.NotTenants},
+		CategoryLow:    bson.M{"$in": qryFltr.Categories, "$nin": qryFltr.NotCategories},
+		AccountLow:     bson.M{"$in": qryFltr.Accounts, "$nin": qryFltr.NotAccounts},
+		SubjectLow:     bson.M{"$in": qryFltr.Subjects, "$nin": qryFltr.NotSubjects},
+		SetupTimeLow:   bson.M{"$gte": qryFltr.SetupTimeStart, "$lt": qryFltr.SetupTimeEnd},
+		AnswerTimeLow:  bson.M{"$gte": qryFltr.AnswerTimeStart, "$lt": qryFltr.AnswerTimeEnd},
+		CreatedAtLow:   bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
+		UpdatedAtLow:   bson.M{"$gte": qryFltr.UpdatedAtStart, "$lt": qryFltr.UpdatedAtEnd},
+		UsageLow:       bson.M{"$gte": minUsage, "$lt": maxUsage},
 		//CostDetailsLow + "." + AccountLow: bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
 		//CostDetailsLow + "." + SubjectLow: bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
 	}

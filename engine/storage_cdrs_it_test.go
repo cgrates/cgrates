@@ -574,13 +574,6 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	} else if len(CDRs) != 6 {
 		return fmt.Errorf("testGetCDRs #35, unexpected number of CDRs returned: %+v", CDRs)
 	}
-
-	// Filter on direction
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Directions: []string{utils.OUT}}, false); err != nil {
-		return fmt.Errorf("testGetCDRs #36 err: %v", err)
-	} else if len(CDRs) != 10 {
-		return fmt.Errorf("testGetCDRs #37, unexpected number of CDRs returned: %+v", CDRs)
-	}
 	// Filter on Tenant
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Tenants: []string{"itsyscom.com"}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #38 err: %v", err)
@@ -661,7 +654,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("testGetCDRs #63, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on MinUsage
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinUsage: "125"}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinUsage: "125s"}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #64, err: %v", err)
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("testGetCDRs #65, unexpected number of CDRs returned: %d", len(CDRs))
@@ -717,24 +710,6 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("testGetCDRs #76, err: %v", err)
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("testGetCDRs #77, unexpected number of CDRs returned: %+v", CDRs)
-	}
-	// Filter on MinPDD
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinPDD: "20ms"}, false); err != nil {
-		return fmt.Errorf("testGetCDRs #78, err: %v", err)
-	} else if len(CDRs) != 7 {
-		return fmt.Errorf("testGetCDRs #79, unexpected number of CDRs returned: %+v", CDRs)
-	}
-	// Filter on maxPdd
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxPDD: "1s"}, false); err != nil {
-		return fmt.Errorf("testGetCDRs #80, err: %v", err)
-	} else if len(CDRs) != 8 {
-		return fmt.Errorf("testGetCDRs #81, unexpected number of CDRs returned: %+v", CDRs)
-	}
-	// Filter on minPdd, maxPdd
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinPDD: "10ms", MaxPDD: "1s"}, false); err != nil {
-		return fmt.Errorf("testGetCDRs #82, err: %v", err)
-	} else if len(CDRs) != 6 {
-		return fmt.Errorf("testGetCDRs #83, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Combined filter
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}, false); err != nil {

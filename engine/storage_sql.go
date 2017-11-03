@@ -817,12 +817,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if len(qryFltr.NotRequestTypes) != 0 {
 		q = q.Where("request_type not in (?)", qryFltr.NotRequestTypes)
 	}
-	if len(qryFltr.Directions) != 0 {
-		q = q.Where("direction in (?)", qryFltr.Directions)
-	}
-	if len(qryFltr.NotDirections) != 0 {
-		q = q.Where("direction not in (?)", qryFltr.NotDirections)
-	}
 	if len(qryFltr.Tenants) != 0 {
 		q = q.Where("tenant in (?)", qryFltr.Tenants)
 	}
@@ -868,18 +862,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		}
 		qIds.WriteString(" )")
 		q = q.Where(qIds.String())
-	}
-	if len(qryFltr.Suppliers) != 0 {
-		q = q.Where("supplier in (?)", qryFltr.Subjects)
-	}
-	if len(qryFltr.NotSuppliers) != 0 {
-		q = q.Where("supplier not in (?)", qryFltr.NotSubjects)
-	}
-	if len(qryFltr.DisconnectCauses) != 0 {
-		q = q.Where("disconnect_cause in (?)", qryFltr.DisconnectCauses)
-	}
-	if len(qryFltr.NotDisconnectCauses) != 0 {
-		q = q.Where("disconnect_cause not in (?)", qryFltr.NotDisconnectCauses)
 	}
 	if len(qryFltr.Costs) != 0 {
 		q = q.Where(utils.CDRsTBL+".cost in (?)", qryFltr.Costs)
@@ -974,22 +956,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		}
 
 	}
-	if len(qryFltr.MinPDD) != 0 {
-		if minPDD, err := utils.ParseDurationWithNanosecs(qryFltr.MinPDD); err != nil {
-			return nil, 0, err
-		} else {
-			q = q.Where("pdd >= ?", minPDD.Nanoseconds())
-		}
-
-	}
-	if len(qryFltr.MaxPDD) != 0 {
-		if maxPDD, err := utils.ParseDurationWithNanosecs(qryFltr.MaxPDD); err != nil {
-			return nil, 0, err
-		} else {
-			q = q.Where("pdd < ?", maxPDD.Nanoseconds())
-		}
-	}
-
 	if qryFltr.MinCost != nil {
 		if qryFltr.MaxCost == nil {
 			q = q.Where("cost >= ?", *qryFltr.MinCost)
