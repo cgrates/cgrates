@@ -793,6 +793,7 @@ func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
 	cdr.OriginHost = cdrSql.OriginHost
 	cdr.Source = cdrSql.Source
 	cdr.OriginID = cdrSql.OriginID
+	cdr.OrderID = cdrSql.ID
 	cdr.ToR = cdrSql.TOR
 	cdr.RequestType = cdrSql.RequestType
 	cdr.Tenant = cdrSql.Tenant
