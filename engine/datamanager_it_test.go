@@ -58,8 +58,9 @@ func TestDMitMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dataDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort, mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheConfig, mgoITCfg.LoadHistorySize)
+	dataDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
+		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
+		utils.StorDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize)
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
