@@ -107,6 +107,7 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	return ""
 }
 
+<<<<<<< HEAD
 func CurrentDataDBVersions() Versions {
 	return Versions{
 		utils.StatS:               2,

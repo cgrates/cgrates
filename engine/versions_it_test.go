@@ -182,16 +182,9 @@ func testVersion(t *testing.T) {
 	storType = storageDb.GetStorageType()
 	switch storType {
 	case utils.MONGO, utils.MAPSTOR:
-<<<<<<< HEAD
-		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2,
-			utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2, utils.CDRs: 2}
-		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2,
-			utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2, utils.CDRs: 2}
-=======
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
->>>>>>> Added move feature(to migrate data from one db to another) and updated GetTPIds , IsDBempty and the versioning accordingly
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
 	case utils.POSTGRES, utils.MYSQL:
 		currentVersion = storDbVersions
