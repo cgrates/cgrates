@@ -69,7 +69,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.InstanceID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SmGenericConfig = new(SmGenericConfig)
-	cfg.CacheConfig = make(CacheConfig)
+	cfg.cacheConfig = make(CacheConfig)
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
@@ -202,7 +202,7 @@ type CGRConfig struct {
 	StorDBConnMaxLifetime    int
 	StorDBCDRSIndexes        []string
 	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
-	CacheConfig              CacheConfig
+	cacheConfig              CacheConfig
 	RPCJSONListen            string            // RPC JSON listening address
 	RPCGOBListen             string            // RPC GOB listening address
 	HTTPListen               string            // HTTP listening address
@@ -822,7 +822,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnCacheCfg != nil {
-		if err := self.CacheConfig.loadFromJsonCfg(jsnCacheCfg); err != nil {
+		if err := self.cacheConfig.loadFromJsonCfg(jsnCacheCfg); err != nil {
 			return err
 		}
 	}
@@ -1246,4 +1246,8 @@ func (self *CGRConfig) SMAsteriskCfg() *SMAsteriskCfg {
 
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
 	return cfg.filterSCfg
+}
+
+func (cfg *CGRConfig) CacheCfg() CacheConfig {
+	return cfg.cacheConfig
 }

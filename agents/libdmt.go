@@ -270,7 +270,8 @@ func splitIntoInterface(content, sep string) []interface{} {
 
 // avpsWithPath is used to find AVPs by specifying RSRField as filter
 func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) {
-	return m.FindAVPsWithPath(splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
+	return m.FindAVPsWithPath(
+		splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
 }
 
 func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVars map[string]string) (bool, int) {

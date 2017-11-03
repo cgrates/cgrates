@@ -89,9 +89,12 @@ func main() {
 			log.Print("Initializing storDB:", *storDBType)
 		}
 		var dm *engine.DataManager
-		dm, _ = engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName, *dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
-		storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort, *storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
-			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+		dm, _ = engine.ConfigureDataStorage(*dataDBType, *dataDBHost, *dataDBPort, *dataDBName,
+			*dataDBUser, *dataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
+		storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort,
+			*storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
+			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns,
+			config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
 			log.Fatal(err)
 		}

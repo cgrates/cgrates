@@ -108,12 +108,16 @@ func TestMetaValueExponent(t *testing.T) {
 			}),
 		},
 	})
-	if val, err := metaValueExponent(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err != nil {
+	if val, err := metaValueExponent(m, utils.ParseRSRFieldsMustCompile(
+		"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+		utils.INFIELD_SEP), 10); err != nil {
 		t.Error(err)
 	} else if val != "0.1" {
 		t.Error("Received: ", val)
 	}
-	if _, err = metaValueExponent(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err == nil {
+	if _, err = metaValueExponent(m, utils.ParseRSRFieldsMustCompile(
+		"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+		utils.INFIELD_SEP), 10); err == nil {
 		t.Error("Should have received error") // Insufficient number arguments
 	}
 }

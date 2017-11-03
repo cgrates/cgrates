@@ -37,71 +37,72 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
 	var waitTasks []chan struct{}
-
+	cacheCfg := cfg.CacheCfg()
 	//Cache load
 	cacheTaskChan := make(chan struct{})
 	waitTasks = append(waitTasks, cacheTaskChan)
 	go func() {
 		defer close(cacheTaskChan)
-		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs []string
-		if cCfg, has := cfg.CacheConfig[utils.CacheDestinations]; !has || !cCfg.Precache {
+		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs,
+			lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs []string
+		if cCfg, has := cacheCfg[utils.CacheDestinations]; !has || !cCfg.Precache {
 			dstIDs = make([]string, 0) // Don't cache any
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheReverseDestinations]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheReverseDestinations]; !has || !cCfg.Precache {
 			rvDstIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheRatingPlans]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheRatingPlans]; !has || !cCfg.Precache {
 			rplIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheRatingProfiles]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheRatingProfiles]; !has || !cCfg.Precache {
 			rpfIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheActions]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheActions]; !has || !cCfg.Precache {
 			actIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheActionPlans]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheActionPlans]; !has || !cCfg.Precache {
 			aplIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheAccountActionPlans]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheAccountActionPlans]; !has || !cCfg.Precache {
 			aapIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheActionTriggers]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheActionTriggers]; !has || !cCfg.Precache {
 			atrgIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheSharedGroups]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheSharedGroups]; !has || !cCfg.Precache {
 			sgIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheLCRRules]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheLCRRules]; !has || !cCfg.Precache {
 			lcrIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheDerivedChargers]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheDerivedChargers]; !has || !cCfg.Precache {
 			dcIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheAliases]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheAliases]; !has || !cCfg.Precache {
 			alsIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheReverseAliases]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheReverseAliases]; !has || !cCfg.Precache {
 			rvAlsIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheResourceProfiles]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheResourceProfiles]; !has || !cCfg.Precache {
 			rspIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheResources]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheResources]; !has || !cCfg.Precache {
 			resIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheStatQueues]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheStatQueues]; !has || !cCfg.Precache {
 			stqIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheStatQueueProfiles]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheStatQueueProfiles]; !has || !cCfg.Precache {
 			stqpIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheThresholds]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheThresholds]; !has || !cCfg.Precache {
 			thIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheThresholdProfiles]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheThresholdProfiles]; !has || !cCfg.Precache {
 			thpIDs = make([]string, 0)
 		}
-		if cCfg, has := cfg.CacheConfig[utils.CacheFilters]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheFilters]; !has || !cCfg.Precache {
 			fltrIDs = make([]string, 0)
 		}
 
