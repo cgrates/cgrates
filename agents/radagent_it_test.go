@@ -272,7 +272,7 @@ func TestRAitAcctStop(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Usage != "4" {
+		if cdrs[0].Usage != "4s" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		}
 		if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {

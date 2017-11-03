@@ -126,16 +126,15 @@ func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnd
 	return
 }
 
-func usageFromCCR(reqType, reqNr, reqCCTime, usedCCTime int, debitIterval time.Duration) time.Duration {
-	dISecs := debitIterval.Seconds()
-	var ccTime int
+func usageFromCCR(reqType int, reqNr, usedCCTime int64, debitIterval time.Duration) (usage time.Duration) {
+	//dISecs := debitIterval.Nano()
+	//var ccTime int
+	usage = debitIterval
 	if reqType == 3 {
 		reqNr -= 1 // decrease request number to reach the real number
-		ccTime = usedCCTime + (int(dISecs) * reqNr)
-	} else {
-		ccTime = int(dISecs)
+		usage = (time.Duration(usedCCTime) * time.Second) + time.Duration(debitIterval.Nanoseconds()*reqNr)
 	}
-	return time.Duration(ccTime) * time.Second
+	return
 }
 
 // Utility function to convert from StoredCdr to CCR struct
@@ -185,7 +184,7 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 	case META_CCR_USAGE:
 		var ok bool
 		var reqType datatype.Enumerated
-		var reqNr, reqUnit, usedUnit datatype.Unsigned32
+		var reqNr, usedUnit datatype.Unsigned32
 		if ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", 0); err != nil {
 			return "", err
 		} else if ccReqTypeAvp == nil {
@@ -206,7 +205,7 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 				return "", err
 			} else if len(reqUnitAVPs) == 0 {
 				return "", errors.New("Requested-Service-Unit>CC-Time not found")
-			} else if reqUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+			} else if usedUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
 				return "", fmt.Errorf("Requested-Service-Unit>CC-Time must be Unsigned32 and not %v", reqUnitAVPs[0].Data.Type())
 			}
 		case datatype.Enumerated(3), datatype.Enumerated(4):
@@ -218,8 +217,7 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 				}
 			}
 		}
-		usage := usageFromCCR(int(reqType), int(reqNr), int(reqUnit), int(usedUnit), dur)
-		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
+		return usageFromCCR(int(reqType), int64(reqNr), int64(usedUnit), dur).String(), nil
 	}
 	return "", nil
 }

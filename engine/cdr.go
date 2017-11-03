@@ -403,6 +403,13 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 }
 
 func (cdr *CDR) AsExternalCDR() *ExternalCDR {
+	var usageStr string
+	switch cdr.ToR {
+	case utils.VOICE: // usage as time
+		usageStr = cdr.Usage.String()
+	default: // usage as units
+		usageStr = strconv.FormatInt(cdr.Usage.Nanoseconds(), 10)
+	}
 	return &ExternalCDR{CGRID: cdr.CGRID,
 		RunID:       cdr.RunID,
 		OrderID:     cdr.OrderID,
@@ -418,7 +425,7 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 		Destination: cdr.Destination,
 		SetupTime:   cdr.SetupTime.Format(time.RFC3339),
 		AnswerTime:  cdr.AnswerTime.Format(time.RFC3339),
-		Usage:       cdr.FormatUsage(utils.SECONDS),
+		Usage:       usageStr,
 		ExtraFields: cdr.ExtraFields,
 		CostSource:  cdr.CostSource,
 		Cost:        cdr.Cost,
