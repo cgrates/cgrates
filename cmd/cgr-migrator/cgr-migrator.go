@@ -66,7 +66,7 @@ var (
 	inStorDBUser = flag.String("stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
 	inStorDBPass = flag.String("stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
 
-	loadHistorySize   = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
 
 	dbDataEncoding   = flag.String("dbData_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object Data in strings")
 	inDBDataEncoding = flag.String("in_dbData_encoding", "", "The encoding used to store object Data in strings")
@@ -86,6 +86,7 @@ func main() {
 			log.Print("Initializing DataDB:", *outDataDBType)
 			log.Print("Initializing storDB:", *outStorDBType)
 		}
+
 		var dmOUT *engine.DataManager
 		dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 		storDB, err := engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,

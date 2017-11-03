@@ -44,7 +44,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	go func() {
 		defer close(cacheTaskChan)
 		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, lcrPrfIDs []string
-		if cCfg, has := ccacheCfg[utils.CacheDestinations]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheDestinations]; !has || !cCfg.Precache {
 			dstIDs = make([]string, 0) // Don't cache any
 		}
 		if cCfg, has := cacheCfg[utils.CacheReverseDestinations]; !has || !cCfg.Precache {
