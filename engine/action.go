@@ -213,14 +213,15 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 	// set stored cdr values
 	var cdrs []*CDR
 	for _, action := range acs {
-		if !utils.IsSliceMember([]string{DEBIT, DEBIT_RESET, TOPUP, TOPUP_RESET}, action.ActionType) || action.Balance == nil {
+		if !utils.IsSliceMember([]string{DEBIT, DEBIT_RESET, TOPUP, TOPUP_RESET}, action.ActionType) ||
+			action.Balance == nil {
 			continue // Only log specific actions
 		}
 		cdr := &CDR{RunID: action.ActionType, Source: CDRLOG,
 			SetupTime: time.Now(), AnswerTime: time.Now(), OriginID: utils.GenUUID(),
 			ExtraFields: make(map[string]string)}
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.String())
-		cdr.Usage = time.Duration(1) * time.Second
+		cdr.Usage = time.Duration(1)
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {
 			parsedValue := parseTemplateValue(rsrFlds, acc, action)

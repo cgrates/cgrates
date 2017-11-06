@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"sync"
 	"time"
 
@@ -153,7 +152,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Send disconnect order to remote connection
 func (self *SMGSession) disconnectSession(reason string) error {
-	self.EventStart[utils.USAGE] = strconv.FormatFloat(self.TotalUsage.Seconds(), 'f', -1, 64) // Set the usage to total one debitted
+	self.EventStart[utils.USAGE] = self.TotalUsage.Nanoseconds() // Set the usage to total one debitted
 	if self.clntConn == nil || reflect.ValueOf(self.clntConn).IsNil() {
 		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
 	}

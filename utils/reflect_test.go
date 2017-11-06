@@ -218,6 +218,22 @@ func TestStringToInterface(t *testing.T) {
 }
 
 func TestCastFieldIfToString(t *testing.T) {
+	val := interface{}("string1")
+	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "string1" {
+		t.Error(resVal, converted)
+	}
+	val = interface{}(123)
+	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "123" {
+		t.Error(resVal, converted)
+	}
+	val = interface{}([]byte("byte_val"))
+	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "byte_val" {
+		t.Error(resVal, converted)
+	}
+	val = interface{}(true)
+	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "true" {
+		t.Error(resVal, converted)
+	}
 	if strVal, cast := CastFieldIfToString(time.Duration(1 * time.Second)); !cast {
 		t.Error("cannot cast time.Duration")
 	} else if strVal != "1s" {
