@@ -218,7 +218,7 @@ func TestA1itDataSession1(t *testing.T) {
 			t.Error(err)
 		}
 		if len(cc.Timespans) != 3 {
-			t.Errorf("Unexpected number of timespans: %+v", cc.Timespans)
+			t.Errorf("Unexpected number of timespans: %+v", len(cc.Timespans))
 		}
 		if cc.RatedUsage != 2202800 {
 			t.Errorf("RatingUsage expected: %f received %f, callcost: %+v ", 2202800.0, cc.RatedUsage, cc)
