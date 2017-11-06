@@ -86,8 +86,8 @@ func TestA1itLoadTPFromFolder(t *testing.T) {
 		t.Error(reply)
 	}
 	time.Sleep(time.Duration(100 * time.Millisecond))
-	tStart, _ := utils.ParseDate("2017-03-03T10:39:33Z")
-	tEnd, _ := utils.ParseDate("2017-03-03T12:30:13Z") // Equivalent of 10240 which is a chunk of data charged
+	tStart := time.Date(2017, 3, 3, 10, 39, 33, 0, time.UTC)
+	tEnd := time.Date(2017, 3, 3, 10, 39, 33, 10240, time.UTC)
 	cd := engine.CallDescriptor{
 		Direction:   "*out",
 		Category:    "data1",
@@ -100,7 +100,7 @@ func TestA1itLoadTPFromFolder(t *testing.T) {
 	var cc engine.CallCost
 	if err := a1rpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.0 || cc.RatedUsage != 10240 {
+	} else if cc.Cost != 0.0 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
 	}
 }
@@ -148,7 +148,7 @@ func TestA1itDataSession1(t *testing.T) {
 	var maxUsage float64
 	if err := a1rpc.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
-	} else if maxUsage != 10240 {
+	} else if maxUsage != 0.000010240 {
 		t.Error("Received: ", maxUsage)
 	}
 	smgEv = sessionmanager.SMGenericEvent{
@@ -173,7 +173,7 @@ func TestA1itDataSession1(t *testing.T) {
 	}
 	if err := a1rpc.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
-	} else if maxUsage != 2097152 {
+	} else if maxUsage != 0.002097152 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	smgEv = sessionmanager.SMGenericEvent{

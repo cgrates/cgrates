@@ -361,22 +361,26 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 }
 
 // sessionStart will handle a new session, pass the connectionId so we can communicate on disconnect request
-func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.RpcClientConnection) (err error) {
+func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
+	clntConn rpcclient.RpcClientConnection) (err error) {
 	cgrID := evStart.GetCGRID(utils.META_DEFAULT)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
 		if pSS := smg.passiveToActive(cgrID); len(pSS) != 0 {
 			return nil, nil // ToDo: handle here also debits
 		}
 		var sessionRuns []*engine.SessionRun
-		if err := smg.rals.Call("Responder.GetSessionRuns", evStart.AsStoredCdr(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
+		if err := smg.rals.Call("Responder.GetSessionRuns",
+			evStart.AsStoredCdr(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
 			return nil, err
 		} else if len(sessionRuns) == 0 {
 			return nil, nil
 		}
 		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
-			s := &SMGSession{CGRID: cgrID, EventStart: evStart, RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
-				rals: smg.rals, cdrsrv: smg.cdrsrv, CD: sessionRun.CallDescriptor, clntConn: clntConn}
+			s := &SMGSession{CGRID: cgrID, EventStart: evStart,
+				RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
+				rals: smg.rals, cdrsrv: smg.cdrsrv,
+				CD: sessionRun.CallDescriptor, clntConn: clntConn}
 			smg.recordASession(s)
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
 			if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 {

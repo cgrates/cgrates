@@ -108,7 +108,8 @@ func TestSMGBiRPCTPFromFolder(t *testing.T) {
 func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	// Create a balance with 1 second inside and rating increments of 1ms (to be compatible with debit interval)
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
-		Account: "TestSMGBiRPCSessionAutomaticDisconnects", BalanceType: utils.VOICE,
+		Account:       "TestSMGBiRPCSessionAutomaticDisconnects",
+		BalanceType:   utils.VOICE,
 		BalanceID:     utils.StringPointer("TestSMGBiRPCSessionAutomaticDisconnects"),
 		Value:         utils.Float64Pointer(0.01),
 		RatingSubject: utils.StringPointer("*zero1ms")}
@@ -119,12 +120,14 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	var acnt *engine.Account
-	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
+	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant,
+		Account: attrSetBalance.Account}
 	eAcntVal := 0.01
 	if err := smgRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
-		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+		t.Errorf("Expecting: %f, received: %f", eAcntVal,
+			acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -141,7 +144,8 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 	}
 	var maxUsage float64
-	if err := smgBiRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := smgBiRPC.Call("SMGenericV1.InitiateSession",
+		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != -1 {
@@ -252,7 +256,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Usage != "0.007" {
+		if cdrs[0].Usage != "7ms" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		} else if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {
 			t.Errorf("Unexpected CDR CostSource received, cdr: %v %+v ", cdrs[0].CostSource, cdrs[0])
