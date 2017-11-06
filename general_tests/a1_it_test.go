@@ -146,7 +146,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.SessionTTLUsage:    "0s",
 	}
 	var maxUsage float64
-	if err := a1rpc.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := a1rpc.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	} else if maxUsage != 0.000010240 {
 		t.Error("Received: ", maxUsage)
@@ -171,7 +171,8 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.ANSWER_TIME:        "2017-03-03 11:39:32 +0100 CET",
 		utils.USAGE:              "2097152",
 	}
-	if err := a1rpc.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
+	if err := a1rpc.Call(utils.SMGenericV2UpdateSession,
+		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	} else if maxUsage != 0.002097152 {
 		t.Error("Bad max usage: ", maxUsage)

@@ -1128,6 +1128,16 @@ func (smg *SMGeneric) BiRPCV1ChargeEvent(clnt rpcclient.RpcClientConnection, ev 
 	return nil
 }
 
+// Called on individual Events (eg SMS)
+func (smg *SMGeneric) BiRPCV2ChargeEvent(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *time.Duration) error {
+	if minMaxUsage, err := smg.ChargeEvent(ev); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		*maxUsage = minMaxUsage
+	}
+	return nil
+}
+
 // Called on session end, should send the CDR to CDRS
 func (smg *SMGeneric) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, reply *string) error {
 	if err := smg.ProcessCDR(ev); err != nil {

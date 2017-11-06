@@ -138,9 +138,9 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	} else { // Find out maxUsage over APIs
 		switch ccr.CCRequestType {
 		case 1:
-			err = self.smg.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage)
+			err = self.smg.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage)
 		case 2:
-			err = self.smg.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage)
+			err = self.smg.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage)
 		case 3, 4: // Handle them together since we generate CDR for them
 			var rpl string
 			if ccr.CCRequestType == 3 {

@@ -144,7 +144,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 	}
 	var maxUsage float64
-	if err := smgBiRPC.Call("SMGenericV1.InitiateSession",
+	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
 		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
@@ -225,7 +225,8 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 	}
 	var maxUsage float64
-	if err := smgBiRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
+		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != -1 {
@@ -234,7 +235,8 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Millisecond)) // Give time for  debits to occur
 	smgEv[utils.USAGE] = "7ms"
 	var rpl string
-	if err = smgBiRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgBiRPC.Call("SMGenericV1.TerminateSession",
+		smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(50 * time.Millisecond)) // Give time for  debits to occur

@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
@@ -180,8 +181,8 @@ func (sma *SMAsterisk) handleChannelStateChange(ev *SMAsteriskEvent) {
 		}
 		return
 	}
-	var maxUsage float64
-	if err := sma.smg.Call("SMGenericV1.InitiateSession", *smgEv, &maxUsage); err != nil {
+	var maxUsage time.Duration
+	if err := sma.smg.Call(utils.SMGenericV2InitiateSession, *smgEv, &maxUsage); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to initiate session for channelID: %s", err.Error(), ev.ChannelID()))
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))

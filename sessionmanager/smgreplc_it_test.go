@@ -91,7 +91,8 @@ func TestSMGRplcTPFromFolder(t *testing.T) {
 
 func TestSMGRplcInitiate(t *testing.T) {
 	var pSessions []*ActiveSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions",
+		nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	smgEv := SMGenericEvent{
@@ -110,14 +111,16 @@ func TestSMGRplcInitiate(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	var maxUsage float64
-	if err := smgRplcMstrRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err == nil && err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
+	if err := smgRplcMstrRPC.Call(utils.SMGenericV2UpdateSession,
+		smgEv, &maxUsage); err == nil &&
+		err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
 		t.Error(err)
 	}
 	var reply string
 	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession", smgEv, &reply); err == nil && err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
 		t.Error(err)
 	}
-	if err := smgRplcMstrRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 90 {
@@ -149,7 +152,8 @@ func TestSMGRplcUpdate(t *testing.T) {
 		utils.USAGE:      "1m",
 	}
 	var maxUsage float64
-	if err := smgRplcSlvRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.SMGenericV2UpdateSession,
+		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	} else if maxUsage != 60 {
 		t.Error("Bad max usage: ", maxUsage)
@@ -253,7 +257,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	}
 	for _, smgEv := range []SMGenericEvent{smgEv1, smgEv2} {
 		var maxUsage float64
-		if err := smgRplcMstrRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+		if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 			t.Error(err)
 		}
 		if maxUsage != 90 {

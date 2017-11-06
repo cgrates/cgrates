@@ -488,6 +488,10 @@ const (
 	Action                       = "Action"
 	ThresholdSv1ProcessEvent     = "ThresholdSv1.ProcessEvent"
 	MetaNow                      = "*now"
+	SMGenericV2UpdateSession     = "SMGenericV2.UpdateSession"
+	SMGenericV2InitiateSession   = "SMGenericV2.InitiateSession"
+	SMGenericV1UpdateSession     = "SMGenericV1.UpdateSession"
+	SMGenericV1InitiateSession   = "SMGenericV1.InitiateSession"
 )
 
 func buildCacheInstRevPrefixes() {
