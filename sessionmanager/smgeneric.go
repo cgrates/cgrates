@@ -369,7 +369,8 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
 			return nil, nil // ToDo: handle here also debits
 		}
 		var sessionRuns []*engine.SessionRun
-		if err := smg.rals.Call("Responder.GetSessionRuns", evStart.AsCDR(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
+		if err := smg.rals.Call("Responder.GetSessionRuns",
+			evStart.AsCDR(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
 			return nil, err
 		} else if len(sessionRuns) == 0 {
 			return nil, nil
