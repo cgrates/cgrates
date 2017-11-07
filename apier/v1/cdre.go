@@ -25,9 +25,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -36,6 +33,10 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *string) error {
