@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"fmt"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
@@ -296,6 +297,88 @@ func (v1rs *v1Redis) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 //set
 func (v1rs *v1Redis) setV1SharedGroup(x *v1SharedGroup) (err error) {
 	key := utils.SHARED_GROUP_PREFIX + x.Id
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//Stats methods
+//get
+func (v1rs *v1Redis) getV1Stats() (v1st *v1Stat, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.CDR_STATS_PREFIX)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.ms.Unmarshal(strVal, &v1st); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v1st, nil
+}
+
+//set
+func (v1rs *v1Redis) setV1Stats(x *v1Stat) (err error) {
+	key := utils.CDR_STATS_PREFIX + x.Id
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//Action  methods
+//get
+func (v1rs *v1Redis) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.ms.Unmarshal(strVal, &v2at); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v2at, nil
+}
+
+//set
+func (v1rs *v1Redis) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
+	key := utils.ACTION_TRIGGER_PREFIX + x.ID
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
 		return err

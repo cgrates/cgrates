@@ -174,3 +174,49 @@ func (v1ms *v1Mongo) setV1SharedGroup(x *v1SharedGroup) (err error) {
 	}
 	return
 }
+
+//Stats methods
+//get
+func (v1ms *v1Mongo) getV1Stats() (v1st *v1Stat, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.CDR_STATS_PREFIX).Find(nil).Iter()
+	}
+	v1ms.qryIter.Next(&v1st)
+	if v1st == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
+
+	}
+	return v1st, nil
+}
+
+//set
+func (v1ms *v1Mongo) setV1Stats(x *v1Stat) (err error) {
+	if err := v1ms.session.DB(v1ms.db).C(utils.CDR_STATS_PREFIX).Insert(x); err != nil {
+		return err
+	}
+	return
+}
+
+//Stats methods
+//get
+func (v1ms *v1Mongo) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.ACTION_TRIGGER_PREFIX).Find(nil).Iter()
+	}
+	v1ms.qryIter.Next(&v2at)
+	if v2at == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
+
+	}
+	return v2at, nil
+}
+
+//set
+func (v1ms *v1Mongo) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
+	if err := v1ms.session.DB(v1ms.db).C(utils.ACTION_TRIGGER_PREFIX).Insert(x); err != nil {
+		return err
+	}
+	return
+}

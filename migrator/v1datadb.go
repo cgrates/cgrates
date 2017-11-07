@@ -30,4 +30,8 @@ type V1DataDB interface {
 	setV1ActionTriggers(x *v1ActionTriggers) (err error)
 	getV1SharedGroup() (v1acts *v1SharedGroup, err error)
 	setV1SharedGroup(x *v1SharedGroup) (err error)
+	getV1Stats() (v1st *v1Stat, err error)
+	setV1Stats(x *v1Stat) (err error)
+	getV2ActionTrigger() (v2at *v2ActionTrigger, err error)
+	setV2ActionTrigger(x *v2ActionTrigger) (err error)
 }
