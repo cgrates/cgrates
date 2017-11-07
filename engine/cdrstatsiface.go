@@ -254,7 +254,7 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		if sq == nil {
 			sq = NewCDRStatsQueue(cs)
 			// load queue from storage if exists
-			if saved, err := s.dm.DataDB().GetCdrStatsQueue(sq.GetId()); err == nil {
+			if saved, err := s.dm.GetCdrStatsQueue(sq.GetId()); err == nil {
 				sq.Load(saved)
 			}
 			s.setupQueueSaver(sq)

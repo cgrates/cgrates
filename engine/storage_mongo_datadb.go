@@ -1030,7 +1030,7 @@ func (ms *MongoStorage) RemoveAccount(key string) error {
 
 }
 
-func (ms *MongoStorage) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err error) {
+func (ms *MongoStorage) GetCdrStatsQueueDrv(key string) (sq *CDRStatsQueue, err error) {
 	var result struct {
 		Key   string
 		Value *CDRStatsQueue
@@ -1047,7 +1047,7 @@ func (ms *MongoStorage) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err err
 	return
 }
 
-func (ms *MongoStorage) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
+func (ms *MongoStorage) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
 	session, col := ms.conn(colStq)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"key": sq.GetId()}, &struct {

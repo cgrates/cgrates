@@ -447,10 +447,10 @@ func TestStatsSaveRestoreQeue(t *testing.T) {
 		conf: &CdrStats{Id: "TTT"},
 		Cdrs: []*QCdr{&QCdr{Cost: 9.0}},
 	}
-	if err := dm.DataDB().SetCdrStatsQueue(sq); err != nil {
+	if err := dm.SetCdrStatsQueue(sq); err != nil {
 		t.Error("Error saving metric: ", err)
 	}
-	recovered, err := dm.DataDB().GetCdrStatsQueue(sq.GetId())
+	recovered, err := dm.GetCdrStatsQueue(sq.GetId())
 	if err != nil {
 		t.Error("Error loading metric: ", err)
 	}
