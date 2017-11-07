@@ -789,3 +789,11 @@ func (dm *DataManager) GetReqFilterIndexes(dbKey string) (indexes map[string]map
 func (dm *DataManager) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	return dm.DataDB().SetReqFilterIndexesDrv(dbKey, indexes)
 }
+
+func (dm *DataManager) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err error) {
+	return dm.DataDB().GetCdrStatsQueueDrv(key)
+}
+
+func (dm *DataManager) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
+	return dm.DataDB().SetCdrStatsQueueDrv(sq)
+}
