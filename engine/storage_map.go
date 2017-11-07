@@ -994,7 +994,7 @@ func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers,
 	return err
 }
 
-func (ms *MapStorage) SetCdrStats(cs *CdrStats) error {
+func (ms *MapStorage) SetCdrStatsDrv(cs *CdrStats) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(cs)
@@ -1002,7 +1002,7 @@ func (ms *MapStorage) SetCdrStats(cs *CdrStats) error {
 	return err
 }
 
-func (ms *MapStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
+func (ms *MapStorage) GetCdrStatsDrv(key string) (cs *CdrStats, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	if values, ok := ms.dict[utils.CDR_STATS_PREFIX+key]; ok {
@@ -1013,7 +1013,7 @@ func (ms *MapStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 	return
 }
 
-func (ms *MapStorage) GetAllCdrStats() (css []*CdrStats, err error) {
+func (ms *MapStorage) GetAllCdrStatsDrv() (css []*CdrStats, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	for key, value := range ms.dict {

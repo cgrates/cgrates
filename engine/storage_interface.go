@@ -61,9 +61,9 @@ type DataDB interface {
 	UpdateReverseDestination(*Destination, *Destination, string) error
 	GetLCRDrv(string) (*LCR, error)
 	SetLCRDrv(*LCR) error
-	SetCdrStats(*CdrStats) error
-	GetCdrStats(string) (*CdrStats, error)
-	GetAllCdrStats() ([]*CdrStats, error)
+	SetCdrStatsDrv(*CdrStats) error
+	GetCdrStatsDrv(string) (*CdrStats, error)
+	GetAllCdrStatsDrv() ([]*CdrStats, error)
 	GetDerivedChargersDrv(string) (*utils.DerivedChargers, error)
 	SetDerivedChargers(string, *utils.DerivedChargers, string) error
 	GetActionsDrv(string) (Actions, error)

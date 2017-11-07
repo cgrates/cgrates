@@ -797,3 +797,15 @@ func (dm *DataManager) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err erro
 func (dm *DataManager) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	return dm.DataDB().SetCdrStatsQueueDrv(sq)
 }
+
+func (dm *DataManager) SetCdrStats(cs *CdrStats) error {
+	return dm.DataDB().SetCdrStatsDrv(cs)
+}
+
+func (dm *DataManager) GetCdrStats(key string) (cs *CdrStats, err error) {
+	return dm.DataDB().GetCdrStatsDrv(key)
+}
+
+func (dm *DataManager) GetAllCdrStats() (css []*CdrStats, err error) {
+	return dm.DataDB().GetAllCdrStatsDrv()
+}

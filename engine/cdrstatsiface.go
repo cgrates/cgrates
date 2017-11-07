@@ -85,7 +85,7 @@ func (svr *queueSaver) stop() {
 
 func NewStats(dm *DataManager, saveInterval time.Duration) *Stats {
 	cdrStats := &Stats{dm: dm, defaultSaveInterval: saveInterval}
-	if css, err := dm.DataDB().GetAllCdrStats(); err == nil {
+	if css, err := dm.GetAllCdrStats(); err == nil {
 		cdrStats.UpdateQueues(css, nil)
 	} else {
 		utils.Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
@@ -158,7 +158,7 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 		s.queues[cs.Id] = sq
 	}
 	// save the conf
-	if err := s.dm.DataDB().SetCdrStats(cs); err != nil {
+	if err := s.dm.SetCdrStats(cs); err != nil {
 		return err
 	}
 	if _, exists = s.queueSavers[sq.GetId()]; !exists {
@@ -185,14 +185,14 @@ func (s *Stats) RemoveQueue(qID string, out *int) error {
 
 func (s *Stats) ReloadQueues(ids []string, out *int) error {
 	if len(ids) == 0 {
-		if css, err := s.dm.DataDB().GetAllCdrStats(); err == nil {
+		if css, err := s.dm.GetAllCdrStats(); err == nil {
 			s.UpdateQueues(css, nil)
 		} else {
 			return fmt.Errorf("Cannot load cdr stats: %v", err)
 		}
 	}
 	for _, id := range ids {
-		if cs, err := s.dm.DataDB().GetCdrStats(id); err == nil {
+		if cs, err := s.dm.GetCdrStats(id); err == nil {
 			s.AddQueue(cs, nil)
 		} else {
 			return err

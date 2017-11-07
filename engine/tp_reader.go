@@ -1462,7 +1462,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 			}
 		}
 		for _, stat := range tpr.cdrStats {
-			if err := tpr.dm.DataDB().SetCdrStats(stat); err != nil {
+			if err := tpr.dm.SetCdrStats(stat); err != nil {
 				return err
 			}
 		}
@@ -2015,7 +2015,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("CDR Stats Queues:")
 	}
 	for _, sq := range tpr.cdrStats {
-		err = tpr.dm.DataDB().SetCdrStats(sq)
+		err = tpr.dm.SetCdrStats(sq)
 		if err != nil {
 			return err
 		}

@@ -1635,14 +1635,14 @@ func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 	return err
 }
 
-func (ms *MongoStorage) SetCdrStats(cs *CdrStats) error {
+func (ms *MongoStorage) SetCdrStatsDrv(cs *CdrStats) error {
 	session, col := ms.conn(colCrs)
 	defer session.Close()
 	_, err := col.Upsert(bson.M{"id": cs.Id}, cs)
 	return err
 }
 
-func (ms *MongoStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
+func (ms *MongoStorage) GetCdrStatsDrv(key string) (cs *CdrStats, err error) {
 	cs = new(CdrStats)
 	session, col := ms.conn(colCrs)
 	defer session.Close()
@@ -1655,7 +1655,7 @@ func (ms *MongoStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 	return
 }
 
-func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
+func (ms *MongoStorage) GetAllCdrStatsDrv() (css []*CdrStats, err error) {
 	session, col := ms.conn(colCrs)
 	defer session.Close()
 	iter := col.Find(nil).Iter()

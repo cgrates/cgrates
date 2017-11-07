@@ -1248,18 +1248,18 @@ func testOnStorITCRUDLCR(t *testing.T) {
 func testOnStorITCRUDCdrStats(t *testing.T) {
 	cdrs := &CdrStats{Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}
 
-	if _, rcvErr := onStor.DataDB().GetCdrStats(""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetCdrStats(""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetCdrStats(cdrs); err != nil {
+	if err := onStor.SetCdrStats(cdrs); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetCdrStats(""); err != nil {
+	if rcv, err := onStor.GetCdrStats(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cdrs.Metrics, rcv.Metrics) {
 		t.Errorf("Expecting: %v, received: %v", cdrs.Metrics, rcv.Metrics)
 	}
-	if rcv, err := onStor.DataDB().GetAllCdrStats(); err != nil {
+	if rcv, err := onStor.GetAllCdrStats(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual([]*CdrStats{cdrs}[0].Metrics, rcv[0].Metrics) {
 		t.Errorf("Expecting: %v, received: %v", []*CdrStats{cdrs}[0].Metrics, rcv[0].Metrics)
