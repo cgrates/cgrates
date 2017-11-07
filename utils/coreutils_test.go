@@ -214,6 +214,15 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if !astTMS.Equal(expectedTime) {
 		t.Errorf("Expecting: %v, received: %v", expectedTime, astTMS)
 	}
+	nowTimeStr := "+24h"
+	start := time.Now().Add(time.Duration(23*time.Hour + 59*time.Minute + 58*time.Second))
+	end := start.Add(time.Duration(2 * time.Second))
+	parseNowTimeStr, err := ParseTimeDetectLayout(nowTimeStr, "")
+	if err != nil {
+		t.Error(err)
+	} else if parseNowTimeStr.After(start) && parseNowTimeStr.Before(end) {
+		t.Errorf("Unexpected time parsed: %v", parseNowTimeStr)
+	}
 }
 
 func TestParseDateUnix(t *testing.T) {
