@@ -105,6 +105,10 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateActions()
 		case utils.MetaSharedGroups:
 			err = m.migrateSharedGroups()
+		case utils.MetaStats:
+			err = m.migrateStats()
+		case utils.MetaThresholds:
+			err = m.migrateStats()
 		}
 	}
 	for k, v := range m.stats {
