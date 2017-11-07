@@ -104,7 +104,7 @@ func (sq *CDRStatsQueue) Save(db DataDB) {
 			return
 		}
 
-		if err := db.SetCdrStatsQueue(sq); err != nil {
+		if err := db.SetCdrStatsQueueDrv(sq); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
 			return
 		}

@@ -1595,13 +1595,13 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 				EventTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 			}},
 	}
-	if _, rcvErr := onStor.DataDB().GetCdrStatsQueue(sq.GetId()); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetCdrStatsQueue(sq.GetId()); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetCdrStatsQueue(sq); err != nil {
+	if err := onStor.SetCdrStatsQueue(sq); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetCdrStatsQueue(sq.GetId()); err != nil {
+	if rcv, err := onStor.GetCdrStatsQueue(sq.GetId()); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq.Cdrs, rcv.Cdrs) {
 		t.Errorf("Expecting: %v, received: %v", sq.Cdrs, rcv.Cdrs)
