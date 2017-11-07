@@ -205,6 +205,14 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		return time.ParseInLocation("20060102150405.999", tmStr, loc)
 	case tmStr == "*now":
 		return time.Now(), nil
+	case strings.HasPrefix(tmStr, "+"):
+		tmStr = strings.TrimPrefix(tmStr, "+")
+		if tmStrTmp, err := time.ParseDuration(tmStr); err != nil {
+			return nilTime, err
+		} else {
+			return time.Now().Add(tmStrTmp), nil
+		}
+
 	}
 	return nilTime, errors.New("Unsupported time format")
 }
