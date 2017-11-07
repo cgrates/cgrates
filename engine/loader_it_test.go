@@ -281,7 +281,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, sq := range loader.cdrStats {
-		rcv, err := loader.dm.DataDB().GetCdrStats(k)
+		rcv, err := loader.dm.GetCdrStats(k)
 		// t.Log(utils.ToIJSON(sq))
 		// t.Log(utils.ToIJSON(rcv))
 		t.Log(k)
