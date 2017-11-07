@@ -1120,7 +1120,7 @@ func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 	return
 }
 
-func (rs *RedisStorage) SetCdrStats(cs *CdrStats) error {
+func (rs *RedisStorage) SetCdrStatsDrv(cs *CdrStats) error {
 	marshaled, err := rs.ms.Marshal(cs)
 	if err != nil {
 		return err
@@ -1128,7 +1128,7 @@ func (rs *RedisStorage) SetCdrStats(cs *CdrStats) error {
 	return rs.Cmd("SET", utils.CDR_STATS_PREFIX+cs.Id, marshaled).Err
 }
 
-func (rs *RedisStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
+func (rs *RedisStorage) GetCdrStatsDrv(key string) (cs *CdrStats, err error) {
 	var values []byte
 	if values, err = rs.Cmd("GET", utils.CDR_STATS_PREFIX+key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
@@ -1142,7 +1142,7 @@ func (rs *RedisStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 	return
 }
 
-func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
+func (rs *RedisStorage) GetAllCdrStatsDrv() (css []*CdrStats, err error) {
 	keys, err := rs.Cmd("KEYS", utils.CDR_STATS_PREFIX+"*").List()
 	if err != nil {
 		return nil, err

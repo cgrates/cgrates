@@ -99,7 +99,7 @@ func (sq *CDRStatsQueue) Save(db DataDB) {
 	defer sq.mux.Unlock()
 	if sq.dirty {
 		// save the conf
-		if err := db.SetCdrStats(sq.conf); err != nil {
+		if err := db.SetCdrStatsDrv(sq.conf); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Error saving cdr stats id %s: %v", sq.conf.Id, err))
 			return
 		}
