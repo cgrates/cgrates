@@ -339,10 +339,11 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		return utils.NewErrServerError(err)
 	}
 	if err = self.DataManager.DataDB().RemAccountActionPlans(accID, nil); err != nil {
-		return
+		return err
 	}
-	if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
-		return
+
+	if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err.Error() != utils.ErrNotFound.Error() {
+		return err
 	}
 	*reply = OK
 	return nil
