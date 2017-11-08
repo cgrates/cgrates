@@ -203,6 +203,12 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+		case utils.StatQueueProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+		case utils.StatQueuePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
