@@ -63,7 +63,12 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheReverseAlias,
 	testOnStorITCacheResource,
 	testOnStorITCacheResourceProfile,
+	testOnStorITCacheStatQueueProfile,
+	testOnStorITCacheStatQueue,
+	testOnStorITCacheThresholdProfile,
+	testOnStorITCacheThreshold,
 	testOnStorITCacheTiming,
+	testOnStorITCacheFilter,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
@@ -140,6 +145,7 @@ func testOnStorITFlush(t *testing.T) {
 	}
 	cache.Flush()
 }
+
 func testOnStorITIsDBEmpty(t *testing.T) {
 	test, err := onStor.DataDB().IsDBEmpty()
 	if err != nil {
@@ -147,7 +153,6 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 	} else if test != true {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
-
 }
 
 func testOnStorITSetGetDerivedCharges(t *testing.T) {
@@ -896,7 +901,199 @@ func testOnStorITCacheResource(t *testing.T) {
 	} else if rcv := itm.(*Resource); !reflect.DeepEqual(res, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", res, rcv)
 	}
+}
 
+func testOnStorITCacheStatQueueProfile(t *testing.T) {
+	statProfile := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Test_Stat_Cache",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics:     []string{"ASR"},
+		Thresholds:  []string{"Th1"},
+		Blocker:     true,
+		Stored:      true,
+		Weight:      20,
+		MinItems:    1,
+	}
+	if err := onStor.SetStatQueueProfile(statProfile); err != nil {
+		t.Error(err)
+	}
+	expectedR := []string{"sqp_cgrates.org:Test_Stat_Cache"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedR, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
+	}
+	if _, hasIt := cache.Get(utils.StatQueueProfilePrefix + statProfile.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.StatQueueProfilePrefix, []string{statProfile.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.StatQueueProfilePrefix + statProfile.TenantID()); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*StatQueueProfile); !reflect.DeepEqual(statProfile, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", statProfile, rcv)
+	}
+}
+
+func testOnStorITCacheStatQueue(t *testing.T) {
+	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local())
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "Test_StatQueue_Cache",
+		SQItems: []struct {
+			EventID    string     // Bounded to the original StatEvent
+			ExpiryTime *time.Time // Used to auto-expire events
+		}{{EventID: "cgrates.org:ev1", ExpiryTime: eTime},
+			{EventID: "cgrates.org:ev2", ExpiryTime: eTime},
+			{EventID: "cgrates.org:ev3", ExpiryTime: eTime}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 2,
+				Count:    3,
+				Events: map[string]bool{
+					"cgrates.org:ev1": true,
+					"cgrates.org:ev2": true,
+					"cgrates.org:ev3": false,
+				},
+			},
+		},
+	}
+	if err := onStor.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+	expectedT := []string{"stq_cgrates.org:Test_StatQueue_Cache"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedT, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
+	}
+
+	if _, hasIt := cache.Get(utils.StatQueuePrefix + sq.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.StatQueuePrefix, []string{sq.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.StatQueuePrefix + sq.TenantID()); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*StatQueue); !reflect.DeepEqual(sq, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", sq, rcv)
+	}
+}
+
+func testOnStorITCacheThresholdProfile(t *testing.T) {
+	tPrfl := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Test_Threshold_Cache",
+		FilterIDs: []string{"FilterID1", "FilterID2"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+		Recurrent: true,
+		MinSleep:  time.Duration(5 * time.Minute),
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"ACT_1", "ACT_2"},
+		Async:     true,
+	}
+	if err := onStor.SetThresholdProfile(tPrfl); err != nil {
+		t.Error(err)
+	}
+	expectedR := []string{"thp_cgrates.org:Test_Threshold_Cache"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedR, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
+	}
+	if _, hasIt := cache.Get(utils.ThresholdProfilePrefix + tPrfl.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.ThresholdProfilePrefix, []string{tPrfl.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.ThresholdProfilePrefix + tPrfl.TenantID()); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*ThresholdProfile); !reflect.DeepEqual(tPrfl, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl, rcv)
+	}
+}
+
+func testOnStorITCacheThreshold(t *testing.T) {
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "Test_Th_Cache",
+		Hits:   2,
+		Snooze: time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+	}
+	if err := onStor.SetThreshold(th); err != nil {
+		t.Error(err)
+	}
+	expectedT := []string{"thd_cgrates.org:Test_Th_Cache"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ThresholdPrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedT, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
+	}
+
+	if _, hasIt := cache.Get(utils.ThresholdPrefix + th.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.ThresholdPrefix, []string{th.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.ThresholdPrefix + th.TenantID()); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*Threshold); !reflect.DeepEqual(th, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", th, rcv)
+	}
+}
+
+func testOnStorITCacheFilter(t *testing.T) {
+	filter := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter1",
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "*string",
+				Type:      "Account",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	if err := onStor.SetFilter(filter); err != nil {
+		t.Error(err)
+	}
+	expectedT := []string{"ftr_cgrates.org:Filter1"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.FilterPrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedT, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
+	}
+
+	if _, hasIt := cache.Get(utils.FilterPrefix + filter.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.FilterPrefix, []string{filter.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.FilterPrefix + filter.TenantID()); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*Filter); !reflect.DeepEqual(filter, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", filter, rcv)
+	}
 }
 
 func testOnStorITHasData(t *testing.T) {
