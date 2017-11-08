@@ -1371,8 +1371,7 @@ func (rs *RedisStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 
 // SetStatsQueueDrv stores a StatsQueue into DataDB
 func (rs *RedisStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
-	var result []byte
-	result, err = rs.ms.Marshal(sq)
+	result, err := rs.ms.Marshal(sq)
 	if err != nil {
 		return
 	}
