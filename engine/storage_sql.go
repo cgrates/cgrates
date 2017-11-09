@@ -725,11 +725,7 @@ func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 		OriginID:    smc.OriginID,
 		CostSource:  smc.CostSource,
 		CostDetails: smc.CostDetails.AsJSON(),
-<<<<<<< HEAD
 		Usage:       smc.Usage.Nanoseconds(),
-=======
-		Usage:       smc.Usage,
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 		CreatedAt:   time.Now(),
 	}
 	if tx.Save(cd).Error != nil { // Check further since error does not properly reflect duplicates here (sql: no rows in result set)

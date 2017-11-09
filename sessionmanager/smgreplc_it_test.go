@@ -151,11 +151,7 @@ func TestSMGRplcUpdate(t *testing.T) {
 		utils.ACCID:      "123451",
 		utils.USAGE:      "1m",
 	}
-<<<<<<< HEAD
 	var maxUsage time.Duration
-=======
-	var maxUsage float64
->>>>>>> Using SMGenericV2 methods returning time.Duration as maxDuration instead of float, updated smg_it tests
 	if err := smgRplcSlvRPC.Call(utils.SMGenericV2UpdateSession,
 		smgEv, &maxUsage); err != nil {
 		t.Error(err)
@@ -260,11 +256,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	for _, smgEv := range []SMGenericEvent{smgEv1, smgEv2} {
-<<<<<<< HEAD
 		var maxUsage time.Duration
-=======
-		var maxUsage float64
->>>>>>> Using SMGenericV2 methods returning time.Duration as maxDuration instead of float, updated smg_it tests
 		if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 			t.Error(err)
 		}

@@ -298,46 +298,50 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      acntAttrs.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
-<<<<<<< HEAD
 		utils.SETUP_TIME:  "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1024", // 8 MB
 		utils.LastUsed:    "5120", // 5 MB
-=======
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "20000",
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 1.048576e+06 {
+	if maxUsage != 8192 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49998883840.000000 // 20480
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	eAcntVal = 87040.000000 // 15MB used
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", totalVal)
 	}
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1088576 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
+	} else if len(aSessions) != 1 ||
+		aSessions[0].Usage != time.Duration(15360) {
+		t.Errorf("wrong active sessions: %f", aSessions[0].Usage)
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
 		utils.ACCID:       "123492",
 		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
+		utils.ACCOUNT:     acntAttrs.Account,
+		utils.SUBJECT:     acntAttrs.Account,
+		utils.DESTINATION: utils.DATA,
 		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
+		utils.TENANT:      acntAttrs.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
+<<<<<<< HEAD
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "20000",
 >>>>>>> Using SMGenericV2 methods returning time.Duration as maxDuration instead of float, updated smg_it tests
+=======
+		utils.SETUP_TIME:  "2016-01-05 18:30:50",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.USAGE:       "1024", // 8 MB
+		utils.LastUsed:    "5120", // 5 MB
+>>>>>>> Redesigned core to support nanoseconds/data units, cgr-engine memory profiling in commandline options, tests updates
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
@@ -420,8 +424,29 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		t.Error(err, aSessions)
 	}
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if err := smgRPC.Call("SMGenericV1.ProcessCDR", smgEv, &reply); err != nil {
 =======
+=======
+	if err := smgRPC.Call("SMGenericV1.ProcessCDR", smgEv, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received reply: %s", reply)
+	}
+	time.Sleep(time.Duration(10) * time.Millisecond)
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+		Accounts: []string{acntAttrs.Account}}
+	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "13312" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
+	}
+>>>>>>> Redesigned core to support nanoseconds/data units, cgr-engine memory profiling in commandline options, tests updates
 }
 
 func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
