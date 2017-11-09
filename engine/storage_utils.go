@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -121,7 +122,7 @@ type SMCost struct {
 	OriginHost  string
 	OriginID    string
 	CostSource  string
-	Usage       float64
+	Usage       time.Duration
 	CostDetails *CallCost
 }
 
@@ -141,6 +142,6 @@ type V2SMCost struct {
 	OriginHost  string
 	OriginID    string
 	CostSource  string
-	Usage       float64
+	Usage       time.Duration
 	CostDetails *EventCost
 }

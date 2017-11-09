@@ -61,6 +61,7 @@ var (
 	version           = flag.Bool("version", false, "Prints the application version.")
 	pidFile           = flag.String("pid", "", "Write pid file")
 	cpuprofile        = flag.String("cpuprofile", "", "write cpu profile to file")
+	memprofile        = flag.String("memprofile", "", "write memory profile to file")
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
 	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
@@ -928,6 +929,18 @@ func main() {
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan, internalHistorySChan,
 		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan)
 	<-exitChan
+
+	if *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			log.Fatal("could not create memory profile file: ", err)
+		}
+		defer f.Close()
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+	}
 
 	if *pidFile != "" {
 		if err := os.Remove(*pidFile); err != nil {

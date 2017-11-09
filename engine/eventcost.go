@@ -252,7 +252,7 @@ func (ec *EventCost) ComputeEventCostUsageIndexes() {
 
 func (ec *EventCost) AsCallCost() *CallCost {
 	cc := &CallCost{
-		Cost: ec.GetCost(), RatedUsage: ec.GetUsage().Seconds(),
+		Cost: ec.GetCost(), RatedUsage: float64(ec.GetUsage().Nanoseconds()),
 		AccountSummary: ec.AccountSummary}
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {

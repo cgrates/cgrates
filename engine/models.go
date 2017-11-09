@@ -500,7 +500,7 @@ type SMCostSQL struct {
 	OriginHost  string
 	OriginID    string
 	CostSource  string
-	Usage       float64
+	Usage       int64
 	CostDetails string
 	CreatedAt   time.Time
 	DeletedAt   *time.Time

@@ -234,7 +234,7 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 			ts.createIncrementsSlice()
 			if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
 				rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-				if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
+				if rate/float64(rateUnit.Nanoseconds()) > cd.MaxRate/float64(cd.MaxRateUnit.Nanoseconds()) {
 					return
 				}
 			}
@@ -309,14 +309,13 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
-	if duration, err := utils.ParseZeroRatingSubject(b.RatingSubject); err == nil {
+	if duration, err := utils.ParseZeroRatingSubject(cd.TOR, b.RatingSubject); err == nil {
 		// we have *zero based units
 		cc = cd.CreateCallCost()
 		cc.Timespans = append(cc.Timespans, &TimeSpan{
 			TimeStart: cd.TimeStart,
 			TimeEnd:   cd.TimeEnd,
 		})
-
 		ts := cc.Timespans[0]
 		ts.RoundToDuration(duration)
 		ts.RateInterval = &RateInterval{
@@ -349,9 +348,10 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		for incIndex, inc := range ts.Increments {
 			//log.Printf("INCREMENET: %+v", inc)
 
-			amount := inc.Duration.Seconds()
+			amount := float64(inc.Duration.Nanoseconds())
 			if b.Factor != nil {
-				amount = utils.Round(amount/b.Factor.GetValue(cd.TOR), globalRoundingDecimals, utils.ROUNDING_UP)
+				amount = utils.Round(amount/b.Factor.GetValue(cd.TOR),
+					globalRoundingDecimals, utils.ROUNDING_UP)
 			}
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
@@ -440,7 +440,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 
 				// debit minutes and money
-				amount := inc.Duration.Seconds()
+				amount := float64(inc.Duration.Nanoseconds())
 				if b.Factor != nil {
 					amount = utils.Round(amount/b.Factor.GetValue(cd.TOR), globalRoundingDecimals, utils.ROUNDING_UP)
 				}

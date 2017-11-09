@@ -534,7 +534,8 @@ func (smg *SMGeneric) setPassiveSessions(cgrID string, ss []*SMGSession) (err er
 	if len(ss) == 0 {
 		return
 	}
-	for _, cacheKey := range []string{"InitiateSession" + cgrID, "UpdateSession" + cgrID, "TerminateSession" + cgrID} {
+	for _, cacheKey := range []string{"InitiateSession" + cgrID,
+		"UpdateSession" + cgrID, "TerminateSession" + cgrID} {
 		if _, err := smg.responseCache.Get(cacheKey); err == nil { // Stop processing passive when there has been an update over active RPC
 			smg.deletePassiveSessions(cgrID)
 			return ErrActiveSession
@@ -965,7 +966,8 @@ func (smg *SMGeneric) ProcessCDR(gev SMGenericEvent) (err error) {
 	}
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Err: err})
 	var reply string
-	if err = smg.cdrsrv.Call("CdrsV1.ProcessCDR", gev.AsStoredCdr(smg.cgrCfg, smg.Timezone), &reply); err != nil {
+	if err = smg.cdrsrv.Call("CdrsV1.ProcessCDR",
+		gev.AsStoredCdr(smg.cgrCfg, smg.Timezone), &reply); err != nil {
 		return
 	}
 	return

@@ -348,10 +348,9 @@ func (i *RateInterval) Equal(o *RateInterval) bool {
 }
 
 func (i *RateInterval) GetCost(duration, startSecond time.Duration) float64 {
-	price, _, rateUnit := i.
-		GetRateParameters(startSecond)
-	price /= rateUnit.Seconds()
-	d := duration.Seconds()
+	price, _, rateUnit := i.GetRateParameters(startSecond)
+	price /= float64(rateUnit.Nanoseconds())
+	d := float64(duration.Nanoseconds())
 	return d * price
 }
 

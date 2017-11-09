@@ -32,7 +32,10 @@
 
 "sm_generic": {
 	"enabled": true,
-	"session_ttl": "50ms",
+	//"session_ttl": "50ms",
+	"rals_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	]
 },
 
 }

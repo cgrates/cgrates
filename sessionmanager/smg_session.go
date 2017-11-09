@@ -240,7 +240,7 @@ func (self *SMGSession) storeSMCost() error {
 		RunID:       self.RunID,
 		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
 		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
-		Usage:       self.TotalUsage.Seconds(),
+		Usage:       self.TotalUsage,
 		CostDetails: self.EventCost,
 	}
 	var reply string

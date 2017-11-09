@@ -840,7 +840,7 @@ func TestECAsCallCost(t *testing.T) {
 	}
 	eCC := &CallCost{
 		Cost:           0.85,
-		RatedUsage:     120.0,
+		RatedUsage:     120000000000,
 		AccountSummary: acntSummary,
 		Timespans: TimeSpans{
 			&TimeSpan{

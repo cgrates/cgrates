@@ -392,7 +392,8 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 	cdr.ExtraInfo = "" // Clean previous ExtraInfo, useful when re-rating
 	var cdrsRated []*CDR
 	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
-	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) && (cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
+	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) &&
+		(cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		fib := utils.Fib()
 		var smCosts []*SMCost
@@ -401,7 +402,8 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 			cgrID = "" // for queries involving originIDPrefix we ignore CGRID
 		}
 		for i := 0; i < self.cgrCfg.CDRSSMCostRetries; i++ {
-			smCosts, err = self.cdrDb.GetSMCosts(cgrID, cdr.RunID, cdr.OriginHost, cdr.ExtraFields[utils.OriginIDPrefix])
+			smCosts, err = self.cdrDb.GetSMCosts(cgrID, cdr.RunID, cdr.OriginHost,
+				cdr.ExtraFields[utils.OriginIDPrefix])
 			if err == nil && len(smCosts) != 0 {
 				break
 			}
@@ -414,7 +416,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 				cdrClone := cdr.Clone()
 				cdrClone.OriginID = smCost.OriginID
 				if cdr.Usage == 0 {
-					cdrClone.Usage = time.Duration(smCost.Usage * utils.NANO_MULTIPLIER) // Usage is float as seconds, convert back to duration
+					cdrClone.Usage = smCost.Usage
 				}
 				cdrClone.Cost = smCost.CostDetails.Cost
 				cdrClone.CostDetails = smCost.CostDetails

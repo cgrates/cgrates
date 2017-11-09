@@ -676,7 +676,7 @@ func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 		OriginID:    smc.OriginID,
 		CostSource:  smc.CostSource,
 		CostDetails: smc.CostDetails.AsJSON(),
-		Usage:       smc.Usage,
+		Usage:       smc.Usage.Nanoseconds(),
 		CreatedAt:   time.Now(),
 	}
 	if tx.Save(cd).Error != nil { // Check further since error does not properly reflect duplicates here (sql: no rows in result set)
@@ -729,7 +729,7 @@ func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 			OriginHost:  result.OriginHost,
 			OriginID:    result.OriginID,
 			CostSource:  result.CostSource,
-			Usage:       result.Usage,
+			Usage:       time.Duration(result.Usage),
 			CostDetails: &CallCost{},
 		}
 		if err := json.Unmarshal([]byte(result.CostDetails), smc.CostDetails); err != nil {

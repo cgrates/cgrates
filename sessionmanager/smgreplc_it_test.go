@@ -110,7 +110,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1m30s",
 	}
-	var maxUsage float64
+	var maxUsage time.Duration
 	if err := smgRplcMstrRPC.Call(utils.SMGenericV2UpdateSession,
 		smgEv, &maxUsage); err == nil &&
 		err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
@@ -123,7 +123,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 	if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 90 {
+	if maxUsage != time.Duration(90*time.Second) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
@@ -151,11 +151,11 @@ func TestSMGRplcUpdate(t *testing.T) {
 		utils.ACCID:      "123451",
 		utils.USAGE:      "1m",
 	}
-	var maxUsage float64
+	var maxUsage time.Duration
 	if err := smgRplcSlvRPC.Call(utils.SMGenericV2UpdateSession,
 		smgEv, &maxUsage); err != nil {
 		t.Error(err)
-	} else if maxUsage != 60 {
+	} else if maxUsage != time.Duration(time.Minute) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
@@ -256,11 +256,11 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	for _, smgEv := range []SMGenericEvent{smgEv1, smgEv2} {
-		var maxUsage float64
+		var maxUsage time.Duration
 		if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 			t.Error(err)
 		}
-		if maxUsage != 90 {
+		if maxUsage != time.Duration(90*time.Second) {
 			t.Error("Bad max usage: ", maxUsage)
 		}
 	}

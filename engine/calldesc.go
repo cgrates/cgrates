@@ -599,7 +599,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	for _, ts := range cc.Timespans {
 		if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
 			rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-			if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
+			if rate/float64(rateUnit.Nanoseconds()) > cd.MaxRate/float64(cd.MaxRateUnit.Nanoseconds()) {
 				return utils.MinDuration(initialDuration, totalDuration), nil
 			}
 		}
@@ -824,8 +824,8 @@ func (cd *CallDescriptor) refundIncrements() (err error) {
 			if balance = account.BalanceMap[unitType].GetBalance(increment.BalanceInfo.Unit.UUID); balance == nil {
 				return
 			}
-			balance.AddValue(increment.Duration.Seconds())
-			account.countUnits(-increment.Duration.Seconds(), unitType, cc, balance)
+			balance.AddValue(float64(increment.Duration.Nanoseconds()))
+			account.countUnits(-float64(increment.Duration.Nanoseconds()), unitType, cc, balance)
 		}
 		// check money too
 		if increment.BalanceInfo.Monetary != nil && increment.BalanceInfo.Monetary.UUID != "" {
