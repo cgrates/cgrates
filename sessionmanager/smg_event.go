@@ -187,19 +187,22 @@ func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) 
 }
 
 // GetSessionTTL retrieves SessionTTL setting out of SMGenericEvent
-func (self SMGenericEvent) GetSessionTTL(sesTTL time.Duration, cfgSessionTTLMaxDelay *time.Duration) time.Duration {
+func (self SMGenericEvent) GetSessionTTL(sesTTL time.Duration,
+	cfgSessionTTLMaxDelay *time.Duration) time.Duration {
 	valIf, hasVal := self[utils.SessionTTL]
 	if hasVal {
 		ttlStr, converted := utils.CastFieldIfToString(valIf)
 		if !converted {
-			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot convert SessionTTL, disabling functionality for event: <%s>",
-				self.GetCGRID(utils.META_DEFAULT)))
+			utils.Logger.Warning(
+				fmt.Sprintf("SMGenericEvent, cannot convert SessionTTL, disabling functionality for event: <%s>",
+					self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
 		}
 		var err error
 		if sesTTL, err = utils.ParseDurationWithNanosecs(ttlStr); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot parse SessionTTL, disabling functionality for event: <%s>",
-				self.GetCGRID(utils.META_DEFAULT)))
+			utils.Logger.Warning(
+				fmt.Sprintf("SMGenericEvent, cannot parse SessionTTL, disabling functionality for event: <%s>",
+					self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
 		}
 	}

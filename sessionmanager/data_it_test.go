@@ -388,7 +388,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)
 	}
-	time.Sleep(time.Duration(10) * time.Millisecond)
+	time.Sleep(time.Duration(20) * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
 		Accounts: []string{acntAttrs.Account}}
@@ -403,563 +403,319 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	}
 }
 
-func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
-	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1011"}
-	eAcntVal := 50000.0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
-	}
-	smgEv := SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "1234967",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1011",
-		utils.SUBJECT:     "1011",
-		utils.DESTINATION: "+49",
-		utils.CATEGORY:    "call",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "100",
-	}
-	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	// the second derived charging run has no credit
-
-	if maxUsage != 0 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 50000.0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
-	}
-}
-
 func TestSMGDataTTLExpired(t *testing.T) {
 	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
-	eAcntVal := 49999897600.000000
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
+		Account: "TestSMGDataTTLExpired"}
+	eAcntVal := 102400.0
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
+		BalanceType: utils.DATA,
+		BalanceID:   utils.StringPointer("TestSMGDataTTLExpired"),
+		Value:       utils.Float64Pointer(eAcntVal)}
+	var reply string
+	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", totalVal)
 	}
 	smgEv := SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123494",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:52",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1048576",
+		utils.EVENT_NAME:      "TEST_EVENT",
+		utils.TOR:             utils.DATA,
+		utils.ACCID:           "TestSMGDataTTLExpired",
+		utils.DIRECTION:       utils.OUT,
+		utils.ACCOUNT:         acntAttrs.Account,
+		utils.SUBJECT:         acntAttrs.Account,
+		utils.DESTINATION:     utils.DATA,
+		utils.CATEGORY:        "data",
+		utils.TENANT:          "cgrates.org",
+		utils.REQTYPE:         utils.META_PREPAID,
+		utils.SETUP_TIME:      "2016-01-05 18:30:52",
+		utils.ANSWER_TIME:     "2016-01-05 18:31:05",
+		utils.USAGE:           "1024",
+		utils.SessionTTLUsage: "2048", // will be charged on TTL
 	}
 	var maxUsage float64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 1.048576e+06 {
+	if maxUsage != 1024 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49998842880.000000
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	eAcntVal = 101376.000000
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
-	time.Sleep(50 * time.Millisecond)
-	eAcntVal = 49998842880.000000 //1054720
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	time.Sleep(70 * time.Millisecond)
+	eAcntVal = 99328.000000
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
 }
 
-func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
+func TestSMGDataTTLExpMultiUpdates(t *testing.T) {
 	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
-	eAcntVal := 49998842880.000000
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
+		Account: "TestSMGDataTTLExpMultiUpdates"}
+	eAcntVal := 102400.0
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
+		BalanceType: utils.DATA,
+		BalanceID:   utils.StringPointer("TestSMGDataTTLExpMultiUpdates"),
+		Value:       utils.Float64Pointer(eAcntVal)}
+	var reply string
+	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", totalVal)
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
 		utils.ACCID:       "123495",
 		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
+		utils.ACCOUNT:     acntAttrs.Account,
+		utils.SUBJECT:     acntAttrs.Account,
+		utils.DESTINATION: utils.DATA,
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1048576",
+		utils.USAGE:       "4096", // 3MB
 	}
-	var maxUsage float64
+	var maxUsage int64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 1.048576e+06 {
+	if maxUsage != 4096 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49997788160.000000 //1054720
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	eAcntVal = 98304.000000 //96MB
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
 	aSessions := make([]*ActiveSession, 0)
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
+	} else if len(aSessions) != 1 ||
+		int64(aSessions[0].Usage) != 4096 {
+		t.Errorf("wrong active sessions: %d", int64(aSessions[0].Usage))
 	}
-
 	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123495",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "20000",
-	}
+		utils.EVENT_NAME:         "TEST_EVENT",
+		utils.TOR:                utils.DATA,
+		utils.ACCID:              "123495",
+		utils.DIRECTION:          utils.OUT,
+		utils.ACCOUNT:            acntAttrs.Account,
+		utils.SUBJECT:            acntAttrs.Account,
+		utils.DESTINATION:        utils.DATA,
+		utils.CATEGORY:           "data",
+		utils.TENANT:             "cgrates.org",
+		utils.REQTYPE:            utils.META_PREPAID,
+		utils.SETUP_TIME:         "2016-01-05 18:30:53",
+		utils.ANSWER_TIME:        "2016-01-05 18:31:05",
+		utils.LastUsed:           "1024",
+		utils.USAGE:              "4096",
+		utils.SessionTTLUsage:    "2048", // will be charged on TTL
+		utils.SessionTTLLastUsed: "1024"} // will force last usage on timeout
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 1.048576e+06 {
+	if maxUsage != 4096 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49997767680.000000 // 20480
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	eAcntVal = 97280.000000 // 20480
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-
-	time.Sleep(50 * time.Millisecond)
-	eAcntVal = 49997767680.000000 //0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	time.Sleep(60 * time.Millisecond) // TTL will kick in
+	eAcntVal = 98304.000000           // 1MB is returned
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions",
+		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 }
 
 func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
-	eAcntVal := 49997767680.000000
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
+		Account: "TestSMGDataTTLExpMultiUpdates"}
+	eAcntVal := 102400.0
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
+		BalanceType: utils.DATA,
+		BalanceID:   utils.StringPointer("TestSMGDataTTLExpMultiUpdates"),
+		Value:       utils.Float64Pointer(eAcntVal)}
+	var reply string
+	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", totalVal)
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123496",
+		utils.ACCID:       "123495",
 		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
+		utils.ACCOUNT:     acntAttrs.Account,
+		utils.SUBJECT:     acntAttrs.Account,
+		utils.DESTINATION: utils.DATA,
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:54",
+		utils.SETUP_TIME:  "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1048576",
+		utils.USAGE:       "2048",
 	}
-	var maxUsage float64
+	var maxUsage int64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 1.048576e+06 {
+	if maxUsage != 2048 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49996712960.000000 // 1054720
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	eAcntVal = 100352.000000 // 1054720
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
 	aSessions := make([]*ActiveSession, 0)
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
+	} else if len(aSessions) != 1 ||
+		int64(aSessions[0].Usage) != 2048 {
+		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123496",
+		utils.ACCID:       "123495",
 		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
+		utils.ACCOUNT:     acntAttrs.Account,
+		utils.SUBJECT:     acntAttrs.Account,
+		utils.DESTINATION: utils.DATA,
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
+		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.SessionTTL:  "1h", // cancel timeout since usage 0 will not update it
+		utils.USAGE:       "1024",
+		utils.LastUsed:    "1024",
+	}
+	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
+		t.Error(err)
+	}
+	if maxUsage != 1024 {
+		t.Error("Bad max usage: ", maxUsage)
+	}
+	eAcntVal = 100352.000000 // 1054720
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
+	}
+	aSessions = make([]*ActiveSession, 0)
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 ||
+		int64(aSessions[0].Usage) != 2048 {
+		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
+	}
+
+	smgEv = SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.TOR:         utils.DATA,
+		utils.ACCID:       "123495",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     acntAttrs.Account,
+		utils.SUBJECT:     acntAttrs.Account,
+		utils.DESTINATION: utils.DATA,
+		utils.CATEGORY:    "data",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.SessionTTL:  "1h", // cancel timeout since usage 0 will not update it
+		utils.USAGE:       "0",
 		utils.LastUsed:    "0",
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 1.048576e+06 {
+	if maxUsage != 0 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49996712960.000000 // 0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	eAcntVal = 100352.000000 // 1054720
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
+	aSessions = make([]*ActiveSession, 0)
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
+	} else if len(aSessions) != 1 ||
+		int64(aSessions[0].Usage) != 1024 {
+		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123496",
+		utils.ACCID:       "123495",
 		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
+		utils.ACCOUNT:     acntAttrs.Account,
+		utils.SUBJECT:     acntAttrs.Account,
+		utils.DESTINATION: utils.DATA,
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "0",
-	}
-	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	if maxUsage != 1.048576e+06 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 49996712960.000000 // 0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
-	}
-	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123496",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "0",
-	}
-	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	if maxUsage != 1.048576e+06 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 49996712960.000000 // 0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
-	}
-	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123496",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "0",
-	}
-	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	if maxUsage != 1.048576e+06 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 49996712960.000000 // 0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
-	}
-	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123496",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.LastUsed:    "0",
 	}
 	var rpl string
 	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	eAcntVal = 49997767680.000000 // refunded
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	eAcntVal = 101376.000000 // refunded last 1MB reserved and unused
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions",
+		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
-	}
-}
-
-func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
-	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
-	eAcntVal := 49997767680.000000
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	smgEv := SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123497",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:55",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1048576",
-	}
-	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	if maxUsage != 1.048576e+06 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 49996712960.000000 // 1054720
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	aSessions := make([]*ActiveSession, 0)
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1048576 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
-	}
-
-	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123497",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "600",
-	}
-	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	if maxUsage != 1.048576e+06 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 49996712960.000000 // 0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1049176 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
-	}
-	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123497",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "600",
-	}
-	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	if maxUsage != 1.048576e+06 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 49996712960.000000 // 0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1049776 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
-	}
-	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123497",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "600",
-	}
-	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	if maxUsage != 1.048576e+06 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 49996712960.000000 // 0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1050376 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
-	}
-	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123497",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1048576",
-		utils.LastUsed:    "600",
-	}
-	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
-		t.Error(err)
-	}
-	if maxUsage != 1.048576e+06 {
-		t.Error("Bad max usage: ", maxUsage)
-	}
-	eAcntVal = 49996712960.000000 // 0
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 || aSessions[0].Usage.Seconds() != 1050976 {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
-	}
-	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.DATA,
-		utils.ACCID:       "123497",
-		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1010",
-		utils.SUBJECT:     "1010",
-		utils.DESTINATION: "222",
-		utils.CATEGORY:    "data",
-		utils.TENANT:      "cgrates.org",
-		utils.REQTYPE:     utils.META_PREPAID,
-		utils.LastUsed:    "0",
-	}
-	var rpl string
-	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
-		t.Error(err)
-	}
-	eAcntVal = 49997757440.000000 // 10240 (from the start)
-	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
-	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
 	}
 }

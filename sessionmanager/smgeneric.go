@@ -747,7 +747,9 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns)
 	}
 	smg.resetTerminatorTimer(cgrID,
-		gev.GetSessionTTL(smg.cgrCfg.SmGenericConfig.SessionTTL, smg.cgrCfg.SmGenericConfig.SessionTTLMaxDelay),
+		gev.GetSessionTTL(
+			smg.cgrCfg.SmGenericConfig.SessionTTL,
+			smg.cgrCfg.SmGenericConfig.SessionTTLMaxDelay),
 		gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
 	var evLastUsed time.Duration
@@ -756,7 +758,8 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	} else if err != utils.ErrNotFound {
 		return
 	}
-	if maxUsage, err = gev.GetMaxUsage(utils.META_DEFAULT, smg.cgrCfg.SmGenericConfig.MaxCallDuration); err != nil {
+	if maxUsage, err = gev.GetMaxUsage(utils.META_DEFAULT,
+		smg.cgrCfg.SmGenericConfig.MaxCallDuration); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrMandatoryIeMissing
 		}
