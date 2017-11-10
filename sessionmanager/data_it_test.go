@@ -719,3 +719,68 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		t.Error(err, aSessions)
 	}
 }
+
+// TestSMGDataTTLUsageProtection makes sure that original TTL (50ms)
+// limits the additional debit without overloading memory
+func TestSMGDataTTLUsageProtection(t *testing.T) {
+	var acnt *engine.Account
+	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
+		Account: "TestSMGDataTTLUsageProtection"}
+	eAcntVal := 102400.0
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
+		BalanceType: utils.DATA,
+		BalanceID:   utils.StringPointer("TestSMGDataTTLUsageProtection"),
+		Value:       utils.Float64Pointer(eAcntVal)}
+	var reply string
+	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", totalVal)
+	}
+	smgEv := SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.TOR:         utils.DATA,
+		utils.ACCID:       "123495",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     acntAttrs.Account,
+		utils.SUBJECT:     acntAttrs.Account,
+		utils.DESTINATION: utils.DATA,
+		utils.CATEGORY:    "data",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.USAGE:       "2048",
+	}
+	var maxUsage int64
+	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
+		t.Error(err)
+	}
+	if maxUsage != 2048 {
+		t.Error("Bad max usage: ", maxUsage)
+	}
+	eAcntVal = 100352.000000 // 1054720
+	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
+	}
+	aSessions := make([]*ActiveSession, 0)
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 ||
+		int64(aSessions[0].Usage) != 2048 {
+		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
+	}
+	time.Sleep(60 * time.Millisecond)
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions",
+		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err, aSessions)
+	}
+}
