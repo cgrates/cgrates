@@ -517,7 +517,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 				} else {
 					inc.paid = false
-					// delete the rest of the unpiad increments/timespans
+					// delete the rest of the unpaid increments/timespans
 					if incIndex == 0 {
 						// cut the entire current timespan
 						cc.Timespans = cc.Timespans[:tsIndex]

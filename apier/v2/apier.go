@@ -336,7 +336,7 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 	for idx, apiAct := range attrs.Actions {
 		var vf *utils.ValueFormula
 		if apiAct.Units != "" {
-			if x, err := utils.ParseBalanceFilterValue(apiAct.Units); err == nil {
+			if x, err := utils.ParseBalanceFilterValue(apiAct.BalanceType, apiAct.Units); err == nil {
 				vf = x
 			} else {
 				return err

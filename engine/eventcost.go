@@ -265,7 +265,6 @@ func (ec *EventCost) AsCallCost() *CallCost {
 		ts.TimeEnd = ts.TimeStart.Add(
 			time.Duration(cIl.Usage().Nanoseconds() * int64(cIl.CompressFactor)))
 		if cIl.RatingID != "" {
-			//fmt.Printf("Checking RatingID: <%s>\n", cIl.RatingID)
 			if ec.Rating[cIl.RatingID].RatingFiltersID != "" {
 				rfs := ec.RatingFilters[ec.Rating[cIl.RatingID].RatingFiltersID]
 				ts.MatchedSubject = rfs["Subject"].(string)

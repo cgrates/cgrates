@@ -19,6 +19,7 @@ package utils
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -52,5 +53,26 @@ func TestValueFormulaDayYear(t *testing.T) {
 	now := time.Now()
 	if x := incrementalFormula(params); x != 10/DaysInYear(now.Year()) {
 		t.Error("error caclulating value using formula: ", x)
+	}
+}
+
+func TestValueFormulaParseBalanceFilterValue(t *testing.T) {
+	eVF := &ValueFormula{Static: 10000000000.0}
+	if vf, err := ParseBalanceFilterValue(VOICE, "10s"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eVF, vf) {
+		t.Errorf("Expecting: %+v, received: %+v", eVF, vf)
+	}
+	eVF = &ValueFormula{Static: 1024.0}
+	if vf, err := ParseBalanceFilterValue(DATA, "1024"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eVF, vf) {
+		t.Errorf("Expecting: %+v, received: %+v", eVF, vf)
+	}
+	eVF = &ValueFormula{Static: 10.0}
+	if vf, err := ParseBalanceFilterValue(MONETARY, "10"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eVF, vf) {
+		t.Errorf("Expecting: %+v, received: %+v", eVF, vf)
 	}
 }
