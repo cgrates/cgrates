@@ -739,7 +739,7 @@ func main() {
 	// Init config
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
-		log.Fatalf("Could not parse config: ", err)
+		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return
 	}
 	config.SetCgrConfig(cfg)       // Share the config object
