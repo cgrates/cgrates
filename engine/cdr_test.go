@@ -685,3 +685,102 @@ func TestCDRAsExportMap(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eCDRMp, cdrMp)
 	}
 }
+
+func TestCDRAsCDRsql(t *testing.T) {
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).Local(),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+		RunID:       utils.DEFAULT_RUNID,
+		Usage:       time.Duration(10) * time.Second,
+		Cost:        1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	eCDR := cdr.AsCDRsql()
+	eCDRSql := &CDRsql{
+		Cgrid:       cdr.CGRID,
+		RunID:       cdr.RunID,
+		OriginID:    "dsafdsaf",
+		TOR:         utils.VOICE,
+		Source:      utils.UNIT_TEST,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).Local(),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+		Usage:       cdr.Usage.Nanoseconds(),
+		Cost:        cdr.Cost,
+		ExtraFields: utils.ToJSON(cdr.ExtraFields),
+		RequestType: cdr.RequestType,
+		OriginHost:  cdr.OriginHost,
+		CostDetails: utils.ToJSON(cdr.CostDetails),
+		CreatedAt:   eCDR.CreatedAt,
+	}
+	if !reflect.DeepEqual(eCDR, eCDRSql) {
+		t.Errorf("Expecting: %+v, received: %+v", eCDR, eCDRSql)
+	}
+
+}
+
+func TestCDRNewCDRFromSQL(t *testing.T) {
+	extraFields := map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+	cdrSql := &CDRsql{
+		ID:          123,
+		Cgrid:       "abecd993d06672714c4218a6dcf8278e0589a171",
+		RunID:       "*default",
+		OriginID:    "dsafdsaf",
+		TOR:         utils.VOICE,
+		Source:      utils.UNIT_TEST,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).Local(),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+		Usage:       10000000000,
+		Cost:        1.01,
+		RequestType: utils.META_RATED,
+		OriginHost:  "192.168.1.1",
+		ExtraFields: utils.ToJSON(extraFields),
+	}
+
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).Local(),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+		RunID:       utils.DEFAULT_RUNID,
+		Usage:       time.Duration(10) * time.Second,
+		Cost:        1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+
+	if eCDR, err := NewCDRFromSQL(cdrSql); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cdr, eCDR) {
+		t.Errorf("Expecting: %+v, received: %+v", cdr, eCDR)
+	}
+
+}
