@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -407,22 +408,36 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 		rightPairs = values[0].Pairs
 	}
 
+	if rightPairs == nil { // attempt to match on *any destination, so we don't longer look for prefixes
+		for _, value := range values {
+			if value.DestinationId == utils.ANY {
+				rightPairs = value.Pairs
+				break
+			}
+		}
+	}
+
 	if rightPairs == nil {
 		// check destination ids
 		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
-			if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
-				for _, value := range values {
-					for _, dId := range destIDs {
-						if value.DestinationId == utils.ANY || value.DestinationId == dId {
-							rightPairs = value.Pairs
-						}
-						if rightPairs != nil {
-							break
-						}
+			destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional)
+			if err != nil {
+				if err.Error() != utils.ErrNotFound.Error() { // no reverse found
+					return err
+				}
+				continue
+			}
+			for _, value := range values {
+				for _, dId := range destIDs {
+					if value.DestinationId == dId {
+						rightPairs = value.Pairs
 					}
 					if rightPairs != nil {
 						break
 					}
+				}
+				if rightPairs != nil {
+					break
 				}
 			}
 			if rightPairs != nil {
@@ -430,7 +445,6 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 			}
 		}
 	}
-
 	if rightPairs != nil {
 		// change values in the given object
 		v := reflect.ValueOf(in)
