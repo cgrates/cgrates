@@ -1332,7 +1332,7 @@ func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
 		OriginHost: cdr.OriginHost,
 		OriginID:   cdr.OriginID,
 		CostSource: "TestTutITPrepaidCDRWithSMCost",
-		Usage:      cdr.Usage.Seconds(),
+		Usage:      cdr.Usage,
 		CostDetails: &engine.CallCost{
 			Direction:   utils.OUT,
 			Destination: "1003",

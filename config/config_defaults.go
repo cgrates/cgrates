@@ -152,7 +152,6 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// start the CDR Server service:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
-	"cdr_account_summary": false,			// add account information from dataDB
 	"sm_cost_retries": 5,					// number of queries to sm_costs before recalculating CDR
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
