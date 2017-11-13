@@ -942,9 +942,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		if jsnCdrsCfg.Store_cdrs != nil {
 			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
 		}
-		if jsnCdrsCfg.Cdr_account_summary != nil {
-			self.CDRScdrAccountSummary = *jsnCdrsCfg.Cdr_account_summary
-		}
 		if jsnCdrsCfg.Sm_cost_retries != nil {
 			self.CDRSSMCostRetries = *jsnCdrsCfg.Sm_cost_retries
 		}
