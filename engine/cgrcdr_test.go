@@ -46,7 +46,7 @@ func TestCgrCdrAsCDR(t *testing.T) {
 		Destination: cgrCdr[utils.DESTINATION], SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: -1}
-	if CDR := cgrCdr.AsStoredCdr(""); !reflect.DeepEqual(expctRtCdr, CDR) {
+	if CDR := cgrCdr.AsCDR(""); !reflect.DeepEqual(expctRtCdr, CDR) {
 		t.Errorf("Expecting %v, received: %v", expctRtCdr, CDR)
 	}
 }
@@ -80,7 +80,7 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 		Cost:            0.12,
 		Rated:           true,
 	}
-	if CDR := cgrCdr.AsStoredCdr(""); !reflect.DeepEqual(expctRtCdr, CDR) {
+	if CDR := cgrCdr.AsCDR(""); !reflect.DeepEqual(expctRtCdr, CDR) {
 		t.Errorf("Expecting %v, received: %v", expctRtCdr, CDR)
 	}
 }

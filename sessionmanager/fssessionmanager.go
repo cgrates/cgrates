@@ -163,7 +163,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	if ev.GetReqType(utils.META_DEFAULT) != utils.META_NONE { // Do not process this request
 		var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
 		if err := sm.rater.Call("Responder.GetDerivedMaxSessionTime",
-			ev.AsStoredCdr(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
+			ev.AsCDR(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s",
 				ev.GetUUID(), err.Error()))
 		}
@@ -276,7 +276,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 		}
 	}
 	if sm.cfg.CreateCdr {
-		sm.ProcessCdr(ev.AsStoredCdr(config.CgrConfig().DefaultTimezone))
+		sm.ProcessCdr(ev.AsCDR(config.CgrConfig().DefaultTimezone))
 	}
 	var reply string
 	attrRU := utils.ArgRSv1ResourceUsage{

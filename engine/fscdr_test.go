@@ -57,7 +57,7 @@ func TestCDRFields(t *testing.T) {
 		OriginHost: "127.0.0.1", Source: "freeswitch_json", Direction: utils.OUT, Category: "call", RequestType: utils.META_PREPAID, Tenant: "cgrates.org", Account: "1001", Subject: "1001",
 		Destination: "1003", SetupTime: setupTime, PDD: time.Duration(28) * time.Millisecond, AnswerTime: answerTime, Usage: time.Duration(66) * time.Second, Supplier: "supplier1",
 		DisconnectCause: "NORMAL_CLEARING", ExtraFields: map[string]string{"sip_user_agent": "PJSUA v2.3 Linux-3.2.0.4/x86_64/glibc-2.13"}, Cost: -1}
-	if CDR := fsCdr.AsStoredCdr(""); !reflect.DeepEqual(expctCDR, CDR) {
+	if CDR := fsCdr.AsCDR(""); !reflect.DeepEqual(expctCDR, CDR) {
 		t.Errorf("Expecting: %v, received: %v", expctCDR, CDR)
 	}
 }

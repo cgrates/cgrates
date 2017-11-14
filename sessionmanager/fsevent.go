@@ -339,7 +339,7 @@ func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string
 }
 */
 
-func (fsev FSEvent) AsStoredCdr(timezone string) *engine.CDR {
+func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.CGRID = fsev.GetCgrId(timezone)
 	storCdr.ToR = utils.VOICE

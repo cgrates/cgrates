@@ -320,7 +320,7 @@ func (kev KamEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return false, ""
 }
 
-func (kev KamEvent) AsStoredCdr(timezone string) *engine.CDR {
+func (kev KamEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.CGRID = kev.GetCgrId(timezone)
 	storCdr.ToR = utils.VOICE
