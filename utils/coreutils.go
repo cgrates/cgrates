@@ -165,6 +165,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
 	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
 	gotimeRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
+	gotimeRule2 := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s[+,-]\d+$`)
 	fsTimestamp := regexp.MustCompile(`^\d{16}$`)
 	astTimestamp := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d*[+,-]\d+$`)
 	unixTimestampRule := regexp.MustCompile(`^\d{10}$`)
@@ -179,6 +180,8 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		return time.Parse(time.RFC3339, tmStr)
 	case gotimeRule.MatchString(tmStr):
 		return time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", tmStr)
+	case gotimeRule2.MatchString(tmStr):
+		return time.Parse("2006-01-02 15:04:05.999999999 -0700 -0700", tmStr)
 	case sqlRule.MatchString(tmStr):
 		return time.ParseInLocation("2006-01-02 15:04:05", tmStr, loc)
 	case fsTimestamp.MatchString(tmStr):

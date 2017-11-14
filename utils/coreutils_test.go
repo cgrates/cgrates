@@ -153,6 +153,22 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
+	loc, err := time.LoadLocation("Asia/Kabul")
+	if err != nil {
+		t.Error(err)
+	}
+	expectedTime = time.Date(2013, 12, 30, 15, 0, 1, 0, loc)
+	goTmStr2 := "2013-12-30 15:00:01 +0430 +0430"
+	goTm, err = ParseTimeDetectLayout(goTmStr2, "")
+	if err != nil {
+		t.Error(err)
+	} else if !goTm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", goTm, expectedTime)
+	}
+	//goTmStr2 = "2013-12-30 15:00:01 +0430"
+	//if _, err = ParseTimeDetectLayout(goTmStr2, ""); err != nil {
+	//	t.Errorf("Expecting error")
+	//}
 	fsTmstampStr := "1394291049287234"
 	fsTm, err := ParseTimeDetectLayout(fsTmstampStr, "")
 	expectedTime = time.Date(2014, 3, 8, 15, 4, 9, 287234000, time.UTC)
