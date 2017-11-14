@@ -21,6 +21,7 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1019,5 +1020,42 @@ func TestAPItoTPFilter(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPs, st)
+	}
+}
+
+func TestFilterToTPFilter(t *testing.T) {
+	filter := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Fltr1",
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
+		},
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+	}
+	tpfilter := &utils.TPFilter{
+		ID:     "Fltr1",
+		Tenant: "cgrates.org",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-01-14T00:00:00Z",
+			ExpiryTime:     "2014-01-14T00:00:00Z",
+		},
+		Filters: []*utils.TPRequestFilter{
+			&utils.TPRequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+	}
+	eTPFilter := FilterToTPFilter(filter)
+	if !reflect.DeepEqual(tpfilter, eTPFilter) {
+		t.Errorf("Expecting: %+v, received: %+v", tpfilter, eTPFilter)
 	}
 }
