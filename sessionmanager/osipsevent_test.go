@@ -139,7 +139,7 @@ func TestOsipsEventMissingParameter(t *testing.T) {
 	}
 }
 
-func TestOsipsEventAsStoredCdr(t *testing.T) {
+func TestOsipsEventAsCDR(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1406370492", "")
 	answerTime, _ := utils.ParseTimeDetectLayout("1406370499", "")
 	eStoredCdr := &engine.CDR{
@@ -151,7 +151,7 @@ func TestOsipsEventAsStoredCdr(t *testing.T) {
 		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime,
 		Usage:       time.Duration(20) * time.Second,
 		ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
-	if storedCdr := osipsEv.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+	if storedCdr := osipsEv.AsCDR(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }
@@ -169,7 +169,7 @@ func TestOsipsAccMissedToStoredCdr(t *testing.T) {
 		RequestType: utils.META_PSEUDOPREPAID, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 		Destination: "1002", SetupTime: setupTime, AnswerTime: setupTime,
 		Usage: time.Duration(0), ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
-	if storedCdr := osipsEv.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+	if storedCdr := osipsEv.AsCDR(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 

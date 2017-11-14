@@ -107,7 +107,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions,
 		utils.TBLTPActionTriggers, utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
 		utils.TBLTPAliases, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
-		utils.TBLTPFilters, utils.TBLSMCosts, utils.TBLCDRs, utils.TBLTPActionPlans, utils.TBLVersions,
+		utils.TBLTPFilters, utils.SMCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans, utils.TBLVersions,
 	}
 	for _, tbl := range tbls {
 		if self.db.HasTable(tbl) {

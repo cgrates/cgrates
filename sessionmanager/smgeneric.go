@@ -185,7 +185,7 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 		s.debit(debitUsage, tmtr.ttlLastUsed)
 	}
 	smg.sessionEnd(s.CGRID, s.TotalUsage)
-	cdr := s.EventStart.AsStoredCdr(smg.cgrCfg, smg.Timezone)
+	cdr := s.EventStart.AsCDR(smg.cgrCfg, smg.Timezone)
 	cdr.Usage = s.TotalUsage
 	var reply string
 	smg.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply)
@@ -369,8 +369,7 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
 			return nil, nil // ToDo: handle here also debits
 		}
 		var sessionRuns []*engine.SessionRun
-		if err := smg.rals.Call("Responder.GetSessionRuns",
-			evStart.AsStoredCdr(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
+		if err := smg.rals.Call("Responder.GetSessionRuns", evStart.AsCDR(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
 			return nil, err
 		} else if len(sessionRuns) == 0 {
 			return nil, nil
@@ -660,7 +659,7 @@ func (smg *SMGeneric) GetMaxUsage(gev SMGenericEvent) (maxUsage time.Duration, e
 	}
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err})
 	gev[utils.EVENT_NAME] = utils.CGR_AUTHORIZATION
-	storedCdr := gev.AsStoredCdr(config.CgrConfig(), smg.Timezone)
+	storedCdr := gev.AsCDR(config.CgrConfig(), smg.Timezone)
 	var maxDur float64
 	if err = smg.rals.Call("Responder.GetDerivedMaxSessionTime", storedCdr, &maxDur); err != nil {
 		return
@@ -865,7 +864,7 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 	}
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err})
 	var sessionRuns []*engine.SessionRun
-	if err = smg.rals.Call("Responder.GetSessionRuns", gev.AsStoredCdr(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
+	if err = smg.rals.Call("Responder.GetSessionRuns", gev.AsCDR(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
 		return
 	} else if len(sessionRuns) == 0 {
 		return
@@ -970,7 +969,7 @@ func (smg *SMGeneric) ProcessCDR(gev SMGenericEvent) (err error) {
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Err: err})
 	var reply string
 	if err = smg.cdrsrv.Call("CdrsV1.ProcessCDR",
-		gev.AsStoredCdr(smg.cgrCfg, smg.Timezone), &reply); err != nil {
+		gev.AsCDR(smg.cgrCfg, smg.Timezone), &reply); err != nil {
 		return
 	}
 	return

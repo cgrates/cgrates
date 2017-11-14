@@ -221,11 +221,11 @@ func TestEvCorelate(t *testing.T) {
 	cdrEv, err := engine.NewFSCdr(jsonCdr, cfg)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err.Error())
-	} else if cdrEv.AsStoredCdr("").OriginID != "86cfd6e2-dbda-45a3-b59d-f683ec368e8b" {
-		t.Error("Unexpected acntId received", cdrEv.AsStoredCdr("").OriginID)
+	} else if cdrEv.AsCDR("").OriginID != "86cfd6e2-dbda-45a3-b59d-f683ec368e8b" {
+		t.Error("Unexpected acntId received", cdrEv.AsCDR("").OriginID)
 	}
-	if answerEv.GetCgrId("") != cdrEv.AsStoredCdr("").CGRID {
-		t.Error("CGRIDs do not match", answerEv.GetCgrId(""), cdrEv.AsStoredCdr("").CGRID)
+	if answerEv.GetCgrId("") != cdrEv.AsCDR("").CGRID {
+		t.Error("CGRIDs do not match", answerEv.GetCgrId(""), cdrEv.AsCDR("").CGRID)
 	}
 
 }
@@ -549,14 +549,14 @@ func TestEvCdrCorelate(t *testing.T) {
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
-	evStoredCdr := hangupEv.AsStoredCdr("")
+	evStoredCdr := hangupEv.AsCDR("")
 	cdrEv, err := engine.NewFSCdr(jsonCdr2, cfg)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err.Error())
-	} else if cdrEv.AsStoredCdr("").OriginID != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
-		t.Error("Unexpected acntId received", cdrEv.AsStoredCdr("").OriginID)
+	} else if cdrEv.AsCDR("").OriginID != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+		t.Error("Unexpected acntId received", cdrEv.AsCDR("").OriginID)
 	}
-	jsnStoredCdr := cdrEv.AsStoredCdr("")
+	jsnStoredCdr := cdrEv.AsCDR("")
 	if evStoredCdr.CGRID != jsnStoredCdr.CGRID {
 		t.Errorf("evStoredCdr.CGRID: %s, jsnStoredCdr.CGRID: %s", evStoredCdr.CGRID, jsnStoredCdr.CGRID)
 	}

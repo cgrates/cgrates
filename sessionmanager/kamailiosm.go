@@ -110,7 +110,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	var remainingDuration float64
 	var errReply error
 	if errReply = self.rater.Call("Responder.GetDerivedMaxSessionTime",
-		kev.AsStoredCdr(self.timezone), &remainingDuration); errReply != nil {
+		kev.AsCDR(self.timezone), &remainingDuration); errReply != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time, error: %s", errReply.Error()))
 	}
 	var supplStr string
@@ -205,7 +205,7 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 	if kev.MissingParameter(self.timezone) {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Mandatory IE missing out of event: %+v", kev))
 	}
-	go self.ProcessCdr(kev.AsStoredCdr(self.Timezone()))
+	go self.ProcessCdr(kev.AsCDR(self.Timezone()))
 	if self.rlS != nil { // Release RLs resource
 		go func() {
 			ev, err := kev.AsMapStringIface()

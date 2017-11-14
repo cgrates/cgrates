@@ -485,7 +485,7 @@ func TesUsageReqAsCDR(t *testing.T) {
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage:      time.Duration(10)}
-	if CDR, err := setupReq.AsStoredCdr(""); err != nil {
+	if CDR, err := setupReq.AsCDR(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStorCdr, CDR) {
 		t.Errorf("Expected: %+v, received: %+v", eStorCdr, CDR)

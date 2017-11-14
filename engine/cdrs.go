@@ -51,7 +51,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 		return
 	}
-	if err := cdrServer.processCdr(cgrCdr.AsStoredCdr(cdrServer.cgrCfg.DefaultTimezone)); err != nil {
+	if err := cdrServer.processCdr(cgrCdr.AsCDR(cdrServer.cgrCfg.DefaultTimezone)); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
 	}
 }
@@ -64,7 +64,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 		return
 	}
-	if err := cdrServer.processCdr(fsCdr.AsStoredCdr(cdrServer.Timezone())); err != nil {
+	if err := cdrServer.processCdr(fsCdr.AsCDR(cdrServer.Timezone())); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
 	}
 }

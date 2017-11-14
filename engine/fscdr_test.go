@@ -62,7 +62,7 @@ func TestCDRFields(t *testing.T) {
 		AnswerTime: answerTime, Usage: time.Duration(66) * time.Second,
 		Cost:        -1,
 		ExtraFields: map[string]string{"sip_user_agent": "PJSUA v2.3 Linux-3.2.0.4/x86_64/glibc-2.13"}}
-	if CDR := fsCdr.AsStoredCdr(""); !reflect.DeepEqual(expctCDR, CDR) {
+	if CDR := fsCdr.AsCDR(""); !reflect.DeepEqual(expctCDR, CDR) {
 		t.Errorf("Expecting: %v, received: %v", expctCDR, CDR)
 	}
 }

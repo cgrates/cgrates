@@ -252,7 +252,7 @@ func (cdr *CDR) FieldsAsString(rsrFlds utils.RSRFields) string {
 	return fldVal
 }
 
-func (cdr *CDR) AsStoredCdr(timezone string) *CDR {
+func (cdr *CDR) AsCDR(timezone string) *CDR {
 	return cdr
 }
 
@@ -867,7 +867,7 @@ type UsageRecord struct {
 	ExtraFields map[string]string
 }
 
-func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
+func (self *UsageRecord) AsCDR(timezone string) (*CDR, error) {
 	var err error
 	cdr := &CDR{CGRID: self.GetId(), ToR: self.ToR, RequestType: self.RequestType, Tenant: self.Tenant,
 		Category: self.Category, Account: self.Account, Subject: self.Subject, Destination: self.Destination}

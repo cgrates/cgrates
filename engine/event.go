@@ -43,7 +43,7 @@ type Event interface {
 	GetExtraFields() map[string]string
 	MissingParameter(string) bool
 	ParseEventValue(*utils.RSRField, string) string
-	AsStoredCdr(timezone string) *CDR
+	AsCDR(timezone string) *CDR
 	String() string
 	AsEvent(string) Event
 	ComputeLcr() bool

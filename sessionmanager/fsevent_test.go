@@ -610,7 +610,7 @@ Caller-Username: 04021292812`
 }
 */
 
-func TestFsEvAsStoredCdr(t *testing.T) {
+func TestFsEvAsCDR(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
@@ -623,7 +623,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 		Destination: "1003", SetupTime: setupTime, AnswerTime: aTime,
 		Usage:       time.Duration(66) * time.Second,
 		ExtraFields: make(map[string]string), Cost: -1}
-	if storedCdr := ev.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+	if storedCdr := ev.AsCDR(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }

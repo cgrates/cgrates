@@ -419,7 +419,7 @@ func (self SMGenericEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return true, ""
 }
 
-func (self SMGenericEvent) AsStoredCdr(cfg *config.CGRConfig, timezone string) *engine.CDR {
+func (self SMGenericEvent) AsCDR(cfg *config.CGRConfig, timezone string) *engine.CDR {
 	storCdr := engine.NewCDRWithDefaults(cfg)
 	storCdr.CGRID = self.GetCGRID(utils.META_DEFAULT)
 	storCdr.ToR = utils.FirstNonEmpty(self.GetTOR(utils.META_DEFAULT), storCdr.ToR) // Keep default if none in the event

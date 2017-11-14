@@ -88,7 +88,7 @@ func main() {
 			log.Print("Initializing storDB:", *outStorDBType)
 		}
 		var dmOUT *engine.DataManager
-		dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
+		dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 		storDB, err := engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
@@ -106,7 +106,7 @@ func main() {
 			log.Print("Initializing inDataDB:", *inDataDBType)
 		}
 		var dmIN *engine.DataManager
-		dmIN, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort, *inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
+		dmIN, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort, *inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 		inDataDB, err := migrator.ConfigureV1DataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort, *inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding)
 		if err != nil {
 			log.Fatal(err)

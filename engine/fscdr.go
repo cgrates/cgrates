@@ -122,7 +122,7 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 	return
 }
 
-func (fsCdr FSCdr) AsStoredCdr(timezone string) *CDR {
+func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr := new(CDR)
 	storCdr.CGRID = fsCdr.getCGRID(timezone)
 	storCdr.ToR = utils.VOICE
