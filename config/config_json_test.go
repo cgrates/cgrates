@@ -691,6 +691,17 @@ func TestDfUserServJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDfFilterSJsonCfg(t *testing.T) {
+	eCfg := &FilterSJsonCfg{
+		Stats_conns: &[]*HaPoolJsonCfg{},
+	}
+	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}
+
 func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 	eCfg := &ResourceSJsonCfg{
 		Enabled:          utils.BoolPointer(false),
