@@ -705,7 +705,7 @@ func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 	return tpFilter.AsTPFilter(), nil
 }
 
-func (csvs *CSVStorage) GetTpIds() ([]string, error) {
+func (csvs *CSVStorage) GetTpIds(x string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 

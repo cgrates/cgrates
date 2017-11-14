@@ -33,7 +33,30 @@ const (
 	v1AccountTBL      = "userbalances"
 )
 
-func (m *Migrator) migrateAccounts() (err error) {
+func (m *Migrator) migrateCurrentAccounts() (err error) {
+	var ids []string
+	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.ACCOUNT_PREFIX)
+		acc, err := m.dmIN.DataDB().GetAccount(idg)
+		if err != nil {
+			return err
+		}
+		if acc != nil {
+			if m.dryRun != true {
+				if err := m.dmOut.DataDB().SetAccount(acc); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateV1Accounts() (err error) {
 	var v1Acnt *v1Account
 	for {
 		v1Acnt, err = m.oldDataDB.getv1Account()
@@ -46,7 +69,7 @@ func (m *Migrator) migrateAccounts() (err error) {
 		if v1Acnt != nil {
 			acnt := v1Acnt.AsAccount()
 			if m.dryRun != true {
-				if err = m.dm.DataDB().SetAccount(acnt); err != nil {
+				if err = m.dmOut.DataDB().SetAccount(acnt); err != nil {
 					return err
 				}
 				m.stats[utils.Accounts] += 1
@@ -57,11 +80,44 @@ func (m *Migrator) migrateAccounts() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
-		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateAccounts() (err error) {
+	var vrs engine.Versions
+	current := engine.CurrentDataDBVersions()
+	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	if err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	} else if len(vrs) == 0 {
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion,
+			"version number is not defined for ActionTriggers model")
+	}
+	switch vrs[utils.Accounts] {
+	case current[utils.Accounts]:
+		if m.sameDBname {
+			return
+		}
+		if err := m.migrateCurrentAccounts(); err != nil {
+			return err
+		}
+		return
+
+	case 1:
+		if err := m.migrateV1Accounts(); err != nil {
+			return err
 		}
 	}
 	return

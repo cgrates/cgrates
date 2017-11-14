@@ -28,31 +28,47 @@ import (
 	"time"
 )
 
-func (ms *MongoStorage) GetTpIds() ([]string, error) {
+func (ms *MongoStorage) GetTpIds(x string) ([]string, error) {
 	tpidMap := make(map[string]bool)
 	session := ms.session.Copy()
 	db := session.DB(ms.db)
 	defer session.Close()
-	cols, err := db.CollectionNames()
-	if err != nil {
-		return nil, err
-	}
-	for _, col := range cols {
-		if strings.HasPrefix(col, "tp_") {
+	var tpids []string
+	if x != "" {
+		if strings.HasPrefix(x, "tp_") {
 			tpids := make([]string, 0)
-			if err := db.C(col).Find(nil).Select(bson.M{"tpid": 1}).Distinct("tpid", &tpids); err != nil {
+			if err := db.C(x).Find(nil).Select(bson.M{"tpid": 1}).Distinct("tpid", &tpids); err != nil {
 				return nil, err
 			}
 			for _, tpid := range tpids {
 				tpidMap[tpid] = true
 			}
 		}
-	}
-	var tpids []string
-	for tpid := range tpidMap {
-		tpids = append(tpids, tpid)
+		for tpid := range tpidMap {
+			tpids = append(tpids, tpid)
+		}
+	} else {
+		cols, err := db.CollectionNames()
+		if err != nil {
+			return nil, err
+		}
+		for _, col := range cols {
+			if strings.HasPrefix(col, "tp_") {
+				tpids := make([]string, 0)
+				if err := db.C(col).Find(nil).Select(bson.M{"tpid": 1}).Distinct("tpid", &tpids); err != nil {
+					return nil, err
+				}
+				for _, tpid := range tpids {
+					tpidMap[tpid] = true
+				}
+			}
+		}
+		for tpid := range tpidMap {
+			tpids = append(tpids, tpid)
+		}
 	}
 	return tpids, nil
+
 }
 
 func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filter map[string]string, pag *utils.Paginator) ([]string, error) {

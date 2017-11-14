@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/mediocregopher/radix.v2/pool"
@@ -78,7 +79,7 @@ func (v1rs *v1Redis) cmd(cmd string, args ...interface{}) *redis.Resp {
 		return redis.NewResp(err)
 	}
 	result := c1.Cmd(cmd, args...)
-	if result.IsType(redis.IOErr) { // Failover mecanism
+	if result.IsType(redis.IOErr) { // Failover mecaneism
 		utils.Logger.Warning(fmt.Sprintf("<RedisStorage> error <%s>, attempting failover.", result.Err.Error()))
 		c2, err := v1rs.dbPool.Get()
 		if err == nil {
@@ -92,6 +93,7 @@ func (v1rs *v1Redis) cmd(cmd string, args ...interface{}) *redis.Resp {
 	}
 	return result
 }
+func (v1rs *v1Redis) Close() {}
 
 func (v1rs *v1Redis) getKeysForPrefix(prefix string) ([]string, error) {
 	r := v1rs.cmd("KEYS", prefix+"*")
@@ -99,6 +101,32 @@ func (v1rs *v1Redis) getKeysForPrefix(prefix string) ([]string, error) {
 		return nil, r.Err
 	}
 	return r.List()
+}
+
+// Adds a single load instance to load history
+func (v1rs *v1Redis) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int, transactionID string) error {
+	if loadHistSize == 0 { // Load history disabled
+		return nil
+	}
+	marshaled, err := v1rs.ms.Marshal(&ldInst)
+	if err != nil {
+		return err
+	}
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
+		histLen, err := v1rs.cmd("LLEN", utils.LOADINST_KEY).Int()
+		if err != nil {
+			return nil, err
+		}
+		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
+			if err := v1rs.cmd("RPOP", utils.LOADINST_KEY).Err; err != nil {
+				return nil, err
+			}
+		}
+		err = v1rs.cmd("LPUSH", utils.LOADINST_KEY, marshaled).Err
+		return nil, err
+	}, 0, utils.LOADINST_KEY)
+
+	return err
 }
 
 //Account methods

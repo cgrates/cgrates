@@ -35,7 +35,7 @@ type AttrGetTPIds struct {
 
 // Queries tarrif plan identities gathered from all tables.
 func (self *ApierV1) GetTPIds(attrs AttrGetTPIds, reply *[]string) error {
-	if ids, err := self.StorDb.GetTpIds(); err != nil {
+	if ids, err := self.StorDb.GetTpIds(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound

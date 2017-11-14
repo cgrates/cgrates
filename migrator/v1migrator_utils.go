@@ -23,11 +23,12 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func ConfigureV1DataStorage(db_type, host, port, name, user, pass, marshaler string) (db V1DataDB, err error) {
-	var d V1DataDB
+func ConfigureV1DataStorage(db_type, host, port, name, user, pass, marshaler string) (db MigratorDataDB, err error) {
+	var d MigratorDataDB
 	switch db_type {
 	case utils.REDIS:
 		var db_nb int
@@ -42,7 +43,7 @@ func ConfigureV1DataStorage(db_type, host, port, name, user, pass, marshaler str
 		d, err = newv1RedisStorage(host, db_nb, pass, marshaler)
 	case utils.MONGO:
 		d, err = newv1MongoStorage(host, port, name, user, pass, utils.DataDB, nil)
-		db = d.(V1DataDB)
+		db = d.(MigratorDataDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
 			db_type, utils.REDIS, utils.MONGO))
@@ -51,4 +52,12 @@ func ConfigureV1DataStorage(db_type, host, port, name, user, pass, marshaler str
 		return nil, err
 	}
 	return d, nil
+}
+
+func (m *Migrator) InStorDB() engine.LoadStorage {
+	return m.oldStorDB.(engine.LoadStorage)
+}
+
+func (m *Migrator) OutStorDB() engine.LoadStorage {
+	return m.storDB.(engine.LoadStorage)
 }
