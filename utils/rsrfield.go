@@ -24,7 +24,7 @@ import (
 	"strings"
 )
 
-func NewRSRField(fldStr string) (*RSRField, error) {
+func NewRSRField(fldStr string) (fld *RSRField, err error) {
 	if len(fldStr) == 0 {
 		return nil, nil
 	}
@@ -35,12 +35,10 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 		if fltrStart < 1 {
 			return nil, fmt.Errorf("Invalid FilterStartValue in string: %s", fldStr)
 		}
-		for _, fltrVal := range strings.Split(fldStr[fltrStart+1:len(fldStr)-1], INFIELD_SEP) {
-			if rsrFltr, err := NewRSRFilter(fltrVal); err != nil {
-				return nil, fmt.Errorf("Invalid FilterValue in string: %s, err: %s", fltrVal, err.Error())
-			} else {
-				filters = append(filters, rsrFltr)
-			}
+		fltrVal := fldStr[fltrStart+1 : len(fldStr)-1]
+		filters, err = ParseRSRFilters(fltrVal, MetaPipe)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid FilterValue in string: %s, err: %s", fltrVal, err.Error())
 		}
 		fldStr = fldStr[:fltrStart] // Take the filter part out before compiling further
 

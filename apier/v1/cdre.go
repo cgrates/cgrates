@@ -26,6 +26,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -270,9 +271,16 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	if arg.ExportFileName != nil && len(*arg.ExportFileName) != 0 {
 		fileName = *arg.ExportFileName
 	}
-	filePath := path.Join(eDir, fileName)
-	if exportFormat == utils.DRYRUN {
+	var filePath string
+	switch exportFormat {
+	case utils.MetaFileFWV, utils.MetaFileCSV:
+		filePath = path.Join(eDir, fileName)
+	case utils.DRYRUN:
 		filePath = utils.DRYRUN
+	default:
+		u, _ := url.Parse(eDir)
+		u.Path = path.Join(u.Path, fileName)
+		filePath = u.String()
 	}
 	usageMultiplyFactor := exportTemplate.UsageMultiplyFactor
 	for k, v := range arg.UsageMultiplyFactor {
@@ -296,7 +304,8 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	} else if len(cdrs) == 0 {
 		return
 	}
-	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat, filePath, utils.META_NONE, exportID,
+	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
+		filePath, utils.META_NONE, exportID,
 		synchronous, attempts, fieldSep, usageMultiplyFactor,
 		costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster)
 	if err != nil {
