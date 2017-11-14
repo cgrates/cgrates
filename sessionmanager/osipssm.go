@@ -232,7 +232,7 @@ func (osm *OsipsSessionManager) onOpensipsStart(cdrDagram *osipsdagram.OsipsEven
 // Triggered by CDR event
 func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	osipsEv, _ := NewOsipsEvent(cdrDagram)
-	if err := osm.ProcessCdr(osipsEv.AsStoredCdr(osm.timezone)); err != nil {
+	if err := osm.ProcessCdr(osipsEv.AsCDR(osm.timezone)); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(osm.timezone), osipsEv.GetUUID(), err.Error()))
 	}
 }
@@ -334,7 +334,7 @@ func (osm *OsipsSessionManager) processCdrStop(osipsEv *OsipsEvent) error {
 	if err := osipsEvStart.updateDurationFromEvent(osipsEv); err != nil {
 		return err
 	}
-	return osm.ProcessCdr(osipsEvStart.AsStoredCdr(osm.timezone))
+	return osm.ProcessCdr(osipsEvStart.AsCDR(osm.timezone))
 }
 
 func (osm *OsipsSessionManager) Sessions() []*Session {

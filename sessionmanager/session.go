@@ -59,7 +59,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 		sessionManager: sm,
 		connId:         connId,
 	}
-	if err := sm.Rater().Call("Responder.GetSessionRuns", ev.AsStoredCdr(s.sessionManager.Timezone()), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
+	if err := sm.Rater().Call("Responder.GetSessionRuns", ev.AsCDR(s.sessionManager.Timezone()), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
 	}
 	for runIdx := range s.sessionRuns {

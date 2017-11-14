@@ -150,7 +150,7 @@ func TestSMGenericEventGetSessionTTL(t *testing.T) {
 	}
 }
 
-func TestSMGenericEventAsStoredCdr(t *testing.T) {
+func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev := SMGenericEvent{}
 	smGev[utils.EVENT_NAME] = "TEST_EVENT"
 	smGev[utils.TOR] = utils.SMS
@@ -177,7 +177,7 @@ func TestSMGenericEventAsStoredCdr(t *testing.T) {
 		Destination: "+4986517174963", SetupTime: time.Date(2015, 11, 9, 14, 21, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 9, 14, 22, 2, 0, time.UTC),
 		Usage: time.Duration(83) * time.Second, PDD: time.Duration(300) * time.Millisecond, Supplier: "supplier1", DisconnectCause: "NORMAL_DISCONNECT",
 		ExtraFields: map[string]string{"Extra1": "Value1", "Extra2": "5"}, Cost: -1}
-	if storedCdr := smGev.AsStoredCdr(cfg, "UTC"); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+	if storedCdr := smGev.AsCDR(cfg, "UTC"); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }

@@ -264,7 +264,7 @@ func (osipsev *OsipsEvent) DialogId() string {
 	return osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID]
 }
 
-func (osipsEv *OsipsEvent) AsStoredCdr(timezone string) *engine.CDR {
+func (osipsEv *OsipsEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.CGRID = osipsEv.GetCgrId(timezone)
 	storCdr.ToR = utils.VOICE
