@@ -31,7 +31,7 @@ import (
 )
 
 var (
-	sameDBname      true
+	sameDBname      = true
 	inDataDB        migrator.MigratorDataDB
 	oldstorDB       engine.Storage
 	oStorDBType     string
@@ -133,7 +133,7 @@ func main() {
 			log.Print("Migrating: ", *migrate)
 		}
 		if inDataDBName != outDataDBName {
-			sameDBname := false
+			sameDBname = false
 		}
 		m, err := migrator.NewMigrator(dmIN, dmOUT, *outDataDBType, *dbDataEncoding, storDB, *storDBType, inDataDB, *inDataDBType, *inDBDataEncoding, oldstorDB, *oldStorDBType, *dryRun, sameDBname)
 		if err != nil {
