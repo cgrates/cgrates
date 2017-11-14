@@ -147,6 +147,7 @@ const (
 	CSV_SEP                       = ','
 	FALLBACK_SEP                  = ';'
 	INFIELD_SEP                   = ";"
+	SUBFIELD_SEP                  = "|"
 	FIELDS_SEP                    = ","
 	InInFieldSep                  = ":"
 	STATIC_HDRVAL_SEP             = "::"

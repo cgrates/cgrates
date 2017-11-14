@@ -24,7 +24,7 @@ import (
 	"strings"
 )
 
-func NewRSRField(fldStr string) (*RSRField, error) {
+func NewRSRField(fldStr string) (fld *RSRField, err error) {
 	if len(fldStr) == 0 {
 		return nil, nil
 	}
@@ -35,12 +35,10 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 		if fltrStart < 1 {
 			return nil, fmt.Errorf("Invalid FilterStartValue in string: %s", fldStr)
 		}
-		for _, fltrVal := range strings.Split(fldStr[fltrStart+1:len(fldStr)-1], INFIELD_SEP) {
-			if rsrFltr, err := NewRSRFilter(fltrVal); err != nil {
-				return nil, fmt.Errorf("Invalid FilterValue in string: %s, err: %s", fltrVal, err.Error())
-			} else {
-				filters = append(filters, rsrFltr)
-			}
+		fltrVal := fldStr[fltrStart+1 : len(fldStr)-1]
+		filters, err = ParseRSRFilters(fltrVal, SUBFIELD_SEP)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid FilterValue in string: %s, err: %s", fltrVal, err.Error())
 		}
 		fldStr = fldStr[:fltrStart] // Take the filter part out before compiling further
 
@@ -149,12 +147,16 @@ func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a reg
 }
 
 func (rsrf *RSRField) FilterPasses(value string) bool {
+	fmt.Printf("RSRField: %s, filterPasses value: <%q>\n", ToJSON(rsrf), value)
 	if len(rsrf.filters) == 0 { // No filters
 		return true
 	}
 	parsedVal := rsrf.ParseValue(value)
+	fmt.Printf("parsedVal: %s\n", parsedVal)
 	filterPasses := false
+	fmt.Printf("having filters: %s, len(filters): %d\n", ToJSON(rsrf.filters), len(rsrf.filters))
 	for _, fltr := range rsrf.filters {
+		fmt.Printf("Checking filter: %s")
 		if fltr.Pass(parsedVal) {
 			filterPasses = true
 		}
@@ -192,6 +194,7 @@ type RSRFilter struct {
 }
 
 func (rsrFltr *RSRFilter) Pass(val string) bool {
+	fmt.Printf("Filter with rule: %s, parsing val: %q\n", rsrFltr.filterRule, val)
 	if rsrFltr.filterRule == "" {
 		return !rsrFltr.negative
 	}
