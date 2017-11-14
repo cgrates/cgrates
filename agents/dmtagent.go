@@ -202,6 +202,9 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> CCA SetProcessorAVPs for message: %+v, error: %s", ccr.diamMessage, err))
 		return false, ErrDiameterRatingFailed
 	}
+	if reqProcessor.DryRun {
+		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCA message: %s", cca.diamMessage))
+	}
 	return true, nil
 }
 
