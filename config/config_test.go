@@ -269,7 +269,7 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
-
+	//asd
 	eHaPoolcfg := []*HaPoolConfig{}
 
 	if cgrCfg.RALsEnabled != false {
@@ -577,6 +577,15 @@ func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 
 	if !reflect.DeepEqual(cgrCfg.UserServerIndexes, eStrSlc) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.UserServerIndexes, eStrSlc)
+	}
+}
+
+func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
+	eFiltersCfg := &FilterSCfg{
+		StatSConns: []*HaPoolConfig{},
+	}
+	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
 	}
 }
 
