@@ -20,7 +20,6 @@ package migrator
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -60,30 +59,52 @@ type v1Stat struct {
 
 type v1Stats []*v1Stat
 
-func (m *Migrator) migrateStats() (err error) {
-	var vrs engine.Versions
-	if m.dm.DataDB() == nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.NoStorDBConnection,
-			"no connection to datadb")
-	}
-	vrs, err = m.dm.DataDB().GetVersions(utils.TBLVersions)
+func (m *Migrator) migrateCurrentStats() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().DefaultTenant
+	//StatQueue
+	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.StatQueuePrefix)
 	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for Stats model")
+		return err
 	}
-	if vrs[utils.StatS] != 1 { // Right now we only support migrating from version 1
-		log.Print("Wrong version")
-		return
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.StatQueuePrefix+tenant+":")
+		sgs, err := m.dmIN.GetStatQueue(tenant, idg, true, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if sgs != nil {
+			if m.dryRun != true {
+				if err := m.dmOut.SetStatQueue(sgs); err != nil {
+					return err
+				}
+			}
+		}
 	}
+	//StatQueueProfile
+	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
+		sgs, err := m.dmIN.GetStatQueueProfile(tenant, idg, true, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if sgs != nil {
+			if m.dryRun != true {
+				if err := m.dmOut.SetStatQueueProfile(sgs); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return
+}
+
+func (m *Migrator) migrateV1CDRSTATS() (err error) {
 	var v1Sts *v1Stat
 	for {
 		v1Sts, err = m.oldDataDB.getV1Stats()
@@ -106,14 +127,14 @@ func (m *Migrator) migrateStats() (err error) {
 			if err != nil {
 				return err
 			}
-			if m.dryRun != true {
-				if err := m.dm.SetFilter(filter); err != nil {
+			if !m.dryRun {
+				if err := m.dmOut.SetFilter(filter); err != nil {
 					return err
 				}
-				if err := m.dm.SetStatQueue(sq); err != nil {
+				if err := m.dmOut.SetStatQueue(sq); err != nil {
 					return err
 				}
-				if err := m.dm.SetStatQueueProfile(sts); err != nil {
+				if err := m.dmOut.SetStatQueueProfile(sts); err != nil {
 					return err
 				}
 				m.stats[utils.StatS] += 1
@@ -123,11 +144,44 @@ func (m *Migrator) migrateStats() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.StatS: engine.CurrentStorDBVersions()[utils.StatS]}
-		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating Stats version into dataDB", err.Error()))
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateStats() (err error) {
+	var vrs engine.Versions
+	current := engine.CurrentDataDBVersions()
+	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	if err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	} else if len(vrs) == 0 {
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion,
+			"version number is not defined for ActionTriggers model")
+	}
+	switch vrs[utils.StatS] {
+	case current[utils.StatS]:
+		if m.sameDBname {
+			return
+		}
+		if err := m.migrateCurrentStats(); err != nil {
+			return err
+		}
+		return
+
+	case 1:
+		if err := m.migrateV1CDRSTATS(); err != nil {
+			return err
 		}
 	}
 	return

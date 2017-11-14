@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,30 @@ type v1Action struct {
 
 type v1Actions []*v1Action
 
-func (m *Migrator) migrateActions() (err error) {
+func (m *Migrator) migrateCurrentActions() (err error) {
+	var ids []string
+	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.ACTION_PREFIX)
+		acts, err := m.dmIN.GetActions(idg, true, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if acts != nil {
+			if m.dryRun != true {
+				if err := m.dmOut.SetActions(idg, acts, utils.NonTransactional); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateV1Actions() (err error) {
 	var v1ACs *v1Actions
 	var acts engine.Actions
 	for {
@@ -55,22 +79,55 @@ func (m *Migrator) migrateActions() (err error) {
 				acts = append(acts, act)
 
 			}
-			if m.dryRun != true {
-				if err := m.dm.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+			if !m.dryRun {
+				if err := m.dmOut.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.Actions] += 1
 			}
 		}
 	}
-	if m.dryRun != true {
+	if !m.dryRun {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
-		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateActions() (err error) {
+	var vrs engine.Versions
+	current := engine.CurrentDataDBVersions()
+	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	if err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	} else if len(vrs) == 0 {
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion,
+			"version number is not defined for ActionTriggers model")
+	}
+	switch vrs[utils.Actions] {
+	case current[utils.Actions]:
+		if m.sameDBname {
+			return
+		}
+		if err := m.migrateCurrentActions(); err != nil {
+			return err
+		}
+		return
+
+	case 1:
+		if err := m.migrateV1Actions(); err != nil {
+			return err
 		}
 	}
 	return

@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dm *engine.DataManager, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB V1DataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string, dryRun bool) (m *Migrator, err error) {
+func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDBname bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -41,27 +41,30 @@ func NewMigrator(dm *engine.DataManager, dataDBType, dataDBEncoding string, stor
 	stats := make(map[string]int)
 
 	m = &Migrator{
-		dm: dm, dataDBType: dataDBType,
-		storDB: storDB, storDBType: storDBType, mrshlr: mrshlr,
+		dmOut: dmOut, dataDBType: dataDBType,
+		storDB: storDB, storDBType: storDBType,
+		mrshlr: mrshlr, dmIN: dmIN,
 		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
 		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType,
-		oldmrshlr: oldmrshlr, dryRun: dryRun, stats: stats,
+		oldmrshlr: oldmrshlr, dryRun: dryRun, sameDBname: sameDBname, stats: stats,
 	}
 	return m, err
 }
 
 type Migrator struct {
-	dm            *engine.DataManager
+	dmIN          *engine.DataManager //oldatadb
+	dmOut         *engine.DataManager
 	dataDBType    string
 	storDB        engine.Storage
 	storDBType    string
 	mrshlr        engine.Marshaler
-	oldDataDB     V1DataDB
+	oldDataDB     MigratorDataDB
 	oldDataDBType string
 	oldStorDB     engine.Storage
 	oldStorDBType string
 	oldmrshlr     engine.Marshaler
 	dryRun        bool
+	sameDBname    bool
 	stats         map[string]int
 }
 
@@ -84,7 +87,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
-				if err := m.dm.DataDB().SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
+				if err := m.dmOut.DataDB().SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
@@ -108,7 +111,224 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 		case utils.MetaStats:
 			err = m.migrateStats()
 		case utils.MetaThresholds:
-			err = m.migrateStats()
+			err = m.migrateThresholds()
+		//only Move
+		case utils.MetaRatingPlans:
+			err = m.migrateRatingPlans()
+		case utils.MetaRatingProfile:
+			err = m.migrateRatingProfiles()
+		case utils.MetaDestinations:
+			err = m.migrateDestinations()
+		case utils.MetaReverseDestinations:
+			err = m.migrateReverseDestinations()
+		case utils.MetaLCR:
+			err = m.migrateLCR()
+		case utils.MetaCdrStats:
+			err = m.migrateCdrStats()
+		case utils.MetaTiming:
+			err = m.migrateTimings()
+		case utils.MetaRQF:
+			err = m.migrateRequestFilter()
+		case utils.MetaResource:
+			err = m.migrateResources()
+		case utils.MetaReverseAlias:
+			err = m.migrateReverseAlias()
+		case utils.MetaAlias:
+			err = m.migrateAlias()
+		case utils.MetaUser:
+			err = m.migrateUser()
+		case utils.MetaSubscribers:
+			err = m.migrateSubscribers()
+		case utils.MetaDerivedChargersV:
+			err = m.migrateDerivedChargers()
+			//TPS
+		case utils.MetaTpRatingPlans:
+			err = m.migrateTPratingplans()
+		case utils.MetaTpLcrs:
+			err = m.migrateTPlcrs()
+		case utils.MetaTpFilters:
+			err = m.migrateTPfilters()
+		case utils.MetaTpDestinationRates:
+			err = m.migrateTPdestinationrates()
+		case utils.MetaTpActionTriggers:
+			err = m.migrateTPactiontriggers()
+		case utils.MetaTpAccountActions:
+			err = m.migrateTPaccountacction()
+		case utils.MetaTpActionPlans:
+			err = m.migrateTPactionplans()
+		case utils.MetaTpActions:
+			err = m.migrateTPactions()
+		case utils.MetaTpDerivedCharges:
+			err = m.migrateTPderivedchargers()
+		case utils.MetaTpThresholds:
+			err = m.migrateTPthresholds()
+		case utils.MetaTpStats:
+			err = m.migrateTPstats()
+		case utils.MetaTpSharedGroups:
+			err = m.migrateTPsharedgroups()
+		case utils.MetaTpRatingProfiles:
+			err = m.migrateTPratingprofiles()
+		case utils.MetaTpResources:
+			err = m.migrateTPresources()
+		case utils.MetaTpRates:
+			err = m.migrateTPrates()
+		case utils.MetaTpTiming:
+			err = m.migrateTpTimings()
+		case utils.MetaTpAliases:
+			err = m.migrateTPaliases()
+		case utils.MetaTpUsers:
+			err = m.migrateTPusers()
+		case utils.MetaTpDerivedChargersV:
+			err = m.migrateTPderivedchargers()
+		case utils.MetaTpCdrStats:
+			err = m.migrateTPcdrstats()
+		case utils.MetaTpDestinations:
+			err = m.migrateTPDestinations()
+		case utils.MetaTpRatingPlan:
+			err = m.migrateTPratingplans()
+		case utils.MetaTpRatingProfile:
+			err = m.migrateTPfilters()
+			//DATADB ALL
+		case utils.MetaDataDB:
+			if err = m.migrateCostDetails(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateAccounts(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateActionPlans(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateActionTriggers(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateActions(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateSharedGroups(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateStats(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateThresholds(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateRatingPlans(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateRatingProfiles(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateDestinations(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateReverseDestinations(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateLCR(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateCdrStats(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTimings(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateRequestFilter(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateResources(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateReverseAlias(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateAlias(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateUser(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateSubscribers(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateDerivedChargers(); err != nil {
+				log.Print(err)
+			}
+			err = nil
+			//STORDB ALL
+		case utils.MetaStorDB:
+			if err := m.migrateTPratingplans(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPlcrs(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPfilters(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPdestinationrates(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPactiontriggers(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPaccountacction(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPactionplans(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPactions(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPderivedchargers(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPthresholds(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPstats(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPsharedgroups(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPratingprofiles(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPresources(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPrates(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTpTimings(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPaliases(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPusers(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPderivedchargers(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPcdrstats(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPDestinations(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPratingplans(); err != nil {
+				log.Print(err)
+			}
+			if err := m.migrateTPfilters(); err != nil {
+				log.Print(err)
+			}
+			err = nil
 		}
 	}
 	for k, v := range m.stats {

@@ -153,7 +153,7 @@ type LoadStorage interface {
 
 // LoadReader reads from .csv or TP tables and provides the data ready for the tp_db or data_db.
 type LoadReader interface {
-	GetTpIds() ([]string, error)
+	GetTpIds(string) ([]string, error)
 	GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
 	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
 	GetTPDestinations(string, string) ([]*utils.TPDestination, error)

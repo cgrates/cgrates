@@ -128,11 +128,60 @@ func CurrentDBVersions(storType string) Versions {
 }
 
 func CurrentDataDBVersions() Versions {
-	return Versions{utils.StatS: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.Thresholds: 2}
+	return Versions{
+		utils.StatS:               2,
+		utils.Accounts:            2,
+		utils.Actions:             2,
+		utils.ActionTriggers:      2,
+		utils.ActionPlans:         2,
+		utils.SharedGroups:        2,
+		utils.Thresholds:          2,
+		utils.Timing:              2,
+		utils.RQF:                 2,
+		utils.Resource:            2,
+		utils.ReverseAlias:        2,
+		utils.Alias:               2,
+		utils.User:                2,
+		utils.Subscribers:         2,
+		utils.DerivedChargersV:    2,
+		utils.CdrStats:            2,
+		utils.Destinations:        2,
+		utils.ReverseDestinations: 2,
+		utils.LCR:                 2,
+		utils.RatingPlan:          2,
+		utils.RatingProfile:       2,
+	}
 }
 
 func CurrentStorDBVersions() Versions {
-	return Versions{utils.COST_DETAILS: 2}
+	return Versions{
+		utils.COST_DETAILS:       2,
+		utils.TpRatingPlans:      2,
+		utils.TpLcrs:             2,
+		utils.TpFilters:          2,
+		utils.TpDestinationRates: 2,
+		utils.TpActionTriggers:   2,
+		utils.TpAccountActions:   2,
+		utils.TpActionPlans:      2,
+		utils.TpActions:          2,
+		utils.TpDerivedCharges:   2,
+		utils.TpThresholds:       2,
+		utils.TpStats:            2,
+		utils.TpSharedGroups:     2,
+		utils.TpRatingProfiles:   2,
+		utils.TpResources:        2,
+		utils.TpRates:            2,
+		utils.TpTiming:           2,
+		utils.TpResource:         2,
+		utils.TpAliases:          2,
+		utils.TpUsers:            2,
+		utils.TpDerivedChargersV: 2,
+		utils.TpCdrStats:         2,
+		utils.TpDestinations:     2,
+		utils.TpLCR:              2,
+		utils.TpRatingPlan:       2,
+		utils.TpRatingProfile:    2,
+	}
 }
 
 // Versions will keep trac of various item versions
