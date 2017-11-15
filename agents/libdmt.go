@@ -426,7 +426,8 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 
 // messageAddAVPsWithPath will dynamically add AVPs into the message
 // 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
-func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr string, appnd bool, timezone string) error {
+func messageSetAVPsWithPath(m *diam.Message, path []interface{},
+	avpValStr string, appnd bool, timezone string) error {
 	if len(path) == 0 {
 		return errors.New("Empty path as AVP filter")
 	}
@@ -700,7 +701,9 @@ func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, proce
 			}
 			return err
 		}
-		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), fmtOut, cfgFld.Append, self.timezone); err != nil {
+		if err := messageSetAVPsWithPath(self.diamMessage,
+			splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP),
+			fmtOut, cfgFld.Append, self.timezone); err != nil {
 			return err
 		}
 		if cfgFld.BreakOnSuccess { // don't look for another field
