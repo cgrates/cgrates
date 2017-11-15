@@ -35,7 +35,8 @@ import (
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
-func NewDiameterAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection, pubsubs rpcclient.RpcClientConnection) (*DiameterAgent, error) {
+func NewDiameterAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection,
+	pubsubs rpcclient.RpcClientConnection) (*DiameterAgent, error) {
 	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg, pubsubs: pubsubs, connMux: new(sync.Mutex)}
 	if reflect.ValueOf(da.pubsubs).IsNil() {
 		da.pubsubs = nil // Empty it so we can check it later

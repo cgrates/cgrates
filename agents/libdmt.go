@@ -429,7 +429,8 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField,
 
 // messageAddAVPsWithPath will dynamically add AVPs into the message
 // 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
-func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr string, appnd bool, timezone string) error {
+func messageSetAVPsWithPath(m *diam.Message, path []interface{},
+	avpValStr string, appnd bool, timezone string) error {
 	if len(path) == 0 {
 		return errors.New("Empty path as AVP filter")
 	}
