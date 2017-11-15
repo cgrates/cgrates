@@ -33,9 +33,7 @@ import (
 var (
 	sameDBname      = true
 	inDataDB        migrator.MigratorDataDB
-	oldstorDB       engine.Storage
-	oStorDBType     string
-	oDataDBType     string
+	instorDB        engine.Storage
 	oDBDataEncoding string
 	migrate         = flag.String("migrate", "", "Fire up automatic migration *to use multiple values use ',' as separator \n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups> ")
 	version         = flag.Bool("version", false, "Prints the application version.")
@@ -47,12 +45,12 @@ var (
 	outDataDBUser = flag.String("out_datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
 	outDataDBPass = flag.String("out_datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
 
-	storDBType = flag.String("stordb_type", config.CgrConfig().StorDBType, "The type of the storDb Database <mysql|postgres>")
-	storDBHost = flag.String("stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
-	storDBPort = flag.String("stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
-	storDBName = flag.String("stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
-	storDBUser = flag.String("stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
-	storDBPass = flag.String("stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
+	outStorDBType = flag.String("out_stordb_type", config.CgrConfig().StorDBType, "The type of the storDb Database <mysql|postgres>")
+	outStorDBHost = flag.String("out_stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
+	outStorDBPort = flag.String("out_stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
+	outStorDBName = flag.String("out_stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
+	outStorDBUser = flag.String("out_stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
+	outStorDBPass = flag.String("out_stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
 
 	inDataDBType = flag.String("in_datadb_type", "", "The type of the DataDb Database <redis>")
 	inDataDBHost = flag.String("in_datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
@@ -61,15 +59,15 @@ var (
 	inDataDBUser = flag.String("in_datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
 	inDataDBPass = flag.String("in_datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
 
-	oldStorDBType = flag.String("old_stordb_type", "", "The type of the storDb Database <mysql|postgres>")
-	oldStorDBHost = flag.String("old_stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
-	oldStorDBPort = flag.String("old_stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
-	oldStorDBName = flag.String("old_stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
-	oldStorDBUser = flag.String("old_stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
-	oldStorDBPass = flag.String("old_stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
+	inStorDBType = flag.String("in_stordb_type", "", "The type of the storDb Database <mysql|postgres>")
+	inStorDBHost = flag.String("in_stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
+	inStorDBPort = flag.String("in_stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
+	inStorDBName = flag.String("in_stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
+	inStorDBUser = flag.String("in_stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
+	inStorDBPass = flag.String("in_stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
 
-	loadHistorySize    = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
-	oldLoadHistorySize = flag.Int("old_load_history_size", 0, "Limit the number of records in the load history")
+	loadHistorySize   = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+	inLoadHistorySize = flag.Int("in_load_history_size", 0, "Limit the number of records in the load history")
 
 	dbDataEncoding   = flag.String("dbData_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object Data in strings")
 	inDBDataEncoding = flag.String("in_dbData_encoding", "", "The encoding used to store object Data in strings")
@@ -87,11 +85,11 @@ func main() {
 	if migrate != nil && *migrate != "" { // Run migrator
 		if *verbose {
 			log.Print("Initializing DataDB:", *outDataDBType)
-			log.Print("Initializing storDB:", *storDBType)
+			log.Print("Initializing storDB:", *outStorDBType)
 		}
 		var dmOUT *engine.DataManager
 		dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheConfig, *loadHistorySize)
-		storDB, err := engine.ConfigureStorStorage(*storDBType, *storDBHost, *storDBPort, *storDBName, *storDBUser, *storDBPass, *dbDataEncoding,
+		storDB, err := engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
 			log.Fatal(err)
@@ -113,17 +111,17 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		oldstorDB = storDB
+		instorDB = storDB
 
 		if *verbose {
-			if *oldStorDBType != "" {
-				log.Print("Initializing oldstorDB:", *oldStorDBType)
+			if *inStorDBType != "" {
+				log.Print("Initializing instorDB:", *inStorDBType)
 			} else {
-				log.Print("Initializing oldstorDB:", *storDBType)
+				log.Print("Initializing instorDB:", *outStorDBType)
 			}
 		}
-		if *oldStorDBType != "" {
-			oldstorDB, err = engine.ConfigureStorStorage(oStorDBType, *oldStorDBHost, *oldStorDBPort, *oldStorDBName, *oldStorDBUser, *oldStorDBPass, *inDBDataEncoding,
+		if *inStorDBType != "" {
+			instorDB, err = engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
 				config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 			if err != nil {
 				log.Fatal(err)
@@ -135,7 +133,7 @@ func main() {
 		if inDataDBName != outDataDBName {
 			sameDBname = false
 		}
-		m, err := migrator.NewMigrator(dmIN, dmOUT, *outDataDBType, *dbDataEncoding, storDB, *storDBType, inDataDB, *inDataDBType, *inDBDataEncoding, oldstorDB, *oldStorDBType, *dryRun, sameDBname)
+		m, err := migrator.NewMigrator(dmIN, dmOUT, *outDataDBType, *dbDataEncoding, storDB, *inStorDBType, inDataDB, *inDataDBType, *inDBDataEncoding, instorDB, *inStorDBType, *dryRun, sameDBname)
 		if err != nil {
 			log.Fatal(err)
 		}

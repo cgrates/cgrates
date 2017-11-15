@@ -120,31 +120,18 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 
 // update
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
-func (self *SQLStorage) GetTpIds(x string) ([]string, error) {
-	if x != "" {
-		rows, err := self.Db.Query(
-			fmt.Sprintf(" (SELECT tpid FROM %s)", x))
+func (self *SQLStorage) GetTpIds(colname string) ([]string, error) {
+	var rows *sql.Rows
+	var err error
+	if colname != "" {
+		rows, err = self.Db.Query(
+			fmt.Sprintf(" (SELECT tpid FROM %s)", colname))
 		if err != nil {
 			return nil, err
 		}
 		defer rows.Close()
-		ids := make([]string, 0)
-		i := 0
-		for rows.Next() {
-			i++ //Keep here a reference so we know we got at least one
-			var id string
-			err = rows.Scan(&id)
-			if err != nil {
-				return nil, err
-			}
-			ids = append(ids, id)
-		}
-		if i == 0 {
-			return nil, nil
-		}
-		return ids, nil
 	} else {
-		rows, err := self.Db.Query(
+		rows, err = self.Db.Query(
 			fmt.Sprintf(
 				"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
 				utils.TBLTPTimings,
@@ -171,23 +158,22 @@ func (self *SQLStorage) GetTpIds(x string) ([]string, error) {
 			return nil, err
 		}
 		defer rows.Close()
-		ids := make([]string, 0)
-		i := 0
-		for rows.Next() {
-			i++ //Keep here a reference so we know we got at least one
-			var id string
-			err = rows.Scan(&id)
-			if err != nil {
-				return nil, err
-			}
-			ids = append(ids, id)
-		}
-		if i == 0 {
-			return nil, nil
-		}
-
-		return ids, nil
 	}
+	ids := make([]string, 0)
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
 }
 
 // ToDo: TEST
