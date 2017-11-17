@@ -67,7 +67,7 @@ LANDLINE_OFFPEAK,0,1,1s,60s,0s
 LANDLINE_OFFPEAK,0,1,1s,1s,60s
 GBP_71,0.000000,5.55555,1s,1s,0s
 GBP_72,0.000000,7.77777,1s,1s,0s
-GBP_70,0.000000,1,1,1s,0s
+GBP_70,0.000000,1,1s,1s,0s
 RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s
 RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s
 R_URG,0,0,1s,1s,0s
@@ -163,10 +163,10 @@ SG3,*any,*lowest,
 `
 	actions = `
 MINI,*topup_reset,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
-MINI,*topup,,,,*voice,*out,,NAT,test,,*unlimited,,100,10,false,false,10
+MINI,*topup,,,,*voice,*out,,NAT,test,,*unlimited,,100s,10,false,false,10
 SHARED,*topup,,,,*monetary,*out,,,,SG1,*unlimited,,100,10,false,false,10
 TOPUP10_AC,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,1,10,false,false,10
-TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,false,false,10
+TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10
 SE0,*topup_reset,,,,*monetary,*out,,,,SG2,*unlimited,,0,10,false,false,10
 SE10,*topup_reset,,,,*monetary,*out,,,,SG2,*unlimited,,10,5,false,false,10
 SE10,*topup,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
@@ -179,8 +179,8 @@ BLOCK,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 BLOCK_EMPTY,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,0,20,true,false,20
 BLOCK_EMPTY,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
-EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300,10,false,false,10
-NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50,10,false,false,10
+EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300s,10,false,false,10
+NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50s,10,false,false,10
 VF,*debit,,,,*monetary,*out,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
 TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,*out,,*any,,,*unlimited,,1000,20,false,false,10
 `
@@ -934,7 +934,7 @@ func TestLoadActions(t *testing.T) {
 				Type:           utils.StringPointer(utils.VOICE),
 				Uuid:           as1[1].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				Value:          &utils.ValueFormula{Static: 100},
+				Value:          &utils.ValueFormula{Static: 100 * float64(time.Second)},
 				Weight:         utils.Float64Pointer(10),
 				RatingSubject:  utils.StringPointer("test"),
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),

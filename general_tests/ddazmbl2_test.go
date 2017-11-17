@@ -51,7 +51,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	sharedGroups := ``
 	lcrs := ``
 	actions := `TOPUP10_AC,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,0,10,false,false,10
-TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,false,false,10`
+TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
@@ -135,7 +135,7 @@ func TestExecuteActions2(t *testing.T) {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
-	} else if acnt.BalanceMap[utils.VOICE][0].Value != 40 {
+	} else if acnt.BalanceMap[utils.VOICE][0].Value != 40*float64(time.Second) {
 		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[utils.VOICE][0].Value)
 	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 0 {
 		t.Error("Account does not have enough monetary balance", acnt.BalanceMap[utils.MONETARY][0].Value)
@@ -165,7 +165,7 @@ func TestDebit2(t *testing.T) {
 	if len(acnt.BalanceMap) != 2 {
 		t.Error("Wrong number of user balances found", acnt.BalanceMap)
 	}
-	if acnt.BalanceMap[utils.VOICE][0].Value != 20 {
+	if acnt.BalanceMap[utils.VOICE][0].Value != 20*float64(time.Second) {
 		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[utils.VOICE][0].Value)
 	}
 	for _, blnc := range acnt.BalanceMap[utils.MONETARY] { // Test negative balance for default one

@@ -69,17 +69,21 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 	} else if maxSessionTime != -1 {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
-	deTMobile := &Destination{Id: "DE_TMOBILE", Prefixes: []string{"+49151", "+49160", "+49170", "+49171", "+49175"}}
+	deTMobile := &Destination{Id: "DE_TMOBILE",
+		Prefixes: []string{"+49151", "+49160", "+49170", "+49171", "+49175"}}
 	if err := dm.DataDB().SetDestination(deTMobile, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if err := dm.DataDB().SetReverseDestination(deTMobile, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	b10 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
-	b20 := &Balance{Value: 20, Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
+	b10 := &Balance{Value: 10 * float64(time.Second),
+		Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
+	b20 := &Balance{Value: 20 * float64(time.Second),
+		Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
 	rifsAccount := &Account{ID: utils.ConcatenatedKey(testTenant, "rif"),
-		BalanceMap: map[string]Balances{utils.VOICE: Balances{b10}}}
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{b10}}}
 	dansAccount := &Account{ID: utils.ConcatenatedKey(testTenant, "dan"),
 		BalanceMap: map[string]Balances{utils.VOICE: Balances{b20}}}
 	if err := dm.DataDB().SetAccount(rifsAccount); err != nil {
@@ -438,10 +442,18 @@ func TestResponderGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts, lcrLc.SupplierCosts)
 	}
-	bRif12 := &Balance{Value: 40, Weight: 10, DestinationIDs: utils.NewStringMap(dstDe.Id)}
-	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationIDs: utils.NewStringMap(dstDe.Id)}
-	rif12sAccount := &Account{ID: utils.ConcatenatedKey("tenant12", "rif12"), BalanceMap: map[string]Balances{utils.VOICE: Balances{bRif12}}, AllowNegative: true}
-	ivo12sAccount := &Account{ID: utils.ConcatenatedKey("tenant12", "ivo12"), BalanceMap: map[string]Balances{utils.VOICE: Balances{bIvo12}}, AllowNegative: true}
+	bRif12 := &Balance{Value: 40 * float64(time.Second),
+		Weight: 10, DestinationIDs: utils.NewStringMap(dstDe.Id)}
+	bIvo12 := &Balance{Value: 60 * float64(time.Second),
+		Weight: 10, DestinationIDs: utils.NewStringMap(dstDe.Id)}
+	rif12sAccount := &Account{
+		ID: utils.ConcatenatedKey("tenant12", "rif12"),
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{bRif12}}, AllowNegative: true}
+	ivo12sAccount := &Account{
+		ID: utils.ConcatenatedKey("tenant12", "ivo12"),
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{bIvo12}}, AllowNegative: true}
 	for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {
 		if err := dm.DataDB().SetAccount(acnt); err != nil {
 			t.Error(err)
@@ -461,7 +473,7 @@ func TestResponderGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.Entry, lcrLc.Entry)
 
 	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts, lcrLc.SupplierCosts)
+		t.Errorf("Expecting: %s\n, received: %+v", utils.ToJSON(eLcLcr.SupplierCosts), utils.ToJSON(lcrLc.SupplierCosts))
 	}
 	/*
 			// Test *qos_threshold strategy here,
