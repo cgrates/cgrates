@@ -89,7 +89,16 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	if attr.ExportID != nil && len(*attr.ExportID) != 0 {
 		exportID = *attr.ExportID
 	}
-	fileName := fmt.Sprintf("cdre_%s.%s", exportID, exportFormat)
+	var expFormat string
+	switch exportFormat {
+	case utils.MetaFileFWV:
+		expFormat = "fwv"
+	case utils.MetaFileCSV:
+		expFormat = "csv"
+	default:
+		expFormat = exportFormat
+	}
+	fileName := fmt.Sprintf("cdre_%s.%s", exportID, expFormat)
 	if attr.ExportFileName != nil && len(*attr.ExportFileName) != 0 {
 		fileName = *attr.ExportFileName
 	}
