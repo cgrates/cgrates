@@ -17,7 +17,8 @@
 				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "^*users", "mandatory": true},
 				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
+					"value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
 				{"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*ccr_usage", "mandatory": true},
@@ -29,7 +30,9 @@
 				{"tag": "ResultCode",  "field_filter":"CGRError(USER_NOT_FOUND)", 
 					"field_id": "Result-Code", "type": "*constant", "value": "5030"},
 				{"tag": "GrantedUnits", "field_filter":"CGRError(^$)", 
-					"field_id": "Granted-Service-Unit>CC-Time", "type": "*composed", "value": "CGRMaxUsage", "mandatory": true},
+					"field_id": "Granted-Service-Unit>CC-Time", 
+					"type": "*handler", "handler_id": "*value_exponent", 
+					"value": "CGRMaxUsage;^|-9", "mandatory": true},
 			],
 		},
 		{
@@ -54,7 +57,9 @@
 			],
 			"cca_fields":[								// fields returned in CCA
 				{"tag": "GrantedUnits", "field_filter":"CGRError(^$)", 
-					"field_id": "Granted-Service-Unit>CC-Time", "type": "*composed", "value": "CGRMaxUsage", "mandatory": true},
+					"field_id": "Granted-Service-Unit>CC-Time", 
+					"type": "*handler", "handler_id": "*value_exponent", 
+					"value": "CGRMaxUsage;^|-9", "mandatory": true},
 			],
 		},
 		{
@@ -79,7 +84,9 @@
 			],
 			"cca_fields":[ // fields returned in CCA								
 				{"tag": "GrantedUnits", "field_filter":"CGRError(^$)", 
-					"field_id": "Granted-Service-Unit>CC-Time", "type": "*composed", "value": "CGRMaxUsage", "mandatory": true},
+					"field_id": "Granted-Service-Unit>CC-Time", 
+					"type": "*handler", "handler_id": "*value_exponent", 
+					"value": "CGRMaxUsage;^|-9", "mandatory": true},
 			],
 		},
 	],

@@ -179,7 +179,8 @@ func avpValAsString(a *diam.AVP) string {
 }
 
 // Handler for meta functions
-func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, error) {
+func metaHandler(m *diam.Message, processorVars map[string]string,
+	tag, arg string, dur time.Duration) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
 		var ok bool
@@ -224,8 +225,9 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 
 // metaValueExponent will multiply the float value with the exponent provided.
 // Expects 2 arguments in template separated by |
-func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
-	valStr := composedFieldvalue(m, argsTpl, 0, nil)
+func metaValueExponent(m *diam.Message, processorVars map[string]string,
+	argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, 0, processorVars)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
 	if len(handlerArgs) != 2 {
 		return "", errors.New("Unexpected number of arguments")
@@ -242,8 +244,9 @@ func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimal
 	return strconv.FormatFloat(utils.Round(res, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 }
 
-func metaSum(m *diam.Message, argsTpl utils.RSRFields, passAtIndex, roundingDecimals int) (string, error) {
-	valStr := composedFieldvalue(m, argsTpl, passAtIndex, nil)
+func metaSum(m *diam.Message, processorVars map[string]string,
+	argsTpl utils.RSRFields, passAtIndex, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, passAtIndex, processorVars)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
 	var summed float64
 	for _, arg := range handlerArgs {
@@ -376,7 +379,8 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 	}
 }
 
-func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}, processorVars map[string]string) (fmtValOut string, err error) {
+func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField,
+	extraParam interface{}, processorVars map[string]string) (fmtValOut string, err error) {
 	var outVal string
 	passAtIndex := -1
 	passedAllFilters := true
@@ -402,11 +406,11 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.META_HANDLER:
 		switch cfgFld.HandlerId {
 		case META_VALUE_EXPONENT:
-			outVal, err = metaValueExponent(m, cfgFld.Value, 10) // FixMe: add here configured number of decimals
+			outVal, err = metaValueExponent(m, processorVars, cfgFld.Value, 10) // FixMe: add here configured number of decimals
 		case META_SUM:
-			outVal, err = metaSum(m, cfgFld.Value, passAtIndex, 10)
+			outVal, err = metaSum(m, processorVars, cfgFld.Value, passAtIndex, 10)
 		default:
-			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
+			outVal, err = metaHandler(m, processorVars, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
 			}
@@ -699,7 +703,9 @@ func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, proce
 			}
 			return err
 		}
-		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), fmtOut, cfgFld.Append, self.timezone); err != nil {
+		if err := messageSetAVPsWithPath(self.diamMessage,
+			splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP),
+			fmtOut, cfgFld.Append, self.timezone); err != nil {
 			return err
 		}
 		if cfgFld.BreakOnSuccess { // don't look for another field

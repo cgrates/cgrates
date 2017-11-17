@@ -994,24 +994,28 @@ func (smg *SMGeneric) Call(serviceMethod string, args interface{}, reply interfa
 }
 
 // Part of utils.BiRPCServer to help internal connections do calls over rpcclient.RpcClientConnection interface
-func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMethod string, args interface{}, reply interface{}) error {
+func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection,
+	serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	// get method BiRPCV1.Method
-	method := reflect.ValueOf(smg).MethodByName("BiRPC" + parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version V1 in the method name and add prefix
+	method := reflect.ValueOf(smg).MethodByName(
+		"BiRPC" + parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version V1 in the method name and add prefix
 	if !method.IsValid() {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	// construct the params
 	var clntVal reflect.Value
 	if clnt == nil {
-		clntVal = reflect.New(reflect.TypeOf(new(utils.BiRPCInternalClient))).Elem() // Kinda cheat since we make up a type here
+		clntVal = reflect.New(
+			reflect.TypeOf(new(utils.BiRPCInternalClient))).Elem() // Kinda cheat since we make up a type here
 	} else {
 		clntVal = reflect.ValueOf(clnt)
 	}
-	params := []reflect.Value{clntVal, reflect.ValueOf(args), reflect.ValueOf(reply)}
+	params := []reflect.Value{clntVal, reflect.ValueOf(args),
+		reflect.ValueOf(reply)}
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return utils.ErrServerError
@@ -1026,7 +1030,8 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMetho
 	return err
 }
 
-func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) error {
+func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection,
+	ev SMGenericEvent, maxUsage *float64) error {
 	maxUsageDur, err := smg.GetMaxUsage(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)

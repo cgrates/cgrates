@@ -108,16 +108,17 @@ func TestMetaValueExponent(t *testing.T) {
 			}),
 		},
 	})
-	if val, err := metaValueExponent(m, utils.ParseRSRFieldsMustCompile(
+	if val, err := metaValueExponent(m, nil, utils.ParseRSRFieldsMustCompile(
 		"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
 		utils.INFIELD_SEP), 10); err != nil {
 		t.Error(err)
 	} else if val != "0.1" {
 		t.Error("Received: ", val)
 	}
-	if _, err = metaValueExponent(m, utils.ParseRSRFieldsMustCompile(
-		"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
-		utils.INFIELD_SEP), 10); err == nil {
+	if _, err = metaValueExponent(m, nil,
+		utils.ParseRSRFieldsMustCompile(
+			"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+			utils.INFIELD_SEP), 10); err == nil {
 		t.Error("Should have received error") // Insufficient number arguments
 	}
 }
@@ -140,12 +141,17 @@ func TestMetaSum(t *testing.T) {
 			}),
 		},
 	})
-	if val, err := metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 0, 10); err != nil {
+	if val, err := metaSum(m, nil,
+		utils.ParseRSRFieldsMustCompile(
+			"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+			utils.INFIELD_SEP), 0, 10); err != nil {
 		t.Error(err)
 	} else if val != "9995" {
 		t.Error("Received: ", val)
 	}
-	if _, err = metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 0, 10); err == nil {
+	if _, err = metaSum(m, nil, utils.ParseRSRFieldsMustCompile(
+		"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+		utils.INFIELD_SEP), 0, 10); err == nil {
 		t.Error("Should have received error") // Insufficient number arguments
 	}
 }

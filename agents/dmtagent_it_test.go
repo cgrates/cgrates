@@ -254,7 +254,8 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 		Usage:      time.Duration(0), RunID: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 	}
-	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm,
+	ccr := storedCdrToCCR(cdr, "UNIT_TEST",
+		daCfg.DiameterAgentCfg().OriginRealm,
 		daCfg.DiameterAgentCfg().VendorId,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION,
 		daCfg.DiameterAgentCfg().DebitInterval, false)
