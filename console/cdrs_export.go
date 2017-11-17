@@ -57,5 +57,6 @@ func (self *CmdExportCdrs) PostprocessRpcParams() error {
 }
 
 func (self *CmdExportCdrs) RpcResult() interface{} {
-	return new(v1.ArgExportCDRs)
+	var reply *v1.RplExportedCDRs
+	return &reply
 }
