@@ -176,7 +176,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 120.0
+	eAcntVal := 120.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -202,7 +202,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	eAcntVal = 150.0
+	eAcntVal = 150.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -242,7 +242,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 	}
 	//var acnt *engine.Account
 	//attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eVoiceVal := 90.0
+	eVoiceVal := 90.0 * float64(time.Second)
 	eMoneyVal := 8.7399
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
@@ -269,7 +269,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	eVoiceVal = 90.0
+	eVoiceVal = 90.0 * float64(time.Second)
 	eMoneyVal = 8.79
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
@@ -677,7 +677,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 
 func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestTTLWithRelocate", BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestTTLWithRelocate"),
-		Value: utils.Float64Pointer(300), RatingSubject: utils.StringPointer("*zero50ms")}
+		Value: utils.Float64Pointer(300 * float64(time.Second)), RatingSubject: utils.StringPointer("*zero50ms")}
 	var reply string
 	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -686,7 +686,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
-	eAcntVal := 300.0
+	eAcntVal := 300.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -724,7 +724,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	} else if aSessions[0].Usage != time.Duration(120)*time.Second {
 		t.Errorf("Expecting 2m, received usage: %v", aSessions[0].Usage)
 	}
-	eAcntVal = 180.0
+	eAcntVal = 180.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -762,7 +762,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
 		t.Errorf("Expecting 2m30s, received usage: %v", aSessions[0].Usage)
 	}
-	eAcntVal = 150.0
+	eAcntVal = 150.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -771,7 +771,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 
 	time.Sleep(100 * time.Millisecond)
-	eAcntVal = 149.95
+	eAcntVal = 149.95 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -802,7 +802,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestRelocateWithOriginIDPrefix",
 		BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestRelocateWithOriginIDPrefix"),
-		Value: utils.Float64Pointer(300), RatingSubject: utils.StringPointer("*zero1s")}
+		Value: utils.Float64Pointer(300 * float64(time.Second)), RatingSubject: utils.StringPointer("*zero1s")}
 	var reply string
 	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -811,7 +811,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
-	eAcntVal := 300.0
+	eAcntVal := 300.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -849,7 +849,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	} else if aSessions[0].Usage != time.Duration(120)*time.Second {
 		t.Errorf("Expecting 2m, received usage: %v", aSessions[0].Usage)
 	}
-	eAcntVal = 180.0
+	eAcntVal = 180.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -885,7 +885,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
 		t.Errorf("Expecting 2m30s, received usage: %v", aSessions[0].Usage)
 	}
-	eAcntVal = 150.0
+	eAcntVal = 150.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -913,7 +913,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		utils.ACCID: "12372-1"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	eAcntVal = 240
+	eAcntVal = 240 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {

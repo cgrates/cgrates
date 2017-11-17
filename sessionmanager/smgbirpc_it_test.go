@@ -111,7 +111,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		Account:       "TestSMGBiRPCSessionAutomaticDisconnects",
 		BalanceType:   utils.VOICE,
 		BalanceID:     utils.StringPointer("TestSMGBiRPCSessionAutomaticDisconnects"),
-		Value:         utils.Float64Pointer(0.01),
+		Value:         utils.Float64Pointer(0.01 * float64(time.Second)),
 		RatingSubject: utils.StringPointer("*zero1ms")}
 	var reply string
 	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
@@ -122,7 +122,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	var acnt *engine.Account
 	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant,
 		Account: attrSetBalance.Account}
-	eAcntVal := 0.01
+	eAcntVal := 0.01 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -195,7 +195,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 
 func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestSMGBiRPCSessionOriginatorTerminate", BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestSMGBiRPCSessionOriginatorTerminate"),
-		Value: utils.Float64Pointer(1), RatingSubject: utils.StringPointer("*zero1ms")}
+		Value: utils.Float64Pointer(1 * float64(time.Second)), RatingSubject: utils.StringPointer("*zero1ms")}
 	var reply string
 	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -204,7 +204,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
-	eAcntVal := 1.0
+	eAcntVal := 1.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -242,7 +242,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	time.Sleep(time.Duration(50 * time.Millisecond)) // Give time for  debits to occur
 	if err := smgRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() > 0.995 { // FixMe: should be not 0.93?
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() > 0.995*float64(time.Second) { // FixMe: should be not 0.93?
 		t.Errorf("Balance value: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	if err := smgRPC.Call("SMGenericV1.ProcessCDR", smgEv, &reply); err != nil {
