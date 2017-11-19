@@ -28,14 +28,19 @@ import (
 	"time"
 )
 
-func (ms *MongoStorage) GetTpIds() ([]string, error) {
+func (ms *MongoStorage) GetTpIds(colname string) ([]string, error) {
 	tpidMap := make(map[string]bool)
 	session := ms.session.Copy()
 	db := session.DB(ms.db)
 	defer session.Close()
-	cols, err := db.CollectionNames()
-	if err != nil {
-		return nil, err
+	var tpids []string
+	var err error
+	cols := []string{colname}
+	if colname == "" {
+		cols, err = db.CollectionNames()
+		if err != nil {
+			return nil, err
+		}
 	}
 	for _, col := range cols {
 		if strings.HasPrefix(col, "tp_") {
@@ -48,7 +53,6 @@ func (ms *MongoStorage) GetTpIds() ([]string, error) {
 			}
 		}
 	}
-	var tpids []string
 	for tpid := range tpidMap {
 		tpids = append(tpids, tpid)
 	}

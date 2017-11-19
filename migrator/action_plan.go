@@ -47,7 +47,31 @@ func (at *v1ActionPlan) IsASAP() bool {
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
 
-func (m *Migrator) migrateActionPlans() (err error) {
+func (m *Migrator) migrateCurrentActionPlans() (err error) {
+	var ids []string
+	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.ACTION_PLAN_PREFIX)
+		acts, err := m.dmIN.DataDB().GetActionPlan(idg, true, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if acts != nil {
+			if m.dryRun != true {
+
+				if err := m.dmOut.DataDB().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateV1ActionPlans() (err error) {
 	var v1APs *v1ActionPlans
 	for {
 		v1APs, err = m.oldDataDB.getV1ActionPlans()
@@ -61,7 +85,7 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			for _, v1ap := range *v1APs {
 				ap := v1ap.AsActionPlan()
 				if m.dryRun != true {
-					if err = m.dm.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+					if err = m.dmOut.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 						return err
 					}
 					m.stats[utils.ActionPlans] += 1
@@ -72,11 +96,44 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
-		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateActionPlans() (err error) {
+	var vrs engine.Versions
+	current := engine.CurrentDataDBVersions()
+	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	if err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	} else if len(vrs) == 0 {
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion,
+			"version number is not defined for ActionTriggers model")
+	}
+	switch vrs[utils.ActionPlans] {
+	case current[utils.ActionPlans]:
+		if m.sameDBname {
+			return
+		}
+		if err := m.migrateCurrentActionPlans(); err != nil {
+			return err
+		}
+		return
+
+	case 1:
+		if err := m.migrateV1ActionPlans(); err != nil {
+			return err
 		}
 	}
 	return

@@ -117,15 +117,30 @@ func testVersion(t *testing.T) {
 	var test string
 	var currentVersion Versions
 	var testVersion Versions
+	dataDbVersions := CurrentDataDBVersions()
+	storDbVersions := CurrentStorDBVersions()
+
+	allVersions := make(Versions)
+	for k, v := range dataDbVersions {
+		allVersions[k] = v
+	}
+	for k, v := range storDbVersions {
+		allVersions[k] = v
+	}
+
 	storType := dm3.DataDB().GetStorageType()
 	switch storType {
 	case utils.MONGO, utils.MAPSTOR:
-		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		currentVersion = allVersions
+
+		testVersion = allVersions
+		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
 	case utils.REDIS:
-		currentVersion = CurrentDataDBVersions()
-		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
+		currentVersion = dataDbVersions
+		testVersion = dataDbVersions
+		testVersion[utils.Accounts] = 1
+
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
 	}
 
@@ -159,12 +174,14 @@ func testVersion(t *testing.T) {
 	storType = storageDb.GetStorageType()
 	switch storType {
 	case utils.MONGO, utils.MAPSTOR:
-		currentVersion = Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-		testVersion = Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
+		currentVersion = allVersions
+		testVersion = allVersions
+		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
 	case utils.POSTGRES, utils.MYSQL:
-		currentVersion = CurrentStorDBVersions()
-		testVersion = Versions{utils.COST_DETAILS: 1}
+		currentVersion = storDbVersions
+		testVersion = allVersions
+		testVersion[utils.COST_DETAILS] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
 	}
 	//storageDb

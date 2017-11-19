@@ -101,11 +101,14 @@ func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 }
 
 func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
-	tbls := []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
+	tbls := []string{
+		utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
 		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 		utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions,
-		utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-		utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats}
+		utils.TBLTPActionTriggers, utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
+		utils.TBLTPAliases, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
+		utils.TBLTPFilters, utils.TBLSMCosts, utils.TBLCDRs, utils.TBLTPActionPlans, utils.TBLVersions,
+	}
 	for _, tbl := range tbls {
 		if self.db.HasTable(tbl) {
 			return false, nil
@@ -115,20 +118,47 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 	return true, nil
 }
 
+// update
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
-func (self *SQLStorage) GetTpIds() ([]string, error) {
-	rows, err := self.Db.Query(
-		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
-			utils.TBLTPTimings,
-			utils.TBLTPDestinations,
-			utils.TBLTPRates,
-			utils.TBLTPDestinationRates,
-			utils.TBLTPRatingPlans,
-			utils.TBLTPRateProfiles))
-	if err != nil {
-		return nil, err
+func (self *SQLStorage) GetTpIds(colname string) ([]string, error) {
+	var rows *sql.Rows
+	var err error
+	if colname != "" {
+		rows, err = self.Db.Query(
+			fmt.Sprintf(" (SELECT tpid FROM %s)", colname))
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+	} else {
+		rows, err = self.Db.Query(
+			fmt.Sprintf(
+				"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+				utils.TBLTPTimings,
+				utils.TBLTPDestinations,
+				utils.TBLTPRates,
+				utils.TBLTPDestinationRates,
+				utils.TBLTPRatingPlans,
+				utils.TBLTPRateProfiles,
+				utils.TBLTPSharedGroups,
+				utils.TBLTPCdrStats,
+				utils.TBLTPLcrs,
+				utils.TBLTPActions,
+				utils.TBLTPActionTriggers,
+				utils.TBLTPAccountActions,
+				utils.TBLTPDerivedChargers,
+				utils.TBLTPUsers,
+				utils.TBLTPAliases,
+				utils.TBLTPResources,
+				utils.TBLTPStats,
+				utils.TBLTPThresholds,
+				utils.TBLTPFilters,
+				utils.TBLTPActionPlans))
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
 	}
-	defer rows.Close()
 	ids := make([]string, 0)
 	i := 0
 	for rows.Next() {
@@ -206,6 +236,7 @@ func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 
 func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) error {
 	tx := self.db.Begin()
+
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,

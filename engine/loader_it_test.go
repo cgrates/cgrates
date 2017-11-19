@@ -367,7 +367,7 @@ func TestLoaderITImportToStorDb(t *testing.T) {
 	if err := csvImporter.Run(); err != nil {
 		t.Error("Error when importing tpdata to storDb: ", err)
 	}
-	if tpids, err := storDb.GetTpIds(); err != nil {
+	if tpids, err := storDb.GetTpIds(""); err != nil {
 		t.Error("Error when querying storDb for imported data: ", err)
 	} else if len(tpids) != 1 || tpids[0] != utils.TEST_SQL {
 		t.Errorf("Data in storDb is different than expected %v", tpids)

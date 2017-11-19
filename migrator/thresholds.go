@@ -20,7 +20,7 @@ package migrator
 
 import (
 	"fmt"
-	"log"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -29,16 +29,14 @@ import (
 )
 
 type v2ActionTrigger struct {
-	ID            string // original csv tag
-	UniqueID      string // individual id
-	ThresholdType string //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *balance_expired
-	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc, *min_ddc, *max_ddc
-	ThresholdValue float64
-	Recurrent      bool          // reset excuted flag each run
-	MinSleep       time.Duration // Minimum duration between two executions in case of recurrent triggers
-	ExpirationDate time.Time
-	ActivationDate time.Time
-	//BalanceType       string // *monetary/*voice etc
+	ID                string // original csv tag
+	UniqueID          string // individual id
+	ThresholdType     string //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *balance_expired
+	ThresholdValue    float64
+	Recurrent         bool          // reset excuted flag each run
+	MinSleep          time.Duration // Minimum duration between two executions in case of recurrent triggers
+	ExpirationDate    time.Time
+	ActivationDate    time.Time
 	Balance           *engine.BalanceFilter //filtru
 	Weight            float64
 	ActionsID         string
@@ -49,30 +47,51 @@ type v2ActionTrigger struct {
 
 type v2ActionTriggers []*v2ActionTrigger
 
-func (m *Migrator) migratev1ActionTriggers() (err error) {
-	var vrs engine.Versions
-	if m.dm.DataDB() == nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.NoStorDBConnection,
-			"no connection to datadb")
-	}
-	vrs, err = m.dm.DataDB().GetVersions(utils.TBLVersions)
+func (m *Migrator) migrateCurrentThresholds() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().DefaultTenant
+	//StatQueue
+	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ThresholdPrefix)
 	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for Stats model")
+		return err
 	}
-	if vrs[utils.Thresholds] != 1 { // Right now we only support migrating from version 1
-		log.Print("Wrong version")
-		return
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.ThresholdPrefix+tenant+":")
+		ths, err := m.dmIN.GetThreshold(tenant, idg, true, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if ths != nil {
+			if m.dryRun != true {
+				if err := m.dmOut.SetThreshold(ths); err != nil {
+					return err
+				}
+			}
+		}
 	}
+	//StatQueueProfile
+	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.ThresholdProfilePrefix+tenant+":")
+		ths, err := m.dmIN.GetThresholdProfile(tenant, idg, true, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if ths != nil {
+			if m.dryRun != true {
+				if err := m.dmOut.SetThresholdProfile(ths); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateV2ActionTriggers() (err error) {
 	var v2ACT *v2ActionTrigger
 	for {
 		v2ACT, err = m.oldDataDB.getV2ActionTrigger()
@@ -88,13 +107,13 @@ func (m *Migrator) migratev1ActionTriggers() (err error) {
 				return err
 			}
 			if m.dryRun != true {
-				if err := m.dm.SetFilter(filter); err != nil {
+				if err := m.dmOut.SetFilter(filter); err != nil {
 					return err
 				}
-				if err := m.dm.SetThreshold(th); err != nil {
+				if err := m.dmOut.SetThreshold(th); err != nil {
 					return err
 				}
-				if err := m.dm.SetThresholdProfile(thp); err != nil {
+				if err := m.dmOut.SetThresholdProfile(thp); err != nil {
 					return err
 				}
 				m.stats[utils.Thresholds] += 1
@@ -104,11 +123,44 @@ func (m *Migrator) migratev1ActionTriggers() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Thresholds: engine.CurrentStorDBVersions()[utils.Thresholds]}
-		if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateThresholds() (err error) {
+	var vrs engine.Versions
+	current := engine.CurrentDataDBVersions()
+	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	if err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	} else if len(vrs) == 0 {
+		return utils.NewCGRError(utils.Migrator,
+			utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion,
+			"version number is not defined for ActionTriggers model")
+	}
+	switch vrs[utils.Thresholds] {
+	case current[utils.Thresholds]:
+		if m.sameDBname {
+			return
+		}
+		if err := m.migrateCurrentThresholds(); err != nil {
+			return err
+		}
+		return
+
+	case 1:
+		if err := m.migrateV2ActionTriggers(); err != nil {
+			return err
 		}
 	}
 	return
@@ -194,7 +246,7 @@ func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *en
 
 func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 	var vrs engine.Versions
-	if m.dm.DataDB() == nil {
+	if m.dmOut.DataDB() == nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
 			utils.NoStorDBConnection,
@@ -206,21 +258,21 @@ func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 			return err
 		}
 		if filter != nil {
-			if err := m.dm.SetFilter(filter); err != nil {
+			if err := m.dmOut.SetFilter(filter); err != nil {
 				return err
 			}
 		}
-		if err := m.dm.SetThreshold(th); err != nil {
+		if err := m.dmOut.SetThreshold(th); err != nil {
 			return err
 		}
-		if err := m.dm.SetThresholdProfile(thp); err != nil {
+		if err := m.dmOut.SetThresholdProfile(thp); err != nil {
 			return err
 		}
 		m.stats[utils.Thresholds] += 1
 	}
 	// All done, update version wtih current one
 	vrs = engine.Versions{utils.Thresholds: engine.CurrentStorDBVersions()[utils.Thresholds]}
-	if err = m.dm.DataDB().SetVersions(vrs, false); err != nil {
+	if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),

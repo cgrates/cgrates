@@ -61,7 +61,7 @@ func newv1MongoStorage(host, port, db, user, pass, storageType string, cdrsIndex
 	v1ms = &v1Mongo{db: db, session: session, v1ms: engine.NewCodecMsgpackMarshaler()}
 	return
 }
-
+func (v1ms *v1Mongo) Close() {}
 func (v1ms *v1Mongo) getKeysForPrefix(prefix string) ([]string, error) {
 	return nil, nil
 }
