@@ -47,6 +47,8 @@ const (
 func NewRadiusAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection) (ra *RadiusAgent, err error) {
 	dts := make(map[string]*radigo.Dictionary, len(cgrCfg.RadiusAgentCfg().ClientDictionaries))
 	for clntID, dictPath := range cgrCfg.RadiusAgentCfg().ClientDictionaries {
+		utils.Logger.Info(fmt.Sprintf(
+			"<RadiusAgent> Loading dictionary for clientID: <%s> out of path <%s>", clntID, dictPath))
 		if dts[clntID], err = radigo.NewDictionaryFromFolderWithRFC2865(dictPath); err != nil {
 			return
 		}
@@ -177,12 +179,17 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 				processorVars[MetaCGRError] = err.Error()
 				return
 			}
-			if reqUsage, has := smgEv[utils.USAGE]; !has { // usage was not requested, decide based on 0
+			if reqUsageStr, has := smgEv[utils.USAGE]; !has { // usage was not requested, decide based on 0
 				if maxUsage == 0 {
 					reply.Code = radigo.AccessReject
 				}
-			} else if reqUsage.(time.Duration) < maxUsage {
-				reply.Code = radigo.AccessReject
+			} else { // usage requested
+				if reqUsage, err := utils.ParseDurationWithSecs(reqUsageStr.(string)); err != nil {
+					processorVars[MetaCGRError] = err.Error()
+					return false, err
+				} else if reqUsage < maxUsage {
+					reply.Code = radigo.AccessReject
+				}
 			}
 		case MetaRadAcctStart:
 			err = ra.smg.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage)
