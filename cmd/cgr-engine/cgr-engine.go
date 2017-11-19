@@ -262,7 +262,8 @@ func startRadiusAgent(internalSMGChan chan *sessionmanager.SMGeneric, exitChan c
 	}(internalSMGChan, smgChan)
 	var smgConn *rpcclient.RpcClientPool
 	if len(cfg.RadiusAgentCfg().SMGenericConns) != 0 {
-		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts,
+			cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.RadiusAgentCfg().SMGenericConns, smgChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RadiusAgent> Could not connect to SMG: %s", err.Error()))

@@ -20,7 +20,7 @@ imports:
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/radigo
-  version: 4351b1d135e822472a2759ae1c95f103cf51df60
+  version: 69d4269e21990c0f120b8e60d5b75d533db7f3dd
 - name: github.com/cgrates/rpcclient
   version: dddae42e9344e877627cd4b7aba075d63b452c0b
 - name: github.com/ChrisTrenkamp/goxpath
