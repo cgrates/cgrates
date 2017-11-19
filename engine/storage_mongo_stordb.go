@@ -28,15 +28,15 @@ import (
 	"time"
 )
 
-func (ms *MongoStorage) GetTpIds(colname string) ([]string, error) {
+func (ms *MongoStorage) GetTpIds(colName string) ([]string, error) {
 	tpidMap := make(map[string]bool)
 	session := ms.session.Copy()
 	db := session.DB(ms.db)
 	defer session.Close()
 	var tpids []string
 	var err error
-	cols := []string{colname}
-	if colname == "" {
+	cols := []string{colName}
+	if colName == "" {
 		cols, err = db.CollectionNames()
 		if err != nil {
 			return nil, err
