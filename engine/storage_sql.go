@@ -120,45 +120,39 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 
 // update
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
-func (self *SQLStorage) GetTpIds(colname string) ([]string, error) {
+func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	var rows *sql.Rows
 	var err error
-	if colname != "" {
-		rows, err = self.Db.Query(
-			fmt.Sprintf(" (SELECT tpid FROM %s)", colname))
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-	} else {
-		rows, err = self.Db.Query(
-			fmt.Sprintf(
-				"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
-				utils.TBLTPTimings,
-				utils.TBLTPDestinations,
-				utils.TBLTPRates,
-				utils.TBLTPDestinationRates,
-				utils.TBLTPRatingPlans,
-				utils.TBLTPRateProfiles,
-				utils.TBLTPSharedGroups,
-				utils.TBLTPCdrStats,
-				utils.TBLTPLcrs,
-				utils.TBLTPActions,
-				utils.TBLTPActionTriggers,
-				utils.TBLTPAccountActions,
-				utils.TBLTPDerivedChargers,
-				utils.TBLTPUsers,
-				utils.TBLTPAliases,
-				utils.TBLTPResources,
-				utils.TBLTPStats,
-				utils.TBLTPThresholds,
-				utils.TBLTPFilters,
-				utils.TBLTPActionPlans))
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
+	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
+	if colName == "" {
+		qryStr = fmt.Sprintf(
+			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			utils.TBLTPTimings,
+			utils.TBLTPDestinations,
+			utils.TBLTPRates,
+			utils.TBLTPDestinationRates,
+			utils.TBLTPRatingPlans,
+			utils.TBLTPRateProfiles,
+			utils.TBLTPSharedGroups,
+			utils.TBLTPCdrStats,
+			utils.TBLTPLcrs,
+			utils.TBLTPActions,
+			utils.TBLTPActionTriggers,
+			utils.TBLTPAccountActions,
+			utils.TBLTPDerivedChargers,
+			utils.TBLTPUsers,
+			utils.TBLTPAliases,
+			utils.TBLTPResources,
+			utils.TBLTPStats,
+			utils.TBLTPThresholds,
+			utils.TBLTPFilters,
+			utils.TBLTPActionPlans)
 	}
+	rows, err = self.Db.Query(qryStr)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 	ids := make([]string, 0)
 	i := 0
 	for rows.Next() {
