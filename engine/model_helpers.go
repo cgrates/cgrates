@@ -2419,9 +2419,9 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilter) {
 	return
 }
 
-type TpLCRProfiles []*TpLCRProfile
+type TpLCRs []*TpLCR
 
-func (tps TpLCRProfiles) AsTPLCRProfile() (result []*utils.TPLCRProfile) {
+func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCRProfile) {
 	mst := make(map[string]*utils.TPLCRProfile)
 	for _, tp := range tps {
 		th, found := mst[tp.ID]
@@ -2440,8 +2440,8 @@ func (tps TpLCRProfiles) AsTPLCRProfile() (result []*utils.TPLCRProfile) {
 				th.StrategyParams = append(th.StrategyParams, strategyParam)
 			}
 		}
-		if tp.RatingPlanIDs != "" {
-			ratingPlansIDsSplit := strings.Split(tp.RatingPlanIDs, utils.INFIELD_SEP)
+		if tp.RatingplanIDs != "" {
+			ratingPlansIDsSplit := strings.Split(tp.RatingplanIDs, utils.INFIELD_SEP)
 			for _, ratingPlanID := range ratingPlansIDsSplit {
 				th.RatingPlanIDs = append(th.RatingPlanIDs, ratingPlanID)
 			}
@@ -2483,10 +2483,10 @@ func (tps TpLCRProfiles) AsTPLCRProfile() (result []*utils.TPLCRProfile) {
 	return
 }
 
-func APItoModelTPLCRProfile(st *utils.TPLCRProfile) (mdls TpLCRProfiles) {
+func APItoModelTPLCRProfile(st *utils.TPLCRProfile) (mdls TpLCRs) {
 	if st != nil {
 		for i, fltr := range st.FilterIDs {
-			mdl := &TpLCRProfile{
+			mdl := &TpLCR{
 				Tenant: st.Tenant,
 				Tpid:   st.TPid,
 				ID:     st.ID,
@@ -2503,9 +2503,9 @@ func APItoModelTPLCRProfile(st *utils.TPLCRProfile) (mdls TpLCRProfiles) {
 				}
 				for i, val := range st.RatingPlanIDs {
 					if i != 0 {
-						mdl.RatingPlanIDs += utils.INFIELD_SEP
+						mdl.RatingplanIDs += utils.INFIELD_SEP
 					}
-					mdl.RatingPlanIDs += val
+					mdl.RatingplanIDs += val
 				}
 				for i, val := range st.StatIDs {
 					if i != 0 {

@@ -525,7 +525,7 @@ type TpFilter struct {
 	CreatedAt          time.Time
 }
 
-type TpLCRProfile struct {
+type TpLCR struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -535,7 +535,7 @@ type TpLCRProfile struct {
 	Strategy           string  `index:"4" re:""`
 	StrategyParams     string  `index:"5" re:""`
 	SupplierID         string  `index:"6" re:""`
-	RatingPlanIDs      string  `index:"7" re:""`
+	RatingplanIDs      string  `index:"7" re:""`
 	StatIDs            string  `index:"8" re:""`
 	Weight             float64 `index:"9" re:"\d+\.?\d*"`
 	CreatedAt          time.Time

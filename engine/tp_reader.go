@@ -1782,7 +1782,7 @@ func (tpr *TpReader) LoadLCRProfilesFiltered(tag string) (err error) {
 		} else if !has {
 			tpr.lcrTntID = append(tpr.lcrTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
-		// index resource for filters
+		// index lcr profile for filters
 		if _, has := tpr.lcrIndexers[tntID.Tenant]; !has {
 			if tpr.lcrIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
 				return
@@ -2212,7 +2212,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 
 	if verbose {
-		log.Print("LCRProfiles:")
+		log.Print("LCR Profiles:")
 	}
 	for _, tpTH := range tpr.lcrProfiles {
 		th, err := APItoLCRProfile(tpTH, tpr.timezone)
@@ -2300,7 +2300,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 
 		if verbose {
-			log.Print("Indexing LCRProfiles")
+			log.Print("Indexing LCR Profiles")
 		}
 		for tenant, fltrIdxer := range tpr.lcrIndexers {
 			if err := fltrIdxer.StoreIndexes(); err != nil {

@@ -107,7 +107,8 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions,
 		utils.TBLTPActionTriggers, utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
 		utils.TBLTPAliases, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
-		utils.TBLTPFilters, utils.TBLSMCosts, utils.TBLCDRs, utils.TBLTPActionPlans, utils.TBLVersions,
+		utils.TBLTPFilters, utils.TBLSMCosts, utils.TBLCDRs, utils.TBLTPActionPlans,
+		utils.TBLVersions, utils.TBLTPLcr,
 	}
 	for _, tbl := range tbls {
 		if self.db.HasTable(tbl) {
@@ -126,7 +127,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
 	if colName == "" {
 		qryStr = fmt.Sprintf(
-			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
 			utils.TBLTPTimings,
 			utils.TBLTPDestinations,
 			utils.TBLTPRates,
@@ -146,7 +147,8 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPStats,
 			utils.TBLTPThresholds,
 			utils.TBLTPFilters,
-			utils.TBLTPActionPlans)
+			utils.TBLTPActionPlans,
+			utils.TBLTPLcr)
 	}
 	rows, err = self.Db.Query(qryStr)
 	if err != nil {
@@ -234,7 +236,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters} {
+			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPLcr} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -689,18 +691,18 @@ func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilter) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPLCRProfile(ths []*utils.TPLCRProfile) error {
-	if len(ths) == 0 {
+func (self *SQLStorage) SetTPLCRProfiles(sts []*utils.TPLCRProfile) error {
+	if len(sts) == 0 {
 		return nil
 	}
 	tx := self.db.Begin()
-	for _, th := range ths {
+	for _, stq := range sts {
 		// Remove previous
-		if err := tx.Where(&TpLCRProfile{Tpid: th.TPid, ID: th.ID}).Delete(TpLCRProfile{}).Error; err != nil {
+		if err := tx.Where(&TpLCR{Tpid: stq.TPid, ID: stq.ID}).Delete(TpLCR{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, mst := range APItoModelTPLCRProfile(th) {
+		for _, mst := range APItoModelTPLCRProfile(stq) {
 			if err := tx.Save(&mst).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1687,6 +1689,22 @@ func (self *SQLStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 		return aths, utils.ErrNotFound
 	}
 	return aths, nil
+}
+
+func (self *SQLStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCRProfile, error) {
+	var rls TpLCRs
+	q := self.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if err := q.Find(&rls).Error; err != nil {
+		return nil, err
+	}
+	arls := rls.AsTPLCRProfile()
+	if len(arls) == 0 {
+		return arls, utils.ErrNotFound
+	}
+	return arls, nil
 }
 
 // GetVersions returns slice of all versions or a specific version if tag is specified
