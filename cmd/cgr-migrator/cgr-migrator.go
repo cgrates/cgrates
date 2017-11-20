@@ -121,8 +121,10 @@ func main() {
 			}
 		}
 		if *inStorDBType != "" {
-			instorDB, err = engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
-				config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+			instorDB, err = engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort,
+				*inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
+				config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns,
+				config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 			if err != nil {
 				log.Fatal(err)
 			}
