@@ -34,15 +34,14 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	dm, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName,
-		cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
+	dm, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
 	if err != nil {
 		return err
 	}
 	if err := dm.DataDB().Flush(""); err != nil {
 		return err
 	}
-	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	//	Write version before starting
 	if err := SetDBVersions(dm.dataDB); err != nil {
 		return err
@@ -136,6 +135,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_
 		path.Join(tpPath, utils.StatsCsv),
 		path.Join(tpPath, utils.ThresholdsCsv),
 		path.Join(tpPath, utils.FiltersCsv),
+		path.Join(tpPath, utils.LCRCsv),
 	), "", timezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)

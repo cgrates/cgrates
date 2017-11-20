@@ -34,36 +34,37 @@ import (
 )
 
 const (
-	colDst   = "destinations"
-	colRds   = "reverse_destinations"
-	colAct   = "actions"
-	colApl   = "action_plans"
-	colAAp   = "account_action_plans"
-	colTsk   = "tasks"
-	colAtr   = "action_triggers"
-	colRpl   = "rating_plans"
-	colRpf   = "rating_profiles"
-	colAcc   = "accounts"
-	colShg   = "shared_groups"
-	colLcr   = "lcr_rules"
-	colDcs   = "derived_chargers"
-	colAls   = "aliases"
-	colRCfgs = "reverse_aliases"
-	colStq   = "stat_qeues"
-	colPbs   = "pubsub"
-	colUsr   = "users"
-	colCrs   = "cdr_stats"
-	colLht   = "load_history"
-	colVer   = "versions"
-	colRsP   = "resource_profiles"
-	colRFI   = "request_filter_indexes"
-	colTmg   = "timings"
-	colRes   = "resources"
-	colSqs   = "statqueues"
-	colSqp   = "statqueue_profiles"
-	colTps   = "threshold_profiles"
-	colThs   = "thresholds"
-	colFlt   = "filters"
+	colDst    = "destinations"
+	colRds    = "reverse_destinations"
+	colAct    = "actions"
+	colApl    = "action_plans"
+	colAAp    = "account_action_plans"
+	colTsk    = "tasks"
+	colAtr    = "action_triggers"
+	colRpl    = "rating_plans"
+	colRpf    = "rating_profiles"
+	colAcc    = "accounts"
+	colShg    = "shared_groups"
+	colLcr    = "lcr_rules"
+	colDcs    = "derived_chargers"
+	colAls    = "aliases"
+	colRCfgs  = "reverse_aliases"
+	colStq    = "stat_qeues"
+	colPbs    = "pubsub"
+	colUsr    = "users"
+	colCrs    = "cdr_stats"
+	colLht    = "load_history"
+	colVer    = "versions"
+	colRsP    = "resource_profiles"
+	colRFI    = "request_filter_indexes"
+	colTmg    = "timings"
+	colRes    = "resources"
+	colSqs    = "statqueues"
+	colSqp    = "statqueue_profiles"
+	colTps    = "threshold_profiles"
+	colThs    = "thresholds"
+	colFlt    = "filters"
+	colLcrPrf = "lcr_profiles"
 )
 
 var (
@@ -573,6 +574,11 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
+	case utils.LCRProfilePrefix:
+		iter := db.C(colLcrPrf).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.LCRProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
+		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 	}
@@ -614,6 +620,9 @@ func (ms *MongoStorage) HasDataDrv(category, subject string) (has bool, err erro
 		has = count > 0
 	case utils.FilterPrefix:
 		count, err = db.C(colFlt).Find(bson.M{"id": subject}).Count()
+		has = count > 0
+	case utils.LCRProfilePrefix:
+		count, err = db.C(colLcrPrf).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	default:
 		err = fmt.Errorf("unsupported category in HasData: %s", category)
@@ -1959,6 +1968,34 @@ func (ms *MongoStorage) SetFilterDrv(r *Filter) (err error) {
 
 func (ms *MongoStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colFlt)
+	defer session.Close()
+	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
+		return
+	}
+	return nil
+}
+
+func (ms *MongoStorage) GetLCRProfileDrv(tenant, id string) (r *LCRProfile, err error) {
+	session, col := ms.conn(colLcrPrf)
+	defer session.Close()
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&r); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
+	return
+}
+
+func (ms *MongoStorage) SetLCRProfileDrv(r *LCRProfile) (err error) {
+	session, col := ms.conn(colLcrPrf)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
+	return
+}
+
+func (ms *MongoStorage) RemoveLCRProfileDrv(tenant, id string) (err error) {
+	session, col := ms.conn(colLcrPrf)
 	defer session.Close()
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return

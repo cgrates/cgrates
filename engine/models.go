@@ -519,3 +519,19 @@ type TBLVersion struct {
 func (t TBLVersion) TableName() string {
 	return utils.TBLVersions
 }
+
+type TpLCRProfile struct {
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string  `index:"0" re:""`
+	ID                 string  `index:"1" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	Strategy           string  `index:"4" re:""`
+	StrategyParams     string  `index:"5" re:""`
+	SupplierID         string  `index:"6" re:""`
+	RatingPlanIDs      string  `index:"7" re:""`
+	StatIDs            string  `index:"8" re:""`
+	Weight             float64 `index:"9" re:"\d+\.?\d*"`
+	CreatedAt          time.Time
+}

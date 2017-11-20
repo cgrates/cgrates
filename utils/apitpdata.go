@@ -1354,3 +1354,17 @@ type TPRequestFilter struct {
 	FieldName string   // Name of the field providing us the Values to check (used in case of some )
 	Values    []string // Filter definition
 }
+
+type TPLCRProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+	Strategy           string
+	StrategyParams     []string
+	SupplierID         string
+	RatingPlanIDs      []string // RatingPlans used when computing price
+	StatIDs            []string // StatProfiles queried in case of QoS based strategies
+	Weight             float64
+}

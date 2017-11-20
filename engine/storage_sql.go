@@ -689,6 +689,28 @@ func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilter) error {
 	return nil
 }
 
+func (self *SQLStorage) SetTPLCRProfile(ths []*utils.TPLCRProfile) error {
+	if len(ths) == 0 {
+		return nil
+	}
+	tx := self.db.Begin()
+	for _, th := range ths {
+		// Remove previous
+		if err := tx.Where(&TpLCRProfile{Tpid: th.TPid, ID: th.ID}).Delete(TpLCRProfile{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mst := range APItoModelTPLCRProfile(th) {
+			if err := tx.Save(&mst).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil

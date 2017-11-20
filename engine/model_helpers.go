@@ -2371,7 +2371,6 @@ func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
 		mdls = append(mdls, mdl)
 	}
 	return
-
 }
 
 func APItoFilter(tpTH *utils.TPFilter, timezone string) (th *Filter, err error) {
@@ -2418,4 +2417,142 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilter) {
 		}
 	}
 	return
+}
+
+type TpLCRProfiles []*TpLCRProfile
+
+func (tps TpLCRProfiles) AsTPLCRProfile() (result []*utils.TPLCRProfile) {
+	mst := make(map[string]*utils.TPLCRProfile)
+	for _, tp := range tps {
+		th, found := mst[tp.ID]
+		if !found {
+			th = &utils.TPLCRProfile{
+				TPid:       tp.Tpid,
+				Tenant:     tp.Tenant,
+				ID:         tp.ID,
+				Strategy:   tp.Strategy,
+				SupplierID: tp.SupplierID,
+			}
+		}
+		if tp.StrategyParams != "" {
+			strategyParamSplit := strings.Split(tp.StrategyParams, utils.INFIELD_SEP)
+			for _, strategyParam := range strategyParamSplit {
+				th.StrategyParams = append(th.StrategyParams, strategyParam)
+			}
+		}
+		if tp.RatingPlanIDs != "" {
+			ratingPlansIDsSplit := strings.Split(tp.RatingPlanIDs, utils.INFIELD_SEP)
+			for _, ratingPlanID := range ratingPlansIDsSplit {
+				th.RatingPlanIDs = append(th.RatingPlanIDs, ratingPlanID)
+			}
+		}
+		if tp.StatIDs != "" {
+			statIDsSplit := strings.Split(tp.StatIDs, utils.INFIELD_SEP)
+			for _, statID := range statIDsSplit {
+				th.StatIDs = append(th.StatIDs, statID)
+			}
+		}
+		if tp.Weight != 0 {
+			th.Weight = tp.Weight
+		}
+		if len(tp.ActivationInterval) != 0 {
+			th.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				th.ActivationInterval.ActivationTime = aiSplt[0]
+				th.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				th.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.FilterIDs != "" {
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				th.FilterIDs = append(th.FilterIDs, filter)
+			}
+		}
+
+		mst[tp.ID] = th
+	}
+	result = make([]*utils.TPLCRProfile, len(mst))
+	i := 0
+	for _, th := range mst {
+		result[i] = th
+		i++
+	}
+	return
+}
+
+func APItoModelTPLCRProfile(st *utils.TPLCRProfile) (mdls TpLCRProfiles) {
+	if st != nil {
+		for i, fltr := range st.FilterIDs {
+			mdl := &TpLCRProfile{
+				Tenant: st.Tenant,
+				Tpid:   st.TPid,
+				ID:     st.ID,
+			}
+			if i == 0 {
+				mdl.Strategy = st.Strategy
+				mdl.Weight = st.Weight
+				mdl.SupplierID = st.SupplierID
+				for i, val := range st.StrategyParams {
+					if i != 0 {
+						mdl.StrategyParams += utils.INFIELD_SEP
+					}
+					mdl.StrategyParams += val
+				}
+				for i, val := range st.RatingPlanIDs {
+					if i != 0 {
+						mdl.RatingPlanIDs += utils.INFIELD_SEP
+					}
+					mdl.RatingPlanIDs += val
+				}
+				for i, val := range st.StatIDs {
+					if i != 0 {
+						mdl.StatIDs += utils.INFIELD_SEP
+					}
+					mdl.StatIDs += val
+				}
+				if st.ActivationInterval != nil {
+					if st.ActivationInterval.ActivationTime != "" {
+						mdl.ActivationInterval = st.ActivationInterval.ActivationTime
+					}
+					if st.ActivationInterval.ExpiryTime != "" {
+						mdl.ActivationInterval += utils.INFIELD_SEP + st.ActivationInterval.ExpiryTime
+					}
+				}
+			}
+			mdl.FilterIDs = fltr
+			mdls = append(mdls, mdl)
+		}
+	}
+	return
+}
+
+func APItoLCRProfile(tpTH *utils.TPLCRProfile, timezone string) (th *LCRProfile, err error) {
+	th = &LCRProfile{
+		Tenant:     tpTH.Tenant,
+		ID:         tpTH.ID,
+		Strategy:   tpTH.Strategy,
+		SupplierID: tpTH.SupplierID,
+		Weight:     tpTH.Weight,
+	}
+	for _, stp := range tpTH.StrategyParams {
+		th.StrategyParams = append(th.StrategyParams, stp)
+	}
+	for _, fli := range tpTH.FilterIDs {
+		th.FilterIDs = append(th.FilterIDs, fli)
+	}
+	if tpTH.ActivationInterval != nil {
+		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
+	}
+	for _, rpl := range tpTH.RatingPlanIDs {
+		th.RatingPlanIDs = append(th.RatingPlanIDs, rpl)
+	}
+	for _, sts := range tpTH.StatIDs {
+		th.StatIDs = append(th.StatIDs, sts)
+	}
+	return th, nil
 }
