@@ -42,6 +42,7 @@
 	"thresholds": {"limit": 10000, "ttl":"0s", "precache": true},
 	"threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 	"filters": {"limit": 10000, "ttl":"0s", "precache": true},
+	"lcr_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 },
 
 

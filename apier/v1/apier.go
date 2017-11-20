@@ -1027,7 +1027,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if args.FlushAll {
 		cache.Flush()
 	}
-	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs []string
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, lcrPrfIDs []string
 	if args.DestinationIDs == nil {
 		dstIDs = nil
 	} else {
@@ -1128,8 +1128,13 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		fltrIDs = *args.FilterIDs
 	}
+	if args.LCRProfileIDs == nil {
+		lcrPrfIDs = nil
+	} else {
+		lcrPrfIDs = *args.LCRProfileIDs
+	}
 
-	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs); err != nil {
+	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, lcrPrfIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -1276,6 +1281,13 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 			cache.RemKey(utils.FilterPrefix+key, true, utils.NonTransactional)
 		}
 	}
+	if args.LCRProfileIDs == nil {
+		cache.RemPrefixKey(utils.LCRProfilePrefix, true, utils.NonTransactional)
+	} else if len(*args.LCRProfileIDs) != 0 {
+		for _, key := range *args.LCRProfileIDs {
+			cache.RemKey(utils.LCRProfilePrefix+key, true, utils.NonTransactional)
+		}
+	}
 
 	*reply = utils.OK
 	return
@@ -1302,6 +1314,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.Thresholds = cache.CountEntries(utils.ThresholdPrefix)
 	cs.ThresholdProfiles = cache.CountEntries(utils.ThresholdProfilePrefix)
 	cs.Filters = cache.CountEntries(utils.FilterPrefix)
+	cs.LCRProfiles = cache.CountEntries(utils.LCRProfilePrefix)
 
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
@@ -1691,6 +1704,25 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		}
 	}
 
+	if args.LCRProfileIDs != nil {
+		var ids []string
+		if len(*args.LCRProfileIDs) != 0 {
+			for _, id := range *args.LCRProfileIDs {
+				if _, hasIt := cache.Get(utils.LCRProfilePrefix + id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range cache.GetEntryKeys(utils.LCRProfilePrefix) {
+				ids = append(ids, id[len(utils.LCRProfilePrefix):])
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.LCRProfileIDs = &ids
+		}
+	}
+
 	return
 }
 
@@ -1727,6 +1759,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.StatsCsv),
 		path.Join(attrs.FolderPath, utils.ThresholdsCsv),
 		path.Join(attrs.FolderPath, utils.FiltersCsv),
+		path.Join(attrs.FolderPath, utils.LCRCsv),
 	), "", self.Config.DefaultTimezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)

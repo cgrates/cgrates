@@ -488,6 +488,30 @@ CREATE TABLE tp_filters (
 );
 
 --
+-- Table structure for table `tp_lcr`
+--
+
+DROP TABLE IF EXISTS tp_lcrs;
+CREATE TABLE tp_lcrs (
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `filter_ids` varchar(64) NOT NULL,
+  `activation_interval` varchar(64) NOT NULL,
+  `strategy` varchar(32) NOT NULL,
+  `strategy_params` varchar(64) NOT NULL,
+  `supplier_id` varchar(32) NOT NULL,
+  `ratingplan_ids` varchar(64) NOT NULL,
+  `stat_ids` varchar(64) NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_lcr` (`tpid`,`tenant`, `id`,`filter_ids` )
+);
+
+--
 -- Table structure for table `versions`
 --
 
@@ -497,5 +521,5 @@ CREATE TABLE versions (
   `item` varchar(64) NOT NULL,
   `version` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `item` (`item`)
+  UNIQUE KEY `id_item` (`id`,`item`)
 );

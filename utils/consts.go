@@ -116,6 +116,7 @@ const (
 	SMCostsTBL                    = "sm_costs"
 	CDRsTBL                       = "cdrs"
 	TBLTPLCRProfiles              = "tp_lcr"
+	TBLTPLcr                      = "tp_lcrs"
 	TBLVersions                   = "versions"
 	TIMINGS_CSV                   = "Timings.csv"
 	DESTINATIONS_CSV              = "Destinations.csv"
