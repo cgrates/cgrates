@@ -1253,7 +1253,7 @@ func (ms *MongoStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCRProfile
 		filter["id"] = id
 	}
 	var results []*utils.TPLCRProfile
-	session, col := ms.conn(utils.TBLTPLCRProfiles)
+	session, col := ms.conn(utils.TBLTPLcr)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
 	if len(results) == 0 {
@@ -1266,7 +1266,7 @@ func (ms *MongoStorage) SetTPLCRProfiles(tpTHs []*utils.TPLCRProfile) (err error
 	if len(tpTHs) == 0 {
 		return
 	}
-	session, col := ms.conn(utils.TBLTPLCRProfiles)
+	session, col := ms.conn(utils.TBLTPLcr)
 	defer session.Close()
 	tx := col.Bulk()
 	for _, tp := range tpTHs {
