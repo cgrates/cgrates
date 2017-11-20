@@ -64,6 +64,7 @@ var (
 		CacheThresholdProfiles:   ThresholdProfilePrefix,
 		CacheThresholds:          ThresholdPrefix,
 		CacheFilters:             FilterPrefix,
+		CacheLCRProfiles:         LCRProfilePrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )
@@ -112,6 +113,7 @@ const (
 	TBLTPStats                    = "tp_stats"
 	TBLTPThresholds               = "tp_thresholds"
 	TBLTPFilters                  = "tp_filters"
+	TBLTPLCRProfiles              = "tp_lcr"
 	TBLSMCosts                    = "sm_costs"
 	TBLCDRs                       = "cdrs"
 	TBLVersions                   = "versions"
@@ -265,6 +267,8 @@ const (
 	LOG_CDR                       = "cdr_"
 	LOG_MEDIATED_CDR              = "mcd_"
 	StatQueueProfilePrefix        = "sqp_"
+	LCRProfilePrefix              = "lcp_"
+	LCRProfilesStringIndex        = "lci_"
 	ThresholdProfilePrefix        = "thp_"
 	StatQueuePrefix               = "stq_"
 	LOADINST_KEY                  = "load_history"
@@ -480,6 +484,7 @@ const (
 	CacheThresholdProfiles       = "threshold_profiles"
 	CacheThresholds              = "thresholds"
 	CacheFilters                 = "filters"
+	CacheLCRProfiles             = "lcr_profiles"
 	AccountUpdate                = "AccountUpdate"
 	BalanceUpdate                = "BalanceUpdate"
 	StatUpdate                   = "StatUpdate"

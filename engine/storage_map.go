@@ -1380,7 +1380,39 @@ func (ms *MapStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	defer ms.mu.Unlock()
 	key := utils.FilterPrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
+	return
+}
 
+func (ms *MapStorage) GetLCRProfileDrv(tenant, id string) (r *LCRProfile, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	values, ok := ms.dict[utils.LCRProfilePrefix+utils.ConcatenatedKey(tenant, id)]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &r)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (ms *MapStorage) SetLCRProfileDrv(r *LCRProfile) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.LCRProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	return
+}
+
+func (ms *MapStorage) RemoveLCRProfileDrv(tenant, id string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.LCRProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	delete(ms.dict, key)
 	return
 }
 
