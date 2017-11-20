@@ -123,7 +123,7 @@ func (sl *StdLogger) Alert(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Alert(m)
 	} else {
-		log.Print("[ALERT]" + m)
+		log.Print("[ALERT] " + m)
 	}
 	return
 }
@@ -136,7 +136,7 @@ func (sl *StdLogger) Crit(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Crit(m)
 	} else {
-		log.Print("[CRITICAL]" + m)
+		log.Print("[CRITICAL] " + m)
 	}
 	return
 }
@@ -149,7 +149,7 @@ func (sl *StdLogger) Debug(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Debug(m)
 	} else {
-		log.Print("[DEBUG]" + m)
+		log.Print("[DEBUG] " + m)
 	}
 	return
 }
@@ -162,7 +162,7 @@ func (sl *StdLogger) Emerg(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Emerg(m)
 	} else {
-		log.Print("[EMERGENCY]" + m)
+		log.Print("[EMERGENCY] " + m)
 	}
 	return
 }
@@ -175,7 +175,7 @@ func (sl *StdLogger) Err(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Err(m)
 	} else {
-		log.Print("[ERROR]" + m)
+		log.Print("[ERROR] " + m)
 	}
 	return
 }
@@ -188,7 +188,7 @@ func (sl *StdLogger) Info(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Info(m)
 	} else {
-		log.Print("[INFO]" + m)
+		log.Print("[INFO] " + m)
 	}
 	return
 }
@@ -201,7 +201,7 @@ func (sl *StdLogger) Notice(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Notice(m)
 	} else {
-		log.Print("[NOTICE]" + m)
+		log.Print("[NOTICE] " + m)
 	}
 	return
 }
@@ -215,7 +215,7 @@ func (sl *StdLogger) Warning(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Warning(m)
 	} else {
-		log.Print("[WARNING]" + m)
+		log.Print("[WARNING] " + m)
 	}
 	return
 }
