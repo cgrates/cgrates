@@ -57,15 +57,18 @@ type TpReader struct {
 	sqProfiles       map[utils.TenantID]*utils.TPStats
 	thProfiles       map[utils.TenantID]*utils.TPThreshold
 	filters          map[utils.TenantID]*utils.TPFilter
+	lcrProfiles      map[utils.TenantID]*utils.TPLCRProfile
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
+	lcrTntID         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
 	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
 	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
 	resIndexers  map[string]*ReqFilterIndexer // tenant, indexer
+	lcrIndexers  map[string]*ReqFilterIndexer // tenant, indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -136,6 +139,7 @@ func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResource)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
+	tpr.lcrProfiles = make(map[utils.TenantID]*utils.TPLCRProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilter)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -143,6 +147,7 @@ func (tpr *TpReader) Init() {
 	tpr.thdsIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.resIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.lcrIndexers = make(map[string]*ReqFilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1760,6 +1765,53 @@ func (tpr *TpReader) LoadFilters() error {
 	return tpr.LoadFiltersFiltered("")
 }
 
+func (tpr *TpReader) LoadLCRProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPLCRProfiles(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	mapRsPfls := make(map[utils.TenantID]*utils.TPLCRProfile)
+	for _, rl := range rls {
+		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
+	}
+	tpr.lcrProfiles = mapRsPfls
+	for tntID, res := range mapRsPfls {
+		resIndxrKey := utils.LCRProfilesStringIndex + tntID.Tenant
+		if has, err := tpr.dm.HasData(utils.LCRProfilePrefix, tntID.TenantID()); err != nil {
+			return err
+		} else if !has {
+			tpr.lcrTntID = append(tpr.lcrTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+		}
+		// index resource for filters
+		if _, has := tpr.lcrIndexers[tntID.Tenant]; !has {
+			if tpr.lcrIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
+				return
+			}
+		}
+		for _, fltrID := range res.FilterIDs {
+			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
+			if !has {
+				var fltr *Filter
+				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
+					}
+					return
+				} else {
+					tpFltr = FilterToTPFilter(fltr)
+				}
+			} else {
+				tpr.lcrIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+			}
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadLCRProfiles() error {
+	return tpr.LoadLCRProfilesFiltered("")
+}
+
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -1819,6 +1871,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadLCRProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -2155,6 +2210,23 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", thd.TenantID())
 		}
 	}
+
+	if verbose {
+		log.Print("LCRProfiles:")
+	}
+	for _, tpTH := range tpr.lcrProfiles {
+		th, err := APItoLCRProfile(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dm.SetLCRProfile(th); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
+		}
+	}
+
 	if verbose {
 		log.Print("Timings:")
 	}
@@ -2226,6 +2298,18 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
 			}
 		}
+
+		if verbose {
+			log.Print("Indexing LCRProfiles")
+		}
+		for tenant, fltrIdxer := range tpr.lcrIndexers {
+			if err := fltrIdxer.StoreIndexes(); err != nil {
+				return err
+			}
+			if verbose {
+				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
+			}
+		}
 	}
 	return
 }
@@ -2287,7 +2371,7 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("LCR rules: ", len(tpr.lcrs))
 	// cdr stats
 	log.Print("CDR stats: ", len(tpr.cdrStats))
-	// resource limits
+	// resource profiles
 	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
 	// stats
 	log.Print("Stats: ", len(tpr.sqProfiles))
@@ -2295,6 +2379,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Thresholds: ", len(tpr.thProfiles))
 	// filters
 	log.Print("Filters: ", len(tpr.filters))
+	// LCR profiles
+	log.Print("LCRProfiles: ", len(tpr.lcrProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2448,6 +2534,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.filters))
 		i := 0
 		for k := range tpr.filters {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.LCRProfilePrefix:
+		keys := make([]string, len(tpr.lcrProfiles))
+		i := 0
+		for k, _ := range tpr.lcrProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}

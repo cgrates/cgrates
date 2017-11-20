@@ -35,3 +35,8 @@ type LCRProfile struct {
 	StatIDs            []string // StatProfiles queried in case of QoS based strategies
 	Weight             float64
 }
+
+// TenantID returns unique identifier of the LCRProfile in a multi-tenant environment
+func (rp *LCRProfile) TenantID() string {
+	return utils.ConcatenatedKey(rp.Tenant, rp.ID)
+}
