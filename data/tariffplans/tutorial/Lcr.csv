@@ -1,0 +1,2 @@
+#Tenant,ID,FilterIDs,ActivationInterval,Strategy,StrategyParams,SupplierID,RatingPlanIDs,StatIDs,Weight
+cgrates.org,LCR_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,RPL_1,,20
