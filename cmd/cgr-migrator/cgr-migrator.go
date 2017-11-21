@@ -133,7 +133,7 @@ func main() {
 		if inDataDBName != outDataDBName {
 			sameDBname = false
 		}
-		m, err := migrator.NewMigrator(dmIN, dmOUT, *outDataDBType, *dbDataEncoding, storDB, *inStorDBType, inDataDB, *inDataDBType, *inDBDataEncoding, instorDB, *inStorDBType, *dryRun, sameDBname)
+		m, err := migrator.NewMigrator(dmIN, dmOUT, *outDataDBType, *dbDataEncoding, storDB, *outStorDBType, inDataDB, *inDataDBType, *inDBDataEncoding, instorDB, *inStorDBType, *dryRun, sameDBname)
 		if err != nil {
 			log.Fatal(err)
 		}
