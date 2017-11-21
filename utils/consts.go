@@ -113,7 +113,7 @@ const (
 	TBLTPStats                    = "tp_stats"
 	TBLTPThresholds               = "tp_thresholds"
 	TBLTPFilters                  = "tp_filters"
-	TBLTPLcr                      = "tp_lcrs"
+	TBLTPLcr                      = "tp_lcr"
 	TBLSMCosts                    = "sm_costs"
 	TBLCDRs                       = "cdrs"
 	TBLVersions                   = "versions"

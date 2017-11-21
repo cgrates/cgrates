@@ -491,8 +491,8 @@ CREATE TABLE tp_filters (
 -- Table structure for table `tp_lcr`
 --
 
-DROP TABLE IF EXISTS tp_lcrs;
-CREATE TABLE tp_lcrs (
+DROP TABLE IF EXISTS tp_lcr;
+CREATE TABLE tp_lcr (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
