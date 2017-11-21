@@ -481,11 +481,11 @@ CREATE TABLE tp_filters (
   CREATE INDEX tp_filters_unique ON tp_filters  ("tpid","tenant", "id", "filter_type", "filter_field_name");
 
   --
-  -- Table structure for table `tp_resources`
+  -- Table structure for table `tp_lcr`
   --
 
-  DROP TABLE IF EXISTS tp_lcrs;
-  CREATE TABLE tp_lcrs (
+  DROP TABLE IF EXISTS tp_lcr;
+  CREATE TABLE tp_lcr (
     "pk" SERIAL PRIMARY KEY,
     "tpid" varchar(64) NOT NULL,
     "tenant"varchar(64) NOT NULL,
@@ -500,8 +500,8 @@ CREATE TABLE tp_filters (
     "weight" decimal(8,2) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
-  CREATE INDEX tp_lcrs_idx ON tp_lcrs (tpid);
-  CREATE INDEX tp_lcrs_unique ON tp_lcrs  ("tpid",  "tenant", "id", "filter_ids");
+  CREATE INDEX tp_lcr_idx ON tp_lcr (tpid);
+  CREATE INDEX tp_lcr_unique ON tp_lcr  ("tpid",  "tenant", "id", "filter_ids");
 
 --
 -- Table structure for table `versions`
