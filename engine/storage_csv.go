@@ -705,7 +705,7 @@ func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 	return tpFilter.AsTPFilter(), nil
 }
 
-func (csvs *CSVStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCRProfile, error) {
+func (csvs *CSVStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.lcrProfilesFn, csvs.sep, getColumnCount(TpLCR{}))
 	if err != nil {
 		//log.Print("Could not load lcr profiles file: ", err)
@@ -715,22 +715,22 @@ func (csvs *CSVStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCRProfile
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpResLimits TpLCRs
+	var tpLCRs TpLCRs
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Printf("bad line in %s, %s\n", csvs.lcrProfilesFn, err.Error())
 			return nil, err
 		}
-		if tpResLimit, err := csvLoad(TpLCR{}, record); err != nil {
+		if tpLCR, err := csvLoad(TpLCR{}, record); err != nil {
 			log.Print("error loading LCRProfiles: ", err)
 			return nil, err
 		} else {
-			tpLimit := tpResLimit.(TpLCR)
+			tpLimit := tpLCR.(TpLCR)
 			tpLimit.Tpid = tpid
-			tpResLimits = append(tpResLimits, &tpLimit)
+			tpLCRs = append(tpLCRs, &tpLimit)
 		}
 	}
-	return tpResLimits.AsTPLCRProfile(), nil
+	return tpLCRs.AsTPLCRProfile(), nil
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {

@@ -178,7 +178,7 @@ type LoadReader interface {
 	GetTPStats(string, string) ([]*utils.TPStats, error)
 	GetTPThresholds(string, string) ([]*utils.TPThreshold, error)
 	GetTPFilters(string, string) ([]*utils.TPFilter, error)
-	GetTPLCRProfiles(string, string) ([]*utils.TPLCRProfile, error)
+	GetTPLCRProfiles(string, string) ([]*utils.TPLCR, error)
 }
 
 type LoadWriter interface {
@@ -203,7 +203,7 @@ type LoadWriter interface {
 	SetTPStats([]*utils.TPStats) error
 	SetTPThresholds([]*utils.TPThreshold) error
 	SetTPFilters([]*utils.TPFilter) error
-	SetTPLCRProfiles([]*utils.TPLCRProfile) error
+	SetTPLCRProfiles([]*utils.TPLCR) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr

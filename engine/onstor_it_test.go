@@ -69,6 +69,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheThreshold,
 	testOnStorITCacheTiming,
 	testOnStorITCacheFilter,
+	testOnStorITCacheLCRProfile,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
@@ -100,6 +101,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDThresholdProfile,
 	testOnStorITCRUDThreshold,
 	testOnStorITCRUDFilter,
+	testOnStorITCRUDLCRProfile,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -1091,6 +1093,44 @@ func testOnStorITCacheFilter(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*Filter); !reflect.DeepEqual(filter, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", filter, rcv)
+	}
+}
+
+func testOnStorITCacheLCRProfile(t *testing.T) {
+	lcrProfile := &LCRProfile{
+		Tenant:    "cgrates.org",
+		ID:        "LCR_1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+		Strategy:       "*lowest_cost",
+		SupplierID:     "supplier1",
+		StrategyParams: []string{},
+		RatingPlanIDs:  []string{"RPL_1"},
+		StatIDs:        []string{},
+		Weight:         20,
+	}
+	if err := onStor.SetLCRProfile(lcrProfile); err != nil {
+		t.Error(err)
+	}
+	expectedT := []string{"lcp_cgrates.org:LCR_1"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.LCRProfilePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedT, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
+	}
+
+	if _, hasIt := cache.Get(utils.LCRProfilePrefix + lcrProfile.TenantID()); hasIt {
+		t.Error("Already in cache")
+	}
+	if err := onStor.CacheDataFromDB(utils.LCRProfilePrefix, []string{lcrProfile.TenantID()}, false); err != nil {
+		t.Error(err)
+	}
+	if itm, hasIt := cache.Get(utils.LCRProfilePrefix + lcrProfile.TenantID()); !hasIt {
+		t.Error("Did not cache")
+	} else if rcv := itm.(*LCRProfile); !reflect.DeepEqual(lcrProfile, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", lcrProfile, rcv)
 	}
 }
 
@@ -2345,6 +2385,45 @@ func testOnStorITCRUDFilter(t *testing.T) {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITCRUDLCRProfile(t *testing.T) {
+	lcrProfile := &LCRProfile{
+		Tenant:    "cgrates.org",
+		ID:        "LCR_1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+		Strategy:       "*lowest_cost",
+		SupplierID:     "supplier1",
+		StrategyParams: []string{},
+		RatingPlanIDs:  []string{"RPL_1"},
+		StatIDs:        []string{},
+		Weight:         20,
+	}
+	if _, rcvErr := onStor.GetLCRProfile("cgrates.org", "LCR_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetLCRProfile(lcrProfile); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetLCRProfile("cgrates.org", "LCR_1", true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(lcrProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", lcrProfile, rcv)
+	}
+	if rcv, err := onStor.GetLCRProfile("cgrates.org", "LCR_1", false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(lcrProfile, rcv) {
+		t.Errorf("Expecting: %v, received: %v", lcrProfile, rcv)
+	}
+	if err := onStor.RemoveLCRProfile(lcrProfile.Tenant, lcrProfile.ID, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetLCRProfile("cgrates.org", "LCR_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

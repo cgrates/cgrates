@@ -363,7 +363,7 @@ func init() {
 		log.Print("error in LoadThresholds:", err)
 	}
 	if err := csvr.LoadLCRProfiles(); err != nil {
-		log.Print("error in LoadThresholds:", err)
+		log.Print("error in LoadLCRProfiles:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
@@ -1619,8 +1619,8 @@ func TestLoadFilters(t *testing.T) {
 }
 
 func TestLoadLCRProfiles(t *testing.T) {
-	eLCRprofiles := map[utils.TenantID]*utils.TPLCRProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "LCR_1"}: &utils.TPLCRProfile{
+	eLCRprofiles := map[utils.TenantID]*utils.TPLCR{
+		utils.TenantID{Tenant: "cgrates.org", ID: "LCR_1"}: &utils.TPLCR{
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "LCR_1",
@@ -1629,10 +1629,10 @@ func TestLoadLCRProfiles(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			Strategy:       "*lowest_cost",
-			StrategyParams: nil,
+			StrategyParams: []string{},
 			SupplierID:     "supplier1",
 			RatingPlanIDs:  []string{"RPL_1"},
-			StatIDs:        nil,
+			StatIDs:        []string{},
 			Weight:         20,
 		},
 	}
