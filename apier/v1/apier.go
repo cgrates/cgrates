@@ -1799,7 +1799,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.StatQueueProfilePrefix,
 		utils.ThresholdPrefix,
 		utils.ThresholdProfilePrefix,
-		utils.FilterPrefix} {
+		utils.FilterPrefix,
+		utils.LCRProfilePrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)

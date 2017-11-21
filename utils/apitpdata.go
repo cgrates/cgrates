@@ -1386,7 +1386,7 @@ type TPRequestFilter struct {
 	Values    []string // Filter definition
 }
 
-type TPLCRProfile struct {
+type TPLCR struct {
 	TPid               string
 	Tenant             string
 	ID                 string

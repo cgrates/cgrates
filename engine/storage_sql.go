@@ -691,7 +691,7 @@ func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilter) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPLCRProfiles(sts []*utils.TPLCRProfile) error {
+func (self *SQLStorage) SetTPLCRProfiles(sts []*utils.TPLCR) error {
 	if len(sts) == 0 {
 		return nil
 	}
@@ -1691,7 +1691,7 @@ func (self *SQLStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 	return aths, nil
 }
 
-func (self *SQLStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCRProfile, error) {
+func (self *SQLStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error) {
 	var rls TpLCRs
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {

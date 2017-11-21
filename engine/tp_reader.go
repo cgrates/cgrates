@@ -57,7 +57,7 @@ type TpReader struct {
 	sqProfiles       map[utils.TenantID]*utils.TPStats
 	thProfiles       map[utils.TenantID]*utils.TPThreshold
 	filters          map[utils.TenantID]*utils.TPFilter
-	lcrProfiles      map[utils.TenantID]*utils.TPLCRProfile
+	lcrProfiles      map[utils.TenantID]*utils.TPLCR
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
@@ -139,7 +139,7 @@ func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResource)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
-	tpr.lcrProfiles = make(map[utils.TenantID]*utils.TPLCRProfile)
+	tpr.lcrProfiles = make(map[utils.TenantID]*utils.TPLCR)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilter)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -1770,7 +1770,7 @@ func (tpr *TpReader) LoadLCRProfilesFiltered(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	mapRsPfls := make(map[utils.TenantID]*utils.TPLCRProfile)
+	mapRsPfls := make(map[utils.TenantID]*utils.TPLCR)
 	for _, rl := range rls {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}

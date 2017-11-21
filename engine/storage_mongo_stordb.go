@@ -1245,14 +1245,14 @@ func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilter) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCRProfile, error) {
+func (ms *MongoStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPLCRProfile
+	var results []*utils.TPLCR
 	session, col := ms.conn(utils.TBLTPLcr)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
@@ -1262,7 +1262,7 @@ func (ms *MongoStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCRProfile
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPLCRProfiles(tpTHs []*utils.TPLCRProfile) (err error) {
+func (ms *MongoStorage) SetTPLCRProfiles(tpTHs []*utils.TPLCR) (err error) {
 	if len(tpTHs) == 0 {
 		return
 	}

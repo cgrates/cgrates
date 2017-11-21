@@ -2421,17 +2421,20 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilter) {
 
 type TpLCRs []*TpLCR
 
-func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCRProfile) {
-	mst := make(map[string]*utils.TPLCRProfile)
+func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCR) {
+	mst := make(map[string]*utils.TPLCR)
 	for _, tp := range tps {
 		th, found := mst[tp.ID]
 		if !found {
-			th = &utils.TPLCRProfile{
-				TPid:       tp.Tpid,
-				Tenant:     tp.Tenant,
-				ID:         tp.ID,
-				Strategy:   tp.Strategy,
-				SupplierID: tp.SupplierID,
+			th = &utils.TPLCR{
+				TPid:           tp.Tpid,
+				Tenant:         tp.Tenant,
+				ID:             tp.ID,
+				Strategy:       tp.Strategy,
+				SupplierID:     tp.SupplierID,
+				StrategyParams: []string{},
+				RatingPlanIDs:  []string{},
+				StatIDs:        []string{},
 			}
 		}
 		if tp.StrategyParams != "" {
@@ -2474,7 +2477,7 @@ func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCRProfile) {
 
 		mst[tp.ID] = th
 	}
-	result = make([]*utils.TPLCRProfile, len(mst))
+	result = make([]*utils.TPLCR, len(mst))
 	i := 0
 	for _, th := range mst {
 		result[i] = th
@@ -2483,7 +2486,7 @@ func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCRProfile) {
 	return
 }
 
-func APItoModelTPLCRProfile(st *utils.TPLCRProfile) (mdls TpLCRs) {
+func APItoModelTPLCRProfile(st *utils.TPLCR) (mdls TpLCRs) {
 	if st != nil {
 		for i, fltr := range st.FilterIDs {
 			mdl := &TpLCR{
@@ -2529,7 +2532,7 @@ func APItoModelTPLCRProfile(st *utils.TPLCRProfile) (mdls TpLCRs) {
 	return
 }
 
-func APItoLCRProfile(tpTH *utils.TPLCRProfile, timezone string) (th *LCRProfile, err error) {
+func APItoLCRProfile(tpTH *utils.TPLCR, timezone string) (th *LCRProfile, err error) {
 	th = &LCRProfile{
 		Tenant:     tpTH.Tenant,
 		ID:         tpTH.ID,
