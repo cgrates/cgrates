@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -107,6 +108,31 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	return ""
 }
 
+<<<<<<< HEAD
+=======
+func CurrentDBVersions(storType string) Versions {
+	dataDbVersions := CurrentDataDBVersions()
+	storDbVersions := CurrentStorDBVersions()
+
+	allVersions := make(Versions)
+	for k, v := range dataDbVersions {
+		allVersions[k] = v
+	}
+	for k, v := range storDbVersions {
+		allVersions[k] = v
+	}
+	switch storType {
+	case utils.MONGO, utils.MAPSTOR:
+		return allVersions
+	case utils.POSTGRES, utils.MYSQL:
+		return storDbVersions
+	case utils.REDIS:
+		return dataDbVersions
+	}
+	return nil
+}
+
+>>>>>>> Updating structures version and fixed typo
 func CurrentDataDBVersions() Versions {
 	return Versions{
 		utils.StatS:               2,
@@ -116,51 +142,51 @@ func CurrentDataDBVersions() Versions {
 		utils.ActionPlans:         2,
 		utils.SharedGroups:        2,
 		utils.Thresholds:          2,
-		utils.Timing:              2,
-		utils.RQF:                 2,
-		utils.Resource:            2,
-		utils.ReverseAlias:        2,
-		utils.Alias:               2,
-		utils.User:                2,
-		utils.Subscribers:         2,
-		utils.DerivedChargersV:    2,
-		utils.CdrStats:            2,
-		utils.Destinations:        2,
-		utils.ReverseDestinations: 2,
-		utils.LCR:                 2,
-		utils.RatingPlan:          2,
-		utils.RatingProfile:       2,
+		utils.Timing:              1,
+		utils.RQF:                 1,
+		utils.Resource:            1,
+		utils.ReverseAlias:        1,
+		utils.Alias:               1,
+		utils.User:                1,
+		utils.Subscribers:         1,
+		utils.DerivedChargersV:    1,
+		utils.CdrStats:            1,
+		utils.Destinations:        1,
+		utils.ReverseDestinations: 1,
+		utils.LCR:                 1,
+		utils.RatingPlan:          1,
+		utils.RatingProfile:       1,
 	}
 }
 
 func CurrentStorDBVersions() Versions {
 	return Versions{
 		utils.COST_DETAILS:       2,
-		utils.TpRatingPlans:      2,
-		utils.TpLcrs:             2,
-		utils.TpFilters:          2,
-		utils.TpDestinationRates: 2,
-		utils.TpActionTriggers:   2,
-		utils.TpAccountActions:   2,
-		utils.TpActionPlans:      2,
-		utils.TpActions:          2,
-		utils.TpDerivedCharges:   2,
-		utils.TpThresholds:       2,
-		utils.TpStats:            2,
-		utils.TpSharedGroups:     2,
-		utils.TpRatingProfiles:   2,
-		utils.TpResources:        2,
-		utils.TpRates:            2,
-		utils.TpTiming:           2,
-		utils.TpResource:         2,
-		utils.TpAliases:          2,
-		utils.TpUsers:            2,
-		utils.TpDerivedChargersV: 2,
-		utils.TpCdrStats:         2,
-		utils.TpDestinations:     2,
-		utils.TpLCR:              2,
-		utils.TpRatingPlan:       2,
-		utils.TpRatingProfile:    2,
+		utils.TpRatingPlans:      1,
+		utils.TpLcrs:             1,
+		utils.TpFilters:          1,
+		utils.TpDestinationRates: 1,
+		utils.TpActionTriggers:   1,
+		utils.TpAccountActions:   1,
+		utils.TpActionPlans:      1,
+		utils.TpActions:          1,
+		utils.TpDerivedCharges:   1,
+		utils.TpThresholds:       1,
+		utils.TpStats:            1,
+		utils.TpSharedGroups:     1,
+		utils.TpRatingProfiles:   1,
+		utils.TpResources:        1,
+		utils.TpRates:            1,
+		utils.TpTiming:           1,
+		utils.TpResource:         1,
+		utils.TpAliases:          1,
+		utils.TpUsers:            1,
+		utils.TpDerivedChargersV: 1,
+		utils.TpCdrStats:         1,
+		utils.TpDestinations:     1,
+		utils.TpLCR:              1,
+		utils.TpRatingPlan:       1,
+		utils.TpRatingProfile:    1,
 	}
 }
 
