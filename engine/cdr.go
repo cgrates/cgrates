@@ -175,11 +175,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 	case utils.ANSWER_TIME:
 		return rsrFld.ParseValue(cdr.AnswerTime.Format(time.RFC3339))
 	case utils.USAGE:
-<<<<<<< HEAD
 		return cdr.Usage.String()
-=======
-		return strconv.FormatFloat(cdr.Usage.Seconds(), 'f', -1, 64)
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(cdr.RunID)
 	case utils.RATED_FLD:
@@ -384,11 +380,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 	durStr := cdr.FieldAsString(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.USAGE, durationFld.Id)
-<<<<<<< HEAD
 	} else if frkStorCdr.Usage, err = utils.ParseDurationWithNanosecs(durStr); err != nil {
-=======
-	} else if frkStorCdr.Usage, err = utils.ParseDurationWithSecs(durStr); err != nil {
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 		return nil, err
 	}
 	ratedStr := cdr.FieldAsString(ratedFld)
@@ -433,11 +425,7 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 		Destination: cdr.Destination,
 		SetupTime:   cdr.SetupTime.Format(time.RFC3339),
 		AnswerTime:  cdr.AnswerTime.Format(time.RFC3339),
-<<<<<<< HEAD
 		Usage:       usageStr,
-=======
-		Usage:       cdr.FormatUsage(utils.SECONDS),
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 		ExtraFields: cdr.ExtraFields,
 		CostSource:  cdr.CostSource,
 		Cost:        cdr.Cost,
@@ -566,11 +554,7 @@ func (cdr *CDR) GetDuration(fieldName string) (time.Duration, error) {
 	} else {
 		durVal = cdr.FieldAsString(&utils.RSRField{Id: fieldName})
 	}
-<<<<<<< HEAD
 	return utils.ParseDurationWithNanosecs(durVal)
-=======
-	return utils.ParseDurationWithSecs(durVal)
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 }
 func (cdr *CDR) GetOriginatorIP(fieldName string) string {
 	if utils.IsSliceMember([]string{utils.CDRHOST, utils.META_DEFAULT, ""}, fieldName) {
@@ -784,11 +768,7 @@ func (cdr *CDR) AsExportMap(exportFields []*config.CfgCdrField, httpSkipTlsCheck
 // AsCDRsTBL converts the CDR into the format used for SQL storage
 func (cdr *CDR) AsCDRsql() (cdrSql *CDRsql) {
 	cdrSql = new(CDRsql)
-<<<<<<< HEAD
 	cdrSql.Cgrid = cdr.CGRID
-=======
-	cdrSql.CGRID = cdr.CGRID
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 	cdrSql.RunID = cdr.RunID
 	cdrSql.OriginHost = cdr.OriginHost
 	cdrSql.Source = cdr.Source
@@ -815,19 +795,12 @@ func (cdr *CDR) AsCDRsql() (cdrSql *CDRsql) {
 // NewCDRFromSQL converts the CDRsql into CDR
 func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
 	cdr = new(CDR)
-<<<<<<< HEAD
 	cdr.CGRID = cdrSql.Cgrid
-=======
-	cdr.CGRID = cdrSql.CGRID
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 	cdr.RunID = cdrSql.RunID
 	cdr.OriginHost = cdrSql.OriginHost
 	cdr.Source = cdrSql.Source
 	cdr.OriginID = cdrSql.OriginID
-<<<<<<< HEAD
 	cdr.OrderID = cdrSql.ID
-=======
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 	cdr.ToR = cdrSql.TOR
 	cdr.RequestType = cdrSql.RequestType
 	cdr.Tenant = cdrSql.Tenant
@@ -838,10 +811,6 @@ func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
 	cdr.SetupTime = cdrSql.SetupTime
 	cdr.AnswerTime = cdrSql.AnswerTime
 	cdr.Usage = time.Duration(cdrSql.Usage)
-<<<<<<< HEAD
-=======
-
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 	cdr.CostSource = cdrSql.CostSource
 	cdr.Cost = cdrSql.Cost
 	cdr.ExtraInfo = cdrSql.ExtraInfo
@@ -851,11 +820,7 @@ func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
 		}
 	}
 	if cdrSql.CostDetails != "" {
-<<<<<<< HEAD
 		if err = json.Unmarshal([]byte(cdrSql.CostDetails), &cdr.CostDetails); err != nil {
-=======
-		if err = json.Unmarshal([]byte(cdrSql.CostDetails), cdr.CostDetails); err != nil {
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 			return nil, err
 		}
 	}

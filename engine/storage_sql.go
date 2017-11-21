@@ -811,11 +811,8 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 		}
 		tx = self.db.Begin()
 		cdrSql.UpdatedAt = time.Now()
-<<<<<<< HEAD
-		updated := tx.Model(&CDRsql{}).Where(&CDRsql{Cgrid: cdr.CGRID, RunID: cdr.RunID, OriginID: cdr.OriginID}).Updates(cdrSql)
-=======
-		updated := tx.Model(&CDRsql{}).Where(&CDRsql{CGRID: cdr.CGRID, RunID: cdr.RunID, OriginID: cdr.OriginID}).Updates(cdrSql)
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
+		updated := tx.Model(&CDRsql{}).Where(
+			&CDRsql{Cgrid: cdr.CGRID, RunID: cdr.RunID, OriginID: cdr.OriginID}).Updates(cdrSql)
 		if updated.Error != nil {
 			tx.Rollback()
 			return updated.Error
@@ -1001,7 +998,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		maxUsage, err := utils.ParseDurationWithNanosecs(qryFltr.MaxUsage)
 		if err != nil {
 			return nil, 0, err
-<<<<<<< HEAD
 		}
 		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
 			q = q.Where("`usage` < ?", maxUsage.Nanoseconds())
@@ -1010,32 +1006,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		}
 
 	}
-=======
-		}
-		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
-			q = q.Where("`usage` < ?", maxUsage.Nanoseconds())
-		} else {
-			q = q.Where("usage < ?", maxUsage.Nanoseconds())
-		}
-
-	}
-	if len(qryFltr.MinPDD) != 0 {
-		if minPDD, err := utils.ParseDurationWithNanosecs(qryFltr.MinPDD); err != nil {
-			return nil, 0, err
-		} else {
-			q = q.Where("pdd >= ?", minPDD.Nanoseconds())
-		}
-
-	}
-	if len(qryFltr.MaxPDD) != 0 {
-		if maxPDD, err := utils.ParseDurationWithNanosecs(qryFltr.MaxPDD); err != nil {
-			return nil, 0, err
-		} else {
-			q = q.Where("pdd < ?", maxPDD.Nanoseconds())
-		}
-	}
-
->>>>>>> Removing Direction, PDD, DisconnectCause, Supplier from main fields of CDR; MySQL/Postgres storing nanoseconds instead of seconds for usage, tests update
 	if qryFltr.MinCost != nil {
 		if qryFltr.MaxCost == nil {
 			q = q.Where("cost >= ?", *qryFltr.MinCost)
