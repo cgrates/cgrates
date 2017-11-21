@@ -152,7 +152,8 @@ func (rp *RatingPlan) getFirstUnsaneRating() string {
 				if nextRate.GroupIntervalStart <= rate.GroupIntervalStart {
 					return rating.tag
 				}
-				if math.Mod(nextRate.GroupIntervalStart.Seconds(), rate.RateIncrement.Seconds()) != 0 {
+				if math.Mod(float64(nextRate.GroupIntervalStart.Nanoseconds()),
+					float64(rate.RateIncrement.Nanoseconds())) != 0 {
 					return rating.tag
 				}
 				if rate.RateUnit == 0 || rate.RateIncrement == 0 {

@@ -43,7 +43,7 @@ func (ev SMGenericEvent) HasField(fieldName string) (hasField bool) {
 }
 
 func (self SMGenericEvent) GetName() string {
-	result, _ := utils.ConvertIfaceToString(self[utils.EVENT_NAME])
+	result, _ := utils.CastFieldIfToString(self[utils.EVENT_NAME])
 	return result
 }
 
@@ -51,7 +51,7 @@ func (self SMGenericEvent) GetTOR(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.TOR
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -65,7 +65,7 @@ func (self SMGenericEvent) GetOriginID(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.ACCID
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -77,7 +77,7 @@ func (self SMGenericEvent) GetDirection(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.DIRECTION
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -85,7 +85,7 @@ func (self SMGenericEvent) GetAccount(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.ACCOUNT
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -93,7 +93,7 @@ func (self SMGenericEvent) GetSubject(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.SUBJECT
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -101,7 +101,7 @@ func (self SMGenericEvent) GetDestination(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.DESTINATION
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -113,7 +113,7 @@ func (self SMGenericEvent) GetCategory(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.CATEGORY
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -121,7 +121,7 @@ func (self SMGenericEvent) GetTenant(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.TENANT
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -129,7 +129,7 @@ func (self SMGenericEvent) GetReqType(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.REQTYPE
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -137,7 +137,7 @@ func (self SMGenericEvent) GetSetupTime(fieldName, timezone string) (time.Time, 
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.SETUP_TIME
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return utils.ParseTimeDetectLayout(result, timezone)
 }
 
@@ -145,7 +145,7 @@ func (self SMGenericEvent) GetAnswerTime(fieldName, timezone string) (time.Time,
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.ANSWER_TIME
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return utils.ParseTimeDetectLayout(result, timezone)
 }
 
@@ -170,8 +170,8 @@ func (self SMGenericEvent) GetUsage(fieldName string) (time.Duration, error) {
 	if !hasVal {
 		return nilDuration, utils.ErrNotFound
 	}
-	result, _ := utils.ConvertIfaceToString(valIf)
-	return utils.ParseDurationWithSecs(result)
+	result, _ := utils.CastFieldIfToString(valIf)
+	return utils.ParseDurationWithNanosecs(result)
 }
 
 func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) {
@@ -182,24 +182,27 @@ func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) 
 	if !hasVal {
 		return nilDuration, utils.ErrNotFound
 	}
-	result, _ := utils.ConvertIfaceToString(valStr)
-	return utils.ParseDurationWithSecs(result)
+	result, _ := utils.CastFieldIfToString(valStr)
+	return utils.ParseDurationWithNanosecs(result)
 }
 
 // GetSessionTTL retrieves SessionTTL setting out of SMGenericEvent
-func (self SMGenericEvent) GetSessionTTL(sesTTL time.Duration, cfgSessionTTLMaxDelay *time.Duration) time.Duration {
+func (self SMGenericEvent) GetSessionTTL(sesTTL time.Duration,
+	cfgSessionTTLMaxDelay *time.Duration) time.Duration {
 	valIf, hasVal := self[utils.SessionTTL]
 	if hasVal {
-		ttlStr, converted := utils.ConvertIfaceToString(valIf)
+		ttlStr, converted := utils.CastFieldIfToString(valIf)
 		if !converted {
-			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot convert SessionTTL, disabling functionality for event: <%s>",
-				self.GetCGRID(utils.META_DEFAULT)))
+			utils.Logger.Warning(
+				fmt.Sprintf("SMGenericEvent, cannot convert SessionTTL, disabling functionality for event: <%s>",
+					self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
 		}
 		var err error
-		if sesTTL, err = utils.ParseDurationWithSecs(ttlStr); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot parse SessionTTL, disabling functionality for event: <%s>",
-				self.GetCGRID(utils.META_DEFAULT)))
+		if sesTTL, err = utils.ParseDurationWithNanosecs(ttlStr); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("SMGenericEvent, cannot parse SessionTTL, disabling functionality for event: <%s>",
+					self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
 		}
 	}
@@ -209,13 +212,13 @@ func (self SMGenericEvent) GetSessionTTL(sesTTL time.Duration, cfgSessionTTLMaxD
 		sessionTTLMaxDelay = cfgSessionTTLMaxDelay.Nanoseconds() / 1000000 // Milliseconds precision
 	}
 	if sesTTLMaxDelayIf, hasVal := self[utils.SessionTTLMaxDelay]; hasVal {
-		maxTTLDelaxStr, converted := utils.ConvertIfaceToString(sesTTLMaxDelayIf)
+		maxTTLDelaxStr, converted := utils.CastFieldIfToString(sesTTLMaxDelayIf)
 		if !converted {
 			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot convert SessionTTLMaxDelay, disabling functionality for event: <%s>",
 				self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
 		}
-		if maxTTLDelay, err := utils.ParseDurationWithSecs(maxTTLDelaxStr); err != nil {
+		if maxTTLDelay, err := utils.ParseDurationWithNanosecs(maxTTLDelaxStr); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("SMGenericEvent, cannot parse SessionTTLMaxDelay, disabling functionality for event: <%s>",
 				self.GetCGRID(utils.META_DEFAULT)))
 			return time.Duration(0)
@@ -236,11 +239,11 @@ func (self SMGenericEvent) GetSessionTTLLastUsed() *time.Duration {
 	if !hasVal {
 		return nil
 	}
-	ttlStr, converted := utils.ConvertIfaceToString(valIf)
+	ttlStr, converted := utils.CastFieldIfToString(valIf)
 	if !converted {
 		return nil
 	}
-	if ttl, err := utils.ParseDurationWithSecs(ttlStr); err != nil {
+	if ttl, err := utils.ParseDurationWithNanosecs(ttlStr); err != nil {
 		return nil
 	} else {
 		return &ttl
@@ -253,11 +256,11 @@ func (self SMGenericEvent) GetSessionTTLUsage() *time.Duration {
 	if !hasVal {
 		return nil
 	}
-	ttlStr, converted := utils.ConvertIfaceToString(valIf)
+	ttlStr, converted := utils.CastFieldIfToString(valIf)
 	if !converted {
 		return nil
 	}
-	if ttl, err := utils.ParseDurationWithSecs(ttlStr); err != nil {
+	if ttl, err := utils.ParseDurationWithNanosecs(ttlStr); err != nil {
 		return nil
 	} else {
 		return &ttl
@@ -272,23 +275,23 @@ func (self SMGenericEvent) GetMaxUsage(fieldName string, cfgMaxUsage time.Durati
 	if !hasIt {
 		return cfgMaxUsage, nil
 	}
-	result, _ := utils.ConvertIfaceToString(maxUsageStr)
-	return utils.ParseDurationWithSecs(result)
+	result, _ := utils.CastFieldIfToString(maxUsageStr)
+	return utils.ParseDurationWithNanosecs(result)
 }
 
 func (self SMGenericEvent) GetPdd(fieldName string) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.PDD
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
-	return utils.ParseDurationWithSecs(result)
+	result, _ := utils.CastFieldIfToString(self[fieldName])
+	return utils.ParseDurationWithNanosecs(result)
 }
 
 func (self SMGenericEvent) GetSupplier(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.SUPPLIER
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -296,7 +299,7 @@ func (self SMGenericEvent) GetDisconnectCause(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.DISCONNECT_CAUSE
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -304,7 +307,7 @@ func (self SMGenericEvent) GetOriginatorIP(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.CDRHOST
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
 }
 
@@ -319,7 +322,7 @@ func (self SMGenericEvent) GetExtraFields() map[string]string {
 		if utils.IsSliceMember(primaryFields, key) {
 			continue
 		}
-		result, _ := utils.ConvertIfaceToString(val)
+		result, _ := utils.CastFieldIfToString(val)
 		extraFields[key] = result
 	}
 	return extraFields
@@ -330,7 +333,7 @@ func (self SMGenericEvent) GetFieldAsString(fieldName string) (string, error) {
 	if !hasVal {
 		return "", utils.ErrNotFound
 	}
-	result, converted := utils.ConvertIfaceToString(valIf)
+	result, converted := utils.CastFieldIfToString(valIf)
 	if !converted {
 		return "", utils.ErrNotConvertible
 	}
@@ -405,7 +408,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 	case utils.COST:
 		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
-		strVal, _ := utils.ConvertIfaceToString(self[rsrFld.Id])
+		strVal, _ := utils.CastFieldIfToString(self[rsrFld.Id])
 		val := rsrFld.ParseValue(strVal)
 		return val
 	}
@@ -424,7 +427,6 @@ func (self SMGenericEvent) AsCDR(cfg *config.CGRConfig, timezone string) *engine
 	storCdr.OriginHost = self.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = self.GetCdrSource()
 	storCdr.RequestType = utils.FirstNonEmpty(self.GetReqType(utils.META_DEFAULT), storCdr.RequestType)
-	storCdr.Direction = utils.FirstNonEmpty(self.GetDirection(utils.META_DEFAULT), storCdr.Direction)
 	storCdr.Tenant = utils.FirstNonEmpty(self.GetTenant(utils.META_DEFAULT), storCdr.Tenant)
 	storCdr.Category = utils.FirstNonEmpty(self.GetCategory(utils.META_DEFAULT), storCdr.Category)
 	storCdr.Account = self.GetAccount(utils.META_DEFAULT)
@@ -433,9 +435,6 @@ func (self SMGenericEvent) AsCDR(cfg *config.CGRConfig, timezone string) *engine
 	storCdr.SetupTime, _ = self.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = self.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = self.GetUsage(utils.META_DEFAULT)
-	storCdr.PDD, _ = self.GetPdd(utils.META_DEFAULT)
-	storCdr.Supplier = self.GetSupplier(utils.META_DEFAULT)
-	storCdr.DisconnectCause = self.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = self.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr
@@ -452,8 +451,8 @@ func (self SMGenericEvent) ComputeLcr() bool {
 }
 
 func (self SMGenericEvent) AsLcrRequest() *engine.LcrRequest {
-	setupTimeStr, _ := utils.ConvertIfaceToString(self[utils.SETUP_TIME])
-	usageStr, _ := utils.ConvertIfaceToString(self[utils.USAGE])
+	setupTimeStr, _ := utils.CastFieldIfToString(self[utils.SETUP_TIME])
+	usageStr, _ := utils.CastFieldIfToString(self[utils.USAGE])
 	return &engine.LcrRequest{
 		Direction:   self.GetDirection(utils.META_DEFAULT),
 		Tenant:      self.GetTenant(utils.META_DEFAULT),

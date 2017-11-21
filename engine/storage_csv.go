@@ -706,6 +706,7 @@ func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 }
 
 func (csvs *CSVStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error) {
+
 	csvReader, fp, err := csvs.readerFunc(csvs.lcrProfilesFn, csvs.sep, getColumnCount(TpLCR{}))
 	if err != nil {
 		//log.Print("Could not load lcr profiles file: ", err)

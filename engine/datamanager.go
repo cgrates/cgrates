@@ -23,7 +23,7 @@ import (
 )
 
 func NewDataManager(dataDB DataDB) *DataManager {
-	return &DataManager{dataDB: dataDB, cacheCfg: config.CgrConfig().CacheConfig}
+	return &DataManager{dataDB: dataDB, cacheCfg: config.CgrConfig().CacheCfg()}
 }
 
 // DataManager is the data storage manager for CGRateS

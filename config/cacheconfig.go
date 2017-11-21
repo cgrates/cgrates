@@ -40,7 +40,7 @@ func (self *CacheParamConfig) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 		self.Limit = *jsnCfg.Limit
 	}
 	if jsnCfg.Ttl != nil {
-		if self.TTL, err = utils.ParseDurationWithSecs(*jsnCfg.Ttl); err != nil {
+		if self.TTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ttl); err != nil {
 			return err
 		}
 	}

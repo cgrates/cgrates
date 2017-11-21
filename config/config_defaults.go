@@ -139,7 +139,13 @@ const CGRATES_CFG_JSON = `
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
-	"lcr_subject_prefix_matching": false	// enables prefix matching for the lcr subject
+	"lcr_subject_prefix_matching": false,	// enables prefix matching for the lcr subject
+	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
+		"*any": "189h",
+		"*voice": "72h",
+		"*data": "107374182400",
+		"*sms": "10000"
+	},
 },
 
 
@@ -147,7 +153,6 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// start the CDR Server service:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
-	"cdr_account_summary": false,			// add account information from dataDB
 	"sm_cost_retries": 5,					// number of queries to sm_costs before recalculating CDR
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
@@ -181,7 +186,6 @@ const CGRATES_CFG_JSON = `
 			{"tag":"TOR", "type": "*composed", "value": "ToR"},
 			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
 			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
-			{"tag":"Direction", "type": "*composed", "value": "Direction"},
 			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
 			{"tag":"Category", "type": "*composed", "value": "Category"},
 			{"tag":"Account", "type": "*composed", "value": "Account"},
@@ -231,7 +235,6 @@ const CGRATES_CFG_JSON = `
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "2", "mandatory": true},
 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "3", "mandatory": true},
 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "4", "mandatory": true},
-			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "5", "mandatory": true},
 			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "6", "mandatory": true},
 			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "7", "mandatory": true},
 			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "8", "mandatory": true},
@@ -248,7 +251,6 @@ const CGRATES_CFG_JSON = `
 			{"tag": "TOR", "type": "*composed", "value": "ToR"},
 			{"tag": "OriginID", "type": "*composed", "value": "OriginID"},
 			{"tag": "RequestType", "type": "*composed", "value": "RequestType"},
-			{"tag": "Direction", "type": "*composed", "value": "Direction"},
 			{"tag": "Tenant", "type": "*composed", "value": "Tenant"},
 			{"tag": "Category", "type": "*composed", "value": "Category"},
 			{"tag": "Account", "type": "*composed", "value": "Account"},

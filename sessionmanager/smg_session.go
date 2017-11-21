@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"sync"
 	"time"
 
@@ -153,7 +152,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Send disconnect order to remote connection
 func (self *SMGSession) disconnectSession(reason string) error {
-	self.EventStart[utils.USAGE] = strconv.FormatFloat(self.TotalUsage.Seconds(), 'f', -1, 64) // Set the usage to total one debitted
+	self.EventStart[utils.USAGE] = self.TotalUsage.Nanoseconds() // Set the usage to total one debitted
 	if self.clntConn == nil || reflect.ValueOf(self.clntConn).IsNil() {
 		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
 	}
@@ -241,7 +240,7 @@ func (self *SMGSession) storeSMCost() error {
 		RunID:       self.RunID,
 		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
 		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
-		Usage:       self.TotalUsage.Seconds(),
+		Usage:       self.TotalUsage,
 		CostDetails: self.EventCost,
 	}
 	var reply string
@@ -261,7 +260,6 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 	defer self.mux.RUnlock()
 	sTime, _ := self.EventStart.GetSetupTime(utils.META_DEFAULT, timezone)
 	aTime, _ := self.EventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
-	pdd, _ := self.EventStart.GetPdd(utils.META_DEFAULT)
 	aSession := &ActiveSession{
 		CGRID:       self.CGRID,
 		TOR:         self.EventStart.GetTOR(utils.META_DEFAULT),
@@ -270,7 +268,6 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 		CdrHost:     self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
 		CdrSource:   self.EventStart.GetCdrSource(),
 		ReqType:     self.EventStart.GetReqType(utils.META_DEFAULT),
-		Direction:   self.EventStart.GetDirection(utils.META_DEFAULT),
 		Tenant:      self.EventStart.GetTenant(utils.META_DEFAULT),
 		Category:    self.EventStart.GetCategory(utils.META_DEFAULT),
 		Account:     self.EventStart.GetAccount(utils.META_DEFAULT),
@@ -279,9 +276,7 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 		SetupTime:   sTime,
 		AnswerTime:  aTime,
 		Usage:       self.TotalUsage,
-		Pdd:         pdd,
 		ExtraFields: self.EventStart.GetExtraFields(),
-		Supplier:    self.EventStart.GetSupplier(utils.META_DEFAULT),
 		SMId:        "CGR-DA",
 	}
 	if self.CD != nil {

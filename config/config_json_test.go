@@ -198,11 +198,23 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 }
 
 func TestDfRalsJsonCfg(t *testing.T) {
-	eCfg := &RalsJsonCfg{Enabled: utils.BoolPointer(false), Thresholds_conns: &[]*HaPoolJsonCfg{},
-		Cdrstats_conns: &[]*HaPoolJsonCfg{}, Stats_conns: &[]*HaPoolJsonCfg{},
-		Historys_conns: &[]*HaPoolJsonCfg{}, Pubsubs_conns: &[]*HaPoolJsonCfg{},
-		Users_conns: &[]*HaPoolJsonCfg{}, Aliases_conns: &[]*HaPoolJsonCfg{},
-		Rp_subject_prefix_matching: utils.BoolPointer(false), Lcr_subject_prefix_matching: utils.BoolPointer(false)}
+	eCfg := &RalsJsonCfg{
+		Enabled:                     utils.BoolPointer(false),
+		Thresholds_conns:            &[]*HaPoolJsonCfg{},
+		Cdrstats_conns:              &[]*HaPoolJsonCfg{},
+		Stats_conns:                 &[]*HaPoolJsonCfg{},
+		Historys_conns:              &[]*HaPoolJsonCfg{},
+		Pubsubs_conns:               &[]*HaPoolJsonCfg{},
+		Users_conns:                 &[]*HaPoolJsonCfg{},
+		Aliases_conns:               &[]*HaPoolJsonCfg{},
+		Rp_subject_prefix_matching:  utils.BoolPointer(false),
+		Lcr_subject_prefix_matching: utils.BoolPointer(false),
+		Max_computed_usage: &map[string]string{
+			utils.ANY:   "189h",
+			utils.VOICE: "72h",
+			utils.DATA:  "107374182400",
+			utils.SMS:   "10000"},
+	}
 	if cfg, err := dfCgrJsonCfg.RalsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -221,11 +233,10 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
-		Enabled:             utils.BoolPointer(false),
-		Extra_fields:        utils.StringSlicePointer([]string{}),
-		Store_cdrs:          utils.BoolPointer(true),
-		Cdr_account_summary: utils.BoolPointer(false),
-		Sm_cost_retries:     utils.IntPointer(5),
+		Enabled:         utils.BoolPointer(false),
+		Extra_fields:    utils.StringSlicePointer([]string{}),
+		Store_cdrs:      utils.BoolPointer(true),
+		Sm_cost_retries: utils.IntPointer(5),
 		Rals_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer("*internal"),
@@ -275,9 +286,6 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.REQTYPE)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Direction"),
-			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DIRECTION)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tenant"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.TENANT)},
@@ -342,8 +350,6 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Value: utils.StringPointer("3"), Mandatory: utils.BoolPointer(true)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"), Field_id: utils.StringPointer(utils.REQTYPE), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("4"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Direction"), Field_id: utils.StringPointer(utils.DIRECTION), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("5"), Mandatory: utils.BoolPointer(true)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tenant"), Field_id: utils.StringPointer(utils.TENANT), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("6"), Mandatory: utils.BoolPointer(true)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Category"), Field_id: utils.StringPointer(utils.CATEGORY), Type: utils.StringPointer(utils.META_COMPOSED),
@@ -377,9 +383,6 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.REQTYPE)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Direction"),
-			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.DIRECTION)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tenant"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.TENANT)},

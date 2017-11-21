@@ -116,13 +116,13 @@ type RateSlot struct {
 // Used to set the durations we need out of strings
 func (self *RateSlot) SetDurations() error {
 	var err error
-	if self.rateUnitDur, err = ParseDurationWithSecs(self.RateUnit); err != nil {
+	if self.rateUnitDur, err = ParseDurationWithNanosecs(self.RateUnit); err != nil {
 		return err
 	}
-	if self.rateIncrementDur, err = ParseDurationWithSecs(self.RateIncrement); err != nil {
+	if self.rateIncrementDur, err = ParseDurationWithNanosecs(self.RateIncrement); err != nil {
 		return err
 	}
-	if self.groupIntervalStartDur, err = ParseDurationWithSecs(self.GroupIntervalStart); err != nil {
+	if self.groupIntervalStartDur, err = ParseDurationWithNanosecs(self.GroupIntervalStart); err != nil {
 		return err
 	}
 	return nil
@@ -738,7 +738,6 @@ type AttrExpFileCdrs struct {
 	CdrHosts                   []string // If provided, it will filter cdrhost
 	CdrSources                 []string // If provided, it will filter cdrsource
 	ReqTypes                   []string // If provided, it will fiter reqtype
-	Directions                 []string // If provided, it will fiter direction
 	Tenants                    []string // If provided, it will filter tenant
 	Categories                 []string // If provided, it will filter çategory
 	Accounts                   []string // If provided, it will filter account
@@ -763,7 +762,6 @@ func (self *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) 
 		OriginHosts:         self.CdrHosts,
 		Sources:             self.CdrSources,
 		RequestTypes:        self.ReqTypes,
-		Directions:          self.Directions,
 		Tenants:             self.Tenants,
 		Categories:          self.Categories,
 		Accounts:            self.Accounts,
@@ -837,7 +835,6 @@ func (self *AttrGetCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		OriginHosts:         self.CdrHosts,
 		Sources:             self.CdrSources,
 		RequestTypes:        self.ReqTypes,
-		Directions:          self.Directions,
 		Tenants:             self.Tenants,
 		Categories:          self.Categories,
 		Accounts:            self.Accounts,
@@ -881,7 +878,6 @@ type AttrRateCdrs struct {
 	CdrHosts            []string // If provided, it will filter cdrhost
 	CdrSources          []string // If provided, it will filter cdrsource
 	ReqTypes            []string // If provided, it will fiter reqtype
-	Directions          []string // If provided, it will fiter direction
 	Tenants             []string // If provided, it will filter tenant
 	Categories          []string // If provided, it will filter çategory
 	Accounts            []string // If provided, it will filter account
@@ -904,7 +900,6 @@ func (attrRateCDRs *AttrRateCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, er
 		Sources:             attrRateCDRs.CdrSources,
 		ToRs:                attrRateCDRs.TORs,
 		RequestTypes:        attrRateCDRs.ReqTypes,
-		Directions:          attrRateCDRs.Directions,
 		Tenants:             attrRateCDRs.Tenants,
 		Categories:          attrRateCDRs.Categories,
 		Accounts:            attrRateCDRs.Accounts,
@@ -1015,8 +1010,6 @@ type CDRsFilter struct {
 	NotToRs                []string          // Filter specific TORs out
 	RequestTypes           []string          // If provided, it will fiter reqtype
 	NotRequestTypes        []string          // Filter out specific request types
-	Directions             []string          // If provided, it will fiter direction
-	NotDirections          []string          // Filter out specific directions
 	Tenants                []string          // If provided, it will filter tenant
 	NotTenants             []string          // If provided, it will filter tenant
 	Categories             []string          // If provided, it will filter çategory
@@ -1027,10 +1020,6 @@ type CDRsFilter struct {
 	NotSubjects            []string          // Filter out specific subjects
 	DestinationPrefixes    []string          // If provided, it will filter on destination prefix
 	NotDestinationPrefixes []string          // Filter out specific destination prefixes
-	Suppliers              []string          // If provided, it will filter the supplier
-	NotSuppliers           []string          // Filter out specific suppliers
-	DisconnectCauses       []string          // Filter for disconnect Cause
-	NotDisconnectCauses    []string          // Filter out specific disconnect causes
 	Costs                  []float64         // Query based on costs specified
 	NotCosts               []float64         // Filter out specific costs out from result
 	ExtraFields            map[string]string // Query based on extra fields content
@@ -1047,8 +1036,6 @@ type CDRsFilter struct {
 	UpdatedAtEnd           *time.Time        // End interval, smaller than
 	MinUsage               string            // Start of the usage interval (>=)
 	MaxUsage               string            // End of the usage interval (<)
-	MinPDD                 string            // Start of the pdd interval (>=)
-	MaxPDD                 string            // End of the pdd interval (<)
 	MinCost                *float64          // Start of the cost interval (>=)
 	MaxCost                *float64          // End of the usage interval (<)
 	Unscoped               bool              // Include soft-deleted records in results
@@ -1071,8 +1058,6 @@ type RPCCDRsFilter struct {
 	NotToRs                []string          // Filter specific TORs out
 	RequestTypes           []string          // If provided, it will fiter reqtype
 	NotRequestTypes        []string          // Filter out specific request types
-	Directions             []string          // If provided, it will fiter direction
-	NotDirections          []string          // Filter out specific directions
 	Tenants                []string          // If provided, it will filter tenant
 	NotTenants             []string          // If provided, it will filter tenant
 	Categories             []string          // If provided, it will filter çategory
@@ -1083,10 +1068,6 @@ type RPCCDRsFilter struct {
 	NotSubjects            []string          // Filter out specific subjects
 	DestinationPrefixes    []string          // If provided, it will filter on destination prefix
 	NotDestinationPrefixes []string          // Filter out specific destination prefixes
-	Suppliers              []string          // If provided, it will filter the supplier
-	NotSuppliers           []string          // Filter out specific suppliers
-	DisconnectCauses       []string          // Filter for disconnect Cause
-	NotDisconnectCauses    []string          // Filter out specific disconnect causes
 	Costs                  []float64         // Query based on costs specified
 	NotCosts               []float64         // Filter out specific costs out from result
 	ExtraFields            map[string]string // Query based on extra fields content
@@ -1103,8 +1084,6 @@ type RPCCDRsFilter struct {
 	UpdatedAtEnd           string            // End interval, smaller than
 	MinUsage               string            // Start of the usage interval (>=)
 	MaxUsage               string            // End of the usage interval (<)
-	MinPDD                 string            // Start of the pdd interval (>=)
-	MaxPDD                 string            // End of the pdd interval (<)
 	MinCost                *float64          // Start of the cost interval (>=)
 	MaxCost                *float64          // End of the usage interval (<)
 	Paginator                                // Add pagination
@@ -1124,8 +1103,6 @@ func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		NotSources:             self.NotSources,
 		RequestTypes:           self.RequestTypes,
 		NotRequestTypes:        self.NotRequestTypes,
-		Directions:             self.Directions,
-		NotDirections:          self.NotDirections,
 		Tenants:                self.Tenants,
 		NotTenants:             self.NotTenants,
 		Categories:             self.Categories,
@@ -1136,23 +1113,17 @@ func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		NotSubjects:            self.NotSubjects,
 		DestinationPrefixes:    self.DestinationPrefixes,
 		NotDestinationPrefixes: self.NotDestinationPrefixes,
-		Suppliers:              self.Suppliers,
-		NotSuppliers:           self.NotSuppliers,
-		DisconnectCauses:       self.DisconnectCauses,
-		NotDisconnectCauses:    self.NotDisconnectCauses,
-		Costs:                  self.Costs,
-		NotCosts:               self.NotCosts,
-		ExtraFields:            self.ExtraFields,
-		NotExtraFields:         self.NotExtraFields,
-		OrderIDStart:           self.OrderIDStart,
-		OrderIDEnd:             self.OrderIDEnd,
-		MinUsage:               self.MinUsage,
-		MaxUsage:               self.MaxUsage,
-		MinPDD:                 self.MinPDD,
-		MaxPDD:                 self.MaxPDD,
-		MinCost:                self.MinCost,
-		MaxCost:                self.MaxCost,
-		Paginator:              self.Paginator,
+		Costs:          self.Costs,
+		NotCosts:       self.NotCosts,
+		ExtraFields:    self.ExtraFields,
+		NotExtraFields: self.NotExtraFields,
+		OrderIDStart:   self.OrderIDStart,
+		OrderIDEnd:     self.OrderIDEnd,
+		MinUsage:       self.MinUsage,
+		MaxUsage:       self.MaxUsage,
+		MinCost:        self.MinCost,
+		MaxCost:        self.MaxCost,
+		Paginator:      self.Paginator,
 	}
 	if len(self.SetupTimeStart) != 0 {
 		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart, timezone); err != nil {

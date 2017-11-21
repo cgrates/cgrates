@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -76,7 +77,8 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	return dSM
 }
 
-func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor, processorVars map[string]string, cca *CCA) (bool, error) {
+func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor,
+	processorVars map[string]string, cca *CCA) (bool, error) {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
 		if passes, _ := passesFieldFilter(ccr.diamMessage, fldFilter, nil); !passes {
@@ -129,7 +131,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			return false, ErrDiameterRatingFailed
 		}
 	}
-	var maxUsage float64
+	var maxUsage time.Duration
 	processorVars[CGRResultCode] = strconv.Itoa(diam.Success)
 	processorVars[CGRError] = ""
 	if reqProcessor.DryRun { // DryRun does not send over network
@@ -138,15 +140,15 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	} else { // Find out maxUsage over APIs
 		switch ccr.CCRequestType {
 		case 1:
-			err = self.smg.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage)
+			err = self.smg.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage)
 		case 2:
-			err = self.smg.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage)
+			err = self.smg.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage)
 		case 3, 4: // Handle them together since we generate CDR for them
 			var rpl string
 			if ccr.CCRequestType == 3 {
 				err = self.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
 			} else if ccr.CCRequestType == 4 {
-				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv.Clone(), &maxUsage)
+				err = self.smg.Call("SMGenericV2.ChargeEvent", smgEv.Clone(), &maxUsage)
 				if maxUsage == 0 {
 					smgEv[utils.USAGE] = 0 // For CDR not to debit
 				}
@@ -182,12 +184,12 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			maxUsage = 0
 		}
 		if prevMaxUsageStr, hasKey := processorVars[CGRMaxUsage]; hasKey {
-			prevMaxUsage, _ := strconv.ParseFloat(prevMaxUsageStr, 64)
+			prevMaxUsage, _ := utils.ParseDurationWithNanosecs(prevMaxUsageStr)
 			if prevMaxUsage < maxUsage {
 				maxUsage = prevMaxUsage
 			}
 		}
-		processorVars[CGRMaxUsage] = strconv.FormatFloat(maxUsage, 'f', -1, 64)
+		processorVars[CGRMaxUsage] = strconv.FormatInt(maxUsage.Nanoseconds(), 10)
 	}
 	if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, processorVars[CGRResultCode],
 		false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {

@@ -48,7 +48,7 @@ func (self *CmdGetMaxUsage) RpcMethod() string {
 
 func (self *CmdGetMaxUsage) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.UsageRecord{Direction: "*out"}
+		self.rpcParams = &engine.UsageRecord{}
 	}
 	return self.rpcParams
 }

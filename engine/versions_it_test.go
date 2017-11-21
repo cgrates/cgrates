@@ -46,12 +46,15 @@ func TestVersionsITMongo(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "tutmongo")); err != nil {
 		t.Fatal(err)
 	}
-	if dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass,
-		cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize); err != nil {
+	if dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost,
+		cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass,
+		cfg.DBDataEncoding, cfg.CacheCfg(), *loadHistorySize); err != nil {
 		log.Fatal(err)
 	}
-	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
-		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost,
+		cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,13 +69,16 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "tutmysql")); err != nil {
 		t.Fatal(err)
 	}
-	dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize)
+	dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
+		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
-		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
+		cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,12 +93,15 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 		t.Fatal(err)
 	}
-	dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, *loadHistorySize)
+	dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
+		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
-		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost,
+		cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,7 +141,6 @@ func testVersion(t *testing.T) {
 	switch storType {
 	case utils.MONGO, utils.MAPSTOR:
 		currentVersion = allVersions
-
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"

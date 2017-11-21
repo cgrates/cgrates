@@ -113,9 +113,10 @@ const (
 	TBLTPStats                    = "tp_stats"
 	TBLTPThresholds               = "tp_thresholds"
 	TBLTPFilters                  = "tp_filters"
-	TBLTPLcr                      = "tp_lcr"
-	TBLSMCosts                    = "sm_costs"
-	TBLCDRs                       = "cdrs"
+	SMCostsTBL                    = "sm_costs"
+	CDRsTBL                       = "cdrs"
+	TBLTPLCRProfiles              = "tp_lcr"
+	TBLTPLcr                      = "tp_lcrs"
 	TBLVersions                   = "versions"
 	TIMINGS_CSV                   = "Timings.csv"
 	DESTINATIONS_CSV              = "Destinations.csv"
@@ -409,7 +410,6 @@ const (
 	UnsupportedMigrationTask     = "unsupported migration task"
 	NoStorDBConnection           = "not connected to StorDB"
 	UndefinedVersion             = "undefined version"
-	MetaSetVersions              = "*set_versions"
 	UnsupportedDB                = "unsupported database"
 	ACCOUNT_SUMMARY              = "AccountSummary"
 	TxtSuffix                    = ".txt"
@@ -434,13 +434,6 @@ const (
 	MetaEveryMinute              = "*every_minute"
 	MetaHourly                   = "*hourly"
 	ID                           = "ID"
-	MetaASR                      = "*asr"
-	MetaACD                      = "*acd"
-	MetaTCD                      = "*tcd"
-	MetaACC                      = "*acc"
-	MetaTCC                      = "*tcc"
-	MetaPDD                      = "*pdd"
-	MetaDDC                      = "*ddc"
 	CacheDestinations            = "destinations"
 	CacheReverseDestinations     = "reverse_destinations"
 	CacheRatingPlans             = "rating_plans"
@@ -491,6 +484,7 @@ const (
 	StatUpdate                   = "StatUpdate"
 	ResourceUpdate               = "ResourceUpdate"
 	CDR                          = "CDR"
+	CDRs                         = "CDRs"
 	ExpiryTime                   = "ExpiryTime"
 	AllowNegative                = "AllowNegative"
 	Disabled                     = "Disabled"
@@ -577,6 +571,26 @@ const (
 	MetaTpRatingProfile          = "*TpRatingProfile"
 	MetaStorDB                   = "*StorDB"
 	MetaDataDB                   = "*DataDB"
+	SMGenericV2UpdateSession     = "SMGenericV2.UpdateSession"
+	SMGenericV2InitiateSession   = "SMGenericV2.InitiateSession"
+	SMGenericV1UpdateSession     = "SMGenericV1.UpdateSession"
+	SMGenericV1InitiateSession   = "SMGenericV1.InitiateSession"
+)
+
+//Meta
+const (
+	MetaASR = "*asr"
+	MetaACD = "*acd"
+	MetaTCD = "*tcd"
+	MetaACC = "*acc"
+	MetaTCC = "*tcc"
+	MetaPDD = "*pdd"
+	MetaDDC = "*ddc"
+)
+
+//Migrator Metas
+const (
+	MetaSetVersions = "*set_versions"
 )
 
 func buildCacheInstRevPrefixes() {

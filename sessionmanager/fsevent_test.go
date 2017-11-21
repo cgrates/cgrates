@@ -371,7 +371,6 @@ func TestEventParseStatic(t *testing.T) {
 	answerTime, _ := ev.GetAnswerTime("^2013-12-07 08:42:24", "")
 	dur, _ := ev.GetDuration("^60s")
 	if ev.GetReqType("^test") != "test" ||
-		ev.GetDirection("^test") != "test" ||
 		ev.GetTenant("^test") != "test" ||
 		ev.GetCategory("^test") != "test" ||
 		ev.GetAccount("^test") != "test" ||
@@ -379,12 +378,9 @@ func TestEventParseStatic(t *testing.T) {
 		ev.GetDestination("^test") != "test" ||
 		setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
 		answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
-		dur != time.Duration(60)*time.Second ||
-		ev.GetSupplier("^test") != "test" ||
-		ev.GetDisconnectCause("^test") != "test" {
+		dur != time.Duration(60)*time.Second {
 		t.Error("Values out of static not matching",
 			ev.GetReqType("^test") != "test",
-			ev.GetDirection("^test") != "test",
 			ev.GetTenant("^test") != "test",
 			ev.GetCategory("^test") != "test",
 			ev.GetAccount("^test") != "test",
@@ -392,9 +388,7 @@ func TestEventParseStatic(t *testing.T) {
 			ev.GetDestination("^test") != "test",
 			setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 			answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
-			dur != time.Duration(60)*time.Second,
-			ev.GetSupplier("^test") != "test",
-			ev.GetDisconnectCause("^test") != "test")
+			dur != time.Duration(60)*time.Second)
 	}
 }
 
@@ -424,7 +418,6 @@ Task-Runtime: 1349437318`
 	answerTime, _ := ev.GetAnswerTime("Event-Date-Local", "")
 	dur, _ := ev.GetDuration("Event-Calling-Line-Number")
 	if ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		ev.GetDirection("FreeSWITCH-Hostname") != "*out" ||
 		ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		ev.GetCategory("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		ev.GetAccount("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
@@ -432,12 +425,9 @@ Task-Runtime: 1349437318`
 		ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
 		answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
-		dur != time.Duration(65)*time.Second ||
-		ev.GetSupplier("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		ev.GetDisconnectCause("FreeSWITCH-Hostname") != "h1.ip-switch.net" {
+		dur != time.Duration(65)*time.Second {
 		t.Error("Values out of static not matching",
 			ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			ev.GetDirection("FreeSWITCH-Hostname") != "*out",
 			ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetCategory("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetAccount("FreeSWITCH-Hostname") != "h1.ip-switch.net",
@@ -445,9 +435,7 @@ Task-Runtime: 1349437318`
 			ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
 			answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
-			dur != time.Duration(65)*time.Second,
-			ev.GetSupplier("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			ev.GetDisconnectCause("FreeSWITCH-Hostname") != "h1.ip-switch.net")
+			dur != time.Duration(65)*time.Second)
 	}
 }
 
@@ -482,7 +470,6 @@ func TestParseFsHangup(t *testing.T) {
 	answerTime, _ := ev.GetAnswerTime(utils.META_DEFAULT, "")
 	dur, _ := ev.GetDuration(utils.META_DEFAULT)
 	if ev.GetReqType(utils.META_DEFAULT) != utils.META_PREPAID ||
-		ev.GetDirection(utils.META_DEFAULT) != "*out" ||
 		ev.GetTenant(utils.META_DEFAULT) != "cgrates.org" ||
 		ev.GetCategory(utils.META_DEFAULT) != "call" ||
 		ev.GetAccount(utils.META_DEFAULT) != "1001" ||
@@ -490,12 +477,9 @@ func TestParseFsHangup(t *testing.T) {
 		ev.GetDestination(utils.META_DEFAULT) != "1003" ||
 		setupTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC) ||
 		answerTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC) ||
-		dur != time.Duration(66)*time.Second ||
-		ev.GetSupplier(utils.META_DEFAULT) != "supplier1" ||
-		ev.GetDisconnectCause(utils.META_DEFAULT) != "NORMAL_CLEARING" {
+		dur != time.Duration(66)*time.Second {
 		t.Error("Default values not matching",
 			ev.GetReqType(utils.META_DEFAULT) != utils.META_PREPAID,
-			ev.GetDirection(utils.META_DEFAULT) != "*out",
 			ev.GetTenant(utils.META_DEFAULT) != "cgrates.org",
 			ev.GetCategory(utils.META_DEFAULT) != "call",
 			ev.GetAccount(utils.META_DEFAULT) != "1001",
@@ -503,9 +487,7 @@ func TestParseFsHangup(t *testing.T) {
 			ev.GetDestination(utils.META_DEFAULT) != "1003",
 			setupTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC),
 			answerTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC),
-			dur != time.Duration(66)*time.Second,
-			ev.GetSupplier(utils.META_DEFAULT) != "supplier1",
-			ev.GetDisconnectCause(utils.META_DEFAULT) != "NORMAL_CLEARING")
+			dur != time.Duration(66)*time.Second)
 	}
 }
 
@@ -635,11 +617,12 @@ func TestFsEvAsCDR(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	eStoredCdr := &engine.CDR{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		ToR: utils.VOICE, OriginID: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad", OriginHost: "10.0.3.15", Source: "FS_CHANNEL_HANGUP_COMPLETE", RequestType: utils.META_PREPAID,
-		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
+		ToR: utils.VOICE, OriginID: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad",
+		OriginHost: "10.0.3.15", Source: "FS_CHANNEL_HANGUP_COMPLETE", RequestType: utils.META_PREPAID,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 		Destination: "1003", SetupTime: setupTime, AnswerTime: aTime,
-		Usage: time.Duration(66) * time.Second, PDD: time.Duration(28) * time.Millisecond, Supplier: "supplier1",
-		DisconnectCause: "NORMAL_CLEARING", ExtraFields: make(map[string]string), Cost: -1}
+		Usage:       time.Duration(66) * time.Second,
+		ExtraFields: make(map[string]string), Cost: -1}
 	if storedCdr := ev.AsCDR(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}

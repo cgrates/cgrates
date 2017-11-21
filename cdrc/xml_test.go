@@ -221,8 +221,6 @@ func TestXMLRPProcess(t *testing.T) {
 					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>localCallId", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.REQTYPE,
 					Value: utils.ParseRSRFieldsMustCompile("^*rated", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "Direction", Type: utils.META_COMPOSED, FieldId: utils.DIRECTION,
-					Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.TENANT,
 					Value: utils.ParseRSRFieldsMustCompile("~broadWorksCDR>cdrData>basicModule>userId:s/.*@(.*)/${1}/", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.CATEGORY,
@@ -235,8 +233,12 @@ func TestXMLRPProcess(t *testing.T) {
 					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>startTime", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.ANSWER_TIME,
 					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>answerTime", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "Usage", Type: utils.META_HANDLER, FieldId: utils.USAGE, HandlerId: utils.HandlerSubstractUsage,
-					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>releaseTime;^|;broadWorksCDR>cdrData>basicModule>answerTime", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Usage", Type: utils.META_HANDLER,
+					FieldId: utils.USAGE, HandlerId: utils.HandlerSubstractUsage,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>releaseTime;^|;broadWorksCDR>cdrData>basicModule>answerTime",
+						utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "UsageSeconds", Type: utils.META_COMPOSED, FieldId: utils.USAGE,
+					Value: utils.ParseRSRFieldsMustCompile("^s", utils.INFIELD_SEP), Mandatory: true},
 			},
 		},
 	}
@@ -255,9 +257,13 @@ func TestXMLRPProcess(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCDRs := []*engine.CDR{
-		&engine.CDR{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714", OriginHost: "0.0.0.0", Source: "TestXML", OriginID: "25160047719:0",
-			ToR: "*voice", RequestType: "*rated", Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Destination: "+4986517174963",
-			SetupTime: time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC), AnswerTime: time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC), Usage: time.Duration(13483000000),
+		&engine.CDR{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
+			OriginHost: "0.0.0.0", Source: "TestXML", OriginID: "25160047719:0",
+			ToR: "*voice", RequestType: "*rated", Tenant: "cgrates.org",
+			Category: "call", Account: "1001", Destination: "+4986517174963",
+			SetupTime:   time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC),
+			AnswerTime:  time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC),
+			Usage:       time.Duration(13483000000),
 			ExtraFields: map[string]string{}, Cost: -1},
 	}
 	if !reflect.DeepEqual(expectedCDRs, cdrs) {

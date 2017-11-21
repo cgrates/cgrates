@@ -416,7 +416,7 @@ func TestParseZeroRatingSubject(t *testing.T) {
 	subj := []string{"", "*zero1s", "*zero5m", "*zero10h"}
 	dur := []time.Duration{time.Second, time.Second, 5 * time.Minute, 10 * time.Hour}
 	for i, s := range subj {
-		if d, err := ParseZeroRatingSubject(s); err != nil || d != dur[i] {
+		if d, err := ParseZeroRatingSubject(VOICE, s); err != nil || d != dur[i] {
 			t.Error("Error parsing rating subject: ", s, d, err)
 		}
 	}
@@ -431,25 +431,6 @@ func TestConcatenatedKey(t *testing.T) {
 	}
 	if key := ConcatenatedKey("a", "b", "c"); key != fmt.Sprintf("a%sb%sc", CONCATENATED_KEY_SEP, CONCATENATED_KEY_SEP) {
 		t.Error("Unexpected key value received: ", key)
-	}
-}
-
-func TestConvertIfaceToString(t *testing.T) {
-	val := interface{}("string1")
-	if resVal, converted := ConvertIfaceToString(val); !converted || resVal != "string1" {
-		t.Error(resVal, converted)
-	}
-	val = interface{}(123)
-	if resVal, converted := ConvertIfaceToString(val); !converted || resVal != "123" {
-		t.Error(resVal, converted)
-	}
-	val = interface{}([]byte("byte_val"))
-	if resVal, converted := ConvertIfaceToString(val); !converted || resVal != "byte_val" {
-		t.Error(resVal, converted)
-	}
-	val = interface{}(true)
-	if resVal, converted := ConvertIfaceToString(val); !converted || resVal != "true" {
-		t.Error(resVal, converted)
 	}
 }
 

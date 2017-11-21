@@ -16,37 +16,29 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package engine
 
 import (
-	"time"
+	"sync"
 
-	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/config"
 )
 
-type ThresholdSCfg struct {
-	Enabled       bool
-	StoreInterval time.Duration // Dump regularly from cache into dataDB
-	IndexedFields []string
+func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
+	c = &CacheS{cfg: cfg, dm: dm,
+		cItems: make(map[string]chan struct{})}
+	for k := range cfg.CacheCfg() {
+		c.cItems[k] = make(chan struct{})
+	}
+	cache.NewCache(cfg.CacheCfg()) // init cache
+	return
 }
 
-func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
-	if jsnCfg == nil {
-		return nil
-	}
-	if jsnCfg.Enabled != nil {
-		t.Enabled = *jsnCfg.Enabled
-	}
-	if jsnCfg.Store_interval != nil {
-		if t.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Indexed_fields != nil {
-		t.IndexedFields = make([]string, len(*jsnCfg.Indexed_fields))
-		for i, fID := range *jsnCfg.Indexed_fields {
-			t.IndexedFields[i] = fID
-		}
-	}
-	return nil
+// CacheS deals with cache preload and other cache related tasks
+type CacheS struct {
+	cfg    *config.CGRConfig
+	dm     *DataManager
+	cItems map[string]chan struct{} // signal receiving of the
+	lMux   sync.RWMutex
 }

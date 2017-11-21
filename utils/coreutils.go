@@ -289,6 +289,17 @@ func ParseDurationWithSecs(durStr string) (d time.Duration, err error) {
 	return time.ParseDuration(durStr)
 }
 
+// Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
+func ParseDurationWithNanosecs(durStr string) (d time.Duration, err error) {
+	if durStr == "" {
+		return
+	}
+	if _, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+		durStr += "ns"
+	}
+	return time.ParseDuration(durStr)
+}
+
 func AccountKey(tenant, account string) string {
 	return fmt.Sprintf("%s:%s", tenant, account)
 }
@@ -304,10 +315,15 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 // ParseZeroRatingSubject will parse the subject in the balance
 // returns duration if able to extract it from subject
 // returns error if not able to parse duration (ie: if ratingSubject is standard one)
-func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
+func ParseZeroRatingSubject(tor, rateSubj string) (time.Duration, error) {
 	rateSubj = strings.TrimSpace(rateSubj)
 	if rateSubj == "" || rateSubj == ANY {
-		rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1s"
+		switch tor {
+		case VOICE:
+			rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1s"
+		default:
+			rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1ns"
+		}
 	}
 	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {
 		return 0, errors.New("malformed rating subject: " + rateSubj)
@@ -477,34 +493,6 @@ func ToJSON(v interface{}) string {
 
 func LogFull(v interface{}) {
 	log.Print(ToIJSON(v))
-}
-
-// Used to convert from generic interface type towards string value
-func ConvertIfaceToString(fld interface{}) (string, bool) {
-	var strVal string
-	var converted bool
-	switch fld.(type) {
-	case string:
-		strVal = fld.(string)
-		converted = true
-	case int:
-		strVal = strconv.Itoa(fld.(int))
-		converted = true
-	case int64:
-		strVal = strconv.FormatInt(fld.(int64), 10)
-		converted = true
-	case bool:
-		strVal = strconv.FormatBool(fld.(bool))
-		converted = true
-	case []uint8:
-		var byteVal []byte
-		if byteVal, converted = fld.([]byte); converted {
-			strVal = string(byteVal)
-		}
-	default: // Maybe we are lucky and the value converts to string
-		strVal, converted = fld.(string)
-	}
-	return strVal, converted
 }
 
 // Simple object cloner, b should be a pointer towards a value into which we want to decode

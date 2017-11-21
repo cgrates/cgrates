@@ -43,3 +43,8 @@ func (smgv2 *SMGenericV2) InitiateSession(ev sessionmanager.SMGenericEvent, maxU
 func (smgv2 *SMGenericV2) UpdateSession(ev sessionmanager.SMGenericEvent, maxUsage *time.Duration) error {
 	return smgv2.SMG.BiRPCV2UpdateSession(nil, ev, maxUsage)
 }
+
+// Called on individual Events (eg SMS)
+func (smgv2 *SMGenericV2) ChargeEvent(ev sessionmanager.SMGenericEvent, maxUsage *time.Duration) error {
+	return smgv2.SMG.BiRPCV2ChargeEvent(nil, ev, maxUsage)
+}

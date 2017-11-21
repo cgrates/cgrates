@@ -61,7 +61,8 @@ var (
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
-	dm, err := engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheConfig, *loadHistorySize)
+	dm, err := engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port,
+		*datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheCfg(), *loadHistorySize)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
@@ -156,7 +157,7 @@ func main() {
 	var timeparsed time.Duration
 	var err error
 	tstart := time.Now().Local()
-	timeparsed, err = utils.ParseDurationWithSecs(*usage)
+	timeparsed, err = utils.ParseDurationWithNanosecs(*usage)
 	tend := tstart.Add(timeparsed)
 	cd := &engine.CallDescriptor{
 		TimeStart:     tstart,

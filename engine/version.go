@@ -24,6 +24,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// Versions will keep trac of various item versions
+type Versions map[string]int64 // map[item]versionNr
+
 func CheckVersions(storage Storage) error {
 	// get current db version
 	storType := storage.GetStorageType()
@@ -104,29 +107,6 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	return ""
 }
 
-func CurrentDBVersions(storType string) Versions {
-	dataDbVersions := CurrentDataDBVersions()
-	storDbVersions := CurrentStorDBVersions()
-
-	allVersions := make(Versions)
-	for k, v := range dataDbVersions {
-		allVersions[k] = v
-	}
-	for k, v := range storDbVersions {
-		allVersions[k] = v
-	}
-
-	switch storType {
-	case utils.MONGO, utils.MAPSTOR:
-		return allVersions
-	case utils.POSTGRES, utils.MYSQL:
-		return storDbVersions
-	case utils.REDIS:
-		return dataDbVersions
-	}
-	return nil
-}
-
 func CurrentDataDBVersions() Versions {
 	return Versions{
 		utils.StatS:               2,
@@ -184,5 +164,25 @@ func CurrentStorDBVersions() Versions {
 	}
 }
 
-// Versions will keep trac of various item versions
-type Versions map[string]int64 // map[item]versionNr
+func CurrentDBVersions(storType string) Versions {
+	dataDbVersions := CurrentDataDBVersions()
+	storDbVersions := CurrentStorDBVersions()
+
+	allVersions := make(Versions)
+	for k, v := range dataDbVersions {
+		allVersions[k] = v
+	}
+	for k, v := range storDbVersions {
+		allVersions[k] = v
+	}
+
+	switch storType {
+	case utils.MONGO, utils.MAPSTOR:
+		return allVersions
+	case utils.POSTGRES, utils.MYSQL:
+		return storDbVersions
+	case utils.REDIS:
+		return dataDbVersions
+	}
+	return nil
+}

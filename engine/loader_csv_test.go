@@ -58,20 +58,20 @@ WEEKENDS,*any,*any,*any,6;7,00:00:00
 ONE_TIME_RUN,2012,,,,*asap
 `
 	rates = `
-R1,0,0.2,60,1,0
-R2,0,0.1,60s,1s,0
-R3,0,0.05,60s,1s,0
-R4,1,1,1s,1s,0
-R5,0,0.5,1s,1s,0
-LANDLINE_OFFPEAK,0,1,1,60,0
-LANDLINE_OFFPEAK,0,1,1,1,60
+R1,0,0.2,60s,1s,0s
+R2,0,0.1,60s,1s,0s
+R3,0,0.05,60s,1s,0s
+R4,1,1,1s,1s,0s
+R5,0,0.5,1s,1s,0s
+LANDLINE_OFFPEAK,0,1,1s,60s,0s
+LANDLINE_OFFPEAK,0,1,1s,1s,60s
 GBP_71,0.000000,5.55555,1s,1s,0s
 GBP_72,0.000000,7.77777,1s,1s,0s
-GBP_70,0.000000,1,1,1,0
+GBP_70,0.000000,1,1s,1s,0s
 RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s
 RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s
-R_URG,0,0,1,1,0
-MX,0,1,1s,1s,0
+R_URG,0,0,1s,1s,0s
+MX,0,1,1s,1s,0s
 DY,0.15,0.05,60s,1s,0s
 CF,1.12,0,1s,1s,0s
 `
@@ -163,10 +163,10 @@ SG3,*any,*lowest,
 `
 	actions = `
 MINI,*topup_reset,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
-MINI,*topup,,,,*voice,*out,,NAT,test,,*unlimited,,100,10,false,false,10
+MINI,*topup,,,,*voice,*out,,NAT,test,,*unlimited,,100s,10,false,false,10
 SHARED,*topup,,,,*monetary,*out,,,,SG1,*unlimited,,100,10,false,false,10
 TOPUP10_AC,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,1,10,false,false,10
-TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,false,false,10
+TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10
 SE0,*topup_reset,,,,*monetary,*out,,,,SG2,*unlimited,,0,10,false,false,10
 SE10,*topup_reset,,,,*monetary,*out,,,,SG2,*unlimited,,10,5,false,false,10
 SE10,*topup,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
@@ -179,8 +179,8 @@ BLOCK,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 BLOCK_EMPTY,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,0,20,true,false,20
 BLOCK_EMPTY,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
-EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300,10,false,false,10
-NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50,10,false,false,10
+EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300s,10,false,false,10
+NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50s,10,false,false,10
 VF,*debit,,,,*monetary,*out,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
 TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,*out,,*any,,,*unlimited,,1000,20,false,false,10
 `
@@ -495,7 +495,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Failed to load rates: ", len(csvr.rates))
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
-	expctRs, err := utils.NewRateSlot(0, 0.2, "60", "1", "0")
+	expctRs, err := utils.NewRateSlot(0, 0.2, "60s", "1s", "0s")
 	if err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -505,16 +505,16 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate, expctRs)
 	}
 	rate = csvr.rates["R2"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.1, "60s", "1s", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0.1, "60s", "1s", "0s"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
 		rate.RateIncrementDuration() != expctRs.RateIncrementDuration() ||
 		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
-		t.Error("Error loading rate: ", rate)
+		t.Errorf("Expecting: %+v, received: %+v", expctRs, rate)
 	}
 	rate = csvr.rates["R3"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.05, "60s", "1s", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0.05, "60s", "1s", "0s"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -523,7 +523,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R4"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(1, 1.0, "1s", "1s", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(1, 1.0, "1s", "1s", "0s"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -532,7 +532,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R5"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.5, "1s", "1s", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0.5, "1s", "1s", "0s"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -541,7 +541,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1", "60", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 1, "1s", "60s", "0s"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -550,7 +550,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[1]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1", "1", "60"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 1, "1s", "1s", "60s"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -941,7 +941,7 @@ func TestLoadActions(t *testing.T) {
 				Type:           utils.StringPointer(utils.VOICE),
 				Uuid:           as1[1].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				Value:          &utils.ValueFormula{Static: 100},
+				Value:          &utils.ValueFormula{Static: 100 * float64(time.Second)},
 				Weight:         utils.Float64Pointer(10),
 				RatingSubject:  utils.StringPointer("test"),
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),

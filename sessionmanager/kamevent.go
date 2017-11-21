@@ -328,7 +328,6 @@ func (kev KamEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr.OriginHost = kev.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = kev.GetCdrSource()
 	storCdr.RequestType = kev.GetReqType(utils.META_DEFAULT)
-	storCdr.Direction = kev.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = kev.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = kev.GetCategory(utils.META_DEFAULT)
 	storCdr.Account = kev.GetAccount(utils.META_DEFAULT)
@@ -337,9 +336,6 @@ func (kev KamEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr.SetupTime, _ = kev.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = kev.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = kev.GetDuration(utils.META_DEFAULT)
-	storCdr.PDD, _ = kev.GetPdd(utils.META_DEFAULT)
-	storCdr.Supplier = kev.GetSupplier(utils.META_DEFAULT)
-	storCdr.DisconnectCause = kev.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = kev.GetExtraFields()
 	storCdr.Cost = -1
 

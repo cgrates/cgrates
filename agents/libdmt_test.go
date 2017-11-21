@@ -59,25 +59,25 @@ func TestDisectUsageForCCR(t *testing.T) {
 }
 
 func TestUsageFromCCR(t *testing.T) {
-	if usage := usageFromCCR(1, 0, 300, 0, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
+	if usage := usageFromCCR(1, 0, 0, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
 		t.Error(usage)
 	}
-	if usage := usageFromCCR(2, 0, 300, 300, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
+	if usage := usageFromCCR(2, 0, 300, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
 		t.Error(usage)
 	}
-	if usage := usageFromCCR(2, 3, 300, 300, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
+	if usage := usageFromCCR(2, 3, 300, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
 		t.Error(usage.Seconds())
 	}
-	if usage := usageFromCCR(3, 3, 0, 10, time.Duration(300)*time.Second); usage != time.Duration(610)*time.Second {
+	if usage := usageFromCCR(3, 3, 10, time.Duration(300)*time.Second); usage != time.Duration(610)*time.Second {
 		t.Error(usage)
 	}
-	if usage := usageFromCCR(3, 4, 0, 35, time.Duration(300)*time.Second); usage != time.Duration(935)*time.Second {
+	if usage := usageFromCCR(3, 4, 35, time.Duration(300)*time.Second); usage != time.Duration(935)*time.Second {
 		t.Error(usage)
 	}
-	if usage := usageFromCCR(3, 1, 0, 35, time.Duration(300)*time.Second); usage != time.Duration(35)*time.Second {
+	if usage := usageFromCCR(3, 1, 35, time.Duration(300)*time.Second); usage != time.Duration(35)*time.Second {
 		t.Error(usage)
 	}
-	if usage := usageFromCCR(1, 0, 360, 0, time.Duration(360)*time.Second); usage != time.Duration(360)*time.Second {
+	if usage := usageFromCCR(1, 0, 0, time.Duration(360)*time.Second); usage != time.Duration(360)*time.Second {
 		t.Error(usage)
 	}
 }
@@ -108,12 +108,17 @@ func TestMetaValueExponent(t *testing.T) {
 			}),
 		},
 	})
-	if val, err := metaValueExponent(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err != nil {
+	if val, err := metaValueExponent(m, nil, utils.ParseRSRFieldsMustCompile(
+		"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+		utils.INFIELD_SEP), 10); err != nil {
 		t.Error(err)
 	} else if val != "0.1" {
 		t.Error("Received: ", val)
 	}
-	if _, err = metaValueExponent(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err == nil {
+	if _, err = metaValueExponent(m, nil,
+		utils.ParseRSRFieldsMustCompile(
+			"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+			utils.INFIELD_SEP), 10); err == nil {
 		t.Error("Should have received error") // Insufficient number arguments
 	}
 }
@@ -136,12 +141,17 @@ func TestMetaSum(t *testing.T) {
 			}),
 		},
 	})
-	if val, err := metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 0, 10); err != nil {
+	if val, err := metaSum(m, nil,
+		utils.ParseRSRFieldsMustCompile(
+			"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+			utils.INFIELD_SEP), 0, 10); err != nil {
 		t.Error(err)
 	} else if val != "9995" {
 		t.Error("Received: ", val)
 	}
-	if _, err = metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 0, 10); err == nil {
+	if _, err = metaSum(m, nil, utils.ParseRSRFieldsMustCompile(
+		"Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent",
+		utils.INFIELD_SEP), 0, 10); err == nil {
 		t.Error("Should have received error") // Insufficient number arguments
 	}
 }

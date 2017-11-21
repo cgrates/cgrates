@@ -101,7 +101,8 @@ func TestActionsitSetCdrlogDebit(t *testing.T) {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG}, Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
+	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))

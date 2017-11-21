@@ -201,7 +201,6 @@ func (sq *CDRStatsQueue) simplifyCdr(cdr *CDR) *QCdr {
 	return &QCdr{
 		SetupTime:  cdr.SetupTime,
 		AnswerTime: cdr.AnswerTime,
-		Pdd:        cdr.PDD,
 		Usage:      cdr.Usage,
 		Cost:       cdr.Cost,
 		Dest:       cdr.Destination,

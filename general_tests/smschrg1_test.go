@@ -28,7 +28,7 @@ import (
 )
 
 func TestSMSSetStorageSmsChrg1(t *testing.T) {
-	config.CgrConfig().CacheConfig[utils.CacheRatingPlans].Precache = true // precache rating plan
+	config.CgrConfig().CacheCfg()[utils.CacheRatingPlans].Precache = true // precache rating plan
 	data, _ := engine.NewMapStorageJson()
 	dataDB = engine.NewDataManager(data)
 	engine.SetDataStorage(dataDB)
@@ -70,7 +70,7 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 }
 
 func TestSMSGetDataCostSmsChrg1(t *testing.T) {
-	usageDur := time.Second
+	usageDur := time.Duration(1)
 	timeStart := time.Date(2014, 3, 4, 0, 0, 0, 0, time.Local)
 	cd := &engine.CallDescriptor{
 		Direction:     "*out",

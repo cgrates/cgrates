@@ -1354,11 +1354,11 @@ func TestApierMaxDebitInexistentAcnt(t *testing.T) {
 
 func TestApierCdrServer(t *testing.T) {
 	httpClient := new(http.Client)
-	cdrForm1 := url.Values{utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED}, utils.DIRECTION: []string{"*out"},
+	cdrForm1 := url.Values{utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED},
 		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1001"}, utils.SUBJECT: []string{"1001"}, utils.DESTINATION: []string{"1002"},
 		utils.SETUP_TIME:  []string{"2013-11-07T08:42:22Z"},
 		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrForm2 := url.Values{utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED}, utils.DIRECTION: []string{"*out"},
+	cdrForm2 := url.Values{utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED},
 		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1001"}, utils.SUBJECT: []string{"1001"}, utils.DESTINATION: []string{"1002"},
 		utils.SETUP_TIME:  []string{"2013-11-07T08:42:23Z"},
 		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
@@ -1384,7 +1384,7 @@ func TestApierITGetCdrs(t *testing.T) {
 func TestApierITProcessCdr(t *testing.T) {
 	var reply string
 	cdr := engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
+		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 		Destination: "1002",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,

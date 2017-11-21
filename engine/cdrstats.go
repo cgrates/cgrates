@@ -105,9 +105,6 @@ func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 	if len(cs.ReqType) > 0 && !utils.IsSliceMember(cs.ReqType, cdr.RequestType) {
 		return false
 	}
-	if len(cs.Direction) > 0 && !utils.IsSliceMember(cs.Direction, cdr.Direction) {
-		return false
-	}
 	if len(cs.Tenant) > 0 && !utils.IsSliceMember(cs.Tenant, cdr.Tenant) {
 		return false
 	}
@@ -149,20 +146,6 @@ func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 		if len(cs.UsageInterval) > 1 && cdr.Usage >= cs.UsageInterval[1] {
 			return false
 		}
-	}
-	if len(cs.PddInterval) > 0 {
-		if cdr.PDD < cs.PddInterval[0] {
-			return false
-		}
-		if len(cs.PddInterval) > 1 && cdr.PDD >= cs.PddInterval[1] {
-			return false
-		}
-	}
-	if len(cs.Supplier) > 0 && !utils.IsSliceMember(cs.Supplier, cdr.Supplier) {
-		return false
-	}
-	if len(cs.DisconnectCause) > 0 && !utils.IsSliceMember(cs.DisconnectCause, cdr.DisconnectCause) {
-		return false
 	}
 	if len(cs.MediationRunIds) > 0 && !utils.IsSliceMember(cs.MediationRunIds, cdr.RunID) {
 		return false

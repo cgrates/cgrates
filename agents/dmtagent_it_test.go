@@ -64,27 +64,6 @@ func TestDmtAgentInitCfg(t *testing.T) {
 	rplyTimeout, _ = utils.ParseDurationWithSecs(*replyTimeout)
 }
 
-// Remove data in both rating and accounting db
-func TestDmtAgentResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(daCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func TestDmtAgentResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(daCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Start CGR Engine
-func TestDmtAgentStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	cfgDefaults, _ := config.NewDefaultCGRConfig()
 	loadDictionaries(cfgDefaults.DiameterAgentCfg().DictionariesDir, "UNIT_TEST")
@@ -133,10 +112,15 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	if ccr.diamMessage, err = ccr.AsDiameterMessage(); err != nil {
 		t.Error(err)
 	}
-	eSMGE := sessionmanager.SMGenericEvent{"EventName": DIAMETER_CCR, "OriginID": "routinga;1442095190;1476802709",
-		"Account": "*users", "AnswerTime": "2015-11-23 12:22:24 +0000 UTC", "Category": "call",
-		"Destination": "4986517174964", "Direction": "*out", "RequestType": "*users", "SetupTime": "2015-11-23 12:22:24 +0000 UTC",
-		"Subject": "*users", "SubscriberId": "4986517174963", "ToR": "*voice", "Tenant": "*users", "Usage": "300"}
+	eSMGE := sessionmanager.SMGenericEvent{"EventName": DIAMETER_CCR,
+		"OriginID": "routinga;1442095190;1476802709",
+		"Account":  "*users", "Category": "call",
+		"AnswerTime":  "2015-11-23 12:22:24 +0000 UTC",
+		"Destination": "4986517174964", "Direction": "*out",
+		"RequestType": "*users",
+		"SetupTime":   "2015-11-23 12:22:24 +0000 UTC",
+		"Subject":     "*users", "SubscriberId": "4986517174963",
+		"ToR": "*voice", "Tenant": "*users", "Usage": "5m0s"}
 	ccrFields := []*config.CfgCdrField{
 		&config.CfgCdrField{Tag: "TOR", FieldId: "ToR", Type: "*composed",
 			Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
@@ -172,30 +156,61 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 
 func TestDmtAgentPopulateCCTotalOctets(t *testing.T) {
 	daRP := &config.DARequestProcessor{CCAFields: []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "GrantedUnit", FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(^$)", utils.INFIELD_SEP),
-			FieldId: "Multiple-Services-Credit-Control>Granted-Service-Unit>CC-Time", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("CGRMaxUsage", utils.INFIELD_SEP), Mandatory: true},
-		&config.CfgCdrField{Tag: "GrantedOctet", FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(^$)", utils.INFIELD_SEP),
-			FieldId: "Multiple-Services-Credit-Control>Granted-Service-Unit>CC-Total-Octets", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("CGRMaxUsage", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "GrantedUnit",
+			FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(^$)", utils.INFIELD_SEP),
+			FieldId:     "Multiple-Services-Credit-Control>Granted-Service-Unit>CC-Time",
+			Type:        utils.META_COMPOSED,
+			Value:       utils.ParseRSRFieldsMustCompile("CGRMaxUsage", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "GrantedOctet",
+			FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(^$)", utils.INFIELD_SEP),
+			FieldId:     "Multiple-Services-Credit-Control>Granted-Service-Unit>CC-Total-Octets",
+			Type:        utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("CGRMaxUsage", utils.INFIELD_SEP),
+			Mandatory: true},
 	}}
 	ccr := new(CCR)
 	ccr.diamMessage = ccr.AsBareDiameterMessage()
 	cca := NewBareCCAFromCCR(ccr, "cgr-da", "cgrates.org")
-	if err := cca.SetProcessorAVPs(daRP, map[string]string{CGRError: "", CGRMaxUsage: "153600"}); err != nil {
+	if err := cca.SetProcessorAVPs(daRP,
+		map[string]string{CGRError: "", CGRMaxUsage: "153600"}); err != nil {
 		t.Error(err)
 	}
-	if avps, err := cca.diamMessage.FindAVPsWithPath([]interface{}{"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := cca.diamMessage.FindAVPsWithPath([]interface{}{
+		"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Not found")
 	} else if strResult := avpValAsString(avps[0]); strResult != "153600" { // Result-Code set in the template
 		t.Errorf("Expecting 153600, received: %s", strResult)
 	}
-	if avps, err := cca.diamMessage.FindAVPsWithPath([]interface{}{"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Total-Octets"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := cca.diamMessage.FindAVPsWithPath([]interface{}{
+		"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Total-Octets"},
+		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Not found")
 	} else if strResult := avpValAsString(avps[0]); strResult != "153600" { // Result-Code set in the template
 		t.Errorf("Expecting 153600, received: %s", strResult)
+	}
+}
+
+// Remove data in both rating and accounting db
+func TestDmtAgentResetDataDb(t *testing.T) {
+	if err := engine.InitDataDb(daCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Wipe out the cdr database
+func TestDmtAgentResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(daCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Start CGR Engine
+func TestDmtAgentStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -228,14 +243,22 @@ func TestDmtAgentConnectDiameterClient(t *testing.T) {
 
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:47:26Z"'
 func TestDmtAgentSendCCRInit(t *testing.T) {
-	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
-		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-		Usage: time.Duration(0), PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
+	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1",
+		time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, ToR: utils.VOICE, OriginID: "testccr1", OriginHost: "192.168.1.1",
+		Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1001",
+		Subject: "1001", Destination: "1004",
+		SetupTime:  time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage:      time.Duration(0), RunID: utils.DEFAULT_RUNID,
+		ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 	}
-	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
-		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DebitInterval, false)
+	ccr := storedCdrToCCR(cdr, "UNIT_TEST",
+		daCfg.DiameterAgentCfg().OriginRealm,
+		daCfg.DiameterAgentCfg().VendorId,
+		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION,
+		daCfg.DiameterAgentCfg().DebitInterval, false)
 	m, err := ccr.AsDiameterMessage()
 	if err != nil {
 		t.Error(err)
@@ -245,7 +268,8 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage(rplyTimeout)
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"},
+		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Granted-Service-Unit not found")
@@ -270,10 +294,10 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:52:26Z"'
 func TestDmtAgentSendCCRUpdate(t *testing.T) {
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
+		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-		Usage: time.Duration(300) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
+		Usage: time.Duration(300) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 	}
 	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DebitInterval, false)
@@ -306,10 +330,10 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:57:26Z"'
 func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
+		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-		Usage: time.Duration(600) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
+		Usage: time.Duration(600) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 	}
 	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DebitInterval, false)
@@ -341,10 +365,10 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 
 func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
+		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-		Usage: time.Duration(610) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
+		Usage: time.Duration(610) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 	}
 	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DebitInterval, true)
@@ -535,10 +559,10 @@ func TestDmtAgentSendCCRSMSWrongAccount(t *testing.T) {
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:47:26Z"'
 func TestDmtAgentSendCCRInitWrongAccount(t *testing.T) {
 	cdr := &engine.CDR{CGRID: utils.Sha1("testccr4", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "testccr4", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
-		Tenant: "cgrates.org", Category: "call", Account: "non_existent", Subject: "non_existent", Destination: "1004", Supplier: "SUPPL1",
+		OriginID: "testccr4", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "non_existent", Subject: "non_existent", Destination: "1004",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-		Usage: time.Duration(0) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
+		Usage: time.Duration(0) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 	}
 	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DebitInterval, false)
@@ -643,7 +667,7 @@ func TestDmtAgentCdrs(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Usage != "610" {
+		if cdrs[0].Usage != "10m10s" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
 		}
 		if cdrs[0].Cost != 0.7565 {

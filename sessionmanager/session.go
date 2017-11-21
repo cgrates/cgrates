@@ -272,7 +272,6 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 	sTime, _ := s.eventStart.GetSetupTime(utils.META_DEFAULT, s.sessionManager.Timezone())
 	aTime, _ := s.eventStart.GetAnswerTime(utils.META_DEFAULT, s.sessionManager.Timezone())
 	usage, _ := s.eventStart.GetDuration(utils.META_DEFAULT)
-	pdd, _ := s.eventStart.GetPdd(utils.META_DEFAULT)
 	for _, sessionRun := range s.sessionRuns {
 		aSession := &ActiveSession{
 			CGRID:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
@@ -281,7 +280,6 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 			CdrHost:     s.eventStart.GetOriginatorIP(utils.META_DEFAULT),
 			CdrSource:   "FS_" + s.eventStart.GetName(),
 			ReqType:     s.eventStart.GetReqType(utils.META_DEFAULT),
-			Direction:   s.eventStart.GetDirection(utils.META_DEFAULT),
 			Tenant:      s.eventStart.GetTenant(utils.META_DEFAULT),
 			Category:    s.eventStart.GetCategory(utils.META_DEFAULT),
 			Account:     s.eventStart.GetAccount(utils.META_DEFAULT),
@@ -290,9 +288,7 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 			SetupTime:   sTime,
 			AnswerTime:  aTime,
 			Usage:       usage,
-			Pdd:         pdd,
 			ExtraFields: s.eventStart.GetExtraFields(),
-			Supplier:    s.eventStart.GetSupplier(utils.META_DEFAULT),
 			SMId:        "UNKNOWN",
 		}
 		if sessionRun.DerivedCharger != nil {
@@ -326,18 +322,15 @@ type ActiveSession struct {
 	OriginID      string            // represents the unique accounting id given by the telecom switch generating the CDR
 	CdrHost       string            // represents the IP address of the host generating the CDR (automatically populated by the server)
 	CdrSource     string            // formally identifies the source of the CDR (free form field)
-	ReqType       string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
-	Direction     string            // matching the supported direction identifiers of the CGRateS <*out>
+	ReqType       string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>
 	Tenant        string            // tenant whom this record belongs
 	Category      string            // free-form filter for this record, matching the category defined in rating profiles.
 	Account       string            // account id (accounting subsystem) the record should be attached to
 	Subject       string            // rating subject (rating subsystem) this record should be attached to
 	Destination   string            // destination to be charged
 	SetupTime     time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
-	Pdd           time.Duration     // PDD value
 	AnswerTime    time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
 	Usage         time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
-	Supplier      string            // Supplier information when available
 	ExtraFields   map[string]string // Extra fields to be stored in CDR
 	SMId          string
 	SMConnId      string

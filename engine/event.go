@@ -28,7 +28,6 @@ type Event interface {
 	GetCgrId(timezone string) string
 	GetUUID() string
 	GetSessionIds() []string // Returns identifiers needed to control a session (eg disconnect)
-	GetDirection(string) string
 	GetSubject(string) string
 	GetAccount(string) string
 	GetDestination(string) string
@@ -41,9 +40,6 @@ type Event interface {
 	GetAnswerTime(string, string) (time.Time, error)
 	GetEndTime(string, string) (time.Time, error)
 	GetDuration(string) (time.Duration, error)
-	GetPdd(string) (time.Duration, error)
-	GetSupplier(string) string
-	GetDisconnectCause(string) string
 	GetExtraFields() map[string]string
 	MissingParameter(string) bool
 	ParseEventValue(*utils.RSRField, string) string

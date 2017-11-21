@@ -39,12 +39,21 @@ func init() {
 
 func populateDB() {
 	ats := []*Action{
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 10}}},
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Weight: utils.Float64Pointer(20), Value: &utils.ValueFormula{Static: 10}, DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
+		&Action{ActionType: "*topup",
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+				Value: &utils.ValueFormula{Static: 10}}},
+		&Action{ActionType: "*topup",
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE),
+				Weight:         utils.Float64Pointer(20),
+				Value:          &utils.ValueFormula{Static: 10 * float64(time.Second)},
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
 	}
 
 	ats1 := []*Action{
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 10}}, Weight: 10},
+		&Action{ActionType: "*topup",
+			Balance: &BalanceFilter{
+				Type:  utils.StringPointer(utils.MONETARY),
+				Value: &utils.ValueFormula{Static: 10}}, Weight: 10},
 		&Action{ActionType: "*reset_account", Weight: 20},
 	}
 
@@ -53,16 +62,21 @@ func populateDB() {
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{Value: 50}},
 			utils.VOICE: Balances{
-				&Balance{Value: 200, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
-				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+				&Balance{Value: 200 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	broker := &Account{
 		ID: "vdf:broker",
 		BalanceMap: map[string]Balances{
 			utils.VOICE: Balances{
-				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	luna := &Account{
@@ -77,8 +91,11 @@ func populateDB() {
 		ID: "vdf:minitsboy",
 		BalanceMap: map[string]Balances{
 			utils.VOICE: Balances{
-				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
+				&Balance{Value: 20 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("NAT"),
+					Weight:         10, RatingSubject: "rif"},
+				&Balance{Value: 100 * float64(time.Second),
+					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			},
 			utils.MONETARY: Balances{
 				&Balance{Value: 100, Weight: 10},
@@ -116,7 +133,9 @@ func populateDB() {
 func debitTest(t *testing.T, wg *sync.WaitGroup) {
 	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2017, time.February, 2, 17, 30, 59, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Account: "moneyp", Subject: "nt", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
+	cd := &CallDescriptor{Direction: "*out", Category: "call",
+		Tenant: "cgrates.org", Account: "moneyp", Subject: "nt",
+		Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
 	if _, err := cd.Debit(); err != nil {
 		t.Errorf("Error debiting balance: %s", err)
 	}
@@ -144,7 +163,9 @@ func TestSerialDebit(t *testing.T) {
 	wg.Wait()
 	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2017, time.February, 2, 17, 30, 59, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Account: "moneyp", Subject: "nt", Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
+	cd := &CallDescriptor{Direction: "*out", Category: "call",
+		Tenant: "cgrates.org", Account: "moneyp", Subject: "nt",
+		Destination: "49", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
 
 	acc, err := cd.getAccount()
 	if err != nil {
@@ -152,14 +173,9 @@ func TestSerialDebit(t *testing.T) {
 	}
 	expBalance := initialBalance - float64(debitsToDo*60)
 	if acc.BalanceMap[utils.MONETARY][0].GetValue() != expBalance {
-		t.Errorf("Balance does not match: %f, expected %f", acc.BalanceMap[utils.MONETARY][0].GetValue(), expBalance)
+		t.Errorf("Balance does not match: %f, expected %f",
+			acc.BalanceMap[utils.MONETARY][0].GetValue(), expBalance)
 	}
-	/*
-		out, err := json.Marshal(acc)
-		if err == nil {
-			t.Log("Account: %s", string(out))
-		}
-	*/
 
 }
 
@@ -1308,9 +1324,11 @@ func TestDebitAndMaxDebit(t *testing.T) {
 	if err1 != nil || err2 != nil {
 		t.Error("Error debiting and/or maxdebiting: ", err1, err2)
 	}
-	if cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value != 90 ||
-		cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value != 80 {
-		t.Error("Error setting the Unit.Value: ", cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value, cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value)
+	if cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value != 90*float64(time.Second) ||
+		cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value != 80*float64(time.Second) {
+		t.Error("Error setting the Unit.Value: ",
+			cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value,
+			cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value)
 	}
 	// make Unit.Values have the same value
 	cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value = 0
@@ -1595,8 +1613,9 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 		LoopIndex:     0,
 		DurationIndex: 0}
 	cd1.MaxDebit()
-	if cd1.account.BalanceMap[utils.VOICE][0].GetValue() != 20 {
-		t.Error("Error using minutes: ", cd1.account.BalanceMap[utils.VOICE][0].GetValue())
+	if cd1.account.BalanceMap[utils.VOICE][0].GetValue() != 20*float64(time.Second) {
+		t.Error("Error using minutes: ",
+			cd1.account.BalanceMap[utils.VOICE][0].GetValue())
 	}
 }
 
@@ -1662,23 +1681,32 @@ func TestCDRefundIncrements(t *testing.T) {
 				&Balance{Uuid: "moneya", Value: 100},
 			},
 			utils.VOICE: Balances{
-				&Balance{Uuid: "minutea", Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
-				&Balance{Uuid: "minuteb", Value: 10, DestinationIDs: utils.StringMap{"RET": true}},
+				&Balance{Uuid: "minutea",
+					Value:          10 * float64(time.Second),
+					Weight:         20,
+					DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Uuid: "minuteb",
+					Value:          10 * float64(time.Second),
+					DestinationIDs: utils.StringMap{"RET": true}},
 			},
 		},
 	}
 	dm.DataDB().SetAccount(ub)
 	increments := Increments{
-		&Increment{Cost: 2, BalanceInfo: &DebitInfo{Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
-		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{Unit: &UnitInfo{UUID: "minutea"}, Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
-		&Increment{Duration: 4 * time.Second, BalanceInfo: &DebitInfo{Unit: &UnitInfo{UUID: "minuteb"}, AccountID: ub.ID}},
+		&Increment{Cost: 2, BalanceInfo: &DebitInfo{
+			Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
+		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{
+			Unit:     &UnitInfo{UUID: "minutea"},
+			Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
+		&Increment{Duration: 4 * time.Second, BalanceInfo: &DebitInfo{
+			Unit: &UnitInfo{UUID: "minuteb"}, AccountID: ub.ID}},
 	}
 	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()
 	ub, _ = dm.DataDB().GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
-		ub.BalanceMap[utils.VOICE][0].GetValue() != 13 ||
-		ub.BalanceMap[utils.VOICE][1].GetValue() != 14 {
+		ub.BalanceMap[utils.VOICE][0].GetValue() != 13*float64(time.Second) ||
+		ub.BalanceMap[utils.VOICE][1].GetValue() != 14*float64(time.Second) {
 		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
 	}
 }
@@ -1717,7 +1745,8 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		ID: "TCDDBSWF:account1",
 		BalanceMap: map[string]Balances{
 			utils.VOICE: Balances{
-				&Balance{ID: "voice1", Value: 60, RatingSubject: "SubjTCDDBSWF"},
+				&Balance{ID: "voice1", Value: 60 * float64(time.Second),
+					RatingSubject: "SubjTCDDBSWF"},
 			}},
 	}
 	dm.DataDB().SetAccount(acnt)

@@ -126,16 +126,15 @@ func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnd
 	return
 }
 
-func usageFromCCR(reqType, reqNr, reqCCTime, usedCCTime int, debitIterval time.Duration) time.Duration {
-	dISecs := debitIterval.Seconds()
-	var ccTime int
+func usageFromCCR(reqType int, reqNr, usedCCTime int64, debitIterval time.Duration) (usage time.Duration) {
+	//dISecs := debitIterval.Nano()
+	//var ccTime int
+	usage = debitIterval
 	if reqType == 3 {
 		reqNr -= 1 // decrease request number to reach the real number
-		ccTime = usedCCTime + (int(dISecs) * reqNr)
-	} else {
-		ccTime = int(dISecs)
+		usage = (time.Duration(usedCCTime) * time.Second) + time.Duration(debitIterval.Nanoseconds()*reqNr)
 	}
-	return time.Duration(ccTime) * time.Second
+	return
 }
 
 // Utility function to convert from StoredCdr to CCR struct
@@ -180,12 +179,13 @@ func avpValAsString(a *diam.AVP) string {
 }
 
 // Handler for meta functions
-func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, error) {
+func metaHandler(m *diam.Message, processorVars map[string]string,
+	tag, arg string, dur time.Duration) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
 		var ok bool
 		var reqType datatype.Enumerated
-		var reqNr, reqUnit, usedUnit datatype.Unsigned32
+		var reqNr, usedUnit datatype.Unsigned32
 		if ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", 0); err != nil {
 			return "", err
 		} else if ccReqTypeAvp == nil {
@@ -206,7 +206,7 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 				return "", err
 			} else if len(reqUnitAVPs) == 0 {
 				return "", errors.New("Requested-Service-Unit>CC-Time not found")
-			} else if reqUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+			} else if usedUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
 				return "", fmt.Errorf("Requested-Service-Unit>CC-Time must be Unsigned32 and not %v", reqUnitAVPs[0].Data.Type())
 			}
 		case datatype.Enumerated(3), datatype.Enumerated(4):
@@ -218,16 +218,16 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 				}
 			}
 		}
-		usage := usageFromCCR(int(reqType), int(reqNr), int(reqUnit), int(usedUnit), dur)
-		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
+		return usageFromCCR(int(reqType), int64(reqNr), int64(usedUnit), dur).String(), nil
 	}
 	return "", nil
 }
 
 // metaValueExponent will multiply the float value with the exponent provided.
 // Expects 2 arguments in template separated by |
-func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
-	valStr := composedFieldvalue(m, argsTpl, 0, nil)
+func metaValueExponent(m *diam.Message, processorVars map[string]string,
+	argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, 0, processorVars)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
 	if len(handlerArgs) != 2 {
 		return "", errors.New("Unexpected number of arguments")
@@ -244,8 +244,9 @@ func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimal
 	return strconv.FormatFloat(utils.Round(res, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 }
 
-func metaSum(m *diam.Message, argsTpl utils.RSRFields, passAtIndex, roundingDecimals int) (string, error) {
-	valStr := composedFieldvalue(m, argsTpl, passAtIndex, nil)
+func metaSum(m *diam.Message, processorVars map[string]string,
+	argsTpl utils.RSRFields, passAtIndex, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, passAtIndex, processorVars)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
 	var summed float64
 	for _, arg := range handlerArgs {
@@ -270,7 +271,8 @@ func splitIntoInterface(content, sep string) []interface{} {
 
 // avpsWithPath is used to find AVPs by specifying RSRField as filter
 func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) {
-	return m.FindAVPsWithPath(splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
+	return m.FindAVPsWithPath(
+		splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
 }
 
 func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVars map[string]string) (bool, int) {
@@ -377,7 +379,8 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 	}
 }
 
-func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}, processorVars map[string]string) (fmtValOut string, err error) {
+func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField,
+	extraParam interface{}, processorVars map[string]string) (fmtValOut string, err error) {
 	var outVal string
 	passAtIndex := -1
 	passedAllFilters := true
@@ -403,11 +406,11 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.META_HANDLER:
 		switch cfgFld.HandlerId {
 		case META_VALUE_EXPONENT:
-			outVal, err = metaValueExponent(m, cfgFld.Value, 10) // FixMe: add here configured number of decimals
+			outVal, err = metaValueExponent(m, processorVars, cfgFld.Value, 10) // FixMe: add here configured number of decimals
 		case META_SUM:
-			outVal, err = metaSum(m, cfgFld.Value, passAtIndex, 10)
+			outVal, err = metaSum(m, processorVars, cfgFld.Value, passAtIndex, 10)
 		default:
-			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
+			outVal, err = metaHandler(m, processorVars, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
 			}

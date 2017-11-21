@@ -24,7 +24,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -131,20 +130,14 @@ func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr.OriginHost = fsCdr.vars[FS_IP]
 	storCdr.Source = FS_CDR_SOURCE
 	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
-	storCdr.Direction = utils.OUT
 	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)
 	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_CATEGORY], fsCdr.cgrCfg.DefaultCategory)
 	storCdr.Account = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_ACCOUNT], fsCdr.vars[FS_USERNAME])
 	storCdr.Subject = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_SUBJECT], fsCdr.vars[utils.CGR_ACCOUNT], fsCdr.vars[FS_USERNAME])
 	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
-	pddStr := utils.FirstNonEmpty(fsCdr.vars[FS_PROGRESS_MEDIAMSEC], fsCdr.vars[FS_PROGRESSMS])
-	pddStr += "ms"
-	storCdr.PDD, _ = time.ParseDuration(pddStr)
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME], timezone)
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
-	storCdr.Supplier = fsCdr.vars[utils.CGR_SUPPLIER]
-	storCdr.DisconnectCause = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DISCONNECT_CAUSE], fsCdr.vars["hangup_cause"])
 	storCdr.ExtraFields = fsCdr.getExtraFields()
 	storCdr.Cost = -1
 	return storCdr

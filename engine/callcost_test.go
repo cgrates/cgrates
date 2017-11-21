@@ -27,7 +27,9 @@ import (
 func TestSingleResultMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 0, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 1, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: utils.OUT, Category: "0",
+		Tenant: "vdf", Subject: "rif",
+		Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.getCost()
 	if cc1.Cost != 61 {
 		t.Errorf("expected 61 was %v", cc1.Cost)
@@ -50,7 +52,7 @@ func TestSingleResultMerge(t *testing.T) {
 		t.Errorf("Exdpected 120 was %v", cc1.Cost)
 	}
 	d := cc1.UpdateRatedUsage()
-	if d != 2*time.Minute || cc1.RatedUsage != 120.0 {
+	if d != 2*time.Minute || cc1.RatedUsage != 120.0*float64(time.Second) {
 		t.Errorf("error updating rating usage: %v, %v", d, cc1.RatedUsage)
 	}
 }

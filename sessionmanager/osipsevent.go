@@ -272,7 +272,6 @@ func (osipsEv *OsipsEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr.OriginHost = osipsEv.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = "OSIPS_" + osipsEv.GetName()
 	storCdr.RequestType = osipsEv.GetReqType(utils.META_DEFAULT)
-	storCdr.Direction = osipsEv.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = osipsEv.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = osipsEv.GetCategory(utils.META_DEFAULT)
 	storCdr.Account = osipsEv.GetAccount(utils.META_DEFAULT)
@@ -281,9 +280,6 @@ func (osipsEv *OsipsEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr.SetupTime, _ = osipsEv.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = osipsEv.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = osipsEv.GetDuration(utils.META_DEFAULT)
-	storCdr.PDD, _ = osipsEv.GetPdd(utils.META_DEFAULT)
-	storCdr.Supplier = osipsEv.GetSupplier(utils.META_DEFAULT)
-	storCdr.DisconnectCause = osipsEv.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = osipsEv.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr

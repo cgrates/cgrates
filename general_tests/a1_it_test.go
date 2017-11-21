@@ -86,8 +86,8 @@ func TestA1itLoadTPFromFolder(t *testing.T) {
 		t.Error(reply)
 	}
 	time.Sleep(time.Duration(100 * time.Millisecond))
-	tStart, _ := utils.ParseDate("2017-03-03T10:39:33Z")
-	tEnd, _ := utils.ParseDate("2017-03-03T12:30:13Z") // Equivalent of 10240 which is a chunk of data charged
+	tStart := time.Date(2017, 3, 3, 10, 39, 33, 0, time.UTC)
+	tEnd := time.Date(2017, 3, 3, 10, 39, 33, 10240, time.UTC)
 	cd := engine.CallDescriptor{
 		Direction:   "*out",
 		Category:    "data1",
@@ -100,7 +100,7 @@ func TestA1itLoadTPFromFolder(t *testing.T) {
 	var cc engine.CallCost
 	if err := a1rpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.0 || cc.RatedUsage != 10240 {
+	} else if cc.Cost != 0.0 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
 	}
 }
@@ -146,7 +146,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.SessionTTLUsage:    "0s",
 	}
 	var maxUsage float64
-	if err := a1rpc.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := a1rpc.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	} else if maxUsage != 10240 {
 		t.Error("Received: ", maxUsage)
@@ -171,7 +171,8 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.ANSWER_TIME:        "2017-03-03 11:39:32 +0100 CET",
 		utils.USAGE:              "2097152",
 	}
-	if err := a1rpc.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
+	if err := a1rpc.Call(utils.SMGenericV2UpdateSession,
+		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	} else if maxUsage != 2097152 {
 		t.Error("Bad max usage: ", maxUsage)
@@ -217,7 +218,7 @@ func TestA1itDataSession1(t *testing.T) {
 			t.Error(err)
 		}
 		if len(cc.Timespans) != 3 {
-			t.Errorf("Unexpected number of timespans: %+v", cc.Timespans)
+			t.Errorf("Unexpected number of timespans: %+v", len(cc.Timespans))
 		}
 		if cc.RatedUsage != 2202800 {
 			t.Errorf("RatingUsage expected: %f received %f, callcost: %+v ", 2202800.0, cc.RatedUsage, cc)

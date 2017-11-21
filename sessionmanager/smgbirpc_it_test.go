@@ -39,7 +39,8 @@ var (
 	disconnectEvChan = make(chan *utils.AttrDisconnectSession)
 )
 
-func handleDisconnectSession(clnt *rpc2.Client, args *utils.AttrDisconnectSession, reply *string) error {
+func handleDisconnectSession(clnt *rpc2.Client,
+	args *utils.AttrDisconnectSession, reply *string) error {
 	disconnectEvChan <- args
 	*reply = utils.OK
 	return nil
@@ -79,11 +80,14 @@ func TestSMGBiRPCStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGBiRPCApierRpcConn(t *testing.T) {
+	time.Sleep(time.Duration(1 * time.Second))
 	clntHandlers := map[string]interface{}{"SMGClientV1.DisconnectSession": handleDisconnectSession}
-	if _, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson, clntHandlers); err != nil { // First attempt is to make sure multiple clients are supported
+	if _, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson,
+		clntHandlers); err != nil { // First attempt is to make sure multiple clients are supported
 		t.Fatal(err)
 	}
-	if smgBiRPC, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson, clntHandlers); err != nil {
+	if smgBiRPC, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson,
+		clntHandlers); err != nil {
 		t.Fatal(err)
 	}
 	if smgRPC, err = jsonrpc.Dial("tcp", smgBiRPCCfg.RPCJSONListen); err != nil { // Connect also simple RPC so we can check accounts and such
@@ -103,8 +107,12 @@ func TestSMGBiRPCTPFromFolder(t *testing.T) {
 
 func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	// Create a balance with 1 second inside and rating increments of 1ms (to be compatible with debit interval)
-	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestSMGBiRPCSessionAutomaticDisconnects", BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestSMGBiRPCSessionAutomaticDisconnects"),
-		Value: utils.Float64Pointer(0.01), RatingSubject: utils.StringPointer("*zero1ms")}
+	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
+		Account:       "TestSMGBiRPCSessionAutomaticDisconnects",
+		BalanceType:   utils.VOICE,
+		BalanceID:     utils.StringPointer("TestSMGBiRPCSessionAutomaticDisconnects"),
+		Value:         utils.Float64Pointer(0.01 * float64(time.Second)),
+		RatingSubject: utils.StringPointer("*zero1ms")}
 	var reply string
 	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -112,12 +120,14 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	var acnt *engine.Account
-	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
-	eAcntVal := 0.01
+	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant,
+		Account: attrSetBalance.Account}
+	eAcntVal := 0.01 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
-		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+		t.Errorf("Expecting: %f, received: %f", eAcntVal,
+			acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -134,7 +144,8 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 	}
 	var maxUsage float64
-	if err := smgBiRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
+		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != -1 {
@@ -165,15 +176,16 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)
 	}
-	time.Sleep(time.Duration(10) * time.Millisecond)
+	time.Sleep(time.Duration(20) * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{smgEv.GetDestination(utils.META_DEFAULT)}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+		DestinationPrefixes: []string{smgEv.GetDestination(utils.META_DEFAULT)}}
 	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Usage != "0.01" {
+		if cdrs[0].Usage != "10ms" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		} else if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {
 			t.Errorf("Unexpected CDR CostSource received, cdr: %v %+v ", cdrs[0].CostSource, cdrs[0])
@@ -183,7 +195,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 
 func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestSMGBiRPCSessionOriginatorTerminate", BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestSMGBiRPCSessionOriginatorTerminate"),
-		Value: utils.Float64Pointer(1), RatingSubject: utils.StringPointer("*zero1ms")}
+		Value: utils.Float64Pointer(1 * float64(time.Second)), RatingSubject: utils.StringPointer("*zero1ms")}
 	var reply string
 	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -192,7 +204,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
-	eAcntVal := 1.0
+	eAcntVal := 1.0 * float64(time.Second)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
@@ -213,7 +225,8 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 	}
 	var maxUsage float64
-	if err := smgBiRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
+		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != -1 {
@@ -222,13 +235,14 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Millisecond)) // Give time for  debits to occur
 	smgEv[utils.USAGE] = "7ms"
 	var rpl string
-	if err = smgBiRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgBiRPC.Call("SMGenericV1.TerminateSession",
+		smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(50 * time.Millisecond)) // Give time for  debits to occur
 	if err := smgRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() > 0.995 { // FixMe: should be not 0.93?
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() > 0.995*float64(time.Second) { // FixMe: should be not 0.93?
 		t.Errorf("Balance value: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	if err := smgRPC.Call("SMGenericV1.ProcessCDR", smgEv, &reply); err != nil {
@@ -244,7 +258,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Usage != "0.007" {
+		if cdrs[0].Usage != "7ms" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		} else if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {
 			t.Errorf("Unexpected CDR CostSource received, cdr: %v %+v ", cdrs[0].CostSource, cdrs[0])

@@ -69,7 +69,7 @@ func (cc *CallCost) UpdateRatedUsage() time.Duration {
 		return 0
 	}
 	totalDuration := cc.GetDuration()
-	cc.RatedUsage = totalDuration.Seconds()
+	cc.RatedUsage = float64(totalDuration.Nanoseconds())
 	return totalDuration
 }
 
@@ -121,15 +121,15 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 	}
 	dc.DataSpans = make([]*DataSpan, len(cc.Timespans))
 	for i, ts := range cc.Timespans {
-		length := ts.TimeEnd.Sub(ts.TimeStart).Seconds()
-		callDuration := ts.DurationIndex.Seconds()
+		length := ts.TimeEnd.Sub(ts.TimeStart).Nanoseconds()
+		callDuration := ts.DurationIndex.Nanoseconds()
 		dc.DataSpans[i] = &DataSpan{
-			DataStart:      callDuration - length,
-			DataEnd:        callDuration,
+			DataStart:      float64(callDuration - length),
+			DataEnd:        float64(callDuration),
 			Cost:           ts.Cost,
 			ratingInfo:     ts.ratingInfo,
 			RateInterval:   ts.RateInterval,
-			DataIndex:      callDuration,
+			DataIndex:      float64(callDuration),
 			MatchedSubject: ts.MatchedSubject,
 			MatchedPrefix:  ts.MatchedPrefix,
 			MatchedDestId:  ts.MatchedDestId,
@@ -138,7 +138,7 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 		dc.DataSpans[i].Increments = make([]*DataIncrement, len(ts.Increments))
 		for j, incr := range ts.Increments {
 			dc.DataSpans[i].Increments[j] = &DataIncrement{
-				Amount:         incr.Duration.Seconds(),
+				Amount:         float64(incr.Duration.Nanoseconds()),
 				Cost:           incr.Cost,
 				BalanceInfo:    incr.BalanceInfo,
 				CompressFactor: incr.CompressFactor,

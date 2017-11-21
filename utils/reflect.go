@@ -30,9 +30,6 @@ func CastFieldIfToString(fld interface{}) (string, bool) {
 	var strVal string
 	var converted bool
 	switch fld.(type) {
-	case string:
-		strVal = fld.(string)
-		converted = true
 	case int:
 		strVal = strconv.Itoa(fld.(int))
 		converted = true

@@ -252,7 +252,7 @@ func (ec *EventCost) ComputeEventCostUsageIndexes() {
 
 func (ec *EventCost) AsCallCost() *CallCost {
 	cc := &CallCost{
-		Cost: ec.GetCost(), RatedUsage: ec.GetUsage().Seconds(),
+		Cost: ec.GetCost(), RatedUsage: float64(ec.GetUsage().Nanoseconds()),
 		AccountSummary: ec.AccountSummary}
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {
@@ -265,7 +265,6 @@ func (ec *EventCost) AsCallCost() *CallCost {
 		ts.TimeEnd = ts.TimeStart.Add(
 			time.Duration(cIl.Usage().Nanoseconds() * int64(cIl.CompressFactor)))
 		if cIl.RatingID != "" {
-			//fmt.Printf("Checking RatingID: <%s>\n", cIl.RatingID)
 			if ec.Rating[cIl.RatingID].RatingFiltersID != "" {
 				rfs := ec.RatingFilters[ec.Rating[cIl.RatingID].RatingFiltersID]
 				ts.MatchedSubject = rfs["Subject"].(string)

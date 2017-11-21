@@ -65,10 +65,11 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
+	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
 	cfg.InstanceID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SmGenericConfig = new(SmGenericConfig)
-	cfg.CacheConfig = make(CacheConfig)
+	cfg.cacheConfig = make(CacheConfig)
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
@@ -201,7 +202,7 @@ type CGRConfig struct {
 	StorDBConnMaxLifetime    int
 	StorDBCDRSIndexes        []string
 	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
-	CacheConfig              CacheConfig
+	cacheConfig              CacheConfig
 	RPCJSONListen            string            // RPC JSON listening address
 	RPCGOBListen             string            // RPC GOB listening address
 	HTTPListen               string            // HTTP listening address
@@ -238,6 +239,7 @@ type CGRConfig struct {
 	RALsAliasSConns          []*HaPoolConfig
 	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
 	LcrSubjectPrefixMatching bool // enables prefix matching for the lcr subject
+	RALsMaxComputedUsage     map[string]time.Duration
 	SchedulerEnabled         bool
 	CDRSEnabled              bool              // Enable CDR Server service
 	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
@@ -772,7 +774,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			self.ConnectAttempts = *jsnGeneralCfg.Connect_attempts
 		}
 		if jsnGeneralCfg.Response_cache_ttl != nil {
-			if self.ResponseCacheTTL, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Response_cache_ttl); err != nil {
+			if self.ResponseCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Response_cache_ttl); err != nil {
 				return err
 			}
 		}
@@ -780,12 +782,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			self.Reconnects = *jsnGeneralCfg.Reconnects
 		}
 		if jsnGeneralCfg.Connect_timeout != nil {
-			if self.ConnectTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Connect_timeout); err != nil {
+			if self.ConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Connect_timeout); err != nil {
 				return err
 			}
 		}
 		if jsnGeneralCfg.Reply_timeout != nil {
-			if self.ReplyTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Reply_timeout); err != nil {
+			if self.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Reply_timeout); err != nil {
 				return err
 			}
 		}
@@ -808,19 +810,19 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			self.DefaultTimezone = *jsnGeneralCfg.Default_timezone
 		}
 		if jsnGeneralCfg.Internal_ttl != nil {
-			if self.InternalTtl, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Internal_ttl); err != nil {
+			if self.InternalTtl, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Internal_ttl); err != nil {
 				return err
 			}
 		}
 		if jsnGeneralCfg.Locking_timeout != nil {
-			if self.LockingTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Locking_timeout); err != nil {
+			if self.LockingTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Locking_timeout); err != nil {
 				return err
 			}
 		}
 	}
 
 	if jsnCacheCfg != nil {
-		if err := self.CacheConfig.loadFromJsonCfg(jsnCacheCfg); err != nil {
+		if err := self.cacheConfig.loadFromJsonCfg(jsnCacheCfg); err != nil {
 			return err
 		}
 	}
@@ -917,6 +919,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		if jsnRALsCfg.Lcr_subject_prefix_matching != nil {
 			self.LcrSubjectPrefixMatching = *jsnRALsCfg.Lcr_subject_prefix_matching
 		}
+		if jsnRALsCfg.Max_computed_usage != nil {
+			for k, v := range *jsnRALsCfg.Max_computed_usage {
+				if self.RALsMaxComputedUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
+					return
+				}
+			}
+		}
 	}
 	if jsnSchedCfg != nil && jsnSchedCfg.Enabled != nil {
 		self.SchedulerEnabled = *jsnSchedCfg.Enabled
@@ -932,9 +941,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnCdrsCfg.Store_cdrs != nil {
 			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
-		}
-		if jsnCdrsCfg.Cdr_account_summary != nil {
-			self.CDRScdrAccountSummary = *jsnCdrsCfg.Cdr_account_summary
 		}
 		if jsnCdrsCfg.Sm_cost_retries != nil {
 			self.CDRSSMCostRetries = *jsnCdrsCfg.Sm_cost_retries
@@ -999,7 +1005,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		if jsnCdrstatsCfg.Enabled != nil {
 			self.CDRStatsEnabled = *jsnCdrstatsCfg.Enabled
 			if jsnCdrstatsCfg.Save_Interval != nil {
-				if self.CDRStatsSaveInterval, err = utils.ParseDurationWithSecs(*jsnCdrstatsCfg.Save_Interval); err != nil {
+				if self.CDRStatsSaveInterval, err = utils.ParseDurationWithNanosecs(*jsnCdrstatsCfg.Save_Interval); err != nil {
 					return err
 				}
 			}
@@ -1116,7 +1122,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			self.HistoryDir = *jsnHistServCfg.History_dir
 		}
 		if jsnHistServCfg.Save_interval != nil {
-			if self.HistorySaveInterval, err = utils.ParseDurationWithSecs(*jsnHistServCfg.Save_interval); err != nil {
+			if self.HistorySaveInterval, err = utils.ParseDurationWithNanosecs(*jsnHistServCfg.Save_interval); err != nil {
 				return err
 			}
 		}
@@ -1237,4 +1243,8 @@ func (self *CGRConfig) SMAsteriskCfg() *SMAsteriskCfg {
 
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
 	return cfg.filterSCfg
+}
+
+func (cfg *CGRConfig) CacheCfg() CacheConfig {
+	return cfg.cacheConfig
 }

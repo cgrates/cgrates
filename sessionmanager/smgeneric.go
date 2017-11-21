@@ -361,22 +361,26 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 }
 
 // sessionStart will handle a new session, pass the connectionId so we can communicate on disconnect request
-func (smg *SMGeneric) sessionStart(evStart SMGenericEvent, clntConn rpcclient.RpcClientConnection) (err error) {
+func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
+	clntConn rpcclient.RpcClientConnection) (err error) {
 	cgrID := evStart.GetCGRID(utils.META_DEFAULT)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
 		if pSS := smg.passiveToActive(cgrID); len(pSS) != 0 {
 			return nil, nil // ToDo: handle here also debits
 		}
 		var sessionRuns []*engine.SessionRun
-		if err := smg.rals.Call("Responder.GetSessionRuns", evStart.AsCDR(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
+		if err := smg.rals.Call("Responder.GetSessionRuns",
+			evStart.AsCDR(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
 			return nil, err
 		} else if len(sessionRuns) == 0 {
 			return nil, nil
 		}
 		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
-			s := &SMGSession{CGRID: cgrID, EventStart: evStart, RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
-				rals: smg.rals, cdrsrv: smg.cdrsrv, CD: sessionRun.CallDescriptor, clntConn: clntConn}
+			s := &SMGSession{CGRID: cgrID, EventStart: evStart,
+				RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
+				rals: smg.rals, cdrsrv: smg.cdrsrv,
+				CD: sessionRun.CallDescriptor, clntConn: clntConn}
 			smg.recordASession(s)
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
 			if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 {
@@ -530,7 +534,8 @@ func (smg *SMGeneric) setPassiveSessions(cgrID string, ss []*SMGSession) (err er
 	if len(ss) == 0 {
 		return
 	}
-	for _, cacheKey := range []string{"InitiateSession" + cgrID, "UpdateSession" + cgrID, "TerminateSession" + cgrID} {
+	for _, cacheKey := range []string{"InitiateSession" + cgrID,
+		"UpdateSession" + cgrID, "TerminateSession" + cgrID} {
 		if _, err := smg.responseCache.Get(cacheKey); err == nil { // Stop processing passive when there has been an update over active RPC
 			smg.deletePassiveSessions(cgrID)
 			return ErrActiveSession
@@ -742,7 +747,9 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns)
 	}
 	smg.resetTerminatorTimer(cgrID,
-		gev.GetSessionTTL(smg.cgrCfg.SmGenericConfig.SessionTTL, smg.cgrCfg.SmGenericConfig.SessionTTLMaxDelay),
+		gev.GetSessionTTL(
+			smg.cgrCfg.SmGenericConfig.SessionTTL,
+			smg.cgrCfg.SmGenericConfig.SessionTTLMaxDelay),
 		gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
 	var evLastUsed time.Duration
@@ -751,7 +758,8 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	} else if err != utils.ErrNotFound {
 		return
 	}
-	if maxUsage, err = gev.GetMaxUsage(utils.META_DEFAULT, smg.cgrCfg.SmGenericConfig.MaxCallDuration); err != nil {
+	if maxUsage, err = gev.GetMaxUsage(utils.META_DEFAULT,
+		smg.cgrCfg.SmGenericConfig.MaxCallDuration); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrMandatoryIeMissing
 		}
@@ -961,7 +969,8 @@ func (smg *SMGeneric) ProcessCDR(gev SMGenericEvent) (err error) {
 	}
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Err: err})
 	var reply string
-	if err = smg.cdrsrv.Call("CdrsV1.ProcessCDR", gev.AsCDR(smg.cgrCfg, smg.Timezone), &reply); err != nil {
+	if err = smg.cdrsrv.Call("CdrsV1.ProcessCDR",
+		gev.AsCDR(smg.cgrCfg, smg.Timezone), &reply); err != nil {
 		return
 	}
 	return
@@ -985,24 +994,28 @@ func (smg *SMGeneric) Call(serviceMethod string, args interface{}, reply interfa
 }
 
 // Part of utils.BiRPCServer to help internal connections do calls over rpcclient.RpcClientConnection interface
-func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMethod string, args interface{}, reply interface{}) error {
+func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection,
+	serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	// get method BiRPCV1.Method
-	method := reflect.ValueOf(smg).MethodByName("BiRPC" + parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version V1 in the method name and add prefix
+	method := reflect.ValueOf(smg).MethodByName(
+		"BiRPC" + parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version V1 in the method name and add prefix
 	if !method.IsValid() {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
 	// construct the params
 	var clntVal reflect.Value
 	if clnt == nil {
-		clntVal = reflect.New(reflect.TypeOf(new(utils.BiRPCInternalClient))).Elem() // Kinda cheat since we make up a type here
+		clntVal = reflect.New(
+			reflect.TypeOf(new(utils.BiRPCInternalClient))).Elem() // Kinda cheat since we make up a type here
 	} else {
 		clntVal = reflect.ValueOf(clnt)
 	}
-	params := []reflect.Value{clntVal, reflect.ValueOf(args), reflect.ValueOf(reply)}
+	params := []reflect.Value{clntVal, reflect.ValueOf(args),
+		reflect.ValueOf(reply)}
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return utils.ErrServerError
@@ -1017,7 +1030,8 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection, serviceMetho
 	return err
 }
 
-func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *float64) error {
+func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection,
+	ev SMGenericEvent, maxUsage *float64) error {
 	maxUsageDur, err := smg.GetMaxUsage(ev)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -1120,6 +1134,16 @@ func (smg *SMGeneric) BiRPCV1ChargeEvent(clnt rpcclient.RpcClientConnection, ev 
 		return utils.NewErrServerError(err)
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
+	}
+	return nil
+}
+
+// Called on individual Events (eg SMS)
+func (smg *SMGeneric) BiRPCV2ChargeEvent(clnt rpcclient.RpcClientConnection, ev SMGenericEvent, maxUsage *time.Duration) error {
+	if minMaxUsage, err := smg.ChargeEvent(ev); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		*maxUsage = minMaxUsage
 	}
 	return nil
 }

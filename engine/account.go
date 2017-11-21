@@ -393,12 +393,13 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			for _, balance := range usefulUnitBalances {
 				//utils.Logger.Info(fmt.Sprintf("Unit balance: %+v", balance))
 				//utils.Logger.Info(fmt.Sprintf("CD BEFORE UNIT: %+v", cd))
-
-				partCC, debitErr := balance.debitUnits(cd, balance.account, usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
+				partCC, debitErr := balance.debitUnits(cd, balance.account,
+					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
 					return nil, debitErr
 				}
-				if balance.RatingSubject != "" && !strings.HasPrefix(balance.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
+				if balance.RatingSubject != "" &&
+					!strings.HasPrefix(balance.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
 					hadBalanceSubj = true
 				}
 				//utils.Logger.Info(fmt.Sprintf("CD AFTER UNIT: %+v", cd))
@@ -439,7 +440,8 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			for _, balance := range usefulMoneyBalances {
 				//utils.Logger.Info(fmt.Sprintf("Money balance: %+v", balance))
 				//utils.Logger.Info(fmt.Sprintf("CD BEFORE MONEY: %+v", cd))
-				partCC, debitErr := balance.debitMoney(cd, balance.account, usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
+				partCC, debitErr := balance.debitMoney(cd, balance.account,
+					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
 					return nil, debitErr
 				}

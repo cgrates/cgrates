@@ -103,27 +103,45 @@ func TestCgrCfgCDRC(t *testing.T) {
 			PartialCacheExpiryAction: "*dump_to_file",
 			HeaderFields:             make([]*CfgCdrField, 0),
 			ContentFields: []*CfgCdrField{
-				&CfgCdrField{FieldId: "ToR", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("~7:s/^(voice|data|sms|mms|generic)$/*$1/", utils.INFIELD_SEP)},
-				&CfgCdrField{FieldId: "AnswerTime", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP)},
-				&CfgCdrField{FieldId: "Usage", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("~9:s/^(\\d+)$/${1}s/", utils.INFIELD_SEP)},
+				&CfgCdrField{FieldId: "ToR", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile("~7:s/^(voice|data|sms|mms|generic)$/*$1/", utils.INFIELD_SEP)},
+				&CfgCdrField{FieldId: "AnswerTime", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP)},
+				&CfgCdrField{FieldId: "Usage", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile("~9:s/^(\\d+)$/${1}s/", utils.INFIELD_SEP)},
 			},
 			TrailerFields: make([]*CfgCdrField, 0),
 			CacheDumpFields: []*CfgCdrField{
-				&CfgCdrField{Tag: "CGRID", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.CGRID, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "RunID", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.MEDI_RUNID, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "TOR", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.TOR, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "OriginID", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.ACCID, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.REQTYPE, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "Direction", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.DIRECTION, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.TENANT, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.CATEGORY, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "Account", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "Subject", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.SUBJECT, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "Destination", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.DESTINATION, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "SetupTime", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.SETUP_TIME, utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
-				&CfgCdrField{Tag: "AnswerTime", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.ANSWER_TIME, utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
-				&CfgCdrField{Tag: "Usage", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.USAGE, utils.INFIELD_SEP)},
-				&CfgCdrField{Tag: "Cost", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.COST, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "CGRID", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.CGRID, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "RunID", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.MEDI_RUNID, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "TOR", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.TOR, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "OriginID", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.ACCID, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.REQTYPE, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.TENANT, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.CATEGORY, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "Account", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "Subject", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.SUBJECT, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "Destination", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.DESTINATION, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "SetupTime", Type: utils.META_COMPOSED,
+					Value:  utils.ParseRSRFieldsMustCompile(utils.SETUP_TIME, utils.INFIELD_SEP),
+					Layout: "2006-01-02T15:04:05Z07:00"},
+				&CfgCdrField{Tag: "AnswerTime", Type: utils.META_COMPOSED,
+					Value:  utils.ParseRSRFieldsMustCompile(utils.ANSWER_TIME, utils.INFIELD_SEP),
+					Layout: "2006-01-02T15:04:05Z07:00"},
+				&CfgCdrField{Tag: "Usage", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.USAGE, utils.INFIELD_SEP)},
+				&CfgCdrField{Tag: "Cost", Type: utils.META_COMPOSED,
+					Value: utils.ParseRSRFieldsMustCompile(utils.COST, utils.INFIELD_SEP)},
 			},
 		},
 	}
@@ -300,6 +318,15 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if cgrCfg.LcrSubjectPrefixMatching != false {
 		t.Error(cgrCfg.LcrSubjectPrefixMatching)
 	}
+	eMaxCU := map[string]time.Duration{
+		utils.ANY:   time.Duration(189 * time.Hour),
+		utils.VOICE: time.Duration(72 * time.Hour),
+		utils.DATA:  time.Duration(107374182400),
+		utils.SMS:   time.Duration(10000),
+	}
+	if !reflect.DeepEqual(eMaxCU, cgrCfg.RALsMaxComputedUsage) {
+		t.Errorf("Expecting: %+v, received: %+v", eMaxCU, cgrCfg.RALsMaxComputedUsage)
+	}
 }
 
 func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
@@ -364,21 +391,37 @@ func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
 func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 	eFields := []*CfgCdrField{}
 	eContentFlds := []*CfgCdrField{
-		&CfgCdrField{Tag: "CGRID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("CGRID", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "RunID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("RunID", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "TOR", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("ToR", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "OriginID", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("OriginID", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "RequestType", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("RequestType", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Direction", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Direction", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Tenant", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Tenant", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Category", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Category", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Account", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Account", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Subject", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Destination", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Destination", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "SetupTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("SetupTime", utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
-		&CfgCdrField{Tag: "AnswerTime", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("AnswerTime", utils.INFIELD_SEP), Layout: "2006-01-02T15:04:05Z07:00"},
-		&CfgCdrField{Tag: "Usage", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Usage", utils.INFIELD_SEP)},
-		&CfgCdrField{Tag: "Cost", Type: "*composed", Value: utils.ParseRSRFieldsMustCompile("Cost", utils.INFIELD_SEP), RoundingDecimals: 4},
+		&CfgCdrField{Tag: "CGRID", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("CGRID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "RunID", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("RunID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "TOR", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("ToR", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "OriginID", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("OriginID", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "RequestType", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("RequestType", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Tenant", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Tenant", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Category", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Category", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Account", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Account", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Subject", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Subject", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Destination", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Destination", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "SetupTime", Type: "*composed",
+			Value:  utils.ParseRSRFieldsMustCompile("SetupTime", utils.INFIELD_SEP),
+			Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{Tag: "AnswerTime", Type: "*composed",
+			Value:  utils.ParseRSRFieldsMustCompile("AnswerTime", utils.INFIELD_SEP),
+			Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{Tag: "Usage", Type: "*composed",
+			Value: utils.ParseRSRFieldsMustCompile("Usage", utils.INFIELD_SEP)},
+		&CfgCdrField{Tag: "Cost", Type: "*composed",
+			Value:            utils.ParseRSRFieldsMustCompile("Cost", utils.INFIELD_SEP),
+			RoundingDecimals: 4},
 	}
 	eCdreCfg := map[string]*CdreConfig{
 		"*default": {
@@ -468,8 +511,9 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheLCRProfiles: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false}}
-	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheConfig) {
-		t.Errorf("received: %s, \nexpecting: %s", utils.ToJSON(eCacheCfg), utils.ToJSON(cgrCfg.CacheConfig))
+	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
+		t.Errorf("received: %s, \nexpecting: %s",
+			utils.ToJSON(eCacheCfg), utils.ToJSON(cgrCfg.CacheCfg()))
 	}
 }
 

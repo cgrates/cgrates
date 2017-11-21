@@ -137,34 +137,34 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 		}
 	}
 	if jsnCfg.Debit_interval != nil {
-		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
+		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Min_call_duration != nil {
-		if self.MinCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Min_call_duration); err != nil {
+		if self.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Max_call_duration != nil {
-		if self.MaxCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Max_call_duration); err != nil {
+		if self.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Session_ttl != nil {
-		if self.SessionTTL, err = utils.ParseDurationWithSecs(*jsnCfg.Session_ttl); err != nil {
+		if self.SessionTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Session_ttl_max_delay != nil {
-		if maxTTLDelay, err := utils.ParseDurationWithSecs(*jsnCfg.Session_ttl_max_delay); err != nil {
+		if maxTTLDelay, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_max_delay); err != nil {
 			return err
 		} else {
 			self.SessionTTLMaxDelay = &maxTTLDelay
 		}
 	}
 	if jsnCfg.Session_ttl_last_used != nil {
-		if sessionTTLLastUsed, err := utils.ParseDurationWithSecs(*jsnCfg.Session_ttl_last_used); err != nil {
+		if sessionTTLLastUsed, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_used); err != nil {
 			return err
 		} else {
 			self.SessionTTLLastUsed = &sessionTTLLastUsed
@@ -234,22 +234,22 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 		}
 	}
 	if jsnCfg.Debit_interval != nil {
-		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
+		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Min_call_duration != nil {
-		if self.MinCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Min_call_duration); err != nil {
+		if self.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Max_call_duration != nil {
-		if self.MaxCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Max_call_duration); err != nil {
+		if self.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Min_dur_low_balance != nil {
-		if self.MinDurLowBalance, err = utils.ParseDurationWithSecs(*jsnCfg.Min_dur_low_balance); err != nil {
+		if self.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_dur_low_balance); err != nil {
 			return err
 		}
 	}
@@ -266,12 +266,12 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 		self.SubscribePark = *jsnCfg.Subscribe_park
 	}
 	if jsnCfg.Channel_sync_interval != nil {
-		if self.ChannelSyncInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Channel_sync_interval); err != nil {
+		if self.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Max_wait_connection != nil {
-		if self.MaxWaitConnection, err = utils.ParseDurationWithSecs(*jsnCfg.Max_wait_connection); err != nil {
+		if self.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_wait_connection); err != nil {
 			return err
 		}
 	}
@@ -359,17 +359,17 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 		self.CreateCdr = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Debit_interval != nil {
-		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
+		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Min_call_duration != nil {
-		if self.MinCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Min_call_duration); err != nil {
+		if self.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Max_call_duration != nil {
-		if self.MaxCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Max_call_duration); err != nil {
+		if self.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
 			return err
 		}
 	}
@@ -439,22 +439,22 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 		self.CreateCdr = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Debit_interval != nil {
-		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
+		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Min_call_duration != nil {
-		if self.MinCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Min_call_duration); err != nil {
+		if self.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Max_call_duration != nil {
-		if self.MaxCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Max_call_duration); err != nil {
+		if self.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Events_subscribe_interval != nil {
-		if self.EventsSubscribeInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Events_subscribe_interval); err != nil {
+		if self.EventsSubscribeInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Events_subscribe_interval); err != nil {
 			return err
 		}
 	}

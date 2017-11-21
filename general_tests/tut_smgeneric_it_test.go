@@ -98,7 +98,7 @@ func TestTutSMGCacheStats(t *testing.T) {
 		t.Error(reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 9,
+	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 10,
 		Actions: 9, ActionPlans: 4, AccountActionPlans: 5, SharedGroups: 1, DerivedChargers: 1, LcrProfiles: 5,
 		CdrStats: 6, Users: 3, Aliases: 1, ReverseAliases: 2, ResourceProfiles: 3, Resources: 3, StatQueues: 1,
 		StatQueueProfiles: 1, Thresholds: 7, ThresholdProfiles: 7, Filters: 16, LCRProfiles: 1}

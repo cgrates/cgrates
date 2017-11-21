@@ -491,6 +491,7 @@ CREATE TABLE tp_filters (
 -- Table structure for table `tp_lcr`
 --
 
+
 DROP TABLE IF EXISTS tp_lcr;
 CREATE TABLE tp_lcr (
   `pk` int(11) NOT NULL AUTO_INCREMENT,

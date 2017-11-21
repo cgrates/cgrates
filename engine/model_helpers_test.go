@@ -876,7 +876,7 @@ func TestAPItoTPStats(t *testing.T) {
 		Weight:      20.0,
 		MinItems:    tps.MinItems,
 	}
-	if eTPs.TTL, err = utils.ParseDurationWithSecs(tps.TTL); err != nil {
+	if eTPs.TTL, err = utils.ParseDurationWithNanosecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
@@ -949,7 +949,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 		FilterIDs: tps.FilterIDs,
 		ActionIDs: []string{"WARN3"},
 	}
-	if eTPs.MinSleep, err = utils.ParseDurationWithSecs(tps.MinSleep); err != nil {
+	if eTPs.MinSleep, err = utils.ParseDurationWithNanosecs(tps.MinSleep); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
 	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")

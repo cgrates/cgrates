@@ -61,6 +61,7 @@ var (
 	version           = flag.Bool("version", false, "Prints the application version.")
 	pidFile           = flag.String("pid", "", "Write pid file")
 	cpuprofile        = flag.String("cpuprofile", "", "write cpu profile to file")
+	memprofile        = flag.String("memprofile", "", "write memory profile to file")
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
 	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
@@ -726,7 +727,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	if *scheduledShutdown != "" {
-		shutdownDur, err := utils.ParseDurationWithSecs(*scheduledShutdown)
+		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -742,7 +743,8 @@ func main() {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return
 	}
-	config.SetCgrConfig(cfg) // Share the config object
+	config.SetCgrConfig(cfg)       // Share the config object
+	cache.NewCache(cfg.CacheCfg()) // init cache
 	// init syslog
 	if err = initLogger(cfg); err != nil {
 		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())
@@ -754,16 +756,14 @@ func main() {
 	}
 	utils.Logger.SetLogLevel(lgLevel)
 
-	// Init cache
-	cache.NewCache(cfg.CacheConfig)
-
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
 
-	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled || cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerEnabled {
+	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled ||
+		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerEnabled {
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheConfig, cfg.LoadHistorySize)
+			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
@@ -777,7 +777,8 @@ func main() {
 	}
 	if cfg.RALsEnabled || cfg.CDRSEnabled || cfg.SchedulerEnabled { // Only connect to storDb if necessary
 		storDb, err := engine.ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
-			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
+			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns,
+			cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
 		if err != nil { // Cannot configure logger database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return
@@ -929,6 +930,18 @@ func main() {
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan, internalHistorySChan,
 		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan)
 	<-exitChan
+
+	if *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			log.Fatal("could not create memory profile file: ", err)
+		}
+		defer f.Close()
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+	}
 
 	if *pidFile != "" {
 		if err := os.Remove(*pidFile); err != nil {
