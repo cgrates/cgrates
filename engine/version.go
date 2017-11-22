@@ -108,31 +108,6 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	return ""
 }
 
-<<<<<<< HEAD
-=======
-func CurrentDBVersions(storType string) Versions {
-	dataDbVersions := CurrentDataDBVersions()
-	storDbVersions := CurrentStorDBVersions()
-
-	allVersions := make(Versions)
-	for k, v := range dataDbVersions {
-		allVersions[k] = v
-	}
-	for k, v := range storDbVersions {
-		allVersions[k] = v
-	}
-	switch storType {
-	case utils.MONGO, utils.MAPSTOR:
-		return allVersions
-	case utils.POSTGRES, utils.MYSQL:
-		return storDbVersions
-	case utils.REDIS:
-		return dataDbVersions
-	}
-	return nil
-}
-
->>>>>>> Updating structures version and fixed typo
 func CurrentDataDBVersions() Versions {
 	return Versions{
 		utils.StatS:               2,
