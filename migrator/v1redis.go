@@ -130,6 +130,7 @@ func (v1rs *v1Redis) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int
 }
 
 //Account methods
+//V1
 //get
 func (v1rs *v1Redis) getv1Account() (v1Acnt *v1Account, err error) {
 	if v1rs.qryIdx == nil {
@@ -161,6 +162,48 @@ func (v1rs *v1Redis) getv1Account() (v1Acnt *v1Account, err error) {
 //set
 func (v1rs *v1Redis) setV1Account(x *v1Account) (err error) {
 	key := v1AccountDBPrefix + x.Id
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//V2
+//get
+func (v1rs *v1Redis) getv2Account() (v2Acnt *v2Account, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACCOUNT_PREFIX)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		v2Acnt = &v2Account{ID: v1rs.dataKeys[*v1rs.qryIdx]}
+		if err := v1rs.ms.Unmarshal(strVal, v2Acnt); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v2Acnt, nil
+}
+
+//set
+func (v1rs *v1Redis) setV2Account(x *v2Account) (err error) {
+	key := utils.ACCOUNT_PREFIX + x.ID
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
 		return err

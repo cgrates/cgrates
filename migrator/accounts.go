@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -67,7 +68,41 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 			break
 		}
 		if v1Acnt != nil {
-			acnt := v1Acnt.AsAccount()
+			acnt := v1Acnt.V1toV3Account()
+			if m.dryRun != true {
+				if err = m.dmOut.DataDB().SetAccount(acnt); err != nil {
+					return err
+				}
+				m.stats[utils.Accounts] += 1
+
+			}
+		}
+	}
+	if m.dryRun != true {
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
+		}
+	}
+	return
+}
+
+func (m *Migrator) migrateV2Accounts() (err error) {
+	var v2Acnt *v2Account
+	for {
+		v2Acnt, err = m.oldDataDB.getv2Account()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v2Acnt != nil {
+			acnt := v2Acnt.V2toV3Account()
 			if m.dryRun != true {
 				if err = m.dmOut.DataDB().SetAccount(acnt); err != nil {
 					return err
@@ -114,9 +149,12 @@ func (m *Migrator) migrateAccounts() (err error) {
 			return err
 		}
 		return
-
 	case 1:
 		if err := m.migrateV1Accounts(); err != nil {
+			return err
+		}
+	case 2:
+		if err := m.migrateV2Accounts(); err != nil {
 			return err
 		}
 	}
@@ -148,11 +186,21 @@ type v1Balance struct {
 	TimingIDs      string
 	Disabled       bool
 }
+
 type v1UnitsCounter struct {
 	Direction   string
 	BalanceType string
-	//	Units     float64
-	Balances v1BalanceChain // first balance is the general one (no destination)
+	Balances    v1BalanceChain // first balance is the general one (no destination)
+}
+
+type v2Account struct {
+	ID                string
+	BalanceMap        map[string]engine.Balances
+	UnitCounters      engine.UnitCounters
+	ActionTriggers    engine.ActionTriggers
+	AllowNegative     bool
+	Disabled          bool
+	executingTriggers bool
 }
 
 func (b *v1Balance) IsDefault() bool {
@@ -165,7 +213,7 @@ func (b *v1Balance) IsDefault() bool {
 		b.Disabled == false
 }
 
-func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
+func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 	// transfer data into new structure
 	ac = &engine.Account{
 		ID:             v1Acc.Id,
@@ -187,11 +235,16 @@ func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 		newBalDirection := idElements[0]
 		ac.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
+			balVal := oldBal.Value
+			if !utils.IsSliceMember([]string{utils.MONETARY, utils.VOICE}, newBalKey) {
+				balVal = utils.Round(balVal/float64(time.Second),
+					config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+			}
 			// check default to set new id
 			ac.BalanceMap[newBalKey][index] = &engine.Balance{
 				Uuid:           oldBal.Uuid,
 				ID:             oldBal.Id,
-				Value:          oldBal.Value,
+				Value:          balVal,
 				Directions:     utils.ParseStringMap(newBalDirection),
 				ExpirationDate: oldBal.ExpirationDate,
 				Weight:         oldBal.Weight,
@@ -307,5 +360,49 @@ func (v1Acc v1Account) AsAccount() (ac *engine.Account) {
 			ac.ActionTriggers[index].ThresholdType = strings.Replace(ac.ActionTriggers[index].ThresholdType, "_", "_event_", 1)
 		}
 	}
+	return
+}
+
+func (v2Acc v2Account) V2toV3Account() (ac *engine.Account) {
+	ac = &engine.Account{
+		ID:             v2Acc.ID,
+		BalanceMap:     make(map[string]engine.Balances, len(v2Acc.BalanceMap)),
+		UnitCounters:   make(engine.UnitCounters, len(v2Acc.UnitCounters)),
+		ActionTriggers: make(engine.ActionTriggers, len(v2Acc.ActionTriggers)),
+		AllowNegative:  v2Acc.AllowNegative,
+		Disabled:       v2Acc.Disabled,
+	}
+	// balances
+	for balType, oldBalChain := range v2Acc.BalanceMap {
+		ac.BalanceMap[balType] = make(engine.Balances, len(oldBalChain))
+		for index, oldBal := range oldBalChain {
+			balVal := oldBal.Value
+			if !utils.IsSliceMember([]string{utils.MONETARY, utils.VOICE}, balType) {
+				balVal = utils.Round(balVal/float64(time.Second),
+					config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+			}
+			// check default to set new id
+			ac.BalanceMap[balType][index] = &engine.Balance{
+				Uuid:           oldBal.Uuid,
+				ID:             oldBal.ID,
+				Value:          balVal,
+				Directions:     oldBal.Directions,
+				ExpirationDate: oldBal.ExpirationDate,
+				Weight:         oldBal.Weight,
+				DestinationIDs: oldBal.DestinationIDs,
+				RatingSubject:  oldBal.RatingSubject,
+				Categories:     oldBal.Categories,
+				SharedGroups:   oldBal.SharedGroups,
+				Timings:        oldBal.Timings,
+				TimingIDs:      oldBal.TimingIDs,
+				Disabled:       oldBal.Disabled,
+				Factor:         oldBal.Factor,
+			}
+		}
+	}
+	// unit counters
+	ac.UnitCounters = v2Acc.UnitCounters
+	//action triggers
+	ac.ActionTriggers = v2Acc.ActionTriggers
 	return
 }

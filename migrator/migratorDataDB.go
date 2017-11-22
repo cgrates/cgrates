@@ -34,4 +34,6 @@ type MigratorDataDB interface {
 	setV1Stats(x *v1Stat) (err error)
 	getV2ActionTrigger() (v2at *v2ActionTrigger, err error)
 	setV2ActionTrigger(x *v2ActionTrigger) (err error)
+	getv2Account() (v2Acnt *v2Account, err error)
+	setV2Account(x *v2Account) (err error)
 }
