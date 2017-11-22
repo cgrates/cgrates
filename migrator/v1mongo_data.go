@@ -67,6 +67,7 @@ func (v1ms *v1Mongo) getKeysForPrefix(prefix string) ([]string, error) {
 }
 
 //Account methods
+//V1
 //get
 func (v1ms *v1Mongo) getv1Account() (v1Acnt *v1Account, err error) {
 	if v1ms.qryIter == nil {
@@ -85,6 +86,30 @@ func (v1ms *v1Mongo) getv1Account() (v1Acnt *v1Account, err error) {
 //set
 func (v1ms *v1Mongo) setV1Account(x *v1Account) (err error) {
 	if err := v1ms.session.DB(v1ms.db).C(v1AccountDBPrefix).Insert(x); err != nil {
+		return err
+	}
+	return
+}
+
+//V2
+//get
+func (v1ms *v1Mongo) getv2Account() (v2Acnt *v2Account, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.ACCOUNT_PREFIX).Find(nil).Iter()
+	}
+	v1ms.qryIter.Next(&v2Acnt)
+
+	if v2Acnt == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
+
+	}
+	return v2Acnt, nil
+}
+
+//set
+func (v1ms *v1Mongo) setV2Account(x *v2Account) (err error) {
+	if err := v1ms.session.DB(v1ms.db).C(utils.ACCOUNT_PREFIX).Insert(x); err != nil {
 		return err
 	}
 	return

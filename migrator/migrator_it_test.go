@@ -56,11 +56,11 @@ func TestMigratorITPostgresConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dataDB, err := engine.ConfigureDataStorage(postgresITCfg.DataDbType, postgresITCfg.DataDbHost, postgresITCfg.DataDbPort, postgresITCfg.DataDbName, postgresITCfg.DataDbUser, postgresITCfg.DataDbPass, postgresITCfg.DBDataEncoding, postgresITCfg.CacheConfig, *loadHistorySize)
+	dataDB, err := engine.ConfigureDataStorage(postgresITCfg.DataDbType, postgresITCfg.DataDbHost, postgresITCfg.DataDbPort, postgresITCfg.DataDbName, postgresITCfg.DataDbUser, postgresITCfg.DataDbPass, postgresITCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDB2, err := engine.ConfigureDataStorage(postgresITCfg.DataDbType, postgresITCfg.DataDbHost, postgresITCfg.DataDbPort, postgresITCfg.DataDbName, postgresITCfg.DataDbUser, postgresITCfg.DataDbPass, postgresITCfg.DBDataEncoding, postgresITCfg.CacheConfig, *loadHistorySize)
+	dataDB2, err := engine.ConfigureDataStorage(postgresITCfg.DataDbType, postgresITCfg.DataDbHost, postgresITCfg.DataDbPort, postgresITCfg.DataDbName, postgresITCfg.DataDbUser, postgresITCfg.DataDbPass, postgresITCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -98,11 +98,11 @@ func TestMigratorITRedisConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dataDB, err := engine.ConfigureDataStorage(mysqlITCfg.DataDbType, mysqlITCfg.DataDbHost, mysqlITCfg.DataDbPort, mysqlITCfg.DataDbName, mysqlITCfg.DataDbUser, mysqlITCfg.DataDbPass, mysqlITCfg.DBDataEncoding, mysqlITCfg.CacheConfig, *loadHistorySize)
+	dataDB, err := engine.ConfigureDataStorage(mysqlITCfg.DataDbType, mysqlITCfg.DataDbHost, mysqlITCfg.DataDbPort, mysqlITCfg.DataDbName, mysqlITCfg.DataDbUser, mysqlITCfg.DataDbPass, mysqlITCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDB2, err := engine.ConfigureDataStorage(mysqlITCfg.DataDbType, mysqlITCfg.DataDbHost, mysqlITCfg.DataDbPort, mysqlITCfg.DataDbName, mysqlITCfg.DataDbUser, mysqlITCfg.DataDbPass, mysqlITCfg.DBDataEncoding, mysqlITCfg.CacheConfig, *loadHistorySize)
+	dataDB2, err := engine.ConfigureDataStorage(mysqlITCfg.DataDbType, mysqlITCfg.DataDbHost, mysqlITCfg.DataDbPort, mysqlITCfg.DataDbName, mysqlITCfg.DataDbUser, mysqlITCfg.DataDbPass, mysqlITCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,11 +140,11 @@ func TestMigratorITMongoConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dataDB, err := engine.ConfigureDataStorage(mgoITCfg.DataDbType, mgoITCfg.DataDbHost, mgoITCfg.DataDbPort, mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass, mgoITCfg.DBDataEncoding, mgoITCfg.CacheConfig, *loadHistorySize)
+	dataDB, err := engine.ConfigureDataStorage(mgoITCfg.DataDbType, mgoITCfg.DataDbHost, mgoITCfg.DataDbPort, mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass, mgoITCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDB2, err := engine.ConfigureDataStorage(mgoITCfg.DataDbType, mgoITCfg.DataDbHost, mgoITCfg.DataDbPort, mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass, mgoITCfg.DBDataEncoding, mgoITCfg.CacheConfig, *loadHistorySize)
+	dataDB2, err := engine.ConfigureDataStorage(mgoITCfg.DataDbType, mgoITCfg.DataDbHost, mgoITCfg.DataDbPort, mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass, mgoITCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -187,11 +187,11 @@ func TestMigratorITMoveConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dataDB, err := engine.ConfigureDataStorage(mgoITCfg.DataDbType, mgoITCfg.DataDbHost, mgoITCfg.DataDbPort, mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass, mgoITCfg.DBDataEncoding, mgoITCfg.CacheConfig, *loadHistorySize)
+	dataDB, err := engine.ConfigureDataStorage(mgoITCfg.DataDbType, mgoITCfg.DataDbHost, mgoITCfg.DataDbPort, mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass, mgoITCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDB2, err := engine.ConfigureDataStorage(mysqlITCfg.DataDbType, mysqlITCfg.DataDbHost, mysqlITCfg.DataDbPort, mysqlITCfg.DataDbName, mysqlITCfg.DataDbUser, mysqlITCfg.DataDbPass, mysqlITCfg.DBDataEncoding, mysqlITCfg.CacheConfig, *loadHistorySize)
+	dataDB2, err := engine.ConfigureDataStorage(mysqlITCfg.DataDbType, mysqlITCfg.DataDbHost, mysqlITCfg.DataDbPort, mysqlITCfg.DataDbName, mysqlITCfg.DataDbUser, mysqlITCfg.DataDbPass, mysqlITCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -232,13 +232,17 @@ func testFlush(t *testing.T) {
 }
 
 func testMigratorAccounts(t *testing.T) {
+	v1d := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
 	v1b := &v1Balance{Value: 10, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
+	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.DATA: v1BalanceChain{v1d}, utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
+
+	v2d := &engine.Balance{Uuid: "", ID: "", Value: 0.0001, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
+		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
 	v2b := &engine.Balance{Uuid: "", ID: "", Value: 10, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
 	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
 		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.VOICE: engine.Balances{v2b}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
+	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.DATA: engine.Balances{v2d}, utils.VOICE: engine.Balances{v2b}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
 	switch {
 	case dbtype == utils.REDIS:
 		err := mig.oldDataDB.setV1Account(v1Acc)
