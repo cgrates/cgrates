@@ -35,8 +35,9 @@ var (
 	inDataDB        migrator.MigratorDataDB
 	instorDB        engine.Storage
 	oDBDataEncoding string
-	migrate         = flag.String("migrate", "", "Fire up automatic migration *to use multiple values use ',' as separator \n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups> ")
-	version         = flag.Bool("version", false, "Prints the application version.")
+	migrate         = flag.String("migrate", "", "Fire up automatic migration *to use multiple values use ',' as separator "+
+		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*StorDB|*DataDB> ")
+	version = flag.Bool("version", false, "Prints the application version.")
 
 	outDataDBType = flag.String("out_datadb_type", "", "The type of the DataDb Database <redis>")
 	outDataDBHost = flag.String("out_datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
@@ -86,7 +87,6 @@ func main() {
 			log.Print("Initializing DataDB:", *inDataDBType)
 			log.Print("Initializing storDB:", *inStorDBType)
 		}
-
 		var dmOUT *engine.DataManager
 		dmOUT, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort, *inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 		storDB, err := engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
@@ -94,7 +94,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		if *outDataDBType == "" {
 			*outDataDBType = *inDataDBType
 			*outDataDBHost = *inDataDBHost
@@ -153,7 +152,6 @@ func main() {
 		if *verbose {
 			log.Print("Done migrating!")
 		}
-
 		return
 	}
 
