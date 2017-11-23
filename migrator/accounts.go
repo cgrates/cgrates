@@ -236,7 +236,7 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 		ac.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
 			balVal := oldBal.Value
-			if !utils.IsSliceMember([]string{utils.MONETARY, utils.VOICE}, newBalKey) {
+			if newBalKey == utils.VOICE {
 				balVal = utils.Round(balVal/float64(time.Second),
 					config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
 			}
@@ -377,8 +377,8 @@ func (v2Acc v2Account) V2toV3Account() (ac *engine.Account) {
 		ac.BalanceMap[balType] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
 			balVal := oldBal.Value
-			if !utils.IsSliceMember([]string{utils.MONETARY, utils.VOICE}, balType) {
-				balVal = utils.Round(balVal/float64(time.Second),
+			if balType == utils.VOICE {
+				balVal = utils.Round(balVal*float64(time.Second),
 					config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
 			}
 			// check default to set new id
