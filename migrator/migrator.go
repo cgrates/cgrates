@@ -184,146 +184,136 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPcdrstats()
 		case utils.MetaTpDestinations:
 			err = m.migrateTPDestinations()
-		case utils.MetaTpRatingPlan:
-			err = m.migrateTPratingplans()
-		case utils.MetaTpRatingProfile:
-			err = m.migrateTPfilters()
 			//DATADB ALL
 		case utils.MetaDataDB:
 			if err := m.migrateAccounts(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaAccounts, " ", err)
 			}
 			if err := m.migrateActionPlans(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaActionPlans, " ", err)
 			}
 			if err := m.migrateActionTriggers(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaActionTriggers, " ", err)
 			}
 			if err := m.migrateActions(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaActions, " ", err)
 			}
 			if err := m.migrateSharedGroups(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaSharedGroups, " ", err)
 			}
 			if err := m.migrateStats(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaStats, " ", err)
 			}
 			if err := m.migrateThresholds(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaThresholds, " ", err)
 			}
 			if err := m.migrateRatingPlans(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaRatingPlans, " ", err)
 			}
 			if err := m.migrateRatingProfiles(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaRatingProfile, " ", err)
 			}
 			if err := m.migrateDestinations(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaDestinations, " ", err)
 			}
 			if err := m.migrateReverseDestinations(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaReverseDestinations, " ", err)
 			}
 			if err := m.migrateLCR(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaLCR, " ", err)
 			}
 			if err := m.migrateCdrStats(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaCdrStats, " ", err)
 			}
 			if err := m.migrateTimings(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTiming, " ", err)
 			}
 			if err := m.migrateRequestFilter(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaRQF, " ", err)
 			}
 			if err := m.migrateResources(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaResource, " ", err)
 			}
 			if err := m.migrateReverseAlias(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaReverseAlias, " ", err)
 			}
 			if err := m.migrateAlias(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaAlias, " ", err)
 			}
 			if err := m.migrateUser(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaUser, " ", err)
 			}
 			if err := m.migrateSubscribers(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaSubscribers, " ", err)
 			}
 			if err := m.migrateDerivedChargers(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaDerivedChargersV, " ", err)
 			}
 			err = nil
 			//STORDB ALL
 		case utils.MetaStorDB:
 			if err := m.migrateTPratingplans(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpRatingPlans, " ", err)
 			}
 			if err := m.migrateTPlcrs(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpLcrs, " ", err)
 			}
 			if err := m.migrateTPfilters(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpFilters, " ", err)
 			}
 			if err := m.migrateTPdestinationrates(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpDestinationRates, " ", err)
 			}
 			if err := m.migrateTPactiontriggers(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpActionTriggers, " ", err)
 			}
 			if err := m.migrateTPaccountacction(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpAccountActions, " ", err)
 			}
 			if err := m.migrateTPactionplans(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpActionPlans, " ", err)
 			}
 			if err := m.migrateTPactions(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpActions, " ", err)
 			}
 			if err := m.migrateTPderivedchargers(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpDerivedCharges, " ", err)
 			}
 			if err := m.migrateTPthresholds(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpThresholds, " ", err)
 			}
 			if err := m.migrateTPstats(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpStats, " ", err)
 			}
 			if err := m.migrateTPsharedgroups(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpSharedGroups, " ", err)
 			}
 			if err := m.migrateTPratingprofiles(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpRatingProfiles, " ", err)
 			}
 			if err := m.migrateTPresources(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpResources, " ", err)
 			}
 			if err := m.migrateTPrates(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpRates, " ", err)
 			}
 			if err := m.migrateTpTimings(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpTiming, " ", err)
 			}
 			if err := m.migrateTPaliases(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpAliases, " ", err)
 			}
 			if err := m.migrateTPusers(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpUsers, " ", err)
 			}
 			if err := m.migrateTPderivedchargers(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpDerivedChargersV, " ", err)
 			}
 			if err := m.migrateTPcdrstats(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpCdrStats, " ", err)
 			}
 			if err := m.migrateTPDestinations(); err != nil {
-				log.Print(err)
-			}
-			if err := m.migrateTPratingplans(); err != nil {
-				log.Print(err)
-			}
-			if err := m.migrateTPfilters(); err != nil {
-				log.Print(err)
+				log.Print("GOT ", utils.MetaTpDestinations, " ", err)
 			}
 			err = nil
 		}

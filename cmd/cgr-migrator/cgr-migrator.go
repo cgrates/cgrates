@@ -130,7 +130,7 @@ func main() {
 		if *verbose {
 			log.Print("Migrating: ", *migrate)
 		}
-		if inDataDBName != outDataDBName {
+		if inDataDBName != outDataDBName || inStorDBName != outStorDBName {
 			sameDBname = false
 		}
 		m, err := migrator.NewMigrator(dmIN, dmOUT, *outDataDBType, *dbDataEncoding, storDB, *outStorDBType, inDataDB, *inDataDBType, *inDBDataEncoding, instorDB, *inStorDBType, *dryRun, sameDBname)
