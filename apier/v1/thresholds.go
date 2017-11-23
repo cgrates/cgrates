@@ -25,37 +25,37 @@ import (
 )
 
 // NewThresholdSV1 initializes ThresholdSV1
-func NewThresholdSV1(tS *engine.ThresholdService) *ThresholdSV1 {
-	return &ThresholdSV1{tS: tS}
+func NewThresholdSv1(tS *engine.ThresholdService) *ThresholdSv1 {
+	return &ThresholdSv1{tS: tS}
 }
 
 // Exports RPC from RLs
-type ThresholdSV1 struct {
+type ThresholdSv1 struct {
 	tS *engine.ThresholdService
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (tSv1 *ThresholdSV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (tSv1 *ThresholdSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(tSv1, serviceMethod, args, reply)
 }
 
 // GetThresholdIDs returns list of threshold IDs registered for a tenant
-func (tSv1 *ThresholdSV1) GetThresholdIDs(tenant string, tIDs *[]string) error {
+func (tSv1 *ThresholdSv1) GetThresholdIDs(tenant string, tIDs *[]string) error {
 	return tSv1.tS.V1GetThresholdIDs(tenant, tIDs)
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
-func (tSv1 *ThresholdSV1) GetThresholdsForEvent(ev *engine.ThresholdEvent, reply *engine.Thresholds) error {
+func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ev *engine.ThresholdEvent, reply *engine.Thresholds) error {
 	return tSv1.tS.V1GetThresholdsForEvent(ev, reply)
 }
 
 // GetThreshold queries a Threshold
-func (tSv1 *ThresholdSV1) GetThreshold(tntID *utils.TenantID, t *engine.Threshold) error {
+func (tSv1 *ThresholdSv1) GetThreshold(tntID *utils.TenantID, t *engine.Threshold) error {
 	return tSv1.tS.V1GetThreshold(tntID, t)
 }
 
 // ProcessEvent will process an Event
-func (tSv1 *ThresholdSV1) ProcessEvent(ev *engine.ThresholdEvent, hits *int) error {
+func (tSv1 *ThresholdSv1) ProcessEvent(ev *engine.ThresholdEvent, hits *int) error {
 	return tSv1.tS.V1ProcessEvent(ev, hits)
 }
 

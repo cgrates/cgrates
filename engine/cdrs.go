@@ -218,7 +218,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 			cdrIf[utils.ID] = cdr.OriginID
 		}
 		var reply string
-		go self.stats.Call("StatSV1.ProcessEvent", cdrIf, &reply)
+		go self.stats.Call(utils.StatSv1ProcessEvent, cdrIf, &reply)
 	}
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
 		self.replicateCDRs([]*CDR{cdr})
@@ -300,7 +300,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 					cdrIf[utils.ID] = ratedCDR.OriginID
 				}
 				var reply string
-				go self.stats.Call("StatSV1.ProcessEvent", cdrIf, &reply)
+				go self.stats.Call(utils.StatSv1ProcessEvent, cdrIf, &reply)
 			}
 		}
 	}

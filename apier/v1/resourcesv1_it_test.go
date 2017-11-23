@@ -135,12 +135,12 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		Tenant: "cgrates.org",
 		Event:  map[string]interface{}{"Unknown": "unknown"}}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(500) * time.Millisecond)
 	args.Event = map[string]interface{}{"Destination": "10"}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(500) * time.Millisecond)
@@ -152,12 +152,12 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	}
 
 	args.Event = map[string]interface{}{"Destination": "20"}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	args.Event = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1002"}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
 	if len(*reply) != 2 {
@@ -165,7 +165,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	}
 
 	args.Event = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1001"}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
 	if len(*reply) != 1 {
@@ -187,7 +187,7 @@ func testV1RsTTL0(t *testing.T) {
 		Units: 1,
 	}
 	var reply string
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	// second allocation should be also allowed
@@ -199,7 +199,7 @@ func testV1RsTTL0(t *testing.T) {
 			"Destination": "3002"},
 		Units: 1,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	// too many units should be rejected
@@ -211,7 +211,7 @@ func testV1RsTTL0(t *testing.T) {
 			"Destination": "3002"},
 		Units: 2,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err == nil ||
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err == nil ||
 		err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
@@ -222,7 +222,7 @@ func testV1RsTTL0(t *testing.T) {
 		Event: map[string]interface{}{
 			"Account":     "3001",
 			"Destination": "3002"}}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &rs); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 1 {
 		t.Errorf("Resources: %+v", rs)
@@ -241,7 +241,7 @@ func testV1RsTTL0(t *testing.T) {
 			"Account":     "3001",
 			"Destination": "3002"},
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.ReleaseResource", argsRU, &releaseReply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResource, argsRU, &releaseReply); err != nil {
 		t.Error(err)
 	}
 }
@@ -258,7 +258,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			"Destination": "1002"},
 		Units: 3,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg := "ResGroup1"
@@ -275,7 +275,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			"Destination": "1002"},
 		Units: 4,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
@@ -292,7 +292,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			"Destination": "1002"},
 		Units: 1,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "SPECIAL_1002"
@@ -309,7 +309,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			"Destination": "1002"},
 		Units: 1,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
@@ -324,7 +324,7 @@ func testV1RsAllocateResource(t *testing.T) {
 			"Destination": "1002"},
 		Units: 1,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
@@ -344,7 +344,7 @@ func testV1RsAllowUsage(t *testing.T) {
 			"Destination": "1002"},
 		Units: 6,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", argsRU, &allowed); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllowUsage, argsRU, &allowed); err != nil {
 		t.Error(err)
 	} else if !allowed { // already 3 usages active before allow call, we should have now more than allowed
 		t.Error("resource is not allowed")
@@ -358,7 +358,7 @@ func testV1RsAllowUsage(t *testing.T) {
 			"Destination": "1002"},
 		Units: 7,
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", argsRU, &allowed); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllowUsage, argsRU, &allowed); err != nil {
 		t.Error(err)
 	} else if allowed { // already 3 usages active before allow call, we should have now more than allowed
 		t.Error("resource should not be allowed")
@@ -376,7 +376,7 @@ func testV1RsReleaseResource(t *testing.T) {
 			"Subject":     "1001",
 			"Destination": "1002"},
 	}
-	if err := rlsV1Rpc.Call("ResourceSV1.ReleaseResource", argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResource, argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	// try reserving with full units for Resource1, case which did not work in previous test
@@ -391,7 +391,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		Units: 7,
 	}
 	var allowed bool
-	if err := rlsV1Rpc.Call("ResourceSV1.AllowUsage", argsRU, &allowed); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllowUsage, argsRU, &allowed); err != nil {
 		t.Error(err)
 	} else if !allowed {
 		t.Error("resource should be allowed")
@@ -403,7 +403,7 @@ func testV1RsReleaseResource(t *testing.T) {
 			"Account":     "1002",
 			"Subject":     "1001",
 			"Destination": "1002"}}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &rs); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)
@@ -429,7 +429,7 @@ func testV1RsDBStore(t *testing.T) {
 	}
 	var reply string
 	eAllocationMsg := "ResGroup1"
-	if err := rlsV1Rpc.Call("ResourceSV1.AllocateResource", argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != eAllocationMsg {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
@@ -441,7 +441,7 @@ func testV1RsDBStore(t *testing.T) {
 			"Account":     "1002",
 			"Subject":     "1001",
 			"Destination": "1002"}}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &rs); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)
@@ -474,7 +474,7 @@ func testV1RsDBStore(t *testing.T) {
 			"Account":     "1002",
 			"Subject":     "1001",
 			"Destination": "1002"}}
-	if err := rlsV1Rpc.Call("ResourceSV1.GetResourcesForEvent", args, &rs); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)

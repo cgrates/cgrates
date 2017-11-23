@@ -219,7 +219,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 			Event:   ev.(FSEvent).AsMapStringInterface(sm.timezone),
 			Units:   1,
 		}
-		if err := sm.rls.Call("ResourceSV1.AllocateResource", attrRU, &reply); err != nil {
+		if err := sm.rls.Call(utils.ResourceSv1AllocateResource, attrRU, &reply); err != nil {
 			if err.Error() == utils.ErrResourceUnavailable.Error() {
 				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), "-"+utils.ErrResourceUnavailable.Error())
 			} else {
@@ -286,7 +286,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 		Units:   1,
 	}
 	if sm.rls != nil {
-		if err := sm.rls.Call("ResourceSV1.ReleaseResource", attrRU, &reply); err != nil {
+		if err := sm.rls.Call(utils.ResourceSv1ReleaseResource, attrRU, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> RLs API error: %s", err.Error()))
 		}
 	}
