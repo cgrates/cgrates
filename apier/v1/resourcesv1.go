@@ -24,37 +24,37 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewResourceSV1(rls *engine.ResourceService) *ResourceSV1 {
-	return &ResourceSV1{rls: rls}
+func NewResourceSv1(rls *engine.ResourceService) *ResourceSv1 {
+	return &ResourceSv1{rls: rls}
 }
 
 // Exports RPC from RLs
-type ResourceSV1 struct {
+type ResourceSv1 struct {
 	rls *engine.ResourceService
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (rsv1 *ResourceSV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (rsv1 *ResourceSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSV1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *engine.Resources) error {
+func (rsv1 *ResourceSv1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *engine.Resources) error {
 	return rsv1.rls.V1ResourcesForEvent(args, reply)
 }
 
 // AllowUsage checks if there are limits imposed for event
-func (rsv1 *ResourceSV1) AllowUsage(args utils.ArgRSv1ResourceUsage, allowed *bool) error {
+func (rsv1 *ResourceSv1) AllowUsage(args utils.ArgRSv1ResourceUsage, allowed *bool) error {
 	return rsv1.rls.V1AllowUsage(args, allowed)
 }
 
 // V1InitiateResourceUsage records usage for an event
-func (rsv1 *ResourceSV1) AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) error {
+func (rsv1 *ResourceSv1) AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) error {
 	return rsv1.rls.V1AllocateResource(args, reply)
 }
 
 // V1TerminateResourceUsage releases usage for an event
-func (rsv1 *ResourceSV1) ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) error {
+func (rsv1 *ResourceSv1) ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) error {
 	return rsv1.rls.V1ReleaseResource(args, reply)
 }
 

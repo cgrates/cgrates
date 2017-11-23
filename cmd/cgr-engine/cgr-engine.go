@@ -568,7 +568,7 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 		exitChan <- true
 		return
 	}()
-	rsV1 := v1.NewResourceSV1(rS)
+	rsV1 := v1.NewResourceSv1(rS)
 	server.RpcRegister(rsV1)
 	internalRsChan <- rsV1
 }
@@ -603,7 +603,7 @@ func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.R
 		exitChan <- true
 		return
 	}()
-	stsV1 := v1.NewStatSV1(sS)
+	stsV1 := v1.NewStatSv1(sS)
 	server.RpcRegister(stsV1)
 	internalStatSChan <- stsV1
 }
@@ -629,7 +629,7 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 		exitChan <- true
 		return
 	}()
-	tSv1 := v1.NewThresholdSV1(tS)
+	tSv1 := v1.NewThresholdSv1(tS)
 	server.RpcRegister(tSv1)
 	internalThresholdSChan <- tSv1
 }

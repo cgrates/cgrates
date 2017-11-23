@@ -837,7 +837,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 					utils.AllowNegative: acnt.AllowNegative,
 					utils.Disabled:      acnt.Disabled}}
 			var hits int
-			if err := thresholdS.Call("ThresholdSV1.ProcessEvent", ev, &hits); err != nil {
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), ev))
 			}

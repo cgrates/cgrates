@@ -65,41 +65,41 @@ func (apierV1 *ApierV1) RemStatQueueProfile(args *utils.TenantID, reply *string)
 }
 
 // NewStatSV1 initializes StatSV1
-func NewStatSV1(sS *engine.StatService) *StatSV1 {
-	return &StatSV1{sS: sS}
+func NewStatSv1(sS *engine.StatService) *StatSv1 {
+	return &StatSv1{sS: sS}
 }
 
 // Exports RPC from RLs
-type StatSV1 struct {
+type StatSv1 struct {
 	sS *engine.StatService
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (stsv1 *StatSV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (stsv1 *StatSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(stsv1, serviceMethod, args, reply)
 }
 
 // GetQueueIDs returns list of queueIDs registered for a tenant
-func (stsv1 *StatSV1) GetQueueIDs(tenant string, qIDs *[]string) error {
+func (stsv1 *StatSv1) GetQueueIDs(tenant string, qIDs *[]string) error {
 	return stsv1.sS.V1GetQueueIDs(tenant, qIDs)
 }
 
 // ProcessEvent returns processes a new Event
-func (stsv1 *StatSV1) ProcessEvent(ev *engine.StatEvent, reply *string) error {
+func (stsv1 *StatSv1) ProcessEvent(ev *engine.StatEvent, reply *string) error {
 	return stsv1.sS.V1ProcessEvent(ev, reply)
 }
 
 // GetQueueIDs returns the list of queues IDs in the system
-func (stsv1 *StatSV1) GetStatQueuesForEvent(ev *engine.StatEvent, reply *engine.StatQueues) (err error) {
+func (stsv1 *StatSv1) GetStatQueuesForEvent(ev *engine.StatEvent, reply *engine.StatQueues) (err error) {
 	return stsv1.sS.V1GetStatQueuesForEvent(ev, reply)
 }
 
 // GetStringMetrics returns the string metrics for a Queue
-func (stsv1 *StatSV1) GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
+func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
 	return stsv1.sS.V1GetQueueStringMetrics(args, reply)
 }
 
 // GetQueueFloatMetrics returns the float metrics for a Queue
-func (stsv1 *StatSV1) GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
+func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
 	return stsv1.sS.V1GetQueueFloatMetrics(args, reply)
 }
