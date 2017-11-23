@@ -1357,6 +1357,13 @@ type TPRequestFilter struct {
 	Values    []string // Filter definition
 }
 
+type TPLCRSupplier struct {
+	ID            string   // SupplierID
+	RatingPlanIDs []string // RatingPlans used when computing price
+	FilterIDs     []string
+	Weight        float64
+}
+
 type TPLCR struct {
 	TPid               string
 	Tenant             string
@@ -1365,8 +1372,6 @@ type TPLCR struct {
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Strategy           string
 	StrategyParams     []string
-	SupplierID         string
-	RatingPlanIDs      []string // RatingPlans used when computing price
-	StatIDs            []string // StatProfiles queried in case of QoS based strategies
+	Suppliers          []*TPLCRSupplier
 	Weight             float64
 }

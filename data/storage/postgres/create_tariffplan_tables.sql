@@ -498,7 +498,8 @@ CREATE TABLE tp_filters (
     "strategy_params" varchar(64) NOT NULL,
     "supplier_id" varchar(32) NOT NULL,
     "ratingplan_ids" varchar(64) NOT NULL,
-    "stat_ids" varchar(64) NOT NULL,
+    "supplier_filter_ids" varchar(64) NOT NULL,
+    "supplier_weight" decimal(8,2) NOT NULL,
     "weight" decimal(8,2) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );

@@ -1108,11 +1108,16 @@ func testOnStorITCacheLCRProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
 		Strategy:       "*lowest_cost",
-		SupplierID:     "supplier1",
 		StrategyParams: []string{},
-		RatingPlanIDs:  []string{"RPL_1"},
-		StatIDs:        []string{},
-		Weight:         20,
+		Suppliers: []*LCRSupplier{
+			&LCRSupplier{
+				ID:            "supplier1",
+				RatingPlanIDs: []string{"RPL_1"},
+				FilterIDs:     []string{"FLTR_DST_DE"},
+				Weight:        10,
+			},
+		},
+		Weight: 20,
 	}
 	if err := onStor.SetLCRProfile(lcrProfile); err != nil {
 		t.Error(err)
@@ -2401,11 +2406,16 @@ func testOnStorITCRUDLCRProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
 		Strategy:       "*lowest_cost",
-		SupplierID:     "supplier1",
 		StrategyParams: []string{},
-		RatingPlanIDs:  []string{"RPL_1"},
-		StatIDs:        []string{},
-		Weight:         20,
+		Suppliers: []*LCRSupplier{
+			&LCRSupplier{
+				ID:            "supplier1",
+				RatingPlanIDs: []string{"RPL_1"},
+				FilterIDs:     []string{"FLTR_DST_DE"},
+				Weight:        10,
+			},
+		},
+		Weight: 20,
 	}
 	if _, rcvErr := onStor.GetLCRProfile("cgrates.org", "LCR_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

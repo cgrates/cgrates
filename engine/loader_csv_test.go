@@ -291,8 +291,9 @@ cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 `
 	lcrProfiles = `
-#Tenant,ID,FilterIDs,ActivationInterval,Strategy,StrategyParams,SupplierID,RatingPlanIDs,StatIDs,Weight
-cgrates.org,LCR_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,RPL_1,,20
+#Tenant,ID,FilterIDs,ActivationInterval,Strategy,StrategyParams,SupplierID,RatingPlanIDs,SupplierFilterIDs,SupplierWeight,Weight
+cgrates.org,LCR_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,RPL_1,FLTR_ACNT_dan,10,20
+cgrates.org,LCR_1,,,,,supplier2,RPL_2,FLTR_DST_DE,20,
 `
 )
 
@@ -1630,17 +1631,28 @@ func TestLoadLCRProfiles(t *testing.T) {
 			},
 			Strategy:       "*lowest_cost",
 			StrategyParams: []string{},
-			SupplierID:     "supplier1",
-			RatingPlanIDs:  []string{"RPL_1"},
-			StatIDs:        []string{},
-			Weight:         20,
+			Suppliers: []*utils.TPLCRSupplier{
+				&utils.TPLCRSupplier{
+					ID:            "supplier1",
+					RatingPlanIDs: []string{"RPL_1"},
+					FilterIDs:     []string{"FLTR_ACNT_dan"},
+					Weight:        10,
+				},
+				&utils.TPLCRSupplier{
+					ID:            "supplier2",
+					RatingPlanIDs: []string{"RPL_2"},
+					FilterIDs:     []string{"FLTR_DST_DE"},
+					Weight:        20,
+				},
+			},
+			Weight: 20,
 		},
 	}
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "LCR_1"}
 	if len(csvr.lcrProfiles) != len(eLCRprofiles) {
 		t.Errorf("Failed to load LCRProfiles: %s", utils.ToIJSON(csvr.lcrProfiles))
-	} else if !reflect.DeepEqual(eLCRprofiles[resKey], csvr.lcrProfiles[resKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eLCRprofiles[resKey], csvr.lcrProfiles[resKey])
+	} else if !reflect.DeepEqual(eLCRprofiles[resKey].Suppliers[0], csvr.lcrProfiles[resKey].Suppliers[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", eLCRprofiles[resKey].Suppliers[0], csvr.lcrProfiles[resKey].Suppliers[0])
 	}
 }
 

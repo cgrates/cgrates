@@ -22,7 +22,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// LCRProfile represents the configuration of a  LCR profile
+type LCRSupplier struct {
+	ID            string   // SupplierID
+	RatingPlanIDs []string // RatingPlans used when computing price
+	FilterIDs     []string
+	Weight        float64
+}
+
+// LCRProfile represents the configuration of a LCR profile
 type LCRProfile struct {
 	Tenant             string
 	ID                 string // LCR Profile ID
@@ -30,9 +37,7 @@ type LCRProfile struct {
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Strategy           string                    // LCR Strategy used when computing
 	StrategyParams     []string
-	SupplierID         string
-	RatingPlanIDs      []string // RatingPlans used when computing price
-	StatIDs            []string // StatProfiles queried in case of QoS based strategies
+	Suppliers          []*LCRSupplier
 	Weight             float64
 }
 
