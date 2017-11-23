@@ -190,9 +190,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPfilters()
 			//DATADB ALL
 		case utils.MetaDataDB:
-			if err = m.migrateCostDetails(); err != nil {
-				log.Print(err)
-			}
 			if err := m.migrateAccounts(); err != nil {
 				log.Print(err)
 			}
