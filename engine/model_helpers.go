@@ -2431,28 +2431,21 @@ func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCR) {
 				Tenant:         tp.Tenant,
 				ID:             tp.ID,
 				Strategy:       tp.Strategy,
-				SupplierID:     tp.SupplierID,
 				StrategyParams: []string{},
-				RatingPlanIDs:  []string{},
-				StatIDs:        []string{},
 			}
+		}
+		if tp.SupplierID != "" {
+			th.Suppliers = append(th.Suppliers, &utils.TPLCRSupplier{
+				ID:            tp.SupplierID,
+				FilterIDs:     strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP),
+				RatingPlanIDs: strings.Split(tp.RatingplanIDs, utils.INFIELD_SEP),
+				Weight:        tp.SupplierWeight,
+			})
 		}
 		if tp.StrategyParams != "" {
 			strategyParamSplit := strings.Split(tp.StrategyParams, utils.INFIELD_SEP)
 			for _, strategyParam := range strategyParamSplit {
 				th.StrategyParams = append(th.StrategyParams, strategyParam)
-			}
-		}
-		if tp.RatingplanIDs != "" {
-			ratingPlansIDsSplit := strings.Split(tp.RatingplanIDs, utils.INFIELD_SEP)
-			for _, ratingPlanID := range ratingPlansIDsSplit {
-				th.RatingPlanIDs = append(th.RatingPlanIDs, ratingPlanID)
-			}
-		}
-		if tp.StatIDs != "" {
-			statIDsSplit := strings.Split(tp.StatIDs, utils.INFIELD_SEP)
-			for _, statID := range statIDsSplit {
-				th.StatIDs = append(th.StatIDs, statID)
 			}
 		}
 		if tp.Weight != 0 {
@@ -2487,58 +2480,59 @@ func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCR) {
 }
 
 func APItoModelTPLCRProfile(st *utils.TPLCR) (mdls TpLCRs) {
-	if st != nil {
-		for i, fltr := range st.FilterIDs {
-			mdl := &TpLCR{
-				Tenant: st.Tenant,
-				Tpid:   st.TPid,
-				ID:     st.ID,
-			}
-			if i == 0 {
-				mdl.Strategy = st.Strategy
-				mdl.Weight = st.Weight
-				mdl.SupplierID = st.SupplierID
-				for i, val := range st.StrategyParams {
-					if i != 0 {
-						mdl.StrategyParams += utils.INFIELD_SEP
-					}
-					mdl.StrategyParams += val
-				}
-				for i, val := range st.RatingPlanIDs {
-					if i != 0 {
-						mdl.RatingplanIDs += utils.INFIELD_SEP
-					}
-					mdl.RatingplanIDs += val
-				}
-				for i, val := range st.StatIDs {
-					if i != 0 {
-						mdl.StatIDs += utils.INFIELD_SEP
-					}
-					mdl.StatIDs += val
-				}
-				if st.ActivationInterval != nil {
-					if st.ActivationInterval.ActivationTime != "" {
-						mdl.ActivationInterval = st.ActivationInterval.ActivationTime
-					}
-					if st.ActivationInterval.ExpiryTime != "" {
-						mdl.ActivationInterval += utils.INFIELD_SEP + st.ActivationInterval.ExpiryTime
-					}
-				}
-			}
-			mdl.FilterIDs = fltr
-			mdls = append(mdls, mdl)
+	if len(st.Suppliers) == 0 {
+		return
+	}
+	for i, supl := range st.Suppliers {
+		mdl := &TpLCR{
+			Tenant: st.Tenant,
+			Tpid:   st.TPid,
+			ID:     st.ID,
 		}
+		if i == 0 {
+			mdl.Strategy = st.Strategy
+			mdl.Weight = st.Weight
+			for i, val := range st.FilterIDs {
+				if i != 0 {
+					mdl.FilterIDs += utils.INFIELD_SEP
+				}
+				mdl.FilterIDs += val
+			}
+			if st.ActivationInterval != nil {
+				if st.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = st.ActivationInterval.ActivationTime
+				}
+				if st.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + st.ActivationInterval.ExpiryTime
+				}
+			}
+		}
+		mdl.SupplierID = supl.ID
+		for i, val := range supl.RatingPlanIDs {
+			if i != 0 {
+				mdl.RatingplanIDs += utils.INFIELD_SEP
+			}
+			mdl.RatingplanIDs += val
+		}
+		for i, val := range supl.FilterIDs {
+			if i != 0 {
+				mdl.SupplierFilterIDs += utils.INFIELD_SEP
+			}
+			mdl.SupplierFilterIDs += val
+		}
+		mdl.SupplierWeight = supl.Weight
+		mdls = append(mdls, mdl)
 	}
 	return
 }
 
 func APItoLCRProfile(tpTH *utils.TPLCR, timezone string) (th *LCRProfile, err error) {
 	th = &LCRProfile{
-		Tenant:     tpTH.Tenant,
-		ID:         tpTH.ID,
-		Strategy:   tpTH.Strategy,
-		SupplierID: tpTH.SupplierID,
-		Weight:     tpTH.Weight,
+		Tenant:    tpTH.Tenant,
+		ID:        tpTH.ID,
+		Strategy:  tpTH.Strategy,
+		Weight:    tpTH.Weight,
+		Suppliers: make([]*LCRSupplier, len(tpTH.Suppliers)),
 	}
 	for _, stp := range tpTH.StrategyParams {
 		th.StrategyParams = append(th.StrategyParams, stp)
@@ -2551,11 +2545,14 @@ func APItoLCRProfile(tpTH *utils.TPLCR, timezone string) (th *LCRProfile, err er
 			return nil, err
 		}
 	}
-	for _, rpl := range tpTH.RatingPlanIDs {
-		th.RatingPlanIDs = append(th.RatingPlanIDs, rpl)
-	}
-	for _, sts := range tpTH.StatIDs {
-		th.StatIDs = append(th.StatIDs, sts)
+	for i, suplier := range tpTH.Suppliers {
+		supl := &LCRSupplier{
+			ID:            suplier.ID,
+			Weight:        suplier.Weight,
+			RatingPlanIDs: suplier.RatingPlanIDs,
+			FilterIDs:     suplier.FilterIDs,
+		}
+		th.Suppliers[i] = supl
 	}
 	return th, nil
 }
