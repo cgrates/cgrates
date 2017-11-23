@@ -1651,8 +1651,8 @@ func TestLoadLCRProfiles(t *testing.T) {
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "LCR_1"}
 	if len(csvr.lcrProfiles) != len(eLCRprofiles) {
 		t.Errorf("Failed to load LCRProfiles: %s", utils.ToIJSON(csvr.lcrProfiles))
-	} else if !reflect.DeepEqual(eLCRprofiles[resKey].Suppliers[0], csvr.lcrProfiles[resKey].Suppliers[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", eLCRprofiles[resKey].Suppliers[0], csvr.lcrProfiles[resKey].Suppliers[0])
+	} else if !reflect.DeepEqual(eLCRprofiles[resKey], csvr.lcrProfiles[resKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eLCRprofiles[resKey], csvr.lcrProfiles[resKey])
 	}
 }
 
