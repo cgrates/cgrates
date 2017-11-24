@@ -53,6 +53,10 @@ var sTestsAcc = []func(t *testing.T){
 	testV1AccGetAccountAfterLoad,
 	testV1AccRemAccount,
 	testV1AccGetAccountAfterDelete,
+	testV1AccSetAccount,
+	testV1AccGetAccountAfterSet,
+	testV1AccRemAccountSet,
+	testV1AccGetAccountSetAfterDelete,
 	testV1AccStopEngine,
 }
 
@@ -143,12 +147,43 @@ func testV1AccRemAccount(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-
 }
 
 func testV1AccGetAccountAfterDelete(t *testing.T) {
 	var reply *engine.Account
 	if err := accRpc.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1AccSetAccount(t *testing.T) {
+	var reply string
+	if err := accRpc.Call("ApierV2.SetAccount", &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testV1AccGetAccountAfterSet(t *testing.T) {
+	var reply *engine.Account
+	if err := accRpc.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testV1AccRemAccountSet(t *testing.T) {
+	var reply string
+	if err := accRpc.Call("ApierV1.RemoveAccount", &utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testV1AccGetAccountSetAfterDelete(t *testing.T) {
+	var reply *engine.Account
+	if err := accRpc.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
