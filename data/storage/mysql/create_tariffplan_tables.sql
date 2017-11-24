@@ -510,7 +510,7 @@ CREATE TABLE tp_lcr (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_lcr` (`tpid`,`tenant`, `id`,`filter_ids` )
+  UNIQUE KEY `unique_tp_lcr` (`tpid`,`tenant`, `id`,`filter_ids`,`supplier_id`,`supplier_filter_ids`,`ratingplan_ids` )
 );
 
 --
