@@ -33,10 +33,10 @@ import (
 var (
 	sameDBname      = true
 	inDataDB        migrator.MigratorDataDB
-	instorDB        engine.Storage
+	storDB          engine.Storage
 	oDBDataEncoding string
-	migrate         = flag.String("migrate", "", "Fire up automatic migration *to use multiple values use ',' as separator "+
-		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*StorDB|*DataDB> ")
+	migrate         = flag.String("migrate", "", "Fire up automatic migration "+
+		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb> ")
 	version = flag.Bool("version", false, "Prints the application version.")
 
 	outDataDBType = flag.String("out_datadb_type", "", "The type of the DataDb Database <redis>")
@@ -87,9 +87,9 @@ func main() {
 			log.Print("Initializing DataDB:", *inDataDBType)
 			log.Print("Initializing storDB:", *inStorDBType)
 		}
-		var dmOUT *engine.DataManager
-		dmOUT, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort, *inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
-		storDB, err := engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
+		var dmIN *engine.DataManager
+		dmIN, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort, *inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
+		instorDB, err := engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
 			log.Fatal(err)
@@ -103,25 +103,25 @@ func main() {
 			*outDataDBPass = *inDataDBPass
 		}
 		if *verbose {
-			log.Print("Initializing inDataDB:", *inDataDBType)
+			log.Print("Initializing outDataDB:", *outDataDBType)
 		}
-		var dmIN *engine.DataManager
-		dmIN, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
+		var dmOUT *engine.DataManager
+		dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
 		inDataDB, err := migrator.ConfigureV1DataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding)
 		if err != nil {
 			log.Fatal(err)
 		}
-		instorDB = storDB
+		storDB = instorDB
 
 		if *verbose {
 			if *outStorDBType != "" {
-				log.Print("Initializing instorDB:", *outStorDBType)
+				log.Print("Initializing outStorDB:", *outStorDBType)
 			} else {
-				log.Print("Initializing instorDB:", *inStorDBType)
+				log.Print("Initializing outStorDB:", *inStorDBType)
 			}
 		}
 		if *outStorDBType != "" {
-			instorDB, err = engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,
+			storDB, err = engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,
 				config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 			if err != nil {
 				log.Fatal(err)
@@ -133,7 +133,7 @@ func main() {
 		if inDataDBName != outDataDBName || inStorDBName != outStorDBName {
 			sameDBname = false
 		}
-		m, err := migrator.NewMigrator(dmIN, dmOUT, *outDataDBType, *dbDataEncoding, storDB, *outStorDBType, inDataDB, *inDataDBType, *inDBDataEncoding, instorDB, *inStorDBType, *dryRun, sameDBname)
+		m, err := migrator.NewMigrator(dmIN, dmOUT, *inDataDBType, *dbDataEncoding, storDB, *inStorDBType, inDataDB, *outDataDBType, *inDBDataEncoding, instorDB, *outStorDBType, *dryRun, sameDBname)
 		if err != nil {
 			log.Fatal(err)
 		}
