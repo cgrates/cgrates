@@ -291,9 +291,9 @@ cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 `
 	lcrProfiles = `
-#Tenant,ID,FilterIDs,ActivationInterval,Strategy,StrategyParams,SupplierID,RatingPlanIDs,SupplierFilterIDs,SupplierWeight,Weight
-cgrates.org,LCR_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,RPL_1,FLTR_ACNT_dan,10,20
-cgrates.org,LCR_1,,,,,supplier2,RPL_2,FLTR_DST_DE,20,
+#Tenant,ID,FilterIDs,ActivationInterval,Strategy,StrategyParams,SupplierID,SupplierFilterIDs,RatingPlanIDs,SupplierWeight,Weight
+cgrates.org,LCR_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,FLTR_ACNT_dan,RPL_1,10,20
+cgrates.org,LCR_1,,,,,supplier2,FLTR_DST_DE,RPL_2,20,
 `
 )
 

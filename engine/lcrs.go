@@ -23,9 +23,9 @@ import (
 )
 
 type LCRSupplier struct {
-	ID            string   // SupplierID
-	RatingPlanIDs []string // RatingPlans used when computing price
+	ID            string // SupplierID
 	FilterIDs     []string
+	RatingPlanIDs []string // RatingPlans used when computing price
 	Weight        float64
 }
 
