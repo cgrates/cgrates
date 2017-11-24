@@ -497,14 +497,14 @@ CREATE TABLE tp_filters (
     "strategy" varchar(32) NOT NULL,
     "strategy_params" varchar(64) NOT NULL,
     "supplier_id" varchar(32) NOT NULL,
-    "ratingplan_ids" varchar(64) NOT NULL,
     "supplier_filter_ids" varchar(64) NOT NULL,
+    "ratingplan_ids" varchar(64) NOT NULL,
     "supplier_weight" decimal(8,2) NOT NULL,
     "weight" decimal(8,2) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
  CREATE INDEX tp_lcr_idx ON tp_lcr (tpid);
- CREATE INDEX tp_lcr_unique ON tp_lcr  ("tpid",  "tenant", "id", "filter_ids");
+ CREATE INDEX tp_lcr_unique ON tp_lcr  ("tpid",  "tenant", "id", "filter_ids","supplier_id","supplier_filter_ids","ratingplan_ids");
 
 
 --

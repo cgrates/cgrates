@@ -1,3 +1,5 @@
 #Tenant,ID,FilterIDs,ActivationInterval,Strategy,StrategyParams,SupplierID,SupplierFilterIDs,RatingPlanIDs,SupplierWeight,Weight
-cgrates.org,LCR_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,,RPL_1,10,20
-cgrates.org,LCR_1,,,,,supplier2,,RPL_2,20,
+cgrates.org,LCR_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,FLTR_1,RPL_1,10,20
+cgrates.org,LCR_1,,,,,supplier1,FLTR_2,RPL_2,20,
+cgrates.org,LCR_1,,,,,supplier2,FLTR_1,RPL_2,20,
+ 
