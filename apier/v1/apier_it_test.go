@@ -1785,7 +1785,24 @@ func TestApierReplayFailedPosts(t *testing.T) {
 			t.Errorf("Error %s removing folder: %s", err, dir)
 		}
 	}
+}
 
+func TestApierGetDataDBVesions(t *testing.T) {
+	var reply *engine.Versions
+	if err := rater.Call("ApierV1.GetDataDBVersions", "", &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(engine.CurrentDataDBVersions(), *reply) {
+		t.Errorf("Expecting : %+v, received: %+v", engine.CurrentDataDBVersions(), *reply)
+	}
+}
+
+func TestApierGetStorDBVesions(t *testing.T) {
+	var reply *engine.Versions
+	if err := rater.Call("ApierV1.GetStorDBVersions", "", &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(engine.CurrentStorDBVersions(), *reply) {
+		t.Errorf("Expecting : %+v, received: %+v", engine.CurrentStorDBVersions(), *reply)
+	}
 }
 
 // Simply kill the engine after we are done with tests within this file

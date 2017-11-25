@@ -26,7 +26,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string, storDB engine.Storage, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string, oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDBname bool) (m *Migrator, err error) {
+func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string,
+	storDB engine.Storage, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
+	oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDBname bool, datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -46,26 +48,28 @@ func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType
 		mrshlr: mrshlr, dmIN: dmIN,
 		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
 		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType,
-		oldmrshlr: oldmrshlr, dryRun: dryRun, sameDBname: sameDBname, stats: stats,
+		oldmrshlr: oldmrshlr, dryRun: dryRun, sameDBname: sameDBname, datadb_versions: datadb_versions, stordb_versions: stordb_versions, stats: stats,
 	}
 	return m, err
 }
 
 type Migrator struct {
-	dmIN          *engine.DataManager //oldatadb
-	dmOut         *engine.DataManager
-	dataDBType    string
-	storDB        engine.Storage
-	storDBType    string
-	mrshlr        engine.Marshaler
-	oldDataDB     MigratorDataDB
-	oldDataDBType string
-	oldStorDB     engine.Storage
-	oldStorDBType string
-	oldmrshlr     engine.Marshaler
-	dryRun        bool
-	sameDBname    bool
-	stats         map[string]int
+	dmIN            *engine.DataManager //oldatadb
+	dmOut           *engine.DataManager
+	dataDBType      string
+	storDB          engine.Storage
+	storDBType      string
+	mrshlr          engine.Marshaler
+	oldDataDB       MigratorDataDB
+	oldDataDBType   string
+	oldStorDB       engine.Storage
+	oldStorDBType   string
+	oldmrshlr       engine.Marshaler
+	dryRun          bool
+	sameDBname      bool
+	datadb_versions bool
+	stordb_versions bool
+	stats           map[string]int
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods
@@ -92,6 +96,20 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 						utils.ServerErrorCaps,
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
+				}
+				if m.datadb_versions {
+					vrs, err := m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+					if err != nil {
+						return err, nil
+					}
+					log.Print("After migrate, DataDB versions :", vrs)
+				}
+				if m.stordb_versions {
+					vrs, err := m.storDB.GetVersions(utils.TBLVersions)
+					if err != nil {
+						return err, nil
+					}
+					log.Print("After migrate, StorDB versions :", vrs)
 				}
 			} else {
 				log.Print("Cannot dryRun SetVersions!")
