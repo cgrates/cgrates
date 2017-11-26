@@ -208,9 +208,9 @@ func (lcrS *LCRService) resourceUsage(resIDs []string) (tUsage float64, err erro
 	return
 }
 
-// supliersForEvent will return the list of
-// valid suppliers for event based on filters and strategies
-func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (lss LCRSuppliers, err error) {
+// supliersForEvent will return the list of valid supplier IDs
+// for event based on filters and sorting algorithms
+func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (lsIDs []string, err error) {
 	var lcrPrfls LCRProfiles
 	if lcrPrfls, err = lcrS.matchingLCRProfilesForEvent(ev); err != nil {
 		return
@@ -218,6 +218,7 @@ func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (lss LCRSuppliers, err er
 		return nil, utils.ErrNotFound
 	}
 	lcrPrfl := lcrPrfls[0] // pick up the first lcr profile as winner
+	var lss LCRSuppliers
 	for _, s := range lcrPrfl.Suppliers {
 		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
 			if pass, err := lcrS.filterS.PassFiltersForEvent(ev.Tenant,
@@ -229,9 +230,5 @@ func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (lss LCRSuppliers, err er
 		}
 		lss = append(lss, s)
 	}
-	if err = lcrS.sortDispatcher.SortSuppliers(lcrPrfl.Sorting,
-		lcrPrfl.Suppliers); err != nil {
-		return nil, err
-	}
-	return lcrPrfl.Suppliers, nil
+	return lcrS.sortDispatcher.SortedSupplierIDs(lcrPrfl.Sorting, lss)
 }

@@ -36,16 +36,17 @@ func NewSupplierSortDispatcher(lcrS *LCRService) (ssd SupplierSortDispatcher, er
 // and dispatch requests to them
 type SupplierSortDispatcher map[string]SuppliersSorting
 
-func (ssd SupplierSortDispatcher) SortSuppliers(strategy string, suppls LCRSuppliers) (err error) {
+func (ssd SupplierSortDispatcher) SortedSupplierIDs(strategy string,
+	suppls LCRSuppliers) (lsIDs []string, err error) {
 	sd, has := ssd[strategy]
 	if !has {
-		return fmt.Errorf("unsupported sort strategy: %s", strategy)
+		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	return sd.SortSuppliers(suppls)
+	return sd.SortedSupplierIDs(suppls)
 }
 
 type SuppliersSorting interface {
-	SortSuppliers(LCRSuppliers) error
+	SortedSupplierIDs(LCRSuppliers) ([]string, error)
 }
 
 // NewLeastCostStrategy constructs LeastCostStrategy
@@ -58,7 +59,7 @@ type LeastCostStrategy struct {
 	lcrS *LCRService
 }
 
-func (lcs *LeastCostStrategy) SortSuppliers(suppls LCRSuppliers) (err error) {
+func (lcs *LeastCostStrategy) SortedSupplierIDs(suppls LCRSuppliers) (lsIDs []string, err error) {
 	return
 }
 
@@ -66,7 +67,11 @@ func (lcs *LeastCostStrategy) SortSuppliers(suppls LCRSuppliers) (err error) {
 type WeightStrategy struct {
 }
 
-func (ss *WeightStrategy) SortSuppliers(suppls LCRSuppliers) (err error) {
+func (ws *WeightStrategy) SortedSupplierIDs(suppls LCRSuppliers) (lsIDs []string, err error) {
 	suppls.Sort()
+	lsIDs = make([]string, len(suppls))
+	for i, s := range suppls {
+		lsIDs[i] = s.ID
+	}
 	return
 }
