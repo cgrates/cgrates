@@ -77,8 +77,8 @@ type LCRProfile struct {
 	ID                 string // LCR Profile ID
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
-	Strategy           string                    // LCR Strategy used when computing
-	StrategyParams     []string
+	Sorting            string                    // Sorting strategy
+	SortingParams      []string
 	Suppliers          LCRSuppliers
 	Blocker            bool // do not process further profiles after this one
 	Weight             float64
@@ -109,7 +109,7 @@ func NewLCRService(dm *DataManager, timezone string,
 		statS:         statS,
 		indexedFields: indexedFields}
 
-	if lcrS.strategyDispatcher, err = NewSupplierStrategyDispatcher(lcrS); err != nil {
+	if lcrS.sortDispatcher, err = NewSupplierSortDispatcher(lcrS); err != nil {
 		return nil, err
 	}
 	return
@@ -123,7 +123,7 @@ type LCRService struct {
 	indexedFields []string
 	resourceS,
 	statS rpcclient.RpcClientConnection
-	strategyDispatcher SupplierStrategyDispatcher
+	sortDispatcher SupplierSortDispatcher
 }
 
 // ListenAndServe will initialize the service
@@ -229,7 +229,7 @@ func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (lss LCRSuppliers, err er
 		}
 		lss = append(lss, s)
 	}
-	if err = lcrS.strategyDispatcher.OrderSuppliers(lcrPrfl.Strategy,
+	if err = lcrS.sortDispatcher.SortSuppliers(lcrPrfl.Sorting,
 		lcrPrfl.Suppliers); err != nil {
 		return nil, err
 	}

@@ -24,9 +24,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewSupplierStrategyDispatcher constructs SupplierStrategyDispatcher
-func NewSupplierStrategyDispatcher(lcrS *LCRService) (ssd SupplierStrategyDispatcher, err error) {
-	ssd = make(map[string]SuppliersStrategy)
+// NewSupplierSortDispatcher constructs SupplierSortDispatcher
+func NewSupplierSortDispatcher(lcrS *LCRService) (ssd SupplierSortDispatcher, err error) {
+	ssd = make(map[string]SuppliersSorting)
 	ssd[utils.MetaStatic] = new(StaticStrategy)
 	ssd[utils.MetaLeastCost] = NewLeastCostStrategy(lcrS)
 	return
@@ -34,18 +34,18 @@ func NewSupplierStrategyDispatcher(lcrS *LCRService) (ssd SupplierStrategyDispat
 
 // SupplierStrategyHandler will initialize strategies
 // and dispatch requests to them
-type SupplierStrategyDispatcher map[string]SuppliersStrategy
+type SupplierSortDispatcher map[string]SuppliersSorting
 
-func (ssd SupplierStrategyDispatcher) OrderSuppliers(strategy string, suppls LCRSuppliers) (err error) {
+func (ssd SupplierSortDispatcher) SortSuppliers(strategy string, suppls LCRSuppliers) (err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return fmt.Errorf("unsupported sort strategy: %s", strategy)
 	}
-	return sd.OrderSuppliers(suppls)
+	return sd.SortSuppliers(suppls)
 }
 
-type SuppliersStrategy interface {
-	OrderSuppliers(LCRSuppliers) error
+type SuppliersSorting interface {
+	SortSuppliers(LCRSuppliers) error
 }
 
 // NewLeastCostStrategy constructs LeastCostStrategy
@@ -58,7 +58,7 @@ type LeastCostStrategy struct {
 	lcrS *LCRService
 }
 
-func (lcs *LeastCostStrategy) OrderSuppliers(suppls LCRSuppliers) (err error) {
+func (lcs *LeastCostStrategy) SortSuppliers(suppls LCRSuppliers) (err error) {
 	return
 }
 
@@ -66,7 +66,7 @@ func (lcs *LeastCostStrategy) OrderSuppliers(suppls LCRSuppliers) (err error) {
 type StaticStrategy struct {
 }
 
-func (ss *StaticStrategy) OrderSuppliers(suppls LCRSuppliers) (err error) {
+func (ss *StaticStrategy) SortSuppliers(suppls LCRSuppliers) (err error) {
 	suppls.Sort()
 	return
 }

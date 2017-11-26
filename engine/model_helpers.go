@@ -2530,12 +2530,12 @@ func APItoLCRProfile(tpTH *utils.TPLCR, timezone string) (th *LCRProfile, err er
 	th = &LCRProfile{
 		Tenant:    tpTH.Tenant,
 		ID:        tpTH.ID,
-		Strategy:  tpTH.Strategy,
+		Sorting:   tpTH.Strategy,
 		Weight:    tpTH.Weight,
 		Suppliers: make([]*LCRSupplier, len(tpTH.Suppliers)),
 	}
 	for _, stp := range tpTH.StrategyParams {
-		th.StrategyParams = append(th.StrategyParams, stp)
+		th.SortingParams = append(th.SortingParams, stp)
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
