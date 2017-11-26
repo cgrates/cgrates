@@ -27,7 +27,7 @@ import (
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
 func NewSupplierSortDispatcher(lcrS *LCRService) (ssd SupplierSortDispatcher, err error) {
 	ssd = make(map[string]SuppliersSorting)
-	ssd[utils.MetaStatic] = new(StaticStrategy)
+	ssd[utils.MetaWeight] = new(WeightStrategy)
 	ssd[utils.MetaLeastCost] = NewLeastCostStrategy(lcrS)
 	return
 }
@@ -62,11 +62,11 @@ func (lcs *LeastCostStrategy) SortSuppliers(suppls LCRSuppliers) (err error) {
 	return
 }
 
-// StaticStrategy orders suppliers based on their weight, no cost involved
-type StaticStrategy struct {
+// WeightStrategy orders suppliers based on their weight, no cost involved
+type WeightStrategy struct {
 }
 
-func (ss *StaticStrategy) SortSuppliers(suppls LCRSuppliers) (err error) {
+func (ss *WeightStrategy) SortSuppliers(suppls LCRSuppliers) (err error) {
 	suppls.Sort()
 	return
 }

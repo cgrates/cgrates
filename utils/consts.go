@@ -584,7 +584,7 @@ const (
 	SMGenericV1UpdateSession        = "SMGenericV1.UpdateSession"
 	SMGenericV1InitiateSession      = "SMGenericV1.InitiateSession"
 	LCRs                            = "LCRs"
-	MetaStatic                      = "*static"
+	MetaWeight                      = "*weight"
 	MetaLeastCost                   = "*least_cost"
 )
 
