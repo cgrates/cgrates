@@ -26,11 +26,12 @@ import (
 )
 
 type AttrGetCost struct {
-	Tenant     string
-	Category   string
-	Subject    string
-	AnswerTime time.Time
-	Usage      string
+	Tenant      string
+	Category    string
+	Subject     string
+	AnswerTime  time.Time
+	Destination string
+	Usage       string
 }
 
 func (apier *ApierV1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
@@ -43,6 +44,7 @@ func (apier *ApierV1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
 		Category:      attrs.Category,
 		Tenant:        attrs.Tenant,
 		Subject:       attrs.Subject,
+		Destination:   attrs.Destination,
 		TimeStart:     attrs.AnswerTime,
 		TimeEnd:       attrs.AnswerTime.Add(usage),
 		DurationIndex: usage,
