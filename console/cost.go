@@ -18,13 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import (
+	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
+)
 
 func init() {
 	c := &CmdGetCost{
 		name:       "cost",
-		rpcMethod:  "Responder.GetCost",
-		clientArgs: []string{"Direction", "Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+		rpcMethod:  "ApierV1.GetCost",
+		clientArgs: []string{"Tenant", "Category", "Subject", "AnswerTime", "Destination", "Usage"},
+		rpcParams:  &v1.AttrGetCost{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +38,7 @@ func init() {
 type CmdGetCost struct {
 	name       string
 	rpcMethod  string
-	rpcParams  *engine.CallDescriptor
+	rpcParams  *v1.AttrGetCost
 	clientArgs []string
 	*CommandExecuter
 }
@@ -49,7 +53,7 @@ func (self *CmdGetCost) RpcMethod() string {
 
 func (self *CmdGetCost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
+		self.rpcParams = &v1.AttrGetCost{}
 	}
 	return self.rpcParams
 }
@@ -59,7 +63,7 @@ func (self *CmdGetCost) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetCost) RpcResult() interface{} {
-	return &engine.CallCost{}
+	return &engine.EventCost{}
 }
 
 func (self *CmdGetCost) ClientArgs() []string {
