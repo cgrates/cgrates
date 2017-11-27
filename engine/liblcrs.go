@@ -27,7 +27,7 @@ import (
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
 func NewSupplierSortDispatcher(lcrS *LCRService) (ssd SupplierSortDispatcher, err error) {
 	ssd = make(map[string]SuppliersSorting)
-	ssd[utils.MetaWeight] = new(WeightStrategy)
+	ssd[utils.MetaWeight] = NewWeightStrategy()
 	ssd[utils.MetaLeastCost] = NewLeastCostStrategy(lcrS)
 	return
 }
@@ -36,17 +36,17 @@ func NewSupplierSortDispatcher(lcrS *LCRService) (ssd SupplierSortDispatcher, er
 // and dispatch requests to them
 type SupplierSortDispatcher map[string]SuppliersSorting
 
-func (ssd SupplierSortDispatcher) SortedSupplierIDs(strategy string,
-	suppls LCRSuppliers) (lsIDs []string, err error) {
+func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
+	suppls LCRSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	return sd.SortedSupplierIDs(suppls)
+	return sd.SortSuppliers(prflID, suppls)
 }
 
 type SuppliersSorting interface {
-	SortedSupplierIDs(LCRSuppliers) ([]string, error)
+	SortSuppliers(string, LCRSuppliers) (*SortedSuppliers, error)
 }
 
 // NewLeastCostStrategy constructs LeastCostStrategy
@@ -59,19 +59,30 @@ type LeastCostStrategy struct {
 	lcrS *LCRService
 }
 
-func (lcs *LeastCostStrategy) SortedSupplierIDs(suppls LCRSuppliers) (lsIDs []string, err error) {
+func (lcs *LeastCostStrategy) SortSuppliers(prflID string,
+	suppls LCRSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	return
+}
+
+func NewWeightStrategy() *WeightStrategy {
+	return &WeightStrategy{Sorting: utils.MetaWeight}
 }
 
 // WeightStrategy orders suppliers based on their weight, no cost involved
 type WeightStrategy struct {
+	Sorting string
 }
 
-func (ws *WeightStrategy) SortedSupplierIDs(suppls LCRSuppliers) (lsIDs []string, err error) {
+func (ws *WeightStrategy) SortSuppliers(prflID string,
+	suppls LCRSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	suppls.Sort()
-	lsIDs = make([]string, len(suppls))
+	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
+		Sorting:         ws.Sorting,
+		SortedSuppliers: make([]*SortedSupplier, len(suppls))}
 	for i, s := range suppls {
-		lsIDs[i] = s.ID
+		sortedSuppls.SortedSuppliers[i] = &SortedSupplier{
+			SupplierID:  s.ID,
+			SortingData: map[string]interface{}{"Weight": s.Weight}}
 	}
 	return
 }

@@ -97,6 +97,19 @@ func (lps LCRProfiles) Sort() {
 	sort.Slice(lps, func(i, j int) bool { return lps[i].Weight > lps[j].Weight })
 }
 
+// SuppliersReply is returned as part of GetSuppliers call
+type SortedSuppliers struct {
+	ProfileID       string
+	Sorting         string
+	SortedSuppliers []*SortedSupplier
+}
+
+// SupplierReply represents one supplier in
+type SortedSupplier struct {
+	SupplierID  string
+	SortingData map[string]interface{} // store here extra info like cost or stats
+}
+
 // NewLCRService initializes a LCRService
 func NewLCRService(dm *DataManager, timezone string,
 	filterS *FilterS, indexedFields []string, resourceS,
@@ -210,7 +223,7 @@ func (lcrS *LCRService) resourceUsage(resIDs []string) (tUsage float64, err erro
 
 // supliersForEvent will return the list of valid supplier IDs
 // for event based on filters and sorting algorithms
-func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (lsIDs []string, err error) {
+func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (sortedSuppls *SortedSuppliers, err error) {
 	var lcrPrfls LCRProfiles
 	if lcrPrfls, err = lcrS.matchingLCRProfilesForEvent(ev); err != nil {
 		return
@@ -230,5 +243,5 @@ func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (lsIDs []string, err erro
 		}
 		lss = append(lss, s)
 	}
-	return lcrS.sortDispatcher.SortedSupplierIDs(lcrPrfl.Sorting, lss)
+	return lcrS.sortDispatcher.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, lss)
 }
