@@ -144,7 +144,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.StatsCsv),
 		path.Join(attrs.FolderPath, utils.ThresholdsCsv),
 		path.Join(attrs.FolderPath, utils.FiltersCsv),
-		path.Join(attrs.FolderPath, utils.LCRCsv),
+		path.Join(attrs.FolderPath, utils.SuppliersCsv),
 	), "", self.Config.DefaultTimezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
@@ -186,7 +186,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.ThresholdPrefix,
 		utils.ThresholdProfilePrefix,
 		utils.FilterPrefix,
-		utils.LCRProfilePrefix} {
+		utils.SupplierProfilePrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)

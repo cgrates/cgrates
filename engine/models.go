@@ -520,23 +520,26 @@ func (t TBLVersion) TableName() string {
 	return utils.TBLVersions
 }
 
-type TpLCR struct {
-	PK                 uint `gorm:"primary_key"`
-	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	Strategy           string  `index:"4" re:""`
-	StrategyParams     string  `index:"5" re:""`
-	SupplierID         string  `index:"6" re:""`
-	SupplierFilterIDs  string  `index:"7" re:""`
-	RatingplanIDs      string  `index:"8" re:""`
-	SupplierWeight     float64 `index:"9" re:"\d+\.?\d*"`
-	Weight             float64 `index:"10" re:"\d+\.?\d*"`
-	CreatedAt          time.Time
+type TpSupplier struct {
+	PK                    uint `gorm:"primary_key"`
+	Tpid                  string
+	Tenant                string  `index:"0" re:""`
+	ID                    string  `index:"1" re:""`
+	FilterIDs             string  `index:"2" re:""`
+	ActivationInterval    string  `index:"3" re:""`
+	Sorting               string  `index:"4" re:""`
+	SortingParams         string  `index:"5" re:""`
+	SupplierID            string  `index:"6" re:""`
+	SupplierFilterIDs     string  `index:"7" re:""`
+	SupplierRatingplanIDs string  `index:"8" re:""`
+	SupplierResourceIDs   string  `index:"9" re:""`
+	SupplierStatIDs       string  `index:"10" re:""`
+	SupplierWeight        float64 `index:"11" re:"\d+\.?\d*"`
+	Blocker               bool    `index:"12" re:""`
+	Weight                float64 `index:"13" re:"\d+\.?\d*"`
+	CreatedAt             time.Time
 }
 
-func (t TpLCR) TableName() string {
-	return utils.TBLTPLcr
+func (t TpSupplier) TableName() string {
+	return utils.TBLTPSuppliers
 }

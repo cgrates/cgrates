@@ -64,7 +64,7 @@ var (
 		CacheThresholdProfiles:   ThresholdProfilePrefix,
 		CacheThresholds:          ThresholdPrefix,
 		CacheFilters:             FilterPrefix,
-		CacheLCRProfiles:         LCRProfilePrefix,
+		CacheSupplierProfiles:    SupplierProfilePrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )
@@ -115,7 +115,7 @@ const (
 	TBLTPFilters                  = "tp_filters"
 	SMCostsTBL                    = "sm_costs"
 	CDRsTBL                       = "cdrs"
-	TBLTPLcr                      = "tp_lcr"
+	TBLTPSuppliers                = "tp_suppliers"
 	TBLVersions                   = "versions"
 	TIMINGS_CSV                   = "Timings.csv"
 	DESTINATIONS_CSV              = "Destinations.csv"
@@ -137,7 +137,7 @@ const (
 	StatsCsv                      = "Stats.csv"
 	ThresholdsCsv                 = "Thresholds.csv"
 	FiltersCsv                    = "Filters.csv"
-	LCRCsv                        = "Lcr.csv"
+	SuppliersCsv                  = "Suppliers.csv"
 	ROUNDING_UP                   = "*up"
 	ROUNDING_MIDDLE               = "*middle"
 	ROUNDING_DOWN                 = "*down"
@@ -268,8 +268,8 @@ const (
 	LOG_CDR                       = "cdr_"
 	LOG_MEDIATED_CDR              = "mcd_"
 	StatQueueProfilePrefix        = "sqp_"
-	LCRProfilePrefix              = "lcp_"
-	LCRProfilesStringIndex        = "lci_"
+	SupplierProfilePrefix         = "spp_"
+	SupplierProfilesStringIndex   = "spi_"
 	ThresholdProfilePrefix        = "thp_"
 	StatQueuePrefix               = "stq_"
 	LOADINST_KEY                  = "load_history"
@@ -477,7 +477,7 @@ const (
 	CacheThresholdProfiles          = "threshold_profiles"
 	CacheThresholds                 = "thresholds"
 	CacheFilters                    = "filters"
-	CacheLCRProfiles                = "lcr_profiles"
+	CacheSupplierProfiles           = "supplier_profiles"
 	AccountUpdate                   = "AccountUpdate"
 	BalanceUpdate                   = "BalanceUpdate"
 	StatUpdate                      = "StatUpdate"
@@ -583,7 +583,7 @@ const (
 	SMGenericV2InitiateSession      = "SMGenericV2.InitiateSession"
 	SMGenericV1UpdateSession        = "SMGenericV1.UpdateSession"
 	SMGenericV1InitiateSession      = "SMGenericV1.InitiateSession"
-	LCRs                            = "LCRs"
+	SupplierS                       = "SupplierS"
 	MetaWeight                      = "*weight"
 	MetaLeastCost                   = "*least_cost"
 )

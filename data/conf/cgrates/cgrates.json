@@ -46,7 +46,7 @@
 // 	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": false},		// control derived charging rule caching
 // 	"resource_limits": {"limit": 10000, "ttl":"0s", "precache": false},			// control resource limits caching
 // 	"timings": {"limit": 10000, "ttl":"0s", "precache": false},					// control timings caching
-//  "lcr_profiles": {"limit": 10000, "ttl":"0s", "precache": true}, // control lcr_rofiles caching
+//  "supplier_profiles": {"limit": 10000, "ttl":"0s", "precache": true}, // control lcr_rofiles caching
 // },
 
 

@@ -49,7 +49,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
 				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix, utils.StatQueueProfilePrefix,
-				utils.ThresholdPrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix, utils.LCRProfilePrefix}, k) && cacheCfg.Precache {
+				utils.ThresholdPrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix, utils.SupplierProfilePrefix}, k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 					return err
 				}
@@ -78,7 +78,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.ThresholdPrefix:            thIDs,
 			utils.ThresholdProfilePrefix:     thpIDs,
 			utils.FilterPrefix:               fltrIDs,
-			utils.LCRProfilePrefix:           lcrPrfIDs,
+			utils.SupplierProfilePrefix:      lcrPrfIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -136,7 +136,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.ThresholdPrefix,
 		utils.ThresholdProfilePrefix,
 		utils.FilterPrefix,
-		utils.LCRProfilePrefix}, prfx) {
+		utils.SupplierProfilePrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -222,9 +222,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
-		case utils.LCRProfilePrefix:
+		case utils.SupplierProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetLCRProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -821,36 +821,36 @@ func (dm *DataManager) GetAllCdrStats() (css []*CdrStats, err error) {
 	return dm.DataDB().GetAllCdrStatsDrv()
 }
 
-func (dm *DataManager) GetLCRProfile(tenant, id string, skipCache bool, transactionID string) (lcrprf *LCRProfile, err error) {
-	key := utils.LCRProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool, transactionID string) (supp *SupplierProfile, err error) {
+	key := utils.SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*LCRProfile), nil
+			return x.(*SupplierProfile), nil
 		}
 	}
-	lcrprf, err = dm.dataDB.GetLCRProfileDrv(tenant, id)
+	supp, err = dm.dataDB.GetSupplierProfileDrv(tenant, id)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	cache.Set(key, lcrprf, cacheCommit(transactionID), transactionID)
+	cache.Set(key, supp, cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (dm *DataManager) SetLCRProfile(lcrprf *LCRProfile) (err error) {
-	return dm.DataDB().SetLCRProfileDrv(lcrprf)
+func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile) (err error) {
+	return dm.DataDB().SetSupplierProfileDrv(supp)
 }
 
-func (dm *DataManager) RemoveLCRProfile(tenant, id, transactionID string) (err error) {
-	if err = dm.DataDB().RemoveLCRProfileDrv(tenant, id); err != nil {
+func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveSupplierProfileDrv(tenant, id); err != nil {
 		return
 	}
-	cache.RemKey(utils.LCRProfilePrefix+utils.ConcatenatedKey(tenant, id),
+	cache.RemKey(utils.SupplierProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	return
 }

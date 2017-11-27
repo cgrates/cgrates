@@ -22,29 +22,29 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new LCR within a tariff plan
-func (self *ApierV1) SetTPLCR(attrs utils.TPLCR, reply *string) error {
+// Creates a new Supplier within a tariff plan
+func (self *ApierV1) SetTPSupplier(attrs utils.TPSupplier, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPLCRProfiles([]*utils.TPLCR{&attrs}); err != nil {
+	if err := self.StorDb.SetTPSuppliers([]*utils.TPSupplier{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-type AttrGetTPLCR struct {
+type AttrGetTPSupplier struct {
 	TPid string // Tariff plan id
 	ID   string // Filter id
 }
 
-// Queries specific LCR on tariff plan
-func (self *ApierV1) GetTPLCR(attr AttrGetTPLCR, reply *utils.TPLCR) error {
+// Queries specific Supplier on tariff plan
+func (self *ApierV1) GetTPSupplier(attr AttrGetTPSupplier, reply *utils.TPSupplier) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if lcr, err := self.StorDb.GetTPLCRProfiles(attr.TPid, attr.ID); err != nil {
+	if lcr, err := self.StorDb.GetTPSuppliers(attr.TPid, attr.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -55,17 +55,17 @@ func (self *ApierV1) GetTPLCR(attr AttrGetTPLCR, reply *utils.TPLCR) error {
 	return nil
 }
 
-type AttrGetTPLCRIds struct {
+type AttrGetTPSupplierIDs struct {
 	TPid string // Tariff plan id
 	utils.Paginator
 }
 
-// Queries Filter identities on specific tariff plan.
-func (self *ApierV1) GetTPLCRIds(attrs AttrGetTPLCRIds, reply *[]string) error {
+// Queries Supplier identities on specific tariff plan.
+func (self *ApierV1) GetTPLCRIds(attrs AttrGetTPSupplierIDs, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPLcr, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSuppliers, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -76,18 +76,18 @@ func (self *ApierV1) GetTPLCRIds(attrs AttrGetTPLCRIds, reply *[]string) error {
 	return nil
 }
 
-type AttrRemTPLCR struct {
+type AttrRemTPSupplier struct {
 	TPid   string // Tariff plan id
 	Tenant string
 	ID     string // LCR id
 }
 
-// Removes specific Filter on Tariff plan
-func (self *ApierV1) RemTPLCR(attrs AttrRemTPLCR, reply *string) error {
+// Removes specific Supplier on Tariff plan
+func (self *ApierV1) RemTPLCR(attrs AttrRemTPSupplier, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPLcr, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPSuppliers, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

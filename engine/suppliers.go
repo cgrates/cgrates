@@ -30,15 +30,15 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-// LCREvent is an event processed by LCRService
-type LCREvent struct {
+// SupplierEvent is an event processed by Supplier Service
+type SupplierEvent struct {
 	Tenant string
 	ID     string
 	Event  map[string]interface{}
 }
 
 // AnswerTime returns the AnswerTime of StatEvent
-func (le *LCREvent) AnswerTime(timezone string) (at time.Time, err error) {
+func (le *SupplierEvent) AnswerTime(timezone string) (at time.Time, err error) {
 	atIf, has := le.Event[utils.ANSWER_TIME]
 	if !has {
 		return at, utils.ErrNotFound
@@ -53,8 +53,8 @@ func (le *LCREvent) AnswerTime(timezone string) (at time.Time, err error) {
 	return utils.ParseTimeDetectLayout(atStr, timezone)
 }
 
-// LCRSupplier defines supplier related information used within a LCRProfile
-type LCRSupplier struct {
+// Supplier defines supplier related information used within a SupplierProfile
+type Supplier struct {
 	ID            string // SupplierID
 	FilterIDs     []string
 	RatingPlanIDs []string // used when computing price
@@ -63,37 +63,37 @@ type LCRSupplier struct {
 	Weight        float64
 }
 
-// LCRSuppliers is a sortable list of LCRSupplier
-type LCRSuppliers []*LCRSupplier
+// Suppliers is a sortable list of Supplier
+type Suppliers []*Supplier
 
 // Sort is part of sort interface, sort based on Weight
-func (lss LCRSuppliers) Sort() {
+func (lss Suppliers) Sort() {
 	sort.Slice(lss, func(i, j int) bool { return lss[i].Weight > lss[j].Weight })
 }
 
-// LCRProfile represents the configuration of a LCR profile
-type LCRProfile struct {
+// SupplierProfile represents the configuration of a Supplier profile
+type SupplierProfile struct {
 	Tenant             string
 	ID                 string // LCR Profile ID
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Sorting            string                    // Sorting strategy
 	SortingParams      []string
-	Suppliers          LCRSuppliers
+	Suppliers          Suppliers
 	Blocker            bool // do not process further profiles after this one
 	Weight             float64
 }
 
 // TenantID returns unique identifier of the LCRProfile in a multi-tenant environment
-func (rp *LCRProfile) TenantID() string {
+func (rp *SupplierProfile) TenantID() string {
 	return utils.ConcatenatedKey(rp.Tenant, rp.ID)
 }
 
-// LCRProfiles is a sortable list of LCRProfile
-type LCRProfiles []*LCRProfile
+// SupplierProfiles is a sortable list of SupplierProfile
+type SupplierProfiles []*SupplierProfile
 
 // Sort is part of sort interface, sort based on Weight
-func (lps LCRProfiles) Sort() {
+func (lps SupplierProfiles) Sort() {
 	sort.Slice(lps, func(i, j int) bool { return lps[i].Weight > lps[j].Weight })
 }
 
@@ -111,10 +111,10 @@ type SortedSupplier struct {
 }
 
 // NewLCRService initializes a LCRService
-func NewLCRService(dm *DataManager, timezone string,
+func NewSupplierService(dm *DataManager, timezone string,
 	filterS *FilterS, indexedFields []string, resourceS,
-	statS rpcclient.RpcClientConnection) (lcrS *LCRService, err error) {
-	lcrS = &LCRService{
+	statS rpcclient.RpcClientConnection) (spS *SupplierService, err error) {
+	spS = &SupplierService{
 		dm:            dm,
 		timezone:      timezone,
 		filterS:       filterS,
@@ -122,14 +122,14 @@ func NewLCRService(dm *DataManager, timezone string,
 		statS:         statS,
 		indexedFields: indexedFields}
 
-	if lcrS.sortDispatcher, err = NewSupplierSortDispatcher(lcrS); err != nil {
+	if spS.sortDispatcher, err = NewSupplierSortDispatcher(spS); err != nil {
 		return nil, err
 	}
 	return
 }
 
-// LCRService is the service computing LCR queries
-type LCRService struct {
+// SupplierService is the service computing Supplier queries
+type SupplierService struct {
 	dm            *DataManager
 	timezone      string
 	filterS       *FilterS
@@ -140,33 +140,33 @@ type LCRService struct {
 }
 
 // ListenAndServe will initialize the service
-func (lcrS *LCRService) ListenAndServe(exitChan chan bool) error {
-	utils.Logger.Info(fmt.Sprintf("<%s> start listening for requests", utils.LCRs))
+func (lcrS *SupplierService) ListenAndServe(exitChan chan bool) error {
+	utils.Logger.Info(fmt.Sprintf("<%s> start listening for requests", utils.SupplierS))
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return nil
 }
 
 // Shutdown is called to shutdown the service
-func (lcrS *LCRService) Shutdown() error {
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.LCRs))
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.LCRs))
+func (lcrS *SupplierService) Shutdown() error {
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.SupplierS))
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.SupplierS))
 	return nil
 }
 
-// matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
-func (lcrS *LCRService) matchingLCRProfilesForEvent(ev *LCREvent) (lps LCRProfiles, err error) {
-	matchingLPs := make(map[string]*LCRProfile)
+// matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
+func (lcrS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) (lps SupplierProfiles, err error) {
+	matchingLPs := make(map[string]*SupplierProfile)
 	lpIDs, err := matchingItemIDsForEvent(ev.Event, lcrS.indexedFields,
-		lcrS.dm, utils.LCRProfilesStringIndex+ev.Tenant)
+		lcrS.dm, utils.SupplierProfilesStringIndex+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(lpIDs.Slice(), utils.LCRProfilesStringIndex)
+	lockIDs := utils.PrefixSliceItems(lpIDs.Slice(), utils.SupplierProfilesStringIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for lpID := range lpIDs {
-		lcrPrfl, err := lcrS.dm.GetLCRProfile(ev.Tenant, lpID, false, utils.NonTransactional)
+		lcrPrfl, err := lcrS.dm.GetSupplierProfile(ev.Tenant, lpID, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -189,7 +189,7 @@ func (lcrS *LCRService) matchingLCRProfilesForEvent(ev *LCREvent) (lps LCRProfil
 		matchingLPs[lpID] = lcrPrfl
 	}
 	// All good, convert from Map to Slice so we can sort
-	lps = make(LCRProfiles, len(matchingLPs))
+	lps = make(SupplierProfiles, len(matchingLPs))
 	i := 0
 	for _, lp := range matchingLPs {
 		lps[i] = lp
@@ -206,35 +206,35 @@ func (lcrS *LCRService) matchingLCRProfilesForEvent(ev *LCREvent) (lps LCRProfil
 }
 
 // costForEvent will compute cost out of ratingPlanIDs for event
-func (lcrS *LCRService) costForEvent(ev *LCREvent, rpIDs []string) (ec *EventCost, err error) {
+func (lcrS *SupplierService) costForEvent(ev *SupplierEvent, rpIDs []string) (ec *EventCost, err error) {
 	return
 }
 
 // statMetrics will query a list of statIDs and return composed metric values
 // first metric found is always returned
-func (lcrS *LCRService) statMetrics(statIDs []string, metricIDs []string) (sms map[string]StatMetric, err error) {
+func (lcrS *SupplierService) statMetrics(statIDs []string, metricIDs []string) (sms map[string]StatMetric, err error) {
 	return
 }
 
 // resourceUsage returns sum of all resource usages out of list
-func (lcrS *LCRService) resourceUsage(resIDs []string) (tUsage float64, err error) {
+func (lcrS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err error) {
 	return
 }
 
 // supliersForEvent will return the list of valid supplier IDs
 // for event based on filters and sorting algorithms
-func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (sortedSuppls *SortedSuppliers, err error) {
-	var lcrPrfls LCRProfiles
-	if lcrPrfls, err = lcrS.matchingLCRProfilesForEvent(ev); err != nil {
+func (spS *SupplierService) supliersForEvent(ev *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
+	var suppPrfls SupplierProfiles
+	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(ev); err != nil {
 		return
-	} else if len(lcrPrfls) == 0 {
+	} else if len(suppPrfls) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	lcrPrfl := lcrPrfls[0] // pick up the first lcr profile as winner
-	var lss LCRSuppliers
+	lcrPrfl := suppPrfls[0] // pick up the first lcr profile as winner
+	var lss Suppliers
 	for _, s := range lcrPrfl.Suppliers {
 		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
-			if pass, err := lcrS.filterS.PassFiltersForEvent(ev.Tenant,
+			if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
 				map[string]interface{}{"SupplierID": s.ID}, s.FilterIDs); err != nil {
 				return nil, err
 			} else if !pass {
@@ -243,5 +243,5 @@ func (lcrS *LCRService) supliersForEvent(ev *LCREvent) (sortedSuppls *SortedSupp
 		}
 		lss = append(lss, s)
 	}
-	return lcrS.sortDispatcher.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, lss)
+	return spS.sortDispatcher.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, lss)
 }

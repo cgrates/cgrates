@@ -2419,33 +2419,36 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilter) {
 	return
 }
 
-type TpLCRs []*TpLCR
+type TpSuppliers []*TpSupplier
 
-func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCR) {
-	mst := make(map[string]*utils.TPLCR)
+func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
+	mst := make(map[string]*utils.TPSupplier)
 	for _, tp := range tps {
 		th, found := mst[tp.ID]
 		if !found {
-			th = &utils.TPLCR{
-				TPid:           tp.Tpid,
-				Tenant:         tp.Tenant,
-				ID:             tp.ID,
-				Strategy:       tp.Strategy,
-				StrategyParams: []string{},
+			th = &utils.TPSupplier{
+				TPid:          tp.Tpid,
+				Tenant:        tp.Tenant,
+				ID:            tp.ID,
+				Blocker:       tp.Blocker,
+				Sorting:       tp.Sorting,
+				SortingParams: []string{},
 			}
 		}
 		if tp.SupplierID != "" {
-			th.Suppliers = append(th.Suppliers, &utils.TPLCRSupplier{
+			th.Suppliers = append(th.Suppliers, &utils.TPRequestSupplier{
 				ID:            tp.SupplierID,
 				FilterIDs:     strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP),
-				RatingPlanIDs: strings.Split(tp.RatingplanIDs, utils.INFIELD_SEP),
+				RatingPlanIDs: strings.Split(tp.SupplierRatingplanIDs, utils.INFIELD_SEP),
+				ResourceIDs:   strings.Split(tp.SupplierResourceIDs, utils.INFIELD_SEP),
+				StatIDs:       strings.Split(tp.SupplierStatIDs, utils.INFIELD_SEP),
 				Weight:        tp.SupplierWeight,
 			})
 		}
-		if tp.StrategyParams != "" {
-			strategyParamSplit := strings.Split(tp.StrategyParams, utils.INFIELD_SEP)
-			for _, strategyParam := range strategyParamSplit {
-				th.StrategyParams = append(th.StrategyParams, strategyParam)
+		if tp.SortingParams != "" {
+			sortingParamSplit := strings.Split(tp.SortingParams, utils.INFIELD_SEP)
+			for _, sortingParam := range sortingParamSplit {
+				th.SortingParams = append(th.SortingParams, sortingParam)
 			}
 		}
 		if tp.Weight != 0 {
@@ -2470,7 +2473,7 @@ func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCR) {
 
 		mst[tp.ID] = th
 	}
-	result = make([]*utils.TPLCR, len(mst))
+	result = make([]*utils.TPSupplier, len(mst))
 	i := 0
 	for _, th := range mst {
 		result[i] = th
@@ -2479,19 +2482,20 @@ func (tps TpLCRs) AsTPLCRProfile() (result []*utils.TPLCR) {
 	return
 }
 
-func APItoModelTPLCRProfile(st *utils.TPLCR) (mdls TpLCRs) {
+func APItoModelTPSuppliers(st *utils.TPSupplier) (mdls TpSuppliers) {
 	if len(st.Suppliers) == 0 {
 		return
 	}
 	for i, supl := range st.Suppliers {
-		mdl := &TpLCR{
+		mdl := &TpSupplier{
 			Tenant: st.Tenant,
 			Tpid:   st.TPid,
 			ID:     st.ID,
 		}
 		if i == 0 {
-			mdl.Strategy = st.Strategy
+			mdl.Sorting = st.Sorting
 			mdl.Weight = st.Weight
+			mdl.Blocker = st.Blocker
 			for i, val := range st.FilterIDs {
 				if i != 0 {
 					mdl.FilterIDs += utils.INFIELD_SEP
@@ -2510,9 +2514,9 @@ func APItoModelTPLCRProfile(st *utils.TPLCR) (mdls TpLCRs) {
 		mdl.SupplierID = supl.ID
 		for i, val := range supl.RatingPlanIDs {
 			if i != 0 {
-				mdl.RatingplanIDs += utils.INFIELD_SEP
+				mdl.SupplierRatingplanIDs += utils.INFIELD_SEP
 			}
-			mdl.RatingplanIDs += val
+			mdl.SupplierRatingplanIDs += val
 		}
 		for i, val := range supl.FilterIDs {
 			if i != 0 {
@@ -2520,21 +2524,34 @@ func APItoModelTPLCRProfile(st *utils.TPLCR) (mdls TpLCRs) {
 			}
 			mdl.SupplierFilterIDs += val
 		}
+		for i, val := range supl.ResourceIDs {
+			if i != 0 {
+				mdl.SupplierResourceIDs += utils.INFIELD_SEP
+			}
+			mdl.SupplierResourceIDs += val
+		}
+		for i, val := range supl.StatIDs {
+			if i != 0 {
+				mdl.SupplierStatIDs += utils.INFIELD_SEP
+			}
+			mdl.SupplierStatIDs += val
+		}
 		mdl.SupplierWeight = supl.Weight
 		mdls = append(mdls, mdl)
 	}
 	return
 }
 
-func APItoLCRProfile(tpTH *utils.TPLCR, timezone string) (th *LCRProfile, err error) {
-	th = &LCRProfile{
+func APItoSupplierProfile(tpTH *utils.TPSupplier, timezone string) (th *SupplierProfile, err error) {
+	th = &SupplierProfile{
 		Tenant:    tpTH.Tenant,
 		ID:        tpTH.ID,
-		Sorting:   tpTH.Strategy,
+		Sorting:   tpTH.Sorting,
 		Weight:    tpTH.Weight,
-		Suppliers: make([]*LCRSupplier, len(tpTH.Suppliers)),
+		Blocker:   tpTH.Blocker,
+		Suppliers: make(Suppliers, len(tpTH.Suppliers)),
 	}
-	for _, stp := range tpTH.StrategyParams {
+	for _, stp := range tpTH.SortingParams {
 		th.SortingParams = append(th.SortingParams, stp)
 	}
 	for _, fli := range tpTH.FilterIDs {
@@ -2546,11 +2563,13 @@ func APItoLCRProfile(tpTH *utils.TPLCR, timezone string) (th *LCRProfile, err er
 		}
 	}
 	for i, suplier := range tpTH.Suppliers {
-		supl := &LCRSupplier{
+		supl := &Supplier{
 			ID:            suplier.ID,
 			Weight:        suplier.Weight,
 			RatingPlanIDs: suplier.RatingPlanIDs,
 			FilterIDs:     suplier.FilterIDs,
+			ResourceIDs:   suplier.ResourceIDs,
+			StatIDs:       suplier.StatIDs,
 		}
 		th.Suppliers[i] = supl
 	}
