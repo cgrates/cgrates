@@ -99,9 +99,9 @@ func (lps SupplierProfiles) Sort() {
 
 // SuppliersReply is returned as part of GetSuppliers call
 type SortedSuppliers struct {
-	ProfileID       string
-	Sorting         string
-	SortedSuppliers []*SortedSupplier
+	ProfileID       string            // Profile matched
+	Sorting         string            // Sorting algorithm
+	SortedSuppliers []*SortedSupplier // list of supplier IDs and SortingData data
 }
 
 // SupplierReply represents one supplier in
@@ -139,7 +139,7 @@ type SupplierService struct {
 }
 
 // ListenAndServe will initialize the service
-func (lcrS *SupplierService) ListenAndServe(exitChan chan bool) error {
+func (spS *SupplierService) ListenAndServe(exitChan chan bool) error {
 	utils.Logger.Info(fmt.Sprintf("<%s> start listening for requests", utils.SupplierS))
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
@@ -147,17 +147,17 @@ func (lcrS *SupplierService) ListenAndServe(exitChan chan bool) error {
 }
 
 // Shutdown is called to shutdown the service
-func (lcrS *SupplierService) Shutdown() error {
+func (spS *SupplierService) Shutdown() error {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.SupplierS))
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.SupplierS))
 	return nil
 }
 
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (lcrS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) (lps SupplierProfiles, err error) {
+func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) (lps SupplierProfiles, err error) {
 	matchingLPs := make(map[string]*SupplierProfile)
-	lpIDs, err := matchingItemIDsForEvent(ev.Event, lcrS.indexedFields,
-		lcrS.dm, utils.SupplierProfilesStringIndex+ev.Tenant)
+	lpIDs, err := matchingItemIDsForEvent(ev.Event, spS.indexedFields,
+		spS.dm, utils.SupplierProfilesStringIndex+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
@@ -165,14 +165,14 @@ func (lcrS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for lpID := range lpIDs {
-		lcrPrfl, err := lcrS.dm.GetSupplierProfile(ev.Tenant, lpID, false, utils.NonTransactional)
+		lcrPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		aTime, err := ev.AnswerTime(lcrS.timezone)
+		aTime, err := ev.AnswerTime(spS.timezone)
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +180,7 @@ func (lcrS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent)
 			!lcrPrfl.ActivationInterval.IsActiveAtTime(aTime) { // not active
 			continue
 		}
-		if pass, err := lcrS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, lcrPrfl.FilterIDs); err != nil {
+		if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, lcrPrfl.FilterIDs); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
@@ -205,18 +205,18 @@ func (lcrS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent)
 }
 
 // costForEvent will compute cost out of ratingPlanIDs for event
-func (lcrS *SupplierService) costForEvent(ev *SupplierEvent, rpIDs []string) (ec *EventCost, err error) {
+func (spS *SupplierService) costForEvent(ev *SupplierEvent, rpIDs []string) (ec *EventCost, err error) {
 	return
 }
 
 // statMetrics will query a list of statIDs and return composed metric values
 // first metric found is always returned
-func (lcrS *SupplierService) statMetrics(statIDs []string, metricIDs []string) (sms map[string]StatMetric, err error) {
+func (spS *SupplierService) statMetrics(statIDs []string, metricIDs []string) (sms map[string]StatMetric, err error) {
 	return
 }
 
 // resourceUsage returns sum of all resource usages out of list
-func (lcrS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err error) {
+func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err error) {
 	return
 }
 
@@ -243,4 +243,20 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSu
 		lss = append(lss, s)
 	}
 	return spS.sorter.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, lss)
+}
+
+// V1GetSuppliersForEvent returns the list of valid supplier IDs
+func (spS *SupplierService) V1GetSuppliers(args *SupplierEvent, reply *SortedSuppliers) (err error) {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	sSps, err := spS.sortedSuppliersForEvent(args)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = *sSps
+	return
 }

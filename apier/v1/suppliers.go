@@ -65,3 +65,24 @@ func (apierV1 *ApierV1) RemSupplierProfile(arg utils.TenantID, reply *string) er
 	*reply = utils.OK
 	return nil
 }
+
+func NewSuplierSv1(splS *engine.SupplierService) *SuplierSv1 {
+	return &SuplierSv1{splS: splS}
+}
+
+// Exports RPC from RLs
+type SuplierSv1 struct {
+	splS *engine.SupplierService
+}
+
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+func (splv1 *SuplierSv1) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(splv1, serviceMethod, args, reply)
+}
+
+// GetSuppliers returns sorted list of suppliers for Event
+func (splv1 *SuplierSv1) GetSuppliers(args *engine.SupplierEvent,
+	reply *engine.SortedSuppliers) error {
+	return splv1.splS.V1GetSuppliers(args, reply)
+}
