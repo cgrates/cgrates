@@ -1568,12 +1568,24 @@ func TestApierITGetScheduledActions(t *testing.T) {
 }
 
 func TestApierITGetDataCost(t *testing.T) {
-	attrs := AttrGetDataCost{Direction: "*out", Category: "data", Tenant: "cgrates.org", Account: "1001", Subject: "1001", StartTime: time.Now(), Usage: 640113}
+	attrs := AttrGetDataCost{Category: "data", Tenant: "cgrates.org",
+		Subject: "1001", AnswerTime: time.Now(), Usage: 640113}
 	var rply *engine.DataCost
 	if err := rater.Call("ApierV1.GetDataCost", attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 128.0240 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
+	}
+}
+
+func TestApierITGetCost(t *testing.T) {
+	attrs := AttrGetCost{Category: "data", Tenant: "cgrates.org",
+		Subject: "1001", AnswerTime: time.Now(), Usage: "640113"}
+	var rply *engine.EventCost
+	if err := rater.Call("ApierV1.GetCost", attrs, &rply); err != nil {
+		t.Error("Unexpected nil error received: ", err.Error())
+	} else if *rply.Cost != 128.0240 {
+		t.Errorf("Unexpected cost received: %f", *rply.Cost)
 	}
 }
 

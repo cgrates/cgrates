@@ -25,25 +25,54 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type AttrGetCost struct {
+	Tenant     string
+	Category   string
+	Subject    string
+	AnswerTime time.Time
+	Usage      string
+}
+
+func (apier *ApierV1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
+	usage, err := utils.ParseDurationWithNanosecs(attrs.Usage)
+	if err != nil {
+		return err
+	}
+	cd := &engine.CallDescriptor{
+		Direction:     utils.OUT,
+		Category:      attrs.Category,
+		Tenant:        attrs.Tenant,
+		Subject:       attrs.Subject,
+		TimeStart:     attrs.AnswerTime,
+		TimeEnd:       attrs.AnswerTime.Add(usage),
+		DurationIndex: usage,
+	}
+	var cc engine.CallCost
+	if err := apier.Responder.GetCost(cd, &cc); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*ec = *engine.NewEventCostFromCallCost(&cc, "", "")
+	ec.Compute()
+	return nil
+}
+
 type AttrGetDataCost struct {
-	Direction                string
-	Category                 string
-	Tenant, Account, Subject string
-	StartTime                time.Time
-	Usage                    int64 // the call duration so far (till TimeEnd)
+	Tenant     string
+	Category   string
+	Subject    string
+	AnswerTime time.Time
+	Usage      time.Duration // the call duration so far (till TimeEnd)
 }
 
 func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost) error {
-	usageAsDuration := time.Duration(attrs.Usage) * time.Nanosecond // Convert to seconds to match the loaded rates
 	cd := &engine.CallDescriptor{
-		Direction:     attrs.Direction,
+		Direction:     utils.OUT,
 		Category:      attrs.Category,
 		Tenant:        attrs.Tenant,
-		Account:       attrs.Account,
 		Subject:       attrs.Subject,
-		TimeStart:     attrs.StartTime,
-		TimeEnd:       attrs.StartTime.Add(usageAsDuration),
-		DurationIndex: usageAsDuration,
+		TimeStart:     attrs.AnswerTime,
+		TimeEnd:       attrs.AnswerTime.Add(attrs.Usage),
+		DurationIndex: attrs.Usage,
 		TOR:           utils.DATA,
 	}
 	var cc engine.CallCost
