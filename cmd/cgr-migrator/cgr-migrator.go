@@ -31,7 +31,8 @@ import (
 )
 
 var (
-	sameDBname      = true
+	sameDataDB      = true
+	sameStorDB      = true
 	outDataDB       migrator.MigratorDataDB
 	storDB          engine.Storage
 	oDBDataEncoding string
@@ -76,7 +77,6 @@ var (
 	inDBDataEncoding = flag.String("in_dbData_encoding", "", "The encoding used to store object Data in strings")
 	dryRun           = flag.Bool("dry_run", false, "When true will not save loaded Data to DataDb but just parse it for consistency and errors.")
 	verbose          = flag.Bool("verbose", false, "Enable detailed verbose logging output")
-	stats            = flag.Bool("stats", false, "Generates statsistics about migrated Data.")
 )
 
 func main() {
@@ -85,10 +85,7 @@ func main() {
 		fmt.Println(utils.GetCGRVersion())
 		return
 	}
-	if *verbose {
-		log.Print("Initializing DataDB:", *inDataDBType)
-		log.Print("Initializing storDB:", *inStorDBType)
-	}
+
 	var dmIN *engine.DataManager
 	dmIN, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort,
 		*inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
@@ -105,9 +102,6 @@ func main() {
 		*outDataDBUser = *inDataDBUser
 		*outDataDBPass = *inDataDBPass
 	}
-	if *verbose {
-		log.Print("Initializing outDataDB:", *outDataDBType)
-	}
 	var dmOUT *engine.DataManager
 	dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort,
 		*outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
@@ -117,13 +111,6 @@ func main() {
 	}
 	storDB = instorDB
 
-	if *verbose {
-		if *outStorDBType != "" {
-			log.Print("Initializing outStorDB:", *outStorDBType)
-		} else {
-			log.Print("Initializing outStorDB:", *inStorDBType)
-		}
-	}
 	if *outStorDBType != "" {
 		storDB, err = engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
@@ -131,48 +118,42 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	if *verbose {
-		log.Print("Migrating: ", *migrate)
+	if *inDataDBName != *outDataDBName || *inDataDBType != *outDataDBType || *inDataDBHost != *outDataDBHost {
+		sameDataDB = false
 	}
-	if inDataDBName != outDataDBName || inStorDBName != outStorDBName {
-		sameDBname = false
+	if *inStorDBName != *outStorDBName || *inStorDBType != *outStorDBName || *inStorDBHost != *outStorDBHost {
+		sameStorDB = false
 	}
 	m, err := migrator.NewMigrator(dmIN, dmOUT, *inDataDBType, *dbDataEncoding, storDB, *inStorDBType, outDataDB,
-		*outDataDBType, *inDBDataEncoding, instorDB, *outStorDBType, *dryRun, sameDBname, *datadb_versions, *stordb_versions)
+		*outDataDBType, *inDBDataEncoding, instorDB, *outStorDBType, *dryRun, sameDataDB, sameStorDB, *datadb_versions, *stordb_versions)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if *datadb_versions {
 		vrs, _ := dmOUT.DataDB().GetVersions(utils.TBLVersions)
 		if len(vrs) != 0 {
-			log.Print("DataDB versions :", vrs)
+			log.Printf("DataDB versions : %+v\n", vrs)
 		} else {
-			log.Print("DataDB versions not_found")
+			log.Printf("DataDB versions not_found")
 		}
 	}
 	if *stordb_versions {
 		vrs, _ := storDB.GetVersions(utils.TBLVersions)
 		if len(vrs) != 0 {
-			log.Print("StorDB versions :", vrs)
+			log.Printf("StorDB versions : %+v\n", vrs)
 		} else {
-			log.Print("StorDB versions not_found")
+			log.Printf("StorDB versions not_found")
 		}
 	}
 	if migrate != nil && *migrate != "" { // Run migrator
 		migrstats := make(map[string]int)
 		mig := strings.Split(*migrate, ",")
-		log.Print("migrating", mig)
 		err, migrstats = m.Migrate(mig)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if *stats != false {
-			for k, v := range migrstats {
-				log.Print(" ", k, " : ", v)
-			}
-		}
-		if *verbose {
-			log.Print("Done migrating!")
+		if *verbose != false {
+			log.Printf("Data migrated: %+v", migrstats)
 		}
 		return
 	}

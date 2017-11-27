@@ -36,6 +36,7 @@ func (m *Migrator) migrateCurrentSubscribers() (err error) {
 				if err := m.dmOut.SetSubscriber(id, sub); err != nil {
 					return err
 				}
+				m.stats[utils.Subscribers] += 1
 			}
 		}
 	}
@@ -59,7 +60,7 @@ func (m *Migrator) migrateSubscribers() (err error) {
 	}
 	switch vrs[utils.Subscribers] {
 	case current[utils.Subscribers]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentSubscribers(); err != nil {

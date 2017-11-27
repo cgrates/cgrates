@@ -103,7 +103,7 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 	}
 	switch vrs[utils.SharedGroups] {
 	case current[utils.SharedGroups]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentSharedGroups(); err != nil {

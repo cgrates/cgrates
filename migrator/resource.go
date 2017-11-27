@@ -45,6 +45,7 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 				if err := m.dmOut.SetResource(res); err != nil {
 					return err
 				}
+				m.stats[utils.Resource] += 1
 			}
 		}
 	}
@@ -68,7 +69,7 @@ func (m *Migrator) migrateResources() (err error) {
 	}
 	switch vrs[utils.Resource] {
 	case current[utils.Resource]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentResource(); err != nil {

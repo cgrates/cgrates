@@ -130,7 +130,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 	}
 	switch vrs[utils.ActionTriggers] {
 	case current[utils.ActionTriggers]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentActionTrigger(); err != nil {

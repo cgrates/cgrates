@@ -36,6 +36,7 @@ func (m *Migrator) migrateCurrentCdrStats() (err error) {
 				if err := m.dmOut.SetCdrStats(cdrst); err != nil {
 					return err
 				}
+				m.stats[utils.CdrStats] += 1
 			}
 		}
 	}
@@ -59,7 +60,7 @@ func (m *Migrator) migrateCdrStats() (err error) {
 	}
 	switch vrs[utils.CdrStats] {
 	case current[utils.CdrStats]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentCdrStats(); err != nil {

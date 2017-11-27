@@ -41,6 +41,7 @@ func (m *Migrator) migrateCurrentTPlcrs() (err error) {
 				if err := m.OutStorDB().SetTPLCRs(dest); err != nil {
 					return err
 				}
+				m.stats[utils.TpLcrs] += 1
 			}
 		}
 	}
@@ -64,7 +65,7 @@ func (m *Migrator) migrateTPlcrs() (err error) {
 	}
 	switch vrs[utils.TpLcrs] {
 	case current[utils.TpLcrs]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPcdrstats(); err != nil {

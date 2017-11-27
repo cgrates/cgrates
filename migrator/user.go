@@ -43,6 +43,7 @@ func (m *Migrator) migrateCurrentUser() (err error) {
 				if err := m.dmOut.SetUser(usr); err != nil {
 					return err
 				}
+				m.stats[utils.User] += 1
 			}
 		}
 	}
@@ -66,7 +67,7 @@ func (m *Migrator) migrateUser() (err error) {
 	}
 	switch vrs[utils.User] {
 	case current[utils.User]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentUser(); err != nil {

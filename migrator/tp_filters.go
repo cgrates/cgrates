@@ -46,6 +46,7 @@ func (m *Migrator) migrateCurrentTPfilters() (err error) {
 					if err := m.OutStorDB().SetTPFilters(dest); err != nil {
 						return err
 					}
+					m.stats[utils.TpFilters] += 1
 				}
 			}
 		}
@@ -70,7 +71,7 @@ func (m *Migrator) migrateTPfilters() (err error) {
 	}
 	switch vrs[utils.TpFilters] {
 	case current[utils.TpFilters]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPfilters(); err != nil {

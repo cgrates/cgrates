@@ -47,6 +47,7 @@ func (m *Migrator) migrateCurrentTPratingplans() (err error) {
 					if err := m.InStorDB().SetTPRatingPlans(rps); err != nil {
 						return err
 					}
+					m.stats[utils.TpRatingPlans] += 1
 				}
 			}
 		}
@@ -71,7 +72,7 @@ func (m *Migrator) migrateTPratingplans() (err error) {
 	}
 	switch vrs[utils.TpRatingPlans] {
 	case current[utils.TpRatingPlans]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPratingplans(); err != nil {

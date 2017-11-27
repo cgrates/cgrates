@@ -30,7 +30,6 @@ func (m *Migrator) migrateCurrentTPaccountacction() (err error) {
 	if err != nil {
 		return err
 	}
-
 	for _, tpid := range tpids {
 		dest, err := m.InStorDB().GetTPAccountActions(&utils.TPAccountActions{TPid: tpid})
 		if err != nil {
@@ -41,6 +40,7 @@ func (m *Migrator) migrateCurrentTPaccountacction() (err error) {
 				if err := m.OutStorDB().SetTPAccountActions(dest); err != nil {
 					return err
 				}
+				m.stats[utils.TpAccountActions] += 1
 			}
 		}
 	}
@@ -64,7 +64,7 @@ func (m *Migrator) migrateTPaccountacction() (err error) {
 	}
 	switch vrs[utils.TpAccountActions] {
 	case current[utils.TpAccountActions]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPaccountacction(); err != nil {

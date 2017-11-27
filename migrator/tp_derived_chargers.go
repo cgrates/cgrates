@@ -39,10 +39,10 @@ func (m *Migrator) migrateCurrentTPderivedchargers() (err error) {
 		}
 		if dest != nil {
 			if m.dryRun != true {
-
 				if err := m.OutStorDB().SetTPDerivedChargers(dest); err != nil {
 					return err
 				}
+				m.stats[utils.TpDerivedCharges] += 1
 			}
 		}
 	}
@@ -66,7 +66,7 @@ func (m *Migrator) migrateTPderivedchargers() (err error) {
 	}
 	switch vrs[utils.TpDerivedCharges] {
 	case current[utils.TpDerivedCharges]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPderivedchargers(); err != nil {

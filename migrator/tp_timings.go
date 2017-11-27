@@ -47,6 +47,7 @@ func (m *Migrator) migrateCurrentTPTiming() (err error) {
 					if err := m.OutStorDB().SetTPTimings(tm); err != nil {
 						return err
 					}
+					m.stats[utils.TpTiming] += 1
 				}
 			}
 		}
@@ -71,7 +72,7 @@ func (m *Migrator) migrateTpTimings() (err error) {
 	}
 	switch vrs[utils.TpTiming] {
 	case current[utils.TpTiming]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPTiming(); err != nil {

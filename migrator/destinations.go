@@ -43,6 +43,7 @@ func (m *Migrator) migrateCurrentDestinations() (err error) {
 				if err := m.dmOut.DataDB().SetDestination(dst, utils.NonTransactional); err != nil {
 					return err
 				}
+				m.stats[utils.Destinations] += 1
 			}
 		}
 	}
@@ -66,7 +67,7 @@ func (m *Migrator) migrateDestinations() (err error) {
 	}
 	switch vrs[utils.Destinations] {
 	case current[utils.Destinations]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentDestinations(); err != nil {
@@ -94,8 +95,11 @@ func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 				return err
 			}
 			if rdst != nil {
-				if err := m.dmOut.DataDB().SetReverseDestination(rdst, utils.NonTransactional); err != nil {
-					return err
+				if m.dryRun != true {
+					if err := m.dmOut.DataDB().SetReverseDestination(rdst, utils.NonTransactional); err != nil {
+						return err
+					}
+					m.stats[utils.ReverseDestinations] += 1
 				}
 			}
 		}
@@ -120,7 +124,7 @@ func (m *Migrator) migrateReverseDestinations() (err error) {
 	}
 	switch vrs[utils.ReverseDestinations] {
 	case current[utils.ReverseDestinations]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentReverseDestinations(); err != nil {

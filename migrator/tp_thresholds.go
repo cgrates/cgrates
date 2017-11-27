@@ -47,6 +47,7 @@ func (m *Migrator) migrateCurrentTPthresholds() (err error) {
 					if err := m.OutStorDB().SetTPThresholds(dest); err != nil {
 						return err
 					}
+					m.stats[utils.TpThresholds] += 1
 				}
 			}
 		}
@@ -71,7 +72,7 @@ func (m *Migrator) migrateTPthresholds() (err error) {
 	}
 	switch vrs[utils.TpThresholds] {
 	case current[utils.TpThresholds]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPthresholds(); err != nil {

@@ -43,6 +43,7 @@ func (m *Migrator) migrateCurrentAlias() (err error) {
 				if err := m.dmOut.DataDB().SetAlias(usr, utils.NonTransactional); err != nil {
 					return err
 				}
+				m.stats[utils.Alias] += 1
 			}
 		}
 	}
@@ -68,8 +69,11 @@ func (m *Migrator) migrateCurrentReverseAlias() (err error) {
 				return err
 			}
 			if alias != nil {
-				if err := m.dmOut.DataDB().SetReverseAlias(alias, utils.NonTransactional); err != nil {
-					return err
+				if m.dryRun != true {
+					if err := m.dmOut.DataDB().SetReverseAlias(alias, utils.NonTransactional); err != nil {
+						return err
+					}
+					m.stats[utils.ReverseAlias] += 1
 				}
 			}
 		}
@@ -94,7 +98,7 @@ func (m *Migrator) migrateAlias() (err error) {
 	}
 	switch vrs[utils.Alias] {
 	case current[utils.Alias]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentAlias(); err != nil {
@@ -122,7 +126,7 @@ func (m *Migrator) migrateReverseAlias() (err error) {
 	}
 	switch vrs[utils.ReverseAlias] {
 	case current[utils.ReverseAlias]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentReverseAlias(); err != nil {

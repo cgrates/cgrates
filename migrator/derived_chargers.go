@@ -43,6 +43,7 @@ func (m *Migrator) migrateCurrentDerivedChargers() (err error) {
 				if err := m.dmOut.DataDB().SetDerivedChargers(id, drc, utils.NonTransactional); err != nil {
 					return err
 				}
+				m.stats[utils.DerivedChargersV] += 1
 			}
 		}
 	}
@@ -66,7 +67,7 @@ func (m *Migrator) migrateDerivedChargers() (err error) {
 	}
 	switch vrs[utils.DerivedChargersV] {
 	case current[utils.DerivedChargersV]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentDerivedChargers(); err != nil {

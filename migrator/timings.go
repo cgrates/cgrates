@@ -43,6 +43,7 @@ func (m *Migrator) migrateCurrentTiming() (err error) {
 				if err := m.dmOut.SetTiming(tm); err != nil {
 					return err
 				}
+				m.stats[utils.Timing] += 1
 			}
 		}
 	}
@@ -66,7 +67,7 @@ func (m *Migrator) migrateTimings() (err error) {
 	}
 	switch vrs[utils.Timing] {
 	case current[utils.Timing]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentTiming(); err != nil {

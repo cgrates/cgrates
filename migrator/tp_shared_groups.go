@@ -47,6 +47,7 @@ func (m *Migrator) migrateCurrentTPsharedgroups() (err error) {
 					if err := m.OutStorDB().SetTPSharedGroups(dest); err != nil {
 						return err
 					}
+					m.stats[utils.TpSharedGroups] += 1
 				}
 			}
 		}
@@ -71,7 +72,7 @@ func (m *Migrator) migrateTPsharedgroups() (err error) {
 	}
 	switch vrs[utils.TpSharedGroups] {
 	case current[utils.TpSharedGroups]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPsharedgroups(); err != nil {

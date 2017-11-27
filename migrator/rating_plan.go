@@ -43,6 +43,7 @@ func (m *Migrator) migrateCurrentRatingPlans() (err error) {
 				if err := m.dmOut.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 					return err
 				}
+				m.stats[utils.RatingPlan] += 1
 			}
 		}
 	}
@@ -66,7 +67,7 @@ func (m *Migrator) migrateRatingPlans() (err error) {
 	}
 	switch vrs[utils.RatingPlan] {
 	case current[utils.RatingPlan]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentRatingPlans(); err != nil {

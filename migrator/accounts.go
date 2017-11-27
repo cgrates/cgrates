@@ -51,6 +51,7 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 				if err := m.dmOut.DataDB().SetAccount(acc); err != nil {
 					return err
 				}
+				m.stats[utils.Accounts] += 1
 			}
 		}
 	}
@@ -74,7 +75,6 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 					return err
 				}
 				m.stats[utils.Accounts] += 1
-
 			}
 		}
 	}
@@ -108,7 +108,6 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 					return err
 				}
 				m.stats[utils.Accounts] += 1
-
 			}
 		}
 	}
@@ -142,7 +141,7 @@ func (m *Migrator) migrateAccounts() (err error) {
 	}
 	switch vrs[utils.Accounts] {
 	case current[utils.Accounts]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentAccounts(); err != nil {

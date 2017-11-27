@@ -56,6 +56,7 @@ func (m *Migrator) migrateCurrentActions() (err error) {
 				if err := m.dmOut.SetActions(idg, acts, utils.NonTransactional); err != nil {
 					return err
 				}
+				m.stats[utils.Actions] += 1
 			}
 		}
 	}
@@ -117,7 +118,7 @@ func (m *Migrator) migrateActions() (err error) {
 	}
 	switch vrs[utils.Actions] {
 	case current[utils.Actions]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentActions(); err != nil {

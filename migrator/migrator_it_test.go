@@ -78,7 +78,7 @@ func TestMigratorITPostgresConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	mig, err = NewMigrator(dataDB, dataDB2, postgresITCfg.DataDbType, postgresITCfg.DBDataEncoding, storDB, postgresITCfg.StorDBType, oldDataDB, postgresITCfg.DataDbType, postgresITCfg.DBDataEncoding, oldstorDB, postgresITCfg.StorDBType, false, true)
+	mig, err = NewMigrator(dataDB, dataDB2, postgresITCfg.DataDbType, postgresITCfg.DBDataEncoding, storDB, postgresITCfg.StorDBType, oldDataDB, postgresITCfg.DataDbType, postgresITCfg.DBDataEncoding, oldstorDB, postgresITCfg.StorDBType, false, true, true, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestMigratorITRedisConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	mig, err = NewMigrator(dataDB, dataDB2, mysqlITCfg.DataDbType, mysqlITCfg.DBDataEncoding, storDB, mysqlITCfg.StorDBType, oldDataDB, mysqlITCfg.DataDbType, mysqlITCfg.DBDataEncoding, oldstorDB, mysqlITCfg.StorDBType, false, true)
+	mig, err = NewMigrator(dataDB, dataDB2, mysqlITCfg.DataDbType, mysqlITCfg.DBDataEncoding, storDB, mysqlITCfg.StorDBType, oldDataDB, mysqlITCfg.DataDbType, mysqlITCfg.DBDataEncoding, oldstorDB, mysqlITCfg.StorDBType, false, true, true, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -162,7 +162,7 @@ func TestMigratorITMongoConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	mig, err = NewMigrator(dataDB, dataDB2, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, storDB, mgoITCfg.StorDBType, oldDataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, oldstorDB, mgoITCfg.StorDBType, false, true)
+	mig, err = NewMigrator(dataDB, dataDB2, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, storDB, mgoITCfg.StorDBType, oldDataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, oldstorDB, mgoITCfg.StorDBType, false, true, true, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -209,7 +209,7 @@ func TestMigratorITMoveConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	mig, err = NewMigrator(dataDB2, dataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, storDB, mgoITCfg.StorDBType, oldDataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, oldstorDB, mgoITCfg.StorDBType, false, false)
+	mig, err = NewMigrator(dataDB2, dataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, storDB, mgoITCfg.StorDBType, oldDataDB, mgoITCfg.DataDbType, mgoITCfg.DBDataEncoding, oldstorDB, mgoITCfg.StorDBType, false, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

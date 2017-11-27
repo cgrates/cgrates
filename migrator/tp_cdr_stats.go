@@ -30,14 +30,12 @@ func (m *Migrator) migrateCurrentTPcdrstats() (err error) {
 	if err != nil {
 		return err
 	}
-
 	for _, tpid := range tpids {
 		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPCdrStats, utils.TPDistinctIds{}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-
 			dest, err := m.InStorDB().GetTPCdrStats(tpid, id)
 			if err != nil {
 				return err
@@ -47,6 +45,7 @@ func (m *Migrator) migrateCurrentTPcdrstats() (err error) {
 					if err := m.OutStorDB().SetTPCdrStats(dest); err != nil {
 						return err
 					}
+					m.stats[utils.TpCdrStats] += 1
 				}
 			}
 		}
@@ -71,7 +70,7 @@ func (m *Migrator) migrateTPcdrstats() (err error) {
 	}
 	switch vrs[utils.TpCdrStats] {
 	case current[utils.TpCdrStats]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPcdrstats(); err != nil {

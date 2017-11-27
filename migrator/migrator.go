@@ -28,7 +28,7 @@ import (
 
 func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string,
 	storDB engine.Storage, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
-	oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDBname bool, datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
+	oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool, datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -48,7 +48,8 @@ func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType
 		mrshlr: mrshlr, dmIN: dmIN,
 		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
 		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType,
-		oldmrshlr: oldmrshlr, dryRun: dryRun, sameDBname: sameDBname, datadb_versions: datadb_versions, stordb_versions: stordb_versions, stats: stats,
+		oldmrshlr: oldmrshlr, dryRun: dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
+		datadb_versions: datadb_versions, stordb_versions: stordb_versions, stats: stats,
 	}
 	return m, err
 }
@@ -66,7 +67,8 @@ type Migrator struct {
 	oldStorDBType   string
 	oldmrshlr       engine.Marshaler
 	dryRun          bool
-	sameDBname      bool
+	sameDataDB      bool
+	sameStorDB      bool
 	datadb_versions bool
 	stordb_versions bool
 	stats           map[string]int
@@ -76,7 +78,6 @@ type Migrator struct {
 func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 	stats = make(map[string]int)
 	for _, taskID := range taskIDs {
-		log.Print("migrating", taskID)
 		switch taskID {
 		default: // unsupported taskID
 			err = utils.NewCGRError(utils.Migrator,

@@ -66,6 +66,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 				if err := m.dmOut.SetThreshold(ths); err != nil {
 					return err
 				}
+				m.stats[utils.Thresholds] += 1
 			}
 		}
 	}
@@ -150,7 +151,7 @@ func (m *Migrator) migrateThresholds() (err error) {
 	}
 	switch vrs[utils.Thresholds] {
 	case current[utils.Thresholds]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentThresholds(); err != nil {

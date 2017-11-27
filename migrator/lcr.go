@@ -43,6 +43,7 @@ func (m *Migrator) migrateCurrentLCR() (err error) {
 				if err := m.dmOut.SetLCR(lcr, utils.NonTransactional); err != nil {
 					return err
 				}
+				m.stats[utils.LCR] += 1
 			}
 		}
 	}
@@ -66,7 +67,7 @@ func (m *Migrator) migrateLCR() (err error) {
 	}
 	switch vrs[utils.LCR] {
 	case current[utils.LCR]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentLCR(); err != nil {
