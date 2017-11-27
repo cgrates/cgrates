@@ -32,139 +32,138 @@ import (
 )
 
 var (
-	tpLCRCfgPath   string
-	tpLCRCfg       *config.CGRConfig
-	tpLCRRPC       *rpc.Client
-	tpLCRDataDir   = "/usr/share/cgrates"
-	tpLCR          *utils.TPLCR
-	tpLCRDelay     int
-	tpLCRConfigDIR string //run tests for specific configuration
+	tpSplPrfCfgPath   string
+	tpSplPrfCfg       *config.CGRConfig
+	tpSplPrfRPC       *rpc.Client
+	tpSplPrfDataDire  = "/usr/share/cgrates"
+	tpSplPr           *utils.TPSupplier
+	tpSplPrfDelay     int
+	tpSplPrfConfigDIR string //run tests for specific configuration
 )
 
-var sTestsTPLCRs = []func(t *testing.T){
-	testTPLCRInitCfg,
-	testTPLCRResetStorDb,
-	testTPLCRStartEngine,
-	testtpLCRRPCConn,
-	testTPLCRGetTPLCRBeforeSet,
-	testTPLCRSetTPLCR,
-	testTPLCRGetTPLCRAfterSet,
-	testTPLCRGetTPLCRIds,
-	testTPLCRUpdateTPLCR,
-	testTPLCRGetTPLCRAfterUpdate,
-	testTPLCRRemTPLCR,
-	testTPLCRGetTPLCRAfterRemove,
-	testTPLCRKillEngine,
+var sTestsTPSplPrf = []func(t *testing.T){
+	testTPSplPrfInitCfg,
+	testTPSplPrfResetStorDb,
+	testTPSplPrfStartEngine,
+	testTPSplPrfRPCConn,
+	testTPSplPrfGetTPSplPrfBeforeSet,
+	testTPSplPrfSetTPSplPrf,
+	testTPSplPrfGetTPSplPrfAfterSet,
+	testTPSplPrfGetTPSplPrfIDs,
+	testTPSplPrfUpdateTPSplPrf,
+	testTPSplPrfGetTPSplPrfAfterUpdate,
+	testTPSplPrfRemTPSplPrf,
+	testTPSplPrfGetTPSplPrfAfterRemove,
+	testTPSplPrfKillEngine,
 }
 
 //Test start here
-func TestTPLCRITMySql(t *testing.T) {
-	tpLCRConfigDIR = "tutmysql"
-	for _, stest := range sTestsTPLCRs {
-		t.Run(tpLCRConfigDIR, stest)
+func TestTPSplPrfITMySql(t *testing.T) {
+	tpSplPrfConfigDIR = "tutmysql"
+	for _, stest := range sTestsTPSplPrf {
+		t.Run(tpSplPrfConfigDIR, stest)
 	}
 }
 
-func TestTPLCRITMongo(t *testing.T) {
-	tpLCRConfigDIR = "tutmongo"
-	for _, stest := range sTestsTPLCRs {
-		t.Run(tpLCRConfigDIR, stest)
+func TestTPSplPrfITMongo(t *testing.T) {
+	tpSplPrfConfigDIR = "tutmongo"
+	for _, stest := range sTestsTPSplPrf {
+		t.Run(tpSplPrfConfigDIR, stest)
 	}
 }
 
-func TestTPLCRITPG(t *testing.T) {
-	tpLCRConfigDIR = "tutpostgres"
-	for _, stest := range sTestsTPLCRs {
-		t.Run(tpLCRConfigDIR, stest)
-	}
-}
-
-func testTPLCRInitCfg(t *testing.T) {
+func testTPSplPrfInitCfg(t *testing.T) {
 	var err error
-	tpLCRCfgPath = path.Join(tpLCRDataDir, "conf", "samples", tpLCRConfigDIR)
-	tpLCRCfg, err = config.NewCGRConfigFromFolder(tpLCRCfgPath)
+	tpSplPrfCfgPath = path.Join(tpSplPrfDataDire, "conf", "samples", tpSplPrfConfigDIR)
+	tpSplPrfCfg, err = config.NewCGRConfigFromFolder(tpSplPrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	tpLCRCfg.DataFolderPath = tpLCRDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpLCRCfg)
-	switch tpLCRConfigDIR {
+	tpSplPrfCfg.DataFolderPath = tpSplPrfDataDire // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(tpSplPrfCfg)
+	switch tpSplPrfConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		tpLCRDelay = 2000
+		tpSplPrfDelay = 2000
 	default:
-		tpLCRDelay = 1000
+		tpSplPrfDelay = 1000
 	}
 }
 
 // Wipe out the cdr database
-func testTPLCRResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tpLCRCfg); err != nil {
+func testTPSplPrfResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(tpSplPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func testTPLCRStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tpLCRCfgPath, tpLCRDelay); err != nil {
+func testTPSplPrfStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(tpSplPrfCfgPath, tpSplPrfDelay); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func testtpLCRRPCConn(t *testing.T) {
+func testTPSplPrfRPCConn(t *testing.T) {
 	var err error
-	tpLCRRPC, err = jsonrpc.Dial("tcp", tpLCRCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpSplPrfRPC, err = jsonrpc.Dial("tcp", tpSplPrfCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testTPLCRGetTPLCRBeforeSet(t *testing.T) {
-	var reply *utils.TPLCR
-	if err := tpLCRRPC.Call("ApierV1.GetTPLCR", &AttrGetTPLCR{TPid: "TP1", ID: "LCR_1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+func testTPSplPrfGetTPSplPrfBeforeSet(t *testing.T) {
+	var reply *utils.TPSupplier
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile", &AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testTPLCRSetTPLCR(t *testing.T) {
-	tpLCR = &utils.TPLCR{
+func testTPSplPrfSetTPSplPrf(t *testing.T) {
+	tpSplPr = &utils.TPSupplier{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
-		ID:        "LCR_1",
+		ID:        "SUPL_1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		Strategy:       "*lowest_cost",
-		StrategyParams: []string{},
-		SupplierID:     "supplier1",
-		RatingPlanIDs:  []string{"RPL_1"},
-		StatIDs:        []string{},
-		Weight:         20,
+		Sorting:       "*lowest_cost",
+		SortingParams: []string{},
+		Suppliers: []*utils.TPRequestSupplier{
+			&utils.TPRequestSupplier{
+				ID:            "supplier1",
+				FilterIDs:     []string{"FLTR_1"},
+				RatingPlanIDs: []string{"RPL_1"},
+				ResourceIDs:   []string{"ResGroup1"},
+				StatIDs:       []string{"Stat1"},
+			},
+		},
+		Blocker: false,
+		Weight:  20,
 	}
 	var result string
-	if err := tpLCRRPC.Call("ApierV1.SetTPLCR", tpLCR, &result); err != nil {
+	if err := tpSplPrfRPC.Call("ApierV1.SetTPSupplierProfile", tpSplPr, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testTPLCRGetTPLCRAfterSet(t *testing.T) {
-	var reply *utils.TPLCR
-	if err := tpLCRRPC.Call("ApierV1.GetTPLCR", &AttrGetTPLCR{TPid: "TP1", ID: "LCR_1"}, &reply); err != nil {
+func testTPSplPrfGetTPSplPrfAfterSet(t *testing.T) {
+	var reply *utils.TPSupplier
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile", &AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tpLCR, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", tpLCR, reply)
+	} else if !reflect.DeepEqual(tpSplPr, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", tpSplPr, reply)
 	}
-
 }
 
-func testTPLCRGetTPLCRIds(t *testing.T) {
+func testTPSplPrfGetTPSplPrfIDs(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"LCR_1"}
-	if err := tpLCRRPC.Call("ApierV1.GetTPLCRIds", &AttrGetTPLCRIds{TPid: "TP1"}, &result); err != nil {
+	expectedTPID := []string{"SUPL_1"}
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfileIDs", &AttrGetTPSupplierIDs{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -172,43 +171,58 @@ func testTPLCRGetTPLCRIds(t *testing.T) {
 
 }
 
-func testTPLCRUpdateTPLCR(t *testing.T) {
-	tpLCR.StatIDs = []string{"STS_1", "STS_2"}
+func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
+	tpSplPr.Suppliers = []*utils.TPRequestSupplier{
+		&utils.TPRequestSupplier{
+			ID:            "supplier1",
+			FilterIDs:     []string{"FLTR_1"},
+			RatingPlanIDs: []string{"RPL_1"},
+			ResourceIDs:   []string{"ResGroup1"},
+			StatIDs:       []string{"Stat1"},
+		},
+		&utils.TPRequestSupplier{
+			ID:            "supplier2",
+			FilterIDs:     []string{"FLTR_1"},
+			RatingPlanIDs: []string{"RPL_1"},
+			ResourceIDs:   []string{"ResGroup1"},
+			StatIDs:       []string{"Stat1"},
+		},
+	}
 	var result string
-	if err := tpLCRRPC.Call("ApierV1.SetTPLCR", tpLCR, &result); err != nil {
+	if err := tpSplPrfRPC.Call("ApierV1.SetTPSupplierProfile", tpSplPr, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 }
 
-func testTPLCRGetTPLCRAfterUpdate(t *testing.T) {
-	var reply *utils.TPLCR
-	if err := tpLCRRPC.Call("ApierV1.GetTPLCR", &AttrGetTPLCR{TPid: "TP1", ID: "LCR_1"}, &reply); err != nil {
+func testTPSplPrfGetTPSplPrfAfterUpdate(t *testing.T) {
+	var reply *utils.TPSupplier
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile", &AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tpLCR, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", tpLCR, reply)
+	} else if !reflect.DeepEqual(tpSplPr, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", tpSplPr, reply)
 	}
 }
 
-func testTPLCRRemTPLCR(t *testing.T) {
+func testTPSplPrfRemTPSplPrf(t *testing.T) {
 	var resp string
-	if err := tpLCRRPC.Call("ApierV1.RemTPLCR", &AttrRemTPLCR{TPid: "TP1", Tenant: "cgrates.org", ID: "LCR_1"}, &resp); err != nil {
+	if err := tpSplPrfRPC.Call("ApierV1.RemTPSupplierProfile", &AttrRemTPSupplier{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 }
 
-func testTPLCRGetTPLCRAfterRemove(t *testing.T) {
-	var reply *utils.TPLCR
-	if err := tpLCRRPC.Call("ApierV1.GetTPLCR", &AttrGetTPLCR{TPid: "TP1", ID: "LCR_1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+func testTPSplPrfGetTPSplPrfAfterRemove(t *testing.T) {
+	var reply *utils.TPSupplier
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile", &AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testTPLCRKillEngine(t *testing.T) {
-	if err := engine.KillEngine(tpLCRDelay); err != nil {
+func testTPSplPrfKillEngine(t *testing.T) {
+	if err := engine.KillEngine(tpSplPrfDelay); err != nil {
 		t.Error(err)
 	}
 }
