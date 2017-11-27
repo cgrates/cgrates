@@ -222,7 +222,7 @@ func (lcrS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err
 
 // supliersForEvent will return the list of valid supplier IDs
 // for event based on filters and sorting algorithms
-func (spS *SupplierService) supliersForEvent(ev *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
+func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
 	var suppPrfls SupplierProfiles
 	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(ev); err != nil {
 		return
