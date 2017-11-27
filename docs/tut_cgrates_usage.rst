@@ -69,13 +69,12 @@ To verify that all actions successfully performed, we use following *cgr-console
 - Query call costs so we can see our calls will have expected costs (final cost will result as sum of *ConnectFee* and *Cost* fields):
 
  ::
-
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:00:20Z"'
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:01:25Z"'
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:00:20Z"'
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:01:25Z"'
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:00:20Z"'
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:01:25Z"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" AnswerTime="2014-08-04T13:00:00Z" Usage="20s"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" AnswerTime="2014-08-04T13:00:00Z" Usage="1m25s"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" AnswerTime="2014-08-04T13:00:00Z" Usage="20s"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" AnswerTime="2014-08-04T13:00:00Z" Usage="1m25s"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" AnswerTime="2014-08-04T13:00:00Z" Usage="20s"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" AnswerTime="2014-08-04T13:00:00Z" Usage="1m25s"'
 
 - Make sure *CDRStats Queues* were created:
 
