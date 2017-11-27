@@ -121,8 +121,7 @@ func NewSupplierService(dm *DataManager, timezone string,
 		resourceS:     resourceS,
 		statS:         statS,
 		indexedFields: indexedFields}
-
-	if spS.sortDispatcher, err = NewSupplierSortDispatcher(spS); err != nil {
+	if spS.sorter, err = NewSupplierSortDispatcher(spS); err != nil {
 		return nil, err
 	}
 	return
@@ -136,7 +135,7 @@ type SupplierService struct {
 	indexedFields []string
 	resourceS,
 	statS rpcclient.RpcClientConnection
-	sortDispatcher SupplierSortDispatcher
+	sorter SupplierSortDispatcher
 }
 
 // ListenAndServe will initialize the service
@@ -243,5 +242,5 @@ func (spS *SupplierService) supliersForEvent(ev *SupplierEvent) (sortedSuppls *S
 		}
 		lss = append(lss, s)
 	}
-	return spS.sortDispatcher.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, lss)
+	return spS.sorter.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, lss)
 }

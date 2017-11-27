@@ -26,15 +26,15 @@ import (
 
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
 func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatcher, err error) {
-	ssd = make(map[string]SuppliersSorting)
-	ssd[utils.MetaWeight] = NewWeightStrategy()
-	ssd[utils.MetaLeastCost] = NewLeastCostStrategy(lcrS)
+	ssd = make(map[string]SuppliersSorter)
+	ssd[utils.MetaWeight] = NewWeightSorter()
+	ssd[utils.MetaLeastCost] = NewLeastCostSorter(lcrS)
 	return
 }
 
 // SupplierStrategyHandler will initialize strategies
 // and dispatch requests to them
-type SupplierSortDispatcher map[string]SuppliersSorting
+type SupplierSortDispatcher map[string]SuppliersSorter
 
 func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
 	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
@@ -45,35 +45,35 @@ func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
 	return sd.SortSuppliers(prflID, suppls)
 }
 
-type SuppliersSorting interface {
+type SuppliersSorter interface {
 	SortSuppliers(string, Suppliers) (*SortedSuppliers, error)
 }
 
-// NewLeastCostStrategy constructs LeastCostStrategy
-func NewLeastCostStrategy(lcrS *SupplierService) *LeastCostStrategy {
-	return &LeastCostStrategy{lcrS: lcrS}
+// NewLeastCostSorter constructs LeastCostSorter
+func NewLeastCostSorter(lcrS *SupplierService) *LeastCostSorter {
+	return &LeastCostSorter{lcrS: lcrS}
 }
 
-// LeastCostStrategy orders suppliers based on lowest cost
-type LeastCostStrategy struct {
+// LeastCostSorter orders suppliers based on lowest cost
+type LeastCostSorter struct {
 	lcrS *SupplierService
 }
 
-func (lcs *LeastCostStrategy) SortSuppliers(prflID string,
+func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
 	return
 }
 
-func NewWeightStrategy() *WeightStrategy {
-	return &WeightStrategy{Sorting: utils.MetaWeight}
+func NewWeightSorter() *WeightSorter {
+	return &WeightSorter{Sorting: utils.MetaWeight}
 }
 
-// WeightStrategy orders suppliers based on their weight, no cost involved
-type WeightStrategy struct {
+// WeightSorter orders suppliers based on their weight, no cost involved
+type WeightSorter struct {
 	Sorting string
 }
 
-func (ws *WeightStrategy) SortSuppliers(prflID string,
+func (ws *WeightSorter) SortSuppliers(prflID string,
 	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
 	suppls.Sort()
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
