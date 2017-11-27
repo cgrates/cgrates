@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"regexp"
 	"strings"
@@ -67,7 +68,7 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 	for i := 0; i < typ.NumField(); i++ {
 		valField := val.Field(i)
 		typeField := typ.Field(i)
-		//log.Printf("%v (%v : %v)", typeField.Name, valField.Kind(), typeField.PkgPath)
+		log.Printf("%v (%v : %v)", typeField.Name, valField.Kind(), typeField.PkgPath)
 		if len(typeField.PkgPath) > 0 { //unexported field
 			continue
 		}
@@ -76,7 +77,7 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 			if valField.Kind() == reflect.Ptr {
 				valField = reflect.New(valField.Type().Elem()).Elem()
 				if valField.Kind() != reflect.Struct {
-					//log.Printf("Here: %v (%v)", typeField.Name, valField.Kind())
+					log.Printf("Here: %v (%v)", typeField.Name, valField.Kind())
 					args = append(args, typeField.Name)
 					continue
 				}
