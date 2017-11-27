@@ -492,25 +492,28 @@ CREATE TABLE tp_filters (
 --
 
 
-DROP TABLE IF EXISTS tp_lcr;
-CREATE TABLE tp_lcr (
+DROP TABLE IF EXISTS tp_suppliers;
+CREATE TABLE tp_suppliers (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
-  `strategy` varchar(32) NOT NULL,
-  `strategy_params` varchar(64) NOT NULL,
+  `sorting` varchar(32) NOT NULL,
+  `sorting_params` varchar(64) NOT NULL,
   `supplier_id` varchar(32) NOT NULL,
-  `ratingplan_ids` varchar(64) NOT NULL,
   `supplier_filter_ids` varchar(64) NOT NULL,
+  `supplier_ratingplan_ids` varchar(64) NOT NULL,
+  `supplier_resource_ids` varchar(64) NOT NULL,
+  `supplier_stat_ids` varchar(64) NOT NULL,
   `supplier_weight` decimal(8,2) NOT NULL,
+  `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_lcr` (`tpid`,`tenant`, `id`,`filter_ids`,`supplier_id`,`supplier_filter_ids`,`ratingplan_ids` )
+  UNIQUE KEY `unique_tp_suppliers` (`tpid`,`tenant`, `id`,`filter_ids`,`supplier_id` )
 );
 
 --

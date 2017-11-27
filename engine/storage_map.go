@@ -171,7 +171,7 @@ func (ms *MapStorage) HasDataDrv(categ, subject string) (bool, error) {
 	switch categ {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix, utils.FilterPrefix, utils.LCRProfilePrefix:
+		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix, utils.FilterPrefix, utils.SupplierProfilePrefix:
 		_, exists := ms.dict[categ+subject]
 		return exists, nil
 	}
@@ -1383,10 +1383,10 @@ func (ms *MapStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetLCRProfileDrv(tenant, id string) (r *LCRProfile, err error) {
+func (ms *MapStorage) GetSupplierProfileDrv(tenant, id string) (r *SupplierProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	values, ok := ms.dict[utils.LCRProfilePrefix+utils.ConcatenatedKey(tenant, id)]
+	values, ok := ms.dict[utils.SupplierProfilePrefix+utils.ConcatenatedKey(tenant, id)]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
@@ -1397,21 +1397,21 @@ func (ms *MapStorage) GetLCRProfileDrv(tenant, id string) (r *LCRProfile, err er
 	return
 }
 
-func (ms *MapStorage) SetLCRProfileDrv(r *LCRProfile) (err error) {
+func (ms *MapStorage) SetSupplierProfileDrv(r *SupplierProfile) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(r)
 	if err != nil {
 		return err
 	}
-	ms.dict[utils.LCRProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	ms.dict[utils.SupplierProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
 	return
 }
 
-func (ms *MapStorage) RemoveLCRProfileDrv(tenant, id string) (err error) {
+func (ms *MapStorage) RemoveSupplierProfileDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.LCRProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	key := utils.SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
 	return
 }

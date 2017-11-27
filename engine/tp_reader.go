@@ -57,18 +57,18 @@ type TpReader struct {
 	sqProfiles       map[utils.TenantID]*utils.TPStats
 	thProfiles       map[utils.TenantID]*utils.TPThreshold
 	filters          map[utils.TenantID]*utils.TPFilter
-	lcrProfiles      map[utils.TenantID]*utils.TPLCR
+	sppProfiles      map[utils.TenantID]*utils.TPSupplier
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
-	lcrTntID         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
+	suppliers        []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
 	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
 	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
 	resIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	lcrIndexers  map[string]*ReqFilterIndexer // tenant, indexer
+	sppIndexers  map[string]*ReqFilterIndexer // tenant, indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -139,7 +139,7 @@ func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResource)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
-	tpr.lcrProfiles = make(map[utils.TenantID]*utils.TPLCR)
+	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplier)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilter)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -147,7 +147,7 @@ func (tpr *TpReader) Init() {
 	tpr.thdsIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.resIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.lcrIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.sppIndexers = make(map[string]*ReqFilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1765,26 +1765,26 @@ func (tpr *TpReader) LoadFilters() error {
 	return tpr.LoadFiltersFiltered("")
 }
 
-func (tpr *TpReader) LoadLCRProfilesFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPLCRProfiles(tpr.tpid, tag)
+func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPSuppliers(tpr.tpid, tag)
 	if err != nil {
 		return err
 	}
-	mapRsPfls := make(map[utils.TenantID]*utils.TPLCR)
+	mapRsPfls := make(map[utils.TenantID]*utils.TPSupplier)
 	for _, rl := range rls {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
-	tpr.lcrProfiles = mapRsPfls
+	tpr.sppProfiles = mapRsPfls
 	for tntID, res := range mapRsPfls {
-		resIndxrKey := utils.LCRProfilesStringIndex + tntID.Tenant
-		if has, err := tpr.dm.HasData(utils.LCRProfilePrefix, tntID.TenantID()); err != nil {
+		resIndxrKey := utils.SupplierProfilesStringIndex + tntID.Tenant
+		if has, err := tpr.dm.HasData(utils.SupplierProfilePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
-			tpr.lcrTntID = append(tpr.lcrTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+			tpr.suppliers = append(tpr.suppliers, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index lcr profile for filters
-		if _, has := tpr.lcrIndexers[tntID.Tenant]; !has {
-			if tpr.lcrIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
+		if _, has := tpr.sppIndexers[tntID.Tenant]; !has {
+			if tpr.sppIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
 				return
 			}
 		}
@@ -1801,15 +1801,15 @@ func (tpr *TpReader) LoadLCRProfilesFiltered(tag string) (err error) {
 					tpFltr = FilterToTPFilter(fltr)
 				}
 			} else {
-				tpr.lcrIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+				tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
 			}
 		}
 	}
 	return nil
 }
 
-func (tpr *TpReader) LoadLCRProfiles() error {
-	return tpr.LoadLCRProfilesFiltered("")
+func (tpr *TpReader) LoadSupplierProfiles() error {
+	return tpr.LoadSupplierProfilesFiltered("")
 }
 
 func (tpr *TpReader) LoadAll() (err error) {
@@ -1873,7 +1873,7 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadLCRProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+	if err = tpr.LoadSupplierProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -2212,14 +2212,14 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 
 	if verbose {
-		log.Print("LCR Profiles:")
+		log.Print("SupplierProfiles:")
 	}
-	for _, tpTH := range tpr.lcrProfiles {
-		th, err := APItoLCRProfile(tpTH, tpr.timezone)
+	for _, tpTH := range tpr.sppProfiles {
+		th, err := APItoSupplierProfile(tpTH, tpr.timezone)
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetLCRProfile(th); err != nil {
+		if err = tpr.dm.SetSupplierProfile(th); err != nil {
 			return err
 		}
 		if verbose {
@@ -2300,9 +2300,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 
 		if verbose {
-			log.Print("Indexing LCR Profiles")
+			log.Print("Indexing Supplier Profiles")
 		}
-		for tenant, fltrIdxer := range tpr.lcrIndexers {
+		for tenant, fltrIdxer := range tpr.sppIndexers {
 			if err := fltrIdxer.StoreIndexes(); err != nil {
 				return err
 			}
@@ -2380,7 +2380,7 @@ func (tpr *TpReader) ShowStatistics() {
 	// filters
 	log.Print("Filters: ", len(tpr.filters))
 	// LCR profiles
-	log.Print("LCRProfiles: ", len(tpr.lcrProfiles))
+	log.Print("SupplierProfiles: ", len(tpr.sppProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2538,10 +2538,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.LCRProfilePrefix:
-		keys := make([]string, len(tpr.lcrProfiles))
+	case utils.SupplierProfilePrefix:
+		keys := make([]string, len(tpr.sppProfiles))
 		i := 0
-		for k, _ := range tpr.lcrProfiles {
+		for k, _ := range tpr.sppProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}

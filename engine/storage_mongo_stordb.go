@@ -1227,15 +1227,15 @@ func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilter) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error) {
+func (ms *MongoStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPLCR
-	session, col := ms.conn(utils.TBLTPLcr)
+	var results []*utils.TPSupplier
+	session, col := ms.conn(utils.TBLTPSuppliers)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
 	if len(results) == 0 {
@@ -1244,14 +1244,14 @@ func (ms *MongoStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPLCRProfiles(tpTHs []*utils.TPLCR) (err error) {
-	if len(tpTHs) == 0 {
+func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplier) (err error) {
+	if len(tpSPs) == 0 {
 		return
 	}
-	session, col := ms.conn(utils.TBLTPLcr)
+	session, col := ms.conn(utils.TBLTPSuppliers)
 	defer session.Close()
 	tx := col.Bulk()
-	for _, tp := range tpTHs {
+	for _, tp := range tpSPs {
 		tx.Upsert(bson.M{"tpid": tp.TPid, "id": tp.ID}, tp)
 	}
 	_, err = tx.Run()

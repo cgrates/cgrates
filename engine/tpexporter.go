@@ -273,14 +273,14 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataTPLCR, err := self.storDb.GetTPLCRProfiles(self.tpID, "")
+	storDataSuppliers, err := self.storDb.GetTPSuppliers(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-	for _, sd := range storDataTPLCR {
-		sdModels := APItoModelTPLCRProfile(sd)
+	for _, sd := range storDataSuppliers {
+		sdModels := APItoModelTPSuppliers(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.LCRCsv] = append(toExportMap[utils.LCRCsv], sdModel)
+			toExportMap[utils.SuppliersCsv] = append(toExportMap[utils.SuppliersCsv], sdModel)
 		}
 	}
 

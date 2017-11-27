@@ -290,10 +290,9 @@ cgrates.org,FLTR_ACNT_dan,*string,Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 `
-	lcrProfiles = `
-#Tenant,ID,FilterIDs,ActivationInterval,Strategy,StrategyParams,SupplierID,SupplierFilterIDs,RatingPlanIDs,SupplierWeight,Weight
-cgrates.org,LCR_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,FLTR_ACNT_dan,RPL_1,10,20
-cgrates.org,LCR_1,,,,,supplier2,FLTR_DST_DE,RPL_2,20,
+	sppProfiles = `
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParams,SupplierID,SupplierFilterIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,Blocker,Weight
+cgrates.org,SPP_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,FLTR_ACNT_dan,RPL_1,ResGroup1,Stat1,10,true,20
 `
 )
 
@@ -301,7 +300,7 @@ var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resProfiles, stats, thresholds, filters, lcrProfiles), testTPID, "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resProfiles, stats, thresholds, filters, sppProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
@@ -363,8 +362,8 @@ func init() {
 	if err := csvr.LoadThresholds(); err != nil {
 		log.Print("error in LoadThresholds:", err)
 	}
-	if err := csvr.LoadLCRProfiles(); err != nil {
-		log.Print("error in LoadLCRProfiles:", err)
+	if err := csvr.LoadSupplierProfiles(); err != nil {
+		log.Print("error in LoadSupplierProfiles:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
@@ -1619,40 +1618,37 @@ func TestLoadFilters(t *testing.T) {
 	}
 }
 
-func TestLoadLCRProfiles(t *testing.T) {
-	eLCRprofiles := map[utils.TenantID]*utils.TPLCR{
-		utils.TenantID{Tenant: "cgrates.org", ID: "LCR_1"}: &utils.TPLCR{
+func TestLoadSupplierProfiles(t *testing.T) {
+	eSppProfiles := map[utils.TenantID]*utils.TPSupplier{
+		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPSupplier{
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
-			ID:        "LCR_1",
+			ID:        "SPP_1",
 			FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			Strategy:       "*lowest_cost",
-			StrategyParams: []string{},
-			Suppliers: []*utils.TPLCRSupplier{
-				&utils.TPLCRSupplier{
+			Sorting:       "*lowest_cost",
+			SortingParams: []string{},
+			Suppliers: []*utils.TPRequestSupplier{
+				&utils.TPRequestSupplier{
 					ID:            "supplier1",
-					RatingPlanIDs: []string{"RPL_1"},
 					FilterIDs:     []string{"FLTR_ACNT_dan"},
+					RatingPlanIDs: []string{"RPL_1"},
+					ResourceIDs:   []string{"ResGroup1"},
+					StatIDs:       []string{"Stat1"},
 					Weight:        10,
 				},
-				&utils.TPLCRSupplier{
-					ID:            "supplier2",
-					RatingPlanIDs: []string{"RPL_2"},
-					FilterIDs:     []string{"FLTR_DST_DE"},
-					Weight:        20,
-				},
 			},
-			Weight: 20,
+			Blocker: true,
+			Weight:  20,
 		},
 	}
-	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "LCR_1"}
-	if len(csvr.lcrProfiles) != len(eLCRprofiles) {
-		t.Errorf("Failed to load LCRProfiles: %s", utils.ToIJSON(csvr.lcrProfiles))
-	} else if !reflect.DeepEqual(eLCRprofiles[resKey], csvr.lcrProfiles[resKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eLCRprofiles[resKey], csvr.lcrProfiles[resKey])
+	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}
+	if len(csvr.sppProfiles) != len(eSppProfiles) {
+		t.Errorf("Failed to load SupplierProfiles: %s", utils.ToIJSON(csvr.sppProfiles))
+	} else if !reflect.DeepEqual(eSppProfiles[resKey], csvr.sppProfiles[resKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eSppProfiles[resKey], csvr.sppProfiles[resKey])
 	}
 }
 

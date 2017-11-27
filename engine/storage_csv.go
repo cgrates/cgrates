@@ -33,26 +33,26 @@ type CSVStorage struct {
 	readerFunc func(string, rune, int) (*csv.Reader, *os.File, error)
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
-	sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, lcrProfilesFn string
+	sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn string
 }
 
 func NewFileCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, lcrProfilesFn string) *CSVStorage {
+	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn string) *CSVStorage {
 	c := new(CSVStorage)
 	c.sep = sep
 	c.readerFunc = openFileCSVStorage
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
-		c.sharedgroupsFn, c.lcrFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn, c.derivedChargersFn, c.cdrStatsFn, c.usersFn, c.aliasesFn, c.resProfilesFn, c.statsFn, c.thresholdsFn, c.filterFn, c.lcrProfilesFn = destinationsFn, timingsFn,
-		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, lcrProfilesFn
+		c.sharedgroupsFn, c.lcrFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn, c.derivedChargersFn, c.cdrStatsFn, c.usersFn, c.aliasesFn, c.resProfilesFn, c.statsFn, c.thresholdsFn, c.filterFn, c.suppProfilesFn = destinationsFn, timingsFn,
+		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn
 	return c
 }
 
 func NewStringCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, lcrProfilesFn string) *CSVStorage {
+	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn string) *CSVStorage {
 	c := NewFileCSVStorage(sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn,
-		ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, lcrProfilesFn)
+		ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn)
 	c.readerFunc = openStringCSVStorage
 	return c
 }
@@ -705,8 +705,8 @@ func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 	return tpFilter.AsTPFilter(), nil
 }
 
-func (csvs *CSVStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.lcrProfilesFn, csvs.sep, getColumnCount(TpLCR{}))
+func (csvs *CSVStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, error) {
+	csvReader, fp, err := csvs.readerFunc(csvs.suppProfilesFn, csvs.sep, getColumnCount(TpSupplier{}))
 	if err != nil {
 		//log.Print("Could not load lcrProfile file: ", err)
 		// allow writing of the other values
@@ -715,22 +715,22 @@ func (csvs *CSVStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpLCRS TpLCRs
+	var tpSPPs TpSuppliers
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Printf("bad line in %s, %s\n", csvs.thresholdsFn, err.Error())
 			return nil, err
 		}
-		if lcrProfile, err := csvLoad(TpLCR{}, record); err != nil {
-			log.Print("error loading tpLCRS: ", err)
+		if suppProfile, err := csvLoad(TpSupplier{}, record); err != nil {
+			log.Print("error loading tpSupplier: ", err)
 			return nil, err
 		} else {
-			lcrProfile := lcrProfile.(TpLCR)
-			lcrProfile.Tpid = tpid
-			tpLCRS = append(tpLCRS, &lcrProfile)
+			suppProfile := suppProfile.(TpSupplier)
+			suppProfile.Tpid = tpid
+			tpSPPs = append(tpSPPs, &suppProfile)
 		}
 	}
-	return tpLCRS.AsTPLCRProfile(), nil
+	return tpSPPs.AsTPSuppliers(), nil
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {

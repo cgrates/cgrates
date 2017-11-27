@@ -25,7 +25,7 @@ import (
 )
 
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
-func NewSupplierSortDispatcher(lcrS *LCRService) (ssd SupplierSortDispatcher, err error) {
+func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatcher, err error) {
 	ssd = make(map[string]SuppliersSorting)
 	ssd[utils.MetaWeight] = NewWeightStrategy()
 	ssd[utils.MetaLeastCost] = NewLeastCostStrategy(lcrS)
@@ -37,7 +37,7 @@ func NewSupplierSortDispatcher(lcrS *LCRService) (ssd SupplierSortDispatcher, er
 type SupplierSortDispatcher map[string]SuppliersSorting
 
 func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
-	suppls LCRSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
@@ -46,21 +46,21 @@ func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
 }
 
 type SuppliersSorting interface {
-	SortSuppliers(string, LCRSuppliers) (*SortedSuppliers, error)
+	SortSuppliers(string, Suppliers) (*SortedSuppliers, error)
 }
 
 // NewLeastCostStrategy constructs LeastCostStrategy
-func NewLeastCostStrategy(lcrS *LCRService) *LeastCostStrategy {
+func NewLeastCostStrategy(lcrS *SupplierService) *LeastCostStrategy {
 	return &LeastCostStrategy{lcrS: lcrS}
 }
 
 // LeastCostStrategy orders suppliers based on lowest cost
 type LeastCostStrategy struct {
-	lcrS *LCRService
+	lcrS *SupplierService
 }
 
 func (lcs *LeastCostStrategy) SortSuppliers(prflID string,
-	suppls LCRSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
 	return
 }
 
@@ -74,7 +74,7 @@ type WeightStrategy struct {
 }
 
 func (ws *WeightStrategy) SortSuppliers(prflID string,
-	suppls LCRSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
 	suppls.Sort()
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         ws.Sorting,

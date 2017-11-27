@@ -136,7 +136,7 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheFilters: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheLCRProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+		utils.CacheSupplierProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
 	}

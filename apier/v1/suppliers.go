@@ -23,40 +23,40 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// GetLCRProfile returns a LCDR configuration
-func (apierV1 *ApierV1) GetLCRProfile(arg utils.TenantID, reply *engine.LCRProfile) error {
+// GetSupplierProfile returns a Supplier configuration
+func (apierV1 *ApierV1) GetSupplierProfile(arg utils.TenantID, reply *engine.SupplierProfile) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rcfg, err := apierV1.DataManager.GetLCRProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+	if spp, err := apierV1.DataManager.GetSupplierProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
 	} else {
-		*reply = *rcfg
+		*reply = *spp
 	}
 	return nil
 }
 
-//SetLCRProfile add a new LCR configuration
-func (apierV1 *ApierV1) SetLCRProfile(res *engine.LCRProfile, reply *string) error {
-	if missing := utils.MissingStructFields(res, []string{"Tenant", "ID"}); len(missing) != 0 {
+//SetSupplierProfile add a new Supplier configuration
+func (apierV1 *ApierV1) SetSupplierProfile(spp *engine.SupplierProfile, reply *string) error {
+	if missing := utils.MissingStructFields(spp, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.SetLCRProfile(res); err != nil {
+	if err := apierV1.DataManager.SetSupplierProfile(spp); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//RemResourceProfile remove a specific resource configuration
-func (apierV1 *ApierV1) RemLCRProfile(arg utils.TenantID, reply *string) error {
+//RemSupplierProfile remove a specific Supplier configuration
+func (apierV1 *ApierV1) RemSupplierProfile(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.RemoveLCRProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.RemoveSupplierProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

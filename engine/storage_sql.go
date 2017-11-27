@@ -108,7 +108,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPActionTriggers, utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
 		utils.TBLTPAliases, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SMCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
-		utils.TBLVersions, utils.TBLTPLcr,
+		utils.TBLVersions, utils.TBLTPSuppliers,
 	}
 	for _, tbl := range tbls {
 		if self.db.HasTable(tbl) {
@@ -148,7 +148,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPThresholds,
 			utils.TBLTPFilters,
 			utils.TBLTPActionPlans,
-			utils.TBLTPLcr)
+			utils.TBLTPSuppliers)
 	}
 	rows, err = self.Db.Query(qryStr)
 	if err != nil {
@@ -236,7 +236,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPLcr} {
+			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPSuppliers} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -691,18 +691,18 @@ func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilter) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPLCRProfiles(sts []*utils.TPLCR) error {
-	if len(sts) == 0 {
+func (self *SQLStorage) SetTPSuppliers(tpSPs []*utils.TPSupplier) error {
+	if len(tpSPs) == 0 {
 		return nil
 	}
 	tx := self.db.Begin()
-	for _, stq := range sts {
+	for _, stq := range tpSPs {
 		// Remove previous
-		if err := tx.Where(&TpLCR{Tpid: stq.TPid, ID: stq.ID}).Delete(TpLCR{}).Error; err != nil {
+		if err := tx.Where(&TpSupplier{Tpid: stq.TPid, ID: stq.ID}).Delete(TpSupplier{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, mst := range APItoModelTPLCRProfile(stq) {
+		for _, mst := range APItoModelTPSuppliers(stq) {
 			if err := tx.Save(&mst).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1556,16 +1556,16 @@ func (self *SQLStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 	return aths, nil
 }
 
-func (self *SQLStorage) GetTPLCRProfiles(tpid, id string) ([]*utils.TPLCR, error) {
-	var rls TpLCRs
+func (self *SQLStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, error) {
+	var sps TpSuppliers
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
 	}
-	if err := q.Find(&rls).Error; err != nil {
+	if err := q.Find(&sps).Error; err != nil {
 		return nil, err
 	}
-	arls := rls.AsTPLCRProfile()
+	arls := sps.AsTPSuppliers()
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}
