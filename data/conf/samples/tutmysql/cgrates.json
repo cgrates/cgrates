@@ -5,7 +5,6 @@
 
 "general": {
 	"log_level": 7,
-	"logger":"*stdout",
 },
 
 
