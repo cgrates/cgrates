@@ -604,6 +604,11 @@ const (
 	MetaSetVersions = "*set_versions"
 )
 
+// MetaSupplierAPIs
+const (
+	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {

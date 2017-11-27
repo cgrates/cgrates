@@ -746,6 +746,18 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDfSupplierSJsonCfg(t *testing.T) {
+	eCfg := &SupplierSJsonCfg{
+		Enabled:        utils.BoolPointer(false),
+		Indexed_fields: utils.StringSlicePointer([]string{}),
+	}
+	if cfg, err := dfCgrJsonCfg.SupplierSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("expecting: %+v, received: %+v", eCfg, cfg)
+	}
+}
+
 func TestDfMailerJsonCfg(t *testing.T) {
 	eCfg := &MailerJsonCfg{
 		Server:        utils.StringPointer("localhost"),

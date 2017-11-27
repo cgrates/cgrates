@@ -276,6 +276,7 @@ type CGRConfig struct {
 	resourceSCfg             *ResourceSConfig         // Configuration for resource limiter
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	thresholdSCfg            *ThresholdSCfg           // configuration for ThresholdS
+	supplierSCfg             *SupplierSCfg            // configuration for SupplierS
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -676,6 +677,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	jsnThresholdSCfg, err := jsnCfg.ThresholdSJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnSupplierSCfg, err := jsnCfg.SupplierSJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1167,6 +1173,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
+	if jsnSupplierSCfg != nil {
+		if self.supplierSCfg == nil {
+			self.supplierSCfg = new(SupplierSCfg)
+		}
+		if self.supplierSCfg.loadFromJsonCfg(jsnSupplierSCfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnUserServCfg != nil {
 		if jsnUserServCfg.Enabled != nil {
 			self.UserServerEnabled = *jsnUserServCfg.Enabled
@@ -1232,6 +1247,10 @@ func (cfg *CGRConfig) StatSCfg() *StatSCfg {
 
 func (cfg *CGRConfig) ThresholdSCfg() *ThresholdSCfg {
 	return cfg.thresholdSCfg
+}
+
+func (cfg *CGRConfig) SuplierSCfg() *SupplierSCfg {
+	return cfg.supplierSCfg
 }
 
 // ToDo: fix locking here

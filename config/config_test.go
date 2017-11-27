@@ -667,7 +667,17 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		IndexedFields: []string{},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
-		t.Errorf("received: %+v, expecting: %+v", eThresholdSCfg, cgrCfg.statsCfg)
+		t.Errorf("received: %+v, expecting: %+v", eThresholdSCfg, cgrCfg.thresholdSCfg)
+	}
+}
+
+func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
+	eSupplSCfg := &SupplierSCfg{
+		Enabled:       false,
+		IndexedFields: []string{},
+	}
+	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.supplierSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", eSupplSCfg, cgrCfg.supplierSCfg)
 	}
 }
 

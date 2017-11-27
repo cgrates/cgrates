@@ -60,6 +60,7 @@ const (
 	RESOURCES_JSON  = "resources"
 	STATS_JSON      = "stats"
 	THRESHOLDS_JSON = "thresholds"
+	SupplierSJson   = "suppliers"
 	FILTERS_JSON    = "filters"
 	MAILER_JSN      = "mailer"
 	SURETAX_JSON    = "suretax"
@@ -394,6 +395,18 @@ func (self CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(ThresholdSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) SupplierSJsonCfg() (*SupplierSJsonCfg, error) {
+	rawCfg, hasKey := self[SupplierSJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(SupplierSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

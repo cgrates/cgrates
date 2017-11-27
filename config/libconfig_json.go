@@ -410,6 +410,12 @@ type ThresholdSJsonCfg struct {
 	Indexed_fields *[]string
 }
 
+// Supplier service config section
+type SupplierSJsonCfg struct {
+	Enabled        *bool
+	Indexed_fields *[]string
+}
+
 // Mailer config section
 type MailerJsonCfg struct {
 	Server        *string

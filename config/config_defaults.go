@@ -446,6 +446,12 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"suppliers": {
+	"enabled": false,				// starts SupplierS service: <true|false>.
+	"indexed_fields": [],			// query indexes based on these fields for faster processing
+},
+
+
 "mailer": {
 	"server": "localhost",								// the server to use when sending emails out
 	"auth_user": "cgrates",								// authenticate to email server using this user
