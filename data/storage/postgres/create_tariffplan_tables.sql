@@ -507,7 +507,9 @@ CREATE TABLE tp_filters (
     "created_at" TIMESTAMP WITH TIME ZONE
   );
  CREATE INDEX tp_suppliers_idx ON tp_suppliers (tpid);
- CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id", "filter_ids","supplier_id");
+ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
+   "filter_ids","supplier_id","supplier_filter_ids","supplier_ratingplan_ids",
+   "supplier_resource_ids","supplier_stat_ids");
 
 
 --

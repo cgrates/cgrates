@@ -539,7 +539,3 @@ type TpSupplier struct {
 	Weight                float64 `index:"13" re:"\d+\.?\d*"`
 	CreatedAt             time.Time
 }
-
-func (t TpSupplier) TableName() string {
-	return utils.TBLTPSuppliers
-}

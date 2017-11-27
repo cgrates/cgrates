@@ -513,7 +513,9 @@ CREATE TABLE tp_suppliers (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_suppliers` (`tpid`,`tenant`, `id`,`filter_ids`,`supplier_id` )
+  UNIQUE KEY `unique_tp_suppliers` (`tpid`,`tenant`,
+    `id`,`filter_ids`,`supplier_id`,`supplier_filter_ids`,
+    `supplier_ratingplan_ids`,`supplier_resource_ids`,`supplier_stat_ids` )
 );
 
 --
