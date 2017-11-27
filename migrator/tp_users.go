@@ -41,6 +41,7 @@ func (m *Migrator) migrateCurrentTPusers() (err error) {
 				if err := m.OutStorDB().SetTPUsers(dest); err != nil {
 					return err
 				}
+				m.stats[utils.TpUsers] += 1
 			}
 		}
 
@@ -65,7 +66,7 @@ func (m *Migrator) migrateTPusers() (err error) {
 	}
 	switch vrs[utils.TpUsers] {
 	case current[utils.TpUsers]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPusers(); err != nil {

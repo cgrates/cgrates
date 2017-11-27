@@ -61,10 +61,10 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 		}
 		if acts != nil {
 			if m.dryRun != true {
-
 				if err := m.dmOut.DataDB().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
 					return err
 				}
+				m.stats[utils.ActionPlans] += 1
 			}
 		}
 	}
@@ -123,14 +123,13 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	}
 	switch vrs[utils.ActionPlans] {
 	case current[utils.ActionPlans]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentActionPlans(); err != nil {
 			return err
 		}
 		return
-
 	case 1:
 		if err := m.migrateV1ActionPlans(); err != nil {
 			return err

@@ -47,6 +47,7 @@ func (m *Migrator) migrateCurrentTPresources() (err error) {
 					if err := m.OutStorDB().SetTPResources(dest); err != nil {
 						return err
 					}
+					m.stats[utils.TpResources] += 1
 				}
 			}
 		}
@@ -71,7 +72,7 @@ func (m *Migrator) migrateTPresources() (err error) {
 	}
 	switch vrs[utils.TpResources] {
 	case current[utils.TpResources]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPresources(); err != nil {

@@ -46,6 +46,7 @@ func (m *Migrator) migrateCurrentTPDestinations() (err error) {
 					if err := m.OutStorDB().SetTPDestinations(dest); err != nil {
 						return err
 					}
+					m.stats[utils.TpDestinations] += 1
 				}
 			}
 		}
@@ -70,7 +71,7 @@ func (m *Migrator) migrateTPDestinations() (err error) {
 	}
 	switch vrs[utils.TpDestinations] {
 	case current[utils.TpDestinations]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPDestinations(); err != nil {

@@ -30,7 +30,6 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 	if err != nil {
 		return err
 	}
-
 	for _, tpid := range tpids {
 		dest, err := m.InStorDB().GetTPAliases(&utils.TPAliases{TPid: tpid})
 		if err != nil {
@@ -41,6 +40,7 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 				if err := m.OutStorDB().SetTPAliases(dest); err != nil {
 					return err
 				}
+				m.stats[utils.TpAliases] += 1
 			}
 		}
 	}
@@ -65,7 +65,7 @@ func (m *Migrator) migrateTPaliases() (err error) {
 	}
 	switch vrs[utils.TpAliases] {
 	case current[utils.TpAliases]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPaliases(); err != nil {

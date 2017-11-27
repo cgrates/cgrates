@@ -43,6 +43,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 				if err := m.dmOut.SetReqFilterIndexes(id, rq); err != nil {
 					return err
 				}
+				m.stats[utils.RQF] += 1
 			}
 		}
 	}
@@ -66,7 +67,7 @@ func (m *Migrator) migrateRequestFilter() (err error) {
 	}
 	switch vrs[utils.RQF] {
 	case current[utils.RQF]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentRequestFilter(); err != nil {

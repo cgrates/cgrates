@@ -78,6 +78,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 				if err := m.dmOut.SetStatQueue(sgs); err != nil {
 					return err
 				}
+				m.stats[utils.StatS] += 1
 			}
 		}
 	}
@@ -171,7 +172,7 @@ func (m *Migrator) migrateStats() (err error) {
 	}
 	switch vrs[utils.StatS] {
 	case current[utils.StatS]:
-		if m.sameDBname {
+		if m.sameDataDB {
 			return
 		}
 		if err := m.migrateCurrentStats(); err != nil {

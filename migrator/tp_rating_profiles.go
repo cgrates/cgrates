@@ -42,6 +42,7 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 				if err := m.OutStorDB().SetTPRatingProfiles(dest); err != nil {
 					return err
 				}
+				m.stats[utils.TpRatingProfiles] += 1
 			}
 		}
 	}
@@ -65,7 +66,7 @@ func (m *Migrator) migrateTPratingprofiles() (err error) {
 	}
 	switch vrs[utils.TpRatingProfiles] {
 	case current[utils.TpRatingProfiles]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPratingprofiles(); err != nil {

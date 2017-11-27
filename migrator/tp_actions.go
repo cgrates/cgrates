@@ -30,14 +30,12 @@ func (m *Migrator) migrateCurrentTPactions() (err error) {
 	if err != nil {
 		return err
 	}
-
 	for _, tpid := range tpids {
 		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPActions, utils.TPDistinctIds{}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-
 			dest, err := m.InStorDB().GetTPActions(tpid, id)
 			if err != nil {
 				return err
@@ -47,6 +45,7 @@ func (m *Migrator) migrateCurrentTPactions() (err error) {
 					if err := m.OutStorDB().SetTPActions(dest); err != nil {
 						return err
 					}
+					m.stats[utils.TpActions] += 1
 				}
 			}
 		}
@@ -71,7 +70,7 @@ func (m *Migrator) migrateTPactions() (err error) {
 	}
 	switch vrs[utils.TpActions] {
 	case current[utils.TpActions]:
-		if m.sameDBname {
+		if m.sameStorDB {
 			return
 		}
 		if err := m.migrateCurrentTPactions(); err != nil {
