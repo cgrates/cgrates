@@ -18,9 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+// SupplierSCfg is the configuration of supplier service
 type SupplierSCfg struct {
-	Enabled       bool
-	IndexedFields []string
+	Enabled        bool
+	IndexedFields  []string
+	RALsConns      []*HaPoolConfig
+	ResourceSConns []*HaPoolConfig
+	StatSConns     []*HaPoolConfig
 }
 
 func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
@@ -34,6 +38,27 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 		spl.IndexedFields = make([]string, len(*jsnCfg.Indexed_fields))
 		for i, fID := range *jsnCfg.Indexed_fields {
 			spl.IndexedFields[i] = fID
+		}
+	}
+	if jsnCfg.Rals_conns != nil {
+		spl.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
+			spl.RALsConns[idx] = NewDfltHaPoolConfig()
+			spl.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Resources_conns != nil {
+		spl.ResourceSConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
+			spl.ResourceSConns[idx] = NewDfltHaPoolConfig()
+			spl.ResourceSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Stats_conns != nil {
+		spl.StatSConns = make([]*HaPoolConfig, len(*jsnCfg.Stats_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
+			spl.StatSConns[idx] = NewDfltHaPoolConfig()
+			spl.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	return nil

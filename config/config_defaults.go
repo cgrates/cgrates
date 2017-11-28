@@ -449,6 +449,11 @@ const CGRATES_CFG_JSON = `
 "suppliers": {
 	"enabled": false,				// starts SupplierS service: <true|false>.
 	"indexed_fields": [],			// query indexes based on these fields for faster processing
+	"rals_conns": [
+		{"address": "*internal"},	// address where to reach the RALs for cost/accounting  <*internal>
+	],
+	"resources_conns": [],			// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+	"stats_conns": [],				// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 },
 
 

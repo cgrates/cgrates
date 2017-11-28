@@ -43,7 +43,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSLoadConfig,
 	testV1SplSInitDataDb,
 	testV1SplSResetStorDb,
-	testV1SplSStartEngine,
+	//testV1SplSStartEngine,
 	testV1SplSRpcConn,
 	testV1SplSFromFolder,
 	testV1SplSGetWeightSuppliers,
@@ -120,7 +120,10 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 	ev := &engine.SupplierEvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetWeightSuppliers",
-		Event:  map[string]interface{}{},
+		Event: map[string]interface{}{
+			"Account":     "1007",
+			"Destination": "+491511231234",
+		},
 	}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,

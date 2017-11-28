@@ -138,6 +138,11 @@
 },
 
 
+"suppliers": {
+	"enabled": true,
+},
+
+
 "historys": {
 	"enabled": true,
 },

@@ -537,6 +537,27 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// SupplierS checks
+	if self.supplierSCfg != nil && self.supplierSCfg.Enabled {
+		for _, connCfg := range self.supplierSCfg.RALsConns {
+			if connCfg.Address != utils.MetaInternal {
+				return errors.New("Only *internal connectivity allowed in SupplierS for now")
+			}
+			if connCfg.Address == utils.MetaInternal && !self.RALsEnabled {
+				return errors.New("RALs not enabled but requested by SupplierS component.")
+			}
+		}
+		for _, connCfg := range self.supplierSCfg.ResourceSConns {
+			if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
+				return errors.New("ResourceS not enabled but requested by SupplierS component.")
+			}
+		}
+		for _, connCfg := range self.supplierSCfg.StatSConns {
+			if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
+				return errors.New("StatS not enabled but requested by SupplierS component.")
+			}
+		}
+	}
 
 	return nil
 }
@@ -1249,7 +1270,7 @@ func (cfg *CGRConfig) ThresholdSCfg() *ThresholdSCfg {
 	return cfg.thresholdSCfg
 }
 
-func (cfg *CGRConfig) SuplierSCfg() *SupplierSCfg {
+func (cfg *CGRConfig) SupplierSCfg() *SupplierSCfg {
 	return cfg.supplierSCfg
 }
 

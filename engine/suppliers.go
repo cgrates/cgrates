@@ -141,7 +141,7 @@ type SupplierService struct {
 
 // ListenAndServe will initialize the service
 func (spS *SupplierService) ListenAndServe(exitChan chan bool) error {
-	utils.Logger.Info(fmt.Sprintf("<%s> start listening for requests", utils.SupplierS))
+	utils.Logger.Info("Starting Supplier Service")
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return nil
@@ -155,17 +155,18 @@ func (spS *SupplierService) Shutdown() error {
 }
 
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) (lps SupplierProfiles, err error) {
+func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) (sPrfls SupplierProfiles, err error) {
 	matchingLPs := make(map[string]*SupplierProfile)
-	lpIDs, err := matchingItemIDsForEvent(ev.Event, spS.indexedFields,
+	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.indexedFields,
 		spS.dm, utils.SupplierProfilesStringIndex+ev.Tenant)
+
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(lpIDs.Slice(), utils.SupplierProfilesStringIndex)
+	lockIDs := utils.PrefixSliceItems(sPrflIDs.Slice(), utils.SupplierProfilesStringIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
-	for lpID := range lpIDs {
+	for lpID := range sPrflIDs {
 		lcrPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -175,7 +176,11 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 		}
 		aTime, err := ev.AnswerTime(spS.timezone)
 		if err != nil {
-			return nil, err
+			if err == utils.ErrNotFound {
+				aTime = time.Now()
+			} else {
+				return nil, err
+			}
 		}
 		if lcrPrfl.ActivationInterval != nil &&
 			!lcrPrfl.ActivationInterval.IsActiveAtTime(aTime) { // not active
@@ -189,16 +194,16 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 		matchingLPs[lpID] = lcrPrfl
 	}
 	// All good, convert from Map to Slice so we can sort
-	lps = make(SupplierProfiles, len(matchingLPs))
+	sPrfls = make(SupplierProfiles, len(matchingLPs))
 	i := 0
-	for _, lp := range matchingLPs {
-		lps[i] = lp
+	for _, sPrfl := range matchingLPs {
+		sPrfls[i] = sPrfl
 		i++
 	}
-	lps.Sort()
-	for i, lp := range lps {
-		if lp.Blocker { // blocker will stop processing
-			lps = lps[:i+1]
+	sPrfls.Sort()
+	for i, sPrfl := range sPrfls {
+		if sPrfl.Blocker { // blocker will stop processing
+			sPrfls = sPrfls[:i+1]
 			break
 		}
 	}

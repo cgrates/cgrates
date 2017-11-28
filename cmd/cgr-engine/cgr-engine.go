@@ -634,6 +634,58 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 	internalThresholdSChan <- tSv1
 }
 
+// startSupplierService fires up the ThresholdS
+func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection,
+	cfg *config.CGRConfig, dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
+	var resourceSConn, statSConn *rpcclient.RpcClientPool
+	if len(cfg.SupplierSCfg().ResourceSConns) != 0 {
+		resourceSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cfg.ConnectAttempts, cfg.Reconnects,
+			cfg.ConnectTimeout, cfg.ReplyTimeout, cfg.SupplierSCfg().ResourceSConns,
+			internalRsChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResourceS: %s",
+				utils.SupplierS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.SupplierSCfg().StatSConns) != 0 {
+		statSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cfg.ConnectAttempts, cfg.Reconnects,
+			cfg.ConnectTimeout, cfg.ReplyTimeout, cfg.SupplierSCfg().StatSConns,
+			internalStatSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
+				utils.SupplierS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	splS, err := engine.NewSupplierService(dm, cfg.DefaultTimezone, filterS,
+		cfg.SupplierSCfg().IndexedFields, resourceSConn, statSConn)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
+			utils.SupplierS, err.Error()))
+		exitChan <- true
+		return
+	}
+	go func() {
+		if err := splS.ListenAndServe(exitChan); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets",
+				utils.SupplierS, err.Error()))
+		}
+		splS.Shutdown()
+		exitChan <- true
+		return
+	}()
+	splV1 := v1.NewSupplierSv1(splS)
+	server.RpcRegister(splV1)
+	internalSupplierSChan <- splV1
+}
+
 // startFilterService fires up the FilterS
 func startFilterService(filterSChan chan *engine.FilterS,
 	internalStatSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
@@ -818,6 +870,7 @@ func main() {
 	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalSupplierSChan := make(chan rpcclient.RpcClientConnection, 1)
 	filterSChan := make(chan *engine.FilterS, 1)
 
 	// Start ServiceManager
@@ -924,6 +977,11 @@ func main() {
 
 	if cfg.ThresholdSCfg().Enabled {
 		go startThresholdService(internalThresholdSChan, cfg, dm, server, exitChan, filterSChan)
+	}
+
+	if cfg.SupplierSCfg().Enabled {
+		go startSupplierService(internalSupplierSChan, internalRsChan, internalStatSChan,
+			cfg, dm, server, exitChan, filterSChan)
 	}
 
 	// Serve rpc connections

@@ -750,6 +750,13 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 	eCfg := &SupplierSJsonCfg{
 		Enabled:        utils.BoolPointer(false),
 		Indexed_fields: utils.StringSlicePointer([]string{}),
+		Rals_conns: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Address: utils.StringPointer("*internal"),
+			},
+		},
+		Resources_conns: &[]*HaPoolJsonCfg{},
+		Stats_conns:     &[]*HaPoolJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.SupplierSJsonCfg(); err != nil {
 		t.Error(err)

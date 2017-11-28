@@ -412,8 +412,11 @@ type ThresholdSJsonCfg struct {
 
 // Supplier service config section
 type SupplierSJsonCfg struct {
-	Enabled        *bool
-	Indexed_fields *[]string
+	Enabled         *bool
+	Indexed_fields  *[]string
+	Rals_conns      *[]*HaPoolJsonCfg
+	Resources_conns *[]*HaPoolJsonCfg
+	Stats_conns     *[]*HaPoolJsonCfg
 }
 
 // Mailer config section

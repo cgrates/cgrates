@@ -675,6 +675,11 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 	eSupplSCfg := &SupplierSCfg{
 		Enabled:       false,
 		IndexedFields: []string{},
+		RALsConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"},
+		},
+		ResourceSConns: []*HaPoolConfig{},
+		StatSConns:     []*HaPoolConfig{},
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.supplierSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eSupplSCfg, cgrCfg.supplierSCfg)

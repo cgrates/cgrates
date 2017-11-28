@@ -38,6 +38,7 @@ type SupplierSortDispatcher map[string]SuppliersSorter
 
 func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
 	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
+	fmt.Printf("Sort strategy: %s, suppliers: %s\n", strategy, utils.ToJSON(suppls))
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
@@ -75,6 +76,7 @@ type WeightSorter struct {
 
 func (ws *WeightSorter) SortSuppliers(prflID string,
 	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
+	fmt.Printf("Sort suppliers: %s\n", utils.ToJSON(suppls))
 	suppls.Sort()
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         ws.Sorting,
