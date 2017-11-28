@@ -2471,6 +2471,12 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 					sup.StatIDs = append(sup.StatIDs, sts)
 				}
 			}
+			if tp.SupplierAccountIDs != "" {
+				accSplit := strings.Split(tp.SupplierAccountIDs, utils.INFIELD_SEP)
+				for _, acc := range accSplit {
+					sup.AccountIDs = append(sup.AccountIDs, acc)
+				}
+			}
 			suppliersMap[tp.ID][tp.SupplierID] = sup
 		}
 		if tp.SortingParams != "" {
@@ -2546,6 +2552,12 @@ func APItoModelTPSuppliers(st *utils.TPSupplier) (mdls TpSuppliers) {
 			}
 		}
 		mdl.SupplierID = supl.ID
+		for i, val := range supl.AccountIDs {
+			if i != 0 {
+				mdl.SupplierAccountIDs += utils.INFIELD_SEP
+			}
+			mdl.SupplierAccountIDs += val
+		}
 		for i, val := range supl.RatingPlanIDs {
 			if i != 0 {
 				mdl.SupplierRatingplanIDs += utils.INFIELD_SEP

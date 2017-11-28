@@ -57,6 +57,7 @@ func (le *SupplierEvent) AnswerTime(timezone string) (at time.Time, err error) {
 type Supplier struct {
 	ID            string // SupplierID
 	FilterIDs     []string
+	AccountIDs    []string
 	RatingPlanIDs []string // used when computing price
 	ResourceIDs   []string // queried in some strategies
 	StatIDs       []string // queried in some strategies

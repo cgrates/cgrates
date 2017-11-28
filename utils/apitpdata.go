@@ -1360,6 +1360,7 @@ type TPRequestFilter struct {
 type TPRequestSupplier struct {
 	ID            string // SupplierID
 	FilterIDs     []string
+	AccountIDs    []string
 	RatingPlanIDs []string // used when computing price
 	ResourceIDs   []string // queried in some strategies
 	StatIDs       []string // queried in some strategies

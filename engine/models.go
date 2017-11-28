@@ -531,11 +531,12 @@ type TpSupplier struct {
 	SortingParams         string  `index:"5" re:""`
 	SupplierID            string  `index:"6" re:""`
 	SupplierFilterIDs     string  `index:"7" re:""`
-	SupplierRatingplanIDs string  `index:"8" re:""`
-	SupplierResourceIDs   string  `index:"9" re:""`
-	SupplierStatIDs       string  `index:"10" re:""`
-	SupplierWeight        float64 `index:"11" re:"\d+\.?\d*"`
-	Blocker               bool    `index:"12" re:""`
-	Weight                float64 `index:"13" re:"\d+\.?\d*"`
+	SupplierAccountIDs    string  `index:"8" re:""`
+	SupplierRatingplanIDs string  `index:"9" re:""`
+	SupplierResourceIDs   string  `index:"10" re:""`
+	SupplierStatIDs       string  `index:"11" re:""`
+	SupplierWeight        float64 `index:"12" re:"\d+\.?\d*"`
+	Blocker               bool    `index:"13" re:""`
+	Weight                float64 `index:"14" re:"\d+\.?\d*"`
 	CreatedAt             time.Time
 }
