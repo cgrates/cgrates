@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -80,6 +81,10 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 					args = append(args, typeField.Name)
 					continue
 				}
+			}
+			if _, canCast := valField.Interface().(time.Time); canCast {
+				args = append(args, typeField.Name)
+				continue
 			}
 			args = append(args, ce.clientArgs(valField.Interface())...)
 
