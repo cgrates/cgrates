@@ -23,6 +23,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -43,7 +44,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSLoadConfig,
 	testV1SplSInitDataDb,
 	testV1SplSResetStorDb,
-	//testV1SplSStartEngine,
+	testV1SplSStartEngine,
 	testV1SplSRpcConn,
 	testV1SplSFromFolder,
 	testV1SplSGetWeightSuppliers,
@@ -125,10 +126,31 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 			"Destination": "+491511231234",
 		},
 	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_WEIGHT_1",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					"Weight": 10.0,
+				},
+			},
+		},
+	}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
 	}
 }
 
