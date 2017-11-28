@@ -108,7 +108,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.FiltersCsv),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.LCRCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv),
 	), "", "")
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -165,7 +165,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadThresholds(); err != nil {
 		t.Error("Failed loading thresholds: ", err.Error())
 	}
-	if err = loader.LoadLCRProfiles(); err != nil {
+	if err = loader.LoadSupplierProfiles(); err != nil {
 		t.Error("Failed loading lcr profiles: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
@@ -358,12 +358,12 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for tenatid, th := range loader.lcrProfiles {
-		rcv, err := loader.dm.GetLCRProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
+	for tenatid, th := range loader.sppProfiles {
+		rcv, err := loader.dm.GetSupplierProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
 		if err != nil {
-			t.Errorf("Failed GetLCRProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
+			t.Errorf("Failed GetSupplierProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
 		}
-		sts, err := APItoLCRProfile(th, "UTC")
+		sts, err := APItoSupplierProfile(th, "UTC")
 		if err != nil {
 			t.Error(err)
 		}

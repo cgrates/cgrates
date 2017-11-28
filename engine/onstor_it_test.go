@@ -69,7 +69,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheThreshold,
 	testOnStorITCacheTiming,
 	testOnStorITCacheFilter,
-	testOnStorITCacheLCRProfile,
+	testOnStorITCacheSupplierProfile,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
@@ -1099,46 +1099,48 @@ func testOnStorITCacheFilter(t *testing.T) {
 
 }
 
-func testOnStorITCacheLCRProfile(t *testing.T) {
-	lcrProfile := &LCRProfile{
+func testOnStorITCacheSupplierProfile(t *testing.T) {
+	splProfile := &SupplierProfile{
 		Tenant:    "cgrates.org",
-		ID:        "LCR_1",
+		ID:        "SPRF_1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		Strategy:       "*lowest_cost",
-		StrategyParams: []string{},
-		Suppliers: []*LCRSupplier{
-			&LCRSupplier{
+		Sorting:       "*lowest_cost",
+		SortingParams: []string{},
+		Suppliers: []*Supplier{
+			&Supplier{
 				ID:            "supplier1",
 				RatingPlanIDs: []string{"RPL_1"},
 				FilterIDs:     []string{"FLTR_DST_DE"},
+				ResourceIDs:   []string{"ResGR1"},
+				StatIDs:       []string{"Stat1"},
 				Weight:        10,
 			},
 		},
 		Weight: 20,
 	}
-	if err := onStor.SetLCRProfile(lcrProfile); err != nil {
+	if err := onStor.SetSupplierProfile(splProfile); err != nil {
 		t.Error(err)
 	}
-	expectedT := []string{"lcp_cgrates.org:LCR_1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.LCRProfilePrefix); err != nil {
+	expectedT := []string{"spp_cgrates.org:SPRF_1"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 
-	if _, hasIt := cache.Get(utils.LCRProfilePrefix + lcrProfile.TenantID()); hasIt {
+	if _, hasIt := cache.Get(utils.SupplierProfilePrefix + splProfile.TenantID()); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.LCRProfilePrefix, []string{lcrProfile.TenantID()}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.SupplierProfilePrefix, []string{splProfile.TenantID()}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.LCRProfilePrefix + lcrProfile.TenantID()); !hasIt {
+	if itm, hasIt := cache.Get(utils.SupplierProfilePrefix + splProfile.TenantID()); !hasIt {
 		t.Error("Did not cache")
-	} else if rcv := itm.(*LCRProfile); !reflect.DeepEqual(lcrProfile, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", lcrProfile, rcv)
+	} else if rcv := itm.(*SupplierProfile); !reflect.DeepEqual(splProfile, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", splProfile, rcv)
 	}
 }
 
@@ -2398,45 +2400,47 @@ func testOnStorITCRUDFilter(t *testing.T) {
 }
 
 func testOnStorITCRUDLCRProfile(t *testing.T) {
-	lcrProfile := &LCRProfile{
+	splProfile := &SupplierProfile{
 		Tenant:    "cgrates.org",
-		ID:        "LCR_1",
+		ID:        "SPRF_1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		Strategy:       "*lowest_cost",
-		StrategyParams: []string{},
-		Suppliers: []*LCRSupplier{
-			&LCRSupplier{
+		Sorting:       "*lowest_cost",
+		SortingParams: []string{},
+		Suppliers: []*Supplier{
+			&Supplier{
 				ID:            "supplier1",
 				RatingPlanIDs: []string{"RPL_1"},
 				FilterIDs:     []string{"FLTR_DST_DE"},
+				ResourceIDs:   []string{"ResGR1"},
+				StatIDs:       []string{"Stat1"},
 				Weight:        10,
 			},
 		},
 		Weight: 20,
 	}
-	if _, rcvErr := onStor.GetLCRProfile("cgrates.org", "LCR_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetLCRProfile(lcrProfile); err != nil {
+	if err := onStor.SetSupplierProfile(splProfile); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetLCRProfile("cgrates.org", "LCR_1", true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1", true, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(lcrProfile, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", lcrProfile, rcv)
+	} else if !(reflect.DeepEqual(splProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
-	if rcv, err := onStor.GetLCRProfile("cgrates.org", "LCR_1", false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1", false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(lcrProfile, rcv) {
-		t.Errorf("Expecting: %v, received: %v", lcrProfile, rcv)
+	} else if !reflect.DeepEqual(splProfile, rcv) {
+		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
-	if err := onStor.RemoveLCRProfile(lcrProfile.Tenant, lcrProfile.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveSupplierProfile(splProfile.Tenant, splProfile.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetLCRProfile("cgrates.org", "LCR_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
