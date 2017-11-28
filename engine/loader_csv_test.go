@@ -293,6 +293,9 @@ cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 	sppProfiles = `
 #Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParams,SupplierID,SupplierFilterIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,Blocker,Weight
 cgrates.org,SPP_1,FLTR_ACNT_dan;FLTR_DST_DE,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,FLTR_ACNT_dan,RPL_1,ResGroup1,Stat1,10,true,20
+cgrates.org,SPP_1,,,,,supplier1,,RPL_2,ResGroup2,,10,,
+cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,RPL_3,ResGroup3,Stat2,10,,
+cgrates.org,SPP_1,,,,,supplier1,,,ResGroup4,Stat3,10,,
 `
 )
 
@@ -1633,10 +1636,10 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			Suppliers: []*utils.TPRequestSupplier{
 				&utils.TPRequestSupplier{
 					ID:            "supplier1",
-					FilterIDs:     []string{"FLTR_ACNT_dan"},
-					RatingPlanIDs: []string{"RPL_1"},
-					ResourceIDs:   []string{"ResGroup1"},
-					StatIDs:       []string{"Stat1"},
+					FilterIDs:     []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+					RatingPlanIDs: []string{"RPL_1", "RPL_2", "RPL_3"},
+					ResourceIDs:   []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
+					StatIDs:       []string{"Stat1", "Stat2", "Stat3"},
 					Weight:        10,
 				},
 			},

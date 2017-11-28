@@ -2423,6 +2423,7 @@ type TpSuppliers []*TpSupplier
 
 func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 	mst := make(map[string]*utils.TPSupplier)
+	suppliersMap := make(map[string]map[string]*utils.TPRequestSupplier)
 	for _, tp := range tps {
 		th, found := mst[tp.ID]
 		if !found {
@@ -2436,14 +2437,41 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 			}
 		}
 		if tp.SupplierID != "" {
-			th.Suppliers = append(th.Suppliers, &utils.TPRequestSupplier{
-				ID:            tp.SupplierID,
-				FilterIDs:     strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP),
-				RatingPlanIDs: strings.Split(tp.SupplierRatingplanIDs, utils.INFIELD_SEP),
-				ResourceIDs:   strings.Split(tp.SupplierResourceIDs, utils.INFIELD_SEP),
-				StatIDs:       strings.Split(tp.SupplierStatIDs, utils.INFIELD_SEP),
-				Weight:        tp.SupplierWeight,
-			})
+			if _, has := suppliersMap[tp.ID]; !has {
+				suppliersMap[tp.ID] = make(map[string]*utils.TPRequestSupplier)
+			}
+			sup, found := suppliersMap[tp.ID][tp.SupplierID]
+			if !found {
+				sup = &utils.TPRequestSupplier{
+					ID:     tp.SupplierID,
+					Weight: tp.SupplierWeight,
+				}
+			}
+			if tp.SupplierFilterIDs != "" {
+				supFilterSplit := strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP)
+				for _, supFilter := range supFilterSplit {
+					sup.FilterIDs = append(sup.FilterIDs, supFilter)
+				}
+			}
+			if tp.SupplierRatingplanIDs != "" {
+				ratingPlanSplit := strings.Split(tp.SupplierRatingplanIDs, utils.INFIELD_SEP)
+				for _, ratingSplit := range ratingPlanSplit {
+					sup.RatingPlanIDs = append(sup.RatingPlanIDs, ratingSplit)
+				}
+			}
+			if tp.SupplierResourceIDs != "" {
+				resSplit := strings.Split(tp.SupplierResourceIDs, utils.INFIELD_SEP)
+				for _, res := range resSplit {
+					sup.ResourceIDs = append(sup.ResourceIDs, res)
+				}
+			}
+			if tp.SupplierStatIDs != "" {
+				statSplit := strings.Split(tp.SupplierStatIDs, utils.INFIELD_SEP)
+				for _, sts := range statSplit {
+					sup.StatIDs = append(sup.StatIDs, sts)
+				}
+			}
+			suppliersMap[tp.ID][tp.SupplierID] = sup
 		}
 		if tp.SortingParams != "" {
 			sortingParamSplit := strings.Split(tp.SortingParams, utils.INFIELD_SEP)
@@ -2470,13 +2498,19 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 				th.FilterIDs = append(th.FilterIDs, filter)
 			}
 		}
-
 		mst[tp.ID] = th
 	}
 	result = make([]*utils.TPSupplier, len(mst))
 	i := 0
 	for _, th := range mst {
 		result[i] = th
+		for id, _ := range suppliersMap {
+			if result[i].ID == id {
+				for _, supdata := range suppliersMap[id] {
+					result[i].Suppliers = append(result[i].Suppliers, supdata)
+				}
+			}
+		}
 		i++
 	}
 	return
