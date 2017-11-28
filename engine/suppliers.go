@@ -168,6 +168,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for lpID := range sPrflIDs {
 		lcrPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, false, utils.NonTransactional)
+		//fmt.Printf("LoadedSupplier: %s\n", utils.ToJSON(lcrPrfl))
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -240,7 +241,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSu
 	for _, s := range lcrPrfl.Suppliers {
 		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
 			if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
-				map[string]interface{}{"SupplierID": s.ID}, s.FilterIDs); err != nil {
+				ev.Event, s.FilterIDs); err != nil {
 				return nil, err
 			} else if !pass {
 				continue
