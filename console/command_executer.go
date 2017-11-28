@@ -82,11 +82,12 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 					continue
 				}
 			}
-			if _, canCast := valField.Interface().(time.Time); canCast {
+			valInterf := valField.Interface()
+			if _, canCast := valInterf.(time.Time); canCast {
 				args = append(args, typeField.Name)
 				continue
 			}
-			args = append(args, ce.clientArgs(valField.Interface())...)
+			args = append(args, ce.clientArgs(valInterf)...)
 
 		default:
 			args = append(args, typeField.Name)
