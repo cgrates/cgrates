@@ -504,6 +504,7 @@ CREATE TABLE tp_suppliers (
   `sorting_params` varchar(64) NOT NULL,
   `supplier_id` varchar(32) NOT NULL,
   `supplier_filter_ids` varchar(64) NOT NULL,
+  `supplier_account_ids` varchar(64) NOT NULL,
   `supplier_ratingplan_ids` varchar(64) NOT NULL,
   `supplier_resource_ids` varchar(64) NOT NULL,
   `supplier_stat_ids` varchar(64) NOT NULL,
@@ -514,7 +515,7 @@ CREATE TABLE tp_suppliers (
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_suppliers` (`tpid`,`tenant`,
-    `id`,`filter_ids`,`supplier_id`,`supplier_filter_ids`,
+    `id`,`filter_ids`,`supplier_id`,`supplier_filter_ids`,`supplier_account_ids`,
     `supplier_ratingplan_ids`,`supplier_resource_ids`,`supplier_stat_ids` )
 );
 

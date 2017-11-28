@@ -1112,8 +1112,9 @@ func testOnStorITCacheSupplierProfile(t *testing.T) {
 		Suppliers: []*Supplier{
 			&Supplier{
 				ID:            "supplier1",
-				RatingPlanIDs: []string{"RPL_1"},
 				FilterIDs:     []string{"FLTR_DST_DE"},
+				AccountIDs:    []string{"Account1"},
+				RatingPlanIDs: []string{"RPL_1"},
 				ResourceIDs:   []string{"ResGR1"},
 				StatIDs:       []string{"Stat1"},
 				Weight:        10,
@@ -2412,8 +2413,9 @@ func testOnStorITCRUDLCRProfile(t *testing.T) {
 		Suppliers: []*Supplier{
 			&Supplier{
 				ID:            "supplier1",
-				RatingPlanIDs: []string{"RPL_1"},
 				FilterIDs:     []string{"FLTR_DST_DE"},
+				AccountIDs:    []string{"Account1"},
+				RatingPlanIDs: []string{"RPL_1"},
 				ResourceIDs:   []string{"ResGR1"},
 				StatIDs:       []string{"Stat1"},
 				Weight:        10,

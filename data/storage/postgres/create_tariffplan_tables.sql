@@ -498,6 +498,7 @@ CREATE TABLE tp_filters (
     "sorting_params" varchar(64) NOT NULL,
     "supplier_id" varchar(32) NOT NULL,
     "supplier_filter_ids" varchar(64) NOT NULL,
+    "supplier_account_ids" varchar(64) NOT NULL,
     "supplier_ratingplan_ids" varchar(64) NOT NULL,
     "supplier_resource_ids" varchar(64) NOT NULL,
     "supplier_stat_ids" varchar(64) NOT NULL,
@@ -508,8 +509,8 @@ CREATE TABLE tp_filters (
   );
  CREATE INDEX tp_suppliers_idx ON tp_suppliers (tpid);
  CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
-   "filter_ids","supplier_id","supplier_filter_ids","supplier_ratingplan_ids",
-   "supplier_resource_ids","supplier_stat_ids");
+   "filter_ids","supplier_id","supplier_filter_ids","supplier_account_ids",
+   "supplier_ratingplan_ids","supplier_resource_ids","supplier_stat_ids");
 
 
 --

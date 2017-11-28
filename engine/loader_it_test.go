@@ -166,7 +166,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		t.Error("Failed loading thresholds: ", err.Error())
 	}
 	if err = loader.LoadSupplierProfiles(); err != nil {
-		t.Error("Failed loading lcr profiles: ", err.Error())
+		t.Error("Failed loading Supplier profiles: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
