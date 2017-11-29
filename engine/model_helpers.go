@@ -2422,6 +2422,7 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilter) {
 type TpSuppliers []*TpSupplier
 
 func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
+	filtermap := make(map[string]map[string]bool)
 	mst := make(map[string]*utils.TPSupplier)
 	suppliersMap := make(map[string]map[string]*utils.TPRequestSupplier)
 	for _, tp := range tps {
@@ -2499,9 +2500,12 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 			}
 		}
 		if tp.FilterIDs != "" {
+			if _, has := filtermap[tp.ID]; !has {
+				filtermap[tp.ID] = make(map[string]bool)
+			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				th.FilterIDs = append(th.FilterIDs, filter)
+				filtermap[tp.ID][filter] = true
 			}
 		}
 		mst[tp.ID] = th
@@ -2517,6 +2521,14 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 				}
 			}
 		}
+		for id, _ := range filtermap {
+			if result[i].ID == id {
+				for filterdata, _ := range filtermap[id] {
+					result[i].FilterIDs = append(result[i].FilterIDs, filterdata)
+				}
+			}
+		}
+
 		i++
 	}
 	return
