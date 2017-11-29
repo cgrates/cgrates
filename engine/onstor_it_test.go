@@ -101,7 +101,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDThresholdProfile,
 	testOnStorITCRUDThreshold,
 	testOnStorITCRUDFilter,
-	testOnStorITCRUDLCRProfile,
+	testOnStorITCRUDSupplierProfile,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -2400,7 +2400,7 @@ func testOnStorITCRUDFilter(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDLCRProfile(t *testing.T) {
+func testOnStorITCRUDSupplierProfile(t *testing.T) {
 	splProfile := &SupplierProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPRF_1",
