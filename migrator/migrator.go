@@ -131,6 +131,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateStats()
 		case utils.MetaThresholds:
 			err = m.migrateThresholds()
+		case utils.MetaSuppliers:
+			err = m.migrateSupplierProfiles()
 		//only Move
 		case utils.MetaRatingPlans:
 			err = m.migrateRatingPlans()
@@ -181,6 +183,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPderivedchargers()
 		case utils.MetaTpThresholds:
 			err = m.migrateTPthresholds()
+		case utils.MetaTpSuppliers:
+			err = m.migrateTPSuppliers()
 		case utils.MetaTpStats:
 			err = m.migrateTPstats()
 		case utils.MetaTpSharedGroups:
@@ -225,6 +229,9 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateThresholds(); err != nil {
 				log.Print("ERROR: ", utils.MetaThresholds, " ", err)
+			}
+			if err := m.migrateSupplierProfiles(); err != nil {
+				log.Print("ERROR: ", utils.MetaSuppliers, " ", err)
 			}
 			if err := m.migrateRatingPlans(); err != nil {
 				log.Print("ERROR: ", utils.MetaRatingPlans, " ", err)
@@ -300,6 +307,9 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateTPthresholds(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpThresholds, " ", err)
+			}
+			if err := m.migrateTPSuppliers(); err != nil {
+				log.Print("ERROR: ", utils.MetaTpSuppliers, " ", err)
 			}
 			if err := m.migrateTPstats(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpStats, " ", err)

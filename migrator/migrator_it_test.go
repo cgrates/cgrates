@@ -1045,3 +1045,51 @@ func testMigratorTPRatingProfile(t *testing.T) {
 		}
 	}
 }
+
+func testMigratorTPSuppliers(t *testing.T) {
+	tpSplPr := &utils.TPSupplier{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "SUPL_1",
+		FilterIDs: []string{"FLTR_ACNT_dan"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "",
+		},
+		Sorting:       "*lowest_cost",
+		SortingParams: []string{},
+		Suppliers: []*utils.TPRequestSupplier{
+			&utils.TPRequestSupplier{
+				ID:            "supplier1",
+				FilterIDs:     []string{"FLTR_1"},
+				RatingPlanIDs: []string{"RPL_1"},
+				ResourceIDs:   []string{"ResGroup1"},
+				StatIDs:       []string{"Stat1"},
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+	switch dbtype {
+	case Move:
+		if err := mig.InStorDB().SetTPSuppliers([]*utils.TPSupplier{tpSplPr}); err != nil {
+			t.Error("Error when setting Stats ", err.Error())
+		}
+		currentVersion := engine.CurrentDataDBVersions()
+		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for stats ", err.Error())
+		}
+		err, _ = mig.Migrate([]string{utils.MetaTpSuppliers})
+		if err != nil {
+			t.Error("Error when migrating Stats ", err.Error())
+		}
+		result, err := mig.OutStorDB().GetTPSuppliers(tpSplPr.TPid, tpSplPr.ID)
+		if err != nil {
+			t.Error("Error when getting Stats ", err.Error())
+		}
+		if !reflect.DeepEqual(tpSplPr, result[0]) {
+			t.Errorf("Expecting: %+v, received: %+v", tpSplPr, result[0])
+		}
+	}
+}
