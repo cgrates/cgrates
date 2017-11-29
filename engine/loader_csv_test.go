@@ -1627,7 +1627,7 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "SPP_1",
-			FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+			FilterIDs: []string{"FLTR_ACNT_dan"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1636,7 +1636,7 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			Suppliers: []*utils.TPRequestSupplier{
 				&utils.TPRequestSupplier{
 					ID:            "supplier1",
-					FilterIDs:     []string{"FLTR_ACNT_dan"},
+					FilterIDs:     []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 					AccountIDs:    []string{"Account1", "Account1_1", "Account2"},
 					RatingPlanIDs: []string{"RPL_1", "RPL_2", "RPL_3"},
 					ResourceIDs:   []string{"ResGroup1", "ResGroup2", "ResGroup3", "ResGroup4"},
