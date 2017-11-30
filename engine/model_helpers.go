@@ -2607,7 +2607,7 @@ func APItoSupplierProfile(tpTH *utils.TPSupplier, timezone string) (th *Supplier
 		Sorting:   tpTH.Sorting,
 		Weight:    tpTH.Weight,
 		Blocker:   tpTH.Blocker,
-		Suppliers: make(Suppliers, len(tpTH.Suppliers)),
+		Suppliers: make([]*Supplier, len(tpTH.Suppliers)),
 	}
 	for _, stp := range tpTH.SortingParams {
 		th.SortingParams = append(th.SortingParams, stp)

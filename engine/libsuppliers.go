@@ -19,10 +19,65 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
+	"sort"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
+
+const (
+	Weight = "Weight"
+)
+
+// SuppliersReply is returned as part of GetSuppliers call
+type SortedSuppliers struct {
+	ProfileID       string            // Profile matched
+	Sorting         string            // Sorting algorithm
+	SortedSuppliers []*SortedSupplier // list of supplier IDs and SortingData data
+}
+
+// SupplierReply represents one supplier in
+type SortedSupplier struct {
+	SupplierID  string
+	SortingData map[string]interface{} // store here extra info like cost or stats
+}
+
+// Sort is part of sort interface, sort based on Weight
+func (sSpls *SortedSuppliers) SortWeight() {
+	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
+		return sSpls.SortedSuppliers[i].SortingData[Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[Weight].(float64)
+	})
+}
+
+// SupplierEvent is an event processed by Supplier Service
+type SupplierEvent struct {
+	Tenant string
+	ID     string
+	Event  map[string]interface{}
+}
+
+// AnswerTime returns the AnswerTime of StatEvent
+func (le *SupplierEvent) AnswerTime(timezone string) (at time.Time, err error) {
+	atIf, has := le.Event[utils.ANSWER_TIME]
+	if !has {
+		return at, utils.ErrNotFound
+	}
+	if at, canCast := atIf.(time.Time); canCast {
+		return at, nil
+	}
+	atStr, canCast := atIf.(string)
+	if !canCast {
+		return at, errors.New("cannot cast to string")
+	}
+	return utils.ParseTimeDetectLayout(atStr, timezone)
+}
+
+// SuppliersSorter is the interface which needs to be implemented by supplier sorters
+type SuppliersSorter interface {
+	SortSuppliers(string, []*Supplier, *SupplierEvent) (*SortedSuppliers, error)
+}
 
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
 func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatcher, err error) {
@@ -37,54 +92,33 @@ func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatche
 type SupplierSortDispatcher map[string]SuppliersSorter
 
 func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
-	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
-	fmt.Printf("Sort strategy: %s, suppliers: %s\n", strategy, utils.ToJSON(suppls))
+	suppls []*Supplier, suplEv *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	return sd.SortSuppliers(prflID, suppls)
-}
-
-type SuppliersSorter interface {
-	SortSuppliers(string, Suppliers) (*SortedSuppliers, error)
-}
-
-// NewLeastCostSorter constructs LeastCostSorter
-func NewLeastCostSorter(lcrS *SupplierService) *LeastCostSorter {
-	return &LeastCostSorter{lcrS: lcrS}
-}
-
-// LeastCostSorter orders suppliers based on lowest cost
-type LeastCostSorter struct {
-	lcrS *SupplierService
-}
-
-func (lcs *LeastCostSorter) SortSuppliers(prflID string,
-	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
-	return
+	return sd.SortSuppliers(prflID, suppls, suplEv)
 }
 
 func NewWeightSorter() *WeightSorter {
-	return &WeightSorter{Sorting: utils.MetaWeight}
+	return &WeightSorter{sorting: utils.MetaWeight}
 }
 
 // WeightSorter orders suppliers based on their weight, no cost involved
 type WeightSorter struct {
-	Sorting string
+	sorting string
 }
 
 func (ws *WeightSorter) SortSuppliers(prflID string,
-	suppls Suppliers) (sortedSuppls *SortedSuppliers, err error) {
-	fmt.Printf("Sort suppliers: %s\n", utils.ToJSON(suppls))
-	suppls.Sort()
+	suppls []*Supplier, suplEv *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         ws.Sorting,
+		Sorting:         ws.sorting,
 		SortedSuppliers: make([]*SortedSupplier, len(suppls))}
 	for i, s := range suppls {
 		sortedSuppls.SortedSuppliers[i] = &SortedSupplier{
 			SupplierID:  s.ID,
 			SortingData: map[string]interface{}{"Weight": s.Weight}}
 	}
+	sortedSuppls.SortWeight()
 	return
 }

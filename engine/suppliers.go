@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -29,29 +28,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
-
-// SupplierEvent is an event processed by Supplier Service
-type SupplierEvent struct {
-	Tenant string
-	ID     string
-	Event  map[string]interface{}
-}
-
-// AnswerTime returns the AnswerTime of StatEvent
-func (le *SupplierEvent) AnswerTime(timezone string) (at time.Time, err error) {
-	atIf, has := le.Event[utils.ANSWER_TIME]
-	if !has {
-		return at, utils.ErrNotFound
-	}
-	if at, canCast := atIf.(time.Time); canCast {
-		return at, nil
-	}
-	atStr, canCast := atIf.(string)
-	if !canCast {
-		return at, errors.New("cannot cast to string")
-	}
-	return utils.ParseTimeDetectLayout(atStr, timezone)
-}
 
 // Supplier defines supplier related information used within a SupplierProfile
 type Supplier struct {
@@ -64,14 +40,6 @@ type Supplier struct {
 	Weight        float64
 }
 
-// Suppliers is a sortable list of Supplier
-type Suppliers []*Supplier
-
-// Sort is part of sort interface, sort based on Weight
-func (lss Suppliers) Sort() {
-	sort.Slice(lss, func(i, j int) bool { return lss[i].Weight > lss[j].Weight })
-}
-
 // SupplierProfile represents the configuration of a Supplier profile
 type SupplierProfile struct {
 	Tenant             string
@@ -80,7 +48,7 @@ type SupplierProfile struct {
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Sorting            string                    // Sorting strategy
 	SortingParams      []string
-	Suppliers          Suppliers
+	Suppliers          []*Supplier
 	Blocker            bool // do not process further profiles after this one
 	Weight             float64
 }
@@ -96,19 +64,6 @@ type SupplierProfiles []*SupplierProfile
 // Sort is part of sort interface, sort based on Weight
 func (lps SupplierProfiles) Sort() {
 	sort.Slice(lps, func(i, j int) bool { return lps[i].Weight > lps[j].Weight })
-}
-
-// SuppliersReply is returned as part of GetSuppliers call
-type SortedSuppliers struct {
-	ProfileID       string            // Profile matched
-	Sorting         string            // Sorting algorithm
-	SortedSuppliers []*SortedSupplier // list of supplier IDs and SortingData data
-}
-
-// SupplierReply represents one supplier in
-type SortedSupplier struct {
-	SupplierID  string
-	SortingData map[string]interface{} // store here extra info like cost or stats
 }
 
 // NewLCRService initializes a LCRService
@@ -237,7 +192,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSu
 		return nil, utils.ErrNotFound
 	}
 	lcrPrfl := suppPrfls[0] // pick up the first lcr profile as winner
-	var lss Suppliers
+	var spls []*Supplier
 	for _, s := range lcrPrfl.Suppliers {
 		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
 			if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
@@ -247,9 +202,9 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSu
 				continue
 			}
 		}
-		lss = append(lss, s)
+		spls = append(spls, s)
 	}
-	return spS.sorter.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, lss)
+	return spS.sorter.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, spls, ev)
 }
 
 // V1GetSuppliersForEvent returns the list of valid supplier IDs
