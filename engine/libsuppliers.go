@@ -29,6 +29,7 @@ import (
 
 const (
 	Weight = "Weight"
+	Cost   = "Cost"
 )
 
 // SuppliersReply is returned as part of GetSuppliers call
@@ -44,10 +45,21 @@ type SortedSupplier struct {
 	SortingData map[string]interface{} // store here extra info like cost or stats
 }
 
-// Sort is part of sort interface, sort based on Weight
+// SortWeight is part of sort interface, sort based on Weight
 func (sSpls *SortedSuppliers) SortWeight() {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
 		return sSpls.SortedSuppliers[i].SortingData[Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[Weight].(float64)
+	})
+}
+
+// SortCost is part of sort interface,
+// sort based on Cost with fallback on Weight
+func (sSpls *SortedSuppliers) SortCost() {
+	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
+		if sSpls.SortedSuppliers[i].SortingData[Cost].(float64) == sSpls.SortedSuppliers[j].SortingData[Cost].(float64) {
+			return sSpls.SortedSuppliers[i].SortingData[Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[Weight].(float64)
+		}
+		return sSpls.SortedSuppliers[i].SortingData[Cost].(float64) < sSpls.SortedSuppliers[j].SortingData[Cost].(float64)
 	})
 }
 

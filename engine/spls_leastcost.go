@@ -43,5 +43,6 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 			SupplierID:  s.ID,
 			SortingData: map[string]interface{}{"Weight": s.Weight}}
 	}
+	sortedSuppls.SortCost()
 	return
 }
