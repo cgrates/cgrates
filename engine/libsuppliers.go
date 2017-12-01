@@ -70,7 +70,20 @@ type SupplierEvent struct {
 	Event  map[string]interface{}
 }
 
-// AnswerTime returns the AnswerTime of StatEvent
+// AnswerTime returns the AnswerTime of SupplierEvent
+func (le *SupplierEvent) FieldAsString(fldName string) (val string, err error) {
+	iface, has := le.Event[fldName]
+	if !has {
+		return "", utils.ErrNotFound
+	}
+	val, canCast := utils.CastFieldIfToString(iface)
+	if !canCast {
+		return "", errors.New("cannot cast to string")
+	}
+	return val, nil
+}
+
+// AnswerTime returns the AnswerTime of SupplierEvent
 func (le *SupplierEvent) AnswerTime(timezone string) (at time.Time, err error) {
 	atIf, has := le.Event[utils.ANSWER_TIME]
 	if !has {
@@ -84,6 +97,22 @@ func (le *SupplierEvent) AnswerTime(timezone string) (at time.Time, err error) {
 		return at, errors.New("cannot cast to string")
 	}
 	return utils.ParseTimeDetectLayout(atStr, timezone)
+}
+
+// AnswerTime returns the AnswerTime of SupplierEvent
+func (le *SupplierEvent) Usage() (usage time.Duration, err error) {
+	iface, has := le.Event[utils.USAGE]
+	if !has {
+		return 0, utils.ErrNotFound
+	}
+	if usage, canCast := iface.(time.Duration); canCast {
+		return usage, nil
+	}
+	usageStr, canCast := iface.(string)
+	if !canCast {
+		return 0, errors.New("cannot cast to string")
+	}
+	return utils.ParseDurationWithNanosecs(usageStr)
 }
 
 // SuppliersSorter is the interface which needs to be implemented by supplier sorters
