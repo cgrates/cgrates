@@ -28,7 +28,8 @@ import (
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.MatchReqFilterIndex, adding utils.NOT_AVAILABLE to list of fields queried
 // executes a number of $(len(fields) + 1) queries to dataDB so the size of event influences the speed of return
-func matchingItemIDsForEvent(ev map[string]interface{}, fieldIDs []string, dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
+func matchingItemIDsForEvent(ev map[string]interface{}, fieldIDs []string,
+	dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
 	if len(fieldIDs) == 0 {
 		fieldIDs = make([]string, len(ev))
 		i := 0

@@ -44,7 +44,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSLoadConfig,
 	testV1SplSInitDataDb,
 	testV1SplSResetStorDb,
-	testV1SplSStartEngine,
+	//testV1SplSStartEngine,
 	testV1SplSRpcConn,
 	testV1SplSFromFolder,
 	//testV1SplSGetWeightSuppliers,
@@ -161,6 +161,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 		ID:     "testV1SplSGetLeastCostSuppliers",
 		Event: map[string]interface{}{
 			utils.ACCOUNT:     "1001",
+			utils.SUBJECT:     "1001",
 			utils.DESTINATION: "1002",
 			utils.ANSWER_TIME: time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       "1m20s",

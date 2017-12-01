@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -115,7 +116,6 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 	matchingLPs := make(map[string]*SupplierProfile)
 	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.indexedFields,
 		spS.dm, utils.SupplierProfilesStringIndex+ev.Tenant)
-
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +123,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for lpID := range sPrflIDs {
-		lcrPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, false, utils.NonTransactional)
-		//fmt.Printf("LoadedSupplier: %s\n", utils.ToJSON(lcrPrfl))
+		splPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -139,17 +138,17 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 				return nil, err
 			}
 		}
-		if lcrPrfl.ActivationInterval != nil &&
-			!lcrPrfl.ActivationInterval.IsActiveAtTime(aTime) { // not active
+		if splPrfl.ActivationInterval != nil &&
+			!splPrfl.ActivationInterval.IsActiveAtTime(aTime) { // not active
 			continue
 		}
 		if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
-			ev.Event, lcrPrfl.FilterIDs); err != nil {
+			ev.Event, splPrfl.FilterIDs); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
 		}
-		matchingLPs[lpID] = lcrPrfl
+		matchingLPs[lpID] = splPrfl
 	}
 	// All good, convert from Map to Slice so we can sort
 	sPrfls = make(SupplierProfiles, len(matchingLPs))
@@ -230,7 +229,7 @@ func (spS *SupplierService) costForEvent(ev *SupplierEvent,
 		}
 		return NewEventCostFromCallCost(cc, "", ""), nil
 	}
-	return
+	return nil, errors.New("no cost found")
 }
 
 // statMetrics will query a list of statIDs and return composed metric values
@@ -253,9 +252,9 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSu
 	} else if len(suppPrfls) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	lcrPrfl := suppPrfls[0] // pick up the first lcr profile as winner
+	splPrfl := suppPrfls[0] // pick up the first lcr profile as winner
 	var spls []*Supplier
-	for _, s := range lcrPrfl.Suppliers {
+	for _, s := range splPrfl.Suppliers {
 		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
 			if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
 				ev.Event, s.FilterIDs); err != nil {
@@ -266,7 +265,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSu
 		}
 		spls = append(spls, s)
 	}
-	return spS.sorter.SortSuppliers(lcrPrfl.ID, lcrPrfl.Sorting, spls, ev)
+	return spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, ev)
 }
 
 // V1GetSuppliersForEvent returns the list of valid supplier IDs
