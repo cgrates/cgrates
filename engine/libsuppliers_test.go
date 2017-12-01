@@ -142,6 +142,7 @@ func TestLibSuppliersSortWeight(t *testing.T) {
 
 }
 
+/*
 func TestLibSuppliersAnswerTime(t *testing.T) {
 	event := make(map[string]interface{})
 	event[utils.ANSWER_TIME] = time.Now().Local()
@@ -167,6 +168,7 @@ func TestLibSuppliersAnswerTime(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/
 
 func TestLibSuppliersFieldAsString(t *testing.T) {
 	event := make(map[string]interface{})
@@ -210,6 +212,7 @@ func TestLibSuppliersFieldAsString(t *testing.T) {
 
 }
 
+/*
 func TestLibSuppliersUsage(t *testing.T) {
 	event := make(map[string]interface{})
 	event[utils.USAGE] = time.Duration(20 * time.Second)
@@ -235,3 +238,4 @@ func TestLibSuppliersUsage(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/
