@@ -119,7 +119,7 @@ func testV1SplSFromFolder(t *testing.T) {
 }
 
 func testV1SplSGetWeightSuppliers(t *testing.T) {
-	ev := &engine.SupplierEvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetWeightSuppliers",
 		Event: map[string]interface{}{

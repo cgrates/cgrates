@@ -28,7 +28,7 @@ import (
 
 var (
 	splserv   SupplierService
-	sev       *SupplierEvent
+	sev       *utils.CGREvent
 	dmspl     *DataManager
 	sprsmatch SupplierProfiles
 )
@@ -197,9 +197,9 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	ev["UsageInterval"] = "1s"
 	ev["PddInterval"] = "1s"
 	ev["Weight"] = "20.0"
-	sev = &SupplierEvent{
+	sev = &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "supplierevent1",
+		ID:     "utils.CGREvent1",
 		Event:  ev,
 	}
 	sprsmatch = SupplierProfiles{
