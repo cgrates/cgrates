@@ -34,14 +34,20 @@ type LeastCostSorter struct {
 }
 
 func (lcs *LeastCostSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, suplEv *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, ev *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, len(suppls))}
 	for i, s := range suppls {
+		cost, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
+		if err != nil {
+			return nil, err
+		}
 		sortedSuppls.SortedSuppliers[i] = &SortedSupplier{
-			SupplierID:  s.ID,
-			SortingData: map[string]interface{}{"Weight": s.Weight}}
+			SupplierID: s.ID,
+			SortingData: map[string]interface{}{
+				Weight: s.Weight,
+				Cost:   cost}}
 	}
 	sortedSuppls.SortCost()
 	return

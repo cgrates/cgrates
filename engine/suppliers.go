@@ -23,6 +23,7 @@ import (
 	"sort"
 	"time"
 
+	//"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -130,7 +131,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 			}
 			return nil, err
 		}
-		aTime, err := ev.AnswerTime(spS.timezone)
+		aTime, err := ev.FieldAsTime(utils.ANSWER_TIME, spS.timezone)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				aTime = time.Now()
@@ -142,7 +143,8 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 			!lcrPrfl.ActivationInterval.IsActiveAtTime(aTime) { // not active
 			continue
 		}
-		if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, lcrPrfl.FilterIDs); err != nil {
+		if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
+			ev.Event, lcrPrfl.FilterIDs); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
@@ -166,8 +168,50 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 	return
 }
 
-// costForEvent will compute cost out of ratingPlanIDs for event
-func (spS *SupplierService) costForEvent(ev *SupplierEvent, rpIDs []string) (ec *EventCost, err error) {
+// costForEvent will compute cost out of accounts and rating plans for event
+func (spS *SupplierService) costForEvent(ev *SupplierEvent,
+	acntIDs, rpIDs []string) (ec *EventCost, err error) {
+	/*if err = ev.CheckMandatoryFields([]string{utils.ACCOUNT,
+		utils.DESTINATION, utils.ANSWER_TIME, utils.USAGE}); err != nil {
+		return
+	}
+	var acnt, subj, dst string
+	if acnt, err = ev.FieldAsString(utils.ACCOUNT); err != nil {
+		return
+	}
+	if subj, err = ev.FieldAsString(utils.ACCOUNT); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		subj = acnt
+	}
+	if dst, err = ev.FieldAsString(utils.DESTINATION); err != nil {
+		return
+	}
+	var aTime time.Time
+	if aTime, err = ev.FieldAsTime(utils.ANSWER_TIME, spS.timezone); err != nil {
+		return
+	}
+	var usage time.Duration
+	if usage, err = ev.FieldAsDuration(utils.USAGE); err != nil {
+		return
+	}
+	for i, rp := range rpIDs {
+		rPrfl := &RatingProfile{
+			Id: utils.ConcatenatedKey(utils.OUT,
+				ev.Tenant, utils.MetaSuppliers, subj),
+			RatingPlanActivations: RatingPlanActivations{
+				&RatingPlanActivation{
+					ActivationTime: aTime,
+					RatingPlanId:   rp,
+				},
+			},
+		}
+		// force cache set so it can be picked by calldescriptor for cost calculation
+		cache.Set(utils.RATING_PROFILE_PREFIX+rPrfl.Id, rPrfl,
+			true, utils.NonTransactional)
+	}
+	*/
 	return
 }
 

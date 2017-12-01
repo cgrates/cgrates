@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -70,6 +69,15 @@ type SupplierEvent struct {
 	Event  map[string]interface{}
 }
 
+func (se *SupplierEvent) CheckMandatoryFields(fldNames []string) error {
+	for _, fldName := range fldNames {
+		if _, has := se.Event[fldName]; !has {
+			return utils.NewErrMandatoryIeMissing(fldName)
+		}
+	}
+	return nil
+}
+
 // AnswerTime returns the AnswerTime of SupplierEvent
 func (le *SupplierEvent) FieldAsString(fldName string) (val string, err error) {
 	iface, has := le.Event[fldName]
@@ -78,41 +86,47 @@ func (le *SupplierEvent) FieldAsString(fldName string) (val string, err error) {
 	}
 	val, canCast := utils.CastFieldIfToString(iface)
 	if !canCast {
-		return "", errors.New("cannot cast to string")
+		return "", fmt.Errorf("cannot cast %s to string", fldName)
 	}
 	return val, nil
 }
 
-// AnswerTime returns the AnswerTime of SupplierEvent
-func (le *SupplierEvent) AnswerTime(timezone string) (at time.Time, err error) {
-	atIf, has := le.Event[utils.ANSWER_TIME]
+// FieldAsTime returns the a field as Time instance
+func (le *SupplierEvent) FieldAsTime(fldName string, timezone string) (t time.Time, err error) {
+	iface, has := le.Event[fldName]
 	if !has {
-		return at, utils.ErrNotFound
+		err = utils.ErrNotFound
+		return
 	}
-	if at, canCast := atIf.(time.Time); canCast {
-		return at, nil
+	var canCast bool
+	if t, canCast = iface.(time.Time); canCast {
+		return
 	}
-	atStr, canCast := atIf.(string)
+	s, canCast := iface.(string)
 	if !canCast {
-		return at, errors.New("cannot cast to string")
+		err = fmt.Errorf("cannot cast %s to string", fldName)
+		return
 	}
-	return utils.ParseTimeDetectLayout(atStr, timezone)
+	return utils.ParseTimeDetectLayout(s, timezone)
 }
 
-// AnswerTime returns the AnswerTime of SupplierEvent
-func (le *SupplierEvent) Usage() (usage time.Duration, err error) {
-	iface, has := le.Event[utils.USAGE]
+// FieldAsTime returns the a field as Time instance
+func (le *SupplierEvent) FieldAsDuration(fldName string) (d time.Duration, err error) {
+	iface, has := le.Event[fldName]
 	if !has {
-		return 0, utils.ErrNotFound
+		err = utils.ErrNotFound
+		return
 	}
-	if usage, canCast := iface.(time.Duration); canCast {
-		return usage, nil
+	var canCast bool
+	if d, canCast = iface.(time.Duration); canCast {
+		return
 	}
-	usageStr, canCast := iface.(string)
+	s, canCast := iface.(string)
 	if !canCast {
-		return 0, errors.New("cannot cast to string")
+		err = fmt.Errorf("cannot cast %s to string", fldName)
+		return
 	}
-	return utils.ParseDurationWithNanosecs(usageStr)
+	return utils.ParseDurationWithNanosecs(s)
 }
 
 // SuppliersSorter is the interface which needs to be implemented by supplier sorters
@@ -158,7 +172,7 @@ func (ws *WeightSorter) SortSuppliers(prflID string,
 	for i, s := range suppls {
 		sortedSuppls.SortedSuppliers[i] = &SortedSupplier{
 			SupplierID:  s.ID,
-			SortingData: map[string]interface{}{"Weight": s.Weight}}
+			SortingData: map[string]interface{}{Weight: s.Weight}}
 	}
 	sortedSuppls.SortWeight()
 	return
