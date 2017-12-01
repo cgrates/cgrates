@@ -20,7 +20,6 @@ package engine
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
