@@ -26,11 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-const (
-	Weight = "Weight"
-	Cost   = "Cost"
-)
-
 // SuppliersReply is returned as part of GetSuppliers call
 type SortedSuppliers struct {
 	ProfileID       string            // Profile matched
@@ -47,7 +42,7 @@ type SortedSupplier struct {
 // SortWeight is part of sort interface, sort based on Weight
 func (sSpls *SortedSuppliers) SortWeight() {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
-		return sSpls.SortedSuppliers[i].SortingData[Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[Weight].(float64)
+		return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
 	})
 }
 
@@ -55,10 +50,10 @@ func (sSpls *SortedSuppliers) SortWeight() {
 // sort based on Cost with fallback on Weight
 func (sSpls *SortedSuppliers) SortCost() {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
-		if sSpls.SortedSuppliers[i].SortingData[Cost].(float64) == sSpls.SortedSuppliers[j].SortingData[Cost].(float64) {
-			return sSpls.SortedSuppliers[i].SortingData[Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[Weight].(float64)
+		if sSpls.SortedSuppliers[i].SortingData[utils.Cost].(float64) == sSpls.SortedSuppliers[j].SortingData[utils.Cost].(float64) {
+			return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
 		}
-		return sSpls.SortedSuppliers[i].SortingData[Cost].(float64) < sSpls.SortedSuppliers[j].SortingData[Cost].(float64)
+		return sSpls.SortedSuppliers[i].SortingData[utils.Cost].(float64) < sSpls.SortedSuppliers[j].SortingData[utils.Cost].(float64)
 	})
 }
 
@@ -172,7 +167,7 @@ func (ws *WeightSorter) SortSuppliers(prflID string,
 	for i, s := range suppls {
 		sortedSuppls.SortedSuppliers[i] = &SortedSupplier{
 			SupplierID:  s.ID,
-			SortingData: map[string]interface{}{Weight: s.Weight}}
+			SortingData: map[string]interface{}{utils.Weight: s.Weight}}
 	}
 	sortedSuppls.SortWeight()
 	return

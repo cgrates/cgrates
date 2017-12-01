@@ -30,22 +30,22 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			&SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
-					Cost:   0.1,
-					Weight: 10.0,
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
 				},
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
-					Cost:   0.1,
-					Weight: 20.0,
+					utils.Cost:   0.1,
+					utils.Weight: 20.0,
 				},
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					Cost:   0.05,
-					Weight: 10.0,
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
 				},
 			},
 		},
@@ -56,22 +56,22 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			&SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					Cost:   0.05,
-					Weight: 10.0,
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
 				},
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
-					Cost:   0.1,
-					Weight: 20.0,
+					utils.Cost:   0.1,
+					utils.Weight: 20.0,
 				},
 			},
 			&SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
-					Cost:   0.1,
-					Weight: 10.0,
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
 				},
 			},
 		},

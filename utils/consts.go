@@ -590,6 +590,8 @@ const (
 	SupplierS                       = "SupplierS"
 	MetaWeight                      = "*weight"
 	MetaLeastCost                   = "*least_cost"
+	Weight                          = "Weight"
+	Cost                            = "Cost"
 )
 
 //Meta
