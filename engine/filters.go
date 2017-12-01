@@ -136,15 +136,15 @@ func (f *Filter) Compile() (err error) {
 }
 
 func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
-	if !utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields, MetaStatS, MetaDestinations,
+	if !utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSRFields, MetaStatS, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaDestinations,
+	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaStringPrefix, MetaTimings, MetaRSRFields,
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSRFields,
 		MetaDestinations, MetaDestinations, MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
