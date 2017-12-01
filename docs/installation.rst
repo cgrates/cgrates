@@ -7,7 +7,7 @@ We recommend using source installs for advanced users familiar with Go programmi
 3.1. Using packages
 -------------------
 
-3.1.1. Debian Jessie/Wheezy
+3.1.1. Debian 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is for the moment the only packaged and the most recommended to use method to install CGRateS.
