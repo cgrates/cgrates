@@ -23,7 +23,7 @@ import (
 	"sort"
 	"time"
 
-	//"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -171,7 +171,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 // costForEvent will compute cost out of accounts and rating plans for event
 func (spS *SupplierService) costForEvent(ev *SupplierEvent,
 	acntIDs, rpIDs []string) (ec *EventCost, err error) {
-	/*if err = ev.CheckMandatoryFields([]string{utils.ACCOUNT,
+	if err = ev.CheckMandatoryFields([]string{utils.ACCOUNT,
 		utils.DESTINATION, utils.ANSWER_TIME, utils.USAGE}); err != nil {
 		return
 	}
@@ -196,7 +196,7 @@ func (spS *SupplierService) costForEvent(ev *SupplierEvent,
 	if usage, err = ev.FieldAsDuration(utils.USAGE); err != nil {
 		return
 	}
-	for i, rp := range rpIDs {
+	for _, rp := range rpIDs { // loop through RatingPlans until we find one without errors
 		rPrfl := &RatingProfile{
 			Id: utils.ConcatenatedKey(utils.OUT,
 				ev.Tenant, utils.MetaSuppliers, subj),
@@ -210,8 +210,26 @@ func (spS *SupplierService) costForEvent(ev *SupplierEvent,
 		// force cache set so it can be picked by calldescriptor for cost calculation
 		cache.Set(utils.RATING_PROFILE_PREFIX+rPrfl.Id, rPrfl,
 			true, utils.NonTransactional)
+		cd := &CallDescriptor{
+			Direction:     utils.OUT,
+			Category:      utils.MetaSuppliers,
+			Tenant:        ev.Tenant,
+			Subject:       subj,
+			Account:       acnt,
+			Destination:   dst,
+			TimeStart:     aTime,
+			TimeEnd:       aTime.Add(usage),
+			DurationIndex: usage,
+		}
+		cc, err := cd.GetCost()
+		if err != nil {
+			if err != utils.ErrNotFound {
+				return nil, err
+			}
+			continue
+		}
+		return NewEventCostFromCallCost(cc, "", ""), nil
 	}
-	*/
 	return
 }
 

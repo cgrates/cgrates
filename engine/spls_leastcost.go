@@ -39,7 +39,7 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, len(suppls))}
 	for i, s := range suppls {
-		cost, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
+		ec, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
 		if err != nil {
 			return nil, err
 		}
@@ -47,7 +47,7 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 			SupplierID: s.ID,
 			SortingData: map[string]interface{}{
 				Weight: s.Weight,
-				Cost:   cost}}
+				Cost:   ec.GetCost()}}
 	}
 	sortedSuppls.SortCost()
 	return
