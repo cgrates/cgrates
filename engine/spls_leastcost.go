@@ -36,7 +36,7 @@ type LeastCostSorter struct {
 }
 
 func (lcs *LeastCostSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, ev *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, ev *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}

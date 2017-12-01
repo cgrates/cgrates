@@ -121,7 +121,7 @@ func TestLibSuppliersSortWeight(t *testing.T) {
 			},
 		},
 	}
-	se := &SupplierEvent{
+	se := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierevent1",
 		Event:  make(map[string]interface{}),

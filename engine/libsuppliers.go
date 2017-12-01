@@ -21,7 +21,7 @@ package engine
 import (
 	"fmt"
 	"sort"
-	"time"
+	// "time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -57,76 +57,9 @@ func (sSpls *SortedSuppliers) SortCost() {
 	})
 }
 
-// SupplierEvent is an event processed by Supplier Service
-type SupplierEvent struct {
-	Tenant string
-	ID     string
-	Event  map[string]interface{}
-}
-
-func (se *SupplierEvent) CheckMandatoryFields(fldNames []string) error {
-	for _, fldName := range fldNames {
-		if _, has := se.Event[fldName]; !has {
-			return utils.NewErrMandatoryIeMissing(fldName)
-		}
-	}
-	return nil
-}
-
-// AnswerTime returns the AnswerTime of SupplierEvent
-func (le *SupplierEvent) FieldAsString(fldName string) (val string, err error) {
-	iface, has := le.Event[fldName]
-	if !has {
-		return "", utils.ErrNotFound
-	}
-	val, canCast := utils.CastFieldIfToString(iface)
-	if !canCast {
-		return "", fmt.Errorf("cannot cast %s to string", fldName)
-	}
-	return val, nil
-}
-
-// FieldAsTime returns the a field as Time instance
-func (le *SupplierEvent) FieldAsTime(fldName string, timezone string) (t time.Time, err error) {
-	iface, has := le.Event[fldName]
-	if !has {
-		err = utils.ErrNotFound
-		return
-	}
-	var canCast bool
-	if t, canCast = iface.(time.Time); canCast {
-		return
-	}
-	s, canCast := iface.(string)
-	if !canCast {
-		err = fmt.Errorf("cannot cast %s to string", fldName)
-		return
-	}
-	return utils.ParseTimeDetectLayout(s, timezone)
-}
-
-// FieldAsTime returns the a field as Time instance
-func (le *SupplierEvent) FieldAsDuration(fldName string) (d time.Duration, err error) {
-	iface, has := le.Event[fldName]
-	if !has {
-		err = utils.ErrNotFound
-		return
-	}
-	var canCast bool
-	if d, canCast = iface.(time.Duration); canCast {
-		return
-	}
-	s, canCast := iface.(string)
-	if !canCast {
-		err = fmt.Errorf("cannot cast %s to string", fldName)
-		return
-	}
-	return utils.ParseDurationWithNanosecs(s)
-}
-
 // SuppliersSorter is the interface which needs to be implemented by supplier sorters
 type SuppliersSorter interface {
-	SortSuppliers(string, []*Supplier, *SupplierEvent) (*SortedSuppliers, error)
+	SortSuppliers(string, []*Supplier, *utils.CGREvent) (*SortedSuppliers, error)
 }
 
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
@@ -142,7 +75,7 @@ func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatche
 type SupplierSortDispatcher map[string]SuppliersSorter
 
 func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
-	suppls []*Supplier, suplEv *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, suplEv *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
@@ -160,7 +93,7 @@ type WeightSorter struct {
 }
 
 func (ws *WeightSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, suplEv *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, suplEv *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         ws.sorting,
 		SortedSuppliers: make([]*SortedSupplier, len(suppls))}

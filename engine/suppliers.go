@@ -111,7 +111,7 @@ func (spS *SupplierService) Shutdown() error {
 }
 
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) (sPrfls SupplierProfiles, err error) {
+func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (sPrfls SupplierProfiles, err error) {
 	matchingLPs := make(map[string]*SupplierProfile)
 	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.indexedFields,
 		spS.dm, utils.SupplierProfilesStringIndex+ev.Tenant)
@@ -168,7 +168,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 
 // costForEvent will compute cost out of accounts and rating plans for event
 // returns map[string]interface{} with cost and relevant matching information inside
-func (spS *SupplierService) costForEvent(ev *SupplierEvent,
+func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	if err = ev.CheckMandatoryFields([]string{utils.ACCOUNT,
 		utils.DESTINATION, utils.ANSWER_TIME, utils.USAGE}); err != nil {
@@ -272,7 +272,7 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 
 // supliersForEvent will return the list of valid supplier IDs
 // for event based on filters and sorting algorithms
-func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
+func (spS *SupplierService) sortedSuppliersForEvent(ev *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
 	var suppPrfls SupplierProfiles
 	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(ev); err != nil {
 		return
@@ -296,7 +296,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *SupplierEvent) (sortedSu
 }
 
 // V1GetSuppliersForEvent returns the list of valid supplier IDs
-func (spS *SupplierService) V1GetSuppliers(args *SupplierEvent, reply *SortedSuppliers) (err error) {
+func (spS *SupplierService) V1GetSuppliers(args *utils.CGREvent, reply *SortedSuppliers) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

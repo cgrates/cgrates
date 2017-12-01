@@ -82,7 +82,7 @@ func (splv1 *SupplierSv1) Call(serviceMethod string,
 }
 
 // GetSuppliers returns sorted list of suppliers for Event
-func (splv1 *SupplierSv1) GetSuppliers(args *engine.SupplierEvent,
+func (splv1 *SupplierSv1) GetSuppliers(args *utils.CGREvent,
 	reply *engine.SortedSuppliers) error {
 	return splv1.splS.V1GetSuppliers(args, reply)
 }
