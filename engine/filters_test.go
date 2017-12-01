@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -198,5 +199,72 @@ func TestReqFilterPassGreaterThan(t *testing.T) {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not pass")
+	}
+}
+
+func TestReqFilterNewRequestFilter(t *testing.T) {
+	rf, err := NewRequestFilter(MetaString, "MetaString", []string{"String"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf := &RequestFilter{Type: MetaString, FieldName: "MetaString", Values: []string{"String"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+	rf, err = NewRequestFilter(MetaStringPrefix, "MetaStringPrefix", []string{"stringPrefix"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &RequestFilter{Type: MetaStringPrefix, FieldName: "MetaStringPrefix", Values: []string{"stringPrefix"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+	rf, err = NewRequestFilter(MetaTimings, "MetaTimings", []string{""})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &RequestFilter{Type: MetaTimings, FieldName: "MetaTimings", Values: []string{""}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+	rf, err = NewRequestFilter(MetaDestinations, "MetaDestinations", []string{""})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &RequestFilter{Type: MetaDestinations, FieldName: "MetaDestinations", Values: []string{""}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+	rf, err = NewRequestFilter(MetaLessThan, "MetaLessThan", []string{"20"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &RequestFilter{Type: MetaLessThan, FieldName: "MetaLessThan", Values: []string{"20"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+	rf, err = NewRequestFilter(MetaLessOrEqual, "MetaLessOrEqual", []string{"20"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &RequestFilter{Type: MetaLessOrEqual, FieldName: "MetaLessOrEqual", Values: []string{"20"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+	rf, err = NewRequestFilter(MetaGreaterThan, "MetaGreaterThan", []string{"20"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &RequestFilter{Type: MetaGreaterThan, FieldName: "MetaGreaterThan", Values: []string{"20"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+	rf, err = NewRequestFilter(MetaGreaterOrEqual, "MetaGreaterOrEqual", []string{"20"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &RequestFilter{Type: MetaGreaterOrEqual, FieldName: "MetaGreaterOrEqual", Values: []string{"20"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
 }
