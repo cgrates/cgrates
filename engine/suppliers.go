@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -229,7 +228,7 @@ func (spS *SupplierService) costForEvent(ev *SupplierEvent,
 		}
 		return NewEventCostFromCallCost(cc, "", ""), nil
 	}
-	return nil, errors.New("no cost found")
+	return
 }
 
 // statMetrics will query a list of statIDs and return composed metric values

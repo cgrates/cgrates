@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,17 +39,22 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 	suppls []*Supplier, ev *SupplierEvent) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         lcs.sorting,
-		SortedSuppliers: make([]*SortedSupplier, len(suppls))}
-	for i, s := range suppls {
+		SortedSuppliers: make([]*SortedSupplier, 0)}
+	for _, s := range suppls {
 		ec, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
 		if err != nil {
 			return nil, err
+		} else if ec == nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
+					utils.SupplierS, prflID, s.ID))
+			continue
 		}
-		sortedSuppls.SortedSuppliers[i] = &SortedSupplier{
+		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, &SortedSupplier{
 			SupplierID: s.ID,
 			SortingData: map[string]interface{}{
 				utils.Weight: s.Weight,
-				utils.Cost:   ec.GetCost()}}
+				utils.Cost:   ec.GetCost()}})
 	}
 	sortedSuppls.SortCost()
 	return

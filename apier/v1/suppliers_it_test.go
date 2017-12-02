@@ -44,10 +44,10 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSLoadConfig,
 	testV1SplSInitDataDb,
 	testV1SplSResetStorDb,
-	//testV1SplSStartEngine,
+	testV1SplSStartEngine,
 	testV1SplSRpcConn,
 	testV1SplSFromFolder,
-	//testV1SplSGetWeightSuppliers,
+	testV1SplSGetWeightSuppliers,
 	testV1SplSGetLeastCostSuppliers,
 	testV1SplSStopEngine,
 }
