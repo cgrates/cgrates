@@ -20,6 +20,7 @@ package utils
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 )
 
@@ -88,4 +89,33 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 		return
 	}
 	return ParseDurationWithNanosecs(s)
+}
+
+func (te *CGREvent) TenantID() string {
+	return ConcatenatedKey(te.Tenant, te.ID)
+}
+
+func (te *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]interface{}) {
+	fEv = make(map[string]interface{})
+	if len(fltredFields) == 0 {
+		i := 0
+		fltredFields = make([]string, len(te.Event))
+		for k := range te.Event {
+			fltredFields[i] = k
+			i++
+		}
+	}
+	for _, fltrFld := range fltredFields {
+		fldVal, has := te.Event[fltrFld]
+		if !has {
+			continue // the field does not exist in map, ignore it
+		}
+		valOf := reflect.ValueOf(fldVal)
+		if valOf.Kind() == reflect.String {
+			fEv[fltrFld] = StringToInterface(valOf.String()) // attempt converting from string to comparable interface
+		} else {
+			fEv[fltrFld] = fldVal
+		}
+	}
+	return
 }

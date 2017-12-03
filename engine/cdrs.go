@@ -196,7 +196,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	}
 	if self.thdS != nil {
 		cdrIf, _ := cdr.AsMapStringIface()
-		ev := &ThresholdEvent{
+		ev := &utils.CGREvent{
 			Tenant: cdr.Tenant,
 			ID:     utils.GenUUID(),
 			Event:  cdrIf}

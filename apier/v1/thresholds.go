@@ -45,7 +45,7 @@ func (tSv1 *ThresholdSv1) GetThresholdIDs(tenant string, tIDs *[]string) error {
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
-func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ev *engine.ThresholdEvent, reply *engine.Thresholds) error {
+func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ev *utils.CGREvent, reply *engine.Thresholds) error {
 	return tSv1.tS.V1GetThresholdsForEvent(ev, reply)
 }
 
@@ -55,7 +55,7 @@ func (tSv1 *ThresholdSv1) GetThreshold(tntID *utils.TenantID, t *engine.Threshol
 }
 
 // ProcessEvent will process an Event
-func (tSv1 *ThresholdSv1) ProcessEvent(ev *engine.ThresholdEvent, hits *int) error {
+func (tSv1 *ThresholdSv1) ProcessEvent(ev *utils.CGREvent, hits *int) error {
 	return tSv1.tS.V1ProcessEvent(ev, hits)
 }
 

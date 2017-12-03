@@ -21,7 +21,6 @@ package engine
 import (
 	"fmt"
 	"math/rand"
-	"reflect"
 	"sort"
 	"sync"
 	"time"
@@ -50,54 +49,6 @@ func (tp *ThresholdProfile) TenantID() string {
 	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
 }
 
-// ThresholdEvent is an event processed by ThresholdService
-type ThresholdEvent struct {
-	Tenant string
-	ID     string
-	Event  map[string]interface{}
-}
-
-func (te *ThresholdEvent) TenantID() string {
-	return utils.ConcatenatedKey(te.Tenant, te.ID)
-}
-
-func (te *ThresholdEvent) Account() (acnt string, err error) {
-	acntIf, has := te.Event[utils.ACCOUNT]
-	if !has {
-		return "", utils.ErrNotFound
-	}
-	var canCast bool
-	if acnt, canCast = acntIf.(string); !canCast {
-		return "", fmt.Errorf("field %s is not string", utils.ACCOUNT)
-	}
-	return
-}
-
-func (te *ThresholdEvent) FilterableEvent(fltredFields []string) (fEv map[string]interface{}) {
-	fEv = make(map[string]interface{})
-	if len(fltredFields) == 0 {
-		i := 0
-		fltredFields = make([]string, len(te.Event))
-		for k := range te.Event {
-			fltredFields[i] = k
-			i++
-		}
-	}
-	for _, fltrFld := range fltredFields {
-		fldVal, has := te.Event[fltrFld]
-		if !has {
-			continue // the field does not exist in map, ignore it
-		}
-		valOf := reflect.ValueOf(fldVal)
-		if valOf.Kind() == reflect.String {
-			fEv[fltrFld] = utils.StringToInterface(valOf.String()) // attempt converting from string to comparable interface
-		} else {
-			fEv[fltrFld] = fldVal
-		}
-	}
-	return
-}
-
 // Threshold is the unit matched by filters
 type Threshold struct {
 	Tenant string
@@ -115,14 +66,14 @@ func (t *Threshold) TenantID() string {
 
 // ProcessEvent processes an ThresholdEvent
 // concurrentActions limits the number of simultaneous action sets executed
-func (t *Threshold) ProcessEvent(ev *ThresholdEvent, dm *DataManager) (err error) {
+func (t *Threshold) ProcessEvent(ev *utils.CGREvent, dm *DataManager) (err error) {
 	if t.Snooze.After(time.Now()) { // snoozed, not executing actions
 		return
 	}
 	if t.Hits < t.tPrfl.MinHits { // number of hits was not met, will not execute actions
 		return
 	}
-	acnt, _ := ev.Account()
+	acnt, _ := ev.utils.FieldAsString(utils.ACCOUNT)
 	var acntID string
 	if acnt != "" {
 		acntID = utils.ConcatenatedKey(ev.Tenant, acnt)
@@ -262,7 +213,7 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts Thresholds, err error) {
+func (tS *ThresholdService) matchingThresholdsForEvent(ev *utils.CGREvent) (ts Thresholds, err error) {
 	matchingTs := make(map[string]*Threshold)
 	tIDs, err := matchingItemIDsForEvent(ev.Event, tS.indexedFields, tS.dm, utils.ThresholdStringIndex+ev.Tenant)
 	if err != nil {
@@ -316,7 +267,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *ThresholdEvent) (ts T
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (hits int, err error) {
+func (tS *ThresholdService) processEvent(ev *utils.CGREvent) (hits int, err error) {
 	matchTs, err := tS.matchingThresholdsForEvent(ev)
 	if err != nil {
 		return 0, err
@@ -361,7 +312,7 @@ func (tS *ThresholdService) processEvent(ev *ThresholdEvent) (hits int, err erro
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(ev *ThresholdEvent, reply *int) (err error) {
+func (tS *ThresholdService) V1ProcessEvent(ev *utils.CGREvent, reply *int) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -374,7 +325,7 @@ func (tS *ThresholdService) V1ProcessEvent(ev *ThresholdEvent, reply *int) (err 
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdService) V1GetThresholdsForEvent(ev *ThresholdEvent, reply *Thresholds) (err error) {
+func (tS *ThresholdService) V1GetThresholdsForEvent(ev *utils.CGREvent, reply *Thresholds) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

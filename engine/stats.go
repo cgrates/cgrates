@@ -231,7 +231,7 @@ func (sS *StatService) processEvent(ev *StatEvent) (err error) {
 			sS.ssqMux.Unlock()
 		}
 		if sS.thdS != nil {
-			ev := &ThresholdEvent{
+			ev := &utils.CGREvent{
 				Tenant: sq.Tenant,
 				ID:     utils.GenUUID(),
 				Event: map[string]interface{}{
