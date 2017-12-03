@@ -169,27 +169,27 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 	}
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_LEASTCOST_1",
-		Sorting:   utils.MetaWeight,
+		Sorting:   utils.MetaLeastCost,
 		SortedSuppliers: []*engine.SortedSupplier{
 			&engine.SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					utils.Weight: 25.0,
-					utils.Cost:   0.2,
+					utils.Cost:   0.02,
+					utils.Weight: 15.0,
 				},
 			},
 			&engine.SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
+					utils.Cost:   0.02,
 					utils.Weight: 10.0,
-					utils.Cost:   0.2,
 				},
 			},
 			&engine.SortedSupplier{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
+					utils.Cost:   0.46666,
 					utils.Weight: 20.0,
-					utils.Cost:   0.2,
 				},
 			},
 		},
