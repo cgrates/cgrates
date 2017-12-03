@@ -592,6 +592,7 @@ const (
 	MetaLeastCost                   = "*least_cost"
 	Weight                          = "Weight"
 	Cost                            = "Cost"
+	RatingPlanID                    = "RatingPlanID"
 )
 
 //Meta

@@ -41,20 +41,24 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		ec, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
+		costData, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
 		if err != nil {
 			return nil, err
-		} else if ec == nil {
+		} else if len(costData) == 0 {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
 					utils.SupplierS, prflID, s.ID))
 			continue
 		}
+		srtData := map[string]interface{}{
+			utils.Weight: s.Weight,
+		}
+		for k, v := range costData {
+			srtData[k] = v
+		}
 		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, &SortedSupplier{
-			SupplierID: s.ID,
-			SortingData: map[string]interface{}{
-				utils.Weight: s.Weight,
-				utils.Cost:   ec.GetCost()}})
+			SupplierID:  s.ID,
+			SortingData: srtData})
 	}
 	sortedSuppls.SortCost()
 	return

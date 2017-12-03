@@ -167,8 +167,9 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *SupplierEvent) 
 }
 
 // costForEvent will compute cost out of accounts and rating plans for event
+// returns map[string]interface{} with cost and relevant matching information inside
 func (spS *SupplierService) costForEvent(ev *SupplierEvent,
-	acntIDs, rpIDs []string) (ec *EventCost, err error) {
+	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	if err = ev.CheckMandatoryFields([]string{utils.ACCOUNT,
 		utils.DESTINATION, utils.ANSWER_TIME, utils.USAGE}); err != nil {
 		return
@@ -194,6 +195,29 @@ func (spS *SupplierService) costForEvent(ev *SupplierEvent,
 	if usage, err = ev.FieldAsDuration(utils.USAGE); err != nil {
 		return
 	}
+	for _, anctID := range acntIDs {
+		cd := &CallDescriptor{
+			Direction:     utils.OUT,
+			Category:      utils.MetaSuppliers,
+			Tenant:        ev.Tenant,
+			Subject:       subj,
+			Account:       anctID,
+			Destination:   dst,
+			TimeStart:     aTime,
+			TimeEnd:       aTime.Add(usage),
+			DurationIndex: usage,
+		}
+		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
+					anctID, err.Error()))
+		} else if maxDur >= usage {
+			return map[string]interface{}{
+				utils.Cost:    0.0,
+				utils.ACCOUNT: anctID,
+			}, nil
+		}
+	}
 	for _, rp := range rpIDs { // loop through RatingPlans until we find one without errors
 		rPrfl := &RatingProfile{
 			Id: utils.ConcatenatedKey(utils.OUT,
@@ -206,8 +230,8 @@ func (spS *SupplierService) costForEvent(ev *SupplierEvent,
 			},
 		}
 		// force cache set so it can be picked by calldescriptor for cost calculation
-		cache.Set(utils.RATING_PROFILE_PREFIX+rPrfl.Id, rPrfl,
-			true, utils.NonTransactional)
+		cacheKey := utils.RATING_PROFILE_PREFIX + rPrfl.Id
+		cache.Set(cacheKey, rPrfl, true, utils.NonTransactional)
 		cd := &CallDescriptor{
 			Direction:     utils.OUT,
 			Category:      utils.MetaSuppliers,
@@ -220,13 +244,17 @@ func (spS *SupplierService) costForEvent(ev *SupplierEvent,
 			DurationIndex: usage,
 		}
 		cc, err := cd.GetCost()
+		cache.RemKey(cacheKey, true, utils.NonTransactional) // Remove here so we don't overload memory
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
 			continue
 		}
-		return NewEventCostFromCallCost(cc, "", ""), nil
+		ec := NewEventCostFromCallCost(cc, "", "")
+		return map[string]interface{}{
+			utils.Cost:         ec.GetCost(),
+			utils.RatingPlanID: rp}, nil
 	}
 	return
 }
