@@ -493,7 +493,7 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 	if rS.thdS == nil {
 		return
 	}
-	ev := &ThresholdEvent{
+	ev := &utils.CGREvent{
 		Tenant: r.Tenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]interface{}{

@@ -779,7 +779,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			accountId = b.account.ID
 			acntTnt := utils.NewTenantID(accountId)
 			if thresholdS != nil {
-				ev := &ThresholdEvent{
+				ev := &utils.CGREvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),
 					Event: map[string]interface{}{
@@ -827,7 +827,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 	if len(savedAccounts) != 0 && thresholdS != nil {
 		for _, acnt := range savedAccounts {
 			acntTnt := utils.NewTenantID(acnt.ID)
-			ev := &ThresholdEvent{
+			ev := &utils.CGREvent{
 				Tenant: acntTnt.Tenant,
 				ID:     utils.GenUUID(),
 				Event: map[string]interface{}{

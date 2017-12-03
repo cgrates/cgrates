@@ -41,8 +41,8 @@ var (
 	thdsDelay   int
 )
 
-var tEvs = []*engine.ThresholdEvent{
-	&engine.ThresholdEvent{ // hitting THD_ACNT_BALANCE_1
+var tEvs = []*utils.CGREvent{
+	&utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
@@ -50,7 +50,7 @@ var tEvs = []*engine.ThresholdEvent{
 			utils.ACCOUNT:       "1002",
 			utils.AllowNegative: true,
 			utils.Disabled:      false}},
-	&engine.ThresholdEvent{ // hitting THD_ACNT_BALANCE_1
+	&utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -60,7 +60,7 @@ var tEvs = []*engine.ThresholdEvent{
 			utils.Units:      12.3,
 			utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC).Local(),
 		}},
-	&engine.ThresholdEvent{ // hitting THD_STATS_1
+	&utils.CGREvent{ // hitting THD_STATS_1
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -74,7 +74,7 @@ var tEvs = []*engine.ThresholdEvent{
 			"ACC":           0.75,
 			"PDD":           "2s",
 		}},
-	&engine.ThresholdEvent{ // hitting THD_STATS_1 and THD_STATS_2
+	&utils.CGREvent{ // hitting THD_STATS_1 and THD_STATS_2
 		Tenant: "cgrates.org",
 		ID:     "event4",
 		Event: map[string]interface{}{
@@ -85,7 +85,7 @@ var tEvs = []*engine.ThresholdEvent{
 			"ACD":           "2m45s",
 			"TCD":           "1h",
 		}},
-	&engine.ThresholdEvent{ // hitting THD_STATS_3
+	&utils.CGREvent{ // hitting THD_STATS_3
 		Tenant: "cgrates.org",
 		ID:     "event5",
 		Event: map[string]interface{}{
@@ -95,7 +95,7 @@ var tEvs = []*engine.ThresholdEvent{
 			"ACD":           "2m45s",
 			"TCD":           "3h1s",
 		}},
-	&engine.ThresholdEvent{ // hitting THD_RES_1
+	&utils.CGREvent{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
 		Event: map[string]interface{}{
@@ -103,7 +103,7 @@ var tEvs = []*engine.ThresholdEvent{
 			utils.ACCOUNT:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.USAGE:      10.0}},
-	&engine.ThresholdEvent{ // hitting THD_RES_1
+	&utils.CGREvent{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
 		Event: map[string]interface{}{
@@ -111,7 +111,7 @@ var tEvs = []*engine.ThresholdEvent{
 			utils.ACCOUNT:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.USAGE:      10.0}},
-	&engine.ThresholdEvent{ // hitting THD_RES_1
+	&utils.CGREvent{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
 		Event: map[string]interface{}{
@@ -119,7 +119,7 @@ var tEvs = []*engine.ThresholdEvent{
 			utils.ACCOUNT:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.USAGE:      10.0}},
-	&engine.ThresholdEvent{ // hitting THD_CDRS_1
+	&utils.CGREvent{ // hitting THD_CDRS_1
 		Tenant: "cgrates.org",
 		ID:     "cdrev1",
 		Event: map[string]interface{}{
