@@ -19,11 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"sort"
-	"strconv"
 	"time"
 )
 
@@ -47,103 +45,6 @@ func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
 }
 
-// StatEvent is an event processed by StatService
-type StatEvent struct {
-	Tenant string
-	ID     string
-	Event  map[string]interface{}
-}
-
-// TenantID returns the unique identifier based on Tenant and ID
-func (se StatEvent) TenantID() string {
-	return utils.ConcatenatedKey(se.Tenant, se.ID)
-}
-
-// AnswerTime returns the AnswerTime of StatEvent
-func (se StatEvent) AnswerTime(timezone string) (at time.Time, err error) {
-	atIf, has := se.Event[utils.ANSWER_TIME]
-	if !has {
-		return at, utils.ErrNotFound
-	}
-	if at, canCast := atIf.(time.Time); canCast {
-		return at, nil
-	}
-	atStr, canCast := atIf.(string)
-	if !canCast {
-		return at, errors.New("cannot cast to string")
-	}
-	return utils.ParseTimeDetectLayout(atStr, timezone)
-}
-
-// Usage returns the Usage of StatEvent
-func (se StatEvent) Usage() (at time.Duration, err error) {
-	usIf, has := se.Event[utils.USAGE]
-	if !has {
-		return at, utils.ErrNotFound
-	}
-	if us, canCast := usIf.(time.Duration); canCast {
-		return us, nil
-	}
-	if us, canCast := usIf.(float64); canCast {
-		return time.Duration(int64(us)), nil
-	}
-	usStr, canCast := usIf.(string)
-	if !canCast {
-		return at, errors.New("cannot cast to string")
-	}
-	return utils.ParseDurationWithNanosecs(usStr)
-}
-
-// Cost returns the Cost of StatEvent
-func (se StatEvent) Cost() (cs float64, err error) {
-	csIf, has := se.Event[utils.COST]
-	if !has {
-		return cs, utils.ErrNotFound
-	}
-	if val, canCast := csIf.(float64); canCast {
-		return val, nil
-	}
-	csStr, canCast := csIf.(string)
-	if !canCast {
-		return cs, errors.New("cannot cast to string")
-	}
-	return strconv.ParseFloat(csStr, 64)
-}
-
-// Pdd returns the Pdd of StatEvent
-func (se StatEvent) Pdd() (pdd time.Duration, err error) {
-	pddIf, has := se.Event[utils.PDD]
-	if !has {
-		return pdd, utils.ErrNotFound
-	}
-	if pdd, canCast := pddIf.(time.Duration); canCast {
-		return pdd, nil
-	}
-	if pdd, canCast := pddIf.(float64); canCast {
-		return time.Duration(int64(pdd)), nil
-	}
-	pddStr, canCast := pddIf.(string)
-	if !canCast {
-		return pdd, errors.New("cannot cast to string")
-	}
-	return utils.ParseDurationWithNanosecs(pddStr)
-}
-
-// Destination returns the Destination of StatEvent
-func (se StatEvent) Destination() (ddc string, err error) {
-	ddcIf, has := se.Event[utils.DESTINATION]
-	if !has {
-		return ddc, utils.ErrNotFound
-	}
-	if ddcInt, canCast := ddcIf.(int64); canCast {
-		return strconv.FormatInt(ddcInt, 64), nil
-	}
-	ddcStr, canCast := ddcIf.(string)
-	if !canCast {
-		return ddc, errors.New("cannot cast to string")
-	}
-	return ddcStr, nil
-}
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
 func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
@@ -175,7 +76,7 @@ type StoredStatQueue struct {
 	Tenant  string
 	ID      string
 	SQItems []struct {
-		EventID    string     // Bounded to the original StatEvent
+		EventID    string     // Bounded to the original utils.CGREvent
 		ExpiryTime *time.Time // Used to auto-expire events
 	}
 	SQMetrics map[string][]byte
@@ -219,7 +120,7 @@ type StatQueue struct {
 	Tenant  string
 	ID      string
 	SQItems []struct {
-		EventID    string     // Bounded to the original StatEvent
+		EventID    string     // Bounded to the original utils.CGREvent
 		ExpiryTime *time.Time // Used to auto-expire events
 	}
 	SQMetrics map[string]StatMetric
@@ -234,8 +135,8 @@ func (sq *StatQueue) TenantID() string {
 	return utils.ConcatenatedKey(sq.Tenant, sq.ID)
 }
 
-// ProcessEvent processes a StatEvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(ev *StatEvent) (err error) {
+// ProcessEvent processes a utils.CGREvent, returns true if processed
+func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent) (err error) {
 	sq.remExpired()
 	sq.remOnQueueLength()
 	sq.addStatEvent(ev)
@@ -283,7 +184,7 @@ func (sq *StatQueue) remOnQueueLength() {
 }
 
 // addStatEvent computes metrics for an event
-func (sq *StatQueue) addStatEvent(ev *StatEvent) {
+func (sq *StatQueue) addStatEvent(ev *utils.CGREvent) {
 	for metricID, metric := range sq.SQMetrics {
 		if err := metric.AddEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",

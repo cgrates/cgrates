@@ -189,7 +189,7 @@ func TestStatAddStatEvent(t *testing.T) {
 	if asr := asrMetric.GetFloat64Value(); asr != 100 {
 		t.Errorf("received ASR: %v", asr)
 	}
-	ev1 := &StatEvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 	sq.addStatEvent(ev1)
 	if asr := asrMetric.GetFloat64Value(); asr != 50 {
 		t.Errorf("received ASR: %v", asr)

@@ -21,6 +21,7 @@ package utils
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -40,7 +41,7 @@ func (ev *CGREvent) CheckMandatoryFields(fldNames []string) error {
 	return nil
 }
 
-// AnswerTime returns the AnswerTime of CGREvent
+// AnswerTime returns a field as string instance
 func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 	iface, has := ev.Event[fldName]
 	if !has {
@@ -53,7 +54,7 @@ func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 	return val, nil
 }
 
-// FieldAsTime returns the a field as Time instance
+// FieldAsTime returns a field as Time instance
 func (ev *CGREvent) FieldAsTime(fldName string, timezone string) (t time.Time, err error) {
 	iface, has := ev.Event[fldName]
 	if !has {
@@ -72,7 +73,7 @@ func (ev *CGREvent) FieldAsTime(fldName string, timezone string) (t time.Time, e
 	return ParseTimeDetectLayout(s, timezone)
 }
 
-// FieldAsTime returns the a field as Time instance
+// FieldAsTime returns a field as Duration instance
 func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error) {
 	iface, has := ev.Event[fldName]
 	if !has {
@@ -91,22 +92,39 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 	return ParseDurationWithNanosecs(s)
 }
 
-func (te *CGREvent) TenantID() string {
-	return ConcatenatedKey(te.Tenant, te.ID)
+// FieldAsFloat returns a field as float64 instance
+func (ev *CGREvent) FieldAsFloat64(fldName string) (f float64, err error) {
+	iface, has := ev.Event[fldName]
+	if !has {
+		return f, ErrNotFound
+	}
+	if val, canCast := iface.(float64); canCast {
+		return val, nil
+	}
+	csStr, canCast := iface.(string)
+	if !canCast {
+		err = fmt.Errorf("cannot cast %s to string", fldName)
+		return
+	}
+	return strconv.ParseFloat(csStr, 64)
 }
 
-func (te *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]interface{}) {
+func (ev *CGREvent) TenantID() string {
+	return ConcatenatedKey(ev.Tenant, ev.ID)
+}
+
+func (ev *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]interface{}) {
 	fEv = make(map[string]interface{})
 	if len(fltredFields) == 0 {
 		i := 0
-		fltredFields = make([]string, len(te.Event))
-		for k := range te.Event {
+		fltredFields = make([]string, len(ev.Event))
+		for k := range ev.Event {
 			fltredFields[i] = k
 			i++
 		}
 	}
 	for _, fltrFld := range fltredFields {
-		fldVal, has := te.Event[fltrFld]
+		fldVal, has := ev.Event[fltrFld]
 		if !has {
 			continue // the field does not exist in map, ignore it
 		}

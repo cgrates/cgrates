@@ -114,3 +114,5 @@ func TestCGREventFieldAsString(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", event["Weight"], answ)
 	}
 }
+
+//float , float in string time duration

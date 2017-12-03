@@ -49,7 +49,7 @@ type StatMetric interface {
 	GetValue() interface{}
 	GetStringValue(fmtOpts string) (val string)
 	GetFloat64Value() (val float64)
-	AddEvent(ev *StatEvent) error
+	AddEvent(ev *utils.CGREvent) error
 	RemEvent(evTenantID string) error
 	Marshal(ms Marshaler) (marshaled []byte, err error)
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
@@ -101,9 +101,9 @@ func (asr *StatASR) GetFloat64Value() (val float64) {
 }
 
 // AddEvent is part of StatMetric interface
-func (asr *StatASR) AddEvent(ev *StatEvent) (err error) {
+func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 	var answered bool
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
@@ -189,12 +189,12 @@ func (acd *StatACD) GetFloat64Value() (v float64) {
 	return
 }
 
-func (acd *StatACD) AddEvent(ev *StatEvent) (err error) {
+func (acd *StatACD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if duration, err := ev.Usage(); err != nil &&
+		if duration, err := ev.FieldAsDuration(utils.USAGE); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else {
@@ -276,12 +276,12 @@ func (tcd *StatTCD) GetFloat64Value() (v float64) {
 	return
 }
 
-func (tcd *StatTCD) AddEvent(ev *StatEvent) (err error) {
+func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if duration, err := ev.Usage(); err != nil &&
+		if duration, err := ev.FieldAsDuration(utils.USAGE); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else {
@@ -362,12 +362,12 @@ func (acc *StatACC) GetFloat64Value() (v float64) {
 	return acc.getValue()
 }
 
-func (acc *StatACC) AddEvent(ev *StatEvent) (err error) {
+func (acc *StatACC) AddEvent(ev *utils.CGREvent) (err error) {
 	var value float64
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if cost, err := ev.Cost(); err != nil &&
+		if cost, err := ev.FieldAsFloat64(utils.COST); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else if cost >= 0 {
@@ -446,12 +446,12 @@ func (tcc *StatTCC) GetFloat64Value() (v float64) {
 	return tcc.getValue()
 }
 
-func (tcc *StatTCC) AddEvent(ev *StatEvent) (err error) {
+func (tcc *StatTCC) AddEvent(ev *utils.CGREvent) (err error) {
 	var value float64
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if cost, err := ev.Cost(); err != nil &&
+		if cost, err := ev.FieldAsFloat64(utils.COST); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else if cost >= 0 {
@@ -534,13 +534,13 @@ func (pdd *StatPDD) GetFloat64Value() (v float64) {
 	return
 }
 
-func (pdd *StatPDD) AddEvent(ev *StatEvent) (err error) {
+func (pdd *StatPDD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.AnswerTime(config.CgrConfig().DefaultTimezone); err != nil &&
+	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
-		if duration, err := ev.Pdd(); err != nil &&
+		if duration, err := ev.FieldAsDuration(utils.PDD); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else {
@@ -608,9 +608,9 @@ func (ddc *StatDDC) GetFloat64Value() (v float64) {
 	return
 }
 
-func (ddc *StatDDC) AddEvent(ev *StatEvent) (err error) {
+func (ddc *StatDDC) AddEvent(ev *utils.CGREvent) (err error) {
 	var dest string
-	if dest, err = ev.Destination(); err != nil {
+	if dest, err = ev.FieldAsString(utils.DESTINATION); err != nil {
 		return err
 	}
 	if _, has := ddc.Destinations[dest]; !has {

@@ -41,8 +41,8 @@ var (
 	statsDelay   int
 )
 
-var evs = []*engine.StatEvent{
-	&engine.StatEvent{
+var evs = []*utils.CGREvent{
+	&utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
@@ -50,14 +50,14 @@ var evs = []*engine.StatEvent{
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(135 * time.Second),
 			utils.COST:        123.0}},
-	&engine.StatEvent{
+	&utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
 			utils.ACCOUNT:     "1002",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(45 * time.Second)}},
-	&engine.StatEvent{
+	&utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -170,7 +170,7 @@ func testV1STSGetStats(t *testing.T) {
 
 func testV1STSProcessEvent(t *testing.T) {
 	var reply string
-	ev1 := engine.StatEvent{
+	ev1 := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
@@ -199,7 +199,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
-	ev2 := engine.StatEvent{
+	ev2 := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -211,7 +211,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("received reply: %s", reply)
 	}
-	ev3 := &engine.StatEvent{
+	ev3 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
