@@ -139,7 +139,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
-func (sS *StatService) matchingStatQueuesForEvent(ev *StatEvent) (sqs StatQueues, err error) {
+func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQueues, err error) {
 	matchingSQs := make(map[string]*StatQueue)
 	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.indexedFields, sS.dm, utils.StatQueuesStringIndex+ev.Tenant)
 	if err != nil {
@@ -203,7 +203,7 @@ func (ss *StatService) Call(serviceMethod string, args interface{}, reply interf
 
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
-func (sS *StatService) processEvent(ev *StatEvent) (err error) {
+func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 	matchSQs, err := sS.matchingStatQueuesForEvent(ev)
 	if err != nil {
 		return err
@@ -255,7 +255,7 @@ func (sS *StatService) processEvent(ev *StatEvent) (err error) {
 }
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1ProcessEvent(ev *StatEvent, reply *string) (err error) {
+func (sS *StatService) V1ProcessEvent(ev *utils.CGREvent, reply *string) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -266,7 +266,7 @@ func (sS *StatService) V1ProcessEvent(ev *StatEvent, reply *string) (err error) 
 }
 
 // V1StatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1GetStatQueuesForEvent(ev *StatEvent, reply *StatQueues) (err error) {
+func (sS *StatService) V1GetStatQueuesForEvent(ev *utils.CGREvent, reply *StatQueues) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

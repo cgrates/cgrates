@@ -26,7 +26,7 @@ import (
 
 func TestASRGetStringValue(t *testing.T) {
 	asr, _ := NewASR(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	if strVal := asr.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
@@ -36,8 +36,8 @@ func TestASRGetStringValue(t *testing.T) {
 	if strVal := asr.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	asr.AddEvent(ev2)
 	if strVal := asr.GetStringValue(""); strVal != "50%" {
 		t.Errorf("wrong asr value: %s", strVal)
@@ -50,10 +50,10 @@ func TestASRGetStringValue(t *testing.T) {
 	if strVal := asr.GetStringValue(""); strVal != "50%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	asr.AddEvent(ev4)
@@ -75,15 +75,15 @@ func TestASRGetStringValue(t *testing.T) {
 
 func TestASRGetValue(t *testing.T) {
 	asr, _ := NewASR(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	asr.AddEvent(ev)
 	if v := asr.GetValue(); v != -1.0 {
 		t.Errorf("wrong asr value: %f", v)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	asr.AddEvent(ev2)
 	asr.AddEvent(ev3)
 	if v := asr.GetValue(); v != 33.33333 {
@@ -93,10 +93,10 @@ func TestASRGetValue(t *testing.T) {
 	if v := asr.GetValue(); v != 50.0 {
 		t.Errorf("wrong asr value: %f", v)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	asr.AddEvent(ev4)
@@ -121,7 +121,7 @@ func TestASRGetValue(t *testing.T) {
 
 func TestACDGetStringValue(t *testing.T) {
 	acd, _ := NewACD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			utils.USAGE:  time.Duration(10 * time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -133,8 +133,8 @@ func TestACDGetStringValue(t *testing.T) {
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acd.AddEvent(ev2)
 	acd.AddEvent(ev3)
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
@@ -147,13 +147,13 @@ func TestACDGetStringValue(t *testing.T) {
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -181,7 +181,7 @@ func TestACDGetStringValue(t *testing.T) {
 
 func TestACDGetFloat64Value(t *testing.T) {
 	acd, _ := NewACD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second)}}
@@ -189,18 +189,18 @@ func TestACDGetFloat64Value(t *testing.T) {
 	if v := acd.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong acd value: %v", v)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	acd.AddEvent(ev2)
 	if v := acd.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong acd value: %v", v)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
 			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -234,7 +234,7 @@ func TestACDGetFloat64Value(t *testing.T) {
 
 func TestACDGetValue(t *testing.T) {
 	acd, _ := NewACD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second)}}
@@ -242,11 +242,11 @@ func TestACDGetValue(t *testing.T) {
 	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(8 * time.Second)}}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acd.AddEvent(ev2)
 	acd.AddEvent(ev3)
 	if v := acd.GetValue(); v != time.Duration(9*time.Second) {
@@ -260,13 +260,13 @@ func TestACDGetValue(t *testing.T) {
 	if v := acd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong acd value: %+v", v)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(4*time.Minute + 30*time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -290,7 +290,7 @@ func TestACDGetValue(t *testing.T) {
 
 func TestTCDGetStringValue(t *testing.T) {
 	tcd, _ := NewTCD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(10 * time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -302,12 +302,12 @@ func TestTCDGetStringValue(t *testing.T) {
 	if strVal := tcd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(10 * time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		}}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	tcd.AddEvent(ev2)
 	tcd.AddEvent(ev3)
 	if strVal := tcd.GetStringValue(""); strVal != "20s" {
@@ -321,13 +321,13 @@ func TestTCDGetStringValue(t *testing.T) {
 	if strVal := tcd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -351,7 +351,7 @@ func TestTCDGetStringValue(t *testing.T) {
 
 func TestTCDGetFloat64Value(t *testing.T) {
 	tcd, _ := NewTCD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second)}}
@@ -359,18 +359,18 @@ func TestTCDGetFloat64Value(t *testing.T) {
 	if v := tcd.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong tcd value: %f", v)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	tcd.AddEvent(ev2)
 	if v := tcd.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong tcd value: %f", v)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -404,7 +404,7 @@ func TestTCDGetFloat64Value(t *testing.T) {
 
 func TestTCDGetValue(t *testing.T) {
 	tcd, _ := NewTCD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second)}}
@@ -412,11 +412,11 @@ func TestTCDGetValue(t *testing.T) {
 	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(5 * time.Second)}}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	tcd.AddEvent(ev2)
 	tcd.AddEvent(ev3)
 	if v := tcd.GetValue(); v != time.Duration(15*time.Second) {
@@ -430,13 +430,13 @@ func TestTCDGetValue(t *testing.T) {
 	if v := tcd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong tcd value: %+v", v)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -460,7 +460,7 @@ func TestTCDGetValue(t *testing.T) {
 
 func TestACCGetStringValue(t *testing.T) {
 	acc, _ := NewACC(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       12.3}}
@@ -471,8 +471,8 @@ func TestACCGetStringValue(t *testing.T) {
 	if strVal := acc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3",
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       12.3}}
@@ -485,11 +485,11 @@ func TestACCGetStringValue(t *testing.T) {
 	if strVal := acc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       5.6}}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       1.2}}
@@ -512,7 +512,7 @@ func TestACCGetStringValue(t *testing.T) {
 
 func TestACCGetValue(t *testing.T) {
 	acc, _ := NewACC(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       "12.3"}}
@@ -523,8 +523,8 @@ func TestACCGetValue(t *testing.T) {
 	if strVal := acc.GetValue(); strVal != -1.0 {
 		t.Errorf("wrong acc value: %v", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acc.AddEvent(ev2)
 	acc.AddEvent(ev3)
 	if strVal := acc.GetValue(); strVal != -1.0 {
@@ -534,11 +534,11 @@ func TestACCGetValue(t *testing.T) {
 	if strVal := acc.GetValue(); strVal != -1.0 {
 		t.Errorf("wrong acc value: %v", strVal)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       "5.6"}}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       "1.2"}}
@@ -561,7 +561,7 @@ func TestACCGetValue(t *testing.T) {
 
 func TestTCCGetStringValue(t *testing.T) {
 	tcc, _ := NewTCC(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       12.3}}
@@ -572,8 +572,8 @@ func TestTCCGetStringValue(t *testing.T) {
 	if strVal := tcc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3",
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       5.7}}
@@ -586,11 +586,11 @@ func TestTCCGetStringValue(t *testing.T) {
 	if strVal := tcc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       5.6}}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       1.2}}
@@ -613,7 +613,7 @@ func TestTCCGetStringValue(t *testing.T) {
 
 func TestTCCGetValue(t *testing.T) {
 	tcc, _ := NewTCC(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       "12.3"}}
@@ -624,8 +624,8 @@ func TestTCCGetValue(t *testing.T) {
 	if strVal := tcc.GetValue(); strVal != -1.0 {
 		t.Errorf("wrong tcc value: %v", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3",
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       1.2}}
@@ -638,11 +638,11 @@ func TestTCCGetValue(t *testing.T) {
 	if strVal := tcc.GetValue(); strVal != -1.0 {
 		t.Errorf("wrong tcc value: %v", strVal)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       "5.6"}}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       "1.2"}}
@@ -665,7 +665,7 @@ func TestTCCGetValue(t *testing.T) {
 
 func TestPDDGetStringValue(t *testing.T) {
 	pdd, _ := NewPDD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			utils.USAGE:  time.Duration(10 * time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -678,8 +678,8 @@ func TestPDDGetStringValue(t *testing.T) {
 	if strVal := pdd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	pdd.AddEvent(ev2)
 	pdd.AddEvent(ev3)
 	if strVal := pdd.GetStringValue(""); strVal != "1.666666666s" {
@@ -693,14 +693,14 @@ func TestPDDGetStringValue(t *testing.T) {
 	if strVal := pdd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    time.Duration(10 * time.Second),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			utils.PDD: time.Duration(10 * time.Second),
 		},
@@ -727,7 +727,7 @@ func TestPDDGetStringValue(t *testing.T) {
 
 func TestPDDGetFloat64Value(t *testing.T) {
 	pdd, _ := NewPDD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second),
@@ -736,19 +736,19 @@ func TestPDDGetFloat64Value(t *testing.T) {
 	if v := pdd.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong pdd value: %v", v)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	pdd.AddEvent(ev2)
 	if v := pdd.GetFloat64Value(); v != 2.5 {
 		t.Errorf("wrong pdd value: %v", v)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    time.Duration(10 * time.Second),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1*time.Minute + 30*time.Second),
 			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -782,7 +782,7 @@ func TestPDDGetFloat64Value(t *testing.T) {
 
 func TestPDDGetValue(t *testing.T) {
 	pdd, _ := NewPDD(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second),
@@ -791,12 +791,12 @@ func TestPDDGetValue(t *testing.T) {
 	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(8 * time.Second),
 			utils.PDD:    time.Duration(10 * time.Second)}}
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3"}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	pdd.AddEvent(ev2)
 	pdd.AddEvent(ev3)
 	if v := pdd.GetValue(); v != time.Duration(6333333333*time.Nanosecond) {
@@ -810,14 +810,14 @@ func TestPDDGetValue(t *testing.T) {
 	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(1 * time.Minute),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    time.Duration(8 * time.Second),
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(4*time.Minute + 30*time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -841,7 +841,7 @@ func TestPDDGetValue(t *testing.T) {
 
 func TestDDCGetStringValue(t *testing.T) {
 	ddc, _ := NewDCC(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.DESTINATION: "1002"}}
@@ -853,12 +853,12 @@ func TestDDCGetStringValue(t *testing.T) {
 	if strVal := ddc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2",
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.DESTINATION: "1002"}}
 
-	ev3 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_3",
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.DESTINATION: "1001"}}
@@ -883,7 +883,7 @@ func TestDDCGetStringValue(t *testing.T) {
 
 func TestDDCGetFloat64Value(t *testing.T) {
 	ddc, _ := NewDCC(2)
-	ev := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_1",
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":           time.Duration(10 * time.Second),
@@ -893,12 +893,12 @@ func TestDDCGetFloat64Value(t *testing.T) {
 	if v := ddc.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong ddc value: %v", v)
 	}
-	ev2 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	ddc.AddEvent(ev2)
 	if v := ddc.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong ddc value: %v", v)
 	}
-	ev4 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_4",
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Usage":           time.Duration(1 * time.Minute),
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -906,7 +906,7 @@ func TestDDCGetFloat64Value(t *testing.T) {
 			utils.DESTINATION: "1001",
 		},
 	}
-	ev5 := &StatEvent{Tenant: "cgrates.org", ID: "EVENT_5",
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":           time.Duration(1*time.Minute + 30*time.Second),
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
