@@ -718,7 +718,7 @@ func (csvs *CSVStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, er
 	var tpSPPs TpSuppliers
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.thresholdsFn, err.Error())
+			log.Printf("bad line in %s, %s\n", csvs.suppProfilesFn, err.Error())
 			return nil, err
 		}
 		if suppProfile, err := csvLoad(TpSupplier{}, record); err != nil {
