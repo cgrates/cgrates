@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -115,4 +117,48 @@ func TestCGREventFieldAsString(t *testing.T) {
 	}
 }
 
-//float , float in string time duration
+func TestCGREventFieldAsFloat64(t *testing.T) {
+	err1 := fmt.Errorf("cannot cast %s to string", ANSWER_TIME)
+	event := make(map[string]interface{})
+	event[ANSWER_TIME] = time.Now().Local()
+	event["supplierprofile1"] = "Supplier"
+	event["UsageInterval"] = "54.2"
+	event["PddInterval"] = "1s"
+	event["Weight"] = 20.0
+	se := &CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "supplierevent1",
+		Event:  event,
+	}
+	answ, err := se.FieldAsFloat64("UsageInterval")
+	if err != nil {
+		t.Error(err)
+	}
+	if answ != float64(54.2) {
+		t.Errorf("Expecting: %+v, received: %+v", event["UsageInterval"], answ)
+	}
+	answ, err = se.FieldAsFloat64("Weight")
+	if err != nil {
+		t.Error(err)
+	}
+	if answ != float64(20.0) {
+		t.Errorf("Expecting: %+v, received: %+v", event["Weight"], answ)
+	}
+	answ, err = se.FieldAsFloat64("PddInterval")
+	//TODO: Make an error to be expected :
+	//	cgrevent_test.go:149: strconv.ParseFloat: parsing "1s": invalid syntax
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	if answ != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, answ)
+	}
+
+	answ, err = se.FieldAsFloat64(ANSWER_TIME)
+	if !reflect.DeepEqual(err, err1) {
+		t.Error(err)
+	}
+	if answ != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, answ)
+	}
+}

@@ -156,7 +156,7 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 }
 
 func testV1SplSGetLeastCostSuppliers(t *testing.T) {
-	ev := &engine.SupplierEvent{
+	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testV1SplSGetLeastCostSuppliers",
 		Event: map[string]interface{}{
@@ -174,22 +174,25 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					utils.Cost:   0.02,
-					utils.Weight: 15.0,
+					utils.Cost:         0.02,
+					utils.RatingPlanID: "RP_SPECIAL_1002",
+					utils.Weight:       15.0,
 				},
 			},
 			&engine.SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
-					utils.Cost:   0.02,
-					utils.Weight: 10.0,
+					utils.Cost:         0.02,
+					utils.RatingPlanID: "RP_SPECIAL_1002",
+					utils.Weight:       10.0,
 				},
 			},
 			&engine.SortedSupplier{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
-					utils.Cost:   0.46666,
-					utils.Weight: 20.0,
+					utils.Cost:         0.46666,
+					utils.RatingPlanID: "RP_RETAIL1",
+					utils.Weight:       20.0,
 				},
 			},
 		},
