@@ -84,6 +84,9 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 	if d, canCast = iface.(time.Duration); canCast {
 		return
 	}
+	if f, canCast := iface.(float64); canCast {
+		return time.Duration(int64(f)), nil
+	}
 	s, canCast := iface.(string)
 	if !canCast {
 		err = fmt.Errorf("cannot cast %s to string", fldName)
