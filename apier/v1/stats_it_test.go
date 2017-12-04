@@ -279,8 +279,8 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		ID:        "TEST_PROFILE1",
 		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
