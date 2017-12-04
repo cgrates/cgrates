@@ -65,7 +65,7 @@ func (m *Migrator) migrateSupplierProfiles() (err error) {
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
 			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+			"version number is not defined for SupplierProfiles model")
 	}
 	switch vrs[utils.Suppliers] {
 	case current[utils.Suppliers]:

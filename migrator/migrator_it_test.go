@@ -40,15 +40,13 @@ var (
 // subtests to be executed for each migrator
 var sTestsITMigrator = []func(t *testing.T){
 	testFlush,
-	/*
-		testMigratorAccounts,
-		testMigratorActionPlans,
-		testMigratorActionTriggers,
-		testMigratorActions,
-		testMigratorSharedGroups,
-		testMigratorStats,
-		testMigratorTPRatingProfile,
-	*/
+	testMigratorAccounts,
+	testMigratorActionPlans,
+	testMigratorActionTriggers,
+	testMigratorActions,
+	testMigratorSharedGroups,
+	testMigratorStats,
+	testMigratorTPRatingProfile,
 	testMigratorTPSuppliers,
 	testFlush,
 }
