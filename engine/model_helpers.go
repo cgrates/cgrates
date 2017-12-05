@@ -2709,6 +2709,9 @@ func APItoModelTPAlias(th *utils.TPAlias) (mdls TPAliases) {
 				}
 				mdl.FilterIDs += val
 			}
+			if th.Weight != 0 {
+				mdl.Weight = th.Weight
+			}
 		}
 		mdl.FieldName = aliasEntry.FieldName
 		mdl.Initial = aliasEntry.Initial
