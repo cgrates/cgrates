@@ -58,17 +58,20 @@ type TpReader struct {
 	thProfiles       map[utils.TenantID]*utils.TPThreshold
 	filters          map[utils.TenantID]*utils.TPFilter
 	sppProfiles      map[utils.TenantID]*utils.TPSupplier
+	aliasProfiles    map[utils.TenantID]*utils.TPAlias
 	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	suppliers        []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
+	aliasTntID       []*utils.TenantID // IDs of suppliers which need creation based on aliasProfiles
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
-	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
-	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	resIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	sppIndexers  map[string]*ReqFilterIndexer // tenant, indexer
+	thdsIndexers  map[string]*ReqFilterIndexer // tenant, indexer
+	sqpIndexers   map[string]*ReqFilterIndexer // tenant, indexer
+	resIndexers   map[string]*ReqFilterIndexer // tenant, indexer
+	sppIndexers   map[string]*ReqFilterIndexer // tenant, indexer
+	aliasIndexers map[string]*ReqFilterIndexer // tenant, indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -140,6 +143,7 @@ func (tpr *TpReader) Init() {
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
 	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplier)
+	tpr.aliasProfiles = make(map[utils.TenantID]*utils.TPAlias)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilter)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -148,6 +152,7 @@ func (tpr *TpReader) Init() {
 	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.resIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.sppIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.aliasIndexers = make(map[string]*ReqFilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1812,6 +1817,53 @@ func (tpr *TpReader) LoadSupplierProfiles() error {
 	return tpr.LoadSupplierProfilesFiltered("")
 }
 
+func (tpr *TpReader) LoadAliasProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPAliasProfiles(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	mapRsPfls := make(map[utils.TenantID]*utils.TPAlias)
+	for _, rl := range rls {
+		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
+	}
+	tpr.aliasProfiles = mapRsPfls
+	for tntID, res := range mapRsPfls {
+		resIndxrKey := utils.AliasProfilesStringIndex + tntID.Tenant
+		if has, err := tpr.dm.HasData(utils.AliasProfilePrefix, tntID.TenantID()); err != nil {
+			return err
+		} else if !has {
+			tpr.aliasTntID = append(tpr.aliasTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+		}
+		// index alias profile for filters
+		if _, has := tpr.aliasIndexers[tntID.Tenant]; !has {
+			if tpr.aliasIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
+				return
+			}
+		}
+		for _, fltrID := range res.FilterIDs {
+			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
+			if !has {
+				var fltr *Filter
+				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
+					}
+					return
+				} else {
+					tpFltr = FilterToTPFilter(fltr)
+				}
+			} else {
+				tpr.aliasIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+			}
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadAliasProfiles() error {
+	return tpr.LoadAliasProfilesFiltered("")
+}
+
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -1874,6 +1926,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadSupplierProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadAliasProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -2228,6 +2283,22 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 
 	if verbose {
+		log.Print("AliasProfiles:")
+	}
+	for _, tpTH := range tpr.aliasProfiles {
+		th, err := APItoAliasProfile(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dm.SetAliasProfile(th); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
+		}
+	}
+
+	if verbose {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
@@ -2379,8 +2450,10 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Thresholds: ", len(tpr.thProfiles))
 	// filters
 	log.Print("Filters: ", len(tpr.filters))
-	// LCR profiles
+	// Supplier profiles
 	log.Print("SupplierProfiles: ", len(tpr.sppProfiles))
+	// Alias profiles
+	log.Print("SupplierProfiles: ", len(tpr.aliasProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2542,6 +2615,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.sppProfiles))
 		i := 0
 		for k, _ := range tpr.sppProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.AliasProfilePrefix:
+		keys := make([]string, len(tpr.aliasProfiles))
+		i := 0
+		for k, _ := range tpr.aliasProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}

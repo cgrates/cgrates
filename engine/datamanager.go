@@ -38,7 +38,9 @@ func (dm *DataManager) DataDB() DataDB {
 	return dm.dataDB
 }
 
-func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splPrflIDs []string) (err error) {
+func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
+	aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs,
+	stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splPrflIDs, alsPrfIDs []string) (err error) {
 	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
 		if dm.cacheCfg == nil {
 			return
@@ -48,8 +50,9 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
 				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
-				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix, utils.StatQueueProfilePrefix,
-				utils.ThresholdPrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix, utils.SupplierProfilePrefix}, k) && cacheCfg.Precache {
+				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix,
+				utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
+				utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AliasProfilePrefix}, k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 					return err
 				}
@@ -79,6 +82,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.ThresholdProfilePrefix:     thpIDs,
 			utils.FilterPrefix:               fltrIDs,
 			utils.SupplierProfilePrefix:      splPrflIDs,
+			utils.AliasProfilePrefix:         alsPrfIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -136,7 +140,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.ThresholdPrefix,
 		utils.ThresholdProfilePrefix,
 		utils.FilterPrefix,
-		utils.SupplierProfilePrefix}, prfx) {
+		utils.SupplierProfilePrefix,
+		utils.AliasProfilePrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -225,6 +230,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.SupplierProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+		case utils.AliasProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetAliasProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -851,6 +859,40 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string) (
 		return
 	}
 	cache.RemKey(utils.SupplierProfilePrefix+utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) GetAliasProfile(tenant, id string, skipCache bool, transactionID string) (alsPrf *AliasProfile, err error) {
+	key := utils.AliasProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*AliasProfile), nil
+		}
+	}
+	alsPrf, err = dm.dataDB.GetAliasProfileDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, alsPrf, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) SetAliasProfile(alsPrf *AliasProfile) (err error) {
+	return dm.DataDB().SetAliasProfileDrv(alsPrf)
+}
+
+func (dm *DataManager) RemoveAliasProfile(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveAliasProfileDrv(tenant, id); err != nil {
+		return
+	}
+	cache.RemKey(utils.AliasProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	return
 }

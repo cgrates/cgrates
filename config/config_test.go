@@ -510,6 +510,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 		utils.CacheFilters: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheSupplierProfiles: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheAliasProfiles: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false}}
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
 		t.Errorf("received: %s, \nexpecting: %s",

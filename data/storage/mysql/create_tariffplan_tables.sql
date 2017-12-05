@@ -488,7 +488,7 @@ CREATE TABLE tp_filters (
 );
 
 --
--- Table structure for table `tp_lcr`
+-- Table structure for table `tp_suppliers`
 --
 
 
@@ -520,8 +520,33 @@ CREATE TABLE tp_suppliers (
 );
 
 --
+-- Table structure for table `tp_alias_profiles`
+--
+
+
+DROP TABLE IF EXISTS tp_alias_profiles;
+CREATE TABLE tp_alias_profiles (
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `filter_ids` varchar(64) NOT NULL,
+  `activation_interval` varchar(64) NOT NULL,
+  `field_name` varchar(64) NOT NULL,
+  `initial` varchar(64) NOT NULL,
+  `alias` varchar(64) NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_alias_profiles` (`tpid`,`tenant`,
+    `id`,`filter_ids`,`field_name`,`initial`,`alias` )
+);
+
+--
 -- Table structure for table `versions`
 --
+
 
 DROP TABLE IF EXISTS versions;
 CREATE TABLE versions (

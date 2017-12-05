@@ -676,6 +676,7 @@ type ArgsCache struct {
 	ThresholdProfileIDs   *[]string
 	FilterIDs             *[]string
 	SupplierProfileIDs    *[]string
+	AliasProfileIDs       *[]string
 }
 
 // Data used to do remote cache reloads via api
@@ -718,6 +719,7 @@ type CacheStats struct {
 	ThresholdProfiles   int
 	Filters             int
 	SupplierProfiles    int
+	AliasProfiles       int
 }
 
 type AttrExpFileCdrs struct {
@@ -1377,5 +1379,21 @@ type TPSupplier struct {
 	SortingParams      []string
 	Suppliers          []*TPRequestSupplier
 	Blocker            bool
+	Weight             float64
+}
+
+type TPAliasEntry struct {
+	FieldName string
+	Initial   string
+	Alias     string
+}
+
+type TPAlias struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+	Aliases            []*TPAliasEntry
 	Weight             float64
 }

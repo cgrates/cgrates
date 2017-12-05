@@ -64,9 +64,12 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	stats := ``
 	thresholds := ``
 	filters := ``
-	lcrprofiles := ``
-	csvr := engine.NewTpReader(dataDB2.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds, filters, lcrprofiles), "", "")
+	suppliers := ``
+	aliasProfiles := ``
+	csvr := engine.NewTpReader(dataDB2.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
+		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, lcrs, actions, actionPlans,
+		actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits,
+		stats, thresholds, filters, suppliers, aliasProfiles), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}
@@ -113,7 +116,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		t.Error("No account saved")
 	}
 	cache.Flush()
-	dataDB2.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB2.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

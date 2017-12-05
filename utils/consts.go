@@ -65,6 +65,7 @@ var (
 		CacheThresholds:          ThresholdPrefix,
 		CacheFilters:             FilterPrefix,
 		CacheSupplierProfiles:    SupplierProfilePrefix,
+		CacheAliasProfiles:       AliasProfilePrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )
@@ -116,6 +117,7 @@ const (
 	SMCostsTBL                    = "sm_costs"
 	CDRsTBL                       = "cdrs"
 	TBLTPSuppliers                = "tp_suppliers"
+	TBLTPAliasProfiles            = "tp_alias_profiles"
 	TBLVersions                   = "versions"
 	TIMINGS_CSV                   = "Timings.csv"
 	DESTINATIONS_CSV              = "Destinations.csv"
@@ -138,6 +140,7 @@ const (
 	ThresholdsCsv                 = "Thresholds.csv"
 	FiltersCsv                    = "Filters.csv"
 	SuppliersCsv                  = "Suppliers.csv"
+	AliasProfileCsv               = "AliasProfiles.csv"
 	ROUNDING_UP                   = "*up"
 	ROUNDING_MIDDLE               = "*middle"
 	ROUNDING_DOWN                 = "*down"
@@ -270,6 +273,8 @@ const (
 	StatQueueProfilePrefix        = "sqp_"
 	SupplierProfilePrefix         = "spp_"
 	SupplierProfilesStringIndex   = "spi_"
+	AliasProfilePrefix            = "alp_"
+	AliasProfilesStringIndex      = "ali_"
 	ThresholdProfilePrefix        = "thp_"
 	StatQueuePrefix               = "stq_"
 	LOADINST_KEY                  = "load_history"
@@ -480,6 +485,7 @@ const (
 	CacheThresholds                 = "thresholds"
 	CacheFilters                    = "filters"
 	CacheSupplierProfiles           = "supplier_profiles"
+	CacheAliasProfiles              = "alias_profiles"
 	AccountUpdate                   = "AccountUpdate"
 	BalanceUpdate                   = "BalanceUpdate"
 	StatUpdate                      = "StatUpdate"

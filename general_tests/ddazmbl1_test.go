@@ -64,13 +64,14 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	stats := ``
 	thresholds := ``
 	filters := ``
-	lcrprofiles := ``
+	suppliers := ``
+	aliasProfiles := ``
 	csvr := engine.NewTpReader(dataDB.DataDB(),
 		engine.NewStringCSVStorage(',', destinations, timings, rates,
 			destinationRates, ratingPlans, ratingProfiles,
 			sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions,
 			derivedCharges, cdrStats, users, aliases, resLimits, stats,
-			thresholds, filters, lcrprofiles), "", "")
+			thresholds, filters, suppliers, aliasProfiles), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +119,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	}
 	cache.Flush()
 
-	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

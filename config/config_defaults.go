@@ -120,7 +120,8 @@ const CGRATES_CFG_JSON = `
 	"threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control threshold profiles caching
 	"thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control thresholds caching
 	"filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
-	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control lcr profile caching
+	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
+	"alias_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control alias profile caching
 },
 
 

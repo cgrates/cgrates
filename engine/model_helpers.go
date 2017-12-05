@@ -2633,3 +2633,112 @@ func APItoSupplierProfile(tpTH *utils.TPSupplier, timezone string) (th *Supplier
 	}
 	return th, nil
 }
+
+type TPAliases []*TPAlias
+
+func (tps TPAliases) AsTPAlias() (result []*utils.TPAlias) {
+	mst := make(map[string]*utils.TPAlias)
+	for _, tp := range tps {
+		th, found := mst[tp.ID]
+		if !found {
+			th = &utils.TPAlias{
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
+			}
+		}
+		if tp.Weight != 0 {
+			th.Weight = tp.Weight
+		}
+		if len(tp.ActivationInterval) != 0 {
+			th.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				th.ActivationInterval.ActivationTime = aiSplt[0]
+				th.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				th.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.FilterIDs != "" {
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				th.FilterIDs = append(th.FilterIDs, filter)
+			}
+		}
+		if tp.FieldName != "" {
+			th.Aliases = append(th.Aliases, &utils.TPAliasEntry{
+				FieldName: tp.FieldName,
+				Initial:   tp.Initial,
+				Alias:     tp.Alias,
+			})
+		}
+		mst[tp.ID] = th
+	}
+	result = make([]*utils.TPAlias, len(mst))
+	i := 0
+	for _, th := range mst {
+		result[i] = th
+		i++
+	}
+	return
+}
+
+func APItoModelTPAlias(th *utils.TPAlias) (mdls TPAliases) {
+	if len(th.Aliases) == 0 {
+		return
+	}
+	for i, aliasEntry := range th.Aliases {
+		mdl := &TPAlias{
+			Tpid:   th.TPid,
+			Tenant: th.Tenant,
+			ID:     th.ID,
+		}
+		if i == 0 {
+			if th.ActivationInterval != nil {
+				if th.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = th.ActivationInterval.ActivationTime
+				}
+				if th.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
+				}
+			}
+			for i, val := range th.FilterIDs {
+				if i != 0 {
+					mdl.FilterIDs += utils.INFIELD_SEP
+				}
+				mdl.FilterIDs += val
+			}
+		}
+		mdl.FieldName = aliasEntry.FieldName
+		mdl.Initial = aliasEntry.Initial
+		mdl.Alias = aliasEntry.Alias
+		mdls = append(mdls, mdl)
+	}
+	return
+}
+
+func APItoAliasProfile(tpTH *utils.TPAlias, timezone string) (th *AliasProfile, err error) {
+	th = &AliasProfile{
+		Tenant:    tpTH.Tenant,
+		ID:        tpTH.ID,
+		Weight:    tpTH.Weight,
+		FilterIDs: []string{},
+		Aliases:   make(map[string]map[string]string, len(tpTH.Aliases)),
+	}
+	for _, fli := range tpTH.FilterIDs {
+		th.FilterIDs = append(th.FilterIDs, fli)
+	}
+	for _, f := range tpTH.Aliases {
+		if _, has := th.Aliases[f.FieldName]; !has {
+			th.Aliases[f.FieldName] = make(map[string]string)
+		}
+		th.Aliases[f.FieldName][f.Initial] = f.Alias
+	}
+	if tpTH.ActivationInterval != nil {
+		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
+	}
+	return th, nil
+}
