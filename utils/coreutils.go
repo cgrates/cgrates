@@ -329,6 +329,9 @@ func ParseZeroRatingSubject(tor, rateSubj string) (time.Duration, error) {
 		return 0, errors.New("malformed rating subject: " + rateSubj)
 	}
 	durStr := rateSubj[len(ZERO_RATING_SUBJECT_PREFIX):]
+	if _, err := strconv.ParseFloat(durStr, 64); err == nil { // No time unit, postpend
+		durStr += "ns"
+	}
 	return time.ParseDuration(durStr)
 }
 
