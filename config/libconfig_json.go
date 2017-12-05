@@ -387,6 +387,12 @@ type UserServJsonCfg struct {
 	Indexes *[]string
 }
 
+// Supplier service config section
+type AliasSJsonCfg struct {
+	Enabled        *bool
+	Indexed_fields *[]string
+}
+
 // ResourceLimiter service config section
 type ResourceSJsonCfg struct {
 	Enabled          *bool

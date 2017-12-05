@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,4 +41,29 @@ type AliasProfile struct {
 
 func (tp *AliasProfile) TenantID() string {
 	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
+}
+
+func NewAliasService(dm *DataManager, filterS *FilterS, indexedFields []string) (*AliasService, error) {
+	return &AliasService{dm: dm, filterS: filterS, indexedFields: indexedFields}, nil
+}
+
+type AliasService struct {
+	dm            *DataManager
+	filterS       *FilterS
+	indexedFields []string
+}
+
+// ListenAndServe will initialize the service
+func (alS *AliasService) ListenAndServe(exitChan chan bool) (err error) {
+	utils.Logger.Info("Starting Alias Service")
+	e := <-exitChan
+	exitChan <- e // put back for the others listening for shutdown request
+	return
+}
+
+// Shutdown is called to shutdown the service
+func (alS *AliasService) Shutdown() (err error) {
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.AliasS))
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.AliasS))
+	return
 }

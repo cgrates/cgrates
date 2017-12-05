@@ -273,6 +273,7 @@ type CGRConfig struct {
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
 	UserServerIndexes        []string                 // List of user profile field indexes
+	aliasSCfg                *AliasSCfg               // Alias service configuration
 	resourceSCfg             *ResourceSConfig         // Configuration for resource limiter
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	thresholdSCfg            *ThresholdSCfg           // configuration for ThresholdS
@@ -683,6 +684,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnAliasSCfg, err := jsnCfg.AliaServJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1167,6 +1173,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
+	if jsnAliasSCfg != nil {
+		if self.aliasSCfg == nil {
+			self.aliasSCfg = new(AliasSCfg)
+		}
+		if self.aliasSCfg.loadFromJsonCfg(jsnAliasSCfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnRLSCfg != nil {
 		if self.resourceSCfg == nil {
 			self.resourceSCfg = new(ResourceSConfig)
@@ -1254,6 +1269,10 @@ func (self *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
 
 func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
 	return self.radiusAgentCfg
+}
+
+func (cfg *CGRConfig) AiasSCfg() *AliasSCfg {
+	return cfg.aliasSCfg
 }
 
 // ToDo: fix locking here

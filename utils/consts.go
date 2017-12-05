@@ -599,6 +599,7 @@ const (
 	Weight                          = "Weight"
 	Cost                            = "Cost"
 	RatingPlanID                    = "RatingPlanID"
+	AliasS                          = "AliasS"
 )
 
 //Meta

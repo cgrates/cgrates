@@ -697,6 +697,18 @@ func TestDfUserServJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDfAliaServJsonCfg(t *testing.T) {
+	eCfg := &AliasSJsonCfg{
+		Enabled:        utils.BoolPointer(false),
+		Indexed_fields: utils.StringSlicePointer([]string{}),
+	}
+	if cfg, err := dfCgrJsonCfg.AliaServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
 func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
 		Stats_conns: &[]*HaPoolJsonCfg{},

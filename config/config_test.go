@@ -637,6 +637,16 @@ func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	}
 }
 
+func TestCgrCfgJSONDefaultSAliasSCfg(t *testing.T) {
+	eAliasSCfg := &AliasSCfg{
+		Enabled:       false,
+		IndexedFields: []string{},
+	}
+	if !reflect.DeepEqual(eAliasSCfg, cgrCfg.aliasSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", eAliasSCfg, cgrCfg.aliasSCfg)
+	}
+}
+
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceSConfig{
 		Enabled:         false,

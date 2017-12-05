@@ -125,7 +125,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"filters": {
+"filters": {								// Filters configuration (*new)
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 },
 
@@ -424,7 +424,13 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"resources": {
+"alias": {							// Alias service (*new)
+	"enabled": false,				// starts Alias service: <true|false>.
+	"indexed_fields": [],			// query indexes based on these fields for faster processing
+},
+
+
+"resources": {						// Resource service (*new)
 	"enabled": false,				// starts ResourceLimiter service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
@@ -432,7 +438,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"stats": {
+"stats": {							// Stat service (*new)
 	"enabled": false,				// starts Stat service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
@@ -440,14 +446,14 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"thresholds": {
+"thresholds": {						// Threshold service (*new)
 	"enabled": false,				// starts ThresholdS service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
-"suppliers": {
+"suppliers": {						// Supplier service (*new)
 	"enabled": false,				// starts SupplierS service: <true|false>.
 	"indexed_fields": [],			// query indexes based on these fields for faster processing
 	"rals_conns": [

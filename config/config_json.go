@@ -57,6 +57,7 @@ const (
 	PUBSUBSERV_JSN  = "pubsubs"
 	ALIASESSERV_JSN = "aliases"
 	USERSERV_JSN    = "users"
+	ALIAS_JSN       = "alias"
 	RESOURCES_JSON  = "resources"
 	STATS_JSON      = "stats"
 	THRESHOLDS_JSON = "thresholds"
@@ -359,6 +360,18 @@ func (self CgrJsonCfg) UserServJsonCfg() (*UserServJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(UserServJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (cgrJsn CgrJsonCfg) AliaServJsonCfg() (*AliasSJsonCfg, error) {
+	rawCfg, hasKey := cgrJsn[ALIAS_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(AliasSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}
