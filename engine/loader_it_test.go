@@ -109,6 +109,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.FiltersCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AliasProfileCsv),
 	), "", "")
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -167,6 +168,9 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadSupplierProfiles(); err != nil {
 		t.Error("Failed loading Supplier profiles: ", err.Error())
+	}
+	if err = loader.LoadAliasProfiles(); err != nil {
+		t.Error("Failed loading Alias profiles: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
@@ -371,6 +375,21 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", sts, rcv)
 		}
 	}
+
+	for tenatid, th := range loader.aliasProfiles {
+		rcv, err := loader.dm.GetAliasProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Errorf("Failed GetAliasProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
+		}
+		sts, err := APItoAliasProfile(th, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(sts, rcv) {
+			t.Errorf("Expecting: %v, received: %v", sts, rcv)
+		}
+	}
+
 }
 
 // Imports data from csv files in tpScenario to storDb

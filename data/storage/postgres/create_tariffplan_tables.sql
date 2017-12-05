@@ -480,37 +480,57 @@ CREATE TABLE tp_filters (
   CREATE INDEX tp_filters_idx ON tp_filters (tpid);
   CREATE INDEX tp_filters_unique ON tp_filters  ("tpid","tenant", "id", "filter_type", "filter_field_name");
 
+--
+-- Table structure for table `tp_suppliers`
+--
+
+DROP TABLE IF EXISTS tp_suppliers;
+CREATE TABLE tp_suppliers (
+  "pk" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant"varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "filter_ids" varchar(64) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
+  "sorting" varchar(32) NOT NULL,
+  "sorting_params" varchar(64) NOT NULL,
+  "supplier_id" varchar(32) NOT NULL,
+  "supplier_filter_ids" varchar(64) NOT NULL,
+  "supplier_account_ids" varchar(64) NOT NULL,
+  "supplier_ratingplan_ids" varchar(64) NOT NULL,
+  "supplier_resource_ids" varchar(64) NOT NULL,
+  "supplier_stat_ids" varchar(64) NOT NULL,
+  "supplier_weight" decimal(8,2) NOT NULL,
+  "blocker" BOOLEAN NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX tp_suppliers_idx ON tp_suppliers (tpid);
+CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
+  "filter_ids","supplier_id","supplier_filter_ids","supplier_account_ids",
+  "supplier_ratingplan_ids","supplier_resource_ids","supplier_stat_ids");
 
   --
-
-  -- Table structure for table `tp_lcr`
+  -- Table structure for table `tp_alias_profiles`
   --
 
-  DROP TABLE IF EXISTS tp_suppliers;
-  CREATE TABLE tp_suppliers (
+  DROP TABLE IF EXISTS tp_alias_profiles;
+  CREATE TABLE tp_alias_profiles (
     "pk" SERIAL PRIMARY KEY,
     "tpid" varchar(64) NOT NULL,
     "tenant"varchar(64) NOT NULL,
     "id" varchar(64) NOT NULL,
     "filter_ids" varchar(64) NOT NULL,
     "activation_interval" varchar(64) NOT NULL,
-    "sorting" varchar(32) NOT NULL,
-    "sorting_params" varchar(64) NOT NULL,
-    "supplier_id" varchar(32) NOT NULL,
-    "supplier_filter_ids" varchar(64) NOT NULL,
-    "supplier_account_ids" varchar(64) NOT NULL,
-    "supplier_ratingplan_ids" varchar(64) NOT NULL,
-    "supplier_resource_ids" varchar(64) NOT NULL,
-    "supplier_stat_ids" varchar(64) NOT NULL,
-    "supplier_weight" decimal(8,2) NOT NULL,
-    "blocker" BOOLEAN NOT NULL,
+    "field_name" varchar(64) NOT NULL,
+    "initial" varchar(64) NOT NULL,
+    "alias" varchar(64) NOT NULL,
     "weight" decimal(8,2) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
- CREATE INDEX tp_suppliers_idx ON tp_suppliers (tpid);
- CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
-   "filter_ids","supplier_id","supplier_filter_ids","supplier_account_ids",
-   "supplier_ratingplan_ids","supplier_resource_ids","supplier_stat_ids");
+  CREATE INDEX tp_alias_profiles_ids ON tp_alias_profiles (tpid);
+  CREATE INDEX tp_alias_profiles_unique ON tp_alias_profiles  ("tpid",  "tenant", "id",
+    "filter_ids","field_name","initial","alias");
 
 
 --

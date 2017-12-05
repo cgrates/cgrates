@@ -131,6 +131,9 @@ type DataDB interface {
 	GetSupplierProfileDrv(string, string) (*SupplierProfile, error)
 	SetSupplierProfileDrv(*SupplierProfile) error
 	RemoveSupplierProfileDrv(string, string) error
+	GetAliasProfileDrv(string, string) (*AliasProfile, error)
+	SetAliasProfileDrv(*AliasProfile) error
+	RemoveAliasProfileDrv(string, string) error
 }
 
 type StorDB interface {
@@ -179,6 +182,7 @@ type LoadReader interface {
 	GetTPThresholds(string, string) ([]*utils.TPThreshold, error)
 	GetTPFilters(string, string) ([]*utils.TPFilter, error)
 	GetTPSuppliers(string, string) ([]*utils.TPSupplier, error)
+	GetTPAliasProfiles(string, string) ([]*utils.TPAlias, error)
 }
 
 type LoadWriter interface {
@@ -204,6 +208,7 @@ type LoadWriter interface {
 	SetTPThresholds([]*utils.TPThreshold) error
 	SetTPFilters([]*utils.TPFilter) error
 	SetTPSuppliers([]*utils.TPSupplier) error
+	SetTPAliasProfiles([]*utils.TPAlias) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr

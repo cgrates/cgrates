@@ -41,7 +41,7 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 	ratingPlans := `RP_SMS1,DR_SMS_1,ALWAYS,10`
 	ratingProfiles := `*out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,,`
 	csvr := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "")
+		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "")
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
-	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedRPlans := cache.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)

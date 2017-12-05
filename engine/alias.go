@@ -36,3 +36,7 @@ type AliasProfile struct {
 	Aliases            map[string]map[string]string // map[FieldName][InitialValue]AliasValue
 	Weight             float64
 }
+
+func (tp *AliasProfile) TenantID() string {
+	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
+}

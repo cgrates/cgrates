@@ -131,7 +131,7 @@ func testTPExportTPToFolder(t *testing.T) {
 		ExportPath: "/tmp/",
 		ExportedFiles: []string{"RatingProfiles.csv", "CdrStats.csv", "Users.csv", "RatingPlans.csv", "Actions.csv", "AccountActions.csv",
 			"Timings.csv", "SharedGroups.csv", "ActionPlans.csv", "ActionTriggers.cs", "DerivedChargers.csv", "Resources.csv",
-			"Stats.csv", "Thresholds.csv", "Destinations.csv", "Rates.csv", "DestinationRates.csv", "Filters.csv", "Suppliers.csv"},
+			"Stats.csv", "Thresholds.csv", "Destinations.csv", "Rates.csv", "DestinationRates.csv", "Filters.csv", "Suppliers.csv", "AliasProfiles.csv"},
 	}
 	tpid := "TEST_TPID2"
 	compress := true
@@ -142,8 +142,8 @@ func testTPExportTPToFolder(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.ExportPath, reply.ExportPath)
 	} else if !reflect.DeepEqual(reply.Compressed, expectedTPStas.Compressed) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.Compressed, reply.Compressed)
-	} else if !reflect.DeepEqual(len(reply.ExportedFiles), len(expectedTPStas.ExportedFiles)) {
-		t.Errorf("Expecting : %+v, received: %+v", len(reply.ExportedFiles), len(expectedTPStas.ExportedFiles))
+	} else if !reflect.DeepEqual(len(expectedTPStas.ExportedFiles), len(reply.ExportedFiles)) {
+		t.Errorf("Expecting : %+v, received: %+v", len(expectedTPStas.ExportedFiles), len(reply.ExportedFiles))
 	}
 	time.Sleep(time.Duration(2 * time.Second))
 

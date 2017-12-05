@@ -64,9 +64,11 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	stats := ``
 	thresholds := ``
 	filters := ``
-	lcrprofiles := ``
-	csvr := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds, filters, lcrprofiles), "", "")
+	suppliers := ``
+	aliasProfiles := ``
+	csvr := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
+		ratingPlans, ratingProfiles, sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions,
+		derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +80,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	}
 
 	cache.Flush()
-	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := cache.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

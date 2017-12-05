@@ -171,7 +171,8 @@ func (ms *MapStorage) HasDataDrv(categ, subject string) (bool, error) {
 	switch categ {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix, utils.FilterPrefix, utils.SupplierProfilePrefix:
+		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix,
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AliasProfilePrefix:
 		_, exists := ms.dict[categ+subject]
 		return exists, nil
 	}
@@ -1412,6 +1413,39 @@ func (ms *MapStorage) RemoveSupplierProfileDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	delete(ms.dict, key)
+	return
+}
+
+func (ms *MapStorage) GetAliasProfileDrv(tenant, id string) (r *AliasProfile, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	values, ok := ms.dict[utils.AliasProfilePrefix+utils.ConcatenatedKey(tenant, id)]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &r)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (ms *MapStorage) SetAliasProfileDrv(r *AliasProfile) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.AliasProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	return
+}
+
+func (ms *MapStorage) RemoveAliasProfileDrv(tenant, id string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.AliasProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
 	return
 }
