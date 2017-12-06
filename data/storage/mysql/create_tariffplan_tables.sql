@@ -520,12 +520,12 @@ CREATE TABLE tp_suppliers (
 );
 
 --
--- Table structure for table `tp_alias_profiles`
+-- Table structure for table `tp_alias`
 --
 
 
-DROP TABLE IF EXISTS tp_alias_profiles;
-CREATE TABLE tp_alias_profiles (
+DROP TABLE IF EXISTS tp_alias;
+CREATE TABLE tp_alias (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
@@ -539,7 +539,7 @@ CREATE TABLE tp_alias_profiles (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_alias_profiles` (`tpid`,`tenant`,
+  UNIQUE KEY `unique_tp_alias` (`tpid`,`tenant`,
     `id`,`filter_ids`,`field_name`,`initial`,`alias` )
 );
 

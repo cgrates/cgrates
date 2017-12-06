@@ -109,7 +109,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.FiltersCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AliasProfileCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AliasCsv),
 	), "", "")
 
 	if err = loader.LoadDestinations(); err != nil {

@@ -514,8 +514,8 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   -- Table structure for table `tp_alias_profiles`
   --
 
-  DROP TABLE IF EXISTS tp_alias_profiles;
-  CREATE TABLE tp_alias_profiles (
+  DROP TABLE IF EXISTS tp_alias;
+  CREATE TABLE tp_alias (
     "pk" SERIAL PRIMARY KEY,
     "tpid" varchar(64) NOT NULL,
     "tenant"varchar(64) NOT NULL,
@@ -528,8 +528,8 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
     "weight" decimal(8,2) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
-  CREATE INDEX tp_alias_profiles_ids ON tp_alias_profiles (tpid);
-  CREATE INDEX tp_alias_profiles_unique ON tp_alias_profiles  ("tpid",  "tenant", "id",
+  CREATE INDEX tp_alias_ids ON tp_alias (tpid);
+  CREATE INDEX tp_alias_unique ON tp_alias  ("tpid",  "tenant", "id",
     "filter_ids","field_name","initial","alias");
 
 

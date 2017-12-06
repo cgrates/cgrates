@@ -65,7 +65,7 @@ func (self *ApierV1) GetTPAliasProfileIds(attrs AttrGetTPAliasProfileIds, reply 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAliasProfiles, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAlias, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -86,7 +86,7 @@ func (self *ApierV1) RemTPAliasProfile(attrs AttrRemTPAliasProfiles, reply *stri
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPAliasProfiles, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPAlias, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

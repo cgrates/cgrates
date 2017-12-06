@@ -108,7 +108,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPActionTriggers, utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
 		utils.TBLTPAliases, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SMCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
-		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAliasProfiles,
+		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAlias,
 	}
 	for _, tbl := range tbls {
 		if self.db.HasTable(tbl) {
@@ -149,7 +149,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPFilters,
 			utils.TBLTPActionPlans,
 			utils.TBLTPSuppliers,
-			utils.TBLTPAliasProfiles)
+			utils.TBLTPAlias)
 	}
 	rows, err = self.Db.Query(qryStr)
 	if err != nil {
@@ -235,9 +235,11 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	tx := self.db.Begin()
 
 	if len(table) == 0 { // Remove tpid out of all tables
-		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
-			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPSuppliers, utils.TBLTPAliasProfiles} {
+		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
+			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles, utils.TBLTPSharedGroups,
+			utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
+			utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers,
+			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPSuppliers, utils.TBLTPAlias} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
