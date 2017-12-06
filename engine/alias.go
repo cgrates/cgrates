@@ -39,8 +39,8 @@ type AliasProfile struct {
 	Weight             float64
 }
 
-func (tp *AliasProfile) TenantID() string {
-	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
+func (als *AliasProfile) TenantID() string {
+	return utils.ConcatenatedKey(als.Tenant, als.ID)
 }
 
 func NewAliasService(dm *DataManager, filterS *FilterS, indexedFields []string) (*AliasService, error) {
@@ -66,4 +66,51 @@ func (alS *AliasService) Shutdown() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.AliasS))
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.AliasS))
 	return
+}
+
+type ExternalAliasProfile struct {
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *utils.ActivationInterval // Activation interval
+	Aliases            []*AliasEntry
+	Weight             float64
+}
+
+func (eap *ExternalAliasProfile) AsAliasProfile() *AliasProfile {
+	alsPrf := &AliasProfile{
+		Tenant:             eap.Tenant,
+		ID:                 eap.ID,
+		Weight:             eap.Weight,
+		FilterIDs:          eap.FilterIDs,
+		ActivationInterval: eap.ActivationInterval,
+	}
+	alsMap := make(map[string]map[string]string)
+	for _, als := range eap.Aliases {
+		alsMap[als.FieldName] = make(map[string]string)
+		alsMap[als.FieldName][als.Initial] = als.Alias
+	}
+	alsPrf.Aliases = alsMap
+	return alsPrf
+}
+
+func NewExternalAliasProfileFromAliasProfile(alsPrf *AliasProfile) *ExternalAliasProfile {
+	extals := &ExternalAliasProfile{
+		Tenant:             alsPrf.Tenant,
+		ID:                 alsPrf.ID,
+		Weight:             alsPrf.Weight,
+		ActivationInterval: alsPrf.ActivationInterval,
+		FilterIDs:          alsPrf.FilterIDs,
+	}
+	for key, val := range alsPrf.Aliases {
+		for key2, val2 := range val {
+			extals.Aliases = append(extals.Aliases, &AliasEntry{
+				FieldName: key,
+				Initial:   key2,
+				Alias:     val2,
+			})
+		}
+	}
+	return extals
+
 }
