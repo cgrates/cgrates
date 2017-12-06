@@ -62,7 +62,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
 	utils.FiltersCsv:            (*TPCSVImporter).importFilters,
 	utils.SuppliersCsv:          (*TPCSVImporter).importSuppliers,
-	utils.AliasProfileCsv:       (*TPCSVImporter).importAliasProfiles,
+	utils.AliasCsv:              (*TPCSVImporter).importAliasProfiles,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -88,7 +88,7 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.ThresholdsCsv),
 		path.Join(self.DirPath, utils.FiltersCsv),
 		path.Join(self.DirPath, utils.SuppliersCsv),
-		path.Join(self.DirPath, utils.AliasProfileCsv),
+		path.Join(self.DirPath, utils.AliasCsv),
 	)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {

@@ -291,7 +291,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataAlias {
 		sdModels := APItoModelTPAlias(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.AliasProfileCsv] = append(toExportMap[utils.AliasProfileCsv], sdModel)
+			toExportMap[utils.AliasCsv] = append(toExportMap[utils.AliasCsv], sdModel)
 		}
 	}
 

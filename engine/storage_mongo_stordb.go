@@ -1266,7 +1266,7 @@ func (ms *MongoStorage) GetTPAliasProfiles(tpid, id string) ([]*utils.TPAlias, e
 		filter["id"] = id
 	}
 	var results []*utils.TPAlias
-	session, col := ms.conn(utils.TBLTPAliasProfiles)
+	session, col := ms.conn(utils.TBLTPAlias)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
 	if len(results) == 0 {
@@ -1279,7 +1279,7 @@ func (ms *MongoStorage) SetTPAliasProfiles(tpSPs []*utils.TPAlias) (err error) {
 	if len(tpSPs) == 0 {
 		return
 	}
-	session, col := ms.conn(utils.TBLTPAliasProfiles)
+	session, col := ms.conn(utils.TBLTPAlias)
 	defer session.Close()
 	tx := col.Bulk()
 	for _, tp := range tpSPs {

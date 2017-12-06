@@ -556,5 +556,5 @@ type TPAlias struct {
 }
 
 func (t TPAlias) TableName() string {
-	return utils.TBLTPAliasProfiles
+	return utils.TBLTPAlias
 }

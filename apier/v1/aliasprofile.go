@@ -23,16 +23,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ApierAliasProfile struct {
+type ExternalAliasProfile struct {
 	Tenant             string
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
-	Aliases            []*ApierAliasEntry
+	Aliases            []*ExternalAliasEntry
 	Weight             float64
 }
 
-type ApierAliasEntry struct {
+type ExternalAliasEntry struct {
 	FieldName string
 	Initial   string
 	Alias     string
@@ -55,7 +55,7 @@ func (apierV1 *ApierV1) GetAliasProfile(arg utils.TenantID, reply *engine.AliasP
 }
 
 //SetAliasProfile add a new Alias Profile
-func (apierV1 *ApierV1) SetAliasProfile(alsPrf *ApierAliasProfile, reply *string) error {
+func (apierV1 *ApierV1) SetAliasProfile(alsPrf *ExternalAliasProfile, reply *string) error {
 	if missing := utils.MissingStructFields(alsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
