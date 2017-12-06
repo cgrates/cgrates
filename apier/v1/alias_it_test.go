@@ -151,8 +151,14 @@ func testAlsPrfSetAlsPrf(t *testing.T) {
 	var reply *engine.ExternalAliasProfile
 	if err := alsPrfRPC.Call("ApierV1.GetAliasProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
+	} else if !reflect.DeepEqual(alsPrf.ActivationInterval, reply.ActivationInterval) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ActivationInterval, reply.ActivationInterval)
+	} else if !reflect.DeepEqual(len(alsPrf.Aliases), len(reply.Aliases)) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Aliases), utils.ToJSON(reply.Aliases))
+	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}
 }
 
@@ -178,8 +184,14 @@ func testAlsPrfUpdateAlsPrf(t *testing.T) {
 	var reply *engine.ExternalAliasProfile
 	if err := alsPrfRPC.Call("ApierV1.GetAliasProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
+	} else if !reflect.DeepEqual(alsPrf.ActivationInterval, reply.ActivationInterval) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ActivationInterval, reply.ActivationInterval)
+	} else if !reflect.DeepEqual(len(alsPrf.Aliases), len(reply.Aliases)) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Aliases), utils.ToJSON(reply.Aliases))
+	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}
 }
 
