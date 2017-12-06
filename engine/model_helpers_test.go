@@ -1059,3 +1059,118 @@ func TestFilterToTPFilter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tpfilter, eTPFilter)
 	}
 }
+
+func TestAPItoAliasProfile(t *testing.T) {
+	tpAlsPrf := &utils.TPAlias{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Aliases: []*utils.TPAliasEntry{
+			&utils.TPAliasEntry{
+				FieldName: "FL1",
+				Initial:   "In1",
+				Alias:     "Al1",
+			},
+		},
+		Weight: 20,
+	}
+	alsMap := make(map[string]map[string]string)
+	alsMap["FL1"] = make(map[string]string)
+	alsMap["FL1"]["In1"] = "Al1"
+	expected := &AliasProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Aliases: alsMap,
+		Weight:  20,
+	}
+	if rcv, err := APItoAliasProfile(tpAlsPrf, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPAlias(t *testing.T) {
+	tpAlsPrf := &utils.TPAlias{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Aliases: []*utils.TPAliasEntry{
+			&utils.TPAliasEntry{
+				FieldName: "FL1",
+				Initial:   "In1",
+				Alias:     "Al1",
+			},
+		},
+		Weight: 20,
+	}
+	expected := TPAliases{
+		&TPAlias{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "ALS1",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			FieldName:          "FL1",
+			Initial:            "In1",
+			Alias:              "Al1",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			Weight:             20,
+		},
+	}
+	rcv := APItoModelTPAlias(tpAlsPrf)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelAsTPAlias(t *testing.T) {
+	model := TPAliases{
+		&TPAlias{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "ALS1",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			FieldName:          "FL1",
+			Initial:            "In1",
+			Alias:              "Al1",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			Weight:             20,
+		},
+	}
+	expected := &utils.TPAlias{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Aliases: []*utils.TPAliasEntry{
+			&utils.TPAliasEntry{
+				FieldName: "FL1",
+				Initial:   "In1",
+				Alias:     "Al1",
+			},
+		},
+		Weight: 20,
+	}
+	rcv := model.AsTPAlias()
+	if !reflect.DeepEqual(expected, rcv[0]) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
+	}
+}
