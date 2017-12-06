@@ -29,6 +29,7 @@ import (
 type CGREvent struct {
 	Tenant string
 	ID     string
+	Time   *time.Time // event time
 	Event  map[string]interface{}
 }
 

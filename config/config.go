@@ -1271,7 +1271,7 @@ func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
 	return self.radiusAgentCfg
 }
 
-func (cfg *CGRConfig) AiasSCfg() *AliasSCfg {
+func (cfg *CGRConfig) AliasSCfg() *AliasSCfg {
 	return cfg.aliasSCfg
 }
 

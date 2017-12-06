@@ -66,3 +66,32 @@ func (apierV1 *ApierV1) RemAliasProfile(arg utils.TenantID, reply *string) error
 	*reply = utils.OK
 	return nil
 }
+
+func NewAliasSv1(alS *engine.AliasService) *AliasSv1 {
+	return &AliasSv1{alS: alS}
+}
+
+// Exports RPC from RLs
+type AliasSv1 struct {
+	alS *engine.AliasService
+}
+
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+func (alSv1 *AliasSv1) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)
+}
+
+/*
+// GetAliasProfileForEvent returns matching AliasProfile for Event
+func (alSv1 *AliasSv1) GetAliasProfileForEvent(ev *utils.CGREvent,
+	reply *engine.ApierAliasProfile) error {
+	return alSv1.alS.V1GetSuppliers(args, reply)
+}
+*/
+
+// ProcessEvent will replace event fields with the ones in maching AliasProfile
+func (alSv1 *AliasSv1) ProcessEvent(ev *utils.CGREvent,
+	reply *string) error {
+	return alSv1.alS.V1ProcessEvent(ev, reply)
+}

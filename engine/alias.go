@@ -20,7 +20,11 @@ package engine
 
 import (
 	"fmt"
+	"sort"
+	"time"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -43,6 +47,14 @@ func (als *AliasProfile) TenantID() string {
 	return utils.ConcatenatedKey(als.Tenant, als.ID)
 }
 
+// AliasProfiles is a sortable list of Alias profiles
+type AliasProfiles []*AliasProfile
+
+// Sort is part of sort interface, sort based on Weight
+func (aps AliasProfiles) Sort() {
+	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
+}
+
 func NewAliasService(dm *DataManager, filterS *FilterS, indexedFields []string) (*AliasService, error) {
 	return &AliasService{dm: dm, filterS: filterS, indexedFields: indexedFields}, nil
 }
@@ -55,7 +67,7 @@ type AliasService struct {
 
 // ListenAndServe will initialize the service
 func (alS *AliasService) ListenAndServe(exitChan chan bool) (err error) {
-	utils.Logger.Info("Starting Alias Service")
+	utils.Logger.Info("Starting Alias service")
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return
@@ -63,8 +75,59 @@ func (alS *AliasService) ListenAndServe(exitChan chan bool) (err error) {
 
 // Shutdown is called to shutdown the service
 func (alS *AliasService) Shutdown() (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.AliasS))
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.AliasS))
+	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.AliasS))
+	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.AliasS))
+	return
+}
+
+// matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
+func (alS *AliasService) matchingAliasProfilesForEvent(ev *utils.CGREvent) (aPrfls AliasProfiles, err error) {
+	matchingAPs := make(map[string]*AliasProfile)
+	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.indexedFields,
+		alS.dm, utils.AliasProfilesStringIndex+ev.Tenant)
+	if err != nil {
+		return nil, err
+	}
+	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AliasProfilesStringIndex)
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
+	defer guardian.Guardian.UnguardIDs(lockIDs...)
+	for apID := range aPrflIDs {
+		aPrfl, err := alS.dm.GetAliasProfile(ev.Tenant, apID, false, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				continue
+			}
+			return nil, err
+		}
+		evTime := time.Now()
+		if ev.Time != nil {
+			evTime = *ev.Time
+		}
+		if aPrfl.ActivationInterval != nil &&
+			!aPrfl.ActivationInterval.IsActiveAtTime(evTime) { // not active
+			continue
+		}
+		if pass, err := alS.filterS.PassFiltersForEvent(ev.Tenant,
+			ev.Event, aPrfl.FilterIDs); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		matchingAPs[apID] = aPrfl
+	}
+	// All good, convert from Map to Slice so we can sort
+	aPrfls = make(AliasProfiles, len(matchingAPs))
+	i := 0
+	for _, aPrfl := range matchingAPs {
+		aPrfls[i] = aPrfl
+		i++
+	}
+	aPrfls.Sort()
+	return
+}
+
+func (alS *AliasService) V1ProcessEvent(ev *utils.CGREvent,
+	reply *string) (err error) {
 	return
 }
 
