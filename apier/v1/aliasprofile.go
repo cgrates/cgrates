@@ -23,56 +23,29 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ExternalAliasProfile struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	Aliases            []*ExternalAliasEntry
-	Weight             float64
-}
-
-type ExternalAliasEntry struct {
-	FieldName string
-	Initial   string
-	Alias     string
-}
-
 // GetAliasProfile returns an Alias Profile
-func (apierV1 *ApierV1) GetAliasProfile(arg utils.TenantID, reply *engine.AliasProfile) error {
+func (apierV1 *ApierV1) GetAliasProfile(arg utils.TenantID, reply *engine.ExternalAliasProfile) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if alsPrf, err := apierV1.DataManager.GetAliasProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+	if alsPrf, err := apierV1.DataManager.GetAliasProfile(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
 	} else {
-		*reply = *alsPrf
+		*reply = *engine.NewExternalAliasProfileFromAliasProfile(alsPrf)
 	}
 	return nil
 }
 
 //SetAliasProfile add a new Alias Profile
-func (apierV1 *ApierV1) SetAliasProfile(alsPrf *ExternalAliasProfile, reply *string) error {
-	if missing := utils.MissingStructFields(alsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV1 *ApierV1) SetAliasProfile(extAls *engine.ExternalAliasProfile, reply *string) error {
+	if missing := utils.MissingStructFields(extAls, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	alsPrfEngine := &engine.AliasProfile{
-		Tenant:             alsPrf.Tenant,
-		ID:                 alsPrf.ID,
-		Weight:             alsPrf.Weight,
-		FilterIDs:          alsPrf.FilterIDs,
-		ActivationInterval: alsPrf.ActivationInterval,
-	}
-	alsMap := make(map[string]map[string]string)
-	for _, als := range alsPrf.Aliases {
-		alsMap[als.FieldName] = make(map[string]string)
-		alsMap[als.FieldName][als.Initial] = als.Alias
-	}
-	alsPrfEngine.Aliases = alsMap
-	if err := apierV1.DataManager.SetAliasProfile(alsPrfEngine); err != nil {
+	alsPrf := extAls.AsAliasProfile()
+	if err := apierV1.DataManager.SetAliasProfile(alsPrf); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
