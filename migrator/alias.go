@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"fmt"
+	//"log"
 	"strings"
 
 	"github.com/cgrates/cgrates/engine"
@@ -50,36 +51,43 @@ func (m *Migrator) migrateCurrentAlias() (err error) {
 	return
 }
 
-func (m *Migrator) migrateCurrentReverseAlias() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.REVERSE_ALIASES_PREFIX)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.REVERSE_ALIASES_PREFIX)
+// func (m *Migrator) migrateCurrentReverseAlias() (err error) {
+// 	var ids []string
+// 	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.REVERSE_ALIASES_PREFIX)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	log.Print("ids: ", ids)
+// 	for _, id := range ids {
+// 		idg := strings.TrimPrefix(id, utils.REVERSE_ALIASES_PREFIX)
+// 		usrs, err := m.dmIN.DataDB().GetReverseAlias(idg, true, utils.NonTransactional)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		log.Print(id)
+// 		log.Print(idg)
+// 		log.Print("values: ", usrs)
 
-		usrs, err := m.dmIN.DataDB().GetReverseAlias(idg, true, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		for _, usr := range usrs {
-			alias, err := m.dmIN.DataDB().GetAlias(usr, true, utils.NonTransactional)
-			if err != nil {
-				return err
-			}
-			if alias != nil {
-				if m.dryRun != true {
-					if err := m.dmOut.DataDB().SetReverseAlias(alias, utils.NonTransactional); err != nil {
-						return err
-					}
-					m.stats[utils.ReverseAlias] += 1
-				}
-			}
-		}
-	}
-	return
-}
+// 		for _, usr := range usrs {
+// 			log.Print(usr)
+
+// 			alias, err := m.dmIN.DataDB().GetAlias(usr, true, utils.NonTransactional)
+// 			if err != nil {
+// 				log.Print("erorr")
+// 				return err
+// 			}
+// 			if alias != nil {
+// 				if m.dryRun != true {
+// 					if err := m.dmOut.DataDB().SetReverseAlias(alias, utils.NonTransactional); err != nil {
+// 						return err
+// 					}
+// 					m.stats[utils.ReverseAlias] += 1
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return
+// }
 
 func (m *Migrator) migrateAlias() (err error) {
 	var vrs engine.Versions
@@ -110,29 +118,29 @@ func (m *Migrator) migrateAlias() (err error) {
 }
 
 func (m *Migrator) migrateReverseAlias() (err error) {
-	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
-	}
-	switch vrs[utils.ReverseAlias] {
-	case current[utils.ReverseAlias]:
-		if m.sameDataDB {
-			return
-		}
-		if err := m.migrateCurrentReverseAlias(); err != nil {
-			return err
-		}
-		return
-	}
+	// var vrs engine.Versions
+	// current := engine.CurrentDataDBVersions()
+	// vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	// if err != nil {
+	// 	return utils.NewCGRError(utils.Migrator,
+	// 		utils.ServerErrorCaps,
+	// 		err.Error(),
+	// 		fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+	// } else if len(vrs) == 0 {
+	// 	return utils.NewCGRError(utils.Migrator,
+	// 		utils.MandatoryIEMissingCaps,
+	// 		utils.UndefinedVersion,
+	// 		"version number is not defined for ActionTriggers model")
+	// }
+	// switch vrs[utils.ReverseAlias] {
+	// case current[utils.ReverseAlias]:
+	// 	if m.sameDataDB {
+	// 		return
+	// 	}
+	// 	if err := m.migrateCurrentReverseAlias(); err != nil {
+	// 		return err
+	// 	}
+	// 	return
+	// }
 	return
 }

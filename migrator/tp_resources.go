@@ -32,7 +32,7 @@ func (m *Migrator) migrateCurrentTPresources() (err error) {
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPResources, utils.TPDistinctIds{}, map[string]string{}, nil)
+		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPResources, utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
@@ -57,8 +57,8 @@ func (m *Migrator) migrateCurrentTPresources() (err error) {
 
 func (m *Migrator) migrateTPresources() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

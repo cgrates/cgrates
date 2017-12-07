@@ -31,13 +31,16 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 		return err
 	}
 	for _, tpid := range tpids {
-		dest, err := m.InStorDB().GetTPAliases(&utils.TPAliases{TPid: tpid})
+		dests, err := m.InStorDB().GetTPAliases(&utils.TPAliases{TPid: tpid})
 		if err != nil {
 			return err
 		}
-		if dest != nil {
+		for _, dest := range dests {
+			dest.TPid = tpid
+		}
+		if dests != nil {
 			if m.dryRun != true {
-				if err := m.OutStorDB().SetTPAliases(dest); err != nil {
+				if err := m.OutStorDB().SetTPAliases(dests); err != nil {
 					return err
 				}
 				m.stats[utils.TpAliases] += 1
@@ -50,8 +53,8 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 
 func (m *Migrator) migrateTPaliases() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

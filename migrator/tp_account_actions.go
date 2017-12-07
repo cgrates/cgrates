@@ -25,8 +25,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateCurrentTPaccountacction() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPActionTriggers)
+func (m *Migrator) migrateCurrentTPaccountAcction() (err error) {
+	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPAccountActions)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (m *Migrator) migrateCurrentTPaccountacction() (err error) {
 				if err := m.OutStorDB().SetTPAccountActions(dest); err != nil {
 					return err
 				}
-				m.stats[utils.TpAccountActions] += 1
+				m.stats[utils.TpAccountActionsV] += 1
 			}
 		}
 	}
@@ -49,8 +49,8 @@ func (m *Migrator) migrateCurrentTPaccountacction() (err error) {
 
 func (m *Migrator) migrateTPaccountacction() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -62,12 +62,12 @@ func (m *Migrator) migrateTPaccountacction() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for ActionTriggers model")
 	}
-	switch vrs[utils.TpAccountActions] {
-	case current[utils.TpAccountActions]:
+	switch vrs[utils.TpAccountActionsV] {
+	case current[utils.TpAccountActionsV]:
 		if m.sameStorDB {
 			return
 		}
-		if err := m.migrateCurrentTPaccountacction(); err != nil {
+		if err := m.migrateCurrentTPaccountAcction(); err != nil {
 			return err
 		}
 		return

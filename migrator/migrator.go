@@ -165,8 +165,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			//TPS
 		case utils.MetaTpRatingPlans:
 			err = m.migrateTPratingplans()
-		case utils.MetaTpLcrs:
-			err = m.migrateTPlcrs()
+		case utils.MetaTpLCRRules:
+			err = m.migrateTpLCRRules()
 		case utils.MetaTpFilters:
 			err = m.migrateTPfilters()
 		case utils.MetaTpDestinationRates:
@@ -179,7 +179,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPactionplans()
 		case utils.MetaTpActions:
 			err = m.migrateTPactions()
-		case utils.MetaTpDerivedCharges:
+		case utils.MetaTpDerivedChargers:
 			err = m.migrateTPderivedchargers()
 		case utils.MetaTpThresholds:
 			err = m.migrateTPthresholds()
@@ -201,8 +201,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPaliases()
 		case utils.MetaTpUsers:
 			err = m.migrateTPusers()
-		case utils.MetaTpDerivedChargersV:
-			err = m.migrateTPderivedchargers()
 		case utils.MetaTpCdrStats:
 			err = m.migrateTPcdrstats()
 		case utils.MetaTpDestinations:
@@ -281,8 +279,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			if err := m.migrateTPratingplans(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpRatingPlans, " ", err)
 			}
-			if err := m.migrateTPlcrs(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpLcrs, " ", err)
+			if err := m.migrateTpLCRRules(); err != nil {
+				log.Print("ERROR: ", utils.MetaTpLCRRules, " ", err)
 			}
 			if err := m.migrateTPfilters(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpFilters, " ", err)
@@ -303,7 +301,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				log.Print("ERROR: ", utils.MetaTpActions, " ", err)
 			}
 			if err := m.migrateTPderivedchargers(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpDerivedCharges, " ", err)
+				log.Print("ERROR: ", utils.MetaTpDerivedChargers, " ", err)
 			}
 			if err := m.migrateTPthresholds(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpThresholds, " ", err)

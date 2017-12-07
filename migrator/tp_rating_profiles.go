@@ -51,8 +51,8 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 
 func (m *Migrator) migrateTPratingprofiles() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

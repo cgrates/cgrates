@@ -26,13 +26,12 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPdestinationrates() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPRatingPlans)
+	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPDestinationRates)
 	if err != nil {
 		return err
 	}
-
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPRatingPlans, utils.TPDistinctIds{}, map[string]string{}, nil)
+		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPDestinationRates, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
@@ -56,8 +55,8 @@ func (m *Migrator) migrateCurrentTPdestinationrates() (err error) {
 
 func (m *Migrator) migrateTPdestinationrates() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
