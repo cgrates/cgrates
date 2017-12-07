@@ -80,8 +80,6 @@ func (m *Migrator) migrateDestinations() (err error) {
 
 func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 	var ids []string
-	var mapids []string
-	mappedvals := make(map[string][]string)
 	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.REVERSE_DESTINATION_PREFIX)
 	if err != nil {
 		return err
@@ -94,20 +92,21 @@ func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 		}
 		if rdst != nil {
 			for _, rdid := range rdst {
-				mapids = append(mapids, rdid)
-				mappedvals[rdid] = append(mappedvals[rdid], id)
-			}
-		}
-	}
-	for _, id := range mapids {
-		dst := &engine.Destination{Id: id, Prefixes: mappedvals[id]}
-
-		if dst != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetReverseDestination(dst, utils.NonTransactional); err != nil {
+				rdstn, err := m.dmIN.DataDB().GetDestination(rdid, true, utils.NonTransactional)
+				if err != nil {
 					return err
 				}
-				m.stats[utils.ReverseDestinations] += 1
+				if rdstn != nil {
+					if m.dryRun != true {
+						if err := m.dmOut.DataDB().SetDestination(rdstn, utils.NonTransactional); err != nil {
+							return err
+						}
+						if err := m.dmOut.DataDB().SetReverseDestination(rdstn, utils.NonTransactional); err != nil {
+							return err
+						}
+						m.stats[utils.ReverseDestinations] += 1
+					}
+				}
 			}
 		}
 	}

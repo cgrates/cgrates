@@ -1509,6 +1509,9 @@ func testMigratorReverseDestinations(t *testing.T) {
 	dst := &engine.Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+494", "+495", "+496"}}
 	switch dbtype {
 	case Move:
+		if err := mig.dmIN.DataDB().SetDestination(dst, utils.NonTransactional); err != nil {
+			t.Error("Error when setting Destinations ", err.Error())
+		}
 		if err := mig.dmIN.DataDB().SetReverseDestination(dst, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ReverseDestinations ", err.Error())
 		}
