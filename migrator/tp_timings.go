@@ -32,7 +32,7 @@ func (m *Migrator) migrateCurrentTPTiming() (err error) {
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPTimings, utils.TPDistinctIds{}, map[string]string{}, nil)
+		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPTimings, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
@@ -57,8 +57,8 @@ func (m *Migrator) migrateCurrentTPTiming() (err error) {
 
 func (m *Migrator) migrateTpTimings() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

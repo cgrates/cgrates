@@ -40,7 +40,7 @@ func (m *Migrator) migrateCurrentDerivedChargers() (err error) {
 		}
 		if drc != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetDerivedChargers(id, drc, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataDB().SetDerivedChargers(idg, drc, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.DerivedChargersV] += 1

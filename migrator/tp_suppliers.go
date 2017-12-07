@@ -57,8 +57,8 @@ func (m *Migrator) migrateCurrentTPSuppliers() (err error) {
 
 func (m *Migrator) migrateTPSuppliers() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLTPSuppliers)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLTPSuppliers)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

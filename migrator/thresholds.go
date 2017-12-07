@@ -167,8 +167,9 @@ func (m *Migrator) migrateThresholds() (err error) {
 	return
 }
 func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {
+	var filterIDS []string
 	var filters []*engine.RequestFilter
-	if *v2ATR.Balance.ID != "" {
+	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
 		if v2ATR.Balance.Directions != nil {
 			x, err := engine.NewRequestFilter(engine.MetaRSRFields, "Directions", v2ATR.Balance.Directions.Slice())
 			if err != nil {
@@ -226,21 +227,22 @@ func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *en
 			}
 			filters = append(filters, x)
 		}
-	}
-	filter = &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, RequestFilters: filters}
 
-	th = &engine.Threshold{
-		Tenant: config.CgrConfig().DefaultTenant,
-		ID:     v2ATR.ID,
-	}
+		filter = &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, RequestFilters: filters}
+		filterIDS = append(filterIDS, filter.ID)
 
+	}
 	thp = &engine.ThresholdProfile{
 		ID:                 v2ATR.ID,
 		Tenant:             config.CgrConfig().DefaultTenant,
 		Weight:             v2ATR.Weight,
 		ActivationInterval: &utils.ActivationInterval{ActivationTime: v2ATR.ActivationDate, ExpiryTime: v2ATR.ExpirationDate},
-		FilterIDs:          []string{filter.ID},
+		FilterIDs:          []string{},
 		MinSleep:           v2ATR.MinSleep,
+	}
+	th = &engine.Threshold{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     v2ATR.ID,
 	}
 	return thp, th, filter, nil
 }

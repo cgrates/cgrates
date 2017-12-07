@@ -22,25 +22,27 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix("request_filter_indexes")
+	tenant := config.CgrConfig().DefaultTenant
+	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.FilterPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, "request_filter_indexes")
-		rq, err := m.dmIN.GetReqFilterIndexes(idg)
+		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
+		fl, err := m.dmIN.GetFilter(tenant, idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
-		if rq != nil {
+		if fl != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetReqFilterIndexes(id, rq); err != nil {
+				if err := m.dmOut.SetFilter(fl); err != nil {
 					return err
 				}
 				m.stats[utils.RQF] += 1

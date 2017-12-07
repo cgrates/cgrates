@@ -31,7 +31,7 @@ func (m *Migrator) migrateCurrentTPactions() (err error) {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPActions, utils.TPDistinctIds{}, map[string]string{}, nil)
+		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPActions, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
@@ -55,8 +55,8 @@ func (m *Migrator) migrateCurrentTPactions() (err error) {
 
 func (m *Migrator) migrateTPactions() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

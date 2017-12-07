@@ -25,12 +25,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateCurrentTPlcrs() (err error) {
+func (m *Migrator) migrateCurrentTpLCRRules() (err error) {
 	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPLcrs)
 	if err != nil {
 		return err
 	}
-
 	for _, tpid := range tpids {
 		dest, err := m.InStorDB().GetTPLCRs(&utils.TPLcrRules{TPid: tpid})
 		if err != nil {
@@ -48,10 +47,10 @@ func (m *Migrator) migrateCurrentTPlcrs() (err error) {
 	return
 }
 
-func (m *Migrator) migrateTPlcrs() (err error) {
+func (m *Migrator) migrateTpLCRRules() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -68,7 +67,7 @@ func (m *Migrator) migrateTPlcrs() (err error) {
 		if m.sameStorDB {
 			return
 		}
-		if err := m.migrateCurrentTPcdrstats(); err != nil {
+		if err := m.migrateCurrentTpLCRRules(); err != nil {
 			return err
 		}
 		return

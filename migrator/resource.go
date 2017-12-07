@@ -35,14 +35,14 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix)
-		res, err := m.dmIN.GetResource(tenant, idg, true, utils.NonTransactional)
+		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix+tenant+":")
+		res, err := m.dmIN.GetResourceProfile(tenant, idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if res != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetResource(res); err != nil {
+				if err := m.dmOut.SetResourceProfile(res); err != nil {
 					return err
 				}
 				m.stats[utils.Resource] += 1

@@ -30,24 +30,24 @@ func (m *Migrator) migrateCurrentTPratingplans() (err error) {
 	if err != nil {
 		return err
 	}
-
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPRatingPlans, utils.TPDistinctIds{}, map[string]string{}, nil)
+		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPRatingPlans, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
-		for _, id := range ids {
-
-			rps, err := m.InStorDB().GetTPRatingPlans(tpid, id, nil)
-			if err != nil {
-				return err
-			}
-			if rps != nil {
-				if m.dryRun != true {
-					if err := m.InStorDB().SetTPRatingPlans(rps); err != nil {
-						return err
+		if len(ids) != 0 {
+			for _, id := range ids {
+				rps, err := m.InStorDB().GetTPRatingPlans(tpid, id, nil)
+				if err != nil {
+					return err
+				}
+				if rps != nil {
+					if m.dryRun != true {
+						if err := m.OutStorDB().SetTPRatingPlans(rps); err != nil {
+							return err
+						}
+						m.stats[utils.TpRatingPlans] += 1
 					}
-					m.stats[utils.TpRatingPlans] += 1
 				}
 			}
 		}
@@ -57,8 +57,8 @@ func (m *Migrator) migrateCurrentTPratingplans() (err error) {
 
 func (m *Migrator) migrateTPratingplans() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

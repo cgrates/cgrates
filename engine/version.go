@@ -143,7 +143,7 @@ func CurrentStorDBVersions() Versions {
 		utils.TpFilters:          1,
 		utils.TpDestinationRates: 1,
 		utils.TpActionTriggers:   1,
-		utils.TpAccountActions:   1,
+		utils.TpAccountActionsV:  1,
 		utils.TpActionPlans:      1,
 		utils.TpActions:          1,
 		utils.TpDerivedCharges:   1,
