@@ -112,7 +112,7 @@ type DataDB interface {
 	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetReqFilterIndexesDrv(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
-	MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
+	MatchReqFilterIndexDrv(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(tenant, id string) (err error)

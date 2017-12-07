@@ -265,12 +265,12 @@ func testOnStorITMatchReqFilterIndex(t *testing.T) {
 		"RL1": true,
 		"RL2": true,
 	}
-	if rcvMp, err := onStor.DataDB().MatchReqFilterIndex(utils.ResourceProfilesStringIndex, "Account", "1002"); err != nil {
+	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesStringIndex, "Account", "1002"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
-	if _, err := onStor.DataDB().MatchReqFilterIndex(utils.ResourceProfilesStringIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesStringIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
