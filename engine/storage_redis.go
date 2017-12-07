@@ -1295,27 +1295,18 @@ func (rs *RedisStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]
 	return rs.Cmd("HMSET", dbKey, mp).Err
 }
 
-func (rs *RedisStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+func (rs *RedisStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(fldName, fldVal)
-	cacheKey := dbKey + fieldValKey
-	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
-		if x == nil {
-			return nil, utils.ErrNotFound
-		}
-		return x.(utils.StringMap), nil
-	}
 	// Not found in cache, check in DB
 	fldValBytes, err := rs.Cmd("HGET", dbKey, fieldValKey).Bytes()
 	if err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
-			cache.Set(cacheKey, nil, true, utils.NonTransactional)
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	} else if err = rs.ms.Unmarshal(fldValBytes, &itemIDs); err != nil {
 		return
 	}
-	cache.Set(cacheKey, itemIDs, true, utils.NonTransactional)
 	return
 }
 

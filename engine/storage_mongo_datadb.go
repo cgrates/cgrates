@@ -1800,15 +1800,7 @@ func (ms *MongoStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]
 	return
 }
 
-func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
-	fieldValKey := utils.ConcatenatedKey(fldName, fldVal)
-	cacheKey := dbKey + fieldValKey
-	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
-		if x == nil {
-			return nil, utils.ErrNotFound
-		}
-		return x.(utils.StringMap), nil
-	}
+func (ms *MongoStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	var result struct {
@@ -1821,12 +1813,10 @@ func (ms *MongoStorage) MatchReqFilterIndex(dbKey, fldName, fldVal string) (item
 		bson.M{fldKey: true}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
-			cache.Set(cacheKey, nil, true, utils.NonTransactional)
 		}
 		return nil, err
 	}
 	itemIDs = result.Value[fldName][fldVal]
-	cache.Set(cacheKey, itemIDs, true, utils.NonTransactional)
 	return
 }
 

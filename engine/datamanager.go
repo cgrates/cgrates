@@ -809,6 +809,27 @@ func (dm *DataManager) SetReqFilterIndexes(dbKey string, indexes map[string]map[
 	return dm.DataDB().SetReqFilterIndexesDrv(dbKey, indexes)
 }
 
+//complete here with cache
+func (dm *DataManager) MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
+	fieldValKey := utils.ConcatenatedKey(fieldName, fieldVal)
+	cacheKey := dbKey + fieldValKey
+	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
+		if x == nil {
+			return nil, utils.ErrNotFound
+		}
+		return x.(utils.StringMap), nil
+	}
+	itemIDs, err = dm.DataDB().MatchReqFilterIndexDrv(dbKey, fieldName, fieldVal)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(cacheKey, nil, true, utils.NonTransactional)
+		}
+		return nil, err
+	}
+	cache.Set(cacheKey, itemIDs, true, utils.NonTransactional)
+	return
+}
+
 func (dm *DataManager) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err error) {
 	return dm.DataDB().GetCdrStatsQueueDrv(key)
 }
