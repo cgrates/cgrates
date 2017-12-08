@@ -137,7 +137,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 					}
 				}
 				for _, apID := range *attr.ActionPlanIDs {
-					if utils.IsSliceMember(acntAPids, apID) {
+					if utils.IsSliceMember(acntAPids, apID) && !attr.ActionPlansOverwrite {
 						continue // Already there
 					}
 					ap, err := self.DataManager.DataDB().GetActionPlan(apID, false, utils.NonTransactional)
