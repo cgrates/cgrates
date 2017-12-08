@@ -174,7 +174,9 @@ func testV1AccGetAccountAfterSet(t *testing.T) {
 
 func testV1AccRemAccountSet(t *testing.T) {
 	var reply string
-	if err := accRpc.Call("ApierV1.RemoveAccount", &utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err != nil {
+	if err := accRpc.Call("ApierV1.RemoveAccount",
+		&utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "testacc"},
+		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)

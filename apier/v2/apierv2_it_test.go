@@ -28,6 +28,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
@@ -207,7 +208,9 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	}
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_1",
 		ActionPlan: []*v1.AttrActionPlan{
-			&v1.AttrActionPlan{ActionsId: argActs1.ActionsId, Time: utils.ASAP, Weight: 20.0}}}
+			&v1.AttrActionPlan{ActionsId: argActs1.ActionsId,
+				Time:   time.Now().Add(time.Duration(time.Minute)).String(),
+				Weight: 20.0}}}
 	if _, err := dm.DataDB().GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
