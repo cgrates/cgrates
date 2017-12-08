@@ -22,29 +22,29 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new alias within a tariff plan
-func (self *ApierV1) SetTPAliasProfile(attrs utils.TPAlias, reply *string) error {
+// Creates a new attribute within a tariff plan
+func (self *ApierV1) SetTPAttribute(attrs utils.TPAttribute, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPAliasProfiles([]*utils.TPAlias{&attrs}); err != nil {
+	if err := self.StorDb.SetTPAttributes([]*utils.TPAttribute{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-type AttrGetTPAliasProfile struct {
+type AttrGetTPAttribute struct {
 	TPid string // Tariff plan id
 	ID   string
 }
 
-// Queries specific Alias on Tariff plan
-func (self *ApierV1) GetTPAliasProfile(attr AttrGetTPAliasProfile, reply *utils.TPAlias) error {
+// Queries specific Attribute on Tariff plan
+func (self *ApierV1) GetTPAttribute(attr AttrGetTPAttribute, reply *utils.TPAttribute) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if als, err := self.StorDb.GetTPAliasProfiles(attr.TPid, attr.ID); err != nil {
+	if als, err := self.StorDb.GetTPAttributes(attr.TPid, attr.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -55,17 +55,17 @@ func (self *ApierV1) GetTPAliasProfile(attr AttrGetTPAliasProfile, reply *utils.
 	return nil
 }
 
-type AttrGetTPAliasProfileIds struct {
+type AttrGetTPAttributeIds struct {
 	TPid string // Tariff plan id
 	utils.Paginator
 }
 
-// Queries alias identities on specific tariff plan.
-func (self *ApierV1) GetTPAliasProfileIds(attrs AttrGetTPAliasProfileIds, reply *[]string) error {
+// Queries attribute identities on specific tariff plan.
+func (self *ApierV1) GetTPAttributeIds(attrs AttrGetTPAttributeIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAlias, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAttributes, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -75,18 +75,18 @@ func (self *ApierV1) GetTPAliasProfileIds(attrs AttrGetTPAliasProfileIds, reply 
 	return nil
 }
 
-type AttrRemTPAliasProfiles struct {
+type AttrRemTPAttribute struct {
 	TPid   string // Tariff plan id
 	Tenant string
-	ID     string // LCR id
+	ID     string // Attribute id
 }
 
-// Removes specific Alias on Tariff plan
-func (self *ApierV1) RemTPAliasProfile(attrs AttrRemTPAliasProfiles, reply *string) error {
+// Removes specific Attribute on Tariff plan
+func (self *ApierV1) RemTPAttribute(attrs AttrRemTPAttribute, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPAlias, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPAttributes, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

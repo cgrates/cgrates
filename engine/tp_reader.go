@@ -31,47 +31,47 @@ import (
 )
 
 type TpReader struct {
-	tpid             string
-	timezone         string
-	dm               *DataManager
-	lr               LoadReader
-	actions          map[string][]*Action
-	actionPlans      map[string]*ActionPlan
-	actionsTriggers  map[string]ActionTriggers
-	accountActions   map[string]*Account
-	dirtyRpAliases   []*TenantRatingSubject // used to clean aliases that might have changed
-	dirtyAccAliases  []*TenantAccount       // used to clean aliases that might have changed
-	destinations     map[string]*Destination
-	timings          map[string]*utils.TPTiming
-	rates            map[string]*utils.TPRate
-	destinationRates map[string]*utils.TPDestinationRate
-	ratingPlans      map[string]*RatingPlan
-	ratingProfiles   map[string]*RatingProfile
-	sharedGroups     map[string]*SharedGroup
-	lcrs             map[string]*LCR
-	derivedChargers  map[string]*utils.DerivedChargers
-	cdrStats         map[string]*CdrStats
-	users            map[string]*UserProfile
-	aliases          map[string]*Alias
-	resProfiles      map[utils.TenantID]*utils.TPResource
-	sqProfiles       map[utils.TenantID]*utils.TPStats
-	thProfiles       map[utils.TenantID]*utils.TPThreshold
-	filters          map[utils.TenantID]*utils.TPFilter
-	sppProfiles      map[utils.TenantID]*utils.TPSupplier
-	aliasProfiles    map[utils.TenantID]*utils.TPAlias
-	resources        []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
-	statQueues       []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
-	thresholds       []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
-	suppliers        []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
-	aliasTntID       []*utils.TenantID // IDs of suppliers which need creation based on aliasProfiles
+	tpid              string
+	timezone          string
+	dm                *DataManager
+	lr                LoadReader
+	actions           map[string][]*Action
+	actionPlans       map[string]*ActionPlan
+	actionsTriggers   map[string]ActionTriggers
+	accountActions    map[string]*Account
+	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
+	dirtyAccAliases   []*TenantAccount       // used to clean aliases that might have changed
+	destinations      map[string]*Destination
+	timings           map[string]*utils.TPTiming
+	rates             map[string]*utils.TPRate
+	destinationRates  map[string]*utils.TPDestinationRate
+	ratingPlans       map[string]*RatingPlan
+	ratingProfiles    map[string]*RatingProfile
+	sharedGroups      map[string]*SharedGroup
+	lcrs              map[string]*LCR
+	derivedChargers   map[string]*utils.DerivedChargers
+	cdrStats          map[string]*CdrStats
+	users             map[string]*UserProfile
+	aliases           map[string]*Alias
+	resProfiles       map[utils.TenantID]*utils.TPResource
+	sqProfiles        map[utils.TenantID]*utils.TPStats
+	thProfiles        map[utils.TenantID]*utils.TPThreshold
+	filters           map[utils.TenantID]*utils.TPFilter
+	sppProfiles       map[utils.TenantID]*utils.TPSupplier
+	attributeProfiles map[utils.TenantID]*utils.TPAttribute
+	resources         []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
+	statQueues        []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
+	thresholds        []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
+	suppliers         []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
+	attrTntID         []*utils.TenantID // IDs of suppliers which need creation based on attributeProfiles
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
-	thdsIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	sqpIndexers   map[string]*ReqFilterIndexer // tenant, indexer
-	resIndexers   map[string]*ReqFilterIndexer // tenant, indexer
-	sppIndexers   map[string]*ReqFilterIndexer // tenant, indexer
-	aliasIndexers map[string]*ReqFilterIndexer // tenant, indexer
+	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
+	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
+	resIndexers  map[string]*ReqFilterIndexer // tenant, indexer
+	sppIndexers  map[string]*ReqFilterIndexer // tenant, indexer
+	attrIndexers map[string]*ReqFilterIndexer // tenant, indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -143,7 +143,7 @@ func (tpr *TpReader) Init() {
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
 	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplier)
-	tpr.aliasProfiles = make(map[utils.TenantID]*utils.TPAlias)
+	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttribute)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilter)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -152,7 +152,7 @@ func (tpr *TpReader) Init() {
 	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.resIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.sppIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.aliasIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.attrIndexers = make(map[string]*ReqFilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1813,25 +1813,25 @@ func (tpr *TpReader) LoadSupplierProfiles() error {
 	return tpr.LoadSupplierProfilesFiltered("")
 }
 
-func (tpr *TpReader) LoadAliasProfilesFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPAliasProfiles(tpr.tpid, tag)
+func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPAttributes(tpr.tpid, tag)
 	if err != nil {
 		return err
 	}
-	mapRsPfls := make(map[utils.TenantID]*utils.TPAlias)
+	mapRsPfls := make(map[utils.TenantID]*utils.TPAttribute)
 	for _, rl := range rls {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
-	tpr.aliasProfiles = mapRsPfls
+	tpr.attributeProfiles = mapRsPfls
 	for tntID, res := range mapRsPfls {
-		if has, err := tpr.dm.HasData(utils.AliasProfilePrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.AttributeProfilePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
-			tpr.aliasTntID = append(tpr.aliasTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+			tpr.attrTntID = append(tpr.attrTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
-		// index alias profile for filters
-		if _, has := tpr.aliasIndexers[tntID.Tenant]; !has {
-			if tpr.aliasIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.AliasProfilePrefix, tntID.Tenant); err != nil {
+		// index attribute profile for filters
+		if _, has := tpr.attrIndexers[tntID.Tenant]; !has {
+			if tpr.attrIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1848,15 +1848,15 @@ func (tpr *TpReader) LoadAliasProfilesFiltered(tag string) (err error) {
 					tpFltr = FilterToTPFilter(fltr)
 				}
 			} else {
-				tpr.aliasIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+				tpr.attrIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
 			}
 		}
 	}
 	return nil
 }
 
-func (tpr *TpReader) LoadAliasProfiles() error {
-	return tpr.LoadAliasProfilesFiltered("")
+func (tpr *TpReader) LoadAttributeProfiles() error {
+	return tpr.LoadAttributeProfilesFiltered("")
 }
 
 func (tpr *TpReader) LoadAll() (err error) {
@@ -1923,7 +1923,7 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadSupplierProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadAliasProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+	if err = tpr.LoadAttributeProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -2278,14 +2278,14 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 
 	if verbose {
-		log.Print("AliasProfiles:")
+		log.Print("AttributeProfiles:")
 	}
-	for _, tpTH := range tpr.aliasProfiles {
-		th, err := APItoAliasProfile(tpTH, tpr.timezone)
+	for _, tpTH := range tpr.attributeProfiles {
+		th, err := APItoAttributeProfile(tpTH, tpr.timezone)
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetAliasProfile(th); err != nil {
+		if err = tpr.dm.SetAttributeProfile(th); err != nil {
 			return err
 		}
 		if verbose {
@@ -2391,9 +2391,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 
 	if verbose {
-		log.Print("Indexing Alias Profiles")
+		log.Print("Indexing Attribute Profiles")
 	}
-	for tenant, fltrIdxer := range tpr.aliasIndexers {
+	for tenant, fltrIdxer := range tpr.attrIndexers {
 		if err := fltrIdxer.StoreIndexes(); err != nil {
 			return err
 		}
@@ -2474,8 +2474,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Filters: ", len(tpr.filters))
 	// Supplier profiles
 	log.Print("SupplierProfiles: ", len(tpr.sppProfiles))
-	// Alias profiles
-	log.Print("SupplierProfiles: ", len(tpr.aliasProfiles))
+	// Attribute profiles
+	log.Print("AttributeProfiles: ", len(tpr.attributeProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2641,10 +2641,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.AliasProfilePrefix:
-		keys := make([]string, len(tpr.aliasProfiles))
+	case utils.AttributeProfilePrefix:
+		keys := make([]string, len(tpr.attributeProfiles))
 		i := 0
-		for k, _ := range tpr.aliasProfiles {
+		for k, _ := range tpr.attributeProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}

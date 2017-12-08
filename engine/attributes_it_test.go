@@ -26,8 +26,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestExternalAliasProfileAsAliasProfile(t *testing.T) {
-	extAls := &ExternalAliasProfile{
+func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
+	extAttr := &ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
@@ -35,19 +35,26 @@ func TestExternalAliasProfileAsAliasProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Aliases: []*AliasEntry{
-			&AliasEntry{
+		Context: "con1",
+		Attributes: []*Attribute{
+			&Attribute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
+				Append:    true,
 			},
 		},
 		Weight: 20,
 	}
-	alsMap := make(map[string]map[string]string)
-	alsMap["FL1"] = make(map[string]string)
-	alsMap["FL1"]["In1"] = "Al1"
-	expected := &AliasProfile{
+	attrMap := make(map[string]map[string]*Attribute)
+	attrMap["FL1"] = make(map[string]*Attribute)
+	attrMap["FL1"]["In1"] = &Attribute{
+		FieldName: "FL1",
+		Initial:   "In1",
+		Alias:     "Al1",
+		Append:    true,
+	}
+	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
@@ -55,21 +62,27 @@ func TestExternalAliasProfileAsAliasProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Aliases: alsMap,
-		Weight:  20,
+		Context:    "con1",
+		Attributes: attrMap,
+		Weight:     20,
 	}
 
-	rcv := extAls.AsAliasProfile()
+	rcv := extAttr.AsAttributeProfile()
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
-func TestNewExternalAliasProfileFromAliasProfile(t *testing.T) {
-	alsMap := make(map[string]map[string]string)
-	alsMap["FL1"] = make(map[string]string)
-	alsMap["FL1"]["In1"] = "Al1"
-	alsPrf := &AliasProfile{
+func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
+	attrMap := make(map[string]map[string]*Attribute)
+	attrMap["FL1"] = make(map[string]*Attribute)
+	attrMap["FL1"]["In1"] = &Attribute{
+		FieldName: "FL1",
+		Initial:   "In1",
+		Alias:     "Al1",
+		Append:    true,
+	}
+	attrPrf := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
@@ -77,11 +90,12 @@ func TestNewExternalAliasProfileFromAliasProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Aliases: alsMap,
-		Weight:  20,
+		Context:    "con1",
+		Attributes: attrMap,
+		Weight:     20,
 	}
 
-	expected := &ExternalAliasProfile{
+	expected := &ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
@@ -89,17 +103,19 @@ func TestNewExternalAliasProfileFromAliasProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Aliases: []*AliasEntry{
-			&AliasEntry{
+		Context: "con1",
+		Attributes: []*Attribute{
+			&Attribute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
+				Append:    true,
 			},
 		},
 		Weight: 20,
 	}
 
-	rcv := NewExternalAliasProfileFromAliasProfile(alsPrf)
+	rcv := NewExternalAttributeProfileFromAttributeProfile(attrPrf)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

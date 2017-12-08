@@ -1258,15 +1258,15 @@ func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplier) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPAliasProfiles(tpid, id string) ([]*utils.TPAlias, error) {
+func (ms *MongoStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttribute, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPAlias
-	session, col := ms.conn(utils.TBLTPAlias)
+	var results []*utils.TPAttribute
+	session, col := ms.conn(utils.TBLTPAttributes)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
 	if len(results) == 0 {
@@ -1275,11 +1275,11 @@ func (ms *MongoStorage) GetTPAliasProfiles(tpid, id string) ([]*utils.TPAlias, e
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPAliasProfiles(tpSPs []*utils.TPAlias) (err error) {
+func (ms *MongoStorage) SetTPAttributes(tpSPs []*utils.TPAttribute) (err error) {
 	if len(tpSPs) == 0 {
 		return
 	}
-	session, col := ms.conn(utils.TBLTPAlias)
+	session, col := ms.conn(utils.TBLTPAttributes)
 	defer session.Close()
 	tx := col.Bulk()
 	for _, tp := range tpSPs {

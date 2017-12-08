@@ -511,7 +511,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheSupplierProfiles: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheAliasProfiles: &CacheParamConfig{Limit: -1,
+		utils.CacheAttributeProfiles: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false}}
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
 		t.Errorf("received: %s, \nexpecting: %s",
@@ -637,13 +637,13 @@ func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultSAliasSCfg(t *testing.T) {
-	eAliasSCfg := &AliasSCfg{
+func TestCgrCfgJSONDefaultSAttributeSCfg(t *testing.T) {
+	eAliasSCfg := &AttributeSCfg{
 		Enabled:       false,
 		IndexedFields: []string{},
 	}
-	if !reflect.DeepEqual(eAliasSCfg, cgrCfg.aliasSCfg) {
-		t.Errorf("received: %+v, expecting: %+v", eAliasSCfg, cgrCfg.aliasSCfg)
+	if !reflect.DeepEqual(eAliasSCfg, cgrCfg.attributeSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", eAliasSCfg, cgrCfg.attributeSCfg)
 	}
 }
 

@@ -43,7 +43,7 @@
 	"threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 	"filters": {"limit": 10000, "ttl":"0s", "precache": true},
 	"supplier_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"alias_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"attribute_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 },
 
 
@@ -116,7 +116,7 @@
 },
 
 
-"alias": {							// Alias service (*new)
+"attributes": {							// Attribute service
 	"enabled": true,				// starts Alias service: <true|false>.
 	"indexed_fields": [],			// query indexes based on these fields for faster processing
 },

@@ -70,7 +70,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheTiming,
 	testOnStorITCacheFilter,
 	testOnStorITCacheSupplierProfile,
-	testOnStorITCacheAliasProfile,
+	testOnStorITCacheAttributeProfile,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
@@ -103,7 +103,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDThreshold,
 	testOnStorITCRUDFilter,
 	testOnStorITCRUDSupplierProfile,
-	testOnStorITCRUDAliasProfile,
+	testOnStorITCRUDAttributeProfile,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -1147,40 +1147,46 @@ func testOnStorITCacheSupplierProfile(t *testing.T) {
 	}
 }
 
-func testOnStorITCacheAliasProfile(t *testing.T) {
-	mapAliases := make(map[string]map[string]string)
-	mapAliases["FN1"] = make(map[string]string)
-	mapAliases["FN1"]["Init1"] = "Al1"
-	alsProfile := &AliasProfile{
+func testOnStorITCacheAttributeProfile(t *testing.T) {
+	mapAttributes := make(map[string]map[string]*Attribute)
+	mapAttributes["FN1"] = make(map[string]*Attribute)
+	mapAttributes["FN1"]["Init1"] = &Attribute{
+		FieldName: "FN1",
+		Initial:   "Init1",
+		Alias:     "Val1",
+		Append:    true,
+	}
+	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
-		ID:        "ALS1",
+		ID:        "ATTRPRF1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		Aliases: mapAliases,
-		Weight:  20,
+		Context:    "con1",
+		Attributes: mapAttributes,
+		Weight:     20,
 	}
-	if err := onStor.SetAliasProfile(alsProfile); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile); err != nil {
 		t.Error(err)
 	}
-	expectedT := []string{"alp_cgrates.org:ALS1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.AliasProfilePrefix); err != nil {
+	expectedT := []string{"alp_cgrates.org:ATTRPRF1"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 
-	if _, hasIt := cache.Get(utils.AliasProfilePrefix + alsProfile.TenantID()); hasIt {
+	if _, hasIt := cache.Get(utils.AttributeProfilePrefix + attrProfile.TenantID()); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.AliasProfilePrefix, []string{alsProfile.TenantID()}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.AttributeProfilePrefix, []string{attrProfile.TenantID()}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.AliasProfilePrefix + alsProfile.TenantID()); !hasIt {
+	if itm, hasIt := cache.Get(utils.AttributeProfilePrefix + attrProfile.TenantID()); !hasIt {
 		t.Error("Did not cache")
-	} else if rcv := itm.(*AliasProfile); !reflect.DeepEqual(alsProfile, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", alsProfile, rcv)
+	} else if rcv := itm.(*AttributeProfile); !reflect.DeepEqual(attrProfile, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", attrProfile, rcv)
 	}
 }
 
@@ -2486,40 +2492,46 @@ func testOnStorITCRUDSupplierProfile(t *testing.T) {
 	}
 }
 
-func testOnStorITCRUDAliasProfile(t *testing.T) {
-	mapAliases := make(map[string]map[string]string)
-	mapAliases["FN1"] = make(map[string]string)
-	mapAliases["FN1"]["Init1"] = "Al1"
-	alsProfile := &AliasProfile{
+func testOnStorITCRUDAttributeProfile(t *testing.T) {
+	mapAttributes := make(map[string]map[string]*Attribute)
+	mapAttributes["FN1"] = make(map[string]*Attribute)
+	mapAttributes["FN1"]["Init1"] = &Attribute{
+		FieldName: "FN1",
+		Initial:   "Init1",
+		Alias:     "Val1",
+		Append:    true,
+	}
+	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
-		ID:        "ALS1",
+		ID:        "AttrPrf1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		Aliases: mapAliases,
-		Weight:  20,
+		Context:    "con1",
+		Attributes: mapAttributes,
+		Weight:     20,
 	}
-	if _, rcvErr := onStor.GetAliasProfile("cgrates.org", "ALS1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetAliasProfile(alsProfile); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetAliasProfile("cgrates.org", "ALS1", true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(alsProfile, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", alsProfile, rcv)
+	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
-	if rcv, err := onStor.GetAliasProfile("cgrates.org", "ALS1", false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsProfile, rcv) {
-		t.Errorf("Expecting: %v, received: %v", alsProfile, rcv)
+	} else if !reflect.DeepEqual(attrProfile, rcv) {
+		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
-	if err := onStor.RemoveAliasProfile(alsProfile.Tenant, alsProfile.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant, attrProfile.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetAliasProfile("cgrates.org", "ALS1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

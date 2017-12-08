@@ -2634,14 +2634,14 @@ func APItoSupplierProfile(tpTH *utils.TPSupplier, timezone string) (th *Supplier
 	return th, nil
 }
 
-type TPAliases []*TPAlias
+type TPAttributes []*TPAttribute
 
-func (tps TPAliases) AsTPAlias() (result []*utils.TPAlias) {
-	mst := make(map[string]*utils.TPAlias)
+func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttribute) {
+	mst := make(map[string]*utils.TPAttribute)
 	for _, tp := range tps {
 		th, found := mst[tp.ID]
 		if !found {
-			th = &utils.TPAlias{
+			th = &utils.TPAttribute{
 				TPid:   tp.Tpid,
 				Tenant: tp.Tenant,
 				ID:     tp.ID,
@@ -2666,16 +2666,20 @@ func (tps TPAliases) AsTPAlias() (result []*utils.TPAlias) {
 				th.FilterIDs = append(th.FilterIDs, filter)
 			}
 		}
+		if tp.Context != "" {
+			th.Context = tp.Context
+		}
 		if tp.FieldName != "" {
-			th.Aliases = append(th.Aliases, &utils.TPAliasEntry{
+			th.Attributes = append(th.Attributes, &utils.TPRequestAttribute{
 				FieldName: tp.FieldName,
 				Initial:   tp.Initial,
 				Alias:     tp.Alias,
+				Append:    tp.Append,
 			})
 		}
 		mst[tp.ID] = th
 	}
-	result = make([]*utils.TPAlias, len(mst))
+	result = make([]*utils.TPAttribute, len(mst))
 	i := 0
 	for _, th := range mst {
 		result[i] = th
@@ -2684,12 +2688,12 @@ func (tps TPAliases) AsTPAlias() (result []*utils.TPAlias) {
 	return
 }
 
-func APItoModelTPAlias(th *utils.TPAlias) (mdls TPAliases) {
-	if len(th.Aliases) == 0 {
+func APItoModelTPAttribute(th *utils.TPAttribute) (mdls TPAttributes) {
+	if len(th.Attributes) == 0 {
 		return
 	}
-	for i, aliasEntry := range th.Aliases {
-		mdl := &TPAlias{
+	for i, reqAttribute := range th.Attributes {
+		mdl := &TPAttribute{
 			Tpid:   th.TPid,
 			Tenant: th.Tenant,
 			ID:     th.ID,
@@ -2703,6 +2707,9 @@ func APItoModelTPAlias(th *utils.TPAlias) (mdls TPAliases) {
 					mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
 				}
 			}
+			if th.Context != "" {
+				mdl.Context = th.Context
+			}
 			for i, val := range th.FilterIDs {
 				if i != 0 {
 					mdl.FilterIDs += utils.INFIELD_SEP
@@ -2713,30 +2720,37 @@ func APItoModelTPAlias(th *utils.TPAlias) (mdls TPAliases) {
 				mdl.Weight = th.Weight
 			}
 		}
-		mdl.FieldName = aliasEntry.FieldName
-		mdl.Initial = aliasEntry.Initial
-		mdl.Alias = aliasEntry.Alias
+		mdl.FieldName = reqAttribute.FieldName
+		mdl.Initial = reqAttribute.Initial
+		mdl.Alias = reqAttribute.Alias
+		mdl.Append = reqAttribute.Append
 		mdls = append(mdls, mdl)
 	}
 	return
 }
 
-func APItoAliasProfile(tpTH *utils.TPAlias, timezone string) (th *AliasProfile, err error) {
-	th = &AliasProfile{
-		Tenant:    tpTH.Tenant,
-		ID:        tpTH.ID,
-		Weight:    tpTH.Weight,
-		FilterIDs: []string{},
-		Aliases:   make(map[string]map[string]string, len(tpTH.Aliases)),
+func APItoAttributeProfile(tpTH *utils.TPAttribute, timezone string) (th *AttributeProfile, err error) {
+	th = &AttributeProfile{
+		Tenant:     tpTH.Tenant,
+		ID:         tpTH.ID,
+		Weight:     tpTH.Weight,
+		FilterIDs:  []string{},
+		Context:    tpTH.Context,
+		Attributes: make(map[string]map[string]*Attribute, len(tpTH.Attributes)),
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
 	}
-	for _, f := range tpTH.Aliases {
-		if _, has := th.Aliases[f.FieldName]; !has {
-			th.Aliases[f.FieldName] = make(map[string]string)
+	for _, reqAttr := range tpTH.Attributes {
+		if _, has := th.Attributes[reqAttr.FieldName]; !has {
+			th.Attributes[reqAttr.FieldName] = make(map[string]*Attribute)
 		}
-		th.Aliases[f.FieldName][f.Initial] = f.Alias
+		th.Attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
+			FieldName: reqAttr.FieldName,
+			Initial:   reqAttr.Initial,
+			Alias:     reqAttr.Alias,
+			Append:    reqAttr.Append,
+		}
 	}
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {

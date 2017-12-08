@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 // SupplierSCfg is the configuration of supplier service
-type AliasSCfg struct {
+type AttributeSCfg struct {
 	Enabled       bool
 	IndexedFields []string
 }
 
-func (alS *AliasSCfg) loadFromJsonCfg(jsnCfg *AliasSJsonCfg) (err error) {
+func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}

@@ -50,7 +50,7 @@
 	"threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 	"filters": {"limit": 10000, "ttl":"0s", "precache": true},
 	"supplier_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"alias_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"attribute_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 },
 
 

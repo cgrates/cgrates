@@ -541,20 +541,18 @@ type TpSupplier struct {
 	CreatedAt             time.Time
 }
 
-type TPAlias struct {
+type TPAttribute struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
 	FilterIDs          string  `index:"2" re:""`
 	ActivationInterval string  `index:"3" re:""`
-	FieldName          string  `index:"4" re:""`
-	Initial            string  `index:"5" re:""`
-	Alias              string  `index:"6" re:""`
-	Weight             float64 `index:"7" re:"\d+\.?\d*"`
+	Context            string  `index:"4" re:""`
+	FieldName          string  `index:"5" re:""`
+	Initial            string  `index:"6" re:""`
+	Alias              string  `index:"7" re:""`
+	Append             bool    `index:"8" re:""`
+	Weight             float64 `index:"9" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
-}
-
-func (t TPAlias) TableName() string {
-	return utils.TBLTPAlias
 }

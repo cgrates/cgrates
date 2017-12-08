@@ -520,26 +520,28 @@ CREATE TABLE tp_suppliers (
 );
 
 --
--- Table structure for table `tp_alias`
+-- Table structure for table `tp_attributes`
 --
 
 
-DROP TABLE IF EXISTS tp_alias;
-CREATE TABLE tp_alias (
+DROP TABLE IF EXISTS tp_attributes;
+CREATE TABLE tp_attributes (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
+  `context` varchar(64) NOT NULL,
   `field_name` varchar(64) NOT NULL,
   `initial` varchar(64) NOT NULL,
   `alias` varchar(64) NOT NULL,
+  `append` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_alias` (`tpid`,`tenant`,
+  UNIQUE KEY `unique_tp_attributes` (`tpid`,`tenant`,
     `id`,`filter_ids`,`field_name`,`initial`,`alias` )
 );
 

@@ -23,41 +23,41 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// GetAliasProfile returns an Alias Profile
-func (apierV1 *ApierV1) GetAliasProfile(arg utils.TenantID, reply *engine.ExternalAliasProfile) error {
+// GetAttributeProfile returns an Attribute Profile
+func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.ExternalAttributeProfile) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if alsPrf, err := apierV1.DataManager.GetAliasProfile(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
+	if alsPrf, err := apierV1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
 	} else {
-		*reply = *engine.NewExternalAliasProfileFromAliasProfile(alsPrf)
+		*reply = *engine.NewExternalAttributeProfileFromAttributeProfile(alsPrf)
 	}
 	return nil
 }
 
-//SetAliasProfile add a new Alias Profile
-func (apierV1 *ApierV1) SetAliasProfile(extAls *engine.ExternalAliasProfile, reply *string) error {
+//SetAttributeProfile add/update a new Attribute Profile
+func (apierV1 *ApierV1) SetAttributeProfile(extAls *engine.ExternalAttributeProfile, reply *string) error {
 	if missing := utils.MissingStructFields(extAls, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	alsPrf := extAls.AsAliasProfile()
-	if err := apierV1.DataManager.SetAliasProfile(alsPrf); err != nil {
+	alsPrf := extAls.AsAttributeProfile()
+	if err := apierV1.DataManager.SetAttributeProfile(alsPrf); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-//RemAliasProfile remove a specific Alias Profile
-func (apierV1 *ApierV1) RemAliasProfile(arg utils.TenantID, reply *string) error {
+//RemAttributeProfile remove a specific Attribute Profile
+func (apierV1 *ApierV1) RemAttributeProfile(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.RemoveAliasProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -67,29 +67,29 @@ func (apierV1 *ApierV1) RemAliasProfile(arg utils.TenantID, reply *string) error
 	return nil
 }
 
-func NewAliasSv1(alS *engine.AliasService) *AliasSv1 {
-	return &AliasSv1{alS: alS}
+func NewAttributeSv1(attrS *engine.AttributeService) *AttributeSv1 {
+	return &AttributeSv1{attrS: attrS}
 }
 
 // Exports RPC from RLs
-type AliasSv1 struct {
-	alS *engine.AliasService
+type AttributeSv1 struct {
+	attrS *engine.AttributeService
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (alSv1 *AliasSv1) Call(serviceMethod string,
+func (alSv1 *AttributeSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)
 }
 
-// GetAliasForEvent  returns matching AliasProfile for Event
-func (alSv1 *AliasSv1) GetAliasForEvent(ev *utils.CGREvent,
-	reply *engine.ExternalAliasProfile) error {
-	return alSv1.alS.V1GetAliasForEvent(ev, reply)
+// GetAttributeForEvent  returns matching AttributeProfile for Event
+func (alSv1 *AttributeSv1) GetAttributeForEvent(ev *utils.CGREvent,
+	reply *engine.ExternalAttributeProfile) error {
+	return alSv1.attrS.V1GetAttributeForEvent(ev, reply)
 }
 
-// ProcessEvent will replace event fields with the ones in maching AliasProfile
-func (alSv1 *AliasSv1) ProcessEvent(ev *utils.CGREvent,
+// ProcessEvent will replace event fields with the ones in maching AttributeProfile
+func (alSv1 *AttributeSv1) ProcessEvent(ev *utils.CGREvent,
 	reply *string) error {
-	return alSv1.alS.V1ProcessEvent(ev, reply)
+	return alSv1.attrS.V1ProcessEvent(ev, reply)
 }

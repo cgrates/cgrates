@@ -34,38 +34,38 @@ import (
 )
 
 const (
-	colDst    = "destinations"
-	colRds    = "reverse_destinations"
-	colAct    = "actions"
-	colApl    = "action_plans"
-	colAAp    = "account_action_plans"
-	colTsk    = "tasks"
-	colAtr    = "action_triggers"
-	colRpl    = "rating_plans"
-	colRpf    = "rating_profiles"
-	colAcc    = "accounts"
-	colShg    = "shared_groups"
-	colLcr    = "lcr_rules"
-	colDcs    = "derived_chargers"
-	colAls    = "aliases"
-	colRCfgs  = "reverse_aliases"
-	colStq    = "stat_qeues"
-	colPbs    = "pubsub"
-	colUsr    = "users"
-	colCrs    = "cdr_stats"
-	colLht    = "load_history"
-	colVer    = "versions"
-	colRsP    = "resource_profiles"
-	colRFI    = "request_filter_indexes"
-	colTmg    = "timings"
-	colRes    = "resources"
-	colSqs    = "statqueues"
-	colSqp    = "statqueue_profiles"
-	colTps    = "threshold_profiles"
-	colThs    = "thresholds"
-	colFlt    = "filters"
-	colSpp    = "supplier_profiles"
-	colAlsPrf = "alias_profiles"
+	colDst   = "destinations"
+	colRds   = "reverse_destinations"
+	colAct   = "actions"
+	colApl   = "action_plans"
+	colAAp   = "account_action_plans"
+	colTsk   = "tasks"
+	colAtr   = "action_triggers"
+	colRpl   = "rating_plans"
+	colRpf   = "rating_profiles"
+	colAcc   = "accounts"
+	colShg   = "shared_groups"
+	colLcr   = "lcr_rules"
+	colDcs   = "derived_chargers"
+	colAls   = "aliases"
+	colRCfgs = "reverse_aliases"
+	colStq   = "stat_qeues"
+	colPbs   = "pubsub"
+	colUsr   = "users"
+	colCrs   = "cdr_stats"
+	colLht   = "load_history"
+	colVer   = "versions"
+	colRsP   = "resource_profiles"
+	colRFI   = "request_filter_indexes"
+	colTmg   = "timings"
+	colRes   = "resources"
+	colSqs   = "statqueues"
+	colSqp   = "statqueue_profiles"
+	colTps   = "threshold_profiles"
+	colThs   = "thresholds"
+	colFlt   = "filters"
+	colSpp   = "supplier_profiles"
+	colAttr  = "attribute_profiles"
 )
 
 var (
@@ -338,7 +338,7 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.ThresholdPrefix:        colThs,
 		utils.FilterPrefix:           colFlt,
 		utils.SupplierProfilePrefix:  colSpp,
-		utils.AliasProfilePrefix:     colAlsPrf,
+		utils.AttributeProfilePrefix: colAttr,
 	}
 	name, ok = colMap[prefix]
 	return
@@ -583,10 +583,10 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.SupplierProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
-	case utils.AliasProfilePrefix:
-		iter := db.C(colAlsPrf).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+	case utils.AttributeProfilePrefix:
+		iter := db.C(colAttr).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
-			result = append(result, utils.AliasProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
+			result = append(result, utils.AttributeProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -633,8 +633,8 @@ func (ms *MongoStorage) HasDataDrv(category, subject string) (has bool, err erro
 	case utils.SupplierProfilePrefix:
 		count, err = db.C(colSpp).Find(bson.M{"id": subject}).Count()
 		has = count > 0
-	case utils.AliasProfilePrefix:
-		count, err = db.C(colAlsPrf).Find(bson.M{"id": subject}).Count()
+	case utils.AttributeProfilePrefix:
+		count, err = db.C(colAttr).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	default:
 		err = fmt.Errorf("unsupported category in HasData: %s", category)
@@ -2005,8 +2005,8 @@ func (ms *MongoStorage) RemoveSupplierProfileDrv(tenant, id string) (err error) 
 	return nil
 }
 
-func (ms *MongoStorage) GetAliasProfileDrv(tenant, id string) (r *AliasProfile, err error) {
-	session, col := ms.conn(colAlsPrf)
+func (ms *MongoStorage) GetAttributeProfileDrv(tenant, id string) (r *AttributeProfile, err error) {
+	session, col := ms.conn(colAttr)
 	defer session.Close()
 	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&r); err != nil {
 		if err == mgo.ErrNotFound {
@@ -2017,15 +2017,15 @@ func (ms *MongoStorage) GetAliasProfileDrv(tenant, id string) (r *AliasProfile, 
 	return
 }
 
-func (ms *MongoStorage) SetAliasProfileDrv(r *AliasProfile) (err error) {
-	session, col := ms.conn(colAlsPrf)
+func (ms *MongoStorage) SetAttributeProfileDrv(r *AttributeProfile) (err error) {
+	session, col := ms.conn(colAttr)
 	defer session.Close()
 	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
 	return
 }
 
-func (ms *MongoStorage) RemoveAliasProfileDrv(tenant, id string) (err error) {
-	session, col := ms.conn(colAlsPrf)
+func (ms *MongoStorage) RemoveAttributeProfileDrv(tenant, id string) (err error) {
+	session, col := ms.conn(colAttr)
 	defer session.Close()
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return

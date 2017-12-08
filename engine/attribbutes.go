@@ -27,44 +27,44 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewAliasService(dm *DataManager, filterS *FilterS, indexedFields []string) (*AliasService, error) {
-	return &AliasService{dm: dm, filterS: filterS, indexedFields: indexedFields}, nil
+func NewAttributeService(dm *DataManager, filterS *FilterS, indexedFields []string) (*AttributeService, error) {
+	return &AttributeService{dm: dm, filterS: filterS, indexedFields: indexedFields}, nil
 }
 
-type AliasService struct {
+type AttributeService struct {
 	dm            *DataManager
 	filterS       *FilterS
 	indexedFields []string
 }
 
 // ListenAndServe will initialize the service
-func (alS *AliasService) ListenAndServe(exitChan chan bool) (err error) {
-	utils.Logger.Info("Starting Alias service")
+func (alS *AttributeService) ListenAndServe(exitChan chan bool) (err error) {
+	utils.Logger.Info("Starting Attribute service")
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return
 }
 
 // Shutdown is called to shutdown the service
-func (alS *AliasService) Shutdown() (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.AliasS))
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.AliasS))
+func (alS *AttributeService) Shutdown() (err error) {
+	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.AttributeS))
+	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.AttributeS))
 	return
 }
 
-// matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (alS *AliasService) matchingAliasProfilesForEvent(ev *utils.CGREvent) (aPrfls AliasProfiles, err error) {
-	matchingAPs := make(map[string]*AliasProfile)
+// matchingAttributeProfilesForEvent returns ordered list of matching resources which are active by the time of the call
+func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREvent) (aPrfls AttributeProfiles, err error) {
+	matchingAPs := make(map[string]*AttributeProfile)
 	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.indexedFields,
-		alS.dm, utils.AliasProfilesStringIndex+ev.Tenant)
+		alS.dm, utils.AttributeProfilesStringIndex+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AliasProfilesStringIndex)
+	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeProfilesStringIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for apID := range aPrflIDs {
-		aPrfl, err := alS.dm.GetAliasProfile(ev.Tenant, apID, false, utils.NonTransactional)
+		aPrfl, err := alS.dm.GetAttributeProfile(ev.Tenant, apID, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -88,7 +88,7 @@ func (alS *AliasService) matchingAliasProfilesForEvent(ev *utils.CGREvent) (aPrf
 		matchingAPs[apID] = aPrfl
 	}
 	// All good, convert from Map to Slice so we can sort
-	aPrfls = make(AliasProfiles, len(matchingAPs))
+	aPrfls = make(AttributeProfiles, len(matchingAPs))
 	i := 0
 	for _, aPrfl := range matchingAPs {
 		aPrfls[i] = aPrfl
@@ -98,9 +98,9 @@ func (alS *AliasService) matchingAliasProfilesForEvent(ev *utils.CGREvent) (aPrf
 	return
 }
 
-func (alS *AliasService) aliasProfileForEvent(ev *utils.CGREvent) (alsPrfl *AliasProfile, err error) {
-	var alsPrfls AliasProfiles
-	if alsPrfls, err = alS.matchingAliasProfilesForEvent(ev); err != nil {
+func (alS *AttributeService) attributeProfileForEvent(ev *utils.CGREvent) (alsPrfl *AttributeProfile, err error) {
+	var alsPrfls AttributeProfiles
+	if alsPrfls, err = alS.matchingAttributeProfilesForEvent(ev); err != nil {
 		return
 	} else if len(alsPrfls) == 0 {
 		return nil, utils.ErrNotFound
@@ -108,21 +108,21 @@ func (alS *AliasService) aliasProfileForEvent(ev *utils.CGREvent) (alsPrfl *Alia
 	return alsPrfls[0], nil
 }
 
-func (alS *AliasService) V1GetAliasForEvent(ev *utils.CGREvent,
-	extAlsPrf *ExternalAliasProfile) (err error) {
-	alsPrf, err := alS.aliasProfileForEvent(ev)
+func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
+	extAlsPrf *ExternalAttributeProfile) (err error) {
+	alsPrf, err := alS.attributeProfileForEvent(ev)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return err
 	}
-	eAlsPrfl := NewExternalAliasProfileFromAliasProfile(alsPrf)
+	eAlsPrfl := NewExternalAttributeProfileFromAttributeProfile(alsPrf)
 	*extAlsPrf = *eAlsPrfl
 	return
 }
 
-func (alS *AliasService) V1ProcessEvent(ev *utils.CGREvent,
+func (alS *AttributeService) V1ProcessEvent(ev *utils.CGREvent,
 	reply *string) (err error) {
 	return
 }

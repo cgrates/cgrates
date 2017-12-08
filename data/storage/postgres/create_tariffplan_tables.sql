@@ -511,25 +511,27 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   "supplier_ratingplan_ids","supplier_resource_ids","supplier_stat_ids");
 
   --
-  -- Table structure for table `tp_alias_profiles`
+  -- Table structure for table `tp_attributes`
   --
 
-  DROP TABLE IF EXISTS tp_alias;
-  CREATE TABLE tp_alias (
+  DROP TABLE IF EXISTS tp_attributes;
+  CREATE TABLE tp_attributes (
     "pk" SERIAL PRIMARY KEY,
     "tpid" varchar(64) NOT NULL,
     "tenant"varchar(64) NOT NULL,
     "id" varchar(64) NOT NULL,
     "filter_ids" varchar(64) NOT NULL,
     "activation_interval" varchar(64) NOT NULL,
+    "context" varchar(64) NOT NULL,
     "field_name" varchar(64) NOT NULL,
     "initial" varchar(64) NOT NULL,
     "alias" varchar(64) NOT NULL,
+    "append" BOOLEAN NOT NULL,
     "weight" decimal(8,2) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
-  CREATE INDEX tp_alias_ids ON tp_alias (tpid);
-  CREATE INDEX tp_alias_unique ON tp_alias  ("tpid",  "tenant", "id",
+  CREATE INDEX tp_attributes_ids ON tp_attributes (tpid);
+  CREATE INDEX tp_attributes_unique ON tp_attributes  ("tpid",  "tenant", "id",
     "filter_ids","field_name","initial","alias");
 
 

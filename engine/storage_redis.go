@@ -209,7 +209,7 @@ func (rs *RedisStorage) HasDataDrv(category, subject string) (bool, error) {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
 		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AliasProfilePrefix:
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
 		i, err := rs.Cmd("EXISTS", category+subject).Int()
 		return i == 1, err
 	}
@@ -1543,8 +1543,8 @@ func (rs *RedisStorage) RemoveSupplierProfileDrv(tenant, id string) (err error) 
 	return
 }
 
-func (rs *RedisStorage) GetAliasProfileDrv(tenant, id string) (r *AliasProfile, err error) {
-	key := utils.AliasProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (rs *RedisStorage) GetAttributeProfileDrv(tenant, id string) (r *AttributeProfile, err error) {
+	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	var values []byte
 	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
@@ -1558,16 +1558,16 @@ func (rs *RedisStorage) GetAliasProfileDrv(tenant, id string) (r *AliasProfile, 
 	return
 }
 
-func (rs *RedisStorage) SetAliasProfileDrv(r *AliasProfile) (err error) {
+func (rs *RedisStorage) SetAttributeProfileDrv(r *AttributeProfile) (err error) {
 	result, err := rs.ms.Marshal(r)
 	if err != nil {
 		return err
 	}
-	return rs.Cmd("SET", utils.AliasProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
+	return rs.Cmd("SET", utils.AttributeProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
 }
 
-func (rs *RedisStorage) RemoveAliasProfileDrv(tenant, id string) (err error) {
-	key := utils.AliasProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (rs *RedisStorage) RemoveAttributeProfileDrv(tenant, id string) (err error) {
+	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

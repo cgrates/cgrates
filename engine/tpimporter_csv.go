@@ -62,7 +62,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
 	utils.FiltersCsv:            (*TPCSVImporter).importFilters,
 	utils.SuppliersCsv:          (*TPCSVImporter).importSuppliers,
-	utils.AliasCsv:              (*TPCSVImporter).importAliasProfiles,
+	utils.AttributesCsv:         (*TPCSVImporter).importAttributeProfiles,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -88,7 +88,7 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.ThresholdsCsv),
 		path.Join(self.DirPath, utils.FiltersCsv),
 		path.Join(self.DirPath, utils.SuppliersCsv),
-		path.Join(self.DirPath, utils.AliasCsv),
+		path.Join(self.DirPath, utils.AttributesCsv),
 	)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
@@ -413,13 +413,13 @@ func (self *TPCSVImporter) importSuppliers(fn string) error {
 	return self.StorDb.SetTPSuppliers(rls)
 }
 
-func (self *TPCSVImporter) importAliasProfiles(fn string) error {
+func (self *TPCSVImporter) importAttributeProfiles(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPAliasProfiles(self.TPid, "")
+	rls, err := self.csvr.GetTPAttributes(self.TPid, "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPAliasProfiles(rls)
+	return self.StorDb.SetTPAttributes(rls)
 }

@@ -139,7 +139,7 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheSupplierProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheAliasProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+		utils.CacheAttributeProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
 	}
@@ -697,12 +697,12 @@ func TestDfUserServJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfAliaServJsonCfg(t *testing.T) {
-	eCfg := &AliasSJsonCfg{
+func TestDfAttributeServJsonCfg(t *testing.T) {
+	eCfg := &AttributeSJsonCfg{
 		Enabled:        utils.BoolPointer(false),
 		Indexed_fields: utils.StringSlicePointer([]string{}),
 	}
-	if cfg, err := dfCgrJsonCfg.AliaServJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

@@ -538,28 +538,28 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *
 	internalUserSChan <- userServer
 }
 
-// startAliasService fires up the AliasS
-func startAliasService(internalAliasSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+// startAttributeService fires up the AttributeS
+func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	aS, err := engine.NewAliasService(dm, filterS, cfg.AliasSCfg().IndexedFields)
+	aS, err := engine.NewAttributeService(dm, filterS, cfg.AttributeSCfg().IndexedFields)
 	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AliasS, err.Error()))
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AttributeS, err.Error()))
 		exitChan <- true
 		return
 	}
 	go func() {
 		if err := aS.ListenAndServe(exitChan); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AliasS, err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AttributeS, err.Error()))
 		}
 		aS.Shutdown()
 		exitChan <- true
 		return
 	}()
-	aSv1 := v1.NewAliasSv1(aS)
+	aSv1 := v1.NewAttributeSv1(aS)
 	server.RpcRegister(aSv1)
-	internalAliasSChan <- aSv1
+	internalAttributeSChan <- aSv1
 }
 
 func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
@@ -891,7 +891,7 @@ func main() {
 	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan *sessionmanager.SMGeneric, 1)
-	internalAliasSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -990,8 +990,8 @@ func main() {
 	// Start FilterS
 	go startFilterService(filterSChan, internalStatSChan, cfg, dm, exitChan)
 
-	if cfg.AliasSCfg().Enabled {
-		go startAliasService(internalAliasSChan, cfg, dm, server, exitChan, filterSChan)
+	if cfg.AttributeSCfg().Enabled {
+		go startAttributeService(internalAttributeSChan, cfg, dm, server, exitChan, filterSChan)
 	}
 
 	// Start RL service

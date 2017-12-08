@@ -168,9 +168,9 @@ func GetDBIndexKey(itemType, dbKeySuffix string, reverse bool) (dbKey string) {
 	case utils.SupplierProfilePrefix:
 		idxPrefix = utils.SupplierProfilesStringIndex
 		rIdxPrefix = utils.SupplierProfilesStringRevIndex
-	case utils.AliasProfilePrefix:
-		idxPrefix = utils.AliasProfilesStringIndex
-		rIdxPrefix = utils.AliasProfilesStringRevIndex
+	case utils.AttributeProfilePrefix:
+		idxPrefix = utils.AttributeProfilesStringIndex
+		rIdxPrefix = utils.AttributeProfilesStringRevIndex
 	}
 	if reverse {
 		return rIdxPrefix + dbKeySuffix

@@ -38,7 +38,7 @@ var (
 	alsPrfCfg       *config.CGRConfig
 	alsPrfRPC       *rpc.Client
 	alsPrfDataDir   = "/usr/share/cgrates"
-	alsPrf          *engine.ExternalAliasProfile
+	alsPrf          *engine.ExternalAttributeProfile
 	alsPrfDelay     int
 	alsPrfConfigDIR string //run tests for specific configuration
 )
@@ -120,8 +120,8 @@ func testAlsPrfRPCConn(t *testing.T) {
 }
 
 func testAlsPrfGetAlsPrfBeforeSet(t *testing.T) {
-	var reply *engine.ExternalAliasProfile
-	if err := alsPrfRPC.Call("ApierV1.GetAliasProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var reply *engine.ExternalAttributeProfile
+	if err := alsPrfRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -144,20 +144,20 @@ func testAlsPrfGetAliasForEvent(t *testing.T) {
 			"Destination": "+491511231234",
 		},
 	}
-	eAlsPrfl := engine.ExternalAliasProfile{
+	eAlsPrfl := engine.ExternalAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_1007"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local()},
-		Aliases: []*engine.AliasEntry{
-			&engine.AliasEntry{
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
 				FieldName: utils.ACCOUNT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
 				Append:    false,
 			},
-			&engine.AliasEntry{
+			&engine.Attribute{
 				FieldName: utils.SUBJECT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
@@ -166,8 +166,8 @@ func testAlsPrfGetAliasForEvent(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
-	var alsReply engine.ExternalAliasProfile
-	if err := alsPrfRPC.Call(utils.AliasSv1GetAliasForEvent,
+	var alsReply engine.ExternalAttributeProfile
+	if err := alsPrfRPC.Call(utils.AttributeSv1GetAliasForEvent,
 		ev, &alsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAlsPrfl, alsReply) {
@@ -177,7 +177,7 @@ func testAlsPrfGetAliasForEvent(t *testing.T) {
 }
 
 func testAlsPrfSetAlsPrf(t *testing.T) {
-	alsPrf = &engine.ExternalAliasProfile{
+	alsPrf = &engine.ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
@@ -185,63 +185,66 @@ func testAlsPrfSetAlsPrf(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Aliases: []*engine.AliasEntry{
-			&engine.AliasEntry{
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
+				Append:    true,
 			},
 		},
 		Weight: 20,
 	}
 	var result string
-	if err := alsPrfRPC.Call("ApierV1.SetAliasProfile", alsPrf, &result); err != nil {
+	if err := alsPrfRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.ExternalAliasProfile
-	if err := alsPrfRPC.Call("ApierV1.GetAliasProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+	var reply *engine.ExternalAttributeProfile
+	if err := alsPrfRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
 	} else if !reflect.DeepEqual(alsPrf.ActivationInterval, reply.ActivationInterval) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ActivationInterval, reply.ActivationInterval)
-	} else if !reflect.DeepEqual(len(alsPrf.Aliases), len(reply.Aliases)) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Aliases), utils.ToJSON(reply.Aliases))
+	} else if !reflect.DeepEqual(len(alsPrf.Attributes), len(reply.Attributes)) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Attributes), utils.ToJSON(reply.Attributes))
 	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}
 }
 
 func testAlsPrfUpdateAlsPrf(t *testing.T) {
-	alsPrf.Aliases = []*engine.AliasEntry{
-		&engine.AliasEntry{
+	alsPrf.Attributes = []*engine.Attribute{
+		&engine.Attribute{
 			FieldName: "FL1",
 			Initial:   "In1",
 			Alias:     "Al1",
+			Append:    true,
 		},
-		&engine.AliasEntry{
+		&engine.Attribute{
 			FieldName: "FL2",
 			Initial:   "In2",
 			Alias:     "Al2",
+			Append:    false,
 		},
 	}
 	var result string
-	if err := alsPrfRPC.Call("ApierV1.SetAliasProfile", alsPrf, &result); err != nil {
+	if err := alsPrfRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.ExternalAliasProfile
-	if err := alsPrfRPC.Call("ApierV1.GetAliasProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+	var reply *engine.ExternalAttributeProfile
+	if err := alsPrfRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
 	} else if !reflect.DeepEqual(alsPrf.ActivationInterval, reply.ActivationInterval) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ActivationInterval, reply.ActivationInterval)
-	} else if !reflect.DeepEqual(len(alsPrf.Aliases), len(reply.Aliases)) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Aliases), utils.ToJSON(reply.Aliases))
+	} else if !reflect.DeepEqual(len(alsPrf.Attributes), len(reply.Attributes)) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Attributes), utils.ToJSON(reply.Attributes))
 	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}
@@ -249,13 +252,13 @@ func testAlsPrfUpdateAlsPrf(t *testing.T) {
 
 func testAlsPrfRemAlsPrf(t *testing.T) {
 	var resp string
-	if err := alsPrfRPC.Call("ApierV1.RemAliasProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err != nil {
+	if err := alsPrfRPC.Call("ApierV1.RemAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	var reply *engine.ExternalAliasProfile
-	if err := alsPrfRPC.Call("ApierV1.GetAliasProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var reply *engine.ExternalAttributeProfile
+	if err := alsPrfRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

@@ -1060,8 +1060,8 @@ func TestFilterToTPFilter(t *testing.T) {
 	}
 }
 
-func TestAPItoAliasProfile(t *testing.T) {
-	tpAlsPrf := &utils.TPAlias{
+func TestAPItoAttributeProfile(t *testing.T) {
+	tpAlsPrf := &utils.TPAttribute{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
@@ -1070,37 +1070,45 @@ func TestAPItoAliasProfile(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Aliases: []*utils.TPAliasEntry{
-			&utils.TPAliasEntry{
+		Context: "con1",
+		Attributes: []*utils.TPRequestAttribute{
+			&utils.TPRequestAttribute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
+				Append:    true,
 			},
 		},
 		Weight: 20,
 	}
-	alsMap := make(map[string]map[string]string)
-	alsMap["FL1"] = make(map[string]string)
-	alsMap["FL1"]["In1"] = "Al1"
-	expected := &AliasProfile{
+	attrMap := make(map[string]map[string]*Attribute)
+	attrMap["FL1"] = make(map[string]*Attribute)
+	attrMap["FL1"]["In1"] = &Attribute{
+		FieldName: "FL1",
+		Initial:   "In1",
+		Alias:     "Al1",
+		Append:    true,
+	}
+	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		Aliases: alsMap,
-		Weight:  20,
+		Context:    "con1",
+		Attributes: attrMap,
+		Weight:     20,
 	}
-	if rcv, err := APItoAliasProfile(tpAlsPrf, "UTC"); err != nil {
+	if rcv, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
-func TestAPItoModelTPAlias(t *testing.T) {
-	tpAlsPrf := &utils.TPAlias{
+func TestAPItoModelTPAttribute(t *testing.T) {
+	tpAlsPrf := &utils.TPAttribute{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
@@ -1109,49 +1117,55 @@ func TestAPItoModelTPAlias(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Aliases: []*utils.TPAliasEntry{
-			&utils.TPAliasEntry{
+		Context: "con1",
+		Attributes: []*utils.TPRequestAttribute{
+			&utils.TPRequestAttribute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
+				Append:    true,
 			},
 		},
 		Weight: 20,
 	}
-	expected := TPAliases{
-		&TPAlias{
+	expected := TPAttributes{
+		&TPAttribute{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			Context:            "con1",
 			FieldName:          "FL1",
 			Initial:            "In1",
 			Alias:              "Al1",
+			Append:             true,
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
 	}
-	rcv := APItoModelTPAlias(tpAlsPrf)
+	rcv := APItoModelTPAttribute(tpAlsPrf)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
-func TestModelAsTPAlias(t *testing.T) {
-	model := TPAliases{
-		&TPAlias{
+func TestModelAsTPAttribute(t *testing.T) {
+	models := TPAttributes{
+		&TPAttribute{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			Context:            "con1",
 			FieldName:          "FL1",
 			Initial:            "In1",
 			Alias:              "Al1",
+			Append:             true,
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
 	}
-	expected := &utils.TPAlias{
+	expected := &utils.TPAttribute{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
@@ -1160,16 +1174,18 @@ func TestModelAsTPAlias(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Aliases: []*utils.TPAliasEntry{
-			&utils.TPAliasEntry{
+		Context: "con1",
+		Attributes: []*utils.TPRequestAttribute{
+			&utils.TPRequestAttribute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
+				Append:    true,
 			},
 		},
 		Weight: 20,
 	}
-	rcv := model.AsTPAlias()
+	rcv := models.AsTPAttributes()
 	if !reflect.DeepEqual(expected, rcv[0]) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
