@@ -1623,7 +1623,6 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	}
 	tpr.resProfiles = mapRsPfls
 	for tntID, res := range mapRsPfls {
-		resIndxrKey := utils.ResourceProfilesStringIndex + tntID.Tenant
 		if has, err := tpr.dm.HasData(utils.ResourcesPrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
@@ -1631,7 +1630,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 		}
 		// index resource for filters
 		if _, has := tpr.resIndexers[tntID.Tenant]; !has {
-			if tpr.resIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
+			if tpr.resIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesPrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1670,7 +1669,6 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 	}
 	tpr.sqProfiles = mapSTs
 	for tntID, sq := range mapSTs {
-		sqpIndxrKey := utils.StatQueuesStringIndex + tntID.Tenant
 		if has, err := tpr.dm.HasData(utils.StatQueuePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
@@ -1678,7 +1676,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 		}
 		// index statQueues for filters
 		if _, has := tpr.sqpIndexers[tntID.Tenant]; !has {
-			if tpr.sqpIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, sqpIndxrKey); err != nil {
+			if tpr.sqpIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.StatQueueProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1717,7 +1715,6 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	}
 	tpr.thProfiles = mapTHs
 	for tntID, th := range mapTHs {
-		thdIndxrKey := utils.ThresholdStringIndex + tntID.Tenant
 		if has, err := tpr.dm.HasData(utils.ThresholdPrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
@@ -1725,7 +1722,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 		}
 		// index thresholds for filters
 		if _, has := tpr.thdsIndexers[tntID.Tenant]; !has {
-			if tpr.thdsIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, thdIndxrKey); err != nil {
+			if tpr.thdsIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.ThresholdProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1781,15 +1778,14 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 	}
 	tpr.sppProfiles = mapRsPfls
 	for tntID, res := range mapRsPfls {
-		resIndxrKey := utils.SupplierProfilesStringIndex + tntID.Tenant
 		if has, err := tpr.dm.HasData(utils.SupplierProfilePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
 			tpr.suppliers = append(tpr.suppliers, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
-		// index lcr profile for filters
+		// index supplier profile for filters
 		if _, has := tpr.sppIndexers[tntID.Tenant]; !has {
-			if tpr.sppIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
+			if tpr.sppIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.SupplierProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1828,7 +1824,6 @@ func (tpr *TpReader) LoadAliasProfilesFiltered(tag string) (err error) {
 	}
 	tpr.aliasProfiles = mapRsPfls
 	for tntID, res := range mapRsPfls {
-		resIndxrKey := utils.AliasProfilesStringIndex + tntID.Tenant
 		if has, err := tpr.dm.HasData(utils.AliasProfilePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
@@ -1836,7 +1831,7 @@ func (tpr *TpReader) LoadAliasProfilesFiltered(tag string) (err error) {
 		}
 		// index alias profile for filters
 		if _, has := tpr.aliasIndexers[tntID.Tenant]; !has {
-			if tpr.aliasIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, resIndxrKey); err != nil {
+			if tpr.aliasIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.AliasProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -2334,52 +2329,79 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
+	}
+	if verbose {
+		log.Print("Indexing resource profiles")
+	}
+	for tenant, fltrIdxer := range tpr.resIndexers {
+		if err := fltrIdxer.StoreIndexes(); err != nil {
+			return err
+		}
 		if verbose {
-			log.Print("Indexing resource profiles")
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
 		}
-		for tenant, fltrIdxer := range tpr.resIndexers {
-			if err := fltrIdxer.StoreIndexes(); err != nil {
-				return err
-			}
-			if verbose {
-				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
-			}
+		if verbose {
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
 		}
+	}
 
+	if verbose {
+		log.Print("StatQueue filter indexes:")
+	}
+	for tenant, fltrIdxer := range tpr.sqpIndexers {
+		if err := fltrIdxer.StoreIndexes(); err != nil {
+			return err
+		}
 		if verbose {
-			log.Print("StatQueue filter indexes:")
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
 		}
-		for tenant, fltrIdxer := range tpr.sqpIndexers {
-			if err := fltrIdxer.StoreIndexes(); err != nil {
-				return err
-			}
-			if verbose {
-				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
-			}
+		if verbose {
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
 		}
+	}
 
+	if verbose {
+		log.Print("Threshold filter indexes:")
+	}
+	for tenant, fltrIdxer := range tpr.thdsIndexers {
+		if err := fltrIdxer.StoreIndexes(); err != nil {
+			return err
+		}
 		if verbose {
-			log.Print("Threshold filter indexes:")
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
 		}
-		for tenant, fltrIdxer := range tpr.thdsIndexers {
-			if err := fltrIdxer.StoreIndexes(); err != nil {
-				return err
-			}
-			if verbose {
-				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
-			}
+		if verbose {
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
 		}
+	}
 
-		if verbose {
-			log.Print("Indexing Supplier Profiles")
+	if verbose {
+		log.Print("Indexing Supplier Profiles")
+	}
+	for tenant, fltrIdxer := range tpr.sppIndexers {
+		if err := fltrIdxer.StoreIndexes(); err != nil {
+			return err
 		}
-		for tenant, fltrIdxer := range tpr.sppIndexers {
-			if err := fltrIdxer.StoreIndexes(); err != nil {
-				return err
-			}
-			if verbose {
-				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys().Slice())
-			}
+		if verbose {
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
+		}
+		if verbose {
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
+		}
+	}
+
+	if verbose {
+		log.Print("Indexing Alias Profiles")
+	}
+	for tenant, fltrIdxer := range tpr.aliasIndexers {
+		if err := fltrIdxer.StoreIndexes(); err != nil {
+			return err
+		}
+		if verbose {
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
+		}
+		if verbose {
+			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
 		}
 	}
 	return

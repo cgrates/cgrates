@@ -273,7 +273,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	for _, spr := range sprsmatch {
 		dmspl.DataDB().SetSupplierProfileDrv(spr)
 	}
-	ref, err := NewReqFilterIndexer(dmspl, utils.SupplierProfilesStringIndex+"cgrates.org")
+	ref, err := NewReqFilterIndexer(dmspl, utils.SupplierProfilePrefix, "cgrates.org")
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
