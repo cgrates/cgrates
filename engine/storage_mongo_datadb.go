@@ -1569,7 +1569,10 @@ func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 	session, col := ms.conn(colAAp)
 	defer session.Close()
 	if len(aPlIDs) == 0 {
-		return col.Remove(bson.M{"key": acntID})
+		err = col.Remove(bson.M{"key": acntID})
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
 	}
 	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
 	if err != nil {

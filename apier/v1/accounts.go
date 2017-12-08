@@ -320,7 +320,8 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			}
 
 			for actionPlanID, ap := range dirtyActionPlans {
-				if err := self.DataManager.DataDB().SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
+				if err := self.DataManager.DataDB().SetActionPlan(actionPlanID, ap, true,
+					utils.NonTransactional); err != nil {
 					return 0, err
 				}
 			}
@@ -329,7 +330,6 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		if err != nil {
 			return 0, err
 		}
-
 		if err := self.DataManager.DataDB().RemoveAccount(accID); err != nil {
 			return 0, err
 		}
@@ -338,11 +338,13 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.DataManager.DataDB().RemAccountActionPlans(accID, nil); err != nil {
+	if err = self.DataManager.DataDB().RemAccountActionPlans(accID, nil); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-
-	if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
+	if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix,
+		[]string{accID}, true); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
 	*reply = OK
