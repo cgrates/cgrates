@@ -809,7 +809,6 @@ func (dm *DataManager) SetReqFilterIndexes(dbKey string, indexes map[string]map[
 	return dm.DataDB().SetReqFilterIndexesDrv(dbKey, indexes)
 }
 
-//complete here with cache
 func (dm *DataManager) MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(fieldName, fieldVal)
 	cacheKey := dbKey + fieldValKey
