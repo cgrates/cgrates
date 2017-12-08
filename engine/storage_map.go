@@ -1176,7 +1176,6 @@ func (ms *MapStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]ma
 func (ms *MapStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	// Not found in cache, check in DB
 	values, ok := ms.dict[dbKey]
 	if !ok {
 		return nil, utils.ErrNotFound
@@ -1187,6 +1186,9 @@ func (ms *MapStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (ite
 	}
 	if _, hasIt := indexes[fldName]; hasIt {
 		itemIDs = indexes[fldName][fldVal]
+	}
+	if len(itemIDs) == 0 {
+		return nil, utils.ErrNotFound
 	}
 	return
 }

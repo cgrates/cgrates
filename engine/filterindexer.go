@@ -22,36 +22,51 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewReqFilterIndexer(dm *DataManager, dbKey string) (*ReqFilterIndexer, error) {
-	indexes, err := dm.GetReqFilterIndexes(dbKey)
+func NewReqFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) (*ReqFilterIndexer, error) {
+	indexes, err := dm.GetReqFilterIndexes(GetDBIndexKey(itemType, dbKeySuffix, false))
 	if err != nil && err != utils.ErrNotFound {
 		return nil, err
 	}
 	if indexes == nil {
 		indexes = make(map[string]map[string]utils.StringMap)
 	}
-	return &ReqFilterIndexer{dm: dm, dbKey: dbKey,
-		indexes: indexes, chngdIndxKeys: make(utils.StringMap)}, nil
+	reverseIndexes, err := dm.GetReqFilterIndexes(GetDBIndexKey(itemType, dbKeySuffix, true))
+	if err != nil && err != utils.ErrNotFound {
+		return nil, err
+	}
+	if reverseIndexes == nil {
+		reverseIndexes = make(map[string]map[string]utils.StringMap)
+	}
+	return &ReqFilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
+		indexes: indexes, reveseIndex: reverseIndexes, chngdIndxKeys: make(utils.StringMap),
+		chngdRevIndxKeys: make(utils.StringMap)}, nil
 }
 
 // ReqFilterIndexer is a centralized indexer for all data sources using RequestFilter
 // retrieves and stores it's data from/to dataDB
 // not thread safe, meant to be used as logic within other code blocks
 type ReqFilterIndexer struct {
-	indexes       map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[resourceID]
-	dm            *DataManager
-	dbKey         string          // get/store the result from/into this key
-	chngdIndxKeys utils.StringMap // keep record of the changed fieldName:fieldValue pair so we can re-cache wisely
+	indexes          map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[itemID]
+	reveseIndex      map[string]map[string]utils.StringMap // map[itemID]map[fieldName]utils.StringMap[fieldValue]
+	dm               *DataManager
+	itemType         string
+	dbKeySuffix      string          // get/store the result from/into this key
+	chngdIndxKeys    utils.StringMap // keep record of the changed fieldName:fieldValue pair so we can re-cache wisely
+	chngdRevIndxKeys utils.StringMap // keep record of the changed itemID:fieldName pair so we can re-cache wisely
 }
 
 // ChangedKeys returns the changed keys from original indexes so we can reload wisely
-func (rfi *ReqFilterIndexer) ChangedKeys() utils.StringMap {
+func (rfi *ReqFilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
+	if reverse {
+		return rfi.chngdRevIndxKeys
+	}
 	return rfi.chngdIndxKeys
 }
 
 // IndexFilters parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
 func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilter) {
 	var hasMetaString bool
+	rfi.reveseIndex[itemID] = make(map[string]utils.StringMap)
 	for _, fltr := range reqFltrs {
 		if fltr.Type != MetaString {
 			continue
@@ -60,21 +75,30 @@ func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilt
 		if _, hastIt := rfi.indexes[fltr.FieldName]; !hastIt {
 			rfi.indexes[fltr.FieldName] = make(map[string]utils.StringMap)
 		}
+		if _, hastIt := rfi.reveseIndex[itemID][fltr.FieldName]; !hastIt {
+			rfi.reveseIndex[itemID][fltr.FieldName] = make(utils.StringMap)
+		}
 		for _, fldVal := range fltr.Values {
 			if _, hasIt := rfi.indexes[fltr.FieldName][fldVal]; !hasIt {
 				rfi.indexes[fltr.FieldName][fldVal] = make(utils.StringMap)
 			}
 			rfi.indexes[fltr.FieldName][fldVal][itemID] = true
+			rfi.reveseIndex[itemID][fltr.FieldName][fldVal] = true
 			rfi.chngdIndxKeys[utils.ConcatenatedKey(fltr.FieldName, fldVal)] = true
 		}
+		rfi.chngdRevIndxKeys[utils.ConcatenatedKey(itemID, fltr.FieldName)] = true
 	}
 	if !hasMetaString {
 		if _, hasIt := rfi.indexes[utils.NOT_AVAILABLE]; !hasIt {
 			rfi.indexes[utils.NOT_AVAILABLE] = make(map[string]utils.StringMap)
 		}
+		if _, hastIt := rfi.reveseIndex[itemID][utils.NOT_AVAILABLE]; !hastIt {
+			rfi.reveseIndex[itemID][utils.NOT_AVAILABLE] = make(utils.StringMap)
+		}
 		if _, hasIt := rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE]; !hasIt {
 			rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] = make(utils.StringMap)
 		}
+		rfi.reveseIndex[itemID][utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] = true
 		rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE][NOT_AVAILABLE][rl.ID]
 	}
 	return
@@ -83,6 +107,7 @@ func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilt
 // IndexFilters parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
 func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilter, itemID string) {
 	var hasMetaString bool
+	rfi.reveseIndex[itemID] = make(map[string]utils.StringMap)
 	for _, fltr := range tpFltr.Filters {
 		if fltr.Type != MetaString {
 			continue
@@ -91,27 +116,64 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilter, itemID string
 		if _, hastIt := rfi.indexes[fltr.FieldName]; !hastIt {
 			rfi.indexes[fltr.FieldName] = make(map[string]utils.StringMap)
 		}
+		if _, hastIt := rfi.reveseIndex[itemID][fltr.FieldName]; !hastIt {
+			rfi.reveseIndex[itemID][fltr.FieldName] = make(utils.StringMap)
+		}
 		for _, fldVal := range fltr.Values {
 			if _, hasIt := rfi.indexes[fltr.FieldName][fldVal]; !hasIt {
 				rfi.indexes[fltr.FieldName][fldVal] = make(utils.StringMap)
 			}
 			rfi.indexes[fltr.FieldName][fldVal][itemID] = true
+			rfi.reveseIndex[itemID][fltr.FieldName][fldVal] = true
 			rfi.chngdIndxKeys[utils.ConcatenatedKey(fltr.FieldName, fldVal)] = true
 		}
+		rfi.chngdRevIndxKeys[utils.ConcatenatedKey(itemID, fltr.FieldName)] = true
 	}
 	if !hasMetaString {
 		if _, hasIt := rfi.indexes[utils.NOT_AVAILABLE]; !hasIt {
 			rfi.indexes[utils.NOT_AVAILABLE] = make(map[string]utils.StringMap)
 		}
+		if _, hastIt := rfi.reveseIndex[itemID][utils.NOT_AVAILABLE]; !hastIt {
+			rfi.reveseIndex[itemID][utils.NOT_AVAILABLE] = make(utils.StringMap)
+		}
 		if _, hasIt := rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE]; !hasIt {
 			rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] = make(utils.StringMap)
 		}
+		rfi.reveseIndex[itemID][utils.NOT_AVAILABLE][utils.NOT_AVAILABLE] = true
 		rfi.indexes[utils.NOT_AVAILABLE][utils.NOT_AVAILABLE][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE][NOT_AVAILABLE][rl.ID]
 	}
 	return
 }
 
 // StoreIndexes handles storing the indexes to dataDB
-func (rfi *ReqFilterIndexer) StoreIndexes() error {
-	return rfi.dm.SetReqFilterIndexes(rfi.dbKey, rfi.indexes)
+func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
+	if err = rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), rfi.indexes); err != nil {
+		return
+	}
+	return rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), rfi.reveseIndex)
+}
+
+func GetDBIndexKey(itemType, dbKeySuffix string, reverse bool) (dbKey string) {
+	var idxPrefix, rIdxPrefix string
+	switch itemType {
+	case utils.ThresholdProfilePrefix:
+		idxPrefix = utils.ThresholdStringIndex
+		rIdxPrefix = utils.ThresholdStringRevIndex
+	case utils.ResourceProfilesPrefix:
+		idxPrefix = utils.ResourceProfilesStringIndex
+		rIdxPrefix = utils.ResourceProfilesStringRevIndex
+	case utils.StatQueueProfilePrefix:
+		idxPrefix = utils.StatQueuesStringIndex
+		rIdxPrefix = utils.StatQueuesStringRevIndex
+	case utils.SupplierProfilePrefix:
+		idxPrefix = utils.SupplierProfilesStringIndex
+		rIdxPrefix = utils.SupplierProfilesStringRevIndex
+	case utils.AliasProfilePrefix:
+		idxPrefix = utils.AliasProfilesStringIndex
+		rIdxPrefix = utils.AliasProfilesStringRevIndex
+	}
+	if reverse {
+		return rIdxPrefix + dbKeySuffix
+	}
+	return idxPrefix + dbKeySuffix
 }
