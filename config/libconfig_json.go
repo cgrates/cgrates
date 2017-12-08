@@ -387,8 +387,8 @@ type UserServJsonCfg struct {
 	Indexes *[]string
 }
 
-// Supplier service config section
-type AliasSJsonCfg struct {
+// Attribute service config section
+type AttributeSJsonCfg struct {
 	Enabled        *bool
 	Indexed_fields *[]string
 }

@@ -24,78 +24,81 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AliasEntry struct {
+type Attribute struct {
 	FieldName string
 	Initial   string
 	Alias     string
 	Append    bool
 }
 
-type AliasProfile struct {
+type AttributeProfile struct {
 	Tenant             string
 	ID                 string
 	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval    // Activation interval
-	Context            string                       // bind this AliasProfile to specific context
-	Aliases            map[string]map[string]string // map[FieldName][InitialValue]AliasValue
+	ActivationInterval *utils.ActivationInterval        // Activation interval
+	Context            string                           // bind this AttributeProfile to specific context
+	Attributes         map[string]map[string]*Attribute // map[FieldName][InitialValue]*Attribute
 	Weight             float64
 }
 
-func (als *AliasProfile) TenantID() string {
+func (als *AttributeProfile) TenantID() string {
 	return utils.ConcatenatedKey(als.Tenant, als.ID)
 }
 
-// AliasProfiles is a sortable list of Alias profiles
-type AliasProfiles []*AliasProfile
+// AttributeProfiles is a sortable list of Attribute profiles
+type AttributeProfiles []*AttributeProfile
 
 // Sort is part of sort interface, sort based on Weight
-func (aps AliasProfiles) Sort() {
+func (aps AttributeProfiles) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
 }
 
-type ExternalAliasProfile struct {
+type ExternalAttributeProfile struct {
 	Tenant             string
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
-	Aliases            []*AliasEntry
+	Context            string                    // bind this AttributeProfile to specific context
+	Attributes         []*Attribute
 	Weight             float64
 }
 
-func (eap *ExternalAliasProfile) AsAliasProfile() *AliasProfile {
-	alsPrf := &AliasProfile{
+func (eap *ExternalAttributeProfile) AsAttributeProfile() *AttributeProfile {
+	alsPrf := &AttributeProfile{
 		Tenant:             eap.Tenant,
 		ID:                 eap.ID,
 		Weight:             eap.Weight,
 		FilterIDs:          eap.FilterIDs,
 		ActivationInterval: eap.ActivationInterval,
+		Context:            eap.Context,
 	}
-	alsMap := make(map[string]map[string]string)
-	for _, als := range eap.Aliases {
-		alsMap[als.FieldName] = make(map[string]string)
-		alsMap[als.FieldName][als.Initial] = als.Alias
+	alsMap := make(map[string]map[string]*Attribute)
+	for _, als := range eap.Attributes {
+		alsMap[als.FieldName] = make(map[string]*Attribute)
+		alsMap[als.FieldName][als.Initial] = als
 	}
-	alsPrf.Aliases = alsMap
+	alsPrf.Attributes = alsMap
 	return alsPrf
 }
 
-func NewExternalAliasProfileFromAliasProfile(alsPrf *AliasProfile) *ExternalAliasProfile {
-	extals := &ExternalAliasProfile{
+func NewExternalAttributeProfileFromAttributeProfile(alsPrf *AttributeProfile) *ExternalAttributeProfile {
+	extals := &ExternalAttributeProfile{
 		Tenant:             alsPrf.Tenant,
 		ID:                 alsPrf.ID,
 		Weight:             alsPrf.Weight,
 		ActivationInterval: alsPrf.ActivationInterval,
+		Context:            alsPrf.Context,
 		FilterIDs:          alsPrf.FilterIDs,
 	}
-	for key, val := range alsPrf.Aliases {
+	for key, val := range alsPrf.Attributes {
 		for key2, val2 := range val {
-			extals.Aliases = append(extals.Aliases, &AliasEntry{
+			extals.Attributes = append(extals.Attributes, &Attribute{
 				FieldName: key,
 				Initial:   key2,
-				Alias:     val2,
+				Alias:     val2.Alias,
+				Append:    val2.Append,
 			})
 		}
 	}
 	return extals
-
 }

@@ -52,7 +52,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
 				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix,
 				utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-				utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AliasProfilePrefix}, k) && cacheCfg.Precache {
+				utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix}, k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 					return err
 				}
@@ -82,7 +82,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.ThresholdProfilePrefix:     thpIDs,
 			utils.FilterPrefix:               fltrIDs,
 			utils.SupplierProfilePrefix:      splPrflIDs,
-			utils.AliasProfilePrefix:         alsPrfIDs,
+			utils.AttributeProfilePrefix:     alsPrfIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -141,7 +141,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.ThresholdProfilePrefix,
 		utils.FilterPrefix,
 		utils.SupplierProfilePrefix,
-		utils.AliasProfilePrefix}, prfx) {
+		utils.AttributeProfilePrefix}, prfx) {
 		return utils.NewCGRError(utils.MONGO,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -230,9 +230,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.SupplierProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
-		case utils.AliasProfilePrefix:
+		case utils.AttributeProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetAliasProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.MONGO,
@@ -883,17 +883,17 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string) (
 	return
 }
 
-func (dm *DataManager) GetAliasProfile(tenant, id string, skipCache bool, transactionID string) (alsPrf *AliasProfile, err error) {
-	key := utils.AliasProfilePrefix + utils.ConcatenatedKey(tenant, id)
+func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool, transactionID string) (alsPrf *AttributeProfile, err error) {
+	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*AliasProfile), nil
+			return x.(*AttributeProfile), nil
 		}
 	}
-	alsPrf, err = dm.dataDB.GetAliasProfileDrv(tenant, id)
+	alsPrf, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
@@ -904,15 +904,15 @@ func (dm *DataManager) GetAliasProfile(tenant, id string, skipCache bool, transa
 	return
 }
 
-func (dm *DataManager) SetAliasProfile(alsPrf *AliasProfile) (err error) {
-	return dm.DataDB().SetAliasProfileDrv(alsPrf)
+func (dm *DataManager) SetAttributeProfile(alsPrf *AttributeProfile) (err error) {
+	return dm.DataDB().SetAttributeProfileDrv(alsPrf)
 }
 
-func (dm *DataManager) RemoveAliasProfile(tenant, id, transactionID string) (err error) {
-	if err = dm.DataDB().RemoveAliasProfileDrv(tenant, id); err != nil {
+func (dm *DataManager) RemoveAttributeProfile(tenant, id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveAttributeProfileDrv(tenant, id); err != nil {
 		return
 	}
-	cache.RemKey(utils.AliasProfilePrefix+utils.ConcatenatedKey(tenant, id),
+	cache.RemKey(utils.AttributeProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	return
 }

@@ -121,7 +121,7 @@ const CGRATES_CFG_JSON = `
 	"thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control thresholds caching
 	"filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
 	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
-	"alias_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control alias profile caching
+	"attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control attribute profile caching
 },
 
 
@@ -424,8 +424,8 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"alias": {							// Alias service (*new)
-	"enabled": false,				// starts Alias service: <true|false>.
+"attributes": {							// Attribute service
+	"enabled": false,				// starts attribute service: <true|false>.
 	"indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 

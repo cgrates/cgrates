@@ -297,10 +297,10 @@ cgrates.org,SPP_1,,,,,supplier1,,,RPL_2,ResGroup2,,10,,
 cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,
 `
-	aliasProfiles = `
-#,Tenant,ID,FilterIDs,ActivationInterval,FieldName,Initial,Alias,Weight
-cgrates.org,ALS1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Alias1,20
-cgrates.org,ALS1,,,Field2,Initial2,Alias2,
+	attributeProfiles = `
+#,Tenant,ID,FilterIDs,ActivationInterval,Context,FieldName,Initial,Alias,Append,Weight
+cgrates.org,ALS1,FLTR_1,2014-07-29T15:00:00Z,con1,Field1,Initial1,Alias1,true,20
+cgrates.org,ALS1,,,,Field2,Initial2,Alias2,false,
 `
 )
 
@@ -309,7 +309,7 @@ var csvr *TpReader
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges,
-		cdrStats, users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, aliasProfiles), testTPID, "")
+		cdrStats, users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
@@ -374,8 +374,8 @@ func init() {
 	if err := csvr.LoadSupplierProfiles(); err != nil {
 		log.Print("error in LoadSupplierProfiles:", err)
 	}
-	if err := csvr.LoadAliasProfiles(); err != nil {
-		log.Print("error in LoadAliasProfiles:", err)
+	if err := csvr.LoadAttributeProfiles(); err != nil {
+		log.Print("error in LoadAttributeProfiles:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	cache.Flush()
@@ -1665,9 +1665,9 @@ func TestLoadSupplierProfiles(t *testing.T) {
 	}
 }
 
-func TestLoadAliasProfiles(t *testing.T) {
-	eAlsProfiles := map[utils.TenantID]*utils.TPAlias{
-		utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}: &utils.TPAlias{
+func TestLoadAttributeProfiles(t *testing.T) {
+	eAttrProfiles := map[utils.TenantID]*utils.TPAttribute{
+		utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}: &utils.TPAttribute{
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
@@ -1675,26 +1675,29 @@ func TestLoadAliasProfiles(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			Aliases: []*utils.TPAliasEntry{
-				&utils.TPAliasEntry{
+			Context: "con1",
+			Attributes: []*utils.TPRequestAttribute{
+				&utils.TPRequestAttribute{
 					FieldName: "Field1",
 					Initial:   "Initial1",
 					Alias:     "Alias1",
+					Append:    true,
 				},
-				&utils.TPAliasEntry{
+				&utils.TPRequestAttribute{
 					FieldName: "Field2",
 					Initial:   "Initial2",
 					Alias:     "Alias2",
+					Append:    false,
 				},
 			},
 			Weight: 20,
 		},
 	}
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}
-	if len(csvr.aliasProfiles) != len(eAlsProfiles) {
-		t.Errorf("Failed to load AliasProfiles: %s", utils.ToIJSON(csvr.aliasProfiles))
-	} else if !reflect.DeepEqual(eAlsProfiles[resKey], csvr.aliasProfiles[resKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eAlsProfiles[resKey], csvr.aliasProfiles[resKey])
+	if len(csvr.attributeProfiles) != len(eAttrProfiles) {
+		t.Errorf("Failed to load attributeProfiles: %s", utils.ToIJSON(csvr.attributeProfiles))
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey], csvr.attributeProfiles[resKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey], csvr.attributeProfiles[resKey])
 	}
 }
 

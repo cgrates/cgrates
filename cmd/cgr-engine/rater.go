@@ -107,7 +107,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		if cCfg, has := cacheCfg[utils.CacheSupplierProfiles]; !has || !cCfg.Precache {
 			sppIDs = make([]string, 0)
 		}
-		if cCfg, has := cacheCfg[utils.CacheAliasProfiles]; !has || !cCfg.Precache {
+		if cCfg, has := cacheCfg[utils.CacheAttributeProfiles]; !has || !cCfg.Precache {
 			alsPrfIDs = make([]string, 0)
 		}
 

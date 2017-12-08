@@ -34,34 +34,34 @@ type CSVStorage struct {
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn,
-	cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, aliasProfilesFn string
+	cdrStatsFn, usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn string
 }
 
 func NewFileCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn,
-	resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, aliasProfilesFn string) *CSVStorage {
+	resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn string) *CSVStorage {
 	c := new(CSVStorage)
 	c.sep = sep
 	c.readerFunc = openFileCSVStorage
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
 		c.sharedgroupsFn, c.lcrFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn,
-		c.derivedChargersFn, c.cdrStatsFn, c.usersFn, c.aliasesFn, c.resProfilesFn, c.statsFn,
-		c.thresholdsFn, c.filterFn, c.suppProfilesFn, c.aliasProfilesFn = destinationsFn, timingsFn,
+		c.derivedChargersFn, c.cdrStatsFn, c.usersFn, c.aliasesFn, c.resProfilesFn, c.statsFn, c.thresholdsFn,
+		c.filterFn, c.suppProfilesFn, c.attributeProfilesFn = destinationsFn, timingsFn,
 		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
 		actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn,
-		usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, aliasProfilesFn
+		usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn
 	return c
 }
 
 func NewStringCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn,
-	aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, aliasProfilesFn string) *CSVStorage {
+	aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn string) *CSVStorage {
 	c := NewFileCSVStorage(sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn,
 		ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn,
 		accountactionsFn, derivedChargersFn, cdrStatsFn, usersFn, aliasesFn, resProfilesFn,
-		statsFn, thresholdsFn, filterFn, suppProfilesFn, aliasProfilesFn)
+		statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn)
 	c.readerFunc = openStringCSVStorage
 	return c
 }
@@ -742,8 +742,8 @@ func (csvs *CSVStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, er
 	return tpSPPs.AsTPSuppliers(), nil
 }
 
-func (csvs *CSVStorage) GetTPAliasProfiles(tpid, id string) ([]*utils.TPAlias, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.aliasProfilesFn, csvs.sep, getColumnCount(TPAlias{}))
+func (csvs *CSVStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttribute, error) {
+	csvReader, fp, err := csvs.readerFunc(csvs.attributeProfilesFn, csvs.sep, getColumnCount(TPAttribute{}))
 	if err != nil {
 		//log.Print("Could not load AliasProfile file: ", err)
 		// allow writing of the other values
@@ -752,22 +752,22 @@ func (csvs *CSVStorage) GetTPAliasProfiles(tpid, id string) ([]*utils.TPAlias, e
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpAls TPAliases
+	var tpAls TPAttributes
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.aliasProfilesFn, err.Error())
+			log.Printf("bad line in %s, %s\n", csvs.attributeProfilesFn, err.Error())
 			return nil, err
 		}
-		if aliasProfile, err := csvLoad(TPAlias{}, record); err != nil {
+		if attributeProfile, err := csvLoad(TPAttribute{}, record); err != nil {
 			log.Print("error loading tpAliasProfile: ", err)
 			return nil, err
 		} else {
-			aliasProfile := aliasProfile.(TPAlias)
-			aliasProfile.Tpid = tpid
-			tpAls = append(tpAls, &aliasProfile)
+			attributeProfile := attributeProfile.(TPAttribute)
+			attributeProfile.Tpid = tpid
+			tpAls = append(tpAls, &attributeProfile)
 		}
 	}
-	return tpAls.AsTPAlias(), nil
+	return tpAls.AsTPAttributes(), nil
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {

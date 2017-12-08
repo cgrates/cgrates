@@ -1133,10 +1133,10 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		splpIDs = *args.SupplierProfileIDs
 	}
-	if args.AliasProfileIDs == nil {
+	if args.AttributeProfileIDs == nil {
 		alsPrfIDs = nil
 	} else {
-		alsPrfIDs = *args.AliasProfileIDs
+		alsPrfIDs = *args.AttributeProfileIDs
 	}
 	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splpIDs, alsPrfIDs); err != nil {
 		return utils.NewErrServerError(err)
@@ -1292,11 +1292,11 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 			cache.RemKey(utils.SupplierProfilePrefix+key, true, utils.NonTransactional)
 		}
 	}
-	if args.AliasProfileIDs == nil {
-		cache.RemPrefixKey(utils.AliasProfilePrefix, true, utils.NonTransactional)
-	} else if len(*args.AliasProfileIDs) != 0 {
-		for _, key := range *args.AliasProfileIDs {
-			cache.RemKey(utils.AliasProfilePrefix+key, true, utils.NonTransactional)
+	if args.AttributeProfileIDs == nil {
+		cache.RemPrefixKey(utils.AttributeProfilePrefix, true, utils.NonTransactional)
+	} else if len(*args.AttributeProfileIDs) != 0 {
+		for _, key := range *args.AttributeProfileIDs {
+			cache.RemKey(utils.AttributeProfilePrefix+key, true, utils.NonTransactional)
 		}
 	}
 
@@ -1326,7 +1326,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.ThresholdProfiles = cache.CountEntries(utils.ThresholdProfilePrefix)
 	cs.Filters = cache.CountEntries(utils.FilterPrefix)
 	cs.SupplierProfiles = cache.CountEntries(utils.SupplierProfilePrefix)
-	cs.AliasProfiles = cache.CountEntries(utils.AliasProfilePrefix)
+	cs.AttributeProfiles = cache.CountEntries(utils.AttributeProfilePrefix)
 
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
@@ -1735,22 +1735,22 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		}
 	}
 
-	if args.AliasProfileIDs != nil {
+	if args.AttributeProfileIDs != nil {
 		var ids []string
-		if len(*args.AliasProfileIDs) != 0 {
-			for _, id := range *args.AliasProfileIDs {
-				if _, hasIt := cache.Get(utils.AliasProfilePrefix + id); hasIt {
+		if len(*args.AttributeProfileIDs) != 0 {
+			for _, id := range *args.AttributeProfileIDs {
+				if _, hasIt := cache.Get(utils.AttributeProfilePrefix + id); hasIt {
 					ids = append(ids, id)
 				}
 			}
 		} else {
-			for _, id := range cache.GetEntryKeys(utils.AliasProfilePrefix) {
-				ids = append(ids, id[len(utils.AliasProfilePrefix):])
+			for _, id := range cache.GetEntryKeys(utils.AttributeProfilePrefix) {
+				ids = append(ids, id[len(utils.AttributeProfilePrefix):])
 			}
 		}
 		ids = args.Paginator.PaginateStringSlice(ids)
 		if len(ids) != 0 {
-			reply.AliasProfileIDs = &ids
+			reply.AttributeProfileIDs = &ids
 		}
 	}
 
@@ -1791,7 +1791,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.ThresholdsCsv),
 		path.Join(attrs.FolderPath, utils.FiltersCsv),
 		path.Join(attrs.FolderPath, utils.SuppliersCsv),
-		path.Join(attrs.FolderPath, utils.AliasCsv),
+		path.Join(attrs.FolderPath, utils.AttributesCsv),
 	), "", self.Config.DefaultTimezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
@@ -1833,7 +1833,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.ThresholdProfilePrefix,
 		utils.FilterPrefix,
 		utils.SupplierProfilePrefix,
-		utils.AliasProfilePrefix} {
+		utils.AttributeProfilePrefix} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
