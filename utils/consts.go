@@ -622,6 +622,11 @@ const (
 	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"
 )
 
+// AliasS APIs
+const (
+	AliasSv1GetAliasForEvent = "AliasSv1.GetAliasForEvent"
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {

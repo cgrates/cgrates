@@ -82,13 +82,11 @@ func (alSv1 *AliasSv1) Call(serviceMethod string,
 	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)
 }
 
-/*
-// GetAliasProfileForEvent returns matching AliasProfile for Event
-func (alSv1 *AliasSv1) GetAliasProfileForEvent(ev *utils.CGREvent,
-	reply *engine.ApierAliasProfile) error {
-	return alSv1.alS.V1GetSuppliers(args, reply)
+// GetAliasForEvent  returns matching AliasProfile for Event
+func (alSv1 *AliasSv1) GetAliasForEvent(ev *utils.CGREvent,
+	reply *engine.ExternalAliasProfile) error {
+	return alSv1.alS.V1GetAliasForEvent(ev, reply)
 }
-*/
 
 // ProcessEvent will replace event fields with the ones in maching AliasProfile
 func (alSv1 *AliasSv1) ProcessEvent(ev *utils.CGREvent,

@@ -116,6 +116,12 @@
 },
 
 
+"alias": {							// Alias service (*new)
+	"enabled": true,				// starts Alias service: <true|false>.
+	"indexed_fields": [],			// query indexes based on these fields for faster processing
+},
+
+
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",

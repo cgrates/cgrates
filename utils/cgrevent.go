@@ -27,10 +27,11 @@ import (
 
 // CGREvent is a generic event processed by CGR services
 type CGREvent struct {
-	Tenant string
-	ID     string
-	Time   *time.Time // event time
-	Event  map[string]interface{}
+	Tenant  string
+	ID      string
+	Context string     // attach the event to a context
+	Time    *time.Time // event time
+	Event   map[string]interface{}
 }
 
 func (ev *CGREvent) CheckMandatoryFields(fldNames []string) error {

@@ -49,6 +49,8 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAlsPrfResetStorDb,
 	testAlsPrfStartEngine,
 	testAlsPrfRPCConn,
+	testAlsPrfFromFolder,
+	//testAlsPrfGetAliasForEvent,
 	testAlsPrfGetAlsPrfBeforeSet,
 	testAlsPrfSetAlsPrf,
 	testAlsPrfUpdateAlsPrf,
@@ -121,6 +123,56 @@ func testAlsPrfGetAlsPrfBeforeSet(t *testing.T) {
 	var reply *engine.ExternalAliasProfile
 	if err := alsPrfRPC.Call("ApierV1.GetAliasProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testAlsPrfFromFolder(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	if err := alsPrfRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(500 * time.Millisecond)
+}
+
+func testAlsPrfGetAliasForEvent(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAlsPrfGetAliasForEvent",
+		Event: map[string]interface{}{
+			"Account":     "1007",
+			"Destination": "+491511231234",
+		},
+	}
+	eAlsPrfl := engine.ExternalAliasProfile{
+		Tenant:    ev.Tenant,
+		ID:        "ALS1",
+		FilterIDs: []string{"FLTR_ACNT_1007"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local()},
+		Aliases: []*engine.AliasEntry{
+			&engine.AliasEntry{
+				FieldName: utils.ACCOUNT,
+				Initial:   utils.ANY,
+				Alias:     "1001",
+				Append:    false,
+			},
+			&engine.AliasEntry{
+				FieldName: utils.SUBJECT,
+				Initial:   utils.ANY,
+				Alias:     "1001",
+				Append:    false,
+			},
+		},
+		Weight: 10.0,
+	}
+	var alsReply engine.ExternalAliasProfile
+	if err := alsPrfRPC.Call(utils.AliasSv1GetAliasForEvent,
+		ev, &alsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAlsPrfl, alsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eAlsPrfl), utils.ToJSON(alsReply))
 	}
 }
 

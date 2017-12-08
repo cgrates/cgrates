@@ -28,6 +28,7 @@ type AliasEntry struct {
 	FieldName string
 	Initial   string
 	Alias     string
+	Append    bool
 }
 
 type AliasProfile struct {
@@ -35,6 +36,7 @@ type AliasProfile struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval    // Activation interval
+	Context            string                       // bind this AliasProfile to specific context
 	Aliases            map[string]map[string]string // map[FieldName][InitialValue]AliasValue
 	Weight             float64
 }

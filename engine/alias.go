@@ -98,6 +98,30 @@ func (alS *AliasService) matchingAliasProfilesForEvent(ev *utils.CGREvent) (aPrf
 	return
 }
 
+func (alS *AliasService) aliasProfileForEvent(ev *utils.CGREvent) (alsPrfl *AliasProfile, err error) {
+	var alsPrfls AliasProfiles
+	if alsPrfls, err = alS.matchingAliasProfilesForEvent(ev); err != nil {
+		return
+	} else if len(alsPrfls) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return alsPrfls[0], nil
+}
+
+func (alS *AliasService) V1GetAliasForEvent(ev *utils.CGREvent,
+	extAlsPrf *ExternalAliasProfile) (err error) {
+	alsPrf, err := alS.aliasProfileForEvent(ev)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	eAlsPrfl := NewExternalAliasProfileFromAliasProfile(alsPrf)
+	*extAlsPrf = *eAlsPrfl
+	return
+}
+
 func (alS *AliasService) V1ProcessEvent(ev *utils.CGREvent,
 	reply *string) (err error) {
 	return
