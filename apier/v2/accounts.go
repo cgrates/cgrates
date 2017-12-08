@@ -105,6 +105,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	var ub *engine.Account
+	var schedNeedsReload bool
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		if bal, _ := self.DataManager.DataDB().GetAccount(accID); bal != nil {
 			ub = bal
@@ -137,20 +138,12 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 					}
 				}
 				for _, apID := range *attr.ActionPlanIDs {
-					if utils.IsSliceMember(acntAPids, apID) && !attr.ActionPlansOverwrite {
-						continue // Already there
-					}
 					ap, err := self.DataManager.DataDB().GetActionPlan(apID, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
-					if ap.AccountIDs == nil {
-						ap.AccountIDs = make(utils.StringMap)
-					}
-					ap.AccountIDs[accID] = true
-					dirtyActionPlans[apID] = ap
-					acntAPids = append(acntAPids, apID)
 					// create tasks
+					var schedTasks int // keep count on the number of scheduled tasks so we can compare with actions needed
 					for _, at := range ap.ActionTimings {
 						if at.IsASAP() {
 							t := &engine.Task{
@@ -161,8 +154,25 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 							if err = self.DataManager.DataDB().PushTask(t); err != nil {
 								return 0, err
 							}
+							schedTasks++
 						}
 					}
+					if schedTasks != 0 && !schedNeedsReload {
+						schedNeedsReload = true
+					}
+					if schedTasks == len(ap.ActionTimings) || // scheduled all actions, no need to add account to AP
+						utils.IsSliceMember(acntAPids, apID) {
+						continue // No need to reschedule since already there
+					}
+					if ap.AccountIDs == nil {
+						ap.AccountIDs = make(utils.StringMap)
+					}
+					ap.AccountIDs[accID] = true
+					dirtyActionPlans[apID] = ap
+					acntAPids = append(acntAPids, apID)
+				}
+				if len(dirtyActionPlans) != 0 && !schedNeedsReload {
+					schedNeedsReload = true
 				}
 				apIDs := make([]string, len(dirtyActionPlans))
 				i := 0
@@ -212,6 +222,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				}
 			}
 		}
+
 		ub.InitCounters()
 		if attr.AllowNegative != nil {
 			ub.AllowNegative = *attr.AllowNegative
@@ -228,7 +239,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if attr.ReloadScheduler && len(dirtyActionPlans) != 0 {
+	if attr.ReloadScheduler && schedNeedsReload {
 		sched := self.ServManager.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
