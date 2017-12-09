@@ -36,7 +36,7 @@ import (
 var (
 	alsPrfCfgPath   string
 	alsPrfCfg       *config.CGRConfig
-	alsPrfRPC       *rpc.Client
+	attrSRPC        *rpc.Client
 	alsPrfDataDir   = "/usr/share/cgrates"
 	alsPrf          *engine.ExternalAttributeProfile
 	alsPrfDelay     int
@@ -44,36 +44,36 @@ var (
 )
 
 var sTestsAlsPrf = []func(t *testing.T){
-	testAlsPrfInitCfg,
-	testAlsPrfInitDataDb,
-	testAlsPrfResetStorDb,
-	testAlsPrfStartEngine,
-	testAlsPrfRPCConn,
-	testAlsPrfFromFolder,
-	//testAlsPrfGetAliasForEvent,
-	testAlsPrfGetAlsPrfBeforeSet,
-	testAlsPrfSetAlsPrf,
-	testAlsPrfUpdateAlsPrf,
-	testAlsPrfRemAlsPrf,
-	testAlsPrfKillEngine,
+	testAttributeSInitCfg,
+	testAttributeSInitDataDb,
+	testAttributeSResetStorDb,
+	testAttributeSStartEngine,
+	testAttributeSRPCConn,
+	testAttributeSLoadFromFolder,
+	testAttributeSGetAttributeForEvent,
+	testAttributeSGetAlsPrfBeforeSet,
+	testAttributeSSetAlsPrf,
+	testAttributeSUpdateAlsPrf,
+	testAttributeSRemAlsPrf,
+	testAttributeSKillEngine,
 }
 
 //Test start here
-func TestAlsPrfITMySql(t *testing.T) {
+func TestAttributeSITMySql(t *testing.T) {
 	alsPrfConfigDIR = "tutmysql"
 	for _, stest := range sTestsAlsPrf {
 		t.Run(alsPrfConfigDIR, stest)
 	}
 }
 
-func TestAlsPrfITMongo(t *testing.T) {
+func TsestAttributeSITMongo(t *testing.T) {
 	alsPrfConfigDIR = "tutmongo"
 	for _, stest := range sTestsAlsPrf {
 		t.Run(alsPrfConfigDIR, stest)
 	}
 }
 
-func testAlsPrfInitCfg(t *testing.T) {
+func testAttributeSInitCfg(t *testing.T) {
 	var err error
 	alsPrfCfgPath = path.Join(alsPrfDataDir, "conf", "samples", alsPrfConfigDIR)
 	alsPrfCfg, err = config.NewCGRConfigFromFolder(alsPrfCfgPath)
@@ -90,72 +90,73 @@ func testAlsPrfInitCfg(t *testing.T) {
 	}
 }
 
-func testAlsPrfInitDataDb(t *testing.T) {
+func testAttributeSInitDataDb(t *testing.T) {
 	if err := engine.InitDataDb(alsPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func testAlsPrfResetStorDb(t *testing.T) {
+func testAttributeSResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(alsPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func testAlsPrfStartEngine(t *testing.T) {
+func testAttributeSStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(alsPrfCfgPath, alsPrfDelay); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func testAlsPrfRPCConn(t *testing.T) {
+func testAttributeSRPCConn(t *testing.T) {
 	var err error
-	alsPrfRPC, err = jsonrpc.Dial("tcp", alsPrfCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	attrSRPC, err = jsonrpc.Dial("tcp", alsPrfCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testAlsPrfGetAlsPrfBeforeSet(t *testing.T) {
+func testAttributeSGetAlsPrfBeforeSet(t *testing.T) {
 	var reply *engine.ExternalAttributeProfile
-	if err := alsPrfRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testAlsPrfFromFolder(t *testing.T) {
+func testAttributeSLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := alsPrfRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := attrSRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
 }
 
-func testAlsPrfGetAliasForEvent(t *testing.T) {
+func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "testAlsPrfGetAliasForEvent",
+		ID:     "testAttributeSGetAttributeForEvent",
 		Event: map[string]interface{}{
 			"Account":     "1007",
 			"Destination": "+491511231234",
 		},
 	}
-	eAlsPrfl := engine.ExternalAttributeProfile{
+	eAttrPrf := engine.ExternalAttributeProfile{
 		Tenant:    ev.Tenant,
-		ID:        "ALS1",
+		ID:        "ATTR_1",
 		FilterIDs: []string{"FLTR_ACNT_1007"},
+		Context:   utils.ALIAS_CONTEXT_RATING,
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local()},
+			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FieldName: utils.ACCOUNT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
-				Append:    false,
+				Append:    true,
 			},
 			&engine.Attribute{
 				FieldName: utils.SUBJECT,
@@ -166,17 +167,41 @@ func testAlsPrfGetAliasForEvent(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
-	var alsReply engine.ExternalAttributeProfile
-	if err := alsPrfRPC.Call(utils.AttributeSv1GetAliasForEvent,
-		ev, &alsReply); err != nil {
+	eAttrPrf2 := engine.ExternalAttributeProfile{
+		Tenant:    ev.Tenant,
+		ID:        "ATTR_1",
+		FilterIDs: []string{"FLTR_ACNT_1007"},
+		Context:   utils.ALIAS_CONTEXT_RATING,
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName: utils.SUBJECT,
+				Initial:   utils.ANY,
+				Alias:     "1001",
+				Append:    false,
+			},
+			&engine.Attribute{
+				FieldName: utils.ACCOUNT,
+				Initial:   utils.ANY,
+				Alias:     "1001",
+				Append:    true,
+			},
+		},
+		Weight: 10.0,
+	}
+	var attrReply engine.ExternalAttributeProfile
+	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+		ev, &attrReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAlsPrfl, alsReply) {
+	} else if !reflect.DeepEqual(eAttrPrf, attrReply) &&
+		!reflect.DeepEqual(eAttrPrf2, attrReply) { // second for reversed order of attributes
 		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eAlsPrfl), utils.ToJSON(alsReply))
+			utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
 }
 
-func testAlsPrfSetAlsPrf(t *testing.T) {
+func testAttributeSSetAlsPrf(t *testing.T) {
 	alsPrf = &engine.ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
@@ -196,13 +221,13 @@ func testAlsPrfSetAlsPrf(t *testing.T) {
 		Weight: 20,
 	}
 	var result string
-	if err := alsPrfRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ExternalAttributeProfile
-	if err := alsPrfRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
@@ -215,7 +240,7 @@ func testAlsPrfSetAlsPrf(t *testing.T) {
 	}
 }
 
-func testAlsPrfUpdateAlsPrf(t *testing.T) {
+func testAttributeSUpdateAlsPrf(t *testing.T) {
 	alsPrf.Attributes = []*engine.Attribute{
 		&engine.Attribute{
 			FieldName: "FL1",
@@ -231,13 +256,13 @@ func testAlsPrfUpdateAlsPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := alsPrfRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ExternalAttributeProfile
-	if err := alsPrfRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
@@ -250,20 +275,20 @@ func testAlsPrfUpdateAlsPrf(t *testing.T) {
 	}
 }
 
-func testAlsPrfRemAlsPrf(t *testing.T) {
+func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
-	if err := alsPrfRPC.Call("ApierV1.RemAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err != nil {
+	if err := attrSRPC.Call("ApierV1.RemAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.ExternalAttributeProfile
-	if err := alsPrfRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func testAlsPrfKillEngine(t *testing.T) {
+func testAttributeSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(alsPrfDelay); err != nil {
 		t.Error(err)
 	}
