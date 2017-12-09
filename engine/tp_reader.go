@@ -67,11 +67,11 @@ type TpReader struct {
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
-	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
-	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	resIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	sppIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	attrIndexers map[string]*ReqFilterIndexer // tenant, indexer
+	thdsIndexers map[string]*ReqFilterIndexer            // tenant, indexer
+	sqpIndexers  map[string]*ReqFilterIndexer            // tenant, indexer
+	resIndexers  map[string]*ReqFilterIndexer            // tenant, indexer
+	sppIndexers  map[string]*ReqFilterIndexer            // tenant, indexer
+	attrIndexers map[string]map[string]*ReqFilterIndexer // tenant, context , indexr
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -152,7 +152,7 @@ func (tpr *TpReader) Init() {
 	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.resIndexers = make(map[string]*ReqFilterIndexer)
 	tpr.sppIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.attrIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.attrIndexers = make(map[string]map[string]*ReqFilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1831,7 +1831,8 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		}
 		// index attribute profile for filters
 		if _, has := tpr.attrIndexers[tntID.Tenant]; !has {
-			if tpr.attrIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, tntID.Tenant); err != nil {
+			tpr.attrIndexers[tntID.Tenant] = make(map[string]*ReqFilterIndexer)
+			if tpr.attrIndexers[tntID.Tenant][res.Context], err = NewReqFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1848,7 +1849,7 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 					tpFltr = FilterToTPFilter(fltr)
 				}
 			} else {
-				tpr.attrIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+				tpr.attrIndexers[tntID.Tenant][res.Context].IndexTPFilter(tpFltr, res.ID)
 			}
 		}
 	}
@@ -2393,15 +2394,17 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if verbose {
 		log.Print("Indexing Attribute Profiles")
 	}
-	for tenant, fltrIdxer := range tpr.attrIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
-			return err
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
+	for tenant, val := range tpr.attrIndexers {
+		for context, fltrIdxer := range val {
+			if err := fltrIdxer.StoreIndexes(); err != nil {
+				return err
+			}
+			if verbose {
+				log.Printf("Tenant: %s, Context : %+v, keys %+v", tenant, context, fltrIdxer.ChangedKeys(false).Slice())
+			}
+			if verbose {
+				log.Printf("Tenant: %s, Context : %+v, keys %+v", tenant, context, fltrIdxer.ChangedKeys(true).Slice())
+			}
 		}
 	}
 	return
