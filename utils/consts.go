@@ -630,6 +630,7 @@ const (
 // AliasS APIs
 const (
 	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
+	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
 )
 
 func buildCacheInstRevPrefixes() {

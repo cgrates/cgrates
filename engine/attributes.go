@@ -98,31 +98,80 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 	return
 }
 
-func (alS *AttributeService) attributeProfileForEvent(ev *utils.CGREvent) (alsPrfl *AttributeProfile, err error) {
-	var alsPrfls AttributeProfiles
-	if alsPrfls, err = alS.matchingAttributeProfilesForEvent(ev); err != nil {
+func (alS *AttributeService) attributeProfileForEvent(ev *utils.CGREvent) (attrPrfl *AttributeProfile, err error) {
+	var attrPrfls AttributeProfiles
+	if attrPrfls, err = alS.matchingAttributeProfilesForEvent(ev); err != nil {
 		return
-	} else if len(alsPrfls) == 0 {
+	} else if len(attrPrfls) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	return alsPrfls[0], nil
+	return attrPrfls[0], nil
+}
+
+type AttrSProcessEventReply struct {
+	MatchedProfile string
+	AlteredFields  []string
+	CGREvent       *utils.CGREvent
+}
+
+// processEvent will match event with attribute profile and do the necessary replacements
+func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProcessEventReply, err error) {
+	attrPrf, err := alS.attributeProfileForEvent(ev)
+	if err != nil {
+		return nil, err
+	}
+	rply = &AttrSProcessEventReply{MatchedProfile: attrPrf.ID, CGREvent: ev.Clone()}
+	for fldName, intialMp := range attrPrf.Attributes {
+		initEvValIf, has := ev.Event[fldName]
+		if !has { // we don't have initial in event, try append
+			if anyInitial, has := intialMp[utils.ANY]; has && anyInitial.Append {
+				rply.CGREvent.Event[fldName] = anyInitial.Alias
+				rply.AlteredFields = append(rply.AlteredFields, fldName)
+			}
+			continue
+		}
+		initEvVal, cast := utils.CastFieldIfToString(initEvValIf)
+		if !cast {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> ev: %s, cannot cast field: %s to string",
+					utils.AttributeS, ev, fldName))
+			continue
+		}
+		attrVal, has := intialMp[initEvVal]
+		if !has {
+			attrVal, has = intialMp[utils.ANY]
+		}
+		if has {
+			rply.CGREvent.Event[fldName] = attrVal.Alias
+			rply.AlteredFields = append(rply.AlteredFields, fldName)
+		}
+	}
+	return
 }
 
 func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
-	extAlsPrf *ExternalAttributeProfile) (err error) {
-	alsPrf, err := alS.attributeProfileForEvent(ev)
+	extattrPrf *ExternalAttributeProfile) (err error) {
+	attrPrf, err := alS.attributeProfileForEvent(ev)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return err
 	}
-	eAlsPrfl := NewExternalAttributeProfileFromAttributeProfile(alsPrf)
-	*extAlsPrf = *eAlsPrfl
+	eattrPrfl := NewExternalAttributeProfileFromAttributeProfile(attrPrf)
+	*extattrPrf = *eattrPrfl
 	return
 }
 
 func (alS *AttributeService) V1ProcessEvent(ev *utils.CGREvent,
-	reply *string) (err error) {
+	reply *AttrSProcessEventReply) (err error) {
+	evReply, err := alS.processEvent(ev)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = *evReply
 	return
 }

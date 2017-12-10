@@ -90,6 +90,6 @@ func (alSv1 *AttributeSv1) GetAttributeForEvent(ev *utils.CGREvent,
 
 // ProcessEvent will replace event fields with the ones in maching AttributeProfile
 func (alSv1 *AttributeSv1) ProcessEvent(ev *utils.CGREvent,
-	reply *string) error {
+	reply *engine.AttrSProcessEventReply) error {
 	return alSv1.attrS.V1ProcessEvent(ev, reply)
 }

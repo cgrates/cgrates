@@ -29,7 +29,7 @@ import (
 type CGREvent struct {
 	Tenant  string
 	ID      string
-	Context string     // attach the event to a context
+	Context *string    // attach the event to a context
 	Time    *time.Time // event time
 	Event   map[string]interface{}
 }
@@ -139,6 +139,24 @@ func (ev *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]inter
 		} else {
 			fEv[fltrFld] = fldVal
 		}
+	}
+	return
+}
+
+func (ev *CGREvent) Clone() (clned *CGREvent) {
+	clned = &CGREvent{
+		Tenant: ev.Tenant,
+		ID:     ev.ID,
+		Event:  make(map[string]interface{}), // a bit forced but safe
+	}
+	if ev.Context != nil {
+		clned.Context = StringPointer(*ev.Context)
+	}
+	if ev.Time != nil {
+		clned.Time = TimePointer(*ev.Time)
+	}
+	for k, v := range ev.Event {
+		clned.Event[k] = v
 	}
 	return
 }

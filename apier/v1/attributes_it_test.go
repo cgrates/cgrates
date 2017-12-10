@@ -51,6 +51,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSRPCConn,
 	testAttributeSLoadFromFolder,
 	testAttributeSGetAttributeForEvent,
+	testAttributeSProcessEvent,
 	testAttributeSGetAlsPrfBeforeSet,
 	testAttributeSSetAlsPrf,
 	testAttributeSUpdateAlsPrf,
@@ -144,7 +145,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			"Destination": "+491511231234",
 		},
 	}
-	eAttrPrf := engine.ExternalAttributeProfile{
+	eAttrPrf := &engine.ExternalAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
 		FilterIDs: []string{"FLTR_ACNT_1007"},
@@ -156,18 +157,18 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				FieldName: utils.ACCOUNT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
-				Append:    true,
+				Append:    false,
 			},
 			&engine.Attribute{
 				FieldName: utils.SUBJECT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
-				Append:    false,
+				Append:    true,
 			},
 		},
 		Weight: 10.0,
 	}
-	eAttrPrf2 := engine.ExternalAttributeProfile{
+	eAttrPrf2 := &engine.ExternalAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
 		FilterIDs: []string{"FLTR_ACNT_1007"},
@@ -179,13 +180,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				FieldName: utils.SUBJECT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
-				Append:    false,
+				Append:    true,
 			},
 			&engine.Attribute{
 				FieldName: utils.ACCOUNT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
-				Append:    true,
+				Append:    false,
 			},
 		},
 		Weight: 10.0,
@@ -194,10 +195,59 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAttrPrf, attrReply) &&
-		!reflect.DeepEqual(eAttrPrf2, attrReply) { // second for reversed order of attributes
+	} else if !reflect.DeepEqual(eAttrPrf, &attrReply) &&
+		!reflect.DeepEqual(eAttrPrf2, &attrReply) { // second for reversed order of attributes
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	}
+}
+
+func testAttributeSProcessEvent(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "testAttributeSProcessEvent",
+		Context: utils.StringPointer(utils.ALIAS_CONTEXT_RATING),
+		Event: map[string]interface{}{
+			"Account":     "1007",
+			"Destination": "+491511231234",
+		},
+	}
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfile: "ATTR_1",
+		AlteredFields:  []string{"Subject", "Account"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSProcessEvent",
+			Context: utils.StringPointer(utils.ALIAS_CONTEXT_RATING),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Subject":     "1001",
+				"Destination": "+491511231234",
+			},
+		},
+	}
+	eRply2 := &engine.AttrSProcessEventReply{
+		MatchedProfile: "ATTR_1",
+		AlteredFields:  []string{"Account", "Subject"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSProcessEvent",
+			Context: utils.StringPointer(utils.ALIAS_CONTEXT_RATING),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Subject":     "1001",
+				"Destination": "+491511231234",
+			},
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) &&
+		!reflect.DeepEqual(eRply2, &rplyEv) { // second for reversed order of attributes
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
 }
 
