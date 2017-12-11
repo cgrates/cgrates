@@ -1071,8 +1071,8 @@ func TestAPItoAttributeProfile(t *testing.T) {
 			ExpiryTime:     "",
 		},
 		Context: "con1",
-		Attributes: []*utils.TPRequestAttribute{
-			&utils.TPRequestAttribute{
+		Substitutes: []*utils.TPRequestSubstitute{
+			&utils.TPRequestSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
@@ -1081,9 +1081,9 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrMap := make(map[string]map[string]*Attribute)
-	attrMap["FL1"] = make(map[string]*Attribute)
-	attrMap["FL1"]["In1"] = &Attribute{
+	attrMap := make(map[string]map[string]*Substitute)
+	attrMap["FL1"] = make(map[string]*Substitute)
+	attrMap["FL1"]["In1"] = &Substitute{
 		FieldName: "FL1",
 		Initial:   "In1",
 		Alias:     "Al1",
@@ -1096,9 +1096,9 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		Context:    "con1",
-		Attributes: attrMap,
-		Weight:     20,
+		Context:     "con1",
+		Substitutes: attrMap,
+		Weight:      20,
 	}
 	if rcv, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err != nil {
 		t.Error(err)
@@ -1118,8 +1118,8 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			ExpiryTime:     "",
 		},
 		Context: "con1",
-		Attributes: []*utils.TPRequestAttribute{
-			&utils.TPRequestAttribute{
+		Substitutes: []*utils.TPRequestSubstitute{
+			&utils.TPRequestSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
@@ -1175,8 +1175,8 @@ func TestModelAsTPAttribute(t *testing.T) {
 			ExpiryTime:     "",
 		},
 		Context: "con1",
-		Attributes: []*utils.TPRequestAttribute{
-			&utils.TPRequestAttribute{
+		Substitutes: []*utils.TPRequestSubstitute{
+			&utils.TPRequestSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",

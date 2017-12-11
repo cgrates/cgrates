@@ -1676,14 +1676,14 @@ func TestLoadAttributeProfiles(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			Context: "con1",
-			Attributes: []*utils.TPRequestAttribute{
-				&utils.TPRequestAttribute{
+			Substitutes: []*utils.TPRequestSubstitute{
+				&utils.TPRequestSubstitute{
 					FieldName: "Field1",
 					Initial:   "Initial1",
 					Alias:     "Alias1",
 					Append:    true,
 				},
-				&utils.TPRequestAttribute{
+				&utils.TPRequestSubstitute{
 					FieldName: "Field2",
 					Initial:   "Initial2",
 					Alias:     "Alias2",

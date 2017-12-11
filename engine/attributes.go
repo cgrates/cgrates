@@ -121,7 +121,7 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 		return nil, err
 	}
 	rply = &AttrSProcessEventReply{MatchedProfile: attrPrf.ID, CGREvent: ev.Clone()}
-	for fldName, intialMp := range attrPrf.Attributes {
+	for fldName, intialMp := range attrPrf.Substitutes {
 		initEvValIf, has := ev.Event[fldName]
 		if !has { // we don't have initial in event, try append
 			if anyInitial, has := intialMp[utils.ANY]; has && anyInitial.Append {
