@@ -191,6 +191,66 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	return nil
 }
 
+func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+		return utils.ErrInvalidKey
+	}
+	var keys []string
+	keys, err = rs.GetKeysForPrefix(prefix)
+	if err != nil {
+		return
+	}
+	for _, key := range keys {
+		if err = rs.Cmd("DEL", key).Err; err != nil {
+			return
+		}
+	}
+	switch prefix {
+	case utils.REVERSE_DESTINATION_PREFIX:
+		if keys, err = rs.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			dest, err := rs.GetDestination(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			if err := rs.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+	case utils.REVERSE_ALIASES_PREFIX:
+		if keys, err = rs.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			al, err := rs.GetAlias(key[len(utils.ALIASES_PREFIX):], true, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			if err := rs.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+	case utils.AccountActionPlansPrefix:
+		if keys, err = rs.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			apl, err := rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional) // skipCache on get since loader checks and caches empty data for loaded objects
+			if err != nil {
+				return err
+			}
+			for acntID := range apl.AccountIDs {
+				if err = rs.RemAccountActionPlans(acntID, []string{apl.Id}); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	r := rs.Cmd("KEYS", prefix+"*")
 	if r.Err != nil {
@@ -254,6 +314,24 @@ func (rs *RedisStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
 		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
 	return
+}
+
+func (rs *RedisStorage) RemoveRatingPlanDrv(key string) error {
+	keys, err := rs.Cmd("KEYS", utils.RATING_PLAN_PREFIX+key+"*").List()
+	if err != nil {
+		return err
+	}
+	for _, key := range keys {
+		if err = rs.Cmd("DEL", key).Err; err != nil {
+			return err
+		}
+		rpf := &RatingProfile{Id: key}
+		if historyScribe != nil {
+			response := 0
+			go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
+		}
+	}
+	return nil
 }
 
 func (rs *RedisStorage) GetRatingProfileDrv(key string) (rpf *RatingProfile, err error) {
@@ -330,6 +408,12 @@ func (rs *RedisStorage) SetLCRDrv(lcr *LCR) (err error) {
 		return
 	}
 	return
+}
+
+func (rs *RedisStorage) RemoveLCRDrv(id, transactionID string) (err error) {
+	dbKey := utils.LCR_PREFIX + id
+	err = rs.Cmd("DEL", dbKey).Err
+	return err
 }
 
 // GetDestination retrieves a destination with id from  tp_db
@@ -548,6 +632,14 @@ func (rs *RedisStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	return
 }
 
+func (rs *RedisStorage) RemoveSharedGroupDrv(id, transactionID string) (err error) {
+	cCommit := cacheCommit(transactionID)
+	dbKey := utils.SHARED_GROUP_PREFIX + id
+	err = rs.Cmd("DEL", dbKey).Err
+	cache.RemKey(dbKey, cCommit, transactionID)
+	return err
+}
+
 func (rs *RedisStorage) GetAccount(key string) (*Account, error) {
 	rpl := rs.Cmd("GET", utils.ACCOUNT_PREFIX+key)
 	if rpl.Err != nil {
@@ -610,6 +702,12 @@ func (rs *RedisStorage) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
 		return
 	}
 	return rs.Cmd("SET", utils.CDR_STATS_QUEUE_PREFIX+sq.GetId(), result).Err
+}
+
+func (rs *RedisStorage) RemoveCdrStatsQueueDrv(id string) (err error) {
+	dbKey := utils.CDR_STATS_QUEUE_PREFIX + id
+	err = rs.Cmd("DEL", dbKey).Err
+	return err
 }
 
 func (rs *RedisStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
@@ -948,6 +1046,13 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool, transactionID 
 	cache.Set(key, ats, cacheCommit(transactionID), transactionID)
 	return
 }
+func (rs *RedisStorage) RemoveActionPlan(key string, transactionID string) error {
+	cCommit := cacheCommit(transactionID)
+	dbKey := utils.ACTION_PLAN_PREFIX + key
+	err := rs.Cmd("DEL", dbKey).Err
+	cache.RemKey(dbKey, cCommit, transactionID)
+	return err
+}
 
 func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
@@ -1118,6 +1223,16 @@ func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 	if err = rs.Cmd("SET", key, marshaled).Err; err != nil {
 		return
 	}
+	return
+}
+
+func (rs *RedisStorage) RemoveDerivedChargersDrv(id, transactionID string) (err error) {
+	cCommit := cacheCommit(transactionID)
+	key := utils.DERIVEDCHARGERS_PREFIX + id
+	if err = rs.Cmd("DEL", key).Err; err != nil {
+		return err
+	}
+	cache.RemKey(key, cCommit, transactionID)
 	return
 }
 
@@ -1293,6 +1408,13 @@ func (rs *RedisStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]
 		}
 	}
 	return rs.Cmd("HMSET", dbKey, mp).Err
+}
+
+func (rs *RedisStorage) RemoveReqFilterIndexesDrv(id string) (err error) {
+	if err = rs.Cmd("DEL", id).Err; err != nil {
+		return err
+	}
+	return
 }
 
 func (rs *RedisStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {

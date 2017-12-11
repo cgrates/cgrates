@@ -428,6 +428,66 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	return nil
 }
 
+func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+		return utils.ErrInvalidKey
+	}
+	colName, ok := ms.getColNameForPrefix(prefix)
+	if !ok {
+		return utils.ErrInvalidKey
+	}
+	session, col := ms.conn(colName)
+	defer session.Close()
+	if _, err := col.RemoveAll(bson.M{}); err != nil {
+		return err
+	}
+	var keys []string
+	switch prefix {
+	case utils.REVERSE_DESTINATION_PREFIX:
+		if keys, err = ms.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			if err := ms.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+	case utils.REVERSE_ALIASES_PREFIX:
+		if keys, err = ms.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], true, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			if err := ms.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+	case utils.AccountActionPlansPrefix:
+		if keys, err = ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			apl, err := ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			for acntID := range apl.AccountIDs {
+				if err = ms.RemAccountActionPlans(acntID, []string{apl.Id}); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
 	session := ms.session.Copy()
 	defer session.Close()
@@ -693,6 +753,39 @@ func (ms *MongoStorage) SetRatingPlanDrv(rp *RatingPlan) error {
 	return err
 }
 
+func (ms *MongoStorage) RemoveRatingPlanDrv(key string) error {
+	session, col := ms.conn(colRpl)
+	defer session.Close()
+	var kv struct {
+		Key   string
+		Value []byte
+	}
+	var rp RatingPlan
+	iter := col.Find(bson.M{"key": key}).Iter()
+	for iter.Next(&kv) {
+		if err := col.Remove(bson.M{"key": kv.Key}); err != nil {
+			return err
+		}
+		b := bytes.NewBuffer(kv.Value)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return err
+		}
+		if err = ms.ms.Unmarshal(out, &rp); err != nil {
+			return err
+		}
+		if err == nil && historyScribe != nil {
+			var response int
+			go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
+		}
+	}
+	return iter.Close()
+}
+
 func (ms *MongoStorage) GetRatingProfileDrv(key string) (rp *RatingProfile, err error) {
 	session, col := ms.conn(colRpf)
 	defer session.Close()
@@ -764,6 +857,13 @@ func (ms *MongoStorage) SetLCRDrv(lcr *LCR) (err error) {
 		return
 	}
 	return
+}
+
+func (ms *MongoStorage) RemoveLCRDrv(id, transactionID string) (err error) {
+	session, col := ms.conn(colLcr)
+	defer session.Close()
+	err = col.Remove(bson.M{"key": id})
+	return err
 }
 
 func (ms *MongoStorage) GetDestination(key string, skipCache bool, transactionID string) (result *Destination, err error) {
@@ -1013,6 +1113,13 @@ func (ms *MongoStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	return
 }
 
+func (ms *MongoStorage) RemoveSharedGroupDrv(id, transactionID string) (err error) {
+	session, col := ms.conn(colShg)
+	defer session.Close()
+	err = col.Remove(bson.M{"id": id})
+	return err
+}
+
 func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
 	result = new(Account)
 	session, col := ms.conn(colAcc)
@@ -1076,6 +1183,15 @@ func (ms *MongoStorage) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
 		Value *CDRStatsQueue
 	}{Key: sq.GetId(), Value: sq})
 	return
+}
+
+func (ms *MongoStorage) RemoveCdrStatsQueueDrv(id string) (err error) {
+	session, col := ms.conn(colStq)
+	defer session.Close()
+	if err = col.Remove(bson.M{"key": id}); err != nil && err != mgo.ErrNotFound {
+		return
+	}
+	return nil
 }
 
 func (ms *MongoStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
@@ -1498,6 +1614,19 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	return err
 }
 
+func (ms *MongoStorage) RemoveActionPlan(key string, transactionID string) error {
+	session, col := ms.conn(colApl)
+	defer session.Close()
+	dbKey := utils.ACTION_PLAN_PREFIX + key
+	cCommit := cacheCommit(transactionID)
+	cache.RemKey(dbKey, cCommit, transactionID)
+	err := col.Remove(bson.M{"key": key})
+	if err != nil && err == mgo.ErrNotFound {
+		err = nil
+	}
+	return err
+}
+
 func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	keys, err := ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
@@ -1659,6 +1788,18 @@ func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 	return err
 }
 
+func (ms *MongoStorage) RemoveDerivedChargersDrv(id, transactionID string) (err error) {
+	cCommit := cacheCommit(transactionID)
+	cacheKey := utils.DERIVEDCHARGERS_PREFIX + id
+	session, col := ms.conn(colDcs)
+	defer session.Close()
+	if err = col.Remove(bson.M{"key": id}); err != nil && err != mgo.ErrNotFound {
+		return
+	}
+	cache.RemKey(cacheKey, cCommit, transactionID)
+	return nil
+}
+
 func (ms *MongoStorage) SetCdrStatsDrv(cs *CdrStats) error {
 	session, col := ms.conn(colCrs)
 	defer session.Close()
@@ -1801,6 +1942,15 @@ func (ms *MongoStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]
 		Value map[string]map[string]utils.StringMap
 	}{dbKey, indexes})
 	return
+}
+
+func (ms *MongoStorage) RemoveReqFilterIndexesDrv(id string) (err error) {
+	session, col := ms.conn(colRFI)
+	defer session.Close()
+	if err = col.Remove(bson.M{"key": id}); err != nil {
+		return
+	}
+	return nil
 }
 
 func (ms *MongoStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {

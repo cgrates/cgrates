@@ -146,6 +146,54 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 	return nil
 }
 
+func (ms *MapStorage) RemoveReverseForPrefix(prefix string) error {
+	// ToDo: should do transaction
+	keys, err := ms.GetKeysForPrefix(prefix)
+	if err != nil {
+		return err
+	}
+	for _, key := range keys {
+		ms.mu.Lock()
+		delete(ms.dict, key)
+		ms.mu.Unlock()
+	}
+	switch prefix {
+	case utils.REVERSE_DESTINATION_PREFIX:
+		keys, err = ms.GetKeysForPrefix(utils.DESTINATION_PREFIX)
+		if err != nil {
+			return err
+		}
+		for _, key := range keys {
+			dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			if err := ms.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+	case utils.REVERSE_ALIASES_PREFIX:
+		keys, err = ms.GetKeysForPrefix(utils.ALIASES_PREFIX)
+		if err != nil {
+			return err
+		}
+		for _, key := range keys {
+			al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], false, utils.NonTransactional)
+			if err != nil {
+				return err
+			}
+			if err := ms.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+	case utils.AccountActionPlansPrefix:
+		return nil
+	default:
+		return utils.ErrInvalidKey
+	}
+	return nil
+}
+
 func (ms *MapStorage) IsDBEmpty() (resp bool, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -217,6 +265,22 @@ func (ms *MapStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
 	return
 }
 
+func (ms *MapStorage) RemoveRatingPlanDrv(key string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	for k := range ms.dict {
+		if strings.HasPrefix(k, key) {
+			delete(ms.dict, key)
+			response := 0
+			rpf := &RatingPlan{Id: key}
+			if historyScribe != nil {
+				go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(), &response)
+			}
+		}
+	}
+	return
+}
+
 func (ms *MapStorage) GetRatingProfileDrv(key string) (rpf *RatingProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -276,6 +340,13 @@ func (ms *MapStorage) SetLCRDrv(lcr *LCR) (err error) {
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(lcr)
 	ms.dict[utils.LCR_PREFIX+lcr.GetId()] = result
+	return
+}
+
+func (ms *MapStorage) RemoveLCRDrv(id, transactionID string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, utils.LCR_PREFIX+id)
 	return
 }
 
@@ -495,6 +566,13 @@ func (ms *MapStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	return
 }
 
+func (ms *MapStorage) RemoveSharedGroupDrv(id, transactionID string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, utils.SHARED_GROUP_PREFIX+id)
+	return
+}
+
 func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -558,6 +636,14 @@ func (ms *MapStorage) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sq)
 	ms.dict[utils.CDR_STATS_QUEUE_PREFIX+sq.GetId()] = result
+	return
+}
+
+func (ms *MapStorage) RemoveCdrStatsQueueDrv(id string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+
+	delete(ms.dict, id)
 	return
 }
 
@@ -847,6 +933,15 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool,
 	return
 }
 
+func (ms *MapStorage) RemoveActionPlan(key string, transactionID string) error {
+	cCommit := cacheCommit(transactionID)
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
+	cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+	return nil
+}
+
 func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	keys, err := ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
@@ -993,6 +1088,15 @@ func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers,
 	ms.dict[key] = result
 	cache.RemKey(key, cCommit, transactionID)
 	return err
+}
+
+func (ms *MapStorage) RemoveDerivedChargersDrv(id, transactionID string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	cCommit := cacheCommit(transactionID)
+	delete(ms.dict, id)
+	cache.RemKey(id, cCommit, transactionID)
+	return
 }
 
 func (ms *MapStorage) SetCdrStatsDrv(cs *CdrStats) error {
@@ -1173,6 +1277,14 @@ func (ms *MapStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]ma
 	ms.dict[dbKey] = result
 	return
 }
+
+func (ms *MapStorage) RemoveReqFilterIndexesDrv(id string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, id)
+	return
+}
+
 func (ms *MapStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()

@@ -2653,3 +2653,351 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	}
 	return nil, errors.New("Unsupported load category")
 }
+
+func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err error) {
+	for _, d := range tpr.destinations {
+		err = tpr.dm.DataDB().RemoveDestination(d.Id, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", d.Id, " : ", d.Prefixes)
+		}
+	}
+	if verbose {
+		log.Print("Reverse Destinations:")
+		for id, vals := range tpr.revDests {
+			log.Printf("\t %s : %+v", id, vals)
+		}
+	}
+	if verbose {
+		log.Print("Rating Plans:")
+	}
+	for _, rp := range tpr.ratingPlans {
+		err = tpr.dm.RemoveRatingPlan(rp.Id, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", rp.Id)
+		}
+	}
+	if verbose {
+		log.Print("Rating Profiles:")
+	}
+	for _, rp := range tpr.ratingProfiles {
+		err = tpr.dm.RemoveRatingProfile(rp.Id, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", rp.Id)
+		}
+	}
+	if verbose {
+		log.Print("Action Plans:")
+	}
+	for k, _ := range tpr.actionPlans {
+		err = tpr.dm.DataDB().RemoveActionPlan(k, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Account Action Plans:")
+		for id, vals := range tpr.acntActionPlans {
+			log.Printf("\t %s : %+v", id, vals)
+		}
+	}
+	if verbose {
+		log.Print("Action Triggers:")
+	}
+	for k, _ := range tpr.actionsTriggers {
+		err = tpr.dm.RemoveActionTriggers(k, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Shared Groups:")
+	}
+	for k, _ := range tpr.sharedGroups {
+		err = tpr.dm.RemoveSharedGroup(k, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("LCR Rules:")
+	}
+	for k, lcr := range tpr.lcrs {
+		err = tpr.dm.RemoveLCR(lcr.GetId(), utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Actions:")
+	}
+	for k, _ := range tpr.actions {
+		err = tpr.dm.RemoveActions(k, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Account Actions:")
+	}
+	for _, ub := range tpr.accountActions {
+		err = tpr.dm.DataDB().RemoveAccount(ub.ID)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", ub.ID)
+		}
+	}
+	if verbose {
+		log.Print("Derived Chargers:")
+	}
+	for key, _ := range tpr.derivedChargers {
+		err = tpr.dm.RemoveDerivedChargers(key, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", key)
+		}
+	}
+	if verbose {
+		log.Print("CDR Stats Queues:")
+	}
+	for _, sq := range tpr.cdrStats {
+		err = tpr.dm.RemoveCdrStatsQueue(sq.Id)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", sq.Id)
+		}
+	}
+	if verbose {
+		log.Print("Users:")
+	}
+	for _, u := range tpr.users {
+		err = tpr.dm.RemoveUser(u.GetId())
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", u.GetId())
+		}
+	}
+	if verbose {
+		log.Print("Aliases:")
+	}
+	for _, al := range tpr.aliases {
+		err = tpr.dm.DataDB().RemoveAlias(al.GetId(), utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", al.GetId())
+		}
+	}
+	if verbose {
+		log.Print("Reverse Aliases:")
+		for id, vals := range tpr.revAliases {
+			log.Printf("\t %s : %+v", id, vals)
+		}
+	}
+	if verbose {
+		log.Print("Filters:")
+	}
+	for _, tpTH := range tpr.filters {
+		if err = tpr.dm.RemoveFilter(tpTH.Tenant, tpTH.ID, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
+	if verbose {
+		log.Print("ResourceProfiles:")
+	}
+	for _, tpRsp := range tpr.resProfiles {
+		if err = tpr.dm.RemoveResourceProfile(tpRsp.Tenant, tpRsp.ID, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpRsp.Tenant)
+		}
+	}
+	if verbose {
+		log.Print("Resources:")
+	}
+	for _, rTid := range tpr.resources {
+		if err = tpr.dm.RemoveResource(rTid.Tenant, rTid.ID, utils.NonTransactional); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", rTid.TenantID())
+		}
+	}
+	if verbose {
+		log.Print("StatQueueProfiles:")
+	}
+	for _, tpST := range tpr.sqProfiles {
+		if err = tpr.dm.RemoveStatQueueProfile(tpST.Tenant, tpST.ID, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpST.Tenant)
+		}
+	}
+	if verbose {
+		log.Print("StatQueues:")
+	}
+	for _, sqTntID := range tpr.statQueues {
+		if err = tpr.dm.RemStatQueue(sqTntID.Tenant, sqTntID.ID, utils.NonTransactional); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", sqTntID.Tenant)
+		}
+	}
+	if verbose {
+		log.Print("ThresholdProfiles:")
+	}
+	for _, tpTH := range tpr.thProfiles {
+		if err = tpr.dm.RemoveThresholdProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
+	if verbose {
+		log.Print("Thresholds:")
+	}
+	for _, thd := range tpr.thresholds {
+		if err = tpr.dm.RemoveThreshold(thd.Tenant, thd.ID, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", thd.Tenant)
+		}
+	}
+
+	if verbose {
+		log.Print("SupplierProfiles:")
+	}
+	for _, tpTH := range tpr.sppProfiles {
+		if err = tpr.dm.RemoveSupplierProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
+	if verbose {
+		log.Print("Timings:")
+	}
+	for _, t := range tpr.timings {
+		if err = tpr.dm.RemoveTiming(t.ID, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", t.ID)
+		}
+	}
+	if !disable_reverse {
+		if len(tpr.destinations) > 0 {
+			if verbose {
+				log.Print("Removing reverse destinations")
+			}
+			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+				return err
+			}
+		}
+		if len(tpr.acntActionPlans) > 0 {
+			if verbose {
+				log.Print("Removing account action plans")
+			}
+			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+				return err
+			}
+		}
+		if len(tpr.aliases) > 0 {
+			if verbose {
+				log.Print("Removing reverse aliases")
+			}
+			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
+				return err
+			}
+		}
+		if verbose {
+			log.Print("Indexing resource profiles")
+		}
+		for tenant, fltrIdxer := range tpr.resIndexers {
+			if err := tpr.dm.RemoveReqFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
+				return err
+			}
+			if verbose {
+				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
+			}
+		}
+
+		if verbose {
+			log.Print("StatQueue filter indexes:")
+		}
+		for tenant, fltrIdxer := range tpr.sqpIndexers {
+			if err := tpr.dm.RemoveReqFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
+				return err
+			}
+			if verbose {
+				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
+			}
+		}
+
+		if verbose {
+			log.Print("Threshold filter indexes:")
+		}
+		for tenant, fltrIdxer := range tpr.thdsIndexers {
+			if err := tpr.dm.RemoveReqFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
+				return err
+			}
+			if verbose {
+				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
+			}
+		}
+
+		if verbose {
+			log.Print("Indexing Supplier Profiles")
+		}
+		for tenant, fltrIdxer := range tpr.sppIndexers {
+			if err := tpr.dm.RemoveReqFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
+				return err
+			}
+			if verbose {
+				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
+			}
+		}
+	}
+	return
+}

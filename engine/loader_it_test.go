@@ -80,6 +80,107 @@ func TestLoaderITCreateStorTpTables(t *testing.T) {
 }
 
 // Loads data from csv files in tp scenario to dataDbCsv
+func TestLoaderITRemoveLoad(t *testing.T) {
+	/*var err error
+	for fn, v := range FileValidators {
+		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
+			t.Error("Failed validating data: ", err.Error())
+		}
+	}*/
+	loader = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATION_RATES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SHARED_GROUPS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.LCRS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_PLANS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.FiltersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv),
+	), "", "")
+
+	if err = loader.LoadDestinations(); err != nil {
+		t.Error("Failed loading destinations: ", err.Error())
+	}
+	if err = loader.LoadTimings(); err != nil {
+		t.Error("Failed loading timings: ", err.Error())
+	}
+	if err = loader.LoadRates(); err != nil {
+		t.Error("Failed loading rates: ", err.Error())
+	}
+	if err = loader.LoadDestinationRates(); err != nil {
+		t.Error("Failed loading destination rates: ", err.Error())
+	}
+	if err = loader.LoadRatingPlans(); err != nil {
+		t.Error("Failed loading rating plans: ", err.Error())
+	}
+	if err = loader.LoadRatingProfiles(); err != nil {
+		t.Error("Failed loading rating profiles: ", err.Error())
+	}
+	if err = loader.LoadActions(); err != nil {
+		t.Error("Failed loading actions: ", err.Error())
+	}
+	if err = loader.LoadActionPlans(); err != nil {
+		t.Error("Failed loading action timings: ", err.Error())
+	}
+	if err = loader.LoadActionTriggers(); err != nil {
+		t.Error("Failed loading action triggers: ", err.Error())
+	}
+	if err = loader.LoadAccountActions(); err != nil {
+		t.Error("Failed loading account actions: ", err.Error())
+	}
+	if err = loader.LoadDerivedChargers(); err != nil {
+		t.Error("Failed loading derived chargers: ", err.Error())
+	}
+	if err = loader.LoadLCRs(); err != nil {
+		t.Error("Failed loading lcr rules: ", err.Error())
+	}
+	if err = loader.LoadUsers(); err != nil {
+		t.Error("Failed loading users: ", err.Error())
+	}
+	if err = loader.LoadAliases(); err != nil {
+		t.Error("Failed loading aliases: ", err.Error())
+	}
+	if err = loader.LoadFilters(); err != nil {
+		t.Error("Failed loading filters: ", err.Error())
+	}
+	if err = loader.LoadResourceProfiles(); err != nil {
+		t.Error("Failed loading resource profiles: ", err.Error())
+	}
+	if err = loader.LoadStats(); err != nil {
+		t.Error("Failed loading stats: ", err.Error())
+	}
+	if err = loader.LoadThresholds(); err != nil {
+		t.Error("Failed loading thresholds: ", err.Error())
+	}
+	if err = loader.LoadSupplierProfiles(); err != nil {
+		t.Error("Failed loading Supplier profiles: ", err.Error())
+	}
+	if err = loader.LoadAttributeProfiles(); err != nil {
+		t.Error("Failed loading Alias profiles: ", err.Error())
+	}
+	if err := loader.WriteToDatabase(true, false, false); err != nil {
+		t.Error("Could not write data into dataDb: ", err.Error())
+	}
+	if err := loader.RemoveFromDatabase(false, true); err != nil {
+		t.Error("Could not write data into dataDb: ", err.Error())
+	}
+}
+
+// Loads data from csv files in tp scenario to dataDbCsv
 func TestLoaderITLoadFromCSV(t *testing.T) {
 	/*var err error
 	for fn, v := range FileValidators {
