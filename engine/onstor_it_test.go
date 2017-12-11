@@ -1148,9 +1148,9 @@ func testOnStorITCacheSupplierProfile(t *testing.T) {
 }
 
 func testOnStorITCacheAttributeProfile(t *testing.T) {
-	mapSubstitutes := make(map[string]map[string]*Substitute)
-	mapSubstitutes["FN1"] = make(map[string]*Substitute)
-	mapSubstitutes["FN1"]["Init1"] = &Substitute{
+	mapSubstitutes := make(map[string]map[string]*AttributeSubstitute)
+	mapSubstitutes["FN1"] = make(map[string]*AttributeSubstitute)
+	mapSubstitutes["FN1"]["Init1"] = &AttributeSubstitute{
 		FieldName: "FN1",
 		Initial:   "Init1",
 		Alias:     "Val1",
@@ -2493,9 +2493,9 @@ func testOnStorITCRUDSupplierProfile(t *testing.T) {
 }
 
 func testOnStorITCRUDAttributeProfile(t *testing.T) {
-	mapSubstitutes := make(map[string]map[string]*Substitute)
-	mapSubstitutes["FN1"] = make(map[string]*Substitute)
-	mapSubstitutes["FN1"]["Init1"] = &Substitute{
+	mapSubstitutes := make(map[string]map[string]*AttributeSubstitute)
+	mapSubstitutes["FN1"] = make(map[string]*AttributeSubstitute)
+	mapSubstitutes["FN1"]["Init1"] = &AttributeSubstitute{
 		FieldName: "FN1",
 		Initial:   "Init1",
 		Alias:     "Val1",

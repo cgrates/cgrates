@@ -67,7 +67,7 @@ func TestAttributeSITMySql(t *testing.T) {
 	}
 }
 
-func TsestAttributeSITMongo(t *testing.T) {
+func TestAttributeSITMongo(t *testing.T) {
 	alsPrfConfigDIR = "tutmongo"
 	for _, stest := range sTestsAlsPrf {
 		t.Run(alsPrfConfigDIR, stest)
@@ -138,8 +138,9 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 
 func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testAttributeSGetAttributeForEvent",
+		Tenant:  "cgrates.org",
+		ID:      "testAttributeSGetAttributeForEvent",
+		Context: utils.StringPointer(utils.ALIAS_CONTEXT_RATING),
 		Event: map[string]interface{}{
 			"Account":     "1007",
 			"Destination": "+491511231234",
@@ -152,14 +153,14 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		FilterIDs: []string{"FLTR_ACNT_1007"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
-		Substitute: []*engine.Substitute{
-			&engine.Substitute{
+		Substitute: []*engine.AttributeSubstitute{
+			&engine.AttributeSubstitute{
 				FieldName: utils.ACCOUNT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
 				Append:    false,
 			},
-			&engine.Substitute{
+			&engine.AttributeSubstitute{
 				FieldName: utils.SUBJECT,
 				Initial:   utils.ANY,
 				Alias:     "1001",
@@ -168,37 +169,43 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
-	eAttrPrf2 := &engine.ExternalAttributeProfile{
-		Tenant:    ev.Tenant,
-		ID:        "ATTR_1",
-		Context:   utils.ALIAS_CONTEXT_RATING,
-		FilterIDs: []string{"FLTR_ACNT_1007"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
-		Substitute: []*engine.Substitute{
-			&engine.Substitute{
-				FieldName: utils.SUBJECT,
-				Initial:   utils.ANY,
-				Alias:     "1001",
-				Append:    true,
-			},
-			&engine.Substitute{
-				FieldName: utils.ACCOUNT,
-				Initial:   utils.ANY,
-				Alias:     "1001",
-				Append:    false,
-			},
+	reverseSubstitute := []*engine.AttributeSubstitute{
+		&engine.AttributeSubstitute{
+			FieldName: utils.SUBJECT,
+			Initial:   utils.ANY,
+			Alias:     "1001",
+			Append:    true,
 		},
-		Weight: 10.0,
+		&engine.AttributeSubstitute{
+			FieldName: utils.ACCOUNT,
+			Initial:   utils.ANY,
+			Alias:     "1001",
+			Append:    false,
+		},
 	}
-	var attrReply engine.ExternalAttributeProfile
+
+	var attrReply *engine.ExternalAttributeProfile
 	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAttrPrf, &attrReply) &&
-		!reflect.DeepEqual(eAttrPrf2, &attrReply) { // second for reversed order of attributes
+	} else if !reflect.DeepEqual(eAttrPrf.Tenant, attrReply.Tenant) {
+		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Tenant, attrReply.Tenant)
+	} else if !reflect.DeepEqual(eAttrPrf.ID, attrReply.ID) {
+		t.Errorf("Expecting: %s, received: %s", eAttrPrf.ID, attrReply.ID)
+	} else if !reflect.DeepEqual(eAttrPrf.Context, attrReply.Context) {
+		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Tenant, attrReply.Tenant)
+	} else if !reflect.DeepEqual(eAttrPrf.FilterIDs, attrReply.FilterIDs) {
+		t.Errorf("Expecting: %s, received: %s", eAttrPrf.FilterIDs, attrReply.FilterIDs)
+	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ActivationTime.Local(), attrReply.ActivationInterval.ActivationTime.Local()) {
 		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+			eAttrPrf.ActivationInterval.ActivationTime.Local(), attrReply.ActivationInterval.ActivationTime.Local())
+	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ExpiryTime.Local(), attrReply.ActivationInterval.ExpiryTime.Local()) {
+		t.Errorf("Expecting: %s, received: %s",
+			eAttrPrf.ActivationInterval.ExpiryTime.Local(), attrReply.ActivationInterval.ExpiryTime.Local())
+	} else if !reflect.DeepEqual(eAttrPrf.Substitute, attrReply.Substitute) && !reflect.DeepEqual(reverseSubstitute, attrReply.Substitute) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf.Substitute), utils.ToJSON(attrReply.Substitute))
+	} else if !reflect.DeepEqual(eAttrPrf.Weight, attrReply.Weight) {
+		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Weight, attrReply.Weight)
 	}
 }
 
@@ -261,8 +268,8 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitute: []*engine.Substitute{
-			&engine.Substitute{
+		Substitute: []*engine.AttributeSubstitute{
+			&engine.AttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
@@ -292,14 +299,14 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 }
 
 func testAttributeSUpdateAlsPrf(t *testing.T) {
-	alsPrf.Substitute = []*engine.Substitute{
-		&engine.Substitute{
+	alsPrf.Substitute = []*engine.AttributeSubstitute{
+		&engine.AttributeSubstitute{
 			FieldName: "FL1",
 			Initial:   "In1",
 			Alias:     "Al1",
 			Append:    true,
 		},
-		&engine.Substitute{
+		&engine.AttributeSubstitute{
 			FieldName: "FL2",
 			Initial:   "In2",
 			Alias:     "Al2",

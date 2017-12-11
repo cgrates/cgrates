@@ -54,9 +54,15 @@ func (alS *AttributeService) Shutdown() (err error) {
 
 // matchingAttributeProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREvent) (aPrfls AttributeProfiles, err error) {
+	var attrIdxKey string
+	contextVal := utils.META_DEFAULT
+	if ev.Context != nil && *ev.Context != "" {
+		contextVal = *ev.Context
+	}
+	attrIdxKey = utils.ConcatenatedKey(ev.Tenant, contextVal)
 	matchingAPs := make(map[string]*AttributeProfile)
 	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.indexedFields,
-		alS.dm, utils.AttributeProfilesStringIndex+ev.Tenant)
+		alS.dm, utils.AttributeProfilesStringIndex+attrIdxKey)
 	if err != nil {
 		return nil, err
 	}

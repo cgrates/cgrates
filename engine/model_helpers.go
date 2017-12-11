@@ -2736,16 +2736,16 @@ func APItoAttributeProfile(tpTH *utils.TPAttribute, timezone string) (th *Attrib
 		Weight:      tpTH.Weight,
 		FilterIDs:   []string{},
 		Context:     tpTH.Context,
-		Substitutes: make(map[string]map[string]*Substitute, len(tpTH.Substitutes)),
+		Substitutes: make(map[string]map[string]*AttributeSubstitute, len(tpTH.Substitutes)),
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
 	}
 	for _, reqAttr := range tpTH.Substitutes {
 		if _, has := th.Substitutes[reqAttr.FieldName]; !has {
-			th.Substitutes[reqAttr.FieldName] = make(map[string]*Substitute)
+			th.Substitutes[reqAttr.FieldName] = make(map[string]*AttributeSubstitute)
 		}
-		th.Substitutes[reqAttr.FieldName][reqAttr.Initial] = &Substitute{
+		th.Substitutes[reqAttr.FieldName][reqAttr.Initial] = &AttributeSubstitute{
 			FieldName: reqAttr.FieldName,
 			Initial:   reqAttr.Initial,
 			Alias:     reqAttr.Alias,

@@ -36,8 +36,8 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitute: []*Substitute{
-			&Substitute{
+		Substitute: []*AttributeSubstitute{
+			&AttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
@@ -46,9 +46,9 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrMap := make(map[string]map[string]*Substitute)
-	attrMap["FL1"] = make(map[string]*Substitute)
-	attrMap["FL1"]["In1"] = &Substitute{
+	attrMap := make(map[string]map[string]*AttributeSubstitute)
+	attrMap["FL1"] = make(map[string]*AttributeSubstitute)
+	attrMap["FL1"]["In1"] = &AttributeSubstitute{
 		FieldName: "FL1",
 		Initial:   "In1",
 		Alias:     "Al1",
@@ -74,9 +74,9 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 }
 
 func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
-	attrMap := make(map[string]map[string]*Substitute)
-	attrMap["FL1"] = make(map[string]*Substitute)
-	attrMap["FL1"]["In1"] = &Substitute{
+	attrMap := make(map[string]map[string]*AttributeSubstitute)
+	attrMap["FL1"] = make(map[string]*AttributeSubstitute)
+	attrMap["FL1"]["In1"] = &AttributeSubstitute{
 		FieldName: "FL1",
 		Initial:   "In1",
 		Alias:     "Al1",
@@ -104,8 +104,8 @@ func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitute: []*Substitute{
-			&Substitute{
+		Substitute: []*AttributeSubstitute{
+			&AttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
