@@ -1136,7 +1136,7 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 			Category:    cd.Category,
 			Account:     cd.Account,
 			Subject:     cd.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, cd, utils.EXTRA_FIELDS)
 
 	result, err := cd.GetMaxSessionDuration()

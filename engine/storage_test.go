@@ -120,7 +120,7 @@ func TestStorageGetAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Context:   utils.ALIAS_CONTEXT_RATING,
+		Context:   utils.MetaRating,
 		Values: AliasValues{
 			&AliasValue{
 				Pairs:         AliasPairs{"Subject": map[string]string{"b1": "aaa"}},
@@ -173,7 +173,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Context:   utils.ALIAS_CONTEXT_RATING,
+		Context:   utils.MetaRating,
 	}
 	alb := &Alias{
 		Direction: "*out",
@@ -183,8 +183,8 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Subject:   "b1",
 		Context:   "*other",
 	}
-	dm.DataDB().GetReverseAlias("aaa"+"Subject"+utils.ALIAS_CONTEXT_RATING, false, utils.NonTransactional)
-	if x, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.ALIAS_CONTEXT_RATING); ok {
+	dm.DataDB().GetReverseAlias("aaa"+"Subject"+utils.MetaRating, false, utils.NonTransactional)
+	if x, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.MetaRating); ok {
 		aliasKeys := x.([]string)
 		if len(aliasKeys) != 1 {
 			t.Error("Error getting reverse alias: ", aliasKeys, ala.GetId()+utils.ANY)
@@ -210,7 +210,7 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Context:   utils.ALIAS_CONTEXT_RATING,
+		Context:   utils.MetaRating,
 	}
 	alb := &Alias{
 		Direction: "*out",
@@ -230,10 +230,10 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 		t.Error("Error removing cached alias: ", ok)
 	}
 
-	if _, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); ok {
+	if _, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.MetaRating); ok {
 		t.Error("Error removing cached reverse alias: ", ok)
 	}
-	if _, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); ok {
+	if _, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.MetaRating); ok {
 		t.Error("Error removing cached reverse alias: ", ok)
 	}
 }
