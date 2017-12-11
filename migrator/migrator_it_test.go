@@ -35,7 +35,7 @@ var (
 	cfg_in          *config.CGRConfig
 	cfg_out         *config.CGRConfig
 	Move            = "move"
-	dbtype          string
+	action          string
 	mig             *Migrator
 	dataDir         = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
@@ -132,7 +132,7 @@ func TestMigratorITPostgresConnect(t *testing.T) {
 }
 
 func TestMigratorITPostgres(t *testing.T) {
-	dbtype = utils.REDIS
+	action = utils.REDIS
 	log.Print("REDIS+POSTGRES")
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnPostgres", stest)
@@ -180,7 +180,7 @@ func TestMigratorITRedisConnect(t *testing.T) {
 }
 
 func TestMigratorITRedis(t *testing.T) {
-	dbtype = utils.REDIS
+	action = utils.REDIS
 	log.Print("REDIS+MYSQL")
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnRedis", stest)
@@ -228,7 +228,7 @@ func TestMigratorITMongoConnect(t *testing.T) {
 }
 
 func TestMigratorITMongo(t *testing.T) {
-	dbtype = utils.MONGO
+	action = utils.MONGO
 	log.Print("MONGO")
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnMongo", stest)
@@ -281,7 +281,7 @@ func TestMigratorITMoveConnect(t *testing.T) {
 }
 
 func TestMigratorITMove(t *testing.T) {
-	dbtype = Move
+	action = Move
 	log.Print("Move")
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnMongo", stest)
@@ -318,7 +318,7 @@ func testMigratorAccounts(t *testing.T) {
 		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
 	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.DATA: engine.Balances{v2d}, utils.VOICE: engine.Balances{v2b}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
 	switch {
-	case dbtype == utils.REDIS:
+	case action == utils.REDIS:
 		err := mig.oldDataDB.setV1Account(v1Acc)
 		if err != nil {
 			t.Error("Error when setting v1 Accounts ", err.Error())
@@ -341,7 +341,7 @@ func testMigratorAccounts(t *testing.T) {
 		} else if !reflect.DeepEqual(testAccount, result) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
-	case dbtype == utils.MONGO:
+	case action == utils.MONGO:
 		err := mig.oldDataDB.setV1Account(v1Acc)
 		if err != nil {
 			t.Error("Error when marshaling ", err.Error())
@@ -362,7 +362,7 @@ func testMigratorAccounts(t *testing.T) {
 		if !reflect.DeepEqual(testAccount, result) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
-	case dbtype == Move:
+	case action == Move:
 		if err := mig.dmIN.DataDB().SetAccount(testAccount); err != nil {
 			log.Print("GOT ERR DMIN", err)
 		}
@@ -389,7 +389,7 @@ func testMigratorActionPlans(t *testing.T) {
 	v1ap := &v1ActionPlans{&v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}
 	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
 	switch {
-	case dbtype == utils.REDIS:
+	case action == utils.REDIS:
 		err := mig.oldDataDB.setV1ActionPlans(v1ap)
 		if err != nil {
 			t.Error("Error when setting v1 ActionPlan ", err.Error())
@@ -414,7 +414,7 @@ func testMigratorActionPlans(t *testing.T) {
 		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
 			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
-	case dbtype == utils.MONGO:
+	case action == utils.MONGO:
 		err := mig.oldDataDB.setV1ActionPlans(v1ap)
 		if err != nil {
 			t.Error("Error when setting v1 ActionPlans ", err.Error())
@@ -439,7 +439,7 @@ func testMigratorActionPlans(t *testing.T) {
 		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
 			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
-	case dbtype == Move:
+	case action == Move:
 		if err := mig.dmIN.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -499,7 +499,7 @@ func testMigratorActionTriggers(t *testing.T) {
 		},
 	}
 	switch {
-	case dbtype == utils.REDIS:
+	case action == utils.REDIS:
 		err := mig.oldDataDB.setV1ActionTriggers(v1atrs)
 		if err != nil {
 			t.Error("Error when setting v1 ActionTriggers ", err.Error())
@@ -580,13 +580,13 @@ func testMigratorActionTriggers(t *testing.T) {
 		} else if !reflect.DeepEqual(atrs[0].Balance.Blocker, result[0].Balance.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Blocker, result[0].Balance.Blocker)
 		}
-	case dbtype == utils.MONGO:
+	case action == utils.MONGO:
 		err, _ := mig.Migrate([]string{utils.MetaActionTriggers})
 		if err != nil && err != utils.ErrNotImplemented {
 			t.Error("Error when migrating ActionTriggers ", err.Error())
 		}
 
-	case dbtype == Move:
+	case action == Move:
 		if err := mig.dmIN.SetActionTriggers(atrs[0].ID, atrs, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -710,7 +710,7 @@ func testMigratorActions(t *testing.T) {
 		},
 	}
 	switch {
-	case dbtype == utils.REDIS:
+	case action == utils.REDIS:
 		err := mig.oldDataDB.setV1Actions(v1act)
 		if err != nil {
 			t.Error("Error when setting v1 Actions ", err.Error())
@@ -732,7 +732,7 @@ func testMigratorActions(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", *act, result)
 		}
 
-	case dbtype == utils.MONGO:
+	case action == utils.MONGO:
 		err := mig.oldDataDB.setV1Actions(v1act)
 		if err != nil {
 			t.Error("Error when setting v1 Actions ", err.Error())
@@ -753,7 +753,7 @@ func testMigratorActions(t *testing.T) {
 		if !reflect.DeepEqual(*act, result) {
 			t.Errorf("Expecting: %+v, received: %+v", *act, result)
 		}
-	case dbtype == Move:
+	case action == Move:
 		if err := mig.dmIN.SetActions((*v1act)[0].Id, *act, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -792,7 +792,7 @@ func testMigratorSharedGroups(t *testing.T) {
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
 	switch {
-	case dbtype == utils.REDIS:
+	case action == utils.REDIS:
 		err := mig.oldDataDB.setV1SharedGroup(v1sqp)
 		if err != nil {
 			t.Error("Error when setting v1 SharedGroup ", err.Error())
@@ -813,7 +813,7 @@ func testMigratorSharedGroups(t *testing.T) {
 		if !reflect.DeepEqual(sqp, result) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
 		}
-	case dbtype == utils.MONGO:
+	case action == utils.MONGO:
 		err := mig.oldDataDB.setV1SharedGroup(v1sqp)
 		if err != nil {
 			t.Error("Error when setting v1 SharedGroup ", err.Error())
@@ -834,7 +834,7 @@ func testMigratorSharedGroups(t *testing.T) {
 		if !reflect.DeepEqual(sqp, result) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
 		}
-	case dbtype == Move:
+	case action == Move:
 		if err := mig.dmIN.SetSharedGroup(sqp, utils.NonTransactional); err != nil {
 			t.Error("Error when setting SharedGroup ", err.Error())
 		}
@@ -940,7 +940,7 @@ func testMigratorStats(t *testing.T) {
 		}
 	}
 	switch {
-	case dbtype == utils.REDIS:
+	case action == utils.REDIS:
 		err := mig.oldDataDB.setV1Stats(v1Sts)
 		if err != nil {
 			t.Error("Error when setting v1Stat ", err.Error())
@@ -1009,7 +1009,7 @@ func testMigratorStats(t *testing.T) {
 		if !reflect.DeepEqual(sq.ID, result2.ID) {
 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
 		}
-	case dbtype == utils.MONGO:
+	case action == utils.MONGO:
 		err := mig.oldDataDB.setV1Stats(v1Sts)
 		if err != nil {
 			t.Error("Error when setting v1Stat ", err.Error())
@@ -1077,7 +1077,7 @@ func testMigratorStats(t *testing.T) {
 		if !reflect.DeepEqual(sq.ID, result2.ID) {
 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
 		}
-	case dbtype == Move:
+	case action == Move:
 		if err := mig.dmIN.SetStatQueueProfile(sqp); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
@@ -1158,7 +1158,7 @@ func testMigratorThreshold(t *testing.T) {
 	}
 
 	switch {
-	case dbtype == utils.REDIS:
+	case action == utils.REDIS:
 		if err := mig.dmIN.SetFilter(filter); err != nil {
 			t.Error("Error when setting Filter ", err.Error())
 		}
@@ -1196,7 +1196,7 @@ func testMigratorThreshold(t *testing.T) {
 		if !reflect.DeepEqual(thp.ID, thpr.ID) {
 			t.Errorf("Expecting: %+v, received: %+v", thp.ID, thpr.ID)
 		}
-	case dbtype == utils.MONGO:
+	case action == utils.MONGO:
 		if err := mig.dmIN.SetFilter(filter); err != nil {
 			t.Error("Error when setting Filter ", err.Error())
 		}
@@ -1234,7 +1234,7 @@ func testMigratorThreshold(t *testing.T) {
 		if !reflect.DeepEqual(thp.ID, thpr.ID) {
 			t.Errorf("Expecting: %+v, received: %+v", thp.ID, thpr.ID)
 		}
-	case dbtype == Move:
+	case action == Move:
 		if err := mig.dmIN.SetFilter(filter); err != nil {
 			t.Error("Error when setting Filter ", err.Error())
 		}
@@ -1304,7 +1304,7 @@ func testMigratorAlias(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.DataDB().SetAlias(alias, utils.NonTransactional); err != nil {
 			t.Error("Error when setting Alias ", err.Error())
@@ -1327,62 +1327,6 @@ func testMigratorAlias(t *testing.T) {
 		}
 	}
 }
-
-//WILL UPDATE AFTER RELEASE OF NEW ALIAS
-//FIXME
-// func testMigratorReverseAlias(t *testing.T) {
-// 	alias := &engine.Alias{
-// 		Direction: "*out",
-// 		Tenant:    "cgrates.org",
-// 		Category:  "call",
-// 		Account:   "dan",
-// 		Subject:   "dan",
-// 		Context:   "*rating",
-// 		Values: engine.AliasValues{
-// 			&engine.AliasValue{
-// 				DestinationId: "EU_LANDLINE",
-// 				Pairs: engine.AliasPairs{
-// 					"Subject": map[string]string{
-// 						"dan": "dan1",
-// 						"rif": "rif1",
-// 					},
-// 					"Cli": map[string]string{
-// 						"0723": "0724",
-// 					},
-// 				},
-// 				Weight: 10,
-// 			},
-
-// 			&engine.AliasValue{
-// 				DestinationId: "GLOBAL1",
-// 				Pairs:         engine.AliasPairs{"Subject": map[string]string{"dan": "dan2"}},
-// 				Weight:        20,
-// 			},
-// 		},
-// 	}
-// 	switch dbtype {
-// 	case Move:
-// 		if err := mig.dmIN.DataDB().SetReverseAlias(alias, utils.NonTransactional); err != nil {
-// 			t.Error("Error when setting ReverseAlias ", err.Error())
-// 		}
-// 		currentVersion := engine.CurrentDataDBVersions()
-// 		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
-// 		if err != nil {
-// 			t.Error("Error when setting version for ReverseAlias ", err.Error())
-// 		}
-// 		err, _ = mig.Migrate([]string{utils.MetaReverseAlias})
-// 		if err != nil {
-// 			t.Error("Error when migrating ReverseAlias ", err.Error())
-// 		}
-// 		result, err := mig.dmOut.DataDB().GetReverseAlias(alias.GetId(), true, utils.NonTransactional)
-// 		if err != nil {
-// 			t.Error("Error when getting ReverseAlias ", err.Error())
-// 		}
-// 		if !reflect.DeepEqual(alias, result) {
-// 			t.Errorf("Expecting: %+v, received: %+v", alias, result)
-// 		}
-// 	}
-// }
 
 func testMigratorCdrStats(t *testing.T) {
 	cdrs := &engine.CdrStats{
@@ -1411,7 +1355,7 @@ func testMigratorCdrStats(t *testing.T) {
 		RatedSubject:    []string{},                                                                       // CDRFieldFilter on RatedSubjects
 		CostInterval:    []float64{},                                                                      // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.SetCdrStats(cdrs); err != nil {
 			t.Error("Error when setting CdrStats ", err.Error())
@@ -1454,7 +1398,7 @@ func testMigratorDerivedChargers(t *testing.T) {
 		},
 	}
 	keyDCS := utils.ConcatenatedKey("*out", "itsyscom.com", "call", "dan", "dan")
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.DataDB().SetDerivedChargers(keyDCS, dcs, utils.NonTransactional); err != nil {
 			t.Error("Error when setting DerivedChargers ", err.Error())
@@ -1481,7 +1425,7 @@ func testMigratorDerivedChargers(t *testing.T) {
 func testMigratorDestinations(t *testing.T) {
 	dst := &engine.Destination{Id: "CRUDDestination2", Prefixes: []string{"+491", "+492", "+493"}}
 
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.DataDB().SetDestination(dst, utils.NonTransactional); err != nil {
 			t.Error("Error when setting Destinations ", err.Error())
@@ -1507,7 +1451,7 @@ func testMigratorDestinations(t *testing.T) {
 
 func testMigratorReverseDestinations(t *testing.T) {
 	dst := &engine.Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+494", "+495", "+496"}}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.DataDB().SetDestination(dst, utils.NonTransactional); err != nil {
 			t.Error("Error when setting Destinations ", err.Error())
@@ -1564,7 +1508,7 @@ func testMigratorLCR(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.SetLCR(lcr, utils.NonTransactional); err != nil {
 			t.Error("Error when setting Lcr ", err.Error())
@@ -1625,7 +1569,7 @@ func testMigratorRatingPlan(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 			t.Error("Error when setting RatingPlan ", err.Error())
@@ -1660,7 +1604,7 @@ func testMigratorRatingProfile(t *testing.T) {
 				CdrStatQueueIds: []string{},
 			}},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 			t.Error("Error when setting RatingProfile ", err.Error())
@@ -1699,7 +1643,7 @@ func testMigratorRQF(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.SetFilter(fp); err != nil {
 			t.Error("Error when setting RequestFilter ", err.Error())
@@ -1736,7 +1680,7 @@ func testMigratorResource(t *testing.T) {
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.SetResourceProfile(rL); err != nil {
 			t.Error("Error when setting ResourceProfile ", err.Error())
@@ -1766,7 +1710,7 @@ func testMigratorSubscribers(t *testing.T) {
 		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
 	sbscID := "testOnStorITCRUDSubscribers"
 
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.SetSubscriber(sbscID, sbsc); err != nil {
 			t.Error("Error when setting RatingProfile ", err.Error())
@@ -1802,7 +1746,7 @@ func testMigratorTimings(t *testing.T) {
 		StartTime: "00:00:00",
 		EndTime:   "",
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.dmIN.SetTiming(tmg); err != nil {
 			t.Error("Error when setting Timings ", err.Error())
@@ -1852,7 +1796,7 @@ func testMigratorTPRatingProfile(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPRatingProfiles(tpRatingProfile); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
@@ -1904,7 +1848,7 @@ func testMigratorTPSuppliers(t *testing.T) {
 			Weight:  20,
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPSuppliers(tpSplPr); err != nil {
 			t.Error("Error when setting TpSupplier ", err.Error())
@@ -1975,7 +1919,7 @@ func testMigratorTPActions(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPActions(tpActions); err != nil {
 			t.Error("Error when setting TpActions ", err.Error())
@@ -2012,7 +1956,7 @@ func testMigratorTPAccountActions(t *testing.T) {
 			Disabled:         false,
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPAccountActions(tpAccActions); err != nil {
 			t.Error("Error when setting TpAccountActions ", err.Error())
@@ -2095,7 +2039,7 @@ func testMigratorTpActionTriggers(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPActionTriggers(tpActionTriggers); err != nil {
 			t.Error("Error when setting TpActionTriggers ", err.Error())
@@ -2138,7 +2082,7 @@ func testMigratorTpActionPlans(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPActionPlans(tpAccPlan); err != nil {
 			t.Error("Error when setting TpActionPlans ", err.Error())
@@ -2182,7 +2126,7 @@ func testMigratorTpUsers(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPUsers(tpUser); err != nil {
 			t.Error("Error when setting TpUsers ", err.Error())
@@ -2217,7 +2161,7 @@ func testMigratorTpTimings(t *testing.T) {
 		Time:      "15:00:00Z",
 	},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPTimings(tpTiming); err != nil {
 			t.Error("Error when setting TpTiming ", err.Error())
@@ -2260,7 +2204,7 @@ func testMigratorTpThreshold(t *testing.T) {
 			Async:     true,
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPThresholds(tpThreshold); err != nil {
 			t.Error("Error when setting TpThreshold ", err.Error())
@@ -2304,7 +2248,7 @@ func testMigratorTpStats(t *testing.T) {
 			Thresholds: []string{"ThreshValue", "ThreshValueTwo"},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPStats(tpStat); err != nil {
 			t.Error("Error when setting TpStats ", err.Error())
@@ -2352,7 +2296,7 @@ func testMigratorTpSharedGroups(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPSharedGroups(tpSharedGroups); err != nil {
 			t.Error("Error when setting TpSharedGroups ", err.Error())
@@ -2396,7 +2340,7 @@ func testMigratorTpResources(t *testing.T) {
 			Thresholds:        []string{"ValOne", "ValTwo"},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPResources(tpRes); err != nil {
 			t.Error("Error when setting TpResources ", err.Error())
@@ -2445,7 +2389,7 @@ func testMigratorTpRatingProfiles(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPRatingProfiles(tpRatingProfile); err != nil {
 			t.Error("Error when setting TpRatingProfiles ", err.Error())
@@ -2488,7 +2432,7 @@ func testMigratorTpRatingPlans(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPRatingPlans(tpRatingPlan); err != nil {
 			t.Error("Error when setting TpRatingPlans ", err.Error())
@@ -2535,7 +2479,7 @@ func testMigratorTpRates(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPRates(tpRate); err != nil {
 			t.Error("Error when setting TpRates ", err.Error())
@@ -2612,7 +2556,7 @@ func testMigratorTpLCRRules(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPLCRs(tpLcrRules); err != nil {
 			t.Error("Error when setting TpLCRRules ", err.Error())
@@ -2655,7 +2599,7 @@ func testMigratorTpFilter(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPFilters(tpFilter); err != nil {
 			t.Error("Error when setting TpFilter ", err.Error())
@@ -2687,7 +2631,7 @@ func testMigratorTpDestination(t *testing.T) {
 			Prefixes: []string{"+49", "+4915"},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPDestinations(tpDestination); err != nil {
 			t.Error("Error when setting TpDestination ", err.Error())
@@ -2729,7 +2673,7 @@ func testMigratorTpDestinationRate(t *testing.T) {
 		},
 	}
 
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPDestinationRates(tpDestRate); err != nil {
 			t.Error("Error when setting TpDestinationRate ", err.Error())
@@ -2796,7 +2740,7 @@ func testMigratorTpDerivedChargers(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPDerivedChargers(tpDerivedChargers); err != nil {
 			t.Error("Error when setting TpDerivedChargers ", err.Error())
@@ -2881,7 +2825,7 @@ func testMigratorTpCdrStats(t *testing.T) {
 			},
 		},
 	}
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPCdrStats(tpCdrStats); err != nil {
 			t.Error("Error when setting TpCdrStats ", err.Error())
@@ -2927,7 +2871,7 @@ func testMigratorTpAliases(t *testing.T) {
 		},
 	}
 
-	switch dbtype {
+	switch action {
 	case Move:
 		if err := mig.InStorDB().SetTPAliases(tpAliases); err != nil {
 			t.Error("Error when setting TpAliases ", err.Error())
