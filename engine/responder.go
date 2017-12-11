@@ -47,7 +47,8 @@ type AttrGetLcr struct {
 
 type Responder struct {
 	ExitChan         chan bool
-	Stats            rpcclient.RpcClientConnection
+	CdrStats         rpcclient.RpcClientConnection
+	AttributeS       rpcclient.RpcClientConnection
 	Timeout          time.Duration
 	Timezone         string
 	MaxComputedUsage map[string]time.Duration
@@ -554,7 +555,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	if !rs.usageAllowed(cd.TOR, cd.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
-	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.Stats, attrs.LCRFilter, attrs.Paginator)
+	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.CdrStats, attrs.LCRFilter, attrs.Paginator)
 	if err != nil {
 		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
 		return err
