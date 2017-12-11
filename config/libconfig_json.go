@@ -85,6 +85,7 @@ type RalsJsonCfg struct {
 	Stats_conns                 *[]*HaPoolJsonCfg
 	Historys_conns              *[]*HaPoolJsonCfg
 	Pubsubs_conns               *[]*HaPoolJsonCfg
+	Attributes_conns            *[]*HaPoolJsonCfg
 	Aliases_conns               *[]*HaPoolJsonCfg
 	Users_conns                 *[]*HaPoolJsonCfg
 	Rp_subject_prefix_matching  *bool
@@ -105,6 +106,7 @@ type CdrsJsonCfg struct {
 	Sm_cost_retries    *int
 	Rals_conns         *[]*HaPoolJsonCfg
 	Pubsubs_conns      *[]*HaPoolJsonCfg
+	Attributes_conns   *[]*HaPoolJsonCfg
 	Users_conns        *[]*HaPoolJsonCfg
 	Aliases_conns      *[]*HaPoolJsonCfg
 	Cdrstats_conns     *[]*HaPoolJsonCfg

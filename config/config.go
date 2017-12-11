@@ -235,6 +235,7 @@ type CGRConfig struct {
 	RALsStatSConns           []*HaPoolConfig
 	RALsHistorySConns        []*HaPoolConfig
 	RALsPubSubSConns         []*HaPoolConfig
+	RALsAttributeSConns      []*HaPoolConfig
 	RALsUserSConns           []*HaPoolConfig
 	RALsAliasSConns          []*HaPoolConfig
 	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
@@ -248,6 +249,7 @@ type CGRConfig struct {
 	CDRSSMCostRetries        int
 	CDRSRaterConns           []*HaPoolConfig // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
 	CDRSPubSubSConns         []*HaPoolConfig // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
+	CDRSAttributeSConns      []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSUserSConns           []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSAliaseSConns         []*HaPoolConfig // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
 	CDRSCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable cdrstats gathering  <""|internal|x.y.z.y:1234>
@@ -318,6 +320,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("Alias server not enabled but requested by RALs component.")
 			}
 		}
+
+		for _, connCfg := range self.RALsAttributeSConns {
+			if connCfg.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
+				return errors.New("Attribute service not enabled but requested by RALs component.")
+			}
+		}
 		for _, connCfg := range self.RALsUserSConns {
 			if connCfg.Address == utils.MetaInternal && !self.UserServerEnabled {
 				return errors.New("User service not enabled but requested by RALs component.")
@@ -339,6 +347,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 		for _, connCfg := range self.CDRSPubSubSConns {
 			if connCfg.Address == utils.MetaInternal && !self.PubSubServerEnabled {
 				return errors.New("PubSubS not enabled but requested by CDRS component.")
+			}
+		}
+		for _, connCfg := range self.CDRSAttributeSConns {
+			if connCfg.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
+				return errors.New("AttributeS not enabled but requested by CDRS component.")
 			}
 		}
 		for _, connCfg := range self.CDRSUserSConns {
@@ -932,6 +945,14 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 				self.RALsPubSubSConns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
 		}
+
+		if jsnRALsCfg.Attributes_conns != nil {
+			self.RALsAttributeSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Attributes_conns))
+			for idx, jsnHaCfg := range *jsnRALsCfg.Attributes_conns {
+				self.RALsAttributeSConns[idx] = NewDfltHaPoolConfig()
+				self.RALsAttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
+		}
 		if jsnRALsCfg.Aliases_conns != nil {
 			self.RALsAliasSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Aliases_conns))
 			for idx, jsnHaCfg := range *jsnRALsCfg.Aliases_conns {
@@ -990,6 +1011,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			for idx, jsnHaCfg := range *jsnCdrsCfg.Pubsubs_conns {
 				self.CDRSPubSubSConns[idx] = NewDfltHaPoolConfig()
 				self.CDRSPubSubSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
+		}
+		if jsnCdrsCfg.Attributes_conns != nil {
+			self.CDRSAttributeSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Attributes_conns))
+			for idx, jsnHaCfg := range *jsnCdrsCfg.Attributes_conns {
+				self.CDRSAttributeSConns[idx] = NewDfltHaPoolConfig()
+				self.CDRSAttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
 		}
 		if jsnCdrsCfg.Users_conns != nil {
