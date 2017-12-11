@@ -140,7 +140,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSGetAttributeForEvent",
-		Context: utils.StringPointer(utils.ALIAS_CONTEXT_RATING),
+		Context: utils.StringPointer(utils.MetaRating),
 		Event: map[string]interface{}{
 			"Account":     "1007",
 			"Destination": "+491511231234",
