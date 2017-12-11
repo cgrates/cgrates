@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type Substitute struct {
+type AttributeSubstitute struct {
 	FieldName string
 	Initial   string
 	Alias     string
@@ -36,8 +36,8 @@ type AttributeProfile struct {
 	ID                 string
 	Context            string // bind this AttributeProfile to specific context
 	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval         // Activation interval
-	Substitutes        map[string]map[string]*Substitute // map[FieldName][InitialValue]*Attribute
+	ActivationInterval *utils.ActivationInterval                  // Activation interval
+	Substitutes        map[string]map[string]*AttributeSubstitute // map[FieldName][InitialValue]*Attribute
 	Weight             float64
 }
 
@@ -59,7 +59,7 @@ type ExternalAttributeProfile struct {
 	Context            string // bind this AttributeProfile to specific context
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
-	Substitute         []*Substitute
+	Substitute         []*AttributeSubstitute
 	Weight             float64
 }
 
@@ -72,9 +72,9 @@ func (eap *ExternalAttributeProfile) AsAttributeProfile() *AttributeProfile {
 		ActivationInterval: eap.ActivationInterval,
 		Weight:             eap.Weight,
 	}
-	alsMap := make(map[string]map[string]*Substitute)
+	alsMap := make(map[string]map[string]*AttributeSubstitute)
 	for _, als := range eap.Substitute {
-		alsMap[als.FieldName] = make(map[string]*Substitute)
+		alsMap[als.FieldName] = make(map[string]*AttributeSubstitute)
 		alsMap[als.FieldName][als.Initial] = als
 	}
 	alsPrf.Substitutes = alsMap
@@ -92,7 +92,7 @@ func NewExternalAttributeProfileFromAttributeProfile(alsPrf *AttributeProfile) *
 	}
 	for key, val := range alsPrf.Substitutes {
 		for key2, val2 := range val {
-			extals.Substitute = append(extals.Substitute, &Substitute{
+			extals.Substitute = append(extals.Substitute, &AttributeSubstitute{
 				FieldName: key,
 				Initial:   key2,
 				Alias:     val2.Alias,

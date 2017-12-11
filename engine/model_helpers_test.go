@@ -1081,9 +1081,9 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrMap := make(map[string]map[string]*Substitute)
-	attrMap["FL1"] = make(map[string]*Substitute)
-	attrMap["FL1"]["In1"] = &Substitute{
+	attrMap := make(map[string]map[string]*AttributeSubstitute)
+	attrMap["FL1"] = make(map[string]*AttributeSubstitute)
+	attrMap["FL1"]["In1"] = &AttributeSubstitute{
 		FieldName: "FL1",
 		Initial:   "In1",
 		Alias:     "Al1",
