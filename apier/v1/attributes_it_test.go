@@ -148,8 +148,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	eAttrPrf := &engine.ExternalAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
-		FilterIDs: []string{"FLTR_ACNT_1007"},
 		Context:   utils.ALIAS_CONTEXT_RATING,
+		FilterIDs: []string{"FLTR_ACNT_1007"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Substitute: []*engine.Substitute{
@@ -171,8 +171,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	eAttrPrf2 := &engine.ExternalAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
-		FilterIDs: []string{"FLTR_ACNT_1007"},
 		Context:   utils.ALIAS_CONTEXT_RATING,
+		FilterIDs: []string{"FLTR_ACNT_1007"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Substitute: []*engine.Substitute{
@@ -255,6 +255,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	alsPrf = &engine.ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
+		Context:   "*rating",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),

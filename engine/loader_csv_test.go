@@ -298,8 +298,8 @@ cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,
 `
 	attributeProfiles = `
-#,Tenant,ID,FilterIDs,ActivationInterval,Context,FieldName,Initial,Alias,Append,Weight
-cgrates.org,ALS1,FLTR_1,2014-07-29T15:00:00Z,con1,Field1,Initial1,Alias1,true,20
+#,Tenant,ID,Context,FilterIDs,ActivationInterval,FieldName,Initial,Alias,Append,Weight
+cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Alias1,true,20
 cgrates.org,ALS1,,,,Field2,Initial2,Alias2,false,
 `
 )
