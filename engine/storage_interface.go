@@ -35,6 +35,7 @@ type Storage interface {
 	Flush(string) error
 	GetKeysForPrefix(string) ([]string, error)
 	RebuildReverseForPrefix(string) error
+	RemoveReverseForPrefix(string) error
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
@@ -50,6 +51,7 @@ type DataDB interface {
 	HasDataDrv(string, string) (bool, error)
 	GetRatingPlanDrv(string) (*RatingPlan, error)
 	SetRatingPlanDrv(*RatingPlan) error
+	RemoveRatingPlanDrv(key string) (err error)
 	GetRatingProfileDrv(string) (*RatingProfile, error)
 	SetRatingProfileDrv(*RatingProfile) error
 	RemoveRatingProfileDrv(string) error
@@ -61,21 +63,25 @@ type DataDB interface {
 	UpdateReverseDestination(*Destination, *Destination, string) error
 	GetLCRDrv(string) (*LCR, error)
 	SetLCRDrv(*LCR) error
+	RemoveLCRDrv(id, transactionID string) (err error)
 	SetCdrStatsDrv(*CdrStats) error
 	GetCdrStatsDrv(string) (*CdrStats, error)
 	GetAllCdrStatsDrv() ([]*CdrStats, error)
 	GetDerivedChargersDrv(string) (*utils.DerivedChargers, error)
 	SetDerivedChargers(string, *utils.DerivedChargers, string) error
+	RemoveDerivedChargersDrv(id, transactionID string) (err error)
 	GetActionsDrv(string) (Actions, error)
 	SetActionsDrv(string, Actions) error
 	RemoveActionsDrv(string) error
 	GetSharedGroupDrv(string) (*SharedGroup, error)
 	SetSharedGroupDrv(*SharedGroup) error
+	RemoveSharedGroupDrv(id, transactionID string) (err error)
 	GetActionTriggersDrv(string) (ActionTriggers, error)
 	SetActionTriggersDrv(string, ActionTriggers) error
 	RemoveActionTriggersDrv(string) error
 	GetActionPlan(string, bool, string) (*ActionPlan, error)
 	SetActionPlan(string, *ActionPlan, bool, string) error
+	RemoveActionPlan(key string, transactionID string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
 	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
@@ -87,6 +93,7 @@ type DataDB interface {
 	RemoveAccount(string) error
 	GetCdrStatsQueueDrv(string) (*CDRStatsQueue, error)
 	SetCdrStatsQueueDrv(*CDRStatsQueue) error
+	RemoveCdrStatsQueueDrv(id string) (err error)
 	GetSubscribersDrv() (map[string]*SubscriberData, error)
 	SetSubscriberDrv(string, *SubscriberData) error
 	RemoveSubscriberDrv(string) error
@@ -112,6 +119,7 @@ type DataDB interface {
 	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetReqFilterIndexesDrv(dbKey string) (indexes map[string]map[string]utils.StringMap, err error)
 	SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error)
+	RemoveReqFilterIndexesDrv(id string) (err error)
 	MatchReqFilterIndexDrv(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)

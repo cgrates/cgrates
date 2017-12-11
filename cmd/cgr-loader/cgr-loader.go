@@ -67,6 +67,7 @@ var (
 	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
 	timezone        = flag.String("timezone", config.CgrConfig().DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
 	disable_reverse = flag.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
+	remove          = flag.Bool("remove", false, "Will remove any data from db that matches data files")
 )
 
 func main() {
@@ -217,107 +218,112 @@ func main() {
 	} else {
 		log.Print("WARNING: Users automatic data reload is disabled!")
 	}
-
-	// write maps to database
-	if err := tpReader.WriteToDatabase(*flush, *verbose, *disable_reverse); err != nil {
-		log.Fatal("Could not write to database: ", err)
-	}
-	if len(*historyServer) != 0 && *verbose {
-		log.Print("Wrote history.")
-	}
-	var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs []string
-	if rater != nil {
-		dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
-		revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
-		rplIds, _ = tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
-		rpfIds, _ = tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
-		actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
-		aapIDs, _ = tpReader.GetLoadedIds(utils.AccountActionPlansPrefix)
-		shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-		alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
-		lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
-		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
-		rspIDs, _ = tpReader.GetLoadedIds(utils.ResourceProfilesPrefix)
-		resIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
-		aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
-		ralsIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_ALIASES_PREFIX)
-	}
-	aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	var statsQueueIds []string
-	if cdrstats != nil {
-		statsQueueIds, _ = tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
-	}
-	var userIds []string
-	if users != nil {
-		userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
-	}
-	// release the reader with it's structures
-	tpReader.Init()
-
-	// Reload scheduler and cache
-	if rater != nil {
-		reply := ""
-
-		// Reload cache first since actions could be calling info from within
-		if *verbose {
-			log.Print("Reloading cache")
+	if !*remove {
+		// write maps to database
+		if err := tpReader.WriteToDatabase(*flush, *verbose, *disable_reverse); err != nil {
+			log.Fatal("Could not write to database: ", err)
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{ArgsCache: utils.ArgsCache{
-			DestinationIDs:        &dstIds,
-			ReverseDestinationIDs: &revDstIDs,
-			RatingPlanIDs:         &rplIds,
-			RatingProfileIDs:      &rpfIds,
-			ActionIDs:             &actIds,
-			ActionPlanIDs:         &aps,
-			AccountActionPlanIDs:  &aapIDs,
-			ActionTriggerIDs:      &aatIDs,
-			SharedGroupIDs:        &shgIds,
-			LCRids:                &lcrIds,
-			DerivedChargerIDs:     &dcsIds,
-			AliasIDs:              &alsIds,
-			ReverseAliasIDs:       &ralsIDs,
-			ResourceProfileIDs:    &rspIDs,
-			ResourceIDs:           &resIDs},
-			FlushAll: *flush,
-		}, &reply); err != nil {
-			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
+		if len(*historyServer) != 0 && *verbose {
+			log.Print("Wrote history.")
 		}
+		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs []string
+		if rater != nil {
+			dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
+			revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
+			rplIds, _ = tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
+			rpfIds, _ = tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
+			actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
+			aapIDs, _ = tpReader.GetLoadedIds(utils.AccountActionPlansPrefix)
+			shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
+			alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
+			lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
+			dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
+			rspIDs, _ = tpReader.GetLoadedIds(utils.ResourceProfilesPrefix)
+			resIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
+			aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
+			ralsIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_ALIASES_PREFIX)
+		}
+		aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+		var statsQueueIds []string
+		if cdrstats != nil {
+			statsQueueIds, _ = tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+		}
+		var userIds []string
+		if users != nil {
+			userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
+		}
+		// release the reader with it's structures
+		tpReader.Init()
 
-		if len(aps) != 0 {
+		// Reload scheduler and cache
+		if rater != nil {
+			reply := ""
+
+			// Reload cache first since actions could be calling info from within
 			if *verbose {
-				log.Print("Reloading scheduler")
+				log.Print("Reloading cache")
 			}
-			if err = rater.Call("ApierV1.ReloadScheduler", "", &reply); err != nil {
-				log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
+			if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{ArgsCache: utils.ArgsCache{
+				DestinationIDs:        &dstIds,
+				ReverseDestinationIDs: &revDstIDs,
+				RatingPlanIDs:         &rplIds,
+				RatingProfileIDs:      &rpfIds,
+				ActionIDs:             &actIds,
+				ActionPlanIDs:         &aps,
+				AccountActionPlanIDs:  &aapIDs,
+				ActionTriggerIDs:      &aatIDs,
+				SharedGroupIDs:        &shgIds,
+				LCRids:                &lcrIds,
+				DerivedChargerIDs:     &dcsIds,
+				AliasIDs:              &alsIds,
+				ReverseAliasIDs:       &ralsIDs,
+				ResourceProfileIDs:    &rspIDs,
+				ResourceIDs:           &resIDs},
+				FlushAll: *flush,
+			}, &reply); err != nil {
+				log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
+			}
+
+			if len(aps) != 0 {
+				if *verbose {
+					log.Print("Reloading scheduler")
+				}
+				if err = rater.Call("ApierV1.ReloadScheduler", "", &reply); err != nil {
+					log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
+				}
+			}
+
+		}
+		if cdrstats != nil {
+			if *flush {
+				statsQueueIds = []string{} // Force reload all
+			}
+			if len(statsQueueIds) != 0 {
+				if *verbose {
+					log.Print("Reloading CDRStats data")
+				}
+				var reply string
+				if err := cdrstats.Call("CDRStatsV1.ReloadQueues", utils.AttrCDRStatsReloadQueues{StatsQueueIds: statsQueueIds}, &reply); err != nil {
+					log.Printf("WARNING: Failed reloading stat queues, error: %s\n", err.Error())
+				}
 			}
 		}
 
-	}
-	if cdrstats != nil {
-		if *flush {
-			statsQueueIds = []string{} // Force reload all
-		}
-		if len(statsQueueIds) != 0 {
-			if *verbose {
-				log.Print("Reloading CDRStats data")
-			}
-			var reply string
-			if err := cdrstats.Call("CDRStatsV1.ReloadQueues", utils.AttrCDRStatsReloadQueues{StatsQueueIds: statsQueueIds}, &reply); err != nil {
-				log.Printf("WARNING: Failed reloading stat queues, error: %s\n", err.Error())
+		if users != nil {
+			if len(userIds) > 0 {
+				if *verbose {
+					log.Print("Reloading Users data")
+				}
+				var reply string
+				if err := cdrstats.Call("UsersV1.ReloadUsers", "", &reply); err != nil {
+					log.Printf("WARNING: Failed reloading users data, error: %s\n", err.Error())
+				}
+
 			}
 		}
-	}
-
-	if users != nil {
-		if len(userIds) > 0 {
-			if *verbose {
-				log.Print("Reloading Users data")
-			}
-			var reply string
-			if err := cdrstats.Call("UsersV1.ReloadUsers", "", &reply); err != nil {
-				log.Printf("WARNING: Failed reloading users data, error: %s\n", err.Error())
-			}
-
+	} else {
+		if err := tpReader.RemoveFromDatabase(*verbose, *disable_reverse); err != nil {
+			log.Fatal("Could not delete from database: ", err)
 		}
 	}
 }

@@ -620,6 +620,19 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup, transactionID string) (er
 	}
 }
 
+func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if err = dm.DataDB().RemoveSharedGroupDrv(id, transactionID); err != nil {
+			return
+		}
+		cache.RemKey(utils.SHARED_GROUP_PREFIX+id, cacheCommit(transactionID), transactionID)
+		return
+	} else {
+		return dm.DataDB().RemoveSharedGroupDrv(id, transactionID)
+	}
+
+}
+
 func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
 	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
 		if err = dm.DataDB().SetLCRDrv(lcr); err != nil {
@@ -628,6 +641,18 @@ func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
 		return
 	} else {
 		return dm.DataDB().SetLCRDrv(lcr)
+	}
+}
+
+func (dm *DataManager) RemoveLCR(id, transactionID string) (err error) {
+	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+		if err = dm.DataDB().RemoveLCRDrv(id, transactionID); err != nil {
+			return
+		}
+		cache.RemKey(utils.LCR_PREFIX+id, cacheCommit(transactionID), transactionID)
+		return
+	} else {
+		return dm.DataDB().RemoveLCRDrv(id, transactionID)
 	}
 }
 
@@ -649,6 +674,14 @@ func (dm *DataManager) GetDerivedChargers(key string, skipCache bool, transactio
 		return nil, err
 	}
 	cache.Set(cacheKey, dcs, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) RemoveDerivedChargers(id, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveDerivedChargersDrv(id, transactionID); err != nil {
+		return
+	}
+	cache.RemKey(utils.DERIVEDCHARGERS_PREFIX+id, cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -726,6 +759,14 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 	} else {
 		return dm.DataDB().SetRatingPlanDrv(rp)
 	}
+}
+
+func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err error) {
+	if err = dm.DataDB().RemoveRatingPlanDrv(key); err != nil {
+		return
+	}
+	cache.RemKey(utils.RATING_PLAN_PREFIX+key, cacheCommit(transactionID), transactionID)
+	return
 }
 
 func (dm *DataManager) GetRatingProfile(key string, skipCache bool, transactionID string) (rpf *RatingProfile, err error) {
@@ -809,6 +850,10 @@ func (dm *DataManager) SetReqFilterIndexes(dbKey string, indexes map[string]map[
 	return dm.DataDB().SetReqFilterIndexesDrv(dbKey, indexes)
 }
 
+func (dm *DataManager) RemoveReqFilterIndexes(dbKey string) (err error) {
+	return dm.DataDB().RemoveReqFilterIndexesDrv(dbKey)
+}
+
 func (dm *DataManager) MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(fieldName, fieldVal)
 	cacheKey := dbKey + fieldValKey
@@ -835,6 +880,10 @@ func (dm *DataManager) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err erro
 
 func (dm *DataManager) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
 	return dm.DataDB().SetCdrStatsQueueDrv(sq)
+}
+
+func (dm *DataManager) RemoveCdrStatsQueue(key string) error {
+	return dm.DataDB().RemoveCdrStatsQueueDrv(key)
 }
 
 func (dm *DataManager) SetCdrStats(cs *CdrStats) error {
