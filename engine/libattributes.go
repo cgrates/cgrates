@@ -34,9 +34,9 @@ type Substitute struct {
 type AttributeProfile struct {
 	Tenant             string
 	ID                 string
+	Context            string // bind this AttributeProfile to specific context
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval         // Activation interval
-	Context            string                            // bind this AttributeProfile to specific context
 	Substitutes        map[string]map[string]*Substitute // map[FieldName][InitialValue]*Attribute
 	Weight             float64
 }
@@ -56,9 +56,9 @@ func (aps AttributeProfiles) Sort() {
 type ExternalAttributeProfile struct {
 	Tenant             string
 	ID                 string
+	Context            string // bind this AttributeProfile to specific context
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
-	Context            string                    // bind this AttributeProfile to specific context
 	Substitute         []*Substitute
 	Weight             float64
 }
@@ -67,10 +67,10 @@ func (eap *ExternalAttributeProfile) AsAttributeProfile() *AttributeProfile {
 	alsPrf := &AttributeProfile{
 		Tenant:             eap.Tenant,
 		ID:                 eap.ID,
-		Weight:             eap.Weight,
+		Context:            eap.Context,
 		FilterIDs:          eap.FilterIDs,
 		ActivationInterval: eap.ActivationInterval,
-		Context:            eap.Context,
+		Weight:             eap.Weight,
 	}
 	alsMap := make(map[string]map[string]*Substitute)
 	for _, als := range eap.Substitute {
@@ -85,10 +85,10 @@ func NewExternalAttributeProfileFromAttributeProfile(alsPrf *AttributeProfile) *
 	extals := &ExternalAttributeProfile{
 		Tenant:             alsPrf.Tenant,
 		ID:                 alsPrf.ID,
-		Weight:             alsPrf.Weight,
-		ActivationInterval: alsPrf.ActivationInterval,
 		Context:            alsPrf.Context,
+		ActivationInterval: alsPrf.ActivationInterval,
 		FilterIDs:          alsPrf.FilterIDs,
+		Weight:             alsPrf.Weight,
 	}
 	for key, val := range alsPrf.Substitutes {
 		for key2, val2 := range val {

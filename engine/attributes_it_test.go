@@ -30,12 +30,12 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 	extAttr := &ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
+		Context:   "con1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Context: "con1",
 		Substitute: []*Substitute{
 			&Substitute{
 				FieldName: "FL1",
@@ -57,12 +57,12 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
+		Context:   "con1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Context:     "con1",
 		Substitutes: attrMap,
 		Weight:      20,
 	}
@@ -85,12 +85,12 @@ func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
 	attrPrf := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
+		Context:   "con1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Context:     "con1",
 		Substitutes: attrMap,
 		Weight:      20,
 	}
@@ -98,12 +98,12 @@ func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
 	expected := &ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
+		Context:   "con1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Context: "con1",
 		Substitute: []*Substitute{
 			&Substitute{
 				FieldName: "FL1",
