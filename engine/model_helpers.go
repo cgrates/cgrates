@@ -2670,7 +2670,7 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttribute) {
 			th.Context = tp.Context
 		}
 		if tp.FieldName != "" {
-			th.Attributes = append(th.Attributes, &utils.TPRequestAttribute{
+			th.Substitutes = append(th.Substitutes, &utils.TPRequestSubstitute{
 				FieldName: tp.FieldName,
 				Initial:   tp.Initial,
 				Alias:     tp.Alias,
@@ -2689,10 +2689,10 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttribute) {
 }
 
 func APItoModelTPAttribute(th *utils.TPAttribute) (mdls TPAttributes) {
-	if len(th.Attributes) == 0 {
+	if len(th.Substitutes) == 0 {
 		return
 	}
-	for i, reqAttribute := range th.Attributes {
+	for i, reqAttribute := range th.Substitutes {
 		mdl := &TPAttribute{
 			Tpid:   th.TPid,
 			Tenant: th.Tenant,
@@ -2731,21 +2731,21 @@ func APItoModelTPAttribute(th *utils.TPAttribute) (mdls TPAttributes) {
 
 func APItoAttributeProfile(tpTH *utils.TPAttribute, timezone string) (th *AttributeProfile, err error) {
 	th = &AttributeProfile{
-		Tenant:     tpTH.Tenant,
-		ID:         tpTH.ID,
-		Weight:     tpTH.Weight,
-		FilterIDs:  []string{},
-		Context:    tpTH.Context,
-		Attributes: make(map[string]map[string]*Attribute, len(tpTH.Attributes)),
+		Tenant:      tpTH.Tenant,
+		ID:          tpTH.ID,
+		Weight:      tpTH.Weight,
+		FilterIDs:   []string{},
+		Context:     tpTH.Context,
+		Substitutes: make(map[string]map[string]*Substitute, len(tpTH.Substitutes)),
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
 	}
-	for _, reqAttr := range tpTH.Attributes {
-		if _, has := th.Attributes[reqAttr.FieldName]; !has {
-			th.Attributes[reqAttr.FieldName] = make(map[string]*Attribute)
+	for _, reqAttr := range tpTH.Substitutes {
+		if _, has := th.Substitutes[reqAttr.FieldName]; !has {
+			th.Substitutes[reqAttr.FieldName] = make(map[string]*Substitute)
 		}
-		th.Attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
+		th.Substitutes[reqAttr.FieldName][reqAttr.Initial] = &Substitute{
 			FieldName: reqAttr.FieldName,
 			Initial:   reqAttr.Initial,
 			Alias:     reqAttr.Alias,

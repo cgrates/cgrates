@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type Attribute struct {
+type Substitute struct {
 	FieldName string
 	Initial   string
 	Alias     string
@@ -35,9 +35,9 @@ type AttributeProfile struct {
 	Tenant             string
 	ID                 string
 	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval        // Activation interval
-	Context            string                           // bind this AttributeProfile to specific context
-	Attributes         map[string]map[string]*Attribute // map[FieldName][InitialValue]*Attribute
+	ActivationInterval *utils.ActivationInterval         // Activation interval
+	Context            string                            // bind this AttributeProfile to specific context
+	Substitutes        map[string]map[string]*Substitute // map[FieldName][InitialValue]*Attribute
 	Weight             float64
 }
 
@@ -59,7 +59,7 @@ type ExternalAttributeProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Context            string                    // bind this AttributeProfile to specific context
-	Attributes         []*Attribute
+	Substitute         []*Substitute
 	Weight             float64
 }
 
@@ -72,12 +72,12 @@ func (eap *ExternalAttributeProfile) AsAttributeProfile() *AttributeProfile {
 		ActivationInterval: eap.ActivationInterval,
 		Context:            eap.Context,
 	}
-	alsMap := make(map[string]map[string]*Attribute)
-	for _, als := range eap.Attributes {
-		alsMap[als.FieldName] = make(map[string]*Attribute)
+	alsMap := make(map[string]map[string]*Substitute)
+	for _, als := range eap.Substitute {
+		alsMap[als.FieldName] = make(map[string]*Substitute)
 		alsMap[als.FieldName][als.Initial] = als
 	}
-	alsPrf.Attributes = alsMap
+	alsPrf.Substitutes = alsMap
 	return alsPrf
 }
 
@@ -90,9 +90,9 @@ func NewExternalAttributeProfileFromAttributeProfile(alsPrf *AttributeProfile) *
 		Context:            alsPrf.Context,
 		FilterIDs:          alsPrf.FilterIDs,
 	}
-	for key, val := range alsPrf.Attributes {
+	for key, val := range alsPrf.Substitutes {
 		for key2, val2 := range val {
-			extals.Attributes = append(extals.Attributes, &Attribute{
+			extals.Substitute = append(extals.Substitute, &Substitute{
 				FieldName: key,
 				Initial:   key2,
 				Alias:     val2.Alias,
