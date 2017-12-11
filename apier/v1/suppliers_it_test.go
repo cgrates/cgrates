@@ -36,6 +36,7 @@ var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
 	splSv1Rpc     *rpc.Client
+	splPrf        *engine.SupplierProfile
 	splSv1ConfDIR string //run tests for specific configuration
 	splsDelay     int
 )
@@ -49,6 +50,9 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSFromFolder,
 	testV1SplSGetWeightSuppliers,
 	testV1SplSGetLeastCostSuppliers,
+	testV1SplSSetSupplierProfiles,
+	testV1SplSUpdateSupplierProfiles,
+	testV1SplSRemSupplierProfiles,
 	testV1SplSStopEngine,
 }
 
@@ -204,6 +208,116 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
+func testV1SplSSetSupplierProfiles(t *testing.T) {
+	var reply *engine.SupplierProfile
+	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	splPrf = &engine.SupplierProfile{
+		Tenant:        "cgrates.org",
+		ID:            "TEST_PROFILE1",
+		FilterIDs:     []string{"FLTR_1"},
+		Sorting:       "Sort1",
+		SortingParams: []string{"Param1", "Param2"},
+		Suppliers: []*engine.Supplier{
+			&engine.Supplier{
+				ID:            "SPL1",
+				RatingPlanIDs: []string{"RP1"},
+				FilterIDs:     []string{"FLTR_1"},
+				AccountIDs:    []string{"Acc"},
+				ResourceIDs:   []string{"Res1", "ResGroup2"},
+				StatIDs:       []string{"Stat1"},
+				Weight:        20,
+			},
+		},
+		Blocker: false,
+		Weight:  10,
+	}
+	var result string
+	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(splPrf, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	}
+}
+
+func testV1SplSUpdateSupplierProfiles(t *testing.T) {
+	splPrf.Suppliers = []*engine.Supplier{
+		&engine.Supplier{
+			ID:            "SPL1",
+			RatingPlanIDs: []string{"RP1"},
+			FilterIDs:     []string{"FLTR_1"},
+			AccountIDs:    []string{"Acc"},
+			ResourceIDs:   []string{"Res1", "ResGroup2"},
+			StatIDs:       []string{"Stat1"},
+			Weight:        20,
+		},
+		&engine.Supplier{
+			ID:            "SPL2",
+			RatingPlanIDs: []string{"RP2"},
+			FilterIDs:     []string{"FLTR_2"},
+			AccountIDs:    []string{"Acc"},
+			ResourceIDs:   []string{"Res2", "ResGroup2"},
+			StatIDs:       []string{"Stat2"},
+			Weight:        20,
+		},
+	}
+	reverseSuppliers := []*engine.Supplier{
+		&engine.Supplier{
+			ID:            "SPL2",
+			RatingPlanIDs: []string{"RP2"},
+			FilterIDs:     []string{"FLTR_2"},
+			AccountIDs:    []string{"Acc"},
+			ResourceIDs:   []string{"Res2", "ResGroup2"},
+			StatIDs:       []string{"Stat2"},
+			Weight:        20,
+		},
+		&engine.Supplier{
+			ID:            "SPL1",
+			RatingPlanIDs: []string{"RP1"},
+			FilterIDs:     []string{"FLTR_1"},
+			AccountIDs:    []string{"Acc"},
+			ResourceIDs:   []string{"Res1", "ResGroup2"},
+			StatIDs:       []string{"Stat1"},
+			Weight:        20,
+		},
+	}
+	var result string
+	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.SupplierProfile
+	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(splPrf.Suppliers, reply.Suppliers) && !reflect.DeepEqual(reverseSuppliers, reply.Suppliers) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(splPrf), utils.ToJSON(reply))
+	}
+}
+
+func testV1SplSRemSupplierProfiles(t *testing.T) {
+	var resp string
+	if err := splSv1Rpc.Call("ApierV1.RemSupplierProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	var reply *engine.SupplierProfile
+	if err := splSv1Rpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 

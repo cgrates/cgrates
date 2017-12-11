@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -28,7 +29,7 @@ func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.Ex
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if alsPrf, err := apierV1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, utils.NonTransactional); err != nil {
+	if alsPrf, err := apierV1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -48,6 +49,7 @@ func (apierV1 *ApierV1) SetAttributeProfile(extAls *engine.ExternalAttributeProf
 	if err := apierV1.DataManager.SetAttributeProfile(alsPrf); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	cache.RemKey(utils.AttributeProfilePrefix+utils.ConcatenatedKey(extAls.Tenant, extAls.ID), true, "") // ToDo: Remove here with autoreload
 	*reply = utils.OK
 	return nil
 }
