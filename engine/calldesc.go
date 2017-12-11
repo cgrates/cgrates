@@ -162,6 +162,28 @@ type CallDescriptor struct {
 	testCallcost        *CallCost // testing purpose only!
 }
 
+// AsCGREvent converts the CallDescriptor into CGREvent
+func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
+	cgrEv := &utils.CGREvent{
+		Tenant:  cd.Tenant,
+		ID:      utils.UUIDSha1Prefix(), // make it unique
+		Context: utils.StringPointer(utils.MetaRating),
+		Event:   make(map[string]interface{}),
+	}
+	for k, v := range cd.ExtraFields {
+		cgrEv.Event[k] = v
+	}
+	cgrEv.Event[utils.TOR] = cd.TOR
+	cgrEv.Event[utils.TENANT] = cd.Tenant
+	cgrEv.Event[utils.CATEGORY] = cd.Category
+	cgrEv.Event[utils.ACCOUNT] = cd.Account
+	cgrEv.Event[utils.SUBJECT] = cd.Subject
+	cgrEv.Event[utils.DESTINATION] = cd.Destination
+	cgrEv.Event[utils.ANSWER_TIME] = cd.TimeStart
+	cgrEv.Event[utils.USAGE] = cd.TimeEnd.Sub(cd.TimeStart)
+	return cgrEv
+}
+
 func (cd *CallDescriptor) ValidateCallData() error {
 	if cd.TimeStart.After(cd.TimeEnd) || cd.TimeStart.Equal(cd.TimeEnd) {
 		return errors.New("TimeStart must be strctly before TimeEnd")

@@ -101,7 +101,7 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 			Category:    arg.Category,
 			Account:     arg.Account,
 			Subject:     arg.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -137,7 +137,7 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 			Category:    arg.Category,
 			Account:     arg.Account,
 			Subject:     arg.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -177,7 +177,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 			Category:    arg.Category,
 			Account:     arg.Account,
 			Subject:     arg.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -224,7 +224,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 			Category:    arg.Category,
 			Account:     arg.Account,
 			Subject:     arg.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		rs.getCache().Cache(cacheKey, &cache.CacheItem{
 			Err: err,
@@ -266,7 +266,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 			Category:    arg.Category,
 			Account:     arg.Account,
 			Subject:     arg.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		rs.getCache().Cache(cacheKey, &cache.CacheItem{
 			Err: err,
@@ -301,7 +301,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 			Category:    arg.Category,
 			Account:     arg.Account,
 			Subject:     arg.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -339,7 +339,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 			Category:    ev.Category,
 			Account:     ev.Account,
 			Subject:     ev.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
 		return err
@@ -447,7 +447,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			Category:    ev.Category,
 			Account:     ev.Account,
 			Subject:     ev.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -547,7 +547,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 			Category:    cd.Category,
 			Account:     cd.Account,
 			Subject:     cd.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, cd, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
 		return err

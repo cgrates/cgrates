@@ -149,8 +149,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	eAttrPrf := &engine.ExternalAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
-		Context:   utils.ALIAS_CONTEXT_RATING,
 		FilterIDs: []string{"FLTR_ACNT_1007"},
+		Context:   utils.MetaRating,
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Substitutes: []*engine.AttributeSubstitute{
@@ -213,7 +213,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.ALIAS_CONTEXT_RATING),
+		Context: utils.StringPointer(utils.MetaRating),
 		Event: map[string]interface{}{
 			"Account":     "1007",
 			"Destination": "+491511231234",
@@ -225,7 +225,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
-			Context: utils.StringPointer(utils.ALIAS_CONTEXT_RATING),
+			Context: utils.StringPointer(utils.MetaRating),
 			Event: map[string]interface{}{
 				"Account":     "1001",
 				"Subject":     "1001",
@@ -239,7 +239,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
-			Context: utils.StringPointer(utils.ALIAS_CONTEXT_RATING),
+			Context: utils.StringPointer(utils.MetaRating),
 			Event: map[string]interface{}{
 				"Account":     "1001",
 				"Subject":     "1001",

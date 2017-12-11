@@ -330,7 +330,7 @@ const (
 	GET_DERIV_MAX_SESS_TIME         = "GET_DERIV_MAX_SESS_TIME_"
 	LOG_CALL_COST_CACHE_PREFIX      = "LOG_CALL_COSTS_"
 	LCRCachePrefix                  = "LCR_"
-	ALIAS_CONTEXT_RATING            = "*rating"
+	MetaRating                      = "*rating"
 	NOT_AVAILABLE                   = "N/A"
 	MetaEmpty                       = "*empty"
 	CALL                            = "call"

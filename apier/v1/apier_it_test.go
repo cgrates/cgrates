@@ -1481,7 +1481,7 @@ func TestApierITSetDestination(t *testing.T) {
 
 func TestApierITGetAliases(t *testing.T) {
 	var alias engine.Alias
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out",
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1504,7 +1504,7 @@ func TestApierITAddRatingSubjectAliases(t *testing.T) {
 	}
 	var alias engine.Alias
 	for _, als := range addRtSubjAliases.Aliases {
-		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out",
+		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out",
 			Tenant: addRtSubjAliases.Tenant, Category: addRtSubjAliases.Category,
 			Account: als, Subject: als}, &alias); err != nil {
 			t.Error("Unexpected error", err.Error())
@@ -1522,7 +1522,7 @@ func TestApierITRemRatingSubjectAliases(t *testing.T) {
 	}
 	var alias engine.Alias
 	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out",
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error %v, alias: %+v, values: %+v", err, alias, alias.Values[0])
 	}
@@ -1538,7 +1538,7 @@ func TestApierITAddAccountAliases(t *testing.T) {
 	}
 	var alias engine.Alias
 	for _, als := range addAcntAliases.Aliases {
-		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: addAcntAliases.Tenant, Category: addAcntAliases.Category,
+		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out", Tenant: addAcntAliases.Tenant, Category: addAcntAliases.Category,
 			Account: als, Subject: als}, &alias); err != nil {
 			t.Error("Unexpected error", err.Error())
 		}
@@ -1555,7 +1555,7 @@ func TestApierITRemAccountAliases(t *testing.T) {
 	}
 	var alias engine.Alias
 	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error %v, alias: %+v", err, alias)
 	}
 }

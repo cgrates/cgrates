@@ -254,7 +254,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 			Category:    cdrRun.Category,
 			Account:     cdrRun.Account,
 			Subject:     cdrRun.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
+			Context:     utils.MetaRating,
 		}, cdrRun, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Aliasing CDR %+v, got error: %s", cdrRun, err.Error()))
 			continue
@@ -331,7 +331,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 		Category:    cdr.Category,
 		Account:     cdr.Account,
 		Subject:     cdr.Subject,
-		Context:     utils.ALIAS_CONTEXT_RATING,
+		Context:     utils.MetaRating,
 	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return nil, err
 	}
