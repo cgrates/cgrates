@@ -36,7 +36,7 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitute: []*AttributeSubstitute{
+		Substitutes: []*AttributeSubstitute{
 			&AttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
@@ -104,7 +104,7 @@ func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitute: []*AttributeSubstitute{
+		Substitutes: []*AttributeSubstitute{
 			&AttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
