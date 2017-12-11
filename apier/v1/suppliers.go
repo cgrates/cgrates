@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -47,6 +48,7 @@ func (apierV1 *ApierV1) SetSupplierProfile(spp *engine.SupplierProfile, reply *s
 	if err := apierV1.DataManager.SetSupplierProfile(spp); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	cache.RemKey(utils.SupplierProfilePrefix+utils.ConcatenatedKey(spp.Tenant, spp.ID), true, "") // ToDo: Remove here with autoreload
 	*reply = utils.OK
 	return nil
 }
