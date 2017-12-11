@@ -153,7 +153,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		FilterIDs: []string{"FLTR_ACNT_1007"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
-		Substitute: []*engine.AttributeSubstitute{
+		Substitutes: []*engine.AttributeSubstitute{
 			&engine.AttributeSubstitute{
 				FieldName: utils.ACCOUNT,
 				Initial:   utils.ANY,
@@ -202,8 +202,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ExpiryTime.Local(), attrReply.ActivationInterval.ExpiryTime.Local()) {
 		t.Errorf("Expecting: %s, received: %s",
 			eAttrPrf.ActivationInterval.ExpiryTime.Local(), attrReply.ActivationInterval.ExpiryTime.Local())
-	} else if !reflect.DeepEqual(eAttrPrf.Substitute, attrReply.Substitute) && !reflect.DeepEqual(reverseSubstitute, attrReply.Substitute) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf.Substitute), utils.ToJSON(attrReply.Substitute))
+	} else if !reflect.DeepEqual(eAttrPrf.Substitutes, attrReply.Substitutes) && !reflect.DeepEqual(reverseSubstitute, attrReply.Substitutes) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf.Substitutes), utils.ToJSON(attrReply.Substitutes))
 	} else if !reflect.DeepEqual(eAttrPrf.Weight, attrReply.Weight) {
 		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Weight, attrReply.Weight)
 	}
@@ -268,7 +268,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitute: []*engine.AttributeSubstitute{
+		Substitutes: []*engine.AttributeSubstitute{
 			&engine.AttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
@@ -291,15 +291,15 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
 	} else if !reflect.DeepEqual(alsPrf.ActivationInterval, reply.ActivationInterval) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ActivationInterval, reply.ActivationInterval)
-	} else if !reflect.DeepEqual(len(alsPrf.Substitute), len(reply.Substitute)) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Substitute), utils.ToJSON(reply.Substitute))
+	} else if !reflect.DeepEqual(len(alsPrf.Substitutes), len(reply.Substitutes)) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Substitutes), utils.ToJSON(reply.Substitutes))
 	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}
 }
 
 func testAttributeSUpdateAlsPrf(t *testing.T) {
-	alsPrf.Substitute = []*engine.AttributeSubstitute{
+	alsPrf.Substitutes = []*engine.AttributeSubstitute{
 		&engine.AttributeSubstitute{
 			FieldName: "FL1",
 			Initial:   "In1",
@@ -326,8 +326,8 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
 	} else if !reflect.DeepEqual(alsPrf.ActivationInterval, reply.ActivationInterval) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ActivationInterval, reply.ActivationInterval)
-	} else if !reflect.DeepEqual(len(alsPrf.Substitute), len(reply.Substitute)) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Substitute), utils.ToJSON(reply.Substitute))
+	} else if !reflect.DeepEqual(len(alsPrf.Substitutes), len(reply.Substitutes)) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Substitutes), utils.ToJSON(reply.Substitutes))
 	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}

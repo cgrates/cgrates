@@ -59,7 +59,7 @@ type ExternalAttributeProfile struct {
 	Context            string // bind this AttributeProfile to specific context
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
-	Substitute         []*AttributeSubstitute
+	Substitutes        []*AttributeSubstitute
 	Weight             float64
 }
 
@@ -73,7 +73,7 @@ func (eap *ExternalAttributeProfile) AsAttributeProfile() *AttributeProfile {
 		Weight:             eap.Weight,
 	}
 	alsMap := make(map[string]map[string]*AttributeSubstitute)
-	for _, als := range eap.Substitute {
+	for _, als := range eap.Substitutes {
 		alsMap[als.FieldName] = make(map[string]*AttributeSubstitute)
 		alsMap[als.FieldName][als.Initial] = als
 	}
@@ -92,7 +92,7 @@ func NewExternalAttributeProfileFromAttributeProfile(alsPrf *AttributeProfile) *
 	}
 	for key, val := range alsPrf.Substitutes {
 		for key2, val2 := range val {
-			extals.Substitute = append(extals.Substitute, &AttributeSubstitute{
+			extals.Substitutes = append(extals.Substitutes, &AttributeSubstitute{
 				FieldName: key,
 				Initial:   key2,
 				Alias:     val2.Alias,
