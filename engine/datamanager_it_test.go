@@ -62,11 +62,11 @@ func TestDMitMongo(t *testing.T) {
 		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
 		utils.StorDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize)
 	if err != nil {
-		t.Fatal("Could not connect to Redis", err.Error())
+		t.Fatal("Could not connect to Mongo", err.Error())
 	}
 	dm2 = NewDataManager(dataDB)
 	for _, stest := range sTestsDMit {
-		t.Run("TestDMitRedis", stest)
+		t.Run("TestDMitMongo", stest)
 	}
 }
 

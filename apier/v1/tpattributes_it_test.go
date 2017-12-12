@@ -130,8 +130,8 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 			ExpiryTime:     "",
 		},
 		Context: "con1",
-		Substitutes: []*utils.TPRequestSubstitute{
-			&utils.TPRequestSubstitute{
+		Substitutes: []*utils.TPAttributeSubstitute{
+			&utils.TPAttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
@@ -168,14 +168,14 @@ func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 }
 
 func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
-	tpAlsPrf.Substitutes = []*utils.TPRequestSubstitute{
-		&utils.TPRequestSubstitute{
+	tpAlsPrf.Substitutes = []*utils.TPAttributeSubstitute{
+		&utils.TPAttributeSubstitute{
 			FieldName: "FL1",
 			Initial:   "In1",
 			Alias:     "Al1",
 			Append:    true,
 		},
-		&utils.TPRequestSubstitute{
+		&utils.TPAttributeSubstitute{
 			FieldName: "FL2",
 			Initial:   "In2",
 			Alias:     "Al2",

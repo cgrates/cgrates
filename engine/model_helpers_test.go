@@ -1071,8 +1071,8 @@ func TestAPItoAttributeProfile(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Substitutes: []*utils.TPRequestSubstitute{
-			&utils.TPRequestSubstitute{
+		Substitutes: []*utils.TPAttributeSubstitute{
+			&utils.TPAttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
@@ -1118,8 +1118,8 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Substitutes: []*utils.TPRequestSubstitute{
-			&utils.TPRequestSubstitute{
+		Substitutes: []*utils.TPAttributeSubstitute{
+			&utils.TPAttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
@@ -1175,8 +1175,8 @@ func TestModelAsTPAttribute(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Substitutes: []*utils.TPRequestSubstitute{
-			&utils.TPRequestSubstitute{
+		Substitutes: []*utils.TPAttributeSubstitute{
+			&utils.TPAttributeSubstitute{
 				FieldName: "FL1",
 				Initial:   "In1",
 				Alias:     "Al1",
