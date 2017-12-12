@@ -217,12 +217,13 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	}
 	if self.stats != nil {
 		cdrIf, _ := cdr.AsMapStringIface()
-		cdrIf[utils.ID] = cdr.CGRID
-		if cdrIf[utils.ID] == "" {
-			cdrIf[utils.ID] = cdr.OriginID
+		cgrEv := &utils.CGREvent{
+			Tenant: cdr.Tenant,
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  cdrIf,
 		}
 		var reply string
-		go self.stats.Call(utils.StatSv1ProcessEvent, cdrIf, &reply)
+		go self.stats.Call(utils.StatSv1ProcessEvent, cgrEv, &reply)
 	}
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
 		self.replicateCDRs([]*CDR{cdr})
