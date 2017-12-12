@@ -161,7 +161,7 @@ func TestTutITGetMatchingAlias(t *testing.T) {
 		Category:    "call",
 		Account:     "1006",
 		Subject:     "1006",
-		Context:     utils.ALIAS_CONTEXT_RATING,
+		Context:     utils.MetaRating,
 		Target:      "Account",
 		Original:    "1006",
 	}
