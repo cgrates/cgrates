@@ -52,7 +52,6 @@ type Responder struct {
 	Timeout          time.Duration
 	Timezone         string
 	MaxComputedUsage map[string]time.Duration
-	cnt              int64
 	responseCache    *cache.ResponseCache
 }
 
@@ -84,9 +83,19 @@ func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed b
 RPC method thet provides the external RPC interface for getting the rating information.
 */
 func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
-	rs.cnt += 1
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
+	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			arg.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
@@ -123,6 +132,17 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
+	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			arg.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
@@ -163,6 +183,17 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
+	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			arg.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
@@ -211,6 +242,17 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			arg.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -253,6 +295,17 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			arg.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -288,6 +341,17 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			arg.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -314,7 +378,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 }
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
-func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
+func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err error) {
 	cacheKey := utils.GET_DERIV_MAX_SESS_TIME + ev.CGRID + ev.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
@@ -324,6 +388,17 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
+	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			ev.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = ev.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
@@ -422,7 +497,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 }
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
-func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
+func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 	cacheKey := utils.GET_SESS_RUNS_CACHE_PREFIX + ev.CGRID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
@@ -432,6 +507,17 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
+	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			ev.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = ev.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
 	}
 	//utils.Logger.Info(fmt.Sprintf("DC before: %+v", ev))
 	// replace user profile fields
@@ -522,7 +608,7 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 	return nil
 }
 
-func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
+func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) (err error) {
 	cacheKey := utils.LCRCachePrefix + attrs.CgrID + attrs.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
@@ -532,6 +618,17 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	}
 	if attrs.CallDescriptor.Subject == "" {
 		attrs.CallDescriptor.Subject = attrs.CallDescriptor.Account
+	}
+	if rs.AttributeS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
+			attrs.CallDescriptor.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = attrs.CallDescriptor.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(attrs.CallDescriptor, utils.EXTRA_FIELDS); err != nil {

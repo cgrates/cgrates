@@ -792,6 +792,78 @@ func (cdr *CDR) AsCDRsql() (cdrSql *CDRsql) {
 	return
 }
 
+func (cdr *CDR) AsCGREvent() *utils.CGREvent {
+	cdrIf, _ := cdr.AsMapStringIface()
+	return &utils.CGREvent{
+		Tenant: cdr.Tenant,
+		ID:     utils.UUIDSha1Prefix(),
+		Event:  cdrIf,
+	}
+}
+
+// UpdateFromCGREvent will update CDR with event fields from CGREvent
+func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
+	for _, fldName := range fields {
+		switch fldName {
+		case utils.CDRHOST:
+			if cdr.OriginHost, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.CDRSOURCE:
+			if cdr.Source, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.TOR:
+			if cdr.ToR, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.REQTYPE:
+			if cdr.RequestType, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.TENANT:
+			if cdr.Tenant, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.CATEGORY:
+			if cdr.Category, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.ACCOUNT:
+			if cdr.Account, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.SUBJECT:
+			if cdr.Subject, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.DESTINATION:
+			if cdr.Destination, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.SETUP_TIME:
+			if cdr.SetupTime, err = cgrEv.FieldAsTime(fldName, config.CgrConfig().DefaultTimezone); err != nil {
+				return
+			}
+		case utils.ANSWER_TIME:
+			if cdr.AnswerTime, err = cgrEv.FieldAsTime(fldName, config.CgrConfig().DefaultTimezone); err != nil {
+				return
+			}
+		case utils.USAGE:
+			if cdr.Usage, err = cgrEv.FieldAsDuration(fldName); err != nil {
+				return
+			}
+		default:
+			fldVal, err := cgrEv.FieldAsString(fldName)
+			if err != nil {
+				return err
+			}
+			cdr.ExtraFields[fldName] = fldVal
+		}
+	}
+	return
+}
+
 // NewCDRFromSQL converts the CDRsql into CDR
 func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
 	cdr = new(CDR)
