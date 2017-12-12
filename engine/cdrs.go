@@ -226,7 +226,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 }
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
-func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, replicate bool) error {
+func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, replicate bool) (err error) {
 	cdrRuns, err := self.deriveCdrs(cdr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Deriving CDR %+v, got error: %s", cdr, err.Error()))
@@ -234,6 +234,17 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 	}
 	var ratedCDRs []*CDR // Gather all CDRs received from rating subsystem
 	for _, cdrRun := range cdrRuns {
+		if self.attrS != nil {
+			var rplyEv AttrSProcessEventReply
+			if err = self.attrS.Call(utils.AttributeSv1ProcessEvent,
+				cdrRun.AsCGREvent(), &rplyEv); err != nil {
+				return
+			}
+			if err = cdrRun.UpdateFromCGREvent(rplyEv.CGREvent,
+				rplyEv.AlteredFields); err != nil {
+				return
+			}
+		}
 		if err := LoadUserProfile(cdrRun, utils.EXTRA_FIELDS); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> UserS handling for CDR %+v, got error: %s", cdrRun, err.Error()))
 			continue
@@ -300,13 +311,24 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 	return nil
 }
 
-func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
+func (self *CdrServer) deriveCdrs(cdr *CDR) (drvdCDRs []*CDR, err error) {
 	dfltCDRRun := cdr.Clone()
 	cdrRuns := []*CDR{dfltCDRRun}
 	if cdr.RunID != utils.MetaRaw { // Only derive *raw CDRs
 		return cdrRuns, nil
 	}
 	dfltCDRRun.RunID = utils.META_DEFAULT // Rewrite *raw with *default since we have it as first run
+	if self.attrS != nil {
+		var rplyEv AttrSProcessEventReply
+		if err = self.attrS.Call(utils.AttributeSv1ProcessEvent,
+			cdr.AsCGREvent(), &rplyEv); err != nil {
+			return
+		}
+		if err = cdr.UpdateFromCGREvent(rplyEv.CGREvent,
+			rplyEv.AlteredFields); err != nil {
+			return
+		}
+	}
 	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
 		return nil, err
 	}
