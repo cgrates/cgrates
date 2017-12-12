@@ -198,16 +198,16 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
 		}
 	}
+	cdrIf, _ := cdr.AsMapStringIface()
 	if self.thdS != nil {
-		cdrIf, _ := cdr.AsMapStringIface()
-		ev := &utils.CGREvent{
+		cgrEv := &utils.CGREvent{
 			Tenant: cdr.Tenant,
-			ID:     utils.GenUUID(),
+			ID:     utils.UUIDSha1Prefix(),
 			Event:  cdrIf}
 		var hits int
-		if err := self.thdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+		if err := self.thdS.Call(utils.ThresholdSv1ProcessEvent, cgrEv, &hits); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<CDRS> error: %s processing CDR event %+v with thdS.", err.Error(), ev))
+				fmt.Sprintf("<CDRS> error: %s processing CDR event %+v with thdS.", err.Error(), cgrEv))
 		}
 	}
 	// Attach raw CDR to stats
@@ -216,7 +216,6 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		go self.cdrstats.Call("CDRStatsV1.AppendCDR", cdr, &out)
 	}
 	if self.stats != nil {
-		cdrIf, _ := cdr.AsMapStringIface()
 		cgrEv := &utils.CGREvent{
 			Tenant: cdr.Tenant,
 			ID:     utils.UUIDSha1Prefix(),
@@ -300,12 +299,13 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 			}
 			if self.stats != nil {
 				cdrIf, _ := ratedCDR.AsMapStringIface()
-				cdrIf[utils.ID] = ratedCDR.CGRID
-				if cdrIf[utils.ID] == "" {
-					cdrIf[utils.ID] = ratedCDR.OriginID
+				cgrEv := &utils.CGREvent{
+					Tenant: cdr.Tenant,
+					ID:     utils.UUIDSha1Prefix(),
+					Event:  cdrIf,
 				}
 				var reply string
-				go self.stats.Call(utils.StatSv1ProcessEvent, cdrIf, &reply)
+				go self.stats.Call(utils.StatSv1ProcessEvent, cgrEv, &reply)
 			}
 		}
 	}
