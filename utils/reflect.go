@@ -71,13 +71,13 @@ func StringToInterface(s string) interface{} {
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
 		return f
 	}
-	// time.Duration
-	if d, err := time.ParseDuration(s); err == nil {
-		return d
-	}
 	// time.Time
 	if t, err := ParseTimeDetectLayout(s, "Local"); err == nil {
 		return t
+	}
+	// time.Duration
+	if d, err := time.ParseDuration(s); err == nil {
+		return d
 	}
 	// string
 	return s
