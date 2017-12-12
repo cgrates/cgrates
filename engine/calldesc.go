@@ -184,6 +184,57 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 	return cgrEv
 }
 
+// UpdateFromCGREvent will update CallDescriptor with fields from CGREvent
+// cgrEv contains both fields and their values
+// fields represent fields needing update
+func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
+	for _, fldName := range fields {
+		switch fldName {
+		case utils.TOR:
+			if cd.TOR, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.TENANT:
+			if cd.Tenant, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.CATEGORY:
+			if cd.Category, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.ACCOUNT:
+			if cd.Account, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.SUBJECT:
+			if cd.Subject, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.DESTINATION:
+			if cd.Destination, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
+			}
+		case utils.ANSWER_TIME:
+			if cd.TimeStart, err = cgrEv.FieldAsTime(fldName, config.CgrConfig().DefaultTimezone); err != nil {
+				return
+			}
+		case utils.USAGE:
+			usage, err := cgrEv.FieldAsDuration(fldName)
+			if err != nil {
+				return err
+			}
+			cd.TimeEnd = cd.TimeStart.Add(usage)
+		default:
+			fldVal, err := cgrEv.FieldAsString(fldName)
+			if err != nil {
+				return err
+			}
+			cd.ExtraFields[fldName] = fldVal
+		}
+	}
+	return
+}
+
 func (cd *CallDescriptor) ValidateCallData() error {
 	if cd.TimeStart.After(cd.TimeEnd) || cd.TimeStart.Equal(cd.TimeEnd) {
 		return errors.New("TimeStart must be strctly before TimeEnd")
