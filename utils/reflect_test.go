@@ -215,6 +215,12 @@ func TestStringToInterface(t *testing.T) {
 	if res := StringToInterface("45s"); res != time.Duration(45*time.Second) {
 		t.Error("not parsing time.Duration")
 	}
+	res := StringToInterface("+24h")
+	resTime := res.(time.Time)
+	now := time.Now()
+	if resTime.Hour() != now.Hour() && resTime.Minute() != now.Minute() {
+		t.Error("not parsing time.Time")
+	}
 }
 
 func TestCastFieldIfToString(t *testing.T) {
