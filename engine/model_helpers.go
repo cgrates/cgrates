@@ -2670,7 +2670,7 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttribute) {
 			th.Context = tp.Context
 		}
 		if tp.FieldName != "" {
-			th.Substitutes = append(th.Substitutes, &utils.TPRequestSubstitute{
+			th.Substitutes = append(th.Substitutes, &utils.TPAttributeSubstitute{
 				FieldName: tp.FieldName,
 				Initial:   tp.Initial,
 				Alias:     tp.Alias,

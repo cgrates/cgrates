@@ -1382,7 +1382,7 @@ type TPSupplier struct {
 	Weight             float64
 }
 
-type TPRequestSubstitute struct {
+type TPAttributeSubstitute struct {
 	FieldName string
 	Initial   string
 	Alias     string
@@ -1396,6 +1396,6 @@ type TPAttribute struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Context            string                // bind this TPAttribute to specific context
-	Substitutes        []*TPRequestSubstitute
+	Substitutes        []*TPAttributeSubstitute
 	Weight             float64
 }
