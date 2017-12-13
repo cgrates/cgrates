@@ -59,6 +59,11 @@ func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
 }
 
 func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
+	_, ok := iface.(*map[string]interface{})
+	if ok {
+		args = append(args, "MapStringInterface")
+		return
+	}
 	val := reflect.ValueOf(iface)
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
@@ -88,7 +93,6 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 				continue
 			}
 			args = append(args, ce.clientArgs(valInterf)...)
-
 		default:
 			args = append(args, typeField.Name)
 		}

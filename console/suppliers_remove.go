@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import "github.com/cgrates/cgrates/utils"
+
 //rename to suppliers everything
 func init() {
 	c := &CmdRemoveSuppliers{
@@ -61,4 +62,3 @@ func (self *CmdRemoveSuppliers) RpcResult() interface{} {
 	var s string
 	return &s
 }
-
