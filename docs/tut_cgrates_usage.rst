@@ -29,7 +29,11 @@ following rules:
  - 1001 will receive 5 units of general  *\*monetary*, 5 units of shared balance in the shared group "SHARED_A" and 90 seconds of calling destination 1002 with special rates *RT_1CNT*.
  - 1007 will receive 0 units of shared balance in the shared group "SHARED_A".
  - Define the shared balance "SHARED_A" with debit policy *\*highest*.
- - For each balance created, attach 4 triggers to control the balance: log on balance<2, log on balance>20, log on 5 mins talked towards 10xx destination, disable the account and log if a balance is higher than 100 units.
+ - For each balance created, attach 4 triggers to control the balance:
+  - log on balance<2,
+  - log on balance>20,
+  - log on 5 mins talked towards 10xx destination,
+  - disable the account and log if a balance is higher than 100 units.
 
 - *DerivedCharging* will execute one extra mediation run when the sessions will have as account and rating subject 1001 resulting in a cloned session with most of parameters identical to original except RequestType which will be set on *rated* instead of original *prepaid* one. The extra run will be identified by *derived_run1* in CDRs.
 
@@ -69,6 +73,7 @@ To verify that all actions successfully performed, we use following *cgr-console
 - Query call costs so we can see our calls will have expected costs (final cost will result as sum of *ConnectFee* and *Cost* fields):
 
  ::
+ 
   cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" AnswerTime="2014-08-04T13:00:00Z" Usage="20s"'
   cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" AnswerTime="2014-08-04T13:00:00Z" Usage="1m25s"'
   cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" AnswerTime="2014-08-04T13:00:00Z" Usage="20s"'
