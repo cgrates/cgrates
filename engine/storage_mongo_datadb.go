@@ -81,7 +81,7 @@ var (
 	DirectionLow       = strings.ToLower(utils.DIRECTION)
 	TenantLow          = strings.ToLower(utils.TENANT)
 	CategoryLow        = strings.ToLower(utils.CATEGORY)
-	AccountLow         = strings.ToLower(utils.ACCOUNT)
+	AccountLow         = strings.ToLower(utils.Account)
 	SubjectLow         = strings.ToLower(utils.SUBJECT)
 	SupplierLow        = strings.ToLower(utils.SUPPLIER)
 	DisconnectCauseLow = strings.ToLower(utils.DISCONNECT_CAUSE)

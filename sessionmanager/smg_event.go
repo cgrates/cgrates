@@ -83,7 +83,7 @@ func (self SMGenericEvent) GetDirection(fieldName string) string {
 
 func (self SMGenericEvent) GetAccount(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.ACCOUNT
+		fieldName = utils.Account
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
@@ -381,7 +381,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		return rsrFld.ParseValue(self.GetTenant(utils.META_DEFAULT))
 	case utils.CATEGORY:
 		return rsrFld.ParseValue(self.GetCategory(utils.META_DEFAULT))
-	case utils.ACCOUNT:
+	case utils.Account:
 		return rsrFld.ParseValue(self.GetAccount(utils.META_DEFAULT))
 	case utils.SUBJECT:
 		return rsrFld.ParseValue(self.GetSubject(utils.META_DEFAULT))

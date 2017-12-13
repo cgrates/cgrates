@@ -785,7 +785,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 					Event: map[string]interface{}{
 						utils.EventType:   utils.BalanceUpdate,
 						utils.EventSource: utils.AccountService,
-						utils.ACCOUNT:     acntTnt.ID,
+						utils.Account:     acntTnt.ID,
 						utils.BalanceID:   b.ID,
 						utils.Units:       b.Value}}
 				if !b.ExpirationDate.IsZero() {
@@ -833,7 +833,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				Event: map[string]interface{}{
 					utils.EventType:     utils.AccountUpdate,
 					utils.EventSource:   utils.AccountService,
-					utils.ACCOUNT:       acntTnt.ID,
+					utils.Account:       acntTnt.ID,
 					utils.AllowNegative: acnt.AllowNegative,
 					utils.Disabled:      acnt.Disabled}}
 			var hits int

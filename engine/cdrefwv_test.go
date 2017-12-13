@@ -57,7 +57,7 @@ var contentJsnCfgFlds = []*config.CdrFieldJsonCfg{
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("TypeOfRecord"),
 		Type: utils.StringPointer(utils.META_CONSTANT), Value: utils.StringPointer("20"), Width: utils.IntPointer(2)},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Account"), Type: utils.StringPointer(utils.META_COMPOSED),
-		Value: utils.StringPointer(utils.ACCOUNT), Width: utils.IntPointer(12),
+		Value: utils.StringPointer(utils.Account), Width: utils.IntPointer(12),
 		Strip: utils.StringPointer("left"), Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Subject"), Type: utils.StringPointer(utils.META_COMPOSED),
 		Value: utils.StringPointer(utils.SUBJECT), Width: utils.IntPointer(5),

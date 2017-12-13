@@ -36,7 +36,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.TOR] = "*voice"
 	smGev[utils.ACCID] = "12345"
 	smGev[utils.DIRECTION] = "*out"
-	smGev[utils.ACCOUNT] = "account1"
+	smGev[utils.Account] = "account1"
 	smGev[utils.SUBJECT] = "subject1"
 	smGev[utils.DESTINATION] = "+4986517174963"
 	smGev[utils.CATEGORY] = "call"
@@ -156,7 +156,7 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev[utils.TOR] = utils.SMS
 	smGev[utils.ACCID] = "12345"
 	smGev[utils.DIRECTION] = utils.OUT
-	smGev[utils.ACCOUNT] = "account1"
+	smGev[utils.Account] = "account1"
 	smGev[utils.SUBJECT] = "subject1"
 	smGev[utils.DESTINATION] = "+4986517174963"
 	smGev[utils.CATEGORY] = "call"
@@ -190,7 +190,7 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 	smGev[utils.TOR] = utils.VOICE
 	smGev[utils.ACCID] = "12345"
 	smGev[utils.DIRECTION] = utils.OUT
-	smGev[utils.ACCOUNT] = "account1"
+	smGev[utils.Account] = "account1"
 	smGev[utils.SUBJECT] = "subject1"
 	smGev[utils.DESTINATION] = "+4986517174963"
 	smGev[utils.CATEGORY] = "call"
@@ -218,7 +218,7 @@ func TestSMGenericEventGetFieldAsString(t *testing.T) {
 	smGev[utils.TOR] = utils.VOICE
 	smGev[utils.ACCID] = "12345"
 	smGev[utils.DIRECTION] = utils.OUT
-	smGev[utils.ACCOUNT] = "account1"
+	smGev[utils.Account] = "account1"
 	smGev[utils.SUBJECT] = "subject1"
 	eFldVal := utils.VOICE
 	if strVal, err := smGev.GetFieldAsString(utils.TOR); err != nil {

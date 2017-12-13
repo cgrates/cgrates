@@ -46,7 +46,7 @@ var evs = []*utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.ACCOUNT:     "1001",
+			utils.Account:     "1001",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(135 * time.Second),
 			utils.COST:        123.0}},
@@ -54,14 +54,14 @@ var evs = []*utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
-			utils.ACCOUNT:     "1002",
+			utils.Account:     "1002",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(45 * time.Second)}},
 	&utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			utils.ACCOUNT:    "1002",
+			utils.Account:    "1002",
 			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:      0}},
 }
@@ -174,7 +174,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.ACCOUNT:     "1001",
+			utils.Account:     "1001",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(135 * time.Second),
 			utils.COST:        123.0,
@@ -203,7 +203,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
-			utils.ACCOUNT:     "1002",
+			utils.Account:     "1002",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       time.Duration(45 * time.Second)}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev2, &reply); err != nil {
@@ -215,7 +215,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			utils.ACCOUNT:    "1002",
+			utils.Account:    "1002",
 			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:      0}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
