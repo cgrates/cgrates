@@ -95,7 +95,7 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.Account}) != cdr.Account ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.SUBJECT}) != cdr.Subject ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}) != cdr.Destination ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.Destination}) != cdr.Destination ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.SETUP_TIME}) != cdr.SetupTime.Format(time.RFC3339) ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.ANSWER_TIME}) != cdr.AnswerTime.Format(time.RFC3339) ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.USAGE}) != "10s" ||
@@ -115,7 +115,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.Account}) != cdr.Account,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.SUBJECT}) != cdr.Subject,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}) != cdr.Destination,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.Destination}) != cdr.Destination,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.SETUP_TIME}) != cdr.SetupTime.Format(time.RFC3339),
 			cdr.FieldAsString(&utils.RSRField{Id: utils.ANSWER_TIME}) != cdr.AnswerTime.Format(time.RFC3339),
 			cdr.FieldAsString(&utils.RSRField{Id: utils.USAGE}) != "10s",
@@ -249,8 +249,8 @@ func TestCDRAsHttpForm(t *testing.T) {
 	if cdrForm.Get(utils.SUBJECT) != "1001" {
 		t.Errorf("Expected: %s, received: %s", "1001", cdrForm.Get(utils.SUBJECT))
 	}
-	if cdrForm.Get(utils.DESTINATION) != "1002" {
-		t.Errorf("Expected: %s, received: %s", "1002", cdrForm.Get(utils.DESTINATION))
+	if cdrForm.Get(utils.Destination) != "1002" {
+		t.Errorf("Expected: %s, received: %s", "1002", cdrForm.Get(utils.Destination))
 	}
 	if cdrForm.Get(utils.SETUP_TIME) != "2013-11-07T08:42:20Z" {
 		t.Errorf("Expected: %s, received: %s", "2013-11-07T08:42:20Z", cdrForm.Get(utils.SETUP_TIME))
@@ -283,7 +283,7 @@ func TestCDRForkCdr(t *testing.T) {
 		Usage:      time.Duration(10) * time.Second, Cost: 1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"}}
 	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.Account}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.DESTINATION},
+		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.Account}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.Destination},
 		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE},
 		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST},
 		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "field_extr2"}}, true, "")
@@ -324,7 +324,7 @@ func TestCDRForkCdrStaticVals(t *testing.T) {
 	rsrStDur, _ := utils.NewRSRField("^12s")
 	rsrStRated, _ := utils.NewRSRField("^true")
 	rsrStCost, _ := utils.NewRSRField("^1.2")
-	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: utils.DESTINATION},
+	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: utils.Destination},
 		rsrStST, rsrStAT, rsrStDur, rsrStRated, rsrStCost, []*utils.RSRField{}, true, "")
 	if err != nil {
 		t.Error("Unexpected error received", err)
@@ -342,7 +342,7 @@ func TestCDRForkCdrStaticVals(t *testing.T) {
 	}
 	_, err = storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: "dummy_header"},
 		&utils.RSRField{Id: utils.TENANT}, &utils.RSRField{Id: utils.TOR}, &utils.RSRField{Id: utils.Account},
-		&utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.DESTINATION},
+		&utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.Destination},
 		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE},
 		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST}, []*utils.RSRField{}, true, "")
 	if err == nil {
@@ -569,7 +569,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		utils.CATEGORY:     "call",
 		utils.Account:      "1002",
 		utils.SUBJECT:      "1001",
-		utils.DESTINATION:  "+4986517174963",
+		utils.Destination:  "+4986517174963",
 		utils.SETUP_TIME:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		utils.ANSWER_TIME:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		utils.USAGE:        time.Duration(10) * time.Second,
@@ -606,8 +606,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		RunID:       utils.DEFAULT_RUNID, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
 
-	val, _ := utils.ParseRSRFields(utils.DESTINATION, utils.INFIELD_SEP)
-	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val, Timezone: "UTC"}
+	val, _ := utils.ParseRSRFields(utils.Destination, utils.INFIELD_SEP)
+	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.Destination, Value: val, Timezone: "UTC"}
 	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != cdr.Destination {
@@ -617,7 +617,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val, MaskDestID: "MASKED_DESTINATIONS", MaskLen: 3}
+	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.Destination, Value: val, MaskDestID: "MASKED_DESTINATIONS", MaskLen: 3}
 	eDst := "+4986517174***"
 	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
 		t.Error(err)
@@ -631,7 +631,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
 	fltr, _ := utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION, Value: val, FieldFilter: fltr, Timezone: "UTC"}
+	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.Destination, Value: val, FieldFilter: fltr, Timezone: "UTC"}
 	if _, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err == nil {
 		t.Error("Failed to use filter")
 	}
@@ -671,12 +671,12 @@ func TestCDRAsExportMap(t *testing.T) {
 	}
 	eCDRMp := map[string]string{
 		utils.CGRID:       cdr.CGRID,
-		utils.DESTINATION: "004986517174963",
+		utils.Destination: "004986517174963",
 		"FieldExtra1":     "val_extr1",
 	}
 	expFlds := []*config.CfgCdrField{
 		&config.CfgCdrField{FieldId: utils.CGRID, Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.CGRID, utils.INFIELD_SEP)},
-		&config.CfgCdrField{FieldId: utils.DESTINATION, Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("~Destination:s/^\\+(\\d+)$/00${1}/", utils.INFIELD_SEP)},
+		&config.CfgCdrField{FieldId: utils.Destination, Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("~Destination:s/^\\+(\\d+)$/00${1}/", utils.INFIELD_SEP)},
 		&config.CfgCdrField{FieldId: "FieldExtra1", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("field_extr1", utils.INFIELD_SEP)},
 	}
 	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, 0); err != nil {

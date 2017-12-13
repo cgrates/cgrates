@@ -128,7 +128,7 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 		ID:     "testV1SplSGetWeightSuppliers",
 		Event: map[string]interface{}{
 			utils.Account:     "1007",
-			utils.DESTINATION: "+491511231234",
+			utils.Destination: "+491511231234",
 		},
 	}
 	eSpls := engine.SortedSuppliers{
@@ -166,7 +166,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.SUBJECT:     "1001",
-			utils.DESTINATION: "1002",
+			utils.Destination: "1002",
 			utils.ANSWER_TIME: time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 			utils.USAGE:       "1m20s",
 		},

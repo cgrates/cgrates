@@ -610,7 +610,7 @@ func (ddc *StatDDC) GetFloat64Value() (v float64) {
 
 func (ddc *StatDDC) AddEvent(ev *utils.CGREvent) (err error) {
 	var dest string
-	if dest, err = ev.FieldAsString(utils.DESTINATION); err != nil {
+	if dest, err = ev.FieldAsString(utils.Destination); err != nil {
 		return err
 	}
 	if _, has := ddc.Destinations[dest]; !has {

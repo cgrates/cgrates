@@ -127,7 +127,7 @@ func TestSMGV1AccountsBefore(t *testing.T) {
 // Make sure account was debited properly
 func TestSMGV1GetMaxUsage(t *testing.T) {
 	setupReq := &sessionmanager.SMGenericEvent{utils.REQTYPE: utils.META_PREPAID, utils.TENANT: "cgrates.org",
-		utils.Account: "1003", utils.DESTINATION: "1002", utils.SETUP_TIME: "2015-11-10T15:20:00Z"}
+		utils.Account: "1003", utils.Destination: "1002", utils.SETUP_TIME: "2015-11-10T15:20:00Z"}
 	var maxTime float64
 	if err := smgV1Rpc.Call("SMGenericV1.GetMaxUsage", setupReq, &maxTime); err != nil {
 		t.Error(err)

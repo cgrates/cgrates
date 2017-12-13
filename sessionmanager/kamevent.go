@@ -294,7 +294,7 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		return rsrFld.ParseValue(kev.GetAccount(utils.META_DEFAULT))
 	case utils.SUBJECT:
 		return rsrFld.ParseValue(kev.GetSubject(utils.META_DEFAULT))
-	case utils.DESTINATION:
+	case utils.Destination:
 		return rsrFld.ParseValue(kev.GetDestination(utils.META_DEFAULT))
 	case utils.SETUP_TIME:
 		return rsrFld.ParseValue(sTime.String())

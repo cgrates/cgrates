@@ -181,7 +181,7 @@ func TestFieldOutVal(t *testing.T) {
 	} else if fldOut != eOut {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
-	cfgFld = &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
+	cfgFld = &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 		Value: utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Time", utils.INFIELD_SEP), Mandatory: true}
 	eOut = "360"
 	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
@@ -190,7 +190,7 @@ func TestFieldOutVal(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
 	// With filter on ProcessorVars
-	cfgFld = &config.CfgCdrField{Tag: "ComposedTestWithProcessorVarsFilter", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
+	cfgFld = &config.CfgCdrField{Tag: "ComposedTestWithProcessorVarsFilter", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 		FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(INSUFFICIENT_CREDIT)", utils.INFIELD_SEP),
 		Value:       utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Time", utils.INFIELD_SEP), Mandatory: true}
 	if _, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err == nil {

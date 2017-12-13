@@ -168,7 +168,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(cdr.Account)
 	case utils.SUBJECT:
 		return rsrFld.ParseValue(cdr.Subject)
-	case utils.DESTINATION:
+	case utils.Destination:
 		return rsrFld.ParseValue(cdr.Destination)
 	case utils.SETUP_TIME:
 		return rsrFld.ParseValue(cdr.SetupTime.Format(time.RFC3339))
@@ -215,7 +215,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		cdr.Account += fieldVal
 	case utils.SUBJECT:
 		cdr.Subject += fieldVal
-	case utils.DESTINATION:
+	case utils.Destination:
 		cdr.Destination += fieldVal
 	case utils.RATED_FLD:
 		cdr.Rated, _ = strconv.ParseBool(fieldVal)
@@ -300,7 +300,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 		destFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
 	if destFld.Id == utils.META_DEFAULT {
-		destFld.Id = utils.DESTINATION
+		destFld.Id = utils.Destination
 	}
 	if setupTimeFld == nil {
 		setupTimeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -363,7 +363,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 	}
 	frkStorCdr.Destination = cdr.FieldAsString(destFld)
 	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.ToR == utils.VOICE {
-		return nil, utils.NewErrMandatoryIeMissing(utils.DESTINATION, destFld.Id)
+		return nil, utils.NewErrMandatoryIeMissing(utils.Destination, destFld.Id)
 	}
 	sTimeStr := cdr.FieldAsString(setupTimeFld)
 	if primaryMandatory && len(sTimeStr) == 0 {
@@ -473,7 +473,7 @@ func (cdr *CDR) GetAccount(fieldName string) string {
 	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (cdr *CDR) GetDestination(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.DESTINATION, utils.META_DEFAULT, ""}, fieldName) {
+	if utils.IsSliceMember([]string{utils.Destination, utils.META_DEFAULT, ""}, fieldName) {
 		return cdr.Destination
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -482,7 +482,7 @@ func (cdr *CDR) GetDestination(fieldName string) string {
 	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (cdr *CDR) GetCallDestNr(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.DESTINATION, utils.META_DEFAULT, ""}, fieldName) {
+	if utils.IsSliceMember([]string{utils.Destination, utils.META_DEFAULT, ""}, fieldName) {
 		return cdr.Destination
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -626,7 +626,7 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (string, error) 
 			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
 		case utils.ANSWER_TIME: // Format time based on layout
 			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
-		case utils.DESTINATION:
+		case utils.Destination:
 			cdrVal = cdr.FieldAsString(rsrFld)
 			if cfgCdrFld.MaskLen != -1 && len(cfgCdrFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgCdrFld.MaskDestID, cdrVal) {
 				cdrVal = utils.MaskSuffix(cdrVal, cfgCdrFld.MaskLen)
@@ -712,7 +712,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
 	mp[utils.CATEGORY] = cdr.Category
 	mp[utils.Account] = cdr.Account
 	mp[utils.SUBJECT] = cdr.Subject
-	mp[utils.DESTINATION] = cdr.Destination
+	mp[utils.Destination] = cdr.Destination
 	mp[utils.SETUP_TIME] = cdr.SetupTime
 	mp[utils.ANSWER_TIME] = cdr.AnswerTime
 	mp[utils.USAGE] = cdr.Usage
@@ -837,7 +837,7 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 			if cdr.Subject, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
-		case utils.DESTINATION:
+		case utils.Destination:
 			if cdr.Destination, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}

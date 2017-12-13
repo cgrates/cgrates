@@ -199,7 +199,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 	}
 	smgEv[utils.CDRHOST] = smaEv.OriginatorIP()
 	smgEv[utils.Account] = smaEv.Account()
-	smgEv[utils.DESTINATION] = smaEv.Destination()
+	smgEv[utils.Destination] = smaEv.Destination()
 	smgEv[utils.SETUP_TIME] = smaEv.Timestamp()
 	if smaEv.Supplier() != "" {
 		smgEv[utils.SUPPLIER] = smaEv.Supplier()

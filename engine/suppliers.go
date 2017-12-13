@@ -171,7 +171,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
-		utils.DESTINATION, utils.ANSWER_TIME, utils.USAGE}); err != nil {
+		utils.Destination, utils.ANSWER_TIME, utils.USAGE}); err != nil {
 		return
 	}
 	var acnt, subj, dst string
@@ -184,7 +184,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		}
 		subj = acnt
 	}
-	if dst, err = ev.FieldAsString(utils.DESTINATION); err != nil {
+	if dst, err = ev.FieldAsString(utils.Destination); err != nil {
 		return
 	}
 	var aTime time.Time
