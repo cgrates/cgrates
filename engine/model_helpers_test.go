@@ -971,12 +971,12 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 			FilterFieldValues: "1001;1002",
 		},
 	}
-	eTPs := []*utils.TPFilter{
-		&utils.TPFilter{
+	eTPs := []*utils.TPFilterProfile{
+		&utils.TPFilterProfile{
 			TPid: tps[0].Tpid,
 			ID:   tps[0].ID,
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
+			Filters: []*utils.TPFilter{
+				&utils.TPFilter{
 					Type:      MetaStringPrefix,
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
@@ -992,12 +992,12 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 }
 
 func TestAPItoTPFilter(t *testing.T) {
-	tps := &utils.TPFilter{
+	tps := &utils.TPFilterProfile{
 		TPid:   testTPID,
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{
+		Filters: []*utils.TPFilter{
+			&utils.TPFilter{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -1039,15 +1039,15 @@ func TestFilterToTPFilter(t *testing.T) {
 			},
 		},
 	}
-	tpfilter := &utils.TPFilter{
+	tpfilter := &utils.TPFilterProfile{
 		ID:     "Fltr1",
 		Tenant: "cgrates.org",
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-01-14T00:00:00Z",
 			ExpiryTime:     "2014-01-14T00:00:00Z",
 		},
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{
+		Filters: []*utils.TPFilter{
+			&utils.TPFilter{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -1061,7 +1061,7 @@ func TestFilterToTPFilter(t *testing.T) {
 }
 
 func TestAPItoAttributeProfile(t *testing.T) {
-	tpAlsPrf := &utils.TPAttribute{
+	tpAlsPrf := &utils.TPAttributeProfile{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
@@ -1071,23 +1071,23 @@ func TestAPItoAttributeProfile(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Substitutes: []*utils.TPAttributeSubstitute{
-			&utils.TPAttributeSubstitute{
-				FieldName: "FL1",
-				Initial:   "In1",
-				Alias:     "Al1",
-				Append:    true,
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
-	attrMap := make(map[string]map[string]*AttributeSubstitute)
-	attrMap["FL1"] = make(map[string]*AttributeSubstitute)
-	attrMap["FL1"]["In1"] = &AttributeSubstitute{
-		FieldName: "FL1",
-		Initial:   "In1",
-		Alias:     "Al1",
-		Append:    true,
+	attrMap := make(map[string]map[string]*Attribute)
+	attrMap["FL1"] = make(map[string]*Attribute)
+	attrMap["FL1"]["In1"] = &Attribute{
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: "Al1",
+		Append:     true,
 	}
 	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -1097,8 +1097,8 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		Substitutes: attrMap,
-		Weight:      20,
+		Attributes: attrMap,
+		Weight:     20,
 	}
 	if rcv, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err != nil {
 		t.Error(err)
@@ -1108,7 +1108,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 }
 
 func TestAPItoModelTPAttribute(t *testing.T) {
-	tpAlsPrf := &utils.TPAttribute{
+	tpAlsPrf := &utils.TPAttributeProfile{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
@@ -1118,12 +1118,12 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Substitutes: []*utils.TPAttributeSubstitute{
-			&utils.TPAttributeSubstitute{
-				FieldName: "FL1",
-				Initial:   "In1",
-				Alias:     "Al1",
-				Append:    true,
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
 			},
 		},
 		Weight: 20,
@@ -1137,7 +1137,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
 			FieldName:          "FL1",
 			Initial:            "In1",
-			Alias:              "Al1",
+			Substitute:         "Al1",
 			Append:             true,
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
@@ -1159,13 +1159,13 @@ func TestModelAsTPAttribute(t *testing.T) {
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
 			FieldName:          "FL1",
 			Initial:            "In1",
-			Alias:              "Al1",
+			Substitute:         "Al1",
 			Append:             true,
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
 	}
-	expected := &utils.TPAttribute{
+	expected := &utils.TPAttributeProfile{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
@@ -1175,12 +1175,12 @@ func TestModelAsTPAttribute(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Substitutes: []*utils.TPAttributeSubstitute{
-			&utils.TPAttributeSubstitute{
-				FieldName: "FL1",
-				Initial:   "In1",
-				Alias:     "Al1",
-				Append:    true,
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
 			},
 		},
 		Weight: 20,

@@ -127,11 +127,11 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 		return nil, err
 	}
 	rply = &AttrSProcessEventReply{MatchedProfile: attrPrf.ID, CGREvent: ev.Clone()}
-	for fldName, intialMp := range attrPrf.Substitutes {
+	for fldName, intialMp := range attrPrf.Attributes {
 		initEvValIf, has := ev.Event[fldName]
 		if !has { // we don't have initial in event, try append
 			if anyInitial, has := intialMp[utils.ANY]; has && anyInitial.Append {
-				rply.CGREvent.Event[fldName] = anyInitial.Alias
+				rply.CGREvent.Event[fldName] = anyInitial.Substitute
 				rply.AlteredFields = append(rply.AlteredFields, fldName)
 			}
 			continue
@@ -148,7 +148,7 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 			attrVal, has = intialMp[utils.ANY]
 		}
 		if has {
-			rply.CGREvent.Event[fldName] = attrVal.Alias
+			rply.CGREvent.Event[fldName] = attrVal.Substitute
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}
 	}

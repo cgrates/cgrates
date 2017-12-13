@@ -686,7 +686,7 @@ func (csvs *CSVStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, 
 	return tpThreshold.AsTPThreshold(), nil
 }
 
-func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error) {
+func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilterProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.filterFn, csvs.sep, getColumnCount(TpFilter{}))
 	if err != nil {
 		//log.Print("Could not load filter file: ", err)
@@ -714,7 +714,7 @@ func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 	return tpFilter.AsTPFilter(), nil
 }
 
-func (csvs *CSVStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, error) {
+func (csvs *CSVStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplierProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.suppProfilesFn, csvs.sep, getColumnCount(TpSupplier{}))
 	if err != nil {
 		//log.Print("Could not load lcrProfile file: ", err)
@@ -742,10 +742,10 @@ func (csvs *CSVStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, er
 	return tpSPPs.AsTPSuppliers(), nil
 }
 
-func (csvs *CSVStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttribute, error) {
+func (csvs *CSVStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributeProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.attributeProfilesFn, csvs.sep, getColumnCount(TPAttribute{}))
 	if err != nil {
-		//log.Print("Could not load AliasProfile file: ", err)
+		//log.Print("Could not load AttributeProfile file: ", err)
 		// allow writing of the other values
 		return nil, nil
 	}

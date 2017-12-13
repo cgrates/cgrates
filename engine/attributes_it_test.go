@@ -36,23 +36,23 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitutes: []*AttributeSubstitute{
-			&AttributeSubstitute{
-				FieldName: "FL1",
-				Initial:   "In1",
-				Alias:     "Al1",
-				Append:    true,
+		Attributes: []*Attribute{
+			&Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
-	attrMap := make(map[string]map[string]*AttributeSubstitute)
-	attrMap["FL1"] = make(map[string]*AttributeSubstitute)
-	attrMap["FL1"]["In1"] = &AttributeSubstitute{
-		FieldName: "FL1",
-		Initial:   "In1",
-		Alias:     "Al1",
-		Append:    true,
+	attrMap := make(map[string]map[string]*Attribute)
+	attrMap["FL1"] = make(map[string]*Attribute)
+	attrMap["FL1"]["In1"] = &Attribute{
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: "Al1",
+		Append:     true,
 	}
 	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -63,8 +63,8 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitutes: attrMap,
-		Weight:      20,
+		Attributes: attrMap,
+		Weight:     20,
 	}
 
 	rcv := extAttr.AsAttributeProfile()
@@ -74,13 +74,13 @@ func TestExternalAttributeProfileAsAttributeProfile(t *testing.T) {
 }
 
 func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
-	attrMap := make(map[string]map[string]*AttributeSubstitute)
-	attrMap["FL1"] = make(map[string]*AttributeSubstitute)
-	attrMap["FL1"]["In1"] = &AttributeSubstitute{
-		FieldName: "FL1",
-		Initial:   "In1",
-		Alias:     "Al1",
-		Append:    true,
+	attrMap := make(map[string]map[string]*Attribute)
+	attrMap["FL1"] = make(map[string]*Attribute)
+	attrMap["FL1"]["In1"] = &Attribute{
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: "Al1",
+		Append:     true,
 	}
 	attrPrf := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -91,8 +91,8 @@ func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitutes: attrMap,
-		Weight:      20,
+		Attributes: attrMap,
+		Weight:     20,
 	}
 
 	expected := &ExternalAttributeProfile{
@@ -104,12 +104,12 @@ func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
 		},
-		Substitutes: []*AttributeSubstitute{
-			&AttributeSubstitute{
-				FieldName: "FL1",
-				Initial:   "In1",
-				Alias:     "Al1",
-				Append:    true,
+		Attributes: []*Attribute{
+			&Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
 			},
 		},
 		Weight: 20,
