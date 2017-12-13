@@ -122,7 +122,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:59",
+		utils.SetupTime:   "2016-01-05 18:30:59",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "5120", // 5MB
 	}
@@ -151,7 +151,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:59",
+		utils.SetupTime:   "2016-01-05 18:30:59",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "5120",
 		utils.LastUsed:    "4096",
@@ -179,7 +179,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:59",
+		utils.SetupTime:   "2016-01-05 18:30:59",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.LastUsed:    "0",
 	}
@@ -229,7 +229,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      acntAttrs.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:50",
+		utils.SetupTime:   "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "6144", // 6 MB
 	}
@@ -264,7 +264,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      acntAttrs.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:50",
+		utils.SetupTime:   "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "8192", // 8 MB
 		utils.LastUsed:    "7168",
@@ -298,7 +298,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      acntAttrs.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:50",
+		utils.SetupTime:   "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "1024", // 8 MB
 		utils.LastUsed:    "5120", // 5 MB
@@ -332,7 +332,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      acntAttrs.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:50",
+		utils.SetupTime:   "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "1024",
 	}
@@ -365,7 +365,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      acntAttrs.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:50",
+		utils.SetupTime:   "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.LastUsed:    "0", // refund 1024 (extra used) + 1024 (extra reserved)
 	}
@@ -435,7 +435,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 		utils.CATEGORY:        "data",
 		utils.TENANT:          "cgrates.org",
 		utils.REQTYPE:         utils.META_PREPAID,
-		utils.SETUP_TIME:      "2016-01-05 18:30:52",
+		utils.SetupTime:       "2016-01-05 18:30:52",
 		utils.ANSWER_TIME:     "2016-01-05 18:31:05",
 		utils.Usage:           "1024",
 		utils.SessionTTLUsage: "2048", // will be charged on TTL
@@ -494,7 +494,7 @@ func TestSMGDataTTLExpMultiUpdates(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.SetupTime:   "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "4096", // 3MB
 	}
@@ -529,7 +529,7 @@ func TestSMGDataTTLExpMultiUpdates(t *testing.T) {
 		utils.CATEGORY:           "data",
 		utils.TENANT:             "cgrates.org",
 		utils.REQTYPE:            utils.META_PREPAID,
-		utils.SETUP_TIME:         "2016-01-05 18:30:53",
+		utils.SetupTime:          "2016-01-05 18:30:53",
 		utils.ANSWER_TIME:        "2016-01-05 18:31:05",
 		utils.LastUsed:           "1024",
 		utils.Usage:              "4096",
@@ -592,7 +592,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.SetupTime:   "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "2048",
 	}
@@ -627,7 +627,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.SetupTime:   "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.SessionTTL:  "1h", // cancel timeout since usage 0 will not update it
 		utils.Usage:       "1024",
@@ -664,7 +664,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.SetupTime:   "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.SessionTTL:  "1h", // cancel timeout since usage 0 will not update it
 		utils.Usage:       "0",
@@ -700,7 +700,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.SetupTime:   "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.LastUsed:    "0",
 	}
@@ -754,7 +754,7 @@ func TestSMGDataTTLUsageProtection(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:53",
+		utils.SetupTime:   "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "2048",
 	}

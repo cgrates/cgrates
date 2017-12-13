@@ -61,9 +61,9 @@ var evs = []*utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      0}},
+			utils.Account:   "1002",
+			utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:     0}},
 }
 
 func init() {
@@ -215,9 +215,9 @@ func testV1STSProcessEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      0}}
+			utils.Account:   "1002",
+			utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:     0}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

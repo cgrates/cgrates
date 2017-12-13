@@ -140,7 +140,7 @@ var tEvs = []*utils.CGREvent{
 			utils.Account:     "1007",
 			utils.SUBJECT:     "1007",
 			utils.Destination: "+4986517174963",
-			utils.SETUP_TIME:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 			utils.PDD:         time.Duration(0) * time.Second,
 			utils.ANSWER_TIME: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 			utils.Usage:       time.Duration(10) * time.Second,

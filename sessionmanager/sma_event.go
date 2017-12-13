@@ -93,7 +93,7 @@ func (smaEv *SMAsteriskEvent) ChannelState() string {
 }
 
 func (smaEv *SMAsteriskEvent) SetupTime() string {
-	cachedKey := utils.SETUP_TIME
+	cachedKey := utils.SetupTime
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
 		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
@@ -163,7 +163,7 @@ func (smaEv *SMAsteriskEvent) DisconnectCause() string {
 
 func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) {
 	extraParams = make(map[string]string)
-	primaryFields := []string{eventType, channelID, timestamp, utils.SETUP_TIME, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
+	primaryFields := []string{eventType, channelID, timestamp, utils.SetupTime, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
 		utils.CGR_TENANT, utils.CGR_CATEGORY, utils.CGR_SUBJECT, utils.CGR_PDD, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE}
 	for cachedKey, cachedVal := range smaEv.cachedFields {
 		if !utils.IsSliceMember(primaryFields, cachedKey) {
@@ -200,7 +200,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 	smgEv[utils.CDRHOST] = smaEv.OriginatorIP()
 	smgEv[utils.Account] = smaEv.Account()
 	smgEv[utils.Destination] = smaEv.Destination()
-	smgEv[utils.SETUP_TIME] = smaEv.Timestamp()
+	smgEv[utils.SetupTime] = smaEv.Timestamp()
 	if smaEv.Supplier() != "" {
 		smgEv[utils.SUPPLIER] = smaEv.Supplier()
 	}

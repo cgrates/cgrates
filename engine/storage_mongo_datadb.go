@@ -85,7 +85,7 @@ var (
 	SubjectLow         = strings.ToLower(utils.SUBJECT)
 	SupplierLow        = strings.ToLower(utils.SUPPLIER)
 	DisconnectCauseLow = strings.ToLower(utils.DISCONNECT_CAUSE)
-	SetupTimeLow       = strings.ToLower(utils.SETUP_TIME)
+	SetupTimeLow       = strings.ToLower(utils.SetupTime)
 	AnswerTimeLow      = strings.ToLower(utils.ANSWER_TIME)
 	CreatedAtLow       = strings.ToLower(utils.CreatedAt)
 	UpdatedAtLow       = strings.ToLower(utils.UpdatedAt)
