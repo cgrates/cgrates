@@ -129,7 +129,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 			}
 			return nil, err
 		}
-		aTime, err := ev.FieldAsTime(utils.ANSWER_TIME, spS.timezone)
+		aTime, err := ev.FieldAsTime(utils.AnswerTime, spS.timezone)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				aTime = time.Now()
@@ -171,7 +171,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
-		utils.Destination, utils.ANSWER_TIME, utils.Usage}); err != nil {
+		utils.Destination, utils.AnswerTime, utils.Usage}); err != nil {
 		return
 	}
 	var acnt, subj, dst string
@@ -188,7 +188,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		return
 	}
 	var aTime time.Time
-	if aTime, err = ev.FieldAsTime(utils.ANSWER_TIME, spS.timezone); err != nil {
+	if aTime, err = ev.FieldAsTime(utils.AnswerTime, spS.timezone); err != nil {
 		return
 	}
 	var usage time.Duration

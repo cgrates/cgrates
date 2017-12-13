@@ -37,7 +37,7 @@ func TestCgrCdrAsCDR(t *testing.T) {
 		utils.CDRSOURCE: "internal_test", utils.REQTYPE: utils.META_RATED,
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call",
 		utils.Account: "1001", utils.SUBJECT: "1001", utils.Destination: "1002",
-		utils.SetupTime: "2013-11-07T08:42:20Z", utils.ANSWER_TIME: "2013-11-07T08:42:26Z",
+		utils.SetupTime: "2013-11-07T08:42:20Z", utils.AnswerTime: "2013-11-07T08:42:26Z",
 		utils.Usage: "10s", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SetupTime], "")
 	expctRtCdr := &CDR{CGRID: utils.Sha1(cgrCdr[utils.ACCID], setupTime.String()),
@@ -62,7 +62,7 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 	cgrCdr := CgrCdr{utils.CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", utils.TOR: utils.VOICE, utils.ACCID: "dsafdsaf", utils.CDRHOST: "192.168.1.1",
 		utils.CDRSOURCE: "internal_test", utils.REQTYPE: utils.META_RATED,
 		utils.DIRECTION: utils.OUT, utils.TENANT: "cgrates.org", utils.CATEGORY: "call",
-		utils.Account: "1001", utils.SUBJECT: "1001", utils.Destination: "1002", utils.SetupTime: "2013-11-07T08:42:20Z", utils.PDD: "0.200", utils.ANSWER_TIME: "2013-11-07T08:42:26Z",
+		utils.Account: "1001", utils.SUBJECT: "1001", utils.Destination: "1002", utils.SetupTime: "2013-11-07T08:42:20Z", utils.PDD: "0.200", utils.AnswerTime: "2013-11-07T08:42:26Z",
 		utils.Usage: "10s", utils.SUPPLIER: "SUPPL1", utils.DISCONNECT_CAUSE: "NORMAL_CLEARING", utils.COST: "0.12", utils.RATED: "true", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	expctRtCdr := &CDR{CGRID: cgrCdr[utils.CGRID],
 		ToR:         cgrCdr[utils.TOR],

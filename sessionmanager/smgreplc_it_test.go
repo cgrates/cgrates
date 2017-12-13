@@ -107,7 +107,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
@@ -237,7 +237,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
 	smgEv2 := SMGenericEvent{
@@ -252,7 +252,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
 	for _, smgEv := range []SMGenericEvent{smgEv1, smgEv2} {

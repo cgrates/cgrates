@@ -218,12 +218,12 @@ func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *SMGenericEvent) error {
 	case ARIChannelStateChange:
 		if smaEv.ChannelState() == channelUp {
 			resSMGEv[utils.EVENT_NAME] = SMASessionStart
-			resSMGEv[utils.ANSWER_TIME] = smaEv.Timestamp()
+			resSMGEv[utils.AnswerTime] = smaEv.Timestamp()
 		}
 	case ARIChannelDestroyed:
 		resSMGEv[utils.EVENT_NAME] = SMASessionTerminate
 		resSMGEv[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
-		if _, hasIt := resSMGEv[utils.ANSWER_TIME]; !hasIt {
+		if _, hasIt := resSMGEv[utils.AnswerTime]; !hasIt {
 			resSMGEv[utils.Usage] = "0s"
 		} else {
 			if aTime, err := smgEv.GetAnswerTime(utils.META_DEFAULT, ""); err != nil {

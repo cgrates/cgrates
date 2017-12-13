@@ -141,7 +141,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		utils.TENANT:      attrSetBalance.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 	}
 	var maxUsage float64
 	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
@@ -222,7 +222,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 		utils.TENANT:      attrSetBalance.Tenant,
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 	}
 	var maxUsage float64
 	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,

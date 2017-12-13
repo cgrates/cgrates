@@ -424,7 +424,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 		utils.Account:     "1001",
 		utils.Destination: "1003",
 		utils.SetupTime:   "2016-09-12T13:53:48.919+0200",
-		utils.ANSWER_TIME: "2016-09-12T13:53:52.110+0200",
+		utils.AnswerTime:  "2016-09-12T13:53:52.110+0200",
 		"extra1":          "val1",
 		"extra2":          "val2",
 	}
@@ -447,7 +447,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 		utils.Account:          "1001",
 		utils.Destination:      "1003",
 		utils.SetupTime:        "2016-09-12T13:53:48.919+0200",
-		utils.ANSWER_TIME:      "2016-09-12T13:53:52.110+0200",
+		utils.AnswerTime:       "2016-09-12T13:53:52.110+0200",
 		utils.Usage:            "35.225s",
 		utils.DISCONNECT_CAUSE: "Normal Clearing",
 		"extra1":               "val1",

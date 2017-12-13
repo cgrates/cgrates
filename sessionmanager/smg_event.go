@@ -143,7 +143,7 @@ func (self SMGenericEvent) GetSetupTime(fieldName, timezone string) (time.Time, 
 
 func (self SMGenericEvent) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.ANSWER_TIME
+		fieldName = utils.AnswerTime
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return utils.ParseTimeDetectLayout(result, timezone)
@@ -390,7 +390,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 	case utils.SetupTime:
 		st, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
 		return rsrFld.ParseValue(st.String())
-	case utils.ANSWER_TIME:
+	case utils.AnswerTime:
 		at, _ := self.GetAnswerTime(utils.META_DEFAULT, timezone)
 		return rsrFld.ParseValue(at.String())
 	case utils.Usage:
