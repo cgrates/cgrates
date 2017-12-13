@@ -66,7 +66,7 @@ var contentJsnCfgFlds = []*config.CdrFieldJsonCfg{
 		Value: utils.StringPointer("cli"), Width: utils.IntPointer(15),
 		Strip: utils.StringPointer("xright"), Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Destination"), Type: utils.StringPointer(utils.META_COMPOSED),
-		Value: utils.StringPointer(utils.DESTINATION), Width: utils.IntPointer(24),
+		Value: utils.StringPointer(utils.Destination), Width: utils.IntPointer(24),
 		Strip: utils.StringPointer("xright"), Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"), Type: utils.StringPointer(utils.META_CONSTANT), Value: utils.StringPointer("02"), Width: utils.IntPointer(2)},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("SubtypeTOR"), Type: utils.StringPointer(utils.META_CONSTANT), Value: utils.StringPointer("11"), Width: utils.IntPointer(4),

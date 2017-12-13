@@ -143,7 +143,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		Context: utils.StringPointer(utils.MetaRating),
 		Event: map[string]interface{}{
 			utils.Account:     "1007",
-			utils.DESTINATION: "+491511231234",
+			utils.Destination: "+491511231234",
 		},
 	}
 	eAttrPrf := &engine.ExternalAttributeProfile{

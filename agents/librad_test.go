@@ -153,7 +153,7 @@ func TestRadFieldOutVal(t *testing.T) {
 		t.Error(err)
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
-	cfgFld := &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
+	cfgFld := &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 		Value: utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco/Cisco-NAS-Port", MetaRadReqType), utils.INFIELD_SEP), Mandatory: true}
 	if outVal, err := radFieldOutVal(pkt, map[string]string{MetaRadReqType: MetaRadAcctStart}, cfgFld); err != nil {
 		t.Error(err)
@@ -225,7 +225,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 			Value: utils.ParseRSRFieldsMustCompile("call", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "Account", FieldId: utils.Account, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("User-Name", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Destination", FieldId: utils.DESTINATION, Type: utils.META_COMPOSED,
+		&config.CfgCdrField{Tag: "Destination", FieldId: utils.Destination, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("Called-Station-Id", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "SetupTime", FieldId: utils.SETUP_TIME, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("Ascend-User-Acct-Time", utils.INFIELD_SEP)},
@@ -244,7 +244,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.CATEGORY:    "call",
 		utils.Account:     "1001",
-		utils.DESTINATION: "1002",
+		utils.Destination: "1002",
 		utils.SETUP_TIME:  "1497106115",
 		utils.ANSWER_TIME: "1497106115",
 		utils.USAGE:       "4s",

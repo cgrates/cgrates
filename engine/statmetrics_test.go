@@ -844,7 +844,7 @@ func TestDDCGetStringValue(t *testing.T) {
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.DESTINATION: "1002"}}
+			utils.Destination: "1002"}}
 	if strVal := ddc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
@@ -856,12 +856,12 @@ func TestDDCGetStringValue(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.DESTINATION: "1002"}}
+			utils.Destination: "1002"}}
 
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.DESTINATION: "1001"}}
+			utils.Destination: "1001"}}
 	ddc.AddEvent(ev2)
 	ddc.AddEvent(ev3)
 	if strVal := ddc.GetStringValue(""); strVal != "2" {
@@ -888,7 +888,7 @@ func TestDDCGetFloat64Value(t *testing.T) {
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":           time.Duration(10 * time.Second),
 			utils.PDD:         time.Duration(5 * time.Second),
-			utils.DESTINATION: "1002"}}
+			utils.Destination: "1002"}}
 	ddc.AddEvent(ev)
 	if v := ddc.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong ddc value: %v", v)
@@ -903,14 +903,14 @@ func TestDDCGetFloat64Value(t *testing.T) {
 			"Usage":           time.Duration(1 * time.Minute),
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:         time.Duration(10 * time.Second),
-			utils.DESTINATION: "1001",
+			utils.Destination: "1001",
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Usage":           time.Duration(1*time.Minute + 30*time.Second),
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.DESTINATION: "1003",
+			utils.Destination: "1003",
 		},
 	}
 	ddc.AddEvent(ev4)

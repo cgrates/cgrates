@@ -20,7 +20,7 @@ package utils
 
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap}
-	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, Account, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
+	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, Account, SUBJECT, Destination, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
 		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField, MEDI_RUNID}
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
@@ -131,7 +131,7 @@ const (
 	CATEGORY                        = "Category"
 	Account                         = "Account"
 	SUBJECT                         = "Subject"
-	DESTINATION                     = "Destination"
+	Destination                     = "Destination"
 	SETUP_TIME                      = "SetupTime"
 	ANSWER_TIME                     = "AnswerTime"
 	USAGE                           = "Usage"

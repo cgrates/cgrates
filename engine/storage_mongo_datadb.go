@@ -92,7 +92,7 @@ var (
 	UsageLow           = strings.ToLower(utils.USAGE)
 	PDDLow             = strings.ToLower(utils.PDD)
 	CostDetailsLow     = strings.ToLower(utils.COST_DETAILS)
-	DestinationLow     = strings.ToLower(utils.DESTINATION)
+	DestinationLow     = strings.ToLower(utils.Destination)
 	CostLow            = strings.ToLower(utils.COST)
 )
 

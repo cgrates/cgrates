@@ -38,7 +38,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.DIRECTION] = "*out"
 	smGev[utils.Account] = "account1"
 	smGev[utils.SUBJECT] = "subject1"
-	smGev[utils.DESTINATION] = "+4986517174963"
+	smGev[utils.Destination] = "+4986517174963"
 	smGev[utils.CATEGORY] = "call"
 	smGev[utils.TENANT] = "cgrates.org"
 	smGev[utils.REQTYPE] = "*prepaid"
@@ -158,7 +158,7 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev[utils.DIRECTION] = utils.OUT
 	smGev[utils.Account] = "account1"
 	smGev[utils.SUBJECT] = "subject1"
-	smGev[utils.DESTINATION] = "+4986517174963"
+	smGev[utils.Destination] = "+4986517174963"
 	smGev[utils.CATEGORY] = "call"
 	smGev[utils.TENANT] = "cgrates.org"
 	smGev[utils.REQTYPE] = utils.META_PREPAID
@@ -192,7 +192,7 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 	smGev[utils.DIRECTION] = utils.OUT
 	smGev[utils.Account] = "account1"
 	smGev[utils.SUBJECT] = "subject1"
-	smGev[utils.DESTINATION] = "+4986517174963"
+	smGev[utils.Destination] = "+4986517174963"
 	smGev[utils.CATEGORY] = "call"
 	smGev[utils.TENANT] = "cgrates.org"
 	smGev[utils.REQTYPE] = utils.META_PREPAID
