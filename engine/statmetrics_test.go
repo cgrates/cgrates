@@ -123,7 +123,7 @@ func TestACDGetStringValue(t *testing.T) {
 	acd, _ := NewACD(2)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
-			utils.USAGE:  time.Duration(10 * time.Second),
+			utils.Usage:  time.Duration(10 * time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		}}
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
@@ -667,7 +667,7 @@ func TestPDDGetStringValue(t *testing.T) {
 	pdd, _ := NewPDD(2)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
-			utils.USAGE:  time.Duration(10 * time.Second),
+			utils.Usage:  time.Duration(10 * time.Second),
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    time.Duration(5 * time.Second),
 		}}

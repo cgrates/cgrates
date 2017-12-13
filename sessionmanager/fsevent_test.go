@@ -539,7 +539,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ANSWER_TIME}, ""); parsed != aTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.USAGE}, ""); parsed != "66000000000" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Usage}, ""); parsed != "66000000000" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.PDD}, ""); parsed != "0.028" {

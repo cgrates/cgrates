@@ -499,7 +499,7 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 		Event: map[string]interface{}{
 			utils.EventType:  utils.ResourceUpdate,
 			utils.ResourceID: r.ID,
-			utils.USAGE:      r.totalUsage()}}
+			utils.Usage:      r.totalUsage()}}
 	var hits int
 	if err = thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
 		utils.Logger.Warning(

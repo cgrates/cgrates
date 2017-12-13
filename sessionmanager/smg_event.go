@@ -164,7 +164,7 @@ func (self SMGenericEvent) GetEndTime(fieldName, timezone string) (time.Time, er
 
 func (self SMGenericEvent) GetUsage(fieldName string) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.USAGE
+		fieldName = utils.Usage
 	}
 	valIf, hasVal := self[fieldName]
 	if !hasVal {
@@ -269,7 +269,7 @@ func (self SMGenericEvent) GetSessionTTLUsage() *time.Duration {
 
 func (self SMGenericEvent) GetMaxUsage(fieldName string, cfgMaxUsage time.Duration) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.USAGE
+		fieldName = utils.Usage
 	}
 	maxUsageStr, hasIt := self[fieldName]
 	if !hasIt {
@@ -393,7 +393,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 	case utils.ANSWER_TIME:
 		at, _ := self.GetAnswerTime(utils.META_DEFAULT, timezone)
 		return rsrFld.ParseValue(at.String())
-	case utils.USAGE:
+	case utils.Usage:
 		dur, _ := self.GetUsage(utils.META_DEFAULT)
 		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
 	case utils.PDD:
@@ -452,7 +452,7 @@ func (self SMGenericEvent) ComputeLcr() bool {
 
 func (self SMGenericEvent) AsLcrRequest() *engine.LcrRequest {
 	setupTimeStr, _ := utils.CastFieldIfToString(self[utils.SETUP_TIME])
-	usageStr, _ := utils.CastFieldIfToString(self[utils.USAGE])
+	usageStr, _ := utils.CastFieldIfToString(self[utils.Usage])
 	return &engine.LcrRequest{
 		Direction:   self.GetDirection(utils.META_DEFAULT),
 		Tenant:      self.GetTenant(utils.META_DEFAULT),

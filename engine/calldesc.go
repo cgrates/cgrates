@@ -180,7 +180,7 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 	cgrEv.Event[utils.SUBJECT] = cd.Subject
 	cgrEv.Event[utils.Destination] = cd.Destination
 	cgrEv.Event[utils.ANSWER_TIME] = cd.TimeStart
-	cgrEv.Event[utils.USAGE] = cd.TimeEnd.Sub(cd.TimeStart)
+	cgrEv.Event[utils.Usage] = cd.TimeEnd.Sub(cd.TimeStart)
 	return cgrEv
 }
 
@@ -218,7 +218,7 @@ func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []str
 			if cd.TimeStart, err = cgrEv.FieldAsTime(fldName, config.CgrConfig().DefaultTimezone); err != nil {
 				return
 			}
-		case utils.USAGE:
+		case utils.Usage:
 			usage, err := cgrEv.FieldAsDuration(fldName)
 			if err != nil {
 				return err

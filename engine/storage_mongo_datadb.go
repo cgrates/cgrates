@@ -89,7 +89,7 @@ var (
 	AnswerTimeLow      = strings.ToLower(utils.ANSWER_TIME)
 	CreatedAtLow       = strings.ToLower(utils.CreatedAt)
 	UpdatedAtLow       = strings.ToLower(utils.UpdatedAt)
-	UsageLow           = strings.ToLower(utils.USAGE)
+	UsageLow           = strings.ToLower(utils.Usage)
 	PDDLow             = strings.ToLower(utils.PDD)
 	CostDetailsLow     = strings.ToLower(utils.COST_DETAILS)
 	DestinationLow     = strings.ToLower(utils.Destination)

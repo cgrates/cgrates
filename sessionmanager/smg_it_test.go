@@ -105,7 +105,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m30s",
+		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession,
@@ -136,7 +136,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m",
+		utils.Usage:       "1m",
 	}
 	var rpl string
 	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
@@ -164,7 +164,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m30s",
+		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession,
@@ -196,7 +196,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m",
+		utils.Usage:       "1m",
 	}
 	var rpl string
 	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
@@ -231,7 +231,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m30s",
+		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
@@ -263,7 +263,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m",
+		utils.Usage:       "1m",
 	}
 	var rpl string
 	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
@@ -303,7 +303,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
@@ -329,7 +329,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 		utils.LastUsed:    "1m30s",
 	}
 	if err := smgRPC.Call(utils.SMGenericV2UpdateSession, smgEv, &maxUsage); err != nil {
@@ -355,7 +355,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 		utils.LastUsed:    "2m30s",
 	}
 	if err := smgRPC.Call(utils.SMGenericV2UpdateSession, smgEv, &maxUsage); err != nil {
@@ -381,7 +381,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "1m",
+		utils.Usage:       "1m",
 	}
 	var rpl string
 	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
@@ -417,7 +417,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
@@ -443,7 +443,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 		utils.LastUsed:    "30s",
 	}
 	if err := smgRPC.Call(utils.SMGenericV2UpdateSession, smgEv, &maxUsage); err != nil {
@@ -505,7 +505,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
@@ -531,7 +531,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 		utils.LastUsed:    "13s",
 	}
 	if err := smgRPC.Call(utils.SMGenericV2UpdateSession, smgEv, &maxUsage); err != nil {
@@ -593,7 +593,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
@@ -629,7 +629,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 		utils.LastUsed:    "30s",
 	}
 	if err := smgRPC.Call(utils.SMGenericV2UpdateSession, smgEv, &maxUsage); err != nil {
@@ -705,7 +705,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
@@ -742,7 +742,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		utils.CATEGORY:        smgEv[utils.CATEGORY],
 		utils.TENANT:          smgEv[utils.TENANT],
 		utils.REQTYPE:         smgEv[utils.REQTYPE],
-		utils.USAGE:           "2m",
+		utils.Usage:           "2m",
 		utils.LastUsed:        "30s",
 	}
 	if err := smgRPC.Call(utils.SMGenericV2UpdateSession,
@@ -830,7 +830,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2m",
+		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
 	if err := smgRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
@@ -867,7 +867,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		utils.CATEGORY:        smgEv[utils.CATEGORY],
 		utils.TENANT:          smgEv[utils.TENANT],
 		utils.REQTYPE:         smgEv[utils.REQTYPE],
-		utils.USAGE:           "2m",
+		utils.Usage:           "2m",
 		utils.LastUsed:        "30s",
 	}
 	if err := smgRPC.Call(utils.SMGenericV2UpdateSession, smgEv, &maxUsage); err != nil {
@@ -902,7 +902,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		utils.CATEGORY:       smgEv[utils.CATEGORY],
 		utils.TENANT:         smgEv[utils.TENANT],
 		utils.REQTYPE:        smgEv[utils.REQTYPE],
-		utils.USAGE:          "1m", // Total session usage
+		utils.Usage:          "1m", // Total session usage
 	}
 	var rpl string
 	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
@@ -962,7 +962,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "100",
+		utils.Usage:       "100",
 	}
 	var maxUsage float64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {

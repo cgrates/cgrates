@@ -224,18 +224,18 @@ func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *SMGenericEvent) error {
 		resSMGEv[utils.EVENT_NAME] = SMASessionTerminate
 		resSMGEv[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
 		if _, hasIt := resSMGEv[utils.ANSWER_TIME]; !hasIt {
-			resSMGEv[utils.USAGE] = "0s"
+			resSMGEv[utils.Usage] = "0s"
 		} else {
 			if aTime, err := smgEv.GetAnswerTime(utils.META_DEFAULT, ""); err != nil {
 				return err
 			} else if aTime.IsZero() {
-				resSMGEv[utils.USAGE] = "0s"
+				resSMGEv[utils.Usage] = "0s"
 			} else {
 				actualTime, err := utils.ParseTimeDetectLayout(smaEv.Timestamp(), "")
 				if err != nil {
 					return err
 				}
-				resSMGEv[utils.USAGE] = actualTime.Sub(aTime).String()
+				resSMGEv[utils.Usage] = actualTime.Sub(aTime).String()
 			}
 		}
 	}

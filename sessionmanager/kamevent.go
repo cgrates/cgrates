@@ -300,7 +300,7 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		return rsrFld.ParseValue(sTime.String())
 	case utils.ANSWER_TIME:
 		return rsrFld.ParseValue(aTime.String())
-	case utils.USAGE:
+	case utils.Usage:
 		return rsrFld.ParseValue(strconv.FormatFloat(utils.Round(duration.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64))
 	case utils.PDD:
 		return rsrFld.ParseValue(strconv.FormatFloat(utils.Round(duration.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64))

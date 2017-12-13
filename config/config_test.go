@@ -139,7 +139,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 					Value:  utils.ParseRSRFieldsMustCompile(utils.ANSWER_TIME, utils.INFIELD_SEP),
 					Layout: "2006-01-02T15:04:05Z07:00"},
 				&CfgCdrField{Tag: "Usage", Type: utils.META_COMPOSED,
-					Value: utils.ParseRSRFieldsMustCompile(utils.USAGE, utils.INFIELD_SEP)},
+					Value: utils.ParseRSRFieldsMustCompile(utils.Usage, utils.INFIELD_SEP)},
 				&CfgCdrField{Tag: "Cost", Type: utils.META_COMPOSED,
 					Value: utils.ParseRSRFieldsMustCompile(utils.COST, utils.INFIELD_SEP)},
 			},

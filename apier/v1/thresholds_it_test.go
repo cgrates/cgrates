@@ -102,7 +102,7 @@ var tEvs = []*utils.CGREvent{
 			utils.EventType:  utils.ResourceUpdate,
 			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
-			utils.USAGE:      10.0}},
+			utils.Usage:      10.0}},
 	&utils.CGREvent{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
@@ -110,7 +110,7 @@ var tEvs = []*utils.CGREvent{
 			utils.EventType:  utils.ResourceUpdate,
 			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
-			utils.USAGE:      10.0}},
+			utils.Usage:      10.0}},
 	&utils.CGREvent{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
@@ -118,7 +118,7 @@ var tEvs = []*utils.CGREvent{
 			utils.EventType:  utils.ResourceUpdate,
 			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
-			utils.USAGE:      10.0}},
+			utils.Usage:      10.0}},
 	&utils.CGREvent{ // hitting THD_CDRS_1
 		Tenant: "cgrates.org",
 		ID:     "cdrev1",
@@ -143,7 +143,7 @@ var tEvs = []*utils.CGREvent{
 			utils.SETUP_TIME:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 			utils.PDD:         time.Duration(0) * time.Second,
 			utils.ANSWER_TIME: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-			utils.USAGE:       time.Duration(10) * time.Second,
+			utils.Usage:       time.Duration(10) * time.Second,
 			utils.SUPPLIER:    "SUPPL1",
 			utils.COST:        -1.0}},
 }

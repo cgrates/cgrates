@@ -124,7 +124,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:59",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "5120", // 5MB
+		utils.Usage:       "5120", // 5MB
 	}
 	var maxUsage int64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
@@ -153,7 +153,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:59",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "5120",
+		utils.Usage:       "5120",
 		utils.LastUsed:    "4096",
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
@@ -231,7 +231,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "6144", // 6 MB
+		utils.Usage:       "6144", // 6 MB
 	}
 	var maxUsage float64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
@@ -266,7 +266,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "8192", // 8 MB
+		utils.Usage:       "8192", // 8 MB
 		utils.LastUsed:    "7168",
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
@@ -300,7 +300,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1024", // 8 MB
+		utils.Usage:       "1024", // 8 MB
 		utils.LastUsed:    "5120", // 5 MB
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
@@ -334,7 +334,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1024",
+		utils.Usage:       "1024",
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
@@ -437,7 +437,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 		utils.REQTYPE:         utils.META_PREPAID,
 		utils.SETUP_TIME:      "2016-01-05 18:30:52",
 		utils.ANSWER_TIME:     "2016-01-05 18:31:05",
-		utils.USAGE:           "1024",
+		utils.Usage:           "1024",
 		utils.SessionTTLUsage: "2048", // will be charged on TTL
 	}
 	var maxUsage float64
@@ -496,7 +496,7 @@ func TestSMGDataTTLExpMultiUpdates(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "4096", // 3MB
+		utils.Usage:       "4096", // 3MB
 	}
 	var maxUsage int64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
@@ -532,7 +532,7 @@ func TestSMGDataTTLExpMultiUpdates(t *testing.T) {
 		utils.SETUP_TIME:         "2016-01-05 18:30:53",
 		utils.ANSWER_TIME:        "2016-01-05 18:31:05",
 		utils.LastUsed:           "1024",
-		utils.USAGE:              "4096",
+		utils.Usage:              "4096",
 		utils.SessionTTLUsage:    "2048", // will be charged on TTL
 		utils.SessionTTLLastUsed: "1024"} // will force last usage on timeout
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
@@ -594,7 +594,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2048",
+		utils.Usage:       "2048",
 	}
 	var maxUsage int64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
@@ -630,7 +630,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.SETUP_TIME:  "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.SessionTTL:  "1h", // cancel timeout since usage 0 will not update it
-		utils.USAGE:       "1024",
+		utils.Usage:       "1024",
 		utils.LastUsed:    "1024",
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
@@ -667,7 +667,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.SETUP_TIME:  "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.SessionTTL:  "1h", // cancel timeout since usage 0 will not update it
-		utils.USAGE:       "0",
+		utils.Usage:       "0",
 		utils.LastUsed:    "0",
 	}
 	if err := smgRPC.Call("SMGenericV2.UpdateSession", smgEv, &maxUsage); err != nil {
@@ -756,7 +756,7 @@ func TestSMGDataTTLUsageProtection(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2048",
+		utils.Usage:       "2048",
 	}
 	var maxUsage int64
 	if err := smgRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
