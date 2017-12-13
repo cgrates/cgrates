@@ -146,50 +146,43 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 	dbSession := ms.session.Copy()
 	defer dbSession.Close()
 	db := dbSession.DB(ms.db)
-	idx := mgo.Index{
-		Key:        []string{"key"},
-		Unique:     true,  // Prevent two documents from having the same index key
-		DropDups:   false, // Drop documents with the same index key as a previously indexed one
-		Background: false, // Build index in background and return immediately
-		Sparse:     false, // Only index documents containing the Key fields
-	}
-	var colectNames []string // collection names containing this index
+	var idx mgo.Index
 	if ms.storageType == utils.DataDB {
-		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht}
-	}
-	for _, col := range colectNames {
-		if err = db.C(col).EnsureIndex(idx); err != nil {
-			return
+		idx = mgo.Index{
+			Key:        []string{"key"},
+			Unique:     true,  // Prevent two documents from having the same index key
+			DropDups:   false, // Drop documents with the same index key as a previously indexed one
+			Background: false, // Build index in background and return immediately
+			Sparse:     false, // Only index documents containing the Key fields
 		}
-	}
-	idx = mgo.Index{
-		Key:        []string{"tenant","id"},
-		Unique:     true,
-		DropDups:   false,
-		Background: false,
-		Sparse:     false,
-	}
-if ms.storageType == utils.DataDB {
-		colectNames = []string{ colRsP, colRes}
-	}
-	for _, col := range colectNames {
-		if err = db.C(col).EnsureIndex(idx); err != nil {
-			return
+		for _, col := range []string{colAct, colApl, colAAp, colAtr, colDcs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht} {
+			if err = db.C(col).EnsureIndex(idx); err != nil {
+				return
+			}
 		}
-	}
-	idx = mgo.Index{
-		Key:        []string{"id"},
-		Unique:     true,
-		DropDups:   false,
-		Background: false,
-		Sparse:     false,
-	}
-	if ms.storageType == utils.DataDB {
-		colectNames = []string{colRpf, colShg, colCrs, colAcc}
-	}
-	for _, col := range colectNames {
-		if err = db.C(col).EnsureIndex(idx); err != nil {
-			return
+		idx = mgo.Index{
+			Key:        []string{"tenant", "id"},
+			Unique:     true,
+			DropDups:   false,
+			Background: false,
+			Sparse:     false,
+		}
+		for _, col := range []string{colRsP, colRes} {
+			if err = db.C(col).EnsureIndex(idx); err != nil {
+				return
+			}
+		}
+		idx = mgo.Index{
+			Key:        []string{"id"},
+			Unique:     true,
+			DropDups:   false,
+			Background: false,
+			Sparse:     false,
+		}
+		for _, col := range []string{colRpf, colShg, colCrs, colAcc} {
+			if err = db.C(col).EnsureIndex(idx); err != nil {
+				return
+			}
 		}
 	}
 	if ms.storageType == utils.StorDB {
@@ -201,7 +194,7 @@ if ms.storageType == utils.DataDB {
 			Sparse:     false,
 		}
 		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, 
+			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 			utils.TBLTPStats, utils.TBLTPResources} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
