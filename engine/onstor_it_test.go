@@ -1173,13 +1173,13 @@ func testOnStorITCacheSupplierProfile(t *testing.T) {
 }
 
 func testOnStorITCacheAttributeProfile(t *testing.T) {
-	mapSubstitutes := make(map[string]map[string]*AttributeSubstitute)
-	mapSubstitutes["FN1"] = make(map[string]*AttributeSubstitute)
-	mapSubstitutes["FN1"]["Init1"] = &AttributeSubstitute{
-		FieldName: "FN1",
-		Initial:   "Init1",
-		Alias:     "Val1",
-		Append:    true,
+	mapSubstitutes := make(map[string]map[string]*Attribute)
+	mapSubstitutes["FN1"] = make(map[string]*Attribute)
+	mapSubstitutes["FN1"]["Init1"] = &Attribute{
+		FieldName:  "FN1",
+		Initial:    "Init1",
+		Substitute: "Val1",
+		Append:     true,
 	}
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -1188,9 +1188,9 @@ func testOnStorITCacheAttributeProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		Context:     "con1",
-		Substitutes: mapSubstitutes,
-		Weight:      20,
+		Context:    "con1",
+		Attributes: mapSubstitutes,
+		Weight:     20,
 	}
 	if err := onStor.SetAttributeProfile(attrProfile); err != nil {
 		t.Error(err)
@@ -2543,13 +2543,13 @@ func testOnStorITCRUDSupplierProfile(t *testing.T) {
 }
 
 func testOnStorITCRUDAttributeProfile(t *testing.T) {
-	mapSubstitutes := make(map[string]map[string]*AttributeSubstitute)
-	mapSubstitutes["FN1"] = make(map[string]*AttributeSubstitute)
-	mapSubstitutes["FN1"]["Init1"] = &AttributeSubstitute{
-		FieldName: "FN1",
-		Initial:   "Init1",
-		Alias:     "Val1",
-		Append:    true,
+	mapSubstitutes := make(map[string]map[string]*Attribute)
+	mapSubstitutes["FN1"] = make(map[string]*Attribute)
+	mapSubstitutes["FN1"]["Init1"] = &Attribute{
+		FieldName:  "FN1",
+		Initial:    "Init1",
+		Substitute: "Val1",
+		Append:     true,
 	}
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -2558,9 +2558,9 @@ func testOnStorITCRUDAttributeProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		Context:     "con1",
-		Substitutes: mapSubstitutes,
-		Weight:      20,
+		Context:    "con1",
+		Attributes: mapSubstitutes,
+		Weight:     20,
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

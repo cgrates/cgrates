@@ -22,25 +22,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new Filter within a tariff plan
-func (self *ApierV1) SetTPFilter(attrs utils.TPFilter, reply *string) error {
+// Creates a new FilterProfile within a tariff plan
+func (self *ApierV1) SetTPFilterProfile(attrs utils.TPFilterProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPFilters([]*utils.TPFilter{&attrs}); err != nil {
+	if err := self.StorDb.SetTPFilters([]*utils.TPFilterProfile{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-type AttrGetTPFilter struct {
+type AttrGetTPFilterProfile struct {
 	TPid string // Tariff plan id
 	ID   string // Filter id
 }
 
-// Queries specific Filter on tariff plan
-func (self *ApierV1) GetTPFilter(attr AttrGetTPFilter, reply *utils.TPFilter) error {
+// Queries specific FilterProfile on tariff plan
+func (self *ApierV1) GetTPFilterProfile(attr AttrGetTPFilterProfile, reply *utils.TPFilterProfile) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -55,13 +55,13 @@ func (self *ApierV1) GetTPFilter(attr AttrGetTPFilter, reply *utils.TPFilter) er
 	return nil
 }
 
-type AttrGetTPFilterIds struct {
+type AttrGetTPFilterProfileIds struct {
 	TPid string // Tariff plan id
 	utils.Paginator
 }
 
-// Queries Filter identities on specific tariff plan.
-func (self *ApierV1) GetTPFilterIds(attrs AttrGetTPFilterIds, reply *[]string) error {
+// Queries FilterProfile identities on specific tariff plan.
+func (self *ApierV1) GetTPFilterProfileIds(attrs AttrGetTPFilterProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -76,14 +76,14 @@ func (self *ApierV1) GetTPFilterIds(attrs AttrGetTPFilterIds, reply *[]string) e
 	return nil
 }
 
-type AttrRemTPFilter struct {
+type AttrRemTPFilterProfile struct {
 	TPid   string // Tariff plan id
 	Tenant string
 	ID     string // Filter id
 }
 
-// Removes specific Filter on Tariff plan
-func (self *ApierV1) RemTPFilter(attrs AttrRemTPFilter, reply *string) error {
+// Removes specific FilterProfile on Tariff plan
+func (self *ApierV1) RemTPFilterProfile(attrs AttrRemTPFilterProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -36,7 +36,7 @@ var (
 	tpFilterCfg       *config.CGRConfig
 	tpFilterRPC       *rpc.Client
 	tpFilterDataDir   = "/usr/share/cgrates"
-	tpFilter          *utils.TPFilter
+	tpFilter          *utils.TPFilterProfile
 	tpFilterDelay     int
 	tpFilterConfigDIR string //run tests for specific configuration
 )
@@ -120,19 +120,19 @@ func testTPFilterRpcConn(t *testing.T) {
 }
 
 func ttestTPFilterGetTPFilterBeforeSet(t *testing.T) {
-	var reply *utils.TPFilter
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilter", &AttrGetTPFilter{TPid: "TP1", ID: "Filter"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var reply *utils.TPFilterProfile
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile", &AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
 func testTPFilterSetTPFilter(t *testing.T) {
-	tpFilter = &utils.TPFilter{
+	tpFilter = &utils.TPFilterProfile{
 		TPid:   "TP1",
 		Tenant: "cgrates.org",
 		ID:     "Filter",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{
+		Filters: []*utils.TPFilter{
+			&utils.TPFilter{
 				Type:      "*string",
 				FieldName: "Account",
 				Values:    []string{"1001", "1002"},
@@ -145,7 +145,7 @@ func testTPFilterSetTPFilter(t *testing.T) {
 	}
 
 	var result string
-	if err := tpFilterRPC.Call("ApierV1.SetTPFilter", tpFilter, &result); err != nil {
+	if err := tpFilterRPC.Call("ApierV1.SetTPFilterProfile", tpFilter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -153,41 +153,39 @@ func testTPFilterSetTPFilter(t *testing.T) {
 }
 
 func testTPFilterGetTPFilterAfterSet(t *testing.T) {
-	var reply *utils.TPFilter
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilter", &AttrGetTPFilter{TPid: "TP1", ID: "Filter"}, &reply); err != nil {
+	var reply *utils.TPFilterProfile
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile", &AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpFilter, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpFilter, reply)
 	}
-
 }
 
 func testTPFilterGetFilterIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"Filter"}
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilterIds", &AttrGetTPFilterIds{TPid: "TP1"}, &result); err != nil {
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfileIds", &AttrGetTPFilterProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
 	}
-
 }
 
 func testTPFilterUpdateTPFilter(t *testing.T) {
-	tpFilter.Filters = []*utils.TPRequestFilter{
-		&utils.TPRequestFilter{
+	tpFilter.Filters = []*utils.TPFilter{
+		&utils.TPFilter{
 			Type:      "*string",
 			FieldName: "Account",
 			Values:    []string{"1001", "1002"},
 		},
-		&utils.TPRequestFilter{
+		&utils.TPFilter{
 			Type:      "*string_prefix",
 			FieldName: "Destination",
 			Values:    []string{"10", "20"},
 		},
 	}
 	var result string
-	if err := tpFilterRPC.Call("ApierV1.SetTPFilter", tpFilter, &result); err != nil {
+	if err := tpFilterRPC.Call("ApierV1.SetTPFilterProfile", tpFilter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -195,8 +193,8 @@ func testTPFilterUpdateTPFilter(t *testing.T) {
 }
 
 func testTPFilterGetTPFilterAfterUpdate(t *testing.T) {
-	var reply *utils.TPFilter
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilter", &AttrGetTPFilter{TPid: "TP1", ID: "Filter"}, &reply); err != nil {
+	var reply *utils.TPFilterProfile
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile", &AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpFilter, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpFilter, reply)
@@ -205,7 +203,7 @@ func testTPFilterGetTPFilterAfterUpdate(t *testing.T) {
 
 func testTPFilterRemTPFilter(t *testing.T) {
 	var resp string
-	if err := tpFilterRPC.Call("ApierV1.RemTPFilter", &AttrRemTPFilter{TPid: "TP1", Tenant: "cgrates.org", ID: "Filter"}, &resp); err != nil {
+	if err := tpFilterRPC.Call("ApierV1.RemTPFilterProfile", &AttrRemTPFilterProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "Filter"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -213,8 +211,8 @@ func testTPFilterRemTPFilter(t *testing.T) {
 }
 
 func testTPFilterGetTPFilterAfterRemove(t *testing.T) {
-	var reply *utils.TPFilter
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilter", &AttrGetTPFilter{TPid: "TP1", ID: "Filter"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var reply *utils.TPFilterProfile
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile", &AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

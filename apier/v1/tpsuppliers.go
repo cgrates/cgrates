@@ -22,12 +22,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new Supplier within a tariff plan
-func (self *ApierV1) SetTPSupplierProfile(attrs utils.TPSupplier, reply *string) error {
+// Creates a new SupplierProfile within a tariff plan
+func (self *ApierV1) SetTPSupplierProfile(attrs utils.TPSupplierProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPSuppliers([]*utils.TPSupplier{&attrs}); err != nil {
+	if err := self.StorDb.SetTPSuppliers([]*utils.TPSupplierProfile{&attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -39,8 +39,8 @@ type AttrGetTPSupplierProfile struct {
 	ID   string // Filter id
 }
 
-// Queries specific Supplier on tariff plan
-func (self *ApierV1) GetTPSupplierProfile(attr AttrGetTPSupplierProfile, reply *utils.TPSupplier) error {
+// Queries specific SupplierProfile on tariff plan
+func (self *ApierV1) GetTPSupplierProfile(attr AttrGetTPSupplierProfile, reply *utils.TPSupplierProfile) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -55,13 +55,13 @@ func (self *ApierV1) GetTPSupplierProfile(attr AttrGetTPSupplierProfile, reply *
 	return nil
 }
 
-type AttrGetTPSupplierIDs struct {
+type AttrGetTPSupplierProfileIDs struct {
 	TPid string // Tariff plan id
 	utils.Paginator
 }
 
-// Queries Supplier identities on specific tariff plan.
-func (self *ApierV1) GetTPSupplierProfileIDs(attrs AttrGetTPSupplierIDs, reply *[]string) error {
+// Queries SupplierProfile identities on specific tariff plan.
+func (self *ApierV1) GetTPSupplierProfileIDs(attrs AttrGetTPSupplierProfileIDs, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -76,14 +76,14 @@ func (self *ApierV1) GetTPSupplierProfileIDs(attrs AttrGetTPSupplierIDs, reply *
 	return nil
 }
 
-type AttrRemTPSupplier struct {
+type AttrRemTPSupplierProfile struct {
 	TPid   string // Tariff plan id
 	Tenant string
 	ID     string // LCR id
 }
 
-// Removes specific Supplier on Tariff plan
-func (self *ApierV1) RemTPSupplierProfile(attrs AttrRemTPSupplier, reply *string) error {
+// Removes specific SupplierProfile on Tariff plan
+func (self *ApierV1) RemTPSupplierProfile(attrs AttrRemTPSupplierProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
