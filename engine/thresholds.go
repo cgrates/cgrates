@@ -73,7 +73,7 @@ func (t *Threshold) ProcessEvent(ev *utils.CGREvent, dm *DataManager) (err error
 	if t.Hits < t.tPrfl.MinHits { // number of hits was not met, will not execute actions
 		return
 	}
-	acnt, _ := ev.FieldAsString(utils.ACCOUNT)
+	acnt, _ := ev.FieldAsString(utils.Account)
 	var acntID string
 	if acnt != "" {
 		acntID = utils.ConcatenatedKey(ev.Tenant, acnt)

@@ -142,8 +142,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		ID:      "testAttributeSGetAttributeForEvent",
 		Context: utils.StringPointer(utils.MetaRating),
 		Event: map[string]interface{}{
-			"Account":     "1007",
-			"Destination": "+491511231234",
+			utils.Account:     "1007",
+			utils.DESTINATION: "+491511231234",
 		},
 	}
 	eAttrPrf := &engine.ExternalAttributeProfile{
@@ -155,7 +155,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.ACCOUNT,
+				FieldName:  utils.Account,
 				Initial:    utils.ANY,
 				Substitute: "1001",
 				Append:     false,
@@ -177,7 +177,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			Append:     true,
 		},
 		&engine.Attribute{
-			FieldName:  utils.ACCOUNT,
+			FieldName:  utils.Account,
 			Initial:    utils.ANY,
 			Substitute: "1001",
 			Append:     false,

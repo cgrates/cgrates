@@ -47,7 +47,7 @@ var tEvs = []*utils.CGREvent{
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.EventType:     utils.AccountUpdate,
-			utils.ACCOUNT:       "1002",
+			utils.Account:       "1002",
 			utils.AllowNegative: true,
 			utils.Disabled:      false}},
 	&utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
@@ -55,7 +55,7 @@ var tEvs = []*utils.CGREvent{
 		ID:     "event2",
 		Event: map[string]interface{}{
 			utils.EventType:  utils.BalanceUpdate,
-			utils.ACCOUNT:    "1002",
+			utils.Account:    "1002",
 			utils.BalanceID:  utils.META_DEFAULT,
 			utils.Units:      12.3,
 			utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC).Local(),
@@ -66,7 +66,7 @@ var tEvs = []*utils.CGREvent{
 		Event: map[string]interface{}{
 			utils.EventType: utils.StatUpdate,
 			utils.StatID:    "Stats1",
-			utils.ACCOUNT:   "1002",
+			utils.Account:   "1002",
 			"ASR":           35.0,
 			"ACD":           "2m45s",
 			"TCC":           12.7,
@@ -80,7 +80,7 @@ var tEvs = []*utils.CGREvent{
 		Event: map[string]interface{}{
 			utils.EventType: utils.StatUpdate,
 			utils.StatID:    "STATS_HOURLY_DE",
-			utils.ACCOUNT:   "1002",
+			utils.Account:   "1002",
 			"ASR":           35.0,
 			"ACD":           "2m45s",
 			"TCD":           "1h",
@@ -91,7 +91,7 @@ var tEvs = []*utils.CGREvent{
 		Event: map[string]interface{}{
 			utils.EventType: utils.StatUpdate,
 			utils.StatID:    "STATS_DAILY_DE",
-			utils.ACCOUNT:   "1002",
+			utils.Account:   "1002",
 			"ACD":           "2m45s",
 			"TCD":           "3h1s",
 		}},
@@ -100,7 +100,7 @@ var tEvs = []*utils.CGREvent{
 		ID:     "event6",
 		Event: map[string]interface{}{
 			utils.EventType:  utils.ResourceUpdate,
-			utils.ACCOUNT:    "1002",
+			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.USAGE:      10.0}},
 	&utils.CGREvent{ // hitting THD_RES_1
@@ -108,7 +108,7 @@ var tEvs = []*utils.CGREvent{
 		ID:     "event6",
 		Event: map[string]interface{}{
 			utils.EventType:  utils.ResourceUpdate,
-			utils.ACCOUNT:    "1002",
+			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.USAGE:      10.0}},
 	&utils.CGREvent{ // hitting THD_RES_1
@@ -116,7 +116,7 @@ var tEvs = []*utils.CGREvent{
 		ID:     "event6",
 		Event: map[string]interface{}{
 			utils.EventType:  utils.ResourceUpdate,
-			utils.ACCOUNT:    "1002",
+			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.USAGE:      10.0}},
 	&utils.CGREvent{ // hitting THD_CDRS_1
@@ -137,7 +137,7 @@ var tEvs = []*utils.CGREvent{
 			utils.DIRECTION:   "*out",
 			utils.TENANT:      "cgrates.org",
 			utils.CATEGORY:    "call",
-			utils.ACCOUNT:     "1007",
+			utils.Account:     "1007",
 			utils.SUBJECT:     "1007",
 			utils.DESTINATION: "+4986517174963",
 			utils.SETUP_TIME:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),

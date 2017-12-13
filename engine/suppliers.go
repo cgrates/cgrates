@@ -170,15 +170,15 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 // returns map[string]interface{} with cost and relevant matching information inside
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
-	if err = ev.CheckMandatoryFields([]string{utils.ACCOUNT,
+	if err = ev.CheckMandatoryFields([]string{utils.Account,
 		utils.DESTINATION, utils.ANSWER_TIME, utils.USAGE}); err != nil {
 		return
 	}
 	var acnt, subj, dst string
-	if acnt, err = ev.FieldAsString(utils.ACCOUNT); err != nil {
+	if acnt, err = ev.FieldAsString(utils.Account); err != nil {
 		return
 	}
-	if subj, err = ev.FieldAsString(utils.ACCOUNT); err != nil {
+	if subj, err = ev.FieldAsString(utils.Account); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
@@ -214,7 +214,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		} else if maxDur >= usage {
 			return map[string]interface{}{
 				utils.Cost:    0.0,
-				utils.ACCOUNT: anctID,
+				utils.Account: anctID,
 			}, nil
 		}
 	}

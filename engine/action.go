@@ -152,7 +152,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 			parsedValue += rsrFld.ParseValue(b.Directions.String())
 		case utils.TENANT:
 			parsedValue += rsrFld.ParseValue(dta.Tenant)
-		case utils.ACCOUNT:
+		case utils.Account:
 			parsedValue += rsrFld.ParseValue(dta.Account)
 		case "ActionID":
 			parsedValue += rsrFld.ParseValue(action.Id)
@@ -191,8 +191,8 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 		utils.CDRHOST: utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
 		utils.REQTYPE: utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
 		utils.TENANT:  utils.ParseRSRFieldsMustCompile(utils.TENANT, utils.INFIELD_SEP),
-		utils.ACCOUNT: utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP),
-		utils.SUBJECT: utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP),
+		utils.Account: utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP),
+		utils.SUBJECT: utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP), //here need to be modify
 		utils.COST:    utils.ParseRSRFieldsMustCompile("ActionValue", utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)

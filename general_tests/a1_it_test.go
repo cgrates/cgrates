@@ -132,7 +132,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.TOR:                utils.DATA,
 		utils.ACCID:              "504966119",
 		utils.DIRECTION:          utils.OUT,
-		utils.ACCOUNT:            "rpdata1",
+		utils.Account:            "rpdata1",
 		utils.SUBJECT:            "rpdata1",
 		utils.DESTINATION:        "data",
 		utils.CATEGORY:           "data1",
@@ -153,7 +153,7 @@ func TestA1itDataSession1(t *testing.T) {
 	}
 	smgEv = sessionmanager.SMGenericEvent{
 		utils.EVENT_NAME:         "UPDATE_SESSION",
-		utils.ACCOUNT:            "rpdata1",
+		utils.Account:            "rpdata1",
 		utils.CATEGORY:           "data1",
 		utils.DESTINATION:        "data",
 		utils.DIRECTION:          utils.OUT,
@@ -179,7 +179,7 @@ func TestA1itDataSession1(t *testing.T) {
 	}
 	smgEv = sessionmanager.SMGenericEvent{
 		utils.EVENT_NAME:     "TERMINATE_SESSION",
-		utils.ACCOUNT:        "rpdata1",
+		utils.Account:        "rpdata1",
 		utils.CATEGORY:       "data1",
 		utils.DESTINATION:    "data",
 		utils.DIRECTION:      utils.OUT,
