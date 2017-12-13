@@ -1671,22 +1671,22 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
+			Context:   "con1",
 			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			Context: "con1",
 			Attributes: []*utils.TPAttribute{
 				&utils.TPAttribute{
 					FieldName:  "Field1",
 					Initial:    "Initial1",
-					Substitute: "Alias1",
+					Substitute: "Sub1",
 					Append:     true,
 				},
 				&utils.TPAttribute{
 					FieldName:  "Field2",
 					Initial:    "Initial2",
-					Substitute: "Alias2",
+					Substitute: "Sub2",
 					Append:     false,
 				},
 			},
@@ -1696,8 +1696,18 @@ func TestLoadAttributeProfiles(t *testing.T) {
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}
 	if len(csvr.attributeProfiles) != len(eAttrProfiles) {
 		t.Errorf("Failed to load attributeProfiles: %s", utils.ToIJSON(csvr.attributeProfiles))
-	} else if !reflect.DeepEqual(eAttrProfiles[resKey], csvr.attributeProfiles[resKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey], csvr.attributeProfiles[resKey])
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Tenant, csvr.attributeProfiles[resKey].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Tenant, csvr.attributeProfiles[resKey].Tenant)
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].ID, csvr.attributeProfiles[resKey].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].ID, csvr.attributeProfiles[resKey].ID)
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Context, csvr.attributeProfiles[resKey].Context) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Context, csvr.attributeProfiles[resKey].Context)
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs)
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].ActivationInterval.ActivationTime, csvr.attributeProfiles[resKey].ActivationInterval.ActivationTime) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].ActivationInterval, csvr.attributeProfiles[resKey].ActivationInterval)
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes)
 	}
 }
 

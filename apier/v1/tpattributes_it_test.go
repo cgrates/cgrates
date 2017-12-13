@@ -36,7 +36,7 @@ var (
 	tpAlsPrfCfg       *config.CGRConfig
 	tpAlsPrfRPC       *rpc.Client
 	tpAlsPrfDataDir   = "/usr/share/cgrates"
-	tpAlsPrf          *utils.TPAttribute
+	tpAlsPrf          *utils.TPAttributeProfile
 	tpAlsPrfDelay     int
 	tpAlsPrfConfigDIR string //run tests for specific configuration
 )
@@ -113,14 +113,14 @@ func testTPAlsPrfRPCConn(t *testing.T) {
 }
 
 func testTPAlsPrfGetTPAlsPrfBeforeSet(t *testing.T) {
-	var reply *utils.TPAttribute
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttribute", &AttrGetTPAttribute{TPid: "TP1", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var reply *utils.TPAttributeProfile
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile", &AttrGetTPAttributeProfile{TPid: "TP1", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
 func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
-	tpAlsPrf = &utils.TPAttribute{
+	tpAlsPrf = &utils.TPAttributeProfile{
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "Attr1",
@@ -130,18 +130,18 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 			ExpiryTime:     "",
 		},
 		Context: "con1",
-		Substitutes: []*utils.TPAttributeSubstitute{
-			&utils.TPAttributeSubstitute{
-				FieldName: "FL1",
-				Initial:   "In1",
-				Alias:     "Al1",
-				Append:    true,
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
 	var result string
-	if err := tpAlsPrfRPC.Call("ApierV1.SetTPAttribute", tpAlsPrf, &result); err != nil {
+	if err := tpAlsPrfRPC.Call("ApierV1.SetTPAttributeProfile", tpAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -149,8 +149,8 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 }
 
 func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
-	var reply *utils.TPAttribute
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttribute", &AttrGetTPAttribute{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
+	var reply *utils.TPAttributeProfile
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile", &AttrGetTPAttributeProfile{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAlsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpAlsPrf, reply)
@@ -160,7 +160,7 @@ func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"Attr1"}
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeIds", &AttrGetTPAttributeIds{TPid: "TP1"}, &result); err != nil {
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfileIds", &AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -168,22 +168,22 @@ func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 }
 
 func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
-	tpAlsPrf.Substitutes = []*utils.TPAttributeSubstitute{
-		&utils.TPAttributeSubstitute{
-			FieldName: "FL1",
-			Initial:   "In1",
-			Alias:     "Al1",
-			Append:    true,
+	tpAlsPrf.Attributes = []*utils.TPAttribute{
+		&utils.TPAttribute{
+			FieldName:  "FL1",
+			Initial:    "In1",
+			Substitute: "Al1",
+			Append:     true,
 		},
-		&utils.TPAttributeSubstitute{
-			FieldName: "FL2",
-			Initial:   "In2",
-			Alias:     "Al2",
-			Append:    false,
+		&utils.TPAttribute{
+			FieldName:  "FL2",
+			Initial:    "In2",
+			Substitute: "Al2",
+			Append:     false,
 		},
 	}
 	var result string
-	if err := tpAlsPrfRPC.Call("ApierV1.SetTPAttribute", tpAlsPrf, &result); err != nil {
+	if err := tpAlsPrfRPC.Call("ApierV1.SetTPAttributeProfile", tpAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -191,8 +191,8 @@ func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 }
 
 func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
-	var reply *utils.TPAttribute
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttribute", &AttrGetTPAttribute{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
+	var reply *utils.TPAttributeProfile
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile", &AttrGetTPAttributeProfile{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAlsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpAlsPrf, reply)
@@ -201,7 +201,7 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 
 func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 	var resp string
-	if err := tpAlsPrfRPC.Call("ApierV1.RemTPAttribute", &AttrRemTPAttribute{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &resp); err != nil {
+	if err := tpAlsPrfRPC.Call("ApierV1.RemTPAttributeProfile", &AttrRemTPAttributeProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -209,8 +209,8 @@ func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 }
 
 func testTPAlsPrfGetTPAlsPrfAfterRemove(t *testing.T) {
-	var reply *utils.TPAttribute
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttribute", &AttrGetTPAttribute{TPid: "TP1", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var reply *utils.TPAttributeProfile
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile", &AttrGetTPAttributeProfile{TPid: "TP1", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
