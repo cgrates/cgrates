@@ -28,6 +28,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/cenk/rpc2"
@@ -40,34 +41,51 @@ type Server struct {
 	rpcEnabled  bool
 	httpEnabled bool
 	birpcSrv    *rpc2.Server
+	sync.RWMutex
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
 	rpc.Register(rcvr)
+	s.Lock()
 	s.rpcEnabled = true
+	s.Unlock()
 }
 
 func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
 	rpc.RegisterName(name, rcvr)
+	s.Lock()
 	s.rpcEnabled = true
+	s.Unlock()
 }
 
 func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	http.HandleFunc(pattern, handler)
+	s.Lock()
 	s.httpEnabled = true
+	s.Unlock()
 }
 
 // Registers a new BiJsonRpc name
 func (s *Server) BiRPCRegisterName(method string, handlerFunc interface{}) {
-	if s.birpcSrv == nil {
+	s.RLock()
+	isNil := s.birpcSrv == nil
+	s.RUnlock()
+	if isNil {
+		s.Lock()
 		s.birpcSrv = rpc2.NewServer()
+		s.Unlock()
 	}
 	s.birpcSrv.Handle(method, handlerFunc)
 }
 
 func (s *Server) BiRPCRegister(rcvr interface{}) {
-	if s.birpcSrv == nil {
+	s.RLock()
+	isNil := s.birpcSrv == nil
+	s.RUnlock()
+	if isNil {
+		s.Lock()
 		s.birpcSrv = rpc2.NewServer()
+		s.Unlock()
 	}
 	rcvType := reflect.TypeOf(rcvr)
 	for i := 0; i < rcvType.NumMethod(); i++ {
@@ -79,7 +97,10 @@ func (s *Server) BiRPCRegister(rcvr interface{}) {
 }
 
 func (s *Server) ServeJSON(addr string) {
-	if !s.rpcEnabled {
+	s.RLock()
+	enabled := s.rpcEnabled
+	s.RUnlock()
+	if !enabled {
 		return
 	}
 	lJSON, e := net.Listen("tcp", addr)
@@ -111,7 +132,10 @@ func (s *Server) ServeJSON(addr string) {
 }
 
 func (s *Server) ServeGOB(addr string) {
-	if !s.rpcEnabled {
+	s.RLock()
+	enabled := s.rpcEnabled
+	s.RUnlock()
+	if !enabled {
 		return
 	}
 	lGOB, e := net.Listen("tcp", addr)
@@ -150,8 +174,16 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string, useBasicAuth bool, userList map[string]string) {
-	if s.rpcEnabled && jsonRPCURL != "" {
+	s.RLock()
+	enabled := s.rpcEnabled
+	s.RUnlock()
+	if !enabled {
+		return
+	}
+	if enabled && jsonRPCURL != "" {
+		s.Lock()
 		s.httpEnabled = true
+		s.Unlock()
 		Logger.Info("<HTTP> enabling handler for JSON-RPC")
 		if useBasicAuth {
 			http.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
@@ -160,8 +192,10 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string, useB
 		}
 	}
 
-	if s.rpcEnabled && wsRPCURL != "" {
+	if enabled && wsRPCURL != "" {
+		s.Lock()
 		s.httpEnabled = true
+		s.Unlock()
 		Logger.Info("<HTTP> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
 			jsonrpc.ServeConn(ws)
@@ -186,7 +220,10 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string, useB
 }
 
 func (s *Server) ServeBiJSON(addr string) {
-	if s.birpcSrv == nil {
+	s.RLock()
+	isNil := s.birpcSrv == nil
+	s.RUnlock()
+	if isNil {
 		return
 	}
 	lBiJSON, e := net.Listen("tcp", addr)

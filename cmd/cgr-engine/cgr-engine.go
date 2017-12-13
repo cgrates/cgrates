@@ -69,7 +69,6 @@ var (
 
 	cfg   *config.CGRConfig
 	smRpc *v1.SessionManagerV1
-	err   error
 )
 
 func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
@@ -132,8 +131,10 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 	}
 }
 
-func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRaterChan, internalCDRSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
+func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRaterChan,
+	internalCDRSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMGeneric service.")
+	var err error
 	var ralsConns, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SmGenericConfig.RALsConns) != 0 {
 		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
@@ -212,6 +213,7 @@ func startSMAsterisk(internalSMGChan chan *sessionmanager.SMGeneric, exitChan ch
 }
 
 func startDiameterAgent(internalSMGChan chan *sessionmanager.SMGeneric, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+	var err error
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
 	smgChan := make(chan rpcclient.RpcClientConnection, 1) // Use it to pass smg
 	go func(internalSMGChan chan *sessionmanager.SMGeneric, smgChan chan rpcclient.RpcClientConnection) {
@@ -253,6 +255,7 @@ func startDiameterAgent(internalSMGChan chan *sessionmanager.SMGeneric, internal
 }
 
 func startRadiusAgent(internalSMGChan chan *sessionmanager.SMGeneric, exitChan chan bool) {
+	var err error
 	utils.Logger.Info("Starting CGRateS RadiusAgent service")
 	smgChan := make(chan rpcclient.RpcClientConnection, 1) // Use it to pass smg
 	go func(internalSMGChan chan *sessionmanager.SMGeneric, smgChan chan rpcclient.RpcClientConnection) {
@@ -285,6 +288,7 @@ func startRadiusAgent(internalSMGChan chan *sessionmanager.SMGeneric, exitChan c
 }
 
 func startSmFreeSWITCH(internalRaterChan, internalCDRSChan, rlsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+	var err error
 	utils.Logger.Info("Starting CGRateS SMFreeSWITCH service")
 	var ralsConn, cdrsConn, rlsConn *rpcclient.RpcClientPool
 	if len(cfg.SmFsConfig.RALsConns) != 0 {
@@ -323,6 +327,7 @@ func startSmFreeSWITCH(internalRaterChan, internalCDRSChan, rlsChan chan rpcclie
 }
 
 func startSmKamailio(internalRaterChan, internalCDRSChan, internalRsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+	var err error
 	utils.Logger.Info("Starting CGRateS SMKamailio service.")
 	var ralsConn, cdrsConn, rlSConn *rpcclient.RpcClientPool
 	if len(cfg.SmKamConfig.RALsConns) != 0 {
@@ -361,6 +366,7 @@ func startSmKamailio(internalRaterChan, internalCDRSChan, internalRsChan chan rp
 }
 
 func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+	var err error
 	utils.Logger.Info("Starting CGRateS SMOpenSIPS service.")
 	var ralsConn, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SmOsipsConfig.RALsConns) != 0 {
@@ -394,6 +400,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	internalRaterChan, internalPubSubSChan, internalAttributeSChan, internalUserSChan, internalAliaseSChan,
 	internalCdrStatSChan, internalThresholdSChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool) {
+	var err error
 	utils.Logger.Info("Starting CGRateS CDRS service.")
 	var ralConn, pubSubConn, usersConn, attrSConn, aliasesConn, cdrstatsConn, thresholdSConn, statsConn *rpcclient.RpcClientPool
 	if len(cfg.CDRSRaterConns) != 0 { // Conn pool towards RAL
@@ -574,6 +581,7 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 
 func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	var err error
 	var thdSConn *rpcclient.RpcClientPool
 	filterS := <-filterSChan
 	filterSChan <- filterS
@@ -610,6 +618,7 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 // startStatService fires up the StatS
 func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	var err error
 	var thdSConn *rpcclient.RpcClientPool
 	filterS := <-filterSChan
 	filterSChan <- filterS
@@ -671,6 +680,7 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 // startSupplierService fires up the ThresholdS
 func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	cfg *config.CGRConfig, dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	var err error
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var resourceSConn, statSConn *rpcclient.RpcClientPool
@@ -823,6 +833,7 @@ func main() {
 			return
 		}()
 	}
+	var err error
 	// Init config
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
