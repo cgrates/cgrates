@@ -155,7 +155,22 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 	}
 	var colectNames []string // collection names containing this index
 	if ms.storageType == utils.DataDB {
-		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRsP, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht, colRes}
+		colectNames = []string{colAct, colApl, colAAp, colAtr, colDcs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht}
+	}
+	for _, col := range colectNames {
+		if err = db.C(col).EnsureIndex(idx); err != nil {
+			return
+		}
+	}
+	idx = mgo.Index{
+		Key:        []string{"tenant","id"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+if ms.storageType == utils.DataDB {
+		colectNames = []string{ colRsP, colRes}
 	}
 	for _, col := range colectNames {
 		if err = db.C(col).EnsureIndex(idx); err != nil {
@@ -186,7 +201,8 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Sparse:     false,
 		}
 		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPStats, utils.TBLTPResources} {
+			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers, 
+			utils.TBLTPStats, utils.TBLTPResources} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
 			}
