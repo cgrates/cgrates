@@ -146,9 +146,8 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 	dbSession := ms.session.Copy()
 	defer dbSession.Close()
 	db := dbSession.DB(ms.db)
-	var idx mgo.Index
 	if ms.storageType == utils.DataDB {
-		idx = mgo.Index{
+		idx := mgo.Index{
 			Key:        []string{"key"},
 			Unique:     true,  // Prevent two documents from having the same index key
 			DropDups:   false, // Drop documents with the same index key as a previously indexed one
@@ -186,7 +185,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 		}
 	}
 	if ms.storageType == utils.StorDB {
-		idx = mgo.Index{
+		idx := mgo.Index{
 			Key:        []string{"tpid", "id"},
 			Unique:     true,
 			DropDups:   false,
