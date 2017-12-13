@@ -277,7 +277,7 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		return rsrFld.ParseValue(fsev.GetReqType(""))
 	case utils.DIRECTION:
 		return rsrFld.ParseValue(fsev.GetDirection(""))
-	case utils.TENANT:
+	case utils.Tenant:
 		return rsrFld.ParseValue(fsev.GetTenant(""))
 	case utils.CATEGORY:
 		return rsrFld.ParseValue(fsev.GetCategory(""))
@@ -378,7 +378,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.CDRSOURCE] = "FS_" + fsev.GetName()
 	mp[utils.REQTYPE] = fsev.GetReqType(utils.META_DEFAULT)
 	mp[utils.DIRECTION] = fsev.GetDirection(utils.META_DEFAULT)
-	mp[utils.TENANT] = fsev.GetTenant(utils.META_DEFAULT)
+	mp[utils.Tenant] = fsev.GetTenant(utils.META_DEFAULT)
 	mp[utils.CATEGORY] = fsev.GetCategory(utils.META_DEFAULT)
 	mp[utils.Account] = fsev.GetAccount(utils.META_DEFAULT)
 	mp[utils.SUBJECT] = fsev.GetSubject(utils.META_DEFAULT)

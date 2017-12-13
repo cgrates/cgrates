@@ -189,7 +189,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 		smgEv[utils.REQTYPE] = smaEv.RequestType()
 	}
 	if smaEv.Tenant() != "" {
-		smgEv[utils.TENANT] = smaEv.Tenant()
+		smgEv[utils.Tenant] = smaEv.Tenant()
 	}
 	if smaEv.Category() != "" {
 		smgEv[utils.CATEGORY] = smaEv.Category()

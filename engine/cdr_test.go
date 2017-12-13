@@ -237,8 +237,8 @@ func TestCDRAsHttpForm(t *testing.T) {
 	if cdrForm.Get(utils.DIRECTION) != "*out" {
 		t.Errorf("Expected: %s, received: %s", "*out", cdrForm.Get(utils.DIRECTION))
 	}
-	if cdrForm.Get(utils.TENANT) != "cgrates.org" {
-		t.Errorf("Expected: %s, received: %s", "cgrates.org", cdrForm.Get(utils.TENANT))
+	if cdrForm.Get(utils.Tenant) != "cgrates.org" {
+		t.Errorf("Expected: %s, received: %s", "cgrates.org", cdrForm.Get(utils.Tenant))
 	}
 	if cdrForm.Get(utils.CATEGORY) != "call" {
 		t.Errorf("Expected: %s, received: %s", "call", cdrForm.Get(utils.CATEGORY))
@@ -282,7 +282,7 @@ func TestCDRForkCdr(t *testing.T) {
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage:      time.Duration(10) * time.Second, Cost: 1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"}}
-	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.TENANT},
+	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.Tenant},
 		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.Account}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.Destination},
 		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.AnswerTime}, &utils.RSRField{Id: utils.Usage},
 		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST},
@@ -341,7 +341,7 @@ func TestCDRForkCdrStaticVals(t *testing.T) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
 	}
 	_, err = storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: "dummy_header"},
-		&utils.RSRField{Id: utils.TENANT}, &utils.RSRField{Id: utils.TOR}, &utils.RSRField{Id: utils.Account},
+		&utils.RSRField{Id: utils.Tenant}, &utils.RSRField{Id: utils.TOR}, &utils.RSRField{Id: utils.Account},
 		&utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.Destination},
 		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.AnswerTime}, &utils.RSRField{Id: utils.Usage},
 		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST}, []*utils.RSRField{}, true, "")
@@ -565,7 +565,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		utils.ACCID:        "dsafdsaf",
 		utils.TOR:          utils.VOICE,
 		utils.REQTYPE:      utils.META_RATED,
-		utils.TENANT:       "cgrates.org",
+		utils.Tenant:       "cgrates.org",
 		utils.CATEGORY:     "call",
 		utils.Account:      "1002",
 		utils.SUBJECT:      "1001",
