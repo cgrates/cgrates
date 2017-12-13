@@ -42,7 +42,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.CATEGORY] = "call"
 	smGev[utils.TENANT] = "cgrates.org"
 	smGev[utils.REQTYPE] = "*prepaid"
-	smGev[utils.SETUP_TIME] = "2015-11-09 14:21:24"
+	smGev[utils.SetupTime] = "2015-11-09 14:21:24"
 	smGev[utils.ANSWER_TIME] = "2015-11-09 14:22:02"
 	smGev[utils.Usage] = "1m23s"
 	smGev[utils.LastUsed] = "21s"
@@ -162,7 +162,7 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev[utils.CATEGORY] = "call"
 	smGev[utils.TENANT] = "cgrates.org"
 	smGev[utils.REQTYPE] = utils.META_PREPAID
-	smGev[utils.SETUP_TIME] = "2015-11-09 14:21:24"
+	smGev[utils.SetupTime] = "2015-11-09 14:21:24"
 	smGev[utils.ANSWER_TIME] = "2015-11-09 14:22:02"
 	smGev[utils.Usage] = "1m23s"
 	smGev[utils.PDD] = "300ms"
@@ -196,7 +196,7 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 	smGev[utils.CATEGORY] = "call"
 	smGev[utils.TENANT] = "cgrates.org"
 	smGev[utils.REQTYPE] = utils.META_PREPAID
-	smGev[utils.SETUP_TIME] = "2015-11-09 14:21:24"
+	smGev[utils.SetupTime] = "2015-11-09 14:21:24"
 	smGev[utils.ANSWER_TIME] = "2015-11-09 14:22:02"
 	smGev[utils.Usage] = "1m23s"
 	smGev[utils.PDD] = "300ms"

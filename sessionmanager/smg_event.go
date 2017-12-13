@@ -135,7 +135,7 @@ func (self SMGenericEvent) GetReqType(fieldName string) string {
 
 func (self SMGenericEvent) GetSetupTime(fieldName, timezone string) (time.Time, error) {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.SETUP_TIME
+		fieldName = utils.SetupTime
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return utils.ParseTimeDetectLayout(result, timezone)
@@ -387,7 +387,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		return rsrFld.ParseValue(self.GetSubject(utils.META_DEFAULT))
 	case utils.Destination:
 		return rsrFld.ParseValue(self.GetDestination(utils.META_DEFAULT))
-	case utils.SETUP_TIME:
+	case utils.SetupTime:
 		st, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
 		return rsrFld.ParseValue(st.String())
 	case utils.ANSWER_TIME:
@@ -451,7 +451,7 @@ func (self SMGenericEvent) ComputeLcr() bool {
 }
 
 func (self SMGenericEvent) AsLcrRequest() *engine.LcrRequest {
-	setupTimeStr, _ := utils.CastFieldIfToString(self[utils.SETUP_TIME])
+	setupTimeStr, _ := utils.CastFieldIfToString(self[utils.SetupTime])
 	usageStr, _ := utils.CastFieldIfToString(self[utils.Usage])
 	return &engine.LcrRequest{
 		Direction:   self.GetDirection(utils.META_DEFAULT),

@@ -103,7 +103,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
@@ -134,7 +134,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "1m",
 	}
@@ -162,7 +162,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
@@ -194,7 +194,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "1m",
 	}
@@ -229,7 +229,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
@@ -261,7 +261,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "1m",
 	}
@@ -301,7 +301,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
@@ -415,7 +415,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
@@ -503,7 +503,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
@@ -591,7 +591,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
@@ -703,7 +703,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
@@ -828,7 +828,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
@@ -960,7 +960,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SetupTime:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.Usage:       "100",
 	}

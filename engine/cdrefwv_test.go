@@ -71,7 +71,7 @@ var contentJsnCfgFlds = []*config.CdrFieldJsonCfg{
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"), Type: utils.StringPointer(utils.META_CONSTANT), Value: utils.StringPointer("02"), Width: utils.IntPointer(2)},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("SubtypeTOR"), Type: utils.StringPointer(utils.META_CONSTANT), Value: utils.StringPointer("11"), Width: utils.IntPointer(4),
 		Padding: utils.StringPointer("right")},
-	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("SetupTime"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.SETUP_TIME), Width: utils.IntPointer(12),
+	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("SetupTime"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.SetupTime), Width: utils.IntPointer(12),
 		Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right"), Layout: utils.StringPointer("020106150400")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Duration"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.Usage), Width: utils.IntPointer(6),
 		Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right"), Layout: utils.StringPointer(utils.SECONDS)},

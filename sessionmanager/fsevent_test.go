@@ -532,7 +532,7 @@ func TestParseEventValue(t *testing.T) {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	sTime, _ := utils.ParseTimeDetectLayout("1436280728471153"[:len("1436280728471153")-6], "") // We discard nanoseconds information so we can correlate csv
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SETUP_TIME}, ""); parsed != sTime.String() {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SetupTime}, ""); parsed != sTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", sTime.String(), parsed)
 	}
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728971147"[:len("1436280728971147")-6], "")
