@@ -19,49 +19,58 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdSuppliersSort{
-		name:      "suppliers_sort",
-		rpcMethod: "SupplierSv1.GetSuppliers",
-		rpcParams: new(utils.CGREvent),
+	c := &CmdThresholdProcessEvent{
+		name:      "threshold_process_event",
+		rpcMethod: "ThresholdSv1.ProcessEvent",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSuppliersSort struct {
-	name       string
-	rpcMethod  string
-	rpcParams  *utils.CGREvent
-	clientArgs []string
+type CmdThresholdProcessEvent struct {
+	name      string
+	rpcMethod string
+	rpcParams interface{}
 	*CommandExecuter
 }
 
-func (self *CmdSuppliersSort) Name() string {
+func (self *CmdThresholdProcessEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdSuppliersSort) RpcMethod() string {
+func (self *CmdThresholdProcessEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSuppliersSort) RpcParams(reset bool) interface{} {
+func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.CGREvent)
+		mp := make(map[string]interface{})
+		self.rpcParams = &mp
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSuppliersSort) PostprocessRpcParams() error {
+func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
+	param := self.rpcParams.(*map[string]interface{})
+	cgrev := utils.CGREvent{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     utils.UUIDSha1Prefix(),
+		Event:  *param,
+	}
+	if (*param)[utils.TENANT] != nil && (*param)[utils.TENANT].(string) != "" {
+		cgrev.Tenant = (*param)[utils.TENANT].(string)
+	}
+	self.rpcParams = cgrev
 	return nil
 }
 
-func (self *CmdSuppliersSort) RpcResult() interface{} {
-	atr := engine.SupplierProfile{}
-	return &atr
+func (self *CmdThresholdProcessEvent) RpcResult() interface{} {
+	var s int
+	return &s
 }
