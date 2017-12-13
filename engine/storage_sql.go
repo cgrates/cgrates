@@ -672,7 +672,7 @@ func (self *SQLStorage) SetTPThresholds(ths []*utils.TPThreshold) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilter) error {
+func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilterProfile) error {
 	if len(ths) == 0 {
 		return nil
 	}
@@ -694,7 +694,7 @@ func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilter) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPSuppliers(tpSPs []*utils.TPSupplier) error {
+func (self *SQLStorage) SetTPSuppliers(tpSPs []*utils.TPSupplierProfile) error {
 	if len(tpSPs) == 0 {
 		return nil
 	}
@@ -716,7 +716,7 @@ func (self *SQLStorage) SetTPSuppliers(tpSPs []*utils.TPSupplier) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPAttributes(tpAttrs []*utils.TPAttribute) error {
+func (self *SQLStorage) SetTPAttributes(tpAttrs []*utils.TPAttributeProfile) error {
 	if len(tpAttrs) == 0 {
 		return nil
 	}
@@ -1565,7 +1565,7 @@ func (self *SQLStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, 
 	return aths, nil
 }
 
-func (self *SQLStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error) {
+func (self *SQLStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilterProfile, error) {
 	var ths TpFilterS
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
@@ -1581,7 +1581,7 @@ func (self *SQLStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 	return aths, nil
 }
 
-func (self *SQLStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, error) {
+func (self *SQLStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplierProfile, error) {
 	var sps TpSuppliers
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
@@ -1597,7 +1597,7 @@ func (self *SQLStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, er
 	return arls, nil
 }
 
-func (self *SQLStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttribute, error) {
+func (self *SQLStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributeProfile, error) {
 	var sps TPAttributes
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {

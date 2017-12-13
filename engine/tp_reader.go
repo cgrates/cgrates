@@ -56,9 +56,9 @@ type TpReader struct {
 	resProfiles       map[utils.TenantID]*utils.TPResource
 	sqProfiles        map[utils.TenantID]*utils.TPStats
 	thProfiles        map[utils.TenantID]*utils.TPThreshold
-	filters           map[utils.TenantID]*utils.TPFilter
-	sppProfiles       map[utils.TenantID]*utils.TPSupplier
-	attributeProfiles map[utils.TenantID]*utils.TPAttribute
+	filters           map[utils.TenantID]*utils.TPFilterProfile
+	sppProfiles       map[utils.TenantID]*utils.TPSupplierProfile
+	attributeProfiles map[utils.TenantID]*utils.TPAttributeProfile
 	resources         []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues        []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds        []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
@@ -142,9 +142,9 @@ func (tpr *TpReader) Init() {
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResource)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
-	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplier)
-	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttribute)
-	tpr.filters = make(map[utils.TenantID]*utils.TPFilter)
+	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplierProfile)
+	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
+	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1755,7 +1755,7 @@ func (tpr *TpReader) LoadFiltersFiltered(tag string) error {
 	if err != nil {
 		return err
 	}
-	mapTHs := make(map[utils.TenantID]*utils.TPFilter)
+	mapTHs := make(map[utils.TenantID]*utils.TPFilterProfile)
 	for _, th := range tps {
 		mapTHs[utils.TenantID{Tenant: th.Tenant, ID: th.ID}] = th
 	}
@@ -1772,7 +1772,7 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	mapRsPfls := make(map[utils.TenantID]*utils.TPSupplier)
+	mapRsPfls := make(map[utils.TenantID]*utils.TPSupplierProfile)
 	for _, rl := range rls {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
@@ -1818,7 +1818,7 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	mapRsPfls := make(map[utils.TenantID]*utils.TPAttribute)
+	mapRsPfls := make(map[utils.TenantID]*utils.TPAttributeProfile)
 	for _, rl := range rls {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}

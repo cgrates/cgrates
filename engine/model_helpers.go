@@ -2304,12 +2304,12 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 
 type TpFilterS []*TpFilter
 
-func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
-	mst := make(map[string]*utils.TPFilter)
+func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilterProfile) {
+	mst := make(map[string]*utils.TPFilterProfile)
 	for _, tp := range tps {
 		th, found := mst[tp.ID]
 		if !found {
-			th = &utils.TPFilter{
+			th = &utils.TPFilterProfile{
 				TPid:   tp.Tpid,
 				Tenant: tp.Tenant,
 				ID:     tp.ID,
@@ -2326,14 +2326,14 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
 			}
 		}
 		if tp.FilterType != "" {
-			th.Filters = append(th.Filters, &utils.TPRequestFilter{
+			th.Filters = append(th.Filters, &utils.TPFilter{
 				Type:      tp.FilterType,
 				FieldName: tp.FilterFieldName,
 				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
 		}
 		mst[tp.ID] = th
 	}
-	result = make([]*utils.TPFilter, len(mst))
+	result = make([]*utils.TPFilterProfile, len(mst))
 	i := 0
 	for _, th := range mst {
 		result[i] = th
@@ -2342,7 +2342,7 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilter) {
 	return
 }
 
-func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
+func APItoModelTPFilter(th *utils.TPFilterProfile) (mdls TpFilterS) {
 	if len(th.Filters) == 0 {
 		return
 	}
@@ -2373,7 +2373,7 @@ func APItoModelTPFilter(th *utils.TPFilter) (mdls TpFilterS) {
 	return
 }
 
-func APItoFilter(tpTH *utils.TPFilter, timezone string) (th *Filter, err error) {
+func APItoFilter(tpTH *utils.TPFilterProfile, timezone string) (th *Filter, err error) {
 	th = &Filter{
 		Tenant:         tpTH.Tenant,
 		ID:             tpTH.ID,
@@ -2394,14 +2394,14 @@ func APItoFilter(tpTH *utils.TPFilter, timezone string) (th *Filter, err error) 
 	return th, nil
 }
 
-func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilter) {
-	tpFltr = &utils.TPFilter{
+func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
+	tpFltr = &utils.TPFilterProfile{
 		Tenant:  f.Tenant,
 		ID:      f.ID,
-		Filters: make([]*utils.TPRequestFilter, len(f.RequestFilters)),
+		Filters: make([]*utils.TPFilter, len(f.RequestFilters)),
 	}
 	for i, reqFltr := range f.RequestFilters {
-		tpFltr.Filters[i] = &utils.TPRequestFilter{
+		tpFltr.Filters[i] = &utils.TPFilter{
 			Type:      reqFltr.Type,
 			FieldName: reqFltr.FieldName,
 			Values:    make([]string, len(reqFltr.Values)),
@@ -2421,14 +2421,14 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilter) {
 
 type TpSuppliers []*TpSupplier
 
-func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
+func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 	filtermap := make(map[string]map[string]bool)
-	mst := make(map[string]*utils.TPSupplier)
-	suppliersMap := make(map[string]map[string]*utils.TPRequestSupplier)
+	mst := make(map[string]*utils.TPSupplierProfile)
+	suppliersMap := make(map[string]map[string]*utils.TPSupplier)
 	for _, tp := range tps {
 		th, found := mst[tp.ID]
 		if !found {
-			th = &utils.TPSupplier{
+			th = &utils.TPSupplierProfile{
 				TPid:          tp.Tpid,
 				Tenant:        tp.Tenant,
 				ID:            tp.ID,
@@ -2439,11 +2439,11 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 		}
 		if tp.SupplierID != "" {
 			if _, has := suppliersMap[tp.ID]; !has {
-				suppliersMap[tp.ID] = make(map[string]*utils.TPRequestSupplier)
+				suppliersMap[tp.ID] = make(map[string]*utils.TPSupplier)
 			}
 			sup, found := suppliersMap[tp.ID][tp.SupplierID]
 			if !found {
-				sup = &utils.TPRequestSupplier{
+				sup = &utils.TPSupplier{
 					ID:     tp.SupplierID,
 					Weight: tp.SupplierWeight,
 				}
@@ -2510,7 +2510,7 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 		}
 		mst[tp.ID] = th
 	}
-	result = make([]*utils.TPSupplier, len(mst))
+	result = make([]*utils.TPSupplierProfile, len(mst))
 	i := 0
 	for _, th := range mst {
 		result[i] = th
@@ -2534,7 +2534,7 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplier) {
 	return
 }
 
-func APItoModelTPSuppliers(st *utils.TPSupplier) (mdls TpSuppliers) {
+func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
 	if len(st.Suppliers) == 0 {
 		return
 	}
@@ -2600,7 +2600,7 @@ func APItoModelTPSuppliers(st *utils.TPSupplier) (mdls TpSuppliers) {
 	return
 }
 
-func APItoSupplierProfile(tpTH *utils.TPSupplier, timezone string) (th *SupplierProfile, err error) {
+func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *SupplierProfile, err error) {
 	th = &SupplierProfile{
 		Tenant:    tpTH.Tenant,
 		ID:        tpTH.ID,
@@ -2636,12 +2636,12 @@ func APItoSupplierProfile(tpTH *utils.TPSupplier, timezone string) (th *Supplier
 
 type TPAttributes []*TPAttribute
 
-func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttribute) {
-	mst := make(map[string]*utils.TPAttribute)
+func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
+	mst := make(map[string]*utils.TPAttributeProfile)
 	for _, tp := range tps {
 		th, found := mst[tp.ID]
 		if !found {
-			th = &utils.TPAttribute{
+			th = &utils.TPAttributeProfile{
 				TPid:   tp.Tpid,
 				Tenant: tp.Tenant,
 				ID:     tp.ID,
@@ -2670,16 +2670,16 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttribute) {
 			th.Context = tp.Context
 		}
 		if tp.FieldName != "" {
-			th.Substitutes = append(th.Substitutes, &utils.TPAttributeSubstitute{
-				FieldName: tp.FieldName,
-				Initial:   tp.Initial,
-				Alias:     tp.Alias,
-				Append:    tp.Append,
+			th.Attributes = append(th.Attributes, &utils.TPAttribute{
+				FieldName:  tp.FieldName,
+				Initial:    tp.Initial,
+				Substitute: tp.Substitute,
+				Append:     tp.Append,
 			})
 		}
 		mst[tp.ID] = th
 	}
-	result = make([]*utils.TPAttribute, len(mst))
+	result = make([]*utils.TPAttributeProfile, len(mst))
 	i := 0
 	for _, th := range mst {
 		result[i] = th
@@ -2688,11 +2688,11 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttribute) {
 	return
 }
 
-func APItoModelTPAttribute(th *utils.TPAttribute) (mdls TPAttributes) {
-	if len(th.Substitutes) == 0 {
+func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
+	if len(th.Attributes) == 0 {
 		return
 	}
-	for i, reqAttribute := range th.Substitutes {
+	for i, reqAttribute := range th.Attributes {
 		mdl := &TPAttribute{
 			Tpid:   th.TPid,
 			Tenant: th.Tenant,
@@ -2722,34 +2722,34 @@ func APItoModelTPAttribute(th *utils.TPAttribute) (mdls TPAttributes) {
 		}
 		mdl.FieldName = reqAttribute.FieldName
 		mdl.Initial = reqAttribute.Initial
-		mdl.Alias = reqAttribute.Alias
+		mdl.Substitute = reqAttribute.Substitute
 		mdl.Append = reqAttribute.Append
 		mdls = append(mdls, mdl)
 	}
 	return
 }
 
-func APItoAttributeProfile(tpTH *utils.TPAttribute, timezone string) (th *AttributeProfile, err error) {
+func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th *AttributeProfile, err error) {
 	th = &AttributeProfile{
-		Tenant:      tpTH.Tenant,
-		ID:          tpTH.ID,
-		Weight:      tpTH.Weight,
-		FilterIDs:   []string{},
-		Context:     tpTH.Context,
-		Substitutes: make(map[string]map[string]*AttributeSubstitute, len(tpTH.Substitutes)),
+		Tenant:     tpTH.Tenant,
+		ID:         tpTH.ID,
+		Weight:     tpTH.Weight,
+		FilterIDs:  []string{},
+		Context:    tpTH.Context,
+		Attributes: make(map[string]map[string]*Attribute, len(tpTH.Attributes)),
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
 	}
-	for _, reqAttr := range tpTH.Substitutes {
-		if _, has := th.Substitutes[reqAttr.FieldName]; !has {
-			th.Substitutes[reqAttr.FieldName] = make(map[string]*AttributeSubstitute)
+	for _, reqAttr := range tpTH.Attributes {
+		if _, has := th.Attributes[reqAttr.FieldName]; !has {
+			th.Attributes[reqAttr.FieldName] = make(map[string]*Attribute)
 		}
-		th.Substitutes[reqAttr.FieldName][reqAttr.Initial] = &AttributeSubstitute{
-			FieldName: reqAttr.FieldName,
-			Initial:   reqAttr.Initial,
-			Alias:     reqAttr.Alias,
-			Append:    reqAttr.Append,
+		th.Attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
+			FieldName:  reqAttr.FieldName,
+			Initial:    reqAttr.Initial,
+			Substitute: reqAttr.Substitute,
+			Append:     reqAttr.Append,
 		}
 	}
 	if tpTH.ActivationInterval != nil {

@@ -298,9 +298,9 @@ cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,
 `
 	attributeProfiles = `
-#,Tenant,ID,Context,FilterIDs,ActivationInterval,FieldName,Initial,Alias,Append,Weight
-cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Alias1,true,20
-cgrates.org,ALS1,,,,Field2,Initial2,Alias2,false,
+#,Tenant,ID,Context,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
+cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,20
+cgrates.org,ALS1,,,,Field2,Initial2,Sub2,false,
 `
 )
 
@@ -1550,23 +1550,23 @@ func TestLoadThresholdProfiles(t *testing.T) {
 }
 
 func TestLoadFilters(t *testing.T) {
-	eFilters := map[utils.TenantID]*utils.TPFilter{
-		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}: &utils.TPFilter{
+	eFilters := map[utils.TenantID]*utils.TPFilterProfile{
+		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}: &utils.TPFilterProfile{
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_1",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
+			Filters: []*utils.TPFilter{
+				&utils.TPFilter{
 					FieldName: "Account",
 					Type:      "*string",
 					Values:    []string{"1001", "1002"},
 				},
-				&utils.TPRequestFilter{
+				&utils.TPFilter{
 					FieldName: "Destination",
 					Type:      "*string_prefix",
 					Values:    []string{"10", "20"},
 				},
-				&utils.TPRequestFilter{
+				&utils.TPFilter{
 					FieldName: "",
 					Type:      "*rsr_fields",
 					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
@@ -1576,12 +1576,12 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_dan"}: &utils.TPFilter{
+		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_dan"}: &utils.TPFilterProfile{
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_ACNT_dan",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
+			Filters: []*utils.TPFilter{
+				&utils.TPFilter{
 					FieldName: "Account",
 					Type:      "*string",
 					Values:    []string{"dan"},
@@ -1591,12 +1591,12 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_DST_DE"}: &utils.TPFilter{
+		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_DST_DE"}: &utils.TPFilterProfile{
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_DST_DE",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
+			Filters: []*utils.TPFilter{
+				&utils.TPFilter{
 					FieldName: "Destination",
 					Type:      "*destinations",
 					Values:    []string{"DST_DE"},
@@ -1606,12 +1606,12 @@ func TestLoadFilters(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_DST_NL"}: &utils.TPFilter{
+		utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_DST_NL"}: &utils.TPFilterProfile{
 			TPid:   testTPID,
 			Tenant: "cgrates.org",
 			ID:     "FLTR_DST_NL",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
+			Filters: []*utils.TPFilter{
+				&utils.TPFilter{
 					FieldName: "Destination",
 					Type:      "*destinations",
 					Values:    []string{"DST_NL"},
@@ -1631,8 +1631,8 @@ func TestLoadFilters(t *testing.T) {
 }
 
 func TestLoadSupplierProfiles(t *testing.T) {
-	eSppProfiles := map[utils.TenantID]*utils.TPSupplier{
-		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPSupplier{
+	eSppProfiles := map[utils.TenantID]*utils.TPSupplierProfile{
+		utils.TenantID{Tenant: "cgrates.org", ID: "SPP_1"}: &utils.TPSupplierProfile{
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "SPP_1",
@@ -1642,8 +1642,8 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			},
 			Sorting:       "*lowest_cost",
 			SortingParams: []string{},
-			Suppliers: []*utils.TPRequestSupplier{
-				&utils.TPRequestSupplier{
+			Suppliers: []*utils.TPSupplier{
+				&utils.TPSupplier{
 					ID:            "supplier1",
 					FilterIDs:     []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 					AccountIDs:    []string{"Account1", "Account1_1", "Account2"},
@@ -1666,8 +1666,8 @@ func TestLoadSupplierProfiles(t *testing.T) {
 }
 
 func TestLoadAttributeProfiles(t *testing.T) {
-	eAttrProfiles := map[utils.TenantID]*utils.TPAttribute{
-		utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}: &utils.TPAttribute{
+	eAttrProfiles := map[utils.TenantID]*utils.TPAttributeProfile{
+		utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}: &utils.TPAttributeProfile{
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
@@ -1676,18 +1676,18 @@ func TestLoadAttributeProfiles(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			Context: "con1",
-			Substitutes: []*utils.TPAttributeSubstitute{
-				&utils.TPAttributeSubstitute{
-					FieldName: "Field1",
-					Initial:   "Initial1",
-					Alias:     "Alias1",
-					Append:    true,
+			Attributes: []*utils.TPAttribute{
+				&utils.TPAttribute{
+					FieldName:  "Field1",
+					Initial:    "Initial1",
+					Substitute: "Alias1",
+					Append:     true,
 				},
-				&utils.TPAttributeSubstitute{
-					FieldName: "Field2",
-					Initial:   "Initial2",
-					Alias:     "Alias2",
-					Append:    false,
+				&utils.TPAttribute{
+					FieldName:  "Field2",
+					Initial:    "Initial2",
+					Substitute: "Alias2",
+					Append:     false,
 				},
 			},
 			Weight: 20,

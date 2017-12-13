@@ -1196,14 +1196,14 @@ func (ms *MongoStorage) SetTPThresholds(tpTHs []*utils.TPThreshold) (err error) 
 	return
 }
 
-func (ms *MongoStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error) {
+func (ms *MongoStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilterProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPFilter
+	var results []*utils.TPFilterProfile
 	session, col := ms.conn(utils.TBLTPFilters)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
@@ -1213,7 +1213,7 @@ func (ms *MongoStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilter, error)
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilter) (err error) {
+func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilterProfile) (err error) {
 	if len(tpTHs) == 0 {
 		return
 	}
@@ -1227,14 +1227,14 @@ func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilter) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, error) {
+func (ms *MongoStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplierProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPSupplier
+	var results []*utils.TPSupplierProfile
 	session, col := ms.conn(utils.TBLTPSuppliers)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
@@ -1244,7 +1244,7 @@ func (ms *MongoStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplier, er
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplier) (err error) {
+func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplierProfile) (err error) {
 	if len(tpSPs) == 0 {
 		return
 	}
@@ -1258,14 +1258,14 @@ func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplier) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttribute, error) {
+func (ms *MongoStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributeProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if id != "" {
 		filter["id"] = id
 	}
-	var results []*utils.TPAttribute
+	var results []*utils.TPAttributeProfile
 	session, col := ms.conn(utils.TBLTPAttributes)
 	defer session.Close()
 	err := col.Find(filter).All(&results)
@@ -1275,7 +1275,7 @@ func (ms *MongoStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttribute, 
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPAttributes(tpSPs []*utils.TPAttribute) (err error) {
+func (ms *MongoStorage) SetTPAttributes(tpSPs []*utils.TPAttributeProfile) (err error) {
 	if len(tpSPs) == 0 {
 		return
 	}

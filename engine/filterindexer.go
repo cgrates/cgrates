@@ -105,7 +105,7 @@ func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilt
 }
 
 // IndexFilters parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
-func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilter, itemID string) {
+func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
 	var hasMetaString bool
 	rfi.reveseIndex[itemID] = make(map[string]utils.StringMap)
 	for _, fltr := range tpFltr.Filters {

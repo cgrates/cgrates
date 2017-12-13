@@ -551,7 +551,7 @@ type TPAttribute struct {
 	ActivationInterval string  `index:"4" re:""`
 	FieldName          string  `index:"5" re:""`
 	Initial            string  `index:"6" re:""`
-	Alias              string  `index:"7" re:""`
+	Substitute         string  `index:"7" re:""`
 	Append             bool    `index:"8" re:""`
 	Weight             float64 `index:"9" re:"\d+\.?\d*"`
 	CreatedAt          time.Time

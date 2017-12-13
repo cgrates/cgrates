@@ -1345,21 +1345,21 @@ type TPThreshold struct {
 	Async              bool
 }
 
-type TPFilter struct {
+type TPFilterProfile struct {
 	TPid               string
 	Tenant             string
 	ID                 string
-	Filters            []*TPRequestFilter
+	Filters            []*TPFilter
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 }
 
-type TPRequestFilter struct {
+type TPFilter struct {
 	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
 	FieldName string   // Name of the field providing us the Values to check (used in case of some )
 	Values    []string // Filter definition
 }
 
-type TPRequestSupplier struct {
+type TPSupplier struct {
 	ID            string // SupplierID
 	FilterIDs     []string
 	AccountIDs    []string
@@ -1369,7 +1369,7 @@ type TPRequestSupplier struct {
 	Weight        float64
 }
 
-type TPSupplier struct {
+type TPSupplierProfile struct {
 	TPid               string
 	Tenant             string
 	ID                 string
@@ -1377,25 +1377,25 @@ type TPSupplier struct {
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Sorting            string
 	SortingParams      []string
-	Suppliers          []*TPRequestSupplier
+	Suppliers          []*TPSupplier
 	Blocker            bool
 	Weight             float64
 }
 
-type TPAttributeSubstitute struct {
-	FieldName string
-	Initial   string
-	Alias     string
-	Append    bool
+type TPAttribute struct {
+	FieldName  string
+	Initial    string
+	Substitute string
+	Append     bool
 }
 
-type TPAttribute struct {
+type TPAttributeProfile struct {
 	TPid               string
 	Tenant             string
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Context            string                // bind this TPAttribute to specific context
-	Substitutes        []*TPAttributeSubstitute
+	Attributes         []*TPAttribute
 	Weight             float64
 }
