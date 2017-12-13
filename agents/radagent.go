@@ -179,7 +179,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 				processorVars[MetaCGRError] = err.Error()
 				return
 			}
-			if reqUsageStr, has := smgEv[utils.USAGE]; !has { // usage was not requested, decide based on 0
+			if reqUsageStr, has := smgEv[utils.Usage]; !has { // usage was not requested, decide based on 0
 				if maxUsage == 0 {
 					reply.Code = radigo.AccessReject
 				}

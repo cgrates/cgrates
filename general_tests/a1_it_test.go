@@ -140,7 +140,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.REQTYPE:            utils.META_PREPAID,
 		utils.SETUP_TIME:         "2017-03-03 11:39:32 +0100 CET",
 		utils.ANSWER_TIME:        "2017-03-03 11:39:32 +0100 CET",
-		utils.USAGE:              "10240",
+		utils.Usage:              "10240",
 		utils.SessionTTL:         "28800s",
 		utils.SessionTTLLastUsed: "0s",
 		utils.SessionTTLUsage:    "0s",
@@ -169,7 +169,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.TOR:                utils.DATA,
 		utils.SETUP_TIME:         "2017-03-03 11:39:32 +0100 CET",
 		utils.ANSWER_TIME:        "2017-03-03 11:39:32 +0100 CET",
-		utils.USAGE:              "2097152",
+		utils.Usage:              "2097152",
 	}
 	if err := a1rpc.Call(utils.SMGenericV2UpdateSession,
 		smgEv, &maxUsage); err != nil {

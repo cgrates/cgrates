@@ -159,7 +159,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		if SMGenericEvent(disconnectEv.EventStart).GetOriginID(utils.META_DEFAULT) != smgEv[utils.ACCID] {
 			t.Errorf("Unexpected event received: %+v", disconnectEv)
 		}
-		smgEv[utils.USAGE] = disconnectEv.EventStart[utils.USAGE]
+		smgEv[utils.Usage] = disconnectEv.EventStart[utils.Usage]
 	}
 	var rpl string
 	if err = smgBiRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
@@ -233,7 +233,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(10 * time.Millisecond)) // Give time for  debits to occur
-	smgEv[utils.USAGE] = "7ms"
+	smgEv[utils.Usage] = "7ms"
 	var rpl string
 	if err = smgBiRPC.Call("SMGenericV1.TerminateSession",
 		smgEv, &rpl); err != nil || rpl != utils.OK {

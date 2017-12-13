@@ -48,7 +48,7 @@ var evs = []*utils.CGREvent{
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.USAGE:       time.Duration(135 * time.Second),
+			utils.Usage:       time.Duration(135 * time.Second),
 			utils.COST:        123.0}},
 	&utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -56,14 +56,14 @@ var evs = []*utils.CGREvent{
 		Event: map[string]interface{}{
 			utils.Account:     "1002",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.USAGE:       time.Duration(45 * time.Second)}},
+			utils.Usage:       time.Duration(45 * time.Second)}},
 	&utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
 			utils.Account:    "1002",
 			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.USAGE:      0}},
+			utils.Usage:      0}},
 }
 
 func init() {
@@ -176,7 +176,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.USAGE:       time.Duration(135 * time.Second),
+			utils.Usage:       time.Duration(135 * time.Second),
 			utils.COST:        123.0,
 			utils.PDD:         time.Duration(12 * time.Second)}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -205,7 +205,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:     "1002",
 			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.USAGE:       time.Duration(45 * time.Second)}}
+			utils.Usage:       time.Duration(45 * time.Second)}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -217,7 +217,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:    "1002",
 			utils.SETUP_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.USAGE:      0}}
+			utils.Usage:      0}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

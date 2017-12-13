@@ -73,7 +73,7 @@ var contentJsnCfgFlds = []*config.CdrFieldJsonCfg{
 		Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("SetupTime"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.SETUP_TIME), Width: utils.IntPointer(12),
 		Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right"), Layout: utils.StringPointer("020106150400")},
-	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Duration"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.USAGE), Width: utils.IntPointer(6),
+	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Duration"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.Usage), Width: utils.IntPointer(6),
 		Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right"), Layout: utils.StringPointer(utils.SECONDS)},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("DataVolume"), Type: utils.StringPointer(utils.META_FILLER), Width: utils.IntPointer(6)},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("TaxCode"), Type: utils.StringPointer(utils.META_CONSTANT), Value: utils.StringPointer("1"), Width: utils.IntPointer(1)},

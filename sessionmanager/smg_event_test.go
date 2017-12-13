@@ -44,7 +44,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.REQTYPE] = "*prepaid"
 	smGev[utils.SETUP_TIME] = "2015-11-09 14:21:24"
 	smGev[utils.ANSWER_TIME] = "2015-11-09 14:22:02"
-	smGev[utils.USAGE] = "1m23s"
+	smGev[utils.Usage] = "1m23s"
 	smGev[utils.LastUsed] = "21s"
 	smGev[utils.PDD] = "300ms"
 	smGev[utils.SUPPLIER] = "supplier1"
@@ -164,7 +164,7 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev[utils.REQTYPE] = utils.META_PREPAID
 	smGev[utils.SETUP_TIME] = "2015-11-09 14:21:24"
 	smGev[utils.ANSWER_TIME] = "2015-11-09 14:22:02"
-	smGev[utils.USAGE] = "1m23s"
+	smGev[utils.Usage] = "1m23s"
 	smGev[utils.PDD] = "300ms"
 	smGev[utils.SUPPLIER] = "supplier1"
 	smGev[utils.DISCONNECT_CAUSE] = "NORMAL_DISCONNECT"
@@ -198,7 +198,7 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 	smGev[utils.REQTYPE] = utils.META_PREPAID
 	smGev[utils.SETUP_TIME] = "2015-11-09 14:21:24"
 	smGev[utils.ANSWER_TIME] = "2015-11-09 14:22:02"
-	smGev[utils.USAGE] = "1m23s"
+	smGev[utils.Usage] = "1m23s"
 	smGev[utils.PDD] = "300ms"
 	smGev[utils.SUPPLIER] = "supplier1"
 	smGev[utils.DISCONNECT_CAUSE] = "NORMAL_DISCONNECT"

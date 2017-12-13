@@ -174,7 +174,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(cdr.SetupTime.Format(time.RFC3339))
 	case utils.ANSWER_TIME:
 		return rsrFld.ParseValue(cdr.AnswerTime.Format(time.RFC3339))
-	case utils.USAGE:
+	case utils.Usage:
 		return cdr.Usage.String()
 	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(cdr.RunID)
@@ -227,7 +227,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 		}
-	case utils.USAGE:
+	case utils.Usage:
 		if cdr.Usage, err = utils.ParseDurationWithNanosecs(fieldVal); err != nil {
 			return fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
 		}
@@ -318,7 +318,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 		durationFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
 	if durationFld.Id == utils.META_DEFAULT {
-		durationFld.Id = utils.USAGE
+		durationFld.Id = utils.Usage
 	}
 	if ratedFld == nil {
 		ratedFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -379,7 +379,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 	}
 	durStr := cdr.FieldAsString(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
-		return nil, utils.NewErrMandatoryIeMissing(utils.USAGE, durationFld.Id)
+		return nil, utils.NewErrMandatoryIeMissing(utils.Usage, durationFld.Id)
 	} else if frkStorCdr.Usage, err = utils.ParseDurationWithNanosecs(durStr); err != nil {
 		return nil, err
 	}
@@ -545,7 +545,7 @@ func (cdr *CDR) GetEndTime(fieldName, timezone string) (time.Time, error) {
 	return cdr.AnswerTime.Add(cdr.Usage), nil
 }
 func (cdr *CDR) GetDuration(fieldName string) (time.Duration, error) {
-	if utils.IsSliceMember([]string{utils.USAGE, utils.META_DEFAULT, ""}, fieldName) {
+	if utils.IsSliceMember([]string{utils.Usage, utils.META_DEFAULT, ""}, fieldName) {
 		return cdr.Usage, nil
 	}
 	var durVal string
@@ -620,7 +620,7 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (string, error) 
 		switch rsrFld.Id {
 		case utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits, cfgCdrFld.RoundingDecimals)
-		case utils.USAGE:
+		case utils.Usage:
 			cdrVal = cdr.FormatUsage(cfgCdrFld.Layout)
 		case utils.SETUP_TIME:
 			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
@@ -715,7 +715,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
 	mp[utils.Destination] = cdr.Destination
 	mp[utils.SETUP_TIME] = cdr.SetupTime
 	mp[utils.ANSWER_TIME] = cdr.AnswerTime
-	mp[utils.USAGE] = cdr.Usage
+	mp[utils.Usage] = cdr.Usage
 	mp[utils.CostSource] = cdr.CostSource
 	mp[utils.COST] = cdr.Cost
 	mp[utils.COST_DETAILS] = cdr.CostDetails
@@ -849,7 +849,7 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 			if cdr.AnswerTime, err = cgrEv.FieldAsTime(fldName, config.CgrConfig().DefaultTimezone); err != nil {
 				return
 			}
-		case utils.USAGE:
+		case utils.Usage:
 			if cdr.Usage, err = cgrEv.FieldAsDuration(fldName); err != nil {
 				return
 			}

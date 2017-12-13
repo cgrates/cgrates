@@ -194,7 +194,7 @@ func (acd *StatACD) AddEvent(ev *utils.CGREvent) (err error) {
 	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if duration, err := ev.FieldAsDuration(utils.USAGE); err != nil &&
+		if duration, err := ev.FieldAsDuration(utils.Usage); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else {
@@ -281,7 +281,7 @@ func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
 	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
-		if duration, err := ev.FieldAsDuration(utils.USAGE); err != nil &&
+		if duration, err := ev.FieldAsDuration(utils.Usage); err != nil &&
 			err != utils.ErrNotFound {
 			return err
 		} else {

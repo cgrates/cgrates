@@ -231,7 +231,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 			Value: utils.ParseRSRFieldsMustCompile("Ascend-User-Acct-Time", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "AnswerTime", FieldId: utils.ANSWER_TIME, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("Ascend-User-Acct-Time", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Usage", FieldId: utils.USAGE, Type: utils.META_HANDLER, HandlerId: MetaUsageDifference,
+		&config.CfgCdrField{Tag: "Usage", FieldId: utils.Usage, Type: utils.META_HANDLER, HandlerId: MetaUsageDifference,
 			Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp;^|;Ascend-User-Acct-Time", utils.INFIELD_SEP)},
 	}
 
@@ -247,7 +247,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 		utils.Destination: "1002",
 		utils.SETUP_TIME:  "1497106115",
 		utils.ANSWER_TIME: "1497106115",
-		utils.USAGE:       "4s",
+		utils.Usage:       "4s",
 		utils.CDRHOST:     "127.0.0.1",
 	}
 

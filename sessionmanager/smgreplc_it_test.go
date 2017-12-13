@@ -108,7 +108,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m30s",
+		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
 	if err := smgRplcMstrRPC.Call(utils.SMGenericV2UpdateSession,
@@ -149,7 +149,7 @@ func TestSMGRplcUpdate(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME: "TEST_EVENT",
 		utils.ACCID:      "123451",
-		utils.USAGE:      "1m",
+		utils.Usage:      "1m",
 	}
 	var maxUsage time.Duration
 	if err := smgRplcSlvRPC.Call(utils.SMGenericV2UpdateSession,
@@ -194,7 +194,7 @@ func TestSMGRplcTerminate(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME: "TEST_EVENT",
 		utils.ACCID:      "123451",
-		utils.USAGE:      "3m",
+		utils.Usage:      "3m",
 	}
 	var reply string
 	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession", smgEv, &reply); err != nil {
@@ -238,7 +238,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m30s",
+		utils.Usage:       "1m30s",
 	}
 	smgEv2 := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -253,7 +253,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "1m30s",
+		utils.Usage:       "1m30s",
 	}
 	for _, smgEv := range []SMGenericEvent{smgEv1, smgEv2} {
 		var maxUsage time.Duration

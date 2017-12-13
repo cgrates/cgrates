@@ -26,7 +26,7 @@ import (
 
 func TestLibSuppliersUsage(t *testing.T) {
 	event := make(map[string]interface{})
-	event[USAGE] = time.Duration(20 * time.Second)
+	event[Usage] = time.Duration(20 * time.Second)
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierevent1",
@@ -37,14 +37,14 @@ func TestLibSuppliersUsage(t *testing.T) {
 		ID:     "supplierevent1",
 		Event:  make(map[string]interface{}),
 	}
-	answ, err := se.FieldAsDuration(USAGE)
+	answ, err := se.FieldAsDuration(Usage)
 	if err != nil {
 		t.Error(err)
 	}
-	if answ != event[USAGE] {
-		t.Errorf("Expecting: %+v, received: %+v", event[USAGE], answ)
+	if answ != event[Usage] {
+		t.Errorf("Expecting: %+v, received: %+v", event[Usage], answ)
 	}
-	answ, err = seErr.FieldAsDuration(USAGE)
+	answ, err = seErr.FieldAsDuration(Usage)
 	if err != ErrNotFound {
 		t.Error(err)
 	}
