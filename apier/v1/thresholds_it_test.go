@@ -142,7 +142,7 @@ var tEvs = []*utils.CGREvent{
 			utils.Destination: "+4986517174963",
 			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 			utils.PDD:         time.Duration(0) * time.Second,
-			utils.ANSWER_TIME: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+			utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 			utils.Usage:       time.Duration(10) * time.Second,
 			utils.SUPPLIER:    "SUPPL1",
 			utils.COST:        -1.0}},

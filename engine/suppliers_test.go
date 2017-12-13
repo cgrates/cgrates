@@ -193,7 +193,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	ev := make(map[string]interface{})
 	ev["supplierprofile1"] = "Supplier"
 	ev["supplierprofile2"] = "Supplier"
-	ev[utils.ANSWER_TIME] = time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC).Local()
+	ev[utils.AnswerTime] = time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC).Local()
 	ev["UsageInterval"] = "1s"
 	ev["PddInterval"] = "1s"
 	ev["Weight"] = "20.0"

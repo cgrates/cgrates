@@ -52,7 +52,7 @@ func TestLibSuppliersUsage(t *testing.T) {
 
 func TestCGREventFieldAsTime(t *testing.T) {
 	event := make(map[string]interface{})
-	event[ANSWER_TIME] = time.Now().Local()
+	event[AnswerTime] = time.Now().Local()
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierevent1",
@@ -63,14 +63,14 @@ func TestCGREventFieldAsTime(t *testing.T) {
 		ID:     "supplierevent1",
 		Event:  make(map[string]interface{}),
 	}
-	answ, err := se.FieldAsTime(ANSWER_TIME, "UTC")
+	answ, err := se.FieldAsTime(AnswerTime, "UTC")
 	if err != nil {
 		t.Error(err)
 	}
-	if answ != event[ANSWER_TIME] {
-		t.Errorf("Expecting: %+v, received: %+v", event[ANSWER_TIME], answ)
+	if answ != event[AnswerTime] {
+		t.Errorf("Expecting: %+v, received: %+v", event[AnswerTime], answ)
 	}
-	answ, err = seErr.FieldAsTime(ANSWER_TIME, "CET")
+	answ, err = seErr.FieldAsTime(AnswerTime, "CET")
 	if err != ErrNotFound {
 		t.Error(err)
 	}
@@ -118,9 +118,9 @@ func TestCGREventFieldAsString(t *testing.T) {
 }
 
 func TestCGREventFieldAsFloat64(t *testing.T) {
-	err1 := fmt.Errorf("cannot cast %s to string", ANSWER_TIME)
+	err1 := fmt.Errorf("cannot cast %s to string", AnswerTime)
 	event := make(map[string]interface{})
-	event[ANSWER_TIME] = time.Now().Local()
+	event[AnswerTime] = time.Now().Local()
 	event["supplierprofile1"] = "Supplier"
 	event["UsageInterval"] = "54.2"
 	event["PddInterval"] = "1s"
@@ -154,7 +154,7 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", 0, answ)
 	}
 
-	answ, err = se.FieldAsFloat64(ANSWER_TIME)
+	answ, err = se.FieldAsFloat64(AnswerTime)
 	if !reflect.DeepEqual(err, err1) {
 		t.Error(err)
 	}

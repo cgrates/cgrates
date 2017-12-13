@@ -46,17 +46,17 @@ var evs = []*utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:       time.Duration(135 * time.Second),
-			utils.COST:        123.0}},
+			utils.Account:    "1001",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(135 * time.Second),
+			utils.COST:       123.0}},
 	&utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
-			utils.Account:     "1002",
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:       time.Duration(45 * time.Second)}},
+			utils.Account:    "1002",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(45 * time.Second)}},
 	&utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
@@ -174,11 +174,11 @@ func testV1STSProcessEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:       time.Duration(135 * time.Second),
-			utils.COST:        123.0,
-			utils.PDD:         time.Duration(12 * time.Second)}}
+			utils.Account:    "1001",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(135 * time.Second),
+			utils.COST:       123.0,
+			utils.PDD:        time.Duration(12 * time.Second)}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -203,9 +203,9 @@ func testV1STSProcessEvent(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
-			utils.Account:     "1002",
-			utils.ANSWER_TIME: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:       time.Duration(45 * time.Second)}}
+			utils.Account:    "1002",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(45 * time.Second)}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

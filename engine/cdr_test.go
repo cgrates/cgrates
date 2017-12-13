@@ -97,7 +97,7 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&utils.RSRField{Id: utils.SUBJECT}) != cdr.Subject ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.Destination}) != cdr.Destination ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.SetupTime}) != cdr.SetupTime.Format(time.RFC3339) ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.ANSWER_TIME}) != cdr.AnswerTime.Format(time.RFC3339) ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.AnswerTime}) != cdr.AnswerTime.Format(time.RFC3339) ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.Usage}) != "10s" ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.RunID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.COST}) != "1.01" ||
@@ -117,7 +117,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&utils.RSRField{Id: utils.SUBJECT}) != cdr.Subject,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.Destination}) != cdr.Destination,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.SetupTime}) != cdr.SetupTime.Format(time.RFC3339),
-			cdr.FieldAsString(&utils.RSRField{Id: utils.ANSWER_TIME}) != cdr.AnswerTime.Format(time.RFC3339),
+			cdr.FieldAsString(&utils.RSRField{Id: utils.AnswerTime}) != cdr.AnswerTime.Format(time.RFC3339),
 			cdr.FieldAsString(&utils.RSRField{Id: utils.Usage}) != "10s",
 			cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.RunID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.COST}) != "1.01",
@@ -255,8 +255,8 @@ func TestCDRAsHttpForm(t *testing.T) {
 	if cdrForm.Get(utils.SetupTime) != "2013-11-07T08:42:20Z" {
 		t.Errorf("Expected: %s, received: %s", "2013-11-07T08:42:20Z", cdrForm.Get(utils.SetupTime))
 	}
-	if cdrForm.Get(utils.ANSWER_TIME) != "2013-11-07T08:42:26Z" {
-		t.Errorf("Expected: %s, received: %s", "2013-11-07T08:42:26Z", cdrForm.Get(utils.ANSWER_TIME))
+	if cdrForm.Get(utils.AnswerTime) != "2013-11-07T08:42:26Z" {
+		t.Errorf("Expected: %s, received: %s", "2013-11-07T08:42:26Z", cdrForm.Get(utils.AnswerTime))
 	}
 	if cdrForm.Get(utils.Usage) != "10" {
 		t.Errorf("Expected: %s, received: %s", "10", cdrForm.Get(utils.Usage))
@@ -284,7 +284,7 @@ func TestCDRForkCdr(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"}}
 	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.TENANT},
 		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.Account}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.Destination},
-		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.Usage},
+		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.AnswerTime}, &utils.RSRField{Id: utils.Usage},
 		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST},
 		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "field_extr2"}}, true, "")
 	if err != nil {
@@ -343,7 +343,7 @@ func TestCDRForkCdrStaticVals(t *testing.T) {
 	_, err = storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: "dummy_header"},
 		&utils.RSRField{Id: utils.TENANT}, &utils.RSRField{Id: utils.TOR}, &utils.RSRField{Id: utils.Account},
 		&utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.Destination},
-		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.Usage},
+		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.AnswerTime}, &utils.RSRField{Id: utils.Usage},
 		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST}, []*utils.RSRField{}, true, "")
 	if err == nil {
 		t.Error("Failed to detect missing header")
@@ -571,7 +571,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		utils.SUBJECT:      "1001",
 		utils.Destination:  "+4986517174963",
 		utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-		utils.ANSWER_TIME:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		utils.Usage:        time.Duration(10) * time.Second,
 		utils.CostSource:   cdr.CostSource,
 		utils.COST:         1.01,

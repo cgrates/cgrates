@@ -298,7 +298,7 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		return rsrFld.ParseValue(kev.GetDestination(utils.META_DEFAULT))
 	case utils.SetupTime:
 		return rsrFld.ParseValue(sTime.String())
-	case utils.ANSWER_TIME:
+	case utils.AnswerTime:
 		return rsrFld.ParseValue(aTime.String())
 	case utils.Usage:
 		return rsrFld.ParseValue(strconv.FormatFloat(utils.Round(duration.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64))

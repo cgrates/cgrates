@@ -103,7 +103,7 @@ func (asr *StatASR) GetFloat64Value() (val float64) {
 // AddEvent is part of StatMetric interface
 func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 	var answered bool
-	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil &&
+	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
@@ -191,7 +191,7 @@ func (acd *StatACD) GetFloat64Value() (v float64) {
 
 func (acd *StatACD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if duration, err := ev.FieldAsDuration(utils.Usage); err != nil &&
@@ -278,7 +278,7 @@ func (tcd *StatTCD) GetFloat64Value() (v float64) {
 
 func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if duration, err := ev.FieldAsDuration(utils.Usage); err != nil &&
@@ -364,7 +364,7 @@ func (acc *StatACC) GetFloat64Value() (v float64) {
 
 func (acc *StatACC) AddEvent(ev *utils.CGREvent) (err error) {
 	var value float64
-	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if cost, err := ev.FieldAsFloat64(utils.COST); err != nil &&
@@ -448,7 +448,7 @@ func (tcc *StatTCC) GetFloat64Value() (v float64) {
 
 func (tcc *StatTCC) AddEvent(ev *utils.CGREvent) (err error) {
 	var value float64
-	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if cost, err := ev.FieldAsFloat64(utils.COST); err != nil &&
@@ -536,7 +536,7 @@ func (pdd *StatPDD) GetFloat64Value() (v float64) {
 
 func (pdd *StatPDD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.ANSWER_TIME, config.CgrConfig().DefaultTimezone); err != nil &&
+	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {

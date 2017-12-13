@@ -104,7 +104,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
@@ -135,7 +135,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m",
 	}
 	var rpl string
@@ -163,7 +163,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
@@ -195,7 +195,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m",
 	}
 	var rpl string
@@ -230,7 +230,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
@@ -262,7 +262,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m",
 	}
 	var rpl string
@@ -302,7 +302,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
@@ -416,7 +416,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
@@ -504,7 +504,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
@@ -592,7 +592,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
@@ -704,7 +704,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
@@ -829,7 +829,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "2m",
 	}
 	var maxUsage time.Duration
@@ -961,7 +961,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SetupTime:  "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.AnswerTime: "2016-01-05 18:31:05",
 		utils.Usage:       "100",
 	}
 	var maxUsage float64

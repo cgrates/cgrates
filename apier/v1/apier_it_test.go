@@ -1356,12 +1356,12 @@ func TestApierCdrServer(t *testing.T) {
 	httpClient := new(http.Client)
 	cdrForm1 := url.Values{utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED},
 		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.Account: []string{"1001"}, utils.SUBJECT: []string{"1001"}, utils.Destination: []string{"1002"},
-		utils.SetupTime:   []string{"2013-11-07T08:42:22Z"},
-		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+		utils.SetupTime:  []string{"2013-11-07T08:42:22Z"},
+		utils.AnswerTime: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	cdrForm2 := url.Values{utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED},
 		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.Account: []string{"1001"}, utils.SUBJECT: []string{"1001"}, utils.Destination: []string{"1002"},
-		utils.SetupTime:   []string{"2013-11-07T08:42:23Z"},
-		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+		utils.SetupTime:  []string{"2013-11-07T08:42:23Z"},
+		utils.AnswerTime: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
 		cdrForm.Set(utils.CDRSOURCE, utils.TEST_SQL)
 		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_http", "127.0.0.1:2080"), cdrForm); err != nil {

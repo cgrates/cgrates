@@ -536,7 +536,7 @@ func TestParseEventValue(t *testing.T) {
 		t.Errorf("Expecting: %s, parsed: %s", sTime.String(), parsed)
 	}
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728971147"[:len("1436280728971147")-6], "")
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ANSWER_TIME}, ""); parsed != aTime.String() {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.AnswerTime}, ""); parsed != aTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Usage}, ""); parsed != "66000000000" {

@@ -197,7 +197,7 @@ func TestStatAddStatEvent(t *testing.T) {
 		t.Errorf("ASR: %v", asrMetric)
 	}
 	ev1.Event = map[string]interface{}{
-		utils.ANSWER_TIME: time.Now()}
+		utils.AnswerTime: time.Now()}
 	sq.addStatEvent(ev1)
 	if asr := asrMetric.GetFloat64Value(); asr != 66.66667 {
 		t.Errorf("received ASR: %v", asr)
