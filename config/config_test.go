@@ -123,7 +123,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 				&CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED,
 					Value: utils.ParseRSRFieldsMustCompile(utils.REQTYPE, utils.INFIELD_SEP)},
 				&CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED,
-					Value: utils.ParseRSRFieldsMustCompile(utils.TENANT, utils.INFIELD_SEP)},
+					Value: utils.ParseRSRFieldsMustCompile(utils.Tenant, utils.INFIELD_SEP)},
 				&CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED,
 					Value: utils.ParseRSRFieldsMustCompile(utils.CATEGORY, utils.INFIELD_SEP)},
 				&CfgCdrField{Tag: "Account", Type: utils.META_COMPOSED,

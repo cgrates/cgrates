@@ -135,7 +135,7 @@ var tEvs = []*utils.CGREvent{
 			utils.TOR:         utils.VOICE,
 			utils.REQTYPE:     utils.META_RATED,
 			utils.DIRECTION:   "*out",
-			utils.TENANT:      "cgrates.org",
+			utils.Tenant:      "cgrates.org",
 			utils.CATEGORY:    "call",
 			utils.Account:     "1007",
 			utils.SUBJECT:     "1007",

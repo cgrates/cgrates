@@ -35,7 +35,7 @@ func TestCgrCdrInterfaces(t *testing.T) {
 func TestCgrCdrAsCDR(t *testing.T) {
 	cgrCdr := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "dsafdsaf", utils.CDRHOST: "192.168.1.1",
 		utils.CDRSOURCE: "internal_test", utils.REQTYPE: utils.META_RATED,
-		utils.TENANT: "cgrates.org", utils.CATEGORY: "call",
+		utils.Tenant: "cgrates.org", utils.CATEGORY: "call",
 		utils.Account: "1001", utils.SUBJECT: "1001", utils.Destination: "1002",
 		utils.SetupTime: "2013-11-07T08:42:20Z", utils.AnswerTime: "2013-11-07T08:42:26Z",
 		utils.Usage: "10s", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
@@ -45,7 +45,7 @@ func TestCgrCdrAsCDR(t *testing.T) {
 		OriginHost:  cgrCdr[utils.CDRHOST],
 		Source:      cgrCdr[utils.CDRSOURCE],
 		RequestType: cgrCdr[utils.REQTYPE],
-		Tenant:      cgrCdr[utils.TENANT], Category: cgrCdr[utils.CATEGORY],
+		Tenant:      cgrCdr[utils.Tenant], Category: cgrCdr[utils.CATEGORY],
 		Account: cgrCdr[utils.Account], Subject: cgrCdr[utils.SUBJECT],
 		Destination: cgrCdr[utils.Destination],
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
@@ -61,7 +61,7 @@ func TestCgrCdrAsCDR(t *testing.T) {
 func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 	cgrCdr := CgrCdr{utils.CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", utils.TOR: utils.VOICE, utils.ACCID: "dsafdsaf", utils.CDRHOST: "192.168.1.1",
 		utils.CDRSOURCE: "internal_test", utils.REQTYPE: utils.META_RATED,
-		utils.DIRECTION: utils.OUT, utils.TENANT: "cgrates.org", utils.CATEGORY: "call",
+		utils.DIRECTION: utils.OUT, utils.Tenant: "cgrates.org", utils.CATEGORY: "call",
 		utils.Account: "1001", utils.SUBJECT: "1001", utils.Destination: "1002", utils.SetupTime: "2013-11-07T08:42:20Z", utils.PDD: "0.200", utils.AnswerTime: "2013-11-07T08:42:26Z",
 		utils.Usage: "10s", utils.SUPPLIER: "SUPPL1", utils.DISCONNECT_CAUSE: "NORMAL_CLEARING", utils.COST: "0.12", utils.RATED: "true", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	expctRtCdr := &CDR{CGRID: cgrCdr[utils.CGRID],
@@ -70,7 +70,7 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 		OriginHost:  cgrCdr[utils.CDRHOST],
 		Source:      cgrCdr[utils.CDRSOURCE],
 		RequestType: cgrCdr[utils.REQTYPE],
-		Tenant:      cgrCdr[utils.TENANT],
+		Tenant:      cgrCdr[utils.Tenant],
 		Category:    cgrCdr[utils.CATEGORY],
 		Account:     cgrCdr[utils.Account],
 		Subject:     cgrCdr[utils.SUBJECT],

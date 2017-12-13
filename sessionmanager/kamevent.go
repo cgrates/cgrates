@@ -286,7 +286,7 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		return rsrFld.ParseValue(kev.GetReqType(utils.META_DEFAULT))
 	case utils.DIRECTION:
 		return rsrFld.ParseValue(kev.GetDirection(utils.META_DEFAULT))
-	case utils.TENANT:
+	case utils.Tenant:
 		return rsrFld.ParseValue(kev.GetTenant(utils.META_DEFAULT))
 	case utils.CATEGORY:
 		return rsrFld.ParseValue(kev.GetCategory(utils.META_DEFAULT))

@@ -136,7 +136,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.SUBJECT:            "rpdata1",
 		utils.Destination:        "data",
 		utils.CATEGORY:           "data1",
-		utils.TENANT:             "cgrates.org",
+		utils.Tenant:             "cgrates.org",
 		utils.REQTYPE:            utils.META_PREPAID,
 		utils.SetupTime:          "2017-03-03 11:39:32 +0100 CET",
 		utils.AnswerTime:         "2017-03-03 11:39:32 +0100 CET",
@@ -165,7 +165,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.SessionTTLLastUsed: "2097152s",
 		utils.SessionTTLUsage:    "0s",
 		utils.SUBJECT:            "rpdata1",
-		utils.TENANT:             "cgrates.org",
+		utils.Tenant:             "cgrates.org",
 		utils.TOR:                utils.DATA,
 		utils.SetupTime:          "2017-03-03 11:39:32 +0100 CET",
 		utils.AnswerTime:         "2017-03-03 11:39:32 +0100 CET",
@@ -190,7 +190,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.SetupTime:      "2017-03-03 11:39:32 +0100 CET",
 		utils.AnswerTime:     "2017-03-03 11:39:32 +0100 CET",
 		utils.SUBJECT:        "rpdata1",
-		utils.TENANT:         "cgrates.org",
+		utils.Tenant:         "cgrates.org",
 		utils.TOR:            utils.DATA,
 	}
 	var rpl string

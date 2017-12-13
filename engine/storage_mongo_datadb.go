@@ -79,7 +79,7 @@ var (
 	CDRSourceLow       = strings.ToLower(utils.CDRSOURCE)
 	RequestTypeLow     = strings.ToLower(utils.REQTYPE)
 	DirectionLow       = strings.ToLower(utils.DIRECTION)
-	TenantLow          = strings.ToLower(utils.TENANT)
+	TenantLow          = strings.ToLower(utils.Tenant)
 	CategoryLow        = strings.ToLower(utils.CATEGORY)
 	AccountLow         = strings.ToLower(utils.Account)
 	SubjectLow         = strings.ToLower(utils.SUBJECT)

@@ -150,7 +150,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 			parsedValue += rsrFld.ParseValue(acnt.ID)
 		case "Directions":
 			parsedValue += rsrFld.ParseValue(b.Directions.String())
-		case utils.TENANT:
+		case utils.Tenant:
 			parsedValue += rsrFld.ParseValue(dta.Tenant)
 		case utils.Account:
 			parsedValue += rsrFld.ParseValue(dta.Account)
@@ -190,7 +190,7 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 		utils.TOR:     utils.ParseRSRFieldsMustCompile("BalanceType", utils.INFIELD_SEP),
 		utils.CDRHOST: utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
 		utils.REQTYPE: utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
-		utils.TENANT:  utils.ParseRSRFieldsMustCompile(utils.TENANT, utils.INFIELD_SEP),
+		utils.Tenant:  utils.ParseRSRFieldsMustCompile(utils.Tenant, utils.INFIELD_SEP),
 		utils.Account: utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP),
 		utils.SUBJECT: utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP), //here need to be modify
 		utils.COST:    utils.ParseRSRFieldsMustCompile("ActionValue", utils.INFIELD_SEP),
