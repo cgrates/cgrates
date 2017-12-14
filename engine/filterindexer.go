@@ -23,22 +23,10 @@ import (
 )
 
 func NewReqFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) (*ReqFilterIndexer, error) {
-	indexes, err := dm.GetReqFilterIndexes(GetDBIndexKey(itemType, dbKeySuffix, false))
-	if err != nil && err != utils.ErrNotFound {
-		return nil, err
-	}
-	if indexes == nil {
-		indexes = make(map[string]map[string]utils.StringMap)
-	}
-	reverseIndexes, err := dm.GetReqFilterIndexes(GetDBIndexKey(itemType, dbKeySuffix, true))
-	if err != nil && err != utils.ErrNotFound {
-		return nil, err
-	}
-	if reverseIndexes == nil {
-		reverseIndexes = make(map[string]map[string]utils.StringMap)
-	}
 	return &ReqFilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
-		indexes: indexes, reveseIndex: reverseIndexes, chngdIndxKeys: make(utils.StringMap),
+		indexes:          make(map[string]map[string]utils.StringMap),
+		reveseIndex:      make(map[string]map[string]utils.StringMap),
+		chngdIndxKeys:    make(utils.StringMap),
 		chngdRevIndxKeys: make(utils.StringMap)}, nil
 }
 
