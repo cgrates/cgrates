@@ -305,7 +305,7 @@ func (self SMGenericEvent) GetDisconnectCause(fieldName string) string {
 
 func (self SMGenericEvent) GetOriginatorIP(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.CDRHOST
+		fieldName = utils.OriginHost
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
@@ -369,7 +369,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		return rsrFld.ParseValue(utils.VOICE)
 	case utils.ACCID:
 		return rsrFld.ParseValue(self.GetOriginID(utils.META_DEFAULT))
-	case utils.CDRHOST:
+	case utils.OriginHost:
 		return rsrFld.ParseValue(self.GetOriginatorIP(utils.META_DEFAULT))
 	case utils.CDRSOURCE:
 		return rsrFld.ParseValue(self.GetName())

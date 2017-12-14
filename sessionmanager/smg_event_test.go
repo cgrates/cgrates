@@ -49,7 +49,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.PDD] = "300ms"
 	smGev[utils.SUPPLIER] = "supplier1"
 	smGev[utils.DISCONNECT_CAUSE] = "NORMAL_DISCONNECT"
-	smGev[utils.CDRHOST] = "127.0.0.1"
+	smGev[utils.OriginHost] = "127.0.0.1"
 	smGev["Extra1"] = "Value1"
 	smGev["Extra2"] = 5
 	if smGev.GetName() != "TEST_EVENT" {
@@ -168,7 +168,7 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev[utils.PDD] = "300ms"
 	smGev[utils.SUPPLIER] = "supplier1"
 	smGev[utils.DISCONNECT_CAUSE] = "NORMAL_DISCONNECT"
-	smGev[utils.CDRHOST] = "10.0.3.15"
+	smGev[utils.OriginHost] = "10.0.3.15"
 	smGev["Extra1"] = "Value1"
 	smGev["Extra2"] = 5
 	eStoredCdr := &engine.CDR{CGRID: "70c4d16dce41d1f2777b4e8442cff39cf87f5f19",
@@ -202,7 +202,7 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 	smGev[utils.PDD] = "300ms"
 	smGev[utils.SUPPLIER] = "supplier1"
 	smGev[utils.DISCONNECT_CAUSE] = "NORMAL_DISCONNECT"
-	smGev[utils.CDRHOST] = "10.0.3.15"
+	smGev[utils.OriginHost] = "10.0.3.15"
 	smGev["Extra1"] = "Value1"
 	smGev["Extra2"] = 5
 	eLcrReq := &engine.LcrRequest{Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",

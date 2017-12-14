@@ -278,7 +278,7 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		return rsrFld.ParseValue(utils.VOICE)
 	case utils.ACCID:
 		return rsrFld.ParseValue(kev.GetUUID())
-	case utils.CDRHOST:
+	case utils.OriginHost:
 		return rsrFld.ParseValue(kev.GetOriginatorIP(utils.META_DEFAULT))
 	case utils.CDRSOURCE:
 		return rsrFld.ParseValue(kev.GetCdrSource())
