@@ -23,6 +23,7 @@ import (
 	"compress/zlib"
 	"errors"
 	"io/ioutil"
+	"log"
 	"strings"
 	"sync"
 
@@ -1254,17 +1255,21 @@ func (ms *MapStorage) RemoveTimingDrv(id string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetReqFilterIndexesDrv(dbKey string, fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+func (ms *MapStorage) GetReqFilterIndexesDrv(dbKey string,
+	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	log.Print("\nMAPSTORAGE \n")
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[dbKey]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
+	log.Printf(" Values before unmarshal %+v \n", values)
 	err = ms.ms.Unmarshal(values, &indexes)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf(" Values after unmarshal %+v \n", indexes)
 	return
 }
 func (ms *MapStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
