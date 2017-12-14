@@ -60,6 +60,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @TeoV | Teofil Voivozeanu |
 | @paolovisintin | Paolo Visintin |
 | @linuxmaniac | Victor Seva |
+| @basitengr | Abdul Basit |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
