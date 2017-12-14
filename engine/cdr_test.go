@@ -90,7 +90,7 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&utils.RSRField{Id: utils.TOR}) != utils.VOICE ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.OriginHost}) != cdr.OriginHost ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.CDRSOURCE}) != cdr.Source ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.Source}) != cdr.Source ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.RequestType ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.Account}) != cdr.Account ||
@@ -110,7 +110,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&utils.RSRField{Id: utils.TOR}) != utils.VOICE,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.OriginHost}) != cdr.OriginHost,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.CDRSOURCE}) != cdr.Source,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.Source}) != cdr.Source,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.RequestType,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.Account}) != cdr.Account,
@@ -228,8 +228,8 @@ func TestCDRAsHttpForm(t *testing.T) {
 	if cdrForm.Get(utils.OriginHost) != "192.168.1.1" {
 		t.Errorf("Expected: %s, received: %s", "192.168.1.1", cdrForm.Get(utils.OriginHost))
 	}
-	if cdrForm.Get(utils.CDRSOURCE) != utils.UNIT_TEST {
-		t.Errorf("Expected: %s, received: %s", utils.UNIT_TEST, cdrForm.Get(utils.CDRSOURCE))
+	if cdrForm.Get(utils.Source) != utils.UNIT_TEST {
+		t.Errorf("Expected: %s, received: %s", utils.UNIT_TEST, cdrForm.Get(utils.Source))
 	}
 	if cdrForm.Get(utils.REQTYPE) != utils.META_RATED {
 		t.Errorf("Expected: %s, received: %s", utils.META_RATED, cdrForm.Get(utils.REQTYPE))
@@ -561,7 +561,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		utils.MEDI_RUNID:   utils.DEFAULT_RUNID,
 		utils.ORDERID:      cdr.OrderID,
 		utils.OriginHost:   "192.168.1.1",
-		utils.CDRSOURCE:    utils.UNIT_TEST,
+		utils.Source:       utils.UNIT_TEST,
 		utils.ACCID:        "dsafdsaf",
 		utils.TOR:          utils.VOICE,
 		utils.REQTYPE:      utils.META_RATED,

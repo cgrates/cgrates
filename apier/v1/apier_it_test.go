@@ -1363,7 +1363,7 @@ func TestApierCdrServer(t *testing.T) {
 		utils.SetupTime:  []string{"2013-11-07T08:42:23Z"},
 		utils.AnswerTime: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
-		cdrForm.Set(utils.CDRSOURCE, utils.TEST_SQL)
+		cdrForm.Set(utils.Source, utils.TEST_SQL)
 		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_http", "127.0.0.1:2080"), cdrForm); err != nil {
 			t.Error(err.Error())
 		}
