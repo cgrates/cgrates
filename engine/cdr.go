@@ -156,7 +156,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(cdr.OriginID)
 	case utils.OriginHost:
 		return rsrFld.ParseValue(cdr.OriginHost)
-	case utils.CDRSOURCE:
+	case utils.Source:
 		return rsrFld.ParseValue(cdr.Source)
 	case utils.REQTYPE:
 		return rsrFld.ParseValue(cdr.RequestType)
@@ -704,7 +704,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
 	mp[utils.MEDI_RUNID] = cdr.RunID
 	mp[utils.ORDERID] = cdr.OrderID
 	mp[utils.OriginHost] = cdr.OriginHost
-	mp[utils.CDRSOURCE] = cdr.Source
+	mp[utils.Source] = cdr.Source
 	mp[utils.ACCID] = cdr.OriginID
 	mp[utils.TOR] = cdr.ToR
 	mp[utils.REQTYPE] = cdr.RequestType
@@ -809,7 +809,7 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 			if cdr.OriginHost, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
-		case utils.CDRSOURCE:
+		case utils.Source:
 			if cdr.Source, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}

@@ -76,7 +76,7 @@ var (
 	OriginIDLow        = strings.ToLower(utils.ACCID)
 	ToRLow             = strings.ToLower(utils.TOR)
 	CDRHostLow         = strings.ToLower(utils.OriginHost)
-	CDRSourceLow       = strings.ToLower(utils.CDRSOURCE)
+	CDRSourceLow       = strings.ToLower(utils.Source)
 	RequestTypeLow     = strings.ToLower(utils.REQTYPE)
 	DirectionLow       = strings.ToLower(utils.DIRECTION)
 	TenantLow          = strings.ToLower(utils.Tenant)

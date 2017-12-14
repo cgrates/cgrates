@@ -507,7 +507,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginHost}, ""); parsed != "10.0.3.15" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CDRSOURCE}, ""); parsed != "FS_EVENT" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Source}, ""); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.REQTYPE}, ""); parsed != utils.META_PREPAID {

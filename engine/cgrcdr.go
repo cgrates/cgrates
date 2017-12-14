@@ -31,7 +31,7 @@ func NewCgrCdrFromHttpReq(req *http.Request, timezone string) (CgrCdr, error) {
 		}
 	}
 	cgrCdr := make(CgrCdr)
-	cgrCdr[utils.CDRSOURCE] = req.RemoteAddr
+	cgrCdr[utils.Source] = req.RemoteAddr
 	for k, vals := range req.Form {
 		cgrCdr[k] = vals[0] // We only support the first value for now, if more are provided it is considered remote's fault
 	}
@@ -64,7 +64,7 @@ func (cgrCdr CgrCdr) AsCDR(timezone string) *CDR {
 	storCdr.ToR = cgrCdr[utils.TOR]
 	storCdr.OriginID = cgrCdr[utils.ACCID]
 	storCdr.OriginHost = cgrCdr[utils.OriginHost]
-	storCdr.Source = cgrCdr[utils.CDRSOURCE]
+	storCdr.Source = cgrCdr[utils.Source]
 	storCdr.RequestType = cgrCdr[utils.REQTYPE]
 	storCdr.Tenant = cgrCdr[utils.Tenant]
 	storCdr.Category = cgrCdr[utils.CATEGORY]

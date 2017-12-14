@@ -371,7 +371,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		return rsrFld.ParseValue(self.GetOriginID(utils.META_DEFAULT))
 	case utils.OriginHost:
 		return rsrFld.ParseValue(self.GetOriginatorIP(utils.META_DEFAULT))
-	case utils.CDRSOURCE:
+	case utils.Source:
 		return rsrFld.ParseValue(self.GetName())
 	case utils.REQTYPE:
 		return rsrFld.ParseValue(self.GetReqType(utils.META_DEFAULT))

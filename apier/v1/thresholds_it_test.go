@@ -130,7 +130,7 @@ var tEvs = []*utils.CGREvent{
 			utils.MEDI_RUNID:  utils.MetaRaw,
 			utils.ORDERID:     123,
 			utils.OriginHost:  "192.168.1.1",
-			utils.CDRSOURCE:   utils.UNIT_TEST,
+			utils.Source:      utils.UNIT_TEST,
 			utils.ACCID:       "dsafdsaf",
 			utils.TOR:         utils.VOICE,
 			utils.REQTYPE:     utils.META_RATED,

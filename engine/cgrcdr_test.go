@@ -34,7 +34,7 @@ func TestCgrCdrInterfaces(t *testing.T) {
 
 func TestCgrCdrAsCDR(t *testing.T) {
 	cgrCdr := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "dsafdsaf", utils.OriginHost: "192.168.1.1",
-		utils.CDRSOURCE: "internal_test", utils.REQTYPE: utils.META_RATED,
+		utils.Source: "internal_test", utils.REQTYPE: utils.META_RATED,
 		utils.Tenant: "cgrates.org", utils.CATEGORY: "call",
 		utils.Account: "1001", utils.SUBJECT: "1001", utils.Destination: "1002",
 		utils.SetupTime: "2013-11-07T08:42:20Z", utils.AnswerTime: "2013-11-07T08:42:26Z",
@@ -43,7 +43,7 @@ func TestCgrCdrAsCDR(t *testing.T) {
 	expctRtCdr := &CDR{CGRID: utils.Sha1(cgrCdr[utils.ACCID], setupTime.String()),
 		ToR: utils.VOICE, OriginID: cgrCdr[utils.ACCID],
 		OriginHost:  cgrCdr[utils.OriginHost],
-		Source:      cgrCdr[utils.CDRSOURCE],
+		Source:      cgrCdr[utils.Source],
 		RequestType: cgrCdr[utils.REQTYPE],
 		Tenant:      cgrCdr[utils.Tenant], Category: cgrCdr[utils.CATEGORY],
 		Account: cgrCdr[utils.Account], Subject: cgrCdr[utils.SUBJECT],
@@ -60,7 +60,7 @@ func TestCgrCdrAsCDR(t *testing.T) {
 // Make sure the replicated CDR matches the expected CDR
 func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 	cgrCdr := CgrCdr{utils.CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", utils.TOR: utils.VOICE, utils.ACCID: "dsafdsaf", utils.OriginHost: "192.168.1.1",
-		utils.CDRSOURCE: "internal_test", utils.REQTYPE: utils.META_RATED,
+		utils.Source: "internal_test", utils.REQTYPE: utils.META_RATED,
 		utils.DIRECTION: utils.OUT, utils.Tenant: "cgrates.org", utils.CATEGORY: "call",
 		utils.Account: "1001", utils.SUBJECT: "1001", utils.Destination: "1002", utils.SetupTime: "2013-11-07T08:42:20Z", utils.PDD: "0.200", utils.AnswerTime: "2013-11-07T08:42:26Z",
 		utils.Usage: "10s", utils.SUPPLIER: "SUPPL1", utils.DISCONNECT_CAUSE: "NORMAL_CLEARING", utils.COST: "0.12", utils.RATED: "true", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
@@ -68,7 +68,7 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 		ToR:         cgrCdr[utils.TOR],
 		OriginID:    cgrCdr[utils.ACCID],
 		OriginHost:  cgrCdr[utils.OriginHost],
-		Source:      cgrCdr[utils.CDRSOURCE],
+		Source:      cgrCdr[utils.Source],
 		RequestType: cgrCdr[utils.REQTYPE],
 		Tenant:      cgrCdr[utils.Tenant],
 		Category:    cgrCdr[utils.CATEGORY],
