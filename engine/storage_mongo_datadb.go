@@ -22,15 +22,17 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
-	"io/ioutil"
-	"strings"
-	"time"
 )
 
 const (
@@ -1928,6 +1930,7 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 
 func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	log.Print(" \n MONGO \n")
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	var result struct {
@@ -1936,10 +1939,19 @@ func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 	}
 	findParam := bson.M{"key": dbKey}
 	if len(fldNameVal) != 0 {
+		var findParam2 bson.M
 		for fldName, fldValue := range fldNameVal {
-			findParam[fmt.Sprintf("value.%s", fldName)] = fldValue
+			findParam2 = bson.M{fmt.Sprintf("value.%s.%s", fldName, fldValue): 1}
+			if err = col.Find(findParam).Select(findParam2).One(&result); err != nil {
+				if err == mgo.ErrNotFound {
+					err = utils.ErrNotFound
+				}
+				return nil, err
+			}
+			return result.Value, nil
 		}
 	}
+	log.Printf(fmt.Sprintf("\n FindParam after for : %+v \n", findParam))
 	if err = col.Find(findParam).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound

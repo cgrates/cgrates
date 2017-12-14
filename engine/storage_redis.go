@@ -1381,8 +1381,11 @@ func (rs *RedisStorage) GetReqFilterIndexesDrv(dbKey string,
 	} else {
 		for fldName, fldVal := range fldNameVal {
 			concatNameVal := utils.ConcatenatedKey(fldName, fldVal)
-			itmMpStr := rs.Cmd("HMGET", dbKey, utils.ConcatenatedKey(fldName, fldVal)).String()
-			mp[concatNameVal] = itmMpStr
+			itmMpStrLst, err := rs.Cmd("HMGET", dbKey, concatNameVal).List()
+			if err != nil {
+				return nil, err
+			}
+			mp[concatNameVal] = itmMpStrLst[0]
 		}
 	}
 	indexes = make(map[string]map[string]utils.StringMap)
