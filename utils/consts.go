@@ -626,6 +626,7 @@ const (
 	TBLTPSuppliers        = "tp_suppliers"
 	TBLTPAttributes       = "tp_attributes"
 	TBLVersions           = "versions"
+	FilterS               = "FilterS"
 )
 
 //Cache Name

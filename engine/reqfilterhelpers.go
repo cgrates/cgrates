@@ -46,7 +46,9 @@ func matchingItemIDsForEvent(ev map[string]interface{}, fieldIDs []string,
 		}
 		fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
 		if !canCast {
-			return nil, fmt.Errorf("Cannot cast field: %s into string", fldName)
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
+			continue
 		}
 		dbItemIDs, err := dm.MatchReqFilterIndex(dbIdxKey, fldName, fldVal)
 		if err != nil {
