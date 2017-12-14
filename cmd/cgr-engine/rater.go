@@ -248,7 +248,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		waitTasks = append(waitTasks, usersTaskChan)
 		go func() {
 			defer close(usersTaskChan)
-			if usersConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
+			var err error
+			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsUserSConns, internalUserSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect UserS, error: %s", err.Error()))

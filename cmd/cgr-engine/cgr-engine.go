@@ -131,7 +131,7 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 	}
 }
 
-func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRaterChan,
+func startSmGeneric(internalSMGChan, internalRaterChan,
 	internalCDRSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMGeneric service.")
 	var err error
@@ -181,7 +181,7 @@ func startSmGeneric(internalSMGChan chan *sessionmanager.SMGeneric, internalRate
 	}
 }
 
-func startSMAsterisk(internalSMGChan chan *sessionmanager.SMGeneric, exitChan chan bool) {
+func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SMAsterisk service.")
 	/*
 		var smgConn *rpcclient.RpcClientPool
@@ -195,10 +195,12 @@ func startSMAsterisk(internalSMGChan chan *sessionmanager.SMGeneric, exitChan ch
 			}
 		}
 	*/
-	smg := <-internalSMGChan
-	internalSMGChan <- smg
-	birpcClnt := utils.NewBiRPCInternalClient(smg)
+	smgRpcConn := <-internalSMGChan
+	internalSMGChan <- smgRpcConn
+	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
 	for connIdx := range cfg.SMAsteriskCfg().AsteriskConns { // Instantiate connections towards asterisk servers
+		smgRpcConn := <-internalSMGChan
+		internalSMGChan <- smgRpcConn
 		sma, err := sessionmanager.NewSMAsterisk(cfg, connIdx, birpcClnt)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> error: %s!", err))
@@ -212,21 +214,13 @@ func startSMAsterisk(internalSMGChan chan *sessionmanager.SMGeneric, exitChan ch
 	exitChan <- true
 }
 
-func startDiameterAgent(internalSMGChan chan *sessionmanager.SMGeneric, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
-	smgChan := make(chan rpcclient.RpcClientConnection, 1) // Use it to pass smg
-	go func(internalSMGChan chan *sessionmanager.SMGeneric, smgChan chan rpcclient.RpcClientConnection) {
-		// Need this to pass from *sessionmanager.SMGeneric to rpcclient.RpcClientConnection
-		smg := <-internalSMGChan
-		internalSMGChan <- smg
-		smgChan <- smg
-	}(internalSMGChan, smgChan)
 	var smgConn, pubsubConn *rpcclient.RpcClientPool
-
 	if len(cfg.DiameterAgentCfg().SMGenericConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DiameterAgentCfg().SMGenericConns, smgChan, cfg.InternalTtl)
+			cfg.DiameterAgentCfg().SMGenericConns, internalSMGChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
 			exitChan <- true
@@ -254,21 +248,14 @@ func startDiameterAgent(internalSMGChan chan *sessionmanager.SMGeneric, internal
 	exitChan <- true
 }
 
-func startRadiusAgent(internalSMGChan chan *sessionmanager.SMGeneric, exitChan chan bool) {
+func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
 	utils.Logger.Info("Starting CGRateS RadiusAgent service")
-	smgChan := make(chan rpcclient.RpcClientConnection, 1) // Use it to pass smg
-	go func(internalSMGChan chan *sessionmanager.SMGeneric, smgChan chan rpcclient.RpcClientConnection) {
-		// Need this to pass from *sessionmanager.SMGeneric to rpcclient.RpcClientConnection
-		smg := <-internalSMGChan
-		internalSMGChan <- smg
-		smgChan <- smg
-	}(internalSMGChan, smgChan)
 	var smgConn *rpcclient.RpcClientPool
 	if len(cfg.RadiusAgentCfg().SMGenericConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts,
 			cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.RadiusAgentCfg().SMGenericConns, smgChan, cfg.InternalTtl)
+			cfg.RadiusAgentCfg().SMGenericConns, internalSMGChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RadiusAgent> Could not connect to SMG: %s", err.Error()))
 			exitChan <- true
@@ -545,12 +532,14 @@ func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, 
 }
 
 func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	utils.Logger.Info("Starting User service.")
 	userServer, err := engine.NewUserMap(dm, cfg.UserServerIndexes)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
+	utils.Logger.Info("Started User service.")
 	server.RpcRegisterName("UsersV1", userServer)
 	internalUserSChan <- userServer
 }
@@ -741,7 +730,7 @@ func startFilterService(filterSChan chan *engine.FilterS,
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
-	internalAliaseSChan, internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection, internalSMGChan chan *sessionmanager.SMGeneric) {
+	internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan chan rpcclient.RpcClientConnection) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -911,7 +900,7 @@ func main() {
 	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalSMGChan := make(chan *sessionmanager.SMGeneric, 1)
+	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)
