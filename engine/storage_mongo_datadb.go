@@ -1926,14 +1926,21 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 	return nil
 }
 
-func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
+func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
+	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	var result struct {
 		Key   string
 		Value map[string]map[string]utils.StringMap
 	}
-	if err = col.Find(bson.M{"key": dbKey}).One(&result); err != nil {
+	findParam := bson.M{"key": dbKey}
+	if len(fldNameVal) != 0 {
+		for fldName, fldValue := range fldNameVal {
+			findParam[fmt.Sprintf("value.%s", fldName)] = fldValue
+		}
+	}
+	if err = col.Find(findParam).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 		}

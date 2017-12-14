@@ -1368,12 +1368,22 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetReqFilterIndexesDrv(dbKey string) (indexes map[string]map[string]utils.StringMap, err error) {
-	mp, err := rs.Cmd("HGETALL", dbKey).Map()
-	if err != nil {
-		return
-	} else if len(mp) == 0 {
-		return nil, utils.ErrNotFound
+func (rs *RedisStorage) GetReqFilterIndexesDrv(dbKey string,
+	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	mp := make(map[string]string)
+	if len(fldNameVal) == 0 {
+		mp, err = rs.Cmd("HGETALL", dbKey).Map()
+		if err != nil {
+			return
+		} else if len(mp) == 0 {
+			return nil, utils.ErrNotFound
+		}
+	} else {
+		for fldName, fldVal := range fldNameVal {
+			concatNameVal := utils.ConcatenatedKey(fldName, fldVal)
+			itmMpStr := rs.Cmd("HMGET", dbKey, utils.ConcatenatedKey(fldName, fldVal)).String()
+			mp[concatNameVal] = itmMpStr
+		}
 	}
 	indexes = make(map[string]map[string]utils.StringMap)
 	for k, v := range mp {
@@ -1400,6 +1410,9 @@ func (rs *RedisStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]
 	mp := make(map[string]string)
 	for fldName, fldValMp := range indexes {
 		for fldVal, strMp := range fldValMp {
+			if len(strMp) == 0 { // remove with no more elements inside
+				return rs.Cmd("HDEL", dbKey, utils.ConcatenatedKey(fldName, fldVal)).Err
+			}
 			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
 				return err
 			} else {
