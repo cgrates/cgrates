@@ -129,7 +129,7 @@ var tEvs = []*utils.CGREvent{
 			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 			utils.MEDI_RUNID:  utils.MetaRaw,
 			utils.ORDERID:     123,
-			utils.CDRHOST:     "192.168.1.1",
+			utils.OriginHost:  "192.168.1.1",
 			utils.CDRSOURCE:   utils.UNIT_TEST,
 			utils.ACCID:       "dsafdsaf",
 			utils.TOR:         utils.VOICE,

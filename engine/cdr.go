@@ -154,7 +154,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(cdr.ToR)
 	case utils.ACCID:
 		return rsrFld.ParseValue(cdr.OriginID)
-	case utils.CDRHOST:
+	case utils.OriginHost:
 		return rsrFld.ParseValue(cdr.OriginHost)
 	case utils.CDRSOURCE:
 		return rsrFld.ParseValue(cdr.Source)
@@ -557,7 +557,7 @@ func (cdr *CDR) GetDuration(fieldName string) (time.Duration, error) {
 	return utils.ParseDurationWithNanosecs(durVal)
 }
 func (cdr *CDR) GetOriginatorIP(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.CDRHOST, utils.META_DEFAULT, ""}, fieldName) {
+	if utils.IsSliceMember([]string{utils.OriginHost, utils.META_DEFAULT, ""}, fieldName) {
 		return cdr.OriginHost
 	}
 	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
@@ -703,7 +703,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
 	mp[utils.CGRID] = cdr.CGRID
 	mp[utils.MEDI_RUNID] = cdr.RunID
 	mp[utils.ORDERID] = cdr.OrderID
-	mp[utils.CDRHOST] = cdr.OriginHost
+	mp[utils.OriginHost] = cdr.OriginHost
 	mp[utils.CDRSOURCE] = cdr.Source
 	mp[utils.ACCID] = cdr.OriginID
 	mp[utils.TOR] = cdr.ToR
@@ -805,7 +805,7 @@ func (cdr *CDR) AsCGREvent() *utils.CGREvent {
 func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
 	for _, fldName := range fields {
 		switch fldName {
-		case utils.CDRHOST:
+		case utils.OriginHost:
 			if cdr.OriginHost, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}

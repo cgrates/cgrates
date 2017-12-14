@@ -269,7 +269,7 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		return rsrFld.ParseValue(utils.VOICE)
 	case utils.ACCID:
 		return rsrFld.ParseValue(fsev.GetUUID())
-	case utils.CDRHOST:
+	case utils.OriginHost:
 		return rsrFld.ParseValue(fsev["FreeSWITCH-IPv4"])
 	case utils.CDRSOURCE:
 		return rsrFld.ParseValue("FS_EVENT")
@@ -374,7 +374,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.CGRID] = fsev.GetCgrId(timezone)
 	mp[utils.TOR] = utils.VOICE
 	mp[utils.ACCID] = fsev.GetUUID()
-	mp[utils.CDRHOST] = fsev.GetOriginatorIP(utils.META_DEFAULT)
+	mp[utils.OriginHost] = fsev.GetOriginatorIP(utils.META_DEFAULT)
 	mp[utils.CDRSOURCE] = "FS_" + fsev.GetName()
 	mp[utils.REQTYPE] = fsev.GetReqType(utils.META_DEFAULT)
 	mp[utils.DIRECTION] = fsev.GetDirection(utils.META_DEFAULT)

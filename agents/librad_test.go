@@ -213,7 +213,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 			Value: utils.ParseRSRFieldsMustCompile(utils.VOICE, utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "OriginID", FieldId: utils.ACCID, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("Acct-Session-Id;^-;Sip-From-Tag;^-;Sip-To-Tag", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "OriginHost", FieldId: utils.CDRHOST, Type: utils.META_COMPOSED,
+		&config.CfgCdrField{Tag: "OriginHost", FieldId: utils.OriginHost, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("NAS-IP-Address", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "RequestType", FieldId: utils.REQTYPE, Type: utils.META_CONSTANT,
 			Value: utils.ParseRSRFieldsMustCompile(utils.META_PREPAID, utils.INFIELD_SEP)},
@@ -248,7 +248,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 		utils.SetupTime:   "1497106115",
 		utils.AnswerTime:  "1497106115",
 		utils.Usage:       "4s",
-		utils.CDRHOST:     "127.0.0.1",
+		utils.OriginHost:  "127.0.0.1",
 	}
 
 	if smgEv, err := radReqAsSMGEvent(pkt, map[string]string{MetaRadReqType: MetaRadAcctStop}, nil, cfgFlds); err != nil {

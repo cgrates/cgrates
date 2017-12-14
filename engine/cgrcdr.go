@@ -63,7 +63,7 @@ func (cgrCdr CgrCdr) AsCDR(timezone string) *CDR {
 	storCdr.CGRID = cgrCdr.getCGRID(timezone)
 	storCdr.ToR = cgrCdr[utils.TOR]
 	storCdr.OriginID = cgrCdr[utils.ACCID]
-	storCdr.OriginHost = cgrCdr[utils.CDRHOST]
+	storCdr.OriginHost = cgrCdr[utils.OriginHost]
 	storCdr.Source = cgrCdr[utils.CDRSOURCE]
 	storCdr.RequestType = cgrCdr[utils.REQTYPE]
 	storCdr.Tenant = cgrCdr[utils.Tenant]
