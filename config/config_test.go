@@ -446,7 +446,7 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
-	eSmGeCfg := &SmGenericConfig{
+	eSmGeCfg := &SMGConfig{
 		Enabled:             false,
 		ListenBijson:        "127.0.0.1:2014",
 		RALsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
@@ -459,8 +459,8 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		SessionIndexes:      utils.StringMap{},
 	}
 
-	if !reflect.DeepEqual(cgrCfg.SmGenericConfig, eSmGeCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmGenericConfig, eSmGeCfg)
+	if !reflect.DeepEqual(cgrCfg.SMGConfig, eSmGeCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SMGConfig, eSmGeCfg)
 	}
 
 }
@@ -547,22 +547,17 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
 	eSmFsCfg := &SmFsConfig{
 		Enabled:             false,
-		RALsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CDRsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		RLsConns:            []*HaPoolConfig{},
+		SMGConns:            []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		SubscribePark:       true,
 		CreateCdr:           false,
 		ExtraFields:         nil,
-		DebitInterval:       10 * time.Second,
-		MinCallDuration:     0 * time.Second,
-		MaxCallDuration:     3 * time.Hour,
-		MinDurLowBalance:    5 * time.Second,
-		LowBalanceAnnFile:   "",
 		EmptyBalanceContext: "",
 		EmptyBalanceAnnFile: "",
-		SubscribePark:       true,
 		ChannelSyncInterval: 5 * time.Minute,
 		MaxWaitConnection:   2 * time.Second,
-		EventSocketConns:    []*FsConnConfig{&FsConnConfig{Address: "127.0.0.1:8021", Password: "ClueCon", Reconnects: 5}},
+		EventSocketConns: []*FsConnConfig{
+			&FsConnConfig{Address: "127.0.0.1:8021",
+				Password: "ClueCon", Reconnects: 5}},
 	}
 
 	if !reflect.DeepEqual(cgrCfg.SmFsConfig, eSmFsCfg) {
@@ -608,9 +603,14 @@ func TestCgrCfgJSONDefaultsSMOsipsConfig(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsSMAsteriskCfg(t *testing.T) {
 	eSmAsCfg := &SMAsteriskCfg{
-		Enabled:       false,
-		CreateCDR:     false,
-		AsteriskConns: []*AsteriskConnCfg{&AsteriskConnCfg{Address: "127.0.0.1:8088", User: "cgrates", Password: "CGRateS.org", ConnectAttempts: 3, Reconnects: 5}},
+		Enabled: false,
+		SMGConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
+		CreateCDR: false,
+		AsteriskConns: []*AsteriskConnCfg{
+			&AsteriskConnCfg{Address: "127.0.0.1:8088",
+				User: "cgrates", Password: "CGRateS.org",
+				ConnectAttempts: 3, Reconnects: 5}},
 	}
 
 	if !reflect.DeepEqual(cgrCfg.smAsteriskCfg, eSmAsCfg) {
@@ -713,10 +713,11 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	testDA := &DiameterAgentCfg{
-		Enabled:           false,
-		Listen:            "127.0.0.1:3868",
-		DictionariesDir:   "/usr/share/cgrates/diameter/dict/",
-		SMGenericConns:    []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		Enabled:         false,
+		Listen:          "127.0.0.1:3868",
+		DictionariesDir: "/usr/share/cgrates/diameter/dict/",
+		SMGConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
 		PubSubConns:       []*HaPoolConfig{},
 		CreateCDR:         true,
 		DebitInterval:     5 * time.Minute,
@@ -737,8 +738,8 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.DictionariesDir, testDA.DictionariesDir) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.DictionariesDir, testDA.DictionariesDir)
 	}
-	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.SMGenericConns, testDA.SMGenericConns) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.SMGenericConns, testDA.SMGenericConns)
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.SMGConns, testDA.SMGConns) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.SMGConns, testDA.SMGConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.PubSubConns, testDA.PubSubConns) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.PubSubConns, testDA.PubSubConns)
@@ -845,7 +846,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ListenAcct:         "127.0.0.1:1813",
 		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
-		SMGenericConns:     []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
+		SMGConns:           []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 		CreateCDR:          true,
 		CDRRequiresSession: false,
 		Timezone:           "",
@@ -869,8 +870,8 @@ func TestRadiusAgentCfg(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries)
 	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.SMGenericConns, testRA.SMGenericConns) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.SMGenericConns, testRA.SMGenericConns)
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.SMGConns, testRA.SMGConns) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.SMGConns, testRA.SMGConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR)

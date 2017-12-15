@@ -42,7 +42,7 @@ const (
 	CDRSTATS_JSN    = "cdrstats"
 	CDRE_JSN        = "cdre"
 	CDRC_JSN        = "cdrc"
-	SMGENERIC_JSON  = "sm_generic"
+	SMG_JSON        = "smg"
 	SMFS_JSN        = "sm_freeswitch"
 	SMKAM_JSN       = "sm_kamailio"
 	SMOSIPS_JSN     = "sm_opensips"
@@ -233,12 +233,12 @@ func (self CgrJsonCfg) CdrcJsonCfg() ([]*CdrcJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SmGenericJsonCfg() (*SmGenericJsonCfg, error) {
-	rawCfg, hasKey := self[SMGENERIC_JSON]
+func (self CgrJsonCfg) SmgJsonCfg() (*SmgJsonCfg, error) {
+	rawCfg, hasKey := self[SMG_JSON]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(SmGenericJsonCfg)
+	cfg := new(SmgJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

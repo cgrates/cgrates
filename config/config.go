@@ -68,7 +68,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
 	cfg.NodeID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
-	cfg.SmGenericConfig = new(SmGenericConfig)
+	cfg.SMGConfig = new(SMGConfig)
 	cfg.cacheConfig = make(CacheConfig)
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
@@ -259,7 +259,7 @@ type CGRConfig struct {
 	CDRStatsSaveInterval     time.Duration // Save interval duration
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
-	SmGenericConfig          *SmGenericConfig
+	SMGConfig                *SMGConfig
 	SmFsConfig               *SmFsConfig              // SMFreeSWITCH configuration
 	SmKamConfig              *SmKamConfig             // SM-Kamailio Configuration
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
@@ -405,19 +405,19 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SMGeneric checks
-	if self.SmGenericConfig.Enabled {
-		if len(self.SmGenericConfig.RALsConns) == 0 {
+	if self.SMGConfig.Enabled {
+		if len(self.SMGConfig.RALsConns) == 0 {
 			return errors.New("<SMGeneric> RALs definition is mandatory!")
 		}
-		for _, smgRALsConn := range self.SmGenericConfig.RALsConns {
+		for _, smgRALsConn := range self.SMGConfig.RALsConns {
 			if smgRALsConn.Address == utils.MetaInternal && !self.RALsEnabled {
 				return errors.New("<SMGeneric> RALs not enabled but requested by SMGeneric component.")
 			}
 		}
-		if len(self.SmGenericConfig.CDRsConns) == 0 {
+		if len(self.SMGConfig.CDRsConns) == 0 {
 			return errors.New("<SMGeneric> CDRs definition is mandatory!")
 		}
-		for _, smgCDRSConn := range self.SmGenericConfig.CDRsConns {
+		for _, smgCDRSConn := range self.SMGConfig.CDRsConns {
 			if smgCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
 				return errors.New("<SMGeneric> CDRS not enabled but referenced by SMGeneric component")
 			}
@@ -425,25 +425,13 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SMFreeSWITCH checks
 	if self.SmFsConfig.Enabled {
-		if len(self.SmFsConfig.RALsConns) == 0 {
-			return errors.New("<SMFreeSWITCH> RALs definition is mandatory!")
-		}
-		for _, smFSRaterConn := range self.SmFsConfig.RALsConns {
-			if smFSRaterConn.Address == utils.MetaInternal && !self.RALsEnabled {
-				return errors.New("<SMFreeSWITCH> RALs not enabled but requested by SMFreeSWITCH component.")
+		for _, connCfg := range self.SmFsConfig.SMGConns {
+			if connCfg.Address != utils.MetaInternal {
+				return errors.New("Only <*internal> connectivity allowed in in SMFreeSWITCH towards SMG for now")
 			}
-		}
-		if len(self.SmFsConfig.CDRsConns) == 0 {
-			return errors.New("<SMFreeSWITCH> CDRS definition is mandatory!")
-		}
-		for _, smFSCDRSConn := range self.SmFsConfig.CDRsConns {
-			if smFSCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
-				return errors.New("CDRS not enabled but referenced by SMFreeSWITCH component")
-			}
-		}
-		for _, smFSRLsConn := range self.SmFsConfig.RLsConns {
-			if smFSRLsConn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("RLs not enabled but referenced by SMFreeSWITCH component")
+			if connCfg.Address == utils.MetaInternal &&
+				!self.SMGConfig.Enabled {
+				return errors.New("SMGeneric not enabled but referenced by SM-FreeSWITCH")
 			}
 		}
 	}
@@ -497,19 +485,19 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return errors.New("<SMAsterisk> SMG definition is mandatory!")
 		}
 		for _, smAstSMGConn := range self.smAsteriskCfg.SMGConns {
-			if smAstSMGConn.Address == utils.MetaInternal && !self.SmGenericConfig.Enabled {
+			if smAstSMGConn.Address == utils.MetaInternal && !self.SMGConfig.Enabled {
 				return errors.New("<SMAsterisk> SMG not enabled.")
 			}
 		}
 		*/
-		if !self.SmGenericConfig.Enabled {
+		if !self.SMGConfig.Enabled {
 			return errors.New("<SMAsterisk> SMG not enabled.")
 		}
 	}
 	// DAgent checks
 	if self.diameterAgentCfg.Enabled {
-		for _, daSMGConn := range self.diameterAgentCfg.SMGenericConns {
-			if daSMGConn.Address == utils.MetaInternal && !self.SmGenericConfig.Enabled {
+		for _, daSMGConn := range self.diameterAgentCfg.SMGConns {
+			if daSMGConn.Address == utils.MetaInternal && !self.SMGConfig.Enabled {
 				return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
 			}
 		}
@@ -520,8 +508,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	if self.radiusAgentCfg.Enabled {
-		for _, raSMGConn := range self.radiusAgentCfg.SMGenericConns {
-			if raSMGConn.Address == utils.MetaInternal && !self.SmGenericConfig.Enabled {
+		for _, raSMGConn := range self.radiusAgentCfg.SMGConns {
+			if raSMGConn.Address == utils.MetaInternal && !self.SMGConfig.Enabled {
 				return errors.New("SMGeneric not enabled but referenced by RadiusAgent component")
 			}
 		}
@@ -546,7 +534,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.supplierSCfg != nil && self.supplierSCfg.Enabled {
 		for _, connCfg := range self.supplierSCfg.RALsConns {
 			if connCfg.Address != utils.MetaInternal {
-				return errors.New("Only *internal connectivity allowed in SupplierS for now")
+				return errors.New("Only <*internal> connectivity allowed in SupplierS for now")
 			}
 			if connCfg.Address == utils.MetaInternal && !self.RALsEnabled {
 				return errors.New("RALs not enabled but requested by SupplierS component.")
@@ -637,7 +625,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnSmGenericCfg, err := jsnCfg.SmGenericJsonCfg()
+	jsnSmGenericCfg, err := jsnCfg.SmgJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1114,7 +1102,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 	if jsnSmGenericCfg != nil {
-		if err := self.SmGenericConfig.loadFromJsonCfg(jsnSmGenericCfg); err != nil {
+		if err := self.SMGConfig.loadFromJsonCfg(jsnSmGenericCfg); err != nil {
 			return err
 		}
 	}

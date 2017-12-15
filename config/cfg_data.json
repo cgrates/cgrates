@@ -39,6 +39,10 @@
 	},
 ],
 
+"smg": {
+	"enabled": true,						// enable Rater service: <true|false>
+},
+
 "sm_freeswitch": {
 	"enabled": true,				// starts SessionManager service: <true|false>
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers

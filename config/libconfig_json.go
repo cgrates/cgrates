@@ -194,7 +194,7 @@ type CdrcJsonCfg struct {
 }
 
 // SM-Generic config section
-type SmGenericJsonCfg struct {
+type SmgJsonCfg struct {
 	Enabled               *bool
 	Listen_bijson         *string
 	Rals_conns            *[]*HaPoolJsonCfg
@@ -212,23 +212,25 @@ type SmGenericJsonCfg struct {
 
 // SM-FreeSWITCH config section
 type SmFsJsonCfg struct {
-	Enabled                *bool
-	Rals_conns             *[]*HaPoolJsonCfg
-	Cdrs_conns             *[]*HaPoolJsonCfg
-	Resources_conns        *[]*HaPoolJsonCfg
-	Create_cdr             *bool
-	Extra_fields           *[]string
-	Debit_interval         *string
-	Min_call_duration      *string
-	Max_call_duration      *string
-	Min_dur_low_balance    *string
-	Low_balance_ann_file   *string
+	Enabled        *bool
+	Smg_conns      *[]*HaPoolJsonCfg // Connections towards generic SMG
+	Subscribe_park *bool
+	Create_cdr     *bool
+	Extra_fields   *[]string
+	//Min_dur_low_balance    *string
+	//Low_balance_ann_file   *string
 	Empty_balance_context  *string
 	Empty_balance_ann_file *string
-	Subscribe_park         *bool
 	Channel_sync_interval  *string
 	Max_wait_connection    *string
 	Event_socket_conns     *[]*FsConnJsonCfg
+}
+
+// Represents one connection instance towards FreeSWITCH
+type FsConnJsonCfg struct {
+	Address    *string
+	Password   *string
+	Reconnects *int
 }
 
 // Represents one connection instance towards a rater/cdrs server
@@ -247,10 +249,10 @@ type AstConnJsonCfg struct {
 }
 
 type SMAsteriskJsonCfg struct {
-	Enabled          *bool
-	Sm_generic_conns *[]*HaPoolJsonCfg // Connections towards generic SMf
-	Create_cdr       *bool
-	Asterisk_conns   *[]*AstConnJsonCfg
+	Enabled        *bool
+	Smg_conns      *[]*HaPoolJsonCfg // Connections towards generic SMG
+	Create_cdr     *bool
+	Asterisk_conns *[]*AstConnJsonCfg
 }
 
 type CacheParamJsonCfg struct {
@@ -261,13 +263,6 @@ type CacheParamJsonCfg struct {
 }
 
 type CacheJsonCfg map[string]*CacheParamJsonCfg
-
-// Represents one connection instance towards FreeSWITCH
-type FsConnJsonCfg struct {
-	Address    *string
-	Password   *string
-	Reconnects *int
-}
 
 // SM-Kamailio config section
 type SmKamJsonCfg struct {
@@ -313,7 +308,7 @@ type DiameterAgentJsonCfg struct {
 	Enabled              *bool             // enables the diameter agent: <true|false>
 	Listen               *string           // address where to listen for diameter requests <x.y.z.y:1234>
 	Dictionaries_dir     *string           // path towards additional dictionaries
-	Sm_generic_conns     *[]*HaPoolJsonCfg // Connections towards generic SM
+	Smg_conns            *[]*HaPoolJsonCfg // Connections towards generic SM
 	Pubsubs_conns        *[]*HaPoolJsonCfg // connection towards pubsubs
 	Create_cdr           *bool
 	Cdr_requires_session *bool
@@ -347,7 +342,7 @@ type RadiusAgentJsonCfg struct {
 	Listen_acct          *string
 	Client_secrets       *map[string]string
 	Client_dictionaries  *map[string]string
-	Sm_generic_conns     *[]*HaPoolJsonCfg
+	Smg_conns            *[]*HaPoolJsonCfg
 	Create_cdr           *bool
 	Cdr_requires_session *bool
 	Timezone             *string

@@ -277,7 +277,7 @@ const CGRATES_CFG_JSON = `
 ],
 
 
-"sm_generic": {
+"smg": {
 	"enabled": false,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"rals_conns": [
@@ -300,6 +300,9 @@ const CGRATES_CFG_JSON = `
 
 "sm_asterisk": {
 	"enabled": false,						// starts Asterisk SessionManager service: <true|false>
+	"smg_conns": [
+		{"address": "*internal"}			// connection towards SMG component for session management: <*internal>
+	],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
@@ -309,23 +312,16 @@ const CGRATES_CFG_JSON = `
 
 "sm_freeswitch": {
 	"enabled": false,						// starts SessionManager service: <true|false>
-	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	"smg_conns": [
+		{"address": "*internal"}			// connection towards SMG component for session management: <*internal>
 	],
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
-	"resources_conns": [],					// address where to reach the ResourceLimiter service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
-	"debit_interval": "10s",				// interval to perform debits on.
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
-	"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
-	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
+	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+	//"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"channel_sync_interval": "5m",			// sync channels with freeswitch regularly
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
@@ -375,7 +371,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"sm_generic_conns": [
+	"smg_conns": [
 		{"address": "*internal"}								// connection towards SMG component for session management
 	],
 	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
@@ -402,7 +398,7 @@ const CGRATES_CFG_JSON = `
 	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
 		"*default": "/usr/share/cgrates/radius/dict/",			// key represents the client IP or catch-all <*default|$client_ip>
 	},
-	"sm_generic_conns": [
+	"smg_conns": [
 		{"address": "*internal"}								// connection towards SMG component for session management
 	],
 	"create_cdr": true,											// create CDR out of Accounting-Stop and send it to SMG component

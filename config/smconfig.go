@@ -88,7 +88,7 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 	return nil
 }
 
-type SmGenericConfig struct {
+type SMGConfig struct {
 	Enabled             bool
 	ListenBijson        string
 	RALsConns           []*HaPoolConfig
@@ -104,7 +104,7 @@ type SmGenericConfig struct {
 	SessionIndexes      utils.StringMap
 }
 
-func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
+func (self *SMGConfig) loadFromJsonCfg(jsnCfg *SmgJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -177,20 +177,15 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 }
 
 type SmFsConfig struct {
-	Enabled             bool
-	RALsConns           []*HaPoolConfig
-	CDRsConns           []*HaPoolConfig
-	RLsConns            []*HaPoolConfig
-	CreateCdr           bool
-	ExtraFields         []*utils.RSRField
-	DebitInterval       time.Duration
-	MinCallDuration     time.Duration
-	MaxCallDuration     time.Duration
-	MinDurLowBalance    time.Duration
-	LowBalanceAnnFile   string
+	Enabled       bool
+	SMGConns      []*HaPoolConfig
+	SubscribePark bool
+	CreateCdr     bool
+	ExtraFields   []*utils.RSRField
+	//MinDurLowBalance    time.Duration
+	//LowBalanceAnnFile   string
 	EmptyBalanceContext string
 	EmptyBalanceAnnFile string
-	SubscribePark       bool
 	ChannelSyncInterval time.Duration
 	MaxWaitConnection   time.Duration
 	EventSocketConns    []*FsConnConfig
@@ -204,26 +199,15 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Rals_conns != nil {
-		self.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			self.RALsConns[idx] = NewDfltHaPoolConfig()
-			self.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Smg_conns != nil {
+		self.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Smg_conns {
+			self.SMGConns[idx] = NewDfltHaPoolConfig()
+			self.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Cdrs_conns != nil {
-		self.CDRsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			self.CDRsConns[idx] = NewDfltHaPoolConfig()
-			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCfg.Resources_conns != nil {
-		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			self.RLsConns[idx] = NewDfltHaPoolConfig()
-			self.RLsConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
+	if jsnCfg.Subscribe_park != nil {
+		self.SubscribePark = *jsnCfg.Subscribe_park
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
@@ -233,37 +217,12 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 			return err
 		}
 	}
-	if jsnCfg.Debit_interval != nil {
-		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Min_call_duration != nil {
-		if self.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Max_call_duration != nil {
-		if self.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Min_dur_low_balance != nil {
-		if self.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_dur_low_balance); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Low_balance_ann_file != nil {
-		self.LowBalanceAnnFile = *jsnCfg.Low_balance_ann_file
-	}
 	if jsnCfg.Empty_balance_context != nil {
 		self.EmptyBalanceContext = *jsnCfg.Empty_balance_context
 	}
+
 	if jsnCfg.Empty_balance_ann_file != nil {
 		self.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
-	}
-	if jsnCfg.Subscribe_park != nil {
-		self.SubscribePark = *jsnCfg.Subscribe_park
 	}
 	if jsnCfg.Channel_sync_interval != nil {
 		if self.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
@@ -512,9 +471,9 @@ func (aCfg *SMAsteriskCfg) loadFromJsonCfg(jsnCfg *SMAsteriskJsonCfg) (err error
 	if jsnCfg.Enabled != nil {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Sm_generic_conns != nil {
-		aCfg.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Sm_generic_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sm_generic_conns {
+	if jsnCfg.Smg_conns != nil {
+		aCfg.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Smg_conns {
 			aCfg.SMGConns[idx] = NewDfltHaPoolConfig()
 			aCfg.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
