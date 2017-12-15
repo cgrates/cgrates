@@ -388,7 +388,8 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string) 
 	}
 	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
-	return
+	return NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix,
+		tenant).RemoveItemFromIndex(id)
 }
 
 func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool, transactionID string) (sqp *StatQueueProfile, err error) {
@@ -863,6 +864,7 @@ func (dm *DataManager) MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (i
 		}
 		return x.(utils.StringMap), nil
 	}
+	// Not found in cache, check in DB
 	itemIDs, err = dm.DataDB().MatchReqFilterIndexDrv(dbKey, fieldName, fieldVal)
 	if err != nil {
 		if err == utils.ErrNotFound {

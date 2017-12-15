@@ -273,17 +273,30 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	for _, spr := range sprsmatch {
 		dmspl.DataDB().SetSupplierProfileDrv(spr)
 	}
-	ref, err := NewReqFilterIndexer(dmspl, utils.SupplierProfilePrefix, "cgrates.org")
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+	ref := NewReqFilterIndexer(dmspl, utils.SupplierProfilePrefix, "cgrates.org")
 	ref.IndexFilters("supplierprofile1", filters1)
 	ref.IndexFilters("supplierprofile2", filters2)
 	err = ref.StoreIndexes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-
+	//test here GetReqFilterIndexes with a specific map
+	expidx := map[string]map[string]utils.StringMap{
+		"supplierprofile1": {
+			"Supplier": {
+				"supplierprofile1": true,
+			},
+		},
+	}
+	splPrf1 := make(map[string]string)
+	splPrf1["supplierprofile1"] = "Supplier"
+	if rcvidx, err := dmspl.GetReqFilterIndexes(GetDBIndexKey(utils.SupplierProfilePrefix, "cgrates.org", false), splPrf1); err != nil {
+		t.Errorf("Error: %+v", err)
+	} else {
+		if !reflect.DeepEqual(expidx, rcvidx) {
+			t.Errorf("Expected: %+v received: %+v", expidx, rcvidx)
+		}
+	}
 }
 
 func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {

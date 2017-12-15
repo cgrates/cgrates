@@ -19,15 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewReqFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) (*ReqFilterIndexer, error) {
+func NewReqFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) *ReqFilterIndexer {
 	return &ReqFilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
 		indexes:          make(map[string]map[string]utils.StringMap),
 		reveseIndex:      make(map[string]map[string]utils.StringMap),
 		chngdIndxKeys:    make(utils.StringMap),
-		chngdRevIndxKeys: make(utils.StringMap)}, nil
+		chngdRevIndxKeys: make(utils.StringMap)}
 }
 
 // ReqFilterIndexer is a centralized indexer for all data sources using RequestFilter
@@ -141,6 +142,72 @@ func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
 	return rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), rfi.reveseIndex)
 }
 
+//Populate the ReqFilterIndexer.reveseIndex for specifil itemID
+func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
+	rcvReveseIdx, err := rfi.dm.GetReqFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		map[string]string{itemID: ""})
+	if err != nil {
+		return err
+	}
+	for key2, val2 := range rcvReveseIdx[itemID] {
+		if _, has := rfi.reveseIndex[itemID]; !has {
+			rfi.reveseIndex[itemID] = make(map[string]utils.StringMap)
+		}
+		if _, has := rfi.reveseIndex[itemID][key2]; !has {
+			rfi.reveseIndex[itemID][key2] = make(utils.StringMap)
+		}
+		rfi.reveseIndex[itemID][key2] = val2
+	}
+	utils.Logger.Debug(fmt.Sprintf("itemID %+v \n ReverseIndex %+v ", itemID, rfi.reveseIndex))
+	return err
+}
+
+//Populate ReqFilterIndexer.indexes with specific fieldName,fieldValue , nil
+func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) error {
+	rcvIdx, err := rfi.dm.GetReqFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		map[string]string{fldName: fldVal})
+	if err != nil {
+		return err
+	}
+	for fldName, fldValMp := range rcvIdx {
+		if _, has := rfi.indexes[fldName]; !has {
+			rfi.indexes[fldName] = make(map[string]utils.StringMap)
+		}
+		for fldVal, itmMap := range fldValMp {
+			rfi.indexes[fldName][fldVal] = itmMap
+		}
+	}
+	utils.Logger.Debug(fmt.Sprintf(" \n Index %+v ", rfi.reveseIndex))
+	return nil
+}
+
+//RemoveItemFromIndex remove
+func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
+	if err = rfi.loadItemReverseIndex(itemID); err != nil {
+		return err
+	}
+	for fldName, fldValMp := range rfi.reveseIndex[itemID] {
+		for fldVal := range fldValMp {
+			if err = rfi.loadFldNameFldValIndex(fldName, fldVal); err != nil {
+				return err
+			}
+		}
+	}
+	for _, fldValMp := range rfi.indexes {
+		for _, itmIDMp := range fldValMp {
+			if _, has := itmIDMp[itemID]; has {
+				delete(itmIDMp, itemID)
+			}
+		}
+	}
+	rfi.StoreIndexes()
+	return
+
+}
+
+//GetDBIndexKey return the dbKey for an specific item
 func GetDBIndexKey(itemType, dbKeySuffix string, reverse bool) (dbKey string) {
 	var idxPrefix, rIdxPrefix string
 	switch itemType {

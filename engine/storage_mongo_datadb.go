@@ -25,6 +25,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
+	//"log"
 	"strings"
 	"time"
 
@@ -1938,8 +1939,13 @@ func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 	findParam := bson.M{"key": dbKey}
 	if len(fldNameVal) != 0 {
 		for fldName, fldValue := range fldNameVal {
-			findParam2 := bson.M{fmt.Sprintf("value.%s.%s", fldName, fldValue): 1}
-			if err = col.Find(findParam).Select(findParam2).One(&result); err != nil {
+			var qryFltr bson.M
+			if fldValue == "" {
+				qryFltr = bson.M{fmt.Sprintf("value.%s", fldName): 1}
+			} else {
+				qryFltr = bson.M{fmt.Sprintf("value.%s.%s", fldName, fldValue): 1}
+			}
+			if err = col.Find(findParam).Select(qryFltr).One(&result); err != nil {
 				if err == mgo.ErrNotFound {
 					err = utils.ErrNotFound
 				}
@@ -1960,6 +1966,16 @@ func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 func (ms *MongoStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
+	for k, v := range indexes {
+		for k2, v2 := range v {
+			for k3, _ := range v2 {
+				findParam2 := bson.M{fmt.Sprintf("value.%s.%s", k, k2, k3): nil}
+				if len(v2) == 0 {
+					err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": findParam2})
+				}
+			}
+		}
+	}
 	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
 		Key   string
 		Value map[string]map[string]utils.StringMap
