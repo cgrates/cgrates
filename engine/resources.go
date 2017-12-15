@@ -510,18 +510,20 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 
 // V1ResourcesForEvent returns active resource configs matching the event
 func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
-	if args.Tenant == "" {
+	if args.CGREvent.Tenant == "" {
 		return utils.NewErrMandatoryIeMissing("Tenant")
+	} else if args.UsageID == "" {
+		return utils.NewErrMandatoryIeMissing("UsageID")
 	}
 	var mtcRLs Resources
 	if args.UsageID != "" { // only cached if UsageID is present
-		mtcRLs = rS.cachedResourcesForEvent(args.TenantID())
+		mtcRLs = rS.cachedResourcesForEvent(args.CGREvent.TenantID())
 	}
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
 			return err
 		}
-		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
+		cache.Set(utils.EventResourcesPrefix+args.CGREvent.TenantID(), mtcRLs.tenantIDs(), true, "")
 	}
 	if len(mtcRLs) == 0 {
 		return utils.ErrNotFound
@@ -530,10 +532,14 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 	return
 }
 
+//cgrevent tenant +id si la args USAGEID
+
 // V1AllowUsage queries service to find if an Usage is allowed
 func (rS *ResourceService) V1AllowUsage(args utils.ArgRSv1ResourceUsage, allow *bool) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	if args.CGREvent.Tenant == "" {
+		return utils.NewErrMandatoryIeMissing("Tenant")
+	} else if args.UsageID == "" {
+		return utils.NewErrMandatoryIeMissing("UsageID")
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.TenantID())
 	if mtcRLs == nil {
@@ -560,8 +566,10 @@ func (rS *ResourceService) V1AllowUsage(args utils.ArgRSv1ResourceUsage, allow *
 
 // V1AllocateResource is called when a resource requires allocation
 func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	if args.CGREvent.Tenant == "" {
+		return utils.NewErrMandatoryIeMissing("Tenant")
+	} else if args.UsageID == "" {
+		return utils.NewErrMandatoryIeMissing("UsageID")
 	}
 	var wasCached bool
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
@@ -613,8 +621,10 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 
 // V1ReleaseResource is called when we need to clear an allocation
 func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	if args.CGREvent.Tenant == "" {
+		return utils.NewErrMandatoryIeMissing("Tenant")
+	} else if args.UsageID == "" {
+		return utils.NewErrMandatoryIeMissing("UsageID")
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
