@@ -135,7 +135,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.Account:            "rpdata1",
 		utils.SUBJECT:            "rpdata1",
 		utils.Destination:        "data",
-		utils.CATEGORY:           "data1",
+		utils.Category:           "data1",
 		utils.Tenant:             "cgrates.org",
 		utils.RequestType:        utils.META_PREPAID,
 		utils.SetupTime:          "2017-03-03 11:39:32 +0100 CET",
@@ -154,7 +154,7 @@ func TestA1itDataSession1(t *testing.T) {
 	smgEv = sessionmanager.SMGenericEvent{
 		utils.EVENT_NAME:         "UPDATE_SESSION",
 		utils.Account:            "rpdata1",
-		utils.CATEGORY:           "data1",
+		utils.Category:           "data1",
 		utils.Destination:        "data",
 		utils.DIRECTION:          utils.OUT,
 		utils.InitialOriginID:    "504966119",
@@ -180,7 +180,7 @@ func TestA1itDataSession1(t *testing.T) {
 	smgEv = sessionmanager.SMGenericEvent{
 		utils.EVENT_NAME:     "TERMINATE_SESSION",
 		utils.Account:        "rpdata1",
-		utils.CATEGORY:       "data1",
+		utils.Category:       "data1",
 		utils.Destination:    "data",
 		utils.DIRECTION:      utils.OUT,
 		utils.LastUsed:       "2202800",

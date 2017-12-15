@@ -174,7 +174,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
 		case "RatingSubject":
 			parsedValue += rsrFld.ParseValue(b.RatingSubject)
-		case utils.CATEGORY:
+		case utils.Category:
 			parsedValue += rsrFld.ParseValue(action.Balance.Categories.String())
 		case "SharedGroups":
 			parsedValue += rsrFld.ParseValue(action.Balance.SharedGroups.String())

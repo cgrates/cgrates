@@ -175,7 +175,7 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 	}
 	cgrEv.Event[utils.TOR] = cd.TOR
 	cgrEv.Event[utils.Tenant] = cd.Tenant
-	cgrEv.Event[utils.CATEGORY] = cd.Category
+	cgrEv.Event[utils.Category] = cd.Category
 	cgrEv.Event[utils.Account] = cd.Account
 	cgrEv.Event[utils.SUBJECT] = cd.Subject
 	cgrEv.Event[utils.Destination] = cd.Destination
@@ -198,7 +198,7 @@ func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []str
 			if cd.Tenant, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
-		case utils.CATEGORY:
+		case utils.Category:
 			if cd.Category, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
