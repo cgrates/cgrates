@@ -223,7 +223,7 @@ func TestXMLRPProcess(t *testing.T) {
 					Value: utils.ParseRSRFieldsMustCompile("^*rated", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
 					Value: utils.ParseRSRFieldsMustCompile("~broadWorksCDR>cdrData>basicModule>userId:s/.*@(.*)/${1}/", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.CATEGORY,
+				&config.CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
 					Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
 					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>userNumber", utils.INFIELD_SEP), Mandatory: true},

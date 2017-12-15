@@ -136,7 +136,7 @@ var tEvs = []*utils.CGREvent{
 			utils.RequestType: utils.META_RATED,
 			utils.DIRECTION:   "*out",
 			utils.Tenant:      "cgrates.org",
-			utils.CATEGORY:    "call",
+			utils.Category:    "call",
 			utils.Account:     "1007",
 			utils.SUBJECT:     "1007",
 			utils.Destination: "+4986517174963",

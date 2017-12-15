@@ -111,7 +111,7 @@ func (self SMGenericEvent) GetCallDestNr(fieldName string) string {
 
 func (self SMGenericEvent) GetCategory(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.CATEGORY
+		fieldName = utils.Category
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
@@ -379,7 +379,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		return rsrFld.ParseValue(self.GetDirection(utils.META_DEFAULT))
 	case utils.Tenant:
 		return rsrFld.ParseValue(self.GetTenant(utils.META_DEFAULT))
-	case utils.CATEGORY:
+	case utils.Category:
 		return rsrFld.ParseValue(self.GetCategory(utils.META_DEFAULT))
 	case utils.Account:
 		return rsrFld.ParseValue(self.GetAccount(utils.META_DEFAULT))

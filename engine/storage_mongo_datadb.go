@@ -81,7 +81,7 @@ var (
 	RequestTypeLow     = strings.ToLower(utils.RequestType)
 	DirectionLow       = strings.ToLower(utils.DIRECTION)
 	TenantLow          = strings.ToLower(utils.Tenant)
-	CategoryLow        = strings.ToLower(utils.CATEGORY)
+	CategoryLow        = strings.ToLower(utils.Category)
 	AccountLow         = strings.ToLower(utils.Account)
 	SubjectLow         = strings.ToLower(utils.SUBJECT)
 	SupplierLow        = strings.ToLower(utils.SUPPLIER)

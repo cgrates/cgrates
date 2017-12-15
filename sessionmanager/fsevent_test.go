@@ -519,7 +519,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Tenant}, ""); parsed != "cgrates.org" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CATEGORY}, ""); parsed != "call" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Category}, ""); parsed != "call" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Account}, ""); parsed != "1001" {
