@@ -91,7 +91,7 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.OriginHost}) != cdr.OriginHost ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.Source}) != cdr.Source ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.RequestType ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.RequestType}) != cdr.RequestType ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.Account}) != cdr.Account ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.SUBJECT}) != cdr.Subject ||
@@ -111,7 +111,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.OriginHost}) != cdr.OriginHost,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.Source}) != cdr.Source,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.RequestType,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.RequestType}) != cdr.RequestType,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.Account}) != cdr.Account,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.SUBJECT}) != cdr.Subject,
@@ -231,8 +231,8 @@ func TestCDRAsHttpForm(t *testing.T) {
 	if cdrForm.Get(utils.Source) != utils.UNIT_TEST {
 		t.Errorf("Expected: %s, received: %s", utils.UNIT_TEST, cdrForm.Get(utils.Source))
 	}
-	if cdrForm.Get(utils.REQTYPE) != utils.META_RATED {
-		t.Errorf("Expected: %s, received: %s", utils.META_RATED, cdrForm.Get(utils.REQTYPE))
+	if cdrForm.Get(utils.RequestType) != utils.META_RATED {
+		t.Errorf("Expected: %s, received: %s", utils.META_RATED, cdrForm.Get(utils.RequestType))
 	}
 	if cdrForm.Get(utils.DIRECTION) != "*out" {
 		t.Errorf("Expected: %s, received: %s", "*out", cdrForm.Get(utils.DIRECTION))
@@ -282,7 +282,7 @@ func TestCDRForkCdr(t *testing.T) {
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage:      time.Duration(10) * time.Second, Cost: 1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"}}
-	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.Tenant},
+	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.RequestType}, &utils.RSRField{Id: utils.Tenant},
 		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.Account}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.Destination},
 		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.AnswerTime}, &utils.RSRField{Id: utils.Usage},
 		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST},
@@ -564,7 +564,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		utils.Source:       utils.UNIT_TEST,
 		utils.ACCID:        "dsafdsaf",
 		utils.TOR:          utils.VOICE,
-		utils.REQTYPE:      utils.META_RATED,
+		utils.RequestType:  utils.META_RATED,
 		utils.Tenant:       "cgrates.org",
 		utils.CATEGORY:     "call",
 		utils.Account:      "1002",

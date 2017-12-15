@@ -219,7 +219,7 @@ func TestXMLRPProcess(t *testing.T) {
 					Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.ACCID,
 					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>localCallId", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.REQTYPE,
+				&config.CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
 					Value: utils.ParseRSRFieldsMustCompile("^*rated", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
 					Value: utils.ParseRSRFieldsMustCompile("~broadWorksCDR>cdrData>basicModule>userId:s/.*@(.*)/${1}/", utils.INFIELD_SEP), Mandatory: true},

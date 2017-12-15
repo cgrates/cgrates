@@ -510,7 +510,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Source}, ""); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.REQTYPE}, ""); parsed != utils.META_PREPAID {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.RequestType}, ""); parsed != utils.META_PREPAID {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DIRECTION}, ""); parsed != utils.OUT {
