@@ -186,7 +186,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 	smgEv := SMGenericEvent{utils.EVENT_NAME: evName}
 	smgEv[utils.ACCID] = smaEv.ChannelID()
 	if smaEv.RequestType() != "" {
-		smgEv[utils.REQTYPE] = smaEv.RequestType()
+		smgEv[utils.RequestType] = smaEv.RequestType()
 	}
 	if smaEv.Tenant() != "" {
 		smgEv[utils.Tenant] = smaEv.Tenant()

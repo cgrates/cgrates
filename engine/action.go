@@ -187,13 +187,13 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 
 func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
 	defaultTemplate := map[string]utils.RSRFields{
-		utils.TOR:        utils.ParseRSRFieldsMustCompile("BalanceType", utils.INFIELD_SEP),
-		utils.OriginHost: utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
-		utils.REQTYPE:    utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
-		utils.Tenant:     utils.ParseRSRFieldsMustCompile(utils.Tenant, utils.INFIELD_SEP),
-		utils.Account:    utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP),
-		utils.SUBJECT:    utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP), //here need to be modify
-		utils.COST:       utils.ParseRSRFieldsMustCompile("ActionValue", utils.INFIELD_SEP),
+		utils.TOR:         utils.ParseRSRFieldsMustCompile("BalanceType", utils.INFIELD_SEP),
+		utils.OriginHost:  utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
+		utils.RequestType: utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
+		utils.Tenant:      utils.ParseRSRFieldsMustCompile(utils.Tenant, utils.INFIELD_SEP),
+		utils.Account:     utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP),
+		utils.SUBJECT:     utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP), //here need to be modify
+		utils.COST:        utils.ParseRSRFieldsMustCompile("ActionValue", utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 

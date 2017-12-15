@@ -158,7 +158,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(cdr.OriginHost)
 	case utils.Source:
 		return rsrFld.ParseValue(cdr.Source)
-	case utils.REQTYPE:
+	case utils.RequestType:
 		return rsrFld.ParseValue(cdr.RequestType)
 	case utils.Tenant:
 		return rsrFld.ParseValue(cdr.Tenant)
@@ -205,7 +205,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		cdr.RunID += fieldVal
 	case utils.ACCID:
 		cdr.OriginID += fieldVal
-	case utils.REQTYPE:
+	case utils.RequestType:
 		cdr.RequestType += fieldVal
 	case utils.Tenant:
 		cdr.Tenant += fieldVal
@@ -270,7 +270,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 		RequestTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
 	if RequestTypeFld.Id == utils.META_DEFAULT {
-		RequestTypeFld.Id = utils.REQTYPE
+		RequestTypeFld.Id = utils.RequestType
 	}
 	if tenantFld == nil {
 		tenantFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -343,7 +343,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 	frkStorCdr.Source = cdr.Source
 	frkStorCdr.RequestType = cdr.FieldAsString(RequestTypeFld)
 	if primaryMandatory && len(frkStorCdr.RequestType) == 0 {
-		return nil, utils.NewErrMandatoryIeMissing(utils.REQTYPE, RequestTypeFld.Id)
+		return nil, utils.NewErrMandatoryIeMissing(utils.RequestType, RequestTypeFld.Id)
 	}
 	frkStorCdr.Tenant = cdr.FieldAsString(tenantFld)
 	if primaryMandatory && len(frkStorCdr.Tenant) == 0 {
@@ -509,7 +509,7 @@ func (cdr *CDR) GetTenant(fieldName string) string {
 	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (cdr *CDR) GetReqType(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.REQTYPE, utils.META_DEFAULT, ""}, fieldName) {
+	if utils.IsSliceMember([]string{utils.RequestType, utils.META_DEFAULT, ""}, fieldName) {
 		return cdr.RequestType
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -707,7 +707,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
 	mp[utils.Source] = cdr.Source
 	mp[utils.ACCID] = cdr.OriginID
 	mp[utils.TOR] = cdr.ToR
-	mp[utils.REQTYPE] = cdr.RequestType
+	mp[utils.RequestType] = cdr.RequestType
 	mp[utils.Tenant] = cdr.Tenant
 	mp[utils.CATEGORY] = cdr.Category
 	mp[utils.Account] = cdr.Account
@@ -817,7 +817,7 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 			if cdr.ToR, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
-		case utils.REQTYPE:
+		case utils.RequestType:
 			if cdr.RequestType, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}

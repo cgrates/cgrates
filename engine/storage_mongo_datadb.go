@@ -25,7 +25,6 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
-	"log"
 	"strings"
 	"time"
 
@@ -79,7 +78,7 @@ var (
 	ToRLow             = strings.ToLower(utils.TOR)
 	CDRHostLow         = strings.ToLower(utils.OriginHost)
 	CDRSourceLow       = strings.ToLower(utils.Source)
-	RequestTypeLow     = strings.ToLower(utils.REQTYPE)
+	RequestTypeLow     = strings.ToLower(utils.RequestType)
 	DirectionLow       = strings.ToLower(utils.DIRECTION)
 	TenantLow          = strings.ToLower(utils.Tenant)
 	CategoryLow        = strings.ToLower(utils.CATEGORY)
@@ -1930,7 +1929,6 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 
 func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
-	log.Print(" \n MONGO \n")
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	var result struct {
@@ -1939,9 +1937,8 @@ func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 	}
 	findParam := bson.M{"key": dbKey}
 	if len(fldNameVal) != 0 {
-		var findParam2 bson.M
 		for fldName, fldValue := range fldNameVal {
-			findParam2 = bson.M{fmt.Sprintf("value.%s.%s", fldName, fldValue): 1}
+			findParam2 := bson.M{fmt.Sprintf("value.%s.%s", fldName, fldValue): 1}
 			if err = col.Find(findParam).Select(findParam2).One(&result); err != nil {
 				if err == mgo.ErrNotFound {
 					err = utils.ErrNotFound
@@ -1951,7 +1948,6 @@ func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 			return result.Value, nil
 		}
 	}
-	log.Printf(fmt.Sprintf("\n FindParam after for : %+v \n", findParam))
 	if err = col.Find(findParam).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound

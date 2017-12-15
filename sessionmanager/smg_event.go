@@ -127,7 +127,7 @@ func (self SMGenericEvent) GetTenant(fieldName string) string {
 
 func (self SMGenericEvent) GetReqType(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.REQTYPE
+		fieldName = utils.RequestType
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
@@ -373,7 +373,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		return rsrFld.ParseValue(self.GetOriginatorIP(utils.META_DEFAULT))
 	case utils.Source:
 		return rsrFld.ParseValue(self.GetName())
-	case utils.REQTYPE:
+	case utils.RequestType:
 		return rsrFld.ParseValue(self.GetReqType(utils.META_DEFAULT))
 	case utils.DIRECTION:
 		return rsrFld.ParseValue(self.GetDirection(utils.META_DEFAULT))
