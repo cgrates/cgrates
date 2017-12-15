@@ -20,36 +20,35 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetAttributeForEvent{
-		name:      "get_attribute_for_event",
-		rpcMethod: "AttributeSv1.GetAttributeForEvent",
+	c := &CmdStatQueueProcessEvent{
+		name:      "statqueue_process_event",
+		rpcMethod: "StatSv1.ProcessEvent",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetAttributeForEvent struct {
+type CmdStatQueueProcessEvent struct {
 	name      string
 	rpcMethod string
 	rpcParams interface{}
 	*CommandExecuter
 }
 
-func (self *CmdGetAttributeForEvent) Name() string {
+func (self *CmdStatQueueProcessEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAttributeForEvent) RpcMethod() string {
+func (self *CmdStatQueueProcessEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdStatQueueProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		mp := make(map[string]interface{})
 		self.rpcParams = &mp
@@ -57,7 +56,7 @@ func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error { //utils.CGREvent
+func (self *CmdStatQueueProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
 	param := self.rpcParams.(*map[string]interface{})
 	cgrev := utils.CGREvent{
 		Tenant: config.CgrConfig().DefaultTenant,
@@ -71,7 +70,7 @@ func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error { //utils.CGRE
 	return nil
 }
 
-func (self *CmdGetAttributeForEvent) RpcResult() interface{} {
-	atr := engine.ExternalAttributeProfile{}
-	return &atr
+func (self *CmdStatQueueProcessEvent) RpcResult() interface{} {
+	var s string
+	return &s
 }

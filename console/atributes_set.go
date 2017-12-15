@@ -21,7 +21,7 @@ package console
 import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdSetResource{
+	c := &CmdSetAttributes{
 		name:      "attributes_set",
 		rpcMethod: "ApierV1.SetAttributeProfile",
 		rpcParams: &engine.ExternalAttributeProfile{},
@@ -31,33 +31,33 @@ func init() {
 }
 
 // Commander implementation
-type CmdSetResource struct {
+type CmdSetAttributes struct {
 	name      string
 	rpcMethod string
 	rpcParams *engine.ExternalAttributeProfile
 	*CommandExecuter
 }
 
-func (self *CmdSetResource) Name() string {
+func (self *CmdSetAttributes) Name() string {
 	return self.name
 }
 
-func (self *CmdSetResource) RpcMethod() string {
+func (self *CmdSetAttributes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetResource) RpcParams(reset bool) interface{} {
+func (self *CmdSetAttributes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.ExternalAttributeProfile{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetResource) PostprocessRpcParams() error {
+func (self *CmdSetAttributes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetResource) RpcResult() interface{} {
+func (self *CmdSetAttributes) RpcResult() interface{} {
 	var s string
 	return &s
 }
