@@ -25,31 +25,31 @@ import (
 )
 
 func init() {
-	c := &CmdGetAttributeForEvent{
-		name:      "get_attribute_for_event",
-		rpcMethod: "AttributeSv1.GetAttributeForEvent",
+	c := &CmdStatsQueueProcessEvent{
+		name:      "statsqueue_for_event",
+		rpcMethod: "StatSv1.GetStatQueuesForEvent",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetAttributeForEvent struct {
+type CmdStatsQueueProcessEvent struct {
 	name      string
 	rpcMethod string
 	rpcParams interface{}
 	*CommandExecuter
 }
 
-func (self *CmdGetAttributeForEvent) Name() string {
+func (self *CmdStatsQueueProcessEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAttributeForEvent) RpcMethod() string {
+func (self *CmdStatsQueueProcessEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdStatsQueueProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		mp := make(map[string]interface{})
 		self.rpcParams = &mp
@@ -57,7 +57,7 @@ func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error { //utils.CGREvent
+func (self *CmdStatsQueueProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
 	param := self.rpcParams.(*map[string]interface{})
 	cgrev := utils.CGREvent{
 		Tenant: config.CgrConfig().DefaultTenant,
@@ -71,7 +71,7 @@ func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error { //utils.CGRE
 	return nil
 }
 
-func (self *CmdGetAttributeForEvent) RpcResult() interface{} {
-	atr := engine.ExternalAttributeProfile{}
-	return &atr
+func (self *CmdStatsQueueProcessEvent) RpcResult() interface{} {
+	s := engine.StatQueues{}
+	return &s
 }
