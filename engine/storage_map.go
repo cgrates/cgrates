@@ -23,7 +23,6 @@ import (
 	"compress/zlib"
 	"errors"
 	"io/ioutil"
-	"log"
 	"strings"
 	"sync"
 
@@ -1257,19 +1256,35 @@ func (ms *MapStorage) RemoveTimingDrv(id string) error {
 
 func (ms *MapStorage) GetReqFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
-	log.Print("\nMAPSTORAGE \n")
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[dbKey]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
-	log.Printf(" Values before unmarshal %+v \n", values)
-	err = ms.ms.Unmarshal(values, &indexes)
-	if err != nil {
-		return nil, err
+	if len(fldNameVal) != 0 {
+		rcvidx := make(map[string]map[string]utils.StringMap)
+		err = ms.ms.Unmarshal(values, &rcvidx)
+		if err != nil {
+			return nil, err
+		}
+		indexes = make(map[string]map[string]utils.StringMap)
+		for fldName, fldVal := range fldNameVal {
+			if _, has := indexes[fldName]; !has {
+				indexes[fldName] = make(map[string]utils.StringMap)
+			}
+			if _, has := indexes[fldName][fldVal]; !has {
+				indexes[fldName][fldVal] = make(utils.StringMap)
+			}
+			indexes[fldName][fldVal] = rcvidx[fldName][fldVal]
+		}
+		return
+	} else {
+		err = ms.ms.Unmarshal(values, &indexes)
+		if err != nil {
+			return nil, err
+		}
 	}
-	log.Printf(" Values after unmarshal %+v \n", indexes)
 	return
 }
 func (ms *MapStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {

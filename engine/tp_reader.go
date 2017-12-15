@@ -1630,7 +1630,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 		}
 		// index resource for filters
 		if _, has := tpr.resIndexers[tntID.Tenant]; !has {
-			if tpr.resIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesPrefix, tntID.Tenant); err != nil {
+			if tpr.resIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesPrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1676,7 +1676,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 		}
 		// index statQueues for filters
 		if _, has := tpr.sqpIndexers[tntID.Tenant]; !has {
-			if tpr.sqpIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.StatQueueProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.sqpIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.StatQueueProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1722,7 +1722,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 		}
 		// index thresholds for filters
 		if _, has := tpr.thdsIndexers[tntID.Tenant]; !has {
-			if tpr.thdsIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.ThresholdProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.thdsIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.ThresholdProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1785,7 +1785,7 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 		}
 		// index supplier profile for filters
 		if _, has := tpr.sppIndexers[tntID.Tenant]; !has {
-			if tpr.sppIndexers[tntID.Tenant], err = NewReqFilterIndexer(tpr.dm, utils.SupplierProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.sppIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.SupplierProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1832,7 +1832,7 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		// index attribute profile for filters
 		attrKey := utils.ConcatenatedKey(tntID.Tenant, res.Context)
 		if _, has := tpr.attrIndexers[attrKey]; !has {
-			if tpr.attrIndexers[attrKey], err = NewReqFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, attrKey); err != nil {
+			if tpr.attrIndexers[attrKey] = NewReqFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, attrKey); err != nil {
 				return
 			}
 		}

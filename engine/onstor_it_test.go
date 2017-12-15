@@ -21,6 +21,7 @@ package engine
 
 import (
 	"fmt"
+	"log"
 	"path"
 	"reflect"
 	"strings"
@@ -29,7 +30,6 @@ import (
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,66 +44,66 @@ var (
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	// testOnStorITSetGetDerivedCharges,
+	testOnStorITSetGetDerivedCharges,
 	testOnStorITSetReqFilterIndexes,
 	testOnStorITGetReqFilterIndexes,
-	//testOnStorITMatchReqFilterIndex,
-	// testOnStorITCacheDestinations,
-	// testOnStorITCacheReverseDestinations,
-	// testOnStorITCacheRatingPlan,
-	// testOnStorITCacheRatingProfile,
-	// testOnStorITCacheActions,
-	// testOnStorITCacheActionPlan,
-	// testOnStorITCacheAccountActionPlans,
-	// testOnStorITCacheActionTriggers,
-	// testOnStorITCacheSharedGroup,
-	// testOnStorITCacheDerivedChargers,
-	// testOnStorITCacheLCR,
-	// testOnStorITCacheAlias,
-	// testOnStorITCacheReverseAlias,
-	// testOnStorITCacheResource,
-	// testOnStorITCacheResourceProfile,
-	// testOnStorITCacheStatQueueProfile,
-	// testOnStorITCacheStatQueue,
-	// testOnStorITCacheThresholdProfile,
-	// testOnStorITCacheThreshold,
-	// testOnStorITCacheTiming,
-	// testOnStorITCacheFilter,
-	// testOnStorITCacheSupplierProfile,
-	// testOnStorITCacheAttributeProfile,
+	testOnStorITMatchReqFilterIndex,
+	testOnStorITCacheDestinations,
+	testOnStorITCacheReverseDestinations,
+	testOnStorITCacheRatingPlan,
+	testOnStorITCacheRatingProfile,
+	testOnStorITCacheActions,
+	testOnStorITCacheActionPlan,
+	testOnStorITCacheAccountActionPlans,
+	testOnStorITCacheActionTriggers,
+	testOnStorITCacheSharedGroup,
+	testOnStorITCacheDerivedChargers,
+	testOnStorITCacheLCR,
+	testOnStorITCacheAlias,
+	testOnStorITCacheReverseAlias,
+	testOnStorITCacheResource,
+	testOnStorITCacheResourceProfile,
+	testOnStorITCacheStatQueueProfile,
+	testOnStorITCacheStatQueue,
+	testOnStorITCacheThresholdProfile,
+	testOnStorITCacheThreshold,
+	testOnStorITCacheTiming,
+	testOnStorITCacheFilter,
+	testOnStorITCacheSupplierProfile,
+	testOnStorITCacheAttributeProfile,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
-	// testOnStorITHasData,
-	// testOnStorITPushPop,
-	// testOnStorITCRUDRatingPlan,
-	// testOnStorITCRUDRatingProfile,
-	// testOnStorITCRUDDestinations,
-	// testOnStorITCRUDReverseDestinations,
-	// testOnStorITCRUDLCR,
-	// testOnStorITCRUDCdrStats,
-	// testOnStorITCRUDActions,
-	// testOnStorITCRUDSharedGroup,
-	// testOnStorITCRUDActionTriggers,
-	// testOnStorITCRUDActionPlan,
-	// testOnStorITCRUDAccountActionPlans,
-	// testOnStorITCRUDAccount,
-	// testOnStorITCRUDCdrStatsQueue,
-	// testOnStorITCRUDSubscribers,
-	// testOnStorITCRUDUser,
-	// testOnStorITCRUDAlias,
-	// testOnStorITCRUDReverseAlias,
-	// testOnStorITCRUDResource,
-	// testOnStorITCRUDResourceProfile,
-	// testOnStorITCRUDTiming,
-	// testOnStorITCRUDHistory,
-	// testOnStorITCRUDStructVersion,
-	// testOnStorITCRUDStatQueueProfile,
-	// testOnStorITCRUDStoredStatQueue,
-	// testOnStorITCRUDThresholdProfile,
-	// testOnStorITCRUDThreshold,
-	// testOnStorITCRUDFilter,
-	// testOnStorITCRUDSupplierProfile,
-	// testOnStorITCRUDAttributeProfile,
+	testOnStorITHasData,
+	testOnStorITPushPop,
+	testOnStorITCRUDRatingPlan,
+	testOnStorITCRUDRatingProfile,
+	testOnStorITCRUDDestinations,
+	testOnStorITCRUDReverseDestinations,
+	testOnStorITCRUDLCR,
+	testOnStorITCRUDCdrStats,
+	testOnStorITCRUDActions,
+	testOnStorITCRUDSharedGroup,
+	testOnStorITCRUDActionTriggers,
+	testOnStorITCRUDActionPlan,
+	testOnStorITCRUDAccountActionPlans,
+	testOnStorITCRUDAccount,
+	testOnStorITCRUDCdrStatsQueue,
+	testOnStorITCRUDSubscribers,
+	testOnStorITCRUDUser,
+	testOnStorITCRUDAlias,
+	testOnStorITCRUDReverseAlias,
+	testOnStorITCRUDResource,
+	testOnStorITCRUDResourceProfile,
+	testOnStorITCRUDTiming,
+	testOnStorITCRUDHistory,
+	testOnStorITCRUDStructVersion,
+	testOnStorITCRUDStatQueueProfile,
+	testOnStorITCRUDStoredStatQueue,
+	testOnStorITCRUDThresholdProfile,
+	testOnStorITCRUDThreshold,
+	testOnStorITCRUDFilter,
+	testOnStorITCRUDSupplierProfile,
+	testOnStorITCRUDAttributeProfile,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -234,32 +234,32 @@ func testOnStorITSetReqFilterIndexes(t *testing.T) {
 }
 
 func testOnStorITGetReqFilterIndexes(t *testing.T) {
-	// eIdxes := map[string]map[string]utils.StringMap{
-	// 	"Account": map[string]utils.StringMap{
-	// 		"1001": utils.StringMap{
-	// 			"RL1": true,
-	// 		},
-	// 		"1002": utils.StringMap{
-	// 			"RL1": true,
-	// 			"RL2": true,
-	// 		},
-	// 		"dan": utils.StringMap{
-	// 			"RL2": true,
-	// 		},
-	// 	},
-	// 	"Subject": map[string]utils.StringMap{
-	// 		"dan": utils.StringMap{
-	// 			"RL2": true,
-	// 			"RL3": true,
-	// 		},
-	// 	},
-	// 	utils.NOT_AVAILABLE: map[string]utils.StringMap{
-	// 		utils.NOT_AVAILABLE: utils.StringMap{
-	// 			"RL4": true,
-	// 			"RL5": true,
-	// 		},
-	// 	},
-	// }
+	eIdxes := map[string]map[string]utils.StringMap{
+		"Account": map[string]utils.StringMap{
+			"1001": utils.StringMap{
+				"RL1": true,
+			},
+			"1002": utils.StringMap{
+				"RL1": true,
+				"RL2": true,
+			},
+			"dan": utils.StringMap{
+				"RL2": true,
+			},
+		},
+		"Subject": map[string]utils.StringMap{
+			"dan": utils.StringMap{
+				"RL2": true,
+				"RL3": true,
+			},
+		},
+		utils.NOT_AVAILABLE: map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: utils.StringMap{
+				"RL4": true,
+				"RL5": true,
+			},
+		},
+	}
 	sbjDan := map[string]string{
 		"Subject": "dan",
 	}
@@ -277,6 +277,76 @@ func testOnStorITGetReqFilterIndexes(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedsbjDan, exsbjDan) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedsbjDan, exsbjDan)
+	}
+	if rcv, err := onStor.GetReqFilterIndexes(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		log.Printf(fmt.Sprintf("RCV ALL IDX %+v \n", rcv))
+		if !reflect.DeepEqual(eIdxes, rcv) {
+			t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
+		}
+	}
+	// expectedsbjDan["Subject"]["dan"] = nil
+	// if err := onStor.SetReqFilterIndexes(
+	// 	GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+	// 	expectedsbjDan); err != nil {
+	// 	t.Error(err)
+	// }
+	// if rcvidx, err := onStor.GetReqFilterIndexes(
+	// 	GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+	// 	nil); err != nil {
+	// 	t.Error(err)
+	// } else {
+	// 	log.Printf(fmt.Sprintf("RcvALLIdx %+v", rcvidx))
+	// }
+	// if rcvidx, err := onStor.GetReqFilterIndexes(
+	// 	GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+	// 	sbjDan); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	// 	log.Printf(fmt.Sprintf("RcvIdx %+v", rcvidx))
+	// 	t.Error(err)
+	// } else {
+	// 	log.Printf(fmt.Sprintf("RcvIdx %+v", rcvidx))
+	// }
+
+	idxes := map[string]map[string]utils.StringMap{
+		"Account": map[string]utils.StringMap{
+			"1001": utils.StringMap{
+				"RL1": true,
+			},
+			"1002": utils.StringMap{
+				"RL1": true,
+				"RL2": true,
+			},
+			"dan": utils.StringMap{
+				"RL2": true,
+			},
+		},
+		"Subject": map[string]utils.StringMap{
+			"dan": utils.StringMap{},
+		},
+		utils.NOT_AVAILABLE: map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: utils.StringMap{
+				"RL4": true,
+				"RL5": true,
+			},
+		},
+	}
+	if err := onStor.SetReqFilterIndexes(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		idxes); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetReqFilterIndexes(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		log.Printf(fmt.Sprintf("RCV ALL IDX %+v \n", rcv))
+		// if !reflect.DeepEqual(eIdxes, rcv) {
+		// 	t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
+		// }
 	}
 	/*
 		if idxes, err := onStor.GetReqFilterIndexes(

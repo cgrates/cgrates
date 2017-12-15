@@ -1379,11 +1379,14 @@ func (rs *RedisStorage) GetReqFilterIndexesDrv(dbKey string,
 			return nil, utils.ErrNotFound
 		}
 	} else {
+		var itmMpStrLst []string
 		for fldName, fldVal := range fldNameVal {
 			concatNameVal := utils.ConcatenatedKey(fldName, fldVal)
-			itmMpStrLst, err := rs.Cmd("HMGET", dbKey, concatNameVal).List()
+			itmMpStrLst, err = rs.Cmd("HMGET", dbKey, concatNameVal).List()
 			if err != nil {
-				return nil, err
+				return
+			} else if itmMpStrLst[0] == "" {
+				return nil, utils.ErrNotFound
 			}
 			mp[concatNameVal] = itmMpStrLst[0]
 		}
@@ -1435,7 +1438,6 @@ func (rs *RedisStorage) RemoveReqFilterIndexesDrv(id string) (err error) {
 
 func (rs *RedisStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(fldName, fldVal)
-	// Not found in cache, check in DB
 	fldValBytes, err := rs.Cmd("HGET", dbKey, fieldValKey).Bytes()
 	if err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
