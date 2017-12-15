@@ -63,8 +63,8 @@ func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error { //utils.CGR
 		ID:     utils.UUIDSha1Prefix(),
 		Event:  *param,
 	}
-	if (*param)[utils.TENANT] != nil && (*param)[utils.TENANT].(string) != "" {
-		cgrev.Tenant = (*param)[utils.TENANT].(string)
+	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
+		cgrev.Tenant = (*param)[utils.Tenant].(string)
 	}
 	self.rpcParams = cgrev
 	return nil

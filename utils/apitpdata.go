@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+
 )
 
 // Used to extract ids from stordb
@@ -1276,10 +1277,9 @@ type AttrRLsCache struct {
 }
 
 type ArgRSv1ResourceUsage struct {
-	Tenant  string
+	CGREvent
 	UsageID string // ResourceUsage Identifier
 	Units   float64
-	Event   map[string]interface{}
 }
 
 func (args *ArgRSv1ResourceUsage) TenantID() string {
