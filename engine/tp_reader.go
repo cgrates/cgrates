@@ -2335,7 +2335,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Indexing resource profiles")
 	}
 	for tenant, fltrIdxer := range tpr.resIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
+		if err := fltrIdxer.StoreIndexes(false); err != nil {
 			return err
 		}
 		if verbose {
@@ -2350,7 +2350,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("StatQueue filter indexes:")
 	}
 	for tenant, fltrIdxer := range tpr.sqpIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
+		if err := fltrIdxer.StoreIndexes(false); err != nil {
 			return err
 		}
 		if verbose {
@@ -2365,7 +2365,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Threshold filter indexes:")
 	}
 	for tenant, fltrIdxer := range tpr.thdsIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
+		if err := fltrIdxer.StoreIndexes(false); err != nil {
 			return err
 		}
 		if verbose {
@@ -2380,7 +2380,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Indexing Supplier Profiles")
 	}
 	for tenant, fltrIdxer := range tpr.sppIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
+		if err := fltrIdxer.StoreIndexes(false); err != nil {
 			return err
 		}
 		if verbose {
@@ -2395,7 +2395,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("Indexing Attribute Profiles")
 	}
 	for tntCntx, fltrIdxer := range tpr.attrIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
+		if err := fltrIdxer.StoreIndexes(false); err != nil {
 			return err
 		}
 		if verbose {

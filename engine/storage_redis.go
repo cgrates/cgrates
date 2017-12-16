@@ -1412,21 +1412,25 @@ func (rs *RedisStorage) GetReqFilterIndexesDrv(dbKey string,
 	return
 }
 
-func (rs *RedisStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (rs *RedisStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
 	mp := make(map[string]string)
-	for fldName, fldValMp := range indexes {
-		for fldVal, strMp := range fldValMp {
-			if len(strMp) == 0 { // remove with no more elements inside
-				return rs.Cmd("HDEL", dbKey, utils.ConcatenatedKey(fldName, fldVal)).Err
-			}
-			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
-				return err
-			} else {
-				mp[utils.ConcatenatedKey(fldName, fldVal)] = string(encodedMp)
+	if update {
+		for fldName, fldValMp := range indexes {
+			for fldVal, strMp := range fldValMp {
+				if len(strMp) == 0 { // remove with no more elements inside
+					return rs.Cmd("HDEL", dbKey, utils.ConcatenatedKey(fldName, fldVal)).Err
+				}
+				if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+					return err
+				} else {
+					mp[utils.ConcatenatedKey(fldName, fldVal)] = string(encodedMp)
+				}
 			}
 		}
+	} else {
+		return rs.Cmd("HMSET", dbKey, mp).Err
 	}
-	return rs.Cmd("HMSET", dbKey, mp).Err
+	return
 }
 
 func (rs *RedisStorage) RemoveReqFilterIndexesDrv(id string) (err error) {

@@ -135,11 +135,11 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 }
 
 // StoreIndexes handles storing the indexes to dataDB
-func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
-	if err = rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), rfi.indexes); err != nil {
+func (rfi *ReqFilterIndexer) StoreIndexes(update bool) (err error) {
+	if err = rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), rfi.indexes, update); err != nil {
 		return
 	}
-	return rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), rfi.reveseIndex)
+	return rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), rfi.reveseIndex, update)
 }
 
 //Populate the ReqFilterIndexer.reveseIndex for specifil itemID
@@ -202,9 +202,9 @@ func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 			}
 		}
 	}
-	rfi.StoreIndexes()
+	utils.Logger.Debug(fmt.Sprintf("Indexes : %+v \n", rfi.indexes))
+	rfi.StoreIndexes(true)
 	return
-
 }
 
 //GetDBIndexKey return the dbKey for an specific item

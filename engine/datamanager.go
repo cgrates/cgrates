@@ -847,8 +847,8 @@ func (dm *DataManager) GetReqFilterIndexes(dbKey string, fldNameVal map[string]s
 	return dm.DataDB().GetReqFilterIndexesDrv(dbKey, fldNameVal)
 }
 
-func (dm *DataManager) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
-	return dm.DataDB().SetReqFilterIndexesDrv(dbKey, indexes)
+func (dm *DataManager) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+	return dm.DataDB().SetReqFilterIndexesDrv(dbKey, indexes, update)
 }
 
 func (dm *DataManager) RemoveReqFilterIndexes(dbKey string) (err error) {
