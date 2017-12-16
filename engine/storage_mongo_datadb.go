@@ -1963,23 +1963,30 @@ func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 	return result.Value, nil
 }
 
-func (ms *MongoStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (ms *MongoStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	for k, v := range indexes {
-		for k2, v2 := range v {
-			for k3, _ := range v2 {
-				findParam2 := bson.M{fmt.Sprintf("value.%s.%s", k, k2, k3): nil}
-				if len(v2) == 0 {
-					err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": findParam2})
+	if update {
+		utils.Logger.Debug("\n ENTER HERE !! \n")
+		for k, v := range indexes {
+			for k2, v2 := range v {
+				findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
+				utils.Logger.Debug(fmt.Sprintf("\nFINDPARAM2 %+v and len(v2) %+v \n", findParam2, len(v2)))
+				if len(v2) != 0 {
+					for k3 := range v2 {
+						err = col.Update(bson.M{"key": dbKey}, bson.M{"$set": bson.M{findParam2: bson.M{k3: true}}})
+					}
+				} else {
+					err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam2: 1}})
 				}
 			}
 		}
+	} else {
+		_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
+			Key   string
+			Value map[string]map[string]utils.StringMap
+		}{dbKey, indexes})
 	}
-	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
-		Key   string
-		Value map[string]map[string]utils.StringMap
-	}{dbKey, indexes})
 	return
 }
 
