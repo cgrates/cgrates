@@ -214,12 +214,13 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	if sm.rls != nil {
 		var reply string
 		attrRU := utils.ArgRSv1ResourceUsage{
+			CGREvent: utils.CGREvent{
+				Tenant: ev.(FSEvent).GetTenant(utils.META_DEFAULT),
+				Event:  ev.(FSEvent).AsMapStringInterface(sm.timezone),
+			},
 			UsageID: ev.GetUUID(),
 			Units:   1,
 		}
-		attrRU.CGREvent.ID=utils.UUIDSha1Prefix()
-		attrRU.CGREvent.Tenant=ev.(FSEvent).GetTenant(utils.META_DEFAULT)
-		attrRU.CGREvent.Event=ev.(FSEvent).AsMapStringInterface(sm.timezone)
 		if err := sm.rls.Call(utils.ResourceSv1AllocateResource, attrRU, &reply); err != nil {
 			if err.Error() == utils.ErrResourceUnavailable.Error() {
 				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), "-"+utils.ErrResourceUnavailable.Error())
@@ -281,12 +282,13 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 	}
 	var reply string
 	attrRU := utils.ArgRSv1ResourceUsage{
-			UsageID: ev.GetUUID(),
-			Units:   1,
-		}
-	attrRU.CGREvent.ID=utils.UUIDSha1Prefix()
-	attrRU.CGREvent.Tenant=ev.(FSEvent).GetTenant(utils.META_DEFAULT)
-	attrRU.CGREvent.Event=ev.(FSEvent).AsMapStringInterface(sm.timezone)
+		CGREvent: utils.CGREvent{
+			Tenant: ev.(FSEvent).GetTenant(utils.META_DEFAULT),
+			Event:  ev.(FSEvent).AsMapStringInterface(sm.timezone),
+		},
+		UsageID: ev.GetUUID(),
+		Units:   1,
+	}
 	if sm.rls != nil {
 		if err := sm.rls.Call(utils.ResourceSv1ReleaseResource, attrRU, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> RLs API error: %s", err.Error()))
