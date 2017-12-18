@@ -21,7 +21,6 @@ package engine
 
 import (
 	"fmt"
-	"log"
 	"path"
 	"reflect"
 	"strings"
@@ -45,9 +44,9 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
 	testOnStorITSetGetDerivedCharges,
-	testOnStorITSetReqFilterIndexes,
-	testOnStorITGetReqFilterIndexes,
-	testOnStorITMatchReqFilterIndex,
+	testOnStorITSetFilterIndexes,
+	testOnStorITGetFilterIndexes,
+	testOnStorITMatchFilterIndex,
 	testOnStorITCacheDestinations,
 	testOnStorITCacheReverseDestinations,
 	testOnStorITCacheRatingPlan,
@@ -199,7 +198,7 @@ func testOnStorITSetGetDerivedCharges(t *testing.T) {
 	}
 }
 
-func testOnStorITSetReqFilterIndexes(t *testing.T) {
+func testOnStorITSetFilterIndexes(t *testing.T) {
 	idxes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -226,14 +225,14 @@ func testOnStorITSetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.SetReqFilterIndexes(
+	if err := onStor.SetFilterIndexes(
 		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		idxes); err != nil {
+		idxes, false); err != nil {
 		t.Error(err)
 	}
 }
 
-func testOnStorITGetReqFilterIndexes(t *testing.T) {
+func testOnStorITGetFilterIndexes(t *testing.T) {
 	eIdxes := map[string]map[string]utils.StringMap{
 		"Account": map[string]utils.StringMap{
 			"1001": utils.StringMap{
@@ -271,122 +270,58 @@ func testOnStorITGetReqFilterIndexes(t *testing.T) {
 			},
 		},
 	}
-	if exsbjDan, err := onStor.GetReqFilterIndexes(
+	if exsbjDan, err := onStor.GetFilterIndexes(
 		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
 		sbjDan); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedsbjDan, exsbjDan) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedsbjDan, exsbjDan)
 	}
-	if rcv, err := onStor.GetReqFilterIndexes(
+	if rcv, err := onStor.GetFilterIndexes(
 		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
 		nil); err != nil {
 		t.Error(err)
 	} else {
-		log.Printf(fmt.Sprintf("RCV ALL IDX %+v \n", rcv))
 		if !reflect.DeepEqual(eIdxes, rcv) {
 			t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 		}
 	}
-	// expectedsbjDan["Subject"]["dan"] = nil
-	// if err := onStor.SetReqFilterIndexes(
-	// 	GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-	// 	expectedsbjDan); err != nil {
-	// 	t.Error(err)
-	// }
-	// if rcvidx, err := onStor.GetReqFilterIndexes(
-	// 	GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-	// 	nil); err != nil {
-	// 	t.Error(err)
-	// } else {
-	// 	log.Printf(fmt.Sprintf("RcvALLIdx %+v", rcvidx))
-	// }
-	// if rcvidx, err := onStor.GetReqFilterIndexes(
-	// 	GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-	// 	sbjDan); err == nil || err.Error() != utils.ErrNotFound.Error() {
-	// 	log.Printf(fmt.Sprintf("RcvIdx %+v", rcvidx))
-	// 	t.Error(err)
-	// } else {
-	// 	log.Printf(fmt.Sprintf("RcvIdx %+v", rcvidx))
-	// }
-
-	idxes := map[string]map[string]utils.StringMap{
-		"Account": map[string]utils.StringMap{
-			"1001": utils.StringMap{
-				"RL1": true,
-			},
-			"1002": utils.StringMap{
-				"RL1": true,
-				"RL2": true,
-			},
-			"dan": utils.StringMap{
-				"RL2": true,
-			},
-		},
-		"Subject": map[string]utils.StringMap{
-			"dan": utils.StringMap{},
-		},
-		utils.NOT_AVAILABLE: map[string]utils.StringMap{
-			utils.NOT_AVAILABLE: utils.StringMap{
-				"RL4": true,
-				"RL5": true,
-			},
-		},
-	}
-	if err := onStor.SetReqFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		idxes); err != nil {
+	if _, err := onStor.GetFilterIndexes("unknown_key", nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetReqFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		nil); err != nil {
+	if err := onStor.RemoveFilterIndexes(GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false)); err != nil {
 		t.Error(err)
-	} else {
-		log.Printf(fmt.Sprintf("RCV ALL IDX %+v \n", rcv))
-		// if !reflect.DeepEqual(eIdxes, rcv) {
-		// 	t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
-		// }
 	}
-	/*
-		if idxes, err := onStor.GetReqFilterIndexes(
-			GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-			nil); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(eIdxes, idxes) {
-			t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
-		}
-
-			if _, err := onStor.GetReqFilterIndexes("unknown_key", nil); err == nil || err != utils.ErrNotFound {
-				t.Error(err)
-			}
-			if err := onStor.RemoveReqFilterIndexes(utils.ResourceProfilesStringIndex); err != nil {
-				t.Error(err)
-			}
-			_, err := onStor.GetReqFilterIndexes(utils.ResourceProfilesStringIndex, nil)
-			if err != utils.ErrNotFound {
-				//if err!=nil{
-				t.Error(err)
-				//}else if !reflect.DeepEqual(eIdxes, idxes) {
-				//	t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
-			}
-			if err := onStor.SetReqFilterIndexes(utils.ResourceProfilesStringIndex, eIdxes); err != nil {
-				t.Error(err)
-			}
-	*/
+	_, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), nil)
+	if err != utils.ErrNotFound {
+		//if err!=nil{
+		t.Error(err)
+		//}else if !reflect.DeepEqual(eIdxes, idxes) {
+		//	t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
+	}
+	if err := onStor.SetFilterIndexes(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		eIdxes, false); err != nil {
+		t.Error(err)
+	}
 }
 
-func testOnStorITMatchReqFilterIndex(t *testing.T) {
+func testOnStorITMatchFilterIndex(t *testing.T) {
 	eMp := utils.StringMap{
 		"RL1": true,
 		"RL2": true,
 	}
-	if rcvMp, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesStringIndex, "Account", "1002"); err != nil {
+	if rcvMp, err := onStor.MatchFilterIndex(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		"Account", "1002"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
-	if _, err := onStor.MatchReqFilterIndex(utils.ResourceProfilesStringIndex, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.MatchFilterIndex(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		"NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1116,10 +1051,25 @@ func testOnStorITCacheStatQueue(t *testing.T) {
 }
 
 func testOnStorITCacheThresholdProfile(t *testing.T) {
+	filter := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "TestFilter",
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "*string",
+				Type:      "Account",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
 	tPrfl := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Test_Threshold_Cache",
-		FilterIDs: []string{"FilterID1", "FilterID2"},
+		FilterIDs: []string{"TestFilter"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
@@ -1131,7 +1081,10 @@ func testOnStorITCacheThresholdProfile(t *testing.T) {
 		ActionIDs: []string{"ACT_1", "ACT_2"},
 		Async:     true,
 	}
-	if err := onStor.SetThresholdProfile(tPrfl); err != nil {
+	if err := onStor.SetFilter(filter); err != nil {
+		t.Error(err)
+	}
+	if err := onStor.SetThresholdProfile(tPrfl, true); err != nil {
 		t.Error(err)
 	}
 	expectedR := []string{"thp_cgrates.org:Test_Threshold_Cache"}
@@ -1202,7 +1155,7 @@ func testOnStorITCacheFilter(t *testing.T) {
 	if err := onStor.SetFilter(filter); err != nil {
 		t.Error(err)
 	}
-	expectedT := []string{"ftr_cgrates.org:Filter1"}
+	expectedT := []string{"ftr_cgrates.org:TestFilter", "ftr_cgrates.org:Filter1"}
 	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.FilterPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedT, itm) {
@@ -1220,7 +1173,6 @@ func testOnStorITCacheFilter(t *testing.T) {
 	} else if rcv := itm.(*Filter); !reflect.DeepEqual(filter, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", filter, rcv)
 	}
-
 }
 
 func testOnStorITCacheSupplierProfile(t *testing.T) {
@@ -2482,23 +2434,41 @@ func testOnStorITCRUDStoredStatQueue(t *testing.T) {
 }
 
 func testOnStorITCRUDThresholdProfile(t *testing.T) {
+	fp := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "TestFilter2",
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
 	timeMinSleep := time.Duration(0 * time.Second)
 	th := &ThresholdProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{},
+		FilterIDs:          []string{"TestFilter2"},
 		Recurrent:          true,
 		MinSleep:           timeMinSleep,
 		Blocker:            true,
 		Weight:             1.4,
 		ActionIDs:          []string{},
 	}
+	if err := onStor.SetFilter(fp); err != nil {
+		t.Error(err)
+	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetThresholdProfile(th); err != nil {
+	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); err != nil {

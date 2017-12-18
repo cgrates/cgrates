@@ -50,7 +50,7 @@ func matchingItemIDsForEvent(ev map[string]interface{}, fieldIDs []string,
 				fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
 			continue
 		}
-		dbItemIDs, err := dm.MatchReqFilterIndex(dbIdxKey, fldName, fldVal)
+		dbItemIDs, err := dm.MatchFilterIndex(dbIdxKey, fldName, fldVal)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -63,7 +63,7 @@ func matchingItemIDsForEvent(ev map[string]interface{}, fieldIDs []string,
 			}
 		}
 	}
-	dbItemIDs, err := dm.MatchReqFilterIndex(dbIdxKey, utils.NOT_AVAILABLE, utils.NOT_AVAILABLE) // add unindexed itemIDs to be checked
+	dbItemIDs, err := dm.MatchFilterIndex(dbIdxKey, utils.NOT_AVAILABLE, utils.NOT_AVAILABLE) // add unindexed itemIDs to be checked
 	if err != nil {
 		if err != utils.ErrNotFound {
 			return nil, err

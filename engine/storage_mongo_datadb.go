@@ -1928,7 +1928,7 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 	return nil
 }
 
-func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
+func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
@@ -1963,15 +1963,13 @@ func (ms *MongoStorage) GetReqFilterIndexesDrv(dbKey string,
 	return result.Value, nil
 }
 
-func (ms *MongoStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	if update {
-		utils.Logger.Debug("\n ENTER HERE !! \n")
 		for k, v := range indexes {
 			for k2, v2 := range v {
 				findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
-				utils.Logger.Debug(fmt.Sprintf("\nFINDPARAM2 %+v and len(v2) %+v \n", findParam2, len(v2)))
 				if len(v2) != 0 {
 					for k3 := range v2 {
 						err = col.Update(bson.M{"key": dbKey}, bson.M{"$set": bson.M{findParam2: bson.M{k3: true}}})
@@ -1990,7 +1988,7 @@ func (ms *MongoStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]
 	return
 }
 
-func (ms *MongoStorage) RemoveReqFilterIndexesDrv(id string) (err error) {
+func (ms *MongoStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	if err = col.Remove(bson.M{"key": id}); err != nil {
@@ -1998,8 +1996,77 @@ func (ms *MongoStorage) RemoveReqFilterIndexesDrv(id string) (err error) {
 	}
 	return nil
 }
+func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
+	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	session, col := ms.conn(colRFI)
+	defer session.Close()
+	var result struct {
+		Key   string
+		Value map[string]map[string]utils.StringMap
+	}
+	findParam := bson.M{"key": dbKey}
+	if len(fldNameVal) != 0 {
+		for fldName, fldValue := range fldNameVal {
+			var qryFltr bson.M
+			if fldValue == "" {
+				qryFltr = bson.M{fmt.Sprintf("value.%s", fldName): 1}
+			} else {
+				qryFltr = bson.M{fmt.Sprintf("value.%s.%s", fldName, fldValue): 1}
+			}
+			if err = col.Find(findParam).Select(qryFltr).One(&result); err != nil {
+				if err == mgo.ErrNotFound {
+					err = utils.ErrNotFound
+				}
+				return nil, err
+			}
+			return result.Value, nil
+		}
+	}
+	if err = col.Find(findParam).One(&result); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
+	return result.Value, nil
+}
 
-func (ms *MongoStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+	session, col := ms.conn(colRFI)
+	defer session.Close()
+	if update {
+		for k, v := range indexes {
+			for k2, v2 := range v {
+				findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
+				if len(v2) != 0 {
+					for k3 := range v2 {
+						err = col.Update(bson.M{"key": dbKey}, bson.M{"$set": bson.M{findParam2: bson.M{k3: true}}})
+					}
+				} else {
+					err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam2: 1}})
+				}
+			}
+		}
+	} else {
+		_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
+			Key   string
+			Value map[string]map[string]utils.StringMap
+		}{dbKey, indexes})
+	}
+	return
+}
+
+func (ms *MongoStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
+	session, col := ms.conn(colRFI)
+	defer session.Close()
+	findParam := fmt.Sprintf("value.%s", itemID)
+	if err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam: 1}}); err != nil {
+		return
+	}
+	return nil
+}
+
+func (ms *MongoStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	var result struct {

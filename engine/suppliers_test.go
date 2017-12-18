@@ -180,7 +180,6 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	filter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter2", RequestFilters: filters2}
 	dmspl.SetFilter(filter1)
 	dmspl.SetFilter(filter2)
-
 	ssd := make(map[string]SuppliersSorter)
 	ssd[utils.MetaWeight] = NewWeightSorter()
 	splserv = SupplierService{
@@ -274,13 +273,13 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		dmspl.DataDB().SetSupplierProfileDrv(spr)
 	}
 	ref := NewReqFilterIndexer(dmspl, utils.SupplierProfilePrefix, "cgrates.org")
-	ref.IndexFilters("supplierprofile1", filters1)
-	ref.IndexFilters("supplierprofile2", filters2)
+	ref.IndexFilters("supplierprofile1", filter1)
+	ref.IndexFilters("supplierprofile2", filter2)
 	err = ref.StoreIndexes(false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	//test here GetReqFilterIndexes with a specific map
+	//test here GetReqFilterIndexes for StorageMap with a specific map
 	expidx := map[string]map[string]utils.StringMap{
 		"supplierprofile1": {
 			"Supplier": {
@@ -290,7 +289,9 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	}
 	splPrf1 := make(map[string]string)
 	splPrf1["supplierprofile1"] = "Supplier"
-	if rcvidx, err := dmspl.GetReqFilterIndexes(GetDBIndexKey(utils.SupplierProfilePrefix, "cgrates.org", false), splPrf1); err != nil {
+	if rcvidx, err := dmspl.GetFilterIndexes(
+		GetDBIndexKey(utils.SupplierProfilePrefix, "cgrates.org", false),
+		splPrf1); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else {
 		if !reflect.DeepEqual(expidx, rcvidx) {
