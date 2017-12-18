@@ -58,14 +58,25 @@ func (self *CmdAttributesProcessEvent) RpcParams(reset bool) interface{} {
 }
 
 func (self *CmdAttributesProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
+	var tenant, context string
 	param := self.rpcParams.(*map[string]interface{})
+	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
+		tenant = (*param)[utils.Tenant].(string)
+		delete((*param), utils.Tenant)
+	} else {
+		tenant = config.CgrConfig().DefaultTenant
+	}
+	if (*param)[utils.Context] != nil && (*param)[utils.Context].(string) != "" {
+		context = (*param)[utils.Context].(string)
+		delete((*param), utils.Context)
+	}
 	cgrev := utils.CGREvent{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Event:  *param,
 	}
-	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
-		cgrev.Tenant = (*param)[utils.Tenant].(string)
+	if context != "" {
+		cgrev.Context = &context
 	}
 	self.rpcParams = cgrev
 	return nil
