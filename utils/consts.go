@@ -129,6 +129,7 @@ const (
 	DIRECTION                       = "Direction"
 	Tenant                          = "Tenant"
 	Category                        = "Category"
+	Context                         = "Context"
 	Account                         = "Account"
 	SUBJECT                         = "Subject"
 	Destination                     = "Destination"
