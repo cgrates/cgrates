@@ -9,7 +9,7 @@ CREATE TABLE cdrs (
   run_id  varchar(64) NOT NULL,
   origin_host varchar(64) NOT NULL,
   source varchar(64) NOT NULL,
-  origin_id varchar(64) NOT NULL,
+  origin_id varchar(128) NOT NULL,
   tor  varchar(16) NOT NULL,
   request_type varchar(24) NOT NULL,
   direction varchar(8) NOT NULL,
