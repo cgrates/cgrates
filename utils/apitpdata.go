@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+
 )
 
 // Used to extract ids from stordb
@@ -1276,14 +1277,15 @@ type AttrRLsCache struct {
 }
 
 type ArgRSv1ResourceUsage struct {
-	Tenant  string
+	// Tenant string
+	// Event map[string]interface{}
+	CGREvent
 	UsageID string // ResourceUsage Identifier
 	Units   float64
-	Event   map[string]interface{}
 }
 
 func (args *ArgRSv1ResourceUsage) TenantID() string {
-	return ConcatenatedKey(args.Tenant, args.UsageID)
+	return ConcatenatedKey(args.CGREvent.Tenant, args.UsageID)
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval

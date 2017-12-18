@@ -510,7 +510,7 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 
 // V1ResourcesForEvent returns active resource configs matching the event
 func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
-	if args.Tenant == "" {
+	if args.CGREvent.Tenant == "" {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
 	var mtcRLs Resources
@@ -518,7 +518,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 		mtcRLs = rS.cachedResourcesForEvent(args.TenantID())
 	}
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
 			return err
 		}
 		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
@@ -532,19 +532,19 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 
 // V1AllowUsage queries service to find if an Usage is allowed
 func (rS *ResourceService) V1AllowUsage(args utils.ArgRSv1ResourceUsage, allow *bool) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&args, []string{"CGREvent.Tenant", "UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.TenantID())
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
 			return err
 		}
 		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
 	}
 	if _, err = mtcRLs.allocateResource(
 		&ResourceUsage{
-			Tenant: args.Tenant,
+			Tenant: args.CGREvent.Tenant,
 			ID:     args.UsageID,
 			Units:  args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
@@ -560,20 +560,20 @@ func (rS *ResourceService) V1AllowUsage(args utils.ArgRSv1ResourceUsage, allow *
 
 // V1AllocateResource is called when a resource requires allocation
 func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&args, []string{"CGREvent.Tenant", "UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var wasCached bool
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
 			return
 		}
 	} else {
 		wasCached = true
 	}
 	alcMsg, err := mtcRLs.allocateResource(
-		&ResourceUsage{Tenant: args.Tenant, ID: args.UsageID, Units: args.Units}, false)
+		&ResourceUsage{Tenant: args.CGREvent.Tenant, ID: args.UsageID, Units: args.Units}, false)
 	if err != nil {
 		return err
 	}
@@ -613,12 +613,12 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 
 // V1ReleaseResource is called when we need to clear an allocation
 func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{"Tenant", "UsageID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&args, []string{"CGREvent.Tenant", "UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.Tenant, args.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
 			return
 		}
 	}

@@ -214,9 +214,11 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	if sm.rls != nil {
 		var reply string
 		attrRU := utils.ArgRSv1ResourceUsage{
-			Tenant:  ev.(FSEvent).GetTenant(utils.META_DEFAULT),
+			CGREvent: utils.CGREvent{
+				Tenant: ev.(FSEvent).GetTenant(utils.META_DEFAULT),
+				Event:  ev.(FSEvent).AsMapStringInterface(sm.timezone),
+			},
 			UsageID: ev.GetUUID(),
-			Event:   ev.(FSEvent).AsMapStringInterface(sm.timezone),
 			Units:   1,
 		}
 		if err := sm.rls.Call(utils.ResourceSv1AllocateResource, attrRU, &reply); err != nil {
@@ -280,9 +282,11 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 	}
 	var reply string
 	attrRU := utils.ArgRSv1ResourceUsage{
-		Tenant:  ev.(FSEvent).GetTenant(utils.META_DEFAULT),
+		CGREvent: utils.CGREvent{
+			Tenant: ev.(FSEvent).GetTenant(utils.META_DEFAULT),
+			Event:  ev.(FSEvent).AsMapStringInterface(sm.timezone),
+		},
 		UsageID: ev.GetUUID(),
-		Event:   ev.(FSEvent).AsMapStringInterface(sm.timezone),
 		Units:   1,
 	}
 	if sm.rls != nil {

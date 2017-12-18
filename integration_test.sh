@@ -28,5 +28,8 @@ agts=$?
 echo 'go test github.com/cgrates/cgrates/sessionmanager -tags=integration'
 go test github.com/cgrates/cgrates/sessionmanager -tags=integration
 smg=$?
+echo 'go test github.com/cgrates/cgrates/migrator -tags=integration'
+go test github.com/cgrates/cgrates/migrator -tags=integration
+mgr=$?
 
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr

@@ -128,6 +128,7 @@ const (
 	REQTYPE                         = "RequestType"
 	DIRECTION                       = "Direction"
 	Tenant                          = "Tenant"
+	Context                         = "Context"
 	CATEGORY                        = "Category"
 	Account                         = "Account"
 	SUBJECT                         = "Subject"
