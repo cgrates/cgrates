@@ -378,8 +378,33 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool, tr
 	return
 }
 
-func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile) (err error) {
-	return dm.DataDB().SetThresholdProfileDrv(th)
+//from t reader setThpRf false from api true
+func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
+	if err = dm.DataDB().SetThresholdProfileDrv(th); err != nil {
+		return err
+	}
+	if withIndex {
+		var thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
+		thdsIndexers = make(map[string]*ReqFilterIndexer)
+		// index thresholds for filters
+		if _, has := thdsIndexers[th.Tenant]; !has {
+			if thdsIndexers[th.Tenant] = NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant); err != nil {
+				return
+			}
+		}
+		for _, fltrID := range th.FilterIDs {
+			var fltr *Filter
+			if fltr, err = dm.GetFilter(th.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
+				}
+				return
+			}
+			thdsIndexers[th.Tenant].IndexFilters(th.ID, fltr)
+		}
+		thdsIndexers[th.Tenant].StoreIndexes(false)
+	}
+	return
 }
 
 func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string) (err error) {
@@ -843,19 +868,31 @@ func (dm *DataManager) HasData(category, subject string) (has bool, err error) {
 	return dm.DataDB().HasDataDrv(category, subject)
 }
 
-func (dm *DataManager) GetReqFilterIndexes(dbKey string, fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
-	return dm.DataDB().GetReqFilterIndexesDrv(dbKey, fldNameVal)
+func (dm *DataManager) GetFilterIndexes(dbKey string, fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	return dm.DataDB().GetFilterIndexesDrv(dbKey, fldNameVal)
 }
 
-func (dm *DataManager) SetReqFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
-	return dm.DataDB().SetReqFilterIndexesDrv(dbKey, indexes, update)
+func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+	return dm.DataDB().SetFilterIndexesDrv(dbKey, indexes, update)
 }
 
-func (dm *DataManager) RemoveReqFilterIndexes(dbKey string) (err error) {
-	return dm.DataDB().RemoveReqFilterIndexesDrv(dbKey)
+func (dm *DataManager) RemoveFilterIndexes(dbKey string) (err error) {
+	return dm.DataDB().RemoveFilterIndexesDrv(dbKey)
 }
 
-func (dm *DataManager) MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
+func (dm *DataManager) GetFilterReverseIndexes(dbKey string, fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	return dm.DataDB().GetFilterReverseIndexesDrv(dbKey, fldNameVal)
+}
+
+func (dm *DataManager) SetFilterReverseIndexes(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+	return dm.DataDB().SetFilterReverseIndexesDrv(dbKey, indexes, update)
+}
+
+func (dm *DataManager) RemoveFilterReverseIndexes(dbKey, itemID string) (err error) {
+	return dm.DataDB().RemoveFilterReverseIndexesDrv(dbKey, itemID)
+}
+
+func (dm *DataManager) MatchFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(fieldName, fieldVal)
 	cacheKey := dbKey + fieldValKey
 	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
@@ -865,7 +902,7 @@ func (dm *DataManager) MatchReqFilterIndex(dbKey, fieldName, fieldVal string) (i
 		return x.(utils.StringMap), nil
 	}
 	// Not found in cache, check in DB
-	itemIDs, err = dm.DataDB().MatchReqFilterIndexDrv(dbKey, fieldName, fieldVal)
+	itemIDs, err = dm.DataDB().MatchFilterIndexDrv(dbKey, fieldName, fieldVal)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			cache.Set(cacheKey, nil, true, utils.NonTransactional)

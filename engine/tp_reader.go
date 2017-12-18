@@ -2243,7 +2243,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetThresholdProfile(th); err != nil {
+		if err = tpr.dm.SetThresholdProfile(th, false); err != nil {
 			return err
 		}
 		if verbose {
@@ -2955,7 +2955,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			log.Print("Indexing resource profiles")
 		}
 		for tenant, fltrIdxer := range tpr.resIndexers {
-			if err := tpr.dm.RemoveReqFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
+			if err := tpr.dm.RemoveFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
 				return err
 			}
 			if verbose {
@@ -2967,7 +2967,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			log.Print("StatQueue filter indexes:")
 		}
 		for tenant, fltrIdxer := range tpr.sqpIndexers {
-			if err := tpr.dm.RemoveReqFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
+			if err := tpr.dm.RemoveFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
 				return err
 			}
 			if verbose {
@@ -2979,7 +2979,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			log.Print("Threshold filter indexes:")
 		}
 		for tenant, fltrIdxer := range tpr.thdsIndexers {
-			if err := tpr.dm.RemoveReqFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
+			if err := tpr.dm.RemoveFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
 				return err
 			}
 			if verbose {
@@ -2991,7 +2991,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			log.Print("Indexing Supplier Profiles")
 		}
 		for tenant, fltrIdxer := range tpr.sppIndexers {
-			if err := tpr.dm.RemoveReqFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
+			if err := tpr.dm.RemoveFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
 				return err
 			}
 			if verbose {

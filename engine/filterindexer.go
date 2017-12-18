@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -53,10 +52,12 @@ func (rfi *ReqFilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
 }
 
 // IndexFilters parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
-func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilter) {
+func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs *Filter) {
 	var hasMetaString bool
-	rfi.reveseIndex[itemID] = make(map[string]utils.StringMap)
-	for _, fltr := range reqFltrs {
+	if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
+		rfi.reveseIndex[itemID] = make(map[string]utils.StringMap)
+	}
+	for _, fltr := range reqFltrs.RequestFilters {
 		if fltr.Type != MetaString {
 			continue
 		}
@@ -93,10 +94,12 @@ func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs []*RequestFilt
 	return
 }
 
-// IndexFilters parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
+// IndexTPFilter parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
 func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
 	var hasMetaString bool
-	rfi.reveseIndex[itemID] = make(map[string]utils.StringMap)
+	if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
+		rfi.reveseIndex[itemID] = make(map[string]utils.StringMap)
+	}
 	for _, fltr := range tpFltr.Filters {
 		if fltr.Type != MetaString {
 			continue
@@ -136,15 +139,15 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *ReqFilterIndexer) StoreIndexes(update bool) (err error) {
-	if err = rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), rfi.indexes, update); err != nil {
+	if err = rfi.dm.SetFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), rfi.indexes, update); err != nil {
 		return
 	}
-	return rfi.dm.SetReqFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), rfi.reveseIndex, update)
+	return rfi.dm.SetFilterReverseIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), rfi.reveseIndex, update)
 }
 
 //Populate the ReqFilterIndexer.reveseIndex for specifil itemID
 func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
-	rcvReveseIdx, err := rfi.dm.GetReqFilterIndexes(
+	rcvReveseIdx, err := rfi.dm.GetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
 		map[string]string{itemID: ""})
 	if err != nil {
@@ -159,13 +162,12 @@ func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
 		}
 		rfi.reveseIndex[itemID][key2] = val2
 	}
-	utils.Logger.Debug(fmt.Sprintf("itemID %+v \n ReverseIndex %+v ", itemID, rfi.reveseIndex))
 	return err
 }
 
 //Populate ReqFilterIndexer.indexes with specific fieldName,fieldValue , nil
 func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) error {
-	rcvIdx, err := rfi.dm.GetReqFilterIndexes(
+	rcvIdx, err := rfi.dm.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
 		map[string]string{fldName: fldVal})
 	if err != nil {
@@ -179,7 +181,6 @@ func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) erro
 			rfi.indexes[fldName][fldVal] = itmMap
 		}
 	}
-	utils.Logger.Debug(fmt.Sprintf(" \n Index %+v ", rfi.reveseIndex))
 	return nil
 }
 
@@ -202,8 +203,8 @@ func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 			}
 		}
 	}
-	utils.Logger.Debug(fmt.Sprintf("Indexes : %+v \n", rfi.indexes))
 	rfi.StoreIndexes(true)
+	rfi.dm.RemoveFilterReverseIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), itemID)
 	return
 }
 

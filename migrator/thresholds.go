@@ -83,7 +83,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		}
 		if ths != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetThresholdProfile(ths); err != nil {
+				if err := m.dmOut.SetThresholdProfile(ths, true); err != nil {
 					return err
 				}
 			}
@@ -114,7 +114,7 @@ func (m *Migrator) migrateV2ActionTriggers() (err error) {
 				if err := m.dmOut.SetThreshold(th); err != nil {
 					return err
 				}
-				if err := m.dmOut.SetThresholdProfile(thp); err != nil {
+				if err := m.dmOut.SetThresholdProfile(thp, true); err != nil {
 					return err
 				}
 				m.stats[utils.Thresholds] += 1
@@ -268,7 +268,7 @@ func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 		if err := m.dmOut.SetThreshold(th); err != nil {
 			return err
 		}
-		if err := m.dmOut.SetThresholdProfile(thp); err != nil {
+		if err := m.dmOut.SetThresholdProfile(thp, true); err != nil {
 			return err
 		}
 		m.stats[utils.Thresholds] += 1

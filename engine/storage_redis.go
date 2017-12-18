@@ -1368,7 +1368,7 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetReqFilterIndexesDrv(dbKey string,
+func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)
 	if len(fldNameVal) == 0 {
@@ -1412,35 +1412,102 @@ func (rs *RedisStorage) GetReqFilterIndexesDrv(dbKey string,
 	return
 }
 
-func (rs *RedisStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
 	mp := make(map[string]string)
-	if update {
-		for fldName, fldValMp := range indexes {
-			for fldVal, strMp := range fldValMp {
-				if len(strMp) == 0 { // remove with no more elements inside
-					return rs.Cmd("HDEL", dbKey, utils.ConcatenatedKey(fldName, fldVal)).Err
-				}
-				if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+	for fldName, fldValMp := range indexes {
+		for fldVal, strMp := range fldValMp {
+			if len(strMp) == 0 { // remove with no more elements inside
+				if err = rs.Cmd("HDEL", dbKey, utils.ConcatenatedKey(fldName, fldVal)).Err; err != nil {
 					return err
-				} else {
-					mp[utils.ConcatenatedKey(fldName, fldVal)] = string(encodedMp)
 				}
+				continue
+			}
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[utils.ConcatenatedKey(fldName, fldVal)] = string(encodedMp)
 			}
 		}
-	} else {
-		return rs.Cmd("HMSET", dbKey, mp).Err
 	}
-	return
+	return rs.Cmd("HMSET", dbKey, mp).Err
 }
 
-func (rs *RedisStorage) RemoveReqFilterIndexesDrv(id string) (err error) {
+func (rs *RedisStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	if err = rs.Cmd("DEL", id).Err; err != nil {
 		return err
 	}
 	return
 }
 
-func (rs *RedisStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+//GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
+func (rs *RedisStorage) GetFilterReverseIndexesDrv(dbKey string,
+	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	mp := make(map[string]string)
+	if len(fldNameVal) == 0 {
+		mp, err = rs.Cmd("HGETALL", dbKey).Map()
+		if err != nil {
+			return
+		} else if len(mp) == 0 {
+			return nil, utils.ErrNotFound
+		}
+	} else {
+		var itmMpStrLst []string
+		for fldName, _ := range fldNameVal {
+			itmMpStrLst, err = rs.Cmd("HMGET", dbKey, fldName).List()
+			if err != nil {
+				return
+			} else if itmMpStrLst[0] == "" {
+				return nil, utils.ErrNotFound
+			}
+			mp[fldName] = itmMpStrLst[0]
+		}
+	}
+	indexes = make(map[string]map[string]utils.StringMap)
+	for k, v := range mp {
+		var sm map[string]utils.StringMap
+		if err = rs.ms.Unmarshal([]byte(v), &sm); err != nil {
+			return
+		}
+		if _, hasKey := indexes[k]; !hasKey {
+			indexes[k] = make(map[string]utils.StringMap)
+		}
+		for key, val := range sm {
+			if _, hasKey := indexes[k][key]; !hasKey {
+				indexes[k][key] = make(utils.StringMap)
+			}
+			indexes[k][key] = val
+		}
+	}
+	return
+}
+
+func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+	mp := make(map[string]string)
+	for fldName, fldValMp := range indexes {
+		for _, strMp := range fldValMp {
+			if len(strMp) == 0 { // remove with no more elements inside
+				if err = rs.Cmd("HDEL", dbKey, fldName).Err; err != nil {
+					return err
+				}
+			}
+			if encodedMp, err := rs.ms.Marshal(fldValMp); err != nil {
+				return err
+			} else {
+				mp[fldName] = string(encodedMp)
+			}
+		}
+	}
+	return rs.Cmd("HMSET", dbKey, mp).Err
+}
+
+func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
+	if err = rs.Cmd("HDEL", dbKey, itemID).Err; err != nil {
+		return err
+	}
+	return
+}
+
+func (rs *RedisStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(fldName, fldVal)
 	fldValBytes, err := rs.Cmd("HGET", dbKey, fieldValKey).Bytes()
 	if err != nil {

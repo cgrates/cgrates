@@ -1254,7 +1254,7 @@ func (ms *MapStorage) RemoveTimingDrv(id string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetReqFilterIndexesDrv(dbKey string,
+func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -1287,7 +1287,8 @@ func (ms *MapStorage) GetReqFilterIndexesDrv(dbKey string,
 	}
 	return
 }
-func (ms *MapStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+
+func (ms *MapStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(indexes)
@@ -1298,14 +1299,66 @@ func (ms *MapStorage) SetReqFilterIndexesDrv(dbKey string, indexes map[string]ma
 	return
 }
 
-func (ms *MapStorage) RemoveReqFilterIndexesDrv(id string) (err error) {
+func (ms *MapStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, id)
 	return
 }
 
-func (ms *MapStorage) MatchReqFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
+	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	values, ok := ms.dict[dbKey]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	if len(fldNameVal) != 0 {
+		rcvidx := make(map[string]map[string]utils.StringMap)
+		err = ms.ms.Unmarshal(values, &rcvidx)
+		if err != nil {
+			return nil, err
+		}
+		indexes = make(map[string]map[string]utils.StringMap)
+		for fldName, fldVal := range fldNameVal {
+			if _, has := indexes[fldName]; !has {
+				indexes[fldName] = make(map[string]utils.StringMap)
+			}
+			if _, has := indexes[fldName][fldVal]; !has {
+				indexes[fldName][fldVal] = make(utils.StringMap)
+			}
+			indexes[fldName][fldVal] = rcvidx[fldName][fldVal]
+		}
+		return
+	} else {
+		err = ms.ms.Unmarshal(values, &indexes)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return
+}
+
+func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(indexes)
+	if err != nil {
+		return err
+	}
+	ms.dict[dbKey] = result
+	return
+}
+
+func (ms *MapStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, utils.ConcatenatedKey(dbKey, itemID))
+	return
+}
+
+func (ms *MapStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[dbKey]
