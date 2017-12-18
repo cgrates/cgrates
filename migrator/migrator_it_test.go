@@ -1821,8 +1821,8 @@ func testMigratorTPRatingProfile(t *testing.T) {
 }
 
 func testMigratorTPSuppliers(t *testing.T) {
-	tpSplPr := []*utils.TPSupplier{
-		&utils.TPSupplier{
+	tpSplPr := []*utils.TPSupplierProfile{
+		&utils.TPSupplierProfile{
 			TPid:      "SupplierTPID12",
 			Tenant:    "cgrates.org",
 			ID:        "SUPL_1",
@@ -1833,8 +1833,8 @@ func testMigratorTPSuppliers(t *testing.T) {
 			},
 			Sorting:       "*lowest_cost",
 			SortingParams: []string{},
-			Suppliers: []*utils.TPRequestSupplier{
-				&utils.TPRequestSupplier{
+			Suppliers: []*utils.TPSupplier{
+				&utils.TPSupplier{
 					ID:            "supplier1",
 					AccountIDs:    []string{"Account1"},
 					FilterIDs:     []string{"FLTR_1"},
@@ -2581,13 +2581,13 @@ func testMigratorTpLCRRules(t *testing.T) {
 }
 
 func testMigratorTpFilter(t *testing.T) {
-	tpFilter := []*utils.TPFilter{
-		&utils.TPFilter{
+	tpFilter := []*utils.TPFilterProfile{
+		&utils.TPFilterProfile{
 			TPid:   "TP1",
 			Tenant: "cgrates.org",
 			ID:     "Filter",
-			Filters: []*utils.TPRequestFilter{
-				&utils.TPRequestFilter{
+			Filters: []*utils.TPFilter{
+				&utils.TPFilter{
 					Type:      "*string",
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
@@ -2617,8 +2617,14 @@ func testMigratorTpFilter(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting TpFilter ", err.Error())
 		}
-		if !reflect.DeepEqual(tpFilter[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0], result[0])
+		if !reflect.DeepEqual(tpFilter[0].TPid, result[0].TPid) {
+			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].TPid, result[0].TPid)
+		}else if !reflect.DeepEqual(tpFilter[0].ID, result[0].ID) {
+			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].ID, result[0].ID)
+		}else if !reflect.DeepEqual(tpFilter[0].Filters, result[0].Filters) {
+			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].Filters, result[0].Filters)
+		}else if !reflect.DeepEqual(tpFilter[0].ActivationInterval, result[0].ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].ActivationInterval, result[0].ActivationInterval)
 		}
 	}
 }
