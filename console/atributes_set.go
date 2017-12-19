@@ -30,7 +30,6 @@ func init() {
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
 type CmdSetAttributes struct {
 	name      string
 	rpcMethod string

@@ -20,7 +20,6 @@ package console
 
 import "github.com/cgrates/cgrates/utils"
 
-//rename to suppliers everything
 func init() {
 	c := &CmdRemoveSuppliers{
 		name:      "suppliers_remove",
@@ -31,7 +30,6 @@ func init() {
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
 type CmdRemoveSuppliers struct {
 	name      string
 	rpcMethod string

@@ -32,7 +32,6 @@ func init() {
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
 type CmdThresholdProcessEvent struct {
 	name      string
 	rpcMethod string
@@ -56,7 +55,7 @@ func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
+func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error {
 	var tenant string
 	param := self.rpcParams.(*map[string]interface{})
 	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
