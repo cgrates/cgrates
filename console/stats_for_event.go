@@ -25,31 +25,31 @@ import (
 )
 
 func init() {
-	c := &CmdGetResourceForEvent{
-		name:      "get_resources_for_event",
-		rpcMethod: "ResourceSv1.GetResourcesForEvent",
+	c := &CmdStatsQueueProcessEvent{
+		name:      "stats_process_event",
+		rpcMethod: "StatSv1.GetStatQueuesForEvent",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetResourceForEvent struct {
+type CmdStatsQueueProcessEvent struct {
 	name      string
 	rpcMethod string
 	rpcParams interface{}
 	*CommandExecuter
 }
 
-func (self *CmdGetResourceForEvent) Name() string {
+func (self *CmdStatsQueueProcessEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdGetResourceForEvent) RpcMethod() string {
+func (self *CmdStatsQueueProcessEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetResourceForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdStatsQueueProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		mp := make(map[string]interface{})
 		self.rpcParams = &mp
@@ -57,7 +57,7 @@ func (self *CmdGetResourceForEvent) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdGetResourceForEvent) PostprocessRpcParams() error { //utils.CGREvent
+func (self *CmdStatsQueueProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
 	var tenant string
 	param := self.rpcParams.(*map[string]interface{})
 	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
@@ -66,18 +66,16 @@ func (self *CmdGetResourceForEvent) PostprocessRpcParams() error { //utils.CGREv
 	} else {
 		tenant = config.CgrConfig().DefaultTenant
 	}
-	argres := utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
-			Tenant: tenant,
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  *param,
-		},
+	cgrev := utils.CGREvent{
+		Tenant: tenant,
+		ID:     utils.UUIDSha1Prefix(),
+		Event:  *param,
 	}
-	self.rpcParams = argres
+	self.rpcParams = cgrev
 	return nil
 }
 
-func (self *CmdGetResourceForEvent) RpcResult() interface{} {
-	atr := engine.Resources{}
-	return &atr
+func (self *CmdStatsQueueProcessEvent) RpcResult() interface{} {
+	s := engine.StatQueues{}
+	return &s
 }

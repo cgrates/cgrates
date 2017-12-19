@@ -25,31 +25,30 @@ import (
 )
 
 func init() {
-	c := &CmdStatsQueueProcessEvent{
-		name:      "statsqueue_for_event",
-		rpcMethod: "StatSv1.GetStatQueuesForEvent",
+	c := &CmdGetAttributeForEvent{
+		name:      "attributes_for_event",
+		rpcMethod: "AttributeSv1.GetAttributeForEvent",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdStatsQueueProcessEvent struct {
+type CmdGetAttributeForEvent struct {
 	name      string
 	rpcMethod string
 	rpcParams interface{}
 	*CommandExecuter
 }
 
-func (self *CmdStatsQueueProcessEvent) Name() string {
+func (self *CmdGetAttributeForEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdStatsQueueProcessEvent) RpcMethod() string {
+func (self *CmdGetAttributeForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdStatsQueueProcessEvent) RpcParams(reset bool) interface{} {
+func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		mp := make(map[string]interface{})
 		self.rpcParams = &mp
@@ -57,7 +56,7 @@ func (self *CmdStatsQueueProcessEvent) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdStatsQueueProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
+func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error {
 	var tenant string
 	param := self.rpcParams.(*map[string]interface{})
 	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
@@ -71,11 +70,12 @@ func (self *CmdStatsQueueProcessEvent) PostprocessRpcParams() error { //utils.CG
 		ID:     utils.UUIDSha1Prefix(),
 		Event:  *param,
 	}
+
 	self.rpcParams = cgrev
 	return nil
 }
 
-func (self *CmdStatsQueueProcessEvent) RpcResult() interface{} {
-	s := engine.StatQueues{}
-	return &s
+func (self *CmdGetAttributeForEvent) RpcResult() interface{} {
+	atr := engine.ExternalAttributeProfile{}
+	return &atr
 }

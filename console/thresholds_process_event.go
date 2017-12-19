@@ -20,35 +20,34 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetAttributeForEvent{
-		name:      "get_attribute_for_event",
-		rpcMethod: "AttributeSv1.GetAttributeForEvent",
+	c := &CmdThresholdProcessEvent{
+		name:      "thresholds_process_event",
+		rpcMethod: "ThresholdSv1.ProcessEvent",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdGetAttributeForEvent struct {
+type CmdThresholdProcessEvent struct {
 	name      string
 	rpcMethod string
 	rpcParams interface{}
 	*CommandExecuter
 }
 
-func (self *CmdGetAttributeForEvent) Name() string {
+func (self *CmdThresholdProcessEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAttributeForEvent) RpcMethod() string {
+func (self *CmdThresholdProcessEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
+func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		mp := make(map[string]interface{})
 		self.rpcParams = &mp
@@ -56,7 +55,7 @@ func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error {
+func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error {
 	var tenant string
 	param := self.rpcParams.(*map[string]interface{})
 	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
@@ -70,12 +69,11 @@ func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error {
 		ID:     utils.UUIDSha1Prefix(),
 		Event:  *param,
 	}
-
 	self.rpcParams = cgrev
 	return nil
 }
 
-func (self *CmdGetAttributeForEvent) RpcResult() interface{} {
-	atr := engine.ExternalAttributeProfile{}
-	return &atr
+func (self *CmdThresholdProcessEvent) RpcResult() interface{} {
+	var s int
+	return &s
 }
