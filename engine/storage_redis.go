@@ -1429,7 +1429,10 @@ func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map
 			}
 		}
 	}
-	return rs.Cmd("HMSET", dbKey, mp).Err
+	if len(mp) != 0 {
+		return rs.Cmd("HMSET", dbKey, mp).Err
+	}
+	return
 }
 
 func (rs *RedisStorage) RemoveFilterIndexesDrv(id string) (err error) {
