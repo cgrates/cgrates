@@ -176,10 +176,10 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	filter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter1", RequestFilters: filters1}
-	filter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter2", RequestFilters: filters2}
-	dmspl.SetFilter(filter1)
-	dmspl.SetFilter(filter2)
+	filter3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter3", RequestFilters: filters1}
+	filter4 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter4", RequestFilters: filters2}
+	dmspl.SetFilter(filter3)
+	dmspl.SetFilter(filter4)
 	ssd := make(map[string]SuppliersSorter)
 	ssd[utils.MetaWeight] = NewWeightSorter()
 	splserv = SupplierService{
@@ -205,7 +205,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		&SupplierProfile{
 			Tenant:    "cgrates.org",
 			ID:        "supplierprofile1",
-			FilterIDs: []string{"filter1"},
+			FilterIDs: []string{"filter3"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)).Local(),
@@ -215,7 +215,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:            "supplier1",
-					FilterIDs:     []string{"filter1"},
+					FilterIDs:     []string{"filter3"},
 					AccountIDs:    []string{},
 					RatingPlanIDs: []string{},
 					ResourceIDs:   []string{},
@@ -229,7 +229,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		&SupplierProfile{
 			Tenant:    "cgrates.org",
 			ID:        "supplierprofile2",
-			FilterIDs: []string{"filter2"},
+			FilterIDs: []string{"filter4"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)).Local(),
@@ -239,7 +239,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:            "supplier2",
-					FilterIDs:     []string{"filter2"},
+					FilterIDs:     []string{"filter4"},
 					AccountIDs:    []string{},
 					RatingPlanIDs: []string{},
 					ResourceIDs:   []string{},
@@ -248,7 +248,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 				},
 				&Supplier{
 					ID:            "supplier3",
-					FilterIDs:     []string{"filter2"},
+					FilterIDs:     []string{"filter4"},
 					AccountIDs:    []string{},
 					RatingPlanIDs: []string{},
 					ResourceIDs:   []string{},
@@ -257,7 +257,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 				},
 				&Supplier{
 					ID:            "supplier1",
-					FilterIDs:     []string{"filter2"},
+					FilterIDs:     []string{"filter4"},
 					AccountIDs:    []string{},
 					RatingPlanIDs: []string{},
 					ResourceIDs:   []string{},
@@ -273,8 +273,8 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		dmspl.DataDB().SetSupplierProfileDrv(spr)
 	}
 	ref := NewReqFilterIndexer(dmspl, utils.SupplierProfilePrefix, "cgrates.org")
-	ref.IndexFilters("supplierprofile1", filter1)
-	ref.IndexFilters("supplierprofile2", filter2)
+	ref.IndexFilters("supplierprofile1", filter3)
+	ref.IndexFilters("supplierprofile2", filter4)
 	err = ref.StoreIndexes(false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
