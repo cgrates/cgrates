@@ -70,8 +70,8 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheFilter,
 	testOnStorITCacheSupplierProfile,
 	testOnStorITCacheAttributeProfile,
-	// ToDo: test cache flush for a prefix
-	// ToDo: testOnStorITLoadAccountingCache
+	// // ToDo: test cache flush for a prefix
+	// // ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
 	testOnStorITPushPop,
 	testOnStorITCRUDRatingPlan,
@@ -103,6 +103,9 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDFilter,
 	testOnStorITCRUDSupplierProfile,
 	testOnStorITCRUDAttributeProfile,
+	testOnStorITFlush,
+	testOnStorITIsDBEmpty,
+	testOnStorITTestNewFilterIndexes,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -2651,4 +2654,208 @@ func testOnStorITCRUDAttributeProfile(t *testing.T) {
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
+}
+
+func testOnStorITTestNewFilterIndexes(t *testing.T) {
+	fp := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter1",
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "EventType",
+				Type:      "*string",
+				Values:    []string{"Event1", "Event2"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	if err := onStor.SetFilter(fp); err != nil {
+		t.Error(err)
+	}
+	timeMinSleep := time.Duration(0 * time.Second)
+	th := &ThresholdProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "THD_Test",
+		ActivationInterval: &utils.ActivationInterval{},
+		FilterIDs:          []string{"Filter1"},
+		Recurrent:          true,
+		MinSleep:           timeMinSleep,
+		Blocker:            true,
+		Weight:             1.4,
+		ActionIDs:          []string{},
+	}
+	if err := onStor.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]map[string]utils.StringMap{
+		"EventType": map[string]utils.StringMap{
+			"Event1": utils.StringMap{
+				"THD_Test": true,
+			},
+			"Event2": utils.StringMap{
+				"THD_Test": true,
+			},
+		},
+	}
+	reverseIdxes := map[string]map[string]utils.StringMap{
+		"THD_Test": map[string]utils.StringMap{
+			"EventType": utils.StringMap{
+				"Event1": true,
+				"Event2": true,
+			},
+		},
+	}
+	rfi := NewReqFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
+	if rcvIdx, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+	//Replace existing filter (Filter1 -> Filter2)
+	fp2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter2",
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	if err := onStor.SetFilter(fp2); err != nil {
+		t.Error(err)
+	}
+	th.FilterIDs = []string{"Filter2"}
+	if err := onStor.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes = map[string]map[string]utils.StringMap{
+		"Account": map[string]utils.StringMap{
+			"1001": utils.StringMap{
+				"THD_Test": true,
+			},
+			"1002": utils.StringMap{
+				"THD_Test": true,
+			},
+		},
+	}
+	reverseIdxes = map[string]map[string]utils.StringMap{
+		"THD_Test": map[string]utils.StringMap{
+			"Account": utils.StringMap{
+				"1001": true,
+				"1002": true,
+			},
+		},
+	}
+	if rcvIdx, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+	//replace old filter with two filters
+	fp3 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter3",
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "Destination",
+				Type:      "*string",
+				Values:    []string{"10", "20"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	if err := onStor.SetFilter(fp3); err != nil {
+		t.Error(err)
+	}
+	th.FilterIDs = []string{"Filter1", "Filter3"}
+	if err := onStor.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes = map[string]map[string]utils.StringMap{
+		"Destination": map[string]utils.StringMap{
+			"10": utils.StringMap{
+				"THD_Test": true,
+			},
+			"20": utils.StringMap{
+				"THD_Test": true,
+			},
+		},
+		"EventType": map[string]utils.StringMap{
+			"Event1": utils.StringMap{
+				"THD_Test": true,
+			},
+			"Event2": utils.StringMap{
+				"THD_Test": true,
+			},
+		},
+	}
+	reverseIdxes = map[string]map[string]utils.StringMap{
+		"THD_Test": map[string]utils.StringMap{
+			"Destination": utils.StringMap{
+				"10": true,
+				"20": true,
+			},
+			"EventType": utils.StringMap{
+				"Event1": true,
+				"Event2": true,
+			},
+		},
+	}
+	if rcvIdx, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+
 }

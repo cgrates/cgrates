@@ -17,6 +17,7 @@ package engine
 
 import (
 	"fmt"
+
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -378,20 +379,12 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool, tr
 	return
 }
 
-//from t reader setThpRf false from api true
 func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
 	if err = dm.DataDB().SetThresholdProfileDrv(th); err != nil {
-		return err
+		return
 	}
 	if withIndex {
-		var thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
-		thdsIndexers = make(map[string]*ReqFilterIndexer)
-		// index thresholds for filters
-		if _, has := thdsIndexers[th.Tenant]; !has {
-			if thdsIndexers[th.Tenant] = NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant); err != nil {
-				return
-			}
-		}
+		thdsIndexers := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
 		for _, fltrID := range th.FilterIDs {
 			var fltr *Filter
 			if fltr, err = dm.GetFilter(th.Tenant, fltrID, false, utils.NonTransactional); err != nil {
@@ -400,9 +393,35 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 				}
 				return
 			}
-			thdsIndexers[th.Tenant].IndexFilters(th.ID, fltr)
+			thdsIndexers.IndexFilters(th.ID, fltr)
 		}
-		thdsIndexers[th.Tenant].StoreIndexes(false)
+		if dm.DataDB().GetStorageType() == utils.REDIS {
+			fldNameVal := map[string]string{
+				th.ID: "",
+			}
+			if _, rcvErr := dm.GetFilterReverseIndexes(
+				GetDBIndexKey(thdsIndexers.itemType, thdsIndexers.dbKeySuffix, true),
+				fldNameVal); rcvErr != nil {
+				if rcvErr.Error() == utils.ErrNotFound.Error() {
+					if err = thdsIndexers.StoreIndexes(false); err != nil {
+						return
+					}
+				} else {
+					return rcvErr
+				}
+			} else {
+				if err = NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix,
+					th.Tenant).RemoveItemFromIndex(th.ID); err != nil {
+					return
+				}
+				if err = thdsIndexers.StoreIndexes(false); err != nil {
+					return
+				}
+			}
+		}
+		if err = thdsIndexers.StoreIndexes(false); err != nil {
+			return
+		}
 	}
 	return
 }

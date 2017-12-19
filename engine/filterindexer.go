@@ -139,10 +139,14 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *ReqFilterIndexer) StoreIndexes(update bool) (err error) {
-	if err = rfi.dm.SetFilterIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), rfi.indexes, update); err != nil {
+	if err = rfi.dm.SetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		rfi.indexes, update); err != nil {
 		return
 	}
-	return rfi.dm.SetFilterReverseIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), rfi.reveseIndex, update)
+	return rfi.dm.SetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		rfi.reveseIndex, update)
 }
 
 //Populate the ReqFilterIndexer.reveseIndex for specifil itemID
@@ -165,7 +169,7 @@ func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
 	return err
 }
 
-//Populate ReqFilterIndexer.indexes with specific fieldName,fieldValue , nil
+//Populate ReqFilterIndexer.indexes with specific fieldName,fieldValue , item
 func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) error {
 	rcvIdx, err := rfi.dm.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
@@ -184,7 +188,7 @@ func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) erro
 	return nil
 }
 
-//RemoveItemFromIndex remove
+//RemoveItemFromIndex remove Indexes for a specific itemID
 func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 	if err = rfi.loadItemReverseIndex(itemID); err != nil {
 		return err
@@ -203,8 +207,13 @@ func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 			}
 		}
 	}
-	rfi.StoreIndexes(true)
-	rfi.dm.RemoveFilterReverseIndexes(GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), itemID)
+	if err = rfi.StoreIndexes(true); err != nil {
+		return
+	}
+	if err = rfi.dm.RemoveFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true), itemID); err != nil {
+		return
+	}
 	return
 }
 
