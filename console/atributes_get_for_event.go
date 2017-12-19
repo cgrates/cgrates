@@ -33,7 +33,6 @@ func init() {
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
 type CmdGetAttributeForEvent struct {
 	name      string
 	rpcMethod string
@@ -57,7 +56,7 @@ func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error { //utils.CGREvent
+func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error {
 	var tenant string
 	param := self.rpcParams.(*map[string]interface{})
 	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {

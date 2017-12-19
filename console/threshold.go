@@ -33,7 +33,6 @@ func init() {
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
 type CmdGetThreshold struct {
 	name      string
 	rpcMethod string

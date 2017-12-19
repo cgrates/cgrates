@@ -22,10 +22,10 @@ import (
 	"bytes"
 	"compress/zlib"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"sync"
-	"fmt"
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
@@ -1546,7 +1546,7 @@ func (ms *MapStorage) SetFilterDrv(r *Filter) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Setsfilter with  Tenant:%+v ID:%+v \n",r.Tenant, r.ID)
+	fmt.Printf("Setsfilter with  Tenant:%+v ID:%+v \n", r.Tenant, r.ID)
 	ms.dict[utils.FilterPrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
 	return
 }
