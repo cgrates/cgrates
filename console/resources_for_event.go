@@ -20,34 +20,36 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdThresholdProcessEvent{
-		name:      "threshold_process_event",
-		rpcMethod: "ThresholdSv1.ProcessEvent",
+	c := &CmdGetResourceForEvent{
+		name:      "resources_for_event",
+		rpcMethod: "ResourceSv1.GetResourcesForEvent",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdThresholdProcessEvent struct {
+// Commander implementation
+type CmdGetResourceForEvent struct {
 	name      string
 	rpcMethod string
 	rpcParams interface{}
 	*CommandExecuter
 }
 
-func (self *CmdThresholdProcessEvent) Name() string {
+func (self *CmdGetResourceForEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdThresholdProcessEvent) RpcMethod() string {
+func (self *CmdGetResourceForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
+func (self *CmdGetResourceForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		mp := make(map[string]interface{})
 		self.rpcParams = &mp
@@ -55,7 +57,7 @@ func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error {
+func (self *CmdGetResourceForEvent) PostprocessRpcParams() error { //utils.CGREvent
 	var tenant string
 	param := self.rpcParams.(*map[string]interface{})
 	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
@@ -64,16 +66,18 @@ func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error {
 	} else {
 		tenant = config.CgrConfig().DefaultTenant
 	}
-	cgrev := utils.CGREvent{
-		Tenant: tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  *param,
+	argres := utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			Tenant: tenant,
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  *param,
+		},
 	}
-	self.rpcParams = cgrev
+	self.rpcParams = argres
 	return nil
 }
 
-func (self *CmdThresholdProcessEvent) RpcResult() interface{} {
-	var s int
-	return &s
+func (self *CmdGetResourceForEvent) RpcResult() interface{} {
+	atr := engine.Resources{}
+	return &atr
 }
