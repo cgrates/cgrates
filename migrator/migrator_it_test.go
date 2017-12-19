@@ -1147,6 +1147,7 @@ func testMigratorThreshold(t *testing.T) {
 	thp := &engine.ThresholdProfile{
 		ID:                 threshold.ID,
 		Tenant:             config.CgrConfig().DefaultTenant,
+		FilterIDs:          []string{filter.ID},
 		Blocker:            false,
 		Weight:             threshold.Weight,
 		ActivationInterval: &utils.ActivationInterval{threshold.ExpirationDate, threshold.ActivationDate},
@@ -1162,7 +1163,7 @@ func testMigratorThreshold(t *testing.T) {
 		if err := mig.dmIN.SetFilter(filter); err != nil {
 			t.Error("Error when setting Filter ", err.Error())
 		}
-		if err := mig.dmIN.SetThresholdProfile(thp); err != nil {
+		if err := mig.dmIN.SetThresholdProfile(thp, true); err != nil {
 			t.Error("Error when setting threshold ", err.Error())
 		}
 		if err := mig.dmIN.SetThreshold(th); err != nil {
@@ -1200,7 +1201,7 @@ func testMigratorThreshold(t *testing.T) {
 		if err := mig.dmIN.SetFilter(filter); err != nil {
 			t.Error("Error when setting Filter ", err.Error())
 		}
-		if err := mig.dmIN.SetThresholdProfile(thp); err != nil {
+		if err := mig.dmIN.SetThresholdProfile(thp, true); err != nil {
 			t.Error("Error when setting Threshold ", err.Error())
 		}
 		if err := mig.dmIN.SetThreshold(th); err != nil {
@@ -1238,7 +1239,7 @@ func testMigratorThreshold(t *testing.T) {
 		if err := mig.dmIN.SetFilter(filter); err != nil {
 			t.Error("Error when setting Filter ", err.Error())
 		}
-		if err := mig.dmIN.SetThresholdProfile(thp); err != nil {
+		if err := mig.dmIN.SetThresholdProfile(thp, true); err != nil {
 			t.Error("Error when setting Threshold ", err.Error())
 		}
 		if err := mig.dmIN.SetThreshold(th); err != nil {
@@ -2619,11 +2620,11 @@ func testMigratorTpFilter(t *testing.T) {
 		}
 		if !reflect.DeepEqual(tpFilter[0].TPid, result[0].TPid) {
 			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].TPid, result[0].TPid)
-		}else if !reflect.DeepEqual(tpFilter[0].ID, result[0].ID) {
+		} else if !reflect.DeepEqual(tpFilter[0].ID, result[0].ID) {
 			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].ID, result[0].ID)
-		}else if !reflect.DeepEqual(tpFilter[0].Filters, result[0].Filters) {
+		} else if !reflect.DeepEqual(tpFilter[0].Filters, result[0].Filters) {
 			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].Filters, result[0].Filters)
-		}else if !reflect.DeepEqual(tpFilter[0].ActivationInterval, result[0].ActivationInterval) {
+		} else if !reflect.DeepEqual(tpFilter[0].ActivationInterval, result[0].ActivationInterval) {
 			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].ActivationInterval, result[0].ActivationInterval)
 		}
 	}

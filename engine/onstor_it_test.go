@@ -229,8 +229,7 @@ func testOnStorITSetFilterIndexes(t *testing.T) {
 		},
 	}
 	if err := onStor.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		idxes, false); err != nil {
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), idxes); err != nil {
 		t.Error(err)
 	}
 }
@@ -304,8 +303,7 @@ func testOnStorITGetFilterIndexes(t *testing.T) {
 		//	t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
 	}
 	if err := onStor.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		eIdxes, false); err != nil {
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), eIdxes); err != nil {
 		t.Error(err)
 	}
 }

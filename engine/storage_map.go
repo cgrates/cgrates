@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"strings"
 	"sync"
@@ -1289,7 +1288,7 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 	return
 }
 
-func (ms *MapStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+func (ms *MapStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(indexes)
@@ -1341,7 +1340,7 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
 	return
 }
 
-func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(indexes)
@@ -1546,7 +1545,6 @@ func (ms *MapStorage) SetFilterDrv(r *Filter) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Setsfilter with  Tenant:%+v ID:%+v \n", r.Tenant, r.ID)
 	ms.dict[utils.FilterPrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
 	return
 }

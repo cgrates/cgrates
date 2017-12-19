@@ -1963,28 +1963,21 @@ func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 	return result.Value, nil
 }
 
-func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	if update {
-		for k, v := range indexes {
-			for k2, v2 := range v {
-				findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
-				if len(v2) != 0 {
-					for k3 := range v2 {
-						err = col.Update(bson.M{"key": dbKey}, bson.M{"$set": bson.M{findParam2: bson.M{k3: true}}})
-					}
-				} else {
-					err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam2: 1}})
-				}
+	for k, v := range indexes {
+		for k2, v2 := range v {
+			findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
+			if len(v2) == 0 {
+				err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam2: 1}})
 			}
 		}
-	} else {
-		_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
-			Key   string
-			Value map[string]map[string]utils.StringMap
-		}{dbKey, indexes})
 	}
+	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
+		Key   string
+		Value map[string]map[string]utils.StringMap
+	}{dbKey, indexes})
 	return
 }
 
@@ -2031,28 +2024,21 @@ func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 	return result.Value, nil
 }
 
-func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	if update {
-		for k, v := range indexes {
-			for k2, v2 := range v {
-				findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
-				if len(v2) != 0 {
-					for k3 := range v2 {
-						err = col.Update(bson.M{"key": dbKey}, bson.M{"$set": bson.M{findParam2: bson.M{k3: true}}})
-					}
-				} else {
-					err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam2: 1}})
-				}
+	for k, v := range indexes {
+		for k2, v2 := range v {
+			findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
+			if len(v2) == 0 {
+				err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam2: 1}})
 			}
 		}
-	} else {
-		_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
-			Key   string
-			Value map[string]map[string]utils.StringMap
-		}{dbKey, indexes})
 	}
+	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
+		Key   string
+		Value map[string]map[string]utils.StringMap
+	}{dbKey, indexes})
 	return
 }
 

@@ -1412,7 +1412,7 @@ func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
 	return
 }
 
-func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	mp := make(map[string]string)
 	for fldName, fldValMp := range indexes {
 		for fldVal, strMp := range fldValMp {
@@ -1484,7 +1484,7 @@ func (rs *RedisStorage) GetFilterReverseIndexesDrv(dbKey string,
 	return
 }
 
-func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap, update bool) (err error) {
+func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
 	mp := make(map[string]string)
 	for fldName, fldValMp := range indexes {
 		for _, strMp := range fldValMp {
