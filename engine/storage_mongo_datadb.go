@@ -1929,55 +1929,41 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 }
 
 func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
-	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	var result struct {
 		Key   string
-		Value map[string]map[string]utils.StringMap
+		Value map[string][]string
 	}
 	findParam := bson.M{"key": dbKey}
-	if len(fldNameVal) != 0 {
-		for fldName, fldValue := range fldNameVal {
-			var qryFltr bson.M
-			if fldValue == "" {
-				qryFltr = bson.M{fmt.Sprintf("value.%s", fldName): 1}
-			} else {
-				qryFltr = bson.M{fmt.Sprintf("value.%s.%s", fldName, fldValue): 1}
-			}
-			if err = col.Find(findParam).Select(qryFltr).One(&result); err != nil {
-				if err == mgo.ErrNotFound {
-					err = utils.ErrNotFound
-				}
-				return nil, err
-			}
-			return result.Value, nil
-		}
-	}
 	if err = col.Find(findParam).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	return result.Value, nil
+	indexes = make(map[string]utils.StringMap)
+	for key, itmSls := range result.Value {
+		if _, hasIt := indexes[key]; !hasIt {
+			indexes[key] = make(utils.StringMap)
+		}
+		indexes[key] = utils.StringMapFromSlice(itmSls)
+	}
+	return indexes, nil
 }
 
-func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	for k, v := range indexes {
-		for k2, v2 := range v {
-			findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
-			if len(v2) == 0 {
-				err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam2: 1}})
-			}
-		}
+	mp := make(map[string][]string)
+	for key, itmMp := range indexes {
+		mp[key] = itmMp.Slice()
 	}
 	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
 		Key   string
-		Value map[string]map[string]utils.StringMap
-	}{dbKey, indexes})
+		Value map[string][]string
+	}{dbKey, mp})
 	return
 }
 
@@ -1990,55 +1976,41 @@ func (ms *MongoStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	return nil
 }
 func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
-	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	fldNameVal map[string]string) (revIdx map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	var result struct {
 		Key   string
-		Value map[string]map[string]utils.StringMap
+		Value map[string][]string
 	}
 	findParam := bson.M{"key": dbKey}
-	if len(fldNameVal) != 0 {
-		for fldName, fldValue := range fldNameVal {
-			var qryFltr bson.M
-			if fldValue == "" {
-				qryFltr = bson.M{fmt.Sprintf("value.%s", fldName): 1}
-			} else {
-				qryFltr = bson.M{fmt.Sprintf("value.%s.%s", fldName, fldValue): 1}
-			}
-			if err = col.Find(findParam).Select(qryFltr).One(&result); err != nil {
-				if err == mgo.ErrNotFound {
-					err = utils.ErrNotFound
-				}
-				return nil, err
-			}
-			return result.Value, nil
-		}
-	}
 	if err = col.Find(findParam).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	return result.Value, nil
+	revIdx = make(map[string]utils.StringMap)
+	for key, itmSls := range result.Value {
+		if _, hasIt := revIdx[key]; !hasIt {
+			revIdx[key] = make(utils.StringMap)
+		}
+		revIdx[key] = utils.StringMapFromSlice(itmSls)
+	}
+	return revIdx, nil
 }
 
-func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	for k, v := range indexes {
-		for k2, v2 := range v {
-			findParam2 := fmt.Sprintf("value.%s.%s", k, k2)
-			if len(v2) == 0 {
-				err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam2: 1}})
-			}
-		}
+	mp := make(map[string][]string)
+	for key, itmMp := range revIdx {
+		mp[key] = itmMp.Slice()
 	}
 	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
 		Key   string
-		Value map[string]map[string]utils.StringMap
-	}{dbKey, indexes})
+		Value map[string][]string
+	}{dbKey, mp})
 	return
 }
 
@@ -2057,9 +2029,9 @@ func (ms *MongoStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (item
 	defer session.Close()
 	var result struct {
 		Key   string
-		Value map[string]map[string]utils.StringMap
+		Value map[string]utils.StringMap
 	}
-	fldKey := fmt.Sprintf("value.%s.%s", fldName, fldVal)
+	fldKey := fmt.Sprintf("value.%s", utils.ConcatenatedKey(fldName, fldVal))
 	if err = col.Find(
 		bson.M{"key": dbKey, fldKey: bson.M{"$exists": true}}).Select(
 		bson.M{fldKey: true}).One(&result); err != nil {
@@ -2068,7 +2040,7 @@ func (ms *MongoStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (item
 		}
 		return nil, err
 	}
-	itemIDs = result.Value[fldName][fldVal]
+	itemIDs = result.Value[utils.ConcatenatedKey(fldName, fldVal)]
 	return
 }
 
