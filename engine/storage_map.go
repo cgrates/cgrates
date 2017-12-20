@@ -1255,7 +1255,7 @@ func (ms *MapStorage) RemoveTimingDrv(id string) error {
 }
 
 func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
-	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[dbKey]
@@ -1263,20 +1263,17 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 		return nil, utils.ErrNotFound
 	}
 	if len(fldNameVal) != 0 {
-		rcvidx := make(map[string]map[string]utils.StringMap)
+		rcvidx := make(map[string]utils.StringMap)
 		err = ms.ms.Unmarshal(values, &rcvidx)
 		if err != nil {
 			return nil, err
 		}
-		indexes = make(map[string]map[string]utils.StringMap)
+		indexes = make(map[string]utils.StringMap)
 		for fldName, fldVal := range fldNameVal {
-			if _, has := indexes[fldName]; !has {
-				indexes[fldName] = make(map[string]utils.StringMap)
+			if _, has := indexes[utils.ConcatenatedKey(fldName, fldVal)]; !has {
+				indexes[utils.ConcatenatedKey(fldName, fldVal)] = make(utils.StringMap)
 			}
-			if _, has := indexes[fldName][fldVal]; !has {
-				indexes[fldName][fldVal] = make(utils.StringMap)
-			}
-			indexes[fldName][fldVal] = rcvidx[fldName][fldVal]
+			indexes[utils.ConcatenatedKey(fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
 		}
 		return
 	} else {
@@ -1288,7 +1285,7 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 	return
 }
 
-func (ms *MapStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (ms *MapStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(indexes)
@@ -1307,7 +1304,7 @@ func (ms *MapStorage) RemoveFilterIndexesDrv(id string) (err error) {
 }
 
 func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
-	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[dbKey]
@@ -1315,20 +1312,17 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
 		return nil, utils.ErrNotFound
 	}
 	if len(fldNameVal) != 0 {
-		rcvidx := make(map[string]map[string]utils.StringMap)
+		rcvidx := make(map[string]utils.StringMap)
 		err = ms.ms.Unmarshal(values, &rcvidx)
 		if err != nil {
 			return nil, err
 		}
-		indexes = make(map[string]map[string]utils.StringMap)
+		indexes = make(map[string]utils.StringMap)
 		for fldName, fldVal := range fldNameVal {
-			if _, has := indexes[fldName]; !has {
-				indexes[fldName] = make(map[string]utils.StringMap)
+			if _, has := indexes[utils.ConcatenatedKey(fldName, fldVal)]; !has {
+				indexes[utils.ConcatenatedKey(fldName, fldVal)] = make(utils.StringMap)
 			}
-			if _, has := indexes[fldName][fldVal]; !has {
-				indexes[fldName][fldVal] = make(utils.StringMap)
-			}
-			indexes[fldName][fldVal] = rcvidx[fldName][fldVal]
+			indexes[utils.ConcatenatedKey(fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
 		}
 		return
 	} else {
@@ -1340,7 +1334,7 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
 	return
 }
 
-func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(indexes)

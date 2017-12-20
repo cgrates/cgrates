@@ -396,27 +396,16 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			thdsIndexers.IndexFilters(th.ID, fltr)
 		}
 		if dm.DataDB().GetStorageType() == utils.REDIS {
-			fldNameVal := map[string]string{
-				th.ID: "",
-			}
-			if _, rcvErr := dm.GetFilterReverseIndexes(
-				GetDBIndexKey(thdsIndexers.itemType, thdsIndexers.dbKeySuffix, true),
-				fldNameVal); rcvErr != nil {
-				if rcvErr.Error() == utils.ErrNotFound.Error() {
+			if err = NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix,
+				th.Tenant).RemoveItemFromIndex(th.ID); err != nil {
+				if err.Error() == utils.ErrNotFound.Error() {
 					if err = thdsIndexers.StoreIndexes(); err != nil {
 						return
 					}
-				} else {
-					return rcvErr
 				}
-			} else {
-				if err = NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix,
-					th.Tenant).RemoveItemFromIndex(th.ID); err != nil {
-					return
-				}
-				if err = thdsIndexers.StoreIndexes(); err != nil {
-					return
-				}
+			}
+			if err = thdsIndexers.StoreIndexes(); err != nil {
+				return
 			}
 		}
 		if err = thdsIndexers.StoreIndexes(); err != nil {
@@ -887,11 +876,11 @@ func (dm *DataManager) HasData(category, subject string) (has bool, err error) {
 	return dm.DataDB().HasDataDrv(category, subject)
 }
 
-func (dm *DataManager) GetFilterIndexes(dbKey string, fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+func (dm *DataManager) GetFilterIndexes(dbKey string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	return dm.DataDB().GetFilterIndexesDrv(dbKey, fldNameVal)
 }
 
-func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	return dm.DataDB().SetFilterIndexesDrv(dbKey, indexes)
 }
 
@@ -899,11 +888,11 @@ func (dm *DataManager) RemoveFilterIndexes(dbKey string) (err error) {
 	return dm.DataDB().RemoveFilterIndexesDrv(dbKey)
 }
 
-func (dm *DataManager) GetFilterReverseIndexes(dbKey string, fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+func (dm *DataManager) GetFilterReverseIndexes(dbKey string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	return dm.DataDB().GetFilterReverseIndexesDrv(dbKey, fldNameVal)
 }
 
-func (dm *DataManager) SetFilterReverseIndexes(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (dm *DataManager) SetFilterReverseIndexes(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	return dm.DataDB().SetFilterReverseIndexesDrv(dbKey, indexes)
 }
 

@@ -1369,7 +1369,7 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 }
 
 func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
-	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)
 	if len(fldNameVal) == 0 {
 		mp, err = rs.Cmd("HGETALL", dbKey).Map()
@@ -1391,42 +1391,37 @@ func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
 			mp[concatNameVal] = itmMpStrLst[0]
 		}
 	}
-	indexes = make(map[string]map[string]utils.StringMap)
+	indexes = make(map[string]utils.StringMap)
 	for k, v := range mp {
 		var sm utils.StringMap
 		if err = rs.ms.Unmarshal([]byte(v), &sm); err != nil {
 			return
 		}
-		kSplt := strings.Split(k, utils.CONCATENATED_KEY_SEP)
-		if len(kSplt) != 2 {
-			return nil, fmt.Errorf("Malformed key in db: %s", k)
+		if _, hasKey := indexes[k]; !hasKey {
+			indexes[k] = make(utils.StringMap)
 		}
-		if _, hasKey := indexes[kSplt[0]]; !hasKey {
-			indexes[kSplt[0]] = make(map[string]utils.StringMap)
-		}
-		if _, hasKey := indexes[kSplt[0]][kSplt[1]]; !hasKey {
-			indexes[kSplt[0]][kSplt[1]] = make(utils.StringMap)
-		}
-		indexes[kSplt[0]][kSplt[1]] = sm
+		indexes[k] = sm
 	}
 	return
 }
 
-func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	mp := make(map[string]string)
-	for fldName, fldValMp := range indexes {
-		for fldVal, strMp := range fldValMp {
-			if len(strMp) == 0 { // remove with no more elements inside
-				if err = rs.Cmd("HDEL", dbKey, utils.ConcatenatedKey(fldName, fldVal)).Err; err != nil {
-					return err
-				}
-				continue
-			}
-			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
-				return err
-			} else {
-				mp[utils.ConcatenatedKey(fldName, fldVal)] = string(encodedMp)
-			}
+	nameValSls := []interface{}{dbKey}
+	for key, strMp := range indexes {
+		if len(strMp) == 0 { // remove with no more elements inside
+			nameValSls = append(nameValSls, key)
+			continue
+		}
+		if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+			return err
+		} else {
+			mp[key] = string(encodedMp)
+		}
+	}
+	if len(nameValSls) != 1 {
+		if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
+			return err
 		}
 	}
 	if len(mp) != 0 {
@@ -1444,7 +1439,7 @@ func (rs *RedisStorage) RemoveFilterIndexesDrv(id string) (err error) {
 
 //GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
 func (rs *RedisStorage) GetFilterReverseIndexesDrv(dbKey string,
-	fldNameVal map[string]string) (indexes map[string]map[string]utils.StringMap, err error) {
+	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)
 	if len(fldNameVal) == 0 {
 		mp, err = rs.Cmd("HGETALL", dbKey).Map()
@@ -1465,42 +1460,33 @@ func (rs *RedisStorage) GetFilterReverseIndexesDrv(dbKey string,
 			mp[fldName] = itmMpStrLst[0]
 		}
 	}
-	indexes = make(map[string]map[string]utils.StringMap)
+	indexes = make(map[string]utils.StringMap)
 	for k, v := range mp {
-		var sm map[string]utils.StringMap
+		var sm utils.StringMap
 		if err = rs.ms.Unmarshal([]byte(v), &sm); err != nil {
 			return
 		}
 		if _, hasKey := indexes[k]; !hasKey {
-			indexes[k] = make(map[string]utils.StringMap)
+			indexes[k] = make(utils.StringMap)
 		}
-		for key, val := range sm {
-			if _, hasKey := indexes[k][key]; !hasKey {
-				indexes[k][key] = make(utils.StringMap)
-			}
-			indexes[k][key] = val
-		}
+		indexes[k] = sm
 	}
 	return
 }
 
-func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]map[string]utils.StringMap) (err error) {
+func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[string]utils.StringMap) (err error) {
 	mp := make(map[string]string)
-	for fldName, fldValMp := range indexes {
-		for _, strMp := range fldValMp {
-			if len(strMp) == 0 { // remove with no more elements inside
-				if err = rs.Cmd("HDEL", dbKey, fldName).Err; err != nil {
-					return err
-				}
-			}
-			if encodedMp, err := rs.ms.Marshal(fldValMp); err != nil {
-				return err
-			} else {
-				mp[fldName] = string(encodedMp)
-			}
+	for key, strMp := range revIdx {
+		if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+			return err
+		} else {
+			mp[key] = string(encodedMp)
 		}
 	}
-	return rs.Cmd("HMSET", dbKey, mp).Err
+	if len(mp) != 0 {
+		return rs.Cmd("HMSET", dbKey, mp).Err
+	}
+	return
 }
 
 func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
