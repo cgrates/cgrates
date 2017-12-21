@@ -43,68 +43,68 @@ var (
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	// testOnStorITSetGetDerivedCharges,
+	testOnStorITSetGetDerivedCharges,
 	testOnStorITSetFilterIndexes,
 	testOnStorITGetFilterIndexes,
 	testOnStorITMatchFilterIndex,
-	// testOnStorITCacheDestinations,
-	// testOnStorITCacheReverseDestinations,
-	// testOnStorITCacheRatingPlan,
-	// testOnStorITCacheRatingProfile,
-	// testOnStorITCacheActions,
-	// testOnStorITCacheActionPlan,
-	// testOnStorITCacheAccountActionPlans,
-	// testOnStorITCacheActionTriggers,
-	// testOnStorITCacheSharedGroup,
-	// testOnStorITCacheDerivedChargers,
-	// testOnStorITCacheLCR,
-	// testOnStorITCacheAlias,
-	// testOnStorITCacheReverseAlias,
-	// testOnStorITCacheResource,
-	// testOnStorITCacheResourceProfile,
-	// testOnStorITCacheStatQueueProfile,
-	// testOnStorITCacheStatQueue,
-	// testOnStorITCacheThresholdProfile,
-	// testOnStorITCacheThreshold,
-	// testOnStorITCacheTiming,
-	// testOnStorITCacheFilter,
-	// testOnStorITCacheSupplierProfile,
-	// testOnStorITCacheAttributeProfile,
+	testOnStorITCacheDestinations,
+	testOnStorITCacheReverseDestinations,
+	testOnStorITCacheRatingPlan,
+	testOnStorITCacheRatingProfile,
+	testOnStorITCacheActions,
+	testOnStorITCacheActionPlan,
+	testOnStorITCacheAccountActionPlans,
+	testOnStorITCacheActionTriggers,
+	testOnStorITCacheSharedGroup,
+	testOnStorITCacheDerivedChargers,
+	testOnStorITCacheLCR,
+	testOnStorITCacheAlias,
+	testOnStorITCacheReverseAlias,
+	testOnStorITCacheResource,
+	testOnStorITCacheResourceProfile,
+	testOnStorITCacheStatQueueProfile,
+	testOnStorITCacheStatQueue,
+	testOnStorITCacheThresholdProfile,
+	testOnStorITCacheThreshold,
+	testOnStorITCacheTiming,
+	testOnStorITCacheFilter,
+	testOnStorITCacheSupplierProfile,
+	testOnStorITCacheAttributeProfile,
 	// // // ToDo: test cache flush for a prefix
 	// // // ToDo: testOnStorITLoadAccountingCache
-	// testOnStorITHasData,
-	// testOnStorITPushPop,
-	// testOnStorITCRUDRatingPlan,
-	// testOnStorITCRUDRatingProfile,
-	// testOnStorITCRUDDestinations,
-	// testOnStorITCRUDReverseDestinations,
-	// testOnStorITCRUDLCR,
-	// testOnStorITCRUDCdrStats,
-	// testOnStorITCRUDActions,
-	// testOnStorITCRUDSharedGroup,
-	// testOnStorITCRUDActionTriggers,
-	// testOnStorITCRUDActionPlan,
-	// testOnStorITCRUDAccountActionPlans,
-	// testOnStorITCRUDAccount,
-	// testOnStorITCRUDCdrStatsQueue,
-	// testOnStorITCRUDSubscribers,
-	// testOnStorITCRUDUser,
-	// testOnStorITCRUDAlias,
-	// testOnStorITCRUDReverseAlias,
-	// testOnStorITCRUDResource,
-	// testOnStorITCRUDResourceProfile,
-	// testOnStorITCRUDTiming,
-	// testOnStorITCRUDHistory,
-	// testOnStorITCRUDStructVersion,
-	// testOnStorITCRUDStatQueueProfile,
-	// testOnStorITCRUDStoredStatQueue,
-	// testOnStorITCRUDThresholdProfile,
-	// testOnStorITCRUDThreshold,
-	// testOnStorITCRUDFilter,
-	// testOnStorITCRUDSupplierProfile,
-	// testOnStorITCRUDAttributeProfile,
-	// testOnStorITFlush,
-	// testOnStorITIsDBEmpty,
+	testOnStorITHasData,
+	testOnStorITPushPop,
+	testOnStorITCRUDRatingPlan,
+	testOnStorITCRUDRatingProfile,
+	testOnStorITCRUDDestinations,
+	testOnStorITCRUDReverseDestinations,
+	testOnStorITCRUDLCR,
+	testOnStorITCRUDCdrStats,
+	testOnStorITCRUDActions,
+	testOnStorITCRUDSharedGroup,
+	testOnStorITCRUDActionTriggers,
+	testOnStorITCRUDActionPlan,
+	testOnStorITCRUDAccountActionPlans,
+	testOnStorITCRUDAccount,
+	testOnStorITCRUDCdrStatsQueue,
+	testOnStorITCRUDSubscribers,
+	testOnStorITCRUDUser,
+	testOnStorITCRUDAlias,
+	testOnStorITCRUDReverseAlias,
+	testOnStorITCRUDResource,
+	testOnStorITCRUDResourceProfile,
+	testOnStorITCRUDTiming,
+	testOnStorITCRUDHistory,
+	testOnStorITCRUDStructVersion,
+	testOnStorITCRUDStatQueueProfile,
+	testOnStorITCRUDStoredStatQueue,
+	testOnStorITCRUDThresholdProfile,
+	testOnStorITCRUDThreshold,
+	testOnStorITCRUDFilter,
+	testOnStorITCRUDSupplierProfile,
+	testOnStorITCRUDAttributeProfile,
+	testOnStorITFlush,
+	testOnStorITIsDBEmpty,
 	//testOnStorITTestNewFilterIndexes,
 }
 
@@ -223,7 +223,8 @@ func testOnStorITSetFilterIndexes(t *testing.T) {
 		},
 	}
 	if err := onStor.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), idxes); err != nil {
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		idxes); err != nil {
 		t.Error(err)
 	}
 }
@@ -277,7 +278,8 @@ func testOnStorITGetFilterIndexes(t *testing.T) {
 	if _, err := onStor.GetFilterIndexes("unknown_key", nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := onStor.RemoveFilterIndexes(GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false)); err != nil {
+	if err := onStor.RemoveFilterIndexes(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false)); err != nil {
 		t.Error(err)
 	}
 	_, err := onStor.GetFilterIndexes(
@@ -289,7 +291,8 @@ func testOnStorITGetFilterIndexes(t *testing.T) {
 		//	t.Errorf("Expecting: %+v, received: %+v", eIdxes, idxes)
 	}
 	if err := onStor.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), eIdxes); err != nil {
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		eIdxes); err != nil {
 		t.Error(err)
 	}
 }

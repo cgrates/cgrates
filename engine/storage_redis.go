@@ -1368,6 +1368,7 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 	return
 }
 
+//GetFilterIndexesDrv retrieves Indexes from dataDB
 func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)
@@ -1405,6 +1406,7 @@ func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
 	return
 }
 
+//SetFilterIndexesDrv stores Indexes into DataDB
 func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	mp := make(map[string]string)
 	nameValSls := []interface{}{dbKey}
@@ -1474,6 +1476,7 @@ func (rs *RedisStorage) GetFilterReverseIndexesDrv(dbKey string,
 	return
 }
 
+//SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
 func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[string]utils.StringMap) (err error) {
 	mp := make(map[string]string)
 	for key, strMp := range revIdx {
@@ -1489,6 +1492,7 @@ func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[stri
 	return
 }
 
+//RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
 func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
 	if err = rs.Cmd("HDEL", dbKey, itemID).Err; err != nil {
 		return err

@@ -280,11 +280,9 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	//test here GetReqFilterIndexes for StorageMap with a specific map
-	expidx := map[string]map[string]utils.StringMap{
-		"supplierprofile1": {
-			"Supplier": {
-				"supplierprofile1": true,
-			},
+	expidx := map[string]utils.StringMap{
+		"supplierprofile1:Supplier": utils.StringMap{
+			"supplierprofile1": true,
 		},
 	}
 	splPrf1 := make(map[string]string)

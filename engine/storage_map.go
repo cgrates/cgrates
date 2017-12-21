@@ -1254,6 +1254,7 @@ func (ms *MapStorage) RemoveTimingDrv(id string) error {
 	return nil
 }
 
+//GetFilterIndexesDrv retrieves Indexes from dataDB
 func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
@@ -1285,6 +1286,7 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 	return
 }
 
+//SetFilterIndexesDrv stores Indexes into DataDB
 func (ms *MapStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -1303,6 +1305,7 @@ func (ms *MapStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	return
 }
 
+//GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
 func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
@@ -1334,6 +1337,7 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
 	return
 }
 
+//SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
 func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -1345,6 +1349,7 @@ func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[strin
 	return
 }
 
+//RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
 func (ms *MapStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -1359,12 +1364,12 @@ func (ms *MapStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemID
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
-	var indexes map[string]map[string]utils.StringMap
+	var indexes map[string]utils.StringMap
 	if err = ms.ms.Unmarshal(values, &indexes); err != nil {
 		return nil, err
 	}
-	if _, hasIt := indexes[fldName]; hasIt {
-		itemIDs = indexes[fldName][fldVal]
+	if _, hasIt := indexes[utils.ConcatenatedKey(fldName, fldVal)]; hasIt {
+		itemIDs = indexes[utils.ConcatenatedKey(fldName, fldVal)]
 	}
 	if len(itemIDs) == 0 {
 		return nil, utils.ErrNotFound

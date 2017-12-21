@@ -1928,6 +1928,7 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 	return nil
 }
 
+//GetFilterIndexesDrv retrieves Indexes from dataDB
 func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
@@ -1937,11 +1938,23 @@ func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 		Value map[string][]string
 	}
 	findParam := bson.M{"key": dbKey}
-	if err = col.Find(findParam).One(&result); err != nil {
-		if err == mgo.ErrNotFound {
-			err = utils.ErrNotFound
+	if len(fldNameVal) != 0 {
+		for fldName, fldValue := range fldNameVal {
+			qryFltr := bson.M{fmt.Sprintf("value.%s", utils.ConcatenatedKey(fldName, fldValue)): 1}
+			if err = col.Find(findParam).Select(qryFltr).One(&result); err != nil {
+				if err == mgo.ErrNotFound {
+					err = utils.ErrNotFound
+				}
+				return nil, err
+			}
 		}
-		return nil, err
+	} else {
+		if err = col.Find(findParam).One(&result); err != nil {
+			if err == mgo.ErrNotFound {
+				err = utils.ErrNotFound
+			}
+			return nil, err
+		}
 	}
 	indexes = make(map[string]utils.StringMap)
 	for key, itmSls := range result.Value {
@@ -1953,6 +1966,7 @@ func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 	return indexes, nil
 }
 
+//SetFilterIndexesDrv stores Indexes into DataDB
 func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
@@ -1975,6 +1989,8 @@ func (ms *MongoStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	}
 	return nil
 }
+
+//GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
 func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (revIdx map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
@@ -1984,11 +2000,23 @@ func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 		Value map[string][]string
 	}
 	findParam := bson.M{"key": dbKey}
-	if err = col.Find(findParam).One(&result); err != nil {
-		if err == mgo.ErrNotFound {
-			err = utils.ErrNotFound
+	if len(fldNameVal) != 0 {
+		for fldName, fldValue := range fldNameVal {
+			qryFltr := bson.M{fmt.Sprintf("value.%s", utils.ConcatenatedKey(fldName, fldValue)): 1}
+			if err = col.Find(findParam).Select(qryFltr).One(&result); err != nil {
+				if err == mgo.ErrNotFound {
+					err = utils.ErrNotFound
+				}
+				return nil, err
+			}
 		}
-		return nil, err
+	} else {
+		if err = col.Find(findParam).One(&result); err != nil {
+			if err == mgo.ErrNotFound {
+				err = utils.ErrNotFound
+			}
+			return nil, err
+		}
 	}
 	revIdx = make(map[string]utils.StringMap)
 	for key, itmSls := range result.Value {
@@ -2000,6 +2028,7 @@ func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 	return revIdx, nil
 }
 
+//SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
 func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
@@ -2014,6 +2043,7 @@ func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[stri
 	return
 }
 
+//RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
 func (ms *MongoStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
@@ -2029,7 +2059,7 @@ func (ms *MongoStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (item
 	defer session.Close()
 	var result struct {
 		Key   string
-		Value map[string]utils.StringMap
+		Value map[string][]string
 	}
 	fldKey := fmt.Sprintf("value.%s", utils.ConcatenatedKey(fldName, fldVal))
 	if err = col.Find(
@@ -2040,7 +2070,7 @@ func (ms *MongoStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (item
 		}
 		return nil, err
 	}
-	itemIDs = result.Value[utils.ConcatenatedKey(fldName, fldVal)]
+	itemIDs = utils.StringMapFromSlice(result.Value[utils.ConcatenatedKey(fldName, fldVal)])
 	return
 }
 
