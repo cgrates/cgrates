@@ -70,8 +70,8 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheFilter,
 	testOnStorITCacheSupplierProfile,
 	testOnStorITCacheAttributeProfile,
-	// // // ToDo: test cache flush for a prefix
-	// // // ToDo: testOnStorITLoadAccountingCache
+	// ToDo: test cache flush for a prefix
+	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
 	testOnStorITPushPop,
 	testOnStorITCRUDRatingPlan,
@@ -2471,7 +2471,8 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
-	if err := onStor.RemoveThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+	//rcv NotFound because SetThresholdProfile don't store Indexes (for now)
+	if err := onStor.RemoveThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -2765,7 +2766,7 @@ func testOnStorITTestNewFilterIndexes(t *testing.T) {
 			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 		}
 	}
-	//replace old filter with two filters
+	//replace old filter with two different filters
 	fp3 := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter3",

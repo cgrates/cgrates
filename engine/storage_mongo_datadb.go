@@ -1928,7 +1928,7 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 	return nil
 }
 
-//GetFilterIndexesDrv retrieves Indexes from dataDB
+// GetFilterIndexesDrv retrieves Indexes from dataDB
 func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
@@ -1940,8 +1940,9 @@ func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 	findParam := bson.M{"key": dbKey}
 	if len(fldNameVal) != 0 {
 		for fldName, fldValue := range fldNameVal {
-			qryFltr := bson.M{fmt.Sprintf("value.%s", utils.ConcatenatedKey(fldName, fldValue)): 1}
-			if err = col.Find(findParam).Select(qryFltr).One(&result); err != nil {
+			qryFltr := fmt.Sprintf("value.%s", utils.ConcatenatedKey(fldName, fldValue))
+			if err = col.Find(bson.M{"key": dbKey, qryFltr: bson.M{"$exists": true}}).Select(
+				bson.M{qryFltr: true}).One(&result); err != nil {
 				if err == mgo.ErrNotFound {
 					err = utils.ErrNotFound
 				}
@@ -1966,18 +1967,24 @@ func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 	return indexes, nil
 }
 
-//SetFilterIndexesDrv stores Indexes into DataDB
+// SetFilterIndexesDrv stores Indexes into DataDB
 func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	mp := make(map[string][]string)
+	pairs := []interface{}{}
 	for key, itmMp := range indexes {
-		mp[key] = itmMp.Slice()
+		param := fmt.Sprintf("value.%s", key)
+		pairs = append(pairs, bson.M{"key": dbKey})
+		if len(itmMp) == 0 {
+			pairs = append(pairs, bson.M{"$unset": bson.M{param: 1}})
+		} else {
+			pairs = append(pairs, bson.M{"$set": bson.M{"key": dbKey, param: itmMp.Slice()}})
+		}
 	}
-	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
-		Key   string
-		Value map[string][]string
-	}{dbKey, mp})
+	bulk := col.Bulk()
+	bulk.Unordered()
+	bulk.Upsert(pairs...)
+	_, err = bulk.Run()
 	return
 }
 
@@ -1990,7 +1997,7 @@ func (ms *MongoStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	return nil
 }
 
-//GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
+// GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
 func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 	fldNameVal map[string]string) (revIdx map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
@@ -2001,9 +2008,10 @@ func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 	}
 	findParam := bson.M{"key": dbKey}
 	if len(fldNameVal) != 0 {
-		for fldName, fldValue := range fldNameVal {
-			qryFltr := bson.M{fmt.Sprintf("value.%s", utils.ConcatenatedKey(fldName, fldValue)): 1}
-			if err = col.Find(findParam).Select(qryFltr).One(&result); err != nil {
+		for fldName, _ := range fldNameVal {
+			qryFltr := fmt.Sprintf("value.%s", fldName)
+			if err = col.Find(bson.M{"key": dbKey, qryFltr: bson.M{"$exists": true}}).Select(
+				bson.M{qryFltr: true}).One(&result); err != nil {
 				if err == mgo.ErrNotFound {
 					err = utils.ErrNotFound
 				}
@@ -2074,7 +2082,7 @@ func (ms *MongoStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (item
 	return
 }
 
-// GetStatQueueProfile retrieves a StatQueueProfile from dataDB
+// GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB
 func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	session, col := ms.conn(colSqp)
 	defer session.Close()
@@ -2087,7 +2095,7 @@ func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 	return
 }
 
-// SetStatsQueueDrv stores a StatsQueue into DataDB
+// SetStatQueueProfileDrv stores a StatsQueue into DataDB
 func (ms *MongoStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
 	session, col := ms.conn(colSqp)
 	defer session.Close()
@@ -2095,7 +2103,7 @@ func (ms *MongoStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	return
 }
 
-// RemStatsQueueDrv removes a StatsQueue from dataDB
+// RemStatQueueProfileDrv removes a StatsQueue from dataDB
 func (ms *MongoStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colSqp)
 	err = col.Remove(bson.M{"tenant": tenant, "id": id})
@@ -2106,7 +2114,7 @@ func (ms *MongoStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	return
 }
 
-// GetStoredStatQueue retrieves a StoredStatQueue
+// GetStoredStatQueueDrv retrieves a StoredStatQueue
 func (ms *MongoStorage) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQueue, err error) {
 	session, col := ms.conn(colSqs)
 	defer session.Close()
@@ -2119,7 +2127,7 @@ func (ms *MongoStorage) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStat
 	return
 }
 
-// SetStoredStatQueue stores the metrics for a StoredStatQueue
+// SetStoredStatQueueDrv stores the metrics for a StoredStatQueue
 func (ms *MongoStorage) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
 	session, col := ms.conn(colSqs)
 	defer session.Close()
@@ -2127,7 +2135,7 @@ func (ms *MongoStorage) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
 	return
 }
 
-// RemStatQueue removes stored metrics for a StoredStatQueue
+// RemStoredStatQueueDrv removes stored metrics for a StoredStatQueue
 func (ms *MongoStorage) RemStoredStatQueueDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colSqs)
 	defer session.Close()
