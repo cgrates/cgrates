@@ -157,7 +157,7 @@ func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
 	return err
 }
 
-//Populate ReqFilterIndexer.indexes with specific fieldName,fieldValue , item
+//Populate ReqFilterIndexer.indexes with specific fieldName:fieldValue , item
 func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) error {
 	rcvIdx, err := rfi.dm.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
@@ -166,14 +166,10 @@ func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) erro
 		return err
 	}
 	for fldName, nameValMp := range rcvIdx {
-		for key, _ := range nameValMp {
-			if _, has := rfi.indexes[key]; !has {
-				rfi.indexes[key] = make(utils.StringMap)
-			}
-			rfi.indexes[key] = utils.StringMap{
-				fldName: true,
-			}
+		if _, has := rfi.indexes[fldName]; !has {
+			rfi.indexes[fldName] = make(utils.StringMap)
 		}
+		rfi.indexes[fldName] = nameValMp
 	}
 	return nil
 }
@@ -199,7 +195,9 @@ func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 			}
 		}
 	}
-	if err = rfi.StoreIndexes(); err != nil {
+	if err = rfi.dm.SetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		rfi.indexes); err != nil {
 		return
 	}
 	if err = rfi.dm.RemoveFilterReverseIndexes(
