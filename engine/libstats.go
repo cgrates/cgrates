@@ -33,9 +33,9 @@ type StatQueueProfile struct {
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	QueueLength        int
 	TTL                time.Duration
-	Metrics            []string // list of metrics to build
-	Thresholds         []string // list of thresholds to be checked after changes
-	Blocker            bool     // blocker flag to stop processing on filters matched
+	Metrics            []*utils.MetricWithParams // list of metrics to build
+	Thresholds         []string                  // list of thresholds to be checked after changes
+	Blocker            bool                      // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64
 	MinItems           int
@@ -47,6 +47,7 @@ func (sqp *StatQueueProfile) TenantID() string {
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
 func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
+	marshaledMetrics := make(map[string]map[string][]byte)
 	sSQ = &StoredStatQueue{
 		Tenant: sq.Tenant,
 		ID:     sq.ID,
@@ -54,19 +55,27 @@ func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err 
 			EventID    string
 			ExpiryTime *time.Time
 		}, len(sq.SQItems)),
-		SQMetrics: make(map[string][]byte, len(sq.SQMetrics)),
-		MinItems:  sq.MinItems,
+		MinItems: sq.MinItems,
 	}
 	for i, sqItm := range sq.SQItems {
 		sSQ.SQItems[i] = sqItm
 	}
-	for metricID, metric := range sq.SQMetrics {
-		if marshaled, err := metric.Marshal(ms); err != nil {
-			return nil, err
-		} else {
-			sSQ.SQMetrics[metricID] = marshaled
+	for metricID, _ := range sq.SQMetrics {
+		for parameter, metric := range sq.SQMetrics[metricID] {
+			if marshaled, err := metric.Marshal(ms); err != nil {
+				return nil, err
+			} else {
+				if _, hasIt := marshaledMetrics[metricID]; !hasIt {
+					marshaledMetrics[metricID] = make(map[string][]byte)
+				}
+				if _, hasIt := marshaledMetrics[metricID][parameter]; !hasIt {
+					marshaledMetrics[metricID][parameter] = make([]byte, len(marshaled))
+				}
+				marshaledMetrics[metricID][parameter] = marshaled
+			}
 		}
 	}
+	sSQ.SQMetrics = marshaledMetrics
 	return
 }
 
@@ -78,7 +87,7 @@ type StoredStatQueue struct {
 		EventID    string     // Bounded to the original utils.CGREvent
 		ExpiryTime *time.Time // Used to auto-expire events
 	}
-	SQMetrics map[string][]byte
+	SQMetrics map[string]map[string][]byte
 	MinItems  int
 }
 
@@ -89,6 +98,7 @@ func (ssq *StoredStatQueue) SqID() string {
 
 // AsStatQueue converts into StatQueue unmarshaling SQMetrics
 func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error) {
+	SQMetrics := make(map[string]map[string]StatMetric)
 	sq = &StatQueue{
 		Tenant: ssq.Tenant,
 		ID:     ssq.ID,
@@ -96,21 +106,26 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 			EventID    string
 			ExpiryTime *time.Time
 		}, len(ssq.SQItems)),
-		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
-		MinItems:  ssq.MinItems,
+		MinItems: ssq.MinItems,
 	}
 	for i, sqItm := range ssq.SQItems {
 		sq.SQItems[i] = sqItm
 	}
-	for metricID, marshaled := range ssq.SQMetrics {
-		if metric, err := NewStatMetric(metricID, ssq.MinItems); err != nil {
-			return nil, err
-		} else if err := metric.LoadMarshaled(ms, marshaled); err != nil {
-			return nil, err
-		} else {
-			sq.SQMetrics[metricID] = metric
+	for metricID, _ := range ssq.SQMetrics {
+		for parameter, marshaled := range ssq.SQMetrics[metricID] {
+			if metric, err := NewStatMetric(metricID, ssq.MinItems, parameter); err != nil {
+				return nil, err
+			} else if err := metric.LoadMarshaled(ms, marshaled); err != nil {
+				return nil, err
+			} else {
+				if _, hasIt := SQMetrics[metricID]; !hasIt {
+					SQMetrics[metricID] = make(map[string]StatMetric)
+				}
+				SQMetrics[metricID][parameter] = metric
+			}
 		}
 	}
+	sq.SQMetrics = SQMetrics
 	return
 }
 
@@ -122,7 +137,7 @@ type StatQueue struct {
 		EventID    string     // Bounded to the original utils.CGREvent
 		ExpiryTime *time.Time // Used to auto-expire events
 	}
-	SQMetrics map[string]StatMetric
+	SQMetrics map[string]map[string]StatMetric
 	MinItems  int
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
@@ -144,9 +159,11 @@ func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent) (err error) {
 
 // remStatEvent removes an event from metrics
 func (sq *StatQueue) remEventWithID(evTenantID string) {
-	for metricID, metric := range sq.SQMetrics {
-		if err := metric.RemEvent(evTenantID); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evTenantID, err.Error()))
+	for metricID, _ := range sq.SQMetrics {
+		for _, metric := range sq.SQMetrics[metricID] {
+			if err := metric.RemEvent(evTenantID); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evTenantID, err.Error()))
+			}
 		}
 	}
 }
@@ -184,10 +201,12 @@ func (sq *StatQueue) remOnQueueLength() {
 
 // addStatEvent computes metrics for an event
 func (sq *StatQueue) addStatEvent(ev *utils.CGREvent) {
-	for metricID, metric := range sq.SQMetrics {
-		if err := metric.AddEvent(ev); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
-				metricID, ev.TenantID(), err.Error()))
+	for metricID, _ := range sq.SQMetrics {
+		for _, metric := range sq.SQMetrics[metricID] {
+			if err := metric.AddEvent(ev); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
+					metricID, ev.TenantID(), err.Error()))
+			}
 		}
 	}
 }

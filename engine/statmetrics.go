@@ -28,20 +28,22 @@ import (
 
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
-func NewStatMetric(metricID string, minItems int) (sm StatMetric, err error) {
-	metrics := map[string]func(int) (StatMetric, error){
-		utils.MetaASR: NewASR,
-		utils.MetaACD: NewACD,
-		utils.MetaTCD: NewTCD,
-		utils.MetaACC: NewACC,
-		utils.MetaTCC: NewTCC,
-		utils.MetaPDD: NewPDD,
-		utils.MetaDDC: NewDCC,
+func NewStatMetric(metricID string, minItems int, extraParams string) (sm StatMetric, err error) {
+	metrics := map[string]func(int, string) (StatMetric, error){
+		utils.MetaASR:     NewASR,
+		utils.MetaACD:     NewACD,
+		utils.MetaTCD:     NewTCD,
+		utils.MetaACC:     NewACC,
+		utils.MetaTCC:     NewTCC,
+		utils.MetaPDD:     NewPDD,
+		utils.MetaDDC:     NewDCC,
+		utils.MetaSum:     NewStatSum,
+		utils.MetaAverage: NewStatAverage,
 	}
 	if _, has := metrics[metricID]; !has {
 		return nil, fmt.Errorf("unsupported metric: %s", metricID)
 	}
-	return metrics[metricID](minItems)
+	return metrics[metricID](minItems, extraParams)
 }
 
 // StatMetric is the interface which a metric should implement
@@ -55,7 +57,7 @@ type StatMetric interface {
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 }
 
-func NewASR(minItems int) (StatMetric, error) {
+func NewASR(minItems int, extraParams string) (StatMetric, error) {
 	return &StatASR{Events: make(map[string]bool), MinItems: minItems}, nil
 }
 
@@ -142,7 +144,7 @@ func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, asr)
 }
 
-func NewACD(minItems int) (StatMetric, error) {
+func NewACD(minItems int, extraParams string) (StatMetric, error) {
 	return &StatACD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
 }
 
@@ -229,7 +231,7 @@ func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acd)
 }
 
-func NewTCD(minItems int) (StatMetric, error) {
+func NewTCD(minItems int, extraParams string) (StatMetric, error) {
 	return &StatTCD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
 }
 
@@ -318,7 +320,7 @@ func (tcd *StatTCD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcd)
 }
 
-func NewACC(minItems int) (StatMetric, error) {
+func NewACC(minItems int, extraParams string) (StatMetric, error) {
 	return &StatACC{Events: make(map[string]float64), MinItems: minItems}, nil
 }
 
@@ -403,7 +405,7 @@ func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acc)
 }
 
-func NewTCC(minItems int) (StatMetric, error) {
+func NewTCC(minItems int, extraParams string) (StatMetric, error) {
 	return &StatTCC{Events: make(map[string]float64), MinItems: minItems}, nil
 }
 
@@ -487,7 +489,7 @@ func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcc)
 }
 
-func NewPDD(minItems int) (StatMetric, error) {
+func NewPDD(minItems int, extraParams string) (StatMetric, error) {
 	return &StatPDD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
 }
 
@@ -575,7 +577,7 @@ func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, pdd)
 }
 
-func NewDCC(minItems int) (StatMetric, error) {
+func NewDCC(minItems int, extraParams string) (StatMetric, error) {
 	return &StatDDC{Destinations: make(map[string]utils.StringMap), Events: make(map[string]string), MinItems: minItems}, nil
 }
 
@@ -640,4 +642,173 @@ func (ddc *StatDDC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, ddc)
+}
+func NewStatSum(minItems int, extraParams string) (StatMetric, error) {
+	return &StatSum{Events: make(map[string]float64), MinItems: minItems, FieldName: extraParams}, nil
+}
+
+type StatSum struct {
+	Sum       float64
+	Count     float64
+	Events    map[string]float64 // map[EventTenantID]Cost
+	MinItems  int
+	FieldName string
+	val       *float64 // cached sum value
+}
+
+// getValue returns tcd.val
+func (sum *StatSum) getValue() float64 {
+	if sum.val == nil {
+		if (sum.MinItems > 0 && len(sum.Events) < sum.MinItems) || (sum.Count == 0) {
+			sum.val = utils.Float64Pointer(STATS_NA)
+		} else {
+			sum.val = utils.Float64Pointer(utils.Round(sum.Sum,
+				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+		}
+	}
+	return *sum.val
+}
+
+func (sum *StatSum) GetStringValue(fmtOpts string) (valStr string) {
+	if val := sum.getValue(); val == STATS_NA {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = strconv.FormatFloat(sum.getValue(), 'f', -1, 64)
+	}
+	return
+}
+
+func (sum *StatSum) GetValue() (v interface{}) {
+	return sum.getValue()
+}
+
+func (sum *StatSum) GetFloat64Value() (v float64) {
+	return sum.getValue()
+}
+
+func (sum *StatSum) AddEvent(ev *utils.CGREvent) (err error) {
+	var value float64
+	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
+		return err
+	} else if !at.IsZero() {
+		if val, err := ev.FieldAsFloat64(sum.FieldName); err != nil &&
+			err != utils.ErrNotFound {
+			return err
+		} else if val >= 0 {
+			value = val
+			sum.Sum += val
+		}
+	}
+	sum.Events[ev.TenantID()] = value
+	sum.Count += 1
+	sum.val = nil
+	return
+}
+
+func (sum *StatSum) RemEvent(evTenantID string) (err error) {
+	val, has := sum.Events[evTenantID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if val != 0 {
+		sum.Sum -= val
+	}
+	sum.Count -= 1
+	delete(sum.Events, evTenantID)
+	sum.val = nil
+	return
+}
+
+func (sum *StatSum) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(sum)
+}
+
+func (sum *StatSum) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, sum)
+}
+
+func NewStatAverage(minItems int, extraParams string) (StatMetric, error) {
+	return &StatAverage{Events: make(map[string]float64), MinItems: minItems, FieldName: extraParams}, nil
+}
+
+// StatAverage implements TotalCallCost metric
+type StatAverage struct {
+	Sum       float64
+	Count     float64
+	Events    map[string]float64 // map[EventTenantID]Cost
+	MinItems  int
+	FieldName string
+	val       *float64 // cached avg value
+}
+
+// getValue returns tcd.val
+func (avg *StatAverage) getValue() float64 {
+	if avg.val == nil {
+		if (avg.MinItems > 0 && len(avg.Events) < avg.MinItems) || (avg.Count == 0) {
+			avg.val = utils.Float64Pointer(STATS_NA)
+		} else {
+			avg.val = utils.Float64Pointer(utils.Round((avg.Sum / avg.Count),
+				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+		}
+	}
+	return *avg.val
+}
+
+func (avg *StatAverage) GetStringValue(fmtOpts string) (valStr string) {
+	if val := avg.getValue(); val == STATS_NA {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = strconv.FormatFloat(avg.getValue(), 'f', -1, 64)
+	}
+	return
+
+}
+
+func (avg *StatAverage) GetValue() (v interface{}) {
+	return avg.getValue()
+}
+
+func (avg *StatAverage) GetFloat64Value() (v float64) {
+	return avg.getValue()
+}
+
+func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
+	var value float64
+	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
+		return err
+	} else if !at.IsZero() {
+		if val, err := ev.FieldAsFloat64(avg.FieldName); err != nil &&
+			err != utils.ErrNotFound {
+			return err
+		} else if val >= 0 {
+			value = val
+			avg.Sum += val
+		}
+	}
+	avg.Events[ev.TenantID()] = value
+	avg.Count += 1
+	avg.val = nil
+	return
+}
+
+func (avg *StatAverage) RemEvent(evTenantID string) (err error) {
+	val, has := avg.Events[evTenantID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	if avg.Events[avg.FieldName] >= 0 {
+		avg.Sum -= val
+	}
+	avg.Count -= 1
+	delete(avg.Events, evTenantID)
+	avg.val = nil
+	return
+}
+
+func (avg *StatAverage) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(avg)
+}
+
+func (avg *StatAverage) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, avg)
 }

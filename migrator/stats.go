@@ -331,7 +331,7 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	stq = &engine.StatQueueProfile{
 		ID:          v1Sts.Id,
 		QueueLength: v1Sts.QueueLength,
-		Metrics:     []string{},
+		Metrics:     []*utils.MetricWithParams{},
 		Tenant:      config.CgrConfig().DefaultTenant,
 		Blocker:     false,
 		Stored:      false,
@@ -348,7 +348,7 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	}
 	sq = &engine.StatQueue{Tenant: config.CgrConfig().DefaultTenant,
 		ID:        v1Sts.Id,
-		SQMetrics: make(map[string]engine.StatMetric),
+		SQMetrics: make(map[string]map[string]engine.StatMetric),
 	}
 	if len(v1Sts.Metrics) != 0 {
 		for i, _ := range v1Sts.Metrics {
@@ -356,11 +356,15 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 				v1Sts.Metrics[i] = "*" + v1Sts.Metrics[i]
 			}
 			v1Sts.Metrics[i] = strings.ToLower(v1Sts.Metrics[i])
-			stq.Metrics = append(stq.Metrics, v1Sts.Metrics[i])
-			if metric, err := engine.NewStatMetric(stq.Metrics[i], 0); err != nil {
+
+			stq.Metrics = append(stq.Metrics, &utils.MetricWithParams{MetricID: v1Sts.Metrics[i]})
+			if metric, err := engine.NewStatMetric(stq.Metrics[i].MetricID, 0, ""); err != nil {
 				return nil, nil, nil, err
 			} else {
-				sq.SQMetrics[stq.Metrics[i]] = metric
+				if _, has := sq.SQMetrics[stq.Metrics[i].MetricID]; !has {
+					sq.SQMetrics[stq.Metrics[i].MetricID] = make(map[string]engine.StatMetric)
+				}
+				sq.SQMetrics[stq.Metrics[i].MetricID][""] = metric
 			}
 		}
 	}

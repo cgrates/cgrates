@@ -23,7 +23,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-
 )
 
 // Used to extract ids from stordb
@@ -1322,12 +1321,17 @@ type TPStats struct {
 	ActivationInterval *TPActivationInterval
 	QueueLength        int
 	TTL                string
-	Metrics            []string
+	Metrics            []*MetricWithParams
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64
 	MinItems           int
 	Thresholds         []string
+}
+
+type MetricWithParams struct {
+	MetricID   string
+	Parameters string
 }
 
 type TPThreshold struct {

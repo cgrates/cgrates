@@ -237,8 +237,10 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 				Event: map[string]interface{}{
 					utils.EventType: utils.StatUpdate,
 					utils.StatID:    sq.ID}}
-			for metricID, metric := range sq.SQMetrics {
-				ev.Event[metricID] = metric.GetValue()
+			for metricID, _ := range sq.SQMetrics {
+				for _, metric := range sq.SQMetrics[metricID] {
+					ev.Event[metricID] = metric.GetValue()
+				}
 			}
 			var hits int
 			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
@@ -279,21 +281,26 @@ func (sS *StatService) V1GetStatQueuesForEvent(ev *utils.CGREvent, reply *StatQu
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
 func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
+	metricsmap := make(map[string]string)
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	utils.Logger.Debug(fmt.Sprintf("\nGETS b4 get \n"))
 	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, false, "")
 	if err != nil {
 		if err != utils.ErrNotFound {
+			utils.Logger.Debug(fmt.Sprintf("\nGETS err not found \n"))
 			err = utils.NewErrServerError(err)
 		}
 		return err
 	}
-	metrics := make(map[string]string, len(sq.SQMetrics))
-	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID] = metric.GetStringValue("")
+	for metricID, _ := range sq.SQMetrics {
+		for _, metric := range sq.SQMetrics[metricID] {
+			metricsmap[metricID] = metric.GetStringValue("")
+			utils.Logger.Debug(fmt.Sprintf("GETS HERE: %+v", metricsmap[metricID]))
+		}
 	}
-	*reply = metrics
+	*reply = metricsmap
 	return
 }
 
@@ -310,8 +317,10 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 		return err
 	}
 	metrics := make(map[string]float64, len(sq.SQMetrics))
-	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID] = metric.GetFloat64Value()
+	for metricID, _ := range sq.SQMetrics {
+		for _, metric := range sq.SQMetrics[metricID] {
+			metrics[metricID] = metric.GetFloat64Value()
+		}
 	}
 	*reply = metrics
 	return

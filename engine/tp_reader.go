@@ -2219,15 +2219,19 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("StatQueues:")
 	}
 	for _, sqTntID := range tpr.statQueues {
-		sq := &StatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID,
-			SQMetrics: make(map[string]StatMetric)}
-		for _, metricID := range tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].Metrics {
-			if metric, err := NewStatMetric(metricID, tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].MinItems); err != nil {
+		metrics := make(map[string]map[string]StatMetric)
+		for _, metricwithparam := range tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].Metrics {
+			if metric, err := NewStatMetric(metricwithparam.MetricID,
+				tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].MinItems, metricwithparam.Parameters); err != nil {
 				return err
 			} else {
-				sq.SQMetrics[metricID] = metric
+				if _, hasIt := metrics[metricwithparam.MetricID]; !hasIt {
+					metrics[metricwithparam.MetricID] = make(map[string]StatMetric)
+				}
+				metrics[metricwithparam.MetricID][metricwithparam.Parameters] = metric
 			}
 		}
+		sq := &StatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID, SQMetrics: metrics}
 		if err = tpr.dm.SetStatQueue(sq); err != nil {
 			return
 		}

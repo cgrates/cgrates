@@ -527,13 +527,15 @@ const (
 
 //Meta
 const (
-	MetaASR = "*asr"
-	MetaACD = "*acd"
-	MetaTCD = "*tcd"
-	MetaACC = "*acc"
-	MetaTCC = "*tcc"
-	MetaPDD = "*pdd"
-	MetaDDC = "*ddc"
+	MetaASR     = "*asr"
+	MetaACD     = "*acd"
+	MetaTCD     = "*tcd"
+	MetaACC     = "*acc"
+	MetaTCC     = "*tcc"
+	MetaPDD     = "*pdd"
+	MetaDDC     = "*ddc"
+	MetaSum     = "*sum"
+	MetaAverage = "*average"
 )
 
 //Migrator Metas

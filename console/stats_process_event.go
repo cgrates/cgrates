@@ -25,7 +25,7 @@ import (
 
 func init() {
 	c := &CmdStatQueueProcessEvent{
-		name:      "statqueue_process_event",
+		name:      "stats_process_event",
 		rpcMethod: "StatSv1.ProcessEvent",
 	}
 	commands[c.Name()] = c

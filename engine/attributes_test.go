@@ -45,10 +45,6 @@ func TestAttributes(t *testing.T) {
 	}
 }
 
-//.matchingAttributeProfilesForEvent
-//.attributeProfileForEvent
-//.processEvent
-
 func testPopulateAttrService(t *testing.T) {
 	var filters1 []*RequestFilter
 	var filters2 []*RequestFilter
@@ -64,7 +60,6 @@ func testPopulateAttrService(t *testing.T) {
 		Substitute: "Al1",
 		Append:     true,
 	}
-
 	atrPs = AttributeProfiles{
 		&AttributeProfile{
 			Tenant:    "cgrates.org",
@@ -91,7 +86,6 @@ func testPopulateAttrService(t *testing.T) {
 			Weight:     20,
 		},
 	}
-
 	x, err := NewRequestFilter(MetaString, "attributeprofile1", []string{"Attribute"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -160,6 +154,7 @@ func testAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", atrPs[1], atrpl[1])
 	}
 }
+
 func testAttributeProfileForEvent(t *testing.T) {
 	context := utils.MetaRating
 	ev := make(map[string]interface{})
@@ -179,8 +174,8 @@ func testAttributeProfileForEvent(t *testing.T) {
 	if !reflect.DeepEqual(atrPs[0], atrpl) && !reflect.DeepEqual(atrPs[1], atrpl) {
 		t.Errorf("Expecting: %+v, received: %+v", atrPs[0], atrpl)
 	}
-
 }
+
 func testAttributeProcessEvent(t *testing.T) {
 	context := utils.MetaRating
 	ev := make(map[string]interface{})
@@ -208,5 +203,4 @@ func testAttributeProcessEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(eRply.CGREvent, atrpl.CGREvent) {
 		t.Errorf("Expecting: %+v, received: %+v", eRply.CGREvent, atrpl.CGREvent)
 	}
-
 }

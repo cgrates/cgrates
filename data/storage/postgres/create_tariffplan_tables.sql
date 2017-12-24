@@ -427,6 +427,7 @@ CREATE TABLE tp_stats (
   "queue_length" INTEGER NOT NULL,
   "ttl" varchar(32) NOT NULL,
   "metrics" varchar(64) NOT NULL,
+  "parameters" varchar(64) NOT NULL,
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
