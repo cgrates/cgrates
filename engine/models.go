@@ -425,11 +425,12 @@ type TpStats struct {
 	QueueLength        int     `index:"4" re:""`
 	TTL                string  `index:"5" re:""`
 	Metrics            string  `index:"6" re:""`
-	Blocker            bool    `index:"7" re:""`
-	Stored             bool    `index:"8" re:""`
-	Weight             float64 `index:"9" re:"\d+\.?\d*"`
-	MinItems           int     `index:"10" re:""`
-	Thresholds         string  `index:"11" re:""`
+	Parameters         string  `index:"7" re:""`
+	Blocker            bool    `index:"8" re:""`
+	Stored             bool    `index:"9" re:""`
+	Weight             float64 `index:"10" re:"\d+\.?\d*"`
+	MinItems           int     `index:"11" re:""`
+	Thresholds         string  `index:"12" re:""`
 	CreatedAt          time.Time
 }
 

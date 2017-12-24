@@ -921,22 +921,29 @@ func testMigratorStats(t *testing.T) {
 		FilterIDs:   []string{v1Sts.Id},
 		QueueLength: 10,
 		TTL:         time.Duration(0) * time.Second,
-		Metrics:     []string{"*asr", "*acd", "*acc"},
-		Thresholds:  []string{"Test"},
-		Blocker:     false,
-		Stored:      true,
-		Weight:      float64(0),
-		MinItems:    0,
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
+			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
+			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
+		},
+		Thresholds: []string{"Test"},
+		Blocker:    false,
+		Stored:     true,
+		Weight:     float64(0),
+		MinItems:   0,
 	}
 	sq := &engine.StatQueue{Tenant: config.CgrConfig().DefaultTenant,
 		ID:        v1Sts.Id,
-		SQMetrics: make(map[string]engine.StatMetric),
+		SQMetrics: make(map[string]map[string]engine.StatMetric),
 	}
-	for _, metricID := range sqp.Metrics {
-		if metric, err := engine.NewStatMetric(metricID, 0); err != nil {
+	for _, metricwparam := range sqp.Metrics {
+		if metric, err := engine.NewStatMetric(metricwparam.MetricID, 0, metricwparam.Parameters); err != nil {
 			t.Error("Error when creating newstatMETRIc ", err.Error())
 		} else {
-			sq.SQMetrics[metricID] = metric
+			if _, has := sq.SQMetrics[metricwparam.MetricID]; !has {
+				sq.SQMetrics[metricwparam.MetricID] = make(map[string]engine.StatMetric)
+			}
+			sq.SQMetrics[metricwparam.MetricID][metricwparam.Parameters] = metric
 		}
 	}
 	switch {
@@ -2240,8 +2247,11 @@ func testMigratorTpStats(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "",
 			},
-			TTL:        "1",
-			Metrics:    []string{"MetricValue", "MetricValueTwo"},
+			TTL: "1",
+			Metrics: []*utils.MetricWithParams{
+				&utils.MetricWithParams{MetricID: "MetricValue", Parameters: ""},
+				&utils.MetricWithParams{MetricID: "MetricValueTwo", Parameters: ""},
+			},
 			Blocker:    false,
 			Stored:     false,
 			Weight:     20,

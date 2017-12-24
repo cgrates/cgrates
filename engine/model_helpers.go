@@ -1951,9 +1951,15 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 type TpStatsS []*TpStats
 
 func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
-	mst := make(map[string]*utils.TPStats)
+	filtermap := make(map[string]map[string]map[string]bool)
+	metricmap := make(map[string]map[string]map[string]*utils.MetricWithParams)
+	thresholdmap := make(map[string]map[string]map[string]bool)
+	mst := make(map[string]map[string]*utils.TPStats)
 	for _, tp := range tps {
-		st, found := mst[tp.ID]
+		if _, found := mst[tp.Tenant]; !found {
+			mst[tp.Tenant] = make(map[string]*utils.TPStats)
+		}
+		st, found := mst[tp.Tenant][tp.ID]
 		if !found {
 			st = &utils.TPStats{
 				Tenant:   tp.Tenant,
@@ -1980,15 +1986,27 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			st.TTL = tp.TTL
 		}
 		if tp.Metrics != "" {
-			metrSplt := strings.Split(tp.Metrics, utils.INFIELD_SEP)
-			for _, metr := range metrSplt {
-				st.Metrics = append(st.Metrics, metr)
+			if _, has := metricmap[tp.Tenant]; !has {
+				metricmap[tp.Tenant] = make(map[string]map[string]*utils.MetricWithParams)
+			}
+			if _, has := metricmap[tp.Tenant][tp.ID]; !has {
+				metricmap[tp.Tenant][tp.ID] = make(map[string]*utils.MetricWithParams)
+			}
+			metricSplit := strings.Split(tp.Metrics, utils.INFIELD_SEP)
+			for _, metric := range metricSplit {
+				metricmap[tp.Tenant][tp.ID][metric] = &utils.MetricWithParams{MetricID: metric, Parameters: tp.Parameters}
 			}
 		}
 		if tp.Thresholds != "" {
+			if _, has := thresholdmap[tp.Tenant]; !has {
+				thresholdmap[tp.Tenant] = make(map[string]map[string]bool)
+			}
+			if _, has := thresholdmap[tp.Tenant][tp.ID]; !has {
+				thresholdmap[tp.Tenant][tp.ID] = make(map[string]bool)
+			}
 			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
 			for _, trsh := range trshSplt {
-				st.Thresholds = append(st.Thresholds, trsh)
+				thresholdmap[tp.Tenant][tp.ID][trsh] = true
 			}
 		}
 		if tp.Weight != 0 {
@@ -2005,19 +2023,58 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			}
 		}
 		if tp.FilterIDs != "" {
+			if _, has := filtermap[tp.Tenant]; !has {
+				filtermap[tp.Tenant] = make(map[string]map[string]bool)
+			}
+			if _, has := filtermap[tp.Tenant][tp.ID]; !has {
+				filtermap[tp.Tenant][tp.ID] = make(map[string]bool)
+			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				st.FilterIDs = append(st.FilterIDs, filter)
+				filtermap[tp.Tenant][tp.ID][filter] = true
 			}
 		}
-
-		mst[tp.ID] = st
+		mst[tp.Tenant][tp.ID] = st
 	}
-	result = make([]*utils.TPStats, len(mst))
-	i := 0
-	for _, st := range mst {
-		result[i] = st
-		i++
+	for _, tnt := range mst {
+		for _, st := range tnt {
+
+			for tenant, _ := range filtermap {
+				if st.Tenant == tenant {
+					for id, _ := range filtermap[st.Tenant] {
+						if st.ID == id {
+							for filterdata, _ := range filtermap[st.Tenant][id] {
+								st.FilterIDs = append(st.FilterIDs, filterdata)
+							}
+						}
+					}
+				}
+			}
+			for tenant, _ := range thresholdmap {
+				if st.Tenant == tenant {
+					for id, _ := range thresholdmap[st.Tenant] {
+						if st.ID == id {
+							for trsh, _ := range thresholdmap[st.Tenant][id] {
+								st.Thresholds = append(st.Thresholds, trsh)
+							}
+						}
+					}
+				}
+			}
+
+			for tenant, _ := range metricmap {
+				if st.Tenant == tenant {
+					for id, _ := range metricmap[st.Tenant] {
+						if st.ID == id {
+							for metricdata, _ := range metricmap[st.Tenant][id] {
+								st.Metrics = append(st.Metrics, metricmap[st.Tenant][id][metricdata])
+							}
+						}
+					}
+				}
+			}
+			result = append(result, st)
+		}
 	}
 	return
 }
@@ -2042,7 +2099,7 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 					if i != 0 {
 						mdl.Metrics += utils.INFIELD_SEP
 					}
-					mdl.Metrics += val
+					mdl.Metrics += val.MetricID
 				}
 				for i, val := range st.Thresholds {
 					if i != 0 {
@@ -2071,6 +2128,7 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 		Tenant:      tpST.Tenant,
 		ID:          tpST.ID,
 		QueueLength: tpST.QueueLength,
+		Metrics:     tpST.Metrics,
 		Weight:      tpST.Weight,
 		Blocker:     tpST.Blocker,
 		Stored:      tpST.Stored,
@@ -2081,12 +2139,8 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 			return nil, err
 		}
 	}
-	for _, metr := range tpST.Metrics {
-		st.Metrics = append(st.Metrics, metr)
-	}
 	for _, trh := range tpST.Thresholds {
 		st.Thresholds = append(st.Thresholds, trh)
-
 	}
 	for _, fltr := range tpST.FilterIDs {
 		st.FilterIDs = append(st.FilterIDs, fltr)

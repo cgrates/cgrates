@@ -813,22 +813,57 @@ func TestTPStatsAsTPStats(t *testing.T) {
 	tps := []*TpStats{
 		&TpStats{
 			Tpid:               "TEST_TPID",
+			Tenant:             "cgrates.org",
 			ID:                 "Stats1",
 			FilterIDs:          "FLTR_1",
 			ActivationInterval: "2014-07-29T15:00:00Z",
 			QueueLength:        100,
 			TTL:                "1s",
-			MinItems:           1,
-			Metrics:            "*asr;*acd;*acc",
+			MinItems:           2,
+			Metrics:            "*asr;*acc;*tcc;*acd;*tcd;*pdd",
+			Parameters:         "",
 			Thresholds:         "THRESH1;THRESH2",
-			Stored:             false,
-			Blocker:            false,
+			Stored:             true,
+			Blocker:            true,
+			Weight:             20.0,
+		},
+		&TpStats{
+			Tpid:               "TEST_TPID",
+			Tenant:             "cgrates.org",
+			ID:                 "Stats1",
+			FilterIDs:          "FLTR_1",
+			ActivationInterval: "2014-07-29T15:00:00Z",
+			QueueLength:        100,
+			TTL:                "1s",
+			MinItems:           2,
+			Metrics:            "*sum;*average;*tcc",
+			Parameters:         "BalanceValue",
+			Thresholds:         "THRESH3",
+			Stored:             true,
+			Blocker:            true,
+			Weight:             20.0,
+		},
+		&TpStats{
+			Tpid:               "TEST_TPID",
+			Tenant:             "itsyscom.com",
+			ID:                 "Stats1",
+			FilterIDs:          "FLTR_1",
+			ActivationInterval: "2014-07-29T15:00:00Z",
+			QueueLength:        100,
+			TTL:                "1s",
+			MinItems:           2,
+			Metrics:            "*sum;*average;*tcc",
+			Parameters:         "BalanceValue",
+			Thresholds:         "THRESH4",
+			Stored:             true,
+			Blocker:            true,
 			Weight:             20.0,
 		},
 	}
 	eTPs := []*utils.TPStats{
 		&utils.TPStats{
 			TPid:      tps[0].Tpid,
+			Tenant:    tps[0].Tenant,
 			ID:        tps[0].ID,
 			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
@@ -836,17 +871,64 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			},
 			QueueLength: tps[0].QueueLength,
 			TTL:         tps[0].TTL,
-			Metrics:     []string{"*asr", "*acd", "*acc"},
-			MinItems:    tps[0].MinItems,
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Stored:      tps[0].Stored,
-			Blocker:     tps[0].Blocker,
-			Weight:      tps[0].Weight,
+			Metrics: []*utils.MetricWithParams{
+				&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
+				&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
+				&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
+				&utils.MetricWithParams{MetricID: "*tcd", Parameters: ""},
+				&utils.MetricWithParams{MetricID: "*pdd", Parameters: ""},
+				&utils.MetricWithParams{MetricID: "*sum", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*average", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*tcc", Parameters: "BalanceValue"},
+			},
+			MinItems:   tps[0].MinItems,
+			Thresholds: []string{"THRESH1", "THRESH2", "THRESH3"},
+			Stored:     tps[0].Stored,
+			Blocker:    tps[0].Blocker,
+			Weight:     tps[0].Weight,
+		},
+		&utils.TPStats{
+			TPid:      tps[0].Tpid,
+			ID:        tps[0].ID,
+			Tenant:    tps[2].Tenant,
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: tps[0].ActivationInterval,
+			},
+			QueueLength: tps[0].QueueLength,
+			TTL:         tps[0].TTL,
+			Metrics: []*utils.MetricWithParams{
+				&utils.MetricWithParams{MetricID: "*sum", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*average", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*tcc", Parameters: "BalanceValue"},
+			},
+			MinItems:   tps[0].MinItems,
+			Thresholds: []string{"THRESH4"},
+			Stored:     tps[0].Stored,
+			Blocker:    tps[0].Blocker,
+			Weight:     tps[0].Weight,
 		},
 	}
 	rcvTPs := TpStatsS(tps).AsTPStats()
-	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
-		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	if !(reflect.DeepEqual(eTPs[1].TPid, rcvTPs[1].TPid) && reflect.DeepEqual(eTPs[0].TPid, rcvTPs[0].TPid)) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[0].TPid), utils.ToIJSON(rcvTPs[0].TPid))
+	} else if !(reflect.DeepEqual(eTPs[1].ID, rcvTPs[1].ID) && reflect.DeepEqual(eTPs[0].ID, rcvTPs[0].ID)) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[0].ID), utils.ToIJSON(rcvTPs[0].ID))
+	} else if !(reflect.DeepEqual(eTPs[1].FilterIDs, rcvTPs[1].FilterIDs) && reflect.DeepEqual(eTPs[0].FilterIDs, rcvTPs[0].FilterIDs)) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[0].FilterIDs), utils.ToIJSON(rcvTPs[0].FilterIDs))
+	} else if len(utils.ToIJSON(eTPs[0].Metrics)) != len(utils.ToIJSON(rcvTPs[0].Metrics)) &&
+		len(utils.ToIJSON(eTPs[1].Metrics)) != len(utils.ToIJSON(rcvTPs[1].Metrics)) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[0].Metrics), utils.ToIJSON(rcvTPs[0].Metrics))
+	}
+	if !(reflect.DeepEqual(eTPs[1].TPid, rcvTPs[1].TPid) && reflect.DeepEqual(eTPs[0].TPid, rcvTPs[0].TPid)) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[1].TPid), utils.ToIJSON(rcvTPs[1].TPid))
+	} else if !(reflect.DeepEqual(eTPs[1].ID, rcvTPs[1].ID) && reflect.DeepEqual(eTPs[0].ID, rcvTPs[0].ID)) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[1].ID), utils.ToIJSON(rcvTPs[1].ID))
+	} else if !(reflect.DeepEqual(eTPs[1].FilterIDs, rcvTPs[1].FilterIDs) && reflect.DeepEqual(eTPs[0].FilterIDs, rcvTPs[0].FilterIDs)) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[1].FilterIDs), utils.ToIJSON(rcvTPs[1].FilterIDs))
+	} else if len(utils.ToIJSON(eTPs[0].Metrics)) != len(utils.ToIJSON(rcvTPs[0].Metrics)) &&
+		len(utils.ToIJSON(eTPs[0].Metrics)) != len(utils.ToIJSON(rcvTPs[0].Metrics)) {
+		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[1].Metrics), utils.ToIJSON(rcvTPs[1].Metrics))
 	}
 }
 
@@ -858,23 +940,31 @@ func TestAPItoTPStats(t *testing.T) {
 		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
 		QueueLength:        100,
 		TTL:                "1s",
-		Metrics:            []string{"*asr", "*acd", "*acc"},
-		MinItems:           1,
-		Thresholds:         []string{"THRESH1", "THRESH2"},
-		Stored:             false,
-		Blocker:            false,
-		Weight:             20.0,
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
+			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
+			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
+		},
+		MinItems:   1,
+		Thresholds: []string{"THRESH1", "THRESH2"},
+		Stored:     false,
+		Blocker:    false,
+		Weight:     20.0,
 	}
 
 	eTPs := &StatQueueProfile{ID: tps.ID,
 		QueueLength: tps.QueueLength,
-		Metrics:     []string{"*asr", "*acd", "*acc"},
-		Thresholds:  []string{"THRESH1", "THRESH2"},
-		FilterIDs:   []string{"FLTR_1"},
-		Stored:      tps.Stored,
-		Blocker:     tps.Blocker,
-		Weight:      20.0,
-		MinItems:    tps.MinItems,
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
+			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
+			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
+		},
+		Thresholds: []string{"THRESH1", "THRESH2"},
+		FilterIDs:  []string{"FLTR_1"},
+		Stored:     tps.Stored,
+		Blocker:    tps.Blocker,
+		Weight:     20.0,
+		MinItems:   tps.MinItems,
 	}
 	if eTPs.TTL, err = utils.ParseDurationWithNanosecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)

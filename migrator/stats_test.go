@@ -89,12 +89,16 @@ func TestV1StatsAsStats(t *testing.T) {
 		FilterIDs:   []string{v1Sts.Id},
 		QueueLength: 10,
 		TTL:         time.Duration(0) * time.Second,
-		Metrics:     []string{"*asr", "*acd", "*acc"},
-		Blocker:     false,
-		Thresholds:  []string{"TestB"},
-		Stored:      true,
-		Weight:      float64(0),
-		MinItems:    0,
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
+			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
+			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
+		},
+		Blocker:    false,
+		Thresholds: []string{"TestB"},
+		Stored:     true,
+		Weight:     float64(0),
+		MinItems:   0,
 	}
 	fltr, _, newsqp, err := v1Sts.AsStatQP()
 	if err != nil {

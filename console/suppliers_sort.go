@@ -25,7 +25,7 @@ import (
 
 func init() {
 	c := &CmdSuppliersSort{
-		name:      "suppliers_sort",
+		name:      "suppliers_get",
 		rpcMethod: "SupplierSv1.GetSuppliers",
 		rpcParams: new(utils.CGREvent),
 	}

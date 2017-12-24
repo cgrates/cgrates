@@ -284,12 +284,21 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
-		Metrics:     []string{"MetricValue", "MetricValueTwo"},
-		Thresholds:  []string{"Val1", "Val2"},
-		Blocker:     true,
-		Stored:      true,
-		Weight:      20,
-		MinItems:    1,
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{
+				MetricID:   "MetricValue",
+				Parameters: "",
+			},
+			&utils.MetricWithParams{
+				MetricID:   "MetricValueTwo",
+				Parameters: "",
+			},
+		},
+		Thresholds: []string{"Val1", "Val2"},
+		Blocker:    true,
+		Stored:     true,
+		Weight:     20,
+		MinItems:   1,
 	}
 	var result string
 	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {

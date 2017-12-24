@@ -48,18 +48,20 @@ func TestStatQueuesSort(t *testing.T) {
 
 func TestStatRemEventWithID(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 1,
-				Count:    2,
-				Events: map[string]bool{
-					"cgrates.org:TestRemEventWithID_1": true,
-					"cgrates.org:TestRemEventWithID_2": false,
+		SQMetrics: map[string]map[string]StatMetric{
+			utils.MetaASR: map[string]StatMetric{
+				"": &StatASR{
+					Answered: 1,
+					Count:    2,
+					Events: map[string]bool{
+						"cgrates.org:TestRemEventWithID_1": true,
+						"cgrates.org:TestRemEventWithID_2": false,
+					},
 				},
 			},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	asrMetric := sq.SQMetrics[utils.MetaASR][""].(*StatASR)
 	if asr := asrMetric.GetFloat64Value(); asr != 50 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	}
@@ -91,14 +93,16 @@ func TestStatRemEventWithID(t *testing.T) {
 
 func TestStatRemExpired(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 2,
-				Count:    3,
-				Events: map[string]bool{
-					"cgrates.org:TestStatRemExpired_1": true,
-					"cgrates.org:TestStatRemExpired_2": false,
-					"cgrates.org:TestStatRemExpired_3": true,
+		SQMetrics: map[string]map[string]StatMetric{
+			utils.MetaASR: map[string]StatMetric{
+				"": &StatASR{
+					Answered: 2,
+					Count:    3,
+					Events: map[string]bool{
+						"cgrates.org:TestStatRemExpired_1": true,
+						"cgrates.org:TestStatRemExpired_2": false,
+						"cgrates.org:TestStatRemExpired_3": true,
+					},
 				},
 			},
 		},
@@ -114,7 +118,7 @@ func TestStatRemExpired(t *testing.T) {
 			{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Duration(time.Minute)))},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	asrMetric := sq.SQMetrics[utils.MetaASR][""].(*StatASR)
 	if asr := asrMetric.GetFloat64Value(); asr != 66.66667 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	}
@@ -175,17 +179,19 @@ func TestStatRemOnQueueLength(t *testing.T) {
 
 func TestStatAddStatEvent(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 1,
-				Count:    1,
-				Events: map[string]bool{
-					"cgrates.org:TestStatRemExpired_1": true,
+		SQMetrics: map[string]map[string]StatMetric{
+			utils.MetaASR: map[string]StatMetric{
+				"": &StatASR{
+					Answered: 1,
+					Count:    1,
+					Events: map[string]bool{
+						"cgrates.org:TestStatRemExpired_1": true,
+					},
 				},
 			},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
+	asrMetric := sq.SQMetrics[utils.MetaASR][""].(*StatASR)
 	if asr := asrMetric.GetFloat64Value(); asr != 100 {
 		t.Errorf("received ASR: %v", asr)
 	}
