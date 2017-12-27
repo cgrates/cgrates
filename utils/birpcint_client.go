@@ -26,6 +26,20 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// NewBiJSONrpcClient will create a bidirectional JSON client connection
+func NewBiJSONrpcClient(addr string, handlers map[string]interface{}) (*rpc2.Client, error) {
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+	clnt := rpc2.NewClientWithCodec(rpc2_jsonrpc.NewJSONCodec(conn))
+	for method, handlerFunc := range handlers {
+		clnt.Handle(method, handlerFunc)
+	}
+	go clnt.Run()
+	return clnt, nil
+}
+
 // Interface which the server needs to work as BiRPCServer
 type BiRPCServer interface {
 	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.RpcClientConnection
@@ -50,18 +64,4 @@ func (clnt *BiRPCInternalClient) SetClientConn(clntConn rpcclient.RpcClientConne
 // Part of rpcclient.RpcClientConnection interface
 func (clnt *BiRPCInternalClient) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return clnt.serverConn.CallBiRPC(clnt.clntConn, serviceMethod, args, reply)
-}
-
-func NewBiJSONrpcClient(addr string, handlers map[string]interface{}) (*rpc2.Client, error) {
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		return nil, err
-	}
-
-	clnt := rpc2.NewClientWithCodec(rpc2_jsonrpc.NewJSONCodec(conn))
-	for method, handlerFunc := range handlers {
-		clnt.Handle(method, handlerFunc)
-	}
-	go clnt.Run()
-	return clnt, nil
 }

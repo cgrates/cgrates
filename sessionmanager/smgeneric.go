@@ -63,12 +63,15 @@ type SMGReplicationConn struct {
 	Synchronous bool
 }
 
-func NewSMGeneric(cgrCfg *config.CGRConfig, rals rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection,
+func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS,
+	splS, attrS, cdrsrv rpcclient.RpcClientConnection,
 	smgReplConns []*SMGReplicationConn, timezone string) *SMGeneric {
 	ssIdxCfg := cgrCfg.SmGenericConfig.SessionIndexes
 	ssIdxCfg[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 	return &SMGeneric{cgrCfg: cgrCfg,
 		rals:               rals,
+		resS:               resS,
+		attrS:              attrS,
 		cdrsrv:             cdrsrv,
 		smgReplConns:       smgReplConns,
 		Timezone:           timezone,
@@ -84,10 +87,13 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals rpcclient.RpcClientConnection, 
 }
 
 type SMGeneric struct {
-	cgrCfg             *config.CGRConfig // Separate from smCfg since there can be multiple
-	rals               rpcclient.RpcClientConnection
-	cdrsrv             rpcclient.RpcClientConnection
-	smgReplConns       []*SMGReplicationConn // list of connections where we will replicate our session data
+	cgrCfg             *config.CGRConfig             // Separate from smCfg since there can be multiple
+	rals               rpcclient.RpcClientConnection // RALs connections
+	resS               rpcclient.RpcClientConnection // ResourceS connections
+	splS               rpcclient.RpcClientConnection // SupplierS connections
+	attrS              rpcclient.RpcClientConnection // AttributeS connections
+	cdrsrv             rpcclient.RpcClientConnection // CDR server connections
+	smgReplConns       []*SMGReplicationConn         // list of connections where we will replicate our session data
 	Timezone           string
 	activeSessions     map[string][]*SMGSession // group sessions per sessionId, multiple runs based on derived charging
 	aSessionsMux       sync.RWMutex
@@ -120,8 +126,8 @@ type smgSessionTerminator struct {
 
 // setSessionTerminator installs a new terminator for a session
 func (smg *SMGeneric) setSessionTerminator(s *SMGSession) {
-	ttl := s.EventStart.GetSessionTTL(smg.cgrCfg.SmGenericConfig.SessionTTL,
-		smg.cgrCfg.SmGenericConfig.SessionTTLMaxDelay)
+	ttl := s.EventStart.GetSessionTTL(smg.cgrCfg.SMGConfig.SessionTTL,
+		smg.cgrCfg.SMGConfig.SessionTTLMaxDelay)
 	if ttl == 0 {
 		return
 	}
@@ -383,9 +389,9 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
 				CD: sessionRun.CallDescriptor, clntConn: clntConn}
 			smg.recordASession(s)
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
-			if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 {
+			if smg.cgrCfg.SMGConfig.DebitInterval != 0 {
 				s.stopDebit = stopDebitChan
-				go s.debitLoop(smg.cgrCfg.SmGenericConfig.DebitInterval)
+				go s.debitLoop(smg.cgrCfg.SMGConfig.DebitInterval)
 			}
 		}
 		return nil, nil
@@ -465,7 +471,7 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 // replicateSessions will replicate session based on configuration
 func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool, smgReplConns []*SMGReplicationConn) (err error) {
 	if len(smgReplConns) == 0 ||
-		(smg.cgrCfg.SmGenericConfig.DebitInterval != 0 && !passiveSessions) { // Replicating active not supported
+		(smg.cgrCfg.SMGConfig.DebitInterval != 0 && !passiveSessions) { // Replicating active not supported
 		return
 	}
 	ssMux := &smg.aSessionsMux
@@ -712,7 +718,7 @@ func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClie
 		smg.sessionEnd(cgrID, 0)
 		return
 	}
-	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 { // Session handled by debit loop
+	if smg.cgrCfg.SMGConfig.DebitInterval != 0 { // Session handled by debit loop
 		maxUsage = time.Duration(-1 * time.Second)
 		return
 	}
@@ -731,7 +737,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		return item.Value.(time.Duration), item.Err
 	}
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err})
-	if smg.cgrCfg.SmGenericConfig.DebitInterval != 0 { // Not possible to update a session with debit loop active
+	if smg.cgrCfg.SMGConfig.DebitInterval != 0 { // Not possible to update a session with debit loop active
 		err = errors.New("ACTIVE_DEBIT_LOOP")
 		return
 	}
@@ -748,8 +754,8 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	}
 	smg.resetTerminatorTimer(cgrID,
 		gev.GetSessionTTL(
-			smg.cgrCfg.SmGenericConfig.SessionTTL,
-			smg.cgrCfg.SmGenericConfig.SessionTTLMaxDelay),
+			smg.cgrCfg.SMGConfig.SessionTTL,
+			smg.cgrCfg.SMGConfig.SessionTTLMaxDelay),
 		gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
 	var evLastUsed time.Duration
@@ -759,7 +765,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		return
 	}
 	if maxUsage, err = gev.GetMaxUsage(utils.META_DEFAULT,
-		smg.cgrCfg.SmGenericConfig.MaxCallDuration); err != nil {
+		smg.cgrCfg.SMGConfig.MaxCallDuration); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrMandatoryIeMissing
 		}
@@ -1272,4 +1278,215 @@ func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientCo
 	}
 	*reply = utils.OK
 	return
+}
+
+type V1AuthorizeArgs struct {
+	GetMaxUsage    bool
+	CheckResources bool
+	GetSuppliers   bool
+	GetAttributes  bool
+	utils.CGREvent
+	utils.Paginator
+}
+
+type V1AuthorizeReply struct {
+	MaxUsage         time.Duration
+	ResourcesAllowed bool
+	Suppliers        engine.SortedSuppliers
+	Attributes       *engine.AttrSProcessEventReply
+}
+
+// BiRPCV1Authorize performs authorization for CGREvent based on specific components
+func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
+	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
+	if args.GetMaxUsage {
+		maxUsage, err := smg.GetMaxUsage(args.CGREvent.Event)
+		if err != nil {
+			return utils.NewErrServerError(err)
+		}
+		authReply.MaxUsage = maxUsage
+	}
+	if args.CheckResources {
+		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		if err != nil {
+			return utils.NewErrServerError(err)
+		}
+		var allowed bool
+		attrRU := utils.ArgRSv1ResourceUsage{
+			Tenant:  args.CGREvent.Tenant,
+			UsageID: originID,
+			Event:   args.CGREvent.Event,
+			Units:   1,
+		}
+		if err = smg.resS.Call(utils.ResourceSv1AllowUsage,
+			attrRU, &allowed); err != nil {
+			return err
+		}
+		authReply.ResourcesAllowed = allowed
+	}
+	if args.GetSuppliers {
+		var splsReply engine.SortedSuppliers
+		if err = smg.splS.Call(utils.SupplierSv1GetSuppliers,
+			args.CGREvent, &splsReply); err != nil {
+			return err
+		}
+		authReply.Suppliers = splsReply
+	}
+	if args.GetAttributes {
+		if args.CGREvent.Context == nil { // populate if not already in
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSMG)
+		}
+		var rplyEv engine.AttrSProcessEventReply
+		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
+			args.CGREvent, &rplyEv); err != nil {
+			return
+		}
+		authReply.Attributes = &rplyEv
+	}
+	return nil
+}
+
+type V1InitSessionArgs struct {
+	InitSession       bool
+	AllocateResources bool
+	GetAttributes     bool
+	utils.CGREvent
+}
+
+type V1InitSessionReply struct {
+	MaxUsage        time.Duration
+	ResAllocMessage string
+	Attributes      *engine.AttrSProcessEventReply
+}
+
+// BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
+func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
+	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
+	if args.AllocateResources {
+		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		if err != nil {
+			return utils.NewErrServerError(err)
+		}
+		attrRU := utils.ArgRSv1ResourceUsage{
+			Tenant:  args.CGREvent.Tenant,
+			UsageID: originID,
+			Event:   args.CGREvent.Event,
+			Units:   1,
+		}
+		var allocMessage string
+		if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
+			attrRU, &allocMessage); err != nil {
+			return err
+		}
+		rply.ResAllocMessage = allocMessage
+	}
+	if args.InitSession {
+		if rply.MaxUsage, err = smg.InitiateSession(args.CGREvent.Event, clnt); err != nil {
+			if err != rpcclient.ErrSessionNotFound {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+	}
+	if args.GetAttributes {
+		if args.CGREvent.Context == nil {
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSMG)
+		}
+		var rplyEv engine.AttrSProcessEventReply
+		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
+			args.CGREvent, &rplyEv); err != nil {
+			return
+		}
+		rply.Attributes = &rplyEv
+	}
+	return
+}
+
+type V1UpdateSessionArgs struct {
+	UpdateSession     bool
+	AllocateResources bool
+	utils.CGREvent
+}
+
+type V1UpdateSessionReply struct {
+	MaxUsage        time.Duration
+	ResAllocMessage string
+}
+
+// BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
+func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
+	args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
+	if args.UpdateSession {
+		if rply.MaxUsage, err = smg.UpdateSession(args.CGREvent.Event, clnt); err != nil {
+			if err != rpcclient.ErrSessionNotFound {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+	}
+	if args.AllocateResources {
+		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		if err != nil {
+			return utils.NewErrServerError(err)
+		}
+		attrRU := utils.ArgRSv1ResourceUsage{
+			Tenant:  args.CGREvent.Tenant,
+			UsageID: originID,
+			Event:   args.CGREvent.Event,
+			Units:   1,
+		}
+		var allocMessage string
+		if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
+			attrRU, &allocMessage); err != nil {
+			return err
+		}
+		rply.ResAllocMessage = allocMessage
+	}
+	return
+}
+
+type V1TerminateSessionArgs struct {
+	TerminateSession bool
+	ReleaseResources bool
+	utils.CGREvent
+}
+
+// BiRPCV1TerminateSession will stop debit loops as well as release any used resources
+func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
+	args *V1TerminateSessionArgs, rply *string) (err error) {
+	if args.TerminateSession {
+		if err = smg.TerminateSession(args.CGREvent.Event, clnt); err != nil {
+			if err != rpcclient.ErrSessionNotFound {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+	}
+	if args.ReleaseResources {
+		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		if err != nil {
+			return utils.NewErrServerError(err)
+		}
+		var reply string
+		argsRU := utils.ArgRSv1ResourceUsage{
+			Tenant:  args.CGREvent.Tenant,
+			UsageID: originID, // same ID should be accepted by first group since the previous resource should be expired
+			Event:   args.CGREvent.Event,
+		}
+		if err = smg.resS.Call(utils.ResourceSv1ReleaseResources,
+			argsRU, &reply); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	*rply = utils.OK
+	return
+}
+
+// Called on session end, should send the CDR to CDRS
+func (smg *SMGeneric) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection, cgrEv utils.CGREvent, reply *string) error {
+	if err := smg.ProcessCDR(cgrEv.Event); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
 }

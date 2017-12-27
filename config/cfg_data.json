@@ -51,4 +51,16 @@
 	],
 },
 
+"resources": {
+	"enabled": true,
+},
+
+"suppliers": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
 }

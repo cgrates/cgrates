@@ -198,8 +198,11 @@ type SmgJsonCfg struct {
 	Enabled               *bool
 	Listen_bijson         *string
 	Rals_conns            *[]*HaPoolJsonCfg
+	Resources_conns       *[]*HaPoolJsonCfg
+	Suppliers_conns       *[]*HaPoolJsonCfg
 	Cdrs_conns            *[]*HaPoolJsonCfg
 	Smg_replication_conns *[]*HaPoolJsonCfg
+	Attributes_conns      *[]*HaPoolJsonCfg
 	Debit_interval        *string
 	Min_call_duration     *string
 	Max_call_duration     *string

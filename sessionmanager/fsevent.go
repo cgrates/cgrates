@@ -72,6 +72,12 @@ const (
 	PDD_NOMEDIA_MS           = "variable_progressmsec"
 	IGNOREPARK               = "variable_cgr_ignorepark"
 	FS_VARPREFIX             = "variable_"
+	VarCGRSubsystems         = "variable_cgr_subsystems"
+	SubSAccountS             = "accounts"
+	SubSSupplierS            = "suppliers"
+	SubSResourceS            = "resources"
+	SubSAttributeS           = "attributes"
+	CGRResourcesAllowed      = "cgr_resources_allowed"
 
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
@@ -86,11 +92,8 @@ func (fsev FSEvent) String() (result string) {
 	return
 }
 
-// Loads the new event data from a body of text containing the key value proprieties.
-// It stores the parsed proprieties in the internal map.
-func (fsev FSEvent) AsEvent(body string) engine.Event {
-	fsev = fsock.FSEventStrToMap(body, nil)
-	return fsev
+func NewFSEvent(strEv string) (fsev FSEvent) {
+	return fsock.FSEventStrToMap(strEv, nil)
 }
 
 func (fsev FSEvent) GetName() string {
@@ -413,6 +416,87 @@ func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 
 func (fsev FSEvent) AsMapStringIface() (map[string]interface{}, error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
+func (fsev FSEvent) V1AuthorizeArgs() (args *V1AuthorizeArgs) {
+	args = &V1AuthorizeArgs{ // defaults
+		GetMaxUsage: true,
+	}
+	subsystems, has := fsev[VarCGRSubsystems]
+	if !has {
+		return
+	}
+	if strings.Index(subsystems, SubSAccountS) == -1 {
+		args.GetMaxUsage = false
+	}
+	if strings.Index(subsystems, SubSResourceS) != -1 {
+		args.CheckResources = true
+	}
+	if strings.Index(subsystems, SubSSupplierS) != -1 {
+		args.GetSuppliers = true
+	}
+	if strings.Index(subsystems, SubSAttributeS) != -1 {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// V2InitSessionArgs returns the arguments used in SMGv1.InitSession
+func (fsev FSEvent) V1InitSessionArgs() (args *V1InitSessionArgs) {
+	args = &V1InitSessionArgs{ // defaults
+		InitSession: true,
+	}
+	subsystems, has := fsev[VarCGRSubsystems]
+	if !has {
+		return
+	}
+	if strings.Index(subsystems, SubSAccountS) == -1 {
+		args.InitSession = false
+	}
+	if strings.Index(subsystems, SubSResourceS) != -1 {
+		args.AllocateResources = true
+	}
+	if strings.Index(subsystems, SubSAttributeS) != -1 {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// V1UpdateSessionArgs returns the arguments used in SMGv1.UpdateSession
+func (fsev FSEvent) V1UpdateSessionArgs() (args *V1UpdateSessionArgs) {
+	args = &V1UpdateSessionArgs{ // defaults
+		UpdateSession: true,
+	}
+	subsystems, has := fsev[VarCGRSubsystems]
+	if !has {
+		return
+	}
+	if strings.Index(subsystems, SubSAccountS) == -1 {
+		args.UpdateSession = false
+	}
+	if strings.Index(subsystems, SubSResourceS) != -1 {
+		args.AllocateResources = true
+	}
+	return
+}
+
+// V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
+func (fsev FSEvent) V1TerminateSessionArgs() (args *V1TerminateSessionArgs) {
+	args = &V1TerminateSessionArgs{ // defaults
+		TerminateSession: true,
+	}
+	subsystems, has := fsev[VarCGRSubsystems]
+	if !has {
+		return
+	}
+	if strings.Index(subsystems, SubSAccountS) == -1 {
+		args.TerminateSession = false
+	}
+	if strings.Index(subsystems, SubSResourceS) != -1 {
+		args.ReleaseResources = true
+	}
+	return
 }
 
 // Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now

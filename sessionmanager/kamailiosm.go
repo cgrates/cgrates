@@ -89,7 +89,7 @@ func (self *KamailioSessionManager) allocateResources(kev KamEvent) (err error) 
 		Units:   1, // One channel reserved
 	}
 	var reply string
-	return self.rlS.Call(utils.ResourceSv1AllocateResource, attrRU, &reply)
+	return self.rlS.Call(utils.ResourceSv1AllocateResources, attrRU, &reply)
 }
 
 func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
@@ -224,7 +224,7 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 				UsageID: kev.GetUUID(),
 				Units:   1,
 			}
-			if err := self.rlS.Call(utils.ResourceSv1ReleaseResource, attrRU, &reply); err != nil {
+			if err := self.rlS.Call(utils.ResourceSv1ReleaseResources, attrRU, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> RLs API error: %s", err.Error()))
 			}
 		}()

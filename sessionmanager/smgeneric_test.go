@@ -29,12 +29,12 @@ var smgCfg *config.CGRConfig
 
 func init() {
 	smgCfg, _ = config.NewDefaultCGRConfig()
-	smgCfg.SmGenericConfig.SessionIndexes = utils.StringMap{"Tenant": true,
+	smgCfg.SMGConfig.SessionIndexes = utils.StringMap{"Tenant": true,
 		"Account": true, "Extra3": true, "Extra4": true}
 }
 
 func TestSMGSessionIndexing(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, nil, "UTC")
+	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, "UTC")
 	smGev := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
@@ -389,7 +389,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 }
 
 func TestSMGActiveSessions(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, nil, "UTC")
+	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, "UTC")
 	smGev1 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
@@ -463,7 +463,7 @@ func TestSMGActiveSessions(t *testing.T) {
 }
 
 func TestGetPassiveSessions(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, nil, "UTC")
+	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, "UTC")
 	if pSS := smg.getSessions("", true); len(pSS) != 0 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}

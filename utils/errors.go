@@ -48,6 +48,7 @@ var (
 	ErrNoActiveSession         = errors.New("NO_ACTIVE_SESSION")
 	ErrPartiallyExecuted       = errors.New("PARTIALLY_EXECUTED")
 	ErrMaxUsageExceeded        = errors.New("MAX_USAGE_EXCEEDED")
+	ErrUnallocatedResource     = errors.New("UNALLOCATED_RESOURCE")
 )
 
 // NewCGRError initialises a new CGRError

@@ -414,6 +414,21 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("<SMGeneric> RALs not enabled but requested by SMGeneric component.")
 			}
 		}
+		for _, conn := range self.SMGConfig.ResSConns {
+			if conn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
+				return errors.New("<SMGeneric> ResourceS not enabled but requested by SMGeneric component.")
+			}
+		}
+		for _, conn := range self.SMGConfig.SupplSConns {
+			if conn.Address == utils.MetaInternal && !self.supplierSCfg.Enabled {
+				return errors.New("<SMGeneric> SupplierS not enabled but requested by SMGeneric component.")
+			}
+		}
+		for _, conn := range self.SMGConfig.AttrSConns {
+			if conn.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
+				return errors.New("<SMGeneric> AttributeS not enabled but requested by SMGeneric component.")
+			}
+		}
 		if len(self.SMGConfig.CDRsConns) == 0 {
 			return errors.New("<SMGeneric> CDRs definition is mandatory!")
 		}

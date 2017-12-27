@@ -92,6 +92,9 @@ type SMGConfig struct {
 	Enabled             bool
 	ListenBijson        string
 	RALsConns           []*HaPoolConfig
+	ResSConns           []*HaPoolConfig
+	SupplSConns         []*HaPoolConfig
+	AttrSConns          []*HaPoolConfig
 	CDRsConns           []*HaPoolConfig
 	SMGReplicationConns []*HaPoolConfig
 	DebitInterval       time.Duration
@@ -120,6 +123,27 @@ func (self *SMGConfig) loadFromJsonCfg(jsnCfg *SmgJsonCfg) error {
 		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
 			self.RALsConns[idx] = NewDfltHaPoolConfig()
 			self.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Resources_conns != nil {
+		self.ResSConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
+			self.ResSConns[idx] = NewDfltHaPoolConfig()
+			self.ResSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Suppliers_conns != nil {
+		self.SupplSConns = make([]*HaPoolConfig, len(*jsnCfg.Suppliers_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Suppliers_conns {
+			self.SupplSConns[idx] = NewDfltHaPoolConfig()
+			self.SupplSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Attributes_conns != nil {
+		self.AttrSConns = make([]*HaPoolConfig, len(*jsnCfg.Attributes_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
+			self.AttrSConns[idx] = NewDfltHaPoolConfig()
+			self.AttrSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Cdrs_conns != nil {

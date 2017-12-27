@@ -26,6 +26,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// SupplierReply represents one supplier in
+type SortedSupplier struct {
+	SupplierID  string
+	SortingData map[string]interface{} // store here extra info like cost or stats
+}
+
 // SuppliersReply is returned as part of GetSuppliers call
 type SortedSuppliers struct {
 	ProfileID       string            // Profile matched
@@ -33,10 +39,13 @@ type SortedSuppliers struct {
 	SortedSuppliers []*SortedSupplier // list of supplier IDs and SortingData data
 }
 
-// SupplierReply represents one supplier in
-type SortedSupplier struct {
-	SupplierID  string
-	SortingData map[string]interface{} // store here extra info like cost or stats
+// SupplierIDs returns list of suppliers
+func (sSpls *SortedSuppliers) SupplierIDs() (sIDs []string) {
+	sIDs = make([]string, len(sSpls.SortedSuppliers))
+	for i, spl := range sSpls.SortedSuppliers {
+		sIDs[i] = spl.SupplierID
+	}
+	return
 }
 
 // SortWeight is part of sort interface, sort based on Weight

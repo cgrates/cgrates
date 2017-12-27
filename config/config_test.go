@@ -447,10 +447,18 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSmGeCfg := &SMGConfig{
-		Enabled:             false,
-		ListenBijson:        "127.0.0.1:2014",
-		RALsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CDRsConns:           []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		Enabled:      false,
+		ListenBijson: "127.0.0.1:2014",
+		RALsConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
+		ResSConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
+		SupplSConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
+		AttrSConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
+		CDRsConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
 		SMGReplicationConns: []*HaPoolConfig{},
 		DebitInterval:       0 * time.Second,
 		MinCallDuration:     0 * time.Second,
