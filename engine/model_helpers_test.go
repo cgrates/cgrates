@@ -917,7 +917,9 @@ func TestTPStatsAsTPStats(t *testing.T) {
 	} else if !(reflect.DeepEqual(eTPs[1].FilterIDs, rcvTPs[1].FilterIDs) && reflect.DeepEqual(eTPs[0].FilterIDs, rcvTPs[0].FilterIDs)) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[0].FilterIDs), utils.ToIJSON(rcvTPs[0].FilterIDs))
 	} else if len(utils.ToIJSON(eTPs[0].Metrics)) != len(utils.ToIJSON(rcvTPs[0].Metrics)) &&
-		len(utils.ToIJSON(eTPs[1].Metrics)) != len(utils.ToIJSON(rcvTPs[1].Metrics)) {
+		len(utils.ToIJSON(eTPs[1].Metrics)) != len(utils.ToIJSON(rcvTPs[1].Metrics)) &&
+		len(utils.ToIJSON(eTPs[1].Metrics)) != len(utils.ToIJSON(rcvTPs[0].Metrics)) &&
+		len(utils.ToIJSON(eTPs[0].Metrics)) != len(utils.ToIJSON(rcvTPs[1].Metrics)) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[0].Metrics), utils.ToIJSON(rcvTPs[0].Metrics))
 	}
 	if !(reflect.DeepEqual(eTPs[1].TPid, rcvTPs[1].TPid) && reflect.DeepEqual(eTPs[0].TPid, rcvTPs[0].TPid)) {
@@ -927,7 +929,9 @@ func TestTPStatsAsTPStats(t *testing.T) {
 	} else if !(reflect.DeepEqual(eTPs[1].FilterIDs, rcvTPs[1].FilterIDs) && reflect.DeepEqual(eTPs[0].FilterIDs, rcvTPs[0].FilterIDs)) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[1].FilterIDs), utils.ToIJSON(rcvTPs[1].FilterIDs))
 	} else if len(utils.ToIJSON(eTPs[0].Metrics)) != len(utils.ToIJSON(rcvTPs[0].Metrics)) &&
-		len(utils.ToIJSON(eTPs[0].Metrics)) != len(utils.ToIJSON(rcvTPs[0].Metrics)) {
+		len(utils.ToIJSON(eTPs[1].Metrics)) != len(utils.ToIJSON(rcvTPs[1].Metrics)) &&
+		len(utils.ToIJSON(eTPs[1].Metrics)) != len(utils.ToIJSON(rcvTPs[0].Metrics)) &&
+		len(utils.ToIJSON(eTPs[0].Metrics)) != len(utils.ToIJSON(rcvTPs[1].Metrics)) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs[1].Metrics), utils.ToIJSON(rcvTPs[1].Metrics))
 	}
 }

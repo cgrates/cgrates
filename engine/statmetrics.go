@@ -649,7 +649,6 @@ func NewStatSum(minItems int, extraParams string) (StatMetric, error) {
 
 type StatSum struct {
 	Sum       float64
-	Count     float64
 	Events    map[string]float64 // map[EventTenantID]Cost
 	MinItems  int
 	FieldName string
@@ -659,7 +658,7 @@ type StatSum struct {
 // getValue returns tcd.val
 func (sum *StatSum) getValue() float64 {
 	if sum.val == nil {
-		if (sum.MinItems > 0 && len(sum.Events) < sum.MinItems) || (sum.Count == 0) {
+		if len(sum.Events) == 0 || len(sum.Events) < sum.MinItems {
 			sum.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			sum.val = utils.Float64Pointer(utils.Round(sum.Sum,
@@ -688,19 +687,14 @@ func (sum *StatSum) GetFloat64Value() (v float64) {
 
 func (sum *StatSum) AddEvent(ev *utils.CGREvent) (err error) {
 	var value float64
-	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
+	if val, err := ev.FieldAsFloat64(sum.FieldName); err != nil &&
+		err != utils.ErrNotFound {
 		return err
-	} else if !at.IsZero() {
-		if val, err := ev.FieldAsFloat64(sum.FieldName); err != nil &&
-			err != utils.ErrNotFound {
-			return err
-		} else if val >= 0 {
-			value = val
-			sum.Sum += val
-		}
+	} else if val >= 0 {
+		value = val
+		sum.Sum += val
 	}
 	sum.Events[ev.TenantID()] = value
-	sum.Count += 1
 	sum.val = nil
 	return
 }
@@ -713,7 +707,6 @@ func (sum *StatSum) RemEvent(evTenantID string) (err error) {
 	if val != 0 {
 		sum.Sum -= val
 	}
-	sum.Count -= 1
 	delete(sum.Events, evTenantID)
 	sum.val = nil
 	return
@@ -774,20 +767,16 @@ func (avg *StatAverage) GetFloat64Value() (v float64) {
 
 func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
 	var value float64
-	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
+	if val, err := ev.FieldAsFloat64(avg.FieldName); err != nil &&
+		err != utils.ErrNotFound {
 		return err
-	} else if !at.IsZero() {
-		if val, err := ev.FieldAsFloat64(avg.FieldName); err != nil &&
-			err != utils.ErrNotFound {
-			return err
-		} else if val >= 0 {
-			value = val
-			avg.Sum += val
-		}
+	} else if val > 0 {
+		value = val
+		avg.Sum += val
+		avg.Events[ev.TenantID()] = value
+		avg.Count += 1
+		avg.val = nil
 	}
-	avg.Events[ev.TenantID()] = value
-	avg.Count += 1
-	avg.val = nil
 	return
 }
 
