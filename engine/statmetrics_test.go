@@ -954,7 +954,7 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	statSum.AddEvent(ev2)
-	if v := statSum.GetFloat64Value(); v != -1.0 {
+	if v := statSum.GetFloat64Value(); v != 20.0 {
 		t.Errorf("wrong statSum value: %v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
