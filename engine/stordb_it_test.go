@@ -1552,10 +1552,23 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			},
 			QueueLength: 100,
 			TTL:         "1s",
-			Metrics:     []string{"*asr", "*acd", "*acc"},
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Weight:      20.0,
-			MinItems:    1,
+			Metrics: []*utils.MetricWithParams{
+				&utils.MetricWithParams{
+					MetricID:   "*asr",
+					Parameters: "",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*acd",
+					Parameters: "",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*acc",
+					Parameters: "",
+				},
+			},
+			Thresholds: []string{"THRESH1", "THRESH2"},
+			Weight:     20.0,
+			MinItems:   1,
 		},
 	}
 

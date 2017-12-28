@@ -54,43 +54,6 @@ func (rfi *ReqFilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
 	return rfi.chngdIndxKeys
 }
 
-// IndexFilters parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
-func (rfi *ReqFilterIndexer) IndexFilters(itemID string, reqFltrs *Filter) {
-	var hasMetaString bool
-	if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
-		rfi.reveseIndex[itemID] = make(utils.StringMap)
-	}
-	for _, fltr := range reqFltrs.RequestFilters {
-		if fltr.Type != MetaString {
-			continue
-		}
-		hasMetaString = true // Mark that we found at least one metatring so we don't index globally
-		if _, hastIt := rfi.reveseIndex[itemID]; !hastIt {
-			rfi.reveseIndex[itemID] = make(utils.StringMap)
-		}
-		for _, fldVal := range fltr.Values {
-			if _, hasIt := rfi.indexes[utils.ConcatenatedKey(fltr.FieldName, fldVal)]; !hasIt {
-				rfi.indexes[utils.ConcatenatedKey(fltr.FieldName, fldVal)] = make(utils.StringMap)
-			}
-			rfi.indexes[utils.ConcatenatedKey(fltr.FieldName, fldVal)][itemID] = true
-			rfi.reveseIndex[itemID][utils.ConcatenatedKey(fltr.FieldName, fldVal)] = true
-			rfi.chngdIndxKeys[utils.ConcatenatedKey(fltr.FieldName, fldVal)] = true
-		}
-		rfi.chngdRevIndxKeys[itemID] = true
-	}
-	if !hasMetaString {
-		if _, hasIt := rfi.indexes[utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)]; !hasIt {
-			rfi.indexes[utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)] = make(utils.StringMap)
-		}
-		if _, hastIt := rfi.reveseIndex[itemID]; !hastIt {
-			rfi.reveseIndex[itemID] = make(utils.StringMap)
-		}
-		rfi.reveseIndex[itemID][utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)] = true
-		rfi.indexes[utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE:NOT_AVAILABLE][rl.ID]
-	}
-	return
-}
-
 // IndexTPFilter parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
 func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
 	var hasMetaString bool
@@ -102,28 +65,24 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 			continue
 		}
 		hasMetaString = true // Mark that we found at least one metatring so we don't index globally
-		if _, hastIt := rfi.reveseIndex[itemID]; !hastIt {
-			rfi.reveseIndex[itemID] = make(utils.StringMap)
-		}
 		for _, fldVal := range fltr.Values {
-			if _, hasIt := rfi.indexes[utils.ConcatenatedKey(fltr.FieldName, fldVal)]; !hasIt {
-				rfi.indexes[utils.ConcatenatedKey(fltr.FieldName, fldVal)] = make(utils.StringMap)
+			concatKey := utils.ConcatenatedKey(fltr.FieldName, fldVal)
+			if _, hasIt := rfi.indexes[concatKey]; !hasIt {
+				rfi.indexes[concatKey] = make(utils.StringMap)
 			}
-			rfi.indexes[utils.ConcatenatedKey(fltr.FieldName, fldVal)][itemID] = true
-			rfi.reveseIndex[itemID][utils.ConcatenatedKey(fltr.FieldName, fldVal)] = true
-			rfi.chngdIndxKeys[utils.ConcatenatedKey(fltr.FieldName, fldVal)] = true
+			rfi.indexes[concatKey][itemID] = true
+			rfi.reveseIndex[itemID][concatKey] = true
+			rfi.chngdIndxKeys[concatKey] = true
 		}
 		rfi.chngdRevIndxKeys[itemID] = true
 	}
 	if !hasMetaString {
-		if _, hasIt := rfi.indexes[utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)]; !hasIt {
-			rfi.indexes[utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)] = make(utils.StringMap)
+		naConcatKey := utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)
+		if _, hasIt := rfi.indexes[naConcatKey]; !hasIt {
+			rfi.indexes[naConcatKey] = make(utils.StringMap)
 		}
-		if _, hastIt := rfi.reveseIndex[itemID]; !hastIt {
-			rfi.reveseIndex[itemID] = make(utils.StringMap)
-		}
-		rfi.reveseIndex[itemID][utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)] = true
-		rfi.indexes[utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE:NOT_AVAILABLE][rl.ID]
+		rfi.reveseIndex[itemID][naConcatKey] = true
+		rfi.indexes[naConcatKey][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE:NOT_AVAILABLE][rl.ID]
 	}
 	return
 }
@@ -191,18 +150,19 @@ func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 	for _, itmMp := range rfi.indexes {
 		for range itmMp {
 			if _, has := itmMp[itemID]; has {
-				delete(itmMp, itemID)
+				delete(itmMp, itemID) //Force deleting in driver
 			}
 		}
 	}
+	rfi.reveseIndex[itemID] = make(utils.StringMap) //Force deleting in driver
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
 		rfi.indexes); err != nil {
 		return
 	}
-	if err = rfi.dm.RemoveFilterReverseIndexes(
+	if err = rfi.dm.SetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		itemID); err != nil {
+		rfi.reveseIndex); err != nil {
 		return
 	}
 	return

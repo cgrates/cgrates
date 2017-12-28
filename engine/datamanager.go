@@ -384,25 +384,25 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		return
 	}
 	if withIndex {
-		//ToDo : update SetThresholdProfile to store indexes
-		// thdsIndexers := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
-		// for _, fltrID := range th.FilterIDs {
-		// 	var fltr *Filter
-		// 	if fltr, err = dm.GetFilter(th.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-		// 		if err == utils.ErrNotFound {
-		// 			err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
-		// 		}
-		// 		return
-		// 	}
-		// 	thdsIndexers.IndexFilters(th.ID, fltr)
-		// }
-		// if dm.DataDB().GetStorageType() == utils.REDIS {
-		// 	if err = thdsIndexers.RemoveItemFromIndex(th.ID); err != nil &&
-		// 		err.Error() != utils.ErrNotFound.Error() {
-		// 		return
-		// 	}
-		// }
-		//return thdsIndexers.StoreIndexes()
+		thdsIndexers := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
+		//remove old ThresholdProfile indexes
+		if err = thdsIndexers.RemoveItemFromIndex(th.ID); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			return
+		}
+
+		//Verify matching Filters for every FilterID from ThresholdProfile
+		for _, fltrID := range th.FilterIDs {
+			var fltr *Filter
+			if fltr, err = dm.GetFilter(th.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
+				}
+				return
+			}
+			thdsIndexers.IndexTPFilter(FilterToTPFilter(fltr), th.ID)
+		}
+		return thdsIndexers.StoreIndexes()
 	}
 	return
 }
