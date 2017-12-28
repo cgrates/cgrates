@@ -135,8 +135,8 @@ func testPopulateAttrService(t *testing.T) {
 	}
 	prefix := utils.ConcatenatedKey(sev.Tenant, *sev.Context)
 	ref := NewReqFilterIndexer(dmAtr, utils.AttributeProfilePrefix, prefix)
-	ref.IndexFilters("attributeprofile1", filter1)
-	ref.IndexFilters("attributeprofile2", filter2)
+	ref.IndexTPFilter(FilterToTPFilter(filter1), "attributeprofile1")
+	ref.IndexTPFilter(FilterToTPFilter(filter2), "attributeprofile2")
 	err = ref.StoreIndexes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)

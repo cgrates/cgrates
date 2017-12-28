@@ -105,7 +105,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDAttributeProfile,
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	//testOnStorITTestNewFilterIndexes,
+	testOnStorITTestNewFilterIndexes,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -965,12 +965,17 @@ func testOnStorITCacheStatQueueProfile(t *testing.T) {
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
-		Metrics:     []string{"ASR"},
-		Thresholds:  []string{"Th1"},
-		Blocker:     true,
-		Stored:      true,
-		Weight:      20,
-		MinItems:    1,
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{
+				MetricID:   "ASR",
+				Parameters: "",
+			},
+		},
+		Thresholds: []string{"Th1"},
+		Blocker:    true,
+		Stored:     true,
+		Weight:     20,
+		MinItems:   1,
 	}
 	if err := onStor.SetStatQueueProfile(statProfile); err != nil {
 		t.Error(err)
@@ -2344,9 +2349,11 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 		FilterIDs:          []string{},
 		QueueLength:        2,
 		TTL:                timeTTL,
-		Metrics:            []string{},
-		Stored:             true,
-		Thresholds:         []string{},
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{},
+		},
+		Stored:     true,
+		Thresholds: []string{},
 	}
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
@@ -2471,9 +2478,8 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
-	//rcv NotFound because SetThresholdProfile don't store Indexes (for now)
-	if err := onStor.RemoveThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != utils.ErrNotFound {
-		t.Error(err)
+	if err := onStor.RemoveThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+		 t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)

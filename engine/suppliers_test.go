@@ -273,8 +273,8 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		dmspl.DataDB().SetSupplierProfileDrv(spr)
 	}
 	ref := NewReqFilterIndexer(dmspl, utils.SupplierProfilePrefix, "cgrates.org")
-	ref.IndexFilters("supplierprofile1", filter3)
-	ref.IndexFilters("supplierprofile2", filter4)
+	ref.IndexTPFilter(FilterToTPFilter(filter3), "attributeprofile1")
+	ref.IndexTPFilter(FilterToTPFilter(filter4), "attributeprofile2")
 	err = ref.StoreIndexes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
