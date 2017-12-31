@@ -245,12 +245,12 @@ func (self CgrJsonCfg) SmgJsonCfg() (*SmgJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SmFsJsonCfg() (*SmFsJsonCfg, error) {
-	rawCfg, hasKey := self[SMFS_JSN]
+func (self CgrJsonCfg) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error) {
+	rawCfg, hasKey := self[FreeSWITCHAgentJSN]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(SmFsJsonCfg)
+	cfg := new(FreeswitchAgentJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}
@@ -281,12 +281,12 @@ func (self CgrJsonCfg) SmOsipsJsonCfg() (*SmOsipsJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SmAsteriskJsonCfg() (*SMAsteriskJsonCfg, error) {
-	rawCfg, hasKey := self[SMAsteriskJSN]
+func (self CgrJsonCfg) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
+	rawCfg, hasKey := self[AsteriskAgentJSN]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(SMAsteriskJsonCfg)
+	cfg := new(AsteriskAgentJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

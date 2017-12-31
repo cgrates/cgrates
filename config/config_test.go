@@ -40,7 +40,7 @@ func TestCgrCfgConfigSharing(t *testing.T) {
 func TestCgrCfgLoadWithDefaults(t *testing.T) {
 	JSN_CFG := `
 {
-"sm_freeswitch": {
+"freeswitch_agent": {
 	"enabled": true,				// starts SessionManager service: <true|false>
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
 		{"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 3},
@@ -53,15 +53,15 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eCgrCfg.SmFsConfig.Enabled = true
-	eCgrCfg.SmFsConfig.EventSocketConns = []*FsConnConfig{
+	eCgrCfg.fsAgentCfg.Enabled = true
+	eCgrCfg.fsAgentCfg.EventSocketConns = []*FsConnConfig{
 		&FsConnConfig{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3},
 		&FsConnConfig{Address: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eCgrCfg.SmFsConfig, cgrCfg.SmFsConfig) {
-		t.Errorf("Expected: %+v, received: %+v", eCgrCfg.SmFsConfig, cgrCfg.SmFsConfig)
+	} else if !reflect.DeepEqual(eCgrCfg.fsAgentCfg, cgrCfg.fsAgentCfg) {
+		t.Errorf("Expected: %+v, received: %+v", eCgrCfg.fsAgentCfg, cgrCfg.fsAgentCfg)
 	}
 }
 
@@ -553,7 +553,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
-	eSmFsCfg := &SmFsConfig{
+	eFsAgentCfg := &FsAgentConfig{
 		Enabled:             false,
 		SMGConns:            []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
 		SubscribePark:       true,
@@ -568,8 +568,8 @@ func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
 				Password: "ClueCon", Reconnects: 5}},
 	}
 
-	if !reflect.DeepEqual(cgrCfg.SmFsConfig, eSmFsCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmFsConfig, eSmFsCfg)
+	if !reflect.DeepEqual(cgrCfg.fsAgentCfg, eFsAgentCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.fsAgentCfg, eFsAgentCfg)
 	}
 }
 
@@ -609,8 +609,8 @@ func TestCgrCfgJSONDefaultsSMOsipsConfig(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsSMAsteriskCfg(t *testing.T) {
-	eSmAsCfg := &SMAsteriskCfg{
+func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
+	eAstAgentCfg := &AsteriskAgentCfg{
 		Enabled: false,
 		SMGConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
@@ -621,8 +621,8 @@ func TestCgrCfgJSONDefaultsSMAsteriskCfg(t *testing.T) {
 				ConnectAttempts: 3, Reconnects: 5}},
 	}
 
-	if !reflect.DeepEqual(cgrCfg.smAsteriskCfg, eSmAsCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.smAsteriskCfg, eSmAsCfg)
+	if !reflect.DeepEqual(cgrCfg.asteriskAgentCfg, eAstAgentCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.asteriskAgentCfg, eAstAgentCfg)
 	}
 }
 

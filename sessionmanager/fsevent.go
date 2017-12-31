@@ -257,7 +257,7 @@ func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 
 func (fsev FSEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
-	for _, fldRule := range config.CgrConfig().SmFsConfig.ExtraFields {
+	for _, fldRule := range config.CgrConfig().FsAgentCfg().ExtraFields {
 		extraFields[fldRule.Id] = fsev.ParseEventValue(fldRule, config.CgrConfig().DefaultTimezone)
 	}
 	return extraFields

@@ -214,7 +214,7 @@ type SmgJsonCfg struct {
 }
 
 // SM-FreeSWITCH config section
-type SmFsJsonCfg struct {
+type FreeswitchAgentJsonCfg struct {
 	Enabled        *bool
 	Smg_conns      *[]*HaPoolJsonCfg // Connections towards generic SMG
 	Subscribe_park *bool
@@ -251,7 +251,7 @@ type AstConnJsonCfg struct {
 	Reconnects       *int
 }
 
-type SMAsteriskJsonCfg struct {
+type AsteriskAgentJsonCfg struct {
 	Enabled        *bool
 	Smg_conns      *[]*HaPoolJsonCfg // Connections towards generic SMG
 	Create_cdr     *bool

@@ -70,10 +70,10 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SMGConfig = new(SMGConfig)
 	cfg.cacheConfig = make(CacheConfig)
-	cfg.SmFsConfig = new(SmFsConfig)
+	cfg.fsAgentCfg = new(FsAgentConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
-	cfg.smAsteriskCfg = new(SMAsteriskCfg)
+	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.filterSCfg = new(FilterSCfg)
@@ -98,9 +98,9 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	}
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
-	dfltFsConnConfig = cfg.SmFsConfig.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
+	dfltFsConnConfig = cfg.fsAgentCfg.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.EvapiConns[0]
-	dfltAstConnCfg = cfg.smAsteriskCfg.AsteriskConns[0]
+	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -260,10 +260,10 @@ type CGRConfig struct {
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	SMGConfig                *SMGConfig
-	SmFsConfig               *SmFsConfig              // SMFreeSWITCH configuration
+	fsAgentCfg               *FsAgentConfig           // SMFreeSWITCH configuration
 	SmKamConfig              *SmKamConfig             // SM-Kamailio Configuration
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
-	smAsteriskCfg            *SMAsteriskCfg           // SMAsterisk Configuration
+	asteriskAgentCfg         *AsteriskAgentCfg        // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
 	radiusAgentCfg           *RadiusAgentCfg          // RadiusAgent configuration
 	filterSCfg               *FilterSCfg              // FilterS configuration
@@ -439,8 +439,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SMFreeSWITCH checks
-	if self.SmFsConfig.Enabled {
-		for _, connCfg := range self.SmFsConfig.SMGConns {
+	if self.fsAgentCfg.Enabled {
+		for _, connCfg := range self.fsAgentCfg.SMGConns {
 			if connCfg.Address != utils.MetaInternal {
 				return errors.New("Only <*internal> connectivity allowed in in SMFreeSWITCH towards SMG for now")
 			}
@@ -495,11 +495,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SMAsterisk checks
-	if self.smAsteriskCfg.Enabled {
-		/*if len(self.smAsteriskCfg.SMGConns) == 0 {
+	if self.asteriskAgentCfg.Enabled {
+		/*if len(self.asteriskAgentCfg.SMGConns) == 0 {
 			return errors.New("<SMAsterisk> SMG definition is mandatory!")
 		}
-		for _, smAstSMGConn := range self.smAsteriskCfg.SMGConns {
+		for _, smAstSMGConn := range self.asteriskAgentCfg.SMGConns {
 			if smAstSMGConn.Address == utils.MetaInternal && !self.SMGConfig.Enabled {
 				return errors.New("<SMAsterisk> SMG not enabled.")
 			}
@@ -645,7 +645,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnSmFsCfg, err := jsnCfg.SmFsJsonCfg()
+	jsnSmFsCfg, err := jsnCfg.FreeswitchAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -660,7 +660,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnSMAstCfg, err := jsnCfg.SmAsteriskJsonCfg()
+	jsnSMAstCfg, err := jsnCfg.AsteriskAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1122,7 +1122,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 	if jsnSmFsCfg != nil {
-		if err := self.SmFsConfig.loadFromJsonCfg(jsnSmFsCfg); err != nil {
+		if err := self.fsAgentCfg.loadFromJsonCfg(jsnSmFsCfg); err != nil {
 			return err
 		}
 	}
@@ -1140,7 +1140,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnSMAstCfg != nil {
-		if err := self.smAsteriskCfg.loadFromJsonCfg(jsnSMAstCfg); err != nil {
+		if err := self.asteriskAgentCfg.loadFromJsonCfg(jsnSMAstCfg); err != nil {
 			return err
 		}
 	}
@@ -1289,11 +1289,13 @@ func (cfg *CGRConfig) SupplierSCfg() *SupplierSCfg {
 	return cfg.supplierSCfg
 }
 
+func (self *CGRConfig) FsAgentCfg() *FsAgentConfig {
+	return self.fsAgentCfg
+}
+
 // ToDo: fix locking here
-func (self *CGRConfig) SMAsteriskCfg() *SMAsteriskCfg {
-	cfgChan := <-self.ConfigReloads[utils.SMAsterisk] // Lock config for read or reloads
-	defer func() { self.ConfigReloads[utils.SMAsterisk] <- cfgChan }()
-	return self.smAsteriskCfg
+func (self *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
+	return self.asteriskAgentCfg
 }
 
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {

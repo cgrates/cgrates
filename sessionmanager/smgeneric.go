@@ -1313,10 +1313,9 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var allowed bool
 		attrRU := utils.ArgRSv1ResourceUsage{
-			Tenant:  args.CGREvent.Tenant,
-			UsageID: originID,
-			Event:   args.CGREvent.Event,
-			Units:   1,
+			CGREvent: args.CGREvent,
+			UsageID:  originID,
+			Units:    1,
 		}
 		if err = smg.resS.Call(utils.ResourceSv1AllowUsage,
 			attrRU, &allowed); err != nil {
@@ -1368,10 +1367,9 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrServerError(err)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
-			Tenant:  args.CGREvent.Tenant,
-			UsageID: originID,
-			Event:   args.CGREvent.Event,
-			Units:   1,
+			CGREvent: args.CGREvent,
+			UsageID:  originID,
+			Units:    1,
 		}
 		var allocMessage string
 		if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
@@ -1430,10 +1428,9 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrServerError(err)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
-			Tenant:  args.CGREvent.Tenant,
-			UsageID: originID,
-			Event:   args.CGREvent.Event,
-			Units:   1,
+			CGREvent: args.CGREvent,
+			UsageID:  originID,
+			Units:    1,
 		}
 		var allocMessage string
 		if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
@@ -1469,9 +1466,9 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 		}
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
-			Tenant:  args.CGREvent.Tenant,
-			UsageID: originID, // same ID should be accepted by first group since the previous resource should be expired
-			Event:   args.CGREvent.Event,
+			CGREvent: args.CGREvent,
+			UsageID:  originID, // same ID should be accepted by first group since the previous resource should be expired
+			Units:    1,
 		}
 		if err = smg.resS.Call(utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {

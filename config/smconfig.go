@@ -200,7 +200,7 @@ func (self *SMGConfig) loadFromJsonCfg(jsnCfg *SmgJsonCfg) error {
 	return nil
 }
 
-type SmFsConfig struct {
+type FsAgentConfig struct {
 	Enabled       bool
 	SMGConns      []*HaPoolConfig
 	SubscribePark bool
@@ -215,7 +215,7 @@ type SmFsConfig struct {
 	EventSocketConns    []*FsConnConfig
 }
 
-func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
+func (self *FsAgentConfig) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -484,14 +484,14 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 	return nil
 }
 
-type SMAsteriskCfg struct {
+type AsteriskAgentCfg struct {
 	Enabled       bool
 	SMGConns      []*HaPoolConfig
 	CreateCDR     bool
 	AsteriskConns []*AsteriskConnCfg
 }
 
-func (aCfg *SMAsteriskCfg) loadFromJsonCfg(jsnCfg *SMAsteriskJsonCfg) (err error) {
+func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}

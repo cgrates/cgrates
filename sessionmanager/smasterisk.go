@@ -67,7 +67,7 @@ type SMAsterisk struct {
 }
 
 func (sma *SMAsterisk) connectAsterisk() (err error) {
-	connCfg := sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx]
+	connCfg := sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx]
 	sma.astEvChan = make(chan map[string]interface{})
 	sma.astErrChan = make(chan error)
 	sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s", connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
@@ -88,7 +88,7 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 		case err = <-sma.astErrChan:
 			return
 		case astRawEv := <-sma.astEvChan:
-			smAsteriskEvent := NewSMAsteriskEvent(astRawEv, strings.Split(sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0])
+			smAsteriskEvent := NewSMAsteriskEvent(astRawEv, strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0])
 			switch smAsteriskEvent.EventType() {
 			case ARIStasisStart:
 				go sma.handleStasisStart(smAsteriskEvent)
@@ -105,7 +105,7 @@ func (sma *SMAsterisk) ListenAndServe() (err error) {
 // hangupChannel will disconnect from CGRateS side with congestion reason
 func (sma *SMAsterisk) hangupChannel(channelID string) (err error) {
 	_, err = sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("http://%s/ari/channels/%s",
-		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
+		sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
 		url.Values{"reason": {"congestion"}})
 	return
 }
@@ -113,7 +113,7 @@ func (sma *SMAsterisk) hangupChannel(channelID string) (err error) {
 func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 	// Subscribe for channel updates even after we leave Stasis
 	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/applications/%s/subscription?eventSource=channel:%s",
-		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, CGRAuthAPP, ev.ChannelID()), nil); err != nil {
+		sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, CGRAuthAPP, ev.ChannelID()), nil); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when subscribing to events for channelID: %s", err.Error(), ev.ChannelID()))
 		// Since we got error, disconnect channel
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
@@ -139,7 +139,7 @@ func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 	} else if maxUsage != -1 {
 		//  Set absolute timeout for non-postpaid calls
 		if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/variable?variable=%s", // Asterisk having issue with variable terminating empty so harcoding param in url
-			sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID(), CGRMaxSessionTime),
+			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID(), CGRMaxSessionTime),
 			url.Values{"value": {strconv.FormatFloat(maxUsage*1000, 'f', -1, 64)}}); err != nil { // Asterisk expects value in ms
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when setting %s for channelID: %s", err.Error(), CGRMaxSessionTime, ev.ChannelID()))
 			// Since we got error, disconnect channel
@@ -152,7 +152,7 @@ func (sma *SMAsterisk) handleStasisStart(ev *SMAsteriskEvent) {
 
 	// Exit channel from stasis
 	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
-		sma.cgrCfg.SMAsteriskCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID()), nil); err != nil {
+		sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ev.ChannelID()), nil); err != nil {
 	}
 	// Done with processing event, cache it for later use
 	sma.evCacheMux.Lock()
@@ -218,7 +218,7 @@ func (sma *SMAsterisk) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	if err := sma.smg.Call("SMGenericV1.TerminateSession", *smgEv, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to terminate session for channelID: %s", err.Error(), ev.ChannelID()))
 	}
-	if sma.cgrCfg.SMAsteriskCfg().CreateCDR {
+	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
 		if err := sma.smg.Call("SMGenericV1.ProcessCDR", *smgEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to process CDR for channelID: %s", err.Error(), ev.ChannelID()))
 		}

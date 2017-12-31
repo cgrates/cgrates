@@ -28,10 +28,10 @@ import (
 	"github.com/cgrates/fsock"
 )
 
-func NewFSSessionManager(smFsConfig *config.SmFsConfig,
+func NewFSSessionManager(fsAgentConfig *config.FsAgentConfig,
 	smg *utils.BiRPCInternalClient, timezone string) *FSSessionManager {
 	return &FSSessionManager{
-		cfg:         smFsConfig,
+		cfg:         fsAgentConfig,
 		conns:       make(map[string]*fsock.FSock),
 		senderPools: make(map[string]*fsock.FSockPool),
 		smg:         smg,
@@ -42,7 +42,7 @@ func NewFSSessionManager(smFsConfig *config.SmFsConfig,
 // The freeswitch session manager type holding a buffer for the network connection
 // and the active sessions
 type FSSessionManager struct {
-	cfg         *config.SmFsConfig
+	cfg         *config.FsAgentConfig
 	conns       map[string]*fsock.FSock     // Keep the list here for connection management purposes
 	senderPools map[string]*fsock.FSockPool // Keep sender pools here
 	smg         *utils.BiRPCInternalClient

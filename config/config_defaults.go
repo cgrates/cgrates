@@ -307,7 +307,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"sm_asterisk": {
+"asterisk_agent": {
 	"enabled": false,						// starts Asterisk SessionManager service: <true|false>
 	"smg_conns": [
 		{"address": "*internal"}			// connection towards SMG component for session management: <*internal>
@@ -319,7 +319,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"sm_freeswitch": {
+"freeswitch_agent": {
 	"enabled": false,						// starts SessionManager service: <true|false>
 	"smg_conns": [
 		{"address": "*internal"}			// connection towards SMG component for session management: <*internal>

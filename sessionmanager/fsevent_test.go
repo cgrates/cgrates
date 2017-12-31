@@ -579,7 +579,7 @@ func TestFsEvAsCDR(t *testing.T) {
 
 func TestFsEvGetExtraFields(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	cfg.SmFsConfig.ExtraFields = []*utils.RSRField{
+	cfg.FsAgentCfg().ExtraFields = []*utils.RSRField{
 		&utils.RSRField{Id: "Channel-Read-Codec-Name"},
 		&utils.RSRField{Id: "Channel-Write-Codec-Name"},
 		&utils.RSRField{Id: "NonExistingHeader"}}

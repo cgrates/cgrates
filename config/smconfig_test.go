@@ -23,8 +23,8 @@ import (
 	"testing"
 )
 
-func TesSmFsConfigLoadFromJsonCfg(t *testing.T) {
-	smFsJsnCfg := &SmFsJsonCfg{
+func TesFsAgentConfigLoadFromJsonCfg(t *testing.T) {
+	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
 		Enabled:        utils.BoolPointer(true),
 		Create_cdr:     utils.BoolPointer(true),
 		Subscribe_park: utils.BoolPointer(true),
@@ -41,7 +41,8 @@ func TesSmFsConfigLoadFromJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	eSmFsConfig := &SmFsConfig{Enabled: true,
+	eFsAgentConfig := &FsAgentConfig{
+		Enabled:       true,
 		CreateCdr:     true,
 		SubscribePark: true,
 		EventSocketConns: []*FsConnConfig{
@@ -49,10 +50,10 @@ func TesSmFsConfigLoadFromJsonCfg(t *testing.T) {
 			&FsConnConfig{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5},
 		},
 	}
-	smFsCfg := new(SmFsConfig)
-	if err := smFsCfg.loadFromJsonCfg(smFsJsnCfg); err != nil {
+	fsAgentCfg := new(FsAgentConfig)
+	if err := fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eSmFsConfig, smFsCfg) {
-		t.Error("Received: ", smFsCfg)
+	} else if !reflect.DeepEqual(eFsAgentConfig, fsAgentCfg) {
+		t.Error("Received: ", fsAgentCfg)
 	}
 }

@@ -218,7 +218,7 @@ func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitCha
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
 	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
-	for connIdx := range cfg.SMAsteriskCfg().AsteriskConns { // Instantiate connections towards asterisk servers
+	for connIdx := range cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
 		sma, err := sessionmanager.NewSMAsterisk(cfg, connIdx, birpcClnt)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> error: %s!", err))
@@ -298,7 +298,7 @@ func startSmFreeSWITCH(internalSMGChan chan rpcclient.RpcClientConnection, exitC
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
 	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
-	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, birpcClnt, cfg.DefaultTimezone)
+	sm := sessionmanager.NewFSSessionManager(cfg.FsAgentCfg(), birpcClnt, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMFreeSWITCH> error: %s!", err))
 	}
@@ -925,7 +925,7 @@ func main() {
 			internalSupplierSChan, internalAttributeSChan, internalCdrSChan, server, exitChan)
 	}
 	// Start SM-FreeSWITCH
-	if cfg.SmFsConfig.Enabled {
+	if cfg.FsAgentCfg().Enabled {
 		go startSmFreeSWITCH(internalSMGChan, exitChan)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler(exitChan)
@@ -941,7 +941,7 @@ func main() {
 		go startSmOpenSIPS(internalRaterChan, internalCdrSChan, cdrDb, exitChan)
 	}
 
-	if cfg.SMAsteriskCfg().Enabled {
+	if cfg.AsteriskAgentCfg().Enabled {
 		go startSMAsterisk(internalSMGChan, exitChan)
 	}
 

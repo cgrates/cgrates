@@ -521,8 +521,8 @@ func TestSmgJsonCfg(t *testing.T) {
 	}
 }
 
-func TestSmFsJsonCfg(t *testing.T) {
-	eCfg := &SmFsJsonCfg{
+func TestFsAgentJsonCfg(t *testing.T) {
+	eCfg := &FreeswitchAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
 		Smg_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
@@ -542,7 +542,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 				Reconnects: utils.IntPointer(5),
 			}},
 	}
-	if cfg, err := dfCgrJsonCfg.SmFsJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.FreeswitchAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -606,8 +606,8 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 	}
 }
 
-func TestSmAsteriskJsonCfg(t *testing.T) {
-	eCfg := &SMAsteriskJsonCfg{
+func TestAsteriskAgentJsonCfg(t *testing.T) {
+	eCfg := &AsteriskAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
 		Smg_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
@@ -624,7 +624,7 @@ func TestSmAsteriskJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.SmAsteriskJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.AsteriskAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s, received: %s ", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -895,7 +895,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	} else if !reflect.DeepEqual(eCfgCdrc, cfg) {
 		t.Errorf("Expecting:\n %+v\n received:\n %+v\n", utils.ToIJSON(eCfgCdrc), utils.ToIJSON(cfg))
 	}
-	eCfgSmFs := &SmFsJsonCfg{
+	eCfgSmFs := &FreeswitchAgentJsonCfg{
 		Enabled: utils.BoolPointer(true),
 		Event_socket_conns: &[]*FsConnJsonCfg{
 			&FsConnJsonCfg{
@@ -910,7 +910,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 			},
 		},
 	}
-	if smFsCfg, err := cgrJsonCfg.SmFsJsonCfg(); err != nil {
+	if smFsCfg, err := cgrJsonCfg.FreeswitchAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfgSmFs, smFsCfg) {
 		t.Error("Received: ", smFsCfg)
