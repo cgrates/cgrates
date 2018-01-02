@@ -155,7 +155,7 @@ func TestApierTPTiming(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPTiming", new(utils.ApierTPTiming), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPTiming, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID Years Months MonthDays WeekDays Time]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID Years Months MonthDays WeekDays Time]" {
 		t.Error("Calling ApierV1.SetTPTiming got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -206,7 +206,7 @@ func TestApierTPDestination(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPDestination", new(utils.TPDestination), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID Prefixes]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID Prefixes]" {
 		t.Error("Calling ApierV1.SetTPDestination got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -257,7 +257,7 @@ func TestApierTPRate(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPRate", new(utils.TPRate), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID RateSlots]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID RateSlots]" {
 		t.Error("Calling ApierV1.SetTPRate got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -311,7 +311,7 @@ func TestApierTPDestinationRate(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPDestinationRate", new(utils.TPDestinationRate), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID DestinationRates]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID DestinationRates]" {
 		t.Error("Calling ApierV1.SetTPDestinationRate got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -362,7 +362,7 @@ func TestApierTPRatingPlan(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPRatingPlan", new(utils.TPRatingPlan), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPRatingPlan, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID RatingPlanBindings]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID RatingPlanBindings]" {
 		t.Error("Calling ApierV1.SetTPRatingPlan got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -414,7 +414,7 @@ func TestApierTPRatingProfile(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPRatingProfile", new(utils.TPRatingProfile), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPRatingProfile, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid LoadId Tenant Category Direction Subject RatingPlanActivations]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid LoadId Tenant Category Direction Subject RatingPlanActivations]" {
 		t.Error("Calling ApierV1.SetTPRatingProfile got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -471,7 +471,7 @@ func TestApierTPActions(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPActions", new(utils.TPActions), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPActions, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID Actions]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID Actions]" {
 		t.Error("Calling ApierV1.SetTPActions got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -521,7 +521,7 @@ func TestApierTPActionPlan(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPActionPlan", new(utils.TPActionPlan), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPActionPlan, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID ActionPlan]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID ActionPlan]" {
 		t.Error("Calling ApierV1.SetTPActionPlan got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -571,7 +571,7 @@ func TestApierTPActionTriggers(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPActionTriggers", new(utils.TPActionTriggers), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPActionTriggers, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ID]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid ID]" {
 		t.Error("Calling ApierV1.SetTPActionTriggers got unexpected error: ", err.Error())
 	}
 	atTst.ActionTriggers[0].Id = utils.TEST_SQL
@@ -630,7 +630,7 @@ func TestApierTPAccountActions(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPAccountActions", new(utils.TPAccountActions), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPAccountActions, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid LoadId Tenant Account ActionPlanId ActionTriggersId]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid LoadId Tenant Account ActionPlanId ActionTriggersId]" {
 		t.Error("Calling ApierV1.SetTPAccountActions got unexpected error: ", err.Error())
 	}
 	// Test get
