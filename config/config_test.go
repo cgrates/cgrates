@@ -451,14 +451,11 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		ListenBijson: "127.0.0.1:2014",
 		RALsConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
-		ResSConns: []*HaPoolConfig{
-			&HaPoolConfig{Address: "*internal"}},
-		SupplSConns: []*HaPoolConfig{
-			&HaPoolConfig{Address: "*internal"}},
-		AttrSConns: []*HaPoolConfig{
-			&HaPoolConfig{Address: "*internal"}},
 		CDRsConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
+		ResSConns:           []*HaPoolConfig{},
+		SupplSConns:         []*HaPoolConfig{},
+		AttrSConns:          []*HaPoolConfig{},
 		SMGReplicationConns: []*HaPoolConfig{},
 		DebitInterval:       0 * time.Second,
 		MinCallDuration:     0 * time.Second,

@@ -283,18 +283,12 @@ const CGRATES_CFG_JSON = `
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
 	],
-	"resources_conns": [
-		{"address": "*internal"}			// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
-	],
-	"suppliers_conns": [
-		{"address": "*internal"}			// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
-	],
-	"attributes_conns": [
-		{"address": "*internal"}			// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
-	],
 	"cdrs_conns": [
 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
+	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
+	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
+	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
 	"smg_replication_conns": [],			// replicate sessions towards these SMGs
 	"debit_interval": "0s",					// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this

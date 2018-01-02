@@ -491,22 +491,13 @@ func TestSmgJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Resources_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Suppliers_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Attributes_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
 		Cdrs_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
+		Resources_conns:       &[]*HaPoolJsonCfg{},
+		Suppliers_conns:       &[]*HaPoolJsonCfg{},
+		Attributes_conns:      &[]*HaPoolJsonCfg{},
 		Smg_replication_conns: &[]*HaPoolJsonCfg{},
 		Debit_interval:        utils.StringPointer("0s"),
 		Min_call_duration:     utils.StringPointer("0s"),
