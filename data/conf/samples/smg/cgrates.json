@@ -36,7 +36,19 @@
 	"enabled": true,					// start the CDR Server service:  <true|false>
 },
 
-"sm_generic": {
+"resources": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"suppliers": {
+	"enabled": true,
+},
+
+"smg": {
 	"enabled": true,
 	"session_ttl": "50ms",
 	"rals_conns": [

@@ -74,7 +74,7 @@
 },
 
 
-"sm_generic": {
+"smg": {
 	"enabled": true,						// starts SessionManager service: <true|false>
 },
 

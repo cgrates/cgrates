@@ -72,7 +72,19 @@
 	"indexes": ["SubscriberId"],
 },
 
-"sm_generic": {
+"resources": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"suppliers": {
+	"enabled": true,
+},
+
+"smg": {
 	"enabled": true,
 },
 

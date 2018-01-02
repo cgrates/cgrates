@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessionmanager
+package agents
 
 import (
 	"fmt"
@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
@@ -37,47 +38,43 @@ type FSEvent map[string]string
 
 const (
 	// Freswitch event proprities names
-	DIRECTION                = "Call-Direction"
-	SUBJECT                  = "variable_" + utils.CGR_SUBJECT
-	ACCOUNT                  = "variable_" + utils.CGR_ACCOUNT
-	DESTINATION              = "variable_" + utils.CGR_DESTINATION
-	REQTYPE                  = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
-	CATEGORY                 = "variable_" + utils.CGR_CATEGORY
-	VAR_CGR_SUPPLIER         = "variable_" + utils.CGR_SUPPLIER
-	UUID                     = "Unique-ID" // -Unique ID for this call leg
-	CSTMID                   = "variable_" + utils.CGR_TENANT
-	CALL_DEST_NR             = "Caller-Destination-Number"
-	SIP_REQ_USER             = "variable_sip_req_user"
-	PARK_TIME                = "Caller-Profile-Created-Time"
-	SETUP_TIME               = "Caller-Channel-Created-Time"
-	ANSWER_TIME              = "Caller-Channel-Answered-Time"
-	END_TIME                 = "Caller-Channel-Hangup-Time"
-	DURATION                 = "variable_billsec"
-	NAME                     = "Event-Name"
-	HEARTBEAT                = "HEARTBEAT"
-	ANSWER                   = "CHANNEL_ANSWER"
-	HANGUP                   = "CHANNEL_HANGUP_COMPLETE"
-	PARK                     = "CHANNEL_PARK"
-	AUTH_OK                  = "+AUTH_OK"
-	DISCONNECT               = "+SWITCH DISCONNECT"
-	INSUFFICIENT_FUNDS       = "-INSUFFICIENT_FUNDS"
-	UNAUTHORIZED_DESTINATION = "-UNAUTHORIZED_DESTINATION"
-	MISSING_PARAMETER        = "-MISSING_PARAMETER"
-	SYSTEM_ERROR             = "-SYSTEM_ERROR"
-	MANAGER_REQUEST          = "+MANAGER_REQUEST"
-	USERNAME                 = "Caller-Username"
-	FS_IPv4                  = "FreeSWITCH-IPv4"
-	HANGUP_CAUSE             = "Hangup-Cause"
-	PDD_MEDIA_MS             = "variable_progress_mediamsec"
-	PDD_NOMEDIA_MS           = "variable_progressmsec"
-	IGNOREPARK               = "variable_cgr_ignorepark"
-	FS_VARPREFIX             = "variable_"
-	VarCGRSubsystems         = "variable_cgr_subsystems"
-	SubSAccountS             = "accounts"
-	SubSSupplierS            = "suppliers"
-	SubSResourceS            = "resources"
-	SubSAttributeS           = "attributes"
-	CGRResourcesAllowed      = "cgr_resources_allowed"
+	DIRECTION           = "Call-Direction"
+	SUBJECT             = "variable_" + utils.CGR_SUBJECT
+	ACCOUNT             = "variable_" + utils.CGR_ACCOUNT
+	DESTINATION         = "variable_" + utils.CGR_DESTINATION
+	REQTYPE             = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
+	CATEGORY            = "variable_" + utils.CGR_CATEGORY
+	VAR_CGR_SUPPLIER    = "variable_" + utils.CGR_SUPPLIER
+	UUID                = "Unique-ID" // -Unique ID for this call leg
+	CSTMID              = "variable_" + utils.CGR_TENANT
+	CALL_DEST_NR        = "Caller-Destination-Number"
+	SIP_REQ_USER        = "variable_sip_req_user"
+	PARK_TIME           = "Caller-Profile-Created-Time"
+	SETUP_TIME          = "Caller-Channel-Created-Time"
+	ANSWER_TIME         = "Caller-Channel-Answered-Time"
+	END_TIME            = "Caller-Channel-Hangup-Time"
+	DURATION            = "variable_billsec"
+	NAME                = "Event-Name"
+	HEARTBEAT           = "HEARTBEAT"
+	ANSWER              = "CHANNEL_ANSWER"
+	HANGUP              = "CHANNEL_HANGUP_COMPLETE"
+	PARK                = "CHANNEL_PARK"
+	AUTH_OK             = "AUTH_OK"
+	DISCONNECT          = "SWITCH DISCONNECT"
+	MANAGER_REQUEST     = "MANAGER_REQUEST"
+	USERNAME            = "Caller-Username"
+	FS_IPv4             = "FreeSWITCH-IPv4"
+	HANGUP_CAUSE        = "Hangup-Cause"
+	PDD_MEDIA_MS        = "variable_progress_mediamsec"
+	PDD_NOMEDIA_MS      = "variable_progressmsec"
+	IGNOREPARK          = "variable_cgr_ignorepark"
+	FS_VARPREFIX        = "variable_"
+	VarCGRSubsystems    = "variable_cgr_subsystems"
+	SubSAccountS        = "accounts"
+	SubSSupplierS       = "suppliers"
+	SubSResourceS       = "resources"
+	SubSAttributeS      = "attributes"
+	CGRResourcesAllowed = "cgr_resources_allowed"
 
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
@@ -172,15 +169,32 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], reqTypeDetected, config.CgrConfig().DefaultReqType)
 }
-func (fsev FSEvent) MissingParameter(timezone string) bool {
-	return strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" ||
-		strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" ||
-		strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" ||
-		strings.TrimSpace(fsev.GetDestination(utils.META_DEFAULT)) == "" ||
-		strings.TrimSpace(fsev.GetCategory(utils.META_DEFAULT)) == "" ||
-		strings.TrimSpace(fsev.GetUUID()) == "" ||
-		strings.TrimSpace(fsev.GetTenant(utils.META_DEFAULT)) == "" ||
-		strings.TrimSpace(fsev.GetCallDestNr(utils.META_DEFAULT)) == ""
+func (fsev FSEvent) MissingParameter(timezone string) string {
+	if strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" {
+		return utils.DIRECTION
+	}
+	if strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" {
+		return utils.Account
+	}
+	if strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" {
+		return utils.SUBJECT
+	}
+	if strings.TrimSpace(fsev.GetDestination(utils.META_DEFAULT)) == "" {
+		return utils.Destination
+	}
+	if strings.TrimSpace(fsev.GetCategory(utils.META_DEFAULT)) == "" {
+		return utils.Category
+	}
+	if strings.TrimSpace(fsev.GetUUID()) == "" {
+		return utils.ACCID
+	}
+	if strings.TrimSpace(fsev.GetTenant(utils.META_DEFAULT)) == "" {
+		return utils.Tenant
+	}
+	if strings.TrimSpace(fsev.GetCallDestNr(utils.META_DEFAULT)) == "" {
+		return CALL_DEST_NR
+	}
+	return ""
 }
 func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err error) {
 	fsSTimeStr, hasKey := fsev[SETUP_TIME]
@@ -419,8 +433,8 @@ func (fsev FSEvent) AsMapStringIface() (map[string]interface{}, error) {
 }
 
 // V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
-func (fsev FSEvent) V1AuthorizeArgs() (args *V1AuthorizeArgs) {
-	args = &V1AuthorizeArgs{ // defaults
+func (fsev FSEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
+	args = &sessionmanager.V1AuthorizeArgs{ // defaults
 		GetMaxUsage: true,
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
@@ -443,8 +457,8 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *V1AuthorizeArgs) {
 }
 
 // V2InitSessionArgs returns the arguments used in SMGv1.InitSession
-func (fsev FSEvent) V1InitSessionArgs() (args *V1InitSessionArgs) {
-	args = &V1InitSessionArgs{ // defaults
+func (fsev FSEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs) {
+	args = &sessionmanager.V1InitSessionArgs{ // defaults
 		InitSession: true,
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
@@ -464,8 +478,8 @@ func (fsev FSEvent) V1InitSessionArgs() (args *V1InitSessionArgs) {
 }
 
 // V1UpdateSessionArgs returns the arguments used in SMGv1.UpdateSession
-func (fsev FSEvent) V1UpdateSessionArgs() (args *V1UpdateSessionArgs) {
-	args = &V1UpdateSessionArgs{ // defaults
+func (fsev FSEvent) V1UpdateSessionArgs() (args *sessionmanager.V1UpdateSessionArgs) {
+	args = &sessionmanager.V1UpdateSessionArgs{ // defaults
 		UpdateSession: true,
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
@@ -482,8 +496,8 @@ func (fsev FSEvent) V1UpdateSessionArgs() (args *V1UpdateSessionArgs) {
 }
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
-func (fsev FSEvent) V1TerminateSessionArgs() (args *V1TerminateSessionArgs) {
-	args = &V1TerminateSessionArgs{ // defaults
+func (fsev FSEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSessionArgs) {
+	args = &sessionmanager.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
 	}
 	subsystems, has := fsev[VarCGRSubsystems]

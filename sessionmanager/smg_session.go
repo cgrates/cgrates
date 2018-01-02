@@ -63,7 +63,7 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 		case <-time.After(sleepDur):
 			if maxDebit, err := self.debit(debitInterval, nil); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit operation on session: %s, error: %s", self.CGRID, err.Error()))
-				disconnectReason := SYSTEM_ERROR
+				disconnectReason := utils.ErrServerError.Error()
 				if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 					disconnectReason = err.Error()
 				}
@@ -73,7 +73,7 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 				return
 			} else if maxDebit < debitInterval {
 				time.Sleep(maxDebit)
-				if err := self.disconnectSession(INSUFFICIENT_FUNDS); err != nil {
+				if err := self.disconnectSession(utils.ErrInsufficientCredit.Error()); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not disconnect session: %s, error: %s", self.CGRID, err.Error()))
 				}
 				return

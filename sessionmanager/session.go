@@ -90,14 +90,14 @@ func (s *Session) debitLoop(runIdx int) {
 		if err := s.sessionManager.Rater().Call("Responder.MaxDebit", nextCd, cc); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
-				s.sessionManager.DisconnectSession(s.eventStart, s.connId, UNAUTHORIZED_DESTINATION)
+				s.sessionManager.DisconnectSession(s.eventStart, s.connId, utils.ErrUnauthorizedDestination.Error())
 				return
 			}
-			s.sessionManager.DisconnectSession(s.eventStart, s.connId, SYSTEM_ERROR)
+			s.sessionManager.DisconnectSession(s.eventStart, s.connId, utils.ErrServerError.Error())
 			return
 		}
 		if cc.GetDuration() == 0 {
-			s.sessionManager.DisconnectSession(s.eventStart, s.connId, INSUFFICIENT_FUNDS)
+			s.sessionManager.DisconnectSession(s.eventStart, s.connId, utils.ErrInsufficientCredit.Error())
 			return
 		}
 		if s.warnMinDur != time.Duration(0) && cc.GetDuration() <= s.warnMinDur {

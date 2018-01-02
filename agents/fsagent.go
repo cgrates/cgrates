@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessionmanager
+package agents
 
 import (
 	"errors"
@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
@@ -135,20 +136,20 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		return
 	}
 	authArgs := fsev.V1AuthorizeArgs()
-	var authReply V1AuthorizeReply
+	var authReply sessionmanager.V1AuthorizeReply
 	if err := sm.smg.Call(utils.SMGv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<SM-FreeSWITCH> Could not authorize event %s, error: %s",
 				fsev.GetUUID(), err.Error()))
 		sm.unparkCall(fsev.GetUUID(), connId,
-			fsev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+			fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
 		return
 	}
 	if authArgs.GetMaxUsage {
 		if authReply.MaxUsage != -1 { // For calls different than unlimited, set limits
 			if authReply.MaxUsage == 0 {
 				sm.unparkCall(fsev.GetUUID(), connId,
-					fsev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
+					fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrInsufficientCredit.Error())
 				return
 			}
 			sm.setMaxCallDuration(fsev.GetUUID(), connId,
@@ -162,7 +163,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 				fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 					utils.SMFreeSWITCH, err.Error(), CGRResourcesAllowed))
 			sm.unparkCall(fsev.GetUUID(), connId,
-				fsev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+				fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
 			return
 		}
 	}
@@ -171,7 +172,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_ERROR: %s", err.Error()))
-			sm.unparkCall(fsev.GetUUID(), connId, fsev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+			sm.unparkCall(fsev.GetUUID(), connId, fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
 			return
 		}
 	}
@@ -185,7 +186,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 						fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 							utils.SMFreeSWITCH, err.Error(), fldName))
 					sm.unparkCall(fsev.GetUUID(), connId,
-						fsev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+						fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
 					return
 				}
 			}
@@ -199,17 +200,18 @@ func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
 	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
-	if fsev.MissingParameter(sm.timezone) {
-		sm.DisconnectSession(fsev, connId, MISSING_PARAMETER)
+	if missing := fsev.MissingParameter(sm.timezone); missing != "" {
+		sm.DisconnectSession(fsev, connId,
+			utils.NewErrMandatoryIeMissing(missing).Error())
 	}
 	initSessionArgs := fsev.V1InitSessionArgs()
-	var initReply V1InitSessionReply
+	var initReply sessionmanager.V1InitSessionReply
 	if err := sm.smg.Call(utils.SMGv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<SM-FreeSWITCH> Could not answer session with event %s, error: %s",
 				fsev.GetUUID(), err.Error()))
-		sm.DisconnectSession(fsev, connId, SYSTEM_ERROR)
+		sm.DisconnectSession(fsev, connId, utils.ErrServerError.Error())
 		return
 	}
 	if initSessionArgs.AllocateResources {
@@ -283,7 +285,7 @@ func (sm *FSSessionManager) DisconnectSession(fsev FSEvent, connId, notify strin
 			err.Error(), connId))
 		return err
 	}
-	if notify == INSUFFICIENT_FUNDS {
+	if notify == utils.ErrInsufficientCredit.Error() {
 		if len(sm.cfg.EmptyBalanceContext) != 0 {
 			if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_transfer %s %s XML %s\n\n",
 				fsev.GetUUID(), fsev.GetCallDestNr(utils.META_DEFAULT), sm.cfg.EmptyBalanceContext)); err != nil {

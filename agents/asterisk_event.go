@@ -16,11 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessionmanager
+package agents
 
 import (
 	"strings"
 
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -173,7 +174,7 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
+func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *sessionmanager.SMGenericEvent {
 	var evName string
 	switch smaEv.EventType() {
 	case ARIStasisStart:
@@ -212,7 +213,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 
 // Updates fields in smgEv based on own fields
 // Using pointer so we update it directly in cache
-func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *SMGenericEvent) error {
+func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *sessionmanager.SMGenericEvent) error {
 	resSMGEv := *smgEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:

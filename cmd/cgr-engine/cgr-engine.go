@@ -145,7 +145,7 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 		}
 	}
 	if len(cfg.SMGConfig.ResSConns) != 0 {
-		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+		resSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SMGConfig.ResSConns, internalResourceSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to ResourceS: %s", err.Error()))
@@ -154,7 +154,7 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 		}
 	}
 	if len(cfg.SMGConfig.SupplSConns) != 0 {
-		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+		suplSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SMGConfig.SupplSConns, internalSupplierSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to SupplierS: %s", err.Error()))
@@ -163,7 +163,7 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 		}
 	}
 	if len(cfg.SMGConfig.AttrSConns) != 0 {
-		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+		attrSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SMGConfig.AttrSConns, internalAttrSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to AttributeS: %s", err.Error()))
@@ -219,7 +219,7 @@ func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitCha
 	internalSMGChan <- smgRpcConn
 	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
 	for connIdx := range cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		sma, err := sessionmanager.NewSMAsterisk(cfg, connIdx, birpcClnt)
+		sma, err := agents.NewSMAsterisk(cfg, connIdx, birpcClnt)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> error: %s!", err))
 			exitChan <- true
@@ -298,7 +298,7 @@ func startSmFreeSWITCH(internalSMGChan chan rpcclient.RpcClientConnection, exitC
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
 	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
-	sm := sessionmanager.NewFSSessionManager(cfg.FsAgentCfg(), birpcClnt, cfg.DefaultTimezone)
+	sm := agents.NewFSSessionManager(cfg.FsAgentCfg(), birpcClnt, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMFreeSWITCH> error: %s!", err))
 	}

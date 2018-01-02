@@ -65,7 +65,6 @@ func TestSMGDataStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGDataApierRpcConn(t *testing.T) {
-
 	var err error
 	smgRPC, err = jsonrpc.Dial("tcp", daCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {

@@ -88,11 +88,19 @@ func (err *CGRError) ActivateLongError() {
 }
 
 func NewErrMandatoryIeMissing(fields ...string) error {
-	return fmt.Errorf("MANDATORY_IE_MISSING:%v", fields)
+	return fmt.Errorf("MANDATORY_IE_MISSING: %v", fields)
 }
 
 func NewErrServerError(err error) error {
 	return fmt.Errorf("SERVER_ERROR: %s", err)
+}
+
+func NewErrServiceNotOperational(serv string) error {
+	return fmt.Errorf("SERVICE_NOT_OPERATIONAL: %s", serv)
+}
+
+func NewErrNotConnected(serv string) error {
+	return fmt.Errorf("NOT_CONNECTED: %s", serv)
 }
 
 // Centralized returns for APIs

@@ -192,7 +192,8 @@ func testV1RsTTL0(t *testing.T) {
 		Units:   1,
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	// second allocation should be also allowed
@@ -206,7 +207,7 @@ func testV1RsTTL0(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
 		Units:   1,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	// too many units should be rejected
@@ -220,7 +221,7 @@ func testV1RsTTL0(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
 		Units:   2,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err == nil ||
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err == nil ||
 		err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
@@ -234,7 +235,8 @@ func testV1RsTTL0(t *testing.T) {
 				"Destination": "3002"},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent,
+		args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 1 {
 		t.Errorf("Resources: %+v", rs)
@@ -255,7 +257,8 @@ func testV1RsTTL0(t *testing.T) {
 				"Destination": "3002"},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResource, argsRU, &releaseReply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+		argsRU, &releaseReply); err != nil {
 		t.Error(err)
 	}
 }
@@ -274,7 +277,8 @@ func testV1RsAllocateResource(t *testing.T) {
 		},
 		Units: 3,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg := "ResGroup1"
@@ -293,7 +297,8 @@ func testV1RsAllocateResource(t *testing.T) {
 		},
 		Units: 4,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
@@ -312,7 +317,8 @@ func testV1RsAllocateResource(t *testing.T) {
 		},
 		Units: 1,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "SPECIAL_1002"
@@ -330,7 +336,7 @@ func testV1RsAllocateResource(t *testing.T) {
 				"Destination": "1002"},
 		}, Units: 1,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource,
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
@@ -348,7 +354,8 @@ func testV1RsAllocateResource(t *testing.T) {
 		},
 		Units: 1,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
@@ -405,7 +412,8 @@ func testV1RsReleaseResource(t *testing.T) {
 				"Destination": "1002"},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResource, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
 	// try reserving with full units for Resource1, case which did not work in previous test
@@ -463,7 +471,7 @@ func testV1RsDBStore(t *testing.T) {
 	}
 	var reply string
 	eAllocationMsg := "ResGroup1"
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != eAllocationMsg {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
@@ -535,7 +543,8 @@ func testV1RsDBStore(t *testing.T) {
 
 func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 	var reply *string
-	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -600,6 +609,7 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
 	rlsConfig.FilterIDs = []string{"FLTR_RES_RCFG1", "FLTR_RES_RCFG2"}
+<<<<<<< HEAD
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG2",
@@ -621,6 +631,10 @@ func testV1RsUpdateResourceProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+=======
+	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile",
+		rlsConfig, &result); err != nil {
+>>>>>>> Moving SMAsterisk and SMFreeSWITCH to agents package, renaming some errors for FsA disconnecting calls, tests improvements
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -650,7 +664,8 @@ func testV1RsRemResourceProfile(t *testing.T) {
 func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 	var reply *string
 	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -660,10 +675,3 @@ func testV1RsStopEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-// args = &utils.ArgRSv1ResourceUsage{
-// 	CGREvent:utils.CGREvent{
-// 		Tenant:"cgrates.org",
-// 		Event:map[string]interface{}{"Account":"1002","Subject":"1001","Destination":"1002"},
-// 	},
-// }

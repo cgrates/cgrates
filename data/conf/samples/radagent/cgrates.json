@@ -74,7 +74,19 @@
 	"indexes": ["SubscriberId"],
 },
 
-"sm_generic": {
+"resources": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"suppliers": {
+	"enabled": true,
+},
+
+"smg": {
 	"enabled": true,
 	"debit_interval": "10s",
 },

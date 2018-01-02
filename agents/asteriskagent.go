@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessionmanager
+package agents
 
 import (
 	"fmt"
@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -50,7 +51,7 @@ const (
 )
 
 func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smgConn *utils.BiRPCInternalClient) (*SMAsterisk, error) {
-	sma := &SMAsterisk{cgrCfg: cgrCfg, smg: *smgConn, eventsCache: make(map[string]*SMGenericEvent)}
+	sma := &SMAsterisk{cgrCfg: cgrCfg, smg: *smgConn, eventsCache: make(map[string]*sessionmanager.SMGenericEvent)}
 	sma.smg.SetClientConn(sma) // pass the connection to SMA back into smg so we can receive the disconnects
 	return sma, nil
 }
@@ -62,8 +63,8 @@ type SMAsterisk struct {
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
-	eventsCache map[string]*SMGenericEvent // used to gather information about events during various phases
-	evCacheMux  sync.RWMutex               // Protect eventsCache
+	eventsCache map[string]*sessionmanager.SMGenericEvent // used to gather information about events during various phases
+	evCacheMux  sync.RWMutex                              // Protect eventsCache
 }
 
 func (sma *SMAsterisk) connectAsterisk() (err error) {
@@ -232,9 +233,11 @@ func (sma *SMAsterisk) ServiceShutdown() error {
 
 // Internal method to disconnect session in asterisk
 func (sma *SMAsterisk) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
-	channelID := SMGenericEvent(args.EventStart).GetOriginID(utils.META_DEFAULT)
+	channelID := sessionmanager.SMGenericEvent(args.EventStart).GetOriginID(utils.META_DEFAULT)
 	if err := sma.hangupChannel(channelID); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), channelID))
+		utils.Logger.Err(
+			fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s",
+				err.Error(), channelID))
 	}
 	*reply = utils.OK
 	return nil

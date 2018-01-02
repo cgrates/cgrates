@@ -82,11 +82,11 @@ func TestSMGBiRPCStartEngine(t *testing.T) {
 func TestSMGBiRPCApierRpcConn(t *testing.T) {
 	time.Sleep(time.Duration(1 * time.Second))
 	clntHandlers := map[string]interface{}{"SMGClientV1.DisconnectSession": handleDisconnectSession}
-	if _, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson,
+	if _, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SMGConfig.ListenBijson,
 		clntHandlers); err != nil { // First attempt is to make sure multiple clients are supported
 		t.Fatal(err)
 	}
-	if smgBiRPC, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SmGenericConfig.ListenBijson,
+	if smgBiRPC, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SMGConfig.ListenBijson,
 		clntHandlers); err != nil {
 		t.Fatal(err)
 	}
