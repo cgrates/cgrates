@@ -95,7 +95,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		}
 		if sgs != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetStatQueueProfile(sgs); err != nil {
+				if err := m.dmOut.SetStatQueueProfile(sgs, true); err != nil {
 					return err
 				}
 			}
@@ -135,7 +135,7 @@ func (m *Migrator) migrateV1CDRSTATS() (err error) {
 				if err := m.dmOut.SetStatQueue(sq); err != nil {
 					return err
 				}
-				if err := m.dmOut.SetStatQueueProfile(sts); err != nil {
+				if err := m.dmOut.SetStatQueueProfile(sts, true); err != nil {
 					return err
 				}
 				m.stats[utils.StatS] += 1

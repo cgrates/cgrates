@@ -79,7 +79,7 @@ func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *s
 	if missing := utils.MissingStructFields(res, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.SetResourceProfile(res); err != nil {
+	if err := apierV1.DataManager.SetResourceProfile(res, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(res.Tenant, res.ID), true, "") // ToDo: Remove here with autoreload

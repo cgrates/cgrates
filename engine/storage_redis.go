@@ -1505,10 +1505,10 @@ func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[stri
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
 func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
-	if err = rs.Cmd("HDEL", dbKey, itemID).Err; err != nil {
-		return err
+	if itemID != "" {
+		return rs.Cmd("HDEL", dbKey, itemID).Err
 	}
-	return
+	return rs.Cmd("DEL", dbKey).Err
 }
 
 func (rs *RedisStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {

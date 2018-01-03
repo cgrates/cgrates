@@ -45,7 +45,7 @@ func (apierV1 *ApierV1) SetSupplierProfile(spp *engine.SupplierProfile, reply *s
 	if missing := utils.MissingStructFields(spp, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.SetSupplierProfile(spp); err != nil {
+	if err := apierV1.DataManager.SetSupplierProfile(spp, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	cache.RemKey(utils.SupplierProfilePrefix+utils.ConcatenatedKey(spp.Tenant, spp.ID), true, "") // ToDo: Remove here with autoreload

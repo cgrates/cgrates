@@ -131,7 +131,7 @@ func testPopulateAttrService(t *testing.T) {
 	}
 
 	for _, atr := range atrPs {
-		dmAtr.SetAttributeProfile(atr)
+		dmAtr.SetAttributeProfile(atr, false)
 	}
 	prefix := utils.ConcatenatedKey(sev.Tenant, *sev.Context)
 	ref := NewReqFilterIndexer(dmAtr, utils.AttributeProfilePrefix, prefix)

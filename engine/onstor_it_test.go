@@ -863,7 +863,7 @@ func testOnStorITCacheResourceProfile(t *testing.T) {
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
 	}
-	if err := onStor.SetResourceProfile(rCfg); err != nil {
+	if err := onStor.SetResourceProfile(rCfg, false); err != nil {
 		t.Error(err)
 	}
 	expectedR := []string{"rsp_cgrates.org:RL_TEST"}
@@ -977,7 +977,7 @@ func testOnStorITCacheStatQueueProfile(t *testing.T) {
 		Weight:     20,
 		MinItems:   1,
 	}
-	if err := onStor.SetStatQueueProfile(statProfile); err != nil {
+	if err := onStor.SetStatQueueProfile(statProfile, false); err != nil {
 		t.Error(err)
 	}
 	expectedR := []string{"sqp_cgrates.org:Test_Stat_Cache"}
@@ -1193,7 +1193,7 @@ func testOnStorITCacheSupplierProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if err := onStor.SetSupplierProfile(splProfile); err != nil {
+	if err := onStor.SetSupplierProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
 	expectedT := []string{"spp_cgrates.org:SPRF_1"}
@@ -1236,7 +1236,7 @@ func testOnStorITCacheAttributeProfile(t *testing.T) {
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
-	if err := onStor.SetAttributeProfile(attrProfile); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
 	expectedT := []string{"alp_cgrates.org:ATTRPRF1"}
@@ -2194,7 +2194,7 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetResourceProfile(rL); err != nil {
+	if err := onStor.SetResourceProfile(rL, false); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); err != nil {
@@ -2361,7 +2361,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.SetStatQueueProfile(sq); err != nil {
+	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
 		t.Error(err)
 	}
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
@@ -2479,7 +2479,7 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
 	if err := onStor.RemoveThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != nil {
-		 t.Error(err)
+		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
@@ -2585,7 +2585,7 @@ func testOnStorITCRUDSupplierProfile(t *testing.T) {
 	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetSupplierProfile(splProfile); err != nil {
+	if err := onStor.SetSupplierProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1", true, utils.NonTransactional); err != nil {
@@ -2629,7 +2629,7 @@ func testOnStorITCRUDAttributeProfile(t *testing.T) {
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetAttributeProfile(attrProfile); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); err != nil {

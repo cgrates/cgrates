@@ -42,7 +42,7 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 		}
 		if res != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetResourceProfile(res); err != nil {
+				if err := m.dmOut.SetResourceProfile(res, true); err != nil {
 					return err
 				}
 				m.stats[utils.Resource] += 1
