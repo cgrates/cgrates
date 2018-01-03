@@ -1953,8 +1953,16 @@ func testMigratorTPActions(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting TpActions ", err.Error())
 		}
-		if !reflect.DeepEqual(tpActions[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActions[0], result[0])
+		if !reflect.DeepEqual(tpActions[0].TPid, result[0].TPid) {
+			t.Errorf("Expecting: %+v, received: %+v", tpActions[0].TPid, result[0].TPid)
+		} else if !reflect.DeepEqual(tpActions[0].ID, result[0].ID) {
+			t.Errorf("Expecting: %+v, received: %+v", tpActions[0].ID, result[0].ID)
+		} else if !reflect.DeepEqual(tpActions[0].Actions[0], result[0].Actions[0]) &&
+			!reflect.DeepEqual(tpActions[0].Actions[0], result[0].Actions[1]) {
+			t.Errorf("Expecting: %+v, received: %+v", tpActions[0].Actions[0], result[0].Actions[0])
+		} else if !reflect.DeepEqual(tpActions[0].Actions[1], result[0].Actions[1]) &&
+			!reflect.DeepEqual(tpActions[0].Actions[1], result[0].Actions[0]) {
+			t.Errorf("Expecting: %+v, received: %+v", tpActions[0].Actions[1], result[0].Actions[1])
 		}
 	}
 }
@@ -2073,8 +2081,16 @@ func testMigratorTpActionTriggers(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting TpAccountActions ", err.Error())
 		}
-		if !reflect.DeepEqual(tpActionTriggers[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0], result[0])
+		if !reflect.DeepEqual(tpActionTriggers[0].TPid, result[0].TPid) {
+			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0].TPid, result[0].TPid)
+		} else if !reflect.DeepEqual(tpActionTriggers[0].ID, result[0].ID) {
+			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0].ID, result[0].ID)
+		} else if !reflect.DeepEqual(tpActionTriggers[0].ActionTriggers[0], result[0].ActionTriggers[0]) &&
+			!reflect.DeepEqual(tpActionTriggers[0].ActionTriggers[0], result[0].ActionTriggers[1]) {
+			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0].ActionTriggers[0], result[0].ActionTriggers[0])
+		} else if !reflect.DeepEqual(tpActionTriggers[0].ActionTriggers[1], result[0].ActionTriggers[1]) &&
+			!reflect.DeepEqual(tpActionTriggers[0].ActionTriggers[1], result[0].ActionTriggers[0]) {
+			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0].ActionTriggers[1], result[0].ActionTriggers[1])
 		}
 	}
 }
