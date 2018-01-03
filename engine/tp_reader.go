@@ -2182,7 +2182,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetResourceProfile(rsp); err != nil {
+		if err = tpr.dm.SetResourceProfile(rsp, false); err != nil {
 			return err
 		}
 		if verbose {
@@ -2208,7 +2208,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetStatQueueProfile(st); err != nil {
+		if err = tpr.dm.SetStatQueueProfile(st, false); err != nil {
 			return err
 		}
 		if verbose {
@@ -2272,7 +2272,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetSupplierProfile(th); err != nil {
+		if err = tpr.dm.SetSupplierProfile(th, false); err != nil {
 			return err
 		}
 		if verbose {
@@ -2288,7 +2288,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetAttributeProfile(th); err != nil {
+		if err = tpr.dm.SetAttributeProfile(th, false); err != nil {
 			return err
 		}
 		if verbose {

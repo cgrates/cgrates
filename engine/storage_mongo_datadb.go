@@ -1981,20 +1981,23 @@ func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]uti
 			pairs = append(pairs, bson.M{"$set": bson.M{"key": dbKey, param: itmMp.Slice()}})
 		}
 	}
-	bulk := col.Bulk()
-	bulk.Unordered()
-	bulk.Upsert(pairs...)
-	_, err = bulk.Run()
+	if len(pairs) != 0 {
+		bulk := col.Bulk()
+		bulk.Unordered()
+		bulk.Upsert(pairs...)
+		_, err = bulk.Run()
+	}
 	return
 }
 
 func (ms *MongoStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	if err = col.Remove(bson.M{"key": id}); err != nil {
-		return
+	err = col.Remove(bson.M{"key": id})
+	if err == mgo.ErrNotFound {
+		err = utils.ErrNotFound
 	}
-	return nil
+	return
 }
 
 // GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
@@ -2040,14 +2043,22 @@ func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[string]utils.StringMap) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	mp := make(map[string][]string)
+	pairs := []interface{}{}
 	for key, itmMp := range revIdx {
-		mp[key] = itmMp.Slice()
+		param := fmt.Sprintf("value.%s", key)
+		pairs = append(pairs, bson.M{"key": dbKey})
+		if len(itmMp) == 0 {
+			pairs = append(pairs, bson.M{"$unset": bson.M{param: 1}})
+		} else {
+			pairs = append(pairs, bson.M{"$set": bson.M{"key": dbKey, param: itmMp.Slice()}})
+		}
 	}
-	_, err = col.Upsert(bson.M{"key": dbKey}, &struct {
-		Key   string
-		Value map[string][]string
-	}{dbKey, mp})
+	if len(pairs) != 0 {
+		bulk := col.Bulk()
+		bulk.Unordered()
+		bulk.Upsert(pairs...)
+		_, err = bulk.Run()
+	}
 	return
 }
 
@@ -2055,11 +2066,15 @@ func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[stri
 func (ms *MongoStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	findParam := fmt.Sprintf("value.%s", itemID)
-	if err = col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam: 1}}); err != nil {
-		return
+	if itemID != "" {
+		findParam := fmt.Sprintf("value.%s", itemID)
+		return col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam: 1}})
 	}
-	return nil
+	err = col.Remove(bson.M{"key": dbKey})
+	if err == mgo.ErrNotFound {
+		err = utils.ErrNotFound
+	}
+	return
 }
 
 func (ms *MongoStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {

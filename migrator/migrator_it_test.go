@@ -1085,7 +1085,7 @@ func testMigratorStats(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
 		}
 	case action == Move:
-		if err := mig.dmIN.SetStatQueueProfile(sqp); err != nil {
+		if err := mig.dmIN.SetStatQueueProfile(sqp, true); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
 		if err := mig.dmIN.SetStatQueue(sq); err != nil {

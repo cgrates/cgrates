@@ -46,7 +46,7 @@ func (apierV1 *ApierV1) SetAttributeProfile(extAls *engine.ExternalAttributeProf
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	alsPrf := extAls.AsAttributeProfile()
-	if err := apierV1.DataManager.SetAttributeProfile(alsPrf); err != nil {
+	if err := apierV1.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	cache.RemKey(utils.AttributeProfilePrefix+utils.ConcatenatedKey(extAls.Tenant, extAls.ID), true, "") // ToDo: Remove here with autoreload

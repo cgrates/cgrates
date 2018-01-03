@@ -543,6 +543,11 @@ const (
 	MetaSetVersions = "*set_versions"
 )
 
+// MetaFilterIndexesAPIs
+const (
+	ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
+)
+
 // MetaSupplierAPIs
 const (
 	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"

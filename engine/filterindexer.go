@@ -89,6 +89,11 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
+
+	for _, idx := range rfi.indexes {
+	}
+	for _, idx := range rfi.reveseIndex {
+	}
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
 		rfi.indexes); err != nil {

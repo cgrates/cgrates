@@ -59,7 +59,12 @@ func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
 }
 
 func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
-	_, ok := iface.(*map[string]interface{})
+	_, ok := iface.(*utils.ArgsComputeFilterIndexes)
+	if ok {
+		args = append(args, "MapStringInterface")
+		return
+	}
+	_, ok = iface.(*map[string]interface{})
 	if ok {
 		args = append(args, "MapStringInterface")
 		return

@@ -1281,6 +1281,15 @@ type ArgRSv1ResourceUsage struct {
 	Units   float64
 }
 
+type ArgsComputeFilterIndexes struct {
+	Tenant       string
+	AttributeIDs *[]string
+	ResourceIDs  *[]string
+	StatIDs      *[]string
+	SupplierIDs  *[]string
+	ThresholdIDs *[]string
+}
+
 func (args *ArgRSv1ResourceUsage) TenantID() string {
 	return ConcatenatedKey(args.CGREvent.Tenant, args.UsageID)
 }

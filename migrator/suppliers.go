@@ -42,7 +42,7 @@ func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
 		}
 		if splp != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetSupplierProfile(splp); err != nil {
+				if err := m.dmOut.SetSupplierProfile(splp, true); err != nil {
 					return err
 				}
 				m.stats[utils.Suppliers] += 1
