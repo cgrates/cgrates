@@ -45,7 +45,7 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsLoadConfig,
 	testV1RsInitDataDb,
 	testV1RsResetStorDb,
-	testV1RsStartEngine,
+	// testV1RsStartEngine,
 	testV1RsRpcConn,
 	testV1RsFromFolder,
 	testV1RsGetResourcesForEvent,
@@ -61,7 +61,7 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsGetResourceProfileAfterUpdate,
 	testV1RsRemResourceProfile,
 	testV1RsGetResourceProfileAfterDelete,
-	testV1RsStopEngine,
+	// testV1RsStopEngine,
 }
 
 //Test start here
@@ -560,7 +560,27 @@ func testV1RsSetResourceProfile(t *testing.T) {
 		Weight:            20,
 		Thresholds:        []string{"Val1", "Val2"},
 	}
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_RES_RCFG1",
+		RequestFilters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "*string",
+				Type:      "Account",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
 	var result string
+	if err := rlsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -582,6 +602,26 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
 	rlsConfig.FilterIDs = []string{"FLTR_RES_RCFG1", "FLTR_RES_RCFG2"}
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_RES_RCFG2",
+		RequestFilters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "*string",
+				Type:      "Account",
+				Values:    []string{"1001", "1002"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	if err := rlsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

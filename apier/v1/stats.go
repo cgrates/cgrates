@@ -43,7 +43,7 @@ func (apierV1 *ApierV1) SetStatQueueProfile(sqp *engine.StatQueueProfile, reply 
 	if missing := utils.MissingStructFields(sqp, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.SetStatQueueProfile(sqp, false); err != nil {
+	if err := apierV1.DataManager.SetStatQueueProfile(sqp, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sqp.Tenant, sqp.ID),
