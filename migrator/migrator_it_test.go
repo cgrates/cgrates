@@ -934,16 +934,15 @@ func testMigratorStats(t *testing.T) {
 	}
 	sq := &engine.StatQueue{Tenant: config.CgrConfig().DefaultTenant,
 		ID:        v1Sts.Id,
-		SQMetrics: make(map[string]map[string]engine.StatMetric),
+		SQMetrics: make(map[string]engine.StatMetric),
 	}
 	for _, metricwparam := range sqp.Metrics {
 		if metric, err := engine.NewStatMetric(metricwparam.MetricID, 0, metricwparam.Parameters); err != nil {
 			t.Error("Error when creating newstatMETRIc ", err.Error())
 		} else {
 			if _, has := sq.SQMetrics[metricwparam.MetricID]; !has {
-				sq.SQMetrics[metricwparam.MetricID] = make(map[string]engine.StatMetric)
+				sq.SQMetrics[metricwparam.MetricID] = metric
 			}
-			sq.SQMetrics[metricwparam.MetricID][metricwparam.Parameters] = metric
 		}
 	}
 	switch {
@@ -1676,6 +1675,7 @@ func testMigratorRQF(t *testing.T) {
 }
 
 func testMigratorResource(t *testing.T) {
+	var filters []*engine.RequestFilter
 	rL := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RL_TEST2",
@@ -1690,7 +1690,15 @@ func testMigratorResource(t *testing.T) {
 	}
 	switch action {
 	case Move:
-		if err := mig.dmIN.SetResourceProfile(rL); err != nil {
+		x, _ := engine.NewRequestFilter(engine.MetaGreaterOrEqual, "PddInterval", []string{rL.UsageTTL.String()})
+		filters = append(filters, x)
+
+		filter := &engine.Filter{Tenant: "cgrates.org", ID: "FLTR_RES_RL_TEST2", RequestFilters: filters}
+
+		if err := mig.dmIN.SetFilter(filter); err != nil {
+			t.Error("Error when setting filter ", err.Error())
+		}
+		if err := mig.dmIN.SetResourceProfile(rL, true); err != nil {
 			t.Error("Error when setting ResourceProfile ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
