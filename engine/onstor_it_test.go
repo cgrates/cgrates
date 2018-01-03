@@ -967,7 +967,7 @@ func testOnStorITCacheStatQueueProfile(t *testing.T) {
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
 			&utils.MetricWithParams{
-				MetricID:   "ASR",
+				MetricID:   "*asr",
 				Parameters: "",
 			},
 		},

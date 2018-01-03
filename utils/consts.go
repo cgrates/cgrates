@@ -545,7 +545,7 @@ const (
 
 // MetaFilterIndexesAPIs
 const (
-	ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
+	ApierV1ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
 )
 
 // MetaSupplierAPIs

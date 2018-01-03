@@ -380,6 +380,9 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool, tr
 }
 
 func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
+	if err = dm.DataDB().SetThresholdProfileDrv(th); err != nil {
+		return err
+	}
 	if withIndex {
 		indexer := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
 		//remove old ThresholdProfile indexes
@@ -403,7 +406,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			return
 		}
 	}
-	return dm.DataDB().SetThresholdProfileDrv(th)
+	return
 }
 
 func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string) (err error) {
@@ -438,6 +441,9 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool, tr
 }
 
 func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool) (err error) {
+	if err = dm.DataDB().SetStatQueueProfileDrv(sqp); err != nil {
+		return err
+	}
 	// if withIndex {
 	// 	indexer := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, sqp.Tenant)
 	// 	//remove old StatQueueProfile indexes
@@ -460,7 +466,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 	// 		return
 	// 	}
 	// }
-	return dm.DataDB().SetStatQueueProfileDrv(sqp)
+	return
 }
 
 func (dm *DataManager) RemoveStatQueueProfile(tenant, id, transactionID string) (err error) {
@@ -561,30 +567,33 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, skipCache bool, tra
 }
 
 func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (err error) {
+	if err = dm.DataDB().SetResourceProfileDrv(rp); err != nil {
+		return err
+	}
 	//to be implemented in tests
-	// if withIndex {
-	// 	indexer := NewReqFilterIndexer(dm, utils.ResourceProfilesPrefix, rp.Tenant)
-	// 	//remove old ResourceProfiles indexes
-	// 	if err = indexer.RemoveItemFromIndex(rp.ID); err != nil &&
-	// 		err.Error() != utils.ErrNotFound.Error() {
-	// 		return
-	// 	}
-	// 	//Verify matching Filters for every FilterID from ResourceProfiles
-	// 	for _, fltrID := range rp.FilterIDs {
-	// 		var fltr *Filter
-	// 		if fltr, err = dm.GetFilter(rp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-	// 			if err == utils.ErrNotFound {
-	// 				err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, rp)
-	// 			}
-	// 			return
-	// 		}
-	// 		indexer.IndexTPFilter(FilterToTPFilter(fltr), rp.ID)
-	// 	}
-	// 	if err = indexer.StoreIndexes(); err != nil {
-	// 		return
-	// 	}
-	// }
-	return dm.DataDB().SetResourceProfileDrv(rp)
+	if withIndex {
+		indexer := NewReqFilterIndexer(dm, utils.ResourceProfilesPrefix, rp.Tenant)
+		//remove old ResourceProfiles indexes
+		if err = indexer.RemoveItemFromIndex(rp.ID); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			return
+		}
+		//Verify matching Filters for every FilterID from ResourceProfiles
+		for _, fltrID := range rp.FilterIDs {
+			var fltr *Filter
+			if fltr, err = dm.GetFilter(rp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, rp)
+				}
+				return
+			}
+			indexer.IndexTPFilter(FilterToTPFilter(fltr), rp.ID)
+		}
+		if err = indexer.StoreIndexes(); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string) (err error) {
@@ -1003,6 +1012,9 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool, tra
 }
 
 func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool) (err error) {
+	if err = dm.DataDB().SetSupplierProfileDrv(supp); err != nil {
+		return err
+	}
 	//to be implemented in tests
 	// if withIndex {
 	// 	indexer := NewReqFilterIndexer(dm, utils.SupplierProfilePrefix, supp.Tenant)
@@ -1026,7 +1038,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	// 		return
 	// 	}
 	// }
-	return dm.DataDB().SetSupplierProfileDrv(supp)
+	return
 }
 
 func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string) (err error) {
@@ -1060,6 +1072,9 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool, tr
 }
 
 func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool) (err error) {
+	if err = dm.DataDB().SetAttributeProfileDrv(ap); err != nil {
+		return err
+	}
 	//to be implemented in tests
 	// if withIndex {
 	// 	indexer := NewReqFilterIndexer(dm, utils.AttributeProfilePrefix, ap.Tenant)
@@ -1083,7 +1098,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 	// 		return
 	// 	}
 	// }
-	return dm.DataDB().SetAttributeProfileDrv(ap)
+	return
 }
 
 func (dm *DataManager) RemoveAttributeProfile(tenant, id, transactionID string) (err error) {
