@@ -23,7 +23,7 @@
 	"enabled": true,					// start the CDR Server service:  <true|false>
 },
 
-"smg": {
+"sessions": {
 	"enabled": true,
 	"debit_interval": "1ms",					// interval to perform debits on.
 },

@@ -86,14 +86,14 @@
 	"enabled": true,
 },
 
-"smg": {
+"sessions": {
 	"enabled": true,
 	"debit_interval": "10s",
 },
 
 "radius_agent": {
 	"enabled": true,
-	"sm_generic_conns": [
+	"sessions_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}								// connection towards SMG component for session management
 	],
 	"request_processors": [

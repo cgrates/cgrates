@@ -125,7 +125,7 @@
 },
 
 
-"sm_generic": {
+"sessions": {
 	"enabled": true,
 	"debit_interval": "5s",					// interval to perform debits on.
 },

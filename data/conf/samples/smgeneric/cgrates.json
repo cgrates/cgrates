@@ -74,7 +74,7 @@
 },
 
 
-"smg": {
+"sessions": {
 	"enabled": true,						// starts SessionManager service: <true|false>
 },
 

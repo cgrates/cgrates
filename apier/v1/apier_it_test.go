@@ -1101,7 +1101,10 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 // Make sure we have scheduled actions
 func TestApierITGetScheduledActionsForAccount(t *testing.T) {
 	var rply []*scheduler.ScheduledAction
-	if err := rater.Call("ApierV1.GetScheduledActions", scheduler.ArgsGetScheduledActions{Tenant: utils.StringPointer("cgrates.org"), Account: utils.StringPointer("dan7")}, &rply); err != nil {
+	if err := rater.Call("ApierV1.GetScheduledActions",
+		scheduler.ArgsGetScheduledActions{
+			Tenant:  utils.StringPointer("cgrates.org"),
+			Account: utils.StringPointer("dan7")}, &rply); err != nil {
 		t.Error("Unexpected error: ", err)
 	} else if len(rply) == 0 {
 		t.Errorf("ScheduledActions: %+v", rply)

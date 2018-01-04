@@ -48,7 +48,7 @@
 	"enabled": true,
 },
 
-"smg": {
+"sessions": {
 	"enabled": true,
 	"session_ttl": "50ms",
 	"rals_conns": [

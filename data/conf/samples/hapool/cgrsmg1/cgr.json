@@ -14,7 +14,7 @@
 	"cdrstats": "",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 },
 
-"sm_generic": {
+"sessions": {
 	"enabled": true,
 	"rals_conns": [
 	      {"address": "127.0.0.1:2014"},

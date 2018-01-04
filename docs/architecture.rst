@@ -127,13 +127,6 @@ Responsible with call control on the Telecommunication Switch side. Operates in 
 
 All call actions are logged into CGRateS's LogDB.
 
-Right now there are **five** session manager types.
-   - sm_freeswitch
-   - sm_kamailio
-   - sm_opensips
-   - sm_asterisk
-   - **sm_generic**
-
 - Communicates via:
    - RPC
    - internal/in-process *within the same running* **cgr-engine** process.
@@ -142,12 +135,6 @@ Right now there are **five** session manager types.
 
    "stor_db" - (cdrDb)
 
-- Config section in the CGRateS configuration file:
-   - ``"sm_freeswitch": {...}``
-   - ``"sm_kamailio": {...}``
-   - ``"sm_opensips": {...}``
-   - ``"sm_asterisk": {...}``
-   - ``"sm_generic": {...}``
 
 2.1.4. DiameterAgent service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -165,7 +152,7 @@ Despite the name it is a flexible **Diameter Server**.
 - Config section in the CGRateS configuration file:
    - ``"diameter_agent": {...}``
 
-2.1.5. CDRS service
+2.1.5. CDR service
 ~~~~~~~~~~~~~~~~~~~
 Centralized CDR server and CDR (raw or rated) **replicator**.
 

@@ -27,9 +27,9 @@
 	"enabled": true,
 },
 
-"sm_generic": {
+"sessions": {
 	"enabled": true,
-	"smg_replication_conns": [
+	"session_replication_conns": [
 		{"address": "127.0.0.1:22012", "transport": "*json"},
 	],
 },
