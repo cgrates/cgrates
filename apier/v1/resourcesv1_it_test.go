@@ -609,7 +609,6 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
 	rlsConfig.FilterIDs = []string{"FLTR_RES_RCFG1", "FLTR_RES_RCFG2"}
-<<<<<<< HEAD
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG2",
@@ -631,10 +630,6 @@ func testV1RsUpdateResourceProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
-=======
-	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile",
-		rlsConfig, &result); err != nil {
->>>>>>> Moving SMAsterisk and SMFreeSWITCH to agents package, renaming some errors for FsA disconnecting calls, tests improvements
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
