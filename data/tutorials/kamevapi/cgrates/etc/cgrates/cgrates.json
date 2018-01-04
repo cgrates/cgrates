@@ -19,9 +19,6 @@
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
-	"historys_conns": [
-		{"address": "*internal"}
-	],
 	"pubsubs_conns": [
 		{"address": "*internal"}
 	],
@@ -118,12 +115,6 @@
 "sm_kamailio": {
 	"enabled": true,
 	"create_cdr": true,
-},
-
-
-"historys": {
-	"enabled": true,
-	"history_dir": "/tmp/cgr_kamevapi/cgrates/history",
 },
 
 

@@ -35,7 +35,6 @@ import (
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessionmanager"
@@ -496,17 +495,6 @@ func startCdrStats(internalCdrStatSChan chan rpcclient.RpcClientConnection, dm *
 	internalCdrStatSChan <- cdrStats
 }
 
-func startHistoryServer(internalHistorySChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
-	scribeServer, err := history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	server.RpcRegisterName("HistoryV1", scribeServer)
-	internalHistorySChan <- scribeServer
-}
-
 func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
 	pubSubServer, err := engine.NewPubSub(dm, cfg.HttpSkipTlsVerify)
 	if err != nil {
@@ -729,7 +717,7 @@ func startFilterService(filterSChan chan *engine.FilterS,
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
-	internalCdrSChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan,
+	internalCdrSChan, internalCdrStatSChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan chan rpcclient.RpcClientConnection) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
@@ -738,8 +726,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalCdrSChan <- cdrs
 	case cdrstats := <-internalCdrStatSChan:
 		internalCdrStatSChan <- cdrstats
-	case hist := <-internalHistorySChan:
-		internalHistorySChan <- hist
 	case pubsubs := <-internalPubSubSChan:
 		internalPubSubSChan <- pubsubs
 	case users := <-internalUserSChan:
@@ -896,7 +882,6 @@ func main() {
 	cacheDoneChan := make(chan struct{}, 1)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrStatSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalHistorySChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -914,7 +899,7 @@ func main() {
 	// Start rater service
 	if cfg.RALsEnabled {
 		go startRater(internalRaterChan, cacheDoneChan, internalThresholdSChan,
-			internalCdrStatSChan, internalStatSChan, internalHistorySChan,
+			internalCdrStatSChan, internalStatSChan,
 			internalPubSubSChan, internalAttributeSChan,
 			internalUserSChan, internalAliaseSChan,
 			srvManager, server, dm, loadDb, cdrDb, &stopHandled, exitChan)
@@ -980,11 +965,6 @@ func main() {
 		go startRadiusAgent(internalSMGChan, exitChan)
 	}
 
-	// Start HistoryS service
-	if cfg.HistoryServerEnabled {
-		go startHistoryServer(internalHistorySChan, server, exitChan)
-	}
-
 	// Start PubSubS service
 	if cfg.PubSubServerEnabled {
 		go startPubSubServer(internalPubSubSChan, dm, server, exitChan)
@@ -1026,7 +1006,7 @@ func main() {
 	}
 
 	// Serve rpc connections
-	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan, internalHistorySChan,
+	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan,
 		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan)
 	<-exitChan
 

@@ -309,10 +309,6 @@ func (rs *RedisStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
 	w.Write(result)
 	w.Close()
 	err = rs.Cmd("SET", utils.RATING_PLAN_PREFIX+rp.Id, b.Bytes()).Err
-	if err == nil && historyScribe != nil {
-		response := 0
-		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
-	}
 	return
 }
 
@@ -324,11 +320,6 @@ func (rs *RedisStorage) RemoveRatingPlanDrv(key string) error {
 	for _, key := range keys {
 		if err = rs.Cmd("DEL", key).Err; err != nil {
 			return err
-		}
-		rpf := &RatingProfile{Id: key}
-		if historyScribe != nil {
-			response := 0
-			go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
 		}
 	}
 	return nil
@@ -358,10 +349,6 @@ func (rs *RedisStorage) SetRatingProfileDrv(rpf *RatingProfile) (err error) {
 	if err = rs.Cmd("SET", key, result).Err; err != nil {
 		return
 	}
-	if historyScribe != nil {
-		response := 0
-		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
-	}
 	return
 }
 
@@ -373,11 +360,6 @@ func (rs *RedisStorage) RemoveRatingProfileDrv(key string) error {
 	for _, key := range keys {
 		if err = rs.Cmd("DEL", key).Err; err != nil {
 			return err
-		}
-		rpf := &RatingProfile{Id: key}
-		if historyScribe != nil {
-			response := 0
-			go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
 		}
 	}
 	return nil
@@ -465,10 +447,6 @@ func (rs *RedisStorage) SetDestination(dest *Destination, transactionID string) 
 	key := utils.DESTINATION_PREFIX + dest.Id
 	if err = rs.Cmd("SET", key, b.Bytes()).Err; err != nil {
 		return err
-	}
-	if historyScribe != nil {
-		response := 0
-		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
 	return
 }

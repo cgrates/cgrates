@@ -15,4 +15,3 @@ Scenario:
  - CGR-Mediator component attaching costs to the raw CDRs from FreeSWITCH_ inside CGR StorDB.
  - CGR-CDRE exporting mediated CDRs from CGR StorDB (export path: */tmp*).
  - CGR-CDRStats component building up stats in 5 different queues.
- - CGR-History component keeping the archive of the rates modifications (path browsable with git client at */tmp/cgr_history*).

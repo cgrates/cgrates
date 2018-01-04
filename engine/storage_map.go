@@ -258,10 +258,6 @@ func (ms *MapStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
 	w.Write(result)
 	w.Close()
 	ms.dict[utils.RATING_PLAN_PREFIX+rp.Id] = b.Bytes()
-	response := 0
-	if historyScribe != nil {
-		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
-	}
 	return
 }
 
@@ -271,11 +267,6 @@ func (ms *MapStorage) RemoveRatingPlanDrv(key string) (err error) {
 	for k := range ms.dict {
 		if strings.HasPrefix(k, key) {
 			delete(ms.dict, key)
-			response := 0
-			rpf := &RatingPlan{Id: key}
-			if historyScribe != nil {
-				go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(), &response)
-			}
 		}
 	}
 	return
@@ -300,10 +291,6 @@ func (ms *MapStorage) SetRatingProfileDrv(rpf *RatingProfile) (err error) {
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rpf)
 	ms.dict[utils.RATING_PROFILE_PREFIX+rpf.Id] = result
-	response := 0
-	if historyScribe != nil {
-		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
-	}
 	return
 }
 
@@ -313,11 +300,6 @@ func (ms *MapStorage) RemoveRatingProfileDrv(key string) (err error) {
 	for k := range ms.dict {
 		if strings.HasPrefix(k, key) {
 			delete(ms.dict, key)
-			response := 0
-			rpf := &RatingProfile{Id: key}
-			if historyScribe != nil {
-				go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
-			}
 		}
 	}
 	return
@@ -400,10 +382,6 @@ func (ms *MapStorage) SetDestination(dest *Destination, transactionID string) (e
 	w.Close()
 	key := utils.DESTINATION_PREFIX + dest.Id
 	ms.dict[key] = b.Bytes()
-	response := 0
-	if historyScribe != nil {
-		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
-	}
 	cache.RemKey(key, cacheCommit(transactionID), transactionID)
 	return
 }

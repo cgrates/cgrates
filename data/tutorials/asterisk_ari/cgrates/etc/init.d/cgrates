@@ -29,7 +29,6 @@ PIDFILE=$RUNDIR/cgr-engine.pid
 STACKTRACE=$RUNDIR/$NAME.strace
 ENABLE=true
 DAEMON_OPTS="-config_dir=$TUTFOLDER/etc/cgrates"
-HISTDIR=$TMP_DIR/history
 CDREDIR=$TMP_DIR/cdre
 CDRCINDIR=$TMP_DIR/cdrc/in
 CDRCOUTDIR=$TMP_DIR/cdrc/out
@@ -67,11 +66,6 @@ fi
 if [ ! -d $CDREDIR ]; then
   mkdir -p $CDREDIR
   chown $USER:$GROUP $CDREDIR
-fi
-# Install the history folder
-if [ ! -d $HISTDIR ]; then
-  mkdir -p $HISTDIR
-  chown $USER:$GROUP $HISTDIR
 fi
 
 #

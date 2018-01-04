@@ -29,9 +29,6 @@
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
-	"historys_conns": [
-		{"address": "*internal"}
-	],
 	"pubsubs_conns": [
 		{"address": "*internal"}
 	],
@@ -139,12 +136,6 @@
 	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10}
 	],
-},
-
-
-"historys": {
-	"enabled": true,							// starts History service: <true|false>.
-	"history_dir": "/tmp/cgr_osipsasync/cgrates/history",	// location on disk where to store history files.
 },
 
 

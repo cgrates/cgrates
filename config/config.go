@@ -233,7 +233,6 @@ type CGRConfig struct {
 	RALsThresholdSConns      []*HaPoolConfig // address where to reach ThresholdS config
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
 	RALsStatSConns           []*HaPoolConfig
-	RALsHistorySConns        []*HaPoolConfig
 	RALsPubSubSConns         []*HaPoolConfig
 	RALsAttributeSConns      []*HaPoolConfig
 	RALsUserSConns           []*HaPoolConfig
@@ -268,9 +267,6 @@ type CGRConfig struct {
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
 	radiusAgentCfg           *RadiusAgentCfg          // RadiusAgent configuration
 	filterSCfg               *FilterSCfg              // FilterS configuration
-	HistoryServerEnabled     bool                     // Starts History as server: <true|false>.
-	HistoryDir               string                   // Location on disk where to store history files.
-	HistorySaveInterval      time.Duration            // The timout duration between pubsub writes
 	PubSubServerEnabled      bool                     // Starts PubSub as server: <true|false>.
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
 	UserServerEnabled        bool                     // Starts User as server: <true|false>
@@ -303,11 +299,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 		for _, connCfg := range self.RALsStatSConns {
 			if connCfg.Address == utils.MetaInternal && !self.statsCfg.Enabled {
 				return errors.New("StatS not enabled but requested by RALs component.")
-			}
-		}
-		for _, connCfg := range self.RALsHistorySConns {
-			if connCfg.Address == utils.MetaInternal && !self.HistoryServerEnabled {
-				return errors.New("History server not enabled but requested by RALs component.")
 			}
 		}
 		for _, connCfg := range self.RALsPubSubSConns {
@@ -681,11 +672,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnHistServCfg, err := jsnCfg.HistServJsonCfg()
-	if err != nil {
-		return err
-	}
-
 	jsnPubSubServCfg, err := jsnCfg.PubSubServJsonCfg()
 	if err != nil {
 		return err
@@ -931,13 +917,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 				self.RALsStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
 		}
-		if jsnRALsCfg.Historys_conns != nil {
-			self.RALsHistorySConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Historys_conns))
-			for idx, jsnHaCfg := range *jsnRALsCfg.Historys_conns {
-				self.RALsHistorySConns[idx] = NewDfltHaPoolConfig()
-				self.RALsHistorySConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
 		if jsnRALsCfg.Pubsubs_conns != nil {
 			self.RALsPubSubSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Pubsubs_conns))
 			for idx, jsnHaCfg := range *jsnRALsCfg.Pubsubs_conns {
@@ -1172,20 +1151,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRACfg != nil {
 		if err := self.radiusAgentCfg.loadFromJsonCfg(jsnRACfg); err != nil {
 			return err
-		}
-	}
-
-	if jsnHistServCfg != nil {
-		if jsnHistServCfg.Enabled != nil {
-			self.HistoryServerEnabled = *jsnHistServCfg.Enabled
-		}
-		if jsnHistServCfg.History_dir != nil {
-			self.HistoryDir = *jsnHistServCfg.History_dir
-		}
-		if jsnHistServCfg.Save_interval != nil {
-			if self.HistorySaveInterval, err = utils.ParseDurationWithNanosecs(*jsnHistServCfg.Save_interval); err != nil {
-				return err
-			}
 		}
 	}
 

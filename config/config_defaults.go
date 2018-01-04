@@ -135,7 +135,6 @@ const CGRATES_CFG_JSON = `
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"historys_conns": [],					// address where to reach the history service, empty to disable history functionality: <""|*internal|x.y.z.y:1234>
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
@@ -400,13 +399,6 @@ const CGRATES_CFG_JSON = `
 	"cdr_requires_session": false,								// only create CDR if there is an active session at terminate
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"request_processors": [],
-},
-
-
-"historys": {
-	"enabled": false,							// starts History service: <true|false>.
-	"history_dir": "/var/lib/cgrates/history",	// location on disk where to store history files.
-	"save_interval": "1s",						// interval to save changed cache into .git archive
 },
 
 

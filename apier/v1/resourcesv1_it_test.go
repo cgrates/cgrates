@@ -45,7 +45,7 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsLoadConfig,
 	testV1RsInitDataDb,
 	testV1RsResetStorDb,
-	// testV1RsStartEngine,
+	testV1RsStartEngine,
 	testV1RsRpcConn,
 	testV1RsFromFolder,
 	testV1RsGetResourcesForEvent,
@@ -61,7 +61,7 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsGetResourceProfileAfterUpdate,
 	testV1RsRemResourceProfile,
 	testV1RsGetResourceProfileAfterDelete,
-	// testV1RsStopEngine,
+	testV1RsStopEngine,
 }
 
 //Test start here

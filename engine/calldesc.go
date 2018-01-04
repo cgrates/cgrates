@@ -72,7 +72,6 @@ var (
 	debitPeriod              = 10 * time.Second
 	globalRoundingDecimals   = 6
 	thresholdS               rpcclient.RpcClientConnection // used by RALs to communicate with ThresholdS
-	historyScribe            rpcclient.RpcClientConnection
 	pubSubServer             rpcclient.RpcClientConnection
 	userService              rpcclient.RpcClientConnection
 	aliasService             rpcclient.RpcClientConnection
@@ -107,11 +106,6 @@ Sets the database for CDR storing, used by *cdrlog in first place
 */
 func SetCdrStorage(cStorage CdrStorage) {
 	cdrStorage = cStorage
-}
-
-// Exported method to set the history scribe.
-func SetHistoryScribe(scribe rpcclient.RpcClientConnection) {
-	historyScribe = scribe
 }
 
 func SetPubSub(ps rpcclient.RpcClientConnection) {

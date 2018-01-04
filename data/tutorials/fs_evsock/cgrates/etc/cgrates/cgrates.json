@@ -12,9 +12,6 @@
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
-	"historys_conns": [
-		{"address": "*internal"}
-	],
 	"pubsubs_conns": [
 		{"address": "*internal"}
 	],
@@ -129,12 +126,6 @@
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
 	],
-},
-
-
-"historys": {
-	"enabled": true,							// starts History service: <true|false>.
-	"history_dir": "/tmp/cgr_fsevsock/cgrates/history",	// location on disk where to store history files.
 },
 
 

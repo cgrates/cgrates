@@ -206,7 +206,6 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		Thresholds_conns:            &[]*HaPoolJsonCfg{},
 		Cdrstats_conns:              &[]*HaPoolJsonCfg{},
 		Stats_conns:                 &[]*HaPoolJsonCfg{},
-		Historys_conns:              &[]*HaPoolJsonCfg{},
 		Pubsubs_conns:               &[]*HaPoolJsonCfg{},
 		Attributes_conns:            &[]*HaPoolJsonCfg{},
 		Users_conns:                 &[]*HaPoolJsonCfg{},
@@ -649,19 +648,6 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		rcv := *cfg.Request_processors
 		t.Errorf("Received: %+v", rcv)
-	}
-}
-
-func TestDfHistServJsonCfg(t *testing.T) {
-	eCfg := &HistServJsonCfg{
-		Enabled:       utils.BoolPointer(false),
-		History_dir:   utils.StringPointer("/var/lib/cgrates/history"),
-		Save_interval: utils.StringPointer("1s"),
-	}
-	if cfg, err := dfCgrJsonCfg.HistServJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
 	}
 }
 

@@ -300,9 +300,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns, eHaPoolcfg) {
 		t.Error(cgrCfg.RALsCDRStatSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RALsHistorySConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsHistorySConns)
-	}
 	if !reflect.DeepEqual(cgrCfg.RALsPubSubSConns, eHaPoolcfg) {
 		t.Error(cgrCfg.RALsPubSubSConns)
 	}
@@ -596,18 +593,6 @@ func TestCgrCfgJSONDefaultsSMAsteriskCfg(t *testing.T) {
 
 	if !reflect.DeepEqual(cgrCfg.smAsteriskCfg, eSmAsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.smAsteriskCfg, eSmAsCfg)
-	}
-}
-
-func TestCgrCfgJSONDefaultsHistoryS(t *testing.T) {
-	if cgrCfg.HistoryServerEnabled != false {
-		t.Error(cgrCfg.HistoryServerEnabled)
-	}
-	if cgrCfg.HistoryDir != "/var/lib/cgrates/history" {
-		t.Error(cgrCfg.HistoryDir)
-	}
-	if cgrCfg.HistorySaveInterval != 1*time.Second {
-		t.Error(cgrCfg.HistorySaveInterval)
 	}
 }
 
