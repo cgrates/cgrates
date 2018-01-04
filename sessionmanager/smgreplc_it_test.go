@@ -160,7 +160,8 @@ func TestSMGRplcUpdate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions",
+		map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -169,16 +170,20 @@ func TestSMGRplcUpdate(t *testing.T) {
 	}
 	var pSessions []*ActiveSession
 	// Make sure we don't have passive session on active host
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil,
+		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// Master should not longer have activeSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions",
+		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
 	// Make sure session was replicated
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions",
+		nil, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
