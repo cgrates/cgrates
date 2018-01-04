@@ -197,15 +197,15 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 	smgRpc := v1.NewSMGenericV1(sm)
 	server.RpcRegister(smgRpc)
 	server.RpcRegister(&v2.SMGenericV2{*smgRpc})
-	smgv1 := v1.NewSMGv1(sm) // methods with multiple options
-	server.RpcRegister(smgv1)
+	ssv1 := v1.NewSessionSv1(sm) // methods with multiple options
+	server.RpcRegister(ssv1)
 	// Register BiRpc handlers
 	if cfg.SessionSCfg().ListenBijson != "" {
 		smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
 		for method, handler := range smgBiRpc.Handlers() {
 			server.BiRPCRegisterName(method, handler)
 		}
-		for method, handler := range smgv1.Handlers() {
+		for method, handler := range ssv1.Handlers() {
 			server.BiRPCRegisterName(method, handler)
 		}
 		server.ServeBiJSON(cfg.SessionSCfg().ListenBijson)

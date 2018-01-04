@@ -23,44 +23,44 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSMGv1(sm *sessionmanager.SMGeneric) *SMGv1 {
-	return &SMGv1{SMG: sm}
+func NewSessionSv1(sm *sessionmanager.SMGeneric) *SessionSv1 {
+	return &SessionSv1{SMG: sm}
 }
 
-// Exports RPC from SMGv1
-type SMGv1 struct {
+// Exports RPC from SessionSv1
+type SessionSv1 struct {
 	SMG *sessionmanager.SMGeneric
 }
 
-// Publishes BiJSONRPC methods exported by SMGv1
-func (smgv1 *SMGv1) Handlers() map[string]interface{} {
+// Publishes BiJSONRPC methods exported by SessionSv1
+func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		"SMGv1.InitiateSession":  smgv1.SMG.BiRPCv1InitiateSession,
-		"SMGv1.UpdateSession":    smgv1.SMG.BiRPCv1UpdateSession,
-		"SMGv1.TerminateSession": smgv1.SMG.BiRPCv1TerminateSession,
-		"SMGv1.ProcessCDR":       smgv1.SMG.BiRPCv1ProcessCDR,
+		"SessionSv1.InitiateSession":  ssv1.SMG.BiRPCv1InitiateSession,
+		"SessionSv1.UpdateSession":    ssv1.SMG.BiRPCv1UpdateSession,
+		"SessionSv1.TerminateSession": ssv1.SMG.BiRPCv1TerminateSession,
+		"SessionSv1.ProcessCDR":       ssv1.SMG.BiRPCv1ProcessCDR,
 	}
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
-func (smgv1 *SMGv1) InitiateSession(args *sessionmanager.V1InitSessionArgs,
+func (ssv1 *SessionSv1) InitiateSession(args *sessionmanager.V1InitSessionArgs,
 	rply *sessionmanager.V1InitSessionReply) error {
-	return smgv1.SMG.BiRPCv1InitiateSession(nil, args, rply)
+	return ssv1.SMG.BiRPCv1InitiateSession(nil, args, rply)
 }
 
 // Interim updates, returns remaining duration from the rater
-func (smgv1 *SMGv1) UpdateSession(args *sessionmanager.V1UpdateSessionArgs,
+func (ssv1 *SessionSv1) UpdateSession(args *sessionmanager.V1UpdateSessionArgs,
 	rply *sessionmanager.V1UpdateSessionReply) error {
-	return smgv1.SMG.BiRPCv1UpdateSession(nil, args, rply)
+	return ssv1.SMG.BiRPCv1UpdateSession(nil, args, rply)
 }
 
 // Called on session end, should stop debit loop
-func (smgv1 *SMGv1) TerminateSession(args *sessionmanager.V1TerminateSessionArgs,
+func (ssv1 *SessionSv1) TerminateSession(args *sessionmanager.V1TerminateSessionArgs,
 	rply *string) error {
-	return smgv1.SMG.BiRPCv1TerminateSession(nil, args, rply)
+	return ssv1.SMG.BiRPCv1TerminateSession(nil, args, rply)
 }
 
 // Called on session end, should stop debit loop
-func (smgv1 *SMGv1) ProcessCDR(cgrEv utils.CGREvent, rply *string) error {
-	return smgv1.SMG.BiRPCv1ProcessCDR(nil, cgrEv, rply)
+func (ssv1 *SessionSv1) ProcessCDR(cgrEv utils.CGREvent, rply *string) error {
+	return ssv1.SMG.BiRPCv1ProcessCDR(nil, cgrEv, rply)
 }
