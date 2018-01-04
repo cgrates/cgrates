@@ -756,10 +756,6 @@ func (ms *MongoStorage) SetRatingPlanDrv(rp *RatingPlan) error {
 		Key   string
 		Value []byte
 	}{Key: rp.Id, Value: b.Bytes()})
-	if err == nil && historyScribe != nil {
-		var response int
-		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
-	}
 	return err
 }
 
@@ -788,10 +784,6 @@ func (ms *MongoStorage) RemoveRatingPlanDrv(key string) error {
 		if err = ms.ms.Unmarshal(out, &rp); err != nil {
 			return err
 		}
-		if err == nil && historyScribe != nil {
-			var response int
-			go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
-		}
 	}
 	return iter.Close()
 }
@@ -814,10 +806,6 @@ func (ms *MongoStorage) SetRatingProfileDrv(rp *RatingProfile) (err error) {
 	if _, err = col.Upsert(bson.M{"id": rp.Id}, rp); err != nil {
 		return
 	}
-	if historyScribe != nil {
-		var response int
-		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(false), &response)
-	}
 	return
 }
 
@@ -829,11 +817,6 @@ func (ms *MongoStorage) RemoveRatingProfileDrv(key string) error {
 	for iter.Next(&result) {
 		if err := col.Remove(bson.M{"id": result.Id}); err != nil {
 			return err
-		}
-		rpf := &RatingProfile{Id: result.Id}
-		if historyScribe != nil {
-			var response int
-			go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
 		}
 	}
 	return iter.Close()
@@ -933,10 +916,6 @@ func (ms *MongoStorage) SetDestination(dest *Destination, transactionID string) 
 		Value []byte
 	}{Key: dest.Id, Value: b.Bytes()}); err != nil {
 		return
-	}
-	if historyScribe != nil {
-		var response int
-		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
 	return
 }

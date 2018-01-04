@@ -211,22 +211,7 @@ Gathers offline CDRs and post them to CDR Server - (CDRS component)
 - Config section in the CGRateS configuration file:
    - ``"cdrc": {...}``
 
-2.1.8. History service
-~~~~~~~~~~~~~~~~~~~~~~
-Archives rate changes in human readable JSON format using **GIT**.
-
-- Communicates via:
-   - RPC
-   - internal/in-process *within the same running* **cgr-engine** process.
-
-- Operates with the following CGRateS database(s): ::
-
-   - none
-
-- Config section in the CGRateS configuration file:
-   - ``"historys": {...}``
-
-2.1.9. Aliases service
+2.1.8. Aliases service
 ~~~~~~~~~~~~~~~~~~~~~~~
 Generic purpose **aliasing** system.
 
@@ -246,7 +231,7 @@ Possible applications:
 - Config section in the CGRateS configuration file:
    - ``"aliases": {...}``
 
-2.1.10. User service
+2.1.9. User service
 ~~~~~~~~~~~~~~~~~~~~
 Generic purpose **user** system to maintain user profiles (LDAP similarity).
 
@@ -261,7 +246,7 @@ Generic purpose **user** system to maintain user profiles (LDAP similarity).
 - Config section in the CGRateS configuration file:
    - ``"users": {...}``
 
-2.1.11. PubSub service
+2.1.10. PubSub service
 ~~~~~~~~~~~~~~~~~~~~~~
 PubSub service used to expose internal events to interested external components (eg: balance ops)
 
@@ -277,7 +262,7 @@ PubSub service used to expose internal events to interested external components 
    - ``"pubsubs": {...}``
 
 
-2.1.12. Resource Limiter service
+2.1.11. Resource Limiter service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Resource Limiter service used to limit resources during authorization (eg: maximum calls per destination for an account)
 
@@ -292,7 +277,7 @@ Resource Limiter service used to limit resources during authorization (eg: maxim
 - Config section in the CGRateS configuration file:
    - ``"rls": {...}``
 
-2.1.13. APIER RPC service
+2.1.12. APIER RPC service
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 RPC service used to expose external access towards internal components.
 
@@ -301,7 +286,7 @@ RPC service used to expose external access towards internal components.
    - JSON over HTTP
    - JSON over WebSocket
 
-2.1.14. Cdre
+2.1.13. Cdre
 ~~~~~~~~~~~~
 Component to retrieve rated CDRs from internal CDRs database.
 
@@ -314,7 +299,7 @@ Component to retrieve rated CDRs from internal CDRs database.
 - Config section in the CGRateS configuration file:
    - ``"cdre": {...}``
 
-2.1.15. Mailer
+2.1.14. Mailer
 ~~~~~~~~~~~~~~
 TBD
 
@@ -325,7 +310,7 @@ TBD
 - Config section in the CGRateS configuration file:
    - ``"mailer": {...}``
 
-2.1.16. Suretax
+2.1.15. Suretax
 ~~~~~~~~~~~~~~~
 TBD
 
@@ -386,8 +371,6 @@ Can be used to:
          Flush the database before importing
    -from_stordb
          Load the tariff plan from storDb to dataDb
-   -history_server string
-         The history server address:port, empty to disable automatic history archiving (default "127.0.0.1:2013")
    -load_history_size int
          Limit the number of records in the load history (default 10)
    -migrate_rc8 string

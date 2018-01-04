@@ -17,9 +17,6 @@
 	"cdrstats_conns": [
 		{"address": "*internal"}
 	],
-	"historys_conns": [
-		{"address": "*internal"}
-	],
 	"pubsubs_conns": [
 		{"address": "*internal"}
 	],
@@ -110,12 +107,6 @@
 		],
 		"trailer_fields": [],
 	},
-},
-
-
-"historys": {
-	"enabled": true,							// starts History service: <true|false>.
-	"history_dir": "/tmp/cgr_osipsnative/cgrates/history",	// location on disk where to store history files.
 },
 
 

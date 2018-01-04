@@ -25,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -238,17 +237,6 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 	}
 
 	return utils.ErrNotFound
-}
-
-// history record method
-func (rpf *RatingProfile) GetHistoryRecord(deleted bool) history.Record {
-	js, _ := json.Marshal(rpf)
-	return history.Record{
-		Id:       rpf.Id,
-		Filename: history.RATING_PROFILES_FN,
-		Payload:  js,
-		Deleted:  deleted,
-	}
 }
 
 type TenantRatingSubject struct {

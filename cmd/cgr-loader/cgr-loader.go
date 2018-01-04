@@ -59,7 +59,6 @@ var (
 	fromStorDb      = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb        = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 	rpcEncoding     = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
-	historyServer   = flag.String("historys", config.CgrConfig().RPCJSONListen, "The history server address:port, empty to disable automatic history archiving")
 	ralsAddress     = flag.String("rals", config.CgrConfig().RPCJSONListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
 	cdrstatsAddress = flag.String("cdrstats", config.CgrConfig().RPCJSONListen, "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
 	usersAddress    = flag.String("users", config.CgrConfig().RPCJSONListen, "Users service to contact for data reloads, empty to disable automatic data reloads")
@@ -171,18 +170,6 @@ func main() {
 	if *dryRun { // We were just asked to parse the data, not saving it
 		return
 	}
-	if *historyServer != "" { // Init scribeAgent so we can store the differences
-		if scribeAgent, err := rpcclient.NewRpcClient("tcp", *historyServer, 3, 3,
-			time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
-			log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
-			return
-		} else {
-			engine.SetHistoryScribe(scribeAgent)
-			//defer scribeAgent.Client.Close()
-		}
-	} else {
-		log.Print("WARNING: Rates history archiving is disabled!")
-	}
 	if *ralsAddress != "" { // Init connection to rater so we can reload it's data
 		if rater, err = rpcclient.NewRpcClient("tcp", *ralsAddress, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
@@ -222,9 +209,6 @@ func main() {
 		// write maps to database
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disable_reverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
-		}
-		if len(*historyServer) != 0 && *verbose {
-			log.Print("Wrote history.")
 		}
 		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs []string
 		if rater != nil {

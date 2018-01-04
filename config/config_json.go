@@ -53,7 +53,6 @@ const (
 	OSIPS_JSN       = "opensips"
 	DA_JSN          = "diameter_agent"
 	RA_JSN          = "radius_agent"
-	HISTSERV_JSN    = "historys"
 	PUBSUBSERV_JSN  = "pubsubs"
 	ALIASESSERV_JSN = "aliases"
 	USERSERV_JSN    = "users"
@@ -312,18 +311,6 @@ func (self CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(RadiusAgentJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) HistServJsonCfg() (*HistServJsonCfg, error) {
-	rawCfg, hasKey := self[HISTSERV_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(HistServJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

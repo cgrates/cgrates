@@ -19,10 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"encoding/json"
 	"math"
-
-	"github.com/cgrates/cgrates/history"
 )
 
 /*
@@ -97,16 +94,6 @@ func (rp *RatingPlan) AddRateInterval(dId string, ris ...*RateInterval) {
 
 func (rp *RatingPlan) Equal(o *RatingPlan) bool {
 	return rp.Id == o.Id
-}
-
-// history record method
-func (rp *RatingPlan) GetHistoryRecord() history.Record {
-	js, _ := json.Marshal(rp)
-	return history.Record{
-		Id:       rp.Id,
-		Filename: history.RATING_PLANS_FN,
-		Payload:  js,
-	}
 }
 
 // IsValid determines if the rating plan covers a continous period of time

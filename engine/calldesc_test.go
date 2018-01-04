@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"log"
 	"reflect"
@@ -32,7 +31,6 @@ var (
 )
 
 func init() {
-	historyScribe, _ = history.NewMockScribe()
 	dm.DataDB().Flush("")
 	populateDB()
 }

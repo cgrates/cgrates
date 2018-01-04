@@ -83,7 +83,6 @@ type RalsJsonCfg struct {
 	Thresholds_conns            *[]*HaPoolJsonCfg
 	Cdrstats_conns              *[]*HaPoolJsonCfg
 	Stats_conns                 *[]*HaPoolJsonCfg
-	Historys_conns              *[]*HaPoolJsonCfg
 	Pubsubs_conns               *[]*HaPoolJsonCfg
 	Attributes_conns            *[]*HaPoolJsonCfg
 	Aliases_conns               *[]*HaPoolJsonCfg

@@ -24,7 +24,6 @@ import (
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -32,7 +31,7 @@ import (
 
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneChan chan struct{},
-	internalThdSChan, internalCdrStatSChan, internalStatSChan, internalHistorySChan, internalPubSubSChan,
+	internalThdSChan, internalCdrStatSChan, internalStatSChan, internalPubSubSChan,
 	internalAttributeSChan, internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
@@ -173,22 +172,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		}()
 	}
 
-	if len(cfg.RALsHistorySConns) != 0 { // Connection to HistoryS,
-		histTaskChan := make(chan struct{})
-		waitTasks = append(waitTasks, histTaskChan)
-		go func() {
-			defer close(histTaskChan)
-			if historySConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsHistorySConns, internalHistorySChan, cfg.InternalTtl); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect HistoryS, error: %s", err.Error()))
-				exitChan <- true
-				return
-			} else {
-				engine.SetHistoryScribe(historySConns)
-			}
-		}()
-	}
-
 	if len(cfg.RALsPubSubSConns) != 0 { // Connection to pubsubs
 		pubsubTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, pubsubTaskChan)
@@ -291,7 +274,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 
 	utils.RegisterRpcParams("", &engine.Stats{})
 	utils.RegisterRpcParams("", &v1.CDRStatsV1{})
-	utils.RegisterRpcParams("ScribeV1", &history.FileScribe{})
 	utils.RegisterRpcParams("PubSubV1", &engine.PubSub{})
 	utils.RegisterRpcParams("AliasesV1", &engine.AliasHandler{})
 	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
