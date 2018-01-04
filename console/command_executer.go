@@ -59,47 +59,39 @@ func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
 }
 
 func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
-	_, ok := iface.(*utils.ArgsComputeFilterIndexes)
-	if ok {
-		args = append(args, "MapStringInterface")
-		return
-	}
-	_, ok = iface.(*map[string]interface{})
-	if ok {
-		args = append(args, "MapStringInterface")
-		return
-	}
 	val := reflect.ValueOf(iface)
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
 		iface = val.Interface()
 	}
 	typ := reflect.TypeOf(iface)
-	for i := 0; i < typ.NumField(); i++ {
-		valField := val.Field(i)
-		typeField := typ.Field(i)
-		//log.Printf("%v (%v : %v)", typeField.Name, valField.Kind(), typeField.PkgPath)
-		if len(typeField.PkgPath) > 0 { //unexported field
-			continue
-		}
-		switch valField.Kind() {
-		case reflect.Ptr, reflect.Struct:
-			if valField.Kind() == reflect.Ptr {
-				valField = reflect.New(valField.Type().Elem()).Elem()
-				if valField.Kind() != reflect.Struct {
-					//log.Printf("Here: %v (%v)", typeField.Name, valField.Kind())
+	if val.Kind() == reflect.Struct {
+		for i := 0; i < typ.NumField(); i++ {
+			valField := val.Field(i)
+			typeField := typ.Field(i)
+			//log.Printf("%v (%v : %v)", typeField.Name, valField.Kind(), typeField.PkgPath)
+			if len(typeField.PkgPath) > 0 { //unexported field
+				continue
+			}
+			switch valField.Kind() {
+			case reflect.Ptr, reflect.Struct:
+				if valField.Kind() == reflect.Ptr {
+					valField = reflect.New(valField.Type().Elem()).Elem()
+					if valField.Kind() != reflect.Struct {
+						//log.Printf("Here: %v (%v)", typeField.Name, valField.Kind())
+						args = append(args, typeField.Name)
+						continue
+					}
+				}
+				valInterf := valField.Interface()
+				if _, canCast := valInterf.(time.Time); canCast {
 					args = append(args, typeField.Name)
 					continue
 				}
-			}
-			valInterf := valField.Interface()
-			if _, canCast := valInterf.(time.Time); canCast {
+				args = append(args, ce.clientArgs(valInterf)...)
+			default:
 				args = append(args, typeField.Name)
-				continue
 			}
-			args = append(args, ce.clientArgs(valInterf)...)
-		default:
-			args = append(args, typeField.Name)
 		}
 	}
 	return
