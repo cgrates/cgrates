@@ -29,7 +29,7 @@ var smgCfg *config.CGRConfig
 
 func init() {
 	smgCfg, _ = config.NewDefaultCGRConfig()
-	smgCfg.SMGConfig.SessionIndexes = utils.StringMap{"Tenant": true,
+	smgCfg.SessionSCfg().SessionIndexes = utils.StringMap{"Tenant": true,
 		"Account": true, "Extra3": true, "Extra4": true}
 }
 
