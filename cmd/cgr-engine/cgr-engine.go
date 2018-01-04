@@ -135,52 +135,52 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 	utils.Logger.Info("Starting CGRateS SMGeneric service.")
 	var err error
 	var ralsConns, resSConns, suplSConns, attrSConns, cdrsConn *rpcclient.RpcClientPool
-	if len(cfg.SMGConfig.RALsConns) != 0 {
+	if len(cfg.SessionSCfg().RALsConns) != 0 {
 		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SMGConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
+			cfg.SessionSCfg().RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RALs: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	if len(cfg.SMGConfig.ResSConns) != 0 {
+	if len(cfg.SessionSCfg().ResSConns) != 0 {
 		resSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SMGConfig.ResSConns, internalResourceSChan, cfg.InternalTtl)
+			cfg.SessionSCfg().ResSConns, internalResourceSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to ResourceS: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	if len(cfg.SMGConfig.SupplSConns) != 0 {
+	if len(cfg.SessionSCfg().SupplSConns) != 0 {
 		suplSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SMGConfig.SupplSConns, internalSupplierSChan, cfg.InternalTtl)
+			cfg.SessionSCfg().SupplSConns, internalSupplierSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to SupplierS: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	if len(cfg.SMGConfig.AttrSConns) != 0 {
+	if len(cfg.SessionSCfg().AttrSConns) != 0 {
 		attrSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SMGConfig.AttrSConns, internalAttrSChan, cfg.InternalTtl)
+			cfg.SessionSCfg().AttrSConns, internalAttrSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to AttributeS: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	if len(cfg.SMGConfig.CDRsConns) != 0 {
+	if len(cfg.SessionSCfg().CDRsConns) != 0 {
 		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SMGConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
+			cfg.SessionSCfg().CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RALs: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	smgReplConns, err := sessionmanager.NewSMGReplicationConns(cfg.SMGConfig.SMGReplicationConns, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout)
+	smgReplConns, err := sessionmanager.NewSessionReplicationConns(cfg.SessionSCfg().SessionReplicationConns, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to SMGReplicationConnection error: <%s>", err.Error()))
 		exitChan <- true
@@ -200,7 +200,7 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 	smgv1 := v1.NewSMGv1(sm) // methods with multiple options
 	server.RpcRegister(smgv1)
 	// Register BiRpc handlers
-	if cfg.SMGConfig.ListenBijson != "" {
+	if cfg.SessionSCfg().ListenBijson != "" {
 		smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
 		for method, handler := range smgBiRpc.Handlers() {
 			server.BiRPCRegisterName(method, handler)
@@ -208,7 +208,7 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 		for method, handler := range smgv1.Handlers() {
 			server.BiRPCRegisterName(method, handler)
 		}
-		server.ServeBiJSON(cfg.SMGConfig.ListenBijson)
+		server.ServeBiJSON(cfg.SessionSCfg().ListenBijson)
 		exitChan <- true
 	}
 }
@@ -236,9 +236,9 @@ func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcC
 	var err error
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
 	var smgConn, pubsubConn *rpcclient.RpcClientPool
-	if len(cfg.DiameterAgentCfg().SMGConns) != 0 {
+	if len(cfg.DiameterAgentCfg().SessionSConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DiameterAgentCfg().SMGConns, internalSMGChan, cfg.InternalTtl)
+			cfg.DiameterAgentCfg().SessionSConns, internalSMGChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
 			exitChan <- true
@@ -270,10 +270,10 @@ func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitCh
 	var err error
 	utils.Logger.Info("Starting CGRateS RadiusAgent service")
 	var smgConn *rpcclient.RpcClientPool
-	if len(cfg.RadiusAgentCfg().SMGConns) != 0 {
+	if len(cfg.RadiusAgentCfg().SessionSConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts,
 			cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.RadiusAgentCfg().SMGConns, internalSMGChan, cfg.InternalTtl)
+			cfg.RadiusAgentCfg().SessionSConns, internalSMGChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RadiusAgent> Could not connect to SMG: %s", err.Error()))
 			exitChan <- true
@@ -920,7 +920,7 @@ func main() {
 	go startCdrcs(internalCdrSChan, internalRaterChan, exitChan)
 
 	// Start SM-Generic
-	if cfg.SMGConfig.Enabled {
+	if cfg.SessionSCfg().Enabled {
 		go startSmGeneric(internalSMGChan, internalRaterChan, internalRsChan,
 			internalSupplierSChan, internalAttributeSChan, internalCdrSChan, server, exitChan)
 	}

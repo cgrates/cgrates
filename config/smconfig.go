@@ -88,26 +88,26 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 	return nil
 }
 
-type SMGConfig struct {
-	Enabled             bool
-	ListenBijson        string
-	RALsConns           []*HaPoolConfig
-	ResSConns           []*HaPoolConfig
-	SupplSConns         []*HaPoolConfig
-	AttrSConns          []*HaPoolConfig
-	CDRsConns           []*HaPoolConfig
-	SMGReplicationConns []*HaPoolConfig
-	DebitInterval       time.Duration
-	MinCallDuration     time.Duration
-	MaxCallDuration     time.Duration
-	SessionTTL          time.Duration
-	SessionTTLMaxDelay  *time.Duration
-	SessionTTLLastUsed  *time.Duration
-	SessionTTLUsage     *time.Duration
-	SessionIndexes      utils.StringMap
+type SessionSCfg struct {
+	Enabled                 bool
+	ListenBijson            string
+	RALsConns               []*HaPoolConfig
+	ResSConns               []*HaPoolConfig
+	SupplSConns             []*HaPoolConfig
+	AttrSConns              []*HaPoolConfig
+	CDRsConns               []*HaPoolConfig
+	SessionReplicationConns []*HaPoolConfig
+	DebitInterval           time.Duration
+	MinCallDuration         time.Duration
+	MaxCallDuration         time.Duration
+	SessionTTL              time.Duration
+	SessionTTLMaxDelay      *time.Duration
+	SessionTTLLastUsed      *time.Duration
+	SessionTTLUsage         *time.Duration
+	SessionIndexes          utils.StringMap
 }
 
-func (self *SMGConfig) loadFromJsonCfg(jsnCfg *SmgJsonCfg) error {
+func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -153,11 +153,11 @@ func (self *SMGConfig) loadFromJsonCfg(jsnCfg *SmgJsonCfg) error {
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Smg_replication_conns != nil {
-		self.SMGReplicationConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_replication_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Smg_replication_conns {
-			self.SMGReplicationConns[idx] = NewDfltHaPoolConfig()
-			self.SMGReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Session_replication_conns != nil {
+		self.SessionReplicationConns = make([]*HaPoolConfig, len(*jsnCfg.Session_replication_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Session_replication_conns {
+			self.SessionReplicationConns[idx] = NewDfltHaPoolConfig()
+			self.SessionReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Debit_interval != nil {
@@ -202,7 +202,7 @@ func (self *SMGConfig) loadFromJsonCfg(jsnCfg *SmgJsonCfg) error {
 
 type FsAgentConfig struct {
 	Enabled       bool
-	SMGConns      []*HaPoolConfig
+	SessionSConns []*HaPoolConfig
 	SubscribePark bool
 	CreateCdr     bool
 	ExtraFields   []*utils.RSRField
@@ -223,11 +223,11 @@ func (self *FsAgentConfig) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Smg_conns != nil {
-		self.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Smg_conns {
-			self.SMGConns[idx] = NewDfltHaPoolConfig()
-			self.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Sessions_conns != nil {
+		self.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
+			self.SessionSConns[idx] = NewDfltHaPoolConfig()
+			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Subscribe_park != nil {
@@ -486,7 +486,7 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 
 type AsteriskAgentCfg struct {
 	Enabled       bool
-	SMGConns      []*HaPoolConfig
+	SessionSConns []*HaPoolConfig
 	CreateCDR     bool
 	AsteriskConns []*AsteriskConnCfg
 }
@@ -495,11 +495,11 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	if jsnCfg.Enabled != nil {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Smg_conns != nil {
-		aCfg.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Smg_conns {
-			aCfg.SMGConns[idx] = NewDfltHaPoolConfig()
-			aCfg.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Sessions_conns != nil {
+		aCfg.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
+			aCfg.SessionSConns[idx] = NewDfltHaPoolConfig()
+			aCfg.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {

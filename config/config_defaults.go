@@ -277,11 +277,11 @@ const CGRATES_CFG_JSON = `
 ],
 
 
-"smg": {
-	"enabled": false,						// starts SessionManager service: <true|false>
+"sessions": {
+	"enabled": false,						// starts session manager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+		{"address": "*internal"}			// address where to reach the RALs <""|*internal|127.0.0.1:2013>
 	],
 	"cdrs_conns": [
 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
@@ -289,7 +289,7 @@ const CGRATES_CFG_JSON = `
 	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
 	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
-	"smg_replication_conns": [],			// replicate sessions towards these SMGs
+	"session_replication_conns": [],		// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
@@ -302,9 +302,9 @@ const CGRATES_CFG_JSON = `
 
 
 "asterisk_agent": {
-	"enabled": false,						// starts Asterisk SessionManager service: <true|false>
-	"smg_conns": [
-		{"address": "*internal"}			// connection towards SMG component for session management: <*internal>
+	"enabled": false,						// starts the Asterisk agent: <true|false>
+	"sessions_conns": [
+		{"address": "*internal"}			// connection towards session service: <*internal>
 	],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
@@ -314,9 +314,9 @@ const CGRATES_CFG_JSON = `
 
 
 "freeswitch_agent": {
-	"enabled": false,						// starts SessionManager service: <true|false>
-	"smg_conns": [
-		{"address": "*internal"}			// connection towards SMG component for session management: <*internal>
+	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
+	"sessions_conns": [
+		{"address": "*internal"}			// connection towards session service: <*internal>
 	],
 	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
@@ -374,11 +374,11 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"smg_conns": [
-		{"address": "*internal"}								// connection towards SMG component for session management
+	"sessions_conns": [
+		{"address": "*internal"}								// connection towards SessionService
 	],
 	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
-	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
+	"create_cdr": true,											// create CDR out of CCR terminate and send it to SessionS
 	"cdr_requires_session": true,								// only create CDR if there is an active session at terminate
 	"debit_interval": "5m",										// interval for CCR updates
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
@@ -401,10 +401,10 @@ const CGRATES_CFG_JSON = `
 	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
 		"*default": "/usr/share/cgrates/radius/dict/",			// key represents the client IP or catch-all <*default|$client_ip>
 	},
-	"smg_conns": [
-		{"address": "*internal"}								// connection towards SMG component for session management
+	"sessions_conns": [
+		{"address": "*internal"}								// connection towards SessionService
 	],
-	"create_cdr": true,											// create CDR out of Accounting-Stop and send it to SMG component
+	"create_cdr": true,											// create CDR out of Accounting-Stop and send it to SessionS
 	"cdr_requires_session": false,								// only create CDR if there is an active session at terminate
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"request_processors": [],

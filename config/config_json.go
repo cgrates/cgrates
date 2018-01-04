@@ -28,42 +28,43 @@ import (
 )
 
 const (
-	GENERAL_JSN     = "general"
-	CACHE_JSN       = "cache"
-	LISTEN_JSN      = "listen"
-	HTTP_JSN        = "http"
-	DATADB_JSN      = "data_db"
-	STORDB_JSN      = "stor_db"
-	FilterSjsn      = "filters"
-	RALS_JSN        = "rals"
-	SCHEDULER_JSN   = "scheduler"
-	CDRS_JSN        = "cdrs"
-	MEDIATOR_JSN    = "mediator"
-	CDRSTATS_JSN    = "cdrstats"
-	CDRE_JSN        = "cdre"
-	CDRC_JSN        = "cdrc"
-	SMG_JSON        = "smg"
-	SMFS_JSN        = "sm_freeswitch"
-	SMKAM_JSN       = "sm_kamailio"
-	SMOSIPS_JSN     = "sm_opensips"
-	SMAsteriskJSN   = "sm_asterisk"
-	SM_JSN          = "session_manager"
-	FS_JSN          = "freeswitch"
-	KAMAILIO_JSN    = "kamailio"
-	OSIPS_JSN       = "opensips"
-	DA_JSN          = "diameter_agent"
-	RA_JSN          = "radius_agent"
-	PUBSUBSERV_JSN  = "pubsubs"
-	ALIASESSERV_JSN = "aliases"
-	USERSERV_JSN    = "users"
-	ATTRIBUTE_JSN   = "attributes"
-	RESOURCES_JSON  = "resources"
-	STATS_JSON      = "stats"
-	THRESHOLDS_JSON = "thresholds"
-	SupplierSJson   = "suppliers"
-	FILTERS_JSON    = "filters"
-	MAILER_JSN      = "mailer"
-	SURETAX_JSON    = "suretax"
+	GENERAL_JSN        = "general"
+	CACHE_JSN          = "cache"
+	LISTEN_JSN         = "listen"
+	HTTP_JSN           = "http"
+	DATADB_JSN         = "data_db"
+	STORDB_JSN         = "stor_db"
+	FilterSjsn         = "filters"
+	RALS_JSN           = "rals"
+	SCHEDULER_JSN      = "scheduler"
+	CDRS_JSN           = "cdrs"
+	MEDIATOR_JSN       = "mediator"
+	CDRSTATS_JSN       = "cdrstats"
+	CDRE_JSN           = "cdre"
+	CDRC_JSN           = "cdrc"
+	SessionSJson       = "sessions"
+	FreeSWITCHAgentJSN = "freeswitch_agent"
+	SMKAM_JSN          = "sm_kamailio"
+	SMOSIPS_JSN        = "sm_opensips"
+	AsteriskAgentJSN   = "asterisk_agent"
+	SM_JSN             = "session_manager"
+	FS_JSN             = "freeswitch"
+	KAMAILIO_JSN       = "kamailio"
+	OSIPS_JSN          = "opensips"
+	DA_JSN             = "diameter_agent"
+	RA_JSN             = "radius_agent"
+	HISTSERV_JSN       = "historys"
+	PUBSUBSERV_JSN     = "pubsubs"
+	ALIASESSERV_JSN    = "aliases"
+	USERSERV_JSN       = "users"
+	ATTRIBUTE_JSN      = "attributes"
+	RESOURCES_JSON     = "resources"
+	STATS_JSON         = "stats"
+	THRESHOLDS_JSON    = "thresholds"
+	SupplierSJson      = "suppliers"
+	FILTERS_JSON       = "filters"
+	MAILER_JSN         = "mailer"
+	SURETAX_JSON       = "suretax"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -233,12 +234,12 @@ func (self CgrJsonCfg) CdrcJsonCfg() ([]*CdrcJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SmgJsonCfg() (*SmgJsonCfg, error) {
-	rawCfg, hasKey := self[SMG_JSON]
+func (self CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
+	rawCfg, hasKey := self[SessionSJson]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(SmgJsonCfg)
+	cfg := new(SessionSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

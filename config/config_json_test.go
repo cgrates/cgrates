@@ -484,7 +484,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 }
 
 func TestSmgJsonCfg(t *testing.T) {
-	eCfg := &SmgJsonCfg{
+	eCfg := &SessionSJsonCfg{
 		Enabled:       utils.BoolPointer(false),
 		Listen_bijson: utils.StringPointer("127.0.0.1:2014"),
 		Rals_conns: &[]*HaPoolJsonCfg{
@@ -495,17 +495,17 @@ func TestSmgJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Resources_conns:       &[]*HaPoolJsonCfg{},
-		Suppliers_conns:       &[]*HaPoolJsonCfg{},
-		Attributes_conns:      &[]*HaPoolJsonCfg{},
-		Smg_replication_conns: &[]*HaPoolJsonCfg{},
-		Debit_interval:        utils.StringPointer("0s"),
-		Min_call_duration:     utils.StringPointer("0s"),
-		Max_call_duration:     utils.StringPointer("3h"),
-		Session_ttl:           utils.StringPointer("0s"),
-		Session_indexes:       utils.StringSlicePointer([]string{}),
+		Resources_conns:           &[]*HaPoolJsonCfg{},
+		Suppliers_conns:           &[]*HaPoolJsonCfg{},
+		Attributes_conns:          &[]*HaPoolJsonCfg{},
+		Session_replication_conns: &[]*HaPoolJsonCfg{},
+		Debit_interval:            utils.StringPointer("0s"),
+		Min_call_duration:         utils.StringPointer("0s"),
+		Max_call_duration:         utils.StringPointer("3h"),
+		Session_ttl:               utils.StringPointer("0s"),
+		Session_indexes:           utils.StringSlicePointer([]string{}),
 	}
-	if cfg, err := dfCgrJsonCfg.SmgJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -515,7 +515,7 @@ func TestSmgJsonCfg(t *testing.T) {
 func TestFsAgentJsonCfg(t *testing.T) {
 	eCfg := &FreeswitchAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Smg_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -600,7 +600,7 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 func TestAsteriskAgentJsonCfg(t *testing.T) {
 	eCfg := &AsteriskAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Smg_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -627,7 +627,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Enabled:          utils.BoolPointer(false),
 		Listen:           utils.StringPointer("127.0.0.1:3868"),
 		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Smg_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -662,7 +662,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Client_dictionaries: utils.MapStringStringPointer(map[string]string{
 			utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/",
 		}),
-		Smg_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},

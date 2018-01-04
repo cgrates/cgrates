@@ -39,7 +39,7 @@
 	},
 ],
 
-"smg": {
+"sessions": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
 

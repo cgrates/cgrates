@@ -446,26 +446,25 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
-	eSmGeCfg := &SMGConfig{
+	eSessionSCfg := &SessionSCfg{
 		Enabled:      false,
 		ListenBijson: "127.0.0.1:2014",
 		RALsConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
 		CDRsConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
-		ResSConns:           []*HaPoolConfig{},
-		SupplSConns:         []*HaPoolConfig{},
-		AttrSConns:          []*HaPoolConfig{},
-		SMGReplicationConns: []*HaPoolConfig{},
-		DebitInterval:       0 * time.Second,
-		MinCallDuration:     0 * time.Second,
-		MaxCallDuration:     3 * time.Hour,
-		SessionTTL:          0 * time.Second,
-		SessionIndexes:      utils.StringMap{},
+		ResSConns:               []*HaPoolConfig{},
+		SupplSConns:             []*HaPoolConfig{},
+		AttrSConns:              []*HaPoolConfig{},
+		SessionReplicationConns: []*HaPoolConfig{},
+		DebitInterval:           0 * time.Second,
+		MinCallDuration:         0 * time.Second,
+		MaxCallDuration:         3 * time.Hour,
+		SessionTTL:              0 * time.Second,
+		SessionIndexes:          utils.StringMap{},
 	}
-
-	if !reflect.DeepEqual(cgrCfg.SMGConfig, eSmGeCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SMGConfig, eSmGeCfg)
+	if !reflect.DeepEqual(cgrCfg.SessionSCfg, eSessionSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SessionSCfg, eSessionSCfg)
 	}
 
 }
@@ -552,7 +551,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
 	eFsAgentCfg := &FsAgentConfig{
 		Enabled:             false,
-		SMGConns:            []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		SessionSConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
 		SubscribePark:       true,
 		CreateCdr:           false,
 		ExtraFields:         nil,
@@ -609,7 +608,7 @@ func TestCgrCfgJSONDefaultsSMOsipsConfig(t *testing.T) {
 func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 	eAstAgentCfg := &AsteriskAgentCfg{
 		Enabled: false,
-		SMGConns: []*HaPoolConfig{
+		SessionSConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
 		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
@@ -721,7 +720,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 		Enabled:         false,
 		Listen:          "127.0.0.1:3868",
 		DictionariesDir: "/usr/share/cgrates/diameter/dict/",
-		SMGConns: []*HaPoolConfig{
+		SessionSConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
 		PubSubConns:       []*HaPoolConfig{},
 		CreateCDR:         true,
@@ -743,8 +742,8 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.DictionariesDir, testDA.DictionariesDir) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.DictionariesDir, testDA.DictionariesDir)
 	}
-	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.SMGConns, testDA.SMGConns) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.SMGConns, testDA.SMGConns)
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.SessionSConns, testDA.SessionSConns) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.SessionSConns, testDA.SessionSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.PubSubConns, testDA.PubSubConns) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.PubSubConns, testDA.PubSubConns)
@@ -851,7 +850,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ListenAcct:         "127.0.0.1:1813",
 		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
-		SMGConns:           []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
+		SessionSConns:      []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 		CreateCDR:          true,
 		CDRRequiresSession: false,
 		Timezone:           "",
@@ -875,8 +874,8 @@ func TestRadiusAgentCfg(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries)
 	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.SMGConns, testRA.SMGConns) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.SMGConns, testRA.SMGConns)
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.SessionSConns, testRA.SessionSConns) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.SessionSConns, testRA.SessionSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR)

@@ -29,7 +29,7 @@ type RadiusAgentCfg struct {
 	ListenAcct         string
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string]string
-	SMGConns           []*HaPoolConfig
+	SessionSConns      []*HaPoolConfig
 	CreateCDR          bool
 	CDRRequiresSession bool
 	Timezone           string
@@ -68,11 +68,11 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) error {
 			self.ClientDictionaries[k] = v
 		}
 	}
-	if jsnCfg.Smg_conns != nil {
-		self.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Smg_conns {
-			self.SMGConns[idx] = NewDfltHaPoolConfig()
-			self.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Sessions_conns != nil {
+		self.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
+			self.SessionSConns[idx] = NewDfltHaPoolConfig()
+			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {

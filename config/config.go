@@ -68,7 +68,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
 	cfg.NodeID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
-	cfg.SMGConfig = new(SMGConfig)
+	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.cacheConfig = make(CacheConfig)
 	cfg.fsAgentCfg = new(FsAgentConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
@@ -259,7 +259,7 @@ type CGRConfig struct {
 	CDRStatsSaveInterval     time.Duration // Save interval duration
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
-	SMGConfig                *SMGConfig
+	sessionSCfg              *SessionSCfg
 	fsAgentCfg               *FsAgentConfig           // SMFreeSWITCH configuration
 	SmKamConfig              *SmKamConfig             // SM-Kamailio Configuration
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
@@ -405,34 +405,34 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SMGeneric checks
-	if self.SMGConfig.Enabled {
-		if len(self.SMGConfig.RALsConns) == 0 {
+	if self.sessionSCfg.Enabled {
+		if len(self.sessionSCfg.RALsConns) == 0 {
 			return errors.New("<SMGeneric> RALs definition is mandatory!")
 		}
-		for _, smgRALsConn := range self.SMGConfig.RALsConns {
+		for _, smgRALsConn := range self.sessionSCfg.RALsConns {
 			if smgRALsConn.Address == utils.MetaInternal && !self.RALsEnabled {
 				return errors.New("<SMGeneric> RALs not enabled but requested by SMGeneric component.")
 			}
 		}
-		for _, conn := range self.SMGConfig.ResSConns {
+		for _, conn := range self.sessionSCfg.ResSConns {
 			if conn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
 				return errors.New("<SMGeneric> ResourceS not enabled but requested by SMGeneric component.")
 			}
 		}
-		for _, conn := range self.SMGConfig.SupplSConns {
+		for _, conn := range self.sessionSCfg.SupplSConns {
 			if conn.Address == utils.MetaInternal && !self.supplierSCfg.Enabled {
 				return errors.New("<SMGeneric> SupplierS not enabled but requested by SMGeneric component.")
 			}
 		}
-		for _, conn := range self.SMGConfig.AttrSConns {
+		for _, conn := range self.sessionSCfg.AttrSConns {
 			if conn.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
 				return errors.New("<SMGeneric> AttributeS not enabled but requested by SMGeneric component.")
 			}
 		}
-		if len(self.SMGConfig.CDRsConns) == 0 {
+		if len(self.sessionSCfg.CDRsConns) == 0 {
 			return errors.New("<SMGeneric> CDRs definition is mandatory!")
 		}
-		for _, smgCDRSConn := range self.SMGConfig.CDRsConns {
+		for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
 			if smgCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
 				return errors.New("<SMGeneric> CDRS not enabled but referenced by SMGeneric component")
 			}
@@ -440,12 +440,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SMFreeSWITCH checks
 	if self.fsAgentCfg.Enabled {
-		for _, connCfg := range self.fsAgentCfg.SMGConns {
+		for _, connCfg := range self.fsAgentCfg.SessionSConns {
 			if connCfg.Address != utils.MetaInternal {
 				return errors.New("Only <*internal> connectivity allowed in in SMFreeSWITCH towards SMG for now")
 			}
 			if connCfg.Address == utils.MetaInternal &&
-				!self.SMGConfig.Enabled {
+				!self.sessionSCfg.Enabled {
 				return errors.New("SMGeneric not enabled but referenced by SM-FreeSWITCH")
 			}
 		}
@@ -496,23 +496,23 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SMAsterisk checks
 	if self.asteriskAgentCfg.Enabled {
-		/*if len(self.asteriskAgentCfg.SMGConns) == 0 {
+		/*if len(self.asteriskAgentCfg.SessionSConns) == 0 {
 			return errors.New("<SMAsterisk> SMG definition is mandatory!")
 		}
-		for _, smAstSMGConn := range self.asteriskAgentCfg.SMGConns {
-			if smAstSMGConn.Address == utils.MetaInternal && !self.SMGConfig.Enabled {
+		for _, smAstSMGConn := range self.asteriskAgentCfg.SessionSConns {
+			if smAstSMGConn.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
 				return errors.New("<SMAsterisk> SMG not enabled.")
 			}
 		}
 		*/
-		if !self.SMGConfig.Enabled {
+		if !self.sessionSCfg.Enabled {
 			return errors.New("<SMAsterisk> SMG not enabled.")
 		}
 	}
 	// DAgent checks
 	if self.diameterAgentCfg.Enabled {
-		for _, daSMGConn := range self.diameterAgentCfg.SMGConns {
-			if daSMGConn.Address == utils.MetaInternal && !self.SMGConfig.Enabled {
+		for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
+			if daSMGConn.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
 				return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
 			}
 		}
@@ -523,8 +523,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	if self.radiusAgentCfg.Enabled {
-		for _, raSMGConn := range self.radiusAgentCfg.SMGConns {
-			if raSMGConn.Address == utils.MetaInternal && !self.SMGConfig.Enabled {
+		for _, raSMGConn := range self.radiusAgentCfg.SessionSConns {
+			if raSMGConn.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
 				return errors.New("SMGeneric not enabled but referenced by RadiusAgent component")
 			}
 		}
@@ -640,7 +640,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnSmGenericCfg, err := jsnCfg.SmgJsonCfg()
+	jsnsessionSCfg, err := jsnCfg.SessionSJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1116,8 +1116,8 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnSmGenericCfg != nil {
-		if err := self.SMGConfig.loadFromJsonCfg(jsnSmGenericCfg); err != nil {
+	if jsnsessionSCfg != nil {
+		if err := self.sessionSCfg.loadFromJsonCfg(jsnsessionSCfg); err != nil {
 			return err
 		}
 	}
@@ -1287,6 +1287,10 @@ func (cfg *CGRConfig) ThresholdSCfg() *ThresholdSCfg {
 
 func (cfg *CGRConfig) SupplierSCfg() *SupplierSCfg {
 	return cfg.supplierSCfg
+}
+
+func (cfg *CGRConfig) SessionSCfg() *SessionSCfg {
+	return cfg.sessionSCfg
 }
 
 func (self *CGRConfig) FsAgentCfg() *FsAgentConfig {

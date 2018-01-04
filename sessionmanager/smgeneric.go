@@ -45,7 +45,7 @@ var (
 	ErrActiveSession     = errors.New("ACTIVE_SESSION")
 )
 
-func NewSMGReplicationConns(conns []*config.HaPoolConfig, reconnects int, connTimeout, replyTimeout time.Duration) (smgConns []*SMGReplicationConn, err error) {
+func NewSessionReplicationConns(conns []*config.HaPoolConfig, reconnects int, connTimeout, replyTimeout time.Duration) (smgConns []*SMGReplicationConn, err error) {
 	smgConns = make([]*SMGReplicationConn, len(conns))
 	for i, replConnCfg := range conns {
 		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, 0, reconnects,
@@ -142,8 +142,8 @@ type smgSessionTerminator struct {
 
 // setSessionTerminator installs a new terminator for a session
 func (smg *SMGeneric) setSessionTerminator(s *SMGSession) {
-	ttl := s.EventStart.GetSessionTTL(smg.cgrCfg.SMGConfig.SessionTTL,
-		smg.cgrCfg.SMGConfig.SessionTTLMaxDelay)
+	ttl := s.EventStart.GetSessionTTL(smg.cgrCfg.SessionSCfg().SessionTTL,
+		smg.cgrCfg.SessionSCfg().SessionTTLMaxDelay)
 	if ttl == 0 {
 		return
 	}
@@ -405,9 +405,9 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
 				CD: sessionRun.CallDescriptor, clntConn: clntConn}
 			smg.recordASession(s)
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
-			if smg.cgrCfg.SMGConfig.DebitInterval != 0 {
+			if smg.cgrCfg.SessionSCfg().DebitInterval != 0 {
 				s.stopDebit = stopDebitChan
-				go s.debitLoop(smg.cgrCfg.SMGConfig.DebitInterval)
+				go s.debitLoop(smg.cgrCfg.SessionSCfg().DebitInterval)
 			}
 		}
 		return nil, nil
@@ -487,7 +487,7 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 // replicateSessions will replicate session based on configuration
 func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool, smgReplConns []*SMGReplicationConn) (err error) {
 	if len(smgReplConns) == 0 ||
-		(smg.cgrCfg.SMGConfig.DebitInterval != 0 && !passiveSessions) { // Replicating active not supported
+		(smg.cgrCfg.SessionSCfg().DebitInterval != 0 && !passiveSessions) { // Replicating active not supported
 		return
 	}
 	ssMux := &smg.aSessionsMux
@@ -734,7 +734,7 @@ func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClie
 		smg.sessionEnd(cgrID, 0)
 		return
 	}
-	if smg.cgrCfg.SMGConfig.DebitInterval != 0 { // Session handled by debit loop
+	if smg.cgrCfg.SessionSCfg().DebitInterval != 0 { // Session handled by debit loop
 		maxUsage = time.Duration(-1 * time.Second)
 		return
 	}
@@ -753,7 +753,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		return item.Value.(time.Duration), item.Err
 	}
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err})
-	if smg.cgrCfg.SMGConfig.DebitInterval != 0 { // Not possible to update a session with debit loop active
+	if smg.cgrCfg.SessionSCfg().DebitInterval != 0 { // Not possible to update a session with debit loop active
 		err = errors.New("ACTIVE_DEBIT_LOOP")
 		return
 	}
@@ -770,8 +770,8 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	}
 	smg.resetTerminatorTimer(cgrID,
 		gev.GetSessionTTL(
-			smg.cgrCfg.SMGConfig.SessionTTL,
-			smg.cgrCfg.SMGConfig.SessionTTLMaxDelay),
+			smg.cgrCfg.SessionSCfg().SessionTTL,
+			smg.cgrCfg.SessionSCfg().SessionTTLMaxDelay),
 		gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
 	var evLastUsed time.Duration
@@ -781,7 +781,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 		return
 	}
 	if maxUsage, err = gev.GetMaxUsage(utils.META_DEFAULT,
-		smg.cgrCfg.SMGConfig.MaxCallDuration); err != nil {
+		smg.cgrCfg.SessionSCfg().MaxCallDuration); err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrMandatoryIeMissing
 		}
@@ -1283,7 +1283,7 @@ func (smg *SMGeneric) BiRPCV1ReplicateActiveSessions(clnt rpcclient.RpcClientCon
 	args ArgsReplicateSessions, reply *string) (err error) {
 	smgConns := smg.smgReplConns
 	if len(args.Connections) != 0 {
-		if smgConns, err = NewSMGReplicationConns(args.Connections, smg.cgrCfg.Reconnects,
+		if smgConns, err = NewSessionReplicationConns(args.Connections, smg.cgrCfg.Reconnects,
 			smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout); err != nil {
 			return
 		}
@@ -1302,7 +1302,7 @@ func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientCo
 	args ArgsReplicateSessions, reply *string) (err error) {
 	smgConns := smg.smgReplConns
 	if len(args.Connections) != 0 {
-		if smgConns, err = NewSMGReplicationConns(args.Connections, smg.cgrCfg.Reconnects,
+		if smgConns, err = NewSessionReplicationConns(args.Connections, smg.cgrCfg.Reconnects,
 			smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout); err != nil {
 			return
 		}

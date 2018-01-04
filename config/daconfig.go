@@ -28,7 +28,7 @@ type DiameterAgentCfg struct {
 	Enabled            bool   // enables the diameter agent: <true|false>
 	Listen             string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesDir    string
-	SMGConns           []*HaPoolConfig // connections towards SMG component
+	SessionSConns      []*HaPoolConfig // connections towards SMG component
 	PubSubConns        []*HaPoolConfig // connection towards pubsubs
 	CreateCDR          bool
 	CDRRequiresSession bool
@@ -54,11 +54,11 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 	if jsnCfg.Dictionaries_dir != nil {
 		self.DictionariesDir = *jsnCfg.Dictionaries_dir
 	}
-	if jsnCfg.Smg_conns != nil {
-		self.SMGConns = make([]*HaPoolConfig, len(*jsnCfg.Smg_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Smg_conns {
-			self.SMGConns[idx] = NewDfltHaPoolConfig()
-			self.SMGConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Sessions_conns != nil {
+		self.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
+			self.SessionSConns[idx] = NewDfltHaPoolConfig()
+			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Pubsubs_conns != nil {

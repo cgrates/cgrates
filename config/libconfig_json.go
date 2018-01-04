@@ -194,29 +194,29 @@ type CdrcJsonCfg struct {
 }
 
 // SM-Generic config section
-type SmgJsonCfg struct {
-	Enabled               *bool
-	Listen_bijson         *string
-	Rals_conns            *[]*HaPoolJsonCfg
-	Resources_conns       *[]*HaPoolJsonCfg
-	Suppliers_conns       *[]*HaPoolJsonCfg
-	Cdrs_conns            *[]*HaPoolJsonCfg
-	Smg_replication_conns *[]*HaPoolJsonCfg
-	Attributes_conns      *[]*HaPoolJsonCfg
-	Debit_interval        *string
-	Min_call_duration     *string
-	Max_call_duration     *string
-	Session_ttl           *string
-	Session_ttl_max_delay *string
-	Session_ttl_last_used *string
-	Session_ttl_usage     *string
-	Session_indexes       *[]string
+type SessionSJsonCfg struct {
+	Enabled                   *bool
+	Listen_bijson             *string
+	Rals_conns                *[]*HaPoolJsonCfg
+	Resources_conns           *[]*HaPoolJsonCfg
+	Suppliers_conns           *[]*HaPoolJsonCfg
+	Cdrs_conns                *[]*HaPoolJsonCfg
+	Session_replication_conns *[]*HaPoolJsonCfg
+	Attributes_conns          *[]*HaPoolJsonCfg
+	Debit_interval            *string
+	Min_call_duration         *string
+	Max_call_duration         *string
+	Session_ttl               *string
+	Session_ttl_max_delay     *string
+	Session_ttl_last_used     *string
+	Session_ttl_usage         *string
+	Session_indexes           *[]string
 }
 
 // SM-FreeSWITCH config section
 type FreeswitchAgentJsonCfg struct {
 	Enabled        *bool
-	Smg_conns      *[]*HaPoolJsonCfg // Connections towards generic SMG
+	Sessions_conns *[]*HaPoolJsonCfg
 	Subscribe_park *bool
 	Create_cdr     *bool
 	Extra_fields   *[]string
@@ -253,7 +253,7 @@ type AstConnJsonCfg struct {
 
 type AsteriskAgentJsonCfg struct {
 	Enabled        *bool
-	Smg_conns      *[]*HaPoolJsonCfg // Connections towards generic SMG
+	Sessions_conns *[]*HaPoolJsonCfg
 	Create_cdr     *bool
 	Asterisk_conns *[]*AstConnJsonCfg
 }
@@ -311,7 +311,7 @@ type DiameterAgentJsonCfg struct {
 	Enabled              *bool             // enables the diameter agent: <true|false>
 	Listen               *string           // address where to listen for diameter requests <x.y.z.y:1234>
 	Dictionaries_dir     *string           // path towards additional dictionaries
-	Smg_conns            *[]*HaPoolJsonCfg // Connections towards generic SM
+	Sessions_conns       *[]*HaPoolJsonCfg // Connections towards generic SM
 	Pubsubs_conns        *[]*HaPoolJsonCfg // connection towards pubsubs
 	Create_cdr           *bool
 	Cdr_requires_session *bool
@@ -345,7 +345,7 @@ type RadiusAgentJsonCfg struct {
 	Listen_acct          *string
 	Client_secrets       *map[string]string
 	Client_dictionaries  *map[string]string
-	Smg_conns            *[]*HaPoolJsonCfg
+	Sessions_conns       *[]*HaPoolJsonCfg
 	Create_cdr           *bool
 	Cdr_requires_session *bool
 	Timezone             *string
