@@ -133,7 +133,6 @@ func TestMigratorITPostgresConnect(t *testing.T) {
 
 func TestMigratorITPostgres(t *testing.T) {
 	action = utils.REDIS
-	log.Print("REDIS+POSTGRES")
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnPostgres", stest)
 	}
@@ -181,7 +180,6 @@ func TestMigratorITRedisConnect(t *testing.T) {
 
 func TestMigratorITRedis(t *testing.T) {
 	action = utils.REDIS
-	log.Print("REDIS+MYSQL")
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnRedis", stest)
 	}
@@ -229,7 +227,6 @@ func TestMigratorITMongoConnect(t *testing.T) {
 
 func TestMigratorITMongo(t *testing.T) {
 	action = utils.MONGO
-	log.Print("MONGO")
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnMongo", stest)
 	}
@@ -282,7 +279,6 @@ func TestMigratorITMoveConnect(t *testing.T) {
 
 func TestMigratorITMove(t *testing.T) {
 	action = Move
-	log.Print("Move")
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnMongo", stest)
 	}
@@ -2485,9 +2481,16 @@ func testMigratorTpRatingPlans(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting TpRatingPlans ", err.Error())
 		}
-		if !reflect.DeepEqual(tpRatingPlan[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0], result[0])
+		if !reflect.DeepEqual(tpRatingPlan[0].TPid, result[0].TPid) {
+			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].TPid, result[0].TPid)
+		} else if !reflect.DeepEqual(tpRatingPlan[0].ID, result[0].ID) {
+			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].ID, result[0].ID)
+		} else if !reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0]) {
+			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0])
+		} else if !reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1]) {
+			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1])
 		}
+
 	}
 }
 
