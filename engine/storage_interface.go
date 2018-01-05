@@ -122,7 +122,7 @@ type DataDB interface {
 	RemoveFilterIndexesDrv(id string) (err error)
 	GetFilterReverseIndexesDrv(dbKey string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
 	SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error)
-	RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error)
+	RemoveFilterReverseIndexesDrv(dbKey string) (err error)
 	MatchFilterIndexDrv(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
