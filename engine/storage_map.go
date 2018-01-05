@@ -1328,10 +1328,10 @@ func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[strin
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
-func (ms *MapStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
+func (ms *MapStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	delete(ms.dict, utils.ConcatenatedKey(dbKey, itemID))
+	delete(ms.dict, dbKey)
 	return
 }
 

@@ -1974,7 +1974,7 @@ func (ms *MongoStorage) RemoveFilterIndexesDrv(id string) (err error) {
 	defer session.Close()
 	err = col.Remove(bson.M{"key": id})
 	if err == mgo.ErrNotFound {
-		err = utils.ErrNotFound
+		err = nil
 	}
 	return
 }
@@ -2042,16 +2042,12 @@ func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[stri
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
-func (ms *MongoStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
+func (ms *MongoStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	if itemID != "" {
-		findParam := fmt.Sprintf("value.%s", itemID)
-		return col.Update(bson.M{"key": dbKey}, bson.M{"$unset": bson.M{findParam: 1}})
-	}
 	err = col.Remove(bson.M{"key": dbKey})
 	if err == mgo.ErrNotFound {
-		err = utils.ErrNotFound
+		err = nil
 	}
 	return
 }

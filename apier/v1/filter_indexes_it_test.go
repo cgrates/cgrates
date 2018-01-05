@@ -234,7 +234,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false),
@@ -340,7 +340,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false),
@@ -590,7 +590,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false),
@@ -706,7 +706,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false),
@@ -811,7 +811,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false),
@@ -915,7 +915,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false),
@@ -1026,7 +1026,7 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false),
@@ -1136,7 +1136,7 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false),
@@ -1250,7 +1250,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false),
@@ -1363,7 +1363,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix,
-		tenant, true), ""); err != nil {
+		tenant, true)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false),

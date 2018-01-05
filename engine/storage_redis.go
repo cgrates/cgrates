@@ -1411,10 +1411,7 @@ func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]uti
 }
 
 func (rs *RedisStorage) RemoveFilterIndexesDrv(id string) (err error) {
-	if err = rs.Cmd("DEL", id).Err; err != nil {
-		return err
-	}
-	return
+	return rs.Cmd("DEL", id).Err
 }
 
 //GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
@@ -1482,10 +1479,7 @@ func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[stri
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
-func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey, itemID string) (err error) {
-	if itemID != "" {
-		return rs.Cmd("HDEL", dbKey, itemID).Err
-	}
+func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) {
 	return rs.Cmd("DEL", dbKey).Err
 }
 

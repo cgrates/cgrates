@@ -409,14 +409,16 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	return
 }
 
-func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string, withIndex bool) (err error) {
 	if err = dm.DataDB().RemThresholdProfileDrv(tenant, id); err != nil {
 		return
 	}
 	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
-	return NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix,
-		tenant).RemoveItemFromIndex(id)
+	if withIndex {
+		return NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, tenant).RemoveItemFromIndex(id)
+	}
+	return
 }
 
 func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool, transactionID string) (sqp *StatQueueProfile, err error) {
@@ -444,37 +446,40 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 	if err = dm.DataDB().SetStatQueueProfileDrv(sqp); err != nil {
 		return err
 	}
-	// if withIndex {
-	// 	indexer := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, sqp.Tenant)
-	// 	//remove old StatQueueProfile indexes
-	// 	if err = indexer.RemoveItemFromIndex(sqp.ID); err != nil &&
-	// 		err.Error() != utils.ErrNotFound.Error() {
-	// 		return
-	// 	}
-	// 	//Verify matching Filters for every FilterID from StatQueueProfile
-	// 	for _, fltrID := range sqp.FilterIDs {
-	// 		var fltr *Filter
-	// 		if fltr, err = dm.GetFilter(sqp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-	// 			if err == utils.ErrNotFound {
-	// 				err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, sqp)
-	// 			}
-	// 			return
-	// 		}
-	// 		indexer.IndexTPFilter(FilterToTPFilter(fltr), sqp.ID)
-	// 	}
-	// 	if err = indexer.StoreIndexes(); err != nil {
-	// 		return
-	// 	}
-	// }
+	if withIndex {
+		indexer := NewReqFilterIndexer(dm, utils.StatQueueProfilePrefix, sqp.Tenant)
+		//remove old StatQueueProfile indexes
+		if err = indexer.RemoveItemFromIndex(sqp.ID); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			return
+		}
+		//Verify matching Filters for every FilterID from StatQueueProfile
+		for _, fltrID := range sqp.FilterIDs {
+			var fltr *Filter
+			if fltr, err = dm.GetFilter(sqp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, sqp)
+				}
+				return
+			}
+			indexer.IndexTPFilter(FilterToTPFilter(fltr), sqp.ID)
+		}
+		if err = indexer.StoreIndexes(); err != nil {
+			return
+		}
+	}
 	return
 }
 
-func (dm *DataManager) RemoveStatQueueProfile(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveStatQueueProfile(tenant, id, transactionID string, withIndex bool) (err error) {
 	if err = dm.DataDB().RemStatQueueProfileDrv(tenant, id); err != nil {
 		return
 	}
 	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if withIndex {
+		return NewReqFilterIndexer(dm, utils.StatQueueProfilePrefix, tenant).RemoveItemFromIndex(id)
+	}
 	return
 }
 
@@ -596,12 +601,15 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	return
 }
 
-func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, withIndex bool) (err error) {
 	if err = dm.DataDB().RemoveResourceProfileDrv(tenant, id); err != nil {
 		return
 	}
 	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if withIndex {
+		return NewReqFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant).RemoveItemFromIndex(id)
+	}
 	return
 }
 
@@ -941,8 +949,8 @@ func (dm *DataManager) SetFilterReverseIndexes(dbKey string, indexes map[string]
 	return dm.DataDB().SetFilterReverseIndexesDrv(dbKey, indexes)
 }
 
-func (dm *DataManager) RemoveFilterReverseIndexes(dbKey, itemID string) (err error) {
-	return dm.DataDB().RemoveFilterReverseIndexesDrv(dbKey, itemID)
+func (dm *DataManager) RemoveFilterReverseIndexes(dbKey string) (err error) {
+	return dm.DataDB().RemoveFilterReverseIndexesDrv(dbKey)
 }
 
 func (dm *DataManager) MatchFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
@@ -1016,37 +1024,40 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 		return err
 	}
 	//to be implemented in tests
-	// if withIndex {
-	// 	indexer := NewReqFilterIndexer(dm, utils.SupplierProfilePrefix, supp.Tenant)
-	// 	//remove old SupplierProfile indexes
-	// 	if err = indexer.RemoveItemFromIndex(supp.ID); err != nil &&
-	// 		err.Error() != utils.ErrNotFound.Error() {
-	// 		return
-	// 	}
-	// 	//Verify matching Filters for every FilterID from SupplierProfile
-	// 	for _, fltrID := range supp.FilterIDs {
-	// 		var fltr *Filter
-	// 		if fltr, err = dm.GetFilter(supp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-	// 			if err == utils.ErrNotFound {
-	// 				err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, supp)
-	// 			}
-	// 			return
-	// 		}
-	// 		indexer.IndexTPFilter(FilterToTPFilter(fltr), supp.ID)
-	// 	}
-	// 	if err = indexer.StoreIndexes(); err != nil {
-	// 		return
-	// 	}
-	// }
+	if withIndex {
+		indexer := NewReqFilterIndexer(dm, utils.SupplierProfilePrefix, supp.Tenant)
+		//remove old SupplierProfile indexes
+		if err = indexer.RemoveItemFromIndex(supp.ID); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			return
+		}
+		//Verify matching Filters for every FilterID from SupplierProfile
+		for _, fltrID := range supp.FilterIDs {
+			var fltr *Filter
+			if fltr, err = dm.GetFilter(supp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, supp)
+				}
+				return
+			}
+			indexer.IndexTPFilter(FilterToTPFilter(fltr), supp.ID)
+		}
+		if err = indexer.StoreIndexes(); err != nil {
+			return
+		}
+	}
 	return
 }
 
-func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, withIndex bool) (err error) {
 	if err = dm.DataDB().RemoveSupplierProfileDrv(tenant, id); err != nil {
 		return
 	}
 	cache.RemKey(utils.SupplierProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if withIndex {
+		return NewReqFilterIndexer(dm, utils.SupplierProfilePrefix, tenant).RemoveItemFromIndex(id)
+	}
 	return
 }
 
@@ -1076,36 +1087,39 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		return err
 	}
 	//to be implemented in tests
-	// if withIndex {
-	// 	indexer := NewReqFilterIndexer(dm, utils.AttributeProfilePrefix, ap.Tenant)
-	// 	//remove old AttributeProfile indexes
-	// 	if err = indexer.RemoveItemFromIndex(ap.ID); err != nil &&
-	// 		err.Error() != utils.ErrNotFound.Error() {
-	// 		return
-	// 	}
-	// 	//Verify matching Filters for every FilterID from AttributeProfile
-	// 	for _, fltrID := range ap.FilterIDs {
-	// 		var fltr *Filter
-	// 		if fltr, err = dm.GetFilter(ap.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-	// 			if err == utils.ErrNotFound {
-	// 				err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, ap)
-	// 			}
-	// 			return
-	// 		}
-	// 		indexer.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
-	// 	}
-	// 	if err = indexer.StoreIndexes(); err != nil {
-	// 		return
-	// 	}
-	// }
+	if withIndex {
+		indexer := NewReqFilterIndexer(dm, utils.AttributeProfilePrefix, ap.Tenant)
+		//remove old AttributeProfile indexes
+		if err = indexer.RemoveItemFromIndex(ap.ID); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			return
+		}
+		//Verify matching Filters for every FilterID from AttributeProfile
+		for _, fltrID := range ap.FilterIDs {
+			var fltr *Filter
+			if fltr, err = dm.GetFilter(ap.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, ap)
+				}
+				return
+			}
+			indexer.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
+		}
+		if err = indexer.StoreIndexes(); err != nil {
+			return
+		}
+	}
 	return
 }
 
-func (dm *DataManager) RemoveAttributeProfile(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveAttributeProfile(tenant, id, transactionID string, withIndex bool) (err error) {
 	if err = dm.DataDB().RemoveAttributeProfileDrv(tenant, id); err != nil {
 		return
 	}
 	cache.RemKey(utils.AttributeProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if withIndex {
+		return NewReqFilterIndexer(dm, utils.AttributeProfilePrefix, tenant).RemoveItemFromIndex(id)
+	}
 	return
 }

@@ -59,7 +59,7 @@ func (apierV1 *ApierV1) RemAttributeProfile(arg utils.TenantID, reply *string) e
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

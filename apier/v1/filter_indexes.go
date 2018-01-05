@@ -99,15 +99,11 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string) err
 	if thIDs == nil {
 		if err := self.DataManager.RemoveFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix,
 			tenant, false)); err != nil {
-			if err != utils.ErrNotFound {
-				return err
-			}
+			return err
 		}
 		if err := self.DataManager.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix,
-			tenant, true), ""); err != nil {
-			if err != utils.ErrNotFound {
-				return err
-			}
+			tenant, true)); err != nil {
+			return err
 		}
 	} else {
 		indexRemover := engine.NewReqFilterIndexer(self.DataManager, utils.ThresholdProfilePrefix, tenant)
@@ -167,7 +163,7 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string) e
 			return err
 		}
 		if err := self.DataManager.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix,
-			tenant, true), ""); err != nil {
+			tenant, true)); err != nil {
 			return err
 		}
 
@@ -227,7 +223,7 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string) erro
 			return err
 		}
 		if err := self.DataManager.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix,
-			tenant, true), ""); err != nil {
+			tenant, true)); err != nil {
 			return err
 		}
 	} else {
@@ -286,7 +282,7 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string) error {
 			return err
 		}
 		if err := self.DataManager.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix,
-			tenant, true), ""); err != nil {
+			tenant, true)); err != nil {
 			return err
 		}
 	} else {
@@ -346,7 +342,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string) err
 			return err
 		}
 		if err := self.DataManager.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix,
-			tenant, true), ""); err != nil {
+			tenant, true)); err != nil {
 			return err
 		}
 	} else {
