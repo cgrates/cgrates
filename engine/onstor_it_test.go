@@ -2218,7 +2218,7 @@ func testOnStorITCRUDResourceProfile(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err := onStor.RemoveResourceProfile(rL.Tenant, rL.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResourceProfile(rL.Tenant, rL.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -2375,7 +2375,7 @@ func testOnStorITCRUDStatQueueProfile(t *testing.T) {
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.RemoveStatQueueProfile(sq.Tenant, sq.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveStatQueueProfile(sq.Tenant, sq.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	if _, ok := cache.Get(utils.StatQueueProfilePrefix + sq.ID); ok != false {
@@ -2478,7 +2478,7 @@ func testOnStorITCRUDThresholdProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", th, rcv)
 	}
-	if err := onStor.RemoveThresholdProfile(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveThresholdProfile(th.Tenant, th.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -2598,7 +2598,7 @@ func testOnStorITCRUDSupplierProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(splProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
-	if err := onStor.RemoveSupplierProfile(splProfile.Tenant, splProfile.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveSupplierProfile(splProfile.Tenant, splProfile.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -2642,7 +2642,7 @@ func testOnStorITCRUDAttributeProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
-	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant, attrProfile.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant, attrProfile.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {

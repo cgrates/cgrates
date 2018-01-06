@@ -2485,9 +2485,15 @@ func testMigratorTpRatingPlans(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].TPid, result[0].TPid)
 		} else if !reflect.DeepEqual(tpRatingPlan[0].ID, result[0].ID) {
 			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].ID, result[0].ID)
-		} else if !reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0]) {
+		} else if !reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0]) &&
+			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1]) &&
+			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[0]) &&
+			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[1]) {
 			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0])
-		} else if !reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1]) {
+		} else if !reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0]) &&
+			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1]) &&
+			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[0]) &&
+			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[1]) {
 			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1])
 		}
 
