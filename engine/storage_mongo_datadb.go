@@ -1969,10 +1969,10 @@ func (ms *MongoStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]uti
 	return
 }
 
-func (ms *MongoStorage) RemoveFilterIndexesDrv(id string) (err error) {
+func (ms *MongoStorage) RemoveFilterIndexesDrv(dbKey string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	err = col.Remove(bson.M{"key": id})
+	err = col.Remove(bson.M{"key": dbKey})
 	if err == mgo.ErrNotFound {
 		err = nil
 	}

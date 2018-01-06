@@ -55,30 +55,34 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxComputeThresholdsIndexes,
 	testV1FIdxSetSecondThresholdProfile,
 	testV1FIdxSecondComputeThresholdsIndexes,
+	testV1FIdxRemoveThresholdProfile,
 	//to add	testV1TSGetThresholdsAfterRestart,
 	// testV1FIdxSetThresholdProfile,
 	// testV1FIdxUpdateThresholdProfile,
-	// testV1FIdxRemoveThresholdProfile,
 
 	testV1FIdxSetStatQueueProfileIndexes,
 	testV1FIdxComputeStatQueueProfileIndexes,
 	testV1FIdxSetSecondStatQueueProfileIndexes,
 	testV1FIdxSecondComputeStatQueueProfileIndexes,
+	testV1FIdxRemoveStatQueueProfile,
 
 	testV1FIdxSetResourceProfileIndexes,
 	testV1FIdxComputeResourceProfileIndexes,
 	testV1FIdxSetSecondResourceProfileIndexes,
 	testV1FIdxSecondComputeResourceProfileIndexes,
+	testV1FIdxRemoveResourceProfile,
 
 	testV1FIdxSetSupplierProfileIndexes,
 	testV1FIdxComputeSupplierProfileIndexes,
 	testV1FIdxSetSecondSupplierProfileIndexes,
 	testV1FIdxSecondComputeSupplierProfileIndexes,
+	testV1FIdxRemoveSupplierProfile,
 
 	testV1FIdxSetAttributeProfileIndexes,
 	testV1FIdxComputeAttributeProfileIndexes,
 	testV1FIdxSetSecondAttributeProfileIndexes,
 	testV1FIdxSecondComputeAttributeProfileIndexes,
+	testV1FIdxRemoveAttributeProfile,
 
 	testV1FIdxStopEngine,
 }
@@ -241,7 +245,10 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
+	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, true),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
 }
 
 func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
@@ -343,10 +350,11 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false),
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false),
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
+
 }
 
 func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
@@ -382,6 +390,57 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedRevIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxRemoveThresholdProfile(t *testing.T) {
+	var resp string
+	tenant := "cgrates.org"
+	emptySlice := []string{}
+	var reply2 string
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:       "cgrates.org",
+		ThresholdIDs: nil,
+		AttributeIDs: &emptySlice,
+		ResourceIDs:  &emptySlice,
+		StatIDs:      &emptySlice,
+		SupplierIDs:  &emptySlice,
+	}, &reply2); err != nil {
+		t.Error(err)
+	}
+	if reply2 != utils.OK {
+		t.Errorf("Error: %+v", reply2)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemThresholdProfile",
+		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemThresholdProfile",
+		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	var sqp *engine.ThresholdProfile
+	if err := tFIdxRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &sqp); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &sqp); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, true),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 
@@ -501,23 +560,8 @@ func testV1FIdxUpdateThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
 	}
 }
-
-func testV1FIdxRemoveThresholdProfile(t *testing.T) {
-	var resp string
-	if err := tFIdxRpc.Call("ApierV1.RemThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
-		t.Error(err)
-	} else if resp != utils.OK {
-		t.Error("Unexpected reply returned", resp)
-	}
-	var sqp *engine.ThresholdProfile
-	if err := tFIdxRpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-}
 */
+
 //StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	tenant := "cgrates.org"
@@ -750,6 +794,55 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
 	}
 }
+func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
+	var resp string
+	tenant := "cgrates.org"
+	emptySlice := []string{}
+	var reply2 string
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:       "cgrates.org",
+		ThresholdIDs: &emptySlice,
+		AttributeIDs: &emptySlice,
+		ResourceIDs:  &emptySlice,
+		StatIDs:      nil,
+		SupplierIDs:  &emptySlice,
+	}, &reply2); err != nil {
+		t.Error(err)
+	}
+	if reply2 != utils.OK {
+		t.Errorf("Error: %+v", reply2)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemStatQueueProfile",
+		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemStatQueueProfile",
+		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply2); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply2); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, true),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
 
 //ResourceProfile
 func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
@@ -957,6 +1050,54 @@ func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedRevIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxRemoveResourceProfile(t *testing.T) {
+	var resp string
+	tenant := "cgrates.org"
+	emptySlice := []string{}
+	var reply2 string
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:       "cgrates.org",
+		ThresholdIDs: &emptySlice,
+		AttributeIDs: &emptySlice,
+		ResourceIDs:  nil,
+		StatIDs:      &emptySlice,
+		SupplierIDs:  &emptySlice,
+	}, &reply2); err != nil {
+		t.Error(err)
+	}
+	if reply2 != utils.OK {
+		t.Errorf("Error: %+v", reply2)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemResourceProfile",
+		&utils.TenantID{Tenant: tenant, ID: "RCFG1"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemResourceProfile",
+		&utils.TenantID{Tenant: tenant, ID: "RCFG2"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetResourceProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
+		&reply2); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetResourceProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "RCFG2"},
+		&reply2); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, true),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 
@@ -1178,6 +1319,56 @@ func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedRevIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxRemoveSupplierProfile(t *testing.T) {
+	var resp string
+	tenant := "cgrates.org"
+	emptySlice := []string{}
+	var reply2 string
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:       "cgrates.org",
+		ThresholdIDs: &emptySlice,
+		AttributeIDs: &emptySlice,
+		ResourceIDs:  &emptySlice,
+		StatIDs:      &emptySlice,
+		SupplierIDs:  nil,
+	}, &reply2); err != nil {
+		t.Error(err)
+	}
+	if reply2 != utils.OK {
+		t.Errorf("Error: %+v", reply2)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemSupplierProfile",
+		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemSupplierProfile",
+		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply2); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply2); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, true),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 
@@ -1405,6 +1596,54 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedRevIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxRemoveAttributeProfile(t *testing.T) {
+	var resp string
+	tenant := "cgrates.org"
+	emptySlice := []string{}
+	var reply2 string
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:       "cgrates.org",
+		ThresholdIDs: &emptySlice,
+		AttributeIDs: nil,
+		ResourceIDs:  &emptySlice,
+		StatIDs:      &emptySlice,
+		SupplierIDs:  &emptySlice,
+	}, &reply2); err != nil {
+		t.Error(err)
+	}
+	if reply2 != utils.OK {
+		t.Errorf("Error: %+v", reply2)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
+		&utils.TenantID{Tenant: tenant, ID: "ApierTest"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
+		&utils.TenantID{Tenant: tenant, ID: "ApierTest2"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: tenant, ID: "ApierTest2"}, &reply2); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: tenant, ID: "ApierTest"}, &reply2); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, true),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 
