@@ -383,7 +383,7 @@ func TestSMAEventAsSMGenericEvent(t *testing.T) {
 	}
 	eSMGEv := &SMGenericEvent{
 		utils.EVENT_NAME:  SMAAuthorization,
-		utils.ACCID:       "1473681228.6",
+		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
 		utils.OriginHost:  "127.0.0.1",
 		utils.Account:     "1001",
@@ -407,7 +407,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
 	smgEv := &SMGenericEvent{
 		utils.EVENT_NAME:  SMAAuthorization,
-		utils.ACCID:       "1473681228.6",
+		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
 		utils.OriginHost:  "127.0.0.1",
 		utils.Account:     "1001",
@@ -418,7 +418,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 	}
 	eSMGEv := &SMGenericEvent{
 		utils.EVENT_NAME:  SMASessionStart,
-		utils.ACCID:       "1473681228.6",
+		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
 		utils.OriginHost:  "127.0.0.1",
 		utils.Account:     "1001",
@@ -441,7 +441,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
 	eSMGEv = &SMGenericEvent{
 		utils.EVENT_NAME:       SMASessionTerminate,
-		utils.ACCID:            "1473681228.6",
+		utils.OriginID:         "1473681228.6",
 		utils.RequestType:      "*prepaid",
 		utils.OriginHost:       "127.0.0.1",
 		utils.Account:          "1001",
@@ -463,7 +463,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 func TestSMAEventUpdateSMGEventUnaswered(t *testing.T) {
 	smgEv := &SMGenericEvent{
 		utils.EVENT_NAME:  SMAAuthorization,
-		utils.ACCID:       "1473681228.6",
+		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
 		utils.OriginHost:  "127.0.0.1",
 		utils.Account:     "1001",
@@ -474,7 +474,7 @@ func TestSMAEventUpdateSMGEventUnaswered(t *testing.T) {
 	}
 	eSMGEv := &SMGenericEvent{
 		utils.EVENT_NAME:       SMASessionTerminate,
-		utils.ACCID:            "1473681228.6",
+		utils.OriginID:         "1473681228.6",
 		utils.RequestType:      "*prepaid",
 		utils.OriginHost:       "127.0.0.1",
 		utils.Account:          "1001",
@@ -501,7 +501,7 @@ func TestSMAEventUpdateSMGEventUnaswered(t *testing.T) {
 func TestSMAEventUpdateSMGEventBusy(t *testing.T) {
 	smgEv := &SMGenericEvent{
 		utils.EVENT_NAME:  SMAAuthorization,
-		utils.ACCID:       "1473681228.6",
+		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
 		utils.OriginHost:  "127.0.0.1",
 		utils.Account:     "1001",
@@ -512,7 +512,7 @@ func TestSMAEventUpdateSMGEventBusy(t *testing.T) {
 	}
 	eSMGEv := &SMGenericEvent{
 		utils.EVENT_NAME:       SMASessionTerminate,
-		utils.ACCID:            "1473681228.6",
+		utils.OriginID:         "1473681228.6",
 		utils.RequestType:      "*prepaid",
 		utils.OriginHost:       "127.0.0.1",
 		utils.Account:          "1001",

@@ -38,7 +38,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 	smGev := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
-		utils.ACCID:            "12345",
+		utils.OriginID:         "12345",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
 		utils.Subject:          "subject1",
@@ -118,7 +118,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 	// Index second session
 	smGev2 := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT2",
-		utils.ACCID:       "12346",
+		utils.OriginID:    "12346",
 		utils.Direction:   "*out",
 		utils.Account:     "account2",
 		utils.Destination: "+4986517174964",
@@ -132,7 +132,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 	smGev3 := SMGenericEvent{
 		utils.EVENT_NAME: "TEST_EVENT3",
 		utils.Tenant:     "cgrates.org",
-		utils.ACCID:      "12347",
+		utils.OriginID:   "12347",
 		utils.Account:    "account2",
 		"Extra5":         "info5",
 	}
@@ -393,7 +393,7 @@ func TestSMGActiveSessions(t *testing.T) {
 	smGev1 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
-		utils.ACCID:            "111",
+		utils.OriginID:         "111",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
 		utils.Subject:          "subject1",
@@ -417,7 +417,7 @@ func TestSMGActiveSessions(t *testing.T) {
 	smGev2 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
-		utils.ACCID:            "222",
+		utils.OriginID:         "222",
 		utils.Direction:        "*out",
 		utils.Account:          "account2",
 		utils.Destination:      "+4986517174963",
@@ -470,7 +470,7 @@ func TestGetPassiveSessions(t *testing.T) {
 	smGev1 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
-		utils.ACCID:            "12345",
+		utils.OriginID:         "12345",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
 		utils.Subject:          "subject1",
@@ -497,7 +497,7 @@ func TestGetPassiveSessions(t *testing.T) {
 	smGev2 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.TOR:              "*voice",
-		utils.ACCID:            "23456",
+		utils.OriginID:         "23456",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
 		utils.Subject:          "subject1",

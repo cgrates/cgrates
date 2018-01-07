@@ -138,7 +138,7 @@ BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|14
 
 	cdrFields := [][]*config.CfgCdrField{[]*config.CfgCdrField{
 		&config.CfgCdrField{Tag: "Tor", Type: utils.CDRFIELD, CdrFieldId: utils.TOR, Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
-		&config.CfgCdrField{Tag: "AccId", Type: utils.CDRFIELD, CdrFieldId: utils.ACCID, Mandatory: true},
+		&config.CfgCdrField{Tag: "AccId", Type: utils.CDRFIELD, CdrFieldId: utils.OriginID, Mandatory: true},
 		&config.CfgCdrField{Tag: "ReqType", Type: utils.CDRFIELD, CdrFieldId: utils.REQTYPE, Value: utils.ParseRSRFieldsMustCompile("7", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "Direction", Type: utils.CDRFIELD, CdrFieldId: utils.DIRECTION, Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "Direction", Type: utils.CDRFIELD, CdrFieldId: utils.DIRECTION, Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
@@ -265,7 +265,7 @@ INVITE|324cb497|d4af7023|8deaadf2ae9a17809a391f05af31afb0@0:0:0:0:0:0:0:0|486|Bu
 
 	cdrFields := [][]*config.CfgCdrField{[]*config.CfgCdrField{
 		&config.CfgCdrField{Tag: "Tor", Type: utils.CDRFIELD, CdrFieldId: utils.TOR, Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
-		&config.CfgCdrField{Tag: "AccId", Type: utils.CDRFIELD, CdrFieldId: utils.ACCID, Mandatory: true},
+		&config.CfgCdrField{Tag: "AccId", Type: utils.CDRFIELD, CdrFieldId: utils.OriginID, Mandatory: true},
 		&config.CfgCdrField{Tag: "ReqType", Type: utils.CDRFIELD, CdrFieldId: utils.REQTYPE, Value: utils.ParseRSRFieldsMustCompile("7", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "Direction", Type: utils.CDRFIELD, CdrFieldId: utils.DIRECTION, Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "Direction", Type: utils.CDRFIELD, CdrFieldId: utils.DIRECTION, Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},

@@ -88,7 +88,7 @@ func TestFieldAsString(t *testing.T) {
 	if cdr.FieldAsString(&utils.RSRField{Id: utils.CGRID}) != cdr.CGRID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.ORDERID}) != "123" ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.TOR}) != utils.VOICE ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.OriginID}) != cdr.OriginID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.OriginHost}) != cdr.OriginHost ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.Source}) != cdr.Source ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.RequestType}) != cdr.RequestType ||
@@ -108,7 +108,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&utils.RSRField{Id: utils.CGRID}) != cdr.CGRID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.ORDERID}) != "123",
 			cdr.FieldAsString(&utils.RSRField{Id: utils.TOR}) != utils.VOICE,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.OriginID}) != cdr.OriginID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.OriginHost}) != cdr.OriginHost,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.Source}) != cdr.Source,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.RequestType}) != cdr.RequestType,
@@ -222,8 +222,8 @@ func TestCDRAsHttpForm(t *testing.T) {
 	if cdrForm.Get(utils.TOR) != utils.VOICE {
 		t.Errorf("Expected: %s, received: %s", utils.VOICE, cdrForm.Get(utils.TOR))
 	}
-	if cdrForm.Get(utils.ACCID) != "dsafdsaf" {
-		t.Errorf("Expected: %s, received: %s", "dsafdsaf", cdrForm.Get(utils.ACCID))
+	if cdrForm.Get(utils.OriginID) != "dsafdsaf" {
+		t.Errorf("Expected: %s, received: %s", "dsafdsaf", cdrForm.Get(utils.OriginID))
 	}
 	if cdrForm.Get(utils.OriginHost) != "192.168.1.1" {
 		t.Errorf("Expected: %s, received: %s", "192.168.1.1", cdrForm.Get(utils.OriginHost))
@@ -562,7 +562,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		utils.ORDERID:      cdr.OrderID,
 		utils.OriginHost:   "192.168.1.1",
 		utils.Source:       utils.UNIT_TEST,
-		utils.ACCID:        "dsafdsaf",
+		utils.OriginID:     "dsafdsaf",
 		utils.TOR:          utils.VOICE,
 		utils.RequestType:  utils.META_RATED,
 		utils.Tenant:       "cgrates.org",

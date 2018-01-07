@@ -63,7 +63,7 @@ func (self SMGenericEvent) GetCGRID(oIDFieldName string) string {
 // fieldName offers the possibility to extract info from other fields, eg: InitialOriginID
 func (self SMGenericEvent) GetOriginID(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.ACCID
+		fieldName = utils.OriginID
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
@@ -367,7 +367,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		return rsrFld.ParseValue(self.GetCGRID(utils.META_DEFAULT))
 	case utils.TOR:
 		return rsrFld.ParseValue(utils.VOICE)
-	case utils.ACCID:
+	case utils.OriginID:
 		return rsrFld.ParseValue(self.GetOriginID(utils.META_DEFAULT))
 	case utils.OriginHost:
 		return rsrFld.ParseValue(self.GetOriginatorIP(utils.META_DEFAULT))

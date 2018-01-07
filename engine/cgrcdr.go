@@ -45,7 +45,7 @@ func (cgrCdr CgrCdr) getCGRID(timezone string) string {
 		return CGRID
 	}
 	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SetupTime], timezone)
-	return utils.Sha1(cgrCdr[utils.ACCID], setupTime.UTC().String())
+	return utils.Sha1(cgrCdr[utils.OriginID], setupTime.UTC().String())
 }
 
 func (cgrCdr CgrCdr) getExtraFields() map[string]string {
@@ -62,7 +62,7 @@ func (cgrCdr CgrCdr) AsCDR(timezone string) *CDR {
 	storCdr := new(CDR)
 	storCdr.CGRID = cgrCdr.getCGRID(timezone)
 	storCdr.ToR = cgrCdr[utils.TOR]
-	storCdr.OriginID = cgrCdr[utils.ACCID]
+	storCdr.OriginID = cgrCdr[utils.OriginID]
 	storCdr.OriginHost = cgrCdr[utils.OriginHost]
 	storCdr.Source = cgrCdr[utils.Source]
 	storCdr.RequestType = cgrCdr[utils.RequestType]

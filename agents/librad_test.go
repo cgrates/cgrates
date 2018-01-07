@@ -211,7 +211,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 	cfgFlds := []*config.CfgCdrField{
 		&config.CfgCdrField{Tag: "TOR", FieldId: utils.TOR, Type: utils.META_CONSTANT,
 			Value: utils.ParseRSRFieldsMustCompile(utils.VOICE, utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "OriginID", FieldId: utils.ACCID, Type: utils.META_COMPOSED,
+		&config.CfgCdrField{Tag: "OriginID", FieldId: utils.OriginID, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("Acct-Session-Id;^-;Sip-From-Tag;^-;Sip-To-Tag", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "OriginHost", FieldId: utils.OriginHost, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("NAS-IP-Address", utils.INFIELD_SEP)},
@@ -238,7 +238,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 	eSMGEv := sessionmanager.SMGenericEvent{
 		utils.EVENT_NAME:  EvRadiusReq,
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
+		utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
 		utils.RequestType: utils.META_PREPAID,
 		utils.Direction:   utils.OUT,
 		utils.Tenant:      "cgrates.org",

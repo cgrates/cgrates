@@ -66,7 +66,7 @@ type SMGReplicationConn struct {
 func NewSMGeneric(cgrCfg *config.CGRConfig, rals rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection,
 	smgReplConns []*SMGReplicationConn, timezone string) *SMGeneric {
 	ssIdxCfg := cgrCfg.SmGenericConfig.SessionIndexes
-	ssIdxCfg[utils.ACCID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
+	ssIdxCfg[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 	return &SMGeneric{cgrCfg: cgrCfg,
 		rals:               rals,
 		cdrsrv:             cdrsrv,
@@ -349,10 +349,10 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 	}
 	idxMux.RLock()
 	// map[OriginID:map[12372-1:map[*default:511654dc4da7ce4706276cb458437cdd81d0e2b3]]]
-	for originID := range ssIndx[utils.ACCID] {
+	for originID := range ssIndx[utils.OriginID] {
 		if strings.HasPrefix(originID, prefix) {
-			if _, hasDefaultRun := ssIndx[utils.ACCID][originID][utils.META_DEFAULT]; hasDefaultRun {
-				cgrIDs = append(cgrIDs, ssIndx[utils.ACCID][originID][utils.META_DEFAULT].Slice()...)
+			if _, hasDefaultRun := ssIndx[utils.OriginID][originID][utils.META_DEFAULT]; hasDefaultRun {
+				cgrIDs = append(cgrIDs, ssIndx[utils.OriginID][originID][utils.META_DEFAULT].Slice()...)
 			}
 		}
 	}
@@ -449,8 +449,8 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 		}
 		for i, s := range ss[initialID] {
 			s.mux.Lock()
-			s.CGRID = cgrID                         // Overwrite initial CGRID with new one
-			s.EventStart[utils.ACCID] = newOriginID // Overwrite OriginID for session indexing
+			s.CGRID = cgrID                            // Overwrite initial CGRID with new one
+			s.EventStart[utils.OriginID] = newOriginID // Overwrite OriginID for session indexing
 			s.mux.Unlock()
 			smg.recordASession(s)
 			if i == 0 {

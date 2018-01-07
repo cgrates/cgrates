@@ -132,7 +132,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "123451",
+		utils.OriginID:    "123451",
 		utils.Direction:   utils.OUT,
 		utils.Account:     attrSetBalance.Account,
 		utils.Subject:     attrSetBalance.Account,
@@ -156,7 +156,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	case <-time.After(time.Duration(50 * time.Millisecond)):
 		t.Error("Did not receive disconnect event")
 	case disconnectEv := <-disconnectEvChan:
-		if SMGenericEvent(disconnectEv.EventStart).GetOriginID(utils.META_DEFAULT) != smgEv[utils.ACCID] {
+		if SMGenericEvent(disconnectEv.EventStart).GetOriginID(utils.META_DEFAULT) != smgEv[utils.OriginID] {
 			t.Errorf("Unexpected event received: %+v", disconnectEv)
 		}
 		smgEv[utils.Usage] = disconnectEv.EventStart[utils.Usage]
@@ -213,7 +213,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "123452",
+		utils.OriginID:    "123452",
 		utils.Direction:   utils.OUT,
 		utils.Account:     attrSetBalance.Account,
 		utils.Subject:     attrSetBalance.Account,
