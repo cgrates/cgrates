@@ -184,7 +184,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 		evName = SMASessionTerminate
 	}
 	smgEv := SMGenericEvent{utils.EVENT_NAME: evName}
-	smgEv[utils.ACCID] = smaEv.ChannelID()
+	smgEv[utils.OriginID] = smaEv.ChannelID()
 	if smaEv.RequestType() != "" {
 		smgEv[utils.RequestType] = smaEv.RequestType()
 	}

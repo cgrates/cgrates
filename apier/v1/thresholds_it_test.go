@@ -131,7 +131,7 @@ var tEvs = []*utils.CGREvent{
 			utils.ORDERID:     123,
 			utils.OriginHost:  "192.168.1.1",
 			utils.Source:      utils.UNIT_TEST,
-			utils.ACCID:       "dsafdsaf",
+			utils.OriginID:    "dsafdsaf",
 			utils.TOR:         utils.VOICE,
 			utils.RequestType: utils.META_RATED,
 			utils.Direction:   "*out",

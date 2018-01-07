@@ -152,7 +152,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(strconv.FormatInt(cdr.OrderID, 10))
 	case utils.TOR:
 		return rsrFld.ParseValue(cdr.ToR)
-	case utils.ACCID:
+	case utils.OriginID:
 		return rsrFld.ParseValue(cdr.OriginID)
 	case utils.OriginHost:
 		return rsrFld.ParseValue(cdr.OriginHost)
@@ -203,7 +203,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		cdr.ToR += fieldVal
 	case utils.MEDI_RUNID:
 		cdr.RunID += fieldVal
-	case utils.ACCID:
+	case utils.OriginID:
 		cdr.OriginID += fieldVal
 	case utils.RequestType:
 		cdr.RequestType += fieldVal
@@ -705,7 +705,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
 	mp[utils.ORDERID] = cdr.OrderID
 	mp[utils.OriginHost] = cdr.OriginHost
 	mp[utils.Source] = cdr.Source
-	mp[utils.ACCID] = cdr.OriginID
+	mp[utils.OriginID] = cdr.OriginID
 	mp[utils.TOR] = cdr.ToR
 	mp[utils.RequestType] = cdr.RequestType
 	mp[utils.Tenant] = cdr.Tenant

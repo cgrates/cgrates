@@ -98,7 +98,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "123451",
+		utils.OriginID:    "123451",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
 		utils.Subject:     "1001",
@@ -128,14 +128,14 @@ func TestSMGRplcInitiate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
 	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", map[string]string{utils.ACCID: "123451"}, &pSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", map[string]string{utils.OriginID: "123451"}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
@@ -148,7 +148,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 func TestSMGRplcUpdate(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME: "TEST_EVENT",
-		utils.ACCID:      "123451",
+		utils.OriginID:   "123451",
 		utils.Usage:      "1m",
 	}
 	var maxUsage time.Duration
@@ -160,7 +160,7 @@ func TestSMGRplcUpdate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -173,7 +173,7 @@ func TestSMGRplcUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	// Master should not longer have activeSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
@@ -193,7 +193,7 @@ func TestSMGRplcUpdate(t *testing.T) {
 func TestSMGRplcTerminate(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME: "TEST_EVENT",
-		utils.ACCID:      "123451",
+		utils.OriginID:   "123451",
 		utils.Usage:      "3m",
 	}
 	var reply string
@@ -202,10 +202,10 @@ func TestSMGRplcTerminate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.ACCID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	var pSessions map[string][]*SMGSession
@@ -228,7 +228,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	smgEv1 := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "123451",
+		utils.OriginID:    "123451",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
 		utils.Subject:     "1001",
@@ -243,7 +243,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	smgEv2 := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "123481",
+		utils.OriginID:    "123481",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1002",
 		utils.Subject:     "1002",

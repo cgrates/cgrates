@@ -501,7 +501,7 @@ func TestParseEventValue(t *testing.T) {
 	if tor := ev.ParseEventValue(&utils.RSRField{Id: utils.TOR}, ""); tor != utils.VOICE {
 		t.Error("Unexpected tor parsed", tor)
 	}
-	if accid := ev.ParseEventValue(&utils.RSRField{Id: utils.ACCID}, ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+	if accid := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginID}, ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
 		t.Error("Unexpected result parsed", accid)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginHost}, ""); parsed != "10.0.3.15" {

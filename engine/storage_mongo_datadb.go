@@ -75,7 +75,7 @@ var (
 	RunIDLow           = strings.ToLower(utils.MEDI_RUNID)
 	OrderIDLow         = strings.ToLower(utils.ORDERID)
 	OriginHostLow      = strings.ToLower(utils.OriginHost)
-	OriginIDLow        = strings.ToLower(utils.ACCID)
+	OriginIDLow        = strings.ToLower(utils.OriginID)
 	ToRLow             = strings.ToLower(utils.TOR)
 	CDRHostLow         = strings.ToLower(utils.OriginHost)
 	CDRSourceLow       = strings.ToLower(utils.Source)
@@ -1973,6 +1973,7 @@ func (ms *MongoStorage) RemoveFilterIndexesDrv(dbKey string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	err = col.Remove(bson.M{"key": dbKey})
+	// redis compatibility
 	if err == mgo.ErrNotFound {
 		err = nil
 	}
@@ -2046,6 +2047,7 @@ func (ms *MongoStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) 
 	session, col := ms.conn(colRFI)
 	defer session.Close()
 	err = col.Remove(bson.M{"key": dbKey})
+	//redis compatibility
 	if err == mgo.ErrNotFound {
 		err = nil
 	}

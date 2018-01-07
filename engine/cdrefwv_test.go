@@ -82,7 +82,7 @@ var contentJsnCfgFlds = []*config.CdrFieldJsonCfg{
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("ProductId"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer("productid"), Width: utils.IntPointer(5),
 		Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("NetworkId"), Type: utils.StringPointer(utils.META_CONSTANT), Value: utils.StringPointer("3"), Width: utils.IntPointer(1)},
-	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("CallId"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.ACCID), Width: utils.IntPointer(16),
+	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("CallId"), Type: utils.StringPointer(utils.META_COMPOSED), Value: utils.StringPointer(utils.OriginID), Width: utils.IntPointer(16),
 		Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Filler"), Type: utils.StringPointer(utils.META_FILLER), Width: utils.IntPointer(8)},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Filler"), Type: utils.StringPointer(utils.META_FILLER), Width: utils.IntPointer(8)},
