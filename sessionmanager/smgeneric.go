@@ -1326,10 +1326,10 @@ type V1AuthorizeArgs struct {
 }
 
 type V1AuthorizeReply struct {
-	MaxUsage            *time.Duration
-	ResourcesAuthorized *bool
-	Suppliers           *engine.SortedSuppliers
-	Attributes          *engine.AttrSProcessEventReply
+	MaxUsage           *time.Duration
+	ResourceAllocation *string
+	Suppliers          *engine.SortedSuppliers
+	Attributes         *engine.AttrSProcessEventReply
 }
 
 // BiRPCV1Authorize performs authorization for CGREvent based on specific components
@@ -1353,17 +1353,17 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt *rpc2.Client,
 		if err != nil {
 			return utils.NewErrMandatoryIeMissing(utils.ACCID)
 		}
-		var allowed bool
+		var allocMsg string
 		attrRU := utils.ArgRSv1ResourceUsage{
 			CGREvent: args.CGREvent,
 			UsageID:  originID,
 			Units:    1,
 		}
-		if err = smg.resS.Call(utils.ResourceSv1AllowUsage,
-			attrRU, &allowed); err != nil {
+		if err = smg.resS.Call(utils.ResourceSv1AuthorizeResources,
+			attrRU, &allocMsg); err != nil {
 			return utils.NewErrResourceS(err)
 		}
-		authReply.ResourcesAuthorized = &allowed
+		authReply.ResourceAllocation = &allocMsg
 	}
 	if args.GetSuppliers {
 		if smg.splS == nil {
@@ -1403,9 +1403,9 @@ type V1InitSessionArgs struct {
 }
 
 type V1InitSessionReply struct {
-	MaxUsage        time.Duration
-	ResAllocMessage string
-	Attributes      *engine.AttrSProcessEventReply
+	MaxUsage           *time.Duration
+	ResourceAllocation *string
+	Attributes         *engine.AttrSProcessEventReply
 }
 
 // BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
@@ -1429,17 +1429,19 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
 			attrRU, &allocMessage); err != nil {
 			return err
 		}
-		rply.ResAllocMessage = allocMessage
+		rply.ResourceAllocation = &allocMessage
 	}
 	if args.InitSession {
 		if smg.rals == nil {
 			return utils.NewErrNotConnected(utils.RALService)
 		}
-		if rply.MaxUsage, err = smg.InitiateSession(args.CGREvent.Event, clnt); err != nil {
+		if maxUsage, err := smg.InitiateSession(args.CGREvent.Event, clnt); err != nil {
 			if err != rpcclient.ErrSessionNotFound {
 				err = utils.NewErrServerError(err)
 			}
-			return
+			return err
+		} else {
+			rply.MaxUsage = &maxUsage
 		}
 	}
 	if args.GetAttributes {
@@ -1447,7 +1449,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
 		if args.CGREvent.Context == nil {
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSMG)
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,

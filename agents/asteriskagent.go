@@ -176,22 +176,33 @@ func (sma *SMAsterisk) handleChannelStateChange(ev *SMAsteriskEvent) {
 	err := ev.UpdateSMGEvent(smgEv) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to initiate session for channelID: %s", err.Error(), ev.ChannelID()))
+		utils.Logger.Err(
+			fmt.Sprintf("<SMAsterisk> Error: %s when attempting to initiate session for channelID: %s",
+				err.Error(), ev.ChannelID()))
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
+			utils.Logger.Err(
+				fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s",
+					err.Error(), ev.ChannelID()))
 		}
 		return
 	}
 	var maxUsage time.Duration
-	if err := sma.smg.Call(utils.SMGenericV2InitiateSession, *smgEv, &maxUsage); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to initiate session for channelID: %s", err.Error(), ev.ChannelID()))
+	if err := sma.smg.Call(utils.SMGenericV2InitiateSession,
+		*smgEv, &maxUsage); err != nil {
+		utils.Logger.Err(
+			fmt.Sprintf("<SMAsterisk> Error: %s when attempting to initiate session for channelID: %s",
+				err.Error(), ev.ChannelID()))
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
+			utils.Logger.Err(
+				fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s",
+					err.Error(), ev.ChannelID()))
 		}
 		return
 	} else if maxUsage == 0 {
 		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s", err.Error(), ev.ChannelID()))
+			utils.Logger.Err(
+				fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s",
+					err.Error(), ev.ChannelID()))
 		}
 		return
 	}

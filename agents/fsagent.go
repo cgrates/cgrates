@@ -157,11 +157,11 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		}
 	}
 	if authArgs.AuthorizeResources {
-		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %b\n\n",
-			fsev.GetUUID(), CGRResourcesAllowed, authReply.ResourcesAuthorized)); err != nil {
+		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
+			fsev.GetUUID(), CGRResourceAllocation, authReply.ResourceAllocation)); err != nil {
 			utils.Logger.Info(
 				fmt.Sprintf("<%s> error %s setting channel variabile: %s",
-					utils.SMFreeSWITCH, err.Error(), CGRResourcesAllowed))
+					utils.FreeSWITCHAgent, err.Error(), CGRResourceAllocation))
 			sm.unparkCall(fsev.GetUUID(), connId,
 				fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
 			return
@@ -171,7 +171,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		fsArray := SliceAsFsArray(authReply.Suppliers.SupplierIDs())
 		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
-			utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_ERROR: %s", err.Error()))
+			utils.Logger.Info(fmt.Sprintf("<%s> error setting suppliers: %s", utils.FreeSWITCHAgent, err.Error()))
 			sm.unparkCall(fsev.GetUUID(), connId, fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
 			return
 		}
@@ -184,7 +184,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 						authReply.Attributes.CGREvent.Event[fldName])); err != nil {
 					utils.Logger.Info(
 						fmt.Sprintf("<%s> error %s setting channel variabile: %s",
-							utils.SMFreeSWITCH, err.Error(), fldName))
+							utils.FreeSWITCHAgent, err.Error(), fldName))
 					sm.unparkCall(fsev.GetUUID(), connId,
 						fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
 					return
@@ -215,7 +215,7 @@ func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
 		return
 	}
 	if initSessionArgs.AllocateResources {
-		if initReply.ResAllocMessage == "" {
+		if initReply.ResourceAllocation == nil {
 			sm.DisconnectSession(fsev, connId,
 				utils.ErrUnallocatedResource.Error())
 		}

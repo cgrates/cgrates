@@ -115,14 +115,14 @@ func TestSSv1ItAuth(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessionmanager.V1AuthorizeArgs{
 		GetMaxUsage:        true,
-		AuthorizeResources: false,
-		GetSuppliers:       false,
+		AuthorizeResources: true,
+		GetSuppliers:       true,
 		GetAttributes:      true,
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
-				utils.ACCID:       "TestSSv1ItAuth",
+				utils.ACCID:       "TestSSv1It",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
 				utils.Destination: "1002",
@@ -138,10 +138,9 @@ func TestSSv1ItAuth(t *testing.T) {
 	if *rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	/*if !*rply.ResourcesAuthorized {
-		t.Errorf("Unexpected ResourceAuthorized: %v", rply.ResourcesAuthorized)
+	if *rply.ResourceAllocation == "" {
+		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
-
 	eSplrs := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1001",
 		Sorting:   utils.MetaWeight,
@@ -163,7 +162,6 @@ func TestSSv1ItAuth(t *testing.T) {
 	if !reflect.DeepEqual(eSplrs, rply.Suppliers) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Suppliers))
 	}
-	*/
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfile: "ATTR_ACNT_1001",
 		AlteredFields:  []string{"OfficeGroup"},
@@ -174,7 +172,58 @@ func TestSSv1ItAuth(t *testing.T) {
 				"Account": "1001", "Destination": "1002",
 				"EventName":   "CgrAuthorization",
 				"OfficeGroup": "Marketing",
-				"OriginID":    "TestSSv1ItAuth",
+				"OriginID":    "TestSSv1It",
+				"RequestType": "*prepaid",
+				"SetupTime":   "2018-01-07T17:00:00Z",
+				"Usage":       300000000000.0,
+			},
+		},
+	}
+	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+	}
+}
+
+func TestSSv1ItInitiateSession(t *testing.T) {
+	initUsage := 5 * time.Minute
+	args := &sessionmanager.V1InitSessionArgs{
+		InitSession:       true,
+		AllocateResources: true,
+		GetAttributes:     true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.ACCID:       "TestSSv1It",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:       initUsage,
+			},
+		},
+	}
+	var rply sessionmanager.V1InitSessionReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1InitiateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if *rply.MaxUsage != initUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	}
+	if *rply.ResourceAllocation != "RES_ACNT_1001" {
+		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
+	}
+	eAttrs := &engine.AttrSProcessEventReply{
+		MatchedProfile: "ATTR_ACNT_1001",
+		AlteredFields:  []string{"OfficeGroup"},
+		CGREvent: &utils.CGREvent{Tenant: "cgrates.org",
+			ID:      "TestSSv1ItInitiateSession",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Account": "1001", "Destination": "1002",
+				"OfficeGroup": "Marketing",
+				"OriginID":    "TestSSv1It",
 				"RequestType": "*prepaid",
 				"SetupTime":   "2018-01-07T17:00:00Z",
 				"Usage":       300000000000.0,
