@@ -284,7 +284,7 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		return rsrFld.ParseValue(kev.GetCdrSource())
 	case utils.RequestType:
 		return rsrFld.ParseValue(kev.GetReqType(utils.META_DEFAULT))
-	case utils.DIRECTION:
+	case utils.Direction:
 		return rsrFld.ParseValue(kev.GetDirection(utils.META_DEFAULT))
 	case utils.Tenant:
 		return rsrFld.ParseValue(kev.GetTenant(utils.META_DEFAULT))

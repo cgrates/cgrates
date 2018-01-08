@@ -513,7 +513,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.RequestType}, ""); parsed != utils.META_PREPAID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DIRECTION}, ""); parsed != utils.OUT {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Direction}, ""); parsed != utils.OUT {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Tenant}, ""); parsed != "cgrates.org" {
