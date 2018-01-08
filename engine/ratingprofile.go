@@ -235,7 +235,6 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 		cd.addRatingInfos(ris)
 		return
 	}
-
 	return utils.ErrNotFound
 }
 

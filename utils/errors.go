@@ -103,6 +103,22 @@ func NewErrNotConnected(serv string) error {
 	return fmt.Errorf("NOT_CONNECTED: %s", serv)
 }
 
+func NewErrRALs(err error) error {
+	return fmt.Errorf("RALS_ERROR: %s", err)
+}
+
+func NewErrResourceS(err error) error {
+	return fmt.Errorf("RESOURCES_ERROR: %s", err)
+}
+
+func NewErrSupplierS(err error) error {
+	return fmt.Errorf("SUPPLIERS_ERROR: %s", err)
+}
+
+func NewErrAttributeS(err error) error {
+	return fmt.Errorf("SUPPLIERS_ERROR: %s", err)
+}
+
 // Centralized returns for APIs
 func APIErrorHandler(errIn error) (err error) {
 	cgrErr, ok := errIn.(*CGRError)

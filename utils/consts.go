@@ -554,6 +554,10 @@ const (
 	ApierV1ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
 )
 
+const (
+	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
+)
+
 // MetaSupplierAPIs
 const (
 	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"

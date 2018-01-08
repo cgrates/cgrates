@@ -27,7 +27,7 @@ func NewSessionSv1(sm *sessionmanager.SMGeneric) *SessionSv1 {
 	return &SessionSv1{SMG: sm}
 }
 
-// Exports RPC from SessionSv1
+// SessionSv1 exports RPC from SessionSv1
 type SessionSv1 struct {
 	SMG *sessionmanager.SMGeneric
 }
@@ -35,32 +35,34 @@ type SessionSv1 struct {
 // Publishes BiJSONRPC methods exported by SessionSv1
 func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		"SessionSv1.InitiateSession":  ssv1.SMG.BiRPCv1InitiateSession,
-		"SessionSv1.UpdateSession":    ssv1.SMG.BiRPCv1UpdateSession,
-		"SessionSv1.TerminateSession": ssv1.SMG.BiRPCv1TerminateSession,
-		"SessionSv1.ProcessCDR":       ssv1.SMG.BiRPCv1ProcessCDR,
+		utils.SessionSv1AuthorizeEvent:   ssv1.SMG.BiRPCv1AuthorizeEvent,
+		utils.SessionSv1InitiateSession:  ssv1.SMG.BiRPCv1InitiateSession,
+		utils.SessionSv1UpdateSession:    ssv1.SMG.BiRPCv1UpdateSession,
+		utils.SessionSv1TerminateSession: ssv1.SMG.BiRPCv1TerminateSession,
+		utils.SessionSv1ProcessCDR:       ssv1.SMG.BiRPCv1ProcessCDR,
 	}
 }
 
-// Called on session start, returns the maximum number of seconds the session can last
+func (ssv1 *SessionSv1) AuthorizeEvent(args *sessionmanager.V1AuthorizeArgs,
+	rply *sessionmanager.V1AuthorizeReply) error {
+	return ssv1.SMG.BiRPCv1AuthorizeEvent(nil, args, rply)
+}
+
 func (ssv1 *SessionSv1) InitiateSession(args *sessionmanager.V1InitSessionArgs,
 	rply *sessionmanager.V1InitSessionReply) error {
 	return ssv1.SMG.BiRPCv1InitiateSession(nil, args, rply)
 }
 
-// Interim updates, returns remaining duration from the rater
 func (ssv1 *SessionSv1) UpdateSession(args *sessionmanager.V1UpdateSessionArgs,
 	rply *sessionmanager.V1UpdateSessionReply) error {
 	return ssv1.SMG.BiRPCv1UpdateSession(nil, args, rply)
 }
 
-// Called on session end, should stop debit loop
 func (ssv1 *SessionSv1) TerminateSession(args *sessionmanager.V1TerminateSessionArgs,
 	rply *string) error {
 	return ssv1.SMG.BiRPCv1TerminateSession(nil, args, rply)
 }
 
-// Called on session end, should stop debit loop
 func (ssv1 *SessionSv1) ProcessCDR(cgrEv utils.CGREvent, rply *string) error {
 	return ssv1.SMG.BiRPCv1ProcessCDR(nil, cgrEv, rply)
 }

@@ -137,7 +137,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 	}
 	authArgs := fsev.V1AuthorizeArgs()
 	var authReply sessionmanager.V1AuthorizeReply
-	if err := sm.smg.Call(utils.SMGv1AuthorizeEvent, authArgs, &authReply); err != nil {
+	if err := sm.smg.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<SM-FreeSWITCH> Could not authorize event %s, error: %s",
 				fsev.GetUUID(), err.Error()))
@@ -146,19 +146,19 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		return
 	}
 	if authArgs.GetMaxUsage {
-		if authReply.MaxUsage != -1 { // For calls different than unlimited, set limits
-			if authReply.MaxUsage == 0 {
+		if *authReply.MaxUsage != -1 { // For calls different than unlimited, set limits
+			if *authReply.MaxUsage == 0 {
 				sm.unparkCall(fsev.GetUUID(), connId,
 					fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrInsufficientCredit.Error())
 				return
 			}
 			sm.setMaxCallDuration(fsev.GetUUID(), connId,
-				authReply.MaxUsage, fsev.GetCallDestNr(utils.META_DEFAULT))
+				*authReply.MaxUsage, fsev.GetCallDestNr(utils.META_DEFAULT))
 		}
 	}
-	if authArgs.CheckResources {
+	if authArgs.AuthorizeResources {
 		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %b\n\n",
-			fsev.GetUUID(), CGRResourcesAllowed, authReply.ResourcesAllowed)); err != nil {
+			fsev.GetUUID(), CGRResourcesAllowed, authReply.ResourcesAuthorized)); err != nil {
 			utils.Logger.Info(
 				fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 					utils.SMFreeSWITCH, err.Error(), CGRResourcesAllowed))
@@ -206,7 +206,7 @@ func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
 	}
 	initSessionArgs := fsev.V1InitSessionArgs()
 	var initReply sessionmanager.V1InitSessionReply
-	if err := sm.smg.Call(utils.SMGv1InitiateSession,
+	if err := sm.smg.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<SM-FreeSWITCH> Could not answer session with event %s, error: %s",
@@ -227,7 +227,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string)
 		return
 	}
 	var reply string
-	if err := sm.smg.Call(utils.SMGv1TerminateSession,
+	if err := sm.smg.Call(utils.SessionSv1TerminateSession,
 		fsev.V1TerminateSessionArgs(), &reply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<SM-FreeSWITCH> Could not terminate session with event %s, error: %s",
@@ -236,7 +236,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string)
 	}
 	if sm.cfg.CreateCdr {
 		cdr := fsev.AsCDR(sm.timezone)
-		if err := sm.smg.Call(utils.SMGv1ProcessCDR, cdr, &reply); err != nil {
+		if err := sm.smg.Call(utils.SessionSv1ProcessCDR, cdr, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>",
 				cdr.CGRID, cdr.OriginID, err.Error()))
 		}

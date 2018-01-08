@@ -1,0 +1,2 @@
+#Tenant,ID,Context,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
+cgrates.org,ATTR_ACNT_1001,*sessions,FLTR_ACCOUNT_1001,,OfficeGroup,*any,Marketing,true,10

@@ -82,8 +82,9 @@ func TestSMGBiRPCStartEngine(t *testing.T) {
 func TestSMGBiRPCApierRpcConn(t *testing.T) {
 	time.Sleep(time.Duration(1 * time.Second))
 	clntHandlers := map[string]interface{}{"SMGClientV1.DisconnectSession": handleDisconnectSession}
-	if _, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SessionSCfg().ListenBijson,
-		clntHandlers); err != nil { // First attempt is to make sure multiple clients are supported
+	dummyClnt, err := utils.NewBiJSONrpcClient(smgBiRPCCfg.SessionSCfg().ListenBijson,
+		clntHandlers)
+	if err != nil { // First attempt is to make sure multiple clients are supported
 		t.Fatal(err)
 	}
 	if smgBiRPC, err = utils.NewBiJSONrpcClient(smgBiRPCCfg.SessionSCfg().ListenBijson,
@@ -93,6 +94,7 @@ func TestSMGBiRPCApierRpcConn(t *testing.T) {
 	if smgRPC, err = jsonrpc.Dial("tcp", smgBiRPCCfg.RPCJSONListen); err != nil { // Connect also simple RPC so we can check accounts and such
 		t.Fatal(err)
 	}
+	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
 }
 
 // Load the tariff plan, creating accounts and their balances

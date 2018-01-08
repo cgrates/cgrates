@@ -445,7 +445,7 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
 		args.GetMaxUsage = false
 	}
 	if strings.Index(subsystems, SubSResourceS) != -1 {
-		args.CheckResources = true
+		args.AuthorizeResources = true
 	}
 	if strings.Index(subsystems, SubSSupplierS) != -1 {
 		args.GetSuppliers = true

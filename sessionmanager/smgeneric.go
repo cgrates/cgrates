@@ -87,6 +87,7 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS,
 	return &SMGeneric{cgrCfg: cgrCfg,
 		rals:               rals,
 		resS:               resS,
+		splS:               splS,
 		attrS:              attrS,
 		cdrsrv:             cdrsrv,
 		smgReplConns:       smgReplConns,
@@ -1316,19 +1317,19 @@ func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientCo
 }
 
 type V1AuthorizeArgs struct {
-	GetMaxUsage    bool
-	CheckResources bool
-	GetSuppliers   bool
-	GetAttributes  bool
+	GetMaxUsage        bool
+	AuthorizeResources bool
+	GetSuppliers       bool
+	GetAttributes      bool
 	utils.CGREvent
 	utils.Paginator
 }
 
 type V1AuthorizeReply struct {
-	MaxUsage         time.Duration
-	ResourcesAllowed bool
-	Suppliers        engine.SortedSuppliers
-	Attributes       *engine.AttrSProcessEventReply
+	MaxUsage            *time.Duration
+	ResourcesAuthorized *bool
+	Suppliers           *engine.SortedSuppliers
+	Attributes          *engine.AttrSProcessEventReply
 }
 
 // BiRPCV1Authorize performs authorization for CGREvent based on specific components
@@ -1340,17 +1341,17 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt *rpc2.Client,
 		}
 		maxUsage, err := smg.GetMaxUsage(args.CGREvent.Event)
 		if err != nil {
-			return utils.NewErrServerError(err)
+			return utils.NewErrRALs(err)
 		}
-		authReply.MaxUsage = maxUsage
+		authReply.MaxUsage = &maxUsage
 	}
-	if args.CheckResources {
+	if args.AuthorizeResources {
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
 		if err != nil {
-			return utils.NewErrServerError(err)
+			return utils.NewErrMandatoryIeMissing(utils.ACCID)
 		}
 		var allowed bool
 		attrRU := utils.ArgRSv1ResourceUsage{
@@ -1360,9 +1361,9 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt *rpc2.Client,
 		}
 		if err = smg.resS.Call(utils.ResourceSv1AllowUsage,
 			attrRU, &allowed); err != nil {
-			return err
+			return utils.NewErrResourceS(err)
 		}
-		authReply.ResourcesAllowed = allowed
+		authReply.ResourcesAuthorized = &allowed
 	}
 	if args.GetSuppliers {
 		if smg.splS == nil {
@@ -1371,16 +1372,18 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt *rpc2.Client,
 		var splsReply engine.SortedSuppliers
 		if err = smg.splS.Call(utils.SupplierSv1GetSuppliers,
 			args.CGREvent, &splsReply); err != nil {
-			return err
+			return utils.NewErrSupplierS(err)
 		}
-		authReply.Suppliers = splsReply
+		if splsReply.SortedSuppliers != nil {
+			authReply.Suppliers = &splsReply
+		}
 	}
 	if args.GetAttributes {
 		if smg.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
 		if args.CGREvent.Context == nil { // populate if not already in
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSMG)
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,

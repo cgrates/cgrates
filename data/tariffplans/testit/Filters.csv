@@ -1,0 +1,3 @@
+#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
+cgrates.org,FLTR_ACCOUNT_1001,*string,Account,1001,
+
