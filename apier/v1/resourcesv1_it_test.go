@@ -51,7 +51,7 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsGetResourcesForEvent,
 	testV1RsTTL0,
 	testV1RsAllocateResource,
-	testV1RsAllowUsage,
+	testV1RsAuthorizeResources,
 	testV1RsReleaseResource,
 	testV1RsDBStore,
 	testV1RsGetResourceProfileBeforeSet,
@@ -356,8 +356,8 @@ func testV1RsAllocateResource(t *testing.T) {
 	}
 }
 
-func testV1RsAllowUsage(t *testing.T) {
-	var allowed bool
+func testV1RsAuthorizeResources(t *testing.T) {
+	var authorized bool
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
@@ -369,10 +369,10 @@ func testV1RsAllowUsage(t *testing.T) {
 		},
 		Units: 6,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllowUsage, argsRU, &allowed); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &authorized); err != nil {
 		t.Error(err)
-	} else if !allowed { // already 3 usages active before allow call, we should have now more than allowed
-		t.Error("resource is not allowed")
+	} else if !authorized { // already 3 usages active before allow call, we should have now more than allowed
+		t.Error("resource is not authorized")
 	}
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
@@ -386,9 +386,9 @@ func testV1RsAllowUsage(t *testing.T) {
 
 		Units: 7,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllowUsage, argsRU, &allowed); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &authorized); err != nil {
 		t.Error(err)
-	} else if allowed { // already 3 usages active before allow call, we should have now more than allowed
+	} else if authorized { // already 3 usages active before allow call, we should have now more than allowed
 		t.Error("resource should not be allowed")
 	}
 }
@@ -423,7 +423,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		Units: 7,
 	}
 	var allowed bool
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllowUsage, argsRU, &allowed); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &allowed); err != nil {
 		t.Error(err)
 	} else if !allowed {
 		t.Error("resource should be allowed")

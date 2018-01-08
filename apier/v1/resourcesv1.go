@@ -43,9 +43,9 @@ func (rsv1 *ResourceSv1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, r
 	return rsv1.rls.V1ResourcesForEvent(args, reply)
 }
 
-// AllowUsage checks if there are limits imposed for event
-func (rsv1 *ResourceSv1) AllowUsage(args utils.ArgRSv1ResourceUsage, allowed *bool) error {
-	return rsv1.rls.V1AllowUsage(args, allowed)
+// AuthorizeResources checks if there are limits imposed for event
+func (rsv1 *ResourceSv1) AuthorizeResources(args utils.ArgRSv1ResourceUsage, allowed *bool) error {
+	return rsv1.rls.V1AuthorizeResources(args, allowed)
 }
 
 // V1InitiateResourceUsage records usage for an event

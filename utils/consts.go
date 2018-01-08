@@ -578,7 +578,7 @@ const (
 	ResourceSv1GetResourcesForEvent = "ResourceSv1.GetResourcesForEvent"
 	ResourceSv1AllocateResource     = "ResourceSv1.AllocateResource"
 	ResourceSv1ReleaseResource      = "ResourceSv1.ReleaseResource"
-	ResourceSv1AllowUsage           = "ResourceSv1.AllowUsage"
+	ResourceSv1AuthorizeResources   = "ResourceSv1.AuthorizeResources"
 )
 
 //CSV file name
