@@ -37,7 +37,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.ACCID] = "12345"
 	smGev[utils.DIRECTION] = "*out"
 	smGev[utils.Account] = "account1"
-	smGev[utils.SUBJECT] = "subject1"
+	smGev[utils.Subject] = "subject1"
 	smGev[utils.Destination] = "+4986517174963"
 	smGev[utils.Category] = "call"
 	smGev[utils.Tenant] = "cgrates.org"
@@ -157,7 +157,7 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev[utils.ACCID] = "12345"
 	smGev[utils.DIRECTION] = utils.OUT
 	smGev[utils.Account] = "account1"
-	smGev[utils.SUBJECT] = "subject1"
+	smGev[utils.Subject] = "subject1"
 	smGev[utils.Destination] = "+4986517174963"
 	smGev[utils.Category] = "call"
 	smGev[utils.Tenant] = "cgrates.org"
@@ -191,7 +191,7 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 	smGev[utils.ACCID] = "12345"
 	smGev[utils.DIRECTION] = utils.OUT
 	smGev[utils.Account] = "account1"
-	smGev[utils.SUBJECT] = "subject1"
+	smGev[utils.Subject] = "subject1"
 	smGev[utils.Destination] = "+4986517174963"
 	smGev[utils.Category] = "call"
 	smGev[utils.Tenant] = "cgrates.org"
@@ -219,7 +219,7 @@ func TestSMGenericEventGetFieldAsString(t *testing.T) {
 	smGev[utils.ACCID] = "12345"
 	smGev[utils.DIRECTION] = utils.OUT
 	smGev[utils.Account] = "account1"
-	smGev[utils.SUBJECT] = "subject1"
+	smGev[utils.Subject] = "subject1"
 	eFldVal := utils.VOICE
 	if strVal, err := smGev.GetFieldAsString(utils.TOR); err != nil {
 		t.Error(err)

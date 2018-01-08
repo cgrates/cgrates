@@ -138,7 +138,7 @@ var tEvs = []*utils.CGREvent{
 			utils.Tenant:      "cgrates.org",
 			utils.Category:    "call",
 			utils.Account:     "1007",
-			utils.SUBJECT:     "1007",
+			utils.Subject:     "1007",
 			utils.Destination: "+4986517174963",
 			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 			utils.PDD:         time.Duration(0) * time.Second,

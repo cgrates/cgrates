@@ -69,7 +69,7 @@ func (cgrCdr CgrCdr) AsCDR(timezone string) *CDR {
 	storCdr.Tenant = cgrCdr[utils.Tenant]
 	storCdr.Category = cgrCdr[utils.Category]
 	storCdr.Account = cgrCdr[utils.Account]
-	storCdr.Subject = cgrCdr[utils.SUBJECT]
+	storCdr.Subject = cgrCdr[utils.Subject]
 	storCdr.Destination = cgrCdr[utils.Destination]
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.SetupTime], timezone) // Not interested to process errors, should do them if necessary in a previous step
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.AnswerTime], timezone)
