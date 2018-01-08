@@ -316,6 +316,26 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 
 func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	var result string
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		RequestFilters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1001"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	if err := stsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	statConfig.FilterIDs = []string{"FLTR_1", "FLTR_2"}
 	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
