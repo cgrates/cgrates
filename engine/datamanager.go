@@ -384,13 +384,13 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		return err
 	}
 	if withIndex {
-		indexer := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
 		//remove old ThresholdProfile indexes
-		if err = indexer.RemoveItemFromIndex(th.ID); err != nil &&
+		indexerRemove := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
+		if err = indexerRemove.RemoveItemFromIndex(th.ID); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
-			utils.Logger.Debug(fmt.Sprintf("RemoveItemFromIndex(setTH) Error "))
 			return
 		}
+		indexer := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
 		//Verify matching Filters for every FilterID from ThresholdProfile
 		for _, fltrID := range th.FilterIDs {
 			var fltr *Filter
@@ -399,6 +399,16 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
 				}
 				return
+			}
+			for _, flt := range fltr.RequestFilters {
+				if flt.Type != MetaString {
+					continue
+				}
+				for _, fldVal := range flt.Values {
+					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+						return err
+					}
+				}
 			}
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), th.ID)
 		}
@@ -462,6 +472,17 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 				}
 				return
 			}
+			for _, flt := range fltr.RequestFilters {
+				if flt.Type != MetaString {
+					continue
+				}
+				for _, fldVal := range flt.Values {
+					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+						return err
+					}
+				}
+			}
+
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), sqp.ID)
 		}
 		if err = indexer.StoreIndexes(); err != nil {
@@ -591,6 +612,16 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, rp)
 				}
 				return
+			}
+			for _, flt := range fltr.RequestFilters {
+				if flt.Type != MetaString {
+					continue
+				}
+				for _, fldVal := range flt.Values {
+					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+						return err
+					}
+				}
 			}
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), rp.ID)
 		}
@@ -1040,6 +1071,16 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 				}
 				return
 			}
+			for _, flt := range fltr.RequestFilters {
+				if flt.Type != MetaString {
+					continue
+				}
+				for _, fldVal := range flt.Values {
+					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+						return err
+					}
+				}
+			}
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), supp.ID)
 		}
 		if err = indexer.StoreIndexes(); err != nil {
@@ -1102,6 +1143,16 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, ap)
 				}
 				return
+			}
+			for _, flt := range fltr.RequestFilters {
+				if flt.Type != MetaString {
+					continue
+				}
+				for _, fldVal := range flt.Values {
+					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+						return err
+					}
+				}
 			}
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
 		}

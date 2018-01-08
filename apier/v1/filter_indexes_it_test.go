@@ -27,7 +27,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-	// "log"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -56,9 +55,6 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxSetSecondThresholdProfile,
 	testV1FIdxSecondComputeThresholdsIndexes,
 	testV1FIdxRemoveThresholdProfile,
-	//to add	testV1TSGetThresholdsAfterRestart,
-	// testV1FIdxSetThresholdProfile,
-	// testV1FIdxUpdateThresholdProfile,
 
 	testV1FIdxSetStatQueueProfileIndexes,
 	testV1FIdxComputeStatQueueProfileIndexes,
@@ -443,124 +439,6 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-/*
-func testV1FIdxGetThresholdsAfterRestart(t *testing.T) {
-	time.Sleep(time.Second)
-	if _, err := engine.StopStartEngine(tSv1CfgPath, thdsDelay); err != nil {
-		t.Fatal(err)
-	}
-	var err error
-	tFIdxRpc, err = jsonrpc.Dial("tcp", tSv1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
-	var td engine.Threshold
-	if err := tFIdxRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &td); err != nil {
-		t.Error(err)
-	} else if td.Snooze.IsZero() { // make sure Snooze time was reset during execution
-		t.Errorf("received: %+v", td)
-	}
-	time.Sleep(time.Duration(1 * time.Second))
-}
-
-func testV1FIdxSetThresholdProfile(t *testing.T) {
-	var reply *engine.ThresholdProfile
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
-				FieldName: "*string",
-				Type:      "Account",
-				Values:    []string{"1001", "1002"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-		},
-	}
-
-	var result string
-	if err := tFIdxRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	if err := tFIdxRpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	tPrfl = &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
-		FilterIDs: []string{"TestFilter"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
-		},
-		Recurrent: true,
-		MinSleep:  time.Duration(5 * time.Minute),
-		Blocker:   false,
-		Weight:    20.0,
-		ActionIDs: []string{"ACT_1", "ACT_2"},
-		Async:     true,
-	}
-	if err := tFIdxRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	if err := tFIdxRpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
-	}
-}
-
-func testV1FIdxUpdateThresholdProfile(t *testing.T) {
-	var result string
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
-				FieldName: "*string",
-				Type:      "Account",
-				Values:    []string{"10", "20"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-		},
-	}
-
-	if err := tFIdxRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	tPrfl.FilterIDs = []string{"TestFilter", "TestFilter2"}
-	if err := tFIdxRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	time.Sleep(time.Duration(100 * time.Millisecond)) // mongo is async
-	var reply *engine.ThresholdProfile
-	if err := tFIdxRpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
-	}
-}
-*/
 
 //StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
@@ -1646,14 +1524,6 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-// 1.set threshold in datadb fara sa faca indexuri
-// 2.fac querri la index sa fiu sigur ca is 0
-// 3.compile indexes all
-// 4.sa verific indexurile sa fie ok pt thresholdu setat de mine
-// 5.set al doilea threshold
-// 6.compute cu id
-// 7.sa verific indexurile sa fie ok pt thresholdu setat de mine
 
 func testV1FIdxStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
