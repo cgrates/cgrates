@@ -122,6 +122,16 @@ const CGRATES_CFG_JSON = `
 	"filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
 	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
 	"attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control attribute profile caching
+	"resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control resource filter indexes caching
+	"resource_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control resource filter reverse indexes caching
+	"stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control stat filter indexes caching
+	"stat_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control stat filter reverse indexes caching
+	"threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control threshold filter indexes caching
+	"threshold_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control threshold filter reverse indexes caching
+	"supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control supplier filter indexes caching
+	"supplier_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control supplier filter reverse indexes caching
+	"attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control attribute filter indexes caching
+	"attribute_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control attribute filter reverse indexes caching
 },
 
 
