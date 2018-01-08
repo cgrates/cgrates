@@ -75,7 +75,7 @@ func (self SMGenericEvent) GetSessionIds() []string {
 
 func (self SMGenericEvent) GetDirection(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.DIRECTION
+		fieldName = utils.Direction
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
@@ -375,7 +375,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		return rsrFld.ParseValue(self.GetName())
 	case utils.RequestType:
 		return rsrFld.ParseValue(self.GetReqType(utils.META_DEFAULT))
-	case utils.DIRECTION:
+	case utils.Direction:
 		return rsrFld.ParseValue(self.GetDirection(utils.META_DEFAULT))
 	case utils.Tenant:
 		return rsrFld.ParseValue(self.GetTenant(utils.META_DEFAULT))
