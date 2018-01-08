@@ -525,7 +525,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Account}, ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUBJECT}, ""); parsed != "1001" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Subject}, ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Destination}, ""); parsed != "1003" {

@@ -166,7 +166,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(cdr.Category)
 	case utils.Account:
 		return rsrFld.ParseValue(cdr.Account)
-	case utils.SUBJECT:
+	case utils.Subject:
 		return rsrFld.ParseValue(cdr.Subject)
 	case utils.Destination:
 		return rsrFld.ParseValue(cdr.Destination)
@@ -213,7 +213,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		cdr.Category += fieldVal
 	case utils.Account:
 		cdr.Account += fieldVal
-	case utils.SUBJECT:
+	case utils.Subject:
 		cdr.Subject += fieldVal
 	case utils.Destination:
 		cdr.Destination += fieldVal
@@ -294,7 +294,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 		subjectFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
 	if subjectFld.Id == utils.META_DEFAULT {
-		subjectFld.Id = utils.SUBJECT
+		subjectFld.Id = utils.Subject
 	}
 	if destFld == nil {
 		destFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -359,7 +359,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 	}
 	frkStorCdr.Subject = cdr.FieldAsString(subjectFld)
 	if primaryMandatory && len(frkStorCdr.Subject) == 0 {
-		return nil, utils.NewErrMandatoryIeMissing(utils.SUBJECT, subjectFld.Id)
+		return nil, utils.NewErrMandatoryIeMissing(utils.Subject, subjectFld.Id)
 	}
 	frkStorCdr.Destination = cdr.FieldAsString(destFld)
 	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.ToR == utils.VOICE {
@@ -455,7 +455,7 @@ func (cdr *CDR) GetSessionIds() []string {
 	return []string{cdr.GetUUID()}
 }
 func (cdr *CDR) GetSubject(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.SUBJECT, utils.META_DEFAULT, ""}, fieldName) {
+	if utils.IsSliceMember([]string{utils.Subject, utils.META_DEFAULT, ""}, fieldName) {
 		return cdr.Subject
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -711,7 +711,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
 	mp[utils.Tenant] = cdr.Tenant
 	mp[utils.Category] = cdr.Category
 	mp[utils.Account] = cdr.Account
-	mp[utils.SUBJECT] = cdr.Subject
+	mp[utils.Subject] = cdr.Subject
 	mp[utils.Destination] = cdr.Destination
 	mp[utils.SetupTime] = cdr.SetupTime
 	mp[utils.AnswerTime] = cdr.AnswerTime
@@ -833,7 +833,7 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 			if cdr.Account, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
-		case utils.SUBJECT:
+		case utils.Subject:
 			if cdr.Subject, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}

@@ -195,7 +195,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *SMGenericEvent {
 		smgEv[utils.Category] = smaEv.Category()
 	}
 	if smaEv.Subject() != "" {
-		smgEv[utils.SUBJECT] = smaEv.Subject()
+		smgEv[utils.Subject] = smaEv.Subject()
 	}
 	smgEv[utils.OriginHost] = smaEv.OriginatorIP()
 	smgEv[utils.Account] = smaEv.Account()

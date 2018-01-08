@@ -161,7 +161,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				Append:     false,
 			},
 			&engine.Attribute{
-				FieldName:  utils.SUBJECT,
+				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
 				Substitute: "1001",
 				Append:     true,
@@ -171,7 +171,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	}
 	reverseSubstitute := []*engine.Attribute{
 		&engine.Attribute{
-			FieldName:  utils.SUBJECT,
+			FieldName:  utils.Subject,
 			Initial:    utils.ANY,
 			Substitute: "1001",
 			Append:     true,
