@@ -154,6 +154,7 @@ func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 			}
 		}
 	}
+
 	rfi.reveseIndex[itemID] = make(utils.StringMap) //Force deleting in driver
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),

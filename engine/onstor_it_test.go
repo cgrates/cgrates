@@ -2681,19 +2681,40 @@ func testOnStorITTestNewFilterIndexes(t *testing.T) {
 		Weight:             1.4,
 		ActionIDs:          []string{},
 	}
+	th2 := &ThresholdProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "THD_Test2",
+		ActivationInterval: &utils.ActivationInterval{},
+		FilterIDs:          []string{"Filter1"},
+		Recurrent:          true,
+		MinSleep:           timeMinSleep,
+		Blocker:            true,
+		Weight:             1.4,
+		ActionIDs:          []string{},
+	}
+
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	if err := onStor.SetThresholdProfile(th2, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
 		"EventType:Event1": utils.StringMap{
-			"THD_Test": true,
+			"THD_Test":  true,
+			"THD_Test2": true,
 		},
 		"EventType:Event2": utils.StringMap{
-			"THD_Test": true,
+			"THD_Test":  true,
+			"THD_Test2": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
+			"EventType:Event1": true,
+			"EventType:Event2": true,
+		},
+		"THD_Test2": utils.StringMap{
 			"EventType:Event1": true,
 			"EventType:Event2": true,
 		},
@@ -2736,6 +2757,7 @@ func testOnStorITTestNewFilterIndexes(t *testing.T) {
 	if err := onStor.SetFilter(fp2); err != nil {
 		t.Error(err)
 	}
+
 	th.FilterIDs = []string{"Filter2"}
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
@@ -2747,11 +2769,22 @@ func testOnStorITTestNewFilterIndexes(t *testing.T) {
 		"Account:1002": utils.StringMap{
 			"THD_Test": true,
 		},
+		"EventType:Event1": utils.StringMap{
+			"THD_Test2": true,
+		},
+		"EventType:Event2": utils.StringMap{
+			"THD_Test2": true,
+		},
 	}
+
 	reverseIdxes = map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
 			"Account:1001": true,
 			"Account:1002": true,
+		},
+		"THD_Test2": utils.StringMap{
+			"EventType:Event1": true,
+			"EventType:Event2": true,
 		},
 	}
 	if rcvIdx, err := onStor.GetFilterIndexes(
@@ -2791,6 +2824,7 @@ func testOnStorITTestNewFilterIndexes(t *testing.T) {
 	if err := onStor.SetFilter(fp3); err != nil {
 		t.Error(err)
 	}
+
 	th.FilterIDs = []string{"Filter1", "Filter3"}
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
@@ -2803,16 +2837,22 @@ func testOnStorITTestNewFilterIndexes(t *testing.T) {
 			"THD_Test": true,
 		},
 		"EventType:Event1": utils.StringMap{
-			"THD_Test": true,
+			"THD_Test":  true,
+			"THD_Test2": true,
 		},
 		"EventType:Event2": utils.StringMap{
-			"THD_Test": true,
+			"THD_Test":  true,
+			"THD_Test2": true,
 		},
 	}
 	reverseIdxes = map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
 			"Destination:10":   true,
 			"Destination:20":   true,
+			"EventType:Event1": true,
+			"EventType:Event2": true,
+		},
+		"THD_Test2": utils.StringMap{
 			"EventType:Event1": true,
 			"EventType:Event2": true,
 		},
