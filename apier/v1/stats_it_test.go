@@ -269,6 +269,27 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 
 func testV1STSSetStatQueueProfile(t *testing.T) {
 	var reply *engine.StatQueueProfile
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_1",
+		RequestFilters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1001"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	var result string
+	if err := stsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -300,7 +321,6 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		Weight:     20,
 		MinItems:   1,
 	}
-	var result string
 	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
