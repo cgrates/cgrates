@@ -515,7 +515,29 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 		utils.CacheSupplierProfiles: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheAttributeProfiles: &CacheParamConfig{Limit: -1,
-			TTL: time.Duration(0), StaticTTL: false, Precache: false}}
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheResourceFilterIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheResourceFilterRevIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheStatFilterIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheStatFilterRevIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheThresholdFilterIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheThresholdFilterRevIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheSupplierFilterIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheSupplierFilterRevIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheAttributeFilterIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheAttributeFilterRevIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+	}
+
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
 		t.Errorf("received: %s, \nexpecting: %s",
 			utils.ToJSON(eCacheCfg), utils.ToJSON(cgrCfg.CacheCfg()))
