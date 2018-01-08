@@ -357,7 +357,7 @@ func testV1RsAllocateResource(t *testing.T) {
 }
 
 func testV1RsAuthorizeResources(t *testing.T) {
-	var authorized bool
+	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
@@ -369,10 +369,10 @@ func testV1RsAuthorizeResources(t *testing.T) {
 		},
 		Units: 6,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &authorized); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
 		t.Error(err)
-	} else if !authorized { // already 3 usages active before allow call, we should have now more than allowed
-		t.Error("resource is not authorized")
+	} else if reply != utils.OK { // already 3 usages active before allow call, we should have now more than allowed
+		t.Error("Unexpected reply returned", reply)
 	}
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
@@ -386,10 +386,10 @@ func testV1RsAuthorizeResources(t *testing.T) {
 
 		Units: 7,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &authorized); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
 		t.Error(err)
-	} else if authorized { // already 3 usages active before allow call, we should have now more than allowed
-		t.Error("resource should not be allowed")
+	} else if reply != "" { // already 3 usages active before allow call, we should have now more than allowed
+		t.Error("Unexpected reply returned", reply)
 	}
 }
 
@@ -422,11 +422,10 @@ func testV1RsReleaseResource(t *testing.T) {
 		},
 		Units: 7,
 	}
-	var allowed bool
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &allowed); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
 		t.Error(err)
-	} else if !allowed {
-		t.Error("resource should be allowed")
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
 	}
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{

@@ -531,7 +531,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 }
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
-func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage, allow *bool) (err error) {
+func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&args, []string{"CGREvent.Tenant", "UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -554,7 +554,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 		}
 		return err
 	}
-	*allow = true
+	*reply = utils.OK
 	return
 }
 
