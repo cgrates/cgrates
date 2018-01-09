@@ -547,7 +547,7 @@ type TPAttribute struct {
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
-	Context            string  `index:"2" re:""`
+	Contexts           string  `index:"2" re:""`
 	FilterIDs          string  `index:"3" re:""`
 	ActivationInterval string  `index:"4" re:""`
 	FieldName          string  `index:"5" re:""`

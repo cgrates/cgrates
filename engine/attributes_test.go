@@ -64,7 +64,7 @@ func testPopulateAttrService(t *testing.T) {
 		&AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "attributeprofile1",
-			Context:   context,
+			Contexts:  []string{context},
 			FilterIDs: []string{"filter1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
@@ -76,7 +76,7 @@ func testPopulateAttrService(t *testing.T) {
 		&AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "attributeprofile2",
-			Context:   context,
+			Contexts:  []string{context},
 			FilterIDs: []string{"filter2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),

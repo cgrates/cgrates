@@ -1124,26 +1124,52 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool, tr
 }
 
 func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool) (err error) {
+	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, true, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().SetAttributeProfileDrv(ap); err != nil {
 		return err
 	}
 	//to be implemented in tests
 	if withIndex {
-		indexer := NewReqFilterIndexer(dm, utils.AttributeProfilePrefix, ap.Tenant)
-		//remove old AttributeProfile indexes
-		if err = indexer.RemoveItemFromIndex(ap.ID); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return
-		}
-		//Verify matching Filters for every FilterID from AttributeProfile
-		for _, fltrID := range ap.FilterIDs {
-			var fltr *Filter
-			if fltr, err = dm.GetFilter(ap.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, ap)
+		if oldAP != nil {
+			for _, ctx := range oldAP.Contexts {
+				var needsRemove bool
+				if !utils.IsSliceMember(ap.Contexts, ctx) {
+					needsRemove = true
+				} else {
+					for _, fltrID := range oldAP.FilterIDs {
+						if !utils.IsSliceMember(ap.FilterIDs, fltrID) {
+							needsRemove = true
+						}
+					}
 				}
+				if needsRemove {
+					if err = NewReqFilterIndexer(dm, utils.AttributeProfilePrefix,
+						utils.ConcatenatedKey(ap.Tenant, ctx)).RemoveItemFromIndex(ap.ID); err != nil {
+						return
+					}
+				}
+			}
+		}
+		for _, ctx := range ap.Contexts {
+			indexer := NewReqFilterIndexer(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(ap.Tenant, ctx))
+			//Verify matching Filters for every FilterID from AttributeProfile
+			for _, fltrID := range ap.FilterIDs {
+				var fltr *Filter
+				if fltr, err = dm.GetFilter(ap.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, ap)
+					}
+					return
+				}
+				indexer.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
+			}
+			if err = indexer.StoreIndexes(); err != nil {
 				return
 			}
+<<<<<<< HEAD
 			for _, flt := range fltr.RequestFilters {
 				if flt.Type != MetaString {
 					continue
@@ -1158,19 +1184,27 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		}
 		if err = indexer.StoreIndexes(); err != nil {
 			return
+=======
+>>>>>>> Update Contexts and indexing for AttributeProfile
 		}
 	}
 	return
 }
 
-func (dm *DataManager) RemoveAttributeProfile(tenant, id, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []string,
+	transactionID string, withIndex bool) (err error) {
 	if err = dm.DataDB().RemoveAttributeProfileDrv(tenant, id); err != nil {
 		return
 	}
 	cache.RemKey(utils.AttributeProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewReqFilterIndexer(dm, utils.AttributeProfilePrefix, tenant).RemoveItemFromIndex(id)
+		for _, context := range contexts {
+			if err = NewReqFilterIndexer(dm, utils.AttributeProfilePrefix,
+				utils.ConcatenatedKey(tenant, context)).RemoveItemFromIndex(id); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
