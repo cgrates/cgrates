@@ -599,6 +599,7 @@ const (
 	SessionSv1UpdateSession     = "SessionSv1.UpdateSession"
 	SessionSv1TerminateSession  = "SessionSv1.TerminateSession"
 	SessionSv1ProcessCDR        = "SessionSv1.ProcessCDR"
+	SessionSv1ProcessEvent      = "SessionSv1.ProcessEvent"
 	SessionSv1DisconnectSession = "SessionSv1.DisconnectSession"
 	SMGenericV1InitiateSession  = "SMGenericV1.InitiateSession"
 	SMGenericV2InitiateSession  = "SMGenericV2.InitiateSession"

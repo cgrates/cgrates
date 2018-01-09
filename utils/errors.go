@@ -116,7 +116,7 @@ func NewErrSupplierS(err error) error {
 }
 
 func NewErrAttributeS(err error) error {
-	return fmt.Errorf("SUPPLIERS_ERROR: %s", err)
+	return fmt.Errorf("ATTRIBUTES_ERROR: %s", err)
 }
 
 // Centralized returns for APIs

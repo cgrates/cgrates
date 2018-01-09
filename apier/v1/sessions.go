@@ -40,6 +40,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1UpdateSession:    ssv1.SMG.BiRPCv1UpdateSession,
 		utils.SessionSv1TerminateSession: ssv1.SMG.BiRPCv1TerminateSession,
 		utils.SessionSv1ProcessCDR:       ssv1.SMG.BiRPCv1ProcessCDR,
+		utils.SessionSv1ProcessEvent:     ssv1.SMG.BiRPCv1ProcessEvent,
 	}
 }
 
@@ -65,4 +66,9 @@ func (ssv1 *SessionSv1) TerminateSession(args *sessionmanager.V1TerminateSession
 
 func (ssv1 *SessionSv1) ProcessCDR(cgrEv utils.CGREvent, rply *string) error {
 	return ssv1.SMG.BiRPCv1ProcessCDR(nil, cgrEv, rply)
+}
+
+func (ssv1 *SessionSv1) ProcessEvent(args *sessionmanager.V1ProcessEventArgs,
+	rply *sessionmanager.V1ProcessEventReply) error {
+	return ssv1.SMG.BiRPCv1ProcessEvent(nil, args, rply)
 }

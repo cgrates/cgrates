@@ -1388,7 +1388,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt *rpc2.Client,
 		var rplyEv engine.AttrSProcessEventReply
 		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
 			args.CGREvent, &rplyEv); err != nil {
-			return
+			return utils.NewErrAttributeS(err)
 		}
 		authReply.Attributes = &rplyEv
 	}
@@ -1396,8 +1396,8 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt *rpc2.Client,
 }
 
 type V1InitSessionArgs struct {
-	InitSession       bool
 	AllocateResources bool
+	InitSession       bool
 	GetAttributes     bool
 	utils.CGREvent
 }
@@ -1417,7 +1417,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
 		}
 		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
 		if err != nil {
-			return utils.NewErrServerError(err)
+			return utils.NewErrMandatoryIeMissing(utils.ACCID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
 			CGREvent: args.CGREvent,
@@ -1427,7 +1427,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
 		var allocMessage string
 		if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
 			attrRU, &allocMessage); err != nil {
-			return err
+			return utils.NewErrResourceS(err)
 		}
 		rply.ResourceAllocation = &allocMessage
 	}
@@ -1436,10 +1436,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
 			return utils.NewErrNotConnected(utils.RALService)
 		}
 		if maxUsage, err := smg.InitiateSession(args.CGREvent.Event, clnt); err != nil {
-			if err != rpcclient.ErrSessionNotFound {
-				err = utils.NewErrServerError(err)
-			}
-			return err
+			return utils.NewErrRALs(err)
 		} else {
 			rply.MaxUsage = &maxUsage
 		}
@@ -1454,7 +1451,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
 		var rplyEv engine.AttrSProcessEventReply
 		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
 			args.CGREvent, &rplyEv); err != nil {
-			return
+			return utils.NewErrAttributeS(err)
 		}
 		rply.Attributes = &rplyEv
 	}
@@ -1478,10 +1475,7 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt *rpc2.Client,
 			return utils.NewErrNotConnected(utils.RALService)
 		}
 		if maxUsage, err := smg.UpdateSession(args.CGREvent.Event, clnt); err != nil {
-			if err != rpcclient.ErrSessionNotFound {
-				err = utils.NewErrServerError(err)
-			}
-			return err
+			return utils.NewErrRALs(err)
 		} else {
 			rply.MaxUsage = &maxUsage
 		}
@@ -1525,10 +1519,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt *rpc2.Client,
 			return utils.NewErrNotConnected(utils.RALService)
 		}
 		if err = smg.TerminateSession(args.CGREvent.Event, clnt); err != nil {
-			if err != rpcclient.ErrSessionNotFound {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.NewErrRALs(err)
 		}
 	}
 	if args.ReleaseResources {
@@ -1537,7 +1528,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt *rpc2.Client,
 		}
 		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
 		if err != nil {
-			return utils.NewErrServerError(err)
+			return utils.NewErrMandatoryIeMissing(utils.ACCID)
 		}
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
@@ -1547,7 +1538,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt *rpc2.Client,
 		}
 		if err = smg.resS.Call(utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
-			return utils.NewErrServerError(err)
+			return utils.NewErrResourceS(err)
 		}
 	}
 	*rply = utils.OK
@@ -1561,5 +1552,68 @@ func (smg *SMGeneric) BiRPCv1ProcessCDR(clnt *rpc2.Client,
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
+	return nil
+}
+
+type V1ProcessEventArgs struct {
+	AllocateResources bool
+	Debit             bool
+	GetAttributes     bool
+	utils.CGREvent
+}
+
+type V1ProcessEventReply struct {
+	MaxUsage           *time.Duration
+	ResourceAllocation *string
+	Attributes         *engine.AttrSProcessEventReply
+}
+
+// Called on session end, should send the CDR to CDRS
+func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt *rpc2.Client,
+	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
+	if args.AllocateResources {
+		if smg.resS == nil {
+			return utils.NewErrNotConnected(utils.ResourceS)
+		}
+		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		if err != nil {
+			return utils.NewErrMandatoryIeMissing(utils.ACCID)
+		}
+		attrRU := utils.ArgRSv1ResourceUsage{
+			CGREvent: args.CGREvent,
+			UsageID:  originID,
+			Units:    1,
+		}
+		var allocMessage string
+		if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
+			attrRU, &allocMessage); err != nil {
+			return utils.NewErrResourceS(err)
+		}
+		rply.ResourceAllocation = &allocMessage
+	}
+	if args.Debit {
+		if smg.rals == nil {
+			return utils.NewErrNotConnected(utils.RALService)
+		}
+		if maxUsage, err := smg.ChargeEvent(args.CGREvent.Event); err != nil {
+			return utils.NewErrRALs(err)
+		} else {
+			rply.MaxUsage = &maxUsage
+		}
+	}
+	if args.GetAttributes {
+		if smg.attrS == nil {
+			return utils.NewErrNotConnected(utils.AttributeS)
+		}
+		if args.CGREvent.Context == nil {
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
+		}
+		var rplyEv engine.AttrSProcessEventReply
+		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
+			args.CGREvent, &rplyEv); err != nil {
+			return utils.NewErrAttributeS(err)
+		}
+		rply.Attributes = &rplyEv
+	}
 	return nil
 }
