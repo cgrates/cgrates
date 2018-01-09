@@ -519,7 +519,6 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
 
 func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
@@ -672,6 +671,7 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
 	}
 }
+
 func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	var resp string
 	tenant := "cgrates.org"
@@ -789,7 +789,6 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
 
 func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
@@ -1052,7 +1051,6 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
 
 func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {

@@ -320,7 +320,8 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ExternalAttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
@@ -335,13 +336,15 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 
 func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
-	if err := attrSRPC.Call("ApierV1.RemAttributeProfile", &ArgRemoveAttrPrf{Tenant: alsPrf.Tenant, ID: alsPrf.ID, Contexts: alsPrf.Contexts}, &resp); err != nil {
+	if err := attrSRPC.Call("ApierV1.RemAttributeProfile",
+		&ArgRemoveAttrPrf{Tenant: alsPrf.Tenant, ID: alsPrf.ID, Contexts: alsPrf.Contexts}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.ExternalAttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

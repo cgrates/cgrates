@@ -298,9 +298,9 @@ cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,
 `
 	attributeProfiles = `
-#,Tenant,ID,Context,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
 cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,20
-cgrates.org,ALS1,,,,Field2,Initial2,Sub2,false,
+cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,
 `
 )
 
@@ -1672,7 +1672,7 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
-			Contexts:  []string{"con1"},
+			Contexts:  []string{"con1", "con2", "con3"},
 			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
