@@ -1282,7 +1282,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	alsPrf = &engine.ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		Context:   "*rating",
+		Contexts:  []string{"*rating1", "*rating2"},
 		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
@@ -1326,7 +1326,6 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
 
 func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
@@ -1395,7 +1394,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	alsPrf = &engine.ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest2",
-		Context:   "*rating",
+		Contexts:  []string{"*rating"},
 		FilterIDs: []string{"FLTR_2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),

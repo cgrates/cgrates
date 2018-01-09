@@ -2720,8 +2720,11 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 				th.FilterIDs = append(th.FilterIDs, filter)
 			}
 		}
-		if tp.Context != "" {
-			th.Context = tp.Context
+		if tp.Contexts != "" {
+			contextSplit := strings.Split(tp.Contexts, utils.INFIELD_SEP)
+			for _, context := range contextSplit {
+				th.Contexts = append(th.Contexts, context)
+			}
 		}
 		if tp.FieldName != "" {
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
@@ -2761,8 +2764,11 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 					mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
 				}
 			}
-			if th.Context != "" {
-				mdl.Context = th.Context
+			for i, val := range th.Contexts {
+				if i != 0 {
+					mdl.Contexts += utils.INFIELD_SEP
+				}
+				mdl.Contexts += val
 			}
 			for i, val := range th.FilterIDs {
 				if i != 0 {
@@ -2789,11 +2795,14 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 		ID:         tpTH.ID,
 		Weight:     tpTH.Weight,
 		FilterIDs:  []string{},
-		Context:    tpTH.Context,
+		Contexts:   []string{},
 		Attributes: make(map[string]map[string]*Attribute, len(tpTH.Attributes)),
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
+	}
+	for _, context := range tpTH.Contexts {
+		th.Contexts = append(th.Contexts, context)
 	}
 	for _, reqAttr := range tpTH.Attributes {
 		if _, has := th.Attributes[reqAttr.FieldName]; !has {

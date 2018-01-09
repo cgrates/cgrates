@@ -34,7 +34,7 @@ type Attribute struct {
 type AttributeProfile struct {
 	Tenant             string
 	ID                 string
-	Context            string // bind this AttributeProfile to specific context
+	Contexts           []string // bind this AttributeProfile to multiple contexts
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval        // Activation interval
 	Attributes         map[string]map[string]*Attribute // map[FieldName][InitialValue]*Attribute
@@ -56,7 +56,7 @@ func (aps AttributeProfiles) Sort() {
 type ExternalAttributeProfile struct {
 	Tenant             string
 	ID                 string
-	Context            string // bind this AttributeProfile to specific context
+	Contexts           []string // bind this AttributeProfile to multiple context
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Attributes         []*Attribute
@@ -67,7 +67,7 @@ func (eap *ExternalAttributeProfile) AsAttributeProfile() *AttributeProfile {
 	alsPrf := &AttributeProfile{
 		Tenant:             eap.Tenant,
 		ID:                 eap.ID,
-		Context:            eap.Context,
+		Contexts:           eap.Contexts,
 		FilterIDs:          eap.FilterIDs,
 		ActivationInterval: eap.ActivationInterval,
 		Weight:             eap.Weight,
@@ -85,7 +85,7 @@ func NewExternalAttributeProfileFromAttributeProfile(alsPrf *AttributeProfile) *
 	extals := &ExternalAttributeProfile{
 		Tenant:             alsPrf.Tenant,
 		ID:                 alsPrf.ID,
-		Context:            alsPrf.Context,
+		Contexts:           alsPrf.Contexts,
 		ActivationInterval: alsPrf.ActivationInterval,
 		FilterIDs:          alsPrf.FilterIDs,
 		Weight:             alsPrf.Weight,

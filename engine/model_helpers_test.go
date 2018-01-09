@@ -1159,7 +1159,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
-		Context:   "con1",
+		Contexts:  []string{"con1"},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
@@ -1186,7 +1186,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
-		Context:   "con1",
+		Contexts:  []string{"con1"},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -1206,7 +1206,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
-		Context:   "con1",
+		Contexts:  []string{"con1"},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
@@ -1227,7 +1227,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
-			Context:            "con1",
+			Contexts:           "con1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
 			FieldName:          "FL1",
 			Initial:            "In1",
@@ -1249,7 +1249,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
-			Context:            "con1",
+			Contexts:           "con1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
 			FieldName:          "FL1",
 			Initial:            "In1",
@@ -1263,7 +1263,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
-		Context:   "con1",
+		Contexts:  []string{"con1"},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",

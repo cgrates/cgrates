@@ -531,7 +531,7 @@ CREATE TABLE tp_attributes (
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
-  `context` varchar(64) NOT NULL,
+  `contexts` varchar(64) NOT NULL,
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `field_name` varchar(64) NOT NULL,

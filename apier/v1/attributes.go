@@ -55,11 +55,11 @@ func (apierV1 *ApierV1) SetAttributeProfile(extAls *engine.ExternalAttributeProf
 }
 
 //RemAttributeProfile remove a specific Attribute Profile
-func (apierV1 *ApierV1) RemAttributeProfile(arg utils.TenantID, reply *string) error {
+func (apierV1 *ApierV1) RemAttributeProfile(arg utils.TenantID, contexts []string, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
+	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, contexts, utils.NonTransactional, true); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

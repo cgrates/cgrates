@@ -150,7 +150,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
 		FilterIDs: []string{"FLTR_ACNT_1007"},
-		Context:   utils.MetaRating,
+		Contexts:  []string{utils.MetaRating},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
@@ -192,8 +192,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Tenant, attrReply.Tenant)
 	} else if !reflect.DeepEqual(eAttrPrf.ID, attrReply.ID) {
 		t.Errorf("Expecting: %s, received: %s", eAttrPrf.ID, attrReply.ID)
-	} else if !reflect.DeepEqual(eAttrPrf.Context, attrReply.Context) {
-		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Tenant, attrReply.Tenant)
+	} else if !reflect.DeepEqual(eAttrPrf.Contexts, attrReply.Contexts) {
+		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Contexts, attrReply.Contexts)
 	} else if !reflect.DeepEqual(eAttrPrf.FilterIDs, attrReply.FilterIDs) {
 		t.Errorf("Expecting: %s, received: %s", eAttrPrf.FilterIDs, attrReply.FilterIDs)
 	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ActivationTime.Local(), attrReply.ActivationInterval.ActivationTime.Local()) {
@@ -262,7 +262,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	alsPrf = &engine.ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		Context:   "*rating",
+		Contexts:  []string{"*rating"},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),

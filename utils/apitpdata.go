@@ -1408,7 +1408,7 @@ type TPAttributeProfile struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	Context            string                // bind this TPAttribute to specific context
+	Contexts           []string              // bind this TPAttribute to multiple context
 	Attributes         []*TPAttribute
 	Weight             float64
 }

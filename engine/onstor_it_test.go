@@ -43,69 +43,70 @@ var (
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	testOnStorITSetGetDerivedCharges,
-	testOnStorITSetFilterIndexes,
-	testOnStorITGetFilterIndexes,
-	testOnStorITMatchFilterIndex,
-	testOnStorITCacheDestinations,
-	testOnStorITCacheReverseDestinations,
-	testOnStorITCacheRatingPlan,
-	testOnStorITCacheRatingProfile,
-	testOnStorITCacheActions,
-	testOnStorITCacheActionPlan,
-	testOnStorITCacheAccountActionPlans,
-	testOnStorITCacheActionTriggers,
-	testOnStorITCacheSharedGroup,
-	testOnStorITCacheDerivedChargers,
-	testOnStorITCacheLCR,
-	testOnStorITCacheAlias,
-	testOnStorITCacheReverseAlias,
-	testOnStorITCacheResource,
-	testOnStorITCacheResourceProfile,
-	testOnStorITCacheStatQueueProfile,
-	testOnStorITCacheStatQueue,
-	testOnStorITCacheThresholdProfile,
-	testOnStorITCacheThreshold,
-	testOnStorITCacheTiming,
-	testOnStorITCacheFilter,
-	testOnStorITCacheSupplierProfile,
-	testOnStorITCacheAttributeProfile,
+	// testOnStorITSetGetDerivedCharges,
+	// testOnStorITSetFilterIndexes,
+	// testOnStorITGetFilterIndexes,
+	// testOnStorITMatchFilterIndex,
+	// testOnStorITCacheDestinations,
+	// testOnStorITCacheReverseDestinations,
+	// testOnStorITCacheRatingPlan,
+	// testOnStorITCacheRatingProfile,
+	// testOnStorITCacheActions,
+	// testOnStorITCacheActionPlan,
+	// testOnStorITCacheAccountActionPlans,
+	// testOnStorITCacheActionTriggers,
+	// testOnStorITCacheSharedGroup,
+	// testOnStorITCacheDerivedChargers,
+	// testOnStorITCacheLCR,
+	// testOnStorITCacheAlias,
+	// testOnStorITCacheReverseAlias,
+	// testOnStorITCacheResource,
+	// testOnStorITCacheResourceProfile,
+	// testOnStorITCacheStatQueueProfile,
+	// testOnStorITCacheStatQueue,
+	// testOnStorITCacheThresholdProfile,
+	// testOnStorITCacheThreshold,
+	// testOnStorITCacheTiming,
+	// testOnStorITCacheFilter,
+	// testOnStorITCacheSupplierProfile,
+	// testOnStorITCacheAttributeProfile,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
-	testOnStorITHasData,
-	testOnStorITPushPop,
-	testOnStorITCRUDRatingPlan,
-	testOnStorITCRUDRatingProfile,
-	testOnStorITCRUDDestinations,
-	testOnStorITCRUDReverseDestinations,
-	testOnStorITCRUDLCR,
-	testOnStorITCRUDCdrStats,
-	testOnStorITCRUDActions,
-	testOnStorITCRUDSharedGroup,
-	testOnStorITCRUDActionTriggers,
-	testOnStorITCRUDActionPlan,
-	testOnStorITCRUDAccountActionPlans,
-	testOnStorITCRUDAccount,
-	testOnStorITCRUDCdrStatsQueue,
-	testOnStorITCRUDSubscribers,
-	testOnStorITCRUDUser,
-	testOnStorITCRUDAlias,
-	testOnStorITCRUDReverseAlias,
-	testOnStorITCRUDResource,
-	testOnStorITCRUDResourceProfile,
-	testOnStorITCRUDTiming,
-	testOnStorITCRUDHistory,
-	testOnStorITCRUDStructVersion,
-	testOnStorITCRUDStatQueueProfile,
-	testOnStorITCRUDStoredStatQueue,
-	testOnStorITCRUDThresholdProfile,
-	testOnStorITCRUDThreshold,
-	testOnStorITCRUDFilter,
-	testOnStorITCRUDSupplierProfile,
-	testOnStorITCRUDAttributeProfile,
-	testOnStorITFlush,
-	testOnStorITIsDBEmpty,
-	testOnStorITTestNewFilterIndexes,
+	// testOnStorITHasData,
+	// testOnStorITPushPop,
+	// testOnStorITCRUDRatingPlan,
+	// testOnStorITCRUDRatingProfile,
+	// testOnStorITCRUDDestinations,
+	// testOnStorITCRUDReverseDestinations,
+	// testOnStorITCRUDLCR,
+	// testOnStorITCRUDCdrStats,
+	// testOnStorITCRUDActions,
+	// testOnStorITCRUDSharedGroup,
+	// testOnStorITCRUDActionTriggers,
+	// testOnStorITCRUDActionPlan,
+	// testOnStorITCRUDAccountActionPlans,
+	// testOnStorITCRUDAccount,
+	// testOnStorITCRUDCdrStatsQueue,
+	// testOnStorITCRUDSubscribers,
+	// testOnStorITCRUDUser,
+	// testOnStorITCRUDAlias,
+	// testOnStorITCRUDReverseAlias,
+	// testOnStorITCRUDResource,
+	// testOnStorITCRUDResourceProfile,
+	// testOnStorITCRUDTiming,
+	// testOnStorITCRUDHistory,
+	// testOnStorITCRUDStructVersion,
+	// testOnStorITCRUDStatQueueProfile,
+	// testOnStorITCRUDStoredStatQueue,
+	// testOnStorITCRUDThresholdProfile,
+	// testOnStorITCRUDThreshold,
+	// testOnStorITCRUDFilter,
+	// testOnStorITCRUDSupplierProfile,
+	// testOnStorITCRUDAttributeProfile,
+	// testOnStorITFlush,
+	// testOnStorITIsDBEmpty,
+	// testOnStorITTestThresholdFilterIndexes,
+	testOnStorITTestAttributeProfileFilterIndexes,
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -1232,7 +1233,7 @@ func testOnStorITCacheAttributeProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		Context:    "con1",
+		Contexts:   []string{"con1"},
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
@@ -2622,7 +2623,7 @@ func testOnStorITCRUDAttributeProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
 		},
-		Context:    "con1",
+		Contexts:   []string{"con1"},
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
@@ -2642,7 +2643,7 @@ func testOnStorITCRUDAttributeProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
-	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant, attrProfile.ID, utils.NonTransactional, false); err != nil {
+	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant, attrProfile.ID, attrProfile.Contexts, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1", true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -2650,7 +2651,7 @@ func testOnStorITCRUDAttributeProfile(t *testing.T) {
 	}
 }
 
-func testOnStorITTestNewFilterIndexes(t *testing.T) {
+func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
@@ -2873,6 +2874,125 @@ func testOnStorITTestNewFilterIndexes(t *testing.T) {
 	} else {
 		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
 			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+}
+
+func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
+	fp := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter1",
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "EventType",
+				Type:      "*string",
+				Values:    []string{"Event1", "Event2"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	if err := onStor.SetFilter(fp); err != nil {
+		t.Error(err)
+	}
+	mapSubstitutes := make(map[string]map[string]*Attribute)
+	mapSubstitutes["FN1"] = make(map[string]*Attribute)
+	mapSubstitutes["FN1"]["Init1"] = &Attribute{
+		FieldName:  "FN1",
+		Initial:    "Init1",
+		Substitute: "Val1",
+		Append:     true,
+	}
+	attrProfile := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTRPRF1",
+		FilterIDs: []string{"Filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+		Contexts:   []string{"con1", "con2"},
+		Attributes: mapSubstitutes,
+		Weight:     20,
+	}
+	//Set AttributeProfile with 2 contexts ( con1 , con2)
+	if err := onStor.SetAttributeProfile(attrProfile, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringMap{
+		"EventType:Event1": utils.StringMap{
+			"ATTRPRF1": true,
+		},
+		"EventType:Event2": utils.StringMap{
+			"ATTRPRF1": true,
+		},
+	}
+	reverseIdxes := map[string]utils.StringMap{
+		"ATTRPRF1": utils.StringMap{
+			"EventType:Event1": true,
+			"EventType:Event2": true,
+		},
+	}
+	for _, ctx := range attrProfile.Contexts {
+		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey(attrProfile.Tenant, ctx))
+		if rcvIdx, err := onStor.GetFilterIndexes(
+			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+			nil); err != nil {
+			t.Error(err)
+		} else {
+			if !reflect.DeepEqual(eIdxes, rcvIdx) {
+				t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+			}
+		}
+		if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
+			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+			nil); err != nil {
+			t.Error(err)
+		} else {
+			if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+				t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+			}
+		}
+	}
+	//Set AttributeProfile with 1 new context (con3)
+	attrProfile.Contexts = []string{"con3"}
+	if err := onStor.SetAttributeProfile(attrProfile, true); err != nil {
+		t.Error(err)
+	}
+	//check indexes with the new context (con3)
+	rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey(attrProfile.Tenant, "con3"))
+	if rcvIdx, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+
+	//check if old contexts was delete
+	for _, ctx := range []string{"con1", "con2"} {
+		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey(attrProfile.Tenant, ctx))
+		if _, err := onStor.GetFilterIndexes(
+			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+			nil); err != nil && err != utils.ErrNotFound {
+			t.Error(err)
+		}
+		if _, err := onStor.GetFilterReverseIndexes(
+			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+			nil); err != nil && err != utils.ErrNotFound {
+			t.Error(err)
 		}
 	}
 
