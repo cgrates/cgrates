@@ -92,41 +92,10 @@
     }
 
 
-Or fetch CDRs from mongodb
-
-4.2 List all CDRs
------------------
-
-:Hint:
-    db.getCollection('cdrs').find({})
-
-4.2.1 Filter based on 'cgrid'
-#############################
-
-:Hint:
-    db.cdrs.find({"cgrid":"84bde1fd133f70572e05e699ea2f1de201e18269", "runid":"\*default"})
-
-4.2.2 Filter calls from 1001 to 1002
-####################################
-
-:Hint:
-    db.cdrs.find({"account":"1001", "destination":"1002"})
-
-4.2.3 Filter calls from 1003 to 1002
-####################################
-
-:Hint:
-    db.cdrs.find({"account":"1003", "destination":"1002"})
-
-4.2.4 Filter calls on setup time
-################################
-
-:Hint:
-
-    db.cdrs.find({"setuptime" : ISODate("2017-12-11T23:38:57.000Z")})
+"/var/spool/cgrates/cdre/cdre_1513199075.csv" is the destination cdr file in csv format.
 
 
-4.3 CDR Stats for Queues
+4.2 CDR Stats for Queues
 ------------------------
 
 Return list of Queue IDs
