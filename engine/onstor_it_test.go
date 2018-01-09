@@ -1247,9 +1247,6 @@ func testOnStorITCacheAttributeProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 
-	if _, hasIt := cache.Get(utils.AttributeProfilePrefix + attrProfile.TenantID()); hasIt {
-		t.Error("Already in cache")
-	}
 	if err := onStor.CacheDataFromDB(utils.AttributeProfilePrefix, []string{attrProfile.TenantID()}, false); err != nil {
 		t.Error(err)
 	}

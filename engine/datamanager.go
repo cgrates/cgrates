@@ -277,7 +277,13 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 	if err != nil {
 		return err
 	}
-	return dm.dataDB.SetStoredStatQueueDrv(ssq)
+	if err = dm.dataDB.SetStoredStatQueueDrv(ssq); err != nil {
+		return
+	}
+	if err = dm.CacheDataFromDB(utils.StatQueuePrefix, []string{sq.TenantID()}, true); err != nil {
+		return
+	}
+	return
 }
 
 // RemStatQueue removes the StoredStatQueue and clears the cache for StatQueue
@@ -312,7 +318,13 @@ func (dm *DataManager) GetFilter(tenant, id string, skipCache bool, transactionI
 }
 
 func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
-	return dm.DataDB().SetFilterDrv(fltr)
+	if err = dm.DataDB().SetFilterDrv(fltr); err != nil {
+		return
+	}
+	if err = dm.CacheDataFromDB(utils.FilterPrefix, []string{fltr.TenantID()}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error) {
@@ -346,7 +358,13 @@ func (dm *DataManager) GetThreshold(tenant, id string, skipCache bool, transacti
 }
 
 func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
-	return dm.DataDB().SetThresholdDrv(th)
+	if err = dm.DataDB().SetThresholdDrv(th); err != nil {
+		return
+	}
+	if err = dm.CacheDataFromDB(utils.ThresholdPrefix, []string{th.TenantID()}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
@@ -383,7 +401,9 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	if err = dm.DataDB().SetThresholdProfileDrv(th); err != nil {
 		return err
 	}
-	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(th.Tenant, th.ID), true, "") // ToDo: Remove here with autoreload
+	if err = dm.CacheDataFromDB(utils.ThresholdProfilePrefix, []string{th.TenantID()}, true); err != nil {
+		return
+	}
 	if withIndex {
 		//remove old ThresholdProfile indexes
 		indexerRemove := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
@@ -457,8 +477,9 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 	if err = dm.DataDB().SetStatQueueProfileDrv(sqp); err != nil {
 		return err
 	}
-	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sqp.Tenant, sqp.ID),
-		true, utils.NonTransactional) // Temporary work around util proper cacheDataFromDB will be implemented
+	if err = dm.CacheDataFromDB(utils.StatQueueProfilePrefix, []string{sqp.TenantID()}, true); err != nil {
+		return
+	}
 	if withIndex {
 		indexer := NewReqFilterIndexer(dm, utils.StatQueueProfilePrefix, sqp.Tenant)
 		//remove old StatQueueProfile indexes
@@ -562,7 +583,13 @@ func (dm *DataManager) GetResource(tenant, id string, skipCache bool, transactio
 }
 
 func (dm *DataManager) SetResource(rs *Resource) (err error) {
-	return dm.DataDB().SetResourceDrv(rs)
+	if err = dm.DataDB().SetResourceDrv(rs); err != nil {
+		return
+	}
+	if err = dm.CacheDataFromDB(utils.ResourcesPrefix, []string{rs.TenantID()}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err error) {
@@ -599,7 +626,9 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	if err = dm.DataDB().SetResourceProfileDrv(rp); err != nil {
 		return err
 	}
-	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(rp.Tenant, rp.ID), true, "") // ToDo: Remove here with autoreload
+	if err = dm.CacheDataFromDB(utils.ResourceProfilesPrefix, []string{rp.TenantID()}, true); err != nil {
+		return
+	}
 	//to be implemented in tests
 	if withIndex {
 		indexer := NewReqFilterIndexer(dm, utils.ResourceProfilesPrefix, rp.Tenant)
@@ -728,7 +757,6 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool, transactionID 
 	}
 	cache.Set(cachekey, sg, cacheCommit(transactionID), transactionID)
 	return
-
 }
 
 func (dm *DataManager) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
@@ -752,7 +780,6 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 	} else {
 		return dm.DataDB().RemoveSharedGroupDrv(id, transactionID)
 	}
-
 }
 
 func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
@@ -1058,9 +1085,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	if err = dm.DataDB().SetSupplierProfileDrv(supp); err != nil {
 		return err
 	}
-	cache.RemKey(utils.SupplierProfilePrefix+utils.ConcatenatedKey(supp.Tenant, supp.ID), true, "")
-	ids := []string{supp.ID}
-	if err = dm.CacheDataFromDB(utils.SupplierProfilePrefix, ids, true); err != nil {
+	if err = dm.CacheDataFromDB(utils.SupplierProfilePrefix, []string{supp.TenantID()}, true); err != nil {
 		return
 	}
 	//to be implemented in tests
@@ -1140,7 +1165,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 	if err = dm.DataDB().SetAttributeProfileDrv(ap); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.AttributeProfilePrefix, []string{ap.ID}, true); err != nil {
+	if err = dm.CacheDataFromDB(utils.AttributeProfilePrefix, []string{ap.TenantID()}, true); err != nil {
 		return
 	}
 	//to be implemented in tests
