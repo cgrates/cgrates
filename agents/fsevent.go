@@ -489,9 +489,9 @@ func (fsev FSEvent) V1UpdateSessionArgs() (args *sessionmanager.V1UpdateSessionA
 	if strings.Index(subsystems, SubSAccountS) == -1 {
 		args.UpdateSession = false
 	}
-	if strings.Index(subsystems, SubSResourceS) != -1 {
-		args.AllocateResources = true
-	}
+	//if strings.Index(subsystems, SubSResourceS) != -1 {
+	//	args.AllocateResources = true
+	//}
 	return
 }
 

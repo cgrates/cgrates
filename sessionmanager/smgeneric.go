@@ -1462,14 +1462,12 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
 }
 
 type V1UpdateSessionArgs struct {
-	UpdateSession     bool
-	AllocateResources bool
+	UpdateSession bool
 	utils.CGREvent
 }
 
 type V1UpdateSessionReply struct {
-	MaxUsage        time.Duration
-	ResAllocMessage string
+	MaxUsage *time.Duration
 }
 
 // BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
@@ -1479,33 +1477,37 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt *rpc2.Client,
 		if smg.rals == nil {
 			return utils.NewErrNotConnected(utils.RALService)
 		}
-		if rply.MaxUsage, err = smg.UpdateSession(args.CGREvent.Event, clnt); err != nil {
+		if maxUsage, err := smg.UpdateSession(args.CGREvent.Event, clnt); err != nil {
 			if err != rpcclient.ErrSessionNotFound {
 				err = utils.NewErrServerError(err)
 			}
-			return
-		}
-	}
-	if args.AllocateResources {
-		if smg.resS == nil {
-			return utils.NewErrNotConnected(utils.ResourceS)
-		}
-		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
-		if err != nil {
-			return utils.NewErrServerError(err)
-		}
-		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
-			UsageID:  originID,
-			Units:    1,
-		}
-		var allocMessage string
-		if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
-			attrRU, &allocMessage); err != nil {
 			return err
+		} else {
+			rply.MaxUsage = &maxUsage
 		}
-		rply.ResAllocMessage = allocMessage
 	}
+	/*
+		if args.AllocateResources {
+			if smg.resS == nil {
+				return utils.NewErrNotConnected(utils.ResourceS)
+			}
+			originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+			if err != nil {
+				return utils.NewErrServerError(err)
+			}
+			attrRU := utils.ArgRSv1ResourceUsage{
+				CGREvent: args.CGREvent,
+				UsageID:  originID,
+				Units:    1,
+			}
+			var allocMessage string
+			if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
+				attrRU, &allocMessage); err != nil {
+				return err
+			}
+			rply.ResAllocMessage = allocMessage
+		}
+	*/
 	return
 }
 

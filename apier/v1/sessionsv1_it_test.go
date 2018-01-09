@@ -199,6 +199,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 				utils.Account:     "1001",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:       initUsage,
 			},
 		},
@@ -226,12 +227,94 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 				"OriginID":    "TestSSv1It",
 				"RequestType": "*prepaid",
 				"SetupTime":   "2018-01-07T17:00:00Z",
+				"AnswerTime":  "2018-01-07T17:00:10Z",
 				"Usage":       300000000000.0,
 			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+		t.Errorf("expecting: %+v, received: %+v",
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+	}
+}
+
+func TestSSv1ItUpdateSession(t *testing.T) {
+	reqUsage := 5 * time.Minute
+	args := &sessionmanager.V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.ACCID:       "TestSSv1It",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       reqUsage,
+			},
+		},
+	}
+	var rply sessionmanager.V1UpdateSessionReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1UpdateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if *rply.MaxUsage != reqUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	}
+}
+
+func TestSSv1ItTerminateSession(t *testing.T) {
+	args := &sessionmanager.V1TerminateSessionArgs{
+		TerminateSession: true,
+		ReleaseResources: false,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.ACCID:       "TestSSv1It",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	var rply string
+	if err := sSv1BiRpc.Call(utils.SessionSv1TerminateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+}
+
+func TestSSv1ItProcessCDR(t *testing.T) {
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestSSv1ItProcessCDR",
+		Event: map[string]interface{}{
+			utils.ACCID:       "TestSSv1It",
+			utils.RequestType: utils.META_PREPAID,
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.Usage:       10 * time.Minute,
+		},
+	}
+	var rply string
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessCDR,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
 	}
 }
 
