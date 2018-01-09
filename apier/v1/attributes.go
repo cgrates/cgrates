@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -49,17 +48,22 @@ func (apierV1 *ApierV1) SetAttributeProfile(extAls *engine.ExternalAttributeProf
 	if err := apierV1.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	cache.RemKey(utils.AttributeProfilePrefix+utils.ConcatenatedKey(extAls.Tenant, extAls.ID), true, "") // ToDo: Remove here with autoreload
 	*reply = utils.OK
 	return nil
 }
 
+type ArgRemoveAttrPrf struct {
+	Tenant   string
+	ID       string
+	Contexts []string
+}
+
 //RemAttributeProfile remove a specific Attribute Profile
-func (apierV1 *ApierV1) RemAttributeProfile(arg utils.TenantID, contexts []string, reply *string) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (apierV1 *ApierV1) RemAttributeProfile(arg ArgRemoveAttrPrf, reply *string) error {
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID", "Contexts"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, contexts, utils.NonTransactional, true); err != nil {
+	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, arg.Contexts, utils.NonTransactional, true); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

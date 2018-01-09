@@ -271,7 +271,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	}
 
 	for _, spr := range sprsmatch {
-		dmspl.SetSupplierProfile(spr, false)
+		dmspl.SetSupplierProfile(spr, true)
 	}
 	ref := NewReqFilterIndexer(dmspl, utils.SupplierProfilePrefix, "cgrates.org")
 	ref.IndexTPFilter(FilterToTPFilter(filter3), "supplierprofile1")
@@ -279,23 +279,6 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	err = ref.StoreIndexes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
-	}
-	//test here GetReqFilterIndexes for StorageMap with a specific map
-	expidx := map[string]utils.StringMap{
-		"supplierprofile1:Supplier": {
-			"supplierprofile1": true,
-		},
-	}
-	splPrf1 := make(map[string]string)
-	splPrf1["supplierprofile1"] = "Supplier"
-	if rcvidx, err := dmspl.GetFilterIndexes(
-		GetDBIndexKey(utils.SupplierProfilePrefix, "cgrates.org", false),
-		splPrf1); err != nil {
-		t.Errorf("Error: %+v", err)
-	} else {
-		if !reflect.DeepEqual(utils.ToJSON(expidx), utils.ToJSON(rcvidx)) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expidx), utils.ToJSON(rcvidx))
-		}
 	}
 }
 

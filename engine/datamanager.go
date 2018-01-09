@@ -383,6 +383,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	if err = dm.DataDB().SetThresholdProfileDrv(th); err != nil {
 		return err
 	}
+	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(th.Tenant, th.ID), true, "") // ToDo: Remove here with autoreload
 	if withIndex {
 		//remove old ThresholdProfile indexes
 		indexerRemove := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
@@ -456,6 +457,8 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 	if err = dm.DataDB().SetStatQueueProfileDrv(sqp); err != nil {
 		return err
 	}
+	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sqp.Tenant, sqp.ID),
+		true, utils.NonTransactional) // Temporary work around util proper cacheDataFromDB will be implemented
 	if withIndex {
 		indexer := NewReqFilterIndexer(dm, utils.StatQueueProfilePrefix, sqp.Tenant)
 		//remove old StatQueueProfile indexes
@@ -596,6 +599,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	if err = dm.DataDB().SetResourceProfileDrv(rp); err != nil {
 		return err
 	}
+	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(rp.Tenant, rp.ID), true, "") // ToDo: Remove here with autoreload
 	//to be implemented in tests
 	if withIndex {
 		indexer := NewReqFilterIndexer(dm, utils.ResourceProfilesPrefix, rp.Tenant)
@@ -1054,6 +1058,11 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	if err = dm.DataDB().SetSupplierProfileDrv(supp); err != nil {
 		return err
 	}
+	cache.RemKey(utils.SupplierProfilePrefix+utils.ConcatenatedKey(supp.Tenant, supp.ID), true, "")
+	ids := []string{supp.ID}
+	if err = dm.CacheDataFromDB(utils.SupplierProfilePrefix, ids, true); err != nil {
+		return
+	}
 	//to be implemented in tests
 	if withIndex {
 		indexer := NewReqFilterIndexer(dm, utils.SupplierProfilePrefix, supp.Tenant)
@@ -1131,6 +1140,9 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 	if err = dm.DataDB().SetAttributeProfileDrv(ap); err != nil {
 		return err
 	}
+	if err = dm.CacheDataFromDB(utils.AttributeProfilePrefix, []string{ap.ID}, true); err != nil {
+		return
+	}
 	//to be implemented in tests
 	if withIndex {
 		if oldAP != nil {
@@ -1164,28 +1176,21 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 					}
 					return
 				}
+				for _, flt := range fltr.RequestFilters {
+					if flt.Type != MetaString {
+						continue
+					}
+					for _, fldVal := range flt.Values {
+						if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+							return err
+						}
+					}
+				}
 				indexer.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
 			}
 			if err = indexer.StoreIndexes(); err != nil {
 				return
 			}
-<<<<<<< HEAD
-			for _, flt := range fltr.RequestFilters {
-				if flt.Type != MetaString {
-					continue
-				}
-				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
-						return err
-					}
-				}
-			}
-			indexer.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
-		}
-		if err = indexer.StoreIndexes(); err != nil {
-			return
-=======
->>>>>>> Update Contexts and indexing for AttributeProfile
 		}
 	}
 	return

@@ -1823,34 +1823,34 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.attributeProfiles = mapRsPfls
-	for tntID, res := range mapRsPfls {
+	for tntID, attrP := range mapRsPfls {
 		if has, err := tpr.dm.HasData(utils.AttributeProfilePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
 			tpr.attrTntID = append(tpr.attrTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index attribute profile for filters
-		for _, context := range res.Contexts {
+		for _, context := range attrP.Contexts {
 			attrKey := utils.ConcatenatedKey(tntID.Tenant, context)
 			if _, has := tpr.attrIndexers[attrKey]; !has {
 				if tpr.attrIndexers[attrKey] = NewReqFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, attrKey); err != nil {
 					return
 				}
 			}
-			for _, fltrID := range res.FilterIDs {
+			for _, fltrID := range attrP.FilterIDs {
 				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
 				if !has {
 					var fltr *Filter
 					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
 						if err == utils.ErrNotFound {
-							err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
+							err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, attrP)
 						}
 						return
 					} else {
 						tpFltr = FilterToTPFilter(fltr)
 					}
 				} else {
-					tpr.attrIndexers[attrKey].IndexTPFilter(tpFltr, res.ID)
+					tpr.attrIndexers[attrKey].IndexTPFilter(tpFltr, attrP.ID)
 				}
 			}
 		}

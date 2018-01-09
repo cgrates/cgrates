@@ -1282,7 +1282,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	alsPrf = &engine.ExternalAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		Contexts:  []string{"*rating1", "*rating2"},
+		Contexts:  []string{"*rating"},
 		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
@@ -1495,22 +1495,23 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		t.Errorf("Error: %+v", reply2)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
-		&utils.TenantID{Tenant: tenant, ID: "ApierTest"}, &resp); err != nil {
+		&ArgRemoveAttrPrf{Tenant: "cgrates.org", ID: "ApierTest", Contexts: []string{"*rating"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
-		&utils.TenantID{Tenant: tenant, ID: "ApierTest2"}, &resp); err != nil {
+		&ArgRemoveAttrPrf{Tenant: "cgrates.org", ID: "ApierTest2", Contexts: []string{"*rating"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: tenant, ID: "ApierTest2"}, &reply2); err == nil ||
+	var reply *engine.ExternalAttributeProfile
+	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: tenant, ID: "ApierTest2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: tenant, ID: "ApierTest"}, &reply2); err == nil ||
+	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: tenant, ID: "ApierTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
