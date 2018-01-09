@@ -45,7 +45,8 @@ var (
 	ErrActiveSession     = errors.New("ACTIVE_SESSION")
 )
 
-func NewSessionReplicationConns(conns []*config.HaPoolConfig, reconnects int, connTimeout, replyTimeout time.Duration) (smgConns []*SMGReplicationConn, err error) {
+func NewSessionReplicationConns(conns []*config.HaPoolConfig, reconnects int,
+	connTimeout, replyTimeout time.Duration) (smgConns []*SMGReplicationConn, err error) {
 	smgConns = make([]*SMGReplicationConn, len(conns))
 	for i, replConnCfg := range conns {
 		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, 0, reconnects,
@@ -67,7 +68,7 @@ type SMGReplicationConn struct {
 func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS,
 	splS, attrS, cdrsrv rpcclient.RpcClientConnection,
 	smgReplConns []*SMGReplicationConn, timezone string) *SMGeneric {
-	ssIdxCfg := cgrCfg.SmGenericConfig.SessionIndexes
+	ssIdxCfg := cgrCfg.SessionSCfg().SessionIndexes
 	ssIdxCfg[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 	if rals != nil && reflect.ValueOf(rals).IsNil() {
 		rals = nil
@@ -1349,9 +1350,9 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt *rpc2.Client,
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
-		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		originID, err := args.CGREvent.FieldAsString(utils.OriginID)
 		if err != nil {
-			return utils.NewErrMandatoryIeMissing(utils.ACCID)
+			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		var allocMsg string
 		attrRU := utils.ArgRSv1ResourceUsage{
@@ -1415,9 +1416,9 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
-		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		originID, err := args.CGREvent.FieldAsString(utils.OriginID)
 		if err != nil {
-			return utils.NewErrMandatoryIeMissing(utils.ACCID)
+			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
 			CGREvent: args.CGREvent,
@@ -1485,7 +1486,7 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt *rpc2.Client,
 			if smg.resS == nil {
 				return utils.NewErrNotConnected(utils.ResourceS)
 			}
-			originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+			originID, err := args.CGREvent.FieldAsString(utils.OriginID)
 			if err != nil {
 				return utils.NewErrServerError(err)
 			}
@@ -1526,9 +1527,9 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt *rpc2.Client,
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
-		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		originID, err := args.CGREvent.FieldAsString(utils.OriginID)
 		if err != nil {
-			return utils.NewErrMandatoryIeMissing(utils.ACCID)
+			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
@@ -1575,9 +1576,9 @@ func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt *rpc2.Client,
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
-		originID, err := args.CGREvent.FieldAsString(utils.ACCID)
+		originID, err := args.CGREvent.FieldAsString(utils.OriginID)
 		if err != nil {
-			return utils.NewErrMandatoryIeMissing(utils.ACCID)
+			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
 			CGREvent: args.CGREvent,

@@ -184,7 +184,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *sessionmanager.SMGenericEvent 
 	case ARIChannelDestroyed:
 		evName = SMASessionTerminate
 	}
-	smgEv := SMGenericEvent{utils.EVENT_NAME: evName}
+	smgEv := sessionmanager.SMGenericEvent{utils.EVENT_NAME: evName}
 	smgEv[utils.OriginID] = smaEv.ChannelID()
 	if smaEv.RequestType() != "" {
 		smgEv[utils.RequestType] = smaEv.RequestType()

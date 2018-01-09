@@ -186,7 +186,7 @@ func (fsev FSEvent) MissingParameter(timezone string) string {
 		return utils.Category
 	}
 	if strings.TrimSpace(fsev.GetUUID()) == "" {
-		return utils.ACCID
+		return utils.OriginID
 	}
 	if strings.TrimSpace(fsev.GetTenant(utils.META_DEFAULT)) == "" {
 		return utils.Tenant

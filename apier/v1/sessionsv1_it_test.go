@@ -122,7 +122,7 @@ func TestSSv1ItAuth(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
-				utils.ACCID:       "TestSSv1It1",
+				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
 				utils.Destination: "1002",
@@ -196,7 +196,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]interface{}{
-				utils.ACCID:       "TestSSv1It1",
+				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
 				utils.Destination: "1002",
@@ -249,7 +249,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
-				utils.ACCID:       "TestSSv1It1",
+				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
 				utils.Destination: "1002",
@@ -277,7 +277,7 @@ func TestSSv1ItTerminateSession(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
-				utils.ACCID:       "TestSSv1It1",
+				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
 				utils.Destination: "1002",
@@ -302,7 +302,7 @@ func TestSSv1ItProcessCDR(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]interface{}{
-			utils.ACCID:       "TestSSv1It1",
+			utils.OriginID:    "TestSSv1It1",
 			utils.RequestType: utils.META_PREPAID,
 			utils.Account:     "1001",
 			utils.Destination: "1002",
@@ -331,7 +331,7 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]interface{}{
-				utils.ACCID:       "TestSSv1It2",
+				utils.OriginID:    "TestSSv1It2",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
 				utils.Destination: "1002",
