@@ -1252,8 +1252,11 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 			if _, has := indexes[utils.ConcatenatedKey(fldName, fldVal)]; !has {
 				indexes[utils.ConcatenatedKey(fldName, fldVal)] = make(utils.StringMap)
 			}
-			indexes[utils.ConcatenatedKey(fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
+			if len(rcvidx[utils.ConcatenatedKey(fldName, fldVal)]) != 0 {
+				indexes[utils.ConcatenatedKey(fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
+			}
 		}
+
 		return
 	} else {
 		err = ms.ms.Unmarshal(values, &indexes)

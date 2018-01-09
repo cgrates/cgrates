@@ -43,69 +43,69 @@ var (
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	// testOnStorITSetGetDerivedCharges,
-	// testOnStorITSetFilterIndexes,
-	// testOnStorITGetFilterIndexes,
-	// testOnStorITMatchFilterIndex,
-	// testOnStorITCacheDestinations,
-	// testOnStorITCacheReverseDestinations,
-	// testOnStorITCacheRatingPlan,
-	// testOnStorITCacheRatingProfile,
-	// testOnStorITCacheActions,
-	// testOnStorITCacheActionPlan,
-	// testOnStorITCacheAccountActionPlans,
-	// testOnStorITCacheActionTriggers,
-	// testOnStorITCacheSharedGroup,
-	// testOnStorITCacheDerivedChargers,
-	// testOnStorITCacheLCR,
-	// testOnStorITCacheAlias,
-	// testOnStorITCacheReverseAlias,
-	// testOnStorITCacheResource,
-	// testOnStorITCacheResourceProfile,
-	// testOnStorITCacheStatQueueProfile,
-	// testOnStorITCacheStatQueue,
-	// testOnStorITCacheThresholdProfile,
-	// testOnStorITCacheThreshold,
-	// testOnStorITCacheTiming,
-	// testOnStorITCacheFilter,
-	// testOnStorITCacheSupplierProfile,
-	// testOnStorITCacheAttributeProfile,
+	testOnStorITSetGetDerivedCharges,
+	testOnStorITSetFilterIndexes,
+	testOnStorITGetFilterIndexes,
+	testOnStorITMatchFilterIndex,
+	testOnStorITCacheDestinations,
+	testOnStorITCacheReverseDestinations,
+	testOnStorITCacheRatingPlan,
+	testOnStorITCacheRatingProfile,
+	testOnStorITCacheActions,
+	testOnStorITCacheActionPlan,
+	testOnStorITCacheAccountActionPlans,
+	testOnStorITCacheActionTriggers,
+	testOnStorITCacheSharedGroup,
+	testOnStorITCacheDerivedChargers,
+	testOnStorITCacheLCR,
+	testOnStorITCacheAlias,
+	testOnStorITCacheReverseAlias,
+	testOnStorITCacheResource,
+	testOnStorITCacheResourceProfile,
+	testOnStorITCacheStatQueueProfile,
+	testOnStorITCacheStatQueue,
+	testOnStorITCacheThresholdProfile,
+	testOnStorITCacheThreshold,
+	testOnStorITCacheTiming,
+	testOnStorITCacheFilter,
+	testOnStorITCacheSupplierProfile,
+	testOnStorITCacheAttributeProfile,
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
-	// testOnStorITHasData,
-	// testOnStorITPushPop,
-	// testOnStorITCRUDRatingPlan,
-	// testOnStorITCRUDRatingProfile,
-	// testOnStorITCRUDDestinations,
-	// testOnStorITCRUDReverseDestinations,
-	// testOnStorITCRUDLCR,
-	// testOnStorITCRUDCdrStats,
-	// testOnStorITCRUDActions,
-	// testOnStorITCRUDSharedGroup,
-	// testOnStorITCRUDActionTriggers,
-	// testOnStorITCRUDActionPlan,
-	// testOnStorITCRUDAccountActionPlans,
-	// testOnStorITCRUDAccount,
-	// testOnStorITCRUDCdrStatsQueue,
-	// testOnStorITCRUDSubscribers,
-	// testOnStorITCRUDUser,
-	// testOnStorITCRUDAlias,
-	// testOnStorITCRUDReverseAlias,
-	// testOnStorITCRUDResource,
-	// testOnStorITCRUDResourceProfile,
-	// testOnStorITCRUDTiming,
-	// testOnStorITCRUDHistory,
-	// testOnStorITCRUDStructVersion,
-	// testOnStorITCRUDStatQueueProfile,
-	// testOnStorITCRUDStoredStatQueue,
-	// testOnStorITCRUDThresholdProfile,
-	// testOnStorITCRUDThreshold,
-	// testOnStorITCRUDFilter,
-	// testOnStorITCRUDSupplierProfile,
-	// testOnStorITCRUDAttributeProfile,
-	// testOnStorITFlush,
-	// testOnStorITIsDBEmpty,
-	// testOnStorITTestThresholdFilterIndexes,
+	testOnStorITHasData,
+	testOnStorITPushPop,
+	testOnStorITCRUDRatingPlan,
+	testOnStorITCRUDRatingProfile,
+	testOnStorITCRUDDestinations,
+	testOnStorITCRUDReverseDestinations,
+	testOnStorITCRUDLCR,
+	testOnStorITCRUDCdrStats,
+	testOnStorITCRUDActions,
+	testOnStorITCRUDSharedGroup,
+	testOnStorITCRUDActionTriggers,
+	testOnStorITCRUDActionPlan,
+	testOnStorITCRUDAccountActionPlans,
+	testOnStorITCRUDAccount,
+	testOnStorITCRUDCdrStatsQueue,
+	testOnStorITCRUDSubscribers,
+	testOnStorITCRUDUser,
+	testOnStorITCRUDAlias,
+	testOnStorITCRUDReverseAlias,
+	testOnStorITCRUDResource,
+	testOnStorITCRUDResourceProfile,
+	testOnStorITCRUDTiming,
+	testOnStorITCRUDHistory,
+	testOnStorITCRUDStructVersion,
+	testOnStorITCRUDStatQueueProfile,
+	testOnStorITCRUDStoredStatQueue,
+	testOnStorITCRUDThresholdProfile,
+	testOnStorITCRUDThreshold,
+	testOnStorITCRUDFilter,
+	testOnStorITCRUDSupplierProfile,
+	testOnStorITCRUDAttributeProfile,
+	testOnStorITFlush,
+	testOnStorITIsDBEmpty,
+	testOnStorITTestThresholdFilterIndexes,
 	testOnStorITTestAttributeProfileFilterIndexes,
 }
 
@@ -2907,7 +2907,7 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
-		ID:        "ATTRPRF1",
+		ID:        "AttrPrf",
 		FilterIDs: []string{"Filter1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
@@ -2922,14 +2922,14 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 	eIdxes := map[string]utils.StringMap{
 		"EventType:Event1": utils.StringMap{
-			"ATTRPRF1": true,
+			"AttrPrf": true,
 		},
 		"EventType:Event2": utils.StringMap{
-			"ATTRPRF1": true,
+			"AttrPrf": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
-		"ATTRPRF1": utils.StringMap{
+		"AttrPrf": utils.StringMap{
 			"EventType:Event1": true,
 			"EventType:Event2": true,
 		},
@@ -2994,6 +2994,22 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 			nil); err != nil && err != utils.ErrNotFound {
 			t.Error(err)
 		}
+	}
+
+	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant, attrProfile.ID, attrProfile.Contexts, utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+	//check if index is removed
+	rfi = NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey("cgrates.org", "con3"))
+	if _, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
 	}
 
 }

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -46,8 +45,6 @@ func (apierV1 *ApierV1) SetStatQueueProfile(sqp *engine.StatQueueProfile, reply 
 	if err := apierV1.DataManager.SetStatQueueProfile(sqp, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(sqp.Tenant, sqp.ID),
-		true, utils.NonTransactional) // Temporary work around util proper cacheDataFromDB will be implemented
 	*reply = utils.OK
 	return nil
 }

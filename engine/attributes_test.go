@@ -41,7 +41,7 @@ var sTestsAttributes = []func(t *testing.T){
 
 func TestAttributes(t *testing.T) {
 	for _, stest := range sTestsAttributes {
-		t.Run("Test Suppliers", stest)
+		t.Run("Test Attributes", stest)
 	}
 }
 
@@ -116,6 +116,7 @@ func testPopulateAttrService(t *testing.T) {
 		filterS:       &FilterS{dm: dmAtr},
 		indexedFields: []string{"attributeprofile1", "attributeprofile2"},
 	}
+
 	ev := make(map[string]interface{})
 	ev["attributeprofile1"] = "Attribute"
 	ev["attributeprofile2"] = "Attribute"
@@ -131,7 +132,9 @@ func testPopulateAttrService(t *testing.T) {
 	}
 
 	for _, atr := range atrPs {
-		dmAtr.SetAttributeProfile(atr, false)
+		if err = dmAtr.SetAttributeProfile(atr, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
 	}
 	prefix := utils.ConcatenatedKey(sev.Tenant, *sev.Context)
 	ref := NewReqFilterIndexer(dmAtr, utils.AttributeProfilePrefix, prefix)
