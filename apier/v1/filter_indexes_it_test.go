@@ -1493,13 +1493,13 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		t.Errorf("Error: %+v", reply2)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
-		&ArgRemoveAttrPrf{Tenant: "cgrates.org", ID: "ApierTest", Contexts: []string{"*rating"}}, &resp); err != nil {
+		&ArgRemoveAttrProfile{Tenant: "cgrates.org", ID: "ApierTest", Contexts: []string{"*rating"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
-		&ArgRemoveAttrPrf{Tenant: "cgrates.org", ID: "ApierTest2", Contexts: []string{"*rating"}}, &resp); err != nil {
+		&ArgRemoveAttrProfile{Tenant: "cgrates.org", ID: "ApierTest2", Contexts: []string{"*rating"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)

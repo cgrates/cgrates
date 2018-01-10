@@ -52,14 +52,14 @@ func (apierV1 *ApierV1) SetAttributeProfile(extAls *engine.ExternalAttributeProf
 	return nil
 }
 
-type ArgRemoveAttrPrf struct {
+type ArgRemoveAttrProfile struct {
 	Tenant   string
 	ID       string
 	Contexts []string
 }
 
 //RemAttributeProfile remove a specific Attribute Profile
-func (apierV1 *ApierV1) RemAttributeProfile(arg *ArgRemoveAttrPrf, reply *string) error {
+func (apierV1 *ApierV1) RemAttributeProfile(arg *ArgRemoveAttrProfile, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID", "Contexts"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
