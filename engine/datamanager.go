@@ -550,7 +550,13 @@ func (dm *DataManager) GetTiming(id string, skipCache bool, transactionID string
 }
 
 func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
-	return dm.DataDB().SetTimingDrv(t)
+	if err = dm.DataDB().SetTimingDrv(t); err != nil {
+		return
+	}
+	if err = dm.CacheDataFromDB(utils.TimingsPrefix, []string{t.ID}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
@@ -706,27 +712,6 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	return
 }
 
-func (dm *DataManager) GetLCR(id string, skipCache bool, transactionID string) (lcr *LCR, err error) {
-	key := utils.LCR_PREFIX + id
-	if !skipCache {
-		if x, ok := cache.Get(key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*LCR), nil
-		}
-	}
-	lcr, err = dm.DataDB().GetLCRDrv(id)
-	if err != nil {
-		if err == utils.ErrNotFound {
-			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
-		}
-		return nil, err
-	}
-	cache.Set(key, lcr, cacheCommit(transactionID), transactionID)
-	return
-}
-
 func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers, transactionID string) (err error) {
 	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
 		if err = dm.DataDB().SetActionTriggersDrv(key, attr); err != nil {
@@ -782,27 +767,43 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 	}
 }
 
-func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
-		if err = dm.DataDB().SetLCRDrv(lcr); err != nil {
-			cache.RemKey(utils.LCR_PREFIX+lcr.GetId(), cacheCommit(transactionID), transactionID)
+func (dm *DataManager) GetLCR(id string, skipCache bool, transactionID string) (lcr *LCR, err error) {
+	key := utils.LCR_PREFIX + id
+	if !skipCache {
+		if x, ok := cache.Get(key); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*LCR), nil
 		}
-		return
-	} else {
-		return dm.DataDB().SetLCRDrv(lcr)
 	}
+	lcr, err = dm.DataDB().GetLCRDrv(id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	cache.Set(key, lcr, cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
+	if err = dm.DataDB().SetLCRDrv(lcr); err != nil {
+		return
+	}
+	if err = dm.CacheDataFromDB(utils.LCR_PREFIX, []string{lcr.GetId()}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveLCR(id, transactionID string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
-		if err = dm.DataDB().RemoveLCRDrv(id, transactionID); err != nil {
-			return
-		}
-		cache.RemKey(utils.LCR_PREFIX+id, cacheCommit(transactionID), transactionID)
+	if err = dm.DataDB().RemoveLCRDrv(id, transactionID); err != nil {
 		return
-	} else {
-		return dm.DataDB().RemoveLCRDrv(id, transactionID)
 	}
+	cache.RemKey(utils.LCR_PREFIX+id, cacheCommit(transactionID), transactionID)
+	return
 }
 
 func (dm *DataManager) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
@@ -856,18 +857,16 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	}
 	cache.Set(cachekey, as, cacheCommit(transactionID), transactionID)
 	return
-
 }
 
 func (dm *DataManager) SetActions(key string, as Actions, transactionID string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
-		if err = dm.DataDB().SetActionsDrv(key, as); err != nil {
-			cache.RemKey(utils.ACTION_PREFIX+key, cacheCommit(transactionID), transactionID)
-		}
+	if err = dm.DataDB().SetActionsDrv(key, as); err != nil {
 		return
-	} else {
-		return dm.DataDB().SetActionsDrv(key, as)
 	}
+	if err = dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{key}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
@@ -900,14 +899,13 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool, transactionID s
 }
 
 func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
-		if err = dm.DataDB().SetRatingPlanDrv(rp); err != nil {
-			cache.RemKey(utils.RATING_PLAN_PREFIX+rp.Id, cacheCommit(transactionID), transactionID)
-		}
+	if err = dm.DataDB().SetRatingPlanDrv(rp); err != nil {
 		return
-	} else {
-		return dm.DataDB().SetRatingPlanDrv(rp)
 	}
+	if err = dm.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err error) {
@@ -941,14 +939,13 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool, transactionI
 }
 
 func (dm *DataManager) SetRatingProfile(rpf *RatingProfile, transactionID string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
-		if err = dm.DataDB().SetRatingProfileDrv(rpf); err != nil {
-			cache.RemKey(utils.RATING_PROFILE_PREFIX+rpf.Id, cacheCommit(transactionID), transactionID)
-		}
+	if err = dm.DataDB().SetRatingProfileDrv(rpf); err != nil {
 		return
-	} else {
-		return dm.DataDB().SetRatingProfileDrv(rpf)
 	}
+	if err = dm.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveRatingProfile(key string, transactionID string) (err error) {
