@@ -1857,15 +1857,11 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 		}
 		if tp.Thresholds != "" {
 			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
-			for _, trsh := range trshSplt {
-				rl.Thresholds = append(rl.Thresholds, trsh)
-			}
+			rl.Thresholds = append(rl.Thresholds, trshSplt...)
 		}
 		if tp.FilterIDs != "" {
 			trshSplt := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
-			for _, trsh := range trshSplt {
-				rl.FilterIDs = append(rl.FilterIDs, trsh)
-			}
+			rl.FilterIDs = append(rl.FilterIDs, trshSplt...)
 		}
 		mrl[tp.ID] = rl
 	}
@@ -2173,9 +2169,7 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 		}
 		if tp.ActionIDs != "" {
 			actionSplit := strings.Split(tp.ActionIDs, utils.INFIELD_SEP)
-			for _, action := range actionSplit {
-				th.ActionIDs = append(th.ActionIDs, action)
-			}
+			th.ActionIDs = append(th.ActionIDs, actionSplit...)
 		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
@@ -2192,9 +2186,7 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 		}
 		if tp.FilterIDs != "" {
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
-			for _, filter := range filterSplit {
-				th.FilterIDs = append(th.FilterIDs, filter)
-			}
+			th.FilterIDs = append(th.FilterIDs, filterSplit...)
 		}
 
 		mst[tp.ID] = th
@@ -2504,41 +2496,30 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			}
 			if tp.SupplierFilterIDs != "" {
 				supFilterSplit := strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP)
-				for _, supFilter := range supFilterSplit {
-					sup.FilterIDs = append(sup.FilterIDs, supFilter)
-				}
+				sup.FilterIDs = append(sup.FilterIDs, supFilterSplit...)
+
 			}
 			if tp.SupplierRatingplanIDs != "" {
 				ratingPlanSplit := strings.Split(tp.SupplierRatingplanIDs, utils.INFIELD_SEP)
-				for _, ratingSplit := range ratingPlanSplit {
-					sup.RatingPlanIDs = append(sup.RatingPlanIDs, ratingSplit)
-				}
+				sup.RatingPlanIDs = append(sup.RatingPlanIDs, ratingPlanSplit...)
 			}
 			if tp.SupplierResourceIDs != "" {
 				resSplit := strings.Split(tp.SupplierResourceIDs, utils.INFIELD_SEP)
-				for _, res := range resSplit {
-					sup.ResourceIDs = append(sup.ResourceIDs, res)
-				}
+				sup.ResourceIDs = append(sup.ResourceIDs, resSplit...)
 			}
 			if tp.SupplierStatIDs != "" {
 				statSplit := strings.Split(tp.SupplierStatIDs, utils.INFIELD_SEP)
-				for _, sts := range statSplit {
-					sup.StatIDs = append(sup.StatIDs, sts)
-				}
+				sup.StatIDs = append(sup.StatIDs, statSplit...)
 			}
 			if tp.SupplierAccountIDs != "" {
 				accSplit := strings.Split(tp.SupplierAccountIDs, utils.INFIELD_SEP)
-				for _, acc := range accSplit {
-					sup.AccountIDs = append(sup.AccountIDs, acc)
-				}
+				sup.AccountIDs = append(sup.AccountIDs, accSplit...)
 			}
 			suppliersMap[tp.ID][tp.SupplierID] = sup
 		}
 		if tp.SortingParams != "" {
 			sortingParamSplit := strings.Split(tp.SortingParams, utils.INFIELD_SEP)
-			for _, sortingParam := range sortingParamSplit {
-				th.SortingParams = append(th.SortingParams, sortingParam)
-			}
+			th.SortingParams = append(th.SortingParams, sortingParamSplit...)
 		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
@@ -2716,15 +2697,11 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 		}
 		if tp.FilterIDs != "" {
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
-			for _, filter := range filterSplit {
-				th.FilterIDs = append(th.FilterIDs, filter)
-			}
+			th.FilterIDs = append(th.FilterIDs, filterSplit...)
 		}
 		if tp.Contexts != "" {
 			contextSplit := strings.Split(tp.Contexts, utils.INFIELD_SEP)
-			for _, context := range contextSplit {
-				th.Contexts = append(th.Contexts, context)
-			}
+			th.Contexts = append(th.Contexts, contextSplit...)
 		}
 		if tp.FieldName != "" {
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
