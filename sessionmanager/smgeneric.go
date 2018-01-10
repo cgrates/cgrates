@@ -682,43 +682,12 @@ func (smg *SMGeneric) GetMaxUsage(gev SMGenericEvent) (maxUsage time.Duration, e
 		return (item.Value.(time.Duration)), item.Err
 	}
 	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err})
-	gev[utils.EVENT_NAME] = utils.CGR_AUTHORIZATION
 	storedCdr := gev.AsCDR(config.CgrConfig(), smg.Timezone)
 	var maxDur float64
 	if err = smg.rals.Call("Responder.GetDerivedMaxSessionTime", storedCdr, &maxDur); err != nil {
 		return
 	}
 	maxUsage = time.Duration(maxDur)
-	return
-}
-
-func (smg *SMGeneric) GetLCRSuppliers(gev SMGenericEvent) (suppls []string, err error) {
-	cacheKey := "LCRSuppliers" + gev.GetCGRID(utils.META_DEFAULT) + gev.GetAccount(utils.META_DEFAULT) + gev.GetDestination(utils.META_DEFAULT)
-	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
-		if item.Value != nil {
-			suppls = (item.Value.([]string))
-		}
-		err = item.Err
-		return suppls, err
-	}
-	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: suppls, Err: err})
-	gev[utils.EVENT_NAME] = utils.CGR_LCR_REQUEST
-	var cd *engine.CallDescriptor
-	cd, err = gev.AsLcrRequest().AsCallDescriptor(smg.Timezone)
-	cd.CgrID = gev.GetCGRID(utils.META_DEFAULT)
-	if err != nil {
-		return
-	}
-	var lcr engine.LCRCost
-	if err = smg.rals.Call("Responder.GetLCR", &engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
-		return
-	}
-	if lcr.HasErrors() {
-		lcr.LogErrors()
-		err = errors.New("LCR_COMPUTE_ERROR")
-		return
-	}
-	suppls, err = lcr.SuppliersSlice()
 	return
 }
 
@@ -1039,7 +1008,6 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection,
 	}
 	params := []reflect.Value{clntVal, reflect.ValueOf(args),
 		reflect.ValueOf(reply)}
-	fmt.Printf("serviceMethod: %s, args: %+v\n", serviceMethod, args)
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return utils.ErrServerError
@@ -1076,17 +1044,6 @@ func (smg *SMGeneric) BiRPCV2GetMaxUsage(clnt rpcclient.RpcClientConnection,
 		return utils.NewErrServerError(err)
 	}
 	*maxUsage = maxUsageDur
-	return nil
-}
-
-/// Returns list of suppliers which can be used for the request
-func (smg *SMGeneric) BiRPCV1GetLCRSuppliers(clnt rpcclient.RpcClientConnection,
-	ev SMGenericEvent, suppliers *[]string) error {
-	if supls, err := smg.GetLCRSuppliers(ev); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*suppliers = supls
-	}
 	return nil
 }
 

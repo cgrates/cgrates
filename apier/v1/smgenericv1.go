@@ -41,11 +41,6 @@ func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.SMGenericEvent, maxUsage 
 	return self.SMG.BiRPCV1GetMaxUsage(nil, ev, maxUsage)
 }
 
-// Returns list of suppliers which can be used for the request
-func (self *SMGenericV1) GetLCRSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	return self.SMG.BiRPCV1GetLCRSuppliers(nil, ev, suppliers)
-}
-
 // Called on session start, returns the maximum number of seconds the session can last
 func (self *SMGenericV1) InitiateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
 	return self.SMG.BiRPCV1InitiateSession(nil, ev, maxUsage)

@@ -171,7 +171,6 @@ func TestSSv1ItAuth(t *testing.T) {
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
 				"Account": "1001", "Destination": "1002",
-				"EventName":   "CgrAuthorization",
 				"OfficeGroup": "Marketing",
 				"OriginID":    "TestSSv1It1",
 				"RequestType": "*prepaid",

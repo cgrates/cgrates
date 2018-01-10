@@ -35,7 +35,6 @@ type SMGenericBiRpcV1 struct {
 func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
 		"SMGenericV1.GetMaxUsage":             self.GetMaxUsage,
-		"SMGenericV1.GetLCRSuppliers":         self.GetLCRSuppliers,
 		"SMGenericV1.InitiateSession":         self.InitiateSession,
 		"SMGenericV1.UpdateSession":           self.UpdateSession,
 		"SMGenericV1.TerminateSession":        self.TerminateSession,
@@ -52,11 +51,6 @@ func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 /// Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *SMGenericBiRpcV1) GetMaxUsage(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
 	return self.sm.BiRPCV1GetMaxUsage(clnt, ev, maxUsage)
-}
-
-/// Returns list of suppliers which can be used for the request
-func (self *SMGenericBiRpcV1) GetLCRSuppliers(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
-	return self.sm.BiRPCV1GetLCRSuppliers(clnt, ev, suppliers)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
