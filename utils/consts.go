@@ -531,6 +531,7 @@ const (
 	AttributeS                   = "AttributeS"
 	MetaSessionS                 = "*sessions"
 	FreeSWITCHAgent              = "FreeSWITCHAgent"
+	SessionS                     = "SessionS"
 )
 
 //Meta

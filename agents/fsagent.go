@@ -259,6 +259,7 @@ func (sm *FSSessionManager) Connect() error {
 		} else {
 			sm.conns[connId] = fSock
 		}
+		utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to FreeSWITCH at: <%s>", utils.FreeSWITCHAgent, connCfg.Address))
 		go func() { // Start reading in own goroutine, return on error
 			if err := sm.conns[connId].ReadEvents(); err != nil {
 				errChan <- err

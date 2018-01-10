@@ -26,7 +26,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -1040,6 +1039,7 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection,
 	}
 	params := []reflect.Value{clntVal, reflect.ValueOf(args),
 		reflect.ValueOf(reply)}
+	fmt.Printf("serviceMethod: %s, args: %+v\n", serviceMethod, args)
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return utils.ErrServerError
@@ -1334,7 +1334,7 @@ type V1AuthorizeReply struct {
 }
 
 // BiRPCV1Authorize performs authorization for CGREvent based on specific components
-func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt *rpc2.Client,
+func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
 	if args.GetMaxUsage {
 		if smg.rals == nil {
@@ -1410,7 +1410,7 @@ type V1InitSessionReply struct {
 }
 
 // BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
-func (smg *SMGeneric) BiRPCv1InitiateSession(clnt *rpc2.Client,
+func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
 	if args.AllocateResources {
 		if smg.resS == nil {
@@ -1469,7 +1469,7 @@ type V1UpdateSessionReply struct {
 }
 
 // BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
-func (smg *SMGeneric) BiRPCv1UpdateSession(clnt *rpc2.Client,
+func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
 	if args.UpdateSession {
 		if smg.rals == nil {
@@ -1513,7 +1513,7 @@ type V1TerminateSessionArgs struct {
 }
 
 // BiRPCV1TerminateSession will stop debit loops as well as release any used resources
-func (smg *SMGeneric) BiRPCv1TerminateSession(clnt *rpc2.Client,
+func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 	args *V1TerminateSessionArgs, rply *string) (err error) {
 	if args.TerminateSession {
 		if smg.rals == nil {
@@ -1547,7 +1547,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt *rpc2.Client,
 }
 
 // Called on session end, should send the CDR to CDRS
-func (smg *SMGeneric) BiRPCv1ProcessCDR(clnt *rpc2.Client,
+func (smg *SMGeneric) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	cgrEv utils.CGREvent, reply *string) error {
 	if err := smg.ProcessCDR(cgrEv.Event); err != nil {
 		return utils.NewErrServerError(err)
@@ -1570,7 +1570,7 @@ type V1ProcessEventReply struct {
 }
 
 // Called on session end, should send the CDR to CDRS
-func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt *rpc2.Client,
+func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
 	if args.AllocateResources {
 		if smg.resS == nil {

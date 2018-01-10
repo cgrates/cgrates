@@ -323,7 +323,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connCfg := range self.RALsThresholdSConns {
-			if connCfg.Address == utils.MetaInternal && !self.UserServerEnabled {
+			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
 				return errors.New("ThresholdS not enabled but requested by RALs component.")
 			}
 		}

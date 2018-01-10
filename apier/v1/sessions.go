@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,12 +36,12 @@ type SessionSv1 struct {
 // Publishes BiJSONRPC methods exported by SessionSv1
 func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		utils.SessionSv1AuthorizeEvent:   ssv1.SMG.BiRPCv1AuthorizeEvent,
-		utils.SessionSv1InitiateSession:  ssv1.SMG.BiRPCv1InitiateSession,
-		utils.SessionSv1UpdateSession:    ssv1.SMG.BiRPCv1UpdateSession,
-		utils.SessionSv1TerminateSession: ssv1.SMG.BiRPCv1TerminateSession,
-		utils.SessionSv1ProcessCDR:       ssv1.SMG.BiRPCv1ProcessCDR,
-		utils.SessionSv1ProcessEvent:     ssv1.SMG.BiRPCv1ProcessEvent,
+		utils.SessionSv1AuthorizeEvent:   ssv1.BiRpcAuthorizeEvent,
+		utils.SessionSv1InitiateSession:  ssv1.BiRpcInitiateSession,
+		utils.SessionSv1UpdateSession:    ssv1.BiRpcUpdateSession,
+		utils.SessionSv1TerminateSession: ssv1.BiRpcTerminateSession,
+		utils.SessionSv1ProcessCDR:       ssv1.BiRpcProcessCDR,
+		utils.SessionSv1ProcessEvent:     ssv1.BiRpcProcessEvent,
 	}
 }
 
@@ -71,4 +72,33 @@ func (ssv1 *SessionSv1) ProcessCDR(cgrEv utils.CGREvent, rply *string) error {
 func (ssv1 *SessionSv1) ProcessEvent(args *sessionmanager.V1ProcessEventArgs,
 	rply *sessionmanager.V1ProcessEventReply) error {
 	return ssv1.SMG.BiRPCv1ProcessEvent(nil, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcAuthorizeEvent(clnt *rpc2.Client, args *sessionmanager.V1AuthorizeArgs,
+	rply *sessionmanager.V1AuthorizeReply) error {
+	return ssv1.SMG.BiRPCv1AuthorizeEvent(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcInitiateSession(clnt *rpc2.Client, args *sessionmanager.V1InitSessionArgs,
+	rply *sessionmanager.V1InitSessionReply) error {
+	return ssv1.SMG.BiRPCv1InitiateSession(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcUpdateSession(clnt *rpc2.Client, args *sessionmanager.V1UpdateSessionArgs,
+	rply *sessionmanager.V1UpdateSessionReply) error {
+	return ssv1.SMG.BiRPCv1UpdateSession(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcTerminateSession(clnt *rpc2.Client, args *sessionmanager.V1TerminateSessionArgs,
+	rply *string) error {
+	return ssv1.SMG.BiRPCv1TerminateSession(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcProcessCDR(clnt *rpc2.Client, cgrEv utils.CGREvent, rply *string) error {
+	return ssv1.SMG.BiRPCv1ProcessCDR(clnt, cgrEv, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcProcessEvent(clnt *rpc2.Client, args *sessionmanager.V1ProcessEventArgs,
+	rply *sessionmanager.V1ProcessEventReply) error {
+	return ssv1.SMG.BiRPCv1ProcessEvent(clnt, args, rply)
 }

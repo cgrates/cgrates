@@ -130,16 +130,16 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 	}
 }
 
-func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, internalSupplierSChan,
+func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, internalSupplierSChan,
 	internalAttrSChan, internalCDRSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
-	utils.Logger.Info("Starting CGRateS SMGeneric service.")
+	utils.Logger.Info("Starting CGRateS Session service.")
 	var err error
 	var ralsConns, resSConns, suplSConns, attrSConns, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SessionSCfg().RALsConns) != 0 {
 		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SessionSCfg().RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RALs: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s", utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
@@ -148,7 +148,7 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 		resSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SessionSCfg().ResSConns, internalResourceSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to ResourceS: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResourceS: %s", utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
@@ -157,7 +157,7 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 		suplSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SessionSCfg().SupplSConns, internalSupplierSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to SupplierS: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SupplierS: %s", utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
@@ -166,7 +166,7 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 		attrSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SessionSCfg().AttrSConns, internalAttrSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to AttributeS: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to AttributeS: %s", utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
@@ -175,21 +175,21 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SessionSCfg().CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RALs: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s", utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
 	}
 	smgReplConns, err := sessionmanager.NewSessionReplicationConns(cfg.SessionSCfg().SessionReplicationConns, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout)
 	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to SMGReplicationConnection error: <%s>", err.Error()))
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMGReplicationConnection error: <%s>", utils.SessionS, err.Error()))
 		exitChan <- true
 		return
 	}
 	sm := sessionmanager.NewSMGeneric(cfg, ralsConns, resSConns, suplSConns,
 		attrSConns, cdrsConn, smgReplConns, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMGeneric> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
 	}
 	// Pass internal connection via BiRPCClient
 	internalSMGChan <- sm
@@ -213,8 +213,8 @@ func startSmGeneric(internalSMGChan, internalRaterChan, internalResourceSChan, i
 	}
 }
 
-func startSMAsterisk(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
-	utils.Logger.Info("Starting CGRateS SM-Asterisk service.")
+func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+	utils.Logger.Info("Starting Asterisk agent")
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
 	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
@@ -292,15 +292,15 @@ func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitCh
 	exitChan <- true
 }
 
-func startSmFreeSWITCH(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startFsAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
-	utils.Logger.Info("Starting CGRateS SM-FreeSWITCH service")
+	utils.Logger.Info("Starting FreeSWITCH agent")
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
 	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
 	sm := agents.NewFSSessionManager(cfg.FsAgentCfg(), birpcClnt, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMFreeSWITCH> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
 	}
 	exitChan <- true
 }
@@ -921,12 +921,12 @@ func main() {
 
 	// Start SM-Generic
 	if cfg.SessionSCfg().Enabled {
-		go startSmGeneric(internalSMGChan, internalRaterChan, internalRsChan,
+		go startSessionS(internalSMGChan, internalRaterChan, internalRsChan,
 			internalSupplierSChan, internalAttributeSChan, internalCdrSChan, server, exitChan)
 	}
 	// Start SM-FreeSWITCH
 	if cfg.FsAgentCfg().Enabled {
-		go startSmFreeSWITCH(internalSMGChan, exitChan)
+		go startFsAgent(internalSMGChan, exitChan)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler(exitChan)
 	}
@@ -942,7 +942,7 @@ func main() {
 	}
 
 	if cfg.AsteriskAgentCfg().Enabled {
-		go startSMAsterisk(internalSMGChan, exitChan)
+		go startAsteriskAgent(internalSMGChan, exitChan)
 	}
 
 	if cfg.DiameterAgentCfg().Enabled {
