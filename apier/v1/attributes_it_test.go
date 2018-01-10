@@ -337,7 +337,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
 	if err := attrSRPC.Call("ApierV1.RemAttributeProfile",
-		&ArgRemoveAttrPrf{Tenant: alsPrf.Tenant, ID: alsPrf.ID, Contexts: alsPrf.Contexts}, &resp); err != nil {
+		&ArgRemoveAttrProfile{Tenant: alsPrf.Tenant, ID: alsPrf.ID, Contexts: alsPrf.Contexts}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
