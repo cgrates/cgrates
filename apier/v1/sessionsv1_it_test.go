@@ -170,7 +170,8 @@ func TestSSv1ItAuth(t *testing.T) {
 			ID:      "TestSSv1ItAuth",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
-				"Account": "1001", "Destination": "1002",
+				"Account":     "1001",
+				"Destination": "1002",
 				"OfficeGroup": "Marketing",
 				"OriginID":    "TestSSv1It1",
 				"RequestType": "*prepaid",
@@ -224,7 +225,8 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 			ID:      "TestSSv1ItInitiateSession",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
-				"Account": "1001", "Destination": "1002",
+				"Account":     "1001",
+				"Destination": "1002",
 				"OfficeGroup": "Marketing",
 				"OriginID":    "TestSSv1It1",
 				"RequestType": "*prepaid",

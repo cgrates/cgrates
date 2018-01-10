@@ -49,19 +49,19 @@
 "sessions": {
 	"enabled": true,
 	"rals_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"cdrs_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"resources_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"suppliers_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"attributes_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"debit_interval": "10s",
 },
@@ -69,9 +69,6 @@
 
 "freeswitch_agent": {
 	"enabled": true,
-	"sessions_conns": [
-		{"address": "*internal"}
-	],
 	"event_socket_conns":[
 		{"address": "10.10.10.204:8021", "password": "ClueCon", "reconnects": 5}
 	],

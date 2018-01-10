@@ -428,14 +428,15 @@ func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 	return lcrReq.AsCallDescriptor(config.CgrConfig().DefaultTimezone)
 }
 
-func (fsev FSEvent) AsMapStringIface() (map[string]interface{}, error) {
-	return nil, utils.ErrNotImplemented
-}
-
 // V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
 func (fsev FSEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
 	args = &sessionmanager.V1AuthorizeArgs{ // defaults
 		GetMaxUsage: true,
+		CGREvent: utils.CGREvent{
+			Tenant: fsev.GetTenant(utils.META_DEFAULT),
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
 	if !has {
@@ -460,6 +461,11 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
 func (fsev FSEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs) {
 	args = &sessionmanager.V1InitSessionArgs{ // defaults
 		InitSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: fsev.GetTenant(utils.META_DEFAULT),
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
 	if !has {
@@ -481,6 +487,11 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs)
 func (fsev FSEvent) V1UpdateSessionArgs() (args *sessionmanager.V1UpdateSessionArgs) {
 	args = &sessionmanager.V1UpdateSessionArgs{ // defaults
 		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: fsev.GetTenant(utils.META_DEFAULT),
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
 	if !has {
@@ -499,6 +510,11 @@ func (fsev FSEvent) V1UpdateSessionArgs() (args *sessionmanager.V1UpdateSessionA
 func (fsev FSEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSessionArgs) {
 	args = &sessionmanager.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: fsev.GetTenant(utils.META_DEFAULT),
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
 	if !has {

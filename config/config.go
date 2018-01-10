@@ -442,7 +442,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.fsAgentCfg.Enabled {
 		for _, connCfg := range self.fsAgentCfg.SessionSConns {
 			if connCfg.Address != utils.MetaInternal {
-				return errors.New("Only <*internal> connectivity allowed in in SMFreeSWITCH towards SMG for now")
+				return errors.New("Only <*internal> connectivity allowed in in FreeSWITCHAgent towards SessionS for now")
 			}
 			if connCfg.Address == utils.MetaInternal &&
 				!self.sessionSCfg.Enabled {
