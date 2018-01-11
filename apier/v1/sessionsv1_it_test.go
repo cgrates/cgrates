@@ -245,6 +245,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 func TestSSv1ItUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessionmanager.V1UpdateSessionArgs{
+		GetAttributes: true,
 		UpdateSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -264,6 +265,29 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1UpdateSession,
 		args, &rply); err != nil {
 		t.Error(err)
+	}
+	eAttrs := &engine.AttrSProcessEventReply{
+		MatchedProfile: "ATTR_ACNT_1001",
+		AlteredFields:  []string{"OfficeGroup"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "TestSSv1ItUpdateSession",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Destination": "1002",
+				"OfficeGroup": "Marketing",
+				"OriginID":    "TestSSv1It1",
+				"RequestType": "*prepaid",
+				"SetupTime":   "2018-01-07T17:00:00Z",
+				"AnswerTime":  "2018-01-07T17:00:10Z",
+				"Usage":       300000000000.0,
+			},
+		},
+	}
+	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
+		t.Errorf("expecting: %+v, received: %+v",
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 	if *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)

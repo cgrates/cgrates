@@ -86,19 +86,6 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if rs.AttributeS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
-			arg.AsCGREvent(), &rplyEv); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
-		} else if err == nil {
-			if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
-				return utils.NewErrAttributeS(err)
-			}
-		}
-	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -134,19 +121,6 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
-	}
-	if rs.AttributeS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
-			arg.AsCGREvent(), &rplyEv); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
-		} else if err == nil {
-			if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
-				return utils.NewErrAttributeS(err)
-			}
-		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
@@ -187,19 +161,6 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
-	}
-	if rs.AttributeS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
-			arg.AsCGREvent(), &rplyEv); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
-		} else if err == nil {
-			if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
-				return utils.NewErrAttributeS(err)
-			}
-		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
@@ -248,19 +209,6 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if rs.AttributeS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
-			arg.AsCGREvent(), &rplyEv); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
-		} else if err == nil {
-			if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
-				return utils.NewErrAttributeS(err)
-			}
-		}
-	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -303,19 +251,6 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if rs.AttributeS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
-			arg.AsCGREvent(), &rplyEv); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
-		} else if err == nil {
-			if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
-				return utils.NewErrAttributeS(err)
-			}
-		}
-	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -350,19 +285,6 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
-	}
-	if rs.AttributeS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
-			arg.AsCGREvent(), &rplyEv); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
-		} else if err == nil {
-			if err = arg.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
-				return utils.NewErrAttributeS(err)
-			}
-		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
@@ -400,19 +322,6 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
-	}
-	if rs.AttributeS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
-			ev.AsCGREvent(), &rplyEv); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
-		} else if err == nil {
-			if err = ev.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
-				return utils.NewErrAttributeS(err)
-			}
-		}
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
@@ -521,19 +430,6 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
-	}
-	if rs.AttributeS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = rs.AttributeS.Call(utils.AttributeSv1ProcessEvent,
-			ev.AsCGREvent(), &rplyEv); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
-		} else if err == nil {
-			if err = ev.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
-				return utils.NewErrAttributeS(err)
-			}
-		}
 	}
 	//utils.Logger.Info(fmt.Sprintf("DC before: %+v", ev))
 	// replace user profile fields

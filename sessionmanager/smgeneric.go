@@ -1275,24 +1275,40 @@ func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientCo
 }
 
 type V1AuthorizeArgs struct {
-	GetMaxUsage        bool
-	AuthorizeResources bool
-	GetSuppliers       bool
 	GetAttributes      bool
+	AuthorizeResources bool
+	GetMaxUsage        bool
+	GetSuppliers       bool
 	utils.CGREvent
 	utils.Paginator
 }
 
 type V1AuthorizeReply struct {
-	MaxUsage           *time.Duration
-	ResourceAllocation *string
-	Suppliers          *engine.SortedSuppliers
 	Attributes         *engine.AttrSProcessEventReply
+	ResourceAllocation *string
+	MaxUsage           *time.Duration
+	Suppliers          *engine.SortedSuppliers
 }
 
 // BiRPCV1Authorize performs authorization for CGREvent based on specific components
 func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
+	if args.GetAttributes {
+		if smg.attrS == nil {
+			return utils.NewErrNotConnected(utils.AttributeS)
+		}
+		if args.CGREvent.Context == nil { // populate if not already in
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
+		}
+		var rplyEv engine.AttrSProcessEventReply
+		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
+			args.CGREvent, &rplyEv); err == nil {
+			args.CGREvent = *rplyEv.CGREvent
+			authReply.Attributes = &rplyEv
+		} else if err.Error() != utils.ErrNotFound.Error() {
+			return utils.NewErrAttributeS(err)
+		}
+	}
 	if args.GetMaxUsage {
 		if smg.rals == nil {
 			return utils.NewErrNotConnected(utils.RALService)
@@ -1336,6 +1352,25 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			authReply.Suppliers = &splsReply
 		}
 	}
+	return nil
+}
+
+type V1InitSessionArgs struct {
+	GetAttributes     bool
+	AllocateResources bool
+	InitSession       bool
+	utils.CGREvent
+}
+
+type V1InitSessionReply struct {
+	Attributes         *engine.AttrSProcessEventReply
+	ResourceAllocation *string
+	MaxUsage           *time.Duration
+}
+
+// BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
+func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
+	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
 	if args.GetAttributes {
 		if smg.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
@@ -1345,30 +1380,13 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
-			args.CGREvent, &rplyEv); err != nil {
+			args.CGREvent, &rplyEv); err == nil {
+			args.CGREvent = *rplyEv.CGREvent
+			rply.Attributes = &rplyEv
+		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
-		authReply.Attributes = &rplyEv
 	}
-	return nil
-}
-
-type V1InitSessionArgs struct {
-	AllocateResources bool
-	InitSession       bool
-	GetAttributes     bool
-	utils.CGREvent
-}
-
-type V1InitSessionReply struct {
-	MaxUsage           *time.Duration
-	ResourceAllocation *string
-	Attributes         *engine.AttrSProcessEventReply
-}
-
-// BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
-func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
-	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
 	if args.AllocateResources {
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)
@@ -1399,35 +1417,39 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			rply.MaxUsage = &maxUsage
 		}
 	}
-	if args.GetAttributes {
-		if smg.attrS == nil {
-			return utils.NewErrNotConnected(utils.AttributeS)
-		}
-		if args.CGREvent.Context == nil {
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
-		}
-		var rplyEv engine.AttrSProcessEventReply
-		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
-			args.CGREvent, &rplyEv); err != nil {
-			return utils.NewErrAttributeS(err)
-		}
-		rply.Attributes = &rplyEv
-	}
 	return
 }
 
 type V1UpdateSessionArgs struct {
+	GetAttributes bool
 	UpdateSession bool
 	utils.CGREvent
 }
 
 type V1UpdateSessionReply struct {
-	MaxUsage *time.Duration
+	Attributes *engine.AttrSProcessEventReply
+	MaxUsage   *time.Duration
 }
 
 // BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
 func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
+	if args.GetAttributes {
+		if smg.attrS == nil {
+			return utils.NewErrNotConnected(utils.AttributeS)
+		}
+		if args.CGREvent.Context == nil { // populate if not already in
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
+		}
+		var rplyEv engine.AttrSProcessEventReply
+		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
+			args.CGREvent, &rplyEv); err == nil {
+			args.CGREvent = *rplyEv.CGREvent
+			rply.Attributes = &rplyEv
+		} else if err.Error() != utils.ErrNotFound.Error() {
+			return utils.NewErrAttributeS(err)
+		}
+	}
 	if args.UpdateSession {
 		if smg.rals == nil {
 			return utils.NewErrNotConnected(utils.RALService)
