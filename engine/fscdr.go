@@ -46,6 +46,7 @@ const (
 	FS_SIP_REQUSER        = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
 	FS_PROGRESS_MEDIAMSEC = "progress_mediamsec"
 	FS_PROGRESSMS         = "progressmsec"
+	FsUsername            = "username"
 )
 
 func NewFSCdr(body []byte, cgrCfg *config.CGRConfig) (*FSCdr, error) {
@@ -122,6 +123,17 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 	return
 }
 
+// firstDefined will return first defined or search for dfltFld
+func (fsCdr FSCdr) firstDefined(fldNames []string, dfltFld string) (val string) {
+	var has bool
+	for _, fldName := range fldNames {
+		if val, has = fsCdr.vars[fldName]; has {
+			return
+		}
+	}
+	return fsCdr.searchExtraField(dfltFld, fsCdr.body)
+}
+
 func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr := new(CDR)
 	storCdr.CGRID = fsCdr.getCGRID(timezone)
@@ -132,8 +144,8 @@ func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
 	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)
 	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_CATEGORY], fsCdr.cgrCfg.DefaultCategory)
-	storCdr.Account = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_ACCOUNT], fsCdr.vars[FS_USERNAME])
-	storCdr.Subject = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_SUBJECT], fsCdr.vars[utils.CGR_ACCOUNT], fsCdr.vars[FS_USERNAME])
+	storCdr.Account = fsCdr.firstDefined([]string{utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
+	storCdr.Subject = fsCdr.firstDefined([]string{utils.CGR_SUBJECT, utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
 	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME], timezone)
