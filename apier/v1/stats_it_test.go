@@ -307,11 +307,11 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
 			&utils.MetricWithParams{
-				MetricID:   "MetricValue",
+				MetricID:   utils.MetaSum,
 				Parameters: "",
 			},
 			&utils.MetricWithParams{
-				MetricID:   "MetricValueTwo",
+				MetricID:   utils.MetaAverage,
 				Parameters: "",
 			},
 		},
