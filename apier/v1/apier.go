@@ -247,9 +247,6 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	} else if !loaded {
 		return utils.ErrNotFound
 	}
-	if err := self.DataManager.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{attrs.RatingPlanId}, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
 	*reply = OK
 	return nil
 }
@@ -261,9 +258,6 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := self.DataManager.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{attrs.KeyId()}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -282,9 +276,6 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := self.DataManager.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{attrs.SharedGroupId}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = OK
@@ -342,24 +333,11 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	for _, prfx := range []string{
 		utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
-		utils.RATING_PLAN_PREFIX,
-		utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
-		utils.ACTION_TRIGGER_PREFIX,
-		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.LCR_PREFIX} {
-		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
-		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
-			return utils.NewErrServerError(err)
-		}
-	}
-	for _, prfx := range []string{
 		utils.ALIASES_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceProfilesPrefix} {
+		utils.REVERSE_ALIASES_PREFIX} {
 		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
@@ -471,9 +449,6 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	if err := self.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.DataManager.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{keyId}, true); err != nil {
-		return
-	}
 	*reply = OK
 	return nil
 }
@@ -556,9 +531,6 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err erro
 	}
 	if err := self.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
-	}
-	if err = self.DataManager.CacheDataFromDB(utils.ACTION_PREFIX, []string{attrs.ActionsId}, true); err != nil {
-		utils.NewErrServerError(err)
 	}
 	*reply = OK
 	return nil
@@ -1815,26 +1787,11 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for _, prfx := range []string{
 		utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
-		utils.RATING_PLAN_PREFIX,
-		utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
-		utils.ACTION_TRIGGER_PREFIX,
-		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceProfilesPrefix,
-		utils.ResourcesPrefix,
-		utils.StatQueuePrefix,
-		utils.StatQueueProfilePrefix,
-		utils.ThresholdPrefix,
-		utils.ThresholdProfilePrefix,
-		utils.FilterPrefix,
-		utils.SupplierProfilePrefix,
-		utils.AttributeProfilePrefix} {
+		utils.REVERSE_ALIASES_PREFIX} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)

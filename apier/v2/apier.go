@@ -52,9 +52,6 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 	if err := dbReader.LoadRatingProfilesFiltered(tpRpf); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataManager.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{attrs.RatingProfileId}, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
 	*reply = v1.OK
 	return nil
 }
@@ -170,26 +167,11 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for _, prfx := range []string{
 		utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
-		utils.RATING_PLAN_PREFIX,
-		utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
-		utils.ACTION_TRIGGER_PREFIX,
-		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX,
-		utils.ResourceProfilesPrefix,
-		utils.ResourcesPrefix,
-		utils.StatQueuePrefix,
-		utils.StatQueueProfilePrefix,
-		utils.ThresholdPrefix,
-		utils.ThresholdProfilePrefix,
-		utils.FilterPrefix,
-		utils.SupplierProfilePrefix,
-		utils.SupplierProfilePrefix} {
+		utils.REVERSE_ALIASES_PREFIX} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
@@ -380,9 +362,6 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 	}
 	if err := self.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
-	}
-	if err := self.DataManager.CacheDataFromDB(utils.ACTION_PREFIX, []string{attrs.ActionsId}, true); err != nil {
-		utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil

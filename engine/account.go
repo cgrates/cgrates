@@ -153,7 +153,6 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	// modify if necessary the shared groups here
 	if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-			sgs := make([]string, len(balance.SharedGroups))
 			i := 0
 			for sgID := range balance.SharedGroups {
 				// add shared group member
@@ -173,7 +172,6 @@ func (acc *Account) setBalanceAction(a *Action) error {
 				}
 				i++
 			}
-			dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
 			return 0, nil
 		}, 0, balance.SharedGroups.Slice()...)
 		if err != nil {
