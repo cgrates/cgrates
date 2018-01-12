@@ -1004,6 +1004,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	filters := bson.M{
 		CGRIDLow:       bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
 		RunIDLow:       bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
+		OriginIDLow:    bson.M{"$in": qryFltr.OriginIDs, "$nin": qryFltr.NotOriginIDs},
 		OrderIDLow:     bson.M{"$gte": qryFltr.OrderIDStart, "$lt": qryFltr.OrderIDEnd},
 		ToRLow:         bson.M{"$in": qryFltr.ToRs, "$nin": qryFltr.NotToRs},
 		CDRHostLow:     bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},

@@ -868,6 +868,12 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if len(qryFltr.NotRunIDs) != 0 {
 		q = q.Where("run_id not in (?)", qryFltr.NotRunIDs)
 	}
+	if len(qryFltr.OriginIDs) != 0 {
+		q = q.Where("origin_id in (?)", qryFltr.OriginIDs)
+	}
+	if len(qryFltr.NotOriginIDs) != 0 {
+		q = q.Where("origin_id not in (?)", qryFltr.NotOriginIDs)
+	}
 	if len(qryFltr.ToRs) != 0 {
 		q = q.Where("tor in (?)", qryFltr.ToRs)
 	}
