@@ -222,16 +222,6 @@ func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
 		sm.disconnectSession(connId, chanUUID, "", utils.ErrServerError.Error())
 		return
 	}
-	if initSessionArgs.InitSession && *initReply.MaxUsage == time.Duration(-1*time.Second) {
-		if _, err := sm.conns[connId].SendApiCmd(
-			fmt.Sprintf("uuid_setvar %s %s false\n\n", fsev.GetUUID(), CGRSessionS)); err != nil {
-			utils.Logger.Err(
-				fmt.Sprintf("<%s> error %s setting channel variabile: %s",
-					utils.FreeSWITCHAgent, err.Error(), CGRSessionS))
-			sm.disconnectSession(connId, chanUUID, "", utils.ErrServerError.Error())
-			return
-		}
-	}
 	if initSessionArgs.AllocateResources {
 		if initReply.ResourceAllocation == nil {
 			sm.disconnectSession(connId, chanUUID, "",
@@ -245,12 +235,14 @@ func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string)
 		return
 	}
 	var reply string
-	if err := sm.smg.Call(utils.SessionSv1TerminateSession,
-		fsev.V1TerminateSessionArgs(), &reply); err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<SM-FreeSWITCH> Could not terminate session with event %s, error: %s",
-				fsev.GetUUID(), err.Error()))
-		return
+	if fsev[VarAnswerEpoch] != "0" { // call was answered
+		if err := sm.smg.Call(utils.SessionSv1TerminateSession,
+			fsev.V1TerminateSessionArgs(), &reply); err != nil {
+			utils.Logger.Err(
+				fmt.Sprintf("<SM-FreeSWITCH> Could not terminate session with event %s, error: %s",
+					fsev.GetUUID(), err.Error()))
+			return
+		}
 	}
 	if sm.cfg.CreateCdr {
 		cdr := fsev.AsCDR(sm.timezone)

@@ -399,6 +399,14 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
 			return nil, nil
 		}
 		stopDebitChan := make(chan struct{})
+		if len(sessionRuns) == 0 { // no sessions need to be created, this will be a placeholder for further updates
+			s := &SMGSession{CGRID: cgrID, EventStart: evStart,
+				RunID: utils.META_NONE, Timezone: smg.Timezone,
+				rals: smg.rals, cdrsrv: smg.cdrsrv,
+				clntConn: clntConn}
+			smg.recordASession(s)
+			return nil, nil
+		}
 		for _, sessionRun := range sessionRuns {
 			s := &SMGSession{CGRID: cgrID, EventStart: evStart,
 				RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
@@ -429,6 +437,9 @@ func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss[cgrID] {
+			if s.RunID == utils.META_NONE {
+				continue
+			}
 			s.TotalUsage = usage // save final usage as totalUsage
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
@@ -767,6 +778,10 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	}
 	defer smg.replicateSessionsWithID(gev.GetCGRID(utils.META_DEFAULT), false, smg.smgReplConns)
 	for _, s := range aSessions[cgrID] {
+		if s.RunID == utils.META_NONE {
+			maxUsage = time.Duration(-1 * time.Second)
+			continue
+		}
 		var maxDur time.Duration
 		if maxDur, err = s.debit(maxUsage, lastUsed); err != nil {
 			return

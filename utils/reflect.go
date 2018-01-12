@@ -83,7 +83,7 @@ func StringToInterface(s string) interface{} {
 	return s
 }
 
-// ReflectFieldInterface parses intf attepting to return the field as string or error otherwise
+// ReflectFieldInterface parses intf attepting to return the field value or error otherwise
 // Supports "ExtraFields" where additional fields are dynamically inserted in map with field name: extraFieldsLabel
 func ReflectFieldInterface(intf interface{}, fldName, extraFieldsLabel string) (retIf interface{}, err error) {
 	v := reflect.ValueOf(intf)
@@ -144,6 +144,18 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 	default:
 		return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
 	}
+}
+
+func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
+	switch itm.(type) {
+	case time.Time:
+		return itm.(time.Time), nil
+	case string:
+		return ParseTimeDetectLayout(itm.(string), timezone)
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to time.Time", itm)
+	}
+	return
 }
 
 // AsMapStringIface converts an item (mostly struct) as map[string]interface{}

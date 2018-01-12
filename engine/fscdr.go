@@ -47,6 +47,7 @@ const (
 	FS_PROGRESS_MEDIAMSEC = "progress_mediamsec"
 	FS_PROGRESSMS         = "progressmsec"
 	FsUsername            = "username"
+	FsIPv4                = "FreeSWITCH-IPv4"
 )
 
 func NewFSCdr(body []byte, cgrCfg *config.CGRConfig) (*FSCdr, error) {
@@ -71,9 +72,8 @@ type FSCdr struct {
 	body   map[string]interface{} // keeps the loaded body for extra field search
 }
 
-func (fsCdr FSCdr) getCGRID(timezone string) string {
-	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone)
-	return utils.Sha1(fsCdr.vars[FS_UUID], setupTime.UTC().String())
+func (fsCdr FSCdr) getCGRID() string {
+	return utils.Sha1(fsCdr.vars[FS_UUID], fsCdr.vars[FsIPv4])
 }
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
@@ -136,7 +136,7 @@ func (fsCdr FSCdr) firstDefined(fldNames []string, dfltFld string) (val string) 
 
 func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr := new(CDR)
-	storCdr.CGRID = fsCdr.getCGRID(timezone)
+	storCdr.CGRID = fsCdr.getCGRID()
 	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsCdr.vars[FS_UUID]
 	storCdr.OriginHost = fsCdr.vars[FS_IP]

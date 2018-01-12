@@ -495,9 +495,6 @@ func TestParseEventValue(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
-	if cgrid := ev.ParseEventValue(&utils.RSRField{Id: utils.CGRID}, ""); cgrid != "164b0422fdc6a5117031b427439482c6a4f90e41" {
-		t.Error("Unexpected cgrid parsed", cgrid)
-	}
 	if tor := ev.ParseEventValue(&utils.RSRField{Id: utils.TOR}, ""); tor != utils.VOICE {
 		t.Error("Unexpected tor parsed", tor)
 	}
@@ -565,7 +562,7 @@ func TestFsEvAsCDR(t *testing.T) {
 	ev := NewFSEvent(hangupEv)
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
-	eStoredCdr := &engine.CDR{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
+	eStoredCdr := &engine.CDR{
 		ToR: utils.VOICE, OriginID: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad",
 		OriginHost: "10.0.3.15", Source: "FS_CHANNEL_HANGUP_COMPLETE", RequestType: utils.META_PREPAID,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",

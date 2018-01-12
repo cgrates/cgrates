@@ -418,7 +418,7 @@ func TestFsCdrCDRFields(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1515666344", "")
 	answerTime, _ := utils.ParseTimeDetectLayout("1515666347", "")
 	expctCDR := &CDR{
-		CGRID: "e4618356eb77efdd5eee315e5b351f9eb2822569",
+		CGRID: "24b5766be325fa751fab5a0a06373e106f33a257",
 		ToR:   utils.VOICE, OriginID: "3da8bf84-c133-4959-9e24-e72875cb33a1",
 		OriginHost: "10.10.10.204", Source: "freeswitch_json", Category: "call",
 		RequestType: utils.META_RATED, Tenant: "cgrates.org",

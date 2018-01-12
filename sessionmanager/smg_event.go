@@ -137,16 +137,14 @@ func (self SMGenericEvent) GetSetupTime(fieldName, timezone string) (time.Time, 
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.SetupTime
 	}
-	result, _ := utils.CastFieldIfToString(self[fieldName])
-	return utils.ParseTimeDetectLayout(result, timezone)
+	return utils.IfaceAsTime(self[fieldName], timezone)
 }
 
 func (self SMGenericEvent) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.AnswerTime
 	}
-	result, _ := utils.CastFieldIfToString(self[fieldName])
-	return utils.ParseTimeDetectLayout(result, timezone)
+	return utils.IfaceAsTime(self[fieldName], timezone)
 }
 
 func (self SMGenericEvent) GetEndTime(fieldName, timezone string) (time.Time, error) {

@@ -33,9 +33,6 @@ import (
 
 // ToDo: Introduce support for RSRFields
 
-// Event type holding a mapping of all event's proprieties
-type FSEvent map[string]string
-
 const (
 	// Freswitch event proprities names
 	DIRECTION                = "Call-Direction"
@@ -75,12 +72,18 @@ const (
 	SubSResourceS            = "resources"
 	SubSAttributeS           = "attributes"
 	CGRResourceAllocation    = "cgr_resource_allocation"
-	CGRSessionS              = "cgr_sessions"
-	VarCGRSessionS           = "variable_" + CGRSessionS
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
 	FsConnID                 = "FsConnID" // used to share connID info in event
+	VarAnswerEpoch           = "variable_answer_epoch"
 )
+
+func NewFSEvent(strEv string) (fsev FSEvent) {
+	return fsock.FSEventStrToMap(strEv, nil)
+}
+
+// Event type holding a mapping of all event's proprieties
+type FSEvent map[string]string
 
 // Nice printing for the event object.
 func (fsev FSEvent) String() (result string) {
@@ -89,10 +92,6 @@ func (fsev FSEvent) String() (result string) {
 	}
 	result += "=============================================================="
 	return
-}
-
-func NewFSEvent(strEv string) (fsev FSEvent) {
-	return fsock.FSEventStrToMap(strEv, nil)
 }
 
 func (fsev FSEvent) GetName() string {
@@ -142,10 +141,6 @@ func (fsev FSEvent) GetCategory(fieldName string) string {
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CATEGORY], config.CgrConfig().DefaultCategory)
-}
-func (fsev FSEvent) GetCgrId(timezone string) string {
-	setupTime, _ := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
-	return utils.Sha1(fsev[UUID], setupTime.UTC().String())
 }
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
@@ -282,8 +277,6 @@ func (fsev FSEvent) GetExtraFields() map[string]string {
 // Used in derived charging and sittuations when we need to run regexp on fields
 func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
 	switch rsrFld.Id {
-	case utils.CGRID:
-		return rsrFld.ParseValue(fsev.GetCgrId(timezone))
 	case utils.TOR:
 		return rsrFld.ParseValue(utils.VOICE)
 	case utils.OriginID:
@@ -337,7 +330,6 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 
 func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
-	storCdr.CGRID = fsev.GetCgrId(timezone)
 	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsev.GetUUID()
 	storCdr.OriginHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
@@ -356,18 +348,9 @@ func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
 	return storCdr
 }
 
-func (fsev FSEvent) ComputeLcr() bool {
-	if computeLcr, err := strconv.ParseBool(fsev[VAR_CGR_CMPUTELCR]); err != nil {
-		return false
-	} else {
-		return computeLcr
-	}
-}
-
 // Used with RLs
 func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{} {
 	mp := make(map[string]interface{})
-	mp[utils.CGRID] = fsev.GetCgrId(timezone)
 	mp[utils.TOR] = utils.VOICE
 	mp[utils.OriginID] = fsev.GetUUID()
 	mp[utils.OriginHost] = fsev.GetOriginatorIP(utils.META_DEFAULT)
@@ -387,23 +370,6 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.META_DEFAULT)
 	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.META_DEFAULT)
 	return mp
-}
-
-// Converts into CallDescriptor due to responder interface needs
-func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
-	lcrReq := &engine.LcrRequest{
-
-		Direction:   fsev.GetDirection(utils.META_DEFAULT),
-		Tenant:      fsev.GetTenant(utils.META_DEFAULT),
-		Category:    fsev.GetCategory(utils.META_DEFAULT),
-		Account:     fsev.GetAccount(utils.META_DEFAULT),
-		Subject:     fsev.GetSubject(utils.META_DEFAULT),
-		Destination: fsev.GetDestination(utils.META_DEFAULT),
-		SetupTime:   utils.FirstNonEmpty(fsev[SETUP_TIME], fsev[ANSWER_TIME]),
-		Duration:    fsev[DURATION],
-		ExtraFields: fsev.GetExtraFields(),
-	}
-	return lcrReq.AsCallDescriptor(config.CgrConfig().DefaultTimezone)
 }
 
 // V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
@@ -471,9 +437,11 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSe
 			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
 		},
 	}
-	subsystems, hasSubsystems := fsev[VarCGRSubsystems]
-	if (hasSubsystems && strings.Index(subsystems, SubSAccountS) == -1) ||
-		fsev[VarCGRSessionS] == "false" {
+	subsystems, has := fsev[VarCGRSubsystems]
+	if !has {
+		return
+	}
+	if strings.Index(subsystems, SubSAccountS) == -1 {
 		args.TerminateSession = false
 	}
 	if strings.Index(subsystems, SubSResourceS) != -1 {
