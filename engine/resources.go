@@ -549,6 +549,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 			ID:     args.UsageID,
 			Units:  args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
+			err = utils.ErrResourceUnauthorized
 			cache.Set(utils.EventResourcesPrefix+args.UsageID, nil, true, "")
 			return
 		}
@@ -574,7 +575,10 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	alcMsg, err := mtcRLs.allocateResource(
 		&ResourceUsage{Tenant: args.CGREvent.Tenant, ID: args.UsageID, Units: args.Units}, false)
 	if err != nil {
-		return err
+		if err == utils.ErrResourceUnavailable {
+			err = utils.ErrResourceUnalocated
+		}
+		return
 	}
 
 	// index it for matching out of cache
