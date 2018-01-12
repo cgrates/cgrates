@@ -396,19 +396,14 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
 			evStart.AsCDR(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
 			return nil, err
 		} else if len(sessionRuns) == 0 {
-			return nil, nil
-		}
-		stopDebitChan := make(chan struct{})
-		if len(sessionRuns) == 0 { // no sessions need to be created, this will be a placeholder for further updates
-			fmt.Printf("Starting *none session")
 			s := &SMGSession{CGRID: cgrID, EventStart: evStart,
 				RunID: utils.META_NONE, Timezone: smg.Timezone,
 				rals: smg.rals, cdrsrv: smg.cdrsrv,
 				clntConn: clntConn}
 			smg.recordASession(s)
-			fmt.Printf("activeSessins: %s\n", utils.ToJSON(smg.aSessionsIndex))
 			return nil, nil
 		}
+		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
 			s := &SMGSession{CGRID: cgrID, EventStart: evStart,
 				RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
