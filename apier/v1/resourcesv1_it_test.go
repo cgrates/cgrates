@@ -371,7 +371,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK { // already 3 usages active before allow call, we should have now more than allowed
+	} else if reply != "ResGroup1" { // already 3 usages active before allow call, we should have now more than allowed
 		t.Error("Unexpected reply returned", reply)
 	}
 	argsRU = utils.ArgRSv1ResourceUsage{
@@ -383,13 +383,11 @@ func testV1RsAuthorizeResources(t *testing.T) {
 				"Subject":     "1001",
 				"Destination": "1002"},
 		},
-
 		Units: 7,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
+		argsRU, &reply); err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
-	} else if reply != "" { // already 3 usages active before allow call, we should have now more than allowed
-		t.Error("Unexpected reply returned", reply)
 	}
 }
 
@@ -424,7 +422,7 @@ func testV1RsReleaseResource(t *testing.T) {
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
+	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var rs *engine.Resources

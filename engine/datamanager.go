@@ -280,10 +280,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 	if err = dm.dataDB.SetStoredStatQueueDrv(ssq); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.StatQueuePrefix, []string{sq.TenantID()}, true); err != nil {
-		return
-	}
-	return
+	return dm.CacheDataFromDB(utils.StatQueuePrefix, []string{sq.TenantID()}, true)
 }
 
 // RemStatQueue removes the StoredStatQueue and clears the cache for StatQueue
@@ -321,10 +318,7 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 	if err = dm.DataDB().SetFilterDrv(fltr); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.FilterPrefix, []string{fltr.TenantID()}, true); err != nil {
-		return
-	}
-	return
+	return dm.CacheDataFromDB(utils.FilterPrefix, []string{fltr.TenantID()}, true)
 }
 
 func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error) {
@@ -553,10 +547,8 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 	if err = dm.DataDB().SetTimingDrv(t); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.TimingsPrefix, []string{t.ID}, true); err != nil {
-		return
-	}
-	return
+	return dm.CacheDataFromDB(utils.TimingsPrefix, []string{t.ID}, true)
+
 }
 
 func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
@@ -713,14 +705,10 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 }
 
 func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers, transactionID string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
-		if err = dm.DataDB().SetActionTriggersDrv(key, attr); err != nil {
-			cache.RemKey(utils.ACTION_TRIGGER_PREFIX+key, cacheCommit(transactionID), transactionID)
-		}
+	if err = dm.DataDB().SetActionTriggersDrv(key, attr); err != nil {
 		return
-	} else {
-		return dm.DataDB().SetActionTriggersDrv(key, attr)
 	}
+	return dm.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{key}, true)
 }
 
 func (dm *DataManager) GetSharedGroup(key string, skipCache bool, transactionID string) (sg *SharedGroup, err error) {
@@ -748,10 +736,7 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup, transactionID string) (er
 	if err = dm.DataDB().SetSharedGroupDrv(sg); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{sg.Id}, true); err != nil {
-		return
-	}
-	return
+	return dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{sg.Id}, true)
 }
 
 func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
@@ -787,10 +772,7 @@ func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
 	if err = dm.DataDB().SetLCRDrv(lcr); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.LCR_PREFIX, []string{lcr.GetId()}, true); err != nil {
-		return
-	}
-	return
+	return dm.CacheDataFromDB(utils.LCR_PREFIX, []string{lcr.GetId()}, true)
 }
 
 func (dm *DataManager) RemoveLCR(id, transactionID string) (err error) {
@@ -858,10 +840,7 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 	if err = dm.DataDB().SetActionsDrv(key, as); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{key}, true); err != nil {
-		return
-	}
-	return
+	return dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{key}, true)
 }
 
 func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
@@ -897,10 +876,7 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 	if err = dm.DataDB().SetRatingPlanDrv(rp); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, true); err != nil {
-		return
-	}
-	return
+	return dm.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, true)
 }
 
 func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err error) {
@@ -937,10 +913,7 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile, transactionID string
 	if err = dm.DataDB().SetRatingProfileDrv(rpf); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, true); err != nil {
-		return
-	}
-	return
+	return dm.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, true)
 }
 
 func (dm *DataManager) RemoveRatingProfile(key string, transactionID string) (err error) {
