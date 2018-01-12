@@ -331,7 +331,7 @@ const (
 	UpdatedAt                    = "UpdatedAt"
 	HandlerArgSep                = "|"
 	FlagForceDuration            = "fd"
-	InstanceID                   = "InstanceID"
+	NodeID                       = "NodeID"
 	ActiveGoroutines             = "ActiveGoroutines"
 	SessionTTL                   = "SessionTTL"
 	SessionTTLMaxDelay           = "SessionTTLMaxDelay"

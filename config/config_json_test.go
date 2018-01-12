@@ -38,7 +38,7 @@ func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
 
 func TestDfGeneralJsonCfg(t *testing.T) {
 	eCfg := &GeneralJsonCfg{
-		Instance_id:          utils.StringPointer(""),
+		Node_id:              utils.StringPointer(""),
 		Logger:               utils.StringPointer(utils.MetaSysLog),
 		Log_level:            utils.IntPointer(utils.LOGLEVEL_INFO),
 		Http_skip_tls_verify: utils.BoolPointer(false),

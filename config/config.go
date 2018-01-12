@@ -66,7 +66,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
 	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
-	cfg.InstanceID = utils.GenUUID()
+	cfg.NodeID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SmGenericConfig = new(SmGenericConfig)
 	cfg.cacheConfig = make(CacheConfig)
@@ -183,7 +183,7 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	InstanceID               string // Identifier for this engine instance
+	NodeID                   string // Identifier for this engine instance
 	DataDbType               string
 	DataDbHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	DataDbPort               string // The port to bind to.
@@ -780,8 +780,8 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnGeneralCfg != nil {
-		if jsnGeneralCfg.Instance_id != nil && *jsnGeneralCfg.Instance_id != "" {
-			self.InstanceID = *jsnGeneralCfg.Instance_id
+		if jsnGeneralCfg.Node_id != nil && *jsnGeneralCfg.Node_id != "" {
+			self.NodeID = *jsnGeneralCfg.Node_id
 		}
 		if jsnGeneralCfg.Logger != nil {
 			self.Logger = *jsnGeneralCfg.Logger
