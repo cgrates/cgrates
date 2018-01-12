@@ -45,6 +45,17 @@ func (apierV1 *ApierV1) SetStatQueueProfile(sqp *engine.StatQueueProfile, reply 
 	if err := apierV1.DataManager.SetStatQueueProfile(sqp, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	metrics := make(map[string]engine.StatMetric)
+	for _, metricwithparam := range sqp.Metrics {
+		if metric, err := engine.NewStatMetric(metricwithparam.MetricID, sqp.MinItems, metricwithparam.Parameters); err != nil {
+			return utils.APIErrorHandler(err)
+		} else {
+			metrics[metricwithparam.MetricID] = metric
+		}
+	}
+	if err := apierV1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: sqp.Tenant, ID: sqp.ID, SQMetrics: metrics}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = utils.OK
 	return nil
 }

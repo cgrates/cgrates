@@ -431,6 +431,8 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			return
 		}
 	}
+	cache.RemPrefixKey(utils.ThresholdStringIndex, true, utils.NonTransactional)
+	cache.RemPrefixKey(utils.ThresholdStringRevIndex, true, utils.NonTransactional)
 	return
 }
 
@@ -486,7 +488,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			var fltr *Filter
 			if fltr, err = dm.GetFilter(sqp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, sqp)
+					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v", fltrID, sqp)
 				}
 				return
 			}
@@ -500,13 +502,14 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 					}
 				}
 			}
-
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), sqp.ID)
 		}
 		if err = indexer.StoreIndexes(); err != nil {
 			return
 		}
 	}
+	cache.RemPrefixKey(utils.StatQueuesStringIndex, true, utils.NonTransactional)
+	cache.RemPrefixKey(utils.StatQueuesStringRevIndex, true, utils.NonTransactional)
 	return
 }
 
@@ -1183,6 +1186,9 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			}
 		}
 	}
+
+	cache.RemPrefixKey(utils.AttributeProfilesStringIndex, true, utils.NonTransactional)
+	cache.RemPrefixKey(utils.AttributeProfilesStringRevIndex, true, utils.NonTransactional)
 	return
 }
 

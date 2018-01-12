@@ -83,6 +83,10 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
+		for _, fltr22 := range f.RequestFilters {
+			strVal, _ := utils.ReflectFieldAsString(ev, fltr22.FieldName, "")
+		}
+
 		for _, fltr := range f.RequestFilters {
 			switch fltr.Type {
 			case MetaString:

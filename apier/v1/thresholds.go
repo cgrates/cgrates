@@ -79,6 +79,9 @@ func (apierV1 *ApierV1) SetThresholdProfile(thp *engine.ThresholdProfile, reply 
 	if err := apierV1.DataManager.SetThresholdProfile(thp, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	if err := apierV1.DataManager.SetThreshold(&engine.Threshold{Tenant: thp.Tenant, ID: thp.ID}); err != nil {
+		return err
+	}
 	*reply = utils.OK
 	return nil
 }

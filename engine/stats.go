@@ -169,6 +169,7 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQ
 		if err != nil {
 			return nil, err
 		}
+
 		if sqPrfl.Stored && s.dirty == nil {
 			s.dirty = utils.BoolPointer(false)
 		}

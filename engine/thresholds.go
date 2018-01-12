@@ -216,12 +216,16 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 func (tS *ThresholdService) matchingThresholdsForEvent(ev *utils.CGREvent) (ts Thresholds, err error) {
 	matchingTs := make(map[string]*Threshold)
 	tIDs, err := matchingItemIDsForEvent(ev.Event, tS.indexedFields, tS.dm, utils.ThresholdStringIndex+ev.Tenant)
+	for _, itm := range tIDs {
+	}
 	if err != nil {
 		return nil, err
 	}
+
 	lockIDs := utils.PrefixSliceItems(tIDs.Slice(), utils.ThresholdStringIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
+
 	for tID := range tIDs {
 		tPrfl, err := tS.dm.GetThresholdProfile(ev.Tenant, tID, false, utils.NonTransactional)
 		if err != nil {
@@ -234,11 +238,13 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *utils.CGREvent) (ts T
 			!tPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
+
 		if pass, err := tS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, tPrfl.FilterIDs); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
 		}
+
 		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
 		if err != nil {
 			return nil, err
