@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -87,6 +88,30 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 	return
 }
 
+func (rfi *ReqFilterIndexer) cacheRemItemType() {
+	switch rfi.itemType {
+	case utils.ThresholdProfilePrefix:
+		cache.RemPrefixKey(utils.ThresholdStringIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ThresholdStringRevIndex, true, utils.NonTransactional)
+
+	case utils.ResourceProfilesPrefix:
+		cache.RemPrefixKey(utils.ResourceProfilesStringIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ResourceProfilesStringRevIndex, true, utils.NonTransactional)
+
+	case utils.StatQueueProfilePrefix:
+		cache.RemPrefixKey(utils.StatQueuesStringIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.StatQueuesStringRevIndex, true, utils.NonTransactional)
+
+	case utils.SupplierProfilePrefix:
+		cache.RemPrefixKey(utils.SupplierProfilesStringIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.SupplierProfilesStringRevIndex, true, utils.NonTransactional)
+
+	case utils.AttributeProfilePrefix:
+		cache.RemPrefixKey(utils.AttributeProfilesStringIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.AttributeProfilesStringRevIndex, true, utils.NonTransactional)
+	}
+}
+
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
 	if err = rfi.dm.SetFilterIndexes(
@@ -94,9 +119,13 @@ func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
 		rfi.indexes); err != nil {
 		return
 	}
-	return rfi.dm.SetFilterReverseIndexes(
+	if err = rfi.dm.SetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		rfi.reveseIndex)
+		rfi.reveseIndex); err != nil {
+		return
+	}
+	rfi.cacheRemItemType()
+	return
 }
 
 //Populate the ReqFilterIndexer.reveseIndex for specifil itemID
