@@ -990,6 +990,32 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.DataManager.CacheDataFromDB(utils.FilterPrefix, dataIDs, true); err != nil {
 		return
 	}
+	// SupplierProfile
+	dataIDs = make([]string, 0)
+	if attrs.SupplierProfileIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.SupplierProfileIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.SupplierProfileIDs))
+		for idx, dId := range *attrs.SupplierProfileIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataManager.CacheDataFromDB(utils.SupplierProfilePrefix, dataIDs, true); err != nil {
+		return
+	}
+	// AttributeProfile
+	dataIDs = make([]string, 0)
+	if attrs.AttributeProfileIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.AttributeProfileIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.AttributeProfileIDs))
+		for idx, dId := range *attrs.AttributeProfileIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataManager.CacheDataFromDB(utils.AttributeProfilePrefix, dataIDs, true); err != nil {
+		return
+	}
 
 	*reply = utils.OK
 	return nil
