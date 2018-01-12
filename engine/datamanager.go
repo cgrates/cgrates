@@ -964,7 +964,6 @@ func (dm *DataManager) GetFilterIndexes(dbKey string, fldNameVal map[string]stri
 }
 
 func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]utils.StringMap) (err error) {
-
 	return dm.DataDB().SetFilterIndexesDrv(dbKey, indexes)
 }
 
@@ -1187,7 +1186,6 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			}
 		}
 	}
-
 	cache.RemPrefixKey(utils.AttributeProfilesStringIndex, true, utils.NonTransactional)
 	cache.RemPrefixKey(utils.AttributeProfilesStringRevIndex, true, utils.NonTransactional)
 	return

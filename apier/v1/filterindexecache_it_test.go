@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	// "flag"
 	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
