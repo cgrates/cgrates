@@ -532,6 +532,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
 func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
+	var alcMessage string
 	if missing := utils.MissingStructFields(&args, []string{"CGREvent.Tenant", "UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -542,19 +543,17 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 		}
 		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
 	}
-	if _, err = mtcRLs.allocateResource(
+	if alcMessage, err = mtcRLs.allocateResource(
 		&ResourceUsage{
 			Tenant: args.CGREvent.Tenant,
 			ID:     args.UsageID,
 			Units:  args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			cache.Set(utils.EventResourcesPrefix+args.UsageID, nil, true, "")
-			err = nil
-			return // not error but still not allowed
+			return
 		}
-		return err
 	}
-	*reply = utils.OK
+	*reply = alcMessage
 	return
 }
 
