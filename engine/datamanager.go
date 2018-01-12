@@ -906,7 +906,6 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool, transactionI
 	}
 	cache.Set(cachekey, rpf, cacheCommit(transactionID), transactionID)
 	return
-
 }
 
 func (dm *DataManager) SetRatingProfile(rpf *RatingProfile, transactionID string) (err error) {

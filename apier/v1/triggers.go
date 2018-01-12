@@ -517,9 +517,6 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	if err = self.DataManager.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = self.DataManager.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{attr.GroupID}, true); err != nil {
-		return
-	}
 	//no cache for action triggers
 	*reply = utils.OK
 	return
