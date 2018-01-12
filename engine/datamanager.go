@@ -745,26 +745,21 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool, transactionID 
 }
 
 func (dm *DataManager) SetSharedGroup(sg *SharedGroup, transactionID string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
-		if err = dm.DataDB().SetSharedGroupDrv(sg); err != nil {
-			cache.RemKey(utils.SHARED_GROUP_PREFIX+sg.Id, cacheCommit(transactionID), transactionID)
-		}
+	if err = dm.DataDB().SetSharedGroupDrv(sg); err != nil {
 		return
-	} else {
-		return dm.DataDB().SetSharedGroupDrv(sg)
 	}
+	if err = dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, []string{sg.Id}, true); err != nil {
+		return
+	}
+	return
 }
 
 func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
-		if err = dm.DataDB().RemoveSharedGroupDrv(id, transactionID); err != nil {
-			return
-		}
-		cache.RemKey(utils.SHARED_GROUP_PREFIX+id, cacheCommit(transactionID), transactionID)
+	if err = dm.DataDB().RemoveSharedGroupDrv(id, transactionID); err != nil {
 		return
-	} else {
-		return dm.DataDB().RemoveSharedGroupDrv(id, transactionID)
 	}
+	cache.RemKey(utils.SHARED_GROUP_PREFIX+id, cacheCommit(transactionID), transactionID)
+	return
 }
 
 func (dm *DataManager) GetLCR(id string, skipCache bool, transactionID string) (lcr *LCR, err error) {
