@@ -222,7 +222,6 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *utils.CGREvent) (ts T
 	lockIDs := utils.PrefixSliceItems(tIDs.Slice(), utils.ThresholdStringIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
-
 	for tID := range tIDs {
 		tPrfl, err := tS.dm.GetThresholdProfile(ev.Tenant, tID, false, utils.NonTransactional)
 		if err != nil {
