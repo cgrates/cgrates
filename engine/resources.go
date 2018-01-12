@@ -575,9 +575,6 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	alcMsg, err := mtcRLs.allocateResource(
 		&ResourceUsage{Tenant: args.CGREvent.Tenant, ID: args.UsageID, Units: args.Units}, false)
 	if err != nil {
-		if err == utils.ErrResourceUnavailable {
-			err = utils.ErrResourceUnalocated
-		}
 		return
 	}
 
