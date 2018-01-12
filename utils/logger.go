@@ -27,10 +27,11 @@ import (
 )
 
 var Logger LoggerInterface
+var nodeID string
 
 func init() {
 	if Logger == nil || reflect.ValueOf(Logger).IsNil() {
-		err := Newlogger(MetaSysLog)
+		err := Newlogger(MetaSysLog, nodeID)
 		if err != nil {
 			Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 		}
@@ -38,11 +39,12 @@ func init() {
 }
 
 //functie Newlogger (logger type)
-func Newlogger(loggertype string) (err error) {
+func Newlogger(loggertype, id string) (err error) {
 	Logger = new(StdLogger)
+	nodeID = id
 	var l *syslog.Writer
 	if loggertype == MetaSysLog {
-		if l, err = syslog.New(syslog.LOG_INFO, "CGRateS"); err != nil {
+		if l, err = syslog.New(syslog.LOG_INFO, fmt.Sprintf("CGRateS <%s> ", nodeID)); err != nil {
 			return err
 		} else {
 			Logger.SetSyslog(l)
@@ -123,7 +125,7 @@ func (sl *StdLogger) Alert(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Alert(m)
 	} else {
-		log.Print("[ALERT] " + m)
+		log.Print("CGRateS <" + nodeID + "> [ALERT] " + m)
 	}
 	return
 }
@@ -136,7 +138,7 @@ func (sl *StdLogger) Crit(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Crit(m)
 	} else {
-		log.Print("[CRITICAL] " + m)
+		log.Print("CGRateS <" + nodeID + "> [CRITICAL] " + m)
 	}
 	return
 }
@@ -149,7 +151,7 @@ func (sl *StdLogger) Debug(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Debug(m)
 	} else {
-		log.Print("[DEBUG] " + m)
+		log.Print("CGRateS <" + nodeID + "> [DEBUG] " + m)
 	}
 	return
 }
@@ -162,7 +164,7 @@ func (sl *StdLogger) Emerg(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Emerg(m)
 	} else {
-		log.Print("[EMERGENCY] " + m)
+		log.Print("CGRateS <" + nodeID + "> [EMERGENCY] " + m)
 	}
 	return
 }
@@ -175,7 +177,7 @@ func (sl *StdLogger) Err(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Err(m)
 	} else {
-		log.Print("[ERROR] " + m)
+		log.Print("CGRateS <" + nodeID + "> [ERROR] " + m)
 	}
 	return
 }
@@ -188,7 +190,7 @@ func (sl *StdLogger) Info(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Info(m)
 	} else {
-		log.Print("[INFO] " + m)
+		log.Print("CGRateS <" + nodeID + "> [INFO] " + m)
 	}
 	return
 }
@@ -201,7 +203,7 @@ func (sl *StdLogger) Notice(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Notice(m)
 	} else {
-		log.Print("[NOTICE] " + m)
+		log.Print("CGRateS <" + nodeID + "> [NOTICE] " + m)
 	}
 	return
 }
@@ -215,7 +217,7 @@ func (sl *StdLogger) Warning(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Warning(m)
 	} else {
-		log.Print("[WARNING] " + m)
+		log.Print("CGRateS <" + nodeID + "> [WARNING] " + m)
 	}
 	return
 }

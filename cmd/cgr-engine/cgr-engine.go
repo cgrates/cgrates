@@ -768,7 +768,7 @@ func initLogger(cfg *config.CGRConfig) error {
 	if *syslogger != "" { // Modify the log level if provided by command arguments
 		sylogger = *syslogger
 	}
-	err := utils.Newlogger(sylogger)
+	err := utils.Newlogger(sylogger, cfg.NodeID)
 	if err != nil {
 		return err
 	}
