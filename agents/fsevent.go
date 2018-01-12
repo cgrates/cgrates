@@ -38,46 +38,48 @@ type FSEvent map[string]string
 
 const (
 	// Freswitch event proprities names
-	DIRECTION             = "Call-Direction"
-	SUBJECT               = "variable_" + utils.CGR_SUBJECT
-	ACCOUNT               = "variable_" + utils.CGR_ACCOUNT
-	DESTINATION           = "variable_" + utils.CGR_DESTINATION
-	REQTYPE               = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
-	CATEGORY              = "variable_" + utils.CGR_CATEGORY
-	VAR_CGR_SUPPLIER      = "variable_" + utils.CGR_SUPPLIER
-	UUID                  = "Unique-ID" // -Unique ID for this call leg
-	CSTMID                = "variable_" + utils.CGR_TENANT
-	CALL_DEST_NR          = "Caller-Destination-Number"
-	SIP_REQ_USER          = "variable_sip_req_user"
-	PARK_TIME             = "Caller-Profile-Created-Time"
-	SETUP_TIME            = "Caller-Channel-Created-Time"
-	ANSWER_TIME           = "Caller-Channel-Answered-Time"
-	END_TIME              = "Caller-Channel-Hangup-Time"
-	DURATION              = "variable_billsec"
-	NAME                  = "Event-Name"
-	HEARTBEAT             = "HEARTBEAT"
-	ANSWER                = "CHANNEL_ANSWER"
-	HANGUP                = "CHANNEL_HANGUP_COMPLETE"
-	PARK                  = "CHANNEL_PARK"
-	AUTH_OK               = "AUTH_OK"
-	DISCONNECT            = "SWITCH DISCONNECT"
-	MANAGER_REQUEST       = "MANAGER_REQUEST"
-	USERNAME              = "Caller-Username"
-	FS_IPv4               = "FreeSWITCH-IPv4"
-	HANGUP_CAUSE          = "Hangup-Cause"
-	PDD_MEDIA_MS          = "variable_progress_mediamsec"
-	PDD_NOMEDIA_MS        = "variable_progressmsec"
-	IGNOREPARK            = "variable_cgr_ignorepark"
-	FS_VARPREFIX          = "variable_"
-	VarCGRSubsystems      = "variable_cgr_subsystems"
-	SubSAccountS          = "accounts"
-	SubSSupplierS         = "suppliers"
-	SubSResourceS         = "resources"
-	SubSAttributeS        = "attributes"
-	CGRResourceAllocation = "cgr_resource_allocation"
-
+	DIRECTION                = "Call-Direction"
+	SUBJECT                  = "variable_" + utils.CGR_SUBJECT
+	ACCOUNT                  = "variable_" + utils.CGR_ACCOUNT
+	DESTINATION              = "variable_" + utils.CGR_DESTINATION
+	REQTYPE                  = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
+	CATEGORY                 = "variable_" + utils.CGR_CATEGORY
+	VAR_CGR_SUPPLIER         = "variable_" + utils.CGR_SUPPLIER
+	UUID                     = "Unique-ID" // -Unique ID for this call leg
+	CSTMID                   = "variable_" + utils.CGR_TENANT
+	CALL_DEST_NR             = "Caller-Destination-Number"
+	SIP_REQ_USER             = "variable_sip_req_user"
+	PARK_TIME                = "Caller-Profile-Created-Time"
+	SETUP_TIME               = "Caller-Channel-Created-Time"
+	ANSWER_TIME              = "Caller-Channel-Answered-Time"
+	END_TIME                 = "Caller-Channel-Hangup-Time"
+	DURATION                 = "variable_billsec"
+	NAME                     = "Event-Name"
+	HEARTBEAT                = "HEARTBEAT"
+	ANSWER                   = "CHANNEL_ANSWER"
+	HANGUP                   = "CHANNEL_HANGUP_COMPLETE"
+	PARK                     = "CHANNEL_PARK"
+	AUTH_OK                  = "AUTH_OK"
+	DISCONNECT               = "SWITCH DISCONNECT"
+	MANAGER_REQUEST          = "MANAGER_REQUEST"
+	USERNAME                 = "Caller-Username"
+	FS_IPv4                  = "FreeSWITCH-IPv4"
+	HANGUP_CAUSE             = "Hangup-Cause"
+	PDD_MEDIA_MS             = "variable_progress_mediamsec"
+	PDD_NOMEDIA_MS           = "variable_progressmsec"
+	IGNOREPARK               = "variable_cgr_ignorepark"
+	FS_VARPREFIX             = "variable_"
+	VarCGRSubsystems         = "variable_cgr_subsystems"
+	SubSAccountS             = "accounts"
+	SubSSupplierS            = "suppliers"
+	SubSResourceS            = "resources"
+	SubSAttributeS           = "attributes"
+	CGRResourceAllocation    = "cgr_resource_allocation"
+	CGRSessionS              = "cgr_sessions"
+	VarCGRSessionS           = "variable_" + CGRSessionS
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
+	FsConnID                 = "FsConnID" // used to share connID info in event
 )
 
 // Nice printing for the event object.
@@ -333,29 +335,6 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 	}
 }
 
-/*
-func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string) {
-	// Keep in sync (or merge) with StoredCdr.PassesFieldFielter()
-	if fieldFilter == nil {
-		return true, ""
-	}
-	if fieldFilter.IsStatic() && fsev.ParseEventValue(&utils.RSRField{Id: fieldFilter.Id}, config.CgrConfig().DefaultTimezone) == fsev.ParseEventValue(fieldFilter, config.CgrConfig().DefaultTimezone) {
-		return true, fsev.ParseEventValue(&utils.RSRField{Id: fieldFilter.Id}, config.CgrConfig().DefaultTimezone)
-	}
-	preparedFilter := &utils.RSRField{Id: fieldFilter.Id, RSRules: make([]*utils.ReSearchReplace, len(fieldFilter.RSRules))} // Reset rules so they do not point towards same structures as original fieldFilter
-	for idx := range fieldFilter.RSRules {
-		// Hardcode the template with maximum of 5 groups ordered
-		preparedFilter.RSRules[idx] = &utils.ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: utils.FILTER_REGEXP_TPL}
-	}
-	preparedVal := fsev.ParseEventValue(preparedFilter, config.CgrConfig().DefaultTimezone)
-	filteredValue := fsev.ParseEventValue(fieldFilter, config.CgrConfig().DefaultTimezone)
-	if preparedFilter.RegexpMatched() && (len(preparedVal) == 0 || preparedVal == filteredValue) {
-		return true, filteredValue
-	}
-	return false, ""
-}
-*/
-
 func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.CGRID = fsev.GetCgrId(timezone)
@@ -407,7 +386,6 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.COST] = -1
 	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.META_DEFAULT)
 	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.META_DEFAULT)
-	//storCdr.ExtraFields = fsev.GetExtraFields()
 	return mp
 }
 
@@ -483,29 +461,6 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs)
 	return
 }
 
-// V1UpdateSessionArgs returns the arguments used in SMGv1.UpdateSession
-func (fsev FSEvent) V1UpdateSessionArgs() (args *sessionmanager.V1UpdateSessionArgs) {
-	args = &sessionmanager.V1UpdateSessionArgs{ // defaults
-		UpdateSession: true,
-		CGREvent: utils.CGREvent{
-			Tenant: fsev.GetTenant(utils.META_DEFAULT),
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
-		},
-	}
-	subsystems, has := fsev[VarCGRSubsystems]
-	if !has {
-		return
-	}
-	if strings.Index(subsystems, SubSAccountS) == -1 {
-		args.UpdateSession = false
-	}
-	//if strings.Index(subsystems, SubSResourceS) != -1 {
-	//	args.AllocateResources = true
-	//}
-	return
-}
-
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (fsev FSEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSessionArgs) {
 	args = &sessionmanager.V1TerminateSessionArgs{ // defaults
@@ -516,11 +471,9 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSe
 			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
 		},
 	}
-	subsystems, has := fsev[VarCGRSubsystems]
-	if !has {
-		return
-	}
-	if strings.Index(subsystems, SubSAccountS) == -1 {
+	subsystems, hasSubsystems := fsev[VarCGRSubsystems]
+	if (hasSubsystems && strings.Index(subsystems, SubSAccountS) == -1) ||
+		fsev[VarCGRSessionS] == "false" {
 		args.TerminateSession = false
 	}
 	if strings.Index(subsystems, SubSResourceS) != -1 {

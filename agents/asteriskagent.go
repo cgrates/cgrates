@@ -51,7 +51,8 @@ const (
 )
 
 func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smgConn *utils.BiRPCInternalClient) (*SMAsterisk, error) {
-	sma := &SMAsterisk{cgrCfg: cgrCfg, smg: *smgConn, eventsCache: make(map[string]*sessionmanager.SMGenericEvent)}
+	sma := &SMAsterisk{cgrCfg: cgrCfg, smg: smgConn,
+		eventsCache: make(map[string]*sessionmanager.SMGenericEvent)}
 	sma.smg.SetClientConn(sma) // pass the connection to SMA back into smg so we can receive the disconnects
 	return sma, nil
 }
@@ -59,7 +60,7 @@ func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smgConn *utils.BiRP
 type SMAsterisk struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
 	astConnIdx  int
-	smg         utils.BiRPCInternalClient
+	smg         *utils.BiRPCInternalClient
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
