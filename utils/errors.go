@@ -45,7 +45,6 @@ var (
 	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
 	ErrResourceUnavailable     = errors.New("RESOURCE_UNAVAILABLE")
 	ErrResourceUnauthorized    = errors.New("RESOURCE_UNAUTHORIZED")
-	ErrResourceUnalocated      = errors.New("RESOURCE_UNALOCATED")
 	ErrNoActiveSession         = errors.New("NO_ACTIVE_SESSION")
 	ErrPartiallyExecuted       = errors.New("PARTIALLY_EXECUTED")
 	ErrMaxUsageExceeded        = errors.New("MAX_USAGE_EXCEEDED")
