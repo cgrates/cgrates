@@ -526,6 +526,13 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("testGetCDRs #23, unexpected number of CDRs returned: %+v", CDRs)
 	}
+	// Filter on OriginID
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OriginIDs: []string{
+		"testevent1", "testevent3"}}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #22 err: %v", err)
+	} else if len(CDRs) != 5 {
+		return fmt.Errorf("testGetCDRs #23, unexpected number of CDRs returned: %+v", CDRs)
+	}
 	// Filter on TOR
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #23 err: %v", err)

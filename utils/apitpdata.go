@@ -806,8 +806,9 @@ type ExportedFileCdrs struct {
 }
 
 type AttrGetCdrs struct {
-	CgrIds              []string // If provided, it will filter based on the cgrids present in list
-	MediationRunIds     []string // If provided, it will filter on mediation runid
+	CgrIds          []string // If provided, it will filter based on the cgrids present in list
+	MediationRunIds []string // If provided, it will filter on mediation runid
+
 	TORs                []string // If provided, filter on TypeOfRecord
 	CdrHosts            []string // If provided, it will filter cdrhost
 	CdrSources          []string // If provided, it will filter cdrsource
@@ -1004,6 +1005,8 @@ type CDRsFilter struct {
 	NotCGRIDs              []string          // Filter specific CgrIds out
 	RunIDs                 []string          // If provided, it will filter on mediation runid
 	NotRunIDs              []string          // Filter specific runIds out
+	OriginIDs              []string          // If provided, it will filter on OriginIDs
+	NotOriginIDs           []string          // Filter specific OriginIDs out
 	OriginHosts            []string          // If provided, it will filter cdrhost
 	NotOriginHosts         []string          // Filter out specific cdr hosts
 	Sources                []string          // If provided, it will filter cdrsource
@@ -1052,6 +1055,8 @@ type RPCCDRsFilter struct {
 	NotCGRIDs              []string          // Filter specific CgrIds out
 	RunIDs                 []string          // If provided, it will filter on mediation runid
 	NotRunIDs              []string          // Filter specific runIds out
+	OriginIDs              []string          // If provided, it will filter on OriginIDs
+	NotOriginIDs           []string          // Filter specific OriginIDs out
 	OriginHosts            []string          // If provided, it will filter cdrhost
 	NotOriginHosts         []string          // Filter out specific cdr hosts
 	Sources                []string          // If provided, it will filter cdrsource
@@ -1097,6 +1102,8 @@ func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		NotCGRIDs:              self.NotCGRIDs,
 		RunIDs:                 self.RunIDs,
 		NotRunIDs:              self.NotRunIDs,
+		OriginIDs:              self.OriginIDs,
+		NotOriginIDs:           self.NotOriginIDs,
 		ToRs:                   self.ToRs,
 		NotToRs:                self.NotToRs,
 		OriginHosts:            self.OriginHosts,
