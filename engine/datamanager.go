@@ -964,6 +964,7 @@ func (dm *DataManager) GetFilterIndexes(dbKey string, fldNameVal map[string]stri
 }
 
 func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]utils.StringMap) (err error) {
+
 	return dm.DataDB().SetFilterIndexesDrv(dbKey, indexes)
 }
 

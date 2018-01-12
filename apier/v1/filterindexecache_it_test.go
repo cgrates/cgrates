@@ -1,4 +1,4 @@
-// +build integration2
+// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"flag"
+	// "flag"
 	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -34,24 +34,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	filter         *engine.Filter
-	tSv1CfgPath    string
-	tSv1Cfg        *config.CGRConfig
-	tSv1ConfDIR    string //run tests for specific configuration
-	dataDir        = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	tFIdxCaRpc     *rpc.Client
-	rdsITdb        *engine.RedisStorage
-	mgoITdb        *engine.MongoStorage
-	onStor         *engine.DataManager
-	err            error
-	indexes        map[string]utils.StringMap
-	matchedindexes utils.StringMap
-	tPrfl          *engine.ThresholdProfile
-	statConfig     *engine.StatQueueProfile
-	rlsConfig      *engine.ResourceProfile
-	thdsDelay      int
-)
+var tFIdxCaRpc *rpc.Client
 
 var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testFlush,
@@ -159,13 +142,6 @@ func testV1FIdxCaResetStorDb(t *testing.T) {
 func testV1FIdxCaStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(tSv1CfgPath, thdsDelay); err != nil {
 		t.Fatal(err)
-	}
-}
-
-func testFlush(t *testing.T) {
-	onStor.DataDB().Flush("")
-	if err := engine.SetDBVersions(onStor.DataDB()); err != nil {
-		t.Error("Error  ", err.Error())
 	}
 }
 
