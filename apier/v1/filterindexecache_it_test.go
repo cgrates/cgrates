@@ -68,6 +68,15 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateAttributeProfile,
 	testV1FIdxCaUpdateAttributeProfileFromTP,
 	testV1FIdxCaRemoveAttributeProfile,
+
+	testFlush,
+	testV1FIdxCaGetResourceProfileWithNotFound,
+	testV1FIdxCaSetResourceProfile,
+	testV1FIdxCaFromFolder,
+	testV1FIdxCaGetResourceProfileFromTP,
+	testV1FIdxCaUpdateResourceProfile,
+	testV1FIdxCaUpdateResourceProfileFromTP,
+	testV1FIdxCaRemoveResourceProfile,
 }
 
 func TestFIdxCaV1ITMySQLConnect(t *testing.T) {
@@ -1262,6 +1271,388 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	fldNameVal2 := map[string]string{"ATTR_1": "", "TEST_PROFILE1": ""}
 	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
 		fldNameVal2); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+// ResourceProfile
+func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
+	var reply string
+	argsRU := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "1002",
+				"Subject":     "1001",
+				"Destination": "1002"},
+		},
+		Units: 6,
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
+		t.Error(err)
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err.Error() != utils.ErrResourceUnavailable.Error() {
+		t.Error(err)
+	}
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, "cgrates.org", true),
+		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+func testV1FIdxCaSetResourceProfile(t *testing.T) {
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_RES_RCFG1",
+		RequestFilters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1001"},
+			},
+			&engine.RequestFilter{
+				FieldName: "Subject",
+				Type:      "*string",
+				Values:    []string{"1002"},
+			},
+			&engine.RequestFilter{
+				FieldName: "Destination",
+				Type:      "*string",
+				Values:    []string{"1001"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	var result string
+	if err := tFIdxCaRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	rlsConfig = &engine.ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RCFG1",
+		FilterIDs: []string{"FLTR_RES_RCFG1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+		UsageTTL:          time.Duration(0) * time.Microsecond,
+		AllocationMessage: "Approved",
+		Limit:             10,
+		Blocker:           true,
+		Stored:            true,
+		Weight:            20,
+		Thresholds:        []string{"Val1", "Val2"},
+	}
+	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	argsRU := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Subject":     "1002",
+				"Destination": "1001"},
+		},
+		Units: 6,
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResource, argsRU, &result); err != nil {
+		t.Error(err)
+	} else if result != "Approved" {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &result); err != nil {
+		t.Error(err)
+	} else if result != "Approved" {
+		t.Error("Unexpected reply returned", result)
+	}
+	fldNameVal := map[string]string{"RCFG1": ""}
+	expectedRevIDX := map[string]utils.StringMap{"RCFG1": {"Account:1001": true, "Subject:1002": true, "Destination:1001": true}}
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
+		fldNameVal); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expectedRevIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, indexes)
+	}
+}
+
+func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
+	var reply string
+	argsRU := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e63",
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Subject":     "1002",
+				"Destination": "1001"},
+		},
+		Units: 6,
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Error("Unexpected reply returned", reply)
+	}
+	argsReU := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "1002",
+				"Subject":     "1001",
+				"Destination": "1002"},
+		},
+		Units: 6,
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsReU, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	idx := map[string]utils.StringMap{"ResGroup1": {"Account:1001": true, "Account:1002": true}}
+	fldNameVal := map[string]string{"ResGroup1": ""}
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
+		fldNameVal); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(idx, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", idx, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_RES_RCFG2",
+		RequestFilters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"2002"},
+			},
+			&engine.RequestFilter{
+				FieldName: "Subject",
+				Type:      "*string",
+				Values:    []string{"2001"},
+			},
+			&engine.RequestFilter{
+				FieldName: "Destination",
+				Type:      "*string",
+				Values:    []string{"2002"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	var result string
+	if err := tFIdxCaRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	rlsConfig = &engine.ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RCFG1",
+		FilterIDs: []string{"FLTR_RES_RCFG2"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+		UsageTTL:          time.Duration(10) * time.Microsecond,
+		Limit:             10,
+		AllocationMessage: "MessageAllocation",
+		Blocker:           true,
+		Stored:            true,
+		Weight:            20,
+		Thresholds:        []string{"Val1", "Val2"},
+	}
+	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	argsReU := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "2002",
+				"Subject":     "2001",
+				"Destination": "2002"},
+		},
+		Units: 6,
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsReU, &result); err != nil {
+		t.Error(err)
+	} else if result != "MessageAllocation" {
+		t.Error("Unexpected reply returned", result)
+	}
+	fldNameVal2 := map[string]string{"RCFG1": ""}
+	expectedRevIDX := map[string]utils.StringMap{"RCFG1": {"Account:2002": true, "Destination:2002": true, "Subject:2001": true}}
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
+		fldNameVal2); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expectedRevIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_RES_RCFG3",
+		RequestFilters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "Account",
+				Type:      "*string",
+				Values:    []string{"1002"},
+			},
+			&engine.RequestFilter{
+				FieldName: "Subject",
+				Type:      "*string",
+				Values:    []string{"1001"},
+			},
+			&engine.RequestFilter{
+				FieldName: "Destination",
+				Type:      "*string",
+				Values:    []string{"1002"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	var result string
+	if err := tFIdxCaRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.ResourceProfile
+	if err := tFIdxCaRpc.Call("ApierV1.GetResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	reply.FilterIDs = []string{"FLTR_RES_RCFG3"}
+	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}
+
+	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile", reply, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	argsReU := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e65",
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "1002",
+				"Subject":     "1001",
+				"Destination": "1002"},
+		},
+		Units: 6,
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsReU, &result); err != nil {
+		t.Error(err)
+	} else if result != "ResGroup1" {
+		t.Error("Unexpected reply returned", result)
+	}
+	fldNameVal2 := map[string]string{"ResGroup1": ""}
+	expectedRevIDX := map[string]utils.StringMap{"ResGroup1": {"Account:1002": true, "Destination:1002": true, "Subject:1001": true}}
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
+		fldNameVal2); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expectedRevIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
+	var resp string
+	argsReU := utils.ArgRSv1ResourceUsage{
+		UsageID: "653a8db2-4f67-4cf8-b622-169e8a482e61",
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "2002",
+				"Subject":     "2001",
+				"Destination": "2002"},
+		},
+		Units: 6,
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResource, argsReU, &resp); err != nil {
+		t.Error(err)
+	} else if resp != "MessageAllocation" {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsReU, &resp); err != nil {
+		t.Error(err)
+	} else if resp != "MessageAllocation" {
+		t.Error("Unexpected reply returned", resp)
+	}
+	argsRU := utils.ArgRSv1ResourceUsage{
+		UsageID: "654a8db2-4f67-4cf8-b622-169e8a482e61",
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "1002",
+				"Subject":     "1001",
+				"Destination": "1002"},
+		},
+		Units: 6,
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &resp); err != nil {
+		t.Error(err)
+	} else if resp != "ResGroup1" {
+		t.Error("Unexpected reply returned", resp)
+	}
+
+	if err := tFIdxCaRpc.Call("ApierV1.RemResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	if err := tFIdxCaRpc.Call("ApierV1.RemResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	var sqp *engine.ThresholdProfile
+	if err := tFIdxCaRpc.Call("ApierV1.GetResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"}, &sqp); err == nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := tFIdxCaRpc.Call("ApierV1.GetResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &sqp); err == nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	fldNameVals2 := map[string]string{"ResGroup1": "", "TEST_PROFILE1": ""}
+	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
+		fldNameVals2); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
