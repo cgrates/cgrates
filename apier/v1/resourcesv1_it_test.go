@@ -221,7 +221,7 @@ func testV1RsTTL0(t *testing.T) {
 		Units:   2,
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err == nil ||
-		err.Error() != utils.ErrResourceUnavailable.Error() {
+		err.Error() != utils.ErrResourceUnalocated.Error() {
 		t.Error(err)
 	}
 	// make sure no usage was recorded
@@ -330,7 +330,8 @@ func testV1RsAllocateResource(t *testing.T) {
 				"Destination": "1002"},
 		}, Units: 1,
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource, argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResource,
+		argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnalocated.Error() {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
@@ -386,7 +387,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 		Units: 7,
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
-		argsRU, &reply); err.Error() != utils.ErrResourceUnavailable.Error() {
+		argsRU, &reply); err.Error() != utils.ErrResourceUnauthorized.Error() {
 		t.Error(err)
 	}
 }
