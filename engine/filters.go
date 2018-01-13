@@ -70,14 +70,31 @@ func (fS *FilterS) connStatS() (err error) {
 	return
 }
 
+type InlineFilter struct {
+	Type      string
+	FieldName string
+	FieldVal  string
+}
+
+func NewInlineFilter(content string) (f *InlineFilter, err error) {
+
+	return
+}
+
 // PassFiltersForEvent will check all filters wihin filterIDs and require them passing for event
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{}, filterIDs []string) (pass bool, err error) {
 	var atLeastOneFilterPassing bool
 	for _, fltrID := range filterIDs {
-		f, err := fS.dm.GetFilter(tenant, fltrID, false, utils.NonTransactional)
-		if err != nil {
-			return false, err
+		var f *Filter
+		if strings.HasPrefix(fltrID, "*") {
+			fmt.Printf("fltr %+v", fltrID)
+		} else {
+			fmt.Printf("enter here with ID %s", fltrID)
+			f, err = fS.dm.GetFilter(tenant, fltrID, false, utils.NonTransactional)
+			if err != nil {
+				return false, err
+			}
 		}
 		if f.ActivationInterval != nil &&
 			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
