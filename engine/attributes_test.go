@@ -116,21 +116,19 @@ func testPopulateAttrService(t *testing.T) {
 		filterS:       &FilterS{dm: dmAtr},
 		indexedFields: []string{"attributeprofile1", "attributeprofile2"},
 	}
-
-	ev := make(map[string]interface{})
-	ev["attributeprofile1"] = "Attribute"
-	ev["attributeprofile2"] = "Attribute"
-	ev[utils.AnswerTime] = time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC).Local()
-	ev["UsageInterval"] = "1s"
-	ev["PddInterval"] = "1s"
-	ev["Weight"] = "20.0"
 	sev = &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "attribute_event",
 		Context: &context,
-		Event:   ev,
+		Event: map[string]interface{}{
+			"attributeprofile1": "Attribute",
+			"attributeprofile2": "Attribute",
+			utils.AnswerTime:    time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC).Local(),
+			"UsageInterval":     "1s",
+			"PddInterval":       "1s",
+			"Weight":            "20.0",
+		},
 	}
-
 	for _, atr := range atrPs {
 		if err = dmAtr.SetAttributeProfile(atr, true); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -160,15 +158,15 @@ func testAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
 
 func testAttributeProfileForEvent(t *testing.T) {
 	context := utils.MetaRating
-	ev := make(map[string]interface{})
-	ev["attributeprofile1"] = "Attribute"
-	ev["UsageInterval"] = "1s"
-	ev["Weight"] = "9.0"
 	sev = &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "attribute_event",
 		Context: &context,
-		Event:   ev,
+		Event: map[string]interface{}{
+			"attributeprofile1": "Attribute",
+			"UsageInterval":     "1s",
+			"Weight":            "9.0",
+		},
 	}
 	atrpl, err := srv.attributeProfileForEvent(sev)
 	if err != nil {
@@ -181,15 +179,15 @@ func testAttributeProfileForEvent(t *testing.T) {
 
 func testAttributeProcessEvent(t *testing.T) {
 	context := utils.MetaRating
-	ev := make(map[string]interface{})
-	ev["attributeprofile1"] = "Attribute"
-	ev["UsageInterval"] = "1s"
-	ev["Weight"] = "9.0"
 	sev = &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "attribute_event",
 		Context: &context,
-		Event:   ev,
+		Event: map[string]interface{}{
+			"attributeprofile1": "Attribute",
+			"UsageInterval":     "1s",
+			"Weight":            "9.0",
+		},
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfile: "attributeprofile1",
