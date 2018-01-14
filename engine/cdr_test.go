@@ -844,8 +844,7 @@ func TestCDRAsCGREvent(t *testing.T) {
 	for fldName, fldVal := range eCGREvent.Event {
 		if _, has := cgrEvent.Event[fldName]; !has {
 			t.Errorf("Expecting: %+v, received: %+v", fldName, nil)
-		}
-		if fldVal != cgrEvent.Event[fldName] {
+		} else if fldVal != cgrEvent.Event[fldName] {
 			t.Errorf("Expecting: %s:%+v, received: %s:%+v", fldName, eCGREvent.Event[fldName], fldName, cgrEvent.Event[fldName])
 		}
 	}
