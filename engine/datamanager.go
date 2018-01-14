@@ -36,7 +36,10 @@ type DataManager struct {
 
 // DataDB exports access to dataDB
 func (dm *DataManager) DataDB() DataDB {
-	return dm.dataDB
+	if dm != nil {
+		return dm.dataDB
+	}
+	return nil
 }
 
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,

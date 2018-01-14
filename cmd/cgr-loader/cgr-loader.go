@@ -80,19 +80,22 @@ func main() {
 	var storDb engine.LoadStorage
 	var rater, cdrstats, users rpcclient.RpcClientConnection
 	var loader engine.LoadReader
-
-	dm, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name,
-		*datadb_user, *datadb_pass, *dbdata_encoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
+	if !*toStorDb {
+		dm, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name,
+			*datadb_user, *datadb_pass, *dbdata_encoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
+	}
 	if *fromStorDb || *toStorDb {
 		storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	}
+
 	// Stop on db errors
 	for _, err = range []error{errDataDB, errDataDB, errStorDb} {
 		if err != nil {
 			log.Fatalf("Could not open database connection: %v", err)
 		}
 	}
+
 	// Defer databases opened to be closed when we are done
 	for _, db := range []engine.Storage{dm.DataDB(), storDb} {
 		if db != nil {
