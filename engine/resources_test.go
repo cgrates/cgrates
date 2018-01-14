@@ -259,3 +259,37 @@ func TestRSCacheSetGet(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", r, x)
 	}
 }
+
+func TestV1AuthorizeResourceMissingStruct(t *testing.T) {
+	data, _ := NewMapStorage()
+	dmresmiss := NewDataManager(data)
+
+	rserv := &ResourceService{
+		dm:            dmresmiss,
+		filterS:       &FilterS{dm: dmresmiss},
+		indexedFields: []string{}, // speed up query on indexes
+	}
+	var reply *string
+	argsMissingTenant := utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			ID:    "id1",
+			Event: map[string]interface{}{},
+		},
+		UsageID: "test1", // ResourceUsage Identifier
+		Units:   20,
+	}
+	argsMissingUsageID := utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "id1",
+			Event:  map[string]interface{}{},
+		},
+		Units: 20,
+	}
+	if err := rserv.V1AuthorizeResources(argsMissingTenant, reply); err.Error() != "MANDATORY_IE_MISSING: [Tenant]" {
+		t.Error(err.Error())
+	}
+	if err := rserv.V1AuthorizeResources(argsMissingUsageID, reply); err.Error() != "MANDATORY_IE_MISSING: [UsageID]" {
+		t.Error(err.Error())
+	}
+}
