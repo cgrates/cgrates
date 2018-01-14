@@ -784,3 +784,148 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 	}
 
 }
+
+func TestCDRAsCGREvent(t *testing.T) {
+	cdr := &CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).Local(),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+		RunID:       utils.DEFAULT_RUNID,
+		Usage:       time.Duration(10) * time.Second,
+		Cost:        1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var costdetails *CallCost
+	eCGREvent := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Generated",
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"AnswerTime":  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+			"CGRID":       cdr.CGRID,
+			"Category":    "call",
+			"Cost":        1.01,
+			"CostDetails": costdetails,
+			"CostSource":  "",
+			"Destination": "+4986517174963",
+			"ExtraInfo":   "",
+			"OrderID":     int64(123),
+			"OriginHost":  "192.168.1.1",
+			"OriginID":    "dsafdsaf",
+			"Partial":     false,
+			"RequestType": "*rated",
+			"RunID":       "*default",
+			"SetupTime":   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).Local(),
+			"Source":      "UNIT_TEST",
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "*voice",
+			"Usage":       time.Duration(10) * time.Second,
+			"field_extr1": "val_extr1",
+			"fieldextr2":  "valextr2",
+			"rated":       false,
+		},
+	}
+	cgrEvent := cdr.AsCGREvent()
+	if !reflect.DeepEqual(eCGREvent.Tenant, cgrEvent.Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", eCGREvent.Tenant, cgrEvent.Tenant)
+	}
+	for fldName, fldVal := range eCGREvent.Event {
+		if _, has := cgrEvent.Event[fldName]; !has {
+			t.Errorf("Expecting: %+v, received: %+v", fldName, nil)
+		}
+		if fldVal != cgrEvent.Event[fldName] {
+			t.Errorf("Expecting: %s:%+v, received: %s:%+v", fldName, eCGREvent.Event[fldName], fldName, cgrEvent.Event[fldName])
+		}
+	}
+}
+
+func TestCDRUpdateFromCGREvent(t *testing.T) {
+	cdr := &CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).Local(),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+		RunID:       utils.DEFAULT_RUNID,
+		Usage:       time.Duration(10) * time.Second,
+		Cost:        1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var costdetails *CallCost
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Generated",
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"AnswerTime":  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+			"CGRID":       cdr.CGRID,
+			"Category":    "call",
+			"Cost":        1.01,
+			"CostDetails": costdetails,
+			"CostSource":  "",
+			"Destination": "+4986517174963",
+			"ExtraInfo":   "",
+			"OrderID":     int64(123),
+			"OriginHost":  "192.168.1.2",
+			"OriginID":    "dsafdsaf",
+			"Partial":     false,
+			"RequestType": "*rated",
+			"RunID":       "*default",
+			"SetupTime":   time.Date(2013, 11, 7, 8, 42, 23, 0, time.UTC).Local(),
+			"Source":      "UNIT_TEST",
+			"Subject":     "1001",
+			"Tenant":      "cgrates.org",
+			"ToR":         "*voice",
+			"Usage":       time.Duration(13) * time.Second,
+			"field_extr1": "val_extr1",
+			"fieldextr2":  "valextr2",
+			"rated":       false,
+		},
+	}
+	eCDR := &CDR{
+		CGRID:       cdr.CGRID,
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.2",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 23, 0, time.UTC).Local(),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Local(),
+		RunID:       utils.DEFAULT_RUNID,
+		Usage:       time.Duration(13) * time.Second,
+		Cost:        1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	if err := cdr.UpdateFromCGREvent(cgrEvent, []string{"OriginHost", "SetupTime", "Usage"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cdr, eCDR) {
+		t.Errorf("Expecting: %+v, received: %+v", cdr, eCDR)
+	}
+}
