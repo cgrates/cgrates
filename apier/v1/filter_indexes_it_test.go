@@ -482,11 +482,11 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
 			&utils.MetricWithParams{
-				MetricID:   "MetricValue",
+				MetricID:   "*sum",
 				Parameters: "",
 			},
 			&utils.MetricWithParams{
-				MetricID:   "MetricValueTwo",
+				MetricID:   "*acd",
 				Parameters: "",
 			},
 		},
@@ -597,11 +597,11 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
 			&utils.MetricWithParams{
-				MetricID:   "MetricValue",
+				MetricID:   "*sum",
 				Parameters: "",
 			},
 			&utils.MetricWithParams{
-				MetricID:   "MetricValueTwo",
+				MetricID:   "*acd",
 				Parameters: "",
 			},
 		},

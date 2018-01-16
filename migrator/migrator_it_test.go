@@ -81,7 +81,6 @@ var sTestsITMigrator = []func(t *testing.T){
 	testMigratorTpRatingProfiles,
 	testMigratorTpRatingPlans,
 	testMigratorTpRates,
-	testMigratorTpLCRRules,
 	testMigratorTpFilter,
 	testMigratorTpDestination,
 	testMigratorTpDestinationRate,
@@ -2567,59 +2566,6 @@ func testMigratorTpRates(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[1].RateIncrement, result[0].RateSlots[1].RateIncrement)
 		} else if !reflect.DeepEqual(tpRate[0].RateSlots[1].GroupIntervalStart, result[0].RateSlots[1].GroupIntervalStart) {
 			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[1].GroupIntervalStart, result[0].RateSlots[1].GroupIntervalStart)
-		}
-	}
-}
-
-func testMigratorTpLCRRules(t *testing.T) {
-	tpLcrRules := []*utils.TPLcrRules{
-		&utils.TPLcrRules{
-			TPid:      "TPLRC1",
-			Direction: "*out",
-			Tenant:    "cgrates.org",
-			Category:  "call",
-			Account:   "1001",
-			Subject:   "*any",
-			Rules: []*utils.TPLcrRule{
-				&utils.TPLcrRule{
-					DestinationId:  "DST_1002",
-					RpCategory:     "lcr_profile1",
-					Strategy:       "*static",
-					StrategyParams: "suppl2;suppl1",
-					ActivationTime: "05:00:00",
-					Weight:         10,
-				},
-				&utils.TPLcrRule{
-					DestinationId:  "*any",
-					RpCategory:     "lcr_profile1",
-					Strategy:       "*highest_cost",
-					StrategyParams: "",
-					ActivationTime: "05:00:00",
-					Weight:         10,
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPLCRs(tpLcrRules); err != nil {
-			t.Error("Error when setting TpLCRRules ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpLCRRules ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpLCRRules})
-		if err != nil {
-			t.Error("Error when migrating TpLCRRules ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPLCRs(&utils.TPLcrRules{TPid: tpLcrRules[0].TPid})
-		if err != nil {
-			t.Error("Error when getting TpLCRRules ", err.Error())
-		}
-		if !reflect.DeepEqual(tpLcrRules[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpLcrRules[0], result[0])
 		}
 	}
 }

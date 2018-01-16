@@ -139,7 +139,6 @@ func CurrentStorDBVersions() Versions {
 	return Versions{
 		utils.COST_DETAILS:       2,
 		utils.TpRatingPlans:      1,
-		utils.TpLcrs:             1,
 		utils.TpFilters:          1,
 		utils.TpDestinationRates: 1,
 		utils.TpActionTriggers:   1,
@@ -161,7 +160,6 @@ func CurrentStorDBVersions() Versions {
 		utils.TpDerivedChargersV: 1,
 		utils.TpCdrStats:         1,
 		utils.TpDestinations:     1,
-		utils.TpLCR:              1,
 		utils.TpRatingPlan:       1,
 		utils.TpRatingProfile:    1,
 	}
