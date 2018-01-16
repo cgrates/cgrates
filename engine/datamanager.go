@@ -17,6 +17,7 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
@@ -412,11 +413,22 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		//Verify matching Filters for every FilterID from ThresholdProfile
 		for _, fltrID := range th.FilterIDs {
 			var fltr *Filter
-			if fltr, err = dm.GetFilter(th.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
+			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				inFltr, err := NewInlineFilter(fltrID)
+				if err != nil {
+					return err
 				}
-				return
+				fltr, err = inFltr.AsFilter(th.Tenant)
+				if err != nil {
+					return err
+				}
+			} else {
+				if fltr, err = dm.GetFilter(th.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
+					}
+					return
+				}
 			}
 			for _, flt := range fltr.RequestFilters {
 				if flt.Type != MetaString {
@@ -487,11 +499,22 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		//Verify matching Filters for every FilterID from StatQueueProfile
 		for _, fltrID := range sqp.FilterIDs {
 			var fltr *Filter
-			if fltr, err = dm.GetFilter(sqp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v", fltrID, sqp)
+			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				inFltr, err := NewInlineFilter(fltrID)
+				if err != nil {
+					return err
 				}
-				return
+				fltr, err = inFltr.AsFilter(sqp.Tenant)
+				if err != nil {
+					return err
+				}
+			} else {
+				if fltr, err = dm.GetFilter(sqp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v", fltrID, sqp)
+					}
+					return
+				}
 			}
 			for _, flt := range fltr.RequestFilters {
 				if flt.Type != MetaString {
@@ -640,11 +663,22 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		//Verify matching Filters for every FilterID from ResourceProfiles
 		for _, fltrID := range rp.FilterIDs {
 			var fltr *Filter
-			if fltr, err = dm.GetFilter(rp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, rp)
+			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				inFltr, err := NewInlineFilter(fltrID)
+				if err != nil {
+					return err
 				}
-				return
+				fltr, err = inFltr.AsFilter(rp.Tenant)
+				if err != nil {
+					return err
+				}
+			} else {
+				if fltr, err = dm.GetFilter(rp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, rp)
+					}
+					return
+				}
 			}
 			for _, flt := range fltr.RequestFilters {
 				if flt.Type != MetaString {
@@ -1066,11 +1100,22 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 		//Verify matching Filters for every FilterID from SupplierProfile
 		for _, fltrID := range supp.FilterIDs {
 			var fltr *Filter
-			if fltr, err = dm.GetFilter(supp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, supp)
+			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				inFltr, err := NewInlineFilter(fltrID)
+				if err != nil {
+					return err
 				}
-				return
+				fltr, err = inFltr.AsFilter(supp.Tenant)
+				if err != nil {
+					return err
+				}
+			} else {
+				if fltr, err = dm.GetFilter(supp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for SupplierProfile: %+v", fltrID, supp)
+					}
+					return
+				}
 			}
 			for _, flt := range fltr.RequestFilters {
 				if flt.Type != MetaString {
@@ -1162,11 +1207,22 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			//Verify matching Filters for every FilterID from AttributeProfile
 			for _, fltrID := range ap.FilterIDs {
 				var fltr *Filter
-				if fltr, err = dm.GetFilter(ap.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, ap)
+				if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+					inFltr, err := NewInlineFilter(fltrID)
+					if err != nil {
+						return err
 					}
-					return
+					fltr, err = inFltr.AsFilter(ap.Tenant)
+					if err != nil {
+						return err
+					}
+				} else {
+					if fltr, err = dm.GetFilter(ap.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+						if err == utils.ErrNotFound {
+							err = fmt.Errorf("broken reference to filter: %+v for AttributeProfile: %+v", fltrID, ap)
+						}
+						return
+					}
 				}
 				for _, flt := range fltr.RequestFilters {
 					if flt.Type != MetaString {

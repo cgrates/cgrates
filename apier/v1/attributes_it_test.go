@@ -149,7 +149,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	eAttrPrf := &engine.ExternalAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
-		FilterIDs: []string{"FLTR_ACNT_1007"},
+		FilterIDs: []string{"*string:Account:1007"},
 		Contexts:  []string{utils.MetaRating},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
