@@ -84,7 +84,6 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITIsDBEmpty,
 	testOnStorITTestThresholdFilterIndexes,
 	testOnStorITTestAttributeProfileFilterIndexes,
-	testOnStorITTestAttributeProfileInlineFilter,
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
 	//testOnStorITCacheReverseAlias,
@@ -92,7 +91,6 @@ var sTestsOnStorIT = []func(t *testing.T){
 	//testOnStorITCRUDUser,
 	//testOnStorITCRUDAlias,
 	//testOnStorITCRUDReverseAlias,
-
 }
 
 func TestOnStorITRedisConnect(t *testing.T) {
@@ -2969,5 +2967,4 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
