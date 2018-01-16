@@ -70,13 +70,32 @@ func (fS *FilterS) connStatS() (err error) {
 	return
 }
 
+func NewInlineFilter(content string) (f *InlineFilter, err error) {
+	if len(strings.Split(content, utils.InInFieldSep)) != 3 {
+		return nil, fmt.Errorf("parse error for string: <%s>")
+	}
+	contentSplit := strings.Split(content, utils.InInFieldSep)
+	return &InlineFilter{Type: contentSplit[0], FieldName: contentSplit[1], FieldVal: contentSplit[2]}, nil
+}
+
 type InlineFilter struct {
 	Type      string
 	FieldName string
 	FieldVal  string
 }
 
-func NewInlineFilter(content string) (f *InlineFilter, err error) {
+//AsFilter convert InlineFilter to Filter
+func (inFtr *InlineFilter) AsFilter(tenant string) (f *Filter, err error) {
+	f = &Filter{
+		Tenant:         tenant,
+		ID:             utils.MetaInline,
+		RequestFilters: make([]*RequestFilter, 1),
+	}
+	rf := &RequestFilter{Type: inFtr.Type, FieldName: inFtr.FieldName, Values: []string{inFtr.FieldVal}}
+	if err := rf.CompileValues(); err != nil {
+		return nil, err
+	}
+	f.RequestFilters[0] = rf
 
 	return
 }
@@ -87,10 +106,13 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 	var atLeastOneFilterPassing bool
 	for _, fltrID := range filterIDs {
 		var f *Filter
-		if strings.HasPrefix(fltrID, "*") {
-			fmt.Printf("fltr %+v", fltrID)
+		if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			inFtr, err := NewInlineFilter(fltrID)
+			if err != nil {
+				return false, err
+			}
+			f, err = inFtr.AsFilter(tenant)
 		} else {
-			fmt.Printf("enter here with ID %s", fltrID)
 			f, err = fS.dm.GetFilter(tenant, fltrID, false, utils.NonTransactional)
 			if err != nil {
 				return false, err

@@ -164,6 +164,7 @@ const (
 	DRYRUN                          = "dry_run"
 	META_COMBIMED                   = "*combimed"
 	MetaInternal                    = "*internal"
+	MetaInline                      = "*inline"
 	ZERO_RATING_SUBJECT_PREFIX      = "*zero"
 	OK                              = "OK"
 	CDRE_FIXED_WIDTH                = "fwv"

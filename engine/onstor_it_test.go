@@ -84,6 +84,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITIsDBEmpty,
 	testOnStorITTestThresholdFilterIndexes,
 	testOnStorITTestAttributeProfileFilterIndexes,
+	testOnStorITTestAttributeProfileInlineFilter,
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
 	//testOnStorITCacheReverseAlias,

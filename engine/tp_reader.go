@@ -1635,19 +1635,32 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 			}
 		}
 		for _, fltrID := range res.FilterIDs {
-			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-			if !has {
-				var fltr *Filter
-				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
-					}
-					return
-				} else {
-					tpFltr = FilterToTPFilter(fltr)
+			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				inFltr, err := NewInlineFilter(fltrID)
+				if err != nil {
+					return err
 				}
-			} else {
+				fltr, err := inFltr.AsFilter(tntID.Tenant)
+				if err != nil {
+					return err
+				}
+				tpFltr := FilterToTPFilter(fltr)
 				tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+			} else {
+				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
+				if !has {
+					var fltr *Filter
+					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+						if err == utils.ErrNotFound {
+							err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
+						}
+						return
+					} else {
+						tpFltr = FilterToTPFilter(fltr)
+					}
+				} else {
+					tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+				}
 			}
 		}
 	}
@@ -1681,19 +1694,32 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 			}
 		}
 		for _, fltrID := range sq.FilterIDs {
-			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-			if !has {
-				var fltr *Filter
-				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for statQueue: %+v", fltrID, sq)
-					}
-					return
-				} else {
-					tpFltr = FilterToTPFilter(fltr)
+			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				inFltr, err := NewInlineFilter(fltrID)
+				if err != nil {
+					return err
 				}
-			} else {
+				fltr, err := inFltr.AsFilter(tntID.Tenant)
+				if err != nil {
+					return err
+				}
+				tpFltr := FilterToTPFilter(fltr)
 				tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
+			} else {
+				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
+				if !has {
+					var fltr *Filter
+					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+						if err == utils.ErrNotFound {
+							err = fmt.Errorf("broken reference to filter: %+v for statQueue: %+v", fltrID, sq)
+						}
+						return
+					} else {
+						tpFltr = FilterToTPFilter(fltr)
+					}
+				} else {
+					tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
+				}
 			}
 		}
 	}
@@ -1727,19 +1753,32 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 			}
 		}
 		for _, fltrID := range th.FilterIDs {
-			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-			if !has {
-				var fltr *Filter
-				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
-					}
-					return
-				} else {
-					tpFltr = FilterToTPFilter(fltr)
+			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				inFltr, err := NewInlineFilter(fltrID)
+				if err != nil {
+					return err
 				}
-			} else {
+				fltr, err := inFltr.AsFilter(tntID.Tenant)
+				if err != nil {
+					return err
+				}
+				tpFltr := FilterToTPFilter(fltr)
 				tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
+			} else {
+				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
+				if !has {
+					var fltr *Filter
+					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+						if err == utils.ErrNotFound {
+							err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
+						}
+						return
+					} else {
+						tpFltr = FilterToTPFilter(fltr)
+					}
+				} else {
+					tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
+				}
 			}
 		}
 	}
@@ -1777,7 +1816,7 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.sppProfiles = mapRsPfls
-	for tntID, res := range mapRsPfls {
+	for tntID, sup := range mapRsPfls {
 		if has, err := tpr.dm.HasData(utils.SupplierProfilePrefix, tntID.TenantID()); err != nil {
 			return err
 		} else if !has {
@@ -1789,20 +1828,33 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 				return
 			}
 		}
-		for _, fltrID := range res.FilterIDs {
-			tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-			if !has {
-				var fltr *Filter
-				if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
-					}
-					return
-				} else {
-					tpFltr = FilterToTPFilter(fltr)
+		for _, fltrID := range sup.FilterIDs {
+			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				inFltr, err := NewInlineFilter(fltrID)
+				if err != nil {
+					return err
 				}
+				fltr, err := inFltr.AsFilter(tntID.Tenant)
+				if err != nil {
+					return err
+				}
+				tpFltr := FilterToTPFilter(fltr)
+				tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sup.ID)
 			} else {
-				tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
+				if !has {
+					var fltr *Filter
+					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+						if err == utils.ErrNotFound {
+							err = fmt.Errorf("broken reference to filter: %+v for SupplierProfile: %+v", fltrID, sup)
+						}
+						return
+					} else {
+						tpFltr = FilterToTPFilter(fltr)
+					}
+				} else {
+					tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sup.ID)
+				}
 			}
 		}
 	}
@@ -1838,19 +1890,32 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 				}
 			}
 			for _, fltrID := range attrP.FilterIDs {
-				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-				if !has {
-					var fltr *Filter
-					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-						if err == utils.ErrNotFound {
-							err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, attrP)
-						}
-						return
-					} else {
-						tpFltr = FilterToTPFilter(fltr)
+				if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+					inFltr, err := NewInlineFilter(fltrID)
+					if err != nil {
+						return err
 					}
-				} else {
+					fltr, err := inFltr.AsFilter(tntID.Tenant)
+					if err != nil {
+						return err
+					}
+					tpFltr := FilterToTPFilter(fltr)
 					tpr.attrIndexers[attrKey].IndexTPFilter(tpFltr, attrP.ID)
+				} else {
+					tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
+					if !has {
+						var fltr *Filter
+						if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
+							if err == utils.ErrNotFound {
+								err = fmt.Errorf("broken reference to filter: %+v for AttributeProfile: %+v", fltrID, attrP)
+							}
+							return
+						} else {
+							tpFltr = FilterToTPFilter(fltr)
+						}
+					} else {
+						tpr.attrIndexers[attrKey].IndexTPFilter(tpFltr, attrP.ID)
+					}
 				}
 			}
 		}

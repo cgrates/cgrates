@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -266,5 +267,37 @@ func TestReqFilterNewRequestFilter(t *testing.T) {
 	erf = &RequestFilter{Type: MetaGreaterOrEqual, FieldName: "MetaGreaterOrEqual", Values: []string{"20"}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+}
+
+func TestInlineFilterPassFiltersForEvent(t *testing.T) {
+	data, _ := NewMapStorage()
+	dmFilterPass := NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	failEvent := map[string]interface{}{
+		"Account": "1001",
+	}
+	passEvent := map[string]interface{}{
+		"Account": "1007",
+	}
+	if _, err := filterS.PassFiltersForEvent("cgrates.org",
+		nil, []string{"*string:Account:1007:error"}); err == nil {
+		t.Errorf(err.Error())
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		failEvent, []string{"*string:Account:1007"}); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent, []string{"*string:Account:1007"}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 }
