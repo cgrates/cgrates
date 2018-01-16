@@ -759,6 +759,9 @@ func testOnStorITRatingPlan(t *testing.T) {
 			StartTime: "00:00:00",
 		},
 	}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -835,6 +838,9 @@ func testOnStorITRatingProfile(t *testing.T) {
 			FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:teo"},
 			CdrStatQueueIds: []string{},
 		},
+	}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
 	}
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1227,6 +1233,9 @@ func testOnStorITActions(t *testing.T) {
 				Blocker: utils.BoolPointer(false),
 			},
 		},
+	}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
 	}
 	if err := onStor.SetActions(acts[0].Id,
 		acts, utils.NonTransactional); err != nil {
@@ -1796,6 +1805,9 @@ func testOnStorITResourceProfile(t *testing.T) {
 	}
 	//update
 	rL.Thresholds = []string{"TH1", "TH2"}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if err := onStor.SetResourceProfile(rL, false); err != nil {
 		t.Error(err)
 	}
@@ -1871,6 +1883,9 @@ func testOnStorITResource(t *testing.T) {
 	}
 	//update
 	res.TTLIdx = []string{"RU1", "RU2"}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
@@ -1940,6 +1955,9 @@ func testOnStorITTiming(t *testing.T) {
 	}
 	//update
 	tmg.MonthDays = utils.MonthDays{1, 2, 3, 4, 5, 6, 7}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if err := onStor.SetTiming(tmg); err != nil {
 		t.Error(err)
 	}
@@ -2015,7 +2033,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 			&utils.MetricWithParams{},
 		},
 		Stored:     true,
-		Thresholds: []string{},
+		Thresholds: []string{"Thresh1"},
 	}
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID,
 		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -2046,6 +2064,9 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 	}
 	//update
 	sq.Thresholds = []string{"TH1", "TH2"}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
 		t.Error(err)
 	}
@@ -2054,14 +2075,14 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		sq.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
-		t.Errorf("Expecting: %v, received: %v", sq, rcv)
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
 	//get from database
 	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
 		sq.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
-		t.Errorf("Expecting: %v, received: %v", sq, rcv)
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
 	if err := onStor.RemoveStatQueueProfile(sq.Tenant, sq.ID,
 		utils.NonTransactional, false); err != nil {
@@ -2140,6 +2161,9 @@ func testOnStorITStatQueue(t *testing.T) {
 				"cgrates.org:ev3": true,
 			},
 		},
+	}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
 	}
 	if err := onStor.SetStatQueue(sq); err != nil {
 		t.Error(err)
@@ -2233,6 +2257,9 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	}
 	//update
 	th.ActionIDs = []string{"Action1", "Action2"}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
@@ -2241,14 +2268,14 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", th, rcv)
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	//get from database
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", th, rcv)
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	if err := onStor.RemoveThresholdProfile(th.Tenant,
 		th.ID, utils.NonTransactional, false); err != nil {
@@ -2302,6 +2329,9 @@ func testOnStorITThreshold(t *testing.T) {
 	}
 	//update
 	th.Hits = 20
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if err := onStor.SetThreshold(th); err != nil {
 		t.Error(err)
 	}
@@ -2389,6 +2419,9 @@ func testOnStorITFilter(t *testing.T) {
 			Type:      "*string",
 			Values:    []string{"10", "20"},
 		},
+	}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
 	}
 	if err := onStor.SetFilter(fp); err != nil {
 		t.Error(err)
@@ -2493,6 +2526,9 @@ func testOnStorITSupplierProfile(t *testing.T) {
 			Weight:        20,
 		},
 	}
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	if err := onStor.SetSupplierProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
@@ -2574,6 +2610,9 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
+	if onStor.DataDB().GetStorageType() == utils.MONGO {
+		time.Sleep(5 * time.Millisecond)
+	}
 	attrProfile.Contexts = []string{"con1", "con2", "con3"}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
