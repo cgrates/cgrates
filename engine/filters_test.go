@@ -300,4 +300,23 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
+	failEvent = map[string]interface{}{
+		"Account": "2001",
+	}
+	passEvent = map[string]interface{}{
+		"Account": "1007",
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		failEvent, []string{"*string_prefix:Account:10"}); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent, []string{"*string_prefix:Account:10"}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+
 }
