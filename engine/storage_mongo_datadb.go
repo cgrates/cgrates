@@ -1922,17 +1922,15 @@ func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 			if err = col.Find(bson.M{"key": dbKey, qryFltr: bson.M{"$exists": true}}).Select(
 				bson.M{qryFltr: true}).One(&result); err != nil {
 				if err == mgo.ErrNotFound {
-					err = utils.ErrNotFound
+					return nil, utils.ErrNotFound
 				}
-				return nil, err
 			}
 		}
 	} else {
 		if err = col.Find(findParam).One(&result); err != nil {
 			if err == mgo.ErrNotFound {
-				err = utils.ErrNotFound
+				return nil, utils.ErrNotFound
 			}
-			return nil, err
 		}
 	}
 	indexes = make(map[string]utils.StringMap)
@@ -1941,6 +1939,9 @@ func (ms *MongoStorage) GetFilterIndexesDrv(dbKey string,
 			indexes[key] = make(utils.StringMap)
 		}
 		indexes[key] = utils.StringMapFromSlice(itmSls)
+	}
+	if len(indexes) == 0 {
+		return nil, utils.ErrNotFound
 	}
 	return indexes, nil
 }
@@ -1995,17 +1996,15 @@ func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 			if err = col.Find(bson.M{"key": dbKey, qryFltr: bson.M{"$exists": true}}).Select(
 				bson.M{qryFltr: true}).One(&result); err != nil {
 				if err == mgo.ErrNotFound {
-					err = utils.ErrNotFound
+					return nil, utils.ErrNotFound
 				}
-				return nil, err
 			}
 		}
 	} else {
 		if err = col.Find(findParam).One(&result); err != nil {
-			if err == mgo.ErrNotFound {
-				err = utils.ErrNotFound
+			if err == mgo.ErrNotFound || len(result.Value) == 0 {
+				return nil, utils.ErrNotFound
 			}
-			return nil, err
 		}
 	}
 	revIdx = make(map[string]utils.StringMap)
@@ -2014,6 +2013,9 @@ func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 			revIdx[key] = make(utils.StringMap)
 		}
 		revIdx[key] = utils.StringMapFromSlice(itmSls)
+	}
+	if len(revIdx) == 0 {
+		return nil, utils.ErrNotFound
 	}
 	return revIdx, nil
 }

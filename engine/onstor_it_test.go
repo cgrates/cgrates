@@ -84,6 +84,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITIsDBEmpty,
 	testOnStorITTestThresholdFilterIndexes,
 	testOnStorITTestAttributeProfileFilterIndexes,
+	testOnStorITTestThresholdInlineFilterIndexing,
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
 	//testOnStorITCacheReverseAlias,
@@ -2832,6 +2833,25 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 		}
 	}
+	//remove thresholds
+	if err := onStor.RemoveThresholdProfile(th.Tenant,
+		th.ID, utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+	if err := onStor.RemoveThresholdProfile(th2.Tenant,
+		th2.ID, utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+	if _, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != utils.ErrNotFound {
+		t.Error(err)
+	}
 }
 
 func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
@@ -2891,7 +2911,8 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 	}
 	for _, ctx := range attrProfile.Contexts {
-		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey(attrProfile.Tenant, ctx))
+		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
+			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if rcvIdx, err := onStor.GetFilterIndexes(
 			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
 			nil); err != nil {
@@ -2917,7 +2938,8 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	//check indexes with the new context (con3)
-	rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey(attrProfile.Tenant, "con3"))
+	rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
+		utils.ConcatenatedKey(attrProfile.Tenant, "con3"))
 	if rcvIdx, err := onStor.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
 		nil); err != nil {
@@ -2939,7 +2961,8 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
-		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey(attrProfile.Tenant, ctx))
+		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
+			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if _, err := onStor.GetFilterIndexes(
 			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
 			nil); err != nil && err != utils.ErrNotFound {
@@ -2952,7 +2975,8 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 		}
 	}
 
-	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant, attrProfile.ID, attrProfile.Contexts, utils.NonTransactional, true); err != nil {
+	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant,
+		attrProfile.ID, attrProfile.Contexts, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 	//check if index is removed
@@ -2965,6 +2989,132 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 	if _, err := onStor.GetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
 		nil); err != nil && err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testOnStorITTestThresholdInlineFilterIndexing(t *testing.T) {
+	fp := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "Filter1",
+		RequestFilters: []*RequestFilter{
+			&RequestFilter{
+				FieldName: "EventType",
+				Type:      "*string",
+				Values:    []string{"Event1", "Event2"},
+			},
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		},
+	}
+	if err := onStor.SetFilter(fp); err != nil {
+		t.Error(err)
+	}
+	th := &ThresholdProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "THD_Test",
+		ActivationInterval: &utils.ActivationInterval{},
+		FilterIDs:          []string{"Filter1"},
+		Recurrent:          true,
+		MinSleep:           time.Duration(0 * time.Second),
+		Blocker:            true,
+		Weight:             1.4,
+		ActionIDs:          []string{},
+	}
+
+	if err := onStor.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringMap{
+		"EventType:Event1": utils.StringMap{
+			"THD_Test": true,
+		},
+		"EventType:Event2": utils.StringMap{
+			"THD_Test": true,
+		},
+	}
+	reverseIdxes := map[string]utils.StringMap{
+		"THD_Test": utils.StringMap{
+			"EventType:Event1": true,
+			"EventType:Event2": true,
+		},
+	}
+	rfi := NewReqFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
+	if rcvIdx, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+	//Add an InlineFilter
+	th.FilterIDs = []string{"Filter1", "*string:Account:1001"}
+	if err := onStor.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes = map[string]utils.StringMap{
+		"Account:1001": utils.StringMap{
+			"THD_Test": true,
+		},
+		"EventType:Event1": utils.StringMap{
+			"THD_Test": true,
+		},
+		"EventType:Event2": utils.StringMap{
+			"THD_Test": true,
+		},
+	}
+
+	reverseIdxes = map[string]utils.StringMap{
+		"THD_Test": utils.StringMap{
+			"Account:1001":     true,
+			"EventType:Event1": true,
+			"EventType:Event2": true,
+		},
+	}
+	if rcvIdx, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+	//remove threshold
+	if err := onStor.RemoveThresholdProfile(th.Tenant,
+		th.ID, utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+	if _, err := onStor.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		nil); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := onStor.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
