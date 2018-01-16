@@ -165,8 +165,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			//TPS
 		case utils.MetaTpRatingPlans:
 			err = m.migrateTPratingplans()
-		case utils.MetaTpLCRRules:
-			err = m.migrateTpLCRRules()
 		case utils.MetaTpFilters:
 			err = m.migrateTPfilters()
 		case utils.MetaTpDestinationRates:
@@ -278,9 +276,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 		case utils.MetaStorDB:
 			if err := m.migrateTPratingplans(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpRatingPlans, " ", err)
-			}
-			if err := m.migrateTpLCRRules(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpLCRRules, " ", err)
 			}
 			if err := m.migrateTPfilters(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpFilters, " ", err)
