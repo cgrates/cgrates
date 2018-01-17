@@ -57,8 +57,9 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 			srtData[k] = v
 		}
 		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, &SortedSupplier{
-			SupplierID:  s.ID,
-			SortingData: srtData})
+			SupplierID:         s.ID,
+			SortingData:        srtData,
+			SupplierParameters: s.SupplierParameters})
 	}
 	sortedSuppls.SortCost()
 	return

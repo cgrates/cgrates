@@ -33,10 +33,11 @@ import (
 )
 
 var (
-	rdsITdb   *RedisStorage
-	mgoITdb   *MongoStorage
-	onStor    *DataManager
-	onStorCfg string
+	rdsITdb    *RedisStorage
+	mgoITdb    *MongoStorage
+	onStor     *DataManager
+	onStorCfg  string
+	sleepDelay time.Duration
 )
 
 // subtests to be executed for each confDIR
@@ -112,6 +113,7 @@ func TestOnStorITRedis(t *testing.T) {
 }
 
 func TestOnStorITMongoConnect(t *testing.T) {
+	sleepDelay = 5 * time.Millisecond
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
@@ -759,9 +761,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 			StartTime: "00:00:00",
 		},
 	}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -839,9 +839,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 			CdrStatQueueIds: []string{},
 		},
 	}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -1234,9 +1232,7 @@ func testOnStorITActions(t *testing.T) {
 			},
 		},
 	}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetActions(acts[0].Id,
 		acts, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1805,9 +1801,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 	}
 	//update
 	rL.Thresholds = []string{"TH1", "TH2"}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetResourceProfile(rL, false); err != nil {
 		t.Error(err)
 	}
@@ -1883,9 +1877,7 @@ func testOnStorITResource(t *testing.T) {
 	}
 	//update
 	res.TTLIdx = []string{"RU1", "RU2"}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
@@ -1955,9 +1947,7 @@ func testOnStorITTiming(t *testing.T) {
 	}
 	//update
 	tmg.MonthDays = utils.MonthDays{1, 2, 3, 4, 5, 6, 7}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetTiming(tmg); err != nil {
 		t.Error(err)
 	}
@@ -2064,9 +2054,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 	}
 	//update
 	sq.Thresholds = []string{"TH1", "TH2"}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
 		t.Error(err)
 	}
@@ -2162,9 +2150,7 @@ func testOnStorITStatQueue(t *testing.T) {
 			},
 		},
 	}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetStatQueue(sq); err != nil {
 		t.Error(err)
 	}
@@ -2257,9 +2243,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	}
 	//update
 	th.ActionIDs = []string{"Action1", "Action2"}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
@@ -2329,9 +2313,7 @@ func testOnStorITThreshold(t *testing.T) {
 	}
 	//update
 	th.Hits = 20
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetThreshold(th); err != nil {
 		t.Error(err)
 	}
@@ -2420,9 +2402,7 @@ func testOnStorITFilter(t *testing.T) {
 			Values:    []string{"10", "20"},
 		},
 	}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetFilter(fp); err != nil {
 		t.Error(err)
 	}
@@ -2467,13 +2447,14 @@ func testOnStorITSupplierProfile(t *testing.T) {
 		SortingParams: []string{},
 		Suppliers: []*Supplier{
 			&Supplier{
-				ID:            "supplier1",
-				FilterIDs:     []string{"FLTR_DST_DE"},
-				AccountIDs:    []string{"Account1"},
-				RatingPlanIDs: []string{"RPL_1"},
-				ResourceIDs:   []string{"ResGR1"},
-				StatIDs:       []string{"Stat1"},
-				Weight:        10,
+				ID:                 "supplier1",
+				FilterIDs:          []string{"FLTR_DST_DE"},
+				AccountIDs:         []string{"Account1"},
+				RatingPlanIDs:      []string{"RPL_1"},
+				ResourceIDs:        []string{"ResGR1"},
+				StatIDs:            []string{"Stat1"},
+				Weight:             10,
+				SupplierParameters: "param1",
 			},
 		},
 		Weight: 20,
@@ -2508,27 +2489,27 @@ func testOnStorITSupplierProfile(t *testing.T) {
 	//update
 	splProfile.Suppliers = []*Supplier{
 		&Supplier{
-			ID:            "supplier1",
-			FilterIDs:     []string{"FLTR_DST_DE"},
-			AccountIDs:    []string{"Account1"},
-			RatingPlanIDs: []string{"RPL_1"},
-			ResourceIDs:   []string{"ResGR1"},
-			StatIDs:       []string{"Stat1"},
-			Weight:        10,
+			ID:                 "supplier1",
+			FilterIDs:          []string{"FLTR_DST_DE"},
+			AccountIDs:         []string{"Account1"},
+			RatingPlanIDs:      []string{"RPL_1"},
+			ResourceIDs:        []string{"ResGR1"},
+			StatIDs:            []string{"Stat1"},
+			Weight:             10,
+			SupplierParameters: "param1",
 		},
 		&Supplier{
-			ID:            "supplier2",
-			FilterIDs:     []string{"FLTR_DST_DE"},
-			AccountIDs:    []string{"Account2"},
-			RatingPlanIDs: []string{"RPL_2"},
-			ResourceIDs:   []string{"ResGR2"},
-			StatIDs:       []string{"Stat2"},
-			Weight:        20,
+			ID:                 "supplier2",
+			FilterIDs:          []string{"FLTR_DST_DE"},
+			AccountIDs:         []string{"Account2"},
+			RatingPlanIDs:      []string{"RPL_2"},
+			ResourceIDs:        []string{"ResGR2"},
+			StatIDs:            []string{"Stat2"},
+			Weight:             20,
+			SupplierParameters: "param2",
 		},
 	}
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	if err := onStor.SetSupplierProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
@@ -2610,9 +2591,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	if onStor.DataDB().GetStorageType() == utils.MONGO {
-		time.Sleep(5 * time.Millisecond)
-	}
+	time.Sleep(sleepDelay)
 	attrProfile.Contexts = []string{"con1", "con2", "con3"}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)

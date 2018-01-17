@@ -33,6 +33,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
+				SupplierParameters: "param1",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
@@ -40,6 +41,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   0.1,
 					utils.Weight: 20.0,
 				},
+				SupplierParameters: "param2",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
@@ -47,6 +49,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
+				SupplierParameters: "param3",
 			},
 		},
 	}
@@ -59,6 +62,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
 				},
+				SupplierParameters: "param3",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
@@ -66,6 +70,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   0.1,
 					utils.Weight: 20.0,
 				},
+				SupplierParameters: "param2",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier1",
@@ -73,6 +78,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
 				},
+				SupplierParameters: "param1",
 			},
 		},
 	}
@@ -85,22 +91,24 @@ func TestLibSuppliersSortCost(t *testing.T) {
 func TestLibSuppliersSortWeight(t *testing.T) {
 	spl := []*Supplier{
 		&Supplier{
-			ID:            "supplier1",
-			FilterIDs:     []string{},
-			AccountIDs:    []string{},
-			RatingPlanIDs: []string{},
-			ResourceIDs:   []string{},
-			StatIDs:       []string{},
-			Weight:        10.0,
+			ID:                 "supplier1",
+			FilterIDs:          []string{},
+			AccountIDs:         []string{},
+			RatingPlanIDs:      []string{},
+			ResourceIDs:        []string{},
+			StatIDs:            []string{},
+			Weight:             10.0,
+			SupplierParameters: "param1",
 		},
 		&Supplier{
-			ID:            "supplier2",
-			FilterIDs:     []string{},
-			AccountIDs:    []string{},
-			RatingPlanIDs: []string{},
-			ResourceIDs:   []string{},
-			StatIDs:       []string{},
-			Weight:        20.0,
+			ID:                 "supplier2",
+			FilterIDs:          []string{},
+			AccountIDs:         []string{},
+			RatingPlanIDs:      []string{},
+			ResourceIDs:        []string{},
+			StatIDs:            []string{},
+			Weight:             20.0,
+			SupplierParameters: "param2",
 		},
 	}
 	eSpls := SortedSuppliers{
@@ -112,12 +120,14 @@ func TestLibSuppliersSortWeight(t *testing.T) {
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
+				SupplierParameters: "param2",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
 				},
+				SupplierParameters: "param1",
 			},
 		},
 	}

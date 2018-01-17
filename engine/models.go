@@ -537,8 +537,9 @@ type TpSupplier struct {
 	SupplierResourceIDs   string  `index:"10" re:""`
 	SupplierStatIDs       string  `index:"11" re:""`
 	SupplierWeight        float64 `index:"12" re:"\d+\.?\d*"`
-	Blocker               bool    `index:"13" re:""`
-	Weight                float64 `index:"14" re:"\d+\.?\d*"`
+	SupplierParameters    string  `index:"13" re:""`
+	Blocker               bool    `index:"14" re:""`
+	Weight                float64 `index:"15" re:"\d+\.?\d*"`
 	CreatedAt             time.Time
 }
 
