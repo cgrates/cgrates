@@ -139,7 +139,7 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 		initEvVal, cast := utils.CastFieldIfToString(initEvValIf)
 		if !cast {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> ev: %s, cannot cast field: %s to string",
+				fmt.Sprintf("<%s> ev: %s, cannot cast field: %+v to string",
 					utils.AttributeS, ev, fldName))
 			continue
 		}
@@ -150,6 +150,14 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 		if has {
 			rply.CGREvent.Event[fldName] = attrVal.Substitute
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
+		}
+		for _, valIface := range rply.CGREvent.Event {
+			if valIface == interface{}(utils.MetaAttributes) {
+				return nil, utils.NewCGRError(utils.AttributeSv1ProcessEvent,
+					utils.AttributesNotFoundCaps,
+					utils.AttributesNotFound,
+					utils.AttributesNotFound)
+			}
 		}
 	}
 	return
