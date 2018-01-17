@@ -171,7 +171,7 @@ func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *en
 	var filters []*engine.RequestFilter
 	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
 		if v2ATR.Balance.Directions != nil {
-			x, err := engine.NewRequestFilter(engine.MetaRSRFields, "Directions", v2ATR.Balance.Directions.Slice())
+			x, err := engine.NewRequestFilter(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
@@ -289,7 +289,7 @@ func AsThreshold2(v2ATR engine.ActionTrigger) (thp *engine.ThresholdProfile, th 
 	var filters []*engine.RequestFilter
 	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
 		if v2ATR.Balance.Directions != nil {
-			x, err := engine.NewRequestFilter(engine.MetaRSRFields, "Directions", v2ATR.Balance.Directions.Slice())
+			x, err := engine.NewRequestFilter(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
