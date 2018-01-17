@@ -590,6 +590,7 @@ const (
 	ResourceSv1ReleaseResources     = "ResourceSv1.ReleaseResources"
 )
 
+//SessionS APIs
 const (
 	SessionSv1AuthorizeEvent    = "SessionSv1.AuthorizeEvent"
 	SessionSv1InitiateSession   = "SessionSv1.InitiateSession"

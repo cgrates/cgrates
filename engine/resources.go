@@ -493,17 +493,22 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 	if rS.thdS == nil {
 		return
 	}
-	ev := &utils.CGREvent{
-		Tenant: r.Tenant,
-		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
-			utils.EventType:  utils.ResourceUpdate,
-			utils.ResourceID: r.ID,
-			utils.Usage:      r.totalUsage()}}
+	var thIDs []string
+	if len(r.rPrf.Thresholds) != 0 {
+		thIDs = r.rPrf.Thresholds
+	}
+	thEv := &ArgsProcessEvent{ThresholdIDs: thIDs,
+		CGREvent: utils.CGREvent{
+			Tenant: r.Tenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				utils.EventType:  utils.ResourceUpdate,
+				utils.ResourceID: r.ID,
+				utils.Usage:      r.totalUsage()}}}
 	var hits int
-	if err = thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+	if err = thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<ResourceS> error: %s processing event %+v with ThresholdS.", err.Error(), ev))
+			fmt.Sprintf("<ResourceS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 	}
 	return
 }

@@ -1407,6 +1407,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err != nil {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
+		//
 		attrRU := utils.ArgRSv1ResourceUsage{
 			CGREvent: args.CGREvent,
 			UsageID:  originID,

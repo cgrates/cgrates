@@ -200,10 +200,11 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	}
 	if self.thdS != nil {
 		var hits int
-		cgrEv := cdr.AsCGREvent()
-		if err := self.thdS.Call(utils.ThresholdSv1ProcessEvent, cgrEv, &hits); err != nil {
+		thEv := &ArgsProcessEvent{
+			CGREvent: *cdr.AsCGREvent()}
+		if err := self.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<CDRS> error: %s processing CDR event %+v with thdS.", err.Error(), cgrEv))
+				fmt.Sprintf("<CDRS> error: %s processing CDR event %+v with thdS.", err.Error(), thEv))
 		}
 	}
 	// Attach raw CDR to stats
