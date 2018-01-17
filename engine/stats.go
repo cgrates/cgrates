@@ -231,19 +231,25 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 			sS.ssqMux.Unlock()
 		}
 		if sS.thdS != nil {
-			ev := &utils.CGREvent{
-				Tenant: sq.Tenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					utils.EventType: utils.StatUpdate,
-					utils.StatID:    sq.ID}}
+			var thIDs []string
+			if len(sq.sqPrfl.Thresholds) != 0 {
+				thIDs = sq.sqPrfl.Thresholds
+			}
+			thEv := &ArgsProcessEvent{
+				ThresholdIDs: thIDs,
+				CGREvent: utils.CGREvent{
+					Tenant: sq.Tenant,
+					ID:     utils.GenUUID(),
+					Event: map[string]interface{}{
+						utils.EventType: utils.StatUpdate,
+						utils.StatID:    sq.ID}}}
 			for metricID, metric := range sq.SQMetrics {
-				ev.Event[metricID] = metric.GetValue()
+				thEv.Event[metricID] = metric.GetValue()
 			}
 			var hits int
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), ev))
+					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 				withErrors = true
 			}
 		}

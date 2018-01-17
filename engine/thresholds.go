@@ -66,17 +66,17 @@ func (t *Threshold) TenantID() string {
 
 // ProcessEvent processes an ThresholdEvent
 // concurrentActions limits the number of simultaneous action sets executed
-func (t *Threshold) ProcessEvent(ev *utils.CGREvent, dm *DataManager) (err error) {
+func (t *Threshold) ProcessEvent(args *ArgsProcessEvent, dm *DataManager) (err error) {
 	if t.Snooze.After(time.Now()) { // snoozed, not executing actions
 		return
 	}
 	if t.Hits < t.tPrfl.MinHits { // number of hits was not met, will not execute actions
 		return
 	}
-	acnt, _ := ev.FieldAsString(utils.Account)
+	acnt, _ := args.FieldAsString(utils.Account)
 	var acntID string
 	if acnt != "" {
-		acntID = utils.ConcatenatedKey(ev.Tenant, acnt)
+		acntID = utils.ConcatenatedKey(args.Tenant, acnt)
 	}
 	for _, actionSetID := range t.tPrfl.ActionIDs {
 		at := &ActionTiming{
@@ -213,17 +213,23 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdService) matchingThresholdsForEvent(ev *utils.CGREvent) (ts Thresholds, err error) {
+func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (ts Thresholds, err error) {
 	matchingTs := make(map[string]*Threshold)
-	tIDs, err := matchingItemIDsForEvent(ev.Event, tS.indexedFields, tS.dm, utils.ThresholdStringIndex+ev.Tenant)
-	if err != nil {
-		return nil, err
+	var tIDs []string
+	if len(args.ThresholdIDs) != 0 {
+		tIDs = args.ThresholdIDs
+	} else {
+		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.indexedFields, tS.dm, utils.ThresholdStringIndex+args.Tenant)
+		if err != nil {
+			return nil, err
+		}
+		tIDs = tIDsMap.Slice()
 	}
-	lockIDs := utils.PrefixSliceItems(tIDs.Slice(), utils.ThresholdStringIndex)
+	lockIDs := utils.PrefixSliceItems(tIDs, utils.ThresholdStringIndex)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
-	for tID := range tIDs {
-		tPrfl, err := tS.dm.GetThresholdProfile(ev.Tenant, tID, false, utils.NonTransactional)
+	for _, tID := range tIDs {
+		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -234,7 +240,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *utils.CGREvent) (ts T
 			!tPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		if pass, err := tS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, tPrfl.FilterIDs); err != nil {
+		if pass, err := tS.filterS.PassFiltersForEvent(args.Tenant, args.Event, tPrfl.FilterIDs); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
@@ -266,9 +272,14 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ev *utils.CGREvent) (ts T
 	return
 }
 
+type ArgsProcessEvent struct {
+	ThresholdIDs []string
+	utils.CGREvent
+}
+
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(ev *utils.CGREvent) (hits int, err error) {
-	matchTs, err := tS.matchingThresholdsForEvent(ev)
+func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (hits int, err error) {
+	matchTs, err := tS.matchingThresholdsForEvent(args)
 	if err != nil {
 		return 0, err
 	}
@@ -276,11 +287,11 @@ func (tS *ThresholdService) processEvent(ev *utils.CGREvent) (hits int, err erro
 	var withErrors bool
 	for _, t := range matchTs {
 		t.Hits += 1
-		err = t.ProcessEvent(ev, tS.dm)
+		err = t.ProcessEvent(args, tS.dm)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
-					t.TenantID(), ev.TenantID(), err.Error()))
+					t.TenantID(), args.TenantID(), err.Error()))
 			withErrors = true
 			continue
 		}
@@ -312,11 +323,11 @@ func (tS *ThresholdService) processEvent(ev *utils.CGREvent) (hits int, err erro
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(ev *utils.CGREvent, reply *int) (err error) {
-	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *int) (err error) {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if hits, err := tS.processEvent(ev); err != nil {
+	if hits, err := tS.processEvent(args); err != nil {
 		return err
 	} else {
 		*reply = hits
@@ -325,12 +336,12 @@ func (tS *ThresholdService) V1ProcessEvent(ev *utils.CGREvent, reply *int) (err 
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdService) V1GetThresholdsForEvent(ev *utils.CGREvent, reply *Thresholds) (err error) {
-	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (tS *ThresholdService) V1GetThresholdsForEvent(args *ArgsProcessEvent, reply *Thresholds) (err error) {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var ts Thresholds
-	if ts, err = tS.matchingThresholdsForEvent(ev); err == nil {
+	if ts, err = tS.matchingThresholdsForEvent(args); err == nil {
 		*reply = ts
 	}
 	return

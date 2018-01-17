@@ -172,14 +172,14 @@ func testV1FIdxCaFromFolder(t *testing.T) {
 
 //ThresholdProfile
 func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.BalanceUpdate,
-			utils.Account:   "1001",
-		},
-	}
+
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.BalanceUpdate,
+				utils.Account:   "1001"}}}
 	var hits int
 	eHits := 0
 	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &hits); err != nil {
@@ -240,14 +240,14 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//matches TEST_PROFILE1
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.BalanceUpdate,
-			utils.Account:   "1001",
-		},
-	}
+	tEv := &engine.ArgsProcessEvent{
+		ThresholdIDs: []string{"TEST_PROFILE1"},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.BalanceUpdate,
+				utils.Account:   "1001"}}}
 	var hits int
 	eHits := 1
 	//Testing ProcessEvent on set thresholdprofile using apier
@@ -270,16 +270,16 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 
 func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 	//matches THD_ACNT_BALANCE_1
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.BalanceUpdate,
-			utils.Account:   "1001",
-			utils.BalanceID: utils.META_DEFAULT,
-			utils.Units:     12.3,
-		},
-	}
+	tEv := &engine.ArgsProcessEvent{
+		ThresholdIDs: []string{"THD_ACNT_BALANCE_1"},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.BalanceUpdate,
+				utils.Account:   "1001",
+				utils.BalanceID: utils.META_DEFAULT,
+				utils.Units:     12.3}}}
 	var hits int
 	eHits := 1
 	//Testing ProcessEvent on set thresholdprofile using apier
@@ -345,14 +345,13 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//make sure doesn't match the thresholdprofile after update
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.AccountUpdate,
-			utils.Account:   "1001",
-		},
-	}
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.AccountUpdate,
+				utils.Account:   "1001"}}}
 	var hits int
 	eHits := 0
 	//Testing ProcessEvent on set thresholdprofile  after update making sure there are no hits
@@ -362,14 +361,13 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
 	//matches thresholdprofile after update
-	tEv2 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.AccountUpdate,
-			utils.Account:   "1002",
-		},
-	}
+	tEv2 := &engine.ArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.AccountUpdate,
+				utils.Account:   "1002"}}}
 	eHits = 1
 	//Testing ProcessEvent on set thresholdprofile after update
 	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &hits); err != nil {
@@ -431,14 +429,13 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account:   "1002",
-			utils.EventType: utils.BalanceUpdate,
-		},
-	}
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:   "1002",
+				utils.EventType: utils.BalanceUpdate}}}
 	var hits int
 	eHits := 0
 	//Testing ProcessEvent on set thresholdprofile using apier
@@ -447,14 +444,13 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	} else if hits != eHits {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
-	tEv2 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			utils.Account:   "1003",
-			utils.EventType: utils.BalanceUpdate,
-		},
-	}
+	tEv2 := &engine.ArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				utils.Account:   "1003",
+				utils.EventType: utils.BalanceUpdate}}}
 	eHits = 1
 	//Testing ProcessEvent on set thresholdprofile using apier
 	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &hits); err != nil {
@@ -476,13 +472,13 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 
 func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	var resp string
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event8",
-		Event: map[string]interface{}{
-			utils.Account:   "1002",
-			utils.EventType: utils.AccountUpdate,
-		}}
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event8",
+			Event: map[string]interface{}{
+				utils.Account:   "1002",
+				utils.EventType: utils.AccountUpdate}}}
 	var hits int
 	eHits := 1
 	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &hits); err != nil {
@@ -491,13 +487,13 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
 
-	tEv2 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event9",
-		Event: map[string]interface{}{
-			utils.Account:   "1003",
-			utils.EventType: utils.BalanceUpdate,
-		}}
+	tEv2 := &engine.ArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event9",
+			Event: map[string]interface{}{
+				utils.Account:   "1003",
+				utils.EventType: utils.BalanceUpdate}}}
 	eHits = 1
 	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &hits); err != nil {
 		t.Error(err)
