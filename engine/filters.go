@@ -33,7 +33,7 @@ const (
 	MetaString         = "*string"
 	MetaStringPrefix   = "*string_prefix"
 	MetaTimings        = "*timings"
-	MetaRSRFields      = "*rsr_fields"
+	MetaRSR            = "*rsr"
 	MetaStatS          = "*stats"
 	MetaDestinations   = "*destinations"
 	MetaMinCapPrefix   = "*min_"
@@ -132,8 +132,8 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 				pass, err = fltr.passTimings(ev, "")
 			case MetaDestinations:
 				pass, err = fltr.passDestinations(ev, "")
-			case MetaRSRFields:
-				pass, err = fltr.passRSRFields(ev, "")
+			case MetaRSR:
+				pass, err = fltr.passRSR(ev, "")
 			case MetaStatS:
 				if err = fS.connStatS(); err != nil {
 					return false, err
@@ -175,7 +175,7 @@ func (f *Filter) Compile() (err error) {
 }
 
 func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
-	if !utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSRFields, MetaStatS, MetaDestinations,
+	if !utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSR, MetaStatS, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
@@ -183,7 +183,7 @@ func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, 
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSRFields,
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSR,
 		MetaDestinations, MetaDestinations, MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
@@ -212,7 +212,7 @@ type RequestFilter struct {
 
 // Separate method to compile RSR fields
 func (rf *RequestFilter) CompileValues() (err error) {
-	if rf.Type == MetaRSRFields {
+	if rf.Type == MetaRSR {
 		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(rf.Values); err != nil {
 			return
 		}
@@ -251,8 +251,8 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, rpcCln
 		return fltr.passTimings(req, extraFieldsLabel)
 	case MetaDestinations:
 		return fltr.passDestinations(req, extraFieldsLabel)
-	case MetaRSRFields:
-		return fltr.passRSRFields(req, extraFieldsLabel)
+	case MetaRSR:
+		return fltr.passRSR(req, extraFieldsLabel)
 	case MetaStatS:
 		return fltr.passStatS(req, extraFieldsLabel, rpcClnt)
 	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
@@ -321,7 +321,7 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 	return false, nil
 }
 
-func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *RequestFilter) passRSR(req interface{}, extraFieldsLabel string) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
 		if strVal, err := utils.ReflectFieldAsString(req, rsrFld.Id, extraFieldsLabel); err != nil {
 			if err == utils.ErrNotFound {

@@ -75,7 +75,7 @@ func (ev *CGREvent) FieldAsTime(fldName string, timezone string) (t time.Time, e
 	return ParseTimeDetectLayout(s, timezone)
 }
 
-// FieldAsTime returns a field as Duration instance
+// FieldAsDuration returns a field as Duration instance
 func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error) {
 	iface, has := ev.Event[fldName]
 	if !has {
@@ -97,7 +97,7 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 	return ParseDurationWithNanosecs(s)
 }
 
-// FieldAsFloat returns a field as float64 instance
+// FieldAsFloat64 returns a field as float64 instance
 func (ev *CGREvent) FieldAsFloat64(fldName string) (f float64, err error) {
 	iface, has := ev.Event[fldName]
 	if !has {

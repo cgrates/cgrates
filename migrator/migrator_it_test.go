@@ -1137,7 +1137,7 @@ func testMigratorThreshold(t *testing.T) {
 		Executed:          false,
 		LastExecutionTime: time.Now(),
 	}
-	x, err := engine.NewRequestFilter(engine.MetaRSRFields, "Directions", threshold.Balance.Directions.Slice())
+	x, err := engine.NewRequestFilter(engine.MetaRSR, "Directions", threshold.Balance.Directions.Slice())
 	if err != nil {
 		t.Error("Error when creating new NewRequestFilter", err.Error())
 	}

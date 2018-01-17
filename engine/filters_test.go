@@ -88,29 +88,29 @@ func TestReqFilterPassRSRFields(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	rf, err := NewRequestFilter(MetaRSRFields, "", []string{"Tenant(~^cgr.*\\.org$)"})
+	rf, err := NewRequestFilter(MetaRSR, "", []string{"Tenant(~^cgr.*\\.org$)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
 	}
-	rf, err = NewRequestFilter(MetaRSRFields, "", []string{"navigation(on)"})
+	rf, err = NewRequestFilter(MetaRSR, "", []string{"navigation(on)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
 	}
-	rf, err = NewRequestFilter(MetaRSRFields, "", []string{"navigation(off)"})
+	rf, err = NewRequestFilter(MetaRSR, "", []string{"navigation(off)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
