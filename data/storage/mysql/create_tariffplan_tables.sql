@@ -510,6 +510,7 @@ CREATE TABLE tp_suppliers (
   `supplier_resource_ids` varchar(64) NOT NULL,
   `supplier_stat_ids` varchar(64) NOT NULL,
   `supplier_weight` decimal(8,2) NOT NULL,
+  `supplier_parameters` varchar(64) NOT NULL,
   `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,

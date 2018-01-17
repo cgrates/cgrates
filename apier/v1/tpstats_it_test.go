@@ -120,7 +120,9 @@ func testTPStatsRpcConn(t *testing.T) {
 
 func testTPStatsGetTPStatBeforeSet(t *testing.T) {
 	var reply *utils.TPStats
-	if err := tpStatRPC.Call("ApierV1.GetTPStat", AttrGetTPStat{TPid: "TPS1", ID: "Stat1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpStatRPC.Call("ApierV1.GetTPStat",
+		&AttrGetTPStat{TPid: "TPS1", ID: "Stat1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -135,8 +137,13 @@ func testTPStatsSetTPStat(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		TTL:        "1",
-		Metrics:    []string{"MetricValue", "MetricValueTwo"},
+		TTL: "1",
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{
+				MetricID:   "*sum",
+				Parameters: "Param1",
+			},
+		},
 		Blocker:    false,
 		Stored:     false,
 		Weight:     20,
@@ -153,7 +160,8 @@ func testTPStatsSetTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterSet(t *testing.T) {
 	var respond *utils.TPStats
-	if err := tpStatRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &respond); err != nil {
+	if err := tpStatRPC.Call("ApierV1.GetTPStat",
+		&AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpStat, respond) {
 		t.Errorf("Expecting: %+v, received: %+v", tpStat, respond)
@@ -163,7 +171,16 @@ func testTPStatsGetTPStatAfterSet(t *testing.T) {
 func testTPStatsUpdateTPStat(t *testing.T) {
 	var result string
 	tpStat.Weight = 21
-	tpStat.FilterIDs = []string{"FLTR_1", "FLTR_STS1"}
+	tpStat.Metrics = []*utils.MetricWithParams{
+		&utils.MetricWithParams{
+			MetricID:   "*sum",
+			Parameters: "Param1",
+		},
+		&utils.MetricWithParams{
+			MetricID:   "*averege",
+			Parameters: "Param1",
+		},
+	}
 	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -173,7 +190,8 @@ func testTPStatsUpdateTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 	var expectedTPS *utils.TPStats
-	if err := tpStatRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &expectedTPS); err != nil {
+	if err := tpStatRPC.Call("ApierV1.GetTPStat",
+		&AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &expectedTPS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpStat, expectedTPS) {
 		t.Errorf("Expecting: %+v, received: %+v", tpStat, expectedTPS)
@@ -182,7 +200,8 @@ func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 
 func testTPStatsRemTPStat(t *testing.T) {
 	var resp string
-	if err := tpStatRPC.Call("ApierV1.RemTPStat", &AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &resp); err != nil {
+	if err := tpStatRPC.Call("ApierV1.RemTPStat",
+		&AttrGetTPStat{TPid: tpStat.TPid, ID: tpStat.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -191,7 +210,9 @@ func testTPStatsRemTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterRemove(t *testing.T) {
 	var respond *utils.TPStats
-	if err := tpStatRPC.Call("ApierV1.GetTPStat", &AttrGetTPStat{TPid: "TPS1", ID: "Stat1"}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpStatRPC.Call("ApierV1.GetTPStat",
+		&AttrGetTPStat{TPid: "TPS1", ID: "Stat1"},
+		&respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

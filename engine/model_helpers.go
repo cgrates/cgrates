@@ -2494,6 +2494,9 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 					Weight: tp.SupplierWeight,
 				}
 			}
+			if tp.SupplierParameters != "" {
+				sup.SupplierParameters = tp.SupplierParameters
+			}
 			if tp.SupplierFilterIDs != "" {
 				supFilterSplit := strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP)
 				sup.FilterIDs = append(sup.FilterIDs, supFilterSplit...)
@@ -2630,6 +2633,7 @@ func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
 			mdl.SupplierStatIDs += val
 		}
 		mdl.SupplierWeight = supl.Weight
+		mdl.SupplierParameters = supl.SupplierParameters
 		mdls = append(mdls, mdl)
 	}
 	return
@@ -2657,12 +2661,13 @@ func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *S
 	}
 	for i, suplier := range tpTH.Suppliers {
 		supl := &Supplier{
-			ID:            suplier.ID,
-			Weight:        suplier.Weight,
-			RatingPlanIDs: suplier.RatingPlanIDs,
-			FilterIDs:     suplier.FilterIDs,
-			ResourceIDs:   suplier.ResourceIDs,
-			StatIDs:       suplier.StatIDs,
+			ID:                 suplier.ID,
+			Weight:             suplier.Weight,
+			RatingPlanIDs:      suplier.RatingPlanIDs,
+			FilterIDs:          suplier.FilterIDs,
+			ResourceIDs:        suplier.ResourceIDs,
+			StatIDs:            suplier.StatIDs,
+			SupplierParameters: suplier.SupplierParameters,
 		}
 		th.Suppliers[i] = supl
 	}

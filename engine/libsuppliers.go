@@ -28,8 +28,9 @@ import (
 
 // SupplierReply represents one supplier in
 type SortedSupplier struct {
-	SupplierID  string
-	SortingData map[string]interface{} // store here extra info like cost or stats
+	SupplierID         string
+	SortingData        map[string]interface{} // store here extra info like cost or stats
+	SupplierParameters string
 }
 
 // SuppliersReply is returned as part of GetSuppliers call
@@ -108,8 +109,9 @@ func (ws *WeightSorter) SortSuppliers(prflID string,
 		SortedSuppliers: make([]*SortedSupplier, len(suppls))}
 	for i, s := range suppls {
 		sortedSuppls.SortedSuppliers[i] = &SortedSupplier{
-			SupplierID:  s.ID,
-			SortingData: map[string]interface{}{utils.Weight: s.Weight}}
+			SupplierID:         s.ID,
+			SortingData:        map[string]interface{}{utils.Weight: s.Weight},
+			SupplierParameters: s.SupplierParameters}
 	}
 	sortedSuppls.SortWeight()
 	return

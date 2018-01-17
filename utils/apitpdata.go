@@ -1380,13 +1380,14 @@ type TPFilter struct {
 }
 
 type TPSupplier struct {
-	ID            string // SupplierID
-	FilterIDs     []string
-	AccountIDs    []string
-	RatingPlanIDs []string // used when computing price
-	ResourceIDs   []string // queried in some strategies
-	StatIDs       []string // queried in some strategies
-	Weight        float64
+	ID                 string // SupplierID
+	FilterIDs          []string
+	AccountIDs         []string
+	RatingPlanIDs      []string // used when computing price
+	ResourceIDs        []string // queried in some strategies
+	StatIDs            []string // queried in some strategies
+	Weight             float64
+	SupplierParameters string
 }
 
 type TPSupplierProfile struct {

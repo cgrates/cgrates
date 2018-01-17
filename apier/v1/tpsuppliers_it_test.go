@@ -114,7 +114,9 @@ func testTPSplPrfRPCConn(t *testing.T) {
 
 func testTPSplPrfGetTPSplPrfBeforeSet(t *testing.T) {
 	var reply *utils.TPSupplier
-	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile", &AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile",
+		&AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -133,19 +135,22 @@ func testTPSplPrfSetTPSplPrf(t *testing.T) {
 		SortingParams: []string{},
 		Suppliers: []*utils.TPSupplier{
 			&utils.TPSupplier{
-				ID:            "supplier1",
-				FilterIDs:     []string{"FLTR_1"},
-				AccountIDs:    []string{"Acc1", "Acc2"},
-				RatingPlanIDs: []string{"RPL_1"},
-				ResourceIDs:   []string{"ResGroup1"},
-				StatIDs:       []string{"Stat1"},
+				ID:                 "supplier1",
+				FilterIDs:          []string{"FLTR_1"},
+				AccountIDs:         []string{"Acc1", "Acc2"},
+				RatingPlanIDs:      []string{"RPL_1"},
+				ResourceIDs:        []string{"ResGroup1"},
+				StatIDs:            []string{"Stat1"},
+				Weight:             10,
+				SupplierParameters: "SortingParam1",
 			},
 		},
 		Blocker: false,
 		Weight:  20,
 	}
 	var result string
-	if err := tpSplPrfRPC.Call("ApierV1.SetTPSupplierProfile", tpSplPr, &result); err != nil {
+	if err := tpSplPrfRPC.Call("ApierV1.SetTPSupplierProfile",
+		tpSplPr, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -154,7 +159,8 @@ func testTPSplPrfSetTPSplPrf(t *testing.T) {
 
 func testTPSplPrfGetTPSplPrfAfterSet(t *testing.T) {
 	var reply *utils.TPSupplierProfile
-	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile", &AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err != nil {
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile",
+		&AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpSplPr, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpSplPr), utils.ToJSON(reply))
@@ -164,7 +170,8 @@ func testTPSplPrfGetTPSplPrfAfterSet(t *testing.T) {
 func testTPSplPrfGetTPSplPrfIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"SUPL_1"}
-	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfileIDs", &AttrGetTPSupplierProfileIDs{TPid: "TP1"}, &result); err != nil {
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfileIDs",
+		&AttrGetTPSupplierProfileIDs{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -175,24 +182,29 @@ func testTPSplPrfGetTPSplPrfIDs(t *testing.T) {
 func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 	tpSplPr.Suppliers = []*utils.TPSupplier{
 		&utils.TPSupplier{
-			ID:            "supplier1",
-			FilterIDs:     []string{"FLTR_1"},
-			AccountIDs:    []string{"Acc1", "Acc2"},
-			RatingPlanIDs: []string{"RPL_1"},
-			ResourceIDs:   []string{"ResGroup1"},
-			StatIDs:       []string{"Stat1"},
+			ID:                 "supplier1",
+			FilterIDs:          []string{"FLTR_1"},
+			AccountIDs:         []string{"Acc1", "Acc2"},
+			RatingPlanIDs:      []string{"RPL_1"},
+			ResourceIDs:        []string{"ResGroup1"},
+			StatIDs:            []string{"Stat1"},
+			Weight:             10,
+			SupplierParameters: "SortingParam1",
 		},
 		&utils.TPSupplier{
-			ID:            "supplier2",
-			FilterIDs:     []string{"FLTR_1"},
-			AccountIDs:    []string{"Acc3"},
-			RatingPlanIDs: []string{"RPL_1"},
-			ResourceIDs:   []string{"ResGroup1"},
-			StatIDs:       []string{"Stat1"},
+			ID:                 "supplier2",
+			FilterIDs:          []string{"FLTR_1"},
+			AccountIDs:         []string{"Acc3"},
+			RatingPlanIDs:      []string{"RPL_1"},
+			ResourceIDs:        []string{"ResGroup1"},
+			StatIDs:            []string{"Stat1"},
+			Weight:             20,
+			SupplierParameters: "SortingParam2",
 		},
 	}
 	var result string
-	if err := tpSplPrfRPC.Call("ApierV1.SetTPSupplierProfile", tpSplPr, &result); err != nil {
+	if err := tpSplPrfRPC.Call("ApierV1.SetTPSupplierProfile",
+		tpSplPr, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -201,16 +213,42 @@ func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 
 func testTPSplPrfGetTPSplPrfAfterUpdate(t *testing.T) {
 	var reply *utils.TPSupplierProfile
-	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile", &AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err != nil {
+	reverseSuppliers := []*utils.TPSupplier{
+		&utils.TPSupplier{
+			ID:                 "supplier2",
+			FilterIDs:          []string{"FLTR_1"},
+			AccountIDs:         []string{"Acc3"},
+			RatingPlanIDs:      []string{"RPL_1"},
+			ResourceIDs:        []string{"ResGroup1"},
+			StatIDs:            []string{"Stat1"},
+			Weight:             20,
+			SupplierParameters: "SortingParam2",
+		},
+		&utils.TPSupplier{
+			ID:                 "supplier1",
+			FilterIDs:          []string{"FLTR_1"},
+			AccountIDs:         []string{"Acc1", "Acc2"},
+			RatingPlanIDs:      []string{"RPL_1"},
+			ResourceIDs:        []string{"ResGroup1"},
+			StatIDs:            []string{"Stat1"},
+			Weight:             10,
+			SupplierParameters: "SortingParam1",
+		},
+	}
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile",
+		&AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tpSplPr, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpSplPr), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(tpSplPr.Suppliers, reply.Suppliers) &&
+		!reflect.DeepEqual(tpSplPr.Suppliers, reverseSuppliers) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpSplPr), utils.ToJSON(reply))
 	}
 }
 
 func testTPSplPrfRemTPSplPrf(t *testing.T) {
 	var resp string
-	if err := tpSplPrfRPC.Call("ApierV1.RemTPSupplierProfile", &AttrRemTPSupplierProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"}, &resp); err != nil {
+	if err := tpSplPrfRPC.Call("ApierV1.RemTPSupplierProfile",
+		&AttrRemTPSupplierProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"},
+		&resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -219,7 +257,9 @@ func testTPSplPrfRemTPSplPrf(t *testing.T) {
 
 func testTPSplPrfGetTPSplPrfAfterRemove(t *testing.T) {
 	var reply *utils.TPSupplierProfile
-	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile", &AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpSplPrfRPC.Call("ApierV1.GetTPSupplierProfile",
+		&AttrGetTPSupplierProfile{TPid: "TP1", ID: "SUPL_1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

@@ -129,7 +129,7 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		Context: "con1",
+		Contexts: []string{"con1"},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
 				FieldName:  "FL1",
@@ -192,7 +192,8 @@ func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 	var reply *utils.TPAttributeProfile
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile", &AttrGetTPAttributeProfile{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile",
+		&AttrGetTPAttributeProfile{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAlsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpAlsPrf, reply)
@@ -201,7 +202,9 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 
 func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 	var resp string
-	if err := tpAlsPrfRPC.Call("ApierV1.RemTPAttributeProfile", &AttrRemTPAttributeProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &resp); err != nil {
+	if err := tpAlsPrfRPC.Call("ApierV1.RemTPAttributeProfile",
+		&AttrRemTPAttributeProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"},
+		&resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -210,7 +213,9 @@ func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfAfterRemove(t *testing.T) {
 	var reply *utils.TPAttributeProfile
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile", &AttrGetTPAttributeProfile{TPid: "TP1", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile",
+		&AttrGetTPAttributeProfile{TPid: "TP1", ID: "ALS1"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

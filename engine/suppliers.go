@@ -32,13 +32,14 @@ import (
 
 // Supplier defines supplier related information used within a SupplierProfile
 type Supplier struct {
-	ID            string // SupplierID
-	FilterIDs     []string
-	AccountIDs    []string
-	RatingPlanIDs []string // used when computing price
-	ResourceIDs   []string // queried in some strategies
-	StatIDs       []string // queried in some strategies
-	Weight        float64
+	ID                 string // SupplierID
+	FilterIDs          []string
+	AccountIDs         []string
+	RatingPlanIDs      []string // used when computing price
+	ResourceIDs        []string // queried in some strategies
+	StatIDs            []string // queried in some strategies
+	Weight             float64
+	SupplierParameters string
 }
 
 // SupplierProfile represents the configuration of a Supplier profile
