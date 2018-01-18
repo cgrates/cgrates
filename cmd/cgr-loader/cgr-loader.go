@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -32,19 +33,19 @@ import (
 )
 
 var (
-	datadb_type = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <redis>")
-	datadb_host = flag.String("datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
-	datadb_port = flag.String("datadb_port", config.CgrConfig().DataDbPort, "The DataDb port to bind to.")
-	datadb_name = flag.String("datadb_name", config.CgrConfig().DataDbName, "The name/number of the DataDb to connect to.")
-	datadb_user = flag.String("datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
-	datadb_pass = flag.String("datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
+	datadb_type = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb database <*redis|*mongo>")
+	datadb_host = flag.String("datadb_host", utils.MetaDynamic, "The DataDb host to connect to.")
+	datadb_port = flag.String("datadb_port", utils.MetaDynamic, "The DataDb port to bind to.")
+	datadb_name = flag.String("datadb_name", utils.MetaDynamic, "The name/number of the DataDb to connect to.")
+	datadb_user = flag.String("datadb_user", utils.MetaDynamic, "The DataDb user to sign in as.")
+	datadb_pass = flag.String("datadb_passwd", utils.MetaDynamic, "The DataDb user's password.")
 
-	stor_db_type = flag.String("stordb_type", config.CgrConfig().StorDBType, "The type of the storDb database <mysql>")
-	stor_db_host = flag.String("stordb_host", config.CgrConfig().StorDBHost, "The storDb host to connect to.")
-	stor_db_port = flag.String("stordb_port", config.CgrConfig().StorDBPort, "The storDb port to bind to.")
-	stor_db_name = flag.String("stordb_name", config.CgrConfig().StorDBName, "The name/number of the storDb to connect to.")
-	stor_db_user = flag.String("stordb_user", config.CgrConfig().StorDBUser, "The storDb user to sign in as.")
-	stor_db_pass = flag.String("stordb_passwd", config.CgrConfig().StorDBPass, "The storDb user's password.")
+	stor_db_type = flag.String("stordb_type", config.CgrConfig().StorDBType, "The type of the storDb database <*mysql|*postgres|*mongo>")
+	stor_db_host = flag.String("stordb_host", utils.MetaDynamic, "The storDb host to connect to.")
+	stor_db_port = flag.String("stordb_port", utils.MetaDynamic, "The storDb port to bind to.")
+	stor_db_name = flag.String("stordb_name", utils.MetaDynamic, "The name/number of the storDb to connect to.")
+	stor_db_user = flag.String("stordb_user", utils.MetaDynamic, "The storDb user to sign in as.")
+	stor_db_pass = flag.String("stordb_passwd", utils.MetaDynamic, "The storDb user's password.")
 
 	dbdata_encoding = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
 
@@ -80,6 +81,21 @@ func main() {
 	var storDb engine.LoadStorage
 	var rater, cdrstats, users rpcclient.RpcClientConnection
 	var loader engine.LoadReader
+
+	*datadb_type = strings.TrimPrefix(*datadb_type, "*")
+	*datadb_host = config.DBDefaults.DBHost(*datadb_type, datadb_host)
+	*datadb_port = config.DBDefaults.DBPort(*datadb_type, datadb_port)
+	*datadb_name = config.DBDefaults.DBName(*datadb_type, datadb_name)
+	*datadb_user = config.DBDefaults.DBUser(*datadb_type, datadb_user)
+	*datadb_pass = config.DBDefaults.DBPass(*datadb_type, datadb_pass)
+
+	*stor_db_type = strings.TrimPrefix(*stor_db_type, "*")
+	*stor_db_host = config.DBDefaults.DBHost(*stor_db_type, stor_db_host)
+	*stor_db_port = config.DBDefaults.DBPort(*stor_db_type, stor_db_port)
+	*stor_db_name = config.DBDefaults.DBName(*stor_db_type, stor_db_name)
+	*stor_db_user = config.DBDefaults.DBUser(*stor_db_type, stor_db_user)
+	*stor_db_pass = config.DBDefaults.DBPass(*stor_db_type, stor_db_pass)
+
 	if !*toStorDb {
 		dm, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name,
 			*datadb_user, *datadb_pass, *dbdata_encoding, config.CgrConfig().CacheCfg(), *loadHistorySize)

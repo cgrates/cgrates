@@ -42,6 +42,7 @@ const (
 )
 
 var (
+	DBDefaults        DbDefaults
 	cgrCfg            *CGRConfig     // will be shared
 	dfltFsConnConfig  *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
 	dfltKamConnConfig *KamConnConfig // Default Kamailio Connection configuration
@@ -49,8 +50,72 @@ var (
 	dfltAstConnCfg    *AsteriskConnCfg
 )
 
+func NewDbDefaults() DbDefaults {
+	deflt := DbDefaults{
+		utils.MYSQL: map[string]string{
+			"DbName": "cgrates",
+			"DbPort": "3306",
+			"DbPass": "CGRateS.org",
+		},
+		utils.POSTGRES: map[string]string{
+			"DbName": "cgrates",
+			"DbPort": "5432",
+			"DbPass": "CGRateS.org",
+		},
+		utils.MONGO: map[string]string{
+			"DbName": "cgrates",
+			"DbPort": "27017",
+			"DbPass": "",
+		},
+		utils.REDIS: map[string]string{
+			"DbName": "10",
+			"DbPort": "6379",
+			"DbPass": "",
+		},
+	}
+	return deflt
+}
+
+type DbDefaults map[string]map[string]string
+
+func (dbDflt DbDefaults) DBName(dbType string, flagInput *string) string {
+	if *flagInput != utils.MetaDynamic {
+		return *flagInput
+	}
+	return dbDflt[dbType]["DbName"]
+}
+
+func (DbDefaults) DBUser(dbType string, flagInput *string) string {
+	if *flagInput != utils.MetaDynamic {
+		return *flagInput
+	}
+	return utils.CGRATES
+}
+
+func (DbDefaults) DBHost(dbType string, flagInput *string) string {
+	if *flagInput != utils.MetaDynamic {
+		return *flagInput
+	}
+	return utils.LOCALHOST
+}
+
+func (self DbDefaults) DBPort(dbType string, flagInput *string) string {
+	if *flagInput != utils.MetaDynamic {
+		return *flagInput
+	}
+	return self[dbType]["DbPort"]
+}
+
+func (self DbDefaults) DBPass(dbType string, flagInput *string) string {
+	if *flagInput != utils.MetaDynamic {
+		return *flagInput
+	}
+	return self[dbType]["DbPass"]
+}
+
 func init() {
 	cgrCfg, _ = NewDefaultCGRConfig()
+	DBDefaults = NewDbDefaults()
 }
 
 // Used to retrieve system configuration from other packages
