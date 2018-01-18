@@ -78,37 +78,37 @@ func NewDbDefaults() DbDefaults {
 
 type DbDefaults map[string]map[string]string
 
-func (dbDflt DbDefaults) DBName(dbType string, flagInput *string) string {
-	if *flagInput != utils.MetaDynamic {
-		return *flagInput
+func (dbDflt DbDefaults) DBName(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
 	}
 	return dbDflt[dbType]["DbName"]
 }
 
-func (DbDefaults) DBUser(dbType string, flagInput *string) string {
-	if *flagInput != utils.MetaDynamic {
-		return *flagInput
+func (DbDefaults) DBUser(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
 	}
 	return utils.CGRATES
 }
 
-func (DbDefaults) DBHost(dbType string, flagInput *string) string {
-	if *flagInput != utils.MetaDynamic {
-		return *flagInput
+func (DbDefaults) DBHost(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
 	}
 	return utils.LOCALHOST
 }
 
-func (self DbDefaults) DBPort(dbType string, flagInput *string) string {
-	if *flagInput != utils.MetaDynamic {
-		return *flagInput
+func (self DbDefaults) DBPort(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
 	}
 	return self[dbType]["DbPort"]
 }
 
-func (self DbDefaults) DBPass(dbType string, flagInput *string) string {
-	if *flagInput != utils.MetaDynamic {
-		return *flagInput
+func (self DbDefaults) DBPass(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
 	}
 	return self[dbType]["DbPass"]
 }
