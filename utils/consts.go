@@ -86,6 +86,7 @@ const (
 	GitLastLogFileName            = ".git_lastlog.txt"
 	DIAMETER_FIRMWARE_REVISION    = 918
 	REDIS_MAX_CONNS               = 10
+	CGRATES                       = "cgrates"
 	POSTGRES                      = "postgres"
 	MYSQL                         = "mysql"
 	MONGO                         = "mongo"
@@ -291,6 +292,7 @@ const (
 	CALL                          = "call"
 	EXTRA_FIELDS                  = "ExtraFields"
 	META_SURETAX                  = "*sure_tax"
+	MetaDynamic                   = "*dynamic"
 	SURETAX                       = "suretax"
 	DIAMETER_AGENT                = "diameter_agent"
 	COUNTER_EVENT                 = "*event"
