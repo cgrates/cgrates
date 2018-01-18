@@ -86,18 +86,18 @@ func main() {
 		return
 	}
 	*inDataDBType = strings.TrimPrefix(*inDataDBType, "*")
-	*inDataDBHost = config.DBDefaults.DBHost(*inDataDBType, inDataDBHost)
-	*inDataDBPort = config.DBDefaults.DBPort(*inDataDBType, inDataDBPort)
-	*inDataDBName = config.DBDefaults.DBName(*inDataDBType, inDataDBName)
-	*inDataDBUser = config.DBDefaults.DBUser(*inDataDBType, inDataDBUser)
-	*inDataDBPass = config.DBDefaults.DBPass(*inDataDBType, inDataDBPass)
+	*inDataDBHost = config.DBDefaults.DBHost(*inDataDBType, *inDataDBHost)
+	*inDataDBPort = config.DBDefaults.DBPort(*inDataDBType, *inDataDBPort)
+	*inDataDBName = config.DBDefaults.DBName(*inDataDBType, *inDataDBName)
+	*inDataDBUser = config.DBDefaults.DBUser(*inDataDBType, *inDataDBUser)
+	*inDataDBPass = config.DBDefaults.DBPass(*inDataDBType, *inDataDBPass)
 
 	*inStorDBType = strings.TrimPrefix(*inStorDBType, "*")
-	*inStorDBHost = config.DBDefaults.DBHost(*inStorDBType, inStorDBHost)
-	*inStorDBPort = config.DBDefaults.DBPort(*inStorDBType, inStorDBPort)
-	*inStorDBName = config.DBDefaults.DBName(*inStorDBType, inStorDBName)
-	*inStorDBUser = config.DBDefaults.DBUser(*inStorDBType, inStorDBUser)
-	*inStorDBPass = config.DBDefaults.DBPass(*inStorDBType, inStorDBPass)
+	*inStorDBHost = config.DBDefaults.DBHost(*inStorDBType, *inStorDBHost)
+	*inStorDBPort = config.DBDefaults.DBPort(*inStorDBType, *inStorDBPort)
+	*inStorDBName = config.DBDefaults.DBName(*inStorDBType, *inStorDBName)
+	*inStorDBUser = config.DBDefaults.DBUser(*inStorDBType, *inStorDBUser)
+	*inStorDBPass = config.DBDefaults.DBPass(*inStorDBType, *inStorDBPass)
 
 	if *outDataDBType == utils.MetaDynamic {
 		*outDataDBType = *inDataDBType
@@ -108,20 +108,20 @@ func main() {
 		*outDataDBPass = *inDataDBPass
 	} else {
 		*outDataDBType = strings.TrimPrefix(*outDataDBType, "*")
-		*outDataDBHost = config.DBDefaults.DBHost(*outDataDBType, outDataDBHost)
-		*outDataDBPort = config.DBDefaults.DBPort(*outDataDBType, outDataDBPort)
-		*outDataDBName = config.DBDefaults.DBName(*outDataDBType, outDataDBName)
-		*outDataDBUser = config.DBDefaults.DBUser(*outDataDBType, outDataDBUser)
-		*outDataDBPass = config.DBDefaults.DBPass(*outDataDBType, outDataDBPass)
+		*outDataDBHost = config.DBDefaults.DBHost(*outDataDBType, *outDataDBHost)
+		*outDataDBPort = config.DBDefaults.DBPort(*outDataDBType, *outDataDBPort)
+		*outDataDBName = config.DBDefaults.DBName(*outDataDBType, *outDataDBName)
+		*outDataDBUser = config.DBDefaults.DBUser(*outDataDBType, *outDataDBUser)
+		*outDataDBPass = config.DBDefaults.DBPass(*outDataDBType, *outDataDBPass)
 	}
 
 	if *outStorDBType != utils.MetaDynamic {
 		*outStorDBType = strings.TrimPrefix(*outStorDBType, "*")
-		*outStorDBHost = config.DBDefaults.DBHost(*outStorDBType, outStorDBHost)
-		*outStorDBPort = config.DBDefaults.DBPort(*outStorDBType, outStorDBPort)
-		*outStorDBName = config.DBDefaults.DBName(*outStorDBType, outStorDBName)
-		*outStorDBUser = config.DBDefaults.DBUser(*outStorDBType, outStorDBUser)
-		*outStorDBPass = config.DBDefaults.DBPass(*outStorDBType, outStorDBPass)
+		*outStorDBHost = config.DBDefaults.DBHost(*outStorDBType, *outStorDBHost)
+		*outStorDBPort = config.DBDefaults.DBPort(*outStorDBType, *outStorDBPort)
+		*outStorDBName = config.DBDefaults.DBName(*outStorDBType, *outStorDBName)
+		*outStorDBUser = config.DBDefaults.DBUser(*outStorDBType, *outStorDBUser)
+		*outStorDBPass = config.DBDefaults.DBPass(*outStorDBType, *outStorDBPass)
 	}
 
 	var dmIN *engine.DataManager

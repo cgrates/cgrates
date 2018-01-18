@@ -83,18 +83,18 @@ func main() {
 	var loader engine.LoadReader
 
 	*datadb_type = strings.TrimPrefix(*datadb_type, "*")
-	*datadb_host = config.DBDefaults.DBHost(*datadb_type, datadb_host)
-	*datadb_port = config.DBDefaults.DBPort(*datadb_type, datadb_port)
-	*datadb_name = config.DBDefaults.DBName(*datadb_type, datadb_name)
-	*datadb_user = config.DBDefaults.DBUser(*datadb_type, datadb_user)
-	*datadb_pass = config.DBDefaults.DBPass(*datadb_type, datadb_pass)
+	*datadb_host = config.DBDefaults.DBHost(*datadb_type, *datadb_host)
+	*datadb_port = config.DBDefaults.DBPort(*datadb_type, *datadb_port)
+	*datadb_name = config.DBDefaults.DBName(*datadb_type, *datadb_name)
+	*datadb_user = config.DBDefaults.DBUser(*datadb_type, *datadb_user)
+	*datadb_pass = config.DBDefaults.DBPass(*datadb_type, *datadb_pass)
 
 	*stor_db_type = strings.TrimPrefix(*stor_db_type, "*")
-	*stor_db_host = config.DBDefaults.DBHost(*stor_db_type, stor_db_host)
-	*stor_db_port = config.DBDefaults.DBPort(*stor_db_type, stor_db_port)
-	*stor_db_name = config.DBDefaults.DBName(*stor_db_type, stor_db_name)
-	*stor_db_user = config.DBDefaults.DBUser(*stor_db_type, stor_db_user)
-	*stor_db_pass = config.DBDefaults.DBPass(*stor_db_type, stor_db_pass)
+	*stor_db_host = config.DBDefaults.DBHost(*stor_db_type, *stor_db_host)
+	*stor_db_port = config.DBDefaults.DBPort(*stor_db_type, *stor_db_port)
+	*stor_db_name = config.DBDefaults.DBName(*stor_db_type, *stor_db_name)
+	*stor_db_user = config.DBDefaults.DBUser(*stor_db_type, *stor_db_user)
+	*stor_db_pass = config.DBDefaults.DBPass(*stor_db_type, *stor_db_pass)
 
 	if !*toStorDb {
 		dm, errDataDB = engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name,
