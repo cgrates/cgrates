@@ -892,3 +892,31 @@ func TestRadiusAgentCfg(t *testing.T) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors)
 	}
 }
+
+func TestDbDefaults(t *testing.T) {
+	dbdf := NewDbDefaults()
+	flagInput := utils.MetaDynamic
+	dbs := []string{utils.MONGO, utils.REDIS, utils.MYSQL}
+	for _, dbtype := range dbs {
+		host := dbdf.DBHost(dbtype, flagInput)
+		if host != utils.LOCALHOST {
+			t.Errorf("received: %+v, expecting: %+v", host, utils.LOCALHOST)
+		}
+		user := dbdf.DBUser(dbtype, flagInput)
+		if user != utils.CGRATES {
+			t.Errorf("received: %+v, expecting: %+v", user, utils.CGRATES)
+		}
+		port := dbdf.DBPort(dbtype, flagInput)
+		if port != dbdf[dbtype]["DbPort"] {
+			t.Errorf("received: %+v, expecting: %+v", port, dbdf[dbtype]["DbPort"])
+		}
+		name := dbdf.DBName(dbtype, flagInput)
+		if name != dbdf[dbtype]["DbName"] {
+			t.Errorf("received: %+v, expecting: %+v", name, dbdf[dbtype]["DbName"])
+		}
+		pass := dbdf.DBPass(dbtype, flagInput)
+		if pass != dbdf[dbtype]["DbPass"] {
+			t.Errorf("received: %+v, expecting: %+v", pass, dbdf[dbtype]["DbPass"])
+		}
+	}
+}
