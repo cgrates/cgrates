@@ -28,7 +28,7 @@ import (
 
 var (
 	splserv   SupplierService
-	sev       *utils.CGREvent
+	argPagEv  *ArgsGetSuppliers
 	dmspl     *DataManager
 	sprsmatch SupplierProfiles
 )
@@ -193,16 +193,18 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		sorter:        ssd,
 	}
 	ssd[utils.MetaLeastCost] = NewLeastCostSorter(&splserv)
-	sev = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "utils.CGREvent1",
-		Event: map[string]interface{}{
-			"supplierprofile1": "Supplier",
-			"supplierprofile2": "Supplier",
-			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC).Local(),
-			"UsageInterval":    "1s",
-			"PddInterval":      "1s",
-			"Weight":           "20.0",
+	argPagEv = &ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"supplierprofile1": "Supplier",
+				"supplierprofile2": "Supplier",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC).Local(),
+				"UsageInterval":    "1s",
+				"PddInterval":      "1s",
+				"Weight":           "20.0",
+			},
 		},
 	}
 	sprsmatch = SupplierProfiles{
@@ -291,7 +293,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 }
 
 func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {
-	sprf, err := splserv.matchingSupplierProfilesForEvent(sev)
+	sprf, err := splserv.matchingSupplierProfilesForEvent(&argPagEv.CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -330,11 +332,97 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 			},
 		},
 	}
-	sprf, err := splserv.sortedSuppliersForEvent(sev)
+	sprf, err := splserv.sortedSuppliersForEvent(argPagEv)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
 		t.Errorf("Expecting: %+v, received: %+v", eFirstSupplierProfile, sprf)
+	}
+}
+
+func TestSuppliersSortedForEventWithLimit(t *testing.T) {
+	eFirstSupplierProfile := &SortedSuppliers{
+		ProfileID: "supplierprofile2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					"Weight": 30.0,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+		},
+	}
+	argPagEv.Paginator = utils.Paginator{
+		Limit: utils.IntPointer(2),
+	}
+	sprf, err := splserv.sortedSuppliersForEvent(argPagEv)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", eFirstSupplierProfile, sprf)
+	}
+}
+
+func TestSuppliersSortedForEventWithOffset(t *testing.T) {
+	eFirstSupplierProfile := &SortedSuppliers{
+		ProfileID: "supplierprofile2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					"Weight": 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	argPagEv.Paginator = utils.Paginator{
+		Offset: utils.IntPointer(2),
+	}
+	sprf, err := splserv.sortedSuppliersForEvent(argPagEv)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstSupplierProfile), utils.ToJSON(sprf))
+	}
+}
+
+func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
+	eFirstSupplierProfile := &SortedSuppliers{
+		ProfileID: "supplierprofile2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+		},
+	}
+	argPagEv.Paginator = utils.Paginator{
+		Limit:  utils.IntPointer(1),
+		Offset: utils.IntPointer(1),
+	}
+	sprf, err := splserv.sortedSuppliersForEvent(argPagEv)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstSupplierProfile), utils.ToJSON(sprf))
 	}
 }

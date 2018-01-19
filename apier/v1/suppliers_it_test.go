@@ -123,12 +123,14 @@ func testV1SplSFromFolder(t *testing.T) {
 }
 
 func testV1SplSGetWeightSuppliers(t *testing.T) {
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testV1SplSGetWeightSuppliers",
-		Event: map[string]interface{}{
-			utils.Account:     "1007",
-			utils.Destination: "+491511231234",
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetWeightSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1007",
+				utils.Destination: "+491511231234",
+			},
 		},
 	}
 	eSpls := engine.SortedSuppliers{
@@ -160,15 +162,17 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 }
 
 func testV1SplSGetLeastCostSuppliers(t *testing.T) {
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testV1SplSGetLeastCostSuppliers",
-		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Subject:     "1001",
-			utils.Destination: "1002",
-			utils.AnswerTime:  time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-			utils.Usage:       "1m20s",
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetLeastCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.AnswerTime:  time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
 		},
 	}
 	eSpls := engine.SortedSuppliers{

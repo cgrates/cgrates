@@ -273,9 +273,9 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 
 // supliersForEvent will return the list of valid supplier IDs
 // for event based on filters and sorting algorithms
-func (spS *SupplierService) sortedSuppliersForEvent(ev *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
+func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	var suppPrfls SupplierProfiles
-	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(ev); err != nil {
+	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent); err != nil {
 		return
 	} else if len(suppPrfls) == 0 {
 		return nil, utils.ErrNotFound
@@ -284,8 +284,8 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *utils.CGREvent) (sortedS
 	var spls []*Supplier
 	for _, s := range splPrfl.Suppliers {
 		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
-			if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
-				ev.Event, s.FilterIDs); err != nil {
+			if pass, err := spS.filterS.PassFiltersForEvent(args.Tenant,
+				args.Event, s.FilterIDs); err != nil {
 				return nil, err
 			} else if !pass {
 				continue
@@ -293,12 +293,31 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *utils.CGREvent) (sortedS
 		}
 		spls = append(spls, s)
 	}
-	return spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, ev)
+	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, &args.CGREvent)
+	if err != nil {
+		return nil, err
+	}
+	if args.Paginator.Offset != nil {
+		if *args.Paginator.Offset <= len(sortedSuppliers.SortedSuppliers) {
+			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[*args.Paginator.Offset:]
+		}
+	}
+	if args.Paginator.Limit != nil {
+		if *args.Paginator.Limit <= len(sortedSuppliers.SortedSuppliers) {
+			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[:*args.Paginator.Limit]
+		}
+	}
+	return sortedSuppliers, nil
+}
+
+type ArgsGetSuppliers struct {
+	utils.CGREvent
+	utils.Paginator
 }
 
 // V1GetSuppliersForEvent returns the list of valid supplier IDs
-func (spS *SupplierService) V1GetSuppliers(args *utils.CGREvent, reply *SortedSuppliers) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *SortedSuppliers) (err error) {
+	if missing := utils.MissingStructFields(&args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	sSps, err := spS.sortedSuppliersForEvent(args)
