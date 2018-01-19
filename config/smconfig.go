@@ -105,6 +105,7 @@ type SessionSCfg struct {
 	SessionTTLLastUsed      *time.Duration
 	SessionTTLUsage         *time.Duration
 	SessionIndexes          utils.StringMap
+	ClientProtocol          float64
 }
 
 func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
@@ -196,6 +197,9 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 	}
 	if jsnCfg.Session_indexes != nil {
 		self.SessionIndexes = utils.StringMapFromSlice(*jsnCfg.Session_indexes)
+	}
+	if jsnCfg.Client_protocol != nil {
+		self.ClientProtocol = *jsnCfg.Client_protocol
 	}
 	return nil
 }

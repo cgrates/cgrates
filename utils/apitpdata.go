@@ -1288,6 +1288,10 @@ type ArgRSv1ResourceUsage struct {
 	Units   float64
 }
 
+func (args *ArgRSv1ResourceUsage) TenantID() string {
+	return ConcatenatedKey(args.CGREvent.Tenant, args.UsageID)
+}
+
 type ArgsComputeFilterIndexes struct {
 	Tenant       string
 	AttributeIDs *[]string
@@ -1295,10 +1299,6 @@ type ArgsComputeFilterIndexes struct {
 	StatIDs      *[]string
 	SupplierIDs  *[]string
 	ThresholdIDs *[]string
-}
-
-func (args *ArgRSv1ResourceUsage) TenantID() string {
-	return ConcatenatedKey(args.CGREvent.Tenant, args.UsageID)
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval

@@ -211,6 +211,7 @@ type SessionSJsonCfg struct {
 	Session_ttl_last_used     *string
 	Session_ttl_usage         *string
 	Session_indexes           *[]string
+	Client_protocol           *float64
 }
 
 // SM-FreeSWITCH config section

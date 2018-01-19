@@ -32,11 +32,12 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
-	mux       sync.RWMutex                  // protects the SMGSession in places where is concurrently accessed
-	stopDebit chan struct{}                 // Channel to communicate with debit loops when closing the session
-	clntConn  rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
-	rals      rpcclient.RpcClientConnection // Connector to rals service
-	cdrsrv    rpcclient.RpcClientConnection // Connector to CDRS service
+	mux         sync.RWMutex                  // protects the SMGSession in places where is concurrently accessed
+	stopDebit   chan struct{}                 // Channel to communicate with debit loops when closing the session
+	clntConn    rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
+	rals        rpcclient.RpcClientConnection // Connector to rals service
+	cdrsrv      rpcclient.RpcClientConnection // Connector to CDRS service
+	clientProto float64
 
 	CGRID      string // Unique identifier for this session
 	RunID      string // Keep a reference for the derived run
@@ -157,7 +158,13 @@ func (self *SMGSession) disconnectSession(reason string) error {
 		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
 	}
 	var reply string
-	if err := self.clntConn.Call("SMGClientV1.DisconnectSession", utils.AttrDisconnectSession{EventStart: self.EventStart, Reason: reason}, &reply); err != nil {
+	servMethod := "SessionSv1.DisconnectSession"
+	if self.clientProto == 0 { // competibility with OpenSIPS
+		servMethod = "SMGClientV1.DisconnectSession"
+	}
+	if err := self.clntConn.Call(servMethod,
+		utils.AttrDisconnectSession{EventStart: self.EventStart, Reason: reason},
+		&reply); err != nil {
 		return err
 	} else if reply != utils.OK {
 		return errors.New(fmt.Sprintf("Unexpected disconnect reply: %s", reply))
