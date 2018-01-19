@@ -28,6 +28,7 @@ import (
 
 var (
 	atrPs AttributeProfiles
+	sev   *utils.CGREvent
 	srv   AttributeService
 	dmAtr *DataManager
 )
