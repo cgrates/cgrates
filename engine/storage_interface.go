@@ -26,8 +26,8 @@ import (
 	"reflect"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/globalsign/mgo/bson"
 	"github.com/ugorji/go/codec"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type Storage interface {

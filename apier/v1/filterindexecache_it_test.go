@@ -210,7 +210,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -224,7 +224,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		ID:        "TEST_PROFILE1",
 		FilterIDs: []string{"TestFilter"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		MinHits:   1,
 		Recurrent: true,
@@ -319,7 +319,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
@@ -332,7 +332,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		ID:        "TEST_PROFILE1",
 		FilterIDs: []string{"TestFilter2"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Recurrent: true,
 		MinSleep:  time.Duration(5 * time.Minute),
@@ -406,7 +406,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
@@ -422,7 +422,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		t.Error(err)
 	}
 	reply.FilterIDs = []string{"TestFilter3"}
-	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local()}
+	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC)}
 
 	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", reply, &result); err != nil {
 		t.Error(err)
@@ -589,7 +589,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -603,7 +603,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		ID:        "TEST_PROFILE1",
 		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
@@ -734,7 +734,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -748,7 +748,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		ID:        "TEST_PROFILE1",
 		FilterIDs: []string{"FLTR_2"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
@@ -810,7 +810,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -825,7 +825,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		t.Error(err)
 	}
 	(*reply).FilterIDs = []string{"FLTR_3"}
-	(*reply).ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}
+	(*reply).ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 	if err := tFIdxCaRpc.Call("ApierV1.SetStatQueueProfile", reply, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -967,7 +967,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -982,7 +982,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 		Contexts:  []string{"*rating"},
 		FilterIDs: []string{"TestFilter"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
@@ -1075,7 +1075,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -1090,7 +1090,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 		Contexts:  []string{"*rating"},
 		FilterIDs: []string{"TestFilter2"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
@@ -1156,7 +1156,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -1319,7 +1319,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -1333,7 +1333,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		ID:        "RCFG1",
 		FilterIDs: []string{"FLTR_RES_RCFG1"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		UsageTTL:          time.Duration(0) * time.Microsecond,
 		AllocationMessage: "Approved",
@@ -1455,7 +1455,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -1469,7 +1469,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		ID:        "RCFG1",
 		FilterIDs: []string{"FLTR_RES_RCFG2"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		UsageTTL:          time.Duration(10) * time.Microsecond,
 		Limit:             10,
@@ -1533,7 +1533,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -1549,7 +1549,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 	}
 
 	reply.FilterIDs = []string{"FLTR_RES_RCFG3"}
-	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local()}
+	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 
 	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile", reply, &result); err != nil {
 		t.Error(err)

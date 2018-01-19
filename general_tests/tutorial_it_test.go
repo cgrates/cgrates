@@ -589,8 +589,8 @@ func TestTutITProcessExternalCdrUP(t *testing.T) {
 		ToR:      utils.VOICE,
 		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1004", Subject: "1004", Destination: "1001",
-		SetupTime:  time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC).Local().Format(time.RFC3339),
-		AnswerTime: time.Date(2014, 8, 4, 13, 0, 7, 0, time.UTC).Local().Format(time.RFC3339), Usage: "2s",
+		SetupTime:  time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC).Format(time.RFC3339),
+		AnswerTime: time.Date(2014, 8, 4, 13, 0, 7, 0, time.UTC).Format(time.RFC3339), Usage: "2s",
 		ExtraFields: map[string]string{"Cli": "+4986517174964", "fieldextr2": "valextr2", "SysUserName": "danb4"},
 		RunID:       utils.DEFAULT_RUNID, Cost: 1}
 	var cdrs []*engine.ExternalCDR
@@ -1338,8 +1338,8 @@ func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
 			Destination: "1003",
 			Timespans: []*engine.TimeSpan{
 				&engine.TimeSpan{
-					TimeStart:     time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC).Local(), // MongoDB saves timestamps in local timezone
-					TimeEnd:       time.Date(2016, 4, 6, 13, 31, 30, 0, time.UTC).Local(),
+					TimeStart:     time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
+					TimeEnd:       time.Date(2016, 4, 6, 13, 31, 30, 0, time.UTC),
 					DurationIndex: 0,
 					RateInterval: &engine.RateInterval{
 						Rating: &engine.RIRate{Rates: engine.RateGroups{

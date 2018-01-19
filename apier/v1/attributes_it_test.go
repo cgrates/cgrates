@@ -196,12 +196,12 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Contexts, attrReply.Contexts)
 	} else if !reflect.DeepEqual(eAttrPrf.FilterIDs, attrReply.FilterIDs) {
 		t.Errorf("Expecting: %s, received: %s", eAttrPrf.FilterIDs, attrReply.FilterIDs)
-	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ActivationTime.Local(), attrReply.ActivationInterval.ActivationTime.Local()) {
+	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ActivationTime, attrReply.ActivationInterval.ActivationTime) {
 		t.Errorf("Expecting: %s, received: %s",
-			eAttrPrf.ActivationInterval.ActivationTime.Local(), attrReply.ActivationInterval.ActivationTime.Local())
-	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ExpiryTime.Local(), attrReply.ActivationInterval.ExpiryTime.Local()) {
+			eAttrPrf.ActivationInterval.ActivationTime, attrReply.ActivationInterval.ActivationTime)
+	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ExpiryTime, attrReply.ActivationInterval.ExpiryTime) {
 		t.Errorf("Expecting: %s, received: %s",
-			eAttrPrf.ActivationInterval.ExpiryTime.Local(), attrReply.ActivationInterval.ExpiryTime.Local())
+			eAttrPrf.ActivationInterval.ExpiryTime, attrReply.ActivationInterval.ExpiryTime)
 	} else if !reflect.DeepEqual(eAttrPrf.Attributes, attrReply.Attributes) && !reflect.DeepEqual(reverseSubstitute, attrReply.Attributes) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf.Attributes), utils.ToJSON(attrReply.Attributes))
 	} else if !reflect.DeepEqual(eAttrPrf.Weight, attrReply.Weight) {
@@ -265,8 +265,8 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		Contexts:  []string{"*rating"},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{

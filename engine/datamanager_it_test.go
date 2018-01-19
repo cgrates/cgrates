@@ -78,7 +78,7 @@ func testDMitDataFlush(t *testing.T) {
 }
 
 func testDMitCRUDStatQueue(t *testing.T) {
-	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local())
+	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC))
 	sq := &StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "testDMitCRUDStatQueue",

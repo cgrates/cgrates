@@ -20,12 +20,13 @@ package engine
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 )
 
 func (ms *MongoStorage) GetTpIds(colName string) ([]string, error) {

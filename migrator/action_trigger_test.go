@@ -27,7 +27,7 @@ import (
 )
 
 func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
-	tim := time.Date(0001, time.January, 1, 2, 0, 0, 0, time.UTC).Local()
+	tim := time.Date(0001, time.January, 1, 2, 0, 0, 0, time.UTC)
 	v1atrs := &v1ActionTrigger{
 		Id:                    "Test",
 		BalanceType:           "*monetary",
