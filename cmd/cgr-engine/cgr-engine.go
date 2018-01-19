@@ -66,8 +66,7 @@ var (
 	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
 	logLevel          = flag.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
 
-	cfg   *config.CGRConfig
-	smRpc *v1.SessionManagerV1
+	cfg *config.CGRConfig
 )
 
 func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
@@ -337,7 +336,6 @@ func startSmKamailio(internalRaterChan, internalCDRSChan, internalRsChan chan rp
 		}
 	}
 	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, ralsConn, cdrsConn, rlSConn, cfg.DefaultTimezone)
-	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SMKamailio> error: %s!", err))
 	}
@@ -367,7 +365,6 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 		}
 	}
 	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, cfg.Reconnects, ralsConn, cdrsConn, cfg.DefaultTimezone)
-	smRpc.SMs = append(smRpc.SMs, sm)
 	if err := sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
 	}
