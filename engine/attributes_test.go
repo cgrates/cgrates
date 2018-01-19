@@ -68,8 +68,8 @@ func testPopulateAttrService(t *testing.T) {
 			Contexts:  []string{context},
 			FilterIDs: []string{"filter1"},
 			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)).Local(),
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)),
 			},
 			Attributes: attrMap,
 			Weight:     20,
@@ -80,8 +80,8 @@ func testPopulateAttrService(t *testing.T) {
 			Contexts:  []string{context},
 			FilterIDs: []string{"filter2"},
 			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)).Local(),
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)),
 			},
 			Attributes: attrMap,
 			Weight:     20,
@@ -124,7 +124,7 @@ func testPopulateAttrService(t *testing.T) {
 		Event: map[string]interface{}{
 			"attributeprofile1": "Attribute",
 			"attributeprofile2": "Attribute",
-			utils.AnswerTime:    time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC).Local(),
+			utils.AnswerTime:    time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			"UsageInterval":     "1s",
 			"PddInterval":       "1s",
 			"Weight":            "20.0",

@@ -156,7 +156,7 @@ func main() {
 	}
 	var timeparsed time.Duration
 	var err error
-	tstart := time.Now().Local()
+	tstart := time.Now()
 	timeparsed, err = utils.ParseDurationWithNanosecs(*usage)
 	tend := tstart.Add(timeparsed)
 	cd := &engine.CallDescriptor{

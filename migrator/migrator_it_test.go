@@ -301,15 +301,15 @@ func testFlush(t *testing.T) {
 }
 
 func testMigratorAccounts(t *testing.T) {
-	v1d := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1b := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.DATA: v1BalanceChain{v1d}, utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
+	v1d := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
+	v1b := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
+	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.DATA: v1BalanceChain{v1d}, utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
 
-	v2d := &engine.Balance{Uuid: "", ID: "", Value: 100000, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
+	v2d := &engine.Balance{Uuid: "", ID: "", Value: 100000, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	v2b := &engine.Balance{Uuid: "", ID: "", Value: 0.0001, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
+	v2b := &engine.Balance{Uuid: "", ID: "", Value: 0.0001, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
+	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
 		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
 	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.DATA: engine.Balances{v2d}, utils.VOICE: engine.Balances{v2b}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
 	switch {
@@ -462,7 +462,7 @@ func testMigratorActionPlans(t *testing.T) {
 }
 
 func testMigratorActionTriggers(t *testing.T) {
-	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()
+	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
 	v1atrs := &v1ActionTriggers{
 		&v1ActionTrigger{
 			Id:                    "Test",
@@ -853,7 +853,7 @@ func testMigratorSharedGroups(t *testing.T) {
 }
 
 func testMigratorStats(t *testing.T) {
-	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()
+	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
 	var filters []*engine.RequestFilter
 	v1Sts := &v1Stat{
 		Id:              "test",                         // Config id, unique per config instance
@@ -1112,7 +1112,7 @@ func testMigratorStats(t *testing.T) {
 }
 
 func testMigratorThreshold(t *testing.T) {
-	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()
+	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
 	tenant := config.CgrConfig().DefaultTenant
 	var filters []*engine.RequestFilter
 	threshold := &v2ActionTrigger{
@@ -1337,25 +1337,25 @@ func testMigratorCdrStats(t *testing.T) {
 		TimeWindow:      time.Duration(1) * time.Second, // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
 		SaveInterval:    time.Duration(1) * time.Second,
 		Metrics:         []string{engine.ASR, engine.PDD, engine.ACD, engine.TCD, engine.ACC, engine.TCC, engine.DDC},
-		SetupInterval:   []time.Time{time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()}, // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
-		TOR:             []string{""},                                                                     // CDRFieldFilter on TORs
-		CdrHost:         []string{""},                                                                     // CDRFieldFilter on CdrHosts
-		CdrSource:       []string{""},                                                                     // CDRFieldFilter on CdrSources
-		ReqType:         []string{""},                                                                     // CDRFieldFilter on RequestTypes
-		Direction:       []string{""},                                                                     // CDRFieldFilter on Directions
-		Tenant:          []string{""},                                                                     // CDRFieldFilter on Tenants
-		Category:        []string{""},                                                                     // CDRFieldFilter on Categories
-		Account:         []string{""},                                                                     // CDRFieldFilter on Accounts
-		Subject:         []string{""},                                                                     // CDRFieldFilter on Subjects
-		DestinationIds:  []string{""},                                                                     // CDRFieldFilter on DestinationPrefixes
-		UsageInterval:   []time.Duration{time.Duration(1) * time.Second},                                  // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
-		PddInterval:     []time.Duration{time.Duration(1) * time.Second},                                  // CDRFieldFilter on PddInterval, 2 or less items (>= Pdd, <Pdd)
-		Supplier:        []string{},                                                                       // CDRFieldFilter on Suppliers
-		DisconnectCause: []string{},                                                                       // Filter on DisconnectCause
-		MediationRunIds: []string{},                                                                       // CDRFieldFilter on MediationRunIds
-		RatedAccount:    []string{},                                                                       // CDRFieldFilter on RatedAccounts
-		RatedSubject:    []string{},                                                                       // CDRFieldFilter on RatedSubjects
-		CostInterval:    []float64{},                                                                      // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
+		SetupInterval:   []time.Time{time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)}, // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
+		TOR:             []string{""},                                                             // CDRFieldFilter on TORs
+		CdrHost:         []string{""},                                                             // CDRFieldFilter on CdrHosts
+		CdrSource:       []string{""},                                                             // CDRFieldFilter on CdrSources
+		ReqType:         []string{""},                                                             // CDRFieldFilter on RequestTypes
+		Direction:       []string{""},                                                             // CDRFieldFilter on Directions
+		Tenant:          []string{""},                                                             // CDRFieldFilter on Tenants
+		Category:        []string{""},                                                             // CDRFieldFilter on Categories
+		Account:         []string{""},                                                             // CDRFieldFilter on Accounts
+		Subject:         []string{""},                                                             // CDRFieldFilter on Subjects
+		DestinationIds:  []string{""},                                                             // CDRFieldFilter on DestinationPrefixes
+		UsageInterval:   []time.Duration{time.Duration(1) * time.Second},                          // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
+		PddInterval:     []time.Duration{time.Duration(1) * time.Second},                          // CDRFieldFilter on PddInterval, 2 or less items (>= Pdd, <Pdd)
+		Supplier:        []string{},                                                               // CDRFieldFilter on Suppliers
+		DisconnectCause: []string{},                                                               // Filter on DisconnectCause
+		MediationRunIds: []string{},                                                               // CDRFieldFilter on MediationRunIds
+		RatedAccount:    []string{},                                                               // CDRFieldFilter on RatedAccounts
+		RatedSubject:    []string{},                                                               // CDRFieldFilter on RatedSubjects
+		CostInterval:    []float64{},                                                              // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
 	}
 	switch action {
 	case Move:
@@ -1490,7 +1490,7 @@ func testMigratorLCR(t *testing.T) {
 		Subject:   "testOnStorITCRUDLCR",
 		Activations: []*engine.LCRActivation{
 			&engine.LCRActivation{
-				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 				Entries: []*engine.LCREntry{
 					&engine.LCREntry{
 						DestinationId:  "EU_LANDLINE",
@@ -1600,7 +1600,7 @@ func testMigratorRatingProfile(t *testing.T) {
 		Id: "*out:test:1:trp",
 		RatingPlanActivations: engine.RatingPlanActivations{
 			&engine.RatingPlanActivation{
-				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 				RatingPlanId:    "TDRT",
 				FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:rif"},
 				CdrStatQueueIds: []string{},
@@ -1641,8 +1641,8 @@ func testMigratorRQF(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	switch action {
@@ -1677,8 +1677,8 @@ func testMigratorResource(t *testing.T) {
 		Weight:    10,
 		FilterIDs: []string{"FLTR_RES_RL_TEST2"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
 		Limit:      1,
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
@@ -1717,7 +1717,7 @@ func testMigratorResource(t *testing.T) {
 
 func testMigratorSubscribers(t *testing.T) {
 	sbsc := &engine.SubscriberData{
-		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
 	sbscID := "testOnStorITCRUDSubscribers"
 

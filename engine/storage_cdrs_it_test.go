@@ -196,8 +196,8 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		Destination: "+4986517174963",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:     time.Date(2015, 12, 28, 8, 53, 0, 0, time.UTC).Local(), // MongoDB saves timestamps in local timezone
-				TimeEnd:       time.Date(2015, 12, 28, 8, 54, 40, 0, time.UTC).Local(),
+				TimeStart:     time.Date(2015, 12, 28, 8, 53, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2015, 12, 28, 8, 54, 40, 0, time.UTC),
 				DurationIndex: 0,
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},

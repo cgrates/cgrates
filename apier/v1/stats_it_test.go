@@ -73,7 +73,7 @@ func init() {
 var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSLoadConfig,
 	testV1STSInitDataDb,
-	testV1STSStartEngine,
+	//testV1STSStartEngine,
 	testV1STSRpcConn,
 	testV1STSFromFolder,
 	testV1STSGetStats,
@@ -280,8 +280,8 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -300,8 +300,8 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		ID:        "TEST_PROFILE1",
 		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
@@ -330,7 +330,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig), utils.ToJSON(reply))
 	}
 }
 
@@ -347,8 +347,8 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := stsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {

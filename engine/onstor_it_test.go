@@ -113,7 +113,7 @@ func TestOnStorITRedis(t *testing.T) {
 }
 
 func TestOnStorITMongoConnect(t *testing.T) {
-	sleepDelay = 5 * time.Millisecond
+	sleepDelay = 10 * time.Microsecond
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
@@ -442,9 +442,9 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 			ThresholdValue:    2,
 			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 			ActionsID:         "TEST_ACTIONS",
-			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()},
+			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)},
 	}
 	atsID := ats[0].ID
 	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
@@ -797,7 +797,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 		Id: "*out:test:1:trp",
 		RatingPlanActivations: RatingPlanActivations{
 			&RatingPlanActivation{
-				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 				RatingPlanId:    "TDRT",
 				FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:rif"},
 				CdrStatQueueIds: []string{},
@@ -815,7 +815,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpf, rcv) {
-		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
 	}
 	//get from database
 	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
@@ -833,7 +833,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 	//update
 	rpf.RatingPlanActivations = RatingPlanActivations{
 		&RatingPlanActivation{
-			ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+			ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 			RatingPlanId:    "TDRT",
 			FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:teo"},
 			CdrStatQueueIds: []string{},
@@ -965,7 +965,7 @@ func testOnStorITLCR(t *testing.T) {
 		Subject:   "*any",
 		Activations: []*LCRActivation{
 			&LCRActivation{
-				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
 					&LCREntry{
 						DestinationId:  "EU_LANDLINE",
@@ -1016,7 +1016,7 @@ func testOnStorITLCR(t *testing.T) {
 	//update
 	lcr.Activations = []*LCRActivation{
 		&LCRActivation{
-			ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 			Entries: []*LCREntry{
 				&LCREntry{
 					DestinationId:  "EU_LANDLINE",
@@ -1349,9 +1349,9 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 			ThresholdValue:    2,
 			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 			ActionsID:         "TEST_ACTIONS",
-			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()},
+			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)},
 	}
 	atsID := ats[0].ID
 	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -1548,9 +1548,9 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 		conf: &CdrStats{Id: "TTT"},
 		Cdrs: []*QCdr{
 			&QCdr{Cost: 9.0,
-				SetupTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-				AnswerTime: time.Date(2012, 1, 1, 0, 0, 10, 0, time.UTC).Local(),
-				EventTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				SetupTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+				AnswerTime: time.Date(2012, 1, 1, 0, 0, 10, 0, time.UTC),
+				EventTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 			}},
 	}
 	if _, rcvErr := onStor.GetCdrStatsQueue(sq.GetId()); rcvErr != utils.ErrNotFound {
@@ -1579,7 +1579,7 @@ func testOnStorITCRUDSubscribers(t *testing.T) {
 		t.Errorf("Received subscribers: %+v", sbs)
 	}
 	sbsc := &SubscriberData{
-		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
 	sbscID := "testOnStorITCRUDSubscribers"
 	if err := onStor.SetSubscriber(sbscID, sbsc); err != nil {
@@ -1766,8 +1766,8 @@ func testOnStorITResourceProfile(t *testing.T) {
 		Weight:    10,
 		FilterIDs: []string{"FLTR_RES_RL_TEST2"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
 		Limit:      1,
 		Thresholds: []string{"TEST_ACTIONS"},
 		UsageTTL:   time.Duration(1 * time.Millisecond),
@@ -1842,7 +1842,7 @@ func testOnStorITResource(t *testing.T) {
 		Usages: map[string]*ResourceUsage{
 			"RU1": &ResourceUsage{
 				ID:         "RU1",
-				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 				Units:      2,
 			},
 		},
@@ -1979,7 +1979,7 @@ func testOnStorITTiming(t *testing.T) {
 }
 
 func testOnStorITCRUDHistory(t *testing.T) {
-	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()
+	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)
 	ist := &utils.LoadInstance{"Load", "RatingLoad", "Account", time}
 	if err := onStor.DataDB().AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -2089,7 +2089,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 }
 
 func testOnStorITStatQueue(t *testing.T) {
-	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local())
+	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC))
 	sq := &StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "Test_StatQueue",
@@ -2196,8 +2196,8 @@ func testOnStorITThresholdProfile(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	th := &ThresholdProfile{
@@ -2281,7 +2281,7 @@ func testOnStorITThreshold(t *testing.T) {
 	th := &Threshold{
 		Tenant: "cgrates.org",
 		ID:     "TH1",
-		Snooze: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+		Snooze: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC),
 		Hits:   10,
 	}
 	if _, rcvErr := onStor.GetThreshold("cgrates.org", "TH1",
@@ -2358,8 +2358,8 @@ func testOnStorITFilter(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
@@ -2441,7 +2441,7 @@ func testOnStorITSupplierProfile(t *testing.T) {
 		ID:        "SPRF_1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Sorting:       "*lowest_cost",
 		SortingParams: []string{},
@@ -2557,7 +2557,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		ID:        "AttrPrf1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Contexts:   []string{"con1"},
 		Attributes: mapSubstitutes,
@@ -2638,8 +2638,8 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := onStor.SetFilter(fp); err != nil {
@@ -2726,8 +2726,8 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := onStor.SetFilter(fp2); err != nil {
@@ -2793,8 +2793,8 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := onStor.SetFilter(fp3); err != nil {
@@ -2885,8 +2885,8 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := onStor.SetFilter(fp); err != nil {
@@ -2905,7 +2905,7 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 		ID:        "AttrPrf",
 		FilterIDs: []string{"Filter1"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Contexts:   []string{"con1", "con2"},
 		Attributes: mapSubstitutes,
@@ -3024,8 +3024,8 @@ func testOnStorITTestThresholdInlineFilterIndexing(t *testing.T) {
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := onStor.SetFilter(fp); err != nil {
