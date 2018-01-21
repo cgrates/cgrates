@@ -66,16 +66,16 @@ var (
 		CacheFilters:                   FilterPrefix,
 		CacheSupplierProfiles:          SupplierProfilePrefix,
 		CacheAttributeProfiles:         AttributeProfilePrefix,
-		CacheResourceFilterIndexes:     ResourceProfilesStringIndex,
-		CacheResourceFilterRevIndexes:  ResourceProfilesStringRevIndex,
-		CacheStatFilterIndexes:         StatQueuesStringIndex,
-		CacheStatFilterRevIndexes:      StatQueuesStringRevIndex,
-		CacheThresholdFilterIndexes:    ThresholdStringIndex,
-		CacheThresholdFilterRevIndexes: ThresholdStringRevIndex,
-		CacheSupplierFilterIndexes:     SupplierProfilesStringIndex,
-		CacheSupplierFilterRevIndexes:  SupplierProfilesStringRevIndex,
-		CacheAttributeFilterIndexes:    AttributeProfilesStringIndex,
-		CacheAttributeFilterRevIndexes: AttributeProfilesStringRevIndex,
+		CacheResourceFilterIndexes:     ResourceFilterIndexes,
+		CacheResourceFilterRevIndexes:  ResourceFilterRevIndexes,
+		CacheStatFilterIndexes:         StatFilterIndexes,
+		CacheStatFilterRevIndexes:      StatFilterRevIndexes,
+		CacheThresholdFilterIndexes:    ThresholdFilterIndexes,
+		CacheThresholdFilterRevIndexes: ThresholdFilterRevIndexes,
+		CacheSupplierFilterIndexes:     SupplierFilterIndexes,
+		CacheSupplierFilterRevIndexes:  SupplierFilterRevIndexes,
+		CacheAttributeFilterIndexes:    AttributeFilterIndexes,
+		CacheAttributeFilterRevIndexes: AttributeFilterRevIndexes,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 )
@@ -703,16 +703,16 @@ const (
 
 //Prefix for indexing
 const (
-	ResourceProfilesStringIndex     = "rsi_"
-	ResourceProfilesStringRevIndex  = "rsr_"
-	StatQueuesStringIndex           = "ssi_"
-	StatQueuesStringRevIndex        = "ssr_"
-	ThresholdStringIndex            = "tsi_"
-	ThresholdStringRevIndex         = "tsr_"
-	SupplierProfilesStringIndex     = "spi_"
-	SupplierProfilesStringRevIndex  = "spr_"
-	AttributeProfilesStringIndex    = "ali_"
-	AttributeProfilesStringRevIndex = "alr_"
+	ResourceFilterIndexes     = "rfi_"
+	ResourceFilterRevIndexes  = "rfr_"
+	StatFilterIndexes         = "sfi_"
+	StatFilterRevIndexes      = "sfr_"
+	ThresholdFilterIndexes    = "tfi_"
+	ThresholdFilterRevIndexes = "tfr_"
+	SupplierFilterIndexes     = "sfi_"
+	SupplierFilterRevIndexes  = "sfr_"
+	AttributeFilterIndexes    = "afi_"
+	AttributeFilterRevIndexes = "afr_"
 )
 
 func buildCacheInstRevPrefixes() {
