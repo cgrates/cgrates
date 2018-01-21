@@ -62,11 +62,11 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 	attrIdxKey = utils.ConcatenatedKey(ev.Tenant, contextVal)
 	matchingAPs := make(map[string]*AttributeProfile)
 	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.indexedFields,
-		alS.dm, utils.AttributeProfilesStringIndex+attrIdxKey, MetaString)
+		alS.dm, utils.AttributeFilterIndexes+attrIdxKey, MetaString)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeProfilesStringIndex)
+	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for apID := range aPrflIDs {

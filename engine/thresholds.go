@@ -219,13 +219,13 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 	if len(args.ThresholdIDs) != 0 {
 		tIDs = args.ThresholdIDs
 	} else {
-		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.indexedFields, tS.dm, utils.ThresholdStringIndex+args.Tenant, MetaString)
+		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.indexedFields, tS.dm, utils.ThresholdFilterIndexes+args.Tenant, MetaString)
 		if err != nil {
 			return nil, err
 		}
 		tIDs = tIDsMap.Slice()
 	}
-	lockIDs := utils.PrefixSliceItems(tIDs, utils.ThresholdStringIndex)
+	lockIDs := utils.PrefixSliceItems(tIDs, utils.ThresholdFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for _, tID := range tIDs {

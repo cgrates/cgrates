@@ -104,24 +104,24 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 func (rfi *ReqFilterIndexer) cacheRemItemType() {
 	switch rfi.itemType {
 	case utils.ThresholdProfilePrefix:
-		cache.RemPrefixKey(utils.ThresholdStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.ThresholdStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ThresholdFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ThresholdFilterRevIndexes, true, utils.NonTransactional)
 
 	case utils.ResourceProfilesPrefix:
-		cache.RemPrefixKey(utils.ResourceProfilesStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.ResourceProfilesStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ResourceFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ResourceFilterRevIndexes, true, utils.NonTransactional)
 
 	case utils.StatQueueProfilePrefix:
-		cache.RemPrefixKey(utils.StatQueuesStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.StatQueuesStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.StatFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.StatFilterRevIndexes, true, utils.NonTransactional)
 
 	case utils.SupplierProfilePrefix:
-		cache.RemPrefixKey(utils.SupplierProfilesStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.SupplierProfilesStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.SupplierFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.SupplierFilterRevIndexes, true, utils.NonTransactional)
 
 	case utils.AttributeProfilePrefix:
-		cache.RemPrefixKey(utils.AttributeProfilesStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.AttributeProfilesStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.AttributeFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.AttributeFilterRevIndexes, true, utils.NonTransactional)
 	}
 }
 
@@ -215,20 +215,20 @@ func GetDBIndexKey(itemType, dbKeySuffix string, reverse bool) (dbKey string) {
 	var idxPrefix, rIdxPrefix string
 	switch itemType {
 	case utils.ThresholdProfilePrefix:
-		idxPrefix = utils.ThresholdStringIndex
-		rIdxPrefix = utils.ThresholdStringRevIndex
+		idxPrefix = utils.ThresholdFilterIndexes
+		rIdxPrefix = utils.ThresholdFilterRevIndexes
 	case utils.ResourceProfilesPrefix:
-		idxPrefix = utils.ResourceProfilesStringIndex
-		rIdxPrefix = utils.ResourceProfilesStringRevIndex
+		idxPrefix = utils.ResourceFilterIndexes
+		rIdxPrefix = utils.ResourceFilterRevIndexes
 	case utils.StatQueueProfilePrefix:
-		idxPrefix = utils.StatQueuesStringIndex
-		rIdxPrefix = utils.StatQueuesStringRevIndex
+		idxPrefix = utils.StatFilterIndexes
+		rIdxPrefix = utils.StatFilterRevIndexes
 	case utils.SupplierProfilePrefix:
-		idxPrefix = utils.SupplierProfilesStringIndex
-		rIdxPrefix = utils.SupplierProfilesStringRevIndex
+		idxPrefix = utils.SupplierFilterIndexes
+		rIdxPrefix = utils.SupplierFilterRevIndexes
 	case utils.AttributeProfilePrefix:
-		idxPrefix = utils.AttributeProfilesStringIndex
-		rIdxPrefix = utils.AttributeProfilesStringRevIndex
+		idxPrefix = utils.AttributeFilterIndexes
+		rIdxPrefix = utils.AttributeFilterRevIndexes
 	}
 	if reverse {
 		return rIdxPrefix + dbKeySuffix

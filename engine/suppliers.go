@@ -115,11 +115,11 @@ func (spS *SupplierService) Shutdown() error {
 func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (sPrfls SupplierProfiles, err error) {
 	matchingLPs := make(map[string]*SupplierProfile)
 	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.indexedFields,
-		spS.dm, utils.SupplierProfilesStringIndex+ev.Tenant, MetaString)
+		spS.dm, utils.SupplierFilterIndexes+ev.Tenant, MetaString)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(sPrflIDs.Slice(), utils.SupplierProfilesStringIndex)
+	lockIDs := utils.PrefixSliceItems(sPrflIDs.Slice(), utils.SupplierFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for lpID := range sPrflIDs {
