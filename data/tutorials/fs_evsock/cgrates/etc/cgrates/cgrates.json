@@ -69,9 +69,6 @@
 
 "freeswitch_agent": {
 	"enabled": true,
-	"event_socket_conns":[
-		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
-	],
 },
 
 

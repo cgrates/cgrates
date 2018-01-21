@@ -1299,7 +1299,7 @@ type V1AuthorizeReply struct {
 	Attributes         *engine.AttrSProcessEventReply
 	ResourceAllocation *string
 	MaxUsage           *time.Duration
-	Suppliers          *engine.SortedSuppliers
+	Suppliers          []string
 }
 
 // BiRPCV1Authorize performs authorization for CGREvent based on specific components
@@ -1364,9 +1364,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			sArgs, &splsReply); err != nil {
 			return utils.NewErrSupplierS(err)
 		}
-		if splsReply.SortedSuppliers != nil {
-			authReply.Suppliers = &splsReply
-		}
+		authReply.Suppliers = splsReply.SuppliersDigest()
 	}
 	return nil
 }

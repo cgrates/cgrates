@@ -141,24 +141,7 @@ func TestSSv1ItAuth(t *testing.T) {
 	if *rply.ResourceAllocation == "" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
-	eSplrs := &engine.SortedSuppliers{
-		ProfileID: "SPL_ACNT_1001",
-		Sorting:   utils.MetaWeight,
-		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					"Weight": 20.0,
-				},
-			},
-			&engine.SortedSupplier{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					"Weight": 10.0,
-				},
-			},
-		},
-	}
+	eSplrs := []string{"supplier1", "supplier2"}
 	if !reflect.DeepEqual(eSplrs, rply.Suppliers) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Suppliers))
 	}

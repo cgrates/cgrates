@@ -67,6 +67,19 @@ func (sSpls *SortedSuppliers) SortCost() {
 	})
 }
 
+// Digest returns list of supplierIDs + parameters for easier outside access
+func (sSpls *SortedSuppliers) SuppliersDigest() (sDigest []string) {
+	sDigest = make([]string, len(sSpls.SortedSuppliers))
+	for i, sSpl := range sSpls.SortedSuppliers {
+		sDigest[i] = sSpl.SupplierID
+		if sSpl.SupplierParameters != "" {
+			sDigest[i] += utils.InInFieldSep + sSpl.SupplierParameters
+		}
+
+	}
+	return
+}
+
 // SuppliersSorter is the interface which needs to be implemented by supplier sorters
 type SuppliersSorter interface {
 	SortSuppliers(string, []*Supplier, *utils.CGREvent) (*SortedSuppliers, error)

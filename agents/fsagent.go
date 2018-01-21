@@ -173,7 +173,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		}
 	}
 	if authArgs.GetSuppliers {
-		fsArray := SliceAsFsArray(authReply.Suppliers.SupplierIDs())
+		fsArray := SliceAsFsArray(authReply.Suppliers)
 		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<%s> error setting suppliers: %s", utils.FreeSWITCHAgent, err.Error()))
