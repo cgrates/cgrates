@@ -434,7 +434,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rIDs, err := matchingItemIDsForEvent(ev, rS.indexedFields, rS.dm, utils.ResourceProfilesStringIndex+tenant)
+	rIDs, err := matchingItemIDsForEvent(ev, rS.indexedFields, rS.dm, utils.ResourceProfilesStringIndex+tenant, MetaString)
 	if err != nil {
 		return nil, err
 	}

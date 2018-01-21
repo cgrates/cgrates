@@ -192,17 +192,17 @@ func testOnStorITSetGetDerivedCharges(t *testing.T) {
 
 func testOnStorITSetFilterIndexes(t *testing.T) {
 	idxes := map[string]utils.StringMap{
-		"Account:1001": utils.StringMap{
+		"*string:Account:1001": utils.StringMap{
 			"RL1": true,
 		},
-		"Account:1002": utils.StringMap{
+		"*string:Account:1002": utils.StringMap{
 			"RL1": true,
 			"RL2": true,
 		},
-		"Account:dan": utils.StringMap{
+		"*string:Account:dan": utils.StringMap{
 			"RL2": true,
 		},
-		"Subject:dan": utils.StringMap{
+		"*string:Subject:dan": utils.StringMap{
 			"RL2": true,
 			"RL3": true,
 		},
@@ -220,17 +220,17 @@ func testOnStorITSetFilterIndexes(t *testing.T) {
 
 func testOnStorITGetFilterIndexes(t *testing.T) {
 	eIdxes := map[string]utils.StringMap{
-		"Account:1001": utils.StringMap{
+		"*string:Account:1001": utils.StringMap{
 			"RL1": true,
 		},
-		"Account:1002": utils.StringMap{
+		"*string:Account:1002": utils.StringMap{
 			"RL1": true,
 			"RL2": true,
 		},
-		"Account:dan": utils.StringMap{
+		"*string:Account:dan": utils.StringMap{
 			"RL2": true,
 		},
-		"Subject:dan": utils.StringMap{
+		"*string:Subject:dan": utils.StringMap{
 			"RL2": true,
 			"RL3": true,
 		},
@@ -243,20 +243,20 @@ func testOnStorITGetFilterIndexes(t *testing.T) {
 		"Subject": "dan",
 	}
 	expectedsbjDan := map[string]utils.StringMap{
-		"Subject:dan": utils.StringMap{
+		"*string:Subject:dan": utils.StringMap{
 			"RL2": true,
 			"RL3": true,
 		},
 	}
 	if exsbjDan, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), MetaString,
 		sbjDan); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedsbjDan, exsbjDan) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedsbjDan, exsbjDan)
 	}
 	if rcv, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), MetaString,
 		nil); err != nil {
 		t.Error(err)
 	} else {
@@ -264,7 +264,7 @@ func testOnStorITGetFilterIndexes(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 		}
 	}
-	if _, err := onStor.GetFilterIndexes("unknown_key", nil); err == nil || err != utils.ErrNotFound {
+	if _, err := onStor.GetFilterIndexes("unknown_key", MetaString, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := onStor.RemoveFilterIndexes(
@@ -272,7 +272,7 @@ func testOnStorITGetFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	_, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), nil)
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), MetaString, nil)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -290,14 +290,14 @@ func testOnStorITMatchFilterIndex(t *testing.T) {
 	}
 	if rcvMp, err := onStor.MatchFilterIndex(
 		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		"Account", "1002"); err != nil {
+		MetaString, "Account", "1002"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
 	if _, err := onStor.MatchFilterIndex(
 		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		"NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
+		MetaString, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -2676,28 +2676,28 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": utils.StringMap{
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
-		"EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": utils.StringMap{
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
+			"*string:EventType:Event1": true,
+			"*string:EventType:Event2": true,
 		},
 		"THD_Test2": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
+			"*string:EventType:Event1": true,
+			"*string:EventType:Event2": true,
 		},
 	}
 	rfi := NewReqFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil {
 		t.Error(err)
 	} else {
@@ -2739,32 +2739,32 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringMap{
-		"Account:1001": utils.StringMap{
+		"*string:Account:1001": utils.StringMap{
 			"THD_Test": true,
 		},
-		"Account:1002": utils.StringMap{
+		"*string:Account:1002": utils.StringMap{
 			"THD_Test": true,
 		},
-		"EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": utils.StringMap{
 			"THD_Test2": true,
 		},
-		"EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": utils.StringMap{
 			"THD_Test2": true,
 		},
 	}
 
 	reverseIdxes = map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
-			"Account:1001": true,
-			"Account:1002": true,
+			"*string:Account:1001": true,
+			"*string:Account:1002": true,
 		},
 		"THD_Test2": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
+			"*string:EventType:Event1": true,
+			"*string:EventType:Event2": true,
 		},
 	}
 	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil {
 		t.Error(err)
 	} else {
@@ -2806,35 +2806,35 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringMap{
-		"Destination:10": utils.StringMap{
+		"*string:Destination:10": utils.StringMap{
 			"THD_Test": true,
 		},
-		"Destination:20": utils.StringMap{
+		"*string:Destination:20": utils.StringMap{
 			"THD_Test": true,
 		},
-		"EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": utils.StringMap{
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
-		"EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": utils.StringMap{
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
 	}
 	reverseIdxes = map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
-			"Destination:10":   true,
-			"Destination:20":   true,
-			"EventType:Event1": true,
-			"EventType:Event2": true,
+			"*string:Destination:10":   true,
+			"*string:Destination:20":   true,
+			"*string:EventType:Event1": true,
+			"*string:EventType:Event2": true,
 		},
 		"THD_Test2": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
+			"*string:EventType:Event1": true,
+			"*string:EventType:Event2": true,
 		},
 	}
 	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil {
 		t.Error(err)
 	} else {
@@ -2861,7 +2861,7 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -2870,6 +2870,7 @@ func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
+
 }
 
 func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
@@ -2915,24 +2916,24 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": utils.StringMap{
 			"AttrPrf": true,
 		},
-		"EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": utils.StringMap{
 			"AttrPrf": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"AttrPrf": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
+			"*string:EventType:Event1": true,
+			"*string:EventType:Event2": true,
 		},
 	}
 	for _, ctx := range attrProfile.Contexts {
 		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if rcvIdx, err := onStor.GetFilterIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 			nil); err != nil {
 			t.Error(err)
 		} else {
@@ -2959,7 +2960,7 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 	rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(attrProfile.Tenant, "con3"))
 	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil {
 		t.Error(err)
 	} else {
@@ -2982,7 +2983,7 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if _, err := onStor.GetFilterIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 			nil); err != nil && err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -3000,7 +3001,7 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 	//check if index is removed
 	rfi = NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey("cgrates.org", "con3"))
 	if _, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -3046,22 +3047,22 @@ func testOnStorITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": utils.StringMap{
 			"THD_Test": true,
 		},
-		"EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": utils.StringMap{
 			"THD_Test": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
+			"*string:EventType:Event1": true,
+			"*string:EventType:Event2": true,
 		},
 	}
 	rfi := NewReqFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil {
 		t.Error(err)
 	} else {
@@ -3084,26 +3085,26 @@ func testOnStorITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringMap{
-		"Account:1001": utils.StringMap{
+		"*string:Account:1001": utils.StringMap{
 			"THD_Test": true,
 		},
-		"EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": utils.StringMap{
 			"THD_Test": true,
 		},
-		"EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": utils.StringMap{
 			"THD_Test": true,
 		},
 	}
 
 	reverseIdxes = map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
-			"Account:1001":     true,
-			"EventType:Event1": true,
-			"EventType:Event2": true,
+			"*string:Account:1001":     true,
+			"*string:EventType:Event1": true,
+			"*string:EventType:Event2": true,
 		},
 	}
 	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil {
 		t.Error(err)
 	} else {
@@ -3126,7 +3127,7 @@ func testOnStorITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}

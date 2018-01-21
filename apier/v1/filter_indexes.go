@@ -25,18 +25,6 @@ import (
 	"strings"
 )
 
-/*
-type ArgsComputeFilterIndexes struct {
-	Tenant       string
-	AttributeIDs *[]string
-	ResourceIDs  *[]string
-	StatIDs      *[]string
-	SupplierIDs  *[]string
-	ThresholdIDs *[]string
-}
-*/
-
-// sa fac cu pointer de []string
 func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) error {
 	//ThresholdProfile Indexes
 	if err := self.computeThresholdIndexes(args.Tenant, args.ThresholdIDs); err != nil {
@@ -46,17 +34,14 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if err := self.computeStatIndexes(args.Tenant, args.StatIDs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-
 	//ResourceProfile Indexes
 	if err := self.computeResourceIndexes(args.Tenant, args.ResourceIDs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-
 	//SupplierProfile Indexes
 	if err := self.computeSupplierIndexes(args.Tenant, args.SupplierIDs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-
 	//AttributeProfile Indexes
 	if err := self.computeAttributeIndexes(args.Tenant, args.AttributeIDs); err != nil {
 		return utils.APIErrorHandler(err)
@@ -166,7 +151,6 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string) e
 			tenant, true)); err != nil {
 			return err
 		}
-
 	} else {
 		indexRemover := engine.NewReqFilterIndexer(self.DataManager, utils.AttributeProfilePrefix, tenant)
 		for _, id := range attributeIDs {

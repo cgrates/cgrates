@@ -435,7 +435,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 					continue
 				}
 				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+					if err = indexer.loadFldNameFldValIndex(flt.Type, flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -521,7 +521,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 					continue
 				}
 				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+					if err = indexer.loadFldNameFldValIndex(flt.Type, flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -685,7 +685,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 					continue
 				}
 				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+					if err = indexer.loadFldNameFldValIndex(flt.Type, flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -992,8 +992,8 @@ func (dm *DataManager) HasData(category, subject string) (has bool, err error) {
 	return dm.DataDB().HasDataDrv(category, subject)
 }
 
-func (dm *DataManager) GetFilterIndexes(dbKey string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
-	return dm.DataDB().GetFilterIndexesDrv(dbKey, fldNameVal)
+func (dm *DataManager) GetFilterIndexes(dbKey, filterType string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
+	return dm.DataDB().GetFilterIndexesDrv(dbKey, filterType, fldNameVal)
 }
 
 func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]utils.StringMap) (err error) {
@@ -1016,8 +1016,8 @@ func (dm *DataManager) RemoveFilterReverseIndexes(dbKey string) (err error) {
 	return dm.DataDB().RemoveFilterReverseIndexesDrv(dbKey)
 }
 
-func (dm *DataManager) MatchFilterIndex(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
-	fieldValKey := utils.ConcatenatedKey(fieldName, fieldVal)
+func (dm *DataManager) MatchFilterIndex(dbKey, filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
+	fieldValKey := utils.ConcatenatedKey(filterType, fieldName, fieldVal)
 	cacheKey := dbKey + fieldValKey
 	if x, ok := cache.Get(cacheKey); ok { // Attempt to find in cache first
 		if x == nil {
@@ -1026,7 +1026,7 @@ func (dm *DataManager) MatchFilterIndex(dbKey, fieldName, fieldVal string) (item
 		return x.(utils.StringMap), nil
 	}
 	// Not found in cache, check in DB
-	itemIDs, err = dm.DataDB().MatchFilterIndexDrv(dbKey, fieldName, fieldVal)
+	itemIDs, err = dm.DataDB().MatchFilterIndexDrv(dbKey, filterType, fieldName, fieldVal)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			cache.Set(cacheKey, nil, true, utils.NonTransactional)
@@ -1122,7 +1122,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 					continue
 				}
 				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+					if err = indexer.loadFldNameFldValIndex(flt.Type, flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -1229,7 +1229,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 						continue
 					}
 					for _, fldVal := range flt.Values {
-						if err = indexer.loadFldNameFldValIndex(flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+						if err = indexer.loadFldNameFldValIndex(flt.Type, flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
 							return err
 						}
 					}

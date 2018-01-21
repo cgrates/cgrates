@@ -219,8 +219,9 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 	if len(args.ThresholdIDs) != 0 {
 		tIDs = args.ThresholdIDs
 	} else {
-		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.indexedFields, tS.dm, utils.ThresholdStringIndex+args.Tenant)
+		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.indexedFields, tS.dm, utils.ThresholdStringIndex+args.Tenant, MetaString)
 		if err != nil {
+			utils.Logger.Debug(fmt.Sprintf("here gets NOTFOUND"))
 			return nil, err
 		}
 		tIDs = tIDsMap.Slice()
