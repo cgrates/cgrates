@@ -57,34 +57,47 @@ func (rfi *ReqFilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
 
 // IndexTPFilter parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
 func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
-	var hasMetaString bool
-	if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
-		rfi.reveseIndex[itemID] = make(utils.StringMap)
-	}
 	for _, fltr := range tpFltr.Filters {
-		if fltr.Type != MetaString {
-			continue
-		}
-		hasMetaString = true // Mark that we found at least one metatring so we don't index globally
-		for _, fldVal := range fltr.Values {
-			concatKey := utils.ConcatenatedKey(fltr.FieldName, fldVal)
-			if _, hasIt := rfi.indexes[concatKey]; !hasIt {
-				rfi.indexes[concatKey] = make(utils.StringMap)
+		switch fltr.Type {
+		case MetaString:
+			for _, fldVal := range fltr.Values {
+				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
+				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
+					rfi.indexes[concatKey] = make(utils.StringMap)
+				}
+				rfi.indexes[concatKey][itemID] = true
+
+				if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
+					rfi.reveseIndex[itemID] = make(utils.StringMap)
+				}
+				rfi.reveseIndex[itemID][concatKey] = true
+				rfi.chngdIndxKeys[concatKey] = true
 			}
-			rfi.indexes[concatKey][itemID] = true
-			rfi.reveseIndex[itemID][concatKey] = true
-			rfi.chngdIndxKeys[concatKey] = true
+			rfi.chngdRevIndxKeys[itemID] = true
+		// case MetaStringPrefix:
+		// 	for _, fldVal := range fltr.Values {
+		// 		concatKey := utils.ConcatenatedKey(fltr.FieldName, fldVal)
+		// 		if _, hasIt := rfi.indexes[concatKey]; !hasIt {
+		// 			rfi.indexes[concatKey] = make(utils.StringMap)
+		// 		}
+		// 		rfi.indexes[concatKey][itemID] = true
+		// 		rfi.reveseIndex[itemID][concatKey] = true
+		// 		rfi.chngdIndxKeys[concatKey] = true
+		// 	}
+		// 	rfi.chngdRevIndxKeys[itemID] = true
+		default:
+			naConcatKey := utils.ConcatenatedKey(utils.MetaDefault, utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)
+			if _, hasIt := rfi.indexes[naConcatKey]; !hasIt {
+				rfi.indexes[naConcatKey] = make(utils.StringMap)
+			}
+			if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
+				rfi.reveseIndex[itemID] = make(utils.StringMap)
+			}
+			rfi.reveseIndex[itemID][naConcatKey] = true
+			rfi.indexes[naConcatKey][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE:NOT_AVAILABLE][rl.ID]
 		}
-		rfi.chngdRevIndxKeys[itemID] = true
 	}
-	if !hasMetaString {
-		naConcatKey := utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)
-		if _, hasIt := rfi.indexes[naConcatKey]; !hasIt {
-			rfi.indexes[naConcatKey] = make(utils.StringMap)
-		}
-		rfi.reveseIndex[itemID][naConcatKey] = true
-		rfi.indexes[naConcatKey][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE:NOT_AVAILABLE][rl.ID]
-	}
+
 	return
 }
 
@@ -129,7 +142,7 @@ func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
 }
 
 //Populate the ReqFilterIndexer.reveseIndex for specifil itemID
-func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
+func (rfi *ReqFilterIndexer) loadItemReverseIndex(filterType, itemID string) (err error) {
 	rcvReveseIdx, err := rfi.dm.GetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
 		map[string]string{itemID: ""})
@@ -146,9 +159,9 @@ func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
 }
 
 //Populate ReqFilterIndexer.indexes with specific fieldName:fieldValue , item
-func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) error {
+func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal string) error {
 	rcvIdx, err := rfi.dm.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), filterType,
 		map[string]string{fldName: fldVal})
 	if err != nil {
 		return err
@@ -164,15 +177,15 @@ func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) erro
 
 //RemoveItemFromIndex remove Indexes for a specific itemID
 func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
-	if err = rfi.loadItemReverseIndex(itemID); err != nil {
+	if err = rfi.loadItemReverseIndex(MetaString, itemID); err != nil {
 		return err
 	}
 	for key, _ := range rfi.reveseIndex[itemID] {
 		kSplt := strings.Split(key, utils.CONCATENATED_KEY_SEP)
-		if len(kSplt) != 2 {
+		if len(kSplt) != 3 {
 			return fmt.Errorf("Malformed key in db: %s", key)
 		}
-		if err = rfi.loadFldNameFldValIndex(kSplt[0], kSplt[1]); err != nil {
+		if err = rfi.loadFldNameFldValIndex(kSplt[0], kSplt[1], kSplt[2]); err != nil {
 			return err
 		}
 	}

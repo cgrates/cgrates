@@ -251,6 +251,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	var hits int
 	eHits := 1
 	//Testing ProcessEvent on set thresholdprofile using apier
+
 	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &hits); err != nil {
 		t.Error(err)
 	} else if hits != eHits {
@@ -258,7 +259,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	}
 	//test to make sure indexes are made as expected
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1001": true, "EventType:BalanceUpdate": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1001": true, "*string:EventType:BalanceUpdate": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
 		t.Error(err)
@@ -289,7 +290,7 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
 	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{"THD_ACNT_BALANCE_1": {"Account:1001": true, "Account:1002": true, "EventType:BalanceUpdate": true}}
+	idx := map[string]utils.StringMap{"THD_ACNT_BALANCE_1": {"*default:N/A:N/A": true, "*string:Account:1001": true, "*string:Account:1002": true, "*string:EventType:BalanceUpdate": true}}
 	fldNameVal := map[string]string{"THD_ACNT_BALANCE_1": ""}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
@@ -377,7 +378,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	}
 	//test to make sure indexes are made as expecte
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1002": true, "EventType:AccountUpdate": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1002": true, "*string:EventType:AccountUpdate": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
 		t.Error(err)
@@ -460,7 +461,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	}
 	//test to make sure indexes are made as expecte
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1002": true, "EventType:AccountUpdate": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1002": true, "*string:EventType:AccountUpdate": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
 		t.Error(err)
@@ -639,7 +640,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	}
 
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1001": true, "EventType:AccountUpdate": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1001": true, "*string:EventType:AccountUpdate": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
 		t.Error(err)
@@ -703,7 +704,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		t.Errorf("received reply: %s", reply)
 	}
 
-	idx := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1001": true, "EventType:AccountUpdate": true}}
+	idx := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1001": true, "*string:EventType:AccountUpdate": true}}
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
 
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, "cgrates.org", true),
@@ -782,7 +783,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 	}
 
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1002": true, "EventType:BalanceUpdate": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1002": true, "*string:EventType:BalanceUpdate": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
 		t.Error(err)
@@ -843,7 +844,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	fldNameVal := map[string]string{"Stats1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"Stats1": {"Account:1003": true, "EventType:AccountUpdate": true}}
+	expectedRevIDX := map[string]utils.StringMap{"Stats1": {"*string:Account:1003": true, "*string:EventType:AccountUpdate": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
 		t.Error(err)
@@ -1020,7 +1021,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	}
 	//test to make sure indexes are made as expected
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1009": true, "Destination:+491511231234": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1009": true, "*string:Destination:+491511231234": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
 		fldNameVal); err != nil {
 		t.Error(err)
@@ -1046,7 +1047,7 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 		t.Error(err)
 	}
 	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{"ATTR_1": {"Account:1007": true}}
+	idx := map[string]utils.StringMap{"ATTR_1": {"*string:Account:1007": true}}
 	fldNameVal := map[string]string{"ATTR_1": ""}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
 		fldNameVal); err != nil {
@@ -1127,7 +1128,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:2009": true, "Destination:+492511231234": true}}
+	idx := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:2009": true, "*string:Destination:+492511231234": true}}
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
 		fldNameVal); err != nil {
@@ -1189,7 +1190,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		t.Error(err)
 	}
 	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{"ATTR_1": {"Account:3009": true, "Destination:+492511231234": true}}
+	idx := map[string]utils.StringMap{"ATTR_1": {"*string:Account:3009": true, "*string:Destination:+492511231234": true}}
 	fldNameVal := map[string]string{"ATTR_1": ""}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
 		fldNameVal); err != nil {
@@ -1370,7 +1371,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	fldNameVal := map[string]string{"RCFG1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"RCFG1": {"Account:1001": true, "Subject:1002": true, "Destination:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"RCFG1": {"*string:Account:1001": true, "*string:Subject:1002": true, "*string:Destination:1001": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
 		fldNameVal); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
@@ -1421,7 +1422,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	idx := map[string]utils.StringMap{"ResGroup1": {"Account:1001": true, "Account:1002": true}}
+	idx := map[string]utils.StringMap{"ResGroup1": {"*default:N/A:N/A": true, "*string:Account:1001": true, "*string:Account:1002": true}}
 	fldNameVal := map[string]string{"ResGroup1": ""}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
@@ -1500,7 +1501,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	fldNameVal2 := map[string]string{"RCFG1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"RCFG1": {"Account:2002": true, "Destination:2002": true, "Subject:2001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"RCFG1": {"*string:Account:2002": true, "*string:Destination:2002": true, "*string:Subject:2001": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
 		fldNameVal2); err != nil {
 		t.Error(err)
@@ -1572,7 +1573,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	fldNameVal2 := map[string]string{"ResGroup1": ""}
-	expectedRevIDX := map[string]utils.StringMap{"ResGroup1": {"Account:1002": true, "Destination:1002": true, "Subject:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"ResGroup1": {"*string:Account:1002": true, "*string:Destination:1002": true, "*string:Subject:1001": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
 		fldNameVal2); err != nil {
 		t.Error(err)

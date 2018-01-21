@@ -1347,7 +1347,7 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 }
 
 //GetFilterIndexesDrv retrieves Indexes from dataDB
-func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
+func (rs *RedisStorage) GetFilterIndexesDrv(dbKey, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)
 	if len(fldNameVal) == 0 {
@@ -1360,14 +1360,14 @@ func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
 	} else {
 		var itmMpStrLst []string
 		for fldName, fldVal := range fldNameVal {
-			concatNameVal := utils.ConcatenatedKey(fldName, fldVal)
-			itmMpStrLst, err = rs.Cmd("HMGET", dbKey, concatNameVal).List()
+			concatTypeNameVal := utils.ConcatenatedKey(filterType, fldName, fldVal)
+			itmMpStrLst, err = rs.Cmd("HMGET", dbKey, concatTypeNameVal).List()
 			if err != nil {
 				return
 			} else if itmMpStrLst[0] == "" {
 				return nil, utils.ErrNotFound
 			}
-			mp[concatNameVal] = itmMpStrLst[0]
+			mp[concatTypeNameVal] = itmMpStrLst[0]
 		}
 	}
 	indexes = make(map[string]utils.StringMap)
@@ -1483,8 +1483,8 @@ func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) 
 	return rs.Cmd("DEL", dbKey).Err
 }
 
-func (rs *RedisStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
-	fieldValKey := utils.ConcatenatedKey(fldName, fldVal)
+func (rs *RedisStorage) MatchFilterIndexDrv(dbKey, filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+	fieldValKey := utils.ConcatenatedKey(filterType, fldName, fldVal)
 	fldValBytes, err := rs.Cmd("HGET", dbKey, fieldValKey).Bytes()
 	if err != nil {
 		if err == redis.ErrRespNil { // did not find the destination

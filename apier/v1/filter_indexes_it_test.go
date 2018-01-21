@@ -237,7 +237,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -264,15 +264,15 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"TEST_PROFILE1": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"TEST_PROFILE1": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -346,7 +346,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false),
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -371,15 +371,15 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"TEST_PROFILE2": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"TEST_PROFILE2": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE2": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE2": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -430,7 +430,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false),
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -515,7 +515,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -538,15 +538,15 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"TEST_PROFILE1": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"TEST_PROFILE1": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -630,7 +630,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -654,15 +654,15 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"TEST_PROFILE2": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"TEST_PROFILE2": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE2": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE2": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -712,7 +712,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false),
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false), engine.MetaString,
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -785,7 +785,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -808,15 +808,15 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"RCFG1": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"RCFG1": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"RCFG1": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"RCFG1": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -888,7 +888,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -912,15 +912,15 @@ func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"RCFG2": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"RCFG2": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"RCFG2": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"RCFG2": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -968,7 +968,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 		&reply2); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false),
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, tenant, false), engine.MetaString,
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1047,7 +1047,7 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1070,15 +1070,15 @@ func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"TEST_PROFILE1": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"TEST_PROFILE1": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -1156,7 +1156,7 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1180,15 +1180,15 @@ func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"TEST_PROFILE2": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"TEST_PROFILE2": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE2": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE2": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -1238,7 +1238,7 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false),
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1320,7 +1320,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1343,15 +1343,15 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"ApierTest": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"ApierTest": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"ApierTest": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"ApierTest": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -1432,7 +1432,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		tenant, true)); err != nil {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false),
+	if indexes, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1456,15 +1456,15 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"Account:1001": {"ApierTest2": true}}
-	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false), nil)
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"ApierTest2": true}}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"ApierTest2": {"Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"ApierTest2": {"*string:Account:1001": true}}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)
@@ -1513,7 +1513,7 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false),
+	if _, err = onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, false), engine.MetaString,
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}

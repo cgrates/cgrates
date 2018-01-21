@@ -496,6 +496,7 @@ const (
 	RatingPlanID                 = "RatingPlanID"
 	MetaSessionS                 = "*sessions"
 	FreeSWITCHAgent              = "FreeSWITCHAgent"
+	MetaDefault                  = "*default"
 )
 
 //MetaMetrics
