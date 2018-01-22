@@ -389,40 +389,45 @@ type UserServJsonCfg struct {
 
 // Attribute service config section
 type AttributeSJsonCfg struct {
-	Enabled               *bool
-	String_indexed_fields *[]string
+	Enabled                     *bool
+	String_indexed_fields       *[]string
+	Stringprefix_indexed_fields *[]string
 }
 
 // ResourceLimiter service config section
 type ResourceSJsonCfg struct {
-	Enabled               *bool
-	Thresholds_conns      *[]*HaPoolJsonCfg
-	Store_interval        *string
-	String_indexed_fields *[]string
+	Enabled                     *bool
+	Thresholds_conns            *[]*HaPoolJsonCfg
+	Store_interval              *string
+	String_indexed_fields       *[]string
+	Stringprefix_indexed_fields *[]string
 }
 
 // Stat service config section
 type StatServJsonCfg struct {
-	Enabled               *bool
-	Store_interval        *string
-	Thresholds_conns      *[]*HaPoolJsonCfg
-	String_indexed_fields *[]string
+	Enabled                     *bool
+	Store_interval              *string
+	Thresholds_conns            *[]*HaPoolJsonCfg
+	String_indexed_fields       *[]string
+	Stringprefix_indexed_fields *[]string
 }
 
 // Threshold service config section
 type ThresholdSJsonCfg struct {
-	Enabled               *bool
-	Store_interval        *string
-	String_indexed_fields *[]string
+	Enabled                     *bool
+	Store_interval              *string
+	String_indexed_fields       *[]string
+	Stringprefix_indexed_fields *[]string
 }
 
 // Supplier service config section
 type SupplierSJsonCfg struct {
-	Enabled               *bool
-	String_indexed_fields *[]string
-	Rals_conns            *[]*HaPoolJsonCfg
-	Resources_conns       *[]*HaPoolJsonCfg
-	Stats_conns           *[]*HaPoolJsonCfg
+	Enabled                     *bool
+	String_indexed_fields       *[]string
+	Stringprefix_indexed_fields *[]string
+	Rals_conns                  *[]*HaPoolJsonCfg
+	Resources_conns             *[]*HaPoolJsonCfg
+	Stats_conns                 *[]*HaPoolJsonCfg
 }
 
 // Mailer config section

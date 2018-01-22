@@ -126,9 +126,10 @@
 },
 
 
-"attributes": {							// Attribute service
-	"enabled": true,				// starts Alias service: <true|false>.
+"attributes": {								// Attribute service
+	"enabled": true,						// starts Alias service: <true|false>.
 	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"stringprefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 },
 
 

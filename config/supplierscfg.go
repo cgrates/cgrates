@@ -20,11 +20,12 @@ package config
 
 // SupplierSCfg is the configuration of supplier service
 type SupplierSCfg struct {
-	Enabled             bool
-	StringIndexedFields []string
-	RALsConns           []*HaPoolConfig
-	ResourceSConns      []*HaPoolConfig
-	StatSConns          []*HaPoolConfig
+	Enabled                   bool
+	StringIndexedFields       []string
+	StringPrefixIndexedFields []string
+	RALsConns                 []*HaPoolConfig
+	ResourceSConns            []*HaPoolConfig
+	StatSConns                []*HaPoolConfig
 }
 
 func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
@@ -38,6 +39,12 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 		spl.StringIndexedFields = make([]string, len(*jsnCfg.String_indexed_fields))
 		for i, fID := range *jsnCfg.String_indexed_fields {
 			spl.StringIndexedFields[i] = fID
+		}
+	}
+	if jsnCfg.Stringprefix_indexed_fields != nil {
+		spl.StringPrefixIndexedFields = make([]string, len(*jsnCfg.Stringprefix_indexed_fields))
+		for i, fID := range *jsnCfg.Stringprefix_indexed_fields {
+			spl.StringPrefixIndexedFields[i] = fID
 		}
 	}
 	if jsnCfg.Rals_conns != nil {

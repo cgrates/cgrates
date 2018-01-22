@@ -428,43 +428,48 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"attributes": {							// Attribute service
-	"enabled": false,				// starts attribute service: <true|false>.
+"attributes": {								// Attribute service
+	"enabled": false,						// starts attribute service: <true|false>.
 	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"stringprefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 },
 
 
-"resources": {						// Resource service (*new)
-	"enabled": false,				// starts ResourceLimiter service: <true|false>.
-	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
+"resources": {								// Resource service (*new)
+	"enabled": false,						// starts ResourceLimiter service: <true|false>.
+	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"stringprefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 },
 
 
-"stats": {							// Stat service (*new)
-	"enabled": false,				// starts Stat service: <true|false>.
-	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
+"stats": {									// Stat service (*new)
+	"enabled": false,						// starts Stat service: <true|false>.
+	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"stringprefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 },
 
 
-"thresholds": {						// Threshold service (*new)
-	"enabled": false,				// starts ThresholdS service: <true|false>.
-	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+"thresholds": {								// Threshold service (*new)
+	"enabled": false,						// starts ThresholdS service: <true|false>.
+	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"stringprefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 },
 
 
-"suppliers": {						// Supplier service (*new)
-	"enabled": false,				// starts SupplierS service: <true|false>.
+"suppliers": {								// Supplier service (*new)
+	"enabled": false,						// starts SupplierS service: <true|false>.
 	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"stringprefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rals_conns": [
-		{"address": "*internal"},	// address where to reach the RALs for cost/accounting  <*internal>
+		{"address": "*internal"},			// address where to reach the RALs for cost/accounting  <*internal>
 	],
-	"resources_conns": [],			// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
-	"stats_conns": [],				// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"resources_conns": [],					// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+	"stats_conns": [],						// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 },
 
 
